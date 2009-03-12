@@ -60,6 +60,7 @@ Bottom-up:
      ppp/                basic PPP model (framing only)
      mfcore/             Core modules from the Mobility Framework (modified)
      mf80211/            MF's 802.11b ad-hoc mode model (modified)
+     ext/                External interface
 
    network/              L3 (network layer) protocols
      contract/           API to common L3 functionality
