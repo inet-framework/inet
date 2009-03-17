@@ -29,7 +29,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "SCTPAssociation.h"
 #include "platdep/intxtypes.h"
 
-#ifndef _MSC_VER
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
 #include <sys/types.h>
 #include <sys/socket.h>
