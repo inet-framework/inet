@@ -28,7 +28,7 @@ Define_Module(TraCIScenarioManager);
 
 TraCIScenarioManager::~TraCIScenarioManager()
 {
-	cancelAndDelete(executeOneTimestepTrigger); 
+	cancelAndDelete(executeOneTimestepTrigger);
 }
 
 
@@ -69,7 +69,7 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 
 	uint32_t msgLength;
 	{
-		char buf2[sizeof(uint32_t)]; 
+		char buf2[sizeof(uint32_t)];
 		size_t receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf2), sizeof(uint32_t), MSG_WAITALL);
 		if (receivedBytes != sizeof(uint32_t)) error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), receivedBytes, strerror(errno));
 		TraCIBuffer(std::string(buf2, sizeof(uint32_t))) >> msgLength;
@@ -157,7 +157,7 @@ void TraCIScenarioManager::connect() {
 	{
 		// Send "Subscribe Domain" Command for DOM_VEHICLE
 		uint8_t domain = DOM_VEHICLE;
-		uint8_t variableCount = 5;
+		uint8_t variableCount = 6;
 		uint8_t variableId1 = DOMVAR_SIMTIME;
 		uint8_t dataType1 = TYPE_DOUBLE;
 		uint8_t variableId2 = DOMVAR_POSITION;
@@ -168,7 +168,9 @@ void TraCIScenarioManager::connect() {
 		uint8_t dataType4 = TYPE_FLOAT;
 		uint8_t variableId5 = DOMVAR_ANGLE;
 		uint8_t dataType5 = TYPE_FLOAT;
-		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBEDOMAIN, TraCIBuffer() << domain << variableCount << variableId1 << dataType1 << variableId2 << dataType2 << variableId3 << dataType3 << variableId4 << dataType4 << variableId5 << dataType5); 
+		uint8_t variableId6 = DOMVAR_ALLOWED_SPEED;
+		uint8_t dataType6 = TYPE_FLOAT;
+		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBEDOMAIN, TraCIBuffer() << domain << variableCount << variableId1 << dataType1 << variableId2 << dataType2 << variableId3 << dataType3 << variableId4 << dataType4 << variableId5 << dataType5 << variableId6 << dataType6);
 		if (!buf.eof()) error("expected only an OK response, but received additional bytes");
 	}
 
@@ -363,6 +365,7 @@ void TraCIScenarioManager::executeOneTimestep() {
 
 			float angle; buf >> angle;
 
+			float allowed_speed; buf >> allowed_speed;
 
 			cModule* mod = getManagedModule(nodeId);
 
@@ -373,7 +376,7 @@ void TraCIScenarioManager::executeOneTimestep() {
 				TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
 				if (!mm) continue;
 				if (debug) EV << "module " << nodeId << " moving to " << pxi << "," << pyi << endl;
-				mm->nextPosition(pxi, pyi, speed, angle * M_PI / 180.0, edge);
+				mm->nextPosition(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
 			}
 		} else {
 			error("Expected CMD_OBJECTCREATION, CMD_UPDATEOBJECT, CMD_OBJECTDESTRUCTION, but got %d", commandId);

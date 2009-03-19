@@ -49,7 +49,7 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual void finish();
 
 		virtual void handleSelfMsg(cMessage *msg);
-		virtual void nextPosition(int x, int y, double speed = -1, double angle = -1, std::string road_id = "");
+		virtual void nextPosition(int x, int y, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
 		virtual void changePosition();
 		virtual void setExternalId(int32_t external_id) {
 			this->external_id = external_id;
@@ -61,6 +61,10 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual Coord getPosition() {
 			return pos;
 		}
+		virtual std::string getRoadId() {
+			if (road_id == "") throw std::runtime_error("TraCIMobility::getRoadId called with no road_id set yet");
+			return road_id;
+		}
 		virtual double getSpeed() {
 			if (speed == -1) throw std::runtime_error("TraCIMobility::getSpeed called with no speed set yet");
 			return speed;
@@ -69,9 +73,9 @@ class INET_API TraCIMobility : public BasicMobility
 			if (angle == -1) throw std::runtime_error("TraCIMobility::getAngle called with no angle set yet");
 			return angle;
 		}
-		virtual std::string getRoadId() {
-			if (road_id == "") throw std::runtime_error("TraCIMobility::getRoadId called with no road_id set yet");
-			return road_id;
+		virtual double getAllowedSpeed() {
+			if (allowed_speed == -1) throw std::runtime_error("TraCIMobility::getAllowedSpeed called with no allowed speed set yet");
+			return allowed_speed;
 		}
 		virtual TraCIScenarioManager* getManager() {
 			if (!manager) manager = TraCIScenarioManagerAccess().get();
@@ -106,9 +110,10 @@ class INET_API TraCIMobility : public BasicMobility
 
 		simtime_t lastUpdate; /**< updated by nextPosition() */
 		Coord nextPos; /**< updated by nextPosition() */
+		std::string road_id; /**< updated by nextPosition() */
 		double speed; /**< updated by nextPosition() */
 		double angle; /**< updated by nextPosition() */
-		std::string road_id; /**< updated by nextPosition() */
+		double allowed_speed; /**< updated by nextPosition() */
 
 		cMessage* startAccidentMsg;
 		cMessage* stopAccidentMsg;

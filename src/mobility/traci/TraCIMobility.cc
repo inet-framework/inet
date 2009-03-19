@@ -53,9 +53,10 @@ void TraCIMobility::initialize(int stage)
 		external_id = -1;
 
 		nextPos = Coord(-1,-1);
+		road_id = -1; WATCH(road_id);
 		speed = -1; WATCH(speed);
 		angle = -1; WATCH(angle);
-		road_id = -1; WATCH(road_id);
+		allowed_speed = -1; WATCH(allowed_speed);
 
 		startAccidentMsg = 0;
 		stopAccidentMsg = 0;
@@ -109,13 +110,14 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 }
 
-void TraCIMobility::nextPosition(int x, int y, double speed, double angle, std::string road_id)
+void TraCIMobility::nextPosition(int x, int y, std::string road_id, double speed, double angle, double allowed_speed)
 {
-	if (debug) EV << "nextPosition " << x << " " << y << " " << speed << " " << angle << " " << road_id << std::endl;
+	if (debug) EV << "nextPosition " << x << " " << y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
 	nextPos = Coord(x,y);
+	this->road_id = road_id;
 	this->speed = speed;
 	this->angle = angle;
-	this->road_id = road_id;
+	this->allowed_speed = allowed_speed;
 	changePosition();
 }
 
