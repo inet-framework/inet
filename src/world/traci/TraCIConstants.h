@@ -2,12 +2,12 @@
 /// @file    TraCIConstants.h
 /// @author  Axel Wegener <wegener@itm.uni-luebeck.de>
 /// @date    2007/10/24
+/// @version $Id: TraCIConstants.h 6843 2009-02-20 16:03:37Z dkrajzew $
 ///
 /// holds codes used for TraCI
 /****************************************************************************/
 // SUMO, Simulation of Urban MObility; see http://sumo.sourceforge.net/
-// copyright : (C) 2001-2007
-//  by DLR (http://www.dlr.de/) and ZAIK (http://www.zaik.uni-koeln.de/AFS)
+// Copyright 2001-2009 DLR (http://www.dlr.de/) and contributors
 /****************************************************************************/
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -99,6 +99,28 @@
 // command: report traffic light status switch
 #define CMD_TLSWITCH 0x91
 
+// command: get induction loop (e1) variable
+#define CMD_GET_INDUCTIONLOOP_VARIABLE 0xa0
+
+// response: get induction loop (e1) variable
+#define RESPONSE_GET_INDUCTIONLOOP_VARIABLE 0xb0
+
+// command: get areal detector (e3) variable
+#define CMD_GET_AREALDETECTOR_VARIABLE 0xa1
+
+// response: get areal detector (e3) variable
+#define RESPONSE_GET_AREALDETECTOR_VARIABLE 0xb1
+
+// command: get traffic lights variable
+#define CMD_GET_TL_VARIABLE 0xa2
+
+// response: get traffic lights variable
+#define RESPONSE_GET_TL_VARIABLE 0xb2
+
+// command: set traffic lights variable
+#define CMD_SET_TL_VARIABLE 0xc2
+
+
 // ****************************************
 // POSITION REPRESENTATIONS
 // ****************************************
@@ -136,6 +158,8 @@
 #define TYPE_STRING 0x0C
 // list of traffic light phases
 #define TYPE_TLPHASELIST 0x0D
+// list of strings
+#define TYPE_STRINGLIST 0x0E
 
 
 // ****************************************
@@ -196,6 +220,8 @@
 #define DOMVAR_NAME 0x0D
 // route, a car plans to drive
 #define DOMVAR_ROUTE 0x0E
+// maximum allowed speed of a node
+#define DOMVAR_ALLOWED_SPEED 0x0F
 // air distance from a certain object to a position
 #define DOMVAR_AIRDISTANCE 0x10
 // driving distance from a certain object to a position
@@ -204,8 +230,23 @@
 #define DOMVAR_EXTID 0x12
 // angle of a certain object, in degrees [0..360)
 #define DOMVAR_ANGLE 0x13
-// current simulation time 
+// current simulation time
 #define DOMVAR_SIMTIME 0x14
+// current CO2 emission of a node
+#define DOMVAR_CO2EMISSION 0x20
+// current CO emission of a node
+#define DOMVAR_COEMISSION 0x21
+// current HC emission of a node
+#define DOMVAR_HCEMISSION 0x22
+// current PMx emission of a node
+#define DOMVAR_PMXEMISSION 0x23
+// current NOx emission of a node
+#define DOMVAR_NOXEMISSION 0x24
+// current fuel consumption of a node
+#define DOMVAR_FUELCONSUMPTION 0x25
+// current noise emission of a node
+#define DOMVAR_NOISEEMISSION 0x26
+
 
 // ****************************************
 // TRAFFIC LIGHT PHASES
@@ -215,7 +256,7 @@
 #define TLPHASE_RED 0x01
 // yellow phase
 #define TLPHASE_YELLOW 0x02
-// green phase 
+// green phase
 #define TLPHASE_GREEN 0x03
 // tl is blinking
 #define TLPHASE_BLINKING 0x04
@@ -230,6 +271,38 @@
 #define REQUEST_AIRDIST 0x00
 // driving distance
 #define REQUEST_DRIVINGDIST 0x01
+
+
+// ****************************************
+// VARIABLE TYPES (for CMD_GET_*_VARIABLE)
+// ****************************************
+// list of instances' ids (get: induction loops, areal detector, traffic lights)
+#define ID_LIST 0x00
+
+// last step vehicle number (get: induction loops, areal detector)
+#define LAST_STEP_VEHICLE_NUMBER 0x10
+
+// last step vehicle number (get: induction loops)
+#define LAST_STEP_MEAN_SPEED 0x11
+
+// last step vehicle number (get: induction loops)
+#define LAST_STEP_VEHICLE_ID_LIST 0x12
+
+// traffic light states, encoded as rRgGyYoO tuple (get: traffic lights)
+#define TL_RED_YELLOW_GREEN_STATE 0x20
+
+// traffic light states, encoded phase, brake, and yellow tuple (get: traffic lights, set: traffic lights)
+#define TL_PHASE_BRAKE_YELLOW_STATE 0x21
+
+// index of the phase (set: traffic lights)
+#define TL_PHASE_INDEX 0x22
+
+// traffic light program (set: traffic lights)
+#define TL_PROGRAM 0x23
+
+// phase duration (set: traffic lights)
+#define TL_PHASE_DURATION 0x24
+
 
 #endif
 
