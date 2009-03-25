@@ -8,12 +8,11 @@ if [ "$BUILDID" = "" ]; then
     export BUILDID=`date +%Y%m%d`
 fi
 
-FILENAME=$INET_ROOT/INET-$BUILDID-opp4-src.tgz
+FILENAME=$INET_ROOT/../INET-$BUILDID-opp4-src.tgz
 DIRNAME=INET-$BUILDID
 
 rm -rf /tmp/$DIRNAME
-
-svn export . /tmp/$DIRNAME || { echo --- error during SVN export ---; exit 1;}
+cp -r . /tmp/$DIRNAME || { echo --- error copying repo ---; exit 1;}
 
 # cleanup
 cd /tmp
