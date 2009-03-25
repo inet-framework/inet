@@ -104,7 +104,10 @@ void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
 }
 
 std::string TraCIScenarioManager::makeTraCICommand(uint8_t commandId, TraCIBuffer buf) {
-	if (sizeof(uint8_t) + sizeof(uint8_t) + buf.str().length() > 0xFF) error("TraCI command too long");
+	if (sizeof(uint8_t) + sizeof(uint8_t) + buf.str().length() > 0xFF) {
+		uint32_t len = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t) + buf.str().length();
+		return (TraCIBuffer() << static_cast<uint8_t>(0) << len << commandId).str() + buf.str();
+	}
 	uint8_t len = sizeof(uint8_t) + sizeof(uint8_t) + buf.str().length();
 	return (TraCIBuffer() << len << commandId).str() + buf.str();
 }
