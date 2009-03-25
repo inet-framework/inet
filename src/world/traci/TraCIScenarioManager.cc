@@ -59,6 +59,7 @@ void TraCIScenarioManager::initialize()
 	if (debug) EV << "TraCIScenarioManager connecting to TraCI server" << endl;
 	socket = -1;
 	connect();
+	init_traci();
 
 	if (debug) EV << "initialized TraCIScenarioManager" << endl;
 }
@@ -149,7 +150,9 @@ void TraCIScenarioManager::connect() {
 	if (socket < 0) error("Could not create socket to connect to TraCI server");
 
 	if (::connect(socket, (sockaddr const*)&address, sizeof(address)) < 0) error("Could not connect to TraCI server");
+}
 
+void TraCIScenarioManager::init_traci() {
 	{
 		// Send "Subscribe Lifecycles" Command
 		uint8_t domain = DOM_VEHICLE;
@@ -216,7 +219,7 @@ cModule* TraCIScenarioManager::getManagedModule(int32_t nodeId) {
 		return hosts[nodeId];
 }
 
-bool TraCIScenarioManager::isTraCISimulationEnded() {
+bool TraCIScenarioManager::isTraCISimulationEnded() const {
 	return traCISimulationEnded;
 }
 
@@ -295,6 +298,71 @@ void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::stri
 	hosts[nodeId] = mod;
 }
 
+void TraCIScenarioManager::processObjectCreation(uint8_t domain, int32_t nodeId) {
+	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
+
+	cModule* mod = getManagedModule(nodeId);
+	if (mod) error("Tried adding duplicate vehicle with Id %d", nodeId);
+
+	addModule(nodeId, moduleType, moduleName, moduleDisplayString);
+	mod = getManagedModule(nodeId);
+	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
+		cModule* submod = iter();
+		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
+		if (!mm) continue;
+		mm->setExternalId(nodeId);
+	}
+	if (debug) EV << "Added vehicle #" << nodeId << endl;
+}
+
+void TraCIScenarioManager::processObjectDestruction(uint8_t domain, int32_t nodeId) {
+	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
+
+	cModule* mod = getManagedModule(nodeId);
+	if (!mod) error("no vehicle with Id %d found", nodeId);
+
+	if (!mod->getSubmodule("notificationBoard")) error("host has no submodule notificationBoard");
+	cc->unregisterHost(mod);
+
+	hosts.erase(nodeId);
+	mod->callFinish();
+	mod->deleteModule();
+	if (debug) EV << "Removed vehicle #" << nodeId << endl;
+}
+
+void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, TraCIBuffer& buf) {
+	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
+
+	double targetTime; buf >> targetTime; targetTime = targetTime;
+
+	float px; buf >> px;
+	float py; buf >> py;
+	Coord p = traci2omnet(Coord(px, py)); px = p.x; py = p.y;
+	int pxi = static_cast<int>(px);
+	int pyi = static_cast<int>(py);
+	if ((pxi < 0) || (pyi < 0)) error("received bad node position");
+
+	std::string edge; buf >> edge;
+
+	float speed; buf >> speed;
+
+	float angle; buf >> angle;
+
+	float allowed_speed; buf >> allowed_speed;
+
+	cModule* mod = getManagedModule(nodeId);
+
+	if (!mod) error("Vehicle #%d not found", nodeId);
+
+	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
+		cModule* submod = iter();
+		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
+		if (!mm) continue;
+		if (debug) EV << "module " << nodeId << " moving to " << pxi << "," << pyi << endl;
+		mm->nextPosition(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
+	}
+}
+
 void TraCIScenarioManager::executeOneTimestep() {
 
 	if (debug) EV << "Triggering TraCI server simulation advance to t=" << simTime() << endl;
@@ -311,76 +379,19 @@ void TraCIScenarioManager::executeOneTimestep() {
 		if (commandId == CMD_OBJECTCREATION) {
 			uint8_t domain; buf >> domain;
 			int32_t nodeId; buf >> nodeId;
-			if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
-
-			cModule* mod = getManagedModule(nodeId);
-			if (mod) error("Tried adding duplicate vehicle with Id %d", nodeId);
-
-			addModule(nodeId, moduleType, moduleName, moduleDisplayString);
-			mod = getManagedModule(nodeId);
-			for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-				cModule* submod = iter();
-				TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
-				if (!mm) continue;
-				mm->setExternalId(nodeId);
-			}
-			if (debug) EV << "Added vehicle #" << nodeId << endl;
+			processObjectCreation(domain, nodeId);
 		} else if (commandId == CMD_OBJECTDESTRUCTION) {
 			uint8_t domain; buf >> domain;
 			int32_t nodeId; buf >> nodeId;
-			if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
-
-			cModule* mod = getManagedModule(nodeId);
-			if (!mod) error("no vehicle with Id %d found", nodeId);
-
-			if (!mod->getSubmodule("notificationBoard")) error("host has no submodule notificationBoard");
-			cc->unregisterHost(mod);
-
-			hosts.erase(nodeId);
-			mod->callFinish();
-			mod->deleteModule();
-			if (debug) EV << "Removed vehicle #" << nodeId << endl;
-
+			processObjectDestruction(domain, nodeId);
 			if (autoShutdown && (hosts.size() < 1)) {
 				if (debug) EV << "Simulation End: All vehicles have left the simulation." << std::endl;
 				shutdown = true;
 			}
-
 		} else if (commandId == CMD_UPDATEOBJECT) {
-
-			uint8_t domainId; buf >> domainId;
-			if (domainId != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domainId);
-
+			uint8_t domain; buf >> domain;
 			int32_t nodeId; buf >> nodeId;
-
-			double targetTime; buf >> targetTime; targetTime = targetTime;
-
-			float px; buf >> px;
-			float py; buf >> py;
-			Coord p = traci2omnet(Coord(px, py)); px = p.x; py = p.y;
-			int pxi = static_cast<int>(px);
-			int pyi = static_cast<int>(py);
-			if ((pxi < 0) || (pyi < 0)) error("received bad node position");
-
-			std::string edge; buf >> edge;
-
-			float speed; buf >> speed;
-
-			float angle; buf >> angle;
-
-			float allowed_speed; buf >> allowed_speed;
-
-			cModule* mod = getManagedModule(nodeId);
-
-			if (!mod) error("Vehicle #%d not found", nodeId);
-
-			for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-				cModule* submod = iter();
-				TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
-				if (!mm) continue;
-				if (debug) EV << "module " << nodeId << " moving to " << pxi << "," << pyi << endl;
-				mm->nextPosition(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
-			}
+			processUpdateObject(domain, nodeId, buf);
 		} else {
 			error("Expected CMD_OBJECTCREATION, CMD_UPDATEOBJECT, CMD_OBJECTDESTRUCTION, but got %d", commandId);
 		}

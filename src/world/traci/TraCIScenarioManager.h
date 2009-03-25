@@ -61,7 +61,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		virtual void finish();
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);
-		virtual bool isTraCISimulationEnded();
+		virtual bool isTraCISimulationEnded() const;
 
 		void commandSetMaximumSpeed(int32_t nodeId, float maxSpeed);
 		void commandChangeRoute(int32_t nodeId, std::string roadId, double travelTime);
@@ -97,6 +97,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		cModule* getManagedModule(int32_t nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
 
 		void connect();
+		virtual void init_traci();
 		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString);
 
 		/**
@@ -187,6 +188,12 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 				std::string buf;
 				size_t buf_index;
 		};
+
+		void processObjectCreation(uint8_t domain, int32_t nodeId);
+
+		void processObjectDestruction(uint8_t domain, int32_t nodeId);
+
+		void processUpdateObject(uint8_t domain, int32_t nodeId, TraCIBuffer& buf);
 
 		/**
 		 * sends a single command via TraCI, checks status response, returns additional responses
