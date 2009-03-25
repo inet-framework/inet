@@ -32,8 +32,9 @@
 #define HAVE_U_INT16_T
 #define HAVE_U_INT32_T
 #define HAVE_U_INT64_T
+#ifdef HAVE_PCAP
 #include <pcap.h>
-
+#endif
 #include "ExtFrame_m.h"
 
 class cSocketRTScheduler : public cScheduler
@@ -45,7 +46,6 @@ class cSocketRTScheduler : public cScheduler
 
 		virtual bool receiveWithTimeout();
 		virtual int receiveUntil(const timeval& targetTime);
-		//virtual void packet_handler(u_char *, const struct pcap_pkthdr *, const u_char *);
 	public:
 		/**
 		 * Constructor.
@@ -56,10 +56,12 @@ class cSocketRTScheduler : public cScheduler
 		 * Destructor.
 		 */
 		virtual ~cSocketRTScheduler();
+#ifdef HAVE_PCAP
 		static std::vector<cModule *>modules;
 		static std::vector<pcap_t *>pds;
 		static std::vector<int>datalinks;
 		static std::vector<int>headerLengths;
+#endif
 		static timeval baseTime;
 		/**
 		 * Called at the beginning of a simulation run.
@@ -91,7 +93,7 @@ class cSocketRTScheduler : public cScheduler
 		/**
 		 * Send on the currently open connection
 		 */
-		 void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+		void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
 
 #endif

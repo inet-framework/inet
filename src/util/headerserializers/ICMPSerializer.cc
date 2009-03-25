@@ -28,7 +28,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "ICMPSerializer.h"
 #include "PingPayload_m.h"
 
-#ifndef _WIN32 /*not MSVC or MinGW*/
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
@@ -53,8 +53,12 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             icmp->icmp_id   = htons(pp->getOriginatorId());
             icmp->icmp_seq  = htons(pp->getSeqNo());
             unsigned int datalen = (pp->getByteLength() - 4);
-            for(unsigned int i=0; i < datalen; i++)
-                icmp->icmp_data[i] = 'a';
+            for (unsigned int i=0; i < datalen; i++)
+                if (i < pp->getDataArraySize()) {
+                	icmp->icmp_data[i] = pp->getData(i);
+                } else {
+                	icmp->icmp_data[i] = 'a';
+                }
             packetLength += datalen;
             break;
         }
@@ -137,6 +141,9 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             pp->setOriginatorId(ntohs(icmp->icmp_id));
             pp->setSeqNo(ntohs(icmp->icmp_seq));
             pp->setByteLength(bufsize - 4);
+            pp->setDataArraySize(bufsize - ICMP_MINLEN);
+            for (unsigned int i=0; i<bufsize - ICMP_MINLEN; i++)
+                pp->setData(i, icmp->icmp_data[i]);
             pkt->encapsulate(pp);
             pkt->setName(pp->getName());
             break;
