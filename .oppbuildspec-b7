@@ -1,2 +1,0 @@
-version 4.0
-src: --deep --make-so -o INET -O out -pINET -lpcap --meta:auto-include-path --meta:export-library --meta:use-exported-libs
