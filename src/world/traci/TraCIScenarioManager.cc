@@ -299,6 +299,16 @@ void TraCIScenarioManager::commandStopNode(int32_t nodeId, std::string roadId, f
 	if (!buf.eof()) error("expected only a response to CMD_STOP, but received additional bytes");
 }
 
+void TraCIScenarioManager::commandSetTrafficLightProgram(std::string trafficLightId, std::string program) {
+	TraCIBuffer buf = queryTraCI(CMD_SET_TL_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(TL_PROGRAM) << trafficLightId << static_cast<uint8_t>(TYPE_STRING) << program);
+	if (!buf.eof()) error("expected only an OK response, but received additional bytes");
+}
+
+void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index) {
+	TraCIBuffer buf = queryTraCI(CMD_SET_TL_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(TL_PHASE_INDEX) << trafficLightId << static_cast<uint8_t>(TYPE_INTEGER) << index);
+	if (!buf.eof()) error("expected only an OK response, but received additional bytes");
+}
+
 // name: host;Car;i=vehicle.gif
 void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");

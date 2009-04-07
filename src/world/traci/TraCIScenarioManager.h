@@ -62,6 +62,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void commandChangeRoute(int32_t nodeId, std::string roadId, double travelTime);
 		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
 		void commandStopNode(int32_t nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
+		void commandSetTrafficLightProgram(std::string trafficLightId, std::string program);
+		void commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index);
 
 	protected:
 
