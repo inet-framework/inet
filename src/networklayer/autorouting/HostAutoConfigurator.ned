@@ -24,11 +24,12 @@ package inet.networklayer.autorouting;
 //
 simple HostAutoConfigurator
 {
-    parameters:
-        bool debug = default(false);                 // emit debug messages?
-        string interfaces = default("wlan");         // list of interfaces to autoassign addresses to, separated by a single space characters
-        string addressBase = default("10.0.0.0");    // start of address range from which to automatically assign an address to the autoassignInterfaces
-        string netmask = default("255.0.0.0");       // netmask of subnet in which to automatically assign an address to the autoassignInterfaces
-        @display("i=block/cogwheel_s");
+	parameters:
+		bool debug = default(false);                 // emit debug messages?
+		string interfaces = default("wlan");         // list of interfaces to autoassign addresses to, separated by a single space characters
+		string addressBase = default("10.0.0.0");    // start of address range from which to automatically assign an address to the autoassignInterfaces
+		string netmask = default("255.0.0.0");       // netmask of subnet in which to automatically assign an address to the autoassignInterfaces
+		string mcastGroups = default("");         // list of IP addresses of multicast groups to join, separated by a single space characters
+		@display("i=block/cogwheel_s");
 }
 

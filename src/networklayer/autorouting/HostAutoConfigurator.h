@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef HOSTAUTOCONFIGURATOR_H
-#define HOSTAUTOCONFIGURATOR_H
+#ifndef NETWORKLAYER_AUTOROUTING_HOSTAUTOCONFIGURATOR_H
+#define NETWORKLAYER_AUTOROUTING_HOSTAUTOCONFIGURATOR_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"
@@ -33,7 +33,7 @@ class INET_API HostAutoConfigurator : public cSimpleModule
 	public:
 		virtual void initialize(int stage);
 		virtual void finish();
-    		virtual int numInitStages() const {return 3;}
+		virtual int numInitStages() const {return 3;}
 
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);

@@ -18,13 +18,15 @@
  */
 
 #include <stdexcept>
+#include <algorithm>
 
-#include "HostAutoConfigurator.h"
+#include "networklayer/autorouting/HostAutoConfigurator.h"
 
 #include "IPAddressResolver.h"
 #include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
+#include "IPAddress.h"
 
 Define_Module(HostAutoConfigurator);
 
@@ -48,6 +50,24 @@ void HostAutoConfigurator::handleMessage(cMessage* apMsg) {
 void HostAutoConfigurator::handleSelfMsg(cMessage* apMsg) {
 }
 
+namespace {
+	void addToMcastGroup(InterfaceEntry* ie, IRoutingTable* routingTable, const IPAddress& mcastGroup) {
+		IPv4InterfaceData::IPAddressVector mcg = ie->ipv4Data()->getMulticastGroups();
+		if (std::find(mcg.begin(), mcg.end(), mcastGroup) == mcg.end()) mcg.push_back(mcastGroup);
+		ie->ipv4Data()->setMulticastGroups(mcg);
+
+		IPRoute* re = new IPRoute(); //TODO: add @c delete to destructor
+		re->setHost(mcastGroup);
+		re->setNetmask(IPAddress::ALLONES_ADDRESS); // TODO: can't set this to none?
+		re->setGateway(IPAddress()); // none
+		re->setInterface(ie);
+		re->setType(IPRoute::DIRECT);
+		re->setSource(IPRoute::MANUAL);
+		re->setMetric(1);
+		routingTable->addRoute(re);
+	}
+}
+
 void HostAutoConfigurator::setupNetworkLayer()
 {
 	EV << "host auto configuration started" << std::endl;
@@ -55,6 +75,7 @@ void HostAutoConfigurator::setupNetworkLayer()
 	std::string interfaces = par("interfaces").stringValue();
 	IPAddress addressBase = IPAddress(par("addressBase").stringValue());
 	IPAddress netmask = IPAddress(par("netmask").stringValue());
+	std::string mcastGroups = par("mcastGroups").stringValue();
 	IPAddress myAddress = IPAddress(addressBase.getInt() + uint32(getParentModule()->getId()));
 
 	// get our host module
@@ -87,6 +108,18 @@ void HostAutoConfigurator::setupNetworkLayer()
 		ie->ipv4Data()->setIPAddress(myAddress);
 		ie->ipv4Data()->setNetmask(netmask);
 		ie->setBroadcast(true);
+
+		// associate interface with default multicast groups
+		addToMcastGroup(ie, routingTable, IPAddress::ALL_HOSTS_MCAST);
+		addToMcastGroup(ie, routingTable, IPAddress::ALL_ROUTERS_MCAST);
+
+		// associate interface with specified multicast groups
+		cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
+		const char *mcastGroup_s;
+		while ((mcastGroup_s = interfaceTokenizer.nextToken()) != NULL) {
+			IPAddress mcastGroup(mcastGroup_s);
+			addToMcastGroup(ie, routingTable, mcastGroup);
+		}
 	}
 }
 
