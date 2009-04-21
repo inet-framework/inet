@@ -87,6 +87,12 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandChangeRoute(std::string roadId, double travelTime) {
 			getManager()->commandChangeRoute(getExternalId(), roadId, travelTime);
 		}
+		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
+			return getManager()->commandDistanceRequest(position1, position2, returnDrivingDistance);
+		}
+		void commandStopNode(std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
+			return getManager()->commandStopNode(getExternalId(), roadId, pos, laneid, radius, waittime);
+		}
 
 	protected:
 		bool debug; /**< whether to emit debug messages */
