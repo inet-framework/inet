@@ -1,0 +1,3 @@
+#!/bin/sh
+which texttest.py || (echo "Please install Texttest (http://texttest.carmen.se/) and add texttest.py to your PATH"; exit 1)
+texttest.py

@@ -1,0 +1,2 @@
+#!/bin/sh
+opp_run -u Cmdenv -l $TEXTTEST_HOME/../../src/inet -n $TEXTTEST_HOME/../../src:. $*

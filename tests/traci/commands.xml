@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<runs>
+	<run no="1">
+		<commands nodeid="default">
+		</commands>
+		<commands nodeid="0">
+			<CMD_SETMAXSPEED t="10" maxspeed="0" />
+			<CMD_SETMAXSPEED dt="30" maxspeed="-1" />
+		</commands>
+	</run>
+	<run no="2">
+		<commands nodeid="default">
+		</commands>
+		<commands nodeid="0">
+			<CMD_DISTANCEREQUEST dt="0" p1x="25" p1y="7030" p2x="883" p2y="6980" />
+			<CMD_DISTANCEREQUEST dt="0" p1x="25" p1y="7030" p2x="883" p2y="6980" drivingDistance="true" />
+		</commands>
+	</run>
+	<run no="3">
+		<commands nodeid="default">
+		</commands>
+		<commands nodeid="0">
+			<CMD_CHANGEROUTE dt="0" roadid="43" traveltime="9999" /> <!-- close center -->
+			<CMD_CHANGEROUTE dt="0" roadid="42" traveltime="9999" /> <!-- close bottom -->
+		</commands>
+	</run>
+	<run no="4">
+		<commands nodeid="default">
+		</commands>
+		<commands nodeid="0">
+			<CMD_CHANGEROUTE dt="0" roadid="43" traveltime="9999" /><!-- close center -->
+			<CMD_CHANGEROUTE dt="0" roadid="42" traveltime="9999" /><!-- close bottom -->
+			<!-- wait -->
+			<CMD_CHANGEROUTE dt="2" roadid="44" traveltime="9999" /><!-- close top -->
+			<CMD_CHANGEROUTE dt="0" roadid="42" traveltime="-1" /><!-- open bottom -->
+		</commands>
+	</run>
+	<run no="5">
+		<commands nodeid="default">
+		</commands>
+		<commands nodeid="0">
+			<CMD_STOP dt="0" roadid="43" pos="20" laneid="0" radius="10" waittime="30" />
+		</commands>
+	</run>
+</runs>

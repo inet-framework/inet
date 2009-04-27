@@ -1,0 +1,5 @@
+<routes>
+	 <vtype id="SUMO_DEFAULT_TYPE" accel="3" decel="9.81" sigma="0.5" length="5" maxspeed="70"/>
+	 <route id="car" multi_ref="x" edges="25 28 31 34 37 40 43 46 49 52 55 "></route>
+	 <vehicle id="car" type="SUMO_DEFAULT_TYPE" route="car" depart="0" period="5" repno="9" departspeed="max"/>
+</routes>
