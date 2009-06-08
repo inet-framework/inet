@@ -174,6 +174,8 @@ void IPTrafGen::handleMessage(cMessage *msg)
 
         if (!numPackets || numSent<numPackets)
             scheduleAt(simTime()+(double)par("packetInterval"), msg);
+        else
+            delete msg;
     }
     else
     {
