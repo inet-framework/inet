@@ -117,8 +117,10 @@ void IPTrafGen::initialize(int stage)
     if (destAddresses.empty())
         return;
 
-    cMessage *timer = new cMessage("sendTimer");
-    scheduleAt(startTime, timer);
+    if (numPackets > 0) {
+        cMessage *timer = new cMessage("sendTimer");
+        scheduleAt(startTime, timer);
+    }
 }
 
 IPvXAddress IPTrafGen::chooseDestAddr()
