@@ -29,6 +29,10 @@
 
 #include <headers/ethernet.h>
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
+#include <ws2tcpip.h>
+#endif
+
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
 #define PCAP_TIMEOUT 10    /* Timeout in ms */
 
