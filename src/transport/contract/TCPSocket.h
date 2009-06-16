@@ -159,6 +159,11 @@ class INET_API TCPSocket
 
     cGate *gateToTcp;
 
+    std::string sendQueueClass;
+    std::string receiveQueueClass;
+    std::string tcpAlgorithmClass;
+
+
   protected:
     void sendToTCP(cMessage *msg);
 
@@ -231,12 +236,35 @@ class INET_API TCPSocket
      */
     void bind(IPvXAddress localAddr, int localPort);
 
-    //
-    // TBD add support for these options too!
-    //  string sendQueueClass;
-    //  string receiveQueueClass;
-    //  string tcpAlgorithmClass;
-    //
+    /**
+     * Returns the current sendQueueClass parameter.
+     */
+    const char *getSendQueueClass() const {return sendQueueClass.c_str();}
+
+    /**
+     * Returns the current receiveQueueClass parameter.
+     */
+    const char *getReceiveQueueClass() const {return receiveQueueClass.c_str();}
+
+    /**
+     * Returns the current tcpAlgorithmClass parameter.
+     */
+    const char *getTCPAlgorithmClass() const {return tcpAlgorithmClass.c_str();}
+
+    /**
+     * Sets the sendQueueClass parameter of the next connect() or listen() call.
+     */
+    void setSendQueueClass(const char *sendQueueClass) { this->sendQueueClass = sendQueueClass; }
+
+    /**
+     * Sets the receiveQueueClass parameter of the next connect() or listen() call.
+     */
+    void setReceiveQueueClass(const char *receiveQueueClass) { this->receiveQueueClass = receiveQueueClass; }
+
+    /**
+     * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.
+     */
+    void setTCPAlgorithmClass(const char *tcpAlgorithmClass) { this->tcpAlgorithmClass = tcpAlgorithmClass; }
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
