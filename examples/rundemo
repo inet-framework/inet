@@ -61,7 +61,7 @@ foreach line {
    {"802.11b ad-hoc (MF impl.)" "adhoc/mf80211"     "./run"               "run"}
 
    {"Wireless"}
-   {"802.11 AP and hosts"   "wireless/80211lan"     "./run"               "run"}
+   {"802.11 AP and hosts"   "wireless/lan80211"     "./run"               "run"}
    {"802.11 handover"       "wireless/handover"     "./run"               "run"}
    {"802.11 thruput test"   "wireless/throughput"   "./run"               "run"}
    {"802.11 thruput test 2" "wireless/hosttohost"   "./run"               "run"}
