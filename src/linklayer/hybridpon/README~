@@ -1,0 +1,27 @@
+Passive Optical Network (PON) Layer
+===================================
+
+* Shortdesc:	"pon" is a simulation model for PON layer
+* Author:		Kyeong Soo (Joseph) Kim (kyeongsoo.kim@gmail.com)
+* License:		GPLv2
+* Requires:		OMNeT++ 4.0 or later
+
+The 'pon' provides essential components at Physical and Data Link
+Layers to build simulation models for various flavors of PON systems
+(TDM, WDM, hybrid TDM/WDM, and so on).
+
+* Features:
+  - Modular design allowing dynamic loading of different MAC and
+    schedulers at run time
+
+* Notes:
+  This project was originally started as a joint work between Stanford
+  Networking Research Center (SNRC), Photonics & Networking Research
+  Lab (PNRL), Stanford, and Advanced System Technology (AST),
+  STMicrolectronics.
+  
+  With the OMNeT++ 4.0 which brings a lot of fundamental changes all
+  over the simulation framework, supporting packages, and models,
+  however, we decided to start from scratch and now the whole code
+  base (i.e., "inet-hnrl") is being developed and maintained by Hybrid
+  Networking Research Lab (HNRL), Swansea University, Wales, UK.

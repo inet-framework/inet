@@ -1,0 +1,32 @@
+version 2
+run ARPTest-0-20090511-10:22:43-23135
+attr configname ARPTest
+attr datetime 20090511-10:22:43
+attr experiment ARPTest
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network ARPTest
+attr processid 23135
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 135  ARPTest.client.tcp  "sent ack"  ETV
+vector 4  ARPTest.client.eth[0].mac  framesSent  ETV
+vector 6  ARPTest.client.eth[0].mac  bytesSent  ETV
+vector 50  ARPTest.switch.mac[0]  framesReceivedOK  ETV
+vector 52  ARPTest.switch.mac[0]  bytesReceivedOK  ETV
+vector 56  ARPTest.switch.mac[0]  framesPassedToHL  ETV
+vector 48  ARPTest.switch.relayUnit  "buffer level"  ETV
+4	25	1.0000672	1
+6	25	1.0000672	64
+48	27	1.0000672	64
+48	28	1.0000692	0
+50	26	1.0000672	1
+52	26	1.0000672	64
+56	26	1.0000672	1
+135	16	1	0

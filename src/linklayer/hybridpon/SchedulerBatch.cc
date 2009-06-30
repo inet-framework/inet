@@ -1,0 +1,571 @@
+// $Id$
+//------------------------------------------------------------------------------
+//	SchedulerBatch.cc --
+//
+//	This file implements the 'Batch' class for a batch scheduling mode based on
+//	the 'Scheduler' class for the PON OLT.
+//
+//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//------------------------------------------------------------------------------
+
+
+// For debugging
+// #define DEBUG_SCHEDULER
+
+#include <sstream>
+#include "Scheduler.h"
+
+
+// Do not register this getModule(i.e., using 'Define_Module_Like()' macro)
+// because it only serves as base class for other scheduler classes.
+
+
+//------------------------------------------------------------------------------
+//	Misc. functions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Batch::debugVoqStatus --
+//
+//		Generates a snapshot of VOQ status (voqBitCtr).
+//
+// Arguments:
+//
+// Results:
+//      Prints out the lengths of VOQs to event window.
+//------------------------------------------------------------------------------
+
+void Batch::debugVoqStatus(void)
+{
+    ev << "VOQ status at " << simTime() << " sec:" << endl;
+    ev << "For Downstream:" << "\t";
+    for (int i=0; i<numOnus; i++)
+        ev << "VOQ[" << i << "]=" << voqBitCtr[i] << "\t";
+    ev << endl << "For Upstream:" << "\t";
+    for (int i=0; i<numOnus; i++)
+        ev << "VOQ[" << i << "]=" << voqBitCtr[i+numOnus] << "\t";
+    ev << endl;
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::debugSnapshot --
+//
+//		Generates a snapshot of all class variables.
+//
+// Arguments:
+//
+// Results:
+//      Prints out the values of all class member variables to stderr.
+//------------------------------------------------------------------------------
+
+void Batch::debugSnapshot(void)
+{
+    cerr << "Snapshot of " << getFullPath() << " at " << simTime() << " sec:" << endl;
+    cerr << "* NED Parameters *" << endl;
+//    cerr << "- numChannels=" << numChannels << endl;
+    cerr << "- numOnus=" << numOnus << endl;
+    cerr << "- numReceivers=" << numReceivers << endl;
+    cerr << "- numTransmitters=" << numTransmitters << endl;
+    cerr << "- numUsersPerOnu=" << numUsersPerOnu << endl;
+    cerr << "- queueSizePoll=" << queueSizePoll << endl;
+    cerr << "- maxTxDelay=" << maxTxDelay << endl;
+    cerr << "- cwMax=" << cwMax << endl;
+    cerr << "- onuTimeout=" << onuTimeout << endl;
+    cerr << "- distances=" << distances << endl;
+    cerr << "- batchPeriod=" << batchPeriod << endl;
+    cerr << "- voqSize=" << voqSize << endl;
+    cerr << "- voqThreshold=" << voqThreshold << endl;
+
+    cerr << "* Status Variables *" << endl;
+    cerr << "- busyQueuePoll=" << busyQueuePoll << endl;
+    for (int i=0; i<numOnus; i++)
+        cerr << "-RTT[" << i << "]=" << RTT[i] << endl;
+    for (int i=0; i<numOnus; i++)
+        cerr << "-CH[" << i << "]=" << CH[i] << endl;
+    for (int i=0; i<numReceivers; i++)
+        cerr << "-RX[" << i << "]=" << RX[i] << endl;
+    for (int i=0; i<numTransmitters; i++)
+        cerr << "-TX[" << i << "]=" << TX[i] << endl;
+    for (int i=0; i<2*numOnus; i++)
+        cerr << "-voq[" << i << "].length()=" << voq[i].length() << endl;
+    for (int i=0; i<2*numOnus; i++)
+        cerr << "-voqBitCtr[" << i << "]=" << voqBitCtr[i] << endl;
+    cerr << "-voqStartIdx=" << voqStartIdx << endl;
+}
+
+
+//------------------------------------------------------------------------------
+//	Event handling functions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Batch::sendOnuPoll --
+//
+//		Generates a polling PON frame for transmission.
+//
+// Arguments:
+//      cMessage	*msg;
+//
+// Results:
+//		A polling PON frame is generated for a given ONU and
+//		delivered to 'handleGrant()' for granting and transmission.
+//------------------------------------------------------------------------------
+
+void Batch::sendOnuPoll(HybridPonMessage *msg)
+{
+#ifdef DEBUG_SCHEDULER
+    ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
+#endif
+
+	// Get the ONU index from the message.
+    int idx = msg->getOnuIdx();
+
+    // Record ONU Timeout.
+    monitor->recordOnuTimeout(idx);
+
+	// Check the VOQ if there is room for a polling frame.
+	if (voqBitCtr[idx+numOnus] + POLL_FRAME_SIZE <= voqSize) {	// idx+numOnus -> VOQ index!
+
+		// Create a polling (i.e., grant with size 0) frame.
+		HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
+		ponFrameToOnu->setLambda(idx);
+		ponFrameToOnu->setId(false);
+		ponFrameToOnu->setGrant(0);	// Only for payload portion (for Ethernet frames),
+									// not including CW for overhead & report fields
+		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
+
+#ifdef DEBUG_SCHEDULER
+		ev << getFullPath() << "::sendOnuPoll: Destination ONU = " << idx << endl;
+#endif
+
+		// Handle the generated polling frame.
+		handleGrant(idx, ponFrameToOnu);
+	}
+    else if ( voq[idx+numOnus].empty() ) {
+        // Reset ONU timeout only if the VOQ is empty.
+
+		// Check any duplicated poll message.
+		assert(!pollEvent[idx]->isScheduled());
+
+		scheduleAt(simTime()+onuTimeout, pollEvent[idx]);	// From 'now'
+	}
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::batchSchedule --
+//
+//      Schedules transmission of PON frames to ONUs based on a batch scheduling
+//      algorithm (e.g., earliest departure first, longest queue first, and so on)
+//      that is implemented in a subclasses.
+//
+// Arguments:
+//      cMessage    *batchMsg;
+//
+// Results:
+//      Arranges tranmission times of the PON frames in VOQs for the next batch
+//      period. This arrangement is done as follows:
+//      The algorithm checks the next HOL frame in every VOQ to determines which
+//      one is the best according to a govem scheduling algorithm and schedules
+//      this frame first. Then it continues doing this until it finds no more
+//      frames that can be scheduled within the next batch period.
+//------------------------------------------------------------------------------
+
+void Batch::batchSchedule(cMessage *batchMsg)
+{
+#ifdef DEBUG_SCHEDULER
+	ev << "Batch: batchSchedule called at " << simTime() << " sec.:" << endl;
+    debugSchedulerStatus();
+    debugVoqStatus();
+#endif
+
+	// Update all CH[], TX[], RX[] for actual time
+    simtime_t now = simTime();
+	for (int k=0; k<numOnus; k++)
+        CH[k] = (CH[k] < now) ? now : CH[k];
+	for (int k=0; k<numTransmitters; k++)
+        TX[k] = (TX[k] < now) ? now : TX[k];
+ 	for (int k=0; k<numReceivers; k++)
+        RX[k] = (RX[k] < now) ? now : RX[k];
+
+    // Initialize variables used inside the while() loop.
+    int voqsToSchedule = 2*numOnus;
+    BoolVector schedulableVoq(2*numOnus, TRUE);
+
+    while (voqsToSchedule > 0) {
+#ifdef DEBUG_SCHEDULER
+        ev << "Batch: batchSchedule: voqsToSchedule: " << voqsToSchedule << endl;
+#endif
+
+        // Pick earliest available TX & RX
+		int i = 0;
+		for (int m=1; m<numTransmitters; m++)
+            i = (TX[m] <= TX[i]) ? m : i;
+		int j = 0;
+		for (int n=1; n<numReceivers; n++)
+            j = (RX[n] <= RX[j]) ? n: j;
+
+        // Select a VOQ using a specific scheduling algorithm
+        simtime_t t = 0;
+        int voqIdx = scheduler(TX[i], RX[j], t, voqsToSchedule, schedulableVoq, voq);
+
+        if (voqIdx >= 0) {
+            // There's VOQ with a frame to send!
+
+            if ( t <= (now + batchPeriod) ) {
+                simtime_t delay = t - simTime();
+    			if (delay >= 0) {
+                    HybridPonFrame *ponFrameToOnu = (HybridPonFrame *) (voq[voqIdx].pop());
+
+                    // Note that ponFrameToOnu does include preamble, delimiter and CW when appropriate.
+                    simtime_t txDelay = ponFrameToOnu->getBitLength()/BITRATE;  // Transmission delay
+
+                    if (ponFrameToOnu->getId() == true) {
+                        // This is a downstream data frame.
+                        // In this case, VOQ idx = ch. idx.
+                        CH[voqIdx] = t + txDelay;
+                        TX[i] = t + txDelay;
+                    }
+                    else {
+                        // This is a grant frame.
+                        // Note that "channel idx = voq idx. - numOnus" in this case.
+                        int chIdx = voqIdx - numOnus;
+
+                        CH[chIdx] = t + txDelay;
+                        TX[i] = t + txDelay;
+
+                        // We also need to schedule reception at time
+                        // 't + RTT[chIdx]' with RX[j] via CH[chIdx];
+                        RX[j] = t + txDelay + RTT[chIdx];
+
+//                         if (pollEvent[chIdx]->isScheduled()) {
+//                             cancelEvent(pollEvent[chIdx]);
+//                         }
+//                         scheduleAt(t + onuTimeout, pollEvent[chIdx]);
+                    }
+
+                    // Schedule transmission at time t using TX[i] and CH[d] (or CH[chIdx] for grants/polls).
+                    // *** Here we included a transmission delay in sending
+                    // *** because the impact of tranmission rate in delay
+                    // *** has not been taken into account elsewhere.
+                    sendDelayed(ponFrameToOnu, delay + txDelay, "out");
+                    HybridPonMessage *msg = new HybridPonMessage("Actual VOQ TX", ACTUAL_VOQ_TX);
+                    msg->setBitLength(ponFrameToOnu->getBitLength());
+                    msg->setOnuIdx(voqIdx);    // set 'voqIdx'.
+                    scheduleAt(t, msg);
+#ifdef DEBUG_SCHEDULER
+                    ev << "Batch: batchSchedule: TX of PON frame in voq[" << voqIdx << "] scheduled at " << t << endl;
+                    debugSchedulerStatus();
+#endif
+    			}
+	    		else {
+		    		error ("batchSchedule: trying to schedule a delayed send with negative delay");
+			    }
+            }
+            else {
+                // t is greater than batchPeriod:
+                // Do not schedule and make voq[voqIdx] unschedulable.
+
+                schedulableVoq[voqIdx] = FALSE;
+                voqsToSchedule --;
+            }
+        }   // end of if ()
+    }   // end of while()
+
+	if (batchMsg->isScheduled()) {
+		cancelEvent(batchMsg);
+	}
+	scheduleAt(simTime() + batchPeriod, batchMsg);
+
+#ifdef DEBUG_SCHEDULER
+    ev << "Batch: batchSchedule: scheduling finished at " << simTime() << " sec" << endl;
+    debugSchedulerStatus();
+    debugVoqStatus();
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::receiveIpPacket --
+//
+//		receives an IP packet from the upper layer.
+//
+// Arguments:
+// 		IpPacket *pkt;
+//
+// Results:
+//		A PON frame is generated, and unless a buffer overflow occurs,
+//      its transmission is scheduled.
+//------------------------------------------------------------------------------
+
+void Batch::receiveIpPacket(IpPacket *pkt)
+{
+#ifdef DEBUG_SCHEDULER
+    ev << getFullPath() << ": IP packet received" << endl;
+#endif
+
+    // **** for now, this is how we determine to which ONU it is addressed
+    // **** assumes equal number of users per onu, as we have been doing
+    int lambda = pkt->getDstnAddress()/numUsersPerOnu;
+
+    // Check if there is room in the VOQ for a PON frame
+    // corresponding to the incoming IP packet
+    if ( voqBitCtr[lambda] + pkt->getBitLength() + ETH_OVERHEAD_SIZE + DS_DATA_OVERHEAD_SIZE <= voqSize ) {
+
+#ifdef DEBUG_SCHEDULER
+        ev << getFullPath() << ": dstnAddress = " << pkt->getDstnAddress() << ", destination ONU = " << lambda << endl;
+#endif
+
+        // Encapsulate IP packet in Ethernet frame
+        EthFrame *ethFrame = new EthFrame();
+        ethFrame->setBitLength(ETH_HEADER_SIZE + ETH_CRC_SIZE);
+        ethFrame->encapsulate(pkt);
+        int frameLength = ethFrame->getBitLength();
+
+        // Create ponFrame
+        HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
+        ponFrameToOnu->setLambda(lambda);
+        ponFrameToOnu->setId(true);
+        // detected by Joseph Kim, 12/14/2003
+        // ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + pkt->getBitLength());
+        ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + frameLength);
+        (ponFrameToOnu->getEncapsulatedEthFrames()).insert(ethFrame);
+        voqBitCtr[lambda] += ponFrameToOnu->getBitLength();
+        voq[lambda].insert(ponFrameToOnu);
+
+        // Record updated VOQ statistics
+        vQueueLength[lambda].record(voq[lambda].length());  // cQueue::length() returns the # of objects
+        vQueueOctet[lambda].record(voqBitCtr[lambda]/8);
+    }
+    else {
+        monitor->recordLossStats(pkt->getSrcAddress(), pkt->getDstnAddress(), pkt->getBitLength() );
+#ifdef DEBUG_SCHEDULER
+        ev << getFullPath() << ": IP packet dropped due to buffer overflow!" << endl;
+#endif
+        delete (IpPacket *) pkt;
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::handleGrant --
+//
+//		handles a grant PON frame to an ONU.
+//
+// Arguments:
+//      int             lambda;
+// 		HybridPonFrame    *grant;
+//
+// Results:
+//      The grant PON frame is added to a corresponding VOQ if there's room.
+//      Otherwise, it is dropped.
+//------------------------------------------------------------------------------
+
+void Batch::handleGrant(int lambda, HybridPonFrame *grant)
+{
+#ifdef DEBUG_SCHEDULER
+    ev << getFullPath() << ": handles grant PON frame" << endl;
+#endif
+
+    // Note that the VOQ index for a grant (i.e., upstream traffic)
+    // on channel 'i' is 'i+numChannles'!
+    int voqIdx = lambda + numOnus;
+
+    // Check if any other grant is already in the VOQ.
+	assert( voq[voqIdx].empty() );
+    /*if (voq[voqIdx].empty() == false) {
+		error("Error: ONU timeout when another grant in the VOQ for ch = %d", lambda);
+		debugSnapshot();
+    }*/
+
+    if ( voqBitCtr[voqIdx] + grant->getBitLength() <= voqSize ) {
+        voqBitCtr[voqIdx] += grant->getBitLength();
+        voq[voqIdx].insert(grant);
+
+        // Cancel any scheduled ONU timeout event.
+        if (pollEvent[lambda]->isScheduled()) {
+            cancelEvent(pollEvent[lambda]);
+        }
+
+#ifdef DEBUG_SCHEDULER
+        ev << getFullPath() << ": grant PON frame put into a downstream VOQ" << endl;
+#endif
+    }
+    else {
+        delete (HybridPonFrame *) grant;
+
+        // Reset ONU timeout only if the VOQ is empty.
+        if ( voq[voqIdx].empty() ) {
+            if (pollEvent[lambda]->isScheduled()) {
+                cancelEvent(pollEvent[lambda]);
+            }
+            scheduleAt(simTime()+onuTimeout, pollEvent[lambda]);
+        }
+
+#ifdef DEBUG_SCHEDULER
+        ev << getFullPath() << ": grant PON frame dropped due to buffer overflow" << endl;
+#endif
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::transmitVoqDataFrame --
+//------------------------------------------------------------------------------
+
+void Batch::transmitVoqDataFrame(HybridPonMessage *msg)
+{
+	int d = msg->getOnuIdx();		// VOQ index
+	int l = msg->getBitLength();	// frame length [bits]
+    voqBitCtr[d] -= l;
+
+	// Check VOQ bit counter.
+	assert(voqBitCtr[d] >= 0);
+
+    // For a grant frame, reset ONU timeout.
+    if (d >= numOnus) {
+        int ch = d - numOnus;
+        if (pollEvent[ch]->isScheduled()) {
+            cancelEvent(pollEvent[ch]);
+        }
+        scheduleAt(simTime()+l/BITRATE+onuTimeout, pollEvent[ch]);	// tx. delay to be included!
+
+		// Record grant PON frame statistics.
+		simtime_t now = simTime();
+		monitor->recordGrantStats(ch, l, l - POLL_FRAME_SIZE, now - vTxTime[ch]);
+		// Note that 'l - POLL_FRAME_SIZE' is the grant size of the frame.
+		vTxTime[ch] = now;
+    }
+
+    delete msg;
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::initializeSpecific
+//
+//		does initialization specific to a batch mode.
+//
+// Arguments:
+//
+// Results:
+//		All member variables are allocated memory and initialized.
+//------------------------------------------------------------------------------
+
+void Batch::initializeSpecific(void)
+{
+    // Initialize NED parameters.
+	batchPeriod = par("batchPeriod");
+	voqSize = par("voqSize");
+    voqThreshold = par("voqThreshold");
+
+    voq = new Voq[2*numOnus];
+        // For downstream data:       [0...numOnus-1]
+        // For upstream grants/polls: [numOnus...2*numOnus-1]
+
+    voqBitCtr.assign(2*numOnus, 0);
+    voqStartIdx = 0;
+
+//     // Increase nextToSchedule by one and point it to voq[i]'s head
+//     nextToSchedule.reserve(2*numOnus);
+//     for (int i = 0; i < 2*numOnus; i++) {
+//         cQueue::Iterator tempIter(voq[i], false);    // tempIter indicates the last object of voq[i]
+//         nextToSchedule[i] = tempIter;
+//         nextToSchedule.resize(i+1, tempIter);
+//     }
+
+    // Initialize cOutVector objects for VOQ trace.
+    vQueueLength = new cOutVector[2*numOnus];
+    vQueueOctet = new cOutVector[2*numOnus];
+    ostringstream vectorName;
+    for (int voqIdx = 0; voqIdx < 2*numOnus; voqIdx++) {
+        int direction = (voqIdx < numOnus ? 0 : 1); // 0 for downstream, 1 for upstream.
+        int chIdx = (direction == 0 ? voqIdx : voqIdx - numOnus);
+        vectorName.str("");
+        vectorName << (direction == 0 ? "downstream" : "upstream") << " VOQ length [frame] for channel " << chIdx;
+        vQueueLength[voqIdx].setName((vectorName.str()).c_str());
+        vectorName.str("");
+        vectorName << (direction == 0 ? "downstream" : "upstream") << " VOQ size [octet] for channel " << chIdx;
+        vQueueOctet[voqIdx].setName((vectorName.str()).c_str());
+    }
+
+	// Initialize vectors for grant PON frame Trace.
+	vTxTime.assign(numOnus, simtime_t(0.0));
+
+    // Schedule the first batch period timeout.
+    cMessage *batchMsg = new cMessage("Batch Period Timeout", BATCH_TIMEOUT);
+    scheduleAt(simTime() + batchPeriod, batchMsg);
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::handleMessage --
+//
+//		handles messages by calling appropriate functions for their processing.
+//
+// Arguments:
+// 		cMessage *msg
+//
+// Results:
+//		Simulation starts and runs until it will be terminated by kernel.
+//------------------------------------------------------------------------------
+
+void Batch::handleMessage(cMessage *msg)
+{
+#ifdef TRACE_MSG
+	ev.printf();
+	PrintMsg(*msg);
+#endif
+
+	switch (msg->getKind()) {
+
+	case ONU_POLL:
+        sendOnuPoll((HybridPonMessage *)msg);
+        break;
+
+	case IP_PACKET:
+		// Check if the IP packet received is from IP Packet generator.
+		assert( msg->getArrivalGateId() == gate("fromPacketGenerator")->getId() );
+
+		receiveIpPacket((IpPacket *)msg);
+        break;
+
+	case HYBRID_PON_FRAME:
+        // Check if the PON frame received is from ONU.
+        assert( msg->getArrivalGateId() == gate("in")->getId() );
+
+		receiveHybridPonFrame((HybridPonFrame *)msg);
+        break;
+
+	case ACTUAL_VOQ_TX:
+		transmitVoqDataFrame((HybridPonMessage *)msg);
+		break;
+
+	case BATCH_TIMEOUT:
+		batchSchedule(msg);
+		break;
+
+	default:
+        ev << getFullPath() << ": Unexpected message type: " << msg->getKind() << endl;
+        exit(1);
+	}	// end of switch()
+}
+
+
+//------------------------------------------------------------------------------
+// Batch::finishSpecific
+//
+//		does finalization specific to a batch mode.
+//
+// Arguments:
+//
+// Results:
+//		Any manually allocated memories for member variables have been deallocated.
+//------------------------------------------------------------------------------
+
+void Batch::finishSpecific(void)
+{
+    delete [] vQueueLength;
+    delete [] vQueueOctet;
+}

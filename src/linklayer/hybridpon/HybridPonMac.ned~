@@ -1,0 +1,23 @@
+// $Id$
+//-------------------------------------------------------------------------------
+//	HybridPonMac.ned --
+//
+//	This file defines a HybridPonMac module in a PON ONU.
+//
+//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//-------------------------------------------------------------------------------
+
+
+package inet.linklayer.pon;
+
+
+simple HybridPonMac
+{
+    parameters:
+        int queueSize;        // size of FIFO queue
+    gates:
+        output toMonitor;				// to monitor
+		inout phy;						// to and from PON (i.e., splitter)
+		in		ifIn[numUnisPerOnu];	// to users (through Ethernet I/F)
+		out		ifOut[numUnisPerOnu];	// from users (through Ethernet I/F)
+}

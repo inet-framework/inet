@@ -1,0 +1,66 @@
+// $Id$
+//------------------------------------------------------------------------------
+//	HybridPonFrame.msg --
+//
+//	This file defines 'HybridPonFrame' and 'HybridPonMessage' message objects.
+//
+//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//------------------------------------------------------------------------------
+
+
+//cplusplus {{
+//#include "Ethernet.h"
+//#include "MACAddress.h"
+//#include "Ieee802Ctrl_m.h" // for enums
+//}}
+
+
+class cPacketQueue;
+
+
+packet HybridPonMessage
+{
+    int onuIdx;
+};
+
+
+// packet IpPacket
+// {
+//     int srcAddress;
+//     int dstnAddress;
+//     long seqNumber;
+// };
+
+
+// packet EthFrame extends IpPacket
+// {
+//     int header;
+//     int fcs;
+// };
+
+
+//
+// Common base class for classes representing PON frame types,
+// containing their common header fields.
+//
+// Source and destination address are stored in data members.
+// Other fields include:
+//  - preamble: not stored (only contributes length)
+//  - length: stored in cMessage length, not stored explicitly
+//  - payload: stored a encapsulated packet (cMessage::encapsulate())
+//  - crc: represented by cMessage::hasBitError()
+//
+packet HybridPonFrame extends cPacket
+{
+    bool id;
+    int lambda;
+    int grant;
+    int request;
+    cPacketQueue encapsulatedEthFrames;
+};
+
+
+packet DummyPacket extends HybridPonFrame
+{
+    int idx;
+};
