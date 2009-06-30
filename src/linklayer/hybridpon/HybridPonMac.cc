@@ -1,16 +1,16 @@
-/**
- * @file    HybridPonMac.cc
- * @author  Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
- * @date    Fri Jun 26 21:50:38 2009
- * 
- * @brief   Implements 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
- * 
- * @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
- *
- * @remarks This software is written and distributed under the GNU General
- *          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
- *          You must not remove this notice, or any other, from this software.
- */
+///
+/// @file   HybridPonMac.cc
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   Tue Jun 30 12:26:54 2009
+/// 
+/// @brief  Implements 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
+///
+/// @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+/// 
 
 
 // #define DEBUG_SLOT_MGR
@@ -23,12 +23,12 @@
 Define_Module(HybridPonMac);
 
 
-/** 
- * Handle a user frame from UNIs. Put the frame into a FIFO, if there
- * is enough space. Otherwise, drop it.
- *
- * @param[in] frame a cPacket pointer
- */
+
+/// 
+/// Handle a user frame from UNIs. Put the frame into a FIFO, if there
+/// is enough space. Otherwise, drop it.
+/// @param[in] frame a cPacket pointer 
+///
 void HybridPonMac::handleFrameFromUni(cPacket *frame)
 {
 #ifdef DEBUG_HYBRIDPONMAC
@@ -57,13 +57,13 @@ void HybridPonMac::handleFrameFromUni(cPacket *frame)
 }
 
 
-/** 
- * Handle a PON frame from PON. Extract user frames from it and send
- * them to UNIs.
- * 
- * @param[in] frame a HybridPonFrame pointer
- * @todo Implement local switching for multiple UNIs.
- */
+/// 
+/// Handle a PON frame from PON. Extract user frames from it and send
+/// them to UNIs.
+///
+/// @param[in] frame a HybridPonFrame pointer
+/// @todo Implement local switching for multiple UNIs.
+///
 void HybridPonMac::handleDataFromPon(HybridPonFrame *frame)
 {
 #ifdef DEBUG_HYBRIDPONMAC
@@ -81,13 +81,13 @@ void HybridPonMac::handleDataFromPon(HybridPonFrame *frame)
 }
 
 
-/** 
- * Handle a PON frame from PON including a grant for ONU upstream
- * data. Creates a new PON frame, encapsulate user frames from the
- * FIFO queue in it, and send it to OLT.
- * 
- * @param[in] frame a HybridPonFrame pointer
- */
+///
+/// Handle a PON frame from PON including a grant for ONU upstream
+/// data. Creates a new PON frame, encapsulate user frames from the
+/// FIFO queue in it, and send it to OLT.
+///
+/// @param[in] frame a HybridPonFrame pointer
+///
 void HybridPonMac::handleGrantFromPon(HybridPonFrame *frame)
 {
 #ifdef DEBUG_HYBRIDPONMAC
@@ -144,10 +144,9 @@ void HybridPonMac::handleGrantFromPon(HybridPonFrame *frame)
 }
 
 
-/** 
- * Initialize member variables and allocate memory for them, if needed. 
- * 
- */
+/// 
+/// Initialize member variables and allocate memory for them, if needed. 
+///
 void HybridPonMac::initialize()
 {
 	lambda = (int) getParentModule()->par("lambda");
@@ -162,13 +161,13 @@ void HybridPonMac::initialize()
 }
 
 
-/** 
- * Handle messages by calling appropriate functions for their
- * processing. Start simulation and run until it will be terminated by
- * kernel.
- *
- *  @param[in] msg
- */
+/// 
+/// Handle messages by calling appropriate functions for their
+/// processing. Start simulation and run until it will be terminated by
+/// kernel.
+///
+/// @param[in] msg
+///
 void HybridPonMac::handleMessage(cMessage *msg)
 {
 #ifdef TRACE_MSG
@@ -210,10 +209,9 @@ void HybridPonMac::handleMessage(cMessage *msg)
 }
 
 
-/** 
- * Do post-processing.
- * 
- */
+/// 
+/// Do post-processing.
+///
 void HybridPonMac::finish()
 {
 }

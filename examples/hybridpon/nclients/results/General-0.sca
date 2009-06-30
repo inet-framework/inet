@@ -1,0 +1,106 @@
+version 2
+run General-0-20090625-11:10:12-17822
+attr configname General
+attr datetime 20090625-11:10:12
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network NClients
+attr processid 17822
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar NClients.r1.networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.r1.networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.r1.networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.r1.networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.r1.ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.r1.ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.r1.ppp[1].queue 	"packets received by queue" 	0
+scalar NClients.r1.ppp[1].queue 	"packets dropped by queue" 	0
+scalar NClients.r1.ppp[2].queue 	"packets received by queue" 	0
+scalar NClients.r1.ppp[2].queue 	"packets dropped by queue" 	0
+scalar NClients.r1.ppp[3].queue 	"packets received by queue" 	0
+scalar NClients.r1.ppp[3].queue 	"packets dropped by queue" 	0
+scalar NClients.r1.ppp[4].queue 	"packets received by queue" 	1
+scalar NClients.r1.ppp[4].queue 	"packets dropped by queue" 	0
+scalar NClients.r2.networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.r2.networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.r2.networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.r2.networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.r2.ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.r2.ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.r2.ppp[1].queue 	"packets received by queue" 	1
+scalar NClients.r2.ppp[1].queue 	"packets dropped by queue" 	0
+scalar NClients.r3.networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.r3.networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.r3.networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.r3.networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.r3.ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.r3.ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.r3.ppp[1].queue 	"packets received by queue" 	0
+scalar NClients.r3.ppp[1].queue 	"packets dropped by queue" 	0
+scalar NClients.cli[0].tcpApp[0] 	"number of sessions" 	0
+scalar NClients.cli[0].tcpApp[0] 	"packets sent" 	0
+scalar NClients.cli[0].tcpApp[0] 	"packets rcvd" 	0
+scalar NClients.cli[0].tcpApp[0] 	"bytes sent" 	0
+scalar NClients.cli[0].tcpApp[0] 	"bytes rcvd" 	0
+scalar NClients.cli[0].pingApp 	"Pings sent" 	0
+scalar NClients.cli[0].networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.cli[0].networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.cli[0].networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.cli[0].networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.cli[0].ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.cli[0].ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.cli[1].tcpApp[0] 	"number of sessions" 	1
+scalar NClients.cli[1].tcpApp[0] 	"packets sent" 	0
+scalar NClients.cli[1].tcpApp[0] 	"packets rcvd" 	0
+scalar NClients.cli[1].tcpApp[0] 	"bytes sent" 	0
+scalar NClients.cli[1].tcpApp[0] 	"bytes rcvd" 	0
+scalar NClients.cli[1].pingApp 	"Pings sent" 	0
+scalar NClients.cli[1].networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.cli[1].networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.cli[1].networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.cli[1].networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.cli[1].ppp[0].queue 	"packets received by queue" 	1
+scalar NClients.cli[1].ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.cli[2].tcpApp[0] 	"number of sessions" 	0
+scalar NClients.cli[2].tcpApp[0] 	"packets sent" 	0
+scalar NClients.cli[2].tcpApp[0] 	"packets rcvd" 	0
+scalar NClients.cli[2].tcpApp[0] 	"bytes sent" 	0
+scalar NClients.cli[2].tcpApp[0] 	"bytes rcvd" 	0
+scalar NClients.cli[2].pingApp 	"Pings sent" 	0
+scalar NClients.cli[2].networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.cli[2].networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.cli[2].networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.cli[2].networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.cli[2].ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.cli[2].ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.cli[3].tcpApp[0] 	"number of sessions" 	0
+scalar NClients.cli[3].tcpApp[0] 	"packets sent" 	0
+scalar NClients.cli[3].tcpApp[0] 	"packets rcvd" 	0
+scalar NClients.cli[3].tcpApp[0] 	"bytes sent" 	0
+scalar NClients.cli[3].tcpApp[0] 	"bytes rcvd" 	0
+scalar NClients.cli[3].pingApp 	"Pings sent" 	0
+scalar NClients.cli[3].networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.cli[3].networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.cli[3].networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.cli[3].networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.cli[3].ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.cli[3].ppp[0].queue 	"packets dropped by queue" 	0
+scalar NClients.srv.tcpApp[0] 	"packets sent" 	0
+scalar NClients.srv.tcpApp[0] 	"packets rcvd" 	0
+scalar NClients.srv.tcpApp[0] 	"bytes sent" 	0
+scalar NClients.srv.tcpApp[0] 	"bytes rcvd" 	0
+scalar NClients.srv.pingApp 	"Pings sent" 	0
+scalar NClients.srv.networkLayer.arp 	"ARP requests sent" 	0
+scalar NClients.srv.networkLayer.arp 	"ARP replies sent" 	0
+scalar NClients.srv.networkLayer.arp 	"ARP resolutions" 	0
+scalar NClients.srv.networkLayer.arp 	"failed ARP resolutions" 	0
+scalar NClients.srv.ppp[0].queue 	"packets received by queue" 	0
+scalar NClients.srv.ppp[0].queue 	"packets dropped by queue" 	0
