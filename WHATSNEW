@@ -1,6 +1,10 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-20090325
+-------------
+- tagged version for OMNeT++ 4.0 final
+- reworked build system to create shared library by default
 - added SCTP from Michael Tuexen and Irene Ruengeler
 
 INET-20080920

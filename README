@@ -38,7 +38,7 @@ Finally, you will be ready to run your simulation. As you see, you may use
 the INET framework without writing any C++ code, as long as you use the
 available modules.
 
-Finally, to implement new protocols or modify existing ones, you'll need to
+To implement new protocols or modify existing ones, you'll need to
 download the INET source, compile it yourself, then start adding/modifying
 source files yourself.
 
@@ -80,7 +80,7 @@ Bottom-up:
      tcp/                TCP protocol
      udp/                UDP protocol
      rtp/                Realtime Transport Protocol (not yet integrated)
-     sctp/		 Stream Control Transmission Protocol
+     sctp/               Stream Control Transmission Protocol
 
    applications/         application layer
      tcpapp/             TCP application models
