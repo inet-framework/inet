@@ -81,8 +81,8 @@ package inet.linklayer.radio;
 simple Radio
 {
     gates:
-        input uppergateIn;   // from higher layer protocol (MAC)
-        output uppergateOut; // to higher layer protocol (MAC)
+        input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
+        output uppergateOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
         input radioIn; // to receive frames (AirFrame) on the radio channel
 }
 

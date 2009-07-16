@@ -67,8 +67,8 @@ simple Ieee80211Mac
         int mtu = default(1500);
         @display("i=block/layer");
     gates:
-        input uppergateIn;
-        output uppergateOut;
-        input lowergateIn;
-        output lowergateOut;
+        input uppergateIn @labels(Ieee80211Frame);
+        output uppergateOut @labels(Ieee80211Frame);
+        input lowergateIn @labels(Ieee80211Frame);
+        output lowergateOut @labels(Ieee80211Frame);
 }
