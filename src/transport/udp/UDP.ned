@@ -54,12 +54,12 @@ simple UDP
     parameters:
         @display("i=block/transport");
     gates:
-        input appIn[];
-        input ipIn;
-        input ipv6In;
-        output appOut[];
-        output ipOut;
-        output ipv6Out;
+        input appIn[] @labels(UDPControlInfo/down);
+        input ipIn @labels(UDPPacket);
+        input ipv6In @labels(UDPPacket);
+        output appOut[] @labels(UDPControlInfo/up);
+        output ipOut @labels(UDPPacket);
+        output ipv6Out @labels(UDPPacket);
 }
 
 

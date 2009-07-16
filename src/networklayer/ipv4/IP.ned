@@ -96,4 +96,3 @@ simple IP
         input queueIn[] @labels(IPDatagram);
         output queueOut @labels(IPDatagram);
 }
-
