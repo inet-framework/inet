@@ -183,11 +183,11 @@ simple TCP
         bool recordStats = default(true); // recording seqNum etc. into output vectors on/off
         @display("i=block/wheelbarrow");
     gates:
-        input appIn[];
-        input ipIn;
-        input ipv6In;
-        output appOut[];
-        output ipOut;
-        output ipv6Out;
+        input appIn[] @labels(TCPCommand/down);
+        input ipIn @labels(TCPSegment);
+        input ipv6In @labels(TCPSegment);
+        output appOut[] @labels(TCPCommand/up);
+        output ipOut @labels(TCPSegment);
+        output ipv6Out @labels(TCPSegment);
 }
 
