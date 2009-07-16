@@ -31,6 +31,7 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
+typedef int ssize_t;
 #endif
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
