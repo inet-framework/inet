@@ -38,7 +38,7 @@ module BurstHost
         string routingFile = default("");
         @display("i=device/pc3");
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

@@ -36,8 +36,8 @@ module OSPFRouter
         string routingFile = default("");
         @display("i=srouter");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

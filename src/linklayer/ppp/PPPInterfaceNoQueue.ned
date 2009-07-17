@@ -29,7 +29,7 @@ module PPPInterfaceNoQueue
     gates:
         input netwIn;
         output netwOut;
-        inout phys;
+        inout phys @labels(PPPFrame);
     submodules:
         ppp: PPP {
             parameters:

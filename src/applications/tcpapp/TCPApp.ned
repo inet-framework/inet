@@ -25,7 +25,7 @@ package inet.applications.tcpapp;
 moduleinterface TCPApp
 {
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

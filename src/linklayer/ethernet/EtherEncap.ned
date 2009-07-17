@@ -43,7 +43,7 @@ simple EtherEncap
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down);   // higher layer
         output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer
-        input lowerLayerIn;   // to Ethernet MAC
-        output lowerLayerOut; // to Ethernet MAC
+        input lowerLayerIn @labels(EtherFrame);   // to Ethernet MAC
+        output lowerLayerOut @labels(EtherFrame); // to Ethernet MAC
 }
 

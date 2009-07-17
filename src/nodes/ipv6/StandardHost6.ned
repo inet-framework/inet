@@ -44,8 +44,8 @@ module StandardHost6
         string udpAppType = default("");
         @display("i=device/laptop");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

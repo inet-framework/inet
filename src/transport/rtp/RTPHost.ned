@@ -26,7 +26,7 @@ module RTPHost
         @display("i=device/pc2");
 
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame);
 
     submodules:
         notificationBoard: NotificationBoard {

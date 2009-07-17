@@ -58,8 +58,8 @@ module WirelessHost
         string mobilityType = default("NullMobility");
         @display("i=device/wifilaptop");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
         input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {

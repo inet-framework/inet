@@ -7,11 +7,11 @@ module RTPLayer
 
     gates:
         input fromApp;
-        input fromUDPtoRTP;
-        input fromUDPtoRTCP;
+        input fromUDPtoRTP @labels(UDPControlInfo/up);
+        input fromUDPtoRTCP @labels(UDPControlInfo/up);
         output toApp;
-        output toUDPfromRTP;
-        output toUDPfromRTCP;
+        output toUDPfromRTP @labels(UDPControlInfo/down);
+        output toUDPfromRTCP @labels(UDPControlInfo/down);
 
     submodules:
         rtp: RTP {

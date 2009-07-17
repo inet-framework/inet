@@ -40,6 +40,6 @@ simple Ieee80211MgmtSTASimplified like Ieee80211Mgmt
     gates:
         input uppergateIn;
         output uppergateOut;
-        input macIn;
-        output macOut;
+        input macIn @labels(Ieee80211Frame);
+        output macOut @labels(Ieee80211Frame);
 }

@@ -53,7 +53,7 @@ moduleinterface MACRelayUnit
                                      // (when it expires, entry is removed from the table)
 
     gates:
-        input lowerLayerIn[];
-        output lowerLayerOut[];
+        input lowerLayerIn[] @labels(EtherFrame);
+        output lowerLayerOut[] @labels(EtherFrame);
 }
 

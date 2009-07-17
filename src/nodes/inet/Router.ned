@@ -36,8 +36,8 @@ module Router
         string routingFile = default("");
         @display("i=abstract/router");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:

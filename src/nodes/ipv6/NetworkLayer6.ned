@@ -42,10 +42,10 @@ module NetworkLayer6
     gates:
         input ifIn[];
         output ifOut[];
-        input tcpIn;
-        output TCPOut;
-        input udpIn;
-        output udpOut;
+        input tcpIn @labels(TCPSegment);
+        output TCPOut @labels(TCPSegment);
+        input udpIn @labels(UDPPacket);
+        output udpOut @labels(UDPPacket);
         input rsvpIn;
         output rsvpOut;
         input ospfIn;

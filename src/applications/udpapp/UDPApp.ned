@@ -25,8 +25,8 @@ package inet.applications.udpapp;
 moduleinterface UDPApp
 {
     gates:
-        input udpIn;
-        output udpOut;
+        input udpIn @labels(UDPControlInfo/up);
+        output udpOut @labels(UDPControlInfo/down);
 }
 
 

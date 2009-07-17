@@ -29,7 +29,7 @@ module EthernetInterfaceNoQueue
     gates:
         input netwIn;
         output netwOut;
-        inout phys;
+        inout phys @labels(EtherFrame);
     submodules:
         mac: EtherMAC {
             parameters:

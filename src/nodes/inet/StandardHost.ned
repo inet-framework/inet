@@ -45,18 +45,18 @@ module StandardHost
         @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-    int numSctpApps = default(0);   //I.R.
+        int numSctpApps = default(0);   //I.R.
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
-    string sctpAppType = default("n/a");    //I.R.
+        string sctpAppType = default("n/a");    //I.R.
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
         int numExtInterfaces = default(0);
         @display("i=device/pc2");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -94,11 +94,11 @@ module StandardHost
             parameters:
                 @display("p=272,154");
         }
-    sctpApp[numSctpApps]: <sctpAppType> like SCTPApp {  //I.R.
+        sctpApp[numSctpApps]: <sctpAppType> like SCTPApp {  //I.R.
             parameters:
                 @display("p=385,85");
         }
-    sctp: SCTP {    //I.R.
+        sctp: SCTP {    //I.R.
             @display("p=382,170;i=block/wheelbarrow");
         }
         pingApp: PingApp {
@@ -121,11 +121,11 @@ module StandardHost
             parameters:
                 @display("p=240,350,row,90;q=txQueue");
         }
-    ext[numExtInterfaces]: ExtInterface {   //I.R.
+        ext[numExtInterfaces]: ExtInterface {   //I.R.
             parameters:
                 @display("p=399,390,row,90;q=txQueue;i=block/ifcard");
         }
-    tcpdump: TCPDump {  //I.R.
+        tcpdump: TCPDump {  //I.R.
             parameters:
                 @display("p=254,310;i=abstract/cache_s");
             gates:
@@ -151,7 +151,7 @@ module StandardHost
         udp.ipOut --> networkLayer.udpIn;
         udp.ipIn <-- networkLayer.udpOut;
 
-        for i=0..numSctpApps-1 {    //I.R.
+        for i=0..numSctpApps-1 {
             sctpApp[i].sctpOut --> sctp.from_appl++;
             sctp.to_appl++ --> sctpApp[i].sctpIn;
         }
@@ -178,7 +178,7 @@ module StandardHost
             tcpdump.in2[sizeof(pppg)] <-- networkLayer.ifOut[sizeof(pppg)];
         }
 
-    for i=0..sizeof(extOut)-1 { //I.R.
+        for i=0..sizeof(extOut)-1 {
             ext[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             tcpdump.out2[sizeof(pppg)+sizeof(ethg)+i] --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             ext[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)+sizeof(ethg)+i];

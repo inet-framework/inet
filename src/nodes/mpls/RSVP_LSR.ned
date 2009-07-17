@@ -45,7 +45,7 @@ module RSVP_LSR
         string routingFile = default("");
         @display("i=abstract/router_s");
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

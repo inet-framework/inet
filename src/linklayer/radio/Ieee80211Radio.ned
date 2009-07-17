@@ -42,8 +42,8 @@ simple Ieee80211Radio
         double sensitivity @unit("mW"); // received signals with power below sensitivity are ignored
         @display("i=block/wrxtx");
     gates:
-        input uppergateIn;   // from higher layer protocol (MAC)
-        output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        input uppergateIn @labels(Ieee80211Frame);   // from higher layer protocol (MAC)
+        output uppergateOut @labels(Ieee80211Frame); // to decider (decider connects to higher layer protocol, i.e. the MAC)
         input radioIn; // to receive frames (AirFrame) on the radio channel
 }
 

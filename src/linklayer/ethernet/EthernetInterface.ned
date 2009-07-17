@@ -37,7 +37,7 @@ module EthernetInterface like INetworkInterface
     gates:
         input netwIn;
         output netwOut;
-        inout phys;
+        inout phys @labels(EtherFrame);
     submodules:
         queue: <queueType> like OutputQueue {
             parameters:

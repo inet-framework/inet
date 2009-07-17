@@ -42,8 +42,8 @@ module TCPSpoofingHost
         int namid;
         string routingFile = default("");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame);
+        inout ethg[] @labels(EtherFrame);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:

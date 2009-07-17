@@ -43,10 +43,10 @@ simple ICMP
     parameters:
         @display("i=block/control_s");
     gates:
-        input localIn;  // delivered ICMP packets
+        input localIn @labels(IPControlInfo/up);  // delivered ICMP packets
         input pingIn;  // ping requests from app
         output pingOut;  // result of ping
-        output sendOut;  // towards network
+        output sendOut @labels(IPControlInfo/down);  // towards network
         output errorOut;  // errors
 }
 
