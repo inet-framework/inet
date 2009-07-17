@@ -41,14 +41,14 @@ module NetworkLayer
         input ifIn[] @labels(IPDatagram);
         input tcpIn @labels(TCPSegment,IPControlInfo/down);
         input udpIn @labels(UDPPacket,IPControlInfo/down);
-        input sctpIn @labels(IPControlInfo/down);   //I.R.
+        input sctpIn @labels(IPControlInfo/down,SCTPPacket);   //I.R.
         input rsvpIn @labels(IPControlInfo/down);
         input ospfIn @labels(IPControlInfo/down);
         input pingIn;
         output ifOut[];
         output TCPOut @labels(TCPSegment,IPControlInfo/up);
         output udpOut @labels(UDPPacket,IPControlInfo/up);
-        output sctpOut @labels(IPControlInfo/up); //I.R.
+        output sctpOut @labels(IPControlInfo/up,SCTPPacket); //I.R.
         output rsvpOut @labels(IPControlInfo/up);
         output ospfOut @labels(IPControlInfo/up);
         output pingOut;

@@ -19,7 +19,7 @@ package inet.transport.sctp;
 
 simple SCTP //
 {
-        parameters:
+    parameters:
         int numGapReports = default(3);
         double rtoMin @unit(s) = default(1s);
         double rtoMax @unit(s) = default(60s);
@@ -34,7 +34,7 @@ simple SCTP //
         double hbInterval @unit(s) = default(30s);
         double sackPeriod @unit(s) = default(200ms);
         int sackFrequency = default(2);
-        string sctpAlgorithmClass = default("SCTPAlg"); 
+        string sctpAlgorithmClass = default("SCTPAlg");
         bool nagleEnabled = default(true);
         int naglePoint = default(1468);
         bool reactivatePrimaryPath = default(false);
@@ -42,14 +42,18 @@ simple SCTP //
         bool fragment = default(false);
         int sendQueueLimit = default(0);
         int ccModule = default(0); // RFC4960=0
-	int ssModule = default(0); //ROUND_ROBIN=0
+        //ROUND_ROBIN=0
+        //ROUND_ROBIN=0
+        int ssModule = default(0); //ROUND_ROBIN=0
         int arwnd = default(65535);
-	int swsLimit = default(3000); //Limit for SWS
+        //Limit for SWS
+        //Limit for SWS
+        int swsLimit = default(3000); //Limit for SWS
     gates:
         input from_appl[];
-        input from_ip;
-        input from_ipv6;
+        input from_ip @labels(SCTPPacket,IPControlInfo/up);
+        input from_ipv6 @labels(SCTPPacket);
         output to_appl[];
-        output to_ip;
-        output to_ipv6;
+        output to_ip @labels(SCTPPacket,IPControlInfo/down);
+        output to_ipv6 @labels(SCTPPacket);
 }

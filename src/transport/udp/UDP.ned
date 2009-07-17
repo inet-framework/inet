@@ -55,11 +55,11 @@ simple UDP
         @display("i=block/transport");
     gates:
         input appIn[] @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket);
-        input ipv6In @labels(UDPPacket);
+        input ipIn @labels(UDPPacket,IPControlInfo/up);
+        input ipv6In @labels(UDPPacket,IPv6ControlInfo/up);
         output appOut[] @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket);
-        output ipv6Out @labels(UDPPacket);
+        output ipOut @labels(UDPPacket,IPControlInfo/down);
+        output ipv6Out @labels(UDPPacket,IPv6ControlInfo/down);
 }
 
 

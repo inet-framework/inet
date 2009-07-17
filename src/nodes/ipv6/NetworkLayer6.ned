@@ -40,16 +40,16 @@ module NetworkLayer6
     parameters:
         @display("i=block/fork");
     gates:
-        input ifIn[];
-        output ifOut[];
-        input tcpIn @labels(TCPSegment);
-        output TCPOut @labels(TCPSegment);
-        input udpIn @labels(UDPPacket);
-        output udpOut @labels(UDPPacket);
-        input rsvpIn;
-        output rsvpOut;
-        input ospfIn;
-        output ospfOut;
+        input ifIn[] @labels(IPv6Datagram);
+        output ifOut[] @labels(IPv6Datagram);
+        input tcpIn @labels(TCPSegment,IPv6ControlInfo/down);
+        output TCPOut @labels(TCPSegment,IPv6ControlInfo/up);
+        input udpIn @labels(UDPPacket,IPv6ControlInfo/down);
+        output udpOut @labels(UDPPacket,IPv6ControlInfo/up);
+        input rsvpIn @labels(IPv6ControlInfo/down);
+        output rsvpOut @labels(IPv6ControlInfo/up);
+        input ospfIn @labels(IPv6ControlInfo/down);
+        output ospfOut @labels(IPv6ControlInfo/up);
         input pingIn;
         output pingOut;
         output errorOut;

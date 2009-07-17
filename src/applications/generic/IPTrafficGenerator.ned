@@ -27,9 +27,9 @@ package inet.applications.generic;
 moduleinterface IPTrafficGenerator
 {
     gates:
-        input ipIn;
+        input ipIn @labels(IPControlInfo/up);
         input ipv6In;
-        output ipOut;
+        output ipOut @labels(IPControlInfo/down);
         output ipv6Out;
 }
 

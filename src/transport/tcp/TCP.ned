@@ -184,10 +184,10 @@ simple TCP
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment);
-        input ipv6In @labels(TCPSegment);
+        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment);
-        output ipv6Out @labels(TCPSegment);
+        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }
 

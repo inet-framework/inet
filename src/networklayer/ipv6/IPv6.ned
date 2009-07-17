@@ -81,8 +81,8 @@ simple IPv6
         string protocolMapping;
         @display("i=block/network2");
     gates:
-        input transportIn[] @labels(IPv6ControlInfo/down);
-        output transportOut[] @labels(IPv6ControlInfo/up);
+        input transportIn[] @labels(IPv6ControlInfo/down,TCPSegment,UDPPacket);
+        output transportOut[] @labels(IPv6ControlInfo/up,TCPSegment,UDPPacket);
         input queueIn[] @labels(IPv6Datagram);
         output queueOut[] @labels(IPv6Datagram);
         input icmpIn;
