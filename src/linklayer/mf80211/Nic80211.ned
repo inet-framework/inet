@@ -40,7 +40,7 @@ module Nic80211
     gates:
         input uppergateIn @labels(Ieee802Ctrl); // to upper layers
         output uppergateOut; // from upper layers
-        input radioIn; // to receive AirFrames
+        input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mac: Mac80211 {
             parameters:

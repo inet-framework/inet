@@ -39,5 +39,5 @@ simple SnrEval80211
     gates:
         input uppergateIn @labels(Mac80211Pkt);
         output uppergateOut;
-        input radioIn; // to receive AirFrames
+        input radioIn @labels(AirFrame); // to receive AirFrames
 }

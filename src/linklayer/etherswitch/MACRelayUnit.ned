@@ -51,7 +51,6 @@ moduleinterface MACRelayUnit
         int addressTableSize; // max size of address table
         double agingTime @unit("s"); // max idle time for address table entries
                                      // (when it expires, entry is removed from the table)
-
     gates:
         input lowerLayerIn[] @labels(EtherFrame);
         output lowerLayerOut[] @labels(EtherFrame);

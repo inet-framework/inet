@@ -1,3 +1,6 @@
+TODO:  finish making gate names consistent! around the SCTP and RTP modules
+TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet
+
 TODO: eliminate ARP overhead for PPP interfaces; 
   [Ingmar Baumgart email, 2008 dec 10, "INET Framework: ARP performance issue"]
     The only issue which results in about 10% slowdown in our simulations is

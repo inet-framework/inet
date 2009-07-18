@@ -32,10 +32,11 @@ module Ieee80211Nic
 {
     parameters:
         string mgmtType; // name of the management module type
+        @display("i=block/ifcard");
     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers
-        input radioIn; // to receive AirFrames
+        input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mgmt: <mgmtType> like Ieee80211Mgmt {
             parameters:
@@ -60,6 +61,5 @@ module Ieee80211Nic
 
         mgmt.uppergateOut --> uppergateOut;
         mgmt.uppergateIn <-- uppergateIn;
-
 }
 
