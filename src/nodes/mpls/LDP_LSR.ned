@@ -39,13 +39,14 @@ module LDP_LSR
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=abstract/router");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
         int namid;
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
-        @display("i=abstract/router");
     gates:
         inout pppg[] @labels(PPPFrame);
     submodules:

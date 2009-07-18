@@ -28,6 +28,8 @@ module FailedRouter
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=abstract/router;i2=status/noentry");
         int namid;
         string routingFile = default("");
     gates:

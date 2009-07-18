@@ -39,11 +39,12 @@ module RSVP_LSR
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=abstract/router");
         int namid;
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
-        @display("i=abstract/router_s");
     gates:
         inout pppg[] @labels(PPPFrame);
     submodules:

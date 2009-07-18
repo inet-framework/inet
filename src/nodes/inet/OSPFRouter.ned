@@ -33,6 +33,7 @@ module OSPFRouter
 {
     parameters:
         @node();
+        @labels(node);
         string routingFile = default("");
         @display("i=srouter");
     gates:

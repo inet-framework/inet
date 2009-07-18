@@ -32,5 +32,6 @@ simple FlatNetworkConfigurator6
 {
     parameters:
         @display("i=block/cogwheel");
+        @labels(node);
 }
 

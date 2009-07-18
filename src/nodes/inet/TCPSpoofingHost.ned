@@ -34,6 +34,8 @@ module TCPSpoofingHost
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=device/pc2;i2=status/excl");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");

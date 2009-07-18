@@ -33,6 +33,7 @@ module BurstHost
 {
     parameters:
         @node();
+        @labels(node);
         string trafGenType;
         bool IPForward = default(false);
         string routingFile = default("");

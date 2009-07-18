@@ -47,6 +47,8 @@ module WirelessHostSimplified
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=device/wifilaptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
@@ -54,7 +56,6 @@ module WirelessHostSimplified
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
-        @display("i=device/wifilaptop");
     gates:
         inout pppg[] @labels(PPPFrame);
         inout ethg[] @labels(EtherFrame);

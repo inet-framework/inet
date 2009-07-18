@@ -28,11 +28,13 @@ import inet.nodes.inet.NetworkLayer;
 
 
 //
-// \External router.
+// External router.
 //
 module ExtRouter
 {
     parameters:
+        @labels(node);
+        @display("i=abstract/router;i2=status/connect");
         string routingFile = default("");
         int numExtInterfaces = default(0);
     gates:
@@ -91,7 +93,7 @@ module ExtRouter
             ext[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             ext[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
         }
-	//ext.netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
+    //ext.netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
         //ext.netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)];
 }
 

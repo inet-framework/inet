@@ -26,6 +26,8 @@ import inet.networklayer.extras.Dummy;
 module LDP_FAILED
 {
     parameters:
+        @labels(node);
+        @display("i=abstract/router;i2=status/noentry");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
         int namid;

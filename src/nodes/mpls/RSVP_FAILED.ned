@@ -25,6 +25,8 @@ import inet.networklayer.extras.Dummy;
 module RSVP_FAILED
 {
     parameters:
+        @labels(node);
+        @display("i=abstract/router;i2=status/noentry");
         int namid;
         string peers;
         string routerId = default("auto");

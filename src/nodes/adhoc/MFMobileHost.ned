@@ -43,6 +43,7 @@ module MFMobileHost
 {
     parameters:
         @node();
+        @labels(node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");

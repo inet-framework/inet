@@ -35,6 +35,7 @@ module EtherSwitch2
 {
     parameters:
         @node();
+        @labels(node);
         @display("i=device/switch");
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP

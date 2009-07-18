@@ -38,11 +38,12 @@ module StandardHost6
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=device/laptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
         string udpAppType = default("");
-        @display("i=device/laptop");
     gates:
         inout pppg[] @labels(PPPFrame);
         inout ethg[] @labels(EtherFrame);

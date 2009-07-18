@@ -33,8 +33,9 @@ module Router
 {
     parameters:
         @node();
-        string routingFile = default("");
+        @labels(node);
         @display("i=abstract/router");
+        string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame);
         inout ethg[] @labels(EtherFrame);

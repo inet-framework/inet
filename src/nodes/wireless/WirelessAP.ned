@@ -37,6 +37,7 @@ module WirelessAP
 {
     parameters:
         @node();
+        @labels(node);
         @display("i=device/accesspoint");
     gates:
         input radioIn @directIn;
