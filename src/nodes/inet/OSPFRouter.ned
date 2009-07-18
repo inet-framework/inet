@@ -34,8 +34,8 @@ module OSPFRouter
     parameters:
         @node();
         @labels(node);
-        string routingFile = default("");
         @display("i=srouter");
+        string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame);
         inout ethg[] @labels(EtherFrame);

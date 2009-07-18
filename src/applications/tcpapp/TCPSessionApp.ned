@@ -69,7 +69,7 @@ simple TCPSessionApp like TCPApp
         string sendScript = default("");
         double tClose @unit("s") = default(2s);
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

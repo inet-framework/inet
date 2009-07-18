@@ -154,8 +154,8 @@ simple EtherMAC2
         string queueModule = default("");    // name of optional external queue module
         @display("i=block/queue");
     gates:
-        input upperLayerIn;    // to EtherLLC or MACRelayUnitPP
-        output upperLayerOut;  // to EtherLLC or MACRelayUnitPP
-        inout phys;            // to physical layer or the network
+        input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
+        output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
+        inout phys @labels(EtherFrame);            // to physical layer or the network
 }
 

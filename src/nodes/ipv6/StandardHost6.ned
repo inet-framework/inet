@@ -103,7 +103,7 @@ module StandardHost6
         }
 
         tcp.ipv6Out --> networkLayer.tcpIn;
-        tcp.ipv6In <-- networkLayer.TCPOut;
+        tcp.ipv6In <-- networkLayer.tcpOut;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;

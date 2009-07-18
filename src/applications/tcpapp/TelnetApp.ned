@@ -45,7 +45,7 @@ simple TelnetApp like TCPApp
         volatile double idleInterval @unit("s") = default(exponential(300s)); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, user waits this much before trying to reconnect
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

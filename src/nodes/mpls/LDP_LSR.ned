@@ -134,7 +134,7 @@ module LDP_LSR
         udp.ipIn <-- networkLayer.udpOut;
 
         tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.TCPOut;
+        tcp.ipIn <-- networkLayer.tcpOut;
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;

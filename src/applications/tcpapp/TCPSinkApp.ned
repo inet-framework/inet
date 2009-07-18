@@ -29,7 +29,7 @@ simple TCPSinkApp like TCPApp
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

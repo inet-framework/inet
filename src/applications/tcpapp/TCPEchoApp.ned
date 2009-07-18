@@ -44,7 +44,7 @@ simple TCPEchoApp like TCPApp
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

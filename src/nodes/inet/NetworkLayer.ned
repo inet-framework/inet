@@ -46,7 +46,7 @@ module NetworkLayer
         input ospfIn @labels(IPControlInfo/down);
         input pingIn;
         output ifOut[];
-        output TCPOut @labels(TCPSegment,IPControlInfo/up);
+        output tcpOut @labels(TCPSegment,IPControlInfo/up);
         output udpOut @labels(UDPPacket,IPControlInfo/up);
         output sctpOut @labels(IPControlInfo/up,SCTPPacket); //I.R.
         output rsvpOut @labels(IPControlInfo/up);
@@ -87,7 +87,7 @@ module NetworkLayer
         }
     connections allowunconnected:
         // transport Layer
-        ip.transportOut[0] --> TCPOut;
+        ip.transportOut[0] --> tcpOut;
         ip.transportIn[0] <-- tcpIn;
 
         ip.transportOut[1] --> udpOut;

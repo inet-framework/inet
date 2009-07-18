@@ -40,7 +40,7 @@ simple SCTPClient like SCTPApp
 		double primaryTime @unit(s) = default(0s);
 		string newPrimary = default("");
 	gates:
-		input sctpIn;
-		output sctpOut;
+        input sctpIn @labels(SCTPCommand/up);
+        output sctpOut @labels(SCTPCommand/down);
 }
 

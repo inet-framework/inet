@@ -43,7 +43,7 @@ module NetworkLayer6
         input ifIn[] @labels(IPv6Datagram);
         output ifOut[] @labels(IPv6Datagram);
         input tcpIn @labels(TCPSegment,IPv6ControlInfo/down);
-        output TCPOut @labels(TCPSegment,IPv6ControlInfo/up);
+        output tcpOut @labels(TCPSegment,IPv6ControlInfo/up);
         input udpIn @labels(UDPPacket,IPv6ControlInfo/down);
         output udpOut @labels(UDPPacket,IPv6ControlInfo/up);
         input rsvpIn @labels(IPv6ControlInfo/down);
@@ -78,7 +78,7 @@ module NetworkLayer6
         }
     connections allowunconnected:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer
-        ipv6.transportOut[0] --> { @display("m=n"); } --> TCPOut;
+        ipv6.transportOut[0] --> { @display("m=n"); } --> tcpOut;
         ipv6.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
 
         ipv6.transportOut[1] --> { @display("m=n"); } --> udpOut;

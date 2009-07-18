@@ -30,8 +30,8 @@ simple UDPEchoApp like UDPApp
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
     gates:
-        input udpIn;
-        output udpOut;
+        input udpIn @labels(UDPControlInfo/up);
+        output udpOut @labels(UDPControlInfo/down);
 }
 
 
