@@ -53,6 +53,7 @@ package inet.networklayer.extras;
 simple FailureManager
 {
     parameters:
+        @labels(node);
         @display("i=block/control_s");
 }
 
