@@ -34,6 +34,7 @@ module EthernetInterface2 like INetworkInterface
 {
     parameters:
         string queueType = default("DropTailQueue");
+        @display("i=block/ifcard");
     gates:
         input netwIn;
         output netwOut;

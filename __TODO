@@ -1,3 +1,12 @@
+TODO: labelling:
+  - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
+    i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
+  - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
+    to make them unique?
+  - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
+    (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
+
+
 TODO:  finish making gate names consistent! around the SCTP and RTP modules
 TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet
 

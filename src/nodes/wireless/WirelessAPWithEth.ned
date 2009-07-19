@@ -40,7 +40,7 @@ module WirelessAPWithEth
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
     gates:

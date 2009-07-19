@@ -27,14 +27,14 @@ import inet.networklayer.ospfv2.OSPFRouting;
 
 
 //
-// \IP router.
+// An OSPFv2 router.
 //
 module OSPFRouter
 {
     parameters:
         @node();
-        @labels(node);
-        @display("i=srouter");
+        @labels(node,ethernet-node);
+        @display("i=abstract/router");
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame);

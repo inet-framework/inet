@@ -33,7 +33,7 @@ module EtherHost2
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node);
         @display("b=271,262;i=device/pc2");
     gates:
         inout ethg @labels(EtherFrame);

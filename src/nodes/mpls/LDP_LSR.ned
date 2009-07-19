@@ -39,7 +39,7 @@ module LDP_LSR
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,mpls-node);
         @display("i=abstract/router");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);

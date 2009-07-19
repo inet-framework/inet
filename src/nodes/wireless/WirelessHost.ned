@@ -49,7 +49,7 @@ module WirelessHost
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node,wireless-node);
         @display("i=device/wifilaptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);

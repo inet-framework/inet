@@ -33,7 +33,7 @@ module Router
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node);
         @display("i=abstract/router");
         string routingFile = default("");
     gates:

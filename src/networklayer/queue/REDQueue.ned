@@ -89,6 +89,7 @@ simple REDQueue like OutputQueue
         double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
+        @display("i=block/queue");
     gates:
         input in;
         output out;

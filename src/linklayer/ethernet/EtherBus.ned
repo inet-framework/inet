@@ -36,6 +36,8 @@ simple EtherBus
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
+        @display("b=200,5,,,,1");
         string positions;  // positions of taps on the cable in meters, as a sequence
                            // of numbers separated by spaces. If there are too
                            // few values, the distance between the last two positions

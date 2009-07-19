@@ -39,7 +39,7 @@ module RSVP_LSR
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,mpls-node);
         @display("i=abstract/router");
         int namid;
         string peers;

@@ -38,6 +38,7 @@ simple GenericRadio like Radio
         int headerLengthBits @unit(b); // length of physical layer framing (preamble, etc)
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
+        @display("i=block/wrxtx");
     gates:
         input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output uppergateOut @labels(PhyControlInfo/up); // to decider (decider connects to higher layer protocol, i.e. the MAC)

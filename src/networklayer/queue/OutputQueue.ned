@@ -31,6 +31,8 @@ package inet.networklayer.queue;
 //
 moduleinterface OutputQueue
 {
+    parameters:
+        @display("i=block/queue");
     gates:
         input in;
         output out;

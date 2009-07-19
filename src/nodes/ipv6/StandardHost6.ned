@@ -38,7 +38,7 @@ module StandardHost6
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node);
         @display("i=device/laptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);

@@ -25,6 +25,7 @@ package inet.mobility;
 //
 moduleinterface BasicMobility
 {
+    @display("i=block/cogwheel");
 }
 
 

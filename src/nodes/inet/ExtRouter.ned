@@ -33,7 +33,8 @@ import inet.nodes.inet.NetworkLayer;
 module ExtRouter
 {
     parameters:
-        @labels(node);
+        @node();
+        @labels(node,ethernet-node);
         @display("i=abstract/router;i2=status/connect");
         string routingFile = default("");
         int numExtInterfaces = default(0);

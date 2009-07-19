@@ -38,7 +38,7 @@ module WirelessAPSimplified
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,wireless-node);
         @display("i=device/accesspoint");
     gates:
         input radioIn @directIn;

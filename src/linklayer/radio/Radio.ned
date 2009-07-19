@@ -80,6 +80,8 @@ package inet.linklayer.radio;
 //
 moduleinterface Radio
 {
+    parameters:
+        @display("i=block/wrxtx");
     gates:
         input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output uppergateOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)

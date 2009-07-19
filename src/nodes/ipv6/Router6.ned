@@ -32,7 +32,7 @@ module Router6
 {
     parameters:
         @node();
-        @labels(node);
+        @labels(node,ethernet-node);
         @display("i=abstract/router");
     gates:
         inout pppg[] @labels(PPPFrame);

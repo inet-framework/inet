@@ -26,6 +26,8 @@ package inet.linklayer.ethernet;
 //
 module EthernetInterfaceNoQueue
 {
+    parameters:
+        @display("i=block/ifcard");
     gates:
         input netwIn;
         output netwOut;
