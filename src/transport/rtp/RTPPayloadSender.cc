@@ -48,7 +48,7 @@ void RTPPayloadSender::activity() {
     const char *command;
     while (true) {
         cMessage *msg = receive();
-        if (msg->getArrivalGateId() == findGate("fromProfile")) {
+        if (msg->getArrivalGateId() == findGate("profileIn")) {
             RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
             if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
                 initializeSenderModule(rinpIn);
@@ -103,7 +103,7 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn) {
     delete rinpIn;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleInitialized()");
     rinpOut->senderModuleInitialized(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
-    send(rinpOut, "toProfile");
+    send(rinpOut, "profileOut");
     _status = STOPPED;
     ev << "initializeSenderModule Exit" << endl;
 };
@@ -129,7 +129,7 @@ void RTPPayloadSender::play() {
     rssm->setTimeStamp(_timeStamp);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PLAYING)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
-    send(rinpOut, "toProfile");
+    send(rinpOut, "profileOut");
 
     if (!sendPacket()) {
         endOfFile();
@@ -154,7 +154,7 @@ void RTPPayloadSender::pause() {
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
     rsim->setStatus("PAUSED");
     rinpOut->senderModuleStatus(_ssrc, rsim);
-    send(rinpOut, "toProfile");
+    send(rinpOut, "profileOut");
 };
 
 
@@ -175,7 +175,7 @@ void RTPPayloadSender::stop() {
     rssm->setStatus("STOPPED");
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleStatus(STOPPED)");
     rinp->senderModuleStatus(_ssrc, rssm);
-    send(rinp, "toProfile");
+    send(rinp, "profileOut");
 };
 
 
@@ -185,7 +185,7 @@ void RTPPayloadSender::endOfFile() {
     rssm->setStatus("FINISHED");
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(FINISHED)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
-    send(rinpOut, "toProfile");
+    send(rinpOut, "profileOut");
 };
 
 

@@ -58,10 +58,10 @@ RTCP::~RTCP()
 void RTCP::handleMessage(cMessage *msg) {
 
     // first distinguish incoming messages by arrival gate
-    if (msg->getArrivalGateId() == findGate("fromRTP")) {
+    if (msg->getArrivalGateId() == findGate("rtpIn")) {
         handleMessageFromRTP(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("fromUDP")) {
+    else if (msg->getArrivalGateId() == findGate("udpIn")) {
         handleMessageFromUDP(msg);
     }
     else {
@@ -114,7 +114,7 @@ void RTCP::handleSelfMessage(cMessage *msg) {
         chooseSSRC();
         RTPInnerPacket *rinp1 = new RTPInnerPacket("rtcpInitialized()");
         rinp1->rtcpInitialized(_senderInfo->getSSRC());
-        send(rinp1, "toRTP");
+        send(rinp1, "rtpOut");
     }
 
     createPacket();
@@ -197,37 +197,35 @@ void RTCP::createSocket()
     // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
     // we just manage the UDP socket by hand...
     if (_socketFdIn == -1) {
-    _socketFdIn = UDPSocket::generateSocketId();
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    IPAddress ipaddr(_destinationAddress);
+        _socketFdIn = UDPSocket::generateSocketId();
+        UDPControlInfo *ctrl = new UDPControlInfo();
+        IPAddress ipaddr(_destinationAddress);
 
-    if (ipaddr.isMulticast()) {
-        ctrl->setSrcAddr(IPAddress(_destinationAddress));
-        ctrl->setSrcPort(_port);
-    }
-    else {
-         ctrl->setSrcPort(_port);
-         ctrl->setSockId(_socketFdOut);
-    }
-    ctrl->setSockId((int)_socketFdIn);
-    cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
-    msg->setControlInfo(ctrl);
-    send(msg,"toUDP");
+        if (ipaddr.isMulticast()) {
+            ctrl->setSrcAddr(IPAddress(_destinationAddress));
+            ctrl->setSrcPort(_port);
+        }
+        else {
+             ctrl->setSrcPort(_port);
+             ctrl->setSockId(_socketFdOut);
+        }
+        ctrl->setSockId((int)_socketFdIn);
+        cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
+        msg->setControlInfo(ctrl);
+        send(msg,"udpOut");
 
-    connectRet();
+        connectRet();
     }
 };
 
 
-void RTCP::scheduleInterval() {
+void RTCP::scheduleInterval(){
 
     simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
-
 
     // interval length must be at least 5 seconds
     if (intervalLength < 5.0)
         intervalLength = 5.0;
-
 
     // to avoid rtcp packet bursts multiply calculated interval length
     // with a random number between 0.5 and 1.5
@@ -240,7 +238,7 @@ void RTCP::scheduleInterval() {
 };
 
 
-void RTCP::chooseSSRC() {
+void RTCP::chooseSSRC(){
 
     uint32 ssrc = 0;
     bool ssrcConflict = false;
@@ -322,12 +320,12 @@ void RTCP::createPacket()
     ctrl->setDestPort(_port);
     msg->setControlInfo(ctrl);
 
-    send(msg, "toUDP");
+    send(msg, "udpOut");
 
     if (_leaveSession) {
         RTPInnerPacket *rinp = new RTPInnerPacket("sessionLeft()");
         rinp->sessionLeft();
-        send(rinp, "toRTP");
+        send(rinp, "rtpOut");
     };
 };
 

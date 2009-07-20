@@ -77,8 +77,8 @@ module RTPHost
         }
     connections allowunconnected:
         // transport connections
-        application.toRTP --> rtpLayer.fromApp;
-        application.fromRTP <-- rtpLayer.toApp;
+        application.rtpOut --> rtpLayer.appIn;
+        application.rtpIn <-- rtpLayer.appOut;
 
         rtpLayer.toUDPfromRTP --> udpModule.appIn[0];
         rtpLayer.fromUDPtoRTP <-- udpModule.appOut[0];

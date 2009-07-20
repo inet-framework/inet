@@ -17,6 +17,6 @@ simple RTPApplication
         double sessionLeaveDelay @unit(s);
 
     gates:
-        output toRTP;
-        input fromRTP;
+        output rtpOut @labels(RTPInterfacePacket/down);
+        input rtpIn @labels(RTPInterfacePacket/up);
 }

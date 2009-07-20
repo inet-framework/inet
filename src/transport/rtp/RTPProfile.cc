@@ -42,7 +42,7 @@ void RTPProfile::initialize()
     _preferredPort = PORT_UNDEF;
 
     // how many gates to payload receivers do we have
-    _maxReceivers = gateSize("toPayloadReceiver");
+    _maxReceivers = gateSize("payloadReceiverOut");
     _ssrcGates = new cArray("SSRCGates");
     _autoOutputFileNames = par("autoOutputFileNames").boolValue();
     ev << "initialize() Exit"<<endl;
@@ -56,15 +56,15 @@ RTPProfile::~RTPProfile()
 
 void RTPProfile::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == findGate("fromRTP")) {
+    if (msg->getArrivalGateId() == findGate("rtpIn")) {
         handleMessageFromRTP(msg);
     }
 
-    else if (msg->getArrivalGateId() == findGate("fromPayloadSender")) {
+    else if (msg->getArrivalGateId() == findGate("payloadSenderIn")) {
         handleMessageFromPayloadSender(msg);
     }
 
-    else if (msg->getArrivalGateId() >= findGate("fromPayloadReceiver") && msg->getArrivalGateId() < findGate("fromPayloadReceiver") + _maxReceivers) {
+    else if (msg->getArrivalGateId() >= findGate("payloadReceiverIn") && msg->getArrivalGateId() < findGate("payloadReceiverIn") + _maxReceivers) {
         handleMessageFromPayloadReceiver(msg);
     }
 
@@ -137,7 +137,7 @@ void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
     delete rinp;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
     rinpOut->profileInitialized(_rtcpPercentage, _preferredPort);
-    send(rinpOut, "toRTP");
+    send(rinpOut, "rtpOut");
     ev << "initializeProfile Exit"<<endl;
 }
 
@@ -160,19 +160,19 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
 
-    gate("toPayloadSender")->connectTo(rtpPayloadSender->gate("fromProfile"));
-    rtpPayloadSender->gate("toProfile")->connectTo(gate("fromPayloadSender"));
+    gate("payloadSenderOut")->connectTo(rtpPayloadSender->gate("profileIn"));
+    rtpPayloadSender->gate("profileOut")->connectTo(gate("payloadSenderIn"));
 
     rtpPayloadSender->initialize();
     rtpPayloadSender->scheduleStart(simTime());
 
     RTPInnerPacket *rinpOut1 = new RTPInnerPacket("senderModuleCreated()");
     rinpOut1->senderModuleCreated(ssrc);
-    send(rinpOut1, "toRTP");
+    send(rinpOut1, "rtpOut");
 
     RTPInnerPacket *rinpOut2 = new RTPInnerPacket("initializeSenderModule()");
     rinpOut2->initializeSenderModule(ssrc, rinp->getFileName(), _mtu);
-    send(rinpOut2, "toPayloadSender");
+    send(rinpOut2, "payloadSenderOut");
 
     delete rinp;
     ev << "createSenderModule Exit"<<endl;
@@ -181,20 +181,20 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 
 void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
 {
-    cModule *senderModule = gate("toPayloadSender")->getNextGate()->getOwnerModule();
+    cModule *senderModule = gate("payloadSenderOut")->getNextGate()->getOwnerModule();
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
     rinpOut->senderModuleDeleted(rinpIn->getSSRC());
     delete rinpIn;
 
-    send(rinpOut, "toRTP");
+    send(rinpOut, "rtpOut");
 };
 
 
 void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
 {
-    send(rinp, "toPayloadSender");
+    send(rinp, "payloadSenderOut");
 };
 
 
@@ -228,8 +228,8 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
             }
             receiverModule->finalizeParameters();
 
-            this->gate(ssrcGate->getGateId())->connectTo(receiverModule->gate("fromProfile"));
-            receiverModule->gate("toProfile")->connectTo(this->gate(ssrcGate->getGateId() - findGate("toPayloadReceiver",0) + findGate("fromPayloadReceiver",0)));
+            this->gate(ssrcGate->getGateId())->connectTo(receiverModule->gate("profileIn"));
+            receiverModule->gate("profileOut")->connectTo(this->gate(ssrcGate->getGateId() - findGate("payloadReceiverOut",0) + findGate("payloadReceiverIn",0)));
 
             receiverModule->callInitialize(0);
             receiverModule->scheduleStart(simTime());
@@ -244,21 +244,21 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 void RTPProfile::dataOut(RTPInnerPacket *rinp)
 {
     processOutgoingPacket(rinp);
-    send(rinp, "toRTP");
+    send(rinp, "rtpOut");
 };
 
 
 void RTPProfile::senderModuleInitialized(RTPInnerPacket *rinp)
 {
     ev << "senderModuleInitialized"<<endl;
-    send(rinp, "toRTP");
+    send(rinp, "rtpOut");
 };
 
 
 void RTPProfile::senderModuleStatus(RTPInnerPacket *rinp)
 {
     ev << "senderModuleStatus"<<endl;
-    send(rinp, "toRTP");
+    send(rinp, "rtpOut");
 };
 
 
@@ -292,7 +292,7 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
 {
     SSRCGate *ssrcGate = new SSRCGate(ssrc);
     bool assigned = false;
-    int receiverGateId = findGate("toPayloadReceiver",0);
+    int receiverGateId = findGate("payloadReceiverOut",0);
     for (int i = receiverGateId; i < receiverGateId + _maxReceivers && !assigned; i++) {
         if (!gate(i)->isConnected()) {
             ssrcGate->setGateId(i);
@@ -306,3 +306,5 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
     _ssrcGates->add(ssrcGate);
     return ssrcGate;
 };
+
+

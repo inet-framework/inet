@@ -1,30 +1,37 @@
 package inet.transport.rtp;
 
+//
+// Generic \RTP Profile. RTPProfile is internal to the RTP module;
+// instances are created and connected dynamically by RTP.
+//
 simple RTPProfile
 {
     parameters:
         bool autoOutputFileNames;
 
     gates:
-        input fromRTP;
-        input fromPayloadSender;
-        input fromPayloadReceiver[];
-        output toRTP;
-        output toPayloadSender;
-        output toPayloadReceiver[];
+        input rtpIn;
+        input payloadSenderIn;
+        input payloadReceiverIn[];
+        output rtpOut @labels(RTPInnerPacket);
+        output payloadSenderOut;
+        output payloadReceiverOut[];
 }
 
-//NOTE: like RTPProfile
+//
+// Audio-Video \RTP Profile. RTPAVProfile is internal to the RTP module;
+// instances are created and connected dynamically by RTP.
+//
 simple RTPAVProfile
 {
     parameters:
         bool autoOutputFileNames;
 
     gates:
-        input fromRTP;
-        input fromPayloadSender;
-        input fromPayloadReceiver[];
-        output toRTP;
-        output toPayloadSender;
-        output toPayloadReceiver[];
+        input rtpIn;
+        input payloadSenderIn;
+        input payloadReceiverIn[];
+        output rtpOut;
+        output payloadSenderOut;
+        output payloadReceiverOut[];
 }

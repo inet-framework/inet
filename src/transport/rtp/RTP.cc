@@ -48,16 +48,16 @@ void RTP::initialize()
 
 void RTP::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == findGate("fromApp")) {
+    if (msg->getArrivalGateId() == findGate("appIn")) {
         handleMessageFromApp(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("fromProfile")) {
+    else if (msg->getArrivalGateId() == findGate("profileIn")) {
         handleMessageFromProfile(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("fromRTCP")) {
+    else if (msg->getArrivalGateId() == findGate("rtcpIn")) {
         handleMessageFromRTCP(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("fromUDPLayer")) {
+    else if (msg->getArrivalGateId() == findGate("udpIn")) {
         handleMessagefromUDP(msg);
     }
     else {
@@ -168,12 +168,12 @@ void RTP::enterSession(RTPInterfacePacket *rifp)
 
 void RTP::leaveSession(RTPInterfacePacket *rifp)
 {
-    cModule *profileModule = gate("toProfile")->getNextGate()->getOwnerModule();
+    cModule *profileModule = gate("profileOut")->getNextGate()->getOwnerModule();
     profileModule->deleteModule();
     _leaveSession = true;
     RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
     rinp->leaveSession();
-    send(rinp,"toRTCP");
+    send(rinp,"rtcpOut");
 
     delete rifp;
 };
@@ -184,7 +184,7 @@ void RTP::createSenderModule(RTPInterfacePacket *rifp)
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
     ev << rifp->getSSRC()<<endl;
     rinp->createSenderModule(rifp->getSSRC(), rifp->getPayloadType(), rifp->getFileName());
-    send(rinp, "toProfile");
+    send(rinp, "profileOut");
 
     delete rifp;
 };
@@ -194,7 +194,7 @@ void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
     rinp->deleteSenderModule(rifp->getSSRC());
-    send(rinp, "toProfile");
+    send(rinp, "profileOut");
 
     delete rifp;
 };
@@ -204,7 +204,7 @@ void RTP::senderModuleControl(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleControl()");
     rinp->senderModuleControl(rinp->getSSRC(), (RTPSenderControlMessage *)(rifp->decapsulate()));
-    send(rinp, "toProfile");
+    send(rinp, "profileOut");
 
     delete rifp;
 }
@@ -230,7 +230,7 @@ void RTP::senderModuleCreated(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleCreated()");
     rifp->senderModuleCreated(rinp->getSSRC());
-    send(rifp, "toApp");
+    send(rifp, "appOut");
 
     delete rinp;
 };
@@ -240,7 +240,7 @@ void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleDeleted()");
     rifp->senderModuleDeleted(rinp->getSSRC());
-    send(rifp, "toApp");
+    send(rifp, "appOut");
 
     // perhaps we should send a message to rtcp module
     delete rinp;
@@ -249,7 +249,7 @@ void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
 
 void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 {
-    send(rinp, "toRTCP");
+    send(rinp, "rtcpOut");
 };
 
 
@@ -257,7 +257,7 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleStatus()");
     rifp->senderModuleStatus(rinp->getSSRC(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
-    send(rifp, "toApp");
+    send(rifp, "appOut");
 
     delete rinp;
 };
@@ -276,13 +276,13 @@ void RTP::dataOut(RTPInnerPacket *rinp)
     msg->setControlInfo(ctrl);
 
 //     ev << "Sending packet: ";msg->dump();
-    send(msg, "toUDPLayer");
+    send(msg, "udpOut");
 
     // RTCP module must be informed about sent rtp data packet
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket(*rinp);
     rinpOut->encapsulate(new RTPPacket(*msg));
-    send(rinpOut, "toRTCP");
+    send(rinpOut, "rtcpOut");
 
     delete rinp;
 };
@@ -292,7 +292,7 @@ void RTP::rtcpInitialized(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionEntered()");
     rifp->sessionEntered(rinp->getSSRC());
-    send(rifp, "toApp");
+    send(rifp, "appOut");
 
     delete rinp;
 };
@@ -302,7 +302,7 @@ void RTP::sessionLeft(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionLeft()");
     rifp->sessionLeft();
-    send(rifp, "toApp");
+    send(rifp, "appOut");
 
     delete rinp;
 };
@@ -330,9 +330,9 @@ void RTP::readRet(cMessage *sifp)
          rinp1->dataIn(new RTPPacket(*msg), IPAddress(_destinationAddress), _port);
 
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
-         send(rinp2, "toRTCP");
+         send(rinp2, "rtcpOut");
          //delete rinp2;
-         send(rinp1, "toProfile");
+         send(rinp1, "profileOut");
          //delete rinp1;
     }
 
@@ -360,11 +360,11 @@ void RTP::createProfile()
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
     profile->finalizeParameters();
 
-    profile->setGateSize("toPayloadReceiver", 30);
-    profile->setGateSize("fromPayloadReceiver", 30);
+    profile->setGateSize("payloadReceiverOut", 30);
+    profile->setGateSize("payloadReceiverIn", 30);
 
-    this->gate("toProfile")->connectTo(profile->gate("fromRTP"));
-    profile->gate("toRTP")->connectTo(this->gate("fromProfile"));
+    this->gate("profileOut")->connectTo(profile->gate("rtpIn"));
+    profile->gate("rtpOut")->connectTo(this->gate("profileIn"));
 
     profile->callInitialize();
     profile->scheduleStart(simTime());
@@ -376,26 +376,26 @@ void RTP::createSocket()
     // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
     // we just manage the UDP socket by hand...
     if (_socketFdIn == -1) {
-    _socketFdIn = UDPSocket::generateSocketId();
+        _socketFdIn = UDPSocket::generateSocketId();
 
-    UDPControlInfo *ctrl = new UDPControlInfo();
+        UDPControlInfo *ctrl = new UDPControlInfo();
 
-    IPAddress ipaddr(_destinationAddress);
+        IPAddress ipaddr(_destinationAddress);
 
-    if (ipaddr.isMulticast()) {
-        ctrl->setSrcAddr(IPAddress(_destinationAddress));
-        ctrl->setSrcPort(_port);
-    }
-    else {
-         ctrl->setSrcPort(_port);
-         ctrl->setSockId(_socketFdOut);
-    }
-    ctrl->setSockId((int)_socketFdIn);
-    cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
-    msg->setControlInfo(ctrl);
-    send(msg,"toUDPLayer");
+        if (ipaddr.isMulticast()) {
+            ctrl->setSrcAddr(IPAddress(_destinationAddress));
+            ctrl->setSrcPort(_port);
+        }
+        else {
+             ctrl->setSrcPort(_port);
+             ctrl->setSockId(_socketFdOut);
+        }
+        ctrl->setSockId((int)_socketFdIn);
+        cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
+        msg->setControlInfo(ctrl);
+        send(msg,"udpOut");
 
-    connectRet();
+        connectRet();
     }
 };
 
@@ -403,7 +403,7 @@ void RTP::initializeProfile()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeProfile()");
     rinp->initializeProfile(_mtu);
-    send(rinp, "toProfile");
+    send(rinp, "profileOut");
 };
 
 
@@ -412,5 +412,7 @@ void RTP::initializeRTCP()
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
     int rtcpPort = _port + 1;
     rinp->initializeRTCP(opp_strdup(_commonName), _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
-    send(rinp, "toRTCP");
+    send(rinp, "rtcpOut");
 };
+
+

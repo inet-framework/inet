@@ -61,7 +61,7 @@ void RTPAVProfilePayload32Sender::activity() {
         cMessage *msgIn;
 
         if (_status == STOPPED) {
-            msgIn = receiveOn(findGate("fromProfile"));
+            msgIn = receiveOn(findGate("profileIn"));
 
         }
         else {
@@ -70,7 +70,7 @@ void RTPAVProfilePayload32Sender::activity() {
 
         }
 
-        if (msgIn->getArrivalGateId() == findGate("fromProfile")) {
+        if (msgIn->getArrivalGateId() == findGate("profileIn")) {
             RTPInnerPacket *rinp = (RTPInnerPacket *)msgIn;
             if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
 
@@ -226,7 +226,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
             rinpOut->dataOut(rtpPacket);
 
-            send(rinpOut, "toProfile");
+            send(rinpOut, "profileOut");
 
         };
         _frameNumber++;
@@ -241,3 +241,4 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     }
     ev << "sendPacket() Exit"<< endl;
 };
+
