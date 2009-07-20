@@ -43,7 +43,7 @@ class INET_API ChannelControl : public cSimpleModule
 
   public:
     typedef HostEntry *HostRef; // handle for ChannelControl's clients
-    typedef std::vector<cModule*> ModuleList;
+    typedef std::vector<HostRef> HostRefVector;
     typedef std::list<AirFrame*> TransmissionList;
 
   protected:
@@ -54,13 +54,15 @@ class INET_API ChannelControl : public cSimpleModule
      */
     struct HostEntry {
         cModule *host;
+        cGate *radioInGate;
+        int channel;
         Coord pos; // cached
         std::set<HostRef> neighbors;  // cached neighbour list
-        // TODO: use ChannelAccess vector instead
-        int channel;
 
-        bool isModuleListValid;  // "neighborModules" is produced from "neighbors" on demand
-        ModuleList neighborModules; // derived from "neighbors"
+        // we cache neighbors set in an std::vector, because std::set iteration is slow;
+        // std::vector is created and updated on demand
+        bool isNeighborListValid;
+        HostRefVector neighborList;
     };
     HostList hosts;
 
@@ -114,8 +116,17 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Finds the channelControl module in the network */
     static ChannelControl *get();
 
-    /** @brief Registers the given host */
-    virtual HostRef registerHost(cModule *host, const Coord& initialPos);
+    /** @brief Registers the given host. If radioInGate==NULL, the "radioIn" gate is assumed */
+    virtual HostRef registerHost(cModule *host, const Coord& initialPos, cGate *radioInGate=NULL);
+
+    /** @brief Returns the module that was registered as HostRef h */
+    cModule *getHost(HostRef h) const {return h->host;}
+
+    /** @brief Returns the input gate of the host for receiving AirFrames */
+    cGate *getRadioGate(HostRef h) const {return h->radioInGate;}
+
+    /** @brief Returns the channel the given host listens on */
+    int getHostChannel(HostRef h) const {return h->channel;}
 
     /** @brief Returns the "handle" of a previously registered host */
     virtual HostRef lookupHost(cModule *host);
@@ -136,7 +147,10 @@ class INET_API ChannelControl : public cSimpleModule
     const Coord& getHostPosition(HostRef h)  {return h->pos;}
 
     /** @brief Get the list of modules in range of the given host */
-    const ModuleList& getNeighbors(HostRef h);
+    const HostRefVector& getNeighbors(HostRef h);
+
+    /** @brief Called from ChannelAccess, to transmit a frame to the hosts in range, on the frame's channel */
+    virtual void sendToChannel(cSimpleModule *srcRadioMod, HostRef srcHost, AirFrame *airFrame);
 
     /** @brief Reads init parameters and calculates a maximal interference distance*/
     virtual double getCommunicationRange(HostRef h) {
@@ -151,3 +165,4 @@ class INET_API ChannelControl : public cSimpleModule
 };
 
 #endif
+
