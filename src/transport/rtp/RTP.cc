@@ -43,7 +43,7 @@ void RTP::initialize()
     _socketFdIn = -1;//UDPSocket::generateSocketId();
     _socketFdOut = -1;
     _leaveSession = false;
-};
+}
 
 
 void RTP::handleMessage(cMessage *msg)
@@ -63,7 +63,7 @@ void RTP::handleMessage(cMessage *msg)
     else {
         error("Message from unknown gate");
     }
-};
+}
 
 
 //
@@ -72,7 +72,7 @@ void RTP::handleMessage(cMessage *msg)
 
 void RTP::handleMessageFromApp(cMessage *msg)
 {
-    RTPInterfacePacket *rifp = (RTPInterfacePacket *)msg;
+    RTPInterfacePacket *rifp = check_and_cast<RTPInterfacePacket *>(msg);
     if (rifp->getType() == RTPInterfacePacket::RTP_IFP_ENTER_SESSION) {
         enterSession(rifp);
     }
@@ -91,12 +91,12 @@ void RTP::handleMessageFromApp(cMessage *msg)
     else {
         error("unknown RTPInterfacePacket type from application");
     }
-};
+}
 
 
 void RTP::handleMessageFromProfile(cMessage *msg)
 {
-    RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
+    RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
     if (rinp->getType() == RTPInnerPacket::RTP_INP_PROFILE_INITIALIZED) {
         profileInitialized(rinp);
     }
@@ -124,7 +124,7 @@ void RTP::handleMessageFromProfile(cMessage *msg)
 
 void RTP::handleMessageFromRTCP(cMessage *msg)
 {
-    RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
+    RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
     if (rinp->getType() == RTPInnerPacket::RTP_INP_RTCP_INITIALIZED) {
         rtcpInitialized(rinp);
     }
@@ -134,12 +134,12 @@ void RTP::handleMessageFromRTCP(cMessage *msg)
     else {
         error("Unknown RTPInnerPacket type %d from rtcp", rinp->getType());
     }
-};
+}
 
 void RTP::handleMessagefromUDP(cMessage *msg)
 {
     readRet(msg);
-};
+}
 
 
 //
@@ -163,7 +163,7 @@ void RTP::enterSession(RTPInterfacePacket *rifp)
     createProfile();
     initializeProfile();
     delete rifp;
-};
+}
 
 
 void RTP::leaveSession(RTPInterfacePacket *rifp)
@@ -176,7 +176,7 @@ void RTP::leaveSession(RTPInterfacePacket *rifp)
     send(rinp,"rtcpOut");
 
     delete rifp;
-};
+}
 
 
 void RTP::createSenderModule(RTPInterfacePacket *rifp)
@@ -187,7 +187,7 @@ void RTP::createSenderModule(RTPInterfacePacket *rifp)
     send(rinp, "profileOut");
 
     delete rifp;
-};
+}
 
 
 void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
@@ -197,7 +197,7 @@ void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
     send(rinp, "profileOut");
 
     delete rifp;
-};
+}
 
 
 void RTP::senderModuleControl(RTPInterfacePacket *rifp)
@@ -223,7 +223,7 @@ void RTP::profileInitialized(RTPInnerPacket *rinp)
     delete rinp;
 
     createSocket();
-};
+}
 
 
 void RTP::senderModuleCreated(RTPInnerPacket *rinp)
@@ -233,7 +233,7 @@ void RTP::senderModuleCreated(RTPInnerPacket *rinp)
     send(rifp, "appOut");
 
     delete rinp;
-};
+}
 
 
 void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
@@ -244,13 +244,13 @@ void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
 
     // perhaps we should send a message to rtcp module
     delete rinp;
-};
+}
 
 
 void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 {
     send(rinp, "rtcpOut");
-};
+}
 
 
 void RTP::senderModuleStatus(RTPInnerPacket *rinp)
@@ -260,12 +260,12 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
     send(rifp, "appOut");
 
     delete rinp;
-};
+}
 
 
 void RTP::dataOut(RTPInnerPacket *rinp)
 {
-    RTPPacket *msg = (RTPPacket *)(rinp->decapsulate());
+    RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->decapsulate());
 
     // send message to UDP, with the appropriate control info attached
     msg->setKind(UDP_C_DATA);
@@ -285,7 +285,7 @@ void RTP::dataOut(RTPInnerPacket *rinp)
     send(rinpOut, "rtcpOut");
 
     delete rinp;
-};
+}
 
 
 void RTP::rtcpInitialized(RTPInnerPacket *rinp)
@@ -295,7 +295,7 @@ void RTP::rtcpInitialized(RTPInnerPacket *rinp)
     send(rifp, "appOut");
 
     delete rinp;
-};
+}
 
 
 void RTP::sessionLeft(RTPInnerPacket *rinp)
@@ -305,25 +305,25 @@ void RTP::sessionLeft(RTPInnerPacket *rinp)
     send(rifp, "appOut");
 
     delete rinp;
-};
+}
 
 
 void RTP::socketRet()
 {
-};
+}
 
 
 void RTP::connectRet()
 {
     initializeRTCP();
-};
+}
 
 
 void RTP::readRet(cMessage *sifp)
 {
     if ( ! _leaveSession)
     {
-         RTPPacket *msg = (RTPPacket *)(sifp);
+         RTPPacket *msg = check_and_cast<RTPPacket *>(sifp);
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
@@ -337,7 +337,7 @@ void RTP::readRet(cMessage *sifp)
     }
 
     delete sifp;
-};
+}
 
 
 int RTP::resolveMTU()
@@ -348,7 +348,7 @@ int RTP::resolveMTU()
     // it's 1500 bytes (ethernet) minus ip
     // and udp headers
     return 1500 - 20 - 8;
-};
+}
 
 
 void RTP::createProfile()
@@ -368,7 +368,7 @@ void RTP::createProfile()
 
     profile->callInitialize();
     profile->scheduleStart(simTime());
-};
+}
 
 
 void RTP::createSocket()
@@ -397,14 +397,14 @@ void RTP::createSocket()
 
         connectRet();
     }
-};
+}
 
 void RTP::initializeProfile()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeProfile()");
     rinp->initializeProfile(_mtu);
     send(rinp, "profileOut");
-};
+}
 
 
 void RTP::initializeRTCP()
@@ -413,6 +413,6 @@ void RTP::initializeRTCP()
     int rtcpPort = _port + 1;
     rinp->initializeRTCP(opp_strdup(_commonName), _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
-};
+}
 
 

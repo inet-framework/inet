@@ -22,7 +22,8 @@
 Define_Module(RTPApplication)
 
 
-void RTPApplication::initialize() {
+void RTPApplication::initialize()
+{
 
     // read all omnet parameters
 
@@ -64,7 +65,8 @@ void RTPApplication::initialize() {
 }
 
 
-void RTPApplication::activity() {
+void RTPApplication::activity()
+{
 
 
     bool sessionEntered = false;

@@ -24,9 +24,10 @@
 
 Define_Module(RTPAVProfile);
 
-void RTPAVProfile::initialize() {
+void RTPAVProfile::initialize()
+{
     RTPProfile::initialize();
     _profileName = "AVProfile";
     _rtcpPercentage = 5;
     _preferredPort = 5005;
-};
+}

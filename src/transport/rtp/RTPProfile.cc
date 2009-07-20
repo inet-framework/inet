@@ -72,7 +72,7 @@ void RTPProfile::handleMessage(cMessage *msg)
         error("message coming from unknown gate");
     }
 
-};
+}
 
 
 void RTPProfile::handleMessageFromRTP(cMessage *msg)
@@ -104,9 +104,10 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg)
 }
 
 
-void RTPProfile::handleMessageFromPayloadSender(cMessage *msg) {
+void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
+{
 
-    RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
+    RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
 
     if (rinpIn->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
         dataOut(rinpIn);
@@ -124,7 +125,8 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg) {
 }
 
 
-void RTPProfile::handleMessageFromPayloadReceiver(cMessage *msg) {
+void RTPProfile::handleMessageFromPayloadReceiver(cMessage *msg)
+{
     // currently payload receiver modules don't send messages
     delete msg;
 }
@@ -176,7 +178,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 
     delete rinp;
     ev << "createSenderModule Exit"<<endl;
-};
+}
 
 
 void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
@@ -189,13 +191,13 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
     delete rinpIn;
 
     send(rinpOut, "rtpOut");
-};
+}
 
 
 void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
 {
     send(rinp, "payloadSenderOut");
-};
+}
 
 
 void RTPProfile::dataIn(RTPInnerPacket *rinp)
@@ -203,7 +205,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     ev << "dataIn(RTPInnerPacket *rinp) Enter"<<endl;
     processIncomingPacket(rinp);
 
-    RTPPacket *packet = (RTPPacket *)(rinp->getEncapsulatedMsg());
+    RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->getEncapsulatedMsg());
 
     uint32 ssrc = packet->getSSRC();
 
@@ -234,44 +236,44 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
             receiverModule->callInitialize(0);
             receiverModule->scheduleStart(simTime());
         }
-    };
+    }
 
     send(rinp, ssrcGate->getGateId());
     ev << "dataIn(RTPInnerPacket *rinp) Exit"<<endl;
-};
+}
 
 
 void RTPProfile::dataOut(RTPInnerPacket *rinp)
 {
     processOutgoingPacket(rinp);
     send(rinp, "rtpOut");
-};
+}
 
 
 void RTPProfile::senderModuleInitialized(RTPInnerPacket *rinp)
 {
     ev << "senderModuleInitialized"<<endl;
     send(rinp, "rtpOut");
-};
+}
 
 
 void RTPProfile::senderModuleStatus(RTPInnerPacket *rinp)
 {
     ev << "senderModuleStatus"<<endl;
     send(rinp, "rtpOut");
-};
+}
 
 
 void RTPProfile::processIncomingPacket(RTPInnerPacket *rinp)
 {
     // do nothing with the packet
-};
+}
 
 
 void RTPProfile::processOutgoingPacket(RTPInnerPacket *rinp)
 {
     // do nothing with the packet
-};
+}
 
 
 RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
@@ -284,8 +286,8 @@ RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
     else {
         cObject *co = (_ssrcGates->get(objectIndex));
         return (SSRCGate *)co;
-    };
-};
+    }
+}
 
 
 RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
@@ -305,6 +307,6 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
 
     _ssrcGates->add(ssrcGate);
     return ssrcGate;
-};
+}
 
 
