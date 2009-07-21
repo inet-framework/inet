@@ -3,7 +3,7 @@ package inet.applications.rtpapp;
 simple RTPApplication
 {
     parameters:
-        @display("i=old/app");
+        @display("i=block/app");
         string commonName;
         string profileName;
         double bandwidth;  //XXX in bytes(!) per sec

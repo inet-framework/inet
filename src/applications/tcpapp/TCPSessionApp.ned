@@ -68,6 +68,7 @@ simple TCPSessionApp like TCPApp
         int sendBytes @unit("B") = default(1MB);
         string sendScript = default("");
         double tClose @unit("s") = default(2s);
+        @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

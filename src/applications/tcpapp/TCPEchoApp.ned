@@ -43,6 +43,7 @@ simple TCPEchoApp like TCPApp
         int port; // port number to listen on
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
+        @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

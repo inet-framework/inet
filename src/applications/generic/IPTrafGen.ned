@@ -25,6 +25,7 @@ package inet.applications.generic;
 //
 simple IPTrafSink like IPTrafficGenerator
 {
+    @display("i=block/sink");
     gates:
         input ipIn @labels(IPControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);
@@ -54,6 +55,7 @@ simple IPTrafGen like IPTrafficGenerator
         int protocol; // value for IPDatagram protocol field
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        @display("i=block/source");
     gates:
         input ipIn @labels(IPControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);

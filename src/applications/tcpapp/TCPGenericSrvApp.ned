@@ -43,6 +43,7 @@ simple TCPGenericSrvApp like TCPApp
         string address = default(""); // local address; may be left empty ("")
         int port = default(1000);     // port number to listen on
         double replyDelay @unit("s") = default(0s);
+        @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
