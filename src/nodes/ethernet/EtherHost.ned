@@ -37,7 +37,7 @@ module EtherHost
         @labels(node,ethernet-node);
         @display("i=device/pc2");
     gates:
-        inout ethg @labels(EtherFrame);
+        inout ethg @labels(EtherFrame-conn);
     submodules:
         cli: EtherAppCli {
             parameters:

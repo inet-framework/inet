@@ -45,8 +45,8 @@ module StandardHost6
         string tcpAppType = default("");
         string udpAppType = default("");
     gates:
-        inout pppg[] @labels(PPPFrame);
-        inout ethg[] @labels(EtherFrame);
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

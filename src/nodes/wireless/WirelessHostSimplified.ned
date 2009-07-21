@@ -57,8 +57,8 @@ module WirelessHostSimplified
         string routingFile = default("");
         string mobilityType = default("NullMobility");
     gates:
-        inout pppg[] @labels(PPPFrame);
-        inout ethg[] @labels(EtherFrame);
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
         input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {

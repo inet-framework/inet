@@ -33,8 +33,8 @@ module FailedRouter
         int namid;
         string routingFile = default("");
     gates:
-        inout pppg[] @labels(PPPFrame);
-        inout ethg[] @labels(EtherFrame);
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

@@ -35,7 +35,7 @@ module LDP_FAILED
         string routerId = default("auto");
         string routingFile = default("");
     gates:
-        inout pppg[] @labels(PPPFrame);
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

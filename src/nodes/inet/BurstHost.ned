@@ -39,7 +39,7 @@ module BurstHost
         bool IPForward = default(false);
         string routingFile = default("");
     gates:
-        inout pppg[] @labels(PPPFrame);
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

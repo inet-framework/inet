@@ -46,7 +46,7 @@ module RSVP_LSR
         string routerId = default("auto");
         string routingFile = default("");
     gates:
-        inout pppg[] @labels(PPPFrame);
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

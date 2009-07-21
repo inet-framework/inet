@@ -42,7 +42,7 @@ module EtherSwitch
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
-        inout ethg[] @labels(EtherFrame);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:

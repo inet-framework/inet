@@ -44,6 +44,6 @@ simple EtherBus
                            // is repeated, or 5 meters is used.
         double propagationSpeed @unit("mps") = default(200mps); // signal propagation speed on the bus
     gates:
-        inout ethg[] @labels(EtherFrame);  // to stations; each one represents a tap
+        inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a tap
 }
 

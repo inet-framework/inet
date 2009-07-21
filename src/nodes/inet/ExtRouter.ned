@@ -39,8 +39,8 @@ module ExtRouter
         string routingFile = default("");
         int numExtInterfaces = default(0);
     gates:
-        inout pppg[] @labels(PPPFrame);
-        inout ethg[] @labels(EtherFrame);
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
