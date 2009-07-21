@@ -18,6 +18,8 @@
 //
 
 #include <limits>
+#include <iostream>
+#include <sstream>
 
 #include "mobility/traci/TraCIMobility.h"
 
@@ -25,6 +27,13 @@ Define_Module(TraCIMobility);
 
 namespace {
 	const double MY_INFINITY = (std::numeric_limits<double>::has_infinity ? std::numeric_limits<double>::infinity() : std::numeric_limits<double>::max());
+
+	double roadIdAsDouble(std::string road_id) {
+		std::istringstream iss(road_id);
+		double d;
+		if (!(iss >> d)) return MY_INFINITY;
+		return d;
+	}
 }
 
 void TraCIMobility::initialize(int stage)
@@ -42,6 +51,7 @@ void TraCIMobility::initialize(int stage)
 		currentAccelerationVec.setName("acceleration");
 		currentCO2EmissionVec.setName("co2emission");
 
+		firstRoadNumber = MY_INFINITY;
 		startTime = simTime();
 		totalTime = 0; WATCH(totalTime);
 		stopTime = 0;
@@ -81,6 +91,7 @@ void TraCIMobility::finish()
 {
 	stopTime = simTime();
 
+	if (firstRoadNumber != MY_INFINITY) recordScalar("firstRoadNumber", firstRoadNumber);
 	recordScalar("startTime", startTime);
 	recordScalar("totalTime", totalTime);
 	recordScalar("stopTime", stopTime);
@@ -125,6 +136,9 @@ void TraCIMobility::changePosition()
 {
 	simtime_t updateInterval = simTime() - this->lastUpdate;
 	this->lastUpdate = simTime();
+
+	// keep track of first road id we encounter
+	if (firstRoadNumber == MY_INFINITY && (!road_id.empty())) firstRoadNumber = roadIdAsDouble(road_id);
 
 	// keep speed statistics
 	if ((pos.x != -1) && (pos.y != -1)) {

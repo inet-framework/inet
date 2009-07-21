@@ -104,6 +104,7 @@ class INET_API TraCIMobility : public BasicMobility
 		cOutVector currentAccelerationVec; /**< vector plotting acceleration */
 		cOutVector currentCO2EmissionVec; /**< vector plotting current CO2 emission */
 
+		double firstRoadNumber; /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
 		simtime_t startTime; /**< for statistics: start time */
 		simtime_t totalTime; /**< for statistics: total time travelled */
 		simtime_t stopTime; /**< for statistics: stop time */
