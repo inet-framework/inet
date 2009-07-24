@@ -46,13 +46,13 @@ class INET_API Coord : public cPolymorphic
 
 
   /** Initializes coordinates.*/
-  Coord( const Coord& pos ) {
+  Coord(const Coord& pos) {
         x=pos.x;
         y=pos.y;
   }
 
   /** Initializes coordinates.*/
-  Coord( const Coord* pos ) {
+  Coord(const Coord* pos) {
         x=pos->x;
         y=pos->y;
   }
@@ -64,44 +64,44 @@ class INET_API Coord : public cPolymorphic
   }
 
   /** Adds two coordinate vectors.*/
-  friend Coord operator+(Coord a, Coord b) {
+  friend Coord operator+(const Coord& a, const Coord& b) {
         return Coord(a.x+b.x, a.y+b.y);
   }
 
   /** Subtracts two coordinate vectors.*/
-  friend Coord operator-(Coord a, Coord b) {
+  friend Coord operator-(const Coord& a, const Coord& b) {
         return Coord(a.x-b.x, a.y-b.y);
   }
 
   /** Multiplies a coordinate vector by a real number.*/
-  friend Coord operator*(Coord a, double f) {
+  friend Coord operator*(const Coord& a, double f) {
         return Coord(a.x*f, a.y*f);
   }
 
   /** Divides a coordinate vector by a real number.*/
-  friend Coord operator/(Coord a, double f) {
+  friend Coord operator/(const Coord& a, double f) {
         return Coord(a.x/f, a.y/f);
   }
 
   /** Adds coordinate vector b to a.*/
-  Coord operator+=(Coord a) {
-    x+=a.x;
-    y+=a.y;
-    return *this;
+  const Coord& operator+=(const Coord& a) {
+        x+=a.x;
+        y+=a.y;
+        return *this;
   }
 
   /** Assigns a this.*/
-  Coord operator=(Coord a) {
-    x=a.x;
-    y=a.y;
-    return *this;
+  const Coord& operator=(const Coord& a) {
+        x=a.x;
+        y=a.y;
+        return *this;
   }
 
   /** Subtracts coordinate vector b from a.*/
-  Coord operator-=(Coord a) {
-    x-=a.x;
-    y-=a.y;
-    return *this;
+  const Coord& operator-=(const Coord& a) {
+        x-=a.x;
+        y-=a.y;
+        return *this;
   }
 
   /**
@@ -109,7 +109,7 @@ class INET_API Coord : public cPolymorphic
    * coordinates are of type double, this is done through the
    * FWMath::close function.
    */
-  friend bool operator==(Coord a, Coord b) {
+  friend bool operator==(const Coord& a, const Coord& b) {
         return FWMath::close(a.x,b.x) && FWMath::close(a.y,b.y);
   }
 
@@ -117,24 +117,24 @@ class INET_API Coord : public cPolymorphic
    * Tests whether two coordinate vectors are not equal. Negation of
    * the operator==.
    */
-  friend bool operator!=(Coord a, Coord b) {
+  friend bool operator!=(const Coord& a, const Coord& b) {
         return !(a==b);
   }
 
   /**
-   * Returns the distance to Coord a
+   * Returns the distance to const Coord& a
    */
-  double distance( const Coord a ) const {
-    Coord dist=*this-a;
-    return sqrt( dist.x*dist.x + dist.y*dist.y);
+  double distance(const Coord& a) const {
+        return sqrt(sqrdist(a));
   }
 
   /**
    * Returns distance^2 to Coord a (omits square root).
    */
-  double sqrdist( const Coord a ) const {
-    Coord dist=*this-a;
-    return dist.x*dist.x + dist.y*dist.y;
+  double sqrdist(const Coord& a) const {
+        double dx=x-a.x;
+        double dy=y-a.y;
+        return dx*dx + dy*dy;
   }
 
 };
