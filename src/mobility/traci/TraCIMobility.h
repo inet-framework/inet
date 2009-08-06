@@ -44,6 +44,22 @@
 class INET_API TraCIMobility : public BasicMobility
 {
 	public:
+		class Statistics {
+			public:
+				double firstRoadNumber; /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
+				simtime_t startTime; /**< for statistics: start time */
+				simtime_t totalTime; /**< for statistics: total time travelled */
+				simtime_t stopTime; /**< for statistics: stop time */
+				double minSpeed; /**< for statistics: minimum value of currentSpeed */
+				double maxSpeed; /**< for statistics: maximum value of currentSpeed */
+				double totalDistance; /**< for statistics: total distance travelled */
+				double totalCO2Emission; /**< for statistics: total CO2 emission */
+
+				void initialize();
+				void watch(cSimpleModule& module);
+				void recordScalars(cSimpleModule& module);
+		};
+
 		TraCIMobility() : BasicMobility() {}
 		virtual void initialize(int);
 		virtual void finish();
@@ -104,14 +120,7 @@ class INET_API TraCIMobility : public BasicMobility
 		cOutVector currentAccelerationVec; /**< vector plotting acceleration */
 		cOutVector currentCO2EmissionVec; /**< vector plotting current CO2 emission */
 
-		double firstRoadNumber; /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
-		simtime_t startTime; /**< for statistics: start time */
-		simtime_t totalTime; /**< for statistics: total time travelled */
-		simtime_t stopTime; /**< for statistics: stop time */
-		double minSpeed; /**< for statistics: minimum value of currentSpeed */
-		double maxSpeed; /**< for statistics: maximum value of currentSpeed */
-		double totalDistance; /**< for statistics: total distance travelled */
-		double totalCO2Emission; /**< for statistics: total CO2 emission */
+		Statistics statistics; /**< everything statistics-related */
 
 		int32_t external_id; /**< updated by setExternalId() */
 

@@ -36,6 +36,38 @@ namespace {
 	}
 }
 
+void TraCIMobility::Statistics::initialize()
+{
+	firstRoadNumber = MY_INFINITY;
+	startTime = simTime();
+	totalTime = 0;
+	stopTime = 0;
+	minSpeed = MY_INFINITY; 
+	maxSpeed = -MY_INFINITY; 
+	totalDistance = 0; 
+	totalCO2Emission = 0;
+}
+
+void TraCIMobility::Statistics::watch(cSimpleModule& )
+{
+	WATCH(totalTime);
+	WATCH(minSpeed);
+	WATCH(maxSpeed);
+	WATCH(totalDistance);
+}
+
+void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
+{
+	if (firstRoadNumber != MY_INFINITY) module.recordScalar("firstRoadNumber", firstRoadNumber);
+	module.recordScalar("startTime", startTime);
+	module.recordScalar("totalTime", totalTime);
+	module.recordScalar("stopTime", stopTime);
+	if (minSpeed != MY_INFINITY) module.recordScalar("minSpeed", minSpeed);
+	if (maxSpeed != -MY_INFINITY) module.recordScalar("maxSpeed", maxSpeed);
+	module.recordScalar("totalDistance", totalDistance);
+	module.recordScalar("totalCO2Emission", totalCO2Emission);
+}
+
 void TraCIMobility::initialize(int stage)
 {
 	BasicMobility::initialize(stage);
@@ -51,14 +83,8 @@ void TraCIMobility::initialize(int stage)
 		currentAccelerationVec.setName("acceleration");
 		currentCO2EmissionVec.setName("co2emission");
 
-		firstRoadNumber = MY_INFINITY;
-		startTime = simTime();
-		totalTime = 0; WATCH(totalTime);
-		stopTime = 0;
-		minSpeed = MY_INFINITY; WATCH(minSpeed);
-		maxSpeed = -MY_INFINITY; WATCH(maxSpeed);
-		totalDistance = 0; WATCH(totalDistance);
-		totalCO2Emission = 0;
+		statistics.initialize();
+		statistics.watch(*this);
 
 		external_id = -1;
 
@@ -89,16 +115,9 @@ void TraCIMobility::initialize(int stage)
 
 void TraCIMobility::finish()
 {
-	stopTime = simTime();
+	statistics.stopTime = simTime();
 
-	if (firstRoadNumber != MY_INFINITY) recordScalar("firstRoadNumber", firstRoadNumber);
-	recordScalar("startTime", startTime);
-	recordScalar("totalTime", totalTime);
-	recordScalar("stopTime", stopTime);
-	if (minSpeed != MY_INFINITY) recordScalar("minSpeed", minSpeed);
-	if (maxSpeed != -MY_INFINITY) recordScalar("maxSpeed", maxSpeed);
-	recordScalar("totalDistance", totalDistance);
-	recordScalar("totalCO2Emission", totalCO2Emission);
+	statistics.recordScalars(*this);
 
 	cancelAndDelete(startAccidentMsg);
 	cancelAndDelete(stopAccidentMsg);
@@ -138,16 +157,16 @@ void TraCIMobility::changePosition()
 	this->lastUpdate = simTime();
 
 	// keep track of first road id we encounter
-	if (firstRoadNumber == MY_INFINITY && (!road_id.empty())) firstRoadNumber = roadIdAsDouble(road_id);
+	if (statistics.firstRoadNumber == MY_INFINITY && (!road_id.empty())) statistics.firstRoadNumber = roadIdAsDouble(road_id);
 
 	// keep speed statistics
 	if ((pos.x != -1) && (pos.y != -1)) {
 		double distance = sqrt(((pos.x - nextPos.x) * (pos.x - nextPos.x)) + ((pos.y - nextPos.y) * (pos.y - nextPos.y)));
-		totalDistance += distance;
-		totalTime += updateInterval;
+		statistics.totalDistance += distance;
+		statistics.totalTime += updateInterval;
 		if (speed != -1) {
-			minSpeed = std::min(minSpeed, speed);
-			maxSpeed = std::max(maxSpeed, speed);
+			statistics.minSpeed = std::min(statistics.minSpeed, speed);
+			statistics.maxSpeed = std::max(statistics.maxSpeed, speed);
 			currentPosXVec.record(pos.x);
 			currentPosYVec.record(pos.y);
 			currentSpeedVec.record(speed);
@@ -156,7 +175,7 @@ void TraCIMobility::changePosition()
 				double co2emission = calculateCO2emission(speed, acceleration);
 				currentAccelerationVec.record(acceleration);
 				currentCO2EmissionVec.record(co2emission);
-				totalCO2Emission+=co2emission * updateInterval.dbl();
+				statistics.totalCO2Emission+=co2emission * updateInterval.dbl();
 			}
 			last_speed = speed;
 		} else {
