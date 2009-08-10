@@ -479,10 +479,13 @@ def handle_connection(sumo_command, conn, addr):
         conn.close()
 
 
-def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, pidfile):
+def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do_kill, pidfile):
     """
     Open TCP socket, wait for connections, call handle_connection for each
     """
+   
+    if do_kill:
+        check_kill_daemon(pidfile)   
     
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -513,6 +516,24 @@ def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, pi
         # clean up
         logging.info("Shutting down.")
         listener.close()
+
+
+def check_kill_daemon(pidfile):
+    # check pidfile, see if the daemon is still running
+    try:
+        pidfileh = open(pidfile, 'r')
+        old_pid = int(pidfileh.readline())
+        if old_pid:
+            logging.info("There might already be a daemon running with PID %d. Sending SIGTERM." % old_pid)
+            try:
+                os.kill(old_pid, signal.SIGTERM)
+                time.sleep(1)
+            except OSError, e:
+                pass
+
+        pidfileh.close()
+    except IOError, e:
+        pass
 
 
 def daemonize(pidfile):
@@ -576,6 +597,7 @@ def main():
     parser.add_option("-v", "--verbose", dest="count_verbose", default=0, action="count", help="increase verbosity [default: don't log infos, debug]")
     parser.add_option("-q", "--quiet", dest="count_quiet", default=0, action="count", help="decrease verbosity [default: log warnings, errors]")
     parser.add_option("-d", "--daemon", dest="daemonize", default=False, action="store_true", help="detach and run as daemon [default: no]")
+    parser.add_option("-k", "--kill", dest="kill", default=False, action="store_true", help="send SIGTERM to running daemon first [default: no]")
     parser.add_option("-P", "--pidfile", dest="pidfile", default=os.path.join(tempfile.gettempdir(), "sumo-launchd.pid"), help="if running as a daemon, write pid to PIDFILE [default: %default]", metavar="PIDFILE")
     (options, args) = parser.parse_args()
     _LOGLEVELS = (logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG)
@@ -588,7 +610,7 @@ def main():
     logging.basicConfig(filename=options.logfile, level=loglevel)
 
     # this is where we'll spend our time
-    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.pidfile)
+    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.kill, options.pidfile)
 
 
 # Start main() when run interactively
