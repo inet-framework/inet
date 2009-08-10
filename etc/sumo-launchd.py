@@ -478,7 +478,7 @@ def handle_connection(sumo_command, conn, addr):
         conn.close()
 
 
-def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize):
+def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, pidfile):
     """
     Open TCP socket, wait for connections, call handle_connection for each
     """
@@ -491,7 +491,7 @@ def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize):
 
     if do_daemonize:
         logging.info("Detaching to run as daemon")
-        daemonize()
+        daemonize(pidfile)
 
     try:
         while True:
@@ -514,7 +514,7 @@ def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize):
         listener.close()
 
 
-def daemonize():
+def daemonize(pidfile):
     """
     detach process, keep it running in the background
     """
@@ -538,6 +538,10 @@ def daemonize():
         # parent can exit
         if child_pid > 0:
             logging.info("Fork successful. Child PID is %d" % child_pid)
+            if pidfile:
+                pidfileh = open(pidfile, 'w')
+                pidfileh.write('%d\n' % child_pid)
+                pidfileh.close()
             sys.exit(0)
     except OSError, e:
         logging.error("Aborting. Failed to fork: %s" % e.strerror)
@@ -558,6 +562,7 @@ def main():
     parser.add_option("-v", "--verbose", dest="count_verbose", default=0, action="count", help="increase verbosity [default: don't log infos, debug]")
     parser.add_option("-q", "--quiet", dest="count_quiet", default=0, action="count", help="decrease verbosity [default: log warnings, errors]")
     parser.add_option("-d", "--daemon", dest="daemonize", default=False, action="store_true", help="detach and run as daemon [default: no]")
+    parser.add_option("-P", "--pidfile", dest="pidfile", default=os.path.join(tempfile.gettempdir(), "sumo-launchd.pid"), help="if running as a daemon, write pid to PIDFILE [default: %default]", metavar="PIDFILE")
     (options, args) = parser.parse_args()
     _LOGLEVELS = (logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG)
     loglevel = _LOGLEVELS[max(0, min(1 + options.count_verbose - options.count_quiet, len(_LOGLEVELS)-1))]
@@ -569,7 +574,7 @@ def main():
     logging.basicConfig(filename=options.logfile, level=loglevel)
 
     # this is where we'll spend our time
-    wait_for_connections(options.command, options.port, options.bind, options.daemonize)
+    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.pidfile)
 
 
 # Start main() when run interactively
