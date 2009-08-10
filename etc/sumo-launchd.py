@@ -554,7 +554,7 @@ def main():
     parser.add_option("-c", "--command", dest="command", default="sumo", help="run SUMO as COMMAND [default: %default]", metavar="COMMAND")
     parser.add_option("-p", "--port", dest="port", type="int", default=9999, action="store", help="listen for connections on PORT [default: %default]", metavar="PORT")
     parser.add_option("-b", "--bind", dest="bind", default="127.0.0.1", help="bind to ADDRESS [default: %default]", metavar="ADDRESS")
-    parser.add_option("-L", "--logfile", dest="logfile", default="sumo-launchd.log", help="log messages to LOGFILE [default: TMPDIR/%default]", metavar="LOGFILE")
+    parser.add_option("-L", "--logfile", dest="logfile", default=os.path.join(tempfile.gettempdir(), "sumo-launchd.log"), help="log messages to LOGFILE [default: %default]", metavar="LOGFILE")
     parser.add_option("-v", "--verbose", dest="count_verbose", default=0, action="count", help="increase verbosity [default: don't log infos, debug]")
     parser.add_option("-q", "--quiet", dest="count_quiet", default=0, action="count", help="decrease verbosity [default: log warnings, errors]")
     parser.add_option("-d", "--daemon", dest="daemonize", default=False, action="store_true", help="detach and run as daemon [default: no]")
@@ -566,7 +566,7 @@ def main():
     signal.signal(signal.SIGTERM, lambda signum, stack_frame: sys.exit(1))
     
     # configure logging
-    logging.basicConfig(filename=os.path.join(tempfile.gettempdir(), options.logfile), level=loglevel)
+    logging.basicConfig(filename=options.logfile, level=loglevel)
 
     # this is where we'll spend our time
     wait_for_connections(options.command, options.port, options.bind, options.daemonize)
