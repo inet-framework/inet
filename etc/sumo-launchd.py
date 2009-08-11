@@ -51,6 +51,7 @@ import thread
 import xml.dom.minidom
 import select
 import logging
+import atexit
 from optparse import OptionParser
 
 
@@ -522,9 +523,15 @@ def daemonize(pidfile):
     # fork and exit parent process
     try:
         child_pid = os.fork()
-        # parent can exit
         if child_pid > 0:
+            # parent can exit
             sys.exit(0)
+        elif child_pid == 0:
+            # child does nothing
+            pass
+        else:
+            logging.error("Aborting. Failed to fork: %s" % e.strerror)
+            sys.exit(1);
     except OSError, e:
         logging.error("Aborting. Failed to fork: %s" % e.strerror)
         sys.exit(1)
@@ -535,14 +542,21 @@ def daemonize(pidfile):
     # fork again to prevent zombies
     try:
         child_pid = os.fork()
-        # parent can exit
         if child_pid > 0:
-            logging.info("Fork successful. Child PID is %d" % child_pid)
+            # parent can exit
+            sys.exit(0)
+        elif child_pid == 0:
+            # child creates PIDFILE
+            logging.info("Fork successful. PID is %d" % os.getpid())
             if pidfile:
                 pidfileh = open(pidfile, 'w')
-                pidfileh.write('%d\n' % child_pid)
+                pidfileh.write('%d\n' % os.getpid())
                 pidfileh.close()
-            sys.exit(0)
+                atexit.register(os.remove, pidfile)
+        else:
+            logging.error("Aborting. Failed to fork: %s" % e.strerror)
+            sys.exit(1);
+
     except OSError, e:
         logging.error("Aborting. Failed to fork: %s" % e.strerror)
         sys.exit(1)
