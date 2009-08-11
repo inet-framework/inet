@@ -16,7 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.sctp.traceroute;
+package inet.examples.emulation.traceroute;
+
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.ExtRouter;
@@ -24,12 +25,12 @@ import inet.nodes.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 
 channel pppline extends DatarateChannel
-        {
-            delay = 100ms;
-            datarate = 1 Gbps;
-        }
+{
+    delay = 100ms;
+    datarate = 1 Gbps;
+}
 
-network Traceroute //
+network Traceroute
 {
     parameters:
         double testTimeout @unit(s) = default(0s);
@@ -39,136 +40,136 @@ network Traceroute //
             parameters:
                 IPForward = false;
                 routingFile = "cli1.mrt";
-		@display("p=37,62;i=laptop3");
+                @display("p=37,62;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli2: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli2.mrt";
-            @display("p=35,131;i=laptop3");
+                @display("p=35,131;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli3: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli3.mrt";
-            @display("p=40,223;i=laptop3");
+                @display("p=40,223;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli4: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli4.mrt";
-            @display("p=40,295;i=laptop3");
+                @display("p=40,295;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli5: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli5.mrt";
-            @display("p=40,383;i=laptop3");
+                @display("p=40,383;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli6: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli6.mrt";
-            @display("p=40,439;i=laptop3");
+                @display("p=40,439;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli7: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli7.mrt";
-            @display("p=40,511;i=laptop3");
+                @display("p=40,511;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         cli8: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli8.mrt";
-            @display("p=40,575;i=laptop3");
+                @display("p=40,575;i=laptop3");
             gates:
                 ethg[1];
-	}
+        }
         switch1: EtherSwitch {
-		parameters:
-		@display("p=127,102;i=device/switch");
-		gates:
-		ethg[3];
-	}
+            parameters:
+                @display("p=127,102;i=device/switch");
+            gates:
+                ethg[3];
+        }
         switch2: EtherSwitch {
-		parameters:
-            @display("p=129,254;i=device/switch");
-		gates:
-		ethg[3];
-	}
+            parameters:
+                @display("p=129,254;i=device/switch");
+            gates:
+                ethg[3];
+        }
         switch3: EtherSwitch {
-		parameters:
-            @display("p=137,398;i=device/switch");
-		gates:
-		ethg[3];
-	}
+            parameters:
+                @display("p=137,398;i=device/switch");
+            gates:
+                ethg[3];
+        }
         switch4: EtherSwitch {
-		parameters:
-            @display("p=138,534;i=device/switch");
-		gates:
-		ethg[3];
-	}
+            parameters:
+                @display("p=138,534;i=device/switch");
+            gates:
+                ethg[3];
+        }
         router1: Router {
             parameters:
                 routingFile = "router1.mrt";
-            @display("p=220,101;i=device/router_s");
+                @display("p=220,101;i=device/router_s");
             gates:
                 pppg[1];
-		ethg[1];
-	}
+                ethg[1];
+        }
         router2: Router {
             parameters:
                 routingFile = "router2.mrt";
-            @display("p=236,253;i=device/router_s");
+                @display("p=236,253;i=device/router_s");
             gates:
                 pppg[1];
-		ethg[1];
-	}
+                ethg[1];
+        }
         router3: Router {
             parameters:
                 routingFile = "router3.mrt";
-            @display("p=252,397;i=device/router_s");
+                @display("p=252,397;i=device/router_s");
             gates:
                 pppg[1];
-		ethg[1];
-	}
+                ethg[1];
+        }
         router4: Router {
             parameters:
                 routingFile = "router4.mrt";
-            @display("p=268,533;i=device/router_s");
+                @display("p=268,533;i=device/router_s");
             gates:
                 pppg[1];
-		ethg[1];
-	}
+                ethg[1];
+        }
         Router5: Router {
             parameters:
                 routingFile = "Router5.mrt";
-            @display("p=372,165;i=device/router");
+                @display("p=372,165;i=device/router");
             gates:
                 pppg[3];
-	}
+        }
         Router6: Router {
             parameters:
                 routingFile = "Router6.mrt";
-            @display("p=396,445;i=device/router");
+                @display("p=396,445;i=device/router");
             gates:
                pppg[3];
-	}
+        }
         extRouter: ExtRouter {
             parameters:
                 routingFile = "extRouter.mrt";
@@ -176,7 +177,7 @@ network Traceroute //
                 @display("p=500,293;i=device/router_l");
             gates:
                 pppg[2];
-	}
+        }
     connections allowunconnected:
         cli1.ethg[0]  <--> switch1.ethg[0];
         cli2.ethg[0]  <--> switch1.ethg[1];

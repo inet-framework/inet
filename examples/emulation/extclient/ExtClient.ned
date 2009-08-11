@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2008 Irene Ruengeler
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,17 +16,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.sctp.extclient;
+package inet.examples.emulation.extclient;
+
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
 
-channel etherline extends DatarateChannel {
-	delay =   0 us;
-	datarate = 1Gbps;
-}
 
-
-network ExtClient {
+network ExtClient 
+{
     parameters:
        double testTimeout @unit(s) = default(0s);
        bool testing = default(false);
@@ -37,9 +34,8 @@ network ExtClient {
                 routingFile = "cli1d.mrt";
                 numExtInterfaces = 1;
                 @display("p=29,90;i=laptop3");
-	}
+       }
     connections allowunconnected:
-	
 }
 
 
