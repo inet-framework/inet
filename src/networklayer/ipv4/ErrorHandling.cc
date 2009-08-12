@@ -39,6 +39,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
     numReceived++;
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
+    // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
     IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedMsg());
 
     EV << "Error Handler: ICMP message received:\n";

@@ -71,11 +71,12 @@ enum ICMPDestinationUnreachableCodes
 
 }}
 
-
-
-
 //
 // ICMP message class
+//
+// Note: receiver MUST NOT decapsulate the datagram from ICMP error messages,
+// because their contents is conceptually truncated. decapsulate() would result
+// in a "length became negative" error; use getEncapsulatedMsg() instead.
 //
 packet ICMPMessage
 {
