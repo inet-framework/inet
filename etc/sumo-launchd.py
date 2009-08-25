@@ -100,10 +100,13 @@ def forward_connection(client_socket, server_socket, process):
 
     logging.debug("Starting proxy mode")
 
+    client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
     do_exit = False
     while not do_exit:
 
-        (r, w, e) = select.select([client_socket, server_socket], [], [client_socket, server_socket], 0)
+        (r, w, e) = select.select([client_socket, server_socket], [], [client_socket, server_socket], 1)
         if client_socket in e:
             do_exit = True
             break
@@ -133,8 +136,6 @@ def forward_connection(client_socket, server_socket, process):
         if (rc != None):
             do_exit = True
             break
-
-        time.sleep(0.1)
 
     logging.debug("Done with proxy mode")
 
