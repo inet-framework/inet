@@ -150,6 +150,10 @@ void TraCIScenarioManager::connect() {
 	if (socket < 0) error("Could not create socket to connect to TraCI server");
 
 	if (::connect(socket, (sockaddr const*)&address, sizeof(address)) < 0) error("Could not connect to TraCI server");
+        {
+        	int x = 1;
+		::setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&x, sizeof(x));
+        }
 }
 
 void TraCIScenarioManager::init_traci() {
