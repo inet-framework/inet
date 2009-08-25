@@ -71,8 +71,17 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 	uint32_t msgLength;
 	{
 		char buf2[sizeof(uint32_t)];
-		size_t receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf2), sizeof(uint32_t), MSG_WAITALL);
-		if (receivedBytes != sizeof(uint32_t)) error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), receivedBytes, strerror(errno));
+		uint32_t bytesRead = 0;
+		while (bytesRead < sizeof(uint32_t)) {
+			int receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf2) + bytesRead, sizeof(uint32_t) - bytesRead, 0);
+			if (receivedBytes > 0) {
+				bytesRead += receivedBytes;
+			} else {
+				if (errno == EINTR) continue;
+				if (errno == EAGAIN) continue;
+				error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), bytesRead, strerror(errno));
+			}
+		}
 		TraCIBuffer(std::string(buf2, sizeof(uint32_t))) >> msgLength;
 	}
 
@@ -80,8 +89,17 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 	char buf[bufLength];
 	{
 		if (debug) EV << "Reading TraCI message of " << bufLength << " bytes" << endl;
-		size_t receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf), bufLength, MSG_WAITALL);
-		if (receivedBytes != bufLength) error("Could not read %d bytes from TraCI server, got only %d: %s", bufLength, receivedBytes, strerror(errno));
+		uint32_t bytesRead = 0;
+		while (bytesRead < bufLength) {
+			int receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf) + bytesRead, bufLength - bytesRead, 0);
+			if (receivedBytes > 0) {
+				bytesRead += receivedBytes;
+			} else {
+				if (errno == EINTR) continue;
+				if (errno == EAGAIN) continue;
+				error("Could not read %d bytes from TraCI server, got only %d: %s", bufLength, bytesRead, strerror(errno));
+			}
+		}
 	}
 	return std::string(buf, bufLength);
 }
@@ -150,10 +168,11 @@ void TraCIScenarioManager::connect() {
 	if (socket < 0) error("Could not create socket to connect to TraCI server");
 
 	if (::connect(socket, (sockaddr const*)&address, sizeof(address)) < 0) error("Could not connect to TraCI server");
-        {
-        	int x = 1;
+
+	{
+		int x = 1;
 		::setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&x, sizeof(x));
-        }
+	}
 }
 
 void TraCIScenarioManager::init_traci() {

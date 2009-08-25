@@ -37,11 +37,6 @@
 #include "ChannelControl.h"
 #include "ModuleAccess.h"
 
-// hack for cygwin installations
-#ifndef MSG_WAITALL
-#define MSG_WAITALL 0x100
-#endif
-
 /**
  * TraCIScenarioManager connects OMNeT++ to a TraCI server running road traffic simulations.
  * It sets up and controls simulation experiments, moving nodes with the help
