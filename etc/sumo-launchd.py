@@ -167,7 +167,7 @@ def parse_launch_configuration(launch_xml_string):
     return (basedir, copy_nodes)
 
 
-def run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock):
+def run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock, keep_temp):
     """
     Actually run SUMO.
     """
@@ -355,7 +355,7 @@ def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port):
     return config_file_name
 
 
-def handle_launch_configuration(sumo_command, launch_xml_string, client_socket):
+def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, keep_temp):
     """
     Process launch configuration in launch_xml_string.
     """
@@ -385,14 +385,17 @@ def handle_launch_configuration(sumo_command, launch_xml_string, client_socket):
         config_file_name = copy_and_modify_files(basedir, copy_nodes, runpath, remote_port)
         
         # run SUMO
-        result_xml = run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock)
+        result_xml = run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock, keep_temp)
 
     finally:
         unused_port_lock.__exit__()
 
         # clean up
-        logging.debug("Cleaning up")
-        shutil.rmtree(runpath)
+        if not keep_temp:
+            logging.debug("Cleaning up")
+            shutil.rmtree(runpath)
+        else:
+            logging.debug("Not cleaning up %s" % runpath)
 
         logging.debug('Result: "%s"' % result_xml)
 
@@ -460,7 +463,7 @@ def read_launch_config(conn):
     return data
         
         
-def handle_connection(sumo_command, conn, addr):
+def handle_connection(sumo_command, conn, addr, keep_temp):
     """
     Handle incoming connection.
     """
@@ -469,7 +472,7 @@ def handle_connection(sumo_command, conn, addr):
 
     try:
         data = read_launch_config(conn)
-        handle_launch_configuration(sumo_command, data, conn)
+        handle_launch_configuration(sumo_command, data, conn, keep_temp)
 
     except Exception, e:
         logging.error("Aborting on error: %s" % e)
@@ -479,7 +482,7 @@ def handle_connection(sumo_command, conn, addr):
         conn.close()
 
 
-def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do_kill, pidfile):
+def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do_kill, pidfile, keep_temp):
     """
     Open TCP socket, wait for connections, call handle_connection for each
     """
@@ -501,7 +504,7 @@ def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do
         while True:
             conn, addr = listener.accept()
             logging.debug("Connection from %s on port %d" % addr)
-            thread.start_new_thread(handle_connection, (sumo_command, conn, addr))
+            thread.start_new_thread(handle_connection, (sumo_command, conn, addr, keep_temp))
     
     except exceptions.SystemExit:
         logging.warning("Killed.")
@@ -599,6 +602,7 @@ def main():
     parser.add_option("-d", "--daemon", dest="daemonize", default=False, action="store_true", help="detach and run as daemon [default: no]")
     parser.add_option("-k", "--kill", dest="kill", default=False, action="store_true", help="send SIGTERM to running daemon first [default: no]")
     parser.add_option("-P", "--pidfile", dest="pidfile", default=os.path.join(tempfile.gettempdir(), "sumo-launchd.pid"), help="if running as a daemon, write pid to PIDFILE [default: %default]", metavar="PIDFILE")
+    parser.add_option("-t", "--keep-temp", dest="keep_temp", default=False, action="store_true", help="keep all temporary files [default: no]")
     (options, args) = parser.parse_args()
     _LOGLEVELS = (logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG)
     loglevel = _LOGLEVELS[max(0, min(1 + options.count_verbose - options.count_quiet, len(_LOGLEVELS)-1))]
@@ -610,7 +614,7 @@ def main():
     logging.basicConfig(filename=options.logfile, level=loglevel)
 
     # this is where we'll spend our time
-    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.kill, options.pidfile)
+    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
 
 
 # Start main() when run interactively
