@@ -318,10 +318,7 @@ TCPDump::~TCPDump()
 {
 }
 
-
-
-
-char* TCPDumper::intToChunk(int32 type)
+const char *TCPDumper::intToChunk(int32 type)
 {
     switch (type)
     {
