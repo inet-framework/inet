@@ -35,6 +35,8 @@ module PlainMobilityHost
         @node();
         string mobilityType;
         @display("i=device/pocketpc_s");
+    gates:
+        input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -44,5 +46,6 @@ module PlainMobilityHost
             parameters:
                 @display("p=132,141");
         }
+   connections allowunconnected:
 }
 

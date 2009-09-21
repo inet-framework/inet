@@ -152,6 +152,7 @@ simple EtherMAC2
         int txQueueLimit = default(1000); // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
+        int mtu = default(1500);
         @display("i=block/queue");
     gates:
         input upperLayerIn;    // to EtherLLC or MACRelayUnitPP

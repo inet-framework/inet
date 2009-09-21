@@ -72,9 +72,9 @@ int TCPSerializer::serialize(TCPSegment *msg, unsigned char *buf, unsigned int b
 	tcp->th_flags = (TH_FLAGS & flags);
 	tcp->th_win = htons(msg->getWindow());
 	tcp->th_urp = htons(msg->getUrgentPointer());
-	
 
-		// for computation of the checksum we need the pseudo header infront of the tcp header
+
+	// for computation of the checksum we need the pseudo header in front of the tcp header
 	int wholeheadersize = sizeof(pseudoheader) + writtenbytes;
 	char *wholeheader = (char*) malloc(wholeheadersize);
 

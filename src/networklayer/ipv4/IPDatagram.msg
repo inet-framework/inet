@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004, 2009 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -70,7 +70,6 @@ enum IPOption
 //
 enum TimestampFlag
 {
-
     IP_TIMESTAMP_TIMESTAMP_ONLY = 0;
     IP_TIMESTAMP_WITH_ADDRESS = 1;
     IP_TIMESTAMP_SENDER_INIT_ADDRESS = 3;
@@ -115,15 +114,14 @@ class IPSourceRoutingOption
 //
 // Represents an IP datagram.
 //
-// Uses the following cMessage fields:
-//    - length () / setBitLength(err)  in bits
-//    - hasBitError() / setBitError()
+// Uses the following cPacket fields:
+//    - getByteLength() / setByteLength() to represent total datagram length
+//    - hasBitError() / setBitError() to represent datagram correctness
 //    - getTimestamp() / setTimestamp (simtime) used in timestamp option
 //
-// Additional length fields defined in this class are in bytes
-// (getTotalLength()=length()/8 and header_length), or 8 bytes (fragment_offset).
+// Additional length fields defined in this class are in bytes.
 //
-// Only only one of the option fields can exist at a time.
+// Only one of the option fields can exist at a time.
 //
 packet IPDatagram
 {
@@ -148,17 +146,4 @@ packet IPDatagram
     IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
 }
 
-//
-// Some old code regarding options and header length
-//
-// header length is always set automatically
-//short getHeaderLength() { return header_length; }
-//
-// fields for options
-//IPOption optionType() { return option_code; }
-//
-//    if no option exists, return NULL,
-//    otherwise, return pointer to appropriate structure;
-//    conversion needs to be done by calling function */
-//void *optionField();
 

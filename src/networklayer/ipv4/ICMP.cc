@@ -88,9 +88,18 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     errorMessage->setType(type);
     errorMessage->setCode(code);
     errorMessage->encapsulate(origDatagram);
+
     // ICMP message length: the internet header plus the first 8 bytes of
-    // the original datagram's data is returned to the sender
-    errorMessage->setByteLength(8 + origDatagram->getHeaderLength() + 8);
+    // the original datagram's data is returned to the sender.
+    //
+    // NOTE: since we just overwrite the errorMessage length without actually
+    // truncating origDatagram, one can get "packet length became negative"
+    // error when decapsulating the origDatagram on the receiver side.
+    // A workaround is to avoid decapsulation, or to manually set the
+    // errorMessage length to be larger than the encapsulated message.
+    int dataLength = origDatagram->getByteLength() - origDatagram->getHeaderLength();
+    int truncatedDataLength = dataLength <= 8 ? dataLength : 8;
+    errorMessage->setByteLength(8 + origDatagram->getHeaderLength() + truncatedDataLength);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away

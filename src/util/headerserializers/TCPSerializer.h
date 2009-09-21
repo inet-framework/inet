@@ -27,11 +27,8 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/bsdint.h"
 #include "headers/in.h"
 #include "headers/in_systm.h"
-//#include "headers/ip.h"
 #include "headers/tcp.h"
 };
-
-//#include "TCPConnection.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
@@ -41,9 +38,9 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #endif
 
 using namespace INETFw;
-//#include "Checksum.h"
+
 /**
- * Converts between IPDatagram and binary (network byte order) IP header.
+ * Converts between TCPSegment and binary (network byte order) TCP header.
  */
 class TCPSerializer
 {
@@ -51,18 +48,19 @@ class TCPSerializer
         TCPSerializer() {}
 
         /**
-         * Serializes a TCPMessage for transmission on the wire.
+         * Serializes a TCPSegment for transmission on the wire.
          * The checksum is NOT filled in. (The kernel does that when sending
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
          */
-	int serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize, pseudoheader *pseudo);
-        /**
-         * Puts a packet sniffed from the wire into an SCTPMessage.
-         */
-//	void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest);
+        int serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize, pseudoheader *pseudo);
 
-	static unsigned short checksum(unsigned char *addr, unsigned int count);
+        /**
+         * Puts a packet sniffed from the wire into a TCPSegment.
+         */
+        //void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest); // TODO implement
+
+        static unsigned short checksum(unsigned char *addr, unsigned int count);
 };
 
 #endif

@@ -308,9 +308,8 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        for (unsigned int j=0; j < ie->ipv4Data()->getMulticastGroups().size(); j++)
-            if (dest.equals(ie->ipv4Data()->getMulticastGroups()[j]))
-                return true;
+        if (ie->ipv4Data()->isMemberOfMulticastGroup(dest))
+            return true;
     }
     return false;
 }

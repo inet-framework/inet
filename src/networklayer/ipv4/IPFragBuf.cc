@@ -110,7 +110,10 @@ void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
         DatagramBuffer& buf = i->second;
         if (buf.lastupdate < lastupdate)
         {
-            // send ICMP error
+            // send ICMP error.
+            // Note: receiver MUST NOT call decapsulate() on the datagram fragment,
+            // because its length (being a fragment) is smaller than the encapsulated
+            // packet, resulting in "length became negative" error. Use getEncapsulatedMsg().
             EV << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
             icmpModule->sendErrorMessage(buf.datagram, ICMP_TIME_EXCEEDED, 0);
 

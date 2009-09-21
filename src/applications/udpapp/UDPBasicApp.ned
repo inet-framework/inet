@@ -38,7 +38,7 @@ simple UDPBasicApp like UDPApp
     parameters:
         int localPort; // if -1, app doesn't bind in UDP
         int destPort;
-        int messageLength @unit("B"); // length of messages to generate, in bytes
+        volatile int messageLength @unit("B"); // length of messages to generate, in bytes
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
     gates:
