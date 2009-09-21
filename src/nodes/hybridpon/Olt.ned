@@ -21,8 +21,8 @@ module Olt
         int numOnus;	// number of ONUs connected to OLT
         string schType;	// type of 'Scheduler' (algorithm and operation mode)
     gates:
-		inout pong;		// to and from PON (i.e., splitter)
-		inout ethg;		// to and from network (i.e., metro/backbone)
+		inout ponGate;		// to and from PON (i.e., splitter)
+		inout ethGate;		// to and from network (i.e., metro/backbone)
         output fromSchedulerToMonitor;
         output fromIpPktGeneratorToMonitor;
         output fromIpPktSinkToMonitor;

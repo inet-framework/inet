@@ -284,8 +284,8 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg)
 
     int lambda = (short)msg->getOnuIdx();  // note that the message length is used as ONU number.
 
-    // Record ONU Timeout.
-    monitor->recordOnuTimeout(lambda);
+//    // Record ONU Timeout.
+//    monitor->recordOnuTimeout(lambda);
 
     if (busyQueuePoll + POLL_FRAME_SIZE <= queueSizePoll) {
         // There's room for the frame in the queue.
@@ -293,8 +293,8 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg)
         // Create a polling ponFrame.
         HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
         ponFrameToOnu->setLambda(lambda);
-        ponFrameToOnu->setId(false);
-        ponFrameToOnu->setGrant(0);     // Only for data (Ethernet frames), not including
+        ponFrameToOnu->setFrameType(0);
+        ponFrameToOnu->setGrant(0);     // Only for data (user frames), not including
         // CW for overhead & report fields
         ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
@@ -396,7 +396,7 @@ void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu)
 #endif
         HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
         ponFrameToOnu->setLambda(lambda);
-        ponFrameToOnu->setId(false);
+        ponFrameToOnu->setFrameType(0);
         if (request > cwMax) {
             // Limit the size of max. grant to 'cwMax'.
             request = cwMax;
@@ -496,7 +496,7 @@ void Scheduler::initialize(void)
 	pollEvent.assign(numOnus, (HybridPonMessage *)NULL);
 // 	pollOnu.assign(numOnus, simtime_t(onuTimeout));
 
-	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
+//	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
 #ifdef DEBUG_SCHEDULER
 	ev << getFullPath() << ": monitor pointing to module: " << monitor->getId() << endl;
 #endif

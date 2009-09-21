@@ -57,10 +57,27 @@ packet HybridPonMessage
 //
 packet HybridPonFrame extends cPacket
 {
-    bool id;
-    int lambda;
+    int lambda;			// wavelength channel
+    
+    // 8-Bit "Flags" field
+    //======================================
+    // Bit	Field			Values
+    //======================================
+    // 0-3	Frame Type		0 - Normal data
+    //						1 - Grant
+    //						2-15 - Unused
+    short frameType;
+    // 4	Force Report	0 - No action required
+    //						1 - ONU should report in the corresponding upstream frame
+    // 5-7	Unused	
+    
+    // 16-Bit "Grant"
     int grant;
+    
+    // 16-Bit "Report"
     int request;
+    
+    // Encapsulated frames
     cPacketQueue encapsulatedFrames;
 };
 

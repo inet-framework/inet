@@ -11,7 +11,7 @@
 //------------------------------------------------------------------------------
 
 
-package nodes;
+package inet.linklayer.hybridpon;
 
 
 simple Splitter

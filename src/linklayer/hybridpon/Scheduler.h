@@ -16,11 +16,11 @@
 #ifndef __SCHEDULER_H
 #define __SCHEDULER_H
 
-#include <assert.h>
+
 #include <omnetpp.h>
 #include "HybridPon.h"
-#include "HybridPonMsg_m.h"
-#include "Monitor.h"
+#include "HybridPonFrame_m.h"
+//#include "Monitor.h"
 
 class Scheduler: public cSimpleModule {
 	//--------------------------------------------------------------------------
@@ -53,8 +53,8 @@ protected:
 	HybridPonMsgVector pollEvent;
 	/* 	TimeVector  pollOnu; */
 
-	// For monitoring
-	Monitor *monitor;
+//	// For monitoring
+//	Monitor *monitor;
 
 	//--------------------------------------------------------------------------
 	//	Member functions

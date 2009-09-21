@@ -24,8 +24,8 @@ module Onu
         int queueSize @unit(bit); // size of FIFO queue in the Mac [bit]
     gates:
         output fromMacToMonitor;
-		inout pong;	// to and from PON (i.e., splitter)
-		inout ethg[numUsersPerOnu];
+		inout ponGate;	// to and from PON (i.e., splitter)
+		inout ethGate[numUsersPerOnu];
     submodules:
         mac: HybridPonMac {
             parameters:
@@ -41,7 +41,7 @@ module Onu
         }
     connections:
         mac.toMonitor --> fromMacToMonitor;
-		pong <--> mac.pong
+		ponGate <--> mac.ponGate
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
             eth[i].netwOut --> mac.fromUni[i];

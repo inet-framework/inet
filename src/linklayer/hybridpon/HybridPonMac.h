@@ -2,7 +2,7 @@
 /// @file   HybridPonMac.h
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Tue Jun 30 12:21:53 2009
-/// 
+///
 /// @brief  Declares 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
 ///
 /// @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
@@ -10,7 +10,7 @@
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
 ///          You must not remove this notice, or any other, from this software.
-/// 
+///
 
 
 #ifndef __INET_HYBRIDPONMAC_H
@@ -25,7 +25,7 @@
 
 ///
 /// @class HybridPonMac
-/// @brief Implements MAC module in a hybrid TDM/WDM-PON ONU. 
+/// @brief Implements MAC module in a hybrid TDM/WDM-PON ONU.
 /// @ingroup hybridpon
 ///
 class HybridPonMac : public cSimpleModule

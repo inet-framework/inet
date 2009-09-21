@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------ 
 
 
-package nodes;
+package inet.linklayer.hybridpon;
 
 
 simple BEDF like IScheduler

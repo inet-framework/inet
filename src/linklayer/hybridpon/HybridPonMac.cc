@@ -2,7 +2,7 @@
 /// @file   HybridPonMac.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Tue Jun 30 12:26:54 2009
-/// 
+///
 /// @brief  Implements 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
 ///
 /// @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
@@ -10,7 +10,7 @@
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
 ///          You must not remove this notice, or any other, from this software.
-/// 
+///
 
 
 // #define DEBUG_SLOT_MGR
@@ -24,10 +24,10 @@ Define_Module(HybridPonMac);
 
 
 
-/// 
+///
 /// Handle a user frame from UNIs. Put the frame into a FIFO, if there
 /// is enough space. Otherwise, drop it.
-/// @param[in] frame a cPacket pointer 
+/// @param[in] frame a cPacket pointer
 ///
 void HybridPonMac::handleFrameFromUni(cPacket *frame)
 {
@@ -57,7 +57,7 @@ void HybridPonMac::handleFrameFromUni(cPacket *frame)
 }
 
 
-/// 
+///
 /// Handle a PON frame from PON. Extract user frames from it and send
 /// them to UNIs.
 ///
@@ -70,12 +70,12 @@ void HybridPonMac::handleDataFromPon(HybridPonFrame *frame)
     ev << getFullPath() << ": PON frame received with downstream data" << endl;
 #endif
 
-    cQueue &ethFrameQueue = frame->getEncapsulatedEthFrames();
-    while(!ethFrameQueue.empty()) {
-        EthFrame *ethFrame = (EthFrame *)ethFrame4Queue.pop();
-        IpPacket *pkt = (IpPacket *)ethFrame->decapsulate();
-        send(pkt, "toUni", 0);  /**< @todo Support multiple UNIs with local switching. */
-        delete (EthFrame *) ethFrame;
+    cQueue &frameQueue = frame->getEncapsulatedFrames();
+    while(!frameQueue.empty()) {
+        cPacket *frame = (cPacket *)frameQueue.pop();
+ //       IpPacket *pkt = (IpPacket *)ethFrame->decapsulate();
+        send(frame, "toUni", 0);  /**< @todo Support multiple UNIs with local switching. */
+        delete (cPacket *) frame;
     }
     delete frame;
 }
@@ -88,70 +88,69 @@ void HybridPonMac::handleDataFromPon(HybridPonFrame *frame)
 ///
 /// @param[in] frame a HybridPonFrame pointer
 ///
-void HybridPonMac::handleGrantFromPon(HybridPonFrame *frame)
+void HybridPonMac::handleGrantFromPon(HybridPonFrame *ponFrameDs)
 {
 #ifdef DEBUG_HYBRIDPONMAC
-    ev << getFullPath() << ": PON frame with grant received =" << frame->getGrant() << endl;
+    ev << getFullPath() << ": PON frame with grant received =" << PonFrameDs->getGrant() << endl;
 #endif
 
-    HybridPonFrame *ponFrameToOlt = new HybridPonFrame("", HYBRID_PON_FRAME);
-    ponFrameToOlt->setLambda(lambda);
-    cQueue &ethFrameQueue = ponFrameToOlt->getEncapsulatedEthFrames();
-    int encapsulatedEthFramesSize = 0;
+    HybridPonFrame *ponFrameUs = new HybridPonFrame("", HYBRID_PON_FRAME);
+    ponFrameUs->setLambda(lambda);
+    cPacketQueue &frameQueue = ponFrameUs->getEncapsulatedFrames();
+    int encapsulatedFramesSize = 0;
 
     // First, check the grant size for upstream data to determine
     // if it's for polling (request) only or polling and upstream data.
-	int grant = frame->getGrant();
+	int grant = ponFrameDs->getGrant();
     if (grant > 0) {
         // It's for both polling (request) and upstream data.
 
         if (queue.empty() != true) {
-            EthFrame *ethFrame = (EthFrame *)queue.front();
-            while ( grant >= (ethFrame->getBitLength() + encapsulatedEthFramesSize) ) {
-                // The length of the 1st Ethernet frame in the FIFO queue is less than or
+            cPacket *frame = (cPacket *)queue.front();
+            while ( grant >= (frame->getBitLength() + encapsulatedFramesSize) ) {
+                // The length of the 1st frame in the FIFO queue is less than or
                 // equal to the remaining data grant.
 
-                ethFrame = (EthFrame *)queue.pop();
-                encapsulatedEthFramesSize += ethFrame->getBitLength();
-                busyQueue -= ethFrame->getBitLength();
-                ethFrameQueue.insert(ethFrame);
+                frame = (cPacket *)queue.pop();
+                encapsulatedFramesSize += frame->getBitLength();
+                busyQueue -= frame->getBitLength();
+                frameQueue.insert(frame);
 
                 if (queue.empty() == true) {
                     break;
                 }
                 else {
-                    ethFrame = (EthFrame *)queue.front();
+                    frame = (cPacket *)queue.front();
                 }
             }   // end of while loop
         }
     }
 
     // Set request and other fields of the new upstream PON frame.
-    ponFrameToOlt->setRequest(busyQueue);
-    ponFrameToOlt->setLambda(lambda);
-    ponFrameToOlt->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + REQUEST_SIZE + encapsulatedEthFramesSize);
+    ponFrameUs->setRequest(busyQueue);
+    ponFrameUs->setLambda(lambda);
+    ponFrameUs->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + REQUEST_SIZE + encapsulatedFramesSize);
 
 #ifdef DEBUG_HYBRIDPONMAC
     ev << getFullPath() << ": PON frame sent upstream with length = " <<
-        ponFrameToOlt->getBitLength() << " and request = " << ponFrameToOlt->getRequest() << endl;
+        ponFrameUs->getBitLength() << " and request = " << ponFrameUs->getRequest() << endl;
 #endif
 
     // Here we don't include transmission delay because in PON,
     // the ONU only modulates incoming CW burst, not receives it as usual.
-    send(ponFrameToOlt, "toOlt");
+    send(ponFrameUs, "toOlt");
 
-    delete frame;
+    delete ponFrameDs;
 }
 
 
-/// 
-/// Initialize member variables and allocate memory for them, if needed. 
+///
+/// Initialize member variables and allocate memory for them, if needed.
 ///
 void HybridPonMac::initialize()
 {
 	lambda = (int) getParentModule()->par("lambda");
 	queueSize = par("queueSize");
-
     busyQueue = 0;
 
 // 	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
@@ -161,7 +160,7 @@ void HybridPonMac::initialize()
 }
 
 
-/// 
+///
 /// Handle messages by calling appropriate functions for their
 /// processing. Start simulation and run until it will be terminated by
 /// kernel.
@@ -175,41 +174,36 @@ void HybridPonMac::handleMessage(cMessage *msg)
 	PrintMsg(*msg);
 #endif
 
-    switch (msg->getKind()) {
+	if (msg->getArrivalGateId() == findGate("ponGate$i")) {
+		// It is a PON frame from the OLT.
 
-    case IP_PACKET:
-        receiveFrameFromUni((cPacket *)msg);
-        break;
-
-    case HYBRID_PON_FRAME:
-		// Check if the PON frame received is from OLT.
-		assert( msg->getArrivalGateId() == findGate("fromOlt") );
-
-        //if (msg->getArrivalGateId() == findGate("fromOlt")) {
-        //    // It's a downstream PON frame from the OLT.
+		// Check if the message type is correct.
+		assert ( msg->getKind() == HYBRID_PON_FRAME );
 
 		//HybridPonFrame *ponFrameFromOlt = (HybridPonFrame *)msg;
-		if ( ((HybridPonFrame *)msg)->getId() == true ) {
+		if ( ((HybridPonFrame *)msg)->getFrameType() == 0 ) {
 			// It's a PON frame with downstream data.
-			receiveDataFromPon((HybridPonFrame *)msg);
+			handleDataFromPon((HybridPonFrame *)msg);
 		}
 		else {
 			// It's a PON frame with grant.
-			receiveGrantFromPon((HybridPonFrame *)msg);
+			handleGrantFromPon((HybridPonFrame *)msg);
 		}
+	}
+	else if (1) {	// TODO: Insert a condition to check the input gate of the message.
+		// It is a frame from the UNIs.
 
-		//}
-        break;
-
-    default:
-        ev << getFullPath() << ": ERROR: unexpected message kind " << msg->getKind() << "received." << endl;
-        delete (cMessage *) msg;
-        exit(1);
-    }   // end of switch()
+		handleFrameFromUni((cPacket *)msg);
+	}
+	else {
+		ev << getFullPath() << ": ERROR: unexpected message kind " << msg->getKind() << "received." << endl;
+		delete (cMessage *) msg;
+		exit(1);
+	}
 }
 
 
-/// 
+///
 /// Do post-processing.
 ///
 void HybridPonMac::finish()

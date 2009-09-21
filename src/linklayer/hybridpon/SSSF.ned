@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------ 
 
 
-package nodes;
+package inet.linklayer.hybridpon;
 
 
 simple SSSF like IScheduler

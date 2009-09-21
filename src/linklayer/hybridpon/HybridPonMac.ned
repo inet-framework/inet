@@ -8,7 +8,7 @@
 //-------------------------------------------------------------------------------
 
 
-package inet.linklayer.pon;
+package inet.linklayer.hybridpon;
 
 
 simple HybridPonMac
@@ -17,7 +17,7 @@ simple HybridPonMac
         int queueSize;        // size of FIFO queue
     gates:
 //        output toMonitor;				// to monitor
-		inout	pong;					// to and from PON (i.e., splitter)
-		in		fromUni[numUnisPerOnu];	// from users (through UNIs)
-		out		toUni[numUnisPerOnu];	// to users (through UNIs)
+		inout	ponGate;					// to and from PON (i.e., splitter)
+		input	fromUni[numUnisPerOnu];	// from users (through UNIs)
+		output	toUni[numUnisPerOnu];	// to users (through UNIs)
 }
