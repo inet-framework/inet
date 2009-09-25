@@ -40,10 +40,20 @@ network ECRTest
             delay = 1us;
             datarate = 512Mbps;
         }
+        channel fiberline_10G extends DatarateChannel
+        {
+            delay = 1us;
+            datarate = 10Gbps;
+        }
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;
+        }
+        channel ethernetline_1M extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 1Mbps;
         }
     submodules:
         channelInstaller: ChannelInstaller {
@@ -84,8 +94,8 @@ network ECRTest
         for i=0..n-1 {
             cli[i].pppg++ <--> ethernetline <--> r1.pppg++;
         }
-        r1.pppg++ <--> ethernetline <--> r2.pppg++;
+        r1.pppg++ <--> ethernetline_1M <--> r2.pppg++;
         //        r2.pppg++ <--> ethernetline <--> r3.pppg++;
-        r2.pppg++ <--> srv.pppg++;
+        r2.pppg++ <--> fiberline_10G <--> srv.pppg++;
 }
 
