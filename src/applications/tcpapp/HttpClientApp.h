@@ -25,12 +25,14 @@
 class INET_API HttpClientApp : public TCPBasicClientApp
 {
   protected:
-    cMessage *timeoutMsg;
-    bool earlySend;  // if true, don't wait with sendRequest() until established()
-    int numRequestsToSend; // requests to send in this session
+//    cMessage *timeoutMsg;
+//    bool earlySend;  // if true, don't wait with sendRequest() until established()
+//    int numRequestsToSend; // requests to send in this session
+	  simtime_t sessionStart;	// start time of a session
+	  double sumSessionDelays;	// sum of session delays
 
-    /** Utility: sends a request to the server */
-    virtual void sendRequest();
+//    /** Utility: sends a request to the server */
+//    virtual void sendRequest();
 
 //  public:
 //    TCPBasicClientApp();
@@ -40,20 +42,29 @@ class INET_API HttpClientApp : public TCPBasicClientApp
     /** Redefined to schedule a connect(). */
     virtual void initialize();
 
-    /** Redefined. */
-    virtual void handleTimer(cMessage *msg);
+//    /** Redefined. */
+//    virtual void handleTimer(cMessage *msg);
 
     /** Redefined. */
-    virtual void socketEstablished(int connId, void *yourPtr);
+    void void finish();
 
     /** Redefined. */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void connect();
+
+//    /** Redefined. */
+//    virtual void close();
+
+//    /** Redefined. */
+//    virtual void socketEstablished(int connId, void *yourPtr);
+
+//    /** Redefined. */
+//    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
     /** Redefined to start another session after a delay. */
     virtual void socketClosed(int connId, void *yourPtr);
 
-    /** Redefined to reconnect after a delay. */
-    virtual void socketFailure(int connId, void *yourPtr, int code);
+//    /** Redefined to reconnect after a delay. */
+//    virtual void socketFailure(int connId, void *yourPtr, int code);
 };
 
 #endif
