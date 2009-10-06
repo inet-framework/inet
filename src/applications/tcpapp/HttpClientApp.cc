@@ -90,12 +90,12 @@ void HttpClientApp::initialize()
 
 void HttpClientApp::connect()
 {
-	TCPGenericCliAppBase::connect();
+	TCPBasicClientApp::connect();
 
 	// Initialise per session.
 	// Note that session delays will include connection (i.e., socket) set up time as well.
 	// To exclude connection set up time, initialise this variable in "socketEstablished()".
-	sessionStart= simeTime();
+	sessionStart= simTime();
 }
 
 //void HttpClientApp::socketEstablished(int connId, void *ptr)
@@ -131,14 +131,14 @@ void HttpClientApp::connect()
 
 void HttpClientApp::socketClosed(int connId, void *ptr)
 {
-    TCPGenericCliAppBase::socketClosed(connId, ptr);
+    TCPBasicClientApp::socketClosed(connId, ptr);
 
     // record session delay
     sumSessionDelays += SIMTIME_DBL(simTime() - sessionStart);
 
-    // start another session after a delay
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime()+(simtime_t)par("idleInterval"), timeoutMsg);
+//    // start another session after a delay
+//    timeoutMsg->setKind(MSGKIND_CONNECT);
+//    scheduleAt(simTime()+(simtime_t)par("idleInterval"), timeoutMsg);
 }
 
 //void HttpClientApp::socketFailure(int connId, void *ptr, int code)
@@ -152,9 +152,10 @@ void HttpClientApp::socketClosed(int connId, void *ptr)
 
 void HttpClientApp::finish()
 {
-	EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+	TCPBasicClientApp::finish();
 
-	TCPGenericCliAppBase::finish();
-	recordScalar("average session delay", sumSessionDelays/double(numSessions));
+	double avgSessionDelay = sumSessionDelays/double(numSessions);
+	EV << getFullPath() << ": experienced average session delay " << avgSessionDelay << " seconds\n";
 
+	recordScalar("average session delay", avgSessionDelay);
 }

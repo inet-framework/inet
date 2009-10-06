@@ -14,7 +14,7 @@
 #ifndef __INET_HTTPCLIENTAPP_H
 #define __INET_HTTPCLIENTAPP_H
 
-#include <omnetpp.h>
+//#include <omnetpp.h>
 //#include "TCPGenericCliAppBase.h"
 #include "TCPBasicClientApp.h"
 
@@ -28,6 +28,7 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 //    cMessage *timeoutMsg;
 //    bool earlySend;  // if true, don't wait with sendRequest() until established()
 //    int numRequestsToSend; // requests to send in this session
+
 	  simtime_t sessionStart;	// start time of a session
 	  double sumSessionDelays;	// sum of session delays
 
@@ -46,7 +47,7 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 //    virtual void handleTimer(cMessage *msg);
 
     /** Redefined. */
-    void void finish();
+    virtual void finish();
 
     /** Redefined. */
     virtual void connect();
