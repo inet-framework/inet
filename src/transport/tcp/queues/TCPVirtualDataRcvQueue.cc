@@ -17,7 +17,13 @@
 
 
 #include "TCPVirtualDataRcvQueue.h"
-
+//====================
+// DEBUG by Joseph Kim
+//====================
+#include <iostream>
+//====================
+// DEBUG by Joseph Kim
+//====================
 
 Register_Class(TCPVirtualDataRcvQueue);
 
@@ -60,6 +66,16 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
 void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
 {
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
+	if (segmentBegin == segmentEnd)
+	{
+		EV << "we have an empty region!\n";
+	}
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
     // somewhere, or (if it overlaps with an existing region) extend
@@ -144,6 +160,20 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     if (i==regionList.end())
         return 0;
 
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
+    // create a bool variable for watchpoint in Eclipse
+    bool emptyRegion_b = i->begin<i->end;
+    if (emptyRegion_b == false)
+    {
+    	ev << info();
+    	std::cerr << info();
+    }
+    ASSERT(emptyRegion_b);
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
     ASSERT(i->begin<i->end); // empty regions cannot exist
 
     // seq below 1st region
