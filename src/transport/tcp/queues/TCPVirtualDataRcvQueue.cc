@@ -170,7 +170,6 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     	ev << info();
     	std::cerr << info();
     }
-    ASSERT(emptyRegion_b);
 	//====================
 	// DEBUG by Joseph Kim
 	//====================
