@@ -173,7 +173,7 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 	//====================
 	// DEBUG by Joseph Kim
 	//====================
-    ASSERT(i->begin<i->end); // empty regions cannot exist
+//    ASSERT(i->begin<i->end); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))
