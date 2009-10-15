@@ -71,7 +71,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     //====================
     // DEBUG by Joseph Kim
     //====================
-    virtual std::string more_info(uint32 seq) const;
+    virtual void more_info(uint32 seq) const;
     //====================
     // DEBUG by Joseph Kim
     //====================
