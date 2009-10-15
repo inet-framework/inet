@@ -56,8 +56,47 @@ std::string TCPVirtualDataRcvQueue::info() const
     return res;
 }
 
+//====================
+// DEBUG by Joseph Kim
+//====================
+std::string TCPVirtualDataRcvQueue::more_info(uint32 seq) const
+{
+    std::string res;
+    char buf[64];
+
+    sprintf(buf, "seq=%u ", seq);
+    res = buf;
+
+    sprintf(buf, "rcv_nxt=%u ", rcv_nxt);
+    res = +buf;
+
+    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
+    {
+        sprintf(buf, "[%u..%u) ", i->begin, i->end);
+        res+=buf;
+    }
+    return res;
+}
+//====================
+// DEBUG by Joseph Kim
+//====================
+
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
+	if (tcpseg->getSequenceNo() >= tcpseg->getSequenceNo()+tcpseg->getPayloadLength())
+	{
+		std::cerr << endl;
+		std::cerr << "DEBUG: We have a problem with TCPSegment:\n";
+		std::cerr << "DEBUG: - Segment sequence number: " << tcpseg->getSequenceNo() << endl;
+		std::cerr << "DEBUG: - Segment payload length: " << tcpseg->getPayloadLength() << endl;
+		std::cerr << endl;
+	}
+	//====================
+	// DEBUG by Joseph Kim
+	//====================
     merge(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
     if (seqGE(rcv_nxt, regionList.begin()->begin))
         rcv_nxt = regionList.begin()->end;
@@ -69,9 +108,10 @@ void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
 	//====================
 	// DEBUG by Joseph Kim
 	//====================
-	if (segmentBegin == segmentEnd)
+	if (segmentBegin >= segmentEnd)
 	{
-		EV << "we have an empty region!\n";
+		std::cerr << "we have a zero-sized segment!\n";
+		std::cerr << info();
 	}
 	//====================
 	// DEBUG by Joseph Kim
@@ -163,17 +203,17 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 	//====================
 	// DEBUG by Joseph Kim
 	//====================
-    // create a bool variable for watchpoint in Eclipse
-    bool emptyRegion_b = i->begin<i->end;
-    if (emptyRegion_b == false)
+//     create a bool variable for watchpoint in Eclipse
+//    bool emptyRegion_b = i->begin<i->end;
+    if (i->begin >= i->end)
     {
-    	ev << info();
-    	std::cerr << info();
+//    	ev << info();
+    	std::cerr << more_info(seq);
     }
 	//====================
 	// DEBUG by Joseph Kim
 	//====================
-//    ASSERT(i->begin<i->end); // empty regions cannot exist
+    ASSERT(i->begin<i->end); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))
