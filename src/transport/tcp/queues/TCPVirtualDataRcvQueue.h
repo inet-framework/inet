@@ -68,13 +68,13 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      */
     virtual std::string info() const;
 
-    //====================
-    // DEBUG by Joseph Kim
-    //====================
-    virtual void more_info(uint32 seq) const;
-    //====================
-    // DEBUG by Joseph Kim
-    //====================
+//    //====================
+//    // DEBUG by Joseph Kim
+//    //====================
+//    virtual void more_info(uint32 seq) const;
+//    //====================
+//    // DEBUG by Joseph Kim
+//    //====================
 
     /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.
