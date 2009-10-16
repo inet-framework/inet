@@ -29,8 +29,12 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 //    bool earlySend;  // if true, don't wait with sendRequest() until established()
 //    int numRequestsToSend; // requests to send in this session
 
+	  int bytesRcvdAtSessionStart;	// number of bytes received (so far) at the start of a session
+									// this is used to calculate session size and session transfer rate
+									// (i.e., session size to session delay ratio)
 	  simtime_t sessionStart;	// start time of a session
 	  double sumSessionDelays;	// sum of session delays
+	  double sumSessionTransferRates;	// sum of session transfer rates in bytes/second
 
 //    /** Utility: sends a request to the server */
 //    virtual void sendRequest();
