@@ -17,8 +17,6 @@
 //
 
 
-
-
 package inet.examples.ngoa.ecr;
 
 import inet.examples.ethernet.lans.ethernetline;
@@ -45,6 +43,16 @@ network ECRTest
             delay = 1us;
             datarate = 10Gbps;
         }
+        channel fiberline_10G_10ms_rtt extends DatarateChannel
+        {
+            delay = 5ms;
+            datarate = 10Gbps;
+        }
+        channel fiberline_10G_20ms_rtt extends DatarateChannel
+        {
+            delay = 10ms;
+            datarate = 10Gbps;
+        }        
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
@@ -54,6 +62,11 @@ network ECRTest
         {
             delay = 0.1us;
             datarate = 1Mbps;
+        }
+         channel ethernetline_31M extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 31Mbps;
         }
     submodules:
         channelInstaller: ChannelInstaller {
@@ -94,8 +107,7 @@ network ECRTest
         for i=0..n-1 {
             cli[i].pppg++ <--> ethernetline_1M <--> r1.pppg++;
         }
-        r1.pppg++ <--> ethernetline_1M <--> r2.pppg++;
+        r1.pppg++ <--> ethernetline_31M <--> r2.pppg++;
         //        r2.pppg++ <--> ethernetline <--> r3.pppg++;
-        r2.pppg++ <--> fiberline_10G <--> srv.pppg++;
+        r2.pppg++ <--> fiberline_10G_10ms_rtt <--> srv.pppg++;
 }
-
