@@ -144,7 +144,7 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     if (i==regionList.end())
         return 0;
 
-    ASSERT(seqLess(i->begin,i->end)); // empty regions cannot exis
+    ASSERT(seqLess(i->begin,i->end)); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))
