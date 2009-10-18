@@ -105,7 +105,7 @@ network ECRTest
         }
     connections:
         for i=0..n-1 {
-            cli[i].pppg++ <--> ethernetline_1M <--> r1.pppg++;
+            cli[i].pppg++ <--> ethernetline_31M <--> r1.pppg++;
         }
         r1.pppg++ <--> ethernetline_31M <--> r2.pppg++;
         //        r2.pppg++ <--> ethernetline <--> r3.pppg++;
