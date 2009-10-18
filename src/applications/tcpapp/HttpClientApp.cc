@@ -49,6 +49,7 @@ void HttpClientApp::initialize()
 //    timeoutMsg->setKind(MSGKIND_CONNECT);
 //    scheduleAt((simtime_t)par("startTime"), timeoutMsg);
 
+    numSessionsFinished = 0;
     sumSessionDelays = 0.0;
     sumSessionTransferRates = 0.0;
 }
@@ -135,10 +136,10 @@ void HttpClientApp::socketClosed(int connId, void *ptr)
 {
     TCPBasicClientApp::socketClosed(connId, ptr);
 
+    // update session statistics
+    numSessionsFinished++;
     double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
     int sessionSize = bytesRcvd - bytesRcvdAtSessionStart;
-
-    // record session statistics
     sumSessionDelays += sessionDelay;
     sumSessionTransferRates += sessionSize/sessionDelay;
 //    // start another session after a delay
@@ -159,12 +160,15 @@ void HttpClientApp::finish()
 {
 	TCPBasicClientApp::finish();
 
-	double avgSessionDelay = sumSessionDelays/double(numSessions);
-	double avgSessionThroughput = bytesRcvd/sumSessionDelays;
-	double meanSessionTransferRate = sumSessionTransferRates/numSessions;
-	EV << getFullPath() << ": experienced average session delay " << avgSessionDelay << " seconds\n";
+    // record session statistics
+    if (numSessionsFinished > 0) {
+        double avgSessionDelay = sumSessionDelays/double(numSessionsFinished);
+        double avgSessionThroughput = bytesRcvd/sumSessionDelays;
+        double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;
+        EV << getFullPath() << ": experienced average session delay " << avgSessionDelay << " seconds\n";
 
-	recordScalar("average session delay", avgSessionDelay);
-	recordScalar("average session throughput", avgSessionThroughput);
-	recordScalar("mean session transfer rate", meanSessionTransferRate);
+        recordScalar("average session delay [s]", avgSessionDelay);
+        recordScalar("average session throughput [B/s]", avgSessionThroughput);
+        recordScalar("mean session transfer rate [B/s]", meanSessionTransferRate);
+    }
 }
