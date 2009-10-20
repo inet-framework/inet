@@ -1,5 +1,5 @@
 //
-// Copyright 2004 Andras Varga
+// Copyright (C) 2004-2009 Andras Varga; Kyeong Soo (Joseph) Kim
 //
 // This library is free software, you can redistribute it and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -14,8 +14,6 @@
 #ifndef __INET_HTTPCLIENTAPP_H
 #define __INET_HTTPCLIENTAPP_H
 
-//#include <omnetpp.h>
-//#include "TCPGenericCliAppBase.h"
 #include "TCPBasicClientApp.h"
 
 
@@ -25,10 +23,6 @@
 class INET_API HttpClientApp : public TCPBasicClientApp
 {
   protected:
-//    cMessage *timeoutMsg;
-//    bool earlySend;  // if true, don't wait with sendRequest() until established()
-//    int numRequestsToSend; // requests to send in this session
-
       int numSessionsFinished;      // number of sessions finished (not just started)
 	  int bytesRcvdAtSessionStart;	// number of bytes received (so far) at the start of a session
 									// this is used to calculate session size and session transfer rate
@@ -37,19 +31,9 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 	  double sumSessionDelays;	// sum of session delays
 	  double sumSessionTransferRates;	// sum of session transfer rates in bytes/second
 
-//    /** Utility: sends a request to the server */
-//    virtual void sendRequest();
-
-//  public:
-//    TCPBasicClientApp();
-//    virtual ~TCPBasicClientApp();
-
   protected:
     /** Redefined to schedule a connect(). */
     virtual void initialize();
-
-//    /** Redefined. */
-//    virtual void handleTimer(cMessage *msg);
 
     /** Redefined. */
     virtual void finish();
@@ -57,20 +41,8 @@ class INET_API HttpClientApp : public TCPBasicClientApp
     /** Redefined. */
     virtual void connect();
 
-//    /** Redefined. */
-//    virtual void close();
-
-//    /** Redefined. */
-//    virtual void socketEstablished(int connId, void *yourPtr);
-
-//    /** Redefined. */
-//    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-
     /** Redefined to start another session after a delay. */
     virtual void socketClosed(int connId, void *yourPtr);
-
-//    /** Redefined to reconnect after a delay. */
-//    virtual void socketFailure(int connId, void *yourPtr, int code);
 };
 
 #endif

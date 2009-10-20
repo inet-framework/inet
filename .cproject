@@ -25,8 +25,8 @@
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.414982452" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1406305899" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 <option id="gnu.cpp.compiler.option.include.paths.591923549" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\include&quot;"/>
-<listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\lib\gcc\mingw32\4.2.1-sjlj\include\c++&quot;"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/include"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/lib/gcc/mingw32/4.2.1-sjlj/include/c++"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
