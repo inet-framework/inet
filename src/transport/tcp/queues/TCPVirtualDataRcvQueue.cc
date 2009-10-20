@@ -17,13 +17,7 @@
 
 
 #include "TCPVirtualDataRcvQueue.h"
-////====================
-//// DEBUG by Joseph Kim
-////====================
-#include <iostream>
-////====================
-//// DEBUG by Joseph Kim
-////====================
+
 
 Register_Class(TCPVirtualDataRcvQueue);
 
@@ -56,40 +50,8 @@ std::string TCPVirtualDataRcvQueue::info() const
     return res;
 }
 
-////====================
-//// DEBUG by Joseph Kim
-////====================
-//void TCPVirtualDataRcvQueue::more_info(uint32 seq) const
-//{
-//	std::cerr << endl;
-//	std::cerr << "DEBUG: seq=" << seq << endl;
-//	std::cerr << "DEBUG: rcv_nxt=" << rcv_nxt << endl;
-//	for (RegionList::const_iterator i = regionList.begin(); i
-//			!= regionList.end(); ++i) {
-//		std::cerr << "DEBUG: [" << i->begin << ".." << i->end << ")" << endl;
-//	}
-//	std::cerr << endl;
-//}
-////====================
-//// DEBUG by Joseph Kim
-////====================
-
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
-//	//====================
-//	// DEBUG by Joseph Kim
-//	//====================
-//	if (tcpseg->getSequenceNo() >= tcpseg->getSequenceNo()+tcpseg->getPayloadLength())
-//	{
-//		std::cerr << endl;
-//		std::cerr << "DEBUG: We have problems with a TCPSegment:\n";
-//		std::cerr << "DEBUG: - Sequence number: " << tcpseg->getSequenceNo() << endl;
-//		std::cerr << "DEBUG: - Payload length: " << tcpseg->getPayloadLength() << endl;
-//		std::cerr << endl;
-//	}
-//	//====================
-//	// DEBUG by Joseph Kim
-//	//====================
     merge(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
     if (seqGE(rcv_nxt, regionList.begin()->begin))
         rcv_nxt = regionList.begin()->end;
@@ -98,19 +60,6 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
 void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
 {
-//	//====================
-//	// DEBUG by Joseph Kim
-//	//====================
-//	if (segmentBegin >= segmentEnd)
-//	{
-//		std::cerr << endl;
-//		std::cerr << "DEBUG: We have a zero-sized segment\n";
-//		std::cerr << info();
-//		std::cerr << endl;
-//	}
-//	//====================
-//	// DEBUG by Joseph Kim
-//	//====================
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
     // somewhere, or (if it overlaps with an existing region) extend
@@ -195,7 +144,6 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     if (i==regionList.end())
         return 0;
 
-//    ASSERT(i->begin<i->end); // empty regions cannot exist
     ASSERT(seqLess(i->begin,i->end)); // empty regions cannot exist
 
     // seq below 1st region
@@ -217,3 +165,4 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
         return octets;
     }
 }
+
