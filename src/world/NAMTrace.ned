@@ -28,7 +28,7 @@ package inet.world;
 simple NAMTrace
 {
     parameters:
-        string logfile = default("trace.nam");
+        string logfile = default("");  // the name of the logfile ("trace.nam")
         string prolog = default("");
         @display("i=old/floppy1");
 }
