@@ -1,0 +1,19 @@
+This directory includes various files extending the original OMNeT++ ver. 4.0
+(as of 10/22/2009).
+
+Before starting "make" in the original omnetpp root directory, copy (& overwrite)
+the files under "root" directory to the original root directory. The whole
+OMNeT++ updating process can be done using the shell script ("omnetpp_update")
+on the same directory where this file is located.
+
+
+* Notes:
+OMNeT++ 4.0 user manual has en error in the description of probability distributions
+in Sec. 6.4.4 (page 126 of PDF version):
+
+"lognormal(m, s, rng=0) | lognormal distribution with mean m and variance s>0"
+
+It should be changed as follows:
+
+"lognormal(m, s, rng=0) | lognormal distribution corresponding to a normal distribution
+                          with mean m and standard deviation s>0"

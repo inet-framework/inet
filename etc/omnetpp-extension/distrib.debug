@@ -1,0 +1,6 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2008 Andras Varga, OpenSim Ltd.
+Version: 4.0, build: 090310-10709, edition: Academic Public License -- NOT FOR C
+OMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+args[3] =  int rng?
+argType = 

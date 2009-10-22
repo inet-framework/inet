@@ -1,0 +1,30 @@
+#!/bin/sh
+cd `dirname $0`/../..
+INETROOT=`pwd`
+OMNETPPROOT=$INETROOT/../omnetpp-4.0
+
+# Check root directory of OMNeT++ 4.0.
+if [ -d $OMNETPPROOT ]
+then
+	echo "Cheking root directories for INET and OMNeT++ ..."
+	echo "- INETROOT=$INETROOT"
+	echo "- OMNETPPROOT=$OMNETPPROOT"
+	echo ""
+else
+	echo "Oops! I cannot find OMNeT++ 4.0 root directory."
+	echo "Check this shell script to fix it."
+	exit 1
+fi
+
+cd $OMNETPPROOT
+echo "Updating OMNeT++ in `pwd` ..."
+
+echo "- Copying files from $INETROOT/etc/omnetpp-extension/root ..."
+cp -a $INETROOT/etc/omnetpp-extension/root/* .
+
+echo "- Making ..."
+make
+
+echo ""
+echo "Finished updating OMNeT++."
+echo "Now you can go back to working at your INET directory!"
