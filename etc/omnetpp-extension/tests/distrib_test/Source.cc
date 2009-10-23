@@ -19,6 +19,8 @@ class Source : public cSimpleModule
 {
   private:
     cMessage *sendMessageEvent;
+    cStdDev jobStats;	// job interarrival time statistics
+    cOutVector jobIat;	// job interarrival time vector
 
   public:
      Source();
@@ -27,6 +29,7 @@ class Source : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 };
 
 Define_Module(Source);
@@ -43,6 +46,9 @@ Source::~Source()
 
 void Source::initialize()
 {
+    jobStats.setName("job interarrival time stats");
+    jobIat.setName("job interarrival time vector");
+
     sendMessageEvent = new cMessage("sendMessageEvent");
     scheduleAt(simTime(), sendMessageEvent);
 }
@@ -54,7 +60,19 @@ void Source::handleMessage(cMessage *msg)
     cMessage *job = new cMessage("job");
     send(job, "out");
 
-    scheduleAt(simTime()+par("sendIaTime").doubleValue(), sendMessageEvent);
+    simtime_t iat = par("sendIaTime").doubleValue();
+    scheduleAt(simTime()+iat, sendMessageEvent);
+    EV << "Job arrived with interarrival time: " << iat << "sec" << endl;
+    jobStats.collect( iat );
+    jobIat.record( iat );
+}
+
+void Source::finish()
+{
+    EV << "Total jobs processed: " << jobStats.getCount() << endl;
+    EV << "Avg job interarrival time:    " << jobStats.getMean() << endl;
+    EV << "Max job interarrival time:    " << jobStats.getMax() << endl;
+    EV << "Standard deviation:   " << jobStats.getStddev() << endl;
 }
 
 }; //namespace
