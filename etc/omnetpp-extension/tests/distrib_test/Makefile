@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for fifo
+# OMNeT++/OMNEST Makefile for distrib_test
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -O out
 #
 
 # Name of target to be created (-o option)
-TARGET = fifo$(EXE_SUFFIX)
+TARGET = distrib_test$(EXE_SUFFIX)
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
@@ -91,7 +91,7 @@ msgheaders: $(MSGFILES:.msg=_m.h)
 
 clean:
 	-rm -rf $O
-	-rm -f fifo fifo.exe libfifo.so libfifo.a libfifo.dll libfifo.dylib
+	-rm -f distrib_test distrib_test.exe libdistrib_test.so libdistrib_test.a libdistrib_test.dll libdistrib_test.dylib
 	-rm -f ./*_m.cc ./*_m.h
 
 cleanall: clean
@@ -101,11 +101,11 @@ depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+$O/AbstractFifo.o: AbstractFifo.cc \
+	AbstractFifo.h
+$O/Source.o: Source.cc
 $O/Sink.o: Sink.cc
 $O/Fifo.o: Fifo.cc \
-	AbstractFifo.h \
-	Fifo.h
-$O/Source.o: Source.cc
-$O/AbstractFifo.o: AbstractFifo.cc \
+	Fifo.h \
 	AbstractFifo.h
 
