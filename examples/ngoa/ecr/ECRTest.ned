@@ -38,6 +38,11 @@ network ECRTest
             delay = 1us;
             datarate = 512Mbps;
         }
+        channel fiberline_100M extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
         channel fiberline_10G extends DatarateChannel
         {
             delay = 1us;
@@ -52,22 +57,32 @@ network ECRTest
         {
             delay = 10ms;
             datarate = 10Gbps;
-        }        
-        channel ethernetline extends DatarateChannel
-        {
-            delay = 0.1us;
-            datarate = 10Mbps;
         }
-        channel ethernetline_1M extends DatarateChannel
+        channel fiberline_1T_10ms_rtt extends DatarateChannel
         {
-            delay = 0.1us;
-            datarate = 1Mbps;
+            delay = 5ms;
+            datarate = 1Tbps;
         }
-         channel ethernetline_31M extends DatarateChannel
+        channel fiberline_1T_20ms_rtt extends DatarateChannel
         {
-            delay = 0.1us;
-            datarate = 31Mbps;
-        }
+            delay = 10ms;
+            datarate = 1Tbps;
+        }         
+//        channel ethernetline extends DatarateChannel
+//        {
+//            delay = 0.1us;
+//            datarate = 10Mbps;
+//        }
+//        channel ethernetline_1M extends DatarateChannel
+//        {
+//            delay = 0.1us;
+//            datarate = 1Mbps;
+//        }
+//         channel ethernetline_31M extends DatarateChannel
+//        {
+//            delay = 0.1us;
+//            datarate = 31Mbps;
+//        }
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -79,10 +94,10 @@ network ECRTest
             parameters:
                 @display("p=185,50");
         }
-        nam: NAMTrace {
-            parameters:
-                @display("p=260,50");
-        }
+//        nam: NAMTrace {
+//            parameters:
+//                @display("p=260,50");
+//        }
         r1: Router {
             parameters:
                 @display("p=185,194");
@@ -91,10 +106,6 @@ network ECRTest
             parameters:
                 @display("p=304,194");
         }
-        //        r3: Router {
-        //            parameters:
-        //                @display("p=433,250");
-        //        }
         cli[n]: StandardHost {
             parameters:
                 @display("i=device/laptop;p=67,194");
@@ -105,9 +116,8 @@ network ECRTest
         }
     connections:
         for i=0..n-1 {
-            cli[i].pppg++ <--> ethernetline_31M <--> r1.pppg++;
+            cli[i].pppg++ <--> fiberline_100M <--> r1.pppg++;
         }
-        r1.pppg++ <--> ethernetline_31M <--> r2.pppg++;
-        //        r2.pppg++ <--> ethernetline <--> r3.pppg++;
-        r2.pppg++ <--> fiberline_10G_10ms_rtt <--> srv.pppg++;
+        r1.pppg++ <--> fiberline_100M <--> r2.pppg++;
+        r2.pppg++ <--> fiberline_1T_10ms_rtt <--> srv.pppg++;
 }
