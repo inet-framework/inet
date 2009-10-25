@@ -71,6 +71,7 @@ simple HttpClientApp like TCPApp
         double startTime @unit("s") = default(1s); // time first session begins
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
+        volatile int htmlObjectLength @unit("B") = default(10KB); // length of a HTML object
         volatile int replyLength @unit("B") = default(1MB); // length of a reply
         volatile double thinkTime @unit("s"); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions

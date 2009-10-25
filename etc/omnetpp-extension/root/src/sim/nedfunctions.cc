@@ -585,12 +585,13 @@ DEF(nedf_triang,
 })
 
 DEF(nedf_lognormal,
-    "double lognormal(double m, double w, long rng?)",
+    "quantity lognormal(quantity m, quantity w, long rng?)",
     "random/continuous",
     "Returns a random number from the Lognormal distribution",
 {
     int rng = argc==3 ? (int)argv[2].dbl : 0;
-    argv[0].dbl = lognormal(argv[0].dbl, argv[1].dbl, rng);
+    double argv1converted = UnitConversion::convertUnit(argv[1].dbl, argv[1].dblunit, argv[0].dblunit);
+    argv[0].dbl = lognormal(argv[0].dbl, argv1converted, rng);
     return argv[0];
 })
 

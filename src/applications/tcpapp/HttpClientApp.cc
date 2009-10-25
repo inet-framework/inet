@@ -33,6 +33,18 @@ void HttpClientApp::initialize()
     sumSessionTransferRates = 0.0;
 }
 
+void HttpClientApp::sendHtmlRequest()
+{
+     EV << "sending HTML request\n";
+
+     long requestLength = par("requestLength");
+     long replyLength = par("htmlObjectLength");	// This request is for an HTML object.
+     if (requestLength<1) requestLength=1;
+     if (replyLength<1) replyLength=1;
+
+     sendPacket(requestLength, replyLength);
+}
+
 void HttpClientApp::connect()
 {
 	TCPBasicClientApp::connect();
@@ -42,6 +54,27 @@ void HttpClientApp::connect()
 	// To exclude connection set up time, initialise this variable in "socketEstablished()".
 	sessionStart = simTime();
 	bytesRcvdAtSessionStart = bytesRcvd;
+}
+
+void HttpClientApp::socketEstablished(int connId, void *ptr)
+{
+    TCPGenericCliAppBase::socketEstablished(connId, ptr);
+
+    // determine number of requests in this session
+    // *** NOTICE ***
+    // This number does include the first request for an HTML object.
+    // See the comment below for more information.
+    numRequestsToSend = (long) par("numRequestsPerSession");
+    if (numRequestsToSend<1) numRequestsToSend=1;
+
+    // perform first request if not already done (next one will be sent when reply arrives)
+    // *** NOTICE ***
+    // The first request in HTTP is special in that it is for an HTML object
+    // while others are for embedded objects.
+    // So we use a dedicated function (i.e., "sendHtmlRequest").
+    if (!earlySend)
+        sendHtmlRequest();
+    numRequestsToSend--;
 }
 
 void HttpClientApp::socketClosed(int connId, void *ptr)

@@ -31,6 +31,9 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 	  double sumSessionDelays;	// sum of session delays
 	  double sumSessionTransferRates;	// sum of session transfer rates in bytes/second
 
+    /** Utility: sends a HTML request to the server */
+    virtual void sendHtmlRequest();
+
   protected:
     /** Redefined to schedule a connect(). */
     virtual void initialize();
@@ -40,6 +43,9 @@ class INET_API HttpClientApp : public TCPBasicClientApp
 
     /** Redefined. */
     virtual void connect();
+
+    /** Redefined. */
+    virtual void socketEstablished(int connId, void *yourPtr);
 
     /** Redefined to start another session after a delay. */
     virtual void socketClosed(int connId, void *yourPtr);

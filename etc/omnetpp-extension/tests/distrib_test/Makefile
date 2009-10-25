@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for distrib_test
+# OMNeT++/OMNEST Makefile for inet-hnrl
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out
+#  opp_makemake -f
 #
 
 # Name of target to be created (-o option)
-TARGET = distrib_test$(EXE_SUFFIX)
+TARGET = inet-hnrl$(EXE_SUFFIX)
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
@@ -14,7 +14,7 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 #USERIF_LIBS = $(TKENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I. -Iresults
+INCLUDE_PATH = -I.
 
 # Additional object and library files to link with
 EXTRA_OBJS =
@@ -23,8 +23,8 @@ EXTRA_OBJS =
 LIBS =
 
 # Output directory
-PROJECT_OUTPUT_DIR = out
-PROJECTRELATIVE_PATH =
+PROJECT_OUTPUT_DIR = ../../../../out
+PROJECTRELATIVE_PATH = /etc/omnetpp-extension/tests/distrib_test
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
@@ -91,22 +91,20 @@ msgheaders: $(MSGFILES:.msg=_m.h)
 
 clean:
 	-rm -rf $O
-	-rm -f distrib_test distrib_test.exe libdistrib_test.so libdistrib_test.a libdistrib_test.dll libdistrib_test.dylib
+	-rm -f inet-hnrl inet-hnrl.exe libinet-hnrl.so libinet-hnrl.a libinet-hnrl.dll libinet-hnrl.dylib
 	-rm -f ./*_m.cc ./*_m.h
-	-rm -f results/*_m.cc results/*_m.h
 
 cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/AbstractFifo.o: AbstractFifo.cc \
-	AbstractFifo.h
-$O/Source.o: Source.cc
-$O/Sink.o: Sink.cc
+  ./AbstractFifo.h
 $O/Fifo.o: Fifo.cc \
-	Fifo.h \
-	AbstractFifo.h
-
+  ./AbstractFifo.h \
+  ./Fifo.h
+$O/Sink.o: Sink.cc
+$O/Source.o: Source.cc

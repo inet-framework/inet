@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2009 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -24,65 +25,16 @@ import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
-import inet.world.NAMTrace;
-import ned.DatarateChannel;
 
 
 network ECRTest
 {
     parameters:
         int n;
-    types:
-        channel fiberline extends DatarateChannel
-        {
-            delay = 1us;
-            datarate = 512Mbps;
-        }
-        channel fiberline_100M extends DatarateChannel
-        {
-            delay = 0.1us;
-            datarate = 100Mbps;
-        }
-        channel fiberline_10G extends DatarateChannel
-        {
-            delay = 1us;
-            datarate = 10Gbps;
-        }
-        channel fiberline_10G_10ms_rtt extends DatarateChannel
-        {
-            delay = 5ms;
-            datarate = 10Gbps;
-        }
-        channel fiberline_10G_20ms_rtt extends DatarateChannel
-        {
-            delay = 10ms;
-            datarate = 10Gbps;
-        }
-        channel fiberline_1T_10ms_rtt extends DatarateChannel
-        {
-            delay = 5ms;
-            datarate = 1Tbps;
-        }
-        channel fiberline_1T_20ms_rtt extends DatarateChannel
-        {
-            delay = 10ms;
-            datarate = 1Tbps;
-        }         
-//        channel ethernetline extends DatarateChannel
-//        {
-//            delay = 0.1us;
-//            datarate = 10Mbps;
-//        }
-//        channel ethernetline_1M extends DatarateChannel
-//        {
-//            delay = 0.1us;
-//            datarate = 1Mbps;
-//        }
-//         channel ethernetline_31M extends DatarateChannel
-//        {
-//            delay = 0.1us;
-//            datarate = 31Mbps;
-//        }
+        double backbone_rate @unit(bps) = default(1Tbps);
+        double backbone_delay @unit(s) = default(5ms);	// RTT = 10ms
+        double distribution_rate @unit(bps) = default(100Mbps);
+        double feeder_rate @unit(bps) = default(100Mbps);
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -94,10 +46,6 @@ network ECRTest
             parameters:
                 @display("p=185,50");
         }
-//        nam: NAMTrace {
-//            parameters:
-//                @display("p=260,50");
-//        }
         r1: Router {
             parameters:
                 @display("p=185,194");
@@ -116,8 +64,11 @@ network ECRTest
         }
     connections:
         for i=0..n-1 {
-            cli[i].pppg++ <--> fiberline_100M <--> r1.pppg++;
+//            cli[i].pppg++ <--> fiberline_100M <--> r1.pppg++;
+			cli[i].pppg++ <--> {datarate=distribution_rate;} <--> r1.pppg++;
         }
-        r1.pppg++ <--> fiberline_100M <--> r2.pppg++;
-        r2.pppg++ <--> fiberline_1T_10ms_rtt <--> srv.pppg++;
+//        r1.pppg++ <--> fiberline_100M <--> r2.pppg++;
+        r1.pppg++ <--> {datarate=feeder_rate;} <--> r2.pppg++;
+//        r2.pppg++ <--> fiberline_1T_10ms_rtt <--> srv.pppg++;
+		r2.pppg++ <--> {delay=backbone_delay; datarate=backbone_rate;} <--> srv.pppg++;
 }
