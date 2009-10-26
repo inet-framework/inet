@@ -69,11 +69,11 @@ simple HttpClientApp like TCPApp
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         double startTime @unit("s") = default(1s); // time first session begins
-        volatile int numRequestsPerSession = default(1);  // number of requests sent per session
+        volatile int htmlObjectLength @unit("B") = default(10KB); // length of an HTML object
+        volatile int numEmbeddedObjects = default(1); // number of embedded objects per HTML object
+        volatile int embeddedObjectLength @unit("B") = default(12KB); // length of an embedded object
         volatile int requestLength @unit(B) = default(200B); // length of a request
-        volatile int htmlObjectLength @unit("B") = default(10KB); // length of a HTML object
-        volatile int replyLength @unit("B") = default(1MB); // length of a reply
-        volatile double thinkTime @unit("s"); // time gap between requests
+        volatile double thinkTime @unit("s") = default(0s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
     gates:

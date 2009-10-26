@@ -24,13 +24,44 @@
 
 Define_Module(HttpClientApp);
 
+HttpClientApp::HttpClientApp()
+{
+    timeoutMsg = NULL;
+}
+
+HttpClientApp::~HttpClientApp()
+{
+    cancelAndDelete(timeoutMsg);
+}
+
 void HttpClientApp::initialize()
 {
-    TCPBasicClientApp::initialize();
+    TCPGenericCliAppBase::initialize();
 
+    numEmbeddedObjects = 0;
     numSessionsFinished = 0;
     sumSessionDelays = 0.0;
     sumSessionTransferRates = 0.0;
+
+    earlySend = false;  // TBD make it parameter
+    WATCH(numEmbeddedObjects);
+    WATCH(earlySend);
+
+    timeoutMsg = new cMessage("timer");
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt((simtime_t)par("startTime"), timeoutMsg);
+}
+
+void HttpClientApp::sendRequest()
+{
+     EV << "sending request for an embedded object, " << numEmbeddedObjects-1 << " more to go\n";
+
+     long requestLength = par("requestLength");
+     long replyLength = par("embeddedObjectLength"); // this request is for an embedded object within an HTML object
+     if (requestLength<1) requestLength=1;
+     if (replyLength<1) replyLength=1;
+
+     sendPacket(requestLength, replyLength);
 }
 
 void HttpClientApp::sendHtmlRequest()
@@ -38,7 +69,7 @@ void HttpClientApp::sendHtmlRequest()
      EV << "sending HTML request\n";
 
      long requestLength = par("requestLength");
-     long replyLength = par("htmlObjectLength");	// This request is for an HTML object.
+     long replyLength = par("htmlObjectLength");	// this request is for an HTML object
      if (requestLength<1) requestLength=1;
      if (replyLength<1) replyLength=1;
 
@@ -47,7 +78,7 @@ void HttpClientApp::sendHtmlRequest()
 
 void HttpClientApp::connect()
 {
-	TCPBasicClientApp::connect();
+	TCPGenericCliAppBase::connect();
 
 	// Initialise per session.
 	// Note that session delays will include connection (i.e., socket) set up time as well.
@@ -56,47 +87,98 @@ void HttpClientApp::connect()
 	bytesRcvdAtSessionStart = bytesRcvd;
 }
 
+void HttpClientApp::handleTimer(cMessage *msg)
+{
+    switch (msg->getKind())
+    {
+        case MSGKIND_CONNECT:
+            EV << "starting a new HTTP session\n";
+            connect(); // active OPEN
+
+            // significance of earlySend: if true, data will be sent already
+            // in the ACK of SYN, otherwise only in a separate packet (but still
+            // immediately)
+            if (earlySend)
+                sendHtmlRequest(); // note that the first request is for an HTML object!
+            break;
+
+        case MSGKIND_SEND:
+           sendRequest();
+           numEmbeddedObjects--;
+           // no scheduleAt(): next request will be sent when reply to this one
+           // arrives (see socketDataArrived())
+           break;
+    }
+}
+
 void HttpClientApp::socketEstablished(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketEstablished(connId, ptr);
 
-    // determine number of requests in this session
-    // *** NOTICE ***
-    // This number does include the first request for an HTML object.
-    // See the comment below for more information.
-    numRequestsToSend = (long) par("numRequestsPerSession");
-    if (numRequestsToSend<1) numRequestsToSend=1;
+    // Determine the number of embedded objects in an HTML object,
+    // for which requests are to be sent in this session.
+    numEmbeddedObjects = (long) par("numEmbeddedObjects");
+    if (numEmbeddedObjects<0) numEmbeddedObjects=0;
 
-    // perform first request if not already done (next one will be sent when reply arrives)
-    // *** NOTICE ***
-    // The first request in HTTP is special in that it is for an HTML object
-    // while others are for embedded objects.
-    // So we use a dedicated function (i.e., "sendHtmlRequest").
+    // Send the first request if not already done (next one will be sent when reply arrives)
+    // Note that the first request in HTTP is special in that it is for an HTML object;
+    // following requests are for embedded objects.
+    // So we use a dedicated function for this first request (i.e., "sendHtmlRequest").
     if (!earlySend)
         sendHtmlRequest();
-    numRequestsToSend--;
+}
+
+void HttpClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+{
+    TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
+
+    if (numEmbeddedObjects>0)
+    {
+        EV << "reply arrived\n";
+        timeoutMsg->setKind(MSGKIND_SEND);
+        scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+    }
+    else
+    {
+        EV << "reply to the last request arrived, closing session\n";
+        close();
+    }
 }
 
 void HttpClientApp::socketClosed(int connId, void *ptr)
 {
-    TCPBasicClientApp::socketClosed(connId, ptr);
+    TCPGenericCliAppBase::socketClosed(connId, ptr);
 
     // update session statistics
     numSessionsFinished++;
+    bytesRcvdAtSessionEnd = bytesRcvd;
     double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
-    int sessionSize = bytesRcvd - bytesRcvdAtSessionStart;
+    int sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
     sumSessionDelays += sessionDelay;
     sumSessionTransferRates += sessionSize/sessionDelay;
+
+    // start another session after a delay
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt(simTime()+(simtime_t)par("idleInterval"), timeoutMsg);
+}
+
+void HttpClientApp::socketFailure(int connId, void *ptr, int code)
+{
+    TCPGenericCliAppBase::socketFailure(connId, ptr, code);
+
+    // reconnect after a delay
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt(simTime()+(simtime_t)par("reconnectInterval"), timeoutMsg);
 }
 
 void HttpClientApp::finish()
 {
-	TCPBasicClientApp::finish();
+	TCPGenericCliAppBase::finish();
 
     // record session statistics
     if (numSessionsFinished > 0) {
         double avgSessionDelay = sumSessionDelays/double(numSessionsFinished);
-        double avgSessionThroughput = bytesRcvd/sumSessionDelays;
+        double avgSessionThroughput = bytesRcvdAtSessionEnd/sumSessionDelays;
         double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;
 
         recordScalar("number of finished sessions", numSessionsFinished);
