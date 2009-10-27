@@ -61,13 +61,13 @@ package inet.applications.tcpapp;
 //
 // @see TCPGenericSrvApp, GenericAppMsg, TelnetApp
 //
-simple HttpClientApp like TCPApp
+simple HttpClientApp like TCPApp2
 {
     parameters:
         string address = default(""); // may be left empty ("")
         int port = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
-        int connectPort = default(1000); // port number to connect to
+        int connectPort = default(80); // port number to connect to (80 is for HTTP)
         double startTime @unit("s") = default(1s); // time first session begins
         volatile int htmlObjectLength @unit("B") = default(10KB); // length of an HTML object
         volatile int numEmbeddedObjects = default(1); // number of embedded objects per HTML object

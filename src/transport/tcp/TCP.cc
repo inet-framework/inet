@@ -34,10 +34,12 @@ bool TCP::logverbose;
 // Ephemeral port range settings
 // - BSD: 1024...4999
 // - IANA: 49152...65535
-//#define EPHEMERAL_PORTRANGE_START 1024
+//		--> may cause issues with the current INET implementation
+//		    due to its use of *** signed short *** for port numbers
+#define EPHEMERAL_PORTRANGE_START 1024
+//#define EPHEMERAL_PORTRANGE_START 49152
 //#define EPHEMERAL_PORTRANGE_END   5000
-#define EPHEMERAL_PORTRANGE_START 49152
-#define EPHEMERAL_PORTRANGE_END   65535
+#define EPHEMERAL_PORTRANGE_END   32767
 
 static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {

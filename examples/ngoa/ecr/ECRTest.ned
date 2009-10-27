@@ -24,6 +24,7 @@ import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.StandardHost2;
 import inet.world.ChannelInstaller;
 
 
@@ -54,7 +55,7 @@ network ECRTest
             parameters:
                 @display("p=304,194");
         }
-        cli[n]: StandardHost {
+        cli[n]: StandardHost2 {
             parameters:
                 @display("i=device/laptop;p=67,194");
         }
