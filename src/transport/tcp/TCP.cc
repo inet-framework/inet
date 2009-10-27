@@ -31,8 +31,13 @@ Define_Module(TCP);
 bool TCP::testing;
 bool TCP::logverbose;
 
-#define EPHEMERAL_PORTRANGE_START 1024
-#define EPHEMERAL_PORTRANGE_END   5000
+// Ephemeral port range settings
+// - BSD: 1024...4999
+// - IANA: 49152...65535
+//#define EPHEMERAL_PORTRANGE_START 1024
+//#define EPHEMERAL_PORTRANGE_END   5000
+#define EPHEMERAL_PORTRANGE_START 49152
+#define EPHEMERAL_PORTRANGE_END   65535
 
 static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {
