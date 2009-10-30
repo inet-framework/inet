@@ -44,6 +44,7 @@ void HttpClientApp::initialize()
     sumSessionTransferRates = 0.0;
 
     earlySend = false;  // TBD make it parameter
+    htmlObjectRcvd = false;
     WATCH(numEmbeddedObjects);
     WATCH(earlySend);
 
@@ -74,6 +75,8 @@ void HttpClientApp::sendHtmlRequest()
      if (replyLength<1) replyLength=1;
 
      sendPacket(requestLength, replyLength);
+
+     htmlObjectRcvd = false;
 }
 
 void HttpClientApp::connect()
@@ -132,16 +135,27 @@ void HttpClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool 
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
-    if (numEmbeddedObjects>0)
-    {
-        EV << "reply arrived\n";
-        timeoutMsg->setKind(MSGKIND_SEND);
-        scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+    if (htmlObjectRcvd) {
+        // this is the 2nd (or later) response to embedded object.
+        if (numEmbeddedObjects>0)
+        {
+            EV << "reply for embedded object arrived\n";
+            timeoutMsg->setKind(MSGKIND_SEND);
+            scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+        }
+        else
+        {
+            EV << "reply to the last request arrived, closing session\n";
+            close();
+        }
     }
     else
     {
-        EV << "reply to the last request arrived, closing session\n";
-        close();
+        // this is the response to HTML object (i.e., 1st response from the server).
+        EV << "reply for HTML object arrived\n";
+        timeoutMsg->setKind(MSGKIND_SEND);
+        scheduleAt(simTime()+(simtime_t)par("parsingTime"), timeoutMsg);
+        htmlObjectRcvd = true;
     }
 }
 

@@ -73,6 +73,7 @@ simple HttpClientApp like TCPApp2
         volatile int numEmbeddedObjects = default(1); // number of embedded objects per HTML object
         volatile int embeddedObjectLength @unit("B") = default(12KB); // length of an embedded object
         volatile int requestLength @unit(B) = default(200B); // length of a request
+        volatile double parsingTime @unit("s") = default(0s); // time gap between requests for HTML object and 1st embedded object
         volatile double thinkTime @unit("s") = default(0s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect

@@ -27,6 +27,7 @@ class INET_API HttpClientApp : public TCPGenericCliAppBase
   protected:
 	  cMessage *timeoutMsg;
 	  bool earlySend;  // if true, don't wait with sendRequest() until established()
+      bool htmlObjectRcvd; // if true, response to HTML object (i.e., 1st request) has been received
 	  int numEmbeddedObjects; // number of embedded objects per HTML object
       int numSessionsFinished;      // number of sessions finished (not just started)
 	  int bytesRcvdAtSessionStart;	// number of bytes received (so far) at the start of a session
