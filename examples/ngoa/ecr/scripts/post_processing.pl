@@ -1,22 +1,28 @@
 #!/usr/bin/perl
 #
-# Perl script for extracting data from OMNeT++ scala files and preparing them for plotting
+# Perl script for post processing simulation data in OMNeT++ scala files
 #
 # (C) 2009 Kyeong Soo (Joseph) Kim
 
-@files = <$ARGV[0]>; # a list of files matching a given pattern
+@infiles = <$ARGV[0]>; # a list of files matching a given pattern
 
 # # DEBUG
 # print @files;
 
-foreach $infile (@files) {
+# initialize hash of output file names
+my @outfiles = ();
+
+
+# extracting data from scalar files and put them into new output files
+foreach $infile (@infiles) {
+
 	my @names = split("-", $infile);
 	my $config = $names[0];		# configuration name without run number
 	
 # 	# DEBUG
 # 	print "$config\n";
 	
-	open(INFILE, $infile)
+	open(INFILE, "<", $infile)
 		or die "Can't open $infile for input: $!";
 
 	# initilaize iteration variables to unused values
@@ -152,6 +158,9 @@ foreach $infile (@files) {
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_dly: $!"
 		: "Exit status $? from $outfile_dly";
+	unless ($outfile_dly ~~ @outfiles) {
+		push(@outfiles, $outfile_dly); # store the file name for later processing
+	}
 
 	# average session throughput
 	my $outfile_thr = $outfile . ".thr";
@@ -161,6 +170,9 @@ foreach $infile (@files) {
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_thr: $!"
 		: "Exit status $? from $outfile_thr";
+	unless ($outfile_thr ~~ @outfiles) {
+		push(@outfiles, $outfile_thr); # store the file name for later processing
+	}
 
 	# mean session transfer rate
 	my $outfile_trf = $outfile . ".trf";
@@ -170,4 +182,20 @@ foreach $infile (@files) {
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_trf: $!"
 		: "Exit status $? from $outfile_trf";
-}
+	unless ($outfile_trf ~~ @outfiles) {
+		push(@outfiles, $outfile_trf); # store the file name for later processing
+	}
+
+}	# end of 1st for loop
+
+
+# sorting output files based on the value of the 1st column
+foreach $outfile (@outfiles) {
+
+#	# DEBUG
+#	print "outfile = $outfile\n";
+
+	my $rc = system("sort -o $outfile -n $outfile");
+	die "system() failed with status $rc" unless $rc == 0;
+
+}	# end of 2nd for loop
