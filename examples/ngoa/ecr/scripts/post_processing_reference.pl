@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 #
-# Perl script for post processing simulation data for candidate NGOA
-# architecture in OMNeT++ scala files
+# Perl script for post processing simulation data for ECR reference model
+# in OMNeT++ scala files
 #
-# It prints out results to corresponding output files against number
-# of sessions ($n).
+# It prints out results to corresponding output files against access
+# rate ($dr=$fr).
 #
 # (C) 2009 Kyeong Soo (Joseph) Kim
 
@@ -133,15 +133,15 @@ foreach $infile (@infiles) {
 	if ($N >= 1) {
 		$outfile = $outfile . "_N" . $N;
 	}
-# 	if ($n >= 1) {
-# 		$outfile = $outfile . "_n" . $n;
-#	}
-	if ($dr >= 0) {
-		$outfile = $outfile . "_dr" . $dr;
+ 	if ($n >= 1) {
+ 		$outfile = $outfile . "_n" . $n;
 	}
-	if ($fr >= 0) {
-		$outfile = $outfile . "_fr" . $fr;
-	}
+# 	if ($dr >= 0) {
+# 		$outfile = $outfile . "_dr" . $dr;
+# 	}
+# 	if ($fr >= 0) {
+# 		$outfile = $outfile . "_fr" . $fr;
+# 	}
 	if ($br >= 0) {
 		$outfile = $outfile . "_br" . $br;
 	}
@@ -152,13 +152,13 @@ foreach $infile (@infiles) {
 # 	# DEBUG
 # 	print "outfile = $outfile\n";
 
-	### print results to a corresponding output file against $n$
+	### print results to a corresponding output file against $dr$
 
 	# average session delay
 	my $outfile_dly = $outfile . ".dly";
 	open(OUTFILE, ">>", $outfile_dly)
 		or die "Can't open $outfile_dly for output: $!";
-	printf(OUTFILE "%d\t%le\n", $n, $sum_delay/$num_delay);
+	printf(OUTFILE "%d\t%le\n", $dr, $sum_delay/$num_delay);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_dly: $!"
 		: "Exit status $? from $outfile_dly";
@@ -170,7 +170,7 @@ foreach $infile (@infiles) {
 	my $outfile_thr = $outfile . ".thr";
 	open(OUTFILE, ">>", $outfile_thr)
 		or die "Can't open $outfile_thr for output: $!";
-	printf(OUTFILE "%d\t%le\n", $n, $sum_throughput/$num_throughput);
+	printf(OUTFILE "%d\t%le\n", $dr, $sum_throughput/$num_throughput);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_thr: $!"
 		: "Exit status $? from $outfile_thr";
@@ -182,7 +182,7 @@ foreach $infile (@infiles) {
 	my $outfile_trf = $outfile . ".trf";
 	open(OUTFILE, ">>", $outfile_trf)
 		or die "Can't open $outfile_trf for output: $!";
-	printf(OUTFILE "%d\t%le\n", $n, $sum_transfer_rate/$num_transfer_rate);
+	printf(OUTFILE "%d\t%le\n", $dr, $sum_transfer_rate/$num_transfer_rate);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_trf: $!"
 		: "Exit status $? from $outfile_trf";
