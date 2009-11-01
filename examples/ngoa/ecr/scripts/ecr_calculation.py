@@ -9,6 +9,7 @@
 import os.path
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import numpy.lib.io as io
 import numpy.lib.function_base as num_base
 from scipy import interpolate, optimize
 
@@ -35,7 +36,7 @@ def f(delay):
 in_name = raw_input("The name of the delay data file: ")
 
 # extract the number of sessions & web page delay to X & Y
-X, Y = mlab.load(in_name, usecols=[0,1], unpack=True)
+X, Y = io.loadtxt(in_name, usecols=[0,1], unpack=True)
 
 # DEBUG
 plt.close()
@@ -59,25 +60,47 @@ for i in range(0, len(X)):
         # DEBUG
         #print ecr_name
         
-        x, y = mlab.load(ecr_name, usecols=[0,1], unpack=True)
-
         # DEBUG
-        tck_dbg = interpolate.splrep(x, y, s=smoothing)
-        x_dbg = num_base.linspace(0.01, max(x), 100)
-        y_dbg = interpolate.splev(x_dbg, tck_dbg, der=0)
-        plt.plot(x, y, 'o', x_dbg, y_dbg, '-')
-        plt.show()
+        plt.clf()
+
+        new_smoothing = 0
+        while new_smoothing >= 0:
+            smoothing = new_smoothing
+            x, y = io.loadtxt(ecr_name, usecols=[0,1], unpack=True)
+
+            # DEBUG
+            print "Current smoothing factor = %f" % (smoothing)
+            tck = interpolate.splrep(x, y, s=smoothing)
+            x_new = num_base.linspace(0.01, max(x), 100)
+            y_new = interpolate.splev(x_new, tck, der=0)
+            plt.plot(x, y, 'o', x_new, y_new, '-')
+            plt.show()
+
+            tmp = raw_input("Input new smoothing factor (press ENTER when done): ")
+            if (tmp == ""):
+                break
+            else:
+                new_smoothing = float(tmp)
     else:
         continue
 
     # obtain 1-d spline representation of data
-    tck = interpolate.splrep(x, y, s=smoothing)
+    #tck = interpolate.splrep(x, y, s=smoothing)
 
-    # obtain ECR by solving f(x)=0 with 10 as a starting point, where f(x) is defined above
-    ECR = optimize.newton(f(delay), 0.01)
+    # Before calculating ECR through the interpolated function (i.e., f(x)),
+    # check first if the delay is less than the minimum delay of the ECR
+    # reference model. If that's the case, its ECR is the line rate of
+    # the reference model.
+    if (delay <= min(y)):
+        ECR = max(x)
+    elif (delay > interpolate.splev(0.01, tck, der=0)):
+        ECR = 0.01
+    else:
+        # obtain ECR by solving f(x)=0 with 0.01 as a starting point, where f(x) is defined above
+        ECR = optimize.newton(f(delay), 0.01)
 
     # print the result
-    result = "ECR = " + repr(ECR) + " for n = " + repr(n)
+    result = "n = " + repr(n) + "\tECR = " + repr(ECR)
     print result
 
     # pause for user input
