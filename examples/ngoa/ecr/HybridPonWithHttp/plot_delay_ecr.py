@@ -20,7 +20,7 @@ base1 = "N16_dr10"
 base2 = "br1_bd5"
 
 # plot web page delay
-x1, y1 = io.loadtxt("..\TdmPonWithHttp\N16_dr10_fr10_br1_bd5.dly", usecols=[0,1], unpack=True)
+x1, y1 = io.loadtxt("../TdmPonWithHttp/N16_dr10_fr10_br1_bd5.dly", usecols=[0,1], unpack=True)
 x2, y2 = io.loadtxt(base1 + "_fr20_" + base2 + ".dly", usecols=[0,1], unpack=True)
 x3, y3 = io.loadtxt(base1 + "_fr30_" + base2 + ".dly", usecols=[0,1], unpack=True)
 x4, y4 = io.loadtxt(base1 + "_fr40_" + base2 + ".dly", usecols=[0,1], unpack=True)
@@ -41,7 +41,7 @@ plt.savefig(base1 + "_" + base2 + ".dly.png", format='png')
 raw_input("Press ENTER to continue ...")
 
 # plot ECR
-x1, y1 = io.loadtxt("..\TdmPonWithHttp\N16_dr10_fr10_br1_bd5.ecr", usecols=[0,1], unpack=True)
+x1, y1 = io.loadtxt("../TdmPonWithHttp/N16_dr10_fr10_br1_bd5.ecr", usecols=[0,1], unpack=True)
 x2, y2 = io.loadtxt(base1 + "_fr20_" + base2 + ".ecr", usecols=[0,1], unpack=True)
 x3, y3 = io.loadtxt(base1 + "_fr30_" + base2 + ".ecr", usecols=[0,1], unpack=True)
 x4, y4 = io.loadtxt(base1 + "_fr40_" + base2 + ".ecr", usecols=[0,1], unpack=True)
