@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -32,11 +33,13 @@ struct tcphdr
     unsigned short th_dport;		/* destination port */
     unsigned int th_seq;		/* sequence number */
     unsigned int th_ack;		/* acknowledgement number */
-    unsigned char th_off;
-    unsigned char th_flags;
-    unsigned short th_win;		/* window */
+    unsigned char   th_off;         /* offset = header length */
+    unsigned char   th_flags;       /* flags */
+    unsigned short  th_win;         /* window size */
     unsigned short th_sum;		/* checksum */
     unsigned short th_urp;		/* urgent pointer */
+    unsigned int    th_options[0];  /* options (optional) */
+    //unsigned char data[0];        XXX MSVC only allows zero-size arrays at the end of a struct
 };
 
 
@@ -52,3 +55,5 @@ typedef struct {
 #endif
 
 #endif /* netinet/tcp.h */
+
+

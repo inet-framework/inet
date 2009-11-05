@@ -1,3 +1,7 @@
+2009-11-03 Thomas Reschka
+
+	* Drop and Duplicate generators in PPP interface.
+
 2008-07-26  Andras Varga
 
 	* refactored to use cGate::getDatarateChannel()

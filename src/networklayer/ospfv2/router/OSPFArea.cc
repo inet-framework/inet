@@ -1318,7 +1318,7 @@ OSPF::SummaryLSA* OSPF::Area::OriginateSummaryLSA(const OSPF::SummaryLSA* summar
         if ((lsaHeader.getLsType() == SummaryLSA_NetworksType) &&
             (entry->GetDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) &&
             (entry->GetAddressMask().getInt() == lsaMask) &&
-            (entry->GetDestinationID().getInt() & lsaMask == lsaHeader.getLinkStateID() & lsaMask))
+            ((entry->GetDestinationID().getInt() & lsaMask) == (lsaHeader.getLinkStateID() & lsaMask)))
         {
             OSPF::SummaryLSA* returnLSA = OriginateSummaryLSA(entry, emptyMap, dontReoriginate);
             if (dontReoriginate != NULL) {

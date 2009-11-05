@@ -1,0 +1,42 @@
+2009-03-01 Andras Varga
+
+	* fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
+
+2008-06-29 Andras Varga
+
+	* some refactoring: created factory methods for TCPSegment and 
+	TCPConnection, to allow customizing them via subclassing
+
+2006-03-22 Andras Varga
+
+	* TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user
+	issues CLOSE, defer transition to FIN_WAIT_1 until all data are sent.
+	(Before this fix the transiton was made immediately, but that was 
+	harmless, i.e. it didn't affect TCP's external behaviour.)
+
+2006-03-21 Andras Varga
+
+	* TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
+	carries data [reported by Joachim Meichle]
+
+2005-07-20 Andras Varga
+
+	* some sources moved into subdirs queues/ and flavours/
+
+2005-07-14 Andras Varga
+
+	* TCPMain renamed to TCP
+
+2005-07-12  Andras Varga
+
+	* TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received 
+	several active/passive opens with same local port number. Now it raises
+	an error (this is like EADDRINUSE on *nix)
+
+2005-07-06  Andras Varga
+
+	* TCPConnectionRcvSegment.cc: fixed bug which caused closing of a
+	connection to be reported 2MSL (240s) later to the user. Basically,
+	the user has to be notified already when the connection enters the
+	TIME_WAIT state. (TCP stays in TIME_WAIT for 240s or longer, and 
+	nothing can happen during that time that's of interest to the user.)
