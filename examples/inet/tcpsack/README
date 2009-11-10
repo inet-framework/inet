@@ -1,0 +1,13 @@
+In this example the network consists of one client, one router and one server.
+IP addresses and routing tables are set up by using mrt files.
+
+The client sends 100 MB of data to the server using TCP.
+
+The dropsGenerator at client's PPP interface deletes certain DATA packets.
+On server side a second dropsGenerator deletes certain ACK packets in configs 1-5.
+For config 6 the node type of the server must be changed to
+'StandardHostWithDLDuplicatesGenerator' in ned file to duplicate certain
+received DATA packets.
+
+Different configurations reflect examples from RFC 2018 and RFC 2883 to evaluate
+the implementation of TCP's optional selective acknowledgment (SACK) option.

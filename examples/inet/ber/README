@@ -1,0 +1,12 @@
+In this example the network consists of a client and a server.
+IP addresses and routing tables are set up by using mrt files.
+
+The ber (bit error rate) of the channel between client and server
+depends on the selected configuration.
+
+The client sends 100 MB of data to the server using TCP.
+
+Connections throughput is measured by a throughput meter.
+
+Different configurations demonstrate the impact of TCP's optional selective
+acknowledgment (SACK) option on connections throughput.

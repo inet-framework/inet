@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -78,8 +79,35 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      */
     virtual cPacket *extractBytesUpTo(uint32 seq);
 
+    /**
+     * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
+     */
+    virtual uint32 getAmountOfBufferedBytes();
+
+    /**
+     * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
+     */
+    virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer);
+
+    /**
+     *
+     */
+    virtual uint32 getQueueLength();
+
+    /**
+     *
+     */
+    virtual void getQueueStatus();
+
+    /**
+     *
+     */
+    virtual uint32 getLE(uint32 fromSeqNum);
+
+    /**
+     *
+     */
+    virtual uint32 getRE(uint32 toSeqNum);
 };
 
 #endif
-
-

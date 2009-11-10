@@ -133,7 +133,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                     picture = 'D';
 
                 // create sim line
-                sprintf(line, "%f %i %c-Frame", simTime(), frameSize * 8, picture);
+                sprintf(line, "%f %i %c-Frame", simTime().dbl(), frameSize * 8, picture);
                 // and write it to the file
                 _outputFileStream << line << endl;
             }

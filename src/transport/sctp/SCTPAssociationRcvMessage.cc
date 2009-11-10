@@ -662,7 +662,7 @@ bool trans=false;
 
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 {
-	uint32 tsna, ackedBytes=0, osb=0, bufferPosition, osbPathBefore, osbBefore, lo, hi, hiAcked;
+	uint32 tsna, ackedBytes=0, osb=0, bufferPosition=0, osbPathBefore, osbBefore, lo, hi, hiAcked;
 	uint64 arwnd;
 	uint16 numGaps, numDups;
 	bool ctsnaAdvanced = false, rtxNecessary=false, lowestTsnRetransmitted = false;
@@ -1614,7 +1614,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 		/* only insert chunks that were sent to the path that has timed out 	  */
 		/*========================================================================*/
 		
-		if ((chunk->hasBeenAcked == false && chunk->countsAsOutstanding || chunk->hasBeenRemoved )&& chunk->lastDestination == path->remoteAddress ) 
+		if (((chunk->hasBeenAcked == false && chunk->countsAsOutstanding) || chunk->hasBeenRemoved )&& chunk->lastDestination == path->remoteAddress )
 		{
 			iter->second->hasBeenFastRetransmitted = false;
 			iter->second->gapReports = 0;
