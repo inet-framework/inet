@@ -9,7 +9,7 @@ exec wish "$0" "$@"
 
 #--------------------------------------------------------------
 #  Copyright (C) 1992-2003 Andras Varga
-#
+#					  2009 Thomas Reschka
 #  This file is distributed WITHOUT ANY WARRANTY. See the file
 #  `license' for details on this and other legal matters.
 #--------------------------------------------------------------
@@ -37,6 +37,17 @@ foreach line {
    {"INET Framework"}
    {"About..."               "README"               "../doc/index.html"}
 
+   {"Ethernet"}
+   {"ARP Test"               "ethernet/arptest"     "./run"               "run"}
+   {"ARP Test 2"             "ethernet/arptest2"    "./run"               "run"}
+   {"LANs: mixed Ethernet"   "ethernet/lans"        "./run mixed.ini"     "run mixed.ini"}
+   {"LANs: Ethernet bus"     "ethernet/lans"        "./run bus.ini"       "run bus.ini"}
+   {"LANs: hub"              "ethernet/lans"        "./run hub.ini"       "run hub.ini"}
+   {"LANs: switch"           "ethernet/lans"        "./run switch.ini"    "run switch.ini"}
+   {"LANs: duplexswitch"     "ethernet/lans"        "./run duplexswitch.ini" "run duplexswitch.ini"}
+   {"LANs: two hosts"        "ethernet/lans"        "./run twoHosts.ini"  "run twoHosts.ini"}
+   {"LANs: very large LAN"   "ethernet/lans"        "./run largeNet.ini"  "run largeNet.ini"}
+
    {"INET"}
    {"NClients/Telnet"        "inet/nclients"        "./run"               "run"}
    {"NClients/HTTP"          "inet/nclients" "./run basicHTTP.ini"        "run basicHTTP.ini"}
@@ -46,14 +57,21 @@ foreach line {
    {"Multicast"              "inet/multicast"       "./run"               "run"}
    {"RouterPerf"             "inet/routerperf"      "./run"               "run"}
    {"BulkTransfer"           "inet/bulktransfer"    "./run"               "run"}
+   {"TcpSack"                "inet/tcpsack"         "./run"               "run"}
+   {"Ber"                    "inet/ber"             "./run"               "run"}
+
+   {"IPv6 (work in progress)"}
+   {"NClients"               "ipv6/nclients"        "./run"               "run"}
+   {"DemoNetworkEth"         "ipv6/demonetworketh"  "./run"               "run"}
 
    {"SCTP"}
-   {"NClients"               "sctp/nclients" 	    "./run" 		  "run"}
-   {"Multi-homing"           "sctp/multihomed"      "./run" 		  "run"}
+   {"NClients"               "sctp/nclients" 	    "./run"               "run"}
+   {"Multi-homing"           "sctp/multihomed"      "./run"               "run"}
 
-   {"External interface"}
-   {"Traceroute"	     "sctp/traceroute"	    "./run"		  "run"}
-   {"Host with external interface"  "sctp/extclient"	    "./run"		  "run"}
+   {"Emulation"}
+   {"Traceroute"             "emulation/traceroute" "./run"               "run"}
+   {"ExtClient"	             "emulation/extclient"  "./run"               "run"}
+   {"ExtServer"              "emulation/extserver"  "./run"               "run"}
 
    {"Ad-hoc"}
    {"Mobility models"        "adhoc/mobility"       "./run"               "run"}
@@ -66,34 +84,19 @@ foreach line {
    {"802.11 thruput test"   "wireless/throughput"   "./run"               "run"}
    {"802.11 thruput test 2" "wireless/hosttohost"   "./run"               "run"}
 
-   {"IPv6 (work in progress)"}
-   {"NClients"               "ipv6/nclients"        "./run"               "run"}
-   {"DemoNetworkEth"         "ipv6/demonetworketh"  "./run"               "run"}
-
-   {"Ethernet"}
-   {"ARP Test"               "ethernet/arptest"     "./run"               "run"}
-   {"ARP Test 2"             "ethernet/arptest2"    "./run"               "run"}
-   {"LANs: mixed Ethernet"   "ethernet/lans"        "./run mixed.ini"     "run mixed.ini"}
-   {"LANs: Ethernet bus"     "ethernet/lans"        "./run bus.ini"       "run bus.ini"}
-   {"LANs: hub"              "ethernet/lans"        "./run hub.ini"       "run hub.ini"}
-   {"LANs: switch"           "ethernet/lans"        "./run switch.ini"    "run switch.ini"}
-   {"LANs: duplexswitch"     "ethernet/lans"        "./run duplexswitch.ini" "run duplexswitch.ini"}
-   {"LANs: two hosts"        "ethernet/lans"        "./run twoHosts.ini"  "run twoHosts.ini"}
-   {"LANs: very large LAN"   "ethernet/lans"        "./run largeNet.ini"  "run largeNet.ini"}
-
    {"MPLS/RSVP-TE"}
-   {"TestTE/failure"         "mpls/testte_failure"  "./run"                "run"}
-   {"TestTE/reroute"         "mpls/testte_reroute"  "./run"                "run"}
-   {"TestTE/routing"         "mpls/testte_routing"  "./run"                "run"}
-   {"TestTE/tunnel "         "mpls/testte_tunnel"   "./run"                "run"}
-   {"LDP/test"               "mpls/ldp"             "./run"                "run"}
-   {"Net37"                  "mpls/net37"           "./run"                "run"}
+   {"TestTE/failure"         "mpls/testte_failure"  "./run"               "run"}
+   {"TestTE/reroute"         "mpls/testte_reroute"  "./run"               "run"}
+   {"TestTE/routing"         "mpls/testte_routing"  "./run"               "run"}
+   {"TestTE/tunnel "         "mpls/testte_tunnel"   "./run"               "run"}
+   {"LDP/test"               "mpls/ldp"             "./run"               "run"}
+   {"Net37"                  "mpls/net37"           "./run"               "run"}
 
    {"OSPFv2"}
-   {"SimpleTest"             "ospfv2/simpletest"    "./run"                "run"}
-   {"Areas"                  "ospfv2/areas"         "./run"                "run"}
-   {"Backbone"               "ospfv2/backbone"      "./run"                "run"}
-   {"FullTest"               "ospfv2/fulltest"      "./run"                "run"}
+   {"SimpleTest"             "ospfv2/simpletest"    "./run"               "run"}
+   {"Areas"                  "ospfv2/areas"         "./run"               "run"}
+   {"Backbone"               "ospfv2/backbone"      "./run"               "run"}
+   {"FullTest"               "ospfv2/fulltest"      "./run"               "run"}
 } {
    lappend samples $i
    if {[llength $line]==0} {
@@ -425,4 +428,3 @@ checkVersion
 generic_bindings
 font_bindings
 createWindow
-

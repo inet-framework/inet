@@ -51,7 +51,7 @@ void DumbTCP::established(bool active)
     {
         // finish connection setup with ACK (possibly piggybacked on data)
         tcpEV << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
-        if (!conn->sendData(false))
+        if (!conn->sendData(false,65535))
             conn->sendAck();
     }
 }
@@ -73,7 +73,7 @@ void DumbTCP::processTimer(cMessage *timer, TCPEventCode& event)
 void DumbTCP::sendCommandInvoked()
 {
     // start sending
-    conn->sendData(false);
+    conn->sendData(false,65535);
 }
 
 void DumbTCP::receivedOutOfOrderSegment()
@@ -94,7 +94,7 @@ void DumbTCP::receivedDataAck(uint32)
 {
     // ack may have freed up some room in the window, try sending.
     // small segments also OK (Nagle off)
-    conn->sendData(false);
+    conn->sendData(false,65535);
 }
 
 void DumbTCP::receivedDuplicateAck()
@@ -119,4 +119,6 @@ void DumbTCP::dataSent(uint32)
     conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
 
-
+void DumbTCP::restartRexmitTimer()
+{
+}

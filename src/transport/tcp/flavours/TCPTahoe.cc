@@ -50,6 +50,8 @@ void TCPTahoe::processRexmitTimer(TCPEventCode& event)
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
+    state->afterRto = true;
+
     // Tahoe retransmits only one segment at the front of the queue
     conn->retransmitOneSegment();
 }
@@ -109,13 +111,9 @@ void TCPTahoe::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks==3)
+    if (state->dupacks==DUPTHRESH) // DUPTHRESH = 3
     {
-        tcpEV << "Tahoe on dupAck=3: perform Fast Retransmit, and enter Slow Start:\n";
-
-        // Fast Retransmission: retransmit missing segment without waiting
-        // for the REXMIT timer to expire
-        conn->retransmitOneSegment();
+        tcpEV << "Tahoe on dupAck=DUPTHRESH(=3): perform Fast Retransmit, and enter Slow Start:\n";
 
         // enter Slow Start
         recalculateSlowStartThreshold();
@@ -124,15 +122,21 @@ void TCPTahoe::receivedDuplicateAck()
 
         tcpEV << "Set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
+        // Fast Retransmission: retransmit missing segment without waiting
+        // for the REXMIT timer to expire
+        conn->retransmitOneSegment();
+
         // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
         // double-check if Tahoe really restarts REXMIT timer here
         //
         // restart retransmission timer (with rexmit_count=0), and cancel round-trip time measurement
         // (see p972 "29.4 Fast Retransmit and Fast Recovery Algorithms" of
         // TCP/IP Illustrated, Vol2) -- but that's probably New Reno
-        cancelEvent(rexmitTimer);
-        startRexmitTimer();
-        state->rtseq_sendtime = 0;
+        // cancelEvent(rexmitTimer);
+        // startRexmitTimer();
+        // state->rtseq_sendtime = 0;
+		// FIXED 2009-10-27 by T.R. Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+		// Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
 }
 

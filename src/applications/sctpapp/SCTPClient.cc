@@ -177,12 +177,12 @@ void SCTPClient::socketEstablished(int32, void *)
 					}
 
 				}
-				if ((!timer && numRequestsToSend>0 || timer) && sendAllowed)
+				if (((!timer && numRequestsToSend>0) || timer) && sendAllowed)
 					sendQueueRequest();
 			}
 			else
 			{
-				while ((!timer && numRequestsToSend>0 || timer) && sendAllowed)
+				while (((!timer && numRequestsToSend>0) || timer) && sendAllowed)
 				{
 					if (!timer && numRequestsToSend==1)
 						sendRequest(true);
@@ -226,7 +226,7 @@ void SCTPClient::sendRequestArrived()
 int32 count = 0;
 
 	sctpEV3<<"sendRequestArrived numRequestsToSend="<<numRequestsToSend<<"\n";
-	while ((!timer && numRequestsToSend > 0 || timer) && count++ < queueSize && sendAllowed)
+	while (((!timer && numRequestsToSend > 0) || timer) && count++ < queueSize && sendAllowed)
 	{
 		if (count == queueSize)
 			sendRequest();
@@ -321,7 +321,7 @@ void SCTPClient::handleTimer(cMessage *msg)
 	
 		case MSGKIND_SEND:
 			
-			if ((!timer && numRequestsToSend>0 || timer))
+			if (((!timer && numRequestsToSend>0) || timer))
 			{
 				if (sendAllowed)
 				{

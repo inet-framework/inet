@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,6 +21,7 @@
 
 
 #include "TCPSegment.h"
+#include "TCPSegment_m.h"
 
 #include "headers/defs.h"
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
@@ -58,10 +60,9 @@ class TCPSerializer
         /**
          * Puts a packet sniffed from the wire into a TCPSegment.
          */
-        //void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest); // TODO implement
+    void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest);
 
         static unsigned short checksum(unsigned char *addr, unsigned int count);
 };
 
 #endif
-

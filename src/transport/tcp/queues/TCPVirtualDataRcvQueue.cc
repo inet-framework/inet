@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -166,3 +167,70 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     }
 }
 
+uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
+{
+    uint32 bytes=0;
+
+    RegionList::iterator i = regionList.begin();
+    if (i==regionList.end())    // is queue empty?
+        {return 0;}
+
+    while (i!=regionList.end())
+    {
+        bytes = bytes + (i->end - i->begin);
+        i++;
+    }
+    return bytes;
+}
+
+uint32 TCPVirtualDataRcvQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
+{
+    uint32 usedRcvBuffer = getAmountOfBufferedBytes();
+    uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
+    return freeRcvBuffer;
+}
+
+uint32 TCPVirtualDataRcvQueue::getQueueLength()
+{
+    return regionList.size();
+}
+
+void TCPVirtualDataRcvQueue::getQueueStatus()
+{
+    tcpEV << "receiveQLength=" << regionList.size() << " " << info() << "\n";
+}
+
+
+uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
+{
+    RegionList::iterator i = regionList.begin();
+    while (i!=regionList.end())
+    {
+        if (seqLE(i->begin, fromSeqNum) && seqLE(fromSeqNum, i->end))
+        {
+//            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
+            if (seqLess(i->begin, fromSeqNum))
+                return i->begin;
+            return fromSeqNum;
+        }
+        i++;
+    }
+    return fromSeqNum;
+}
+
+uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
+{
+    RegionList::iterator i = regionList.begin();
+    while (i!=regionList.end())
+    {
+        if (seqLE(i->begin, toSeqNum) && seqLE(toSeqNum, i->end))
+        {
+//            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
+            if (seqLess(toSeqNum, i->end))
+                return i->end;
+            return toSeqNum;
+        }
+        i++;
+    }
+    return toSeqNum;
+}
