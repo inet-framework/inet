@@ -8,15 +8,37 @@
 
 2009-10-27 Thomas Reschka
 
-    * implemented SACK TCP. The current SACK implementation is located
-      in TCP main (and not in flavours). This means that all existing
-      TCP algorithm classes may be used with SACK, although only TCPReno
-      and TCPTahoe make sense.
+    * implemented SACK TCP:
+      - the basic SACK implementation (RFC 2018 and RFC 2883)
+        is located in TCP main (and not in flavours). This means that all existing
+        TCP algorithm classes may be used with SACK, although currently only TCPReno
+        makes sense.
+      - implemented (SACK)-based Loss Recovery algorithm (RFC 3517)
+        which is a conservative replacement of the fast recovery algorithm (RFC2581)
+        integrated to TCPReno but not to TCPTahoe, TCPNoCongestionControl and DumbTCP.
 
-    * implemented (SACK)-based Loss Recovery algorithm (RFC 3517)
-      which is a conservative replacement of the fast recovery algorithm (RFC2581)
-      integrated to TCPReno but not to TCPTahoe, TCPNoCongestionControl and DumbTCP.
+    * implemented flow control:
+      - finite receive buffer size (initiated by parameter advertisedWindow).
+        If receive buffer is exhausted (by out-of-order segments) and the
+        payload length of a new received segment is higher than free receiver
+        buffer, the new segment will be dropped. Such drops are recorded in
+        tcpRcvQueueDropsVector.
+      - update receive window.
+		The data receiver updates all receiver queue related variables before
+		sending (ACK/SACK or DATA) and updates the receiver window,
+		thus data receiver is able to advertise a zero window.
+        Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879].
 
+    * implemented some TCP header options:
+      - EOL: End of option list.
+      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
+      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
+        (local parameter) and the value specified in the MSS option
+        received during connection startup. Based on [RFC 2581, page 1].
+      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
+        PERMITTED during connection startup.
+      - SACK: SACK option implemented, based on RFC 2018, RFC 2883 and RFC 3517.
+	  
     * implemented Limited Transmit algorithm (RFC 3042)
       added new module parameter (limitedTransmitEnabled) to enabled/disabled Limited Transmit algorithm (RFC 3042)
       integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
@@ -33,29 +55,12 @@
         of the restart window (RW) before transmission begins.
         For the purposes of this standard, we define RW = IW."
 
-    * implemented some TCP header options:
-      - EOL: End of option list.
-      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
-      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
-        (local parameter) and the value specified in the MSS option
-        received during connection startup. Based on [RFC 2581, page 1].
-      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
-        PERMITTED during connection startup.
-      - SACK: RFC 2018 and RFC 2883 are implemented, but not RFC 3517.
-
-    * implemented flow control:
-      - finite receive buffer size (initiated by parameter advertisedWindow).
-        If receive buffer is exhausted (by out-of-order segments) and the
-        payload length of a new received segment is higher than free receiver
-        buffer, the new segment will be dropped. Such drops are recorded in
-        tcpRcvQueueDropsVector.
-
     * NEW tcp parameters:
       - bool limitedTransmitEnabled: Limited Transmit algorithm (RFC 3042) enabled/disabled
       - bool increasedIWEnabled: increased initial window (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390) enabled/disabled
-      - bool delayedAcksEnabled
-      - bool nagleEnabled
-      - bool sackSupport
+      - bool delayedAcksEnabled: delayed ACKs enabled/disabled
+      - bool nagleEnabled: Nagle's algorithm (RFC 896) enabled/disabled
+      - bool sackSupport: SACK support (RFC 2018, 2883, 3517) enabled/disabled (SACK will be enabled for a connection if both endpoints support it)
   
     * NEW tcp vectors:
       - pipeVector ("pipe"): current sender's estimate of bytes outstanding in the network
@@ -63,7 +68,6 @@
       - numRtosVector ("numRTOs"): total number of RTOs
       - rcvAdvVector ("advertised window"): current advertised window
       - rcvWndVector ("receive window"): current receive window
-      - sndGapsVector ("snd_gaps"): current number of gaps seen by sender
       - dupAcksVector ("rcvd dupAcks"): current number of received dupAcks
       - sndSacksVector ("sent sacks"): total number of sent SACK blocks
       - rcvSacksVector ("rcvd sacks"): total number of received SACK blocks
@@ -95,14 +99,18 @@
 
     * Other changes:
       - TCPReno and TCPTahoe use new constant DUPTHRESH (=3) to trigger retransmission (RFC 3517).
-      - implemented PERSIST timer. If data sender receives a zero window and
+      - implemented PERSIST timer. If data sender is receiving a zero window and
         the REXMIT timer is not running, the PERSIST timer is started.
-      - Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+      - sending window probes. If PERSIST timer is expired a window probe is
+        sent to request a window update.
+      - Restart of REXMIT timer on retransmission is not part of RFC 2581,
+        however optional in RFC 3517 if sent during recovery.
         This has been FIXED in TCPReno and TCPTahoe.
         REXMIT timer management is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
-      - CHANGED parts of previous SACK implementation (adding recently reported SACKs from sacks_array to header).
-      - CHANGED method to retransmit data after RTO (for TCPReno and TCPTahoe).
-      - Added missing parts in TCPConnection::updateRcvWnd(). Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879].
+      - FIXED behavior of TCPReno after RTO. After REXMIT timeout TCP Reno
+        should start slow start with snd_cwnd = snd_mss.
+        If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
+        therefore "sendData();" has been modified and is called to rexmit outstanding data.
       - new module parameter 'delayedAcksEnabled' added to enable/disable
         (optional) delayed ACKs.
       - changed the implementation of delayed ACKs. Full sized segments are
@@ -112,27 +120,14 @@
       - new module parameter 'nagleEnabled' added to enable/disable (optional)
         Nagle's algorithm. The Nagle's algorithm is unchanged and is possibly
         not precisely implemented.
-      - FIXED behavior of TCPReno after RTO. After REXMIT timeout TCP Reno
-        should start slow start with snd_cwnd = snd_mss. If calling
-        "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
-        therefore "retransmitOneSegment();" needs to be used. After receiving
-        ACK, "retransmitDataAfterRto(state->snd_cwnd);" will be called to rexmit
-        outstanding data.
       - Slightly CHANGED utility function "isSegmentAcceptable" (check
         that segment entirely falls in receive window).
         Based on [RFC 793, page 69].
       - CHANGED data type of some state variables (e.g. snd_wnd, snd_mss)
         from int/uint to uint32 to simplify use of standard functions
         (e.g. std::min).
-      - sending window probes. If PERSIST timer is expired a window probe is
-        sent to request a window update.
       - slightly changed the update of window information (snd_wnd, snd_wl1, snd_wl2).
         Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982].
-      - update receive window. The data receiver updates all receiver queue
-        related variables before sending (ACK/SACK or DATA) to advertise
-        the currently free amount of bytes of its finite receive buffer,
-        thus data receiver is able to advertise a zero window.
-        Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879].
 
 2009-10-17 Rudolf Hornig
 

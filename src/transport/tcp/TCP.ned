@@ -145,12 +145,13 @@ package inet.transport.tcp;
 //  - receive buffer to cache above-sequence data and data not yet forwarded
 //    to the user
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
-//  - RFC 3517 - (\SACK)-based Loss Recovery algorithm which is a conservative 
+//  - The basic SACK implementation (RFC 2018 and RFC 2883) is located in
+//    TCP main (and not in flavours). 
+//    This means that all existing TCP algorithm classes may be used with 
+//    SACK, although currently only TCPReno makes sense.
+//  - RFC 3517 - (SACK)-based Loss Recovery algorithm which is a conservative 
 //    replacement of the fast recovery algorithm (RFC2581) integrated to 
 //    TCPReno but not to TCPTahoe, TCPNoCongestionControl and DumbTCP.
-//  - The SACK implementation is located in TCP main (and not in flavours). 
-//    This means that all existing TCP algorithm classes may be used with 
-//    SACK, although only TCPReno makes sense.
 //  - changes from RFC 2001 to RFC 2581:
 //	  - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //	    when the incoming segment fills in all or part of a gap in the sequence space."
@@ -162,10 +163,10 @@ package inet.transport.tcp;
 //	    received during connection startup. Based on [RFC 2581, page 1].
 //	  - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //	    PERMITTED during connection startup.
-//	  - SACK: RFC 2018 and RFC 2883 are implemented, but not RFC 3517.
+//	  - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
 //	- flow control: finite receive buffer size (initiated by parameter 
 //      advertisedWindow). If receive buffer is exhausted (by out-of-order 
-//      segments) and the  payload length of a new received segment
+//      segments) and the payload length of a new received segment
 //      is higher than free receiver buffer, the new segment will be dropped. 
 //      Such drops are recorded in tcpRcvQueueDropsVector.
 
@@ -194,7 +195,7 @@ package inet.transport.tcp;
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
-//  - Re-starting Idle Connections (NOT YET IMPLEMENTED)
+//  - Re-starting Idle Connections (RFC 2581)
 //    RFC 2581, pages 7 and 8: "When TCP has not received a segment for
 //    more than one retransmission timeout, cwnd is reduced to the value
 //    of the restart window (RW) before transmission begins.
@@ -205,11 +206,6 @@ package inet.transport.tcp;
 //  - Nagle's algorithm possibly not precisely implemented
 //  - Re-starting Idle Connections (RFC 2581)
 //	  RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//	  more than one retransmission timeout, cwnd is reduced to the value
-//	  of the restart window (RW) before transmission begins.
-//	  For the purposes of this standard, we define RW = IW."
-//	- Re-starting Idle Connections (TODO - NOT YET IMPLEMENTED)
-//    RFC 2581, pages 7 and 8: "When TCP has not received a segment for
 //	  more than one retransmission timeout, cwnd is reduced to the value
 //	  of the restart window (RW) before transmission begins.
 //	  For the purposes of this standard, we define RW = IW."
