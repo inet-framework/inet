@@ -64,6 +64,12 @@ TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
     rttvar = 3.0/4.0;
 
     numRtos = 0;
+
+    // RFC 3782, page 4:
+    // "The algorithm specified in this document uses a variable "recover",
+    // whose initial value is the initial send sequence number."
+    recover = iss;
+	firstPartialACK = false;
 }
 
 std::string TCPBaseAlgStateVariables::info() const

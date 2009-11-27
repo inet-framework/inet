@@ -1,3 +1,9 @@
+2009-11-27 Thomas Reschka
+
+    * implemented TCPNewReno algorithm (RFC 3782):
+        - the implementation is based on the 'default' algorithm specified in section 3 of RFC 3782.
+        - algorithm variants (RFC 3782, sections 4-6) are NOT IMPLEMENTED.
+
 2009-10-27 Rudolf Hornig
 
     * Added ITCP module interface that is implemented by TCP and TCP_old
@@ -39,11 +45,11 @@
         PERMITTED during connection startup.
       - SACK: SACK option implemented, based on RFC 2018, RFC 2883 and RFC 3517.
 	  
-    * implemented Limited Transmit algorithm (RFC 3042)
-      added new module parameter (limitedTransmitEnabled) to enabled/disabled Limited Transmit algorithm (RFC 3042)
-      integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
+    * implemented Limited Transmit algorithm (RFC 3042):
+      - added new module parameter (limitedTransmitEnabled) to enabled/disabled Limited Transmit algorithm (RFC 3042).
+      - integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
 
-    * implemented changes from RFC 2001 to RFC 2581
+    * implemented changes from RFC 2001 to RFC 2581:
       - added new module parameter (increasedIWEnabled) to change initial window from one segment (RFC 2001)
         (based on MSS) to maximal four segments (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
         integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).

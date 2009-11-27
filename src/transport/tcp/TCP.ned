@@ -110,18 +110,18 @@ package inet.transport.tcp;
 //
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled 
 //      Limited Transmit algorithm (RFC 3042) integrated to TCPBaseAlg 
-//      (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not 
+//      (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not 
 //      for DumbTCP).
 //
 //   -# use the parameter (increasedIWEnabled) to change initial window 
 //      from one segment (RFC 2001) (based on MSS) to maximal four segments 
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390). integrated to 
-//      TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl 
+//      TCPBaseAlg (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl 
 //      but not for DumbTCP).
 //
 // The \TCP flavour supported depends on the value of the tcpAlgorithmClass
 // module parameters, e.g. "TCPTahoe" or "TCPReno". In the future, other
-// classes can be written which implement New Reno, Vegas, LinuxTCP (which
+// classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
 // Note that TCPOpenCommand allows sendQueueClass, receiveQueueClass and
@@ -151,7 +151,7 @@ package inet.transport.tcp;
 //    SACK, although currently only TCPReno makes sense.
 //  - RFC 3517 - (SACK)-based Loss Recovery algorithm which is a conservative 
 //    replacement of the fast recovery algorithm (RFC2581) integrated to 
-//    TCPReno but not to TCPTahoe, TCPNoCongestionControl and DumbTCP.
+//    TCPReno but not to TCPNewReno, TCPTahoe, TCPNoCongestionControl and DumbTCP.
 //  - changes from RFC 2001 to RFC 2581:
 //	  - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //	    when the incoming segment fills in all or part of a gap in the sequence space."
@@ -170,18 +170,19 @@ package inet.transport.tcp;
 //      is higher than free receiver buffer, the new segment will be dropped. 
 //      Such drops are recorded in tcpRcvQueueDropsVector.
 
-// The TCPTahoe and TCPReno algorithms implement:
+// The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - delayed acks, with 200ms timeout (optional)
 //  - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
-//  - \TCP Tahoe (Fast Retransmit), \TCP Reno (Fast Retransmit and Fast Recovery)
+//  - \TCPTahoe (Fast Retransmit), \TCPReno (Fast Retransmit and Fast Recovery), \TCPNewReno (Fast Retransmit and Fast Recovery)
 //  - A module parameter (increasedIWEnabled) to change initial window from one 
 //    segment (RFC 2001) (based on MSS) to maximal four segments 
 //    (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390). Integrated to TCPBaseAlg 
-//    (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
+//    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
+//    for DumbTCP).
 //  - RFC 3042 - Limited Transmit algorithm. Integrated to TCPBaseAlg 
-//    (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not 
+//    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not 
 //    for DumbTCP).
 //
 // Missing bits:
@@ -201,7 +202,7 @@ package inet.transport.tcp;
 //    of the restart window (RW) before transmission begins.
 //    For the purposes of this standard, we define RW = IW."
 //
-// TCPTahoe/TCPReno issues and missing features:
+// TCPNewReno/TCPReno/TCPTahoe issues and missing features:
 //  - KEEPALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm possibly not precisely implemented
 //  - Re-starting Idle Connections (RFC 2581)
@@ -226,11 +227,11 @@ simple TCP like ITCP
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // delayed ACKs enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
-        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPTahoe/TCPReno/TCPNoCongestionControl)
+        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
         bool increasedIWEnabled = default(false); // increased initial window (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         int mss = default(536); // maximum segment size (header option)
-        string tcpAlgorithmClass = default("TCPReno"); // TCPTahoe/TCPReno/TCPNoCongestionControl/DumbTCP
+        string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
         string receiveQueueClass = default("TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
