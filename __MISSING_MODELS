@@ -6,8 +6,6 @@ Qeueing (we have: FIFO, RED):
   Fair queueing Round Robin
 
 TCP:
-  SACK
-  New Reno
   Vegas
 
 WiMAX (done, see Numbat project)
