@@ -19,6 +19,8 @@
 #ifndef OPPSIM_NETINET_TCP_H
 #define OPPSIM_NETINET_TCP_H
 
+#include "headers/defs.h"   // for endian macros
+
 #  define TH_FIN	0x01
 #  define TH_SYN	0x02
 #  define TH_RST	0x04
@@ -33,11 +35,11 @@ struct tcphdr
     uint16_t th_dport;         /* destination port */
     uint32_t th_seq;           /* sequence number */
     uint32_t th_ack;           /* acknowledgement number */
-#  if __BYTE_ORDER == __LITTLE_ENDIAN
+#  if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t th_x2:4;           /* (unused) */
     uint8_t th_offs:4;         /* data offset */
 #  endif
-#  if __BYTE_ORDER == __BIG_ENDIAN
+#  if BYTE_ORDER == BIG_ENDIAN
     uint8_t th_offs:4;         /* data offset */
     uint8_t th_x2:4;           /* (unused) */
 #  endif
@@ -46,7 +48,7 @@ struct tcphdr
     uint16_t th_sum;           /* checksum */
     uint16_t th_urp;           /* urgent pointer */
 
-    uint32_t th_options[0];  /* options (optional) */
+    uint32_t th_options[0];    /* options (optional) */
     //unsigned char data[0];        XXX MSVC only allows zero-size arrays at the end of a struct
 }; // TODO  __attribute__((packed));
 
