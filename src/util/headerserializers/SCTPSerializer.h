@@ -34,14 +34,14 @@ class SCTPSerializer
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
          */
-        int32 serialize(SCTPMessage *msg, uint8 *buf, uint32 bufsize);
+        int32 serialize(const SCTPMessage *msg, uint8 *buf, uint32 bufsize);
 
         /**
          * Puts a packet sniffed from the wire into an SCTPMessage.
          */
-        void parse(uint8 *buf, uint32 bufsize, SCTPMessage *dest);
+        void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
 
-        static uint32 checksum(uint8 *buf, register uint32 len);
+        static uint32 crc32(const uint8 *buf, register uint32 len);
 };
 
 #endif
