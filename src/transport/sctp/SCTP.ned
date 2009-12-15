@@ -34,7 +34,7 @@ simple SCTP //
         double hbInterval @unit(s) = default(30s);
         double sackPeriod @unit(s) = default(200ms);
         int sackFrequency = default(2);
-        string sctpAlgorithmClass = default("SCTPAlg"); 
+        string sctpAlgorithmClass = default("SCTPAlg");
         bool nagleEnabled = default(true);
         int naglePoint = default(1468);
         bool reactivatePrimaryPath = default(false);

@@ -39,7 +39,7 @@ digraph g {
 
    WAITSIFS -> IDLE             [label="Tx-ACK:endSIFS\n[mode==DCF]\nsendACK()"];
    WAITSIFS -> IDLE             [label="Tx-CTS:endSIFS\n[mode==MACA]\nsendCTS()"];
-   
+
    RESERVE -> IDLE              [label="Release:endReserve\n[mode==MACA]"];
    RESERVE -> RESERVE           [label="RReserve:lowerMsg\n[mode==MACA&&!isForUd&&(msgKind==DATA||msgKind==RTS||msgKind==CTS)]\nscheduleReservePeriod()"];
 }

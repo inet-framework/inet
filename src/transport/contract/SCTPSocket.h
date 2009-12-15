@@ -30,7 +30,7 @@ class SCTPStatusInfo;
 class SCTPMain;
 
 
- 
+
 class SCTPSocket
 {
   public:
@@ -64,10 +64,10 @@ class SCTPSocket
   	protected:
 	int assocId;
 	int sockstate;
-	
+
 	IPvXAddress localAddr;
 	AddressVector localAddresses;
-		
+
 	int localPrt;
 	IPvXAddress remoteAddr;
 	AddressVector remoteAddresses;
@@ -76,13 +76,13 @@ class SCTPSocket
 	int inboundStreams;
 	int outboundStreams;
 	int lastStream;
-	
-	
+
+
 	CallbackInterface *cb;
 	void *yourPtr;
 
 	void sendToSCTP(cPacket *msg);
-	
+
 	public:
 	cGate *gateToSctp;
     /**
@@ -126,7 +126,7 @@ class SCTPSocket
     //@{
   	AddressVector getLocalAddresses()  {return localAddresses;}
     	int getLocalPort() {return localPrt;}
- 
+
 	AddressVector getRemoteAddresses()  {return remoteAddresses;}
 	int getRemotePort() {return remotePrt;}
 	IPvXAddress getRemoteAddr() {return remoteAddr;}
@@ -154,7 +154,7 @@ class SCTPSocket
      * multi-homing).
      */
 	void bind(IPvXAddress localAddr, int localPort);
-   
+
 	void bindx(AddressVector localAddr, int localPort);
 
 	void addAddress(IPvXAddress addr);

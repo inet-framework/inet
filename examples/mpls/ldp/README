@@ -1,4 +1,4 @@
-The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt
 from scratch by Vojta Janota since the INET-20050922 release. This network
 already features the new simulation models.
 
@@ -24,10 +24,10 @@ Red
 Magenta
 - LDP Hello packets
 
-Brown 
+Brown
 - LDP (TCP) session packets (including session establishment)
 
-Orange 
+Orange
 - ICMP error packets (these occur at the very beginning, since when both hosts
   start sending their packets, no routes to their respective destinations exist
   (until TED populates routing tables))

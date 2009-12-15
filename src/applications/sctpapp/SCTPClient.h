@@ -28,9 +28,9 @@
  *
  *
 **/
- 
-class SCTPAssociation; 
- 
+
+class SCTPAssociation;
+
 class SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface
 {
 	protected:
@@ -66,7 +66,7 @@ class SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface
 		typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
 		SCTPPathStatus sctpPathStatus;
 		/**
-		* Initialization. 
+		* Initialization.
 		*/
 		void initialize();
 
@@ -82,51 +82,51 @@ class SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface
 		* at the end of the simulation.
 		*/
 		void finish();
-		
+
 		/** @name Utility functions */
 		//@{
 		/** Issues an active OPEN to the address/port given as module parameters */
 		void connect();
-		
+
 		/** Issues CLOSE command */
 		void close();
-		
+
 		/** Sends a GenericAppMsg of the given length */
 		//   virtual void sendPacket(int32 numBytes, bool serverClose=false);
-		
+
 		/** When running under GUI, it displays the given string next to the icon */
 		void setStatusString(const char *s);
 		//@}
-		
+
 		/** Invoked from handleMessage(). Should be redefined to handle self-messages. */
 		void handleTimer(cMessage *msg);
-		
+
 		/** @name SCTPSocket::CallbackInterface callback methods */
 		//@{
 		/** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
 		void socketEstablished(int32 connId, void *yourPtr);
-		
+
 		/**
 		* Does nothing but update statistics/status. Redefine to perform or schedule next sending.
 		* Beware: this funcion deletes the incoming message, which might not be what you want.
 		*/
 		void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
-		
+
 		void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
 		/** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
 		void socketPeerClosed(int32 connId, void *yourPtr);
-		
+
 		/** Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection. */
 		void socketClosed(int32 connId, void *yourPtr);
-		
+
 		/** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
 		void socketFailure(int32 connId, void *yourPtr, int32 code);
-		
+
 		/** Redefine to handle incoming SCTPStatusInfo. */
 		void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
 		//@}
 		void setAssociation(SCTPAssociation *_assoc) {assoc = _assoc;};
-		
+
 		void setPrimaryPath (const char* addr);
 		void sendRequestArrived();
 		void sendQueueRequest();

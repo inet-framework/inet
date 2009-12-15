@@ -97,11 +97,11 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
 	pseudo->dstaddr = htonl(dgram->getDestAddress().getInt());
 	pseudo->zero = 0;
     pseudo->ptcl = IP_PROT_TCP;
-	pseudo->len = htons(tcpPacket->getBitLength()/8);	
+	pseudo->len = htons(tcpPacket->getBitLength()/8);
         packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES, pseudo);
 	free(pseudo);
-	
+
         break;
 	}
       default:

@@ -42,7 +42,7 @@ function pws()
 function pwsm()
 {
 	if [ -f ~/src/phantasia/master/$1 ]; then
-	  DIR=~/src/phantasia/master 
+	  DIR=~/src/phantasia/master
 	elif [ -f ~/src/phantasia/vpac/doc/omnetpp2002/$1 ]; then
 	  DIR=~/src/phantasia/vpac/doc/omnetpp2002
 	else
@@ -59,7 +59,7 @@ function diffm()
 function rcpsm()
 {
 	pwsm $1
-	cp -p $1 $DIR/$1 
+	cp -p $1 $DIR/$1
 	ln -sf $DIR/$1 .
 	unset DIR
 }

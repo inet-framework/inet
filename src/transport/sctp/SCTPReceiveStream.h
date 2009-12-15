@@ -35,7 +35,7 @@ class SCTPReceiveStream : public cPolymorphic
 	SCTPQueue* deliveryQ;
 	SCTPQueue* orderedQ;
 	SCTPQueue* unorderedQ;
-  public:	
+  public:
   uint32 enqueueNewDataChunk(SCTPDataVariables* dchunk);
     /**
      * Ctor.
@@ -48,7 +48,7 @@ class SCTPReceiveStream : public cPolymorphic
     ~SCTPReceiveStream();
 	//void enqueueNewDataChunk(SCTPDataVariables* dchunk);
 	SCTPQueue* getDeliveryQ() {return deliveryQ;};
-	SCTPQueue* getOrderedQ() {return orderedQ;};	
+	SCTPQueue* getOrderedQ() {return orderedQ;};
 	SCTPQueue* getUnorderedQ() {return unorderedQ;};
 	int32 getExpectedStreamSeqNum() { return expectedStreamSeqNum;};
 	int32 getStreamId() {return streamId;};

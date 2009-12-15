@@ -1,6 +1,6 @@
 Qeueing (we have: FIFO, RED):
   CBQ
-  WFQ 
+  WFQ
   RIO
   Round Robin
   Fair queueing Round Robin

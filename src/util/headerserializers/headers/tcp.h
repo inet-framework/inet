@@ -17,7 +17,7 @@
 //
 
 #ifndef OPPSIM_NETINET_TCP_H
-#define OPPSIM_NETINET_TCP_H	
+#define OPPSIM_NETINET_TCP_H
 
 #  define TH_FIN	0x01
 #  define TH_SYN	0x02

@@ -1,26 +1,26 @@
 2003-12-19  Andras Varga
 
 	* tcpmodule.cc: checked in patch from Joung Woong Lee [zipizigi1@hotmail.com]:
-	- bugfix: with delayed ack feature, an ack advanced the window by only 
+	- bugfix: with delayed ack feature, an ack advanced the window by only
 	  1 segment even if ack acknowledged several ones.
 	- added "mss" (maximum segment size) module parameter -- before it was
-	  536 hardcoded 
-        - added "cOutVector *rec_seq_no" for check receiver(client)'s data 
+	  536 hardcoded
+        - added "cOutVector *rec_seq_no" for check receiver(client)'s data
           reception state
 
 2003-09-30  Andras Varga
 
 	* tcpmodule.cc: simplifications, more informative debug output
-	- deleted all setPhase() lines -- they aren't informative since 
+	- deleted all setPhase() lines -- they aren't informative since
 	  TCPModule services multiple connections;
 	- getTcb(): added debug output;
 	- simplification: AddPor eliminated (replaced by SockPair)
-	- simplification: TcpTcb.tb_state eliminated (state was stored in 
+	- simplification: TcpTcb.tb_state eliminated (state was stored in
 	  the FSM, and tb_state was never used except in ev<<'s)
 	- status() renamed to printStatus(), order of fields made more logical
 	  (state and src/dest addr/port were brought forward), print name
 	  of state and event type instead of numeric value
-	- there were two enums for TCP state, thrown out one (LISTEN, SYN_RCVD, 
+	- there were two enums for TCP state, thrown out one (LISTEN, SYN_RCVD,
 	  etc.) and kept the TCP_S_xxx ones.
 
 2002-07-18  Ulrich Kaage <kaage@int.uni-karlsruhe.de>  <kaage@int.etec.uni-karlsruhe.de>
@@ -114,8 +114,8 @@
 
 2000-11-27  Verena Kahmann  <kahmann@quincy.telematik.informatik.uni-karlsruhe.de>
 
-	* tcpmodule.cc (handleMessage): BugFix: initialize and reset of 
-	bool finwait2_sch to show scheduling of FIN_WAIT_2 Timer. 
+	* tcpmodule.cc (handleMessage): BugFix: initialize and reset of
+	bool finwait2_sch to show scheduling of FIN_WAIT_2 Timer.
 
 2000-11-27  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
 
@@ -172,7 +172,7 @@
 	FIXME: MBI        Code/Function might be incorrect
 	These Tags should be used to mark the "code status" or to point out
 	obvious oddities
-	
+
 
 2000-09-29  Verena Kahmann <kahmann@telematik.informatik.uni-karlsruhe.de>
 

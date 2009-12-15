@@ -23,7 +23,7 @@ $lastCommand = []
 class IO
   alias old_puts puts
 
-  # 
+  #
   # As we only use pipe to R any other puts is to terminal mainly. puts to R
   # should be done in a put/get combo in order to keep both processes in sync
   # otherwise ruby is much faster than R and may overload input buffer of
@@ -38,7 +38,7 @@ class IO
     $lastCommand.push str
 
     if $debug
-      $defout.old_puts str 
+      $defout.old_puts str
       $defout.flush
     end
 
@@ -81,19 +81,19 @@ class RImportOmnet
   #
   # Returns a version string similar to:
   #  <app_name>:  Version: 1.2 Created on: 2002/05/08 by Jim Freeze
-  # The version number is maintained by CVS. 
+  # The version number is maintained by CVS.
   # The date is the last checkin date of this file.
-  # 
+  #
   def version
     "Version: #{VERSION.split[1]} Created on: " +
       "#{REVISION_DATE.split[1]} by #{AUTHOR}"
   end
 
   #
-  # Initialse option variables in case the actual option is not parsed in 
+  # Initialse option variables in case the actual option is not parsed in
   #
   def initialize
-    @debug    = false 
+    @debug    = false
     @verbose  = false
     @quit     = false
     @agg      = false
@@ -137,12 +137,12 @@ class RImportOmnet
       opt.separator ""
       opt.separator "Specific options:"
 
-      
-      #Try testing with this 
+
+      #Try testing with this
       #ruby __FILE__ -x -c -s test
       opt.on("-x", "parse arguments and show Usage") {|@quit|
         pp self
-        (print ARGV.options; exit) 
+        (print ARGV.options; exit)
       }
 
       opt.on("-a", "Aggregate mode i.e. read from many vec files dir layout generated via graph-xx.sh"){|@agg|
@@ -172,7 +172,7 @@ class RImportOmnet
 
       opt.on("--verbose", "-v", "print intermediate steps to STDOUT"){|@verbose|}
 
-      opt.on("--debug", "-d", "print debugging info to STDOUT"){|@debug| 
+      opt.on("--debug", "-d", "print debugging info to STDOUT"){|@debug|
         $debug = @debug
       }
 
@@ -193,7 +193,7 @@ class RImportOmnet
     } or  exit(1);
 
   end
-  
+
 #  private
   #
   # Unused except in unittest.  Retrieve hash of vector index -> label from vec
@@ -202,7 +202,7 @@ class RImportOmnet
   #
   def retrieveLabels(filename)
     vectors = Hash.new
-    
+
     #foreach less verbose than opening file and reading it
     IO::foreach(filename) {|l|
       case l
@@ -234,7 +234,7 @@ class RImportOmnet
   ##.#{index} appended
   def retrieveLabelsVectorSuffix(filename)
     vectors = Hash.new
-    
+
     #foreach less verbose than opening file and reading it
     IO::foreach(filename) {|l|
       case l
@@ -263,7 +263,7 @@ class RImportOmnet
 
   #
   # Form safe column names from omnetpp vector names
-  # p is pipe to R 
+  # p is pipe to R
   # vectors is hash of index -> vector name produced from retrieveLabels
   def safeColumnNames(p, vectors)
     p.puts %{l<-c("#{vectors.values.join("\",\"")}")}
@@ -303,10 +303,10 @@ class RImportOmnet
 
     a = safeColumnNames(p, vectors)
     p a if @debug
-    i = 0 
+    i = 0
     vectors.each_pair { |k,v|
       # does not update value in hash only iterator v
-      #v = a[i] 
+      #v = a[i]
       vectors[k] = a[i]
       i+=1
       raise "different sized containers when assigning safe column names" if vectors.keys.size != a.size
@@ -369,17 +369,17 @@ class RImportOmnet
     print "config name is ", @configName, "\n" if @verbose
     Dir[SingleVariantTest].each{|f|
       next if f =~ /bad/
-      n = File.dirname f 
+      n = File.dirname f
       puts "#{f} is in dir #{n}" if @verbose
 
       #Save every runs own data frame too for later analysis
 
       singleRun(p, f, n)
-      if not @agg 
+      if not @agg
         #forget about resume function for now runs out of diskspace fairly
         #quickly for large datasets (unless we know how to save just v.n)
         output = File.join(File.dirname(f), @rdata)
-        p.puts %{save.image("#{output}")} 
+        p.puts %{save.image("#{output}")}
       end
 
     }
@@ -428,7 +428,7 @@ class RImportOmnet
           next unless File.directory?(d)
           @configs.push d if singleVariant?(d) == 1
         rescue SystemCallError
-          $stderr.print "cd to #{d} failed" + $! 
+          $stderr.print "cd to #{d} failed" + $!
           next
         end
       }
@@ -462,7 +462,7 @@ class RImportOmnet
         #search for aggframe prefix and remove
         frameName = df.sub(/^#{aggprefixre}/,"")
         #search for other frames with same number of rows and matching time columns
-        #cbind the other frame's data column omitting repeated columns i.e. 
+        #cbind the other frame's data column omitting repeated columns i.e.
         #transform(#{f}, #{oframe.split(.,2[1])}=#{oframe}$#{oframe.split(.,2[1])})
 
         p.puts %{#{df} <- rbind(s.#{frameName}, #{df})} if done.include? df
@@ -484,14 +484,14 @@ class RImportOmnet
   def run
     return if $test
     #Run number
-    n = 0    
+    n = 0
 
     IO.popen(RSlave, "w+") { |p|
       if @collect
         collectVariants(p)
       elsif @agg
         @topdir = Dir.pwd
-        aggregateRuns(p, @topdir)     
+        aggregateRuns(p, @topdir)
       else
         raise ArgumentError, "No vector file specified", caller[0] if not @agg and ARGV.size < 1
 
@@ -508,10 +508,10 @@ class RImportOmnet
     $defout.old_puts err.backtrace
     $defout.old_puts "last R command: #{$lastCommand.shift}"
   end#run
-  
+
 end#RImportOmnet
 
-app = RImportOmnet.new.run 
+app = RImportOmnet.new.run
 
 exit unless $test
 
@@ -520,7 +520,7 @@ require 'test/unit'
 
 class TC_RImportOmnet < Test::Unit::TestCase
   def test_safeColumnNames
-    a=@imp.safeColumnNames(@p, Hash[1,"bad names",5,"compliant.column-name"])   
+    a=@imp.safeColumnNames(@p, Hash[1,"bad names",5,"compliant.column-name"])
     assert_equal(a, %w{compliant.column.name bad.names}, "Column names should not differ!")
   end
 
@@ -570,7 +570,7 @@ TARGET
     raise "expected Rdata file #{@imp.rdata} not found in #{Dir.pwd}" if not (File.file? @imp.rdata)
 
     @p.puts %{rm(list=ls())}
-    @p.puts %{load("#{@imp.rdata}")}   
+    @p.puts %{load("#{@imp.rdata}")}
     e = %w{IEEE.802.11.HO.Latency.6.3 Movement.Detection.Latency.3.3 handoverLatency.5.3 pingEED.0.3}
     r = @imp.retrieveRObjects(@p, "*")
     assert_equal(e, r, "singleRun test: list of matching R objects differ!")
@@ -590,7 +590,7 @@ TARGET
     r = @imp.retrieveRObjects(@p, "*")
     assert_equal(e, r, "filter test: list of matching R objects differ!")
     File.delete(@imp.rdata, TestFileName)
-    
+
   end
 
   def test_duplicateVectorNames
@@ -611,7 +611,7 @@ vector 1  "saitEHCalNet.mn.networkLayer.proc.ICMP.duddup"  "handoverLatency"  1
 TARGET
       f.print var
     }
-     e = Hash["3", "Movement Detection Latency", "6", "IEEE 802.11 HO Latency", "5", "handoverLatency", "0", "pingEED", "2", "icmpv6Core.handoverLatency", "1", "duddup.handoverLatency"]     
+     e = Hash["3", "Movement Detection Latency", "6", "IEEE 802.11 HO Latency", "5", "handoverLatency", "0", "pingEED", "2", "icmpv6Core.handoverLatency", "1", "duddup.handoverLatency"]
      h = @imp.retrieveLabels(TestFileName)
      #becomes an array of arrays
      el = e.sort
@@ -628,7 +628,7 @@ TARGET
      assert_equal(e.sort, r.sort, "dupVectorNames retrieveLabelsVectorSuffix failed")
   end
 
-  def test_collect    
+  def test_collect
     Dir.chdir(File.expand_path(%{~/src/phantasia/master/output/saiteh})){
       `ruby #{__FILE__} -o testcoll.Rdata -a -c -f 3,6,5 -O supertest.Rdata`
       assert_equal(0, $?.exitstatus, "collect with  aggregate mode failed")
@@ -650,7 +650,7 @@ TARGET
     @p = IO.popen( RImportOmnet::RSlave, "w+")
     @imp = RImportOmnet.new
   end
-  
+
   def teardown
     @p.close
   end

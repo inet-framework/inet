@@ -30,7 +30,7 @@ simple SCTPPeer like SCTPApp
 		int requestLength = default(1452); // length of a request (bytes)
 		double thinkTime @unit(s) = default(0s); // time gap between requests
 		double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-		bool ordered = default(true);		
+		bool ordered = default(true);
 		int outboundStreams = default(1);
 		int queueSize = default(0);
 		string connectAddress;  // server address (may be symbolic)

@@ -13,7 +13,7 @@ outdir=html
 
 if [ -n $DOT ]; then
     have_dot=yes
-fi    
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -78,7 +78,7 @@ if [ "$have_dot" = "yes" ]; then
 	echo
 	echo 'see warnings from '$DOT' in '$outdir'/dot.err';
     else
-	rm $outdir/dot.err	
+	rm $outdir/dot.err
     fi
 fi
 

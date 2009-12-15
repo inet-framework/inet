@@ -19,7 +19,7 @@
 package inet.transport.tcp;
 
 //
-// Interface for TCP protocol implementations. All TCP implementations should 
+// Interface for TCP protocol implementations. All TCP implementations should
 // implement this (i.e. TCP like ITCP)
 //
 moduleinterface ITCP

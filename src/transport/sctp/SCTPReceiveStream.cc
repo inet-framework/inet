@@ -41,38 +41,38 @@ uint32 delivery = 0;	//0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && d
 
 	 SCTPDataVariables* chunk;
 	/* append to the respective queue */
-	if (!dchunk->ordered) 
+	if (!dchunk->ordered)
 	{
 		/* put message into the streams ->unorderedQ */
 		if (deliveryQ->checkAndInsertVar(dchunk->tsn, dchunk))
 		{
 			delivery = 2;
 		}
-		
-	} 
-	else if (dchunk->ordered) 
+
+	}
+	else if (dchunk->ordered)
 	{
 		/* put message into streams ->reassembyQ */
 		if (orderedQ->checkAndInsertVar(dchunk->tsn, dchunk))
 			delivery++;
-		if (orderedQ->getQueueSize()>0) 
+		if (orderedQ->getQueueSize()>0)
 		{
 			/* dequeue first from orderedQ */
-			
+
 			chunk = orderedQ-> dequeueVarBySsn(expectedStreamSeqNum);
 			if (chunk)
-			{	 
+			{
 				if (deliveryQ->checkAndInsertVar(chunk->tsn, chunk))
-				{ 					
+				{
 					++expectedStreamSeqNum;
-					if (expectedStreamSeqNum > 65535) 
+					if (expectedStreamSeqNum > 65535)
 						expectedStreamSeqNum = 0;
 					delivery++;
 				}
 			}
 		}
-		
-	} 
-	
+
+	}
+
 	return delivery;
 }

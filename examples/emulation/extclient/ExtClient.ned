@@ -22,7 +22,7 @@ import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network ExtClient 
+network ExtClient
 {
     parameters:
        double testTimeout @unit(s) = default(0s);

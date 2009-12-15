@@ -5,14 +5,14 @@ diff -u -r1.1 TCPReno.cc
 +++ TCPReno.cc	29 Nov 2005 00:19:20 -0000
 @@ -132,8 +132,9 @@
          conn->retransmitOneSegment();
- 
+
          // enter slow start
 +        // "set cwnd to ssthresh plus 3 times the segment size." (rfc 2001)
          recalculateSlowStartThreshold();
 -        state->snd_cwnd = 3*state->snd_mss;  // note: in Tahoe we used one MSS not 3 (=dupacks)
 +        state->snd_cwnd = state->ssthresh + 3*state->snd_mss;  // 20051129 (1)
          if (cwndVector) cwndVector->record(state->snd_cwnd);
- 
+
          tcpEV << "set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 @@ -155,6 +156,9 @@
          state->snd_cwnd += state->snd_mss;
@@ -24,7 +24,7 @@ diff -u -r1.1 TCPReno.cc
      }
  }
 
-Other issues 
+Other issues
 
 - MSS:
 
@@ -55,9 +55,9 @@ Other issues
 
 Retransmission timer
 
- - I think I found something else. During the startup there's a ~3s silence, although current 
-   retransmission timeout is only 1.5s then!!!  Turns out we restart the timer every time we 
+ - I think I found something else. During the startup there's a ~3s silence, although current
+   retransmission timeout is only 1.5s then!!!  Turns out we restart the timer every time we
    receive something, so arriving dupacks kept postponing the retransmisson -- I suppose this
-   should not be done. 
+   should not be done.
 
    The code is in TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)

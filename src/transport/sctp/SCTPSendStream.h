@@ -40,9 +40,9 @@ class SCTPSendStream : public cPolymorphic
 		int32 ssn;
 	public:
 
-		SCTPSendStream(uint16 id);  
+		SCTPSendStream(uint16 id);
 		~SCTPSendStream();
-		
+
 		cQueue* getStreamQ() {return streamQ;};
 		cQueue* getUnorderedStreamQ() {return uStreamQ;};
 		uint32 getNextStreamSeqNum() {return nextStreamSeqNum;};

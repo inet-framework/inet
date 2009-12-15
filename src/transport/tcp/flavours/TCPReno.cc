@@ -283,7 +283,7 @@ void TCPReno::receivedDuplicateAck()
 				// Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
         		tcpEV << "Retransmission sent during recovery, restarting REXMIT timer.\n";
         		restartRexmitTimer();
-			
+
 				// RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
 				// segments as follows:"
 				if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
@@ -307,7 +307,7 @@ void TCPReno::receivedDuplicateAck()
 
 		// Note: Steps (A) - (C) of RFC 3517, page 7 ("Once a TCP is in the loss recovery phase the following procedure MUST be used for each arriving ACK")
 		// should not be used here!
-		
+
 		// RFC 3517, pages 7 and 8: "5.1 Retransmission Timeouts
 		// (...)
 		// If there are segments missing from the receiver's buffer following

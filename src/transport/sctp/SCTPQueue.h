@@ -61,32 +61,32 @@ class SCTPQueue : public cPolymorphic
      * Virtual dtor.
      */
     ~SCTPQueue();
-	
+
 //	uint32 insertMessage(uint32 key,SCTPDataVariables* datVar);
 
 	bool checkAndInsertVar(uint32 key,SCTPDataVariables *datVar); /* returns true if new data is inserted and false if data was present*/
 
     SCTPDataVariables *getAndExtractMessage(uint32 tsn);
     SCTPDataVariables *extractMessage();
-	
+
 	void printQueue();
-	
+
 	uint32 getQueueSize();
 
 	SCTPDataVariables* getFirstVar();
-	
+
 	cMessage* getMsg(uint32 key);
-	
+
 	SCTPDataVariables* getVar(uint32 key);
-	
+
 	SCTPDataVariables* getNextVar(uint32 key, uint32 toTsn);
-	
+
 	void removeMsg(uint32 key);
-	
+
 	bool deleteMsg(uint32 tsn);
 
 	int32 getNumBytes();
-		
+
 	SCTPDataVariables* dequeueVarBySsn(uint16 ssn);
 };
 

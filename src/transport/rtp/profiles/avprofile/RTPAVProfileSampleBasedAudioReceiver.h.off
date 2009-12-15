@@ -32,7 +32,7 @@
  */
 class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver
 {
-	public: 
+	public:
 		RTPAVProfileSampleBasedAudioReceiver() : RTPPayloadReceiver() {}
         virtual ~RTPAVProfileSampleBasedAudioReceiver();
 

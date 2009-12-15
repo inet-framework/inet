@@ -23,13 +23,13 @@ class UDPTimestamp
   VERSION       = "$Revision$"
   REVISION_DATE = "$Date$"
   AUTHOR        = "Johnny Lai"
- 
+
   #
   # Returns a version string similar to:
   #  <app_name>:  Version: 1.2 Created on: 2002/05/08 by Jim Freeze
-  # The version number is maintained by CVS. 
+  # The version number is maintained by CVS.
   # The date is the last checkin date of this file.
-  # 
+  #
   def version
     "Version: #{VERSION.split[1]} Created on: " +
       "#{REVISION_DATE.split[1]} by #{AUTHOR}"
@@ -39,7 +39,7 @@ class UDPTimestamp
   # Intialise and parse command line options
   #
   def initialize
-    @debug    = false 
+    @debug    = false
     @verbose  = false
     @quit     = false
     @interval = 0.01
@@ -97,13 +97,13 @@ class UDPTimestamp
 
     if @quit
       pp self
-      (print ARGV.options; exit) 
+      (print ARGV.options; exit)
     end
 
     raise "Missing host from the commandline." if ARGV.size < 1
 
     @host = ARGV.shift
-    
+
     @port = ARGV.shift if not ARGV.empty?
 
   end
@@ -152,7 +152,7 @@ class UDPTimestamp
     STDERR.puts err
     STDERR.puts "\n"
     STDERR.puts "Most likely IPv6 support was not enabled for ruby during compilation"
-    exit 1 
+    exit 1
   end#run
 # 2001:388:608c:fc:20e:cff:fe08:5e74 #supersupreme
 # 2001:388:608c:fc:20e:cff:fe08:3d6e #margarita

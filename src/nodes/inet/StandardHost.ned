@@ -45,7 +45,7 @@ module StandardHost
         @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        int numSctpApps = default(0); 
+        int numSctpApps = default(0);
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");
@@ -99,7 +99,7 @@ module StandardHost
             parameters:
                 @display("p=501,54");
         }
-        sctp: SCTP { 
+        sctp: SCTP {
             @display("p=501,141;i=block/wheelbarrow");
         }
         pingApp: PingApp {
@@ -122,7 +122,7 @@ module StandardHost
             parameters:
                 @display("p=336,390,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: ExtInterface { 
+        ext[numExtInterfaces]: ExtInterface {
             parameters:
                 @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }

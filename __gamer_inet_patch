@@ -12,12 +12,12 @@ diff -r src\linklayer\ppp\PPP.cc src-orig\linklayer\ppp\PPP.cc
 177d172
 < #endif
 198,199d192
-<     	
+<
 < #ifndef _MAX_SPEED
 207d199
 < #endif
 223,224d214
-<     	
+<
 < #ifndef _MAX_SPEED
 228d217
 < #endif
@@ -29,14 +29,14 @@ diff -r src\networklayer\contract\IPControlInfo.msg src-orig\networklayer\contra
 64,68d63
 < //
 < // Scharf M.: for attack tracing, each packet contains an attack id
-< //        
+< //
 < 		short attackTag = 0;
-< 
+<
 diff -r src\networklayer\contract\IPv6ControlInfo.msg src-orig\networklayer\contract\IPv6ControlInfo.msg
 59,62d58
 <                               //
 < // Scharf M.: for attack tracing, each packet contains an attack id
-< //        
+< //
 < 		short attackTag = 0;
 diff -r src\networklayer\ipv4\IP.cc src-orig\networklayer\ipv4\IP.cc
 404,409c404
@@ -50,7 +50,7 @@ diff -r src\networklayer\ipv4\IP.cc src-orig\networklayer\ipv4\IP.cc
 >         send(packet, "transportOut", gateindex);
 diff -r src\networklayer\ipv4\IPDatagram.msg src-orig\networklayer\ipv4\IPDatagram.msg
 2,4c2,17
-< // altered version of the IPDatagram Message originally given in 
+< // altered version of the IPDatagram Message originally given in
 < // INET-Framework
 < // This message uses the RFC-conform IP-Options
 ---
@@ -96,14 +96,14 @@ diff -r src\networklayer\ipv4\IPDatagram.msg src-orig\networklayer\ipv4\IPDatagr
 < 		IPOPTION_STRICT_SOURCE_ROUTING = 9;
 < 		IPOPTION_ROUTER_ALERT = 20;
 <   };
-<   
+<
 ---
 > //
 > // IP options. Beware: these are not the "official" (RFC) codes!
 > //
 > enum IPOption
 > {
-> 
+>
 >     IPOPTION_NO_OPTION = 0;
 >     IPOPTION_RECORD_ROUTE = 1;
 >     IPOPTION_TIMESTAMP = 2;
@@ -111,7 +111,7 @@ diff -r src\networklayer\ipv4\IPDatagram.msg src-orig\networklayer\ipv4\IPDatagr
 >     IPOPTION_STRICT_SOURCE_ROUTING = 4;
 > }
 127a127
-> 
+>
 135,140c135,136
 < //
 < //# FIXME:
@@ -120,11 +120,11 @@ diff -r src\networklayer\ipv4\IPDatagram.msg src-orig\networklayer\ipv4\IPDatagr
 < //
 <     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;
 ---
-> 
+>
 >     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
 144,148d139
-< 
-< //        
+<
+< //
 < // Scharf M.: for attack tracing, each ip packet contains an attackTag
 < //
 < 		short attackTag = 0;
@@ -132,7 +132,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 36c36
 < #include "assert.h"
 ---
-> 
+>
 103,105d102
 < #ifdef _MAX_SPEED
 <  defaultRoute = NULL;
@@ -143,7 +143,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < #else
 <     Enter_Method("interfaceByAddress()=?");
 < #endif
-< 
+<
 284d275
 < #ifndef _MAX_SPEED
 286,288d276
@@ -156,7 +156,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < 		return false;
 < 	}
 < #endif
-< 
+<
 308d289
 < #ifndef _MAX_SPEED
 310,312d290
@@ -164,10 +164,10 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 <     Enter_Method("multicastLocalDeliver() y/n");
 < #endif
 331,349d308
-< 
+<
 < #ifdef _MAX_SPEED
 <     RouteHashMap::iterator r = routeCache.find(dest.getInt());
-<     
+<
 <     if(r != routeCache.end())
 < 		return r->second;
 < 	else
@@ -181,15 +181,15 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < 		else
 < 			return defaultRoute;
 < 	}
-< #endif //_MAX_SPEED 
-< 
+< #endif //_MAX_SPEED
+<
 360,365d318
-< 
+<
 < //#ifdef _MAX_SPEED
 < //    routeCache.insert(RouteCacheEntry(dest.getInt(), bestRoute));
 < //    assert(routeCache.count(dest.getInt()) == 1);
-< //#endif //_MAX_SPEED 
-< 
+< //#endif //_MAX_SPEED
+<
 371d323
 < #ifndef _MAX_SPEED
 373,375d324
@@ -211,7 +211,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 463c404
 < #ifndef _MAX_SPEED
 ---
-> 
+>
 473,505d413
 < #endif
 < #ifdef _MAX_SPEED
@@ -231,7 +231,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < 		{
 < 			if(!entry->netmask.isUnspecified())
 < 				longestNetMask.set(entry->netmask.getInt());
-< 		} 
+< 		}
 < 		else
 < 		{
 < 			if(!entry->netmask.isUnspecified())
@@ -245,7 +245,7 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < 	}
 <     //routeCache.erase(entry->host.getInt());
 <     //assert(routeCache.count(entry->host.getInt()) == 0);
-< #endif //_MAX_SPEED 
+< #endif //_MAX_SPEED
 514,521d421
 < #ifdef _MAX_SPEED
 < 	routeCache.erase(entry->host.getInt());
@@ -259,21 +259,21 @@ diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\Routing
 < //#ifdef _MAX_SPEED
 < //	routeCache.erase(entry->host.getInt()); //buggy
 < //	assert(routeCache.count(entry->host.getInt()) == 0);
-< //#endif //_MAX_SPEED 
-< 	 
+< //#endif //_MAX_SPEED
+<
 539,543d433
 < //#ifdef _MAX_SPEED
 < //	    routeCache.erase(entry->host.getInt());
 < //	    assert(routeCache.count(entry->host.getInt()) == 0);
-< //#endif //_MAX_SPEED 
-< 
+< //#endif //_MAX_SPEED
+<
 diff -r src\networklayer\ipv4\RoutingTable.h src-orig\networklayer\ipv4\RoutingTable.h
 33,35d32
 < #ifdef _MAX_SPEED
 < #include <ext/hash_map>
 < #endif
 163,170d159
-< 
+<
 < #ifdef _MAX_SPEED
 <     typedef __gnu_cxx::hash_map<u_int32_t, RoutingEntry*> RouteHashMap;
 <     typedef std::pair<u_int32_t, RoutingEntry*> RouteCacheEntry;

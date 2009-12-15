@@ -132,7 +132,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 			// tcpEV << "Fast Recovery - Full ACK received: Exit Fast Recovery, setting cwnd to ssthresh=" << state->ssthresh << "\n";
 			// TODO - If the second option (2) is selected, take measures to avoid a possible burst of data (maxburst)!
 			if (cwndVector) cwndVector->record(state->snd_cwnd);
-			
+
 			state->lossRecovery = false;
 			state->firstPartialACK = false;
 			tcpEV << "Loss Recovery terminated.\n";
@@ -156,7 +156,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 			// in the network.  Do not exit the Fast Recovery procedure (i.e.,
 			// if any duplicate ACKs subsequently arrive, execute Steps 3 and 4
 			// above).
-			// 
+			//
 			// For the first partial ACK that arrives during Fast Recovery, also
 			// reset the retransmit timer.  Timer management is discussed in
 			// more detail in Section 4."
@@ -168,19 +168,19 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 			// deflate cwnd by amount of new data acknowledged by cumulative acknowledgement field
 			state->snd_cwnd -= state->snd_una - firstSeqAcked;
 			if (cwndVector) cwndVector->record(state->snd_cwnd);
-			tcpEV << "Fast Recovery: deflating cwnd by amount of new data acknowledged, new cwnd=" << state->snd_cwnd << "\n";	
+			tcpEV << "Fast Recovery: deflating cwnd by amount of new data acknowledged, new cwnd=" << state->snd_cwnd << "\n";
 
 			// if the partial ACK acknowledges at least one SMSS of new data, then add back SMSS bytes to the cwnd
 			if (state->snd_una - firstSeqAcked >= state->snd_mss)
 			{
 				state->snd_cwnd += state->snd_mss;
-				if (cwndVector) cwndVector->record(state->snd_cwnd);	
+				if (cwndVector) cwndVector->record(state->snd_cwnd);
 				tcpEV << "Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 			}
 
 			// try to send a new segment if permitted by the new value of cwnd
 			sendData();
-			
+
 			// reset REXMIT timer for the first partial ACK that arrives during Fast Recovery
 			if (state->lossRecovery)
 			{
@@ -250,7 +250,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 		// step 1, last paragraph)."
 		state->recover = (state->snd_una - 2);
 	}
-	
+
     sendData();
 }
 
@@ -291,7 +291,7 @@ void TCPNewReno::receivedDuplicateAck()
 				state->firstPartialACK = false;
 				state->lossRecovery = true;
 				tcpEV << " set recover=" << state->recover;
-				
+
 				// RFC 3782, page 4:
 				// "2) Entering Fast Retransmit:
 				// Retransmit the lost segment and set cwnd to ssthresh plus 3*SMSS.
@@ -302,7 +302,7 @@ void TCPNewReno::receivedDuplicateAck()
 				if (cwndVector) cwndVector->record(state->snd_cwnd);
 				tcpEV << " , cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 				conn->retransmitOneSegment();
-				
+
 				// RFC 3782, page 5:
 				// "4) Fast Recovery, continued:
 				// Transmit a segment, if allowed by the new value of cwnd and the
@@ -312,7 +312,7 @@ void TCPNewReno::receivedDuplicateAck()
 			else
 			{
 				tcpEV << "NewReno on dupAck=DUPTHRESH(=3): not invoking Fast Retransmit and Fast Recovery\n";
-			
+
 				// RFC 3782, page 4:
 				// "1B) Not invoking Fast Retransmit:
 				// Do not enter the Fast Retransmit and Fast Recovery procedure.  In

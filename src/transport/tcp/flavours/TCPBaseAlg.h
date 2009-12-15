@@ -66,7 +66,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
     //@{
     uint32 numRtos;          ///< total number of RTOs
     //@}
-    
+
     /// RFC 3782 variables
     //@{
     uint32 recover;            ///< recover (RFC 3782)
