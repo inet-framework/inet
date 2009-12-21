@@ -22,6 +22,11 @@
 
 class IPDatagram;
 
+/**
+ * Control information for sending/receiving packets over IP.
+ *
+ * See the IPControlInfo.msg file for more info.
+ */
 class INET_API IPControlInfo : public IPControlInfo_Base
 {
   protected:
@@ -33,6 +38,7 @@ class INET_API IPControlInfo : public IPControlInfo_Base
     IPControlInfo& operator=(const IPControlInfo& other) {IPControlInfo_Base::operator=(other); return *this;}
 
     virtual void setOrigDatagram(IPDatagram *d);
+    virtual IPDatagram *getOrigDatagram() const {return dgram;}
     virtual IPDatagram *removeOrigDatagram();
 };
 
