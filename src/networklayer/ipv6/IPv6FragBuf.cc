@@ -89,6 +89,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
         // datagram complete: deallocate buffer and return complete datagram
         IPv6Datagram *ret = buf->datagram;
         ret->setByteLength(ret->calculateHeaderByteLength()+buf->buf.getTotalLength()); // FIXME cf with 4.5 of RFC 2460
+        //TODO: remove extension header IPv6FragmentHeader; maybe not here but when datagram gets inserted into the reassembly buffer --Andras
         bufs.erase(i);
         return ret;
     }
