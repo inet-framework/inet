@@ -1,0 +1,45 @@
+#
+# This makefile was generated with the following command:
+# /home/kks/omnetpp/bin/opp_runall --export Runfile ./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 0..11
+#
+
+.PHONY:  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
+
+all:  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
+
+r0:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 0
+
+r1:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 1
+
+r2:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 2
+
+r3:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 3
+
+r4:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 4
+
+r5:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 5
+
+r6:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 6
+
+r7:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 7
+
+r8:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 8
+
+r9:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 9
+
+r10:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 10
+
+r11:
+	./run -u Cmdenv -f basicHTTP.ini -c EcrStudyWithWebTraffic -r 11
+

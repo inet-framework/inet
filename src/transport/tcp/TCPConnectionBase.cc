@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,6 +26,7 @@
 #include "TCPSendQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
+#include "TCPSACKRexmitQueue.h"
 
 
 TCPStateVariables::TCPStateVariables()
@@ -32,7 +34,7 @@ TCPStateVariables::TCPStateVariables()
     // set everything to 0 -- real init values will be set manually
     active = false;
     fork = false;
-    snd_mss = -1; // will be set from configureStateVariables()
+    snd_mss = 0; // will initialy be set from configureStateVariables() and probably reset during connection setup
     snd_una = 0;
     snd_nxt = 0;
     snd_max = 0;
@@ -41,12 +43,12 @@ TCPStateVariables::TCPStateVariables()
     snd_wl1 = 0;
     snd_wl2 = 0;
     iss = 0;
+
     rcv_nxt = 0;
-    rcv_wnd = -1; // will be set from configureStateVariables()
+    rcv_wnd = 0; // will be set from configureStateVariables()
     rcv_up = 0;
     irs = 0;
-
-    dupacks = 0;
+    rcv_adv = 0; // will be set from configureStateVariables()
 
     syn_rexmit_count = 0;
     syn_rexmit_timeout = 0;
@@ -57,6 +59,40 @@ TCPStateVariables::TCPStateVariables()
     fin_rcvd = false;
     rcv_fin_seq = 0;
 
+    nagle_enabled = false;      // will be set from configureStateVariables()
+    delayed_acks_enabled = false; // will be set from configureStateVariables()
+    limited_transmit_enabled = false; // will be set from configureStateVariables()
+    increased_IW_enabled = false; // will be set from configureStateVariables()
+    full_sized_segment_counter = 0;
+    ack_now = false;
+
+    afterRto = false;
+	
+    sack_support = false;       // will be set from configureStateVariables()
+    sack_enabled = false;
+    snd_sack_perm = false;
+    rcv_sack_perm = false;
+
+    snd_sack = false;
+    snd_dsack = false;
+    start_seqno = 0;
+    end_seqno = 0;
+    highRxt = 0;
+    pipe = 0;
+    recoveryPoint = 0;
+
+    dupacks = 0;
+    snd_sacks = 0;
+    rcv_sacks = 0;
+    rcv_oooseg = 0;
+    sackedBytes = 0;
+    sackedBytes_old = 0;
+    lossRecovery = false;
+
+    maxRcvBuffer  = 0;  // will be set from configureStateVariables()
+    usedRcvBuffer = 0;
+    freeRcvBuffer = 0;
+    tcpRcvQueueDrops = 0;
 }
 
 std::string TCPStateVariables::info() const
@@ -88,7 +124,19 @@ std::string TCPStateVariables::detailedInfo() const
     out << "rcv_wnd = " << rcv_wnd << "\n";
     out << "rcv_up = " << rcv_up << "\n";
     out << "irs = " << irs << "\n";
+    out << "rcv_adv = " << rcv_adv << "\n";
     out << "fin_ack_rcvd = " << fin_ack_rcvd << "\n";
+    out << "nagle_enabled = " << nagle_enabled << "\n";
+    out << "limited_transmit_enabled = " << limited_transmit_enabled << "\n";
+    out << "increased_IW_enabled = " << increased_IW_enabled << "\n";
+    out << "delayed_acks_enabled = " << delayed_acks_enabled << "\n";
+    out << "sack_support = " << sack_support << "\n";
+    out << "sack_enabled = " << sack_enabled << "\n";
+    out << "snd_sack_perm = " << snd_sack_perm << "\n";
+    out << "snd_sacks = " << snd_sacks << "\n";
+    out << "rcv_sacks = " << rcv_sacks << "\n";
+    out << "dupacks = " << dupacks << "\n";
+    out << "rcv_oooseg = " << rcv_oooseg << "\n";
     return out.str();
 }
 
@@ -97,11 +145,14 @@ TCPConnection::TCPConnection()
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
     sendQueue = NULL;
+    rexmitQueue = NULL;
     receiveQueue = NULL;
     tcpAlgorithm = NULL;
     state = NULL;
     the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = NULL;
-    sndWndVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector = NULL;
+    sndWndVector = rcvWndVector = rcvAdvVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector =
+    dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector =
+    tcpRcvQueueBytesVector = tcpRcvQueueDropsVector = pipeVector = sackedBytesVector = NULL;
 }
 
 //
@@ -124,6 +175,7 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
 
     // queues and algorithm will be created on active or passive open
     sendQueue = NULL;
+    rexmitQueue = NULL;
     receiveQueue = NULL;
     tcpAlgorithm = NULL;
     state = NULL;
@@ -140,26 +192,48 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
 
     // statistics
     sndWndVector = NULL;
+    rcvWndVector = NULL;
+    rcvAdvVector = NULL;
     sndNxtVector = NULL;
     sndAckVector = NULL;
     rcvSeqVector = NULL;
     rcvAckVector = NULL;
     unackedVector = NULL;
 
+    dupAcksVector = NULL;
+    sndSacksVector = NULL;
+    rcvSacksVector = NULL;
+    rcvOooSegVector = NULL;
+    tcpRcvQueueBytesVector = NULL;
+    tcpRcvQueueDropsVector = NULL;
+    pipeVector = NULL;
+    sackedBytesVector = NULL;
+
     if (getTcpMain()->recordStatistics)
     {
         sndWndVector = new cOutVector("send window");
-        sndNxtVector = new cOutVector("send seq");
+        rcvWndVector = new cOutVector("receive window");
+        rcvAdvVector = new cOutVector("advertised window");
+        sndNxtVector = new cOutVector("sent seq");
         sndAckVector = new cOutVector("sent ack");
         rcvSeqVector = new cOutVector("rcvd seq");
         rcvAckVector = new cOutVector("rcvd ack");
         unackedVector = new cOutVector("unacked bytes");
+        dupAcksVector = new cOutVector("rcvd dupAcks");
+        pipeVector = new cOutVector("pipe");
+        sndSacksVector = new cOutVector("sent sacks");
+        rcvSacksVector = new cOutVector("rcvd sacks");
+        rcvOooSegVector = new cOutVector("rcvd oooseg");
+        sackedBytesVector = new cOutVector("rcvd sackedBytes");
+        tcpRcvQueueBytesVector = new cOutVector("tcpRcvQueueBytes");
+        tcpRcvQueueDropsVector = new cOutVector("tcpRcvQueueDrops");
     }
 }
 
 TCPConnection::~TCPConnection()
 {
     delete sendQueue;
+    delete rexmitQueue;
     delete receiveQueue;
     delete tcpAlgorithm;
     delete state;
@@ -171,11 +245,21 @@ TCPConnection::~TCPConnection()
 
     // statistics
     delete sndWndVector;
+    delete rcvWndVector;
+    delete rcvAdvVector;
     delete sndNxtVector;
     delete sndAckVector;
     delete rcvSeqVector;
     delete rcvAckVector;
     delete unackedVector;
+    delete dupAcksVector;
+    delete sndSacksVector;
+    delete rcvSacksVector;
+    delete rcvOooSegVector;
+    delete tcpRcvQueueBytesVector;
+    delete tcpRcvQueueDropsVector;
+    delete pipeVector;
+    delete sackedBytesVector;
 }
 
 bool TCPConnection::processTimer(cMessage *msg)

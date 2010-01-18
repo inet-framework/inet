@@ -1,2 +1,0 @@
-Demonstrates Ethernet LANs of various technologies. These simulations
-do not use IP at all: traffic generators send Ethernet frames directly.

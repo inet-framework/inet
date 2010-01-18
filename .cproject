@@ -21,9 +21,17 @@
 <folderInfo id="org.omnetpp.cdt.gnu.config.debug.200906710." name="/" resourcePath="">
 <toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.691128580" name="GCC for OMNEST" superClass="org.omnetpp.cdt.gnu.toolchain.debug">
 <targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.1326710610" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-<builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.debug.1196086938" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.debug"/>
+<builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.debug.1196086938" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.debug">
+<outputEntries>
+<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
+</outputEntries>
+</builder>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.414982452" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1406305899" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+<option id="gnu.cpp.compiler.option.include.paths.591923549" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/include"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/lib/gcc/mingw32/4.2.1-sjlj/include/c++"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.base.759389249" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
@@ -38,6 +46,7 @@
 </inputType>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.base.622777468" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+<option id="gnu.both.asm.option.include.paths.518463544" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.438187578" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
 </toolChain>
@@ -52,6 +61,7 @@
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+
 
 
 <storageModule moduleId="scannerConfiguration">
@@ -231,7 +241,7 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.release.1673461738">
+<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.debug.200906710">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.omnetpp.cdt.OmnetppGCCPerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -320,7 +330,7 @@
 </buildOutputProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.debug.200906710">
+<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.release.1673461738">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.omnetpp.cdt.OmnetppGCCPerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -432,6 +442,11 @@
 <builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.release.1436413241" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.663629041" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.58540110" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+<option id="gnu.cpp.compiler.option.include.paths.1542700430" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\lib\gcc\mingw32\4.2.1-sjlj\include\c++&quot;"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/src/common/platdep"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.924398200" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.base.522323315" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
@@ -445,6 +460,9 @@
 </inputType>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.base.2035203959" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+<option id="gnu.both.asm.option.include.paths.1851658759" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/src/common"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1233807828" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
 </toolChain>
@@ -459,6 +477,7 @@
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+
 
 
 <storageModule moduleId="scannerConfiguration">
@@ -638,7 +657,7 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.release.1673461738">
+<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.debug.200906710">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.omnetpp.cdt.OmnetppGCCPerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -727,7 +746,7 @@
 </buildOutputProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.debug.200906710">
+<scannerConfigBuildInfo instanceId="org.omnetpp.cdt.gnu.config.release.1673461738">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.omnetpp.cdt.OmnetppGCCPerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>

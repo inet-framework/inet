@@ -1,3 +1,21 @@
+2009-10-27  Kyeong Soo (Joseph) Kim  <kyeongsoo.kim@gmail.com>
+
+	* Run-time errors: We faced two run-time errors. One is for
+	exhausting ephemeral port range and the other is for an
+	upspecified local port:
+
+	=========================================================================
+	<!> Error in module (TCP) ECRTest.cli[0].tcp (id=244): User error:
+	Ephemeral port range 1024..5000 exhausted, all ports occupied.
+	=========================================================================
+	
+	=========================================================================
+	<!> Error in module (TCP) ECRTest.cli[0].tcp (id=1044): User
+	error: Error processing command OPEN_ACTIVE: local port
+	unspecified.
+	=========================================================================
+	
+
 See WHATSNEW for an overview of changes from release to release, or 
 ChangeLogs in individual subdirectories for a more detailed list of 
 changes of that component.

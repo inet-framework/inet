@@ -37,7 +37,7 @@
 // helper functions
 //
 inline uint32 uint32rand() {
-	return (uint32)intrand(0xffff) << 16 + (uint32)intrand(0xffff);
+	return ((uint32)intrand(0xffff) << 16) + (uint32)intrand(0xffff);
 }
 
 void SCTPAssociation::printSctpPathMap()
@@ -2500,15 +2500,17 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 				sctpEV3<<"bookedSumSendStreams="<<qCounter.bookedSumSendStreams<<" bytes.bytesToSend="<<bytes.bytesToSend<<"\n";
 				diff = iter->second->cwnd - osb - bytes.bytesToSend;
 				if (diff>0)
-				if (qCounter.bookedSumSendStreams > (uint32)diff)
 				{
-					bytes.bytesToSend =  iter->second->cwnd - osb ;
-					sctpEV3<<"bytesToSend are limited by cwnd: "<<bytes.bytesToSend<<"\n";
-				}
-				else
-				{
-					bytes.bytesToSend += qCounter.bookedSumSendStreams;
-					sctpEV3<<"send all stored bytes: "<<bytes.bytesToSend<<"\n";
+					if (qCounter.bookedSumSendStreams > (uint32)diff)
+					{
+						bytes.bytesToSend =  iter->second->cwnd - osb ;
+						sctpEV3<<"bytesToSend are limited by cwnd: "<<bytes.bytesToSend<<"\n";
+					}
+					else
+					{
+						bytes.bytesToSend += qCounter.bookedSumSendStreams;
+						sctpEV3<<"send all stored bytes: "<<bytes.bytesToSend<<"\n";
+					}
 				}
 			}
 		}

@@ -48,42 +48,42 @@ module TCPSpoofingHost
         namTrace: NAMTraceWriter {
             parameters:
                 namid = namid;
-                @display("p=71,294");
+                @display("p=57,265");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=71,54");
+                @display("p=57,54");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=71,134");
+                @display("p=57,122");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = IPForward;
                 routerId = "";
                 routingFile = routingFile;
-                @display("p=71,214");
+                @display("p=57,192");
         }
         tcpSpoof: TCPSpoof {
             parameters:
-                @display("p=168,122");
+                @display("p=188,54");
         }
         networkLayer: NetworkLayer {
             parameters:
                 proxyARP = false;
-                @display("p=248,247;q=queue");
+                @display("p=188,192;q=queue");
             gates:
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
         ppp[sizeof(pppg)]: PPPInterface {
             parameters:
-                @display("p=205,350,row,90;q=txQueue");
+                @display("p=149,265,row,90;q=txQueue");
         }
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
-                @display("p=240,350,row,90;q=txQueue");
+                @display("p=272,265,row,90;q=txQueue");
         }
     connections allowunconnected:
         tcpSpoof.ipv4Out --> networkLayer.tcpIn;

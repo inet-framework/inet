@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2005 Michael Tuexen
 //           2008 Irene Ruengeler
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -443,7 +444,6 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, 
     }
 }
 
-
 void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     std::ostream& out = *outp;
@@ -453,7 +453,7 @@ void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const s
     sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf;
 
-    // src/dest
+    // src/dest ports
     if (l2r)
     {
         out << srcAddr << "." << tcpseg->getSrcPort() << " > ";
@@ -467,19 +467,16 @@ void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const s
 
     // flags
     bool flags = false;
-    if (tcpseg->getSynBit()) {flags=true; out << "S";}
-    if (tcpseg->getFinBit()) {flags=true; out << "F";}
-    if (tcpseg->getPshBit()) {flags=true; out << "P";}
-    if (tcpseg->getRstBit()) {flags=true; out << "R";}
+    if (tcpseg->getUrgBit()) {flags=true; out << "URG ";}
+    if (tcpseg->getAckBit()) {flags=true; out << "ACK ";}
+    if (tcpseg->getPshBit()) {flags=true; out << "PSH ";}
+    if (tcpseg->getRstBit()) {flags=true; out << "RST ";}
+    if (tcpseg->getSynBit()) {flags=true; out << "SYN ";}
+    if (tcpseg->getFinBit()) {flags=true; out << "FIN ";}
     if (!flags) {out << ".";}
-    out << " ";
 
-    // data-seqno
-    if (tcpseg->getPayloadLength()>0 || tcpseg->getSynBit())
-    {
-        out << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo()+tcpseg->getPayloadLength();
-        out << "(" << tcpseg->getPayloadLength() << ") ";
-    }
+    // seqno
+    out << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo()+tcpseg->getPayloadLength()) << ") " << "(l=" << tcpseg->getPayloadLength() << ") ";
 
     // ack
     if (tcpseg->getAckBit())
@@ -492,7 +489,23 @@ void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const s
     if (tcpseg->getUrgBit())
         out << "urg " << tcpseg->getUrgentPointer() << " ";
 
-    // options (not supported by TCPSegment yet)
+    // options present?
+    if (tcpseg->getHeaderLength() > 20)
+    {
+        std::string direction = "sent";
+        if (l2r) // change direction
+            {direction = "received";}
+
+        unsigned short numOptions = tcpseg->getOptionsArraySize();
+        out << "\nTCP Header Option(s) " << direction << ":\n";
+        for (int i=0; i<numOptions; i++)
+        {
+            TCPOption option = tcpseg->getOptions(i);
+            unsigned short kind = option.getKind();
+            unsigned short length = option.getLength();
+            out << (i+1) << ". option kind=" << kind << " length=" << length << "\n";
+        }
+    }
 
     // comment
     if (comment)
@@ -556,7 +569,7 @@ for (i=0; i<MAXBUFLENGTH; i++)
                     delete msg;
                     return;
                 }
-                l2r = msg->arrivedOn("in1");
+                l2r = msg->arrivedOn("ifIn");
                 if (((IPDatagram *)msg)->getTransportProtocol()==6)
                 {
                     tcpdump.tcpDump(l2r, "", (IPDatagram *)msg, "");
@@ -567,7 +580,7 @@ for (i=0; i<MAXBUFLENGTH; i++)
         }
         else if (dynamic_cast<SCTPMessage *>(msg))
         {
-            l2r = msg->arrivedOn("in1");
+            l2r = msg->arrivedOn("ifIn");
             tcpdump.sctpDump("", (SCTPMessage *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
         else if (dynamic_cast<TCPSegment *>(msg))
@@ -577,7 +590,7 @@ for (i=0; i<MAXBUFLENGTH; i++)
                 delete msg;
                 return;
             }
-            l2r = msg->arrivedOn("in1");
+            l2r = msg->arrivedOn("ifIn");
             tcpdump.tcpDump(l2r, "", (TCPSegment *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
         else if (dynamic_cast<ICMPMessage *>(msg))
@@ -595,7 +608,7 @@ for (i=0; i<MAXBUFLENGTH; i++)
             cPacket *encapmsg = PK(msg);
             while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL && dynamic_cast<IPv6Datagram_Base *>(encapmsg)==NULL)
                 encapmsg = encapmsg->getEncapsulatedMsg();
-                l2r = msg->arrivedOn("in1");
+                l2r = msg->arrivedOn("ifIn");
             if (!encapmsg)
             {
                 //We do not want this to end in an error if EtherAutoconf messages
