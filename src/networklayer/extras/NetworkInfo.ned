@@ -38,6 +38,6 @@ package inet.networklayer.extras;
 //   Setting attribute <tt>compat</tt> to value "linux" modifies the
 //   output to look like `route -n | sort -r` output on linux...
 //
-simple NetworkInfo 
+simple NetworkInfo
 {
 }

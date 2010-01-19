@@ -109,7 +109,7 @@ function run_sim
 	    XMLFILE=$FAST
 	fi
     fi
-    if echo $1|grep $WLAN &>/dev/null ; then      
+    if echo $1|grep $WLAN &>/dev/null ; then
 	XMLFILE=${EXDIRNAMES[1]}
 	SIMTIMELIMIT="199.95"
     fi
@@ -117,8 +117,8 @@ function run_sim
 	cps $XMLFILE.xml
     fi
     if echo $1|grep $FASTRAS &>/dev/null ; then
-	: 
-    else 
+	:
+    else
 	convnofast $XMLFILE
 	XMLFILE=$XMLFILE-nofast
     fi
@@ -177,7 +177,7 @@ function run_sim
 	done
 	FILENAME=$FILENAME_
     fi
-    
+
     echo SIMTIMELIMIT is $SIMTIMELIMIT
 
     #echo "filename is $FILENAME"
@@ -255,7 +255,7 @@ SIMEXE=./${EXDIRNAMES[0]}
 INIFILE=omnetpp
 NETNAME=mipv6fastRANet
 
-for conf in $CONFIGURATIONS; 
+for conf in $CONFIGURATIONS;
 do
   TOPDIR=$BINDIR-$conf
   if [ "$conf" = "$PCOAF" ]; then
@@ -294,18 +294,18 @@ randArray = Array.new
 for i in 0...@@Iterations
   val = rand(@@Hosts)
   #Prevent 0 from occurring
-  val = rand(@@Hosts) if val == 0 
+  val = rand(@@Hosts) if val == 0
   throw "Didn't expect 2 consecutive zeroes from rand" if val == 0
   randArray.push( val )
 end
 
 randArray.each {|x| \$stdout << x << "\n" }
-      
+
 END
 
   fi
 
-  echo topdir is $TOPDIR 
+  echo topdir is $TOPDIR
   pushd $TOPDIR &>/dev/null
   if [ $? -ne 0 ]; then
       echo "Failed to change to $TOPDIR"
@@ -313,7 +313,7 @@ END
   fi
 #cmake -Dxx=ON $SOURCEDIR
   echo "building in $conf"
-#cmake . &> junk.log && 
+#cmake . &> junk.log &&
   make &>junk.log
   if [ $? -ne 0 ]; then
       echo "Failed to build in directory `pwd`"
@@ -385,8 +385,8 @@ if [ "$conf" = "$HMIP" ]; then
 	convpcoaf $XMLFILE
 	XMLFILE=$XMLFILE-$PCOAF
 	run_sim $PCOAF-$ARIMP
-	
-	XMLFILE=$INIFILE	
+
+	XMLFILE=$INIFILE
 	convhmip $XMLFILE
 	XMLFILE=$XMLFILE-$HMIP
 	run_sim $conf-$ARIMP

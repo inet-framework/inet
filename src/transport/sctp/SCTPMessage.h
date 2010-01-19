@@ -31,7 +31,7 @@ class SCTPMessage : public SCTPMessage_Base
 {
 	protected:
 		std::list<cPacket*> chunkList;
-		
+
 	public:
 		SCTPMessage(const char *name=NULL, int32 kind=0) : SCTPMessage_Base(name,kind) {}
 		SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other.getName()) {operator=(other);}
@@ -46,7 +46,7 @@ class SCTPMessage : public SCTPMessage_Base
 		* Returns the number of chunks in this SCTP packet
 		*/
 		virtual uint32 getChunksArraySize() const;
-		
+
 		/**
 		* Returns the kth chunk in this SCTP packet
 		*/
@@ -55,7 +55,7 @@ class SCTPMessage : public SCTPMessage_Base
 		* Adds a message object to the SCTP packet. The packet length will be adjusted
 		*/
 		virtual void addChunk(cPacket* msg);
-		
+
 		/**
 		* Removes and returns the first message object in this SCTP packet.
 		*/
@@ -68,8 +68,8 @@ class SCTPMessage : public SCTPMessage_Base
 		 * writes source port into from structure and
 		 * returns length of sctp data written into buffer
 		 */
-		
-	
+
+
 };
 
 
@@ -77,7 +77,7 @@ class SCTPErrorChunk : public SCTPErrorChunk_Base
 {
 	protected:
 		std::list<cPacket*> parameterList;
-		
+
 	public:
 	    	SCTPErrorChunk(const char *name=NULL, int32 kind=0) : SCTPErrorChunk_Base(name, kind) {};
     		SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.getName()) {operator=(other);};
@@ -88,7 +88,7 @@ class SCTPErrorChunk : public SCTPErrorChunk_Base
     		virtual uint32 getParametersArraySize() const;
 				/** Generated but unused method, should not be called. */
 		virtual void setParameters(uint32 k, const cPacketPtr& parameters_var);
-		
+
 				/**
 		* Returns the kth parameter in this SCTP Reset Chunk
 		*/
@@ -97,7 +97,7 @@ class SCTPErrorChunk : public SCTPErrorChunk_Base
 		* Adds a message object to the SCTP packet. The packet length will be adjusted
 		*/
 		virtual void addParameters(cPacket* msg);
-		
+
 		/**
 		* Removes and returns the first message object in this SCTP packet.
 		*/

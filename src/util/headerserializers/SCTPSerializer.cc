@@ -39,7 +39,7 @@ using namespace INETFw;
 
 
 
-int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 bufsize)
+int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint32 bufsize)
 {
     int32 size_init_chunk = sizeof(struct init_chunk);
     int32 size_sack_chunk = sizeof(struct sack_chunk);
@@ -62,7 +62,7 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 
     for(int32 cc = 0; cc < noChunks; cc++)
     {
-        SCTPChunk *chunk = check_and_cast<SCTPChunk *>(msg->getChunks(cc));
+        const SCTPChunk *chunk = check_and_cast<SCTPChunk *>(((SCTPMessage *)msg)->getChunks(cc));
 
         unsigned char chunkType = chunk->getChunkType();
 
@@ -495,11 +495,11 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 
     /*sctpEV3<<"srcport="<<msg->getSrcPort() <<"destport="<<msg->getDestPort() <<"writtenbytes vor checksum="<<writtenbytes<<"\n";*/
 
-    ch->checksum = checksum((unsigned char*)ch, writtenbytes);
+    ch->checksum = crc32((const unsigned char*)ch, writtenbytes);
     return writtenbytes;
 }
 
-uint32 SCTPSerializer::checksum(unsigned char *buf, register uint32 len)
+uint32 SCTPSerializer::crc32(const unsigned char *buf, register uint32 len)
 {
     uint32 h;
     unsigned char byte0, byte1, byte2, byte3;
@@ -517,7 +517,7 @@ uint32 SCTPSerializer::checksum(unsigned char *buf, register uint32 len)
     return htonl(crc32c);
 }
 
-void SCTPSerializer::parse(unsigned char *buf, uint32 bufsize, SCTPMessage *dest)
+void SCTPSerializer::parse(const unsigned char *buf, uint32 bufsize, SCTPMessage *dest)
 {
     int32 size_common_header = sizeof(struct common_header);
     int32 size_init_chunk = sizeof(struct init_chunk);
@@ -533,7 +533,7 @@ void SCTPSerializer::parse(unsigned char *buf, uint32 bufsize, SCTPMessage *dest
     struct common_header *common_header = (struct common_header*) (buf);
     int32 tempChecksum = common_header->checksum;
     common_header->checksum = 0;
-    int32 chksum = checksum((unsigned char*)common_header, bufsize);
+    int32 chksum = crc32((const unsigned char*)common_header, bufsize);
     common_header->checksum = tempChecksum;
 
     const unsigned char *chunks = (unsigned char*) (buf + size_common_header);

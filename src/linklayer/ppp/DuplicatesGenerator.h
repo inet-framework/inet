@@ -37,7 +37,7 @@ class INET_API DuplicatesGenerator : public cSimpleModule
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void parseVector(const char *vector);	
+    virtual void parseVector(const char *vector);
     virtual void finish();
 };
 

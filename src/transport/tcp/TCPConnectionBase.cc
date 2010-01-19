@@ -34,7 +34,7 @@ TCPStateVariables::TCPStateVariables()
     // set everything to 0 -- real init values will be set manually
     active = false;
     fork = false;
-    snd_mss = 0; // will initialy be set from configureStateVariables() and probably reset during connection setup
+    snd_mss = 0; // will initially be set from configureStateVariables() and probably reset during connection setup
     snd_una = 0;
     snd_nxt = 0;
     snd_max = 0;
@@ -67,7 +67,7 @@ TCPStateVariables::TCPStateVariables()
     ack_now = false;
 
     afterRto = false;
-	
+
     sack_support = false;       // will be set from configureStateVariables()
     sack_enabled = false;
     snd_sack_perm = false;
@@ -80,14 +80,14 @@ TCPStateVariables::TCPStateVariables()
     highRxt = 0;
     pipe = 0;
     recoveryPoint = 0;
+    sackedBytes = 0;
+    sackedBytes_old = 0;
+    lossRecovery = false;
 
     dupacks = 0;
     snd_sacks = 0;
     rcv_sacks = 0;
     rcv_oooseg = 0;
-    sackedBytes = 0;
-    sackedBytes_old = 0;
-    lossRecovery = false;
 
     maxRcvBuffer  = 0;  // will be set from configureStateVariables()
     usedRcvBuffer = 0;

@@ -329,8 +329,18 @@ void TCPConnection::configureStateVariables()
     state->rcv_wnd = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
     state->rcv_adv = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
     state->maxRcvBuffer = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
-    state->snd_mss = tcpMain->par("mss").longValue(); // maximum segment siz
+    state->snd_mss = tcpMain->par("mss").longValue(); // maximum segment size
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+	if (state->sack_support)
+	{
+		std::string algorithmName1 = "TCPReno";
+		std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
+		if (algorithmName1!=algorithmName2) // TODO add additional checks for new SACK supporting algorithms here once they are implemented
+		{
+			EV << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno" << endl;
+			ASSERT(false);
+		}
+	}
 }
 
 void TCPConnection::selectInitialSeqNum()

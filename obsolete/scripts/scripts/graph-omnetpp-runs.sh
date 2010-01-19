@@ -104,7 +104,7 @@ END
     fi
     if [ -f omnetpp.vec ]; then
         local value
-        value=`tail -1 < omnetpp.vec | cut -f 2`    
+        value=`tail -1 < omnetpp.vec | cut -f 2`
         #if [ $value -lt $SIMTIMELIMIT ]; then #works for integers only
         value=`echo $value '<' $SIMTIMELIMIT|bc`
         if [ $value -eq 1 ] ; then
@@ -122,7 +122,7 @@ END
         local outdirs
         dirs=`fn \*.vec`
         for d in $dirs
-          do 
+          do
           value=`tail -1 < $d | cut -f 2`
           value=`echo $value '>' $SIMTIMELIMIT|bc`
           if [ $value -eq 1 ] ; then
@@ -145,13 +145,13 @@ END
     fi
 
     DESTDIR=$DATADIR/$FILENAME
-    
+
     if [ "$PARALLEL" = "p" ]; then
         if [ "$BADRUN" != "true" ]; then
             DESTDIR=$DESTDIR/$i
             ((NUMBEROFGOODRUNS++))
         else
-            DESTDIR=$DESTDIR/bad-$i    
+            DESTDIR=$DESTDIR/bad-$i
         fi
     else
         DESTDIR=$DESTDIR-single
@@ -170,7 +170,7 @@ END
 #grep  -e "^[012]x[[:digit:]]" test-$FILENAMEI.out > result-$FILENAMEI.out
 #HANDOVER_TIMES=`grep MobileMove debug.log|grep -e "client1 [[:digit:]].*"|cut -d ' ' -f 9`
 #echo $HANDOVER_TIMES > handover_$i.out
-#awk -f ~/scripts/ipv6suite-find-handover.awk -v "time=$HANDOVER_TIMES" -- result-$FILENAMEI.out >> handover-$FILENAMEI.out 
+#awk -f ~/scripts/ipv6suite-find-handover.awk -v "time=$HANDOVER_TIMES" -- result-$FILENAMEI.out >> handover-$FILENAMEI.out
 #i=`expr $i + 1`
 
 }
@@ -200,7 +200,7 @@ function execute_runs
                 echo "[General]"
                 echo "random-seed = ${seed}"
             ) > params.ini
-            iterate 
+            iterate
             if [ "$i" = "$NUMBEROFRUNS" ]; then
                 break;
             fi

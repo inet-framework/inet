@@ -30,8 +30,8 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
 #include "UDPSerializer.h"
-#include "SCTPSerializer.h"	//I.R.
-#include "TCPSerializer.h"	//I.R.
+#include "SCTPSerializer.h"    //I.R.
+#include "TCPSerializer.h"    //I.R.
 
 #if defined(_MSC_VER)
 #undef s_addr   /* MSVC #definition interferes with us */
@@ -53,7 +53,7 @@ using namespace INETFw;
 
 
 
-int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int bufsize)
+int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize)
 {
     int packetLength;
     struct ip *ip = (struct ip *) buf;
@@ -85,40 +85,27 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
         packetLength += UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
-      case IP_PROT_SCTP:	//I.R.
+      case IP_PROT_SCTP:    //I.R.
         packetLength += SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
-      case IP_PROT_TCP:		//I.R.
-	{
-	TCPSegment *tcpPacket = check_and_cast<TCPSegment *>(encapPacket);
-	pseudoheader *pseudo = (pseudoheader*)malloc(sizeof(pseudoheader));
-	pseudo->srcaddr = htonl(dgram->getSrcAddress().getInt());
-	pseudo->dstaddr = htonl(dgram->getDestAddress().getInt());
-	pseudo->zero = 0;
-    pseudo->ptcl = IP_PROT_TCP;
-	pseudo->len = htons(tcpPacket->getBitLength()/8);	
+      case IP_PROT_TCP:        //I.R.
         packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
-                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES, pseudo);
-	free(pseudo);
-	
+                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES,
+                                                   dgram->getSrcAddress(), dgram->getDestAddress());
         break;
-	}
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
     }
 
-#ifdef linux
     ip->ip_len = htons(packetLength);
-#else
-    ip->ip_len = packetLength;
-#endif
+
     return packetLength;
 }
 
-void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *dest)
+void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatagram *dest)
 {
-    const struct ip *ip = (struct ip *) buf;
+    const struct ip *ip = (const struct ip *) buf;
     unsigned int totalLength, headerLength;
 
     dest->setVersion(ip->ip_v);

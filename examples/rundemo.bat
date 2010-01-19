@@ -1,1 +1,1 @@
-@wish84 -f "%~dpn0" %* 
+@wish84 -f "%~dpn0" %*

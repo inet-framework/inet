@@ -72,7 +72,7 @@ class SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
 			IPAddress  pid;
 		};
 		typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
-		SCTPPathStatus sctpPathStatus;		
+		SCTPPathStatus sctpPathStatus;
 		void initialize();
 		void handleMessage(cMessage *msg);
 		void finish();
@@ -82,23 +82,23 @@ class SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
 
 		/** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
 		void socketEstablished(int32 connId, void *yourPtr);
-		
+
 		/**
 		* Does nothing but update statistics/status. Redefine to perform or schedule next sending.
 		* Beware: this funcion deletes the incoming message, which might not be what you want.
 		*/
 		void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
-		
+
 		void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
 		/** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
 		void socketPeerClosed(int32 connId, void *yourPtr);
-		
+
 		/** Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection. */
 		void socketClosed(int32 connId, void *yourPtr);
-		
+
 		/** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
 		void socketFailure(int32 connId, void *yourPtr, int32 code);
-		
+
 		/** Redefine to handle incoming SCTPStatusInfo. */
 		void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
 		//@}

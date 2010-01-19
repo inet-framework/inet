@@ -44,7 +44,7 @@ int32 count = streamQ->length();
 		datMsg = check_and_cast<SCTPDataMsg*>(streamQ->pop());
 		smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
 		delete smsg;
-		delete datMsg;	
+		delete datMsg;
 		count--;
 	}
 	while (!uStreamQ->empty())
@@ -52,7 +52,7 @@ int32 count = streamQ->length();
 		datMsg = check_and_cast<SCTPDataMsg*>(uStreamQ->pop());
 		smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
 		delete smsg;
-		delete datMsg;		
+		delete datMsg;
 	}
 	delete streamQ;
 	delete uStreamQ;

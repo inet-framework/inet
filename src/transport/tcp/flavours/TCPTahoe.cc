@@ -32,7 +32,8 @@ void TCPTahoe::recalculateSlowStartThreshold()
 {
     // set ssthresh to flight size/2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
-    uint flight_size = std::min(state->snd_cwnd, state->snd_wnd);
+    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+	// uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size/2, 2*state->snd_mss);
     if (ssthreshVector) ssthreshVector->record(state->ssthresh);
 }
@@ -43,7 +44,7 @@ void TCPTahoe::processRexmitTimer(TCPEventCode& event)
     if (event==TCP_E_ABORT)
         return;
 
-    // begin Slow Start (RFC2001)
+    // begin Slow Start (RFC 2581)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
     if (cwndVector) cwndVector->record(state->snd_cwnd);
@@ -65,16 +66,16 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     //
     if (state->snd_cwnd < state->ssthresh)
     {
-        tcpEV << "cwnd<=ssthresh: Slow Start: increasing cwnd by one segment, to ";
+        tcpEV << "cwnd<=ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
 
-        // perform Slow Start. rfc 2581: "During slow start, a TCP increments cwnd
+        // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
         // by at most SMSS bytes for each ACK received that acknowledges new data."
         state->snd_cwnd += state->snd_mss;
 
         // NOTE: we could increase cwnd based on the number of bytes being
         // acknowledged by each arriving ACK, rather than by the number of ACKs
         // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
-        // described in rfc 3465 (experimental).
+        // described in RFC 3465 (experimental).
         //
         // int bytesAcked = state->snd_una - firstSeqAcked;
         // state->snd_cwnd += bytesAcked;
@@ -85,7 +86,7 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     }
     else
     {
-        // perform Congestion Avoidance (rfc 2581)
+        // perform Congestion Avoidance (RFC 2581)
         int incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
         if (incr==0)
             incr = 1;
@@ -94,9 +95,9 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
 
         //
         // NOTE: some implementations use extra additive constant mss/8 here
-        // which is known to be incorrect (rfc 2581 p5)
+        // which is known to be incorrect (RFC 2581 p5)
         //
-        // NOTE 2: rfc 3465 (experimental) "Appropriate Byte Counting" (ABC)
+        // NOTE 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
         // would require maintaining a bytes_acked variable here which we don't do
         //
 

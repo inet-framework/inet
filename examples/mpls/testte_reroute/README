@@ -1,4 +1,4 @@
-The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt
 from scratch by Vojta Janota since the INET-20050922 release. This network
 already features the new simulation models.
 
@@ -12,7 +12,7 @@ priority path, the orange one has a regular priority. Later, the green path is
 rerouted to the same hop-route the orange one uses and since there is not enough
 bandwidth to serve both, the lower priority orange path is preempted.
 
-Remarks: 
+Remarks:
 
 Rerouting in RSVP-TE works in 3 steps:
 

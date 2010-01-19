@@ -74,7 +74,7 @@ class SCTPMessage;
  * The third object is subclassed from SCTPAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"
  * from SCTPAssociation into SCTPAlgorithm: delayed acks, slow start, fast rexmit,
- * etc. are all implemented in SCTPAlgorithm subclasses. 
+ * etc. are all implemented in SCTPAlgorithm subclasses.
  *
  * The concrete SCTPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
@@ -86,7 +86,7 @@ class SCTP : public cSimpleModule
 		{
 			int32 appGateIndex;
 			int32 assocId;
-	
+
 			inline bool operator<(const AppConnKey& b) const
 			{
 				if (appGateIndex!=b.appGateIndex)
@@ -94,7 +94,7 @@ class SCTP : public cSimpleModule
 				else
 					return assocId<b.assocId;
 			}
-	
+
 		};
 		struct SockPair
 		{
@@ -102,7 +102,7 @@ class SCTP : public cSimpleModule
 			IPvXAddress remoteAddr;
 			uint16 localPort;
 			uint16 remotePort;
-	
+
 			inline bool operator<(const SockPair& b) const
 			{
 				if (remoteAddr!=b.remoteAddr)
@@ -120,7 +120,7 @@ class SCTP : public cSimpleModule
 			uint32 peerVTag;
 			uint16 localPort;
 			uint16 remotePort;
-	
+
 			inline bool operator<(const VTagPair& b) const
 			{
 				if (peerVTag!=b.peerVTag)
@@ -147,36 +147,36 @@ class SCTP : public cSimpleModule
 			double throughput;
 			simtime_t lifeTime;
 		}AssocStat;
-		
+
 		typedef std::map<int32,AssocStat> AssocStatMap;
 		AssocStatMap assocStatMap;
 		typedef std::map<VTagPair,int32> SctpVTagMap;
 		SctpVTagMap sctpVTagMap;
-		
+
 	protected:
 		typedef std::map<AppConnKey,SCTPAssociation*> SctpAppConnMap;
 		typedef std::map<SockPair,SCTPAssociation*> SctpConnMap;
-	
+
 
 		SctpAppConnMap sctpAppConnMap;
 		SctpConnMap sctpConnMap;
-		
+
 		int32 sizeConnMap;
 		static int32 nextConnId;
-	
+
 		uint16 nextEphemeralPort;
-	
+
 		SCTPAssociation *findAssocForMessage(IPvXAddress srcAddr, IPvXAddress destAddr, uint32 srcPort, uint32 destPort, bool findListen);
 		SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
 		void sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr);
 		void sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr);
 		void updateDisplayString();
-	
+
 	public:
 		static bool testing;    // switches between sctpEV and testingEV
 		static bool logverbose; // if !testing, turns on more verbose logging
 		void printInfoConnMap();
-		
+
 		void removeAssociation(SCTPAssociation *assoc);
 		simtime_t testTimeout;
 		uint32 numGapReports;
@@ -187,7 +187,7 @@ class SCTP : public cSimpleModule
 		virtual void initialize();
 		virtual void handleMessage(cMessage *msg);
 		virtual void finish();
-	
+
 		/**
 		* To be called from SCTPAssociation when socket pair  changes
 		*/
@@ -202,18 +202,18 @@ class SCTP : public cSimpleModule
 		* Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
 		*/
 		void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, IPvXAddress localAddr, IPvXAddress remoteAddr, int32 localPort, int32 remotePort);
-	
+
 		/**
 		* To be called from SCTPAssociation: reserves an ephemeral port for the connection.
 		*/
 		int16 getEphemeralPort();
-	
+
 		/**
 		* Generates a new integer, to be used as assocId. (assocId is part of the key
 		* which associates connections with their apps).
 		*/
 		static int32 getNewConnId() {return ++nextConnId;}
-		
+
 		SCTPAssociation* getAssoc(int32 assocId);
 		SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
 		SctpVTagMap getVTagMap() {return sctpVTagMap;};

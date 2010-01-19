@@ -98,7 +98,7 @@ void BasicMobility::updatePosition()
     cc->updateHostPosition(myHostRef, pos);
 
     if (ev.isGUI())
-    { 
+    {
         double r = cc->getCommunicationRange(myHostRef);
         hostPtr->getDisplayString().setTagArg("p", 0, (long) pos.x);
         hostPtr->getDisplayString().setTagArg("p", 1, (long) pos.y);

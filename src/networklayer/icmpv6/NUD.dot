@@ -1,4 +1,4 @@
-/* 
+/*
  * State-transition diagram in Graphviz dot format.
  *
  * To produce GIF image, try: dot -Tgif < NUD.dot >NUD.gif

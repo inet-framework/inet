@@ -5,7 +5,7 @@ Index: src/applications/tcpapp/TCPSessionApp.cc
 @@ -54,7 +54,7 @@
      }
  }
- 
+
 -void TCPSessionApp::count(cMessage *msg)
 +void TCPSessionApp::count(cPacket *msg)
  {
@@ -57,7 +57,7 @@ Index: src/applications/tcpapp/TCPSessionApp.h
      virtual void waitUntil(simtime_t t);
 -    virtual void count(cMessage *msg);
 +    virtual void count(cPacket *msg);
- 
+
      virtual void activity();
      virtual void finish();
 Index: src/applications/tcpapp/TelnetApp.h
@@ -66,11 +66,11 @@ Index: src/applications/tcpapp/TelnetApp.h
 +++ src/applications/tcpapp/TelnetApp.h	(working copy)
 @@ -42,7 +42,7 @@
      virtual void socketEstablished(int connId, void *yourPtr);
- 
+
      /** Redefined. */
 -    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
 +    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
- 
+
      /** Redefined to start another session after a delay. */
      virtual void socketClosed(int connId, void *yourPtr);
 Index: src/applications/tcpapp/TCPSinkApp.cc
@@ -84,7 +84,7 @@ Index: src/applications/tcpapp/TCPSinkApp.cc
 -        bytesRcvd += msg->getByteLength();
 +        bytesRcvd += PK(msg)->getByteLength();
          delete msg;
- 
+
          if (ev.isGUI())
 Index: src/applications/tcpapp/TCPGenericSrvApp.cc
 ===================================================================
@@ -106,7 +106,7 @@ Index: src/applications/tcpapp/TCPSrvHostApp.h
 --- src/applications/tcpapp/TCPSrvHostApp.h	(revision 2038)
 +++ src/applications/tcpapp/TCPSrvHostApp.h	(working copy)
 @@ -58,7 +58,7 @@
- 
+
    protected:
      // internal: TCPSocket::CallbackInterface methods
 -    virtual void socketDataArrived(int, void *, cMessage *msg, bool urgent) {dataArrived(msg,urgent);}
@@ -120,11 +120,11 @@ Index: src/applications/tcpapp/TCPEchoApp.h
 +++ src/applications/tcpapp/TCPEchoApp.h	(working copy)
 @@ -33,7 +33,7 @@
      long bytesSent;
- 
+
    protected:
 -    virtual void sendOrSchedule(cMessage *msg);
 +    virtual void sendDown(cMessage *msg);
- 
+
    protected:
      virtual void initialize();
 Index: src/applications/tcpapp/TCPBasicClientApp.h
@@ -133,11 +133,11 @@ Index: src/applications/tcpapp/TCPBasicClientApp.h
 +++ src/applications/tcpapp/TCPBasicClientApp.h	(working copy)
 @@ -46,7 +46,7 @@
      virtual void socketEstablished(int connId, void *yourPtr);
- 
+
      /** Redefined. */
 -    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
 +    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
- 
+
      /** Redefined to start another session after a delay. */
      virtual void socketClosed(int connId, void *yourPtr);
 Index: src/applications/tcpapp/TelnetApp.cc
@@ -147,7 +147,7 @@ Index: src/applications/tcpapp/TelnetApp.cc
 @@ -95,7 +95,7 @@
      scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
  }
- 
+
 -void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 +void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
  {
@@ -158,7 +158,7 @@ Index: src/applications/tcpapp/TCPGenericSrvThread.cc
 --- src/applications/tcpapp/TCPGenericSrvThread.cc	(revision 2038)
 +++ src/applications/tcpapp/TCPGenericSrvThread.cc	(working copy)
 @@ -46,13 +46,13 @@
- 
+
      if (requestedBytes==0)
      {
 -        delete msg;
@@ -173,7 +173,7 @@ Index: src/applications/tcpapp/TCPGenericSrvThread.cc
 +        delete appmsg->removeControlInfo();
 +        getSocket()->send(appmsg);
      }
- 
+
      if (doClose)
 Index: src/applications/tcpapp/TCPGenericCliAppBase.cc
 ===================================================================
@@ -182,7 +182,7 @@ Index: src/applications/tcpapp/TCPGenericCliAppBase.cc
 @@ -98,7 +98,7 @@
      setStatusString("connected");
  }
- 
+
 -void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
 +void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
  {
@@ -198,7 +198,7 @@ Index: src/applications/tcpapp/TCPGenericCliAppBase.h
       */
 -    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
 +    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
- 
+
      /** Since remote TCP closed, invokes close(). Redefine if you want to do something else. */
      virtual void socketPeerClosed(int connId, void *yourPtr);
 Index: src/applications/tcpapp/GenericAppMsg.msg
@@ -221,7 +221,7 @@ Index: src/applications/tcpapp/TCPEchoApp.cc
 @@ -36,54 +36,55 @@
      socket.listen();
  }
- 
+
 -void TCPEchoApp::sendOrSchedule(cMessage *msg)
 +void TCPEchoApp::sendDown(cMessage *msg)
  {
@@ -238,7 +238,7 @@ Index: src/applications/tcpapp/TCPEchoApp.cc
 +        bytesSent += ((cPacket *)msg)->getByteLength();
 +    send(msg, "tcpOut");
  }
- 
+
  void TCPEchoApp::handleMessage(cMessage *msg)
  {
      if (msg->isSelfMessage())
@@ -280,13 +280,13 @@ Index: src/applications/tcpapp/TCPEchoApp.cc
 -            msg->setControlInfo(cmd);
 +            pkt->setControlInfo(cmd);
              delete ind;
- 
+
 -            long byteLen = msg->getByteLength()*echoFactor;
 +            long byteLen = pkt->getByteLength()*echoFactor;
              if (byteLen<1) byteLen=1;
 -            msg->setByteLength(byteLen);
 +            pkt->setByteLength(byteLen);
- 
+
 -            sendOrSchedule(msg);
 +            if (delay==0)
 +                sendDown(pkt);
@@ -302,39 +302,39 @@ Index: src/applications/tcpapp/TCPBasicClientApp.cc
 @@ -96,7 +96,7 @@
      numRequestsToSend--;
  }
- 
+
 -void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 +void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
  {
      TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
- 
+
 Index: src/applications/udpapp/UDPBasicApp.cc
 ===================================================================
 --- src/applications/udpapp/UDPBasicApp.cc	(revision 2038)
 +++ src/applications/udpapp/UDPBasicApp.cc	(working copy)
 @@ -67,19 +67,19 @@
  }
- 
- 
+
+
 -cMessage *UDPBasicApp::createPacket()
 +cPacket *UDPBasicApp::createPacket()
  {
      char msgName[32];
      sprintf(msgName,"UDPBasicAppData-%d", counter++);
- 
+
 -    cMessage *payload = new cMessage(msgName);
 +    cPacket *payload = new cPacket(msgName);
      payload->setByteLength(msgByteLength);
      return payload;
  }
- 
+
  void UDPBasicApp::sendPacket()
  {
 -    cMessage *payload = createPacket();
 +    cPacket *payload = createPacket();
      IPvXAddress destAddr = chooseDestAddr();
      sendToUDP(payload, localPort, destAddr, destPort);
- 
+
 @@ -97,7 +97,7 @@
      else
      {
@@ -342,12 +342,12 @@ Index: src/applications/udpapp/UDPBasicApp.cc
 -        processPacket(msg);
 +        processPacket(PK(msg));
      }
- 
+
      if (ev.isGUI())
 @@ -109,7 +109,7 @@
  }
- 
- 
+
+
 -void UDPBasicApp::processPacket(cMessage *msg)
 +void UDPBasicApp::processPacket(cPacket *msg)
  {
@@ -358,7 +358,7 @@ Index: src/applications/udpapp/UDPBasicApp.h
 --- src/applications/udpapp/UDPBasicApp.h	(revision 2038)
 +++ src/applications/udpapp/UDPBasicApp.h	(working copy)
 @@ -44,9 +44,9 @@
- 
+
      // chooses random destination address
      virtual IPvXAddress chooseDestAddr();
 -    virtual cMessage *createPacket();
@@ -366,7 +366,7 @@ Index: src/applications/udpapp/UDPBasicApp.h
      virtual void sendPacket();
 -    virtual void processPacket(cMessage *msg);
 +    virtual void processPacket(cPacket *msg);
- 
+
    protected:
      virtual int numInitStages() const {return 4;}
 Index: src/applications/udpapp/UDPEchoAppMsg.msg
@@ -387,18 +387,18 @@ Index: src/applications/udpapp/UDPSink.cc
 --- src/applications/udpapp/UDPSink.cc	(revision 2038)
 +++ src/applications/udpapp/UDPSink.cc	(working copy)
 @@ -38,7 +38,7 @@
- 
+
  void UDPSink::handleMessage(cMessage *msg)
  {
 -    processPacket(msg);
 +    processPacket(PK(msg));
- 
+
      if (ev.isGUI())
      {
 @@ -49,7 +49,7 @@
- 
+
  }
- 
+
 -void UDPSink::processPacket(cMessage *msg)
 +void UDPSink::processPacket(cPacket *msg)
  {
@@ -410,11 +410,11 @@ Index: src/applications/udpapp/UDPSink.h
 +++ src/applications/udpapp/UDPSink.h	(working copy)
 @@ -34,7 +34,7 @@
      int numReceived;
- 
+
    protected:
 -    virtual void processPacket(cMessage *msg);
 +    virtual void processPacket(cPacket *msg);
- 
+
    protected:
      virtual void initialize();
 Index: src/applications/udpapp/UDPVideoStreamCli.cc
@@ -429,16 +429,16 @@ Index: src/applications/udpapp/UDPVideoStreamCli.cc
 +        receiveStream(PK(msg));
      }
  }
- 
+
 @@ -70,11 +70,11 @@
- 
+
      bindToPort(localPort);
- 
+
 -    cMessage *msg = new cMessage("VideoStrmReq");
 +    cPacket *msg = new cPacket("VideoStrmReq");
      sendToUDP(msg, localPort, svrAddr, svrPort);
  }
- 
+
 -void UDPVideoStreamCli::receiveStream(cMessage* msg)
 +void UDPVideoStreamCli::receiveStream(cPacket *msg)
  {
@@ -451,7 +451,7 @@ Index: src/applications/udpapp/UDPAppBase.cc
 @@ -36,7 +36,7 @@
      send(msg, "udpOut");
  }
- 
+
 -void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
 +void UDPAppBase::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
  {
@@ -460,12 +460,12 @@ Index: src/applications/udpapp/UDPAppBase.cc
 @@ -53,7 +53,7 @@
      send(msg, "udpOut");
  }
- 
+
 -void UDPAppBase::printPacket(cMessage *msg)
 +void UDPAppBase::printPacket(cPacket *msg)
  {
      UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
- 
+
 Index: src/applications/udpapp/UDPVideoStreamCli.h
 ===================================================================
 --- src/applications/udpapp/UDPVideoStreamCli.h	(revision 2038)
@@ -477,14 +477,14 @@ Index: src/applications/udpapp/UDPVideoStreamCli.h
 -    virtual void handleMessage(cMessage* msg);
 +    virtual void handleMessage(cMessage *msg);
      //@}
- 
+
    protected:
      virtual void requestStream();
 -    virtual void receiveStream(cMessage* msg);
 +    virtual void receiveStream(cPacket *msg);
  };
- 
- 
+
+
 Index: src/applications/udpapp/UDPAppBase.h
 ===================================================================
 --- src/applications/udpapp/UDPAppBase.h	(revision 2038)
@@ -495,7 +495,7 @@ Index: src/applications/udpapp/UDPAppBase.h
       */
 -    virtual void sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
 +    virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
- 
+
      /**
       * Prints a brief about packets having an attached UDPControlInfo
       * (i.e. those which just arrived from UDP, or about to be send to UDP).
@@ -503,15 +503,15 @@ Index: src/applications/udpapp/UDPAppBase.h
 -    virtual void printPacket(cMessage *msg);
 +    virtual void printPacket(cPacket *msg);
  };
- 
- 
+
+
 Index: src/applications/udpapp/UDPVideoStreamSvr.cc
 ===================================================================
 --- src/applications/udpapp/UDPVideoStreamSvr.cc	(revision 2038)
 +++ src/applications/udpapp/UDPVideoStreamSvr.cc	(working copy)
 @@ -108,7 +108,7 @@
      VideoStreamData *d = (VideoStreamData *) timer->getContextPointer();
- 
+
      // generate and send a packet
 -    cMessage *pkt = new cMessage("VideoStrmPk");
 +    cPacket *pkt = new cPacket("VideoStrmPk");
@@ -525,25 +525,25 @@ Index: src/applications/udpapp/UDPEchoApp.cc
 @@ -39,18 +39,18 @@
  {
  }
- 
+
 -cMessage *UDPEchoApp::createPacket()
 +cPacket *UDPEchoApp::createPacket()
  {
      char msgName[32];
      sprintf(msgName,"UDPEcho-%d", counter++);
- 
+
 -    cMessage *message = new UDPEchoAppMsg(msgName);
 +    UDPEchoAppMsg *message = new UDPEchoAppMsg(msgName);
      message->setByteLength(msgByteLength);
- 
+
      return message;
  }
- 
+
 -void UDPEchoApp::processPacket(cMessage *msg)
 +void UDPEchoApp::processPacket(cPacket *msg)
  {
      UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
- 
+
 Index: src/applications/udpapp/UDPEchoApp.h
 ===================================================================
 --- src/applications/udpapp/UDPEchoApp.h	(revision 2038)
@@ -556,7 +556,7 @@ Index: src/applications/udpapp/UDPEchoApp.h
 -    virtual void processPacket(cMessage *msg);
 +    virtual cPacket *createPacket();
 +    virtual void processPacket(cPacket *msg);
- 
+
    protected:
      virtual void initialize(int stage);
 Index: src/applications/generic/IPTrafGen.cc
@@ -564,18 +564,18 @@ Index: src/applications/generic/IPTrafGen.cc
 --- src/applications/generic/IPTrafGen.cc	(revision 2038)
 +++ src/applications/generic/IPTrafGen.cc	(working copy)
 @@ -36,7 +36,7 @@
- 
+
  void IPTrafSink::handleMessage(cMessage *msg)
  {
 -    processPacket(msg);
 +    processPacket(check_and_cast<cPacket *>(msg));
- 
+
      if (ev.isGUI())
      {
 @@ -47,7 +47,7 @@
- 
+
  }
- 
+
 -void IPTrafSink::printPacket(cMessage *msg)
 +void IPTrafSink::printPacket(cPacket *msg)
  {
@@ -584,7 +584,7 @@ Index: src/applications/generic/IPTrafGen.cc
 @@ -72,7 +72,7 @@
          ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
  }
- 
+
 -void IPTrafSink::processPacket(cMessage *msg)
 +void IPTrafSink::processPacket(cPacket *msg)
  {
@@ -593,11 +593,11 @@ Index: src/applications/generic/IPTrafGen.cc
 @@ -133,7 +133,7 @@
      char msgName[32];
      sprintf(msgName,"appData-%d", counter++);
- 
+
 -    cMessage *payload = new cMessage(msgName);
 +    cPacket *payload = new cPacket(msgName);
      payload->setByteLength(msgByteLength);
- 
+
      IPvXAddress destAddr = chooseDestAddr();
 @@ -179,7 +179,7 @@
      else
@@ -606,7 +606,7 @@ Index: src/applications/generic/IPTrafGen.cc
 -        processPacket(msg);
 +        processPacket(PK(msg));
      }
- 
+
      if (ev.isGUI())
 Index: src/applications/generic/IPTrafGen.h
 ===================================================================
@@ -615,12 +615,12 @@ Index: src/applications/generic/IPTrafGen.h
 @@ -35,8 +35,8 @@
    protected:
      int numReceived;
- 
+
 -    virtual void printPacket(cMessage *msg);
 -    virtual void processPacket(cMessage *msg);
 +    virtual void printPacket(cPacket *msg);
 +    virtual void processPacket(cPacket *msg);
- 
+
    protected:
      virtual void initialize();
 Index: src/applications/ethernet/EtherApp.msg
@@ -665,7 +665,7 @@ Index: src/networklayer/ldp/LDP.cc
 @@ -587,7 +587,7 @@
      // FIXME start LDP session setup (if we're on the active side?)
  }
- 
+
 -void LDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
 +void LDP::socketDataArrived(int, void *yourPtr, cPacket *msg, bool)
  {
@@ -772,7 +772,7 @@ Index: src/networklayer/ospfv2/OSPFPacket.msg
 +packet OSPFHelloPacket extends OSPFPacket
  {
      IPAddress networkMask;
- 
+
 @@ -220,7 +220,7 @@
  //
  // Represents an OSPF Database Description packet
@@ -864,7 +864,7 @@ Index: src/networklayer/ipv4/IP.cc
 @@ -90,7 +90,7 @@
          updateDisplayString();
  }
- 
+
 -InterfaceEntry *IP::getSourceInterfaceFrom(cMessage *msg)
 +InterfaceEntry *IP::getSourceInterfaceFrom(cPacket *msg)
  {
@@ -873,25 +873,25 @@ Index: src/networklayer/ipv4/IP.cc
 @@ -171,7 +171,7 @@
      }
  }
- 
+
 -void IP::handleMessageFromHL(cMessage *msg)
 +void IP::handleMessageFromHL(cPacket *msg)
  {
      // if no interface exists, do not send datagram
      if (ift->getNumInterfaces() == 0)
 @@ -388,7 +388,7 @@
- 
+
      // decapsulate and send on appropriate output gate
      int protocol = datagram->getTransportProtocol();
 -    cMessage *packet = decapsulateIP(datagram);
 +    cPacket *packet = decapsulateIP(datagram);
- 
+
      if (protocol==IP_PROT_ICMP)
      {
 @@ -407,11 +407,11 @@
      }
  }
- 
+
 -cMessage *IP::decapsulateIP(IPDatagram *datagram)
 +cPacket *IP::decapsulateIP(IPDatagram *datagram)
  {
@@ -899,13 +899,13 @@ Index: src/networklayer/ipv4/IP.cc
      InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
 -    cMessage *packet = datagram->decapsulate();
 +    cPacket *packet = datagram->decapsulate();
- 
+
      // create and fill in control info
      IPControlInfo *controlInfo = new IPControlInfo();
 @@ -493,7 +493,7 @@
  }
- 
- 
+
+
 -IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 +IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
  {
@@ -914,7 +914,7 @@ Index: src/networklayer/ipv4/IP.cc
 @@ -501,7 +501,7 @@
      return datagram;
  }
- 
+
 -IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo)
 +IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo)
  {
@@ -925,12 +925,12 @@ Index: src/networklayer/ipv4/IP.h
 --- src/networklayer/ipv4/IP.h	(revision 2038)
 +++ src/networklayer/ipv4/IP.h	(working copy)
 @@ -68,7 +68,7 @@
- 
+
    protected:
      // utility: look up interface from getArrivalGate()
 -    virtual InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
 +    virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
- 
+
      // utility: show current statistics above the icon
      virtual void updateDisplayString();
 @@ -77,14 +77,14 @@
@@ -939,7 +939,7 @@ Index: src/networklayer/ipv4/IP.h
       */
 -    virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 +    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
- 
+
      /**
       * Encapsulate packet coming from higher layers into IPDatagram, using
       * the given control info. Override if you subclassed controlInfo and/or
@@ -947,7 +947,7 @@ Index: src/networklayer/ipv4/IP.h
       */
 -    virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo);
 +    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo);
- 
+
      /**
       * Creates a blank IP datagram. Override when subclassing IPDatagram is needed
 @@ -101,7 +101,7 @@
@@ -956,7 +956,7 @@ Index: src/networklayer/ipv4/IP.h
       */
 -    virtual void handleMessageFromHL(cMessage *msg);
 +    virtual void handleMessageFromHL(cPacket *msg);
- 
+
      /**
       * Handle incoming ARP packets by sending them over "queueOut" to ARP.
 @@ -135,7 +135,7 @@
@@ -965,7 +965,7 @@ Index: src/networklayer/ipv4/IP.h
       */
 -    virtual cMessage *decapsulateIP(IPDatagram *datagram);
 +    virtual cPacket *decapsulateIP(IPDatagram *datagram);
- 
+
      /**
       * Fragment packet if needed, then send it to the selected interface using
 Index: src/networklayer/ipv4/IPDatagram.msg
@@ -1010,12 +1010,12 @@ Index: src/networklayer/ipv4/ICMP.cc
 @@ -112,7 +112,7 @@
      }
  }
- 
+
 -void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
 +void ICMP::sendErrorMessage(cPacket *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
  {
      Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
- 
+
 @@ -182,13 +182,13 @@
  void ICMP::processEchoReply(ICMPMessage *reply)
  {
@@ -1026,7 +1026,7 @@ Index: src/networklayer/ipv4/ICMP.cc
      delete reply;
      send(payload, "pingOut");
  }
- 
+
 -void ICMP::sendEchoRequest(cMessage *msg)
 +void ICMP::sendEchoRequest(cPacket *msg)
  {
@@ -1044,14 +1044,14 @@ Index: src/networklayer/ipv4/ICMP.h
 +    virtual void sendEchoRequest(cPacket *);
      virtual void sendToIP(ICMPMessage *, const IPAddress& dest);
      virtual void sendToIP(ICMPMessage *msg);
- 
+
 @@ -60,7 +60,7 @@
       * so this function will wrap back the transport packet into the IP datagram
       * based on its IPControlInfo.
       */
 -    virtual void sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
 +    virtual void sendErrorMessage(cPacket *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
- 
+
    protected:
      virtual void handleMessage(cMessage *msg);
 Index: src/networklayer/rsvp_te/Utils.cc
@@ -1061,7 +1061,7 @@ Index: src/networklayer/rsvp_te/Utils.cc
 @@ -62,7 +62,7 @@
          dest.push_back(src[i]);
  }
- 
+
 -cModule *getPayloadOwner(cMessage *msg)
 +cModule *getPayloadOwner(cPacket *msg)
  {
@@ -1104,16 +1104,16 @@ Index: src/networklayer/rsvp_te/Utils.h
 +++ src/networklayer/rsvp_te/Utils.h	(working copy)
 @@ -45,9 +45,9 @@
  int find(const EroVector& ERO, IPAddress node);
- 
+
  /**
 - * TODO documentation
 + * XXX function appears to be unused
   */
 -cModule *getPayloadOwner(cMessage *msg);
 +cModule *getPayloadOwner(cPacket *msg);
- 
+
  //void prepend(EroVector& dest, const EroVector& src, bool reverse);
- 
+
 Index: src/networklayer/rsvp_te/RSVPPathMsg.msg
 ===================================================================
 --- src/networklayer/rsvp_te/RSVPPathMsg.msg	(revision 2038)
@@ -1203,7 +1203,7 @@ Index: src/networklayer/icmpv6/ICMPv6.cc
      delete reply;
      send(payload, "pingOut");
  }
- 
+
 -void ICMPv6::sendEchoRequest(cMessage *msg)
 +void ICMPv6::sendEchoRequest(cPacket *msg)
  {
@@ -1212,12 +1212,12 @@ Index: src/networklayer/icmpv6/ICMPv6.cc
 @@ -176,7 +176,7 @@
      }
  }
- 
+
 -void ICMPv6::sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
 +void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
  {
      Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
- 
+
 Index: src/networklayer/icmpv6/ICMPv6.h
 ===================================================================
 --- src/networklayer/icmpv6/ICMPv6.h	(revision 2038)
@@ -1228,7 +1228,7 @@ Index: src/networklayer/icmpv6/ICMPv6.h
       */
 -    virtual void sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
 +    virtual void sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
- 
+
    protected:
      // internal helper functions
 @@ -95,7 +95,7 @@
@@ -1237,7 +1237,7 @@ Index: src/networklayer/icmpv6/ICMPv6.h
       */
 -    virtual void sendEchoRequest(cMessage *);
 +    virtual void sendEchoRequest(cPacket *);
- 
+
      /**
       * Validate the received IPv6 datagram before responding with error message.
 Index: src/networklayer/icmpv6/ICMPv6Message.msg
@@ -1262,20 +1262,20 @@ Index: src/networklayer/icmpv6/ICMPv6Message.msg
  {
      int code enum(ICMPv6DEST_UN);
  }
- 
+
 -message ICMPv6PacketTooBigMsg extends ICMPv6Message
 +packet ICMPv6PacketTooBigMsg extends ICMPv6Message
  {
      int code; //Set to 0 by sender and ignored by receiver.
      int MTU; //MTU of next-hop link
  }
- 
+
 -message ICMPv6TimeExceededMsg extends ICMPv6Message
 +packet ICMPv6TimeExceededMsg extends ICMPv6Message
  {
      int code enum(ICMPv6_TIME_EX);
  }
- 
+
 -message ICMPv6ParamProblemMsg extends ICMPv6Message
 +packet ICMPv6ParamProblemMsg extends ICMPv6Message
  {
@@ -1305,13 +1305,13 @@ Index: src/networklayer/icmpv6/IPv6NDMessage.msg
 +++ src/networklayer/icmpv6/IPv6NDMessage.msg	(working copy)
 @@ -24,7 +24,7 @@
  }}
- 
- 
+
+
 -message ICMPv6Message;
 +packet ICMPv6Message;
- 
+
  class noncobject IPv6Address;
- 
+
 @@ -55,7 +55,7 @@
  //    - Checksum
  //    - Reserved
@@ -1395,7 +1395,7 @@ Index: src/networklayer/ipv6/IPv6.cc
 @@ -90,7 +90,7 @@
          updateDisplayString();
  }
- 
+
 -InterfaceEntry *IPv6::getSourceInterfaceFrom(cMessage *msg)
 +InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
  {
@@ -1404,7 +1404,7 @@ Index: src/networklayer/ipv6/IPv6.cc
 @@ -125,7 +125,7 @@
          routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
  }
- 
+
 -void IPv6::handleMessageFromHL(cMessage *msg)
 +void IPv6::handleMessageFromHL(cPacket *msg)
  {
@@ -1416,13 +1416,13 @@ Index: src/networklayer/ipv6/IPv6.cc
      int protocol = datagram->getTransportProtocol();
 -    cMessage *packet = decapsulate(datagram);
 +    cPacket *packet = decapsulate(datagram);
- 
+
      if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
      {
 @@ -476,11 +476,11 @@
  }
- 
- 
+
+
 -cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 +cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
  {
@@ -1430,18 +1430,18 @@ Index: src/networklayer/ipv6/IPv6.cc
      InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
 -    cMessage *packet = datagram->decapsulate();
 +    cPacket *packet = datagram->decapsulate();
- 
+
      // create and fill in control info
      IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
 @@ -499,7 +499,7 @@
      return packet;
  }
- 
+
 -IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 +IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
  {
      IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
- 
+
 Index: src/networklayer/ipv6/IPv6Datagram.msg
 ===================================================================
 --- src/networklayer/ipv6/IPv6Datagram.msg	(revision 2038)
@@ -1454,18 +1454,18 @@ Index: src/networklayer/ipv6/IPv6Datagram.msg
 +packet IPv6Datagram
  {
      @customize(true);
- 
+
 Index: src/networklayer/ipv6/IPv6.h
 ===================================================================
 --- src/networklayer/ipv6/IPv6.h	(revision 2038)
 +++ src/networklayer/ipv6/IPv6.h	(working copy)
 @@ -57,7 +57,7 @@
- 
+
    protected:
      // utility: look up interface from getArrivalGate()
 -    virtual InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
 +    virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
- 
+
      // utility: show current statistics above the icon
      virtual void updateDisplayString();
 @@ -65,7 +65,7 @@
@@ -1474,7 +1474,7 @@ Index: src/networklayer/ipv6/IPv6.h
       */
 -    virtual IPv6Datagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 +    virtual IPv6Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
- 
+
      /**
       * Handle IPv6Datagram messages arriving from lower layer.
 @@ -77,7 +77,7 @@
@@ -1483,7 +1483,7 @@ Index: src/networklayer/ipv6/IPv6.h
       */
 -    virtual void handleMessageFromHL(cMessage *msg);
 +    virtual void handleMessageFromHL(cPacket *msg);
- 
+
      /**
       * Handle incoming ICMP messages.
 @@ -114,7 +114,7 @@
@@ -1492,7 +1492,7 @@ Index: src/networklayer/ipv6/IPv6.h
       */
 -    virtual cMessage *decapsulate(IPv6Datagram *datagram);
 +    virtual cPacket *decapsulate(IPv6Datagram *datagram);
- 
+
      /**
       * Last hoplimit check, then send datagram on the given interface.
 Index: src/networklayer/extras/FailureManager.cc
@@ -1523,7 +1523,7 @@ Index: src/networklayer/common/InterfaceTable.cc
 +++ src/networklayer/common/InterfaceTable.cc	(working copy)
 @@ -175,16 +175,16 @@
          if (!g) continue;
- 
+
          // find the host/router's gates that internally connect to this interface
 -        if (g->getType()==cGate::OUTPUT && g->getToGate() && g->getToGate()->getOwnerModule()==host)
 -            entry->setNodeOutputGateId(g->getToGate()->getId());
@@ -1533,7 +1533,7 @@ Index: src/networklayer/common/InterfaceTable.cc
 +            entry->setNodeOutputGateId(g->getNextGate()->getId());
 +        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->getOwnerModule()==host)
 +            entry->setNodeInputGateId(g->getPreviousGate()->getId());
- 
+
          // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
 -        if (g->getType()==cGate::OUTPUT && g->getToGate() && g->getToGate()->isName("ifIn"))
 -            nwlayerInGate = g->getToGate();
@@ -1544,7 +1544,7 @@ Index: src/networklayer/common/InterfaceTable.cc
 +        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->isName("ifOut"))
 +            nwlayerOutGate = g->getPreviousGate();
      }
- 
+
      // consistency checks
 Index: src/networklayer/mpls/MPLSPacket.cc
 ===================================================================
@@ -1552,13 +1552,13 @@ Index: src/networklayer/mpls/MPLSPacket.cc
 +++ src/networklayer/mpls/MPLSPacket.cc	(working copy)
 @@ -18,7 +18,7 @@
  #include "MPLSPacket.h"
- 
+
  // constructors
 -MPLSPacket::MPLSPacket(const char *name) : cMessage(name)
 +MPLSPacket::MPLSPacket(const char *name) : cPacket(name)
  {
  }
- 
+
 @@ -31,7 +31,7 @@
  // assignment operator
  MPLSPacket & MPLSPacket::operator=(const MPLSPacket & p)
@@ -1567,7 +1567,7 @@ Index: src/networklayer/mpls/MPLSPacket.cc
 +    cPacket::operator=(p);
      return *this;
  }
- 
+
 Index: src/networklayer/mpls/MPLSPacket.h
 ===================================================================
 --- src/networklayer/mpls/MPLSPacket.h	(revision 2038)
@@ -1593,19 +1593,19 @@ Index: src/networklayer/ted/LinkStatePacket.msg
 +packet LinkStateMsg
  {
      TELinkStateInfo linkInfo[];
- 
+
 Index: src/world/ScenarioManager.cc
 ===================================================================
 --- src/world/ScenarioManager.cc	(revision 2038)
 +++ src/world/ScenarioManager.cc	(working copy)
 @@ -176,7 +176,7 @@
      bubble((std::string("setting channel attr: ")+attrAttr+" = "+valueAttr).c_str());
- 
+
      // make sure gate is connected at all
 -    if (!g->getToGate())
 +    if (!g->getNextGate())
          error("gate '%s' is not connected at %s", g->getFullPath().c_str(), node->getSourceLocation());
- 
+
      // find channel (or add one?)
 Index: src/linklayer/ppp/PPPFrame.msg
 ===================================================================
@@ -1619,28 +1619,28 @@ Index: src/linklayer/ppp/PPPFrame.msg
 +packet PPPFrame
  {
  }
- 
+
 Index: src/linklayer/ppp/PPP.cc
 ===================================================================
 --- src/linklayer/ppp/PPP.cc	(revision 2038)
 +++ src/linklayer/ppp/PPP.cc	(working copy)
 @@ -70,10 +70,10 @@
          physOutGate = gate("phys$o");
- 
+
          // we're connected if other end of connection path is an input gate
 -        bool connected = physOutGate->getDestinationGate()->getType()==cGate::INPUT;
 +        bool connected = physOutGate->getPathEndGate()->getType()==cGate::INPUT;
- 
+
          // if we're connected, get the gate with transmission rate
 -        datarateChannel = connected ? physOutGate->getDatarateChannel() : NULL;
 +        datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
          double datarate = connected ? datarateChannel->par("datarate").doubleValue() : 0;
- 
+
          // register our interface entry in IInterfaceTable
 @@ -151,7 +151,7 @@
  }
- 
- 
+
+
 -void PPP::startTransmitting(cMessage *msg)
 +void PPP::startTransmitting(cPacket *msg)
  {
@@ -1654,7 +1654,7 @@ Index: src/linklayer/ppp/PPP.cc
 +        notifDetails.setPacket(pppFrame);
          nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
      }
- 
+
 @@ -191,14 +191,14 @@
          if (hasSubscribers)
          {
@@ -1663,7 +1663,7 @@ Index: src/linklayer/ppp/PPP.cc
 +            notifDetails.setPacket(NULL);
              nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
          }
- 
+
          if (!txQueue.empty())
          {
 -            msg = (cMessage *) txQueue.pop();
@@ -1681,7 +1681,7 @@ Index: src/linklayer/ppp/PPP.cc
 +            notifDetails.setPacket(PK(msg));
              nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
          }
- 
+
          // check for bit errors
 -        if (msg->hasBitError())
 +        if (PK(msg)->hasBitError())
@@ -1709,7 +1709,7 @@ Index: src/linklayer/ppp/PPP.cc
 @@ -325,7 +325,7 @@
          updateHasSubcribers();
  }
- 
+
 -PPPFrame *PPP::encapsulate(cMessage *msg)
 +PPPFrame *PPP::encapsulate(cPacket *msg)
  {
@@ -1718,7 +1718,7 @@ Index: src/linklayer/ppp/PPP.cc
 @@ -333,9 +333,9 @@
      return pppFrame;
  }
- 
+
 -cMessage *PPP::decapsulate(PPPFrame *pppFrame)
 +cPacket *PPP::decapsulate(PPPFrame *pppFrame)
  {
@@ -1732,7 +1732,7 @@ Index: src/linklayer/ppp/PPP.h
 --- src/linklayer/ppp/PPP.h	(revision 2038)
 +++ src/linklayer/ppp/PPP.h	(working copy)
 @@ -60,9 +60,9 @@
- 
+
    protected:
      virtual InterfaceEntry *registerInterface(double datarate);
 -    virtual void startTransmitting(cMessage *msg);
@@ -1749,14 +1749,14 @@ Index: src/linklayer/ppp/ThruputMeter.cc
 --- src/linklayer/ppp/ThruputMeter.cc	(revision 2038)
 +++ src/linklayer/ppp/ThruputMeter.cc	(working copy)
 @@ -44,7 +44,7 @@
- 
+
  void ThruputMeter::handleMessage(cMessage *msg)
  {
 -    updateStats(simTime(), msg->getBitLength());
 +    updateStats(simTime(), PK(msg)->getBitLength());
      send(msg, "out");
  }
- 
+
 Index: src/linklayer/ieee80211/mac/Ieee80211Frame.msg
 ===================================================================
 --- src/linklayer/ieee80211/mac/Ieee80211Frame.msg	(revision 2038)
@@ -1778,7 +1778,7 @@ Index: src/linklayer/ieee80211/mac/Ieee80211Frame.msg
 +packet Ieee80211OneAddressFrame extends Ieee80211Frame
  {
  }
- 
+
  //
  // Format of the 802.11 ACK frame
  //
@@ -1840,7 +1840,7 @@ Index: src/linklayer/ieee80211/mac/Ieee80211Frame.msg
 +packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
  {
  }
- 
+
 Index: src/linklayer/ieee80211/mac/Ieee80211Mac.cc
 ===================================================================
 --- src/linklayer/ieee80211/mac/Ieee80211Mac.cc	(revision 2038)
@@ -1848,7 +1848,7 @@ Index: src/linklayer/ieee80211/mac/Ieee80211Mac.cc
 @@ -235,7 +235,7 @@
      handleWithFSM(msg);
  }
- 
+
 -void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 +void Ieee80211Mac::handleUpperMsg(cPacket *msg)
  {
@@ -1857,12 +1857,12 @@ Index: src/linklayer/ieee80211/mac/Ieee80211Mac.cc
 @@ -306,7 +306,7 @@
      }
  }
- 
+
 -void Ieee80211Mac::handleLowerMsg(cMessage *msg)
 +void Ieee80211Mac::handleLowerMsg(cPacket *msg)
  {
      EV << "received message from lower layer: " << msg << endl;
- 
+
 Index: src/linklayer/ieee80211/mac/Ieee80211Mac.h
 ===================================================================
 --- src/linklayer/ieee80211/mac/Ieee80211Mac.h	(revision 2038)
@@ -1876,15 +1876,15 @@ Index: src/linklayer/ieee80211/mac/Ieee80211Mac.h
  // modify it under the terms of the GNU General Public License
 @@ -268,10 +268,10 @@
      virtual void handleSelfMsg(cMessage *msg);
- 
+
      /** @brief Handle messages from upper layer */
 -    virtual void handleUpperMsg(cMessage *msg);
 +    virtual void handleUpperMsg(cPacket *msg);
- 
+
      /** @brief Handle messages from lower (physical) layer */
 -    virtual void handleLowerMsg(cMessage *msg);
 +    virtual void handleLowerMsg(cPacket *msg);
- 
+
      /** @brief Handle all kinds of messages and notifications with the state machine */
      virtual void handleWithFSM(cMessage *msg);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.cc
@@ -1894,7 +1894,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.cc
 @@ -176,7 +176,7 @@
      }
  }
- 
+
 -void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
 +void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
  {
@@ -1903,30 +1903,30 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.cc
 @@ -203,7 +203,7 @@
      delete ctrl;
  }
- 
+
 -Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
 +Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
  {
      Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
- 
+
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h
 ===================================================================
 --- src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h	(revision 2038)
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h	(working copy)
 @@ -111,13 +111,13 @@
      virtual void handleTimer(cMessage *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
 -    virtual void handleUpperMessage(cMessage *msg);
 +    virtual void handleUpperMessage(cPacket *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
- 
+
      /** Utility function for handleUpperMessage() */
 -    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 +    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
- 
+
      /** Utility function: sends authentication request */
      virtual void startAuthentication(APInfo *ap, simtime_t timeout);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc
@@ -1934,7 +1934,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc
 --- src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc	(revision 2038)
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc	(working copy)
 @@ -28,7 +28,7 @@
- 
+
      if (stage==0)
      {
 -        hasRelayUnit = gate("uppergateOut")->getDestinationGate()->isConnected();
@@ -1944,7 +1944,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc
  }
 @@ -58,7 +58,7 @@
      //XXX set ethertype
- 
+
      // encapsulate the payload in there
 -    cMessage *payload = frame->decapsulate();
 +    cPacket *payload = frame->decapsulate();
@@ -1953,7 +1953,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.cc
      ethframe->encapsulate(payload);
 @@ -78,7 +78,7 @@
      frame->setAddress3(ethframe->getSrc());
- 
+
      // encapsulate payload
 -    cMessage *payload = ethframe->decapsulate();
 +    cPacket *payload = ethframe->decapsulate();
@@ -1967,7 +1967,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.cc
 @@ -39,7 +39,7 @@
      ASSERT(false);
  }
- 
+
 -void Ieee80211MgmtSTASimplified::handleUpperMessage(cMessage *msg)
 +void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
  {
@@ -1976,30 +1976,30 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.cc
 @@ -50,7 +50,7 @@
      error("handleCommand(): no commands supported");
  }
- 
+
 -Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
 +Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
  {
      Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
- 
+
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h
 ===================================================================
 --- src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h	(revision 2038)
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h	(working copy)
 @@ -46,13 +46,13 @@
      virtual void handleTimer(cMessage *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
 -    virtual void handleUpperMessage(cMessage *msg);
 +    virtual void handleUpperMessage(cPacket *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
- 
+
      /** Utility function for handleUpperMessage() */
 -    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 +    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
- 
+
      /** Called by the NotificationBoard whenever a change occurs we're interested in */
      virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.cc
@@ -2009,7 +2009,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.cc
 @@ -76,7 +76,7 @@
      }
  }
- 
+
 -void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
 +void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
  {
@@ -2021,11 +2021,11 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h	(working copy)
 @@ -71,7 +71,7 @@
      virtual void handleTimer(cMessage *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
 -    virtual void handleUpperMessage(cMessage *msg);
 +    virtual void handleUpperMessage(cPacket *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPSimplified.cc
@@ -2035,7 +2035,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPSimplified.cc
 @@ -36,7 +36,7 @@
      ASSERT(false);
  }
- 
+
 -void Ieee80211MgmtAPSimplified::handleUpperMessage(cMessage *msg)
 +void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
  {
@@ -2047,11 +2047,11 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPSimplified.h
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtAPSimplified.h	(working copy)
 @@ -42,7 +42,7 @@
      virtual void handleTimer(cMessage *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
 -    virtual void handleUpperMessage(cMessage *msg);
 +    virtual void handleUpperMessage(cPacket *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.cc
@@ -2070,12 +2070,12 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.cc
              error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
 -                  msg->getClassName(), msg->getName(), msg->getByteLength());
 +                  pk->getClassName(), pk->getName(), pk->getByteLength());
- 
+
 -        handleUpperMessage(msg);
 +        handleUpperMessage(pk);
      }
  }
- 
+
 -void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
 +void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
  {
@@ -2084,13 +2084,13 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.cc
 @@ -158,9 +159,9 @@
      numMgmtFramesDropped++;
  }
- 
+
 -cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 +cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
  {
 -    cMessage *payload = frame->decapsulate();
 +    cPacket *payload = frame->decapsulate();
- 
+
      Ieee802Ctrl *ctrl = new Ieee802Ctrl();
      ctrl->setSrc(frame->getAddress3());
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h
@@ -2099,27 +2099,27 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h	(working copy)
 @@ -65,13 +65,13 @@
      virtual void handleTimer(cMessage *frame) = 0;
- 
+
      /** Should be redefined to encapsulate and enqueue msgs from higher layers */
 -    virtual void handleUpperMessage(cMessage *msg) = 0;
 +    virtual void handleUpperMessage(cPacket *msg) = 0;
- 
+
      /** Should be redefined to handle commands from the "agent" (if present) */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl) = 0;
- 
+
      /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
 -    virtual void sendOrEnqueue(cMessage *frame);
 +    virtual void sendOrEnqueue(cPacket *frame);
- 
+
      /** Redefined from PassiveQueueBase. */
      virtual bool enqueue(cMessage *msg);
 @@ -86,7 +86,7 @@
      virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);
- 
+
      /** Utility method to decapsulate a data frame (encapsulation depends on adhoc/STA/AP) */
 -    virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
 +    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
- 
+
      /** Utility method: sends the packet to the upper layer */
      virtual void sendUp(cMessage *msg);
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.cc
@@ -2129,7 +2129,7 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.cc
 @@ -34,7 +34,7 @@
      ASSERT(false);
  }
- 
+
 -void Ieee80211MgmtAdhoc::handleUpperMessage(cMessage *msg)
 +void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
  {
@@ -2138,24 +2138,24 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.cc
 @@ -45,7 +45,7 @@
      error("handleCommand(): no commands supported");
  }
- 
+
 -Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
 +Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
  {
      Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
- 
+
 Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames.msg
 ===================================================================
 --- src/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames.msg	(revision 2038)
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames.msg	(working copy)
 @@ -26,7 +26,7 @@
- 
+
  class noncobject MACAddress;
- 
+
 -message Ieee80211ManagementFrame;
 +packet Ieee80211ManagementFrame;
- 
- 
+
+
  //
 @@ -220,7 +220,7 @@
  //
@@ -2253,18 +2253,18 @@ Index: src/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h
 +++ src/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h	(working copy)
 @@ -40,13 +40,13 @@
      virtual void handleTimer(cMessage *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method */
 -    virtual void handleUpperMessage(cMessage *msg);
 +    virtual void handleUpperMessage(cPacket *msg);
- 
+
      /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
      virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
- 
+
      /** Utility function for handleUpperMessage() */
 -    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 +    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
- 
+
      /** Called by the NotificationBoard whenever a change occurs we're interested in */
      virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 Index: src/linklayer/etherswitch/MACRelayUnitNP.cc
@@ -2284,11 +2284,11 @@ Index: src/linklayer/etherswitch/MACRelayUnitNP.cc
 +        processFrame(PK(msg));
      }
  }
- 
+
 @@ -156,7 +157,7 @@
      bufferLevel.record(bufferUsed);
  }
- 
+
 -void MACRelayUnitNP::processFrame(cMessage *msg)
 +void MACRelayUnitNP::processFrame(cPacket *msg)
  {
@@ -2311,7 +2311,7 @@ Index: src/linklayer/etherswitch/MACRelayUnitNP.h
 -    virtual void processFrame(cMessage *msg);
 +    virtual void processFrame(cPacket *msg);
  };
- 
+
  #endif
 Index: src/linklayer/mfcore/WirelessMacBase.h
 ===================================================================
@@ -2319,15 +2319,15 @@ Index: src/linklayer/mfcore/WirelessMacBase.h
 +++ src/linklayer/mfcore/WirelessMacBase.h	(working copy)
 @@ -66,10 +66,10 @@
      virtual void handleSelfMsg(cMessage *msg) = 0;
- 
+
      /** @brief Handle messages from upper layer */
 -    virtual void handleUpperMsg(cMessage *msg) = 0;
 +    virtual void handleUpperMsg(cPacket *msg) = 0;
- 
+
      /** @brief Handle messages from lower layer */
 -    virtual void handleLowerMsg(cMessage *msg) = 0;
 +    virtual void handleLowerMsg(cPacket *msg) = 0;
- 
+
      virtual bool isUpperMsg(cMessage *msg);
      virtual bool isLowerMsg(cMessage *msg);
 Index: src/linklayer/mfcore/BasicSnrEval.cc
@@ -2367,16 +2367,16 @@ Index: src/linklayer/mfcore/BasicSnrEval.h
 +++ src/linklayer/mfcore/BasicSnrEval.h	(working copy)
 @@ -132,11 +132,11 @@
      virtual void sendDown(AirFrame *msg);
- 
+
      /** @brief Encapsulates a MAC frame into an Air Frame*/
 -    virtual AirFrame *encapsMsg(cMessage *msg);
 +    virtual AirFrame *encapsMsg(cPacket *msg);
      /*@}*/
- 
+
      /** @brief This function calculates the duration of the AirFrame */
 -    virtual double calcDuration(cMessage*);
 +    virtual double calcDuration(cPacket *);
- 
+
      /** @brief Returns the channel we're listening on. This version always returns 0 (single radio channel supported) */
      virtual int getChannelNumber() const {return 0;}
 Index: src/linklayer/mfcore/TransmComplete.msg
@@ -2433,7 +2433,7 @@ Index: src/linklayer/mfcore/WirelessMacBase.cc
 -        handleLowerMsg(msg);
 +        handleLowerMsg(PK(msg));
  }
- 
+
  bool WirelessMacBase::isUpperMsg(cMessage *msg)
 Index: src/linklayer/contract/TxNotifDetails.h
 ===================================================================
@@ -2446,10 +2446,10 @@ Index: src/linklayer/contract/TxNotifDetails.h
 -    cMessage *msg;
 +    cPacket *msg;
      InterfaceEntry *ie;
- 
+
    public:
      TxNotifDetails() {msg=NULL; ie=NULL;}
- 
+
 -    cMessage *getMessage() const {return msg;}
 +    cPacket *getPacket() const {return msg;}
      InterfaceEntry *getInterfaceEntry() const {return ie;}
@@ -2457,7 +2457,7 @@ Index: src/linklayer/contract/TxNotifDetails.h
 +    void setPacket(cPacket *m) {msg = m;}
      void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
  };
- 
+
 Index: src/linklayer/ethernet/EtherLLC.cc
 ===================================================================
 --- src/linklayer/ethernet/EtherLLC.cc	(revision 2038)
@@ -2469,12 +2469,12 @@ Index: src/linklayer/ethernet/EtherLLC.cc
 -        processPacketFromHigherLayer(msg);
 +        processPacketFromHigherLayer(PK(msg));
          break;
- 
+
        case ETH_FRAME:
 @@ -84,7 +84,7 @@
      getDisplayString().setTagArg("t",0,buf);
  }
- 
+
 -void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
 +void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
  {
@@ -2483,10 +2483,10 @@ Index: src/linklayer/ethernet/EtherLLC.cc
 @@ -133,7 +133,7 @@
          return;
      }
- 
+
 -    cMessage *higherlayermsg = frame->decapsulate();
 +    cPacket *higherlayermsg = frame->decapsulate();
- 
+
      Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
      etherctrl->setSsap(frame->getSsap());
 Index: src/linklayer/ethernet/EtherLLC.h
@@ -2496,7 +2496,7 @@ Index: src/linklayer/ethernet/EtherLLC.h
 @@ -44,7 +44,7 @@
      virtual void handleMessage(cMessage *msg);
      virtual void finish();
- 
+
 -    virtual void processPacketFromHigherLayer(cMessage *msg);
 +    virtual void processPacketFromHigherLayer(cPacket *msg);
      virtual void processFrameFromMAC(EtherFrameWithLLC *msg);
@@ -2523,11 +2523,11 @@ Index: src/linklayer/ethernet/EtherMAC2.cc
 +        notifDetails.setPacket(frame);
          nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
      }
- 
+
 @@ -128,7 +128,7 @@
          startFrameTransmission();
  }
- 
+
 -void EtherMAC2::processMsgFromNetwork(cMessage *msg)
 +void EtherMAC2::processMsgFromNetwork(cPacket *msg)
  {
@@ -2541,7 +2541,7 @@ Index: src/linklayer/ethernet/EtherMAC2.cc
 +        notifDetails.setPacket(frame);
          nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
      }
- 
+
 @@ -156,7 +156,7 @@
      if (hasSubscribers)
      {
@@ -2550,7 +2550,7 @@ Index: src/linklayer/ethernet/EtherMAC2.cc
 +        notifDetails.setPacket((cPacket *)txQueue.front());
          nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
      }
- 
+
 Index: src/linklayer/ethernet/EtherMAC2.h
 ===================================================================
 --- src/linklayer/ethernet/EtherMAC2.h	(revision 2038)
@@ -2563,7 +2563,7 @@ Index: src/linklayer/ethernet/EtherMAC2.h
 +    virtual void processMsgFromNetwork(cPacket *msg);
      virtual void handleEndIFGPeriod();
      virtual void handleEndTxPeriod();
- 
+
 Index: src/linklayer/ethernet/EtherEncap.cc
 ===================================================================
 --- src/linklayer/ethernet/EtherEncap.cc	(revision 2038)
@@ -2575,12 +2575,12 @@ Index: src/linklayer/ethernet/EtherEncap.cc
 -              processPacketFromHigherLayer(msg);
 +              processPacketFromHigherLayer(PK(msg));
                break;
- 
+
              case IEEE802CTRL_SENDPAUSE:
 @@ -75,7 +75,7 @@
      getDisplayString().setTagArg("t",0,buf);
  }
- 
+
 -void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
 +void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
  {
@@ -2588,11 +2588,11 @@ Index: src/linklayer/ethernet/EtherEncap.cc
          error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->getByteLength(), MAX_ETHERNET_DATA);
 @@ -109,7 +109,7 @@
      totalFromMAC++;
- 
+
      // decapsulate and attach control info
 -    cMessage *higherlayermsg = frame->decapsulate();
 +    cPacket *higherlayermsg = frame->decapsulate();
- 
+
      // add Ieee802Ctrl to packet
      Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
 Index: src/linklayer/ethernet/EtherEncap.h
@@ -2602,12 +2602,12 @@ Index: src/linklayer/ethernet/EtherEncap.h
 @@ -41,7 +41,7 @@
      virtual void handleMessage(cMessage *msg);
      virtual void finish();
- 
+
 -    virtual void processPacketFromHigherLayer(cMessage *msg);
 +    virtual void processPacketFromHigherLayer(cPacket *msg);
      virtual void processFrameFromMAC(EtherFrame *msg);
      virtual void handleSendPause(cMessage *msg);
- 
+
 Index: src/linklayer/ethernet/EtherBus.cc
 ===================================================================
 --- src/linklayer/ethernet/EtherBus.cc	(revision 2038)
@@ -2618,18 +2618,18 @@ Index: src/linklayer/ethernet/EtherBus.cc
   * Copyright (C) 2003 CTIE, Monash University
   *
 @@ -159,7 +160,7 @@
- 
+
          // send out on gate
          bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
 -        cMessage *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
 +        cPacket *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
          send(msg2, "ethg$o", tapPoint);
- 
+
          // if not end of the bus, schedule for next tap
 @@ -201,4 +202,4 @@
          recordScalar("messages/sec", numMessages/t);
  }
- 
+
 -
 +#endif 0 //XXX
 Index: src/linklayer/ethernet/EtherFrame.msg
@@ -2704,36 +2704,36 @@ Index: src/linklayer/ethernet/EtherMACBase.cc
          EV << "MAC not connected to a network.\n";
      WATCH(connected);
 @@ -337,7 +337,7 @@
- 
+
  }
- 
+
 -void EtherMACBase::processMsgFromNetwork(cMessage *frame)
 +void EtherMACBase::processMsgFromNetwork(cPacket *frame)
  {
      EV << "Received frame from network: " << frame << endl;
- 
+
 @@ -439,7 +439,7 @@
          error("End of IFG and no frame to transmit");
- 
+
      // End of IFG period, okay to transmit, if Rx idle OR duplexMode
 -    cMessage *frame = (cMessage *)txQueue.front();
 +    cPacket *frame = (cPacket *)txQueue.front();
      EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
- 
+
      // Perform carrier extension if in Gigabit Ethernet
 @@ -468,7 +468,7 @@
          error("Frame under transmission cannot be found");
- 
+
      // get frame from buffer
 -    cMessage *frame = (cMessage*)txQueue.pop();
 +    cPacket *frame = (cPacket *)txQueue.pop();
- 
+
      numFramesSent++;
      numBytesSent += frame->getByteLength();
 @@ -512,7 +512,7 @@
      transmitState = WAIT_IFG_STATE;
  }
- 
+
 -void EtherMACBase::scheduleEndTxPeriod(cMessage *frame)
 +void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
  {
@@ -2742,7 +2742,7 @@ Index: src/linklayer/ethernet/EtherMACBase.cc
 @@ -566,10 +566,10 @@
      }
  }
- 
+
 -void EtherMACBase::fireChangeNotification(int type, cMessage *msg)
 +void EtherMACBase::fireChangeNotification(int type, cPacket *msg)
  {
@@ -2760,13 +2760,13 @@ Index: src/linklayer/ethernet/EtherMACBase.cc
 +        g = g->getNextGate();
      }
  }
- 
+
 Index: src/linklayer/ethernet/EtherMACBase.h
 ===================================================================
 --- src/linklayer/ethernet/EtherMACBase.h	(revision 2038)
 +++ src/linklayer/ethernet/EtherMACBase.h	(working copy)
 @@ -152,19 +152,19 @@
- 
+
      // event handlers
      virtual void processFrameFromUpperLayer(EtherFrame *msg);
 -    virtual void processMsgFromNetwork(cMessage *msg);
@@ -2780,7 +2780,7 @@ Index: src/linklayer/ethernet/EtherMACBase.h
 -    virtual void scheduleEndTxPeriod(cMessage*);
 +    virtual void scheduleEndTxPeriod(cPacket *);
      virtual void scheduleEndPausePeriod(int pauseUnits);
- 
+
      // helpers
      virtual bool checkAndScheduleEndPausePeriod();
 -    virtual void fireChangeNotification(int type, cMessage *msg);
@@ -2799,7 +2799,7 @@ Index: src/linklayer/ethernet/EtherMAC.cc
 -        g = g->getToGate();
 +        g = g->getNextGate();
      }
- 
+
      // launch autoconfig process
 @@ -225,7 +225,7 @@
          if (msg->getArrivalGate() == gate("upperLayerIn"))
@@ -2812,24 +2812,24 @@ Index: src/linklayer/ethernet/EtherMAC.cc
      {
 @@ -280,7 +280,7 @@
  }
- 
- 
+
+
 -void EtherMAC::processMsgFromNetwork(cMessage *msg)
 +void EtherMAC::processMsgFromNetwork(cPacket *msg)
  {
      EtherMACBase::processMsgFromNetwork(msg);
- 
+
 @@ -397,7 +397,7 @@
      EtherMACBase::handleEndIFGPeriod();
- 
+
      // End of IFG period, okay to transmit, if Rx idle OR duplexMode
 -    cMessage *frame = (cMessage *)txQueue.front();
 +    cPacket *frame = (cPacket *)txQueue.front();
- 
+
      // Perform carrier extension if in Gigabit Ethernet
      if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
 @@ -412,9 +412,9 @@
- 
+
  void EtherMAC::startFrameTransmission()
  {
 -    cMessage *origFrame = (cMessage *)txQueue.front();
@@ -2837,11 +2837,11 @@ Index: src/linklayer/ethernet/EtherMAC.cc
      EV << "Transmitting a copy of frame " << origFrame << endl;
 -    cMessage *frame = (cMessage *) origFrame->dup();
 +    cPacket *frame = origFrame->dup();
- 
+
      // add preamble and SFD (Starting Frame Delimiter), then send out
      frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 @@ -558,7 +558,7 @@
- 
+
  void EtherMAC::sendJamSignal()
  {
 -    cMessage *jam = new cMessage("JAM_SIGNAL", JAM_SIGNAL);
@@ -2852,7 +2852,7 @@ Index: src/linklayer/ethernet/EtherMAC.cc
 @@ -567,7 +567,7 @@
      transmitState = JAMMING_STATE;
  }
- 
+
 -void EtherMAC::scheduleEndRxPeriod(cMessage *frame)
 +void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
  {
@@ -2863,7 +2863,7 @@ Index: src/linklayer/ethernet/EtherMAC.h
 --- src/linklayer/ethernet/EtherMAC.h	(revision 2038)
 +++ src/linklayer/ethernet/EtherMAC.h	(working copy)
 @@ -72,7 +72,7 @@
- 
+
      // event handlers
      virtual void processFrameFromUpperLayer(EtherFrame *msg);
 -    virtual void processMsgFromNetwork(cMessage *msg);
@@ -2873,7 +2873,7 @@ Index: src/linklayer/ethernet/EtherMAC.h
      virtual void handleEndRxPeriod();
 @@ -85,7 +85,7 @@
      virtual void printState();
- 
+
      // helpers
 -    virtual void scheduleEndRxPeriod(cMessage*);
 +    virtual void scheduleEndRxPeriod(cPacket *);
@@ -2912,7 +2912,7 @@ Index: src/linklayer/mf80211/macLayer/Mac80211.cc
      Mac80211Pkt *pkt = new Mac80211Pkt(netw->getName());
      pkt->setBitLength(272);        // headerLength, including final CRC-field
 @@ -188,7 +188,7 @@
- 
+
  void Mac80211::decapsulateAndSendUp(Mac80211Pkt *frame)
  {
 -    cMessage *msg = frame->decapsulate();
@@ -2928,7 +2928,7 @@ Index: src/linklayer/mf80211/macLayer/Mac80211.cc
 +void Mac80211::handleLowerMsg(cPacket *msg)
  {
      Mac80211Pkt *af = check_and_cast<Mac80211Pkt *>(msg);
- 
+
 Index: src/linklayer/mf80211/macLayer/Mac80211Pkt.msg
 ===================================================================
 --- src/linklayer/mf80211/macLayer/Mac80211Pkt.msg	(revision 2038)
@@ -2957,24 +2957,24 @@ Index: src/linklayer/mf80211/macLayer/Mac80211.h
   *              Technische Universitaet Berlin, Germany.
 @@ -81,10 +81,10 @@
      virtual void handleSelfMsg(cMessage*);
- 
+
      /** @brief Handle messages from upper layer */
 -    virtual void handleUpperMsg(cMessage*);
 +    virtual void handleUpperMsg(cPacket*);
- 
+
      /** @brief Handle messages from lower layer */
 -    virtual void handleLowerMsg(cMessage*);
 +    virtual void handleLowerMsg(cPacket*);
- 
+
      /** @brief handle end of contention */
      virtual void handleEndContentionTimer();
 @@ -130,7 +130,7 @@
      virtual void sendBROADCASTframe();
- 
+
      /** @brief encapsulate packet */
 -    virtual Mac80211Pkt* encapsMsg(cMessage *netw);
 +    virtual Mac80211Pkt* encapsMsg(cPacket *netw);
- 
+
      /** @brief decapsulate packet and send to higher layer */
      virtual void decapsulateAndSendUp(Mac80211Pkt *frame);
 Index: src/linklayer/mf80211/macLayer/MacPkt.msg
@@ -3002,7 +3002,7 @@ Index: src/linklayer/mf80211/macLayer/CSMAMacLayer.cc
 +void CSMAMacLayer::handleUpperMsg(cPacket *msg)
  {
      MacPkt *mac = encapsMsg(msg);
- 
+
 @@ -205,7 +205,7 @@
   * frame. If they are equal or the frame is broadcast, we send this
   * frame to the upper layer. If not delete it.
@@ -3011,7 +3011,7 @@ Index: src/linklayer/mf80211/macLayer/CSMAMacLayer.cc
 +void CSMAMacLayer::handleLowerMsg(cPacket *msg)
  {
      MacPkt *mac = check_and_cast<MacPkt *>(msg);
- 
+
 @@ -226,7 +226,7 @@
   * Encapsulates the received network-layer packet into a MacPkt and set all needed
   * header fields.
@@ -3036,22 +3036,22 @@ Index: src/linklayer/mf80211/macLayer/CSMAMacLayer.h
  {
 @@ -85,16 +85,16 @@
      virtual void finish();
- 
+
      /** @brief Handle messages from lower layer */
 -    virtual void handleLowerMsg(cMessage*);
 +    virtual void handleLowerMsg(cPacket*);
- 
+
      /** @brief Handle messages from upper layer */
 -    virtual void handleUpperMsg(cMessage*);
 +    virtual void handleUpperMsg(cPacket*);
- 
+
      /** @brief Handle self messages such as timers */
      virtual void handleSelfMsg(cMessage*);
- 
+
      /** @brief Encapsulate the given higher-layer packet into MacPkt */
 -    virtual MacPkt *encapsMsg(cMessage *netw);
 +    virtual MacPkt *encapsMsg(cPacket *netw);
- 
+
      /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
      virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 Index: src/linklayer/mf80211/phyLayer/snrEval/SnrEval80211.cc
@@ -3072,20 +3072,20 @@ Index: src/linklayer/mf80211/phyLayer/snrEval/SnrEval80211.h
 --- src/linklayer/mf80211/phyLayer/snrEval/SnrEval80211.h	(revision 2038)
 +++ src/linklayer/mf80211/phyLayer/snrEval/SnrEval80211.h	(working copy)
 @@ -45,7 +45,7 @@
- 
+
    protected:
      /** @brief computes the duration of a 802.11 frame in seconds */
 -    virtual double calcDuration(cMessage*);
 +    virtual double calcDuration(cPacket *);
  };
- 
+
  #endif
 Index: src/linklayer/mf80211/phyLayer/snrEval/SnrEval.cc
 ===================================================================
 --- src/linklayer/mf80211/phyLayer/snrEval/SnrEval.cc	(revision 2038)
 +++ src/linklayer/mf80211/phyLayer/snrEval/SnrEval.cc	(working copy)
 @@ -99,7 +99,7 @@
- 
+
  void SnrEval::handleMessage(cMessage *msg)
  {
 -    if (msg->getArrivalGateId()==uppergateIn && msg->getBitLength()==0)
@@ -3100,11 +3100,11 @@ Index: src/linklayer/radio/Ieee80211RadioModel.cc
 @@ -46,7 +46,7 @@
          if (iter->snr < snirMin)
              snirMin = iter->snr;
- 
+
 -    cMessage *frame = airframe->getEncapsulatedMsg();
 +    cPacket *frame = airframe->getEncapsulatedMsg();
      EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
- 
+
      if (snirMin <= snirThreshold)
 Index: src/linklayer/radio/AbstractRadio.cc
 ===================================================================
@@ -3120,7 +3120,7 @@ Index: src/linklayer/radio/AbstractRadio.cc
          cPolymorphic *ctrl = msg->removeControlInfo();
          if (msg->getKind()==0)
 @@ -144,7 +144,7 @@
- 
+
      if (msg->getArrivalGateId() == uppergateIn)
      {
 -        AirFrame *airframe = encapsulatePacket(msg);
@@ -3131,14 +3131,14 @@ Index: src/linklayer/radio/AbstractRadio.cc
 @@ -184,7 +184,7 @@
      scheduleAt(airframe->getArrivalTime() + airframe->getDuration(), endRxTimer);
  }
- 
+
 -AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
 +AirFrame *AbstractRadio::encapsulatePacket(cPacket *frame)
  {
      PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
      ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
 @@ -207,7 +207,7 @@
- 
+
  void AbstractRadio::sendUp(AirFrame *airframe)
  {
 -    cMessage *frame = airframe->decapsulate();
@@ -3147,7 +3147,7 @@ Index: src/linklayer/radio/AbstractRadio.cc
      EV << "sending up frame " << frame->getName() << endl;
      send(frame, uppergateOut);
 @@ -594,14 +594,14 @@
- 
+
                   // we need to send to each radioIn[] gate of this host
                   for (int i = 0; i < radioGate->size(); i++)
 -                     sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
@@ -3157,7 +3157,7 @@ Index: src/linklayer/radio/AbstractRadio.cc
              else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
              {
                   EV << "missed beginning of frame, processing it as noise\n";
- 
+
 -                 AirFrame *frameDup = (AirFrame*)airframe->dup();
 +                 AirFrame *frameDup = airframe->dup();
                   frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
@@ -3169,11 +3169,11 @@ Index: src/linklayer/radio/AbstractRadio.h
 +++ src/linklayer/radio/AbstractRadio.h	(working copy)
 @@ -91,7 +91,7 @@
      virtual void sendDown(AirFrame *airframe);
- 
+
      /** Encapsulates a MAC frame into an Air Frame */
 -    virtual AirFrame *encapsulatePacket(cMessage *msg);
 +    virtual AirFrame *encapsulatePacket(cPacket *msg);
- 
+
      /** Sets the radio state, and also fires change notification */
      virtual void setRadioState(RadioState::State newState);
 Index: src/transport/rtp/RTPInnerPacket.h
@@ -3187,7 +3187,7 @@ Index: src/transport/rtp/RTPInnerPacket.h
 -class INET_API RTPInnerPacket : public cMessage
 +class INET_API RTPInnerPacket : public cPacket
  {
- 
+
      public:
 Index: src/transport/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.cc
 ===================================================================
@@ -3195,7 +3195,7 @@ Index: src/transport/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.cc
 +++ src/transport/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.cc	(working copy)
 @@ -142,7 +142,7 @@
      _initialDelay = delay;
- 
+
      // wait initial delay
 -    // cMessage *reminderMessage = new cMessage("next frame");
 +    // cPacket *reminderMessage = new cMessage("next frame");
@@ -3227,7 +3227,7 @@ Index: src/transport/rtp/RTCPPacket.h
 +class INET_API RTCPPacket : public cPacket
  {
      public:
- 
+
 @@ -118,7 +118,7 @@
          /**
           * Returns the value of the field length in the rtcp header.
@@ -3236,7 +3236,7 @@ Index: src/transport/rtp/RTCPPacket.h
 +         * with the getLength() method inherited from cPacket.
           */
          virtual int getRtcpLength() const;
- 
+
 @@ -428,7 +428,7 @@
   * one RTCPSDESPacket. This class doesn't check if these requirements are
   * met.
@@ -3244,14 +3244,14 @@ Index: src/transport/rtp/RTCPPacket.h
 -class INET_API RTCPCompoundPacket : public cMessage
 +class INET_API RTCPCompoundPacket : public cPacket
  {
- 
+
      public:
 Index: src/transport/rtp/RTP.cc
 ===================================================================
 --- src/transport/rtp/RTP.cc	(revision 2038)
 +++ src/transport/rtp/RTP.cc	(working copy)
 @@ -168,7 +168,7 @@
- 
+
  void RTP::leaveSession(RTPInterfacePacket *rifp)
  {
 -    cModule *profileModule = gate("toProfile")->getToGate()->getOwnerModule();
@@ -3264,27 +3264,27 @@ Index: src/transport/rtp/RTCP.cc
 --- src/transport/rtp/RTCP.cc	(revision 2038)
 +++ src/transport/rtp/RTCP.cc	(working copy)
 @@ -104,7 +104,7 @@
- 
+
  void RTCP::handleMessageFromUDP(cMessage *msg) {
      // from SocketLayer all message are of type cMessage
 -    readRet(msg);
 +    readRet(PK(msg));
  };
- 
- 
+
+
 @@ -186,7 +186,7 @@
  };
- 
- 
+
+
 -void RTCP::readRet(cMessage *sifpIn)
 +void RTCP::readRet(cPacket *sifpIn)
  {
      RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
      processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
 @@ -313,7 +313,7 @@
- 
+
      calculateAveragePacketSize(compoundPacket->getByteLength());
- 
+
 -    cMessage *msg = new cMessage("RTCPCompoundPacket");
 +    cPacket *msg = new cPacket("RTCPCompoundPacket");
      msg->encapsulate(compoundPacket);
@@ -3309,8 +3309,8 @@ Index: src/transport/rtp/RTPInterfacePacket.cc
 +++ src/transport/rtp/RTPInterfacePacket.cc	(working copy)
 @@ -24,7 +24,7 @@
  Register_Class(RTPInterfacePacket);
- 
- 
+
+
 -RTPInterfacePacket::RTPInterfacePacket(const char *name) : cMessage(name) {
 +RTPInterfacePacket::RTPInterfacePacket(const char *name) : cPacket(name) {
      _type = RTP_IFP_UNDEF;
@@ -3318,16 +3318,16 @@ Index: src/transport/rtp/RTPInterfacePacket.cc
      _profileName = NULL;
 @@ -37,7 +37,7 @@
  };
- 
- 
+
+
 -RTPInterfacePacket::RTPInterfacePacket(const RTPInterfacePacket& rifp) : cMessage() {
 +RTPInterfacePacket::RTPInterfacePacket(const RTPInterfacePacket& rifp) : cPacket() {
      setName(rifp.getName());
      operator=(rifp);
  };
 @@ -54,7 +54,7 @@
- 
- 
+
+
  RTPInterfacePacket& RTPInterfacePacket::operator=(const RTPInterfacePacket& rifp) {
 -    cMessage::operator=(rifp);
 +    cPacket::operator=(rifp);
@@ -3353,8 +3353,8 @@ Index: src/transport/rtp/RTPPacket.cc
 +++ src/transport/rtp/RTPPacket.cc	(working copy)
 @@ -24,7 +24,7 @@
  Register_Class(RTPPacket);
- 
- 
+
+
 -RTPPacket::RTPPacket(const char *name) : cMessage(name) {
 +RTPPacket::RTPPacket(const char *name) : cPacket(name) {
      _version = 2;
@@ -3362,16 +3362,16 @@ Index: src/transport/rtp/RTPPacket.cc
      _extension = 0;
 @@ -40,7 +40,7 @@
  };
- 
- 
+
+
 -RTPPacket::RTPPacket(const RTPPacket& packet) : cMessage() {
 +RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket() {
      setName(packet.getName());
      operator=(packet);
  };
 @@ -58,7 +58,7 @@
- 
- 
+
+
  RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
 -    cMessage::operator=(packet);
 +    cPacket::operator=(packet);
@@ -3389,7 +3389,7 @@ Index: src/transport/rtp/RTPPacket.h
 -class INET_API RTPPacket : public cMessage
 +class INET_API RTPPacket : public cPacket
  {
- 
+
      public:
 Index: src/transport/rtp/RTCPPacket.cc
 ===================================================================
@@ -3397,8 +3397,8 @@ Index: src/transport/rtp/RTCPPacket.cc
 +++ src/transport/rtp/RTCPPacket.cc	(working copy)
 @@ -33,13 +33,13 @@
  Register_Class(RTCPPacket);
- 
- 
+
+
 -RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
 +RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
      // initialize variables
@@ -3408,21 +3408,21 @@ Index: src/transport/rtp/RTCPPacket.cc
      _packetType = RTCP_PT_UNDEF;
 -    // rtcpLength can be calculated with cMessage::getLength()
 +    // rtcpLength can be calculated with cPacket::getLength()
- 
+
      // RTCP header length size is 4 bytes
      // not all rtcp packets (in particular RTCPSDESPacket) have
 @@ -48,7 +48,7 @@
  };
- 
- 
+
+
 -RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cMessage() {
 +RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cPacket() {
      setName(rtcpPacket.getName());
      operator=(rtcpPacket);
  };
 @@ -59,7 +59,7 @@
- 
- 
+
+
  RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
 -    cMessage::operator=(rtcpPacket);
 +    cPacket::operator=(rtcpPacket);
@@ -3431,24 +3431,24 @@ Index: src/transport/rtp/RTCPPacket.cc
      _padding = rtcpPacket._padding;
 @@ -395,14 +395,14 @@
  Register_Class(RTCPCompoundPacket);
- 
- 
+
+
 -RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cMessage(name) {
 +RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cPacket(name) {
      _rtcpPackets = new cArray("RTCPPackets");
      // an empty rtcp compound packet has length 0 bytes
      setByteLength(0);
  };
- 
- 
+
+
 -RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cMessage() {
 +RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cPacket() {
      setName(rtcpCompoundPacket.getName());
      operator=(rtcpCompoundPacket);
  };
 @@ -414,7 +414,7 @@
- 
- 
+
+
  RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcpCompoundPacket) {
 -    cMessage::operator=(rtcpCompoundPacket);
 +    cPacket::operator=(rtcpCompoundPacket);
@@ -3465,22 +3465,22 @@ Index: src/transport/rtp/RTCP.h
           */
 -        virtual void readRet(cMessage *sifpIn);
 +        virtual void readRet(cPacket *sifpIn);
- 
+
      protected:
- 
+
 Index: src/transport/rtp/RTPInterfacePacket.h
 ===================================================================
 --- src/transport/rtp/RTPInterfacePacket.h	(revision 2038)
 +++ src/transport/rtp/RTPInterfacePacket.h	(working copy)
 @@ -17,7 +17,7 @@
- 
+
  /** \file RTPInterfacePacket.h
   * This file declares the class RTPInterfacePacket. This class is derived from
 - * cMessage and is used for controlling the rtp layer by the rtp application.
 + * cPacket and is used for controlling the rtp layer by the rtp application.
   */
- 
- 
+
+
 @@ -37,7 +37,7 @@
   * rtp session, transmission of files and feedback about the success of the
   * operations.
@@ -3488,7 +3488,7 @@ Index: src/transport/rtp/RTPInterfacePacket.h
 -class INET_API RTPInterfacePacket : public cMessage
 +class INET_API RTPInterfacePacket : public cPacket
  {
- 
+
      public:
 Index: src/transport/rtp/RTPProfile.cc
 ===================================================================
@@ -3496,30 +3496,30 @@ Index: src/transport/rtp/RTPProfile.cc
 +++ src/transport/rtp/RTPProfile.cc	(working copy)
 @@ -179,8 +179,9 @@
  };
- 
- 
+
+
 -void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
 -    cModule *senderModule = gate("toPayloadSender")->getToGate()->getOwnerModule();
 +void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
 +{
 +    cModule *senderModule = gate("toPayloadSender")->getNextGate()->getOwnerModule();
      senderModule->deleteModule();
- 
+
      RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
 @@ -191,7 +192,8 @@
  };
- 
- 
+
+
 -void RTPProfile::senderModuleControl(RTPInnerPacket *rinp) {
 +void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
 +{
      send(rinp, "toPayloadSender");
  };
- 
+
 @@ -239,7 +241,8 @@
  };
- 
- 
+
+
 -void RTPProfile::dataOut(RTPInnerPacket *rinp) {
 +void RTPProfile::dataOut(RTPInnerPacket *rinp)
 +{
@@ -3528,8 +3528,8 @@ Index: src/transport/rtp/RTPProfile.cc
  };
 @@ -285,7 +288,8 @@
  };
- 
- 
+
+
 -RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc) {
 +RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
 +{
@@ -3542,8 +3542,8 @@ Index: src/transport/rtp/RTPInnerPacket.cc
 +++ src/transport/rtp/RTPInnerPacket.cc	(working copy)
 @@ -27,7 +27,7 @@
  Register_Class(RTPInnerPacket);
- 
- 
+
+
 -RTPInnerPacket::RTPInnerPacket(const char *name) : cMessage(name) {
 +RTPInnerPacket::RTPInnerPacket(const char *name) : cPacket(name) {
      _type = RTP_INP_UNDEF;
@@ -3551,16 +3551,16 @@ Index: src/transport/rtp/RTPInnerPacket.cc
      _mtu = 0;
 @@ -44,7 +44,7 @@
  };
- 
- 
+
+
 -RTPInnerPacket::RTPInnerPacket(const RTPInnerPacket& rinp) : cMessage() {
 +RTPInnerPacket::RTPInnerPacket(const RTPInnerPacket& rinp) : cPacket() {
      setName(rinp.getName());
      operator=(rinp);
  };
 @@ -59,7 +59,7 @@
- 
- 
+
+
  RTPInnerPacket& RTPInnerPacket::operator=(const RTPInnerPacket& rinp) {
 -    cMessage::operator=(rinp);
 +    cPacket::operator=(rinp);
@@ -3579,7 +3579,7 @@ Index: src/transport/tcp/TCPConnectionEventProc.cc
 +            sendQueue->enqueueAppData(PK(msg));  // queue up for later
              tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
              break;
- 
+
          case TCP_S_SYN_RCVD:
          case TCP_S_SYN_SENT:
              tcpEV << "Queueing up data for sending later.\n";
@@ -3587,7 +3587,7 @@ Index: src/transport/tcp/TCPConnectionEventProc.cc
 +            sendQueue->enqueueAppData(PK(msg)); // queue up for later
              tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
              break;
- 
+
          case TCP_S_ESTABLISHED:
          case TCP_S_CLOSE_WAIT:
 -            sendQueue->enqueueAppData(msg);
@@ -3605,9 +3605,9 @@ Index: src/transport/tcp/TCPReceiveQueue.h
       */
 -    virtual cMessage *extractBytesUpTo(uint32 seq) = 0;
 +    virtual cPacket *extractBytesUpTo(uint32 seq) = 0;
- 
+
  };
- 
+
 Index: src/transport/tcp/TCPConnectionRcvSegment.cc
 ===================================================================
 --- src/transport/tcp/TCPConnectionRcvSegment.cc	(revision 2038)
@@ -3631,7 +3631,7 @@ Index: src/transport/tcp/TCPSendQueue.h
       */
 -    virtual void enqueueAppData(cMessage *msg) = 0;
 +    virtual void enqueueAppData(cPacket *msg) = 0;
- 
+
      /**
       * Returns the sequence number of the last byte stored in the buffer plus one.
 Index: src/transport/tcp/TCPSegment.cc
@@ -3645,14 +3645,14 @@ Index: src/transport/tcp/TCPSegment.cc
 -    doPacking(payloadList);
 +    doPacking(b, payloadList);
  }
- 
+
  void TCPSegment::parsimUnpack(cCommBuffer *b)
  {
      TCPSegment_Base::parsimUnpack(b);
 -    doUnpacking(payloadList);
 +    doUnpacking(b, payloadList);
  }
- 
+
  void TCPSegment::setPayloadArraySize(unsigned int size)
 Index: src/transport/tcp/TCPSegment.msg
 ===================================================================
@@ -3674,7 +3674,7 @@ Index: src/transport/tcp/queues/TCPMsgBasedSendQueue.cc
 @@ -45,7 +45,7 @@
      return out.str();
  }
- 
+
 -void TCPMsgBasedSendQueue::enqueueAppData(cMessage *msg)
 +void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
  {
@@ -3688,7 +3688,7 @@ Index: src/transport/tcp/queues/TCPMsgBasedSendQueue.cc
 +        tcpseg->addPayloadMessage(i->msg->dup(), i->endSequenceNo);
          ++i;
      }
- 
+
 Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.cc
 ===================================================================
 --- src/transport/tcp/queues/TCPMsgBasedRcvQueue.cc	(revision 2038)
@@ -3696,7 +3696,7 @@ Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.cc
 @@ -57,7 +57,7 @@
  {
      TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
- 
+
 -    cMessage *msg;
 +    cPacket *msg;
      uint32 endSeqNo;
@@ -3705,16 +3705,16 @@ Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.cc
 @@ -70,7 +70,7 @@
      return rcv_nxt;
  }
- 
+
 -cMessage *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 +cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
  {
      extractTo(seq);
- 
+
 @@ -78,7 +78,7 @@
      if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
          return NULL;
- 
+
 -    cMessage *msg = payloadList.begin()->second;
 +    cPacket *msg = payloadList.begin()->second;
      payloadList.erase(payloadList.begin());
@@ -3739,7 +3739,7 @@ Index: src/transport/tcp/queues/TCPMsgBasedSendQueue.h
       */
 -    virtual void enqueueAppData(cMessage *msg);
 +    virtual void enqueueAppData(cPacket *msg);
- 
+
      /**
       *
 Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.h
@@ -3753,7 +3753,7 @@ Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.h
 -    typedef std::map<uint32, cMessage *> PayloadList;
 +    typedef std::map<uint32, cPacket *> PayloadList;
      PayloadList payloadList;
- 
+
    public:
 @@ -65,7 +65,7 @@
      /**
@@ -3761,9 +3761,9 @@ Index: src/transport/tcp/queues/TCPMsgBasedRcvQueue.h
       */
 -    virtual cMessage *extractBytesUpTo(uint32 seq);
 +    virtual cPacket *extractBytesUpTo(uint32 seq);
- 
+
  };
- 
+
 Index: src/transport/tcp/queues/TCPVirtualDataSendQueue.cc
 ===================================================================
 --- src/transport/tcp/queues/TCPVirtualDataSendQueue.cc	(revision 2038)
@@ -3771,7 +3771,7 @@ Index: src/transport/tcp/queues/TCPVirtualDataSendQueue.cc
 @@ -43,7 +43,7 @@
      return out.str();
  }
- 
+
 -void TCPVirtualDataSendQueue::enqueueAppData(cMessage *msg)
 +void TCPVirtualDataSendQueue::enqueueAppData(cPacket *msg)
  {
@@ -3784,14 +3784,14 @@ Index: src/transport/tcp/queues/TCPVirtualDataRcvQueue.cc
 @@ -126,13 +126,13 @@
      }
  }
- 
+
 -cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 +cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
  {
      ulong numBytes = extractTo(seq);
      if (numBytes==0)
          return NULL;
- 
+
 -    cMessage *msg = new cMessage("data");
 +    cPacket *msg = new cPacket("data");
      msg->setByteLength(numBytes);
@@ -3807,7 +3807,7 @@ Index: src/transport/tcp/queues/TCPVirtualDataSendQueue.h
       */
 -    virtual void enqueueAppData(cMessage *msg);
 +    virtual void enqueueAppData(cPacket *msg);
- 
+
      /**
       *
 Index: src/transport/tcp/queues/TCPVirtualDataRcvQueue.h
@@ -3820,9 +3820,9 @@ Index: src/transport/tcp/queues/TCPVirtualDataRcvQueue.h
       */
 -    virtual cMessage *extractBytesUpTo(uint32 seq);
 +    virtual cPacket *extractBytesUpTo(uint32 seq);
- 
+
  };
- 
+
 Index: src/transport/udp/UDPPacket.msg
 ===================================================================
 --- src/transport/udp/UDPPacket.msg	(revision 2038)
@@ -3860,7 +3860,7 @@ Index: src/transport/udp/UDP.cc
 @@ -263,7 +263,7 @@
             (sd->remoteAddr.isUnspecified() || sd->remoteAddr==remoteAddr);
  }
- 
+
 -void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
 +void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
  {
@@ -3869,7 +3869,7 @@ Index: src/transport/udp/UDP.cc
 @@ -280,7 +280,7 @@
      numPassedUp++;
  }
- 
+
 -void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 +void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
  {
@@ -3878,7 +3878,7 @@ Index: src/transport/udp/UDP.cc
 @@ -324,7 +324,7 @@
      }
  }
- 
+
 -void UDP::processICMPError(cMessage *msg)
 +void UDP::processICMPError(cPacket *msg)
  {
@@ -3886,7 +3886,7 @@ Index: src/transport/udp/UDP.cc
      int type, code;
 @@ -437,7 +437,7 @@
      int matches = 0;
- 
+
      // deliver a copy of the packet to each matching socket
 -    cMessage *payload = udpPacket->getEncapsulatedMsg();
 +    cPacket *payload = udpPacket->getEncapsulatedMsg();
@@ -3913,13 +3913,13 @@ Index: src/transport/udp/UDP.cc
          }
 @@ -484,7 +484,7 @@
  }
- 
- 
+
+
 -void UDP::processMsgFromApp(cMessage *appData)
 +void UDP::processMsgFromApp(cPacket *appData)
  {
      UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
- 
+
 Index: src/transport/udp/UDP.h
 ===================================================================
 --- src/transport/udp/UDP.h	(revision 2038)
@@ -3934,18 +3934,18 @@ Index: src/transport/udp/UDP.h
 +    virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
      virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
      virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
- 
+
      // process an ICMP error packet
 -    virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage
 +    virtual void processICMPError(cPacket *icmpErrorMsg); // TODO use ICMPMessage
- 
+
      // process UDP packets coming from IP
      virtual void processUDPPacket(UDPPacket *udpPacket);
- 
+
      // process packets from application
 -    virtual void processMsgFromApp(cMessage *appData);
 +    virtual void processMsgFromApp(cPacket *appData);
- 
+
      // process commands from application
      virtual void processCommandFromApp(cMessage *msg);
 Index: src/transport/contract/TCPSocket.cc
@@ -4018,8 +4018,8 @@ Index: src/base/INETDefs.h
 +++ src/base/INETDefs.h	(working copy)
 @@ -68,6 +68,9 @@
  #define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
- 
- 
+
+
 +#define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
 +
 +
@@ -4049,7 +4049,7 @@ Index: src/base/Sink.cc
      numPackets++;
 -    numBits += msg->getBitLength();
 +    numBits += PK(msg)->getBitLength();
- 
+
      throughput = numBits / simTime();
      packetPerSec = numPackets / simTime();
 Index: src/util/ThruputMeteringChannel.cc
@@ -4060,17 +4060,17 @@ Index: src/util/ThruputMeteringChannel.cc
  //FIXME to be updated and enabled again
 -#if 0
 +#if 0//XXX
- 
+
  //
  // Copyright (C) 2005 Andras Varga
 @@ -176,7 +176,7 @@
      *p = '\0';
- 
+
      // display label
 -    getFromGate()->getDisplayString().setTagArg("t", 0, buf);
 +    getSourceGate()->getDisplayString().setTagArg("t", 0, buf);
  }
- 
+
  #endif
 Index: src/util/ThruputMeteringChannel.h
 ===================================================================
@@ -4080,7 +4080,7 @@ Index: src/util/ThruputMeteringChannel.h
  //FIXME upgrade and put back!!
 -#if 0
 +#if 0//XXX
- 
+
  //
  // Copyright (C) 2005 Andras Varga
 Index: src/util/TCPDump.cc
@@ -4103,7 +4103,7 @@ Index: src/util/headerserializers/IPSerializer.cc
 @@ -116,7 +116,7 @@
          EV << "Can not handle IP packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
      dest->setByteLength(IP_HEADER_BYTES);
- 
+
 -    cMessage *encapPacket = NULL;
 +    cPacket *encapPacket = NULL;
      switch (dest->getTransportProtocol())
@@ -4127,7 +4127,7 @@ Index: src/util/NAMTraceWriter.cc
 --- src/util/NAMTraceWriter.cc	(revision 2038)
 +++ src/util/NAMTraceWriter.cc	(working copy)
 @@ -78,8 +78,8 @@
- 
+
              // fill in peerNamIds in InterfaceEntries
              cGate *outgate = node->gate(ie->getNodeOutputGateId());
 -            if (!outgate || !outgate->getToGate()) continue;
@@ -4143,26 +4143,26 @@ Index: src/util/NAMTraceWriter.cc
          int peernamid = d->getInterfaceEntry()->getPeerNamId();
 -        cMessage *msg = d->getMessage();
 +        cPacket *msg = d->getPacket();
- 
+
          switch(category)
          {
 @@ -166,14 +166,14 @@
      out << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
  }
- 
+
 -void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cMessage *msg)
 +void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cPacket *msg)
  {
      ASSERT(nt && nt->isEnabled());
      std::ostream& out = nt->out();
- 
+
      int size = msg->getByteLength();
      int color = 0;
 -    for (cMessage *em = msg; em; em = em->getEncapsulatedMsg())
 +    for (cPacket *em = msg; em; em = em->getEncapsulatedMsg())
          if (em->hasPar("color"))
              {color = em->par("color").longValue(); break;}
- 
+
 Index: src/util/NAMTraceWriter.h
 ===================================================================
 --- src/util/NAMTraceWriter.h	(revision 2038)
@@ -4173,7 +4173,7 @@ Index: src/util/NAMTraceWriter.h
      virtual void recordLinkEvent(int peernamid, double datarate, simtime_t delay, const char *state);
 -    virtual void recordPacketEvent(char event, int peernamid, cMessage *msg);
 +    virtual void recordPacketEvent(char event, int peernamid, cPacket *msg);
- 
+
    protected:
      virtual int numInitStages() const {return 3;}
 Index: .oppbuildspec

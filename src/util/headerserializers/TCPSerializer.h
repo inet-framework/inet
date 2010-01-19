@@ -22,24 +22,11 @@
 
 #include "TCPSegment.h"
 #include "TCPSegment_m.h"
+#include "IPvXAddress.h"
 
 #include "headers/defs.h"
-namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
+
 #include "headers/tcp.h"
-};
-
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#endif
-
-using namespace INETFw;
 
 /**
  * Converts between TCPSegment and binary (network byte order) TCP header.
@@ -51,18 +38,34 @@ class TCPSerializer
 
         /**
          * Serializes a TCPSegment for transmission on the wire.
+         * The checksum is NOT filled in.
+         * Returns the length of data written into buffer.
+         * TODO msg why not a const reference?
+         */
+        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
+
+        /**
+         * Serializes a TCPSegment for transmission on the wire.
          * The checksum is NOT filled in. (The kernel does that when sending
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
+         * TODO msg why not a const reference?
+         * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
          */
-        int serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize, pseudoheader *pseudo);
+        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
+        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
 
         /**
          * Puts a packet sniffed from the wire into a TCPSegment.
+         * TODO dest why not reference?
          */
-    void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest);
+        void parse(const unsigned char *srcbuf, unsigned int bufsize, TCPSegment *dest);
 
-        static unsigned short checksum(unsigned char *addr, unsigned int count);
+        /**
+         * Calculate checksum with pseudo header.
+         */
+        static uint16_t checksum(const void *addr, unsigned int count,
+        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
 };
 
 #endif

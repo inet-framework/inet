@@ -1,4 +1,4 @@
-@echo off 
+@echo off
 PATH=C:\home\tools\libxslt-1.0.27.win32\util;%PATH%
 del /q html\*
 xsltproc -o netconf.html xsd2html.xsl netconf.xsd

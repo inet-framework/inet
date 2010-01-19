@@ -13,11 +13,11 @@
 
 2008-06-30  Andras Varga
 
-	* IPAddress: internal representation changed to use a single int32 
+	* IPAddress: internal representation changed to use a single int32
 	instead of unsigned char[4], for more efficient code; several methods
 	made inline [code from Ingmar Baumgart, OverSim]
 
-	* parsim: added pack/unpack functions for IPAddress, IPv6Address, 
+	* parsim: added pack/unpack functions for IPAddress, IPv6Address,
 	IPvXAddress
 
 	* InterfaceTable: added deleteInterface()
@@ -28,6 +28,6 @@
 
 2005-07-12  Andras Varga
 
-	* IPAddress, IPv6Address, IPvXAddress: renamed isNull() to 
+	* IPAddress, IPv6Address, IPvXAddress: renamed isNull() to
 	isUnspecified()
 

@@ -133,7 +133,7 @@ class INET_API TCPSACKRexmitQueue
      * Resets rexmitted bit of all segments in rexmit queue.
      */
     virtual void resetRexmittedBit();
-	
+
     /**
      * Returns a string for debug purposes.
      */
@@ -148,11 +148,11 @@ class INET_API TCPSACKRexmitQueue
      * Returns amount of sacked bytes above seqNum.
      */
     virtual uint32 getAmountOfSackedBytes(uint32 seqNum);
-    
+
     /**
      * Returns the number of discontiguous sacked regions (SACKed sequences) above seqNum.
      */
-    virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum);    
+    virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum);
 };
 
 #endif

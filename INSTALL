@@ -6,8 +6,8 @@ The INET Framework can be compiled on any platform supported by OMNeT++.
 PREREQUISITES
 
 You should have a working OMNeT++ installation, version 4.0 or later.
-If you are running on Windows you will have to install the winpcap driver, 
-which is used by INET to capture network packets from external interfaces 
+If you are running on Windows you will have to install the winpcap driver,
+which is used by INET to capture network packets from external interfaces
 (visit http://www.winpcap.org)
 
 General
@@ -19,7 +19,7 @@ General
    and run INET.
 
 2. Extract the downloaded tarball into a directory of your choice (usually into your
-   workspace directory, if you are using the IDE). NOTE: The built-in Windows 
+   workspace directory, if you are using the IDE). NOTE: The built-in Windows
    archiver has bugs and cannot extract the file correctly. Use some other archiver
    or do it from command line (tar xvfz inet-yyyymmdd-opp4-src.tgz)
 
@@ -29,7 +29,7 @@ If you are building from command line:
 
 4. Type "make makefiles". This should generate the makefiles for you automatically.
 
-5. Type "make" to build the inet executable (debug version). Use "make MODE=release" 
+5. Type "make" to build the inet executable (debug version). Use "make MODE=release"
    to build release version.
 
 6. you can run specific examples by changing into the example's directory and executing "./run"
@@ -40,7 +40,7 @@ If you are using the IDE:
    The extracted directory must be a subdirectory of the workspace dir.
 
 4. Import the project using: File | Import | General | Existing projects into Workspace.
-   Then select the workspace dir as the root directory, and be sure NOT to check the 
+   Then select the workspace dir as the root directory, and be sure NOT to check the
    "Copy projects into workspace" box. Click Finish.
 
 5. Open the project (if already not open) and wait until the indexer finishes.
@@ -55,10 +55,10 @@ Change into examples/ and type "./rundemo".
 
 Note:
 -----
-- by default INET is creating a shared library (libinet.dll, libinet.so etc.) 
+- by default INET is creating a shared library (libinet.dll, libinet.so etc.)
   in the "src" directory. To use the shared library you can use the "opp_run"
   command to load it dynamically. Open the "src/run_inet" script to see how
   to do it.
 - If you add/remove files/directories later in the src directory, you MUST
-  re-create your makefile. Run "make makefiles" again if you are building 
+  re-create your makefile. Run "make makefiles" again if you are building
   from the command line. (The IDE does it for you automatically)

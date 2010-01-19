@@ -22,6 +22,11 @@
 
 class IPv6Datagram;
 
+/**
+ * Control information for sending/receiving packets over IPv6.
+ *
+ * See the IPv6ControlInfo.msg file for more info.
+ */
 class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
 {
   protected:
@@ -33,6 +38,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
 
     virtual void setOrigDatagram(IPv6Datagram *d);
+    virtual IPv6Datagram *getOrigDatagram() const {return dgram;}
     virtual IPv6Datagram *removeOrigDatagram();
 };
 

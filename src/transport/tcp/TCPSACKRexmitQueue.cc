@@ -289,7 +289,7 @@ uint32 TCPSACKRexmitQueue::getAmountOfSackedBytes(uint32 seqNum)
     }
 
 	ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
-	
+
     while (i!=rexmitQueue.end())
     {
         if (i->sacked)
@@ -319,7 +319,7 @@ uint32 TCPSACKRexmitQueue::getNumOfDiscontiguousSacks(uint32 seqNum)
     }
 
 	ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
-	
+
     // search for discontiguous sacked regions
     while (i!=rexmitQueue.end())
     {

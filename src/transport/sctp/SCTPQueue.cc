@@ -31,7 +31,7 @@ SCTPQueue::~SCTPQueue()
 {
 	for (PayloadQueue::iterator i = payloadQueue.begin(); i!=payloadQueue.end(); i++)
 		delete i->second->userData;
-	
+
 	if (!payloadQueue.empty())
 		payloadQueue.clear();
 }
@@ -56,7 +56,7 @@ bool SCTPQueue::checkAndInsertVar(uint32 key,SCTPDataVariables *datVar)
 	{
 		payloadQueue[key]=datVar;
 	}
-		
+
 	return true;
 }
 
@@ -66,7 +66,7 @@ uint32 SCTPQueue::getQueueSize()
 }
 
 SCTPDataVariables *SCTPQueue::extractMessage()
-{	
+{
 	if (!payloadQueue.empty())
 	{
 		PayloadQueue::iterator i = payloadQueue.begin();
@@ -75,9 +75,9 @@ SCTPDataVariables *SCTPQueue::extractMessage()
 		return datVar;
 	}
 	else
-		 
+
 		sctpEV3<<"Queue is empty\n";
-		
+
 	 return NULL;
 }
 
@@ -91,9 +91,9 @@ SCTPDataVariables *SCTPQueue::getAndExtractMessage(uint32 tsn)
 		return datVar;
 	}
 	else
-		 
+
 		sctpEV3<<"Queue is empty\n";
-		
+
 	 return NULL;
 }
 
@@ -104,12 +104,12 @@ void SCTPQueue::printQueue()
 	for (PayloadQueue::iterator i = payloadQueue.begin(); i!=payloadQueue.end(); ++i)
 	{
 		datVar = i->second;
-		key = i->first;	
+		key = i->first;
 		sctpEV3<<key<<"\t";
 	}
-	 
+
 	sctpEV3<<"\n";
-	
+
 }
 
 
@@ -140,7 +140,7 @@ SCTPDataVariables* SCTPQueue::getVar(uint32 tsn)
 
 SCTPDataVariables* SCTPQueue::getNextVar(uint32 tsn, uint32 toTsn)
 {
-	
+
 	for (uint32 i=tsn+1; i<toTsn; i++)
 	{
 		PayloadQueue::iterator pl=payloadQueue.find(i);

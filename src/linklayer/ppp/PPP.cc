@@ -38,7 +38,7 @@ PPP::PPP()
 PPP::~PPP()
 {
     // kludgy way to check that nb is not deleted yet
-    if (nb && nb == NotificationBoardAccess().getIfExists())
+    if (nb && nb == findModuleWhereverInNode("notificationBoard", this))
         nb->unsubscribe(this, NF_SUBSCRIBERLIST_CHANGED);
     cancelAndDelete(endTransmissionEvent);
 }

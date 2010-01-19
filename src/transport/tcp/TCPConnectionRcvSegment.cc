@@ -705,7 +705,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         //
         if (state->fork)
         {
-            TCPConnection *conn = cloneListeningConnection(); // this will stay LISTENing
+            TCPConnection *conn = cloneListeningConnection(); // "conn" is the clone which will stay LISTENing, while "this" gets updated with the remote address
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
             tcpEV << "Connection forked: this connection got new connId=" << connId << ", "
                      "spinoff keeps LISTENing with connId=" << conn->connId << "\n";
@@ -1012,6 +1012,7 @@ TCPEventCode TCPConnection::processRstInSynReceived(TCPSegment *tcpseg)
     }
 
     // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
+    // FIXME if this was a forked connection, it should rather close than go back to listening (otherwise we'd now have two listening connections with the original one!)
     return TCP_E_RCV_RST;
 }
 

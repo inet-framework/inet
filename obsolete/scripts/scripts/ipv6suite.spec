@@ -2,7 +2,7 @@
 
 %define myrelease 1
 
-#example rebuild statement from srpm 
+#example rebuild statement from srpm
 #rpmbuild --rebuild --define "cvsdate <cvsdate>" i.e --define "cvsdate 20040302"
 Summary: IPv6Suite is an OMNeT++ model suite for accurate simulation of IPv6 protocols and networks.
 Name: ipv6suite
@@ -21,7 +21,7 @@ IPv6Suite models the functionality of the following RFCs:
     * RFC 2373 IP Version 6 Addressing Architecture
     * RFC 2460 Internet Protocol, Version 6 (IPv6) Specification}
     * RFC 2374 An IPv6 Aggregatable Global Unicast Address Format
-    * RFC 2463 Internet Control Message Protocol (ICMPv6) for the Internet 
+    * RFC 2463 Internet Control Message Protocol (ICMPv6) for the Internet
       Protocol Version 6 (IPv6) Specification
     * RFC 2461 Neighbor Discovery for IP Version 6 (IPv6)
     * RFC 2462 IPv6 Stateless Address Autoconfiguration
@@ -29,11 +29,11 @@ IPv6Suite models the functionality of the following RFCs:
     * RFC 2473 Generic Packet Tunneling in IPv6
     * RFC 2464 Transmission of IPv6 Packets over Ethernet Networks
     * Mobility Support in IPv6 (MIPv6) revision 18
-    * Hierarchical Mobile IPv6 Mobility Management (HMIPv6) revision 6 
+    * Hierarchical Mobile IPv6 Mobility Management (HMIPv6) revision 6
     * Optimistic Duplicate Address Detection revision 4
-    * Fast Solicited Router Advertisements revision 4 
+    * Fast Solicited Router Advertisements revision 4
 
-Copy files from %{_docdir}/%{name}-%{version}/example to your own directory. 
+Copy files from %{_docdir}/%{name}-%{version}/example to your own directory.
 E.g. cp -r  %{_docdir}/%{name}-%{version}/example .; cd example
 "ccmake ." to configure and generate the Makefiles
 "make" to build the MIPv6Network example network and run ./ExampleBuild.
@@ -45,7 +45,7 @@ Customise CMakeLists.txt for your particular project.
 
 %build
 CMAKE_OPTIONS="BUILD_HMIP BUILD_MOBILITY EWU_L2TRIGGER JLAI_FASTRA JLAI_ODAD"
-for o in $CMAKE_OPTIONS; 
+for o in $CMAKE_OPTIONS;
 do
   FINAL_OPTION="-D$o:BOOL=ON $FINAL_OPTION"
 done
@@ -143,7 +143,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.so
 %{include_dir}
 %{ipv6suite_data}
-%doc example 
+%doc example
 
 
 %changelog

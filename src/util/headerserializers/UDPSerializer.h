@@ -34,17 +34,12 @@ class UDPSerializer
          * Serializes an UDPPacket for transmission on the wire.
          * Returns the length of data written into buffer.
          */
-        int serialize(UDPPacket *pkt, unsigned char *buf, unsigned int bufsize);
+        int serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize);
 
         /**
          * Puts a packet sniffed from the wire into an UDPPacket.
          */
-        void parse(unsigned char *buf, unsigned int bufsize, UDPPacket *pkt);
-
-        /**
-         * Helper: calculate checksum
-         */
-        static unsigned short checksum(unsigned char *addr, unsigned int count);
+        void parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *pkt);
 };
 
 #endif
