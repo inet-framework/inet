@@ -1,5 +1,8 @@
 #!/bin/sh
 #$ -cwd
+#$ -V
+#$ -e $HOME/tmp/
+#$ -o $HOME/tmp/
 
 RUN=$SGE_TASK_ID
 # Run my code for run number $RUN
