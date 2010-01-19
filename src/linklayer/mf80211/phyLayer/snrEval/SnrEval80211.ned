@@ -34,7 +34,7 @@ simple SnrEval80211
         double carrierFrequency @unit("Hz");
         double thermalNoise @unit("dBm");
         double pathLossAlpha;
-        double sensitivity @unit(mW);
+        double sensitivity @unit(dBm);
         @display("i=block/wrxtx");
     gates:
         input uppergateIn;

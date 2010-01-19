@@ -29,13 +29,13 @@ simple GilbertElliotSnr
 {
     parameters:
         bool debug = default(false); // debug switch
-        double transmitterPower @unit("mW");
-        double bitrate @unit("bps");
+        double transmitterPower @unit(mW);
+        double bitrate @unit(bps);
         int headerLength @unit(b);
-        double carrierFrequency @unit("Hz");
-        double thermalNoise @unit("dBm");
+        double carrierFrequency @unit(Hz);
+        double thermalNoise @unit(dBm);
         double pathLossAlpha;
-        double sensitivity @unit(mW);
+        double sensitivity @unit(dBm);
         double meanGood;
         double meanBad;
     gates:
