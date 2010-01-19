@@ -80,6 +80,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		int socket;
 		long statsSimStart;
 		int currStep;
+		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
+		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
 		bool traCISimulationEnded;
 		int packetNo; /**< current packet number (for debugging) */

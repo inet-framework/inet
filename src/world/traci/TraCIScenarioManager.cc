@@ -178,6 +178,31 @@ void TraCIScenarioManager::connect() {
 void TraCIScenarioManager::init_traci() {
 	{
 		// Send "Subscribe Lifecycles" Command
+		uint8_t do_write = 0x00;
+		uint8_t domain = DOM_ROADMAP;
+		uint32_t objectId = 0;
+		uint8_t variableId = DOMVAR_BOUNDINGBOX;
+		uint8_t typeId = TYPE_BOUNDINGBOX;
+		TraCIBuffer buf = queryTraCI(CMD_SCENARIO, TraCIBuffer() << do_write << domain << objectId << variableId << typeId);
+		uint8_t cmdLength_resp; buf >> cmdLength_resp;
+		uint8_t commandId_resp; buf >> commandId_resp; if (commandId_resp != CMD_SCENARIO) error("Expected response to CMD_SCENARIO, but got %d", commandId_resp);
+		uint8_t do_write_resp; buf >> do_write_resp;
+		uint8_t domain_resp; buf >> domain_resp;
+		uint32_t objectId_resp; buf >> objectId_resp;
+		uint8_t variableId_resp; buf >> variableId_resp;
+		uint8_t typeId_resp; buf >> typeId_resp;
+		float x1; buf >> x1;
+		float y1; buf >> y1;
+		float x2; buf >> x2;
+		float y2; buf >> y2;
+		netbounds1 = Coord(x1, y1);
+		netbounds2 = Coord(x2, y2);
+		if (debug) EV << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-(" << x2 << ", " << y2 << ")" << endl;
+		if ((traci2omnet(netbounds2).x > cc->getPgs()->x) || (traci2omnet(netbounds2).y > cc->getPgs()->y)) EV << "WARNING: Playground size (" << cc->getPgs()->x << ", " << cc->getPgs()->y << ") might be too small for vehicle at network bounds (" << traci2omnet(netbounds2).x << ", " << traci2omnet(netbounds2).y << ")" << endl;
+	}
+
+	{
+		// Send "Subscribe Lifecycles" Command
 		uint8_t domain = DOM_VEHICLE;
 		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBELIFECYCLES, TraCIBuffer() << domain);
 		if (!buf.eof()) error("expected only an OK response, but received additional bytes");
@@ -370,10 +395,10 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 
 	float px; buf >> px;
 	float py; buf >> py;
-	Coord p = traci2omnet(Coord(px, py)); px = p.x; py = p.y;
-	int pxi = static_cast<int>(px);
-	int pyi = static_cast<int>(py);
-	if ((pxi < 0) || (pyi < 0)) error("received bad node position");
+	Coord p = traci2omnet(Coord(px, py));
+	int pxi = static_cast<int>(p.x);
+	int pyi = static_cast<int>(p.y);
+	if ((pxi < 0) || (pyi < 0)) error("received bad node position (%.2f, %.2f), translated to (%d, %d)", px, py, pxi, pyi);
 
 	std::string edge; buf >> edge;
 
@@ -435,11 +460,11 @@ void TraCIScenarioManager::executeOneTimestep() {
 }
 
 Coord TraCIScenarioManager::traci2omnet(Coord coord) const {
-	return Coord(coord.x + margin, cc->getPgs()->y - (coord.y + margin));
+	return Coord(coord.x - netbounds1.x + margin, (netbounds2.y - netbounds1.y) - (coord.y - netbounds1.y) + margin);
 }
 
 Coord TraCIScenarioManager::omnet2traci(Coord coord) const {
-	return Coord(coord.x - margin, cc->getPgs()->y - (coord.y + margin));
+	return Coord(coord.x + netbounds1.x - margin, (netbounds2.y - netbounds1.y) - (coord.y - netbounds1.y) + margin);
 }
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv) {
