@@ -63,23 +63,23 @@ enum TCPOptionNumbers
     TCPOPTION_END_OF_OPTION_LIST = 0;                   // RFC 793, LENGTH: 1 Byte
     TCPOPTION_NO_OPERATION = 1;                         // RFC 793, LENGTH: 1 Byte
     TCPOPTION_MAXIMUM_SEGMENT_SIZE = 2;                 // RFC 793, LENGTH: 4 Bytes
-//  TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes + 1 * NOP = 4 Bytes
-    TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes + 2 * NOP = 4 Bytes
+    TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes
+    TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes
     TCPOPTION_SACK = 5;                                 // RFC 2018, LENGTH: N (max. N = 4) 8 * n + 2 Bytes  => 32 + 2 + 2 * NOP = 36 Bytes; If TIMESTAMP option is used with SACK: max. n = 3 => 12 Bytes (for Timestamp) + 28 Bytes (for SACK) = 40 Bytes
 //    TCPOPTION_ECHO = 6;                               // obsoleted by option 8 RFC 1072, LENGTH: 6 Bytes
 //    TCPOPTION_ECHO_REPLY = 7;                         // obsoleted by option 8 RFC 1072, LENGTH: 6 Bytes
-//  TCPOPTION_TIMESTAMP = 8;                            // RFC 1323, LENGTH: 10 Bytes + 2 * NOP = 12 Bytes
-//  TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9;   // RFC 1693, LENGTH: 2 Bytes + 2 * NOP = 4 Bytes
-//  TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;       // RFC 1693, LENGTH: 3 Bytes + 1 * NOP = 4 Bytes
+    TCPOPTION_TIMESTAMP = 8;                            // RFC 1323, LENGTH: 10 Bytes
+//  TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9;   // RFC 1693, LENGTH: 2 Bytes
+//  TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;       // RFC 1693, LENGTH: 3 Bytes
 //  TCPOPTION_CC = 11;                                  // RFC 1644, LENGTH: -
 //  TCPOPTION_CC_NEW = 12;                              // RFC 1644, LENGTH: -
 //  TCPOPTION_CC_ECHO = 13;                             // RFC 1644, LENGTH: -
-//  TCPOPTION_TCP_ALERTERNATIVE_CHECKSUM_REQUEST = 14;  // RFC 1146, LENGTH: 3 Bytes + 1 * NOP = 4 Bytes
-//  TCPOPTION_TCP_ALERTERNATIVE_CHECKSUM_DATA = 15;     // RFC 1146, LENGTH: N
+//  TCPOPTION_TCP_ALTERNATE_CHECKSUM_REQUEST = 14;      // RFC 1146, LENGTH: 3 Bytes
+//  TCPOPTION_TCP_ALTERNATE_CHECKSUM_DATA = 15;         // RFC 1146, LENGTH: N
 //  TCPOPTION_SKEETER = 16;                             // [Knowles], LENGTH: -
 //  TCPOPTION_BUBBA = 17;                               // [Knowles], LENGTH: -
-//  TCPOPTION_TRAILER_CHECKSUM_OPTION = 18;             // [Subbu & Monroe], LENGTH: 3Bytes + 1 * NOP = 4 Bytes
-//  TCPOPTION_MD5_SIGNATURE_OPTION = 19;                // RFC 2385, LENGTH: 18 Bytes + 2 * NOP = 20 Bytes
+//  TCPOPTION_TRAILER_CHECKSUM_OPTION = 18;             // [Subbu & Monroe], LENGTH: 3Bytes
+//  TCPOPTION_MD5_SIGNATURE_OPTION = 19;                // RFC 2385, LENGTH: 18 Bytes
 //  TCPOPTION_SCPS_CAPABILITIES = 20;                   // [Scott], LENGTH: -
 //  TCPOPTION_SELECTIVE_NEGATIVE_ACKNOWLEDGEMENTS = 21; // [Scott], LENGTH: -
 //  TCPOPTION_RECORD_BOUNDARIES = 22;                   // [Scott], LENGTH: -

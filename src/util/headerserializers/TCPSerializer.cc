@@ -16,162 +16,120 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//#include "headers/defs.h"
-//namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-/*{
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-//#include "headers/ip.h"
-#include "headers/tcp.h"
-};
-
-#include "TCPSerializer.h"
-//#include "TCPConnection.h"
-
-#ifndef _MSC_VER
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-
-using namespace INETFw;*/
 
 //Define_Module(TCPSerializer);
 #include "TCPSerializer.h"
 
-int TCPSerializer::serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize,  pseudoheader *pseudo)
-{
-	//cMessage* cmsg;
-	struct tcphdr *tcp = (struct tcphdr*) (buf);
-	//int writtenbytes = sizeof(struct tcphdr)+msg->payloadLength();
-	int writtenbytes = msg->getByteLength();
+#include "IPProtocolId_m.h"
+#include "TCPIPchecksum.h"
 
-	// fill TCP header structure
-	tcp->th_sum = 0;
-	tcp->th_sport = htons(msg->getSrcPort());
-	tcp->th_dport = htons(msg->getDestPort());
-	tcp->th_seq = htonl(msg->getSequenceNo());
-	tcp->th_ack = htonl(msg->getAckNo());
-	tcp->th_off = (sizeof(struct tcphdr)/4)<<4;
+namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
+{
+#include "headers/bsdint.h"
+#include "headers/in.h"
+#include "headers/in_systm.h"
+};
+
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
+#include <netinet/in.h>  // htonl, ntohl, ...
+//#include <sys/types.h>
+//#include <sys/socket.h>
+//#include <arpa/inet.h>
+#endif
+
+using namespace INETFw;
+
+int TCPSerializer::serialize(const TCPSegment *tcpseg,
+        unsigned char *buf, unsigned int bufsize)
+{
+    ASSERT(buf);
+    ASSERT(tcpseg);
+    //cMessage* cmsg;
+    struct tcphdr *tcp = (struct tcphdr*) (buf);
+    //int writtenbytes = sizeof(struct tcphdr)+tcpseg->payloadLength();
+    int writtenbytes = tcpseg->getByteLength();
+
+    // fill TCP header structure
+    tcp->th_sum = 0;
+    tcp->th_sport = htons(tcpseg->getSrcPort());
+    tcp->th_dport = htons(tcpseg->getDestPort());
+    tcp->th_seq = htonl(tcpseg->getSequenceNo());
+    tcp->th_ack = htonl(tcpseg->getAckNo());
+    tcp->th_offs = TCP_HEADER_OCTETS / 4;
 
     // set flags
-	unsigned char flags = 0;
-	if(msg->getFinBit())
-		flags |= TH_FIN;
-	if(msg->getSynBit())
-		flags |= TH_SYN;
-	if(msg->getRstBit())
-		flags |= TH_RST;
-	if(msg->getPshBit())
-		flags |= TH_PUSH;
-	if(msg->getAckBit())
-		flags |= TH_ACK;
-	if(msg->getUrgBit())
-		flags |= TH_URG;
-	tcp->th_flags = (TH_FLAGS & flags);
-	tcp->th_win = htons(msg->getWindow());
-	tcp->th_urp = htons(msg->getUrgentPointer());
+    unsigned char flags = 0;
+    if(tcpseg->getFinBit())
+        flags |= TH_FIN;
+    if(tcpseg->getSynBit())
+        flags |= TH_SYN;
+    if(tcpseg->getRstBit())
+        flags |= TH_RST;
+    if(tcpseg->getPshBit())
+        flags |= TH_PUSH;
+    if(tcpseg->getAckBit())
+        flags |= TH_ACK;
+    if(tcpseg->getUrgBit())
+        flags |= TH_URG;
+    tcp->th_flags = (TH_FLAGS & flags);
+    tcp->th_win = htons(tcpseg->getWindow());
+    tcp->th_urp = htons(tcpseg->getUrgentPointer());
 
-    unsigned short numOptions = msg->getOptionsArraySize();
+    unsigned short numOptions = tcpseg->getOptionsArraySize();
+    unsigned int lengthCounter = 0;
+    unsigned char * options = (unsigned char * )tcp->th_options;
     if (numOptions > 0) // options present?
     {
-        unsigned short lengthCounter = 0;
+        unsigned int maxOptLength = tcpseg->getHeaderLength()-TCP_HEADER_OCTETS;
 
-        while (lengthCounter < (msg->getHeaderLength()-TCP_HEADER_OCTETS)) // TCP_HEADER_OCTETS = 20
+        for (unsigned short i=0; i < numOptions; i++)
         {
-            unsigned short j = 0; // index for tcp->th_options[]
-            for (unsigned short i=0; i<numOptions; i++)
+            TCPOption option = tcpseg->getOptions(i);
+            unsigned short kind = option.getKind();
+            unsigned short length = option.getLength(); // length >= 1
+            options = ((unsigned char * )tcp->th_options)+lengthCounter;
+
+            lengthCounter += length;
+
+            ASSERT(lengthCounter <= maxOptLength);
+
+            options[0] = kind;
+            if(length>1)
             {
-                TCPOption option = msg->getOptions(i);
-                unsigned short kind = option.getKind();
-                unsigned short length = option.getLength();
-
-                lengthCounter = lengthCounter + length;
-
-                switch(kind)
+                options[1] = length;
+            }
+            unsigned int optlen = option.getValuesArraySize();
+            for(unsigned int k=0; k<optlen; k++)
+            {
+                unsigned int value = option.getValues(k);
+                unsigned int p0 = 2 + 4*k;
+                for (unsigned int p = std::min((unsigned int)length-1, 5 + 4*k); p >= p0; p--)
                 {
-                    case TCPOPTION_END_OF_OPTION_LIST: // EOL
-                    {
-                        // kind
-                        if (tcp->th_options[j] == 0)
-                            {tcp->th_options[j] = kind;}
-                        else
-                            {tcp->th_options[j] = tcp->th_options[j] + (kind<<8);}  // 1 padding byte prefixed
-                        break;
-                    }
-                    case TCPOPTION_NO_OPERATION: // NOP
-                    {
-                        // kind
-                        if (tcp->th_options[j] == 0) // first NOP
-                            {tcp->th_options[j] = kind;}
-                        else
-                            {tcp->th_options[j] = tcp->th_options[j] + (kind<<8);} // 1 padding byte prefixed
-                        break;
-                    }
-                    case TCPOPTION_MAXIMUM_SEGMENT_SIZE: // MSS
-                    {
-                        // kind
-                        tcp->th_options[j] = kind;
-                        // length
-                        tcp->th_options[j] = tcp->th_options[j] + (length<<8);
-                        // value
-                        if (option.getValuesArraySize()!=0)
-                            {tcp->th_options[j] = tcp->th_options[j] + htonl(option.getValues(0));}
-                        j++;
-                        break;
-                    }
-                    case TCPOPTION_SACK_PERMITTED: // SACK_PERMITTED
-                    {
-                        // kind
-                        tcp->th_options[j] = tcp->th_options[j] + (kind<<16);   // 2 padding bytes prefixed
-                        // length
-                        tcp->th_options[j] = tcp->th_options[j] + (length<<24); // 2 padding bytes prefixed
-                        j++;
-                        break;
-                    }
-                    case TCPOPTION_SACK: // SACK
-                    {
-                        // kind
-                        tcp->th_options[j] = tcp->th_options[j] + (kind<<16); // 2 padding bytes prefixed
-                        // length
-                        tcp->th_options[j] = tcp->th_options[j] + (length<<24); // 2 padding bytes prefixed
-                        j++;
-                        // values
-                        if (option.getValuesArraySize()!=0)
-                        {
-                            for (unsigned short k=0; k<option.getValuesArraySize(); k++)
-                            {
-                                tcp->th_options[j] = tcp->th_options[j] + htonl(option.getValues(k));
-                                j++;
-                            }
-                        }
-                        break;
-                    }
+                    options[p] = value & 0xFF;
+                    value = value >> 8;
+                }
+            }
+        } // for
+        //padding:
+        options = (unsigned char * )(tcp->th_options);
+        while (lengthCounter % 4)
+            options[lengthCounter++] = 0;
 
-                    // TODO add new TCPOptions here once they are implemented
-                    default:
-                    {
-                        EV << "ERROR: Received option of kind " << kind << " with length " << length << " which is currently not supported\n";
-                        break;
-                    }
-                } // switch
-            } // for
-        } // while
-        tcp->th_off = ((TCP_HEADER_OCTETS+lengthCounter)/4)<<4; // TCP_HEADER_OCTETS = 20
+        ASSERT(TCP_HEADER_OCTETS+lengthCounter <= TCP_MAX_HEADER_OCTETS);
+        tcp->th_offs = (TCP_HEADER_OCTETS+lengthCounter)/4; // TCP_HEADER_OCTETS = 20
     } // if options present
 
     // write data
-    if (msg->getByteLength() > msg->getHeaderLength()) // data present? FIXME TODO: || msg->getEncapsulatedMsg()!=NULL
+    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) // data present? FIXME TODO: || tcpseg->getEncapsulatedMsg()!=NULL
     {
-        unsigned int dataLength = msg->getByteLength() - msg->getHeaderLength();
-//      TCPPayloadMessage *tcpP = check_and_cast<TCPPayloadMessage* >(msg->getEncapsulatedMsg()); // FIXME
-        char *tcpData = (char *)tcp->th_options; //FIXME + length(options)!
+        unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
+        // TCPPayloadMessage *tcpP = check_and_cast<TCPPayloadMessage* >(tcpseg->getEncapsulatedMsg()); // FIXME
+        char *tcpData = (char *)options+lengthCounter;
+        memset(tcpData, 't', dataLength); // fill data part with 't'
+        /*
         for (unsigned int i=0; i < dataLength; i++)
         {
-            if (i < msg->getPayloadArraySize())
+            if (i < tcpseg->getPayloadArraySize())
             {
 //              tcpData[i] = (unsigned char) tcpP.msg; // FIXME
                 tcpData[i] = 't'; // FIXME - write 't' as dummy data
@@ -179,33 +137,35 @@ int TCPSerializer::serialize(TCPSegment *msg, unsigned char *buf, unsigned int b
             else
                 {tcpData[i] = 't';} // write 't' as dummy data
         }
+        */
     }
-
-	// for computation of the checksum we need the pseudo header in front of the tcp header
-	int wholeheadersize = sizeof(pseudoheader) + writtenbytes;
-	char *wholeheader = (char*) malloc(wholeheadersize);
-
-	memcpy(wholeheader, pseudo, sizeof(pseudoheader));
-	memcpy(wholeheader + sizeof(pseudoheader), buf, writtenbytes);
-
-	tcp->th_sum = checksum((unsigned char*)wholeheader, wholeheadersize);
-	free(wholeheader);
-	//tcp->th_sum =checksum((unsigned char*)tcp, writtenbytes);
-
-	return writtenbytes;
+    return writtenbytes;
 }
 
-void TCPSerializer::parse(unsigned char *buf, unsigned int bufsize, TCPSegment *tcpseg)
+int TCPSerializer::serialize(const TCPSegment *tcpseg,
+        unsigned char *buf, unsigned int bufsize,
+        const IPvXAddress &srcIp, const IPvXAddress &destIp)
 {
+    int writtenbytes = serialize(tcpseg, buf, bufsize);
     struct tcphdr *tcp = (struct tcphdr*) (buf);
+    tcp->th_sum = checksum(tcp, writtenbytes, srcIp, destIp);
+
+    return writtenbytes;
+}
+
+void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSegment *tcpseg)
+{
+    ASSERT(buf);
+    ASSERT(tcpseg);
+    struct tcphdr const * const tcp = (struct tcphdr * const ) (buf);
 
     // fill TCP header structure
     tcpseg->setSrcPort(ntohs(tcp->th_sport));
     tcpseg->setDestPort(ntohs(tcp->th_dport));
     tcpseg->setSequenceNo(ntohl(tcp->th_seq));
     tcpseg->setAckNo(ntohl(tcp->th_ack));
-    tcpseg->setHeaderLength(((unsigned short) tcp->th_off)/4);
-    ASSERT(tcpseg->getHeaderLength()>=TCP_HEADER_OCTETS || tcpseg->getHeaderLength()<=TCP_MAX_HEADER_OCTETS); // TCP_HEADER_OCTETS = 20, TCP_MAX_HEADER_OCTETS = 60
+    unsigned short hdrLength =tcp->th_offs * 4;
+    tcpseg->setHeaderLength(hdrLength);
 
     // set flags
     unsigned char flags = tcp->th_flags;
@@ -226,141 +186,76 @@ void TCPSerializer::parse(unsigned char *buf, unsigned int bufsize, TCPSegment *
     // Checksum (header checksum): modelled by cMessage::hasBitError()
     tcpseg->setUrgentPointer(ntohs(tcp->th_urp));
 
-    if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // options present?
+    if (hdrLength > TCP_HEADER_OCTETS) // options present?
     {
-        unsigned short optionBytes = tcpseg->getHeaderLength() - TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
-        unsigned short numOptions = optionBytes/4;
+        unsigned short optionBytes = hdrLength - TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
         unsigned short optionsCounter = 0; // index for tcpseg->setOptions[]
 
-        for (unsigned short j=0; j<numOptions; j++)
+        unsigned short length = 0;
+        for (unsigned short j=0; j<optionBytes; j+=length)
         {
-            unsigned int tmp = ntohl(tcp->th_options[j]);
-            unsigned short tmpArray[4];
-            tmpArray[0] = (tmp>>24) & 0xff; // byte0
-            tmpArray[1] = (tmp>>16) & 0xff; // byte1
-            tmpArray[2] = (tmp>>8)  & 0xff; // byte2
-            tmpArray[3] =  tmp      & 0xff; // byte3
+            unsigned char * options = ((unsigned char * )tcp->th_options)+j;
+            unsigned short kind = options[0];
+            length = options[1];
 
-            unsigned short kind   = tmpArray[0];
-            unsigned short length = tmpArray[1];
-            unsigned short value  = tmp; // byte 2 and 3 (16 bit)
-
-            bool lengthMatched = false;
-            unsigned short i=0;
-
-            while(!lengthMatched && i<3)
+            TCPOption tmpOption;
+            switch(kind)
             {
-                kind = tmpArray[i];
-                length = tmpArray[(i+1)];
+                case TCPOPTION_END_OF_OPTION_LIST: // EOL
+                case TCPOPTION_NO_OPERATION: // NOP
+                    length = 1;
+                    break;
 
-                TCPOption tmpOption;
-                switch(kind)
+                default:
+                    break;
+            } // switch
+
+            // kind
+            tmpOption.setKind(kind);
+            // length
+            tmpOption.setLength(length);
+            // value
+            int optlen = (length+1)/4;
+            tmpOption.setValuesArraySize(optlen);
+            for (short int k=0; k<optlen; k++)
+            {
+                unsigned int value = 0;
+                for (short int l=2+4*k; l<length && l<6+4*k; l++)
                 {
-                    case TCPOPTION_END_OF_OPTION_LIST: // EOL
-                    {
-                        // kind
-                        tmpOption.setKind(kind);
-                        // length
-                        tmpOption.setLength(1);
-                        // no value
-                        tmpOption.setValuesArraySize(0);
-                        break;
-                    }
-                    case TCPOPTION_NO_OPERATION: // NOP
-                    {
-                        // kind
-                        tmpOption.setKind(kind);
-                        // length
-                        tmpOption.setLength(1);
-                        // no value
-                        tmpOption.setValuesArraySize(0);
-                        break;
-                    }
-                    case TCPOPTION_MAXIMUM_SEGMENT_SIZE: // MSS
-                    {
-                        // kind
-                        tmpOption.setKind(kind);
-                        // length
-                        tmpOption.setLength(length);
-                        // value
-                        tmpOption.setValuesArraySize(1);
-                        value = (unsigned short) tmp; // byte 2 and 3 (16 bit)
-                        tmpOption.setValues(0,value);
-                        if (length == 4)
-                            {lengthMatched = true;}
-                        break;
-                    }
-                    case TCPOPTION_SACK_PERMITTED: // SACK_PERMITTED
-                    {
-                        // kind
-                        tmpOption.setKind(kind);
-                        // length
-                        tmpOption.setLength(length);
-                        // no value
-                        tmpOption.setValuesArraySize(0);
-                        lengthMatched = true;
-                        if ((i+1) == 2 && length == 2)
-                            {lengthMatched = true;}
-                        break;
-                    }
-                    case TCPOPTION_SACK: // SACK
-                    {
-                        // kind
-                        tmpOption.setKind(kind);
-                        // length
-                        tmpOption.setLength(length);
-                        // values
-                        tmpOption.setValuesArraySize((length-2)/4);
-                        for (unsigned short k=0; k<tmpOption.getValuesArraySize(); k++)
-                        {
-                            j++;
-                            tmpOption.setValues(k,ntohl(tcp->th_options[j]));
-                        }
-                        if ((2+length)%4==0)
-                            {lengthMatched = true;}
-                        break;
-                    }
-
-                    // TODO add new TCPOptions here once they are implemented
-                    default:
-                    {
-                        EV << "ERROR: Received option of kind " << kind << " with length " << length << " which is currently not supported\n";
-                        tmpOption.setKind(1); // NOP
-                        tmpOption.setLength(1);
-                        tmpOption.setValuesArraySize(0);
-                        break;
-                    }
-                } // switch
-
-                // write option to tcp header
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
-                tcpseg->setOptions(optionsCounter,tmpOption);
-                optionsCounter++;
-                i++;
-            } // while i
+                    value = (value << 8) + options[l];
+                }
+                tmpOption.setValues(k, value);
+            }
+            // write option to tcp header
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpseg->setOptions(optionsCounter,tmpOption);
+            optionsCounter++;
         } // for j
     } // if options present
 
     tcpseg->setByteLength(bufsize);
-    tcpseg->setPayloadLength(tcpseg->getByteLength() - tcpseg->getHeaderLength());
+    tcpseg->setPayloadLength(bufsize - tcpseg->getHeaderLength());
 }
 
-unsigned short TCPSerializer::checksum(unsigned char *addr, unsigned int count)
+uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
+        const IPvXAddress &srcIp, const IPvXAddress &destIp)
 {
-    long sum = 0;
+    uint32_t sum = TCPIPchecksum::_checksum(addr, count);
 
-    while (count > 1)  {
-        sum += *((unsigned short *&)addr)++;
-        if (sum & 0x80000000)
-            sum = (sum & 0xFFFF) + (sum >> 16);
-        count -= 2;
-    }
+    ASSERT(srcIp.wordCount() == destIp.wordCount());
 
-    if (count)
-        sum += *(unsigned char *)addr;
+    //sum += srcip;
+    sum += TCPIPchecksum::_checksum(srcIp.words(), sizeof(uint32)*srcIp.wordCount());
+
+    //sum += destip;
+    sum += TCPIPchecksum::_checksum(destIp.words(), sizeof(uint32)*destIp.wordCount());
+
+    sum += count; // TCP length
+
+    sum += IP_PROT_TCP; // PTCL
 
     while (sum >> 16)
-        sum = (sum & 0xffff) + (sum >> 16);
+        sum = (sum & 0xFFFF) + (sum >> 16);
 
-    return ~sum;
+    return (uint16_t)~sum;
 }

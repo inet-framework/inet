@@ -34,7 +34,7 @@ TCPStateVariables::TCPStateVariables()
     // set everything to 0 -- real init values will be set manually
     active = false;
     fork = false;
-    snd_mss = 0; // will initialy be set from configureStateVariables() and probably reset during connection setup
+    snd_mss = 0; // will initially be set from configureStateVariables() and probably reset during connection setup
     snd_una = 0;
     snd_nxt = 0;
     snd_max = 0;

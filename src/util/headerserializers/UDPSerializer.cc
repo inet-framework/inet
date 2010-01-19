@@ -26,6 +26,8 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "UDPSerializer.h"
 
+#include "TCPIPchecksum.h"
+
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
@@ -34,7 +36,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 using namespace INETFw;
 
 
-int UDPSerializer::serialize(UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
+int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
 {
     struct udphdr *udphdr = (struct udphdr *) (buf);
     int packetLength;
@@ -43,11 +45,11 @@ int UDPSerializer::serialize(UDPPacket *pkt, unsigned char *buf, unsigned int bu
     udphdr->uh_sport = htons(pkt->getSourcePort());
     udphdr->uh_dport = htons(pkt->getDestinationPort());
     udphdr->uh_ulen  = htons(packetLength);
-    udphdr->uh_sum   = checksum(buf, packetLength);
+    udphdr->uh_sum   = TCPIPchecksum::checksum(buf, packetLength);
     return packetLength;
 }
 
-void UDPSerializer::parse(unsigned char *buf, unsigned int bufsize, UDPPacket *dest)
+void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *dest)
 {
 
     struct udphdr *udphdr = (struct udphdr*) buf;
@@ -59,24 +61,4 @@ void UDPSerializer::parse(unsigned char *buf, unsigned int bufsize, UDPPacket *d
     encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
-}
-
-unsigned short UDPSerializer::checksum(unsigned char *addr, unsigned int count)
-{
-    long sum = 0;
-
-    while (count > 1)  {
-        sum += *((unsigned short *&)addr)++;
-        if (sum & 0x80000000)
-            sum = (sum & 0xFFFF) + (sum >> 16);
-        count -= 2;
-    }
-
-    if (count)
-        sum += *(unsigned char *)addr;
-
-    while (sum >> 16)
-        sum = (sum & 0xffff) + (sum >> 16);
-
-    return ~sum;
 }
