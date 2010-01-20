@@ -20,6 +20,9 @@
 #include <omnetpp.h>
 #include "HybridPon.h"
 #include "HybridPonFrame_m.h"
+//#include "MACAddress.h"
+//#include "Ethernet.h"
+#include "EtherFrame_m.h"
 //#include "Monitor.h"
 
 class Scheduler: public cSimpleModule {
@@ -79,7 +82,8 @@ protected:
 	virtual void sendOnuPoll(HybridPonMessage *msg);
 	void transmitPollFrame(HybridPonMessage *msg);
 	virtual void receiveHybridPonFrame(HybridPonFrame *msg);
-	virtual void receiveIpPacket(IpPacket *msg) = 0; // pure virtual function
+//	virtual void receiveIpPacket(IpPacket *pkt) = 0; // pure virtual function
+    virtual void receiveEthernetFrame(EtherFrame *frame) = 0; // pure virtual function
 
 	// Scheduling
 	virtual simtime_t seqSchedule(int onu, HybridPonFrame *ponFrameToOnu);
@@ -117,7 +121,8 @@ protected:
 	virtual void finishSpecific(void);
 
 	// Event handling
-	virtual void receiveIpPacket(IpPacket *msg);
+//	virtual void receiveIpPacket(IpPacket *pkt);
+    virtual void receiveEthernetFrame(EtherFrame *frame);
 	void transmitDataFrame(DummyPacket *msg);
 
 	// OMNeT++
@@ -187,7 +192,8 @@ protected:
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
-	virtual void receiveIpPacket(IpPacket *pkt);
+//	virtual void receiveIpPacket(IpPacket *pkt);
+    virtual void receiveEthernetFrame(EtherFrame *frame);
 	virtual void receiveHybridPonFrame(HybridPonFrame *frame);
 	virtual void transmitDataFrame(DummyPacket *msg);
 
@@ -279,7 +285,8 @@ protected:
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
-	virtual void receiveIpPacket(IpPacket *msg);
+//	virtual void receiveIpPacket(IpPacket *pkt);
+    virtual void receiveEthernetFrame(EtherFrame *frame);
 	void batchSchedule(cMessage *batchMsg);
 	void transmitVoqDataFrame(HybridPonMessage *msg);
 

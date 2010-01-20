@@ -351,10 +351,10 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg)
 // 		HybridPonFrame *frame;
 //
 // Results:
-//      Upstream IP packets, if any in the received frame, is sent to the upper
-//      layer (i.e., IP packet sink) and a downstream grant PON frame based
-//      on the request received from the ONU, is made and scheduled for
-//      transmission through seqSchedule().
+//      Upstream Ethernet frames, if any in the received frame, is sent to a
+//      switch (Ethernet bridge in the current implementation) and a downstream
+//      grant PON frame based on the request received from the ONU, is made and
+//      scheduled for transmission through seqSchedule().
 //------------------------------------------------------------------------------
 
 void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu)
@@ -363,19 +363,20 @@ void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu)
     ev << getFullPath() << ": PON frame received from ONU [" << ponFrameFromOnu->getLambda() << "]" << endl;
 #endif
 
-    // remove Ethernet frames
-    cQueue &ethFrameQueue = ponFrameFromOnu->getEncapsulatedEthFrames();
-    while(!ethFrameQueue.empty()) {
-        EthFrame *ethFrame = (EthFrame *)ethFrameQueue.pop();
+    // deliver Ethernet frames to a switch
+    cQueue &etherFrameQueue = ponFrameFromOnu->getEncapsulatedEtherFrames();
+    while(!etherFrameQueue.empty()) {
+        EtherFrame *etherFrame = (EtherFrame *)etherFrameQueue.pop();
 
 #ifdef DEBUG_SCHEDULER
         ev << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
 #endif
 
-        IpPacket *pkt = (IpPacket *)ethFrame->decapsulate();
-        send(pkt, "toPacketSink");
-        delete (EthFrame *) ethFrame;
-
+//        IpPacket *pkt = (IpPacket *)etherFrame->decapsulate();
+//        send(pkt, "toPacketSink");
+//        delete (EtherFrame *) etherFrame;
+        send(etherFrame, "toSwitch");
+        
 #ifdef DEBUG_SCHEDULER
         ev << getFullPath() << ": Packet removed from Ethernet Frame" << endl;
 #endif
