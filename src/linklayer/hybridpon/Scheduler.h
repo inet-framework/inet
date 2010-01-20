@@ -66,7 +66,7 @@ protected:
 	// Misc.
 	void debugSchedulerStatus(void);
 	virtual void debugSnapshot(void);
-	virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg) // wrapper funciton
+	virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg) // wrapper function
 	{
 		return scheduleAt(t, msg);
 	}
@@ -74,9 +74,9 @@ protected:
 	virtual void initializeSpecific(void) = 0; // "
 	virtual void finishSpecific(void) = 0; // "
 
-	/*     // QUICK DEBUG */
-	/*     simtime_t debugRX(void); */
-	/*     // QUICK DEBUG     */
+//	// QUICK DEBUG */
+//	simtime_t debugRX(void);
+//	// QUICK DEBUG
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
@@ -129,7 +129,7 @@ protected:
 	virtual void handleMessage(cMessage *msg);
 };
 
-class SSSF: public Scheduler // SSSF (Sequential Scheduling with	Schedule-time Framing)
+class SSSF: public Scheduler // SSSF (Sequential Scheduling with Schedule-time Framing)
 {
 protected:
 	//--------------------------------------------------------------------------
@@ -248,65 +248,65 @@ protected:
 // Classes based on batch operation mode
 //------------------------------------------------------------------------------
 
-class Batch: public Scheduler {
-protected:
-	//--------------------------------------------------------------------------
-	//	Member variables
-	//--------------------------------------------------------------------------
+//class Batch: public Scheduler {
+//protected:
+//	//--------------------------------------------------------------------------
+//	//	Member variables
+//	//--------------------------------------------------------------------------
+//
+//	// NED parameters (as defined in NED files)
+//	simtime_t batchPeriod;
+//	int voqSize;
+//	double voqThreshold;
+//
+//	// For VOQs: Indexing is done as follows
+//	// - Downstream data:       [0...numOnus-1]
+//	// - Upstream grants/polls: [numOnus...2*Onus-1]
+//	Voq *voq;
+//	IntVector voqBitCtr; // vector of VOQ lengths [bit]
+//	int voqStartIdx; // VOQ index to start scheduling with at each batch period
+//	// --> used to provide better fairness among VOQs
+//
+//	// For trace of VOQs
+//	cOutVector *vQueueLength; // array of output vector for VOQ length [frame]
+//	cOutVector *vQueueOctet; // array of output vector for VOQ size in octet
+//
+//
+//	//--------------------------------------------------------------------------
+//	//	Member functions
+//	//--------------------------------------------------------------------------
+//
+//	// Misc.
+//	void debugVoqStatus(void);
+//	virtual void debugSnapshot(void);
+//	virtual void handleGrant(int lambda, HybridPonFrame *grant);
+//	virtual void initializeSpecific(void);
+//	virtual void finishSpecific(void);
+//
+//	// Event handling
+//	virtual void sendOnuPoll(HybridPonMessage *msg);
+////	virtual void receiveIpPacket(IpPacket *pkt);
+//    virtual void receiveEthernetFrame(EtherFrame *frame);
+//	void batchSchedule(cMessage *batchMsg);
+//	void transmitVoqDataFrame(HybridPonMessage *msg);
+//
+//	// Scheduler to be defined in derived classes (pure virtual function)
+//	virtual int scheduler(const simtime_t TX, const simtime_t RX, simtime_t &t,
+//			int &voqsToSchedule, BoolVector &schedulableVoq, Voq *voq) = 0;
+//
+//	// OMNeT++
+//	virtual void handleMessage(cMessage *msg);
+//};
 
-	// NED parameters (as defined in NED files)
-	simtime_t batchPeriod;
-	int voqSize;
-	double voqThreshold;
-
-	// For VOQs: Indexing is done as follows
-	// - Downstream data:       [0...numOnus-1]
-	// - Upstream grants/polls: [numOnus...2*Onus-1]
-	Voq *voq;
-	IntVector voqBitCtr; // vector of VOQ lengths [bit]
-	int voqStartIdx; // VOQ index to start scheduling with at each batch period
-	// --> used to provide better fairness among VOQs
-
-	// For trace of VOQs
-	cOutVector *vQueueLength; // array of output vector for VOQ length [frame]
-	cOutVector *vQueueOctet; // array of output vector for VOQ size in octet
-
-
-	//--------------------------------------------------------------------------
-	//	Member functions
-	//--------------------------------------------------------------------------
-
-	// Misc.
-	void debugVoqStatus(void);
-	virtual void debugSnapshot(void);
-	virtual void handleGrant(int lambda, HybridPonFrame *grant);
-	virtual void initializeSpecific(void);
-	virtual void finishSpecific(void);
-
-	// Event handling
-	virtual void sendOnuPoll(HybridPonMessage *msg);
-//	virtual void receiveIpPacket(IpPacket *pkt);
-    virtual void receiveEthernetFrame(EtherFrame *frame);
-	void batchSchedule(cMessage *batchMsg);
-	void transmitVoqDataFrame(HybridPonMessage *msg);
-
-	// Scheduler to be defined in derived classes (pure virtual function)
-	virtual int scheduler(const simtime_t TX, const simtime_t RX, simtime_t &t,
-			int &voqsToSchedule, BoolVector &schedulableVoq, Voq *voq) = 0;
-
-	// OMNeT++
-	virtual void handleMessage(cMessage *msg);
-};
-
-class BEDF: public Batch {
-	//--------------------------------------------------------------------------
-	//	Member functions
-	//--------------------------------------------------------------------------
-
-	// Scheduler
-	virtual int scheduler(const simtime_t TX, const simtime_t RX, simtime_t &t,
-			int &voqsToSchedule, BoolVector &schedulableVoq, Voq *voq);
-};
+//class BEDF: public Batch {
+//	//--------------------------------------------------------------------------
+//	//	Member functions
+//	//--------------------------------------------------------------------------
+//
+//	// Scheduler
+//	virtual int scheduler(const simtime_t TX, const simtime_t RX, simtime_t &t,
+//			int &voqsToSchedule, BoolVector &schedulableVoq, Voq *voq);
+//};
 
 //class LongestQueueFirst : public Batch
 //{

@@ -11,7 +11,9 @@
 package inet.nodes.hybridpon;
 
 import inet.linklayer.hybridpon.HybridPonMac;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.nodes.ethernet.EtherSwitch;
+//import inet.linklayer.ethernet.EtherMAC;
+//import inet.linklayer.ethernet.EthernetInterface;
 
 
 module Onu
@@ -23,28 +25,40 @@ module Onu
         int numUsersPerOnu; // how many users in this ONU
         int queueSize @unit(bit); // size of FIFO queue in the Mac [bit]
     gates:
-        output fromMacToMonitor;
-		inout ponGate;	// to and from PON (i.e., splitter)
-		inout ethGate[numUsersPerOnu];
+//        output fromMacToMonitor;
+		inout pong;	/// PON I/F (i.e., toward AWG)
+		inout ethg[numUsersPerOnu];
     submodules:
         mac: HybridPonMac {
             parameters:
-                @display("i=block/subqueue;p=114,166");
+//                @display("i=block/subqueue;p=114,166");
+                @display("i=block/subqueue");                
                 queueSize = queueSize;
-			gates:
-				fromUni[sizeof(ethg)];
-				toUni[sizepf(ethg)];
+//			gates:
+//				fromUni[sizeof(ethg)];
+//				toUni[sizepf(ethg)];
         }
-        eth[sizeof(ethg)]: EthernetMac {
+        switch: EtherSwitch {
             parameters:
 //                @display("p=145,257,row,110;q=l2queue");
-        }
+        }        
+//        eth[sizeof(ethGate)]: EtherMAC {
+//            parameters:
+//                promiscuous = true;
+//                queueModule = "";
+//                @display("p=70,150,row;q=queue");
+//        }        
+//        eth[sizeof(ethGate)]: EtherMac {
+//            parameters:
+//                @display("p=145,257,row,110;q=l2queue");
+//        }
     connections:
-        mac.toMonitor --> fromMacToMonitor;
-		ponGate <--> mac.ponGate
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> mac.fromUni[i];
-            eth[i].netwIn <-- mac.toUni[i];
+//        mac.toMonitor --> fromMacToMonitor;
+		pong <--> mac.pong;
+        for i=0..numUsersPerOnu-1 {
+            ethg[i] <--> switch.ethg[i];
+//            eth[i].netwOut --> mac.fromUni[i];
+//            eth[i].netwIn <-- mac.toUni[i];
         }
+        mac.ethg <--> switch.ethg[numUserPerOnu];
 }

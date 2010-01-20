@@ -477,22 +477,23 @@ void SSSF::sendOnuPoll(HybridPonMessage *msg)
 
 
 //------------------------------------------------------------------------------
-// SSSF::receiveIpPacket --
+// SSSF::receiveEthernetFrame --
 //
-//		Receives an IP packet from an upper layer.
+//		receives an Ethernet frame from the switch.
 //
 // Arguments:
-// 		IpPacket	*pkt;
+// 		EtherFrame	*frame;
 //
 // Results:
-//		The packet is encapsulated in an Ethernet frame,and if there is a room,
-//		appended at the end of a VOQ. If this is an HOL frame (i.e., no other
-//		Ethernet frames in the VOQ), it is encapsulated in a PON frame,
-//		scheduled for transmission, and put into a TX queue.
-//		If there is no room in the VOQ, the packet is dropped.
+//		If there is a room in the VOQ, the frame is appended at the end of it.
+//		If this is an HOL frame (i.e., no other Ethernet frames in the VOQ),
+//		it is encapsulated in a PON frame, scheduled for transmission, and
+//		put into a TX queue.
+//		If there is no room in the VOQ, the frame is dropped.
 //------------------------------------------------------------------------------
 
-void SSSF::receiveIpPacket(IpPacket *pkt)
+//void SSSF::receiveIpPacket(IpPacket *pkt)
+void SSSF::receiveEthernetFrame(EtherFrame *frame)
 {
 	// Get packet attributes.
     int srcAddress = pkt->getSrcAddress();

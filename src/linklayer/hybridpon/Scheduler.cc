@@ -364,7 +364,7 @@ void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu)
 #endif
 
     // deliver Ethernet frames to a switch
-    cQueue &etherFrameQueue = ponFrameFromOnu->getEncapsulatedEtherFrames();
+    cQueue &etherFrameQueue = ponFrameFromOnu->getEncapsulatedFrames();
     while(!etherFrameQueue.empty()) {
         EtherFrame *etherFrame = (EtherFrame *)etherFrameQueue.pop();
 

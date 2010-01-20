@@ -75,7 +75,7 @@ void MACRelayUnitBase::initialize()
     agingTime = par("agingTime");
     agingTime = agingTime > 0 ? agingTime : 10;
 
-    // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
+    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
     const char *addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)
         readAddressTable(addressTableFile);

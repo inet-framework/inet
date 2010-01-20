@@ -17,7 +17,8 @@ simple HybridPonMac
         int queueSize;        // size of FIFO queue
     gates:
 //        output toMonitor;				// to monitor
-		inout	ponGate;					// to and from PON (i.e., splitter)
-		input	fromUni[numUnisPerOnu];	// from users (through UNIs)
-		output	toUni[numUnisPerOnu];	// to users (through UNIs)
+		inout	pong;	// PON I/F (i.e., toward AWG)
+		inout	ethg;	// I/F Ethernet switch
+//		input	fromUni[numUnisPerOnu];	// from users (through UNIs)
+//		output	toUni[numUnisPerOnu];	// to users (through UNIs)
 }
