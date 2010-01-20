@@ -262,11 +262,6 @@ void TraCIScenarioManager::handleSelfMsg(cMessage *msg)
 	error("TraCIScenarioManager received unknown self-message");
 }
 
-cModule* TraCIScenarioManager::getManagedModule(int32_t nodeId) {
-		if (hosts.find(nodeId) == hosts.end()) return 0;
-		return hosts[nodeId];
-}
-
 bool TraCIScenarioManager::isTraCISimulationEnded() const {
 	return traCISimulationEnded;
 }
@@ -338,7 +333,7 @@ void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficL
 void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");
 
-	uint32_t nodeVectorIndex = nodeId;
+	int32_t nodeVectorIndex = nodeId;
 
 	cModule* parentmod = getParentModule();
 	if (!parentmod) error("Parent Module not found");
@@ -356,26 +351,12 @@ void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::stri
 	hosts[nodeId] = mod;
 }
 
-void TraCIScenarioManager::processObjectCreation(uint8_t domain, int32_t nodeId) {
-	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
-
-	cModule* mod = getManagedModule(nodeId);
-	if (mod) error("Tried adding duplicate vehicle with Id %d", nodeId);
-
-	addModule(nodeId, moduleType, moduleName, moduleDisplayString);
-	mod = getManagedModule(nodeId);
-	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-		cModule* submod = iter();
-		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
-		if (!mm) continue;
-		mm->setExternalId(nodeId);
-	}
-	if (debug) EV << "Added vehicle #" << nodeId << endl;
+cModule* TraCIScenarioManager::getManagedModule(int32_t nodeId) {
+		if (hosts.find(nodeId) == hosts.end()) return 0;
+		return hosts[nodeId];
 }
 
-void TraCIScenarioManager::processObjectDestruction(uint8_t domain, int32_t nodeId) {
-	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
-
+void TraCIScenarioManager::deleteModule(int32_t nodeId) {
 	cModule* mod = getManagedModule(nodeId);
 	if (!mod) error("no vehicle with Id %d found", nodeId);
 
@@ -385,6 +366,27 @@ void TraCIScenarioManager::processObjectDestruction(uint8_t domain, int32_t node
 	hosts.erase(nodeId);
 	mod->callFinish();
 	mod->deleteModule();
+}
+
+bool TraCIScenarioManager::isInRegionOfInterest(int x, int y, std::string road_id, double speed, double angle, double allowed_speed) {
+	return true;
+}
+
+void TraCIScenarioManager::processObjectCreation(uint8_t domain, int32_t nodeId) {
+	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
+
+	// actual object creation is done in processUpdateObject
+}
+
+void TraCIScenarioManager::processObjectDestruction(uint8_t domain, int32_t nodeId) {
+	if (domain != DOM_VEHICLE) error("Expected DOM_VEHICLE, but got %d", domain);
+
+	// check if this object has been deleted already (e.g. because it was outside the ROI)
+	cModule* mod = getManagedModule(nodeId);
+	if (!mod) return;
+
+	deleteModule(nodeId);
+
 	if (debug) EV << "Removed vehicle #" << nodeId << endl;
 }
 
@@ -410,7 +412,31 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 
 	cModule* mod = getManagedModule(nodeId);
 
-	if (!mod) error("Vehicle #%d not found", nodeId);
+	// is it in the ROI?
+	bool inRoi = isInRegionOfInterest(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
+	if (!inRoi) {
+		if (mod) {
+			deleteModule(nodeId);
+			if (debug) EV << "Vehicle #" << nodeId << " left region of interest" << endl;
+		}
+		return;
+	}
+
+	if (!mod) {
+		// no such module - need to create
+
+		addModule(nodeId, moduleType, moduleName, moduleDisplayString);
+		mod = getManagedModule(nodeId);
+		if (!mod) error("Failed to create vehicle #%d", nodeId);
+		for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
+			cModule* submod = iter();
+			TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
+			if (!mm) continue;
+			mm->setExternalId(nodeId);
+		}
+		if (debug) EV << "Added vehicle #" << nodeId << endl;
+		
+	}
 
 	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
 		cModule* submod = iter();

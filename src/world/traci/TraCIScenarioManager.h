@@ -93,11 +93,18 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 		void executeOneTimestep(); /**< read and execute all commands for the next timestep */
 
-		cModule* getManagedModule(int32_t nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
-
 		void connect();
 		virtual void init_traci();
+
 		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString);
+		cModule* getManagedModule(int32_t nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
+		void deleteModule(int32_t nodeId);
+
+		/**
+		 * returns whether a given position lies within the simulation's region of interest.
+		 * Modules are destroyed and re-created as managed vehicles leave and re-enter the ROI
+		 */
+		bool isInRegionOfInterest(int x, int y, std::string road_id, double speed, double angle, double allowed_speed);
 
 		/**
 		 * Byte-buffer that stores values in TraCI byte-order
