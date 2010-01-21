@@ -65,7 +65,7 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual void finish();
 
 		virtual void handleSelfMsg(cMessage *msg);
-		virtual void nextPosition(int x, int y, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
+		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
 		virtual void changePosition();
 		virtual void setExternalId(int32_t external_id) {
 			this->external_id = external_id;

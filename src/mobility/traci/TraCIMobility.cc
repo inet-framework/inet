@@ -140,10 +140,10 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 }
 
-void TraCIMobility::nextPosition(int x, int y, std::string road_id, double speed, double angle, double allowed_speed)
+void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed)
 {
-	if (debug) EV << "nextPosition " << x << " " << y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
-	nextPos = Coord(x,y);
+	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
+	nextPos = position;
 	this->road_id = road_id;
 	this->speed = speed;
 	this->angle = angle;

@@ -368,7 +368,7 @@ void TraCIScenarioManager::deleteModule(int32_t nodeId) {
 	mod->deleteModule();
 }
 
-bool TraCIScenarioManager::isInRegionOfInterest(int x, int y, std::string road_id, double speed, double angle, double allowed_speed) {
+bool TraCIScenarioManager::isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed) {
 	return true;
 }
 
@@ -398,9 +398,7 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 	float px; buf >> px;
 	float py; buf >> py;
 	Coord p = traci2omnet(Coord(px, py));
-	int pxi = static_cast<int>(p.x);
-	int pyi = static_cast<int>(p.y);
-	if ((pxi < 0) || (pyi < 0)) error("received bad node position (%.2f, %.2f), translated to (%d, %d)", px, py, pxi, pyi);
+	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
 
 	std::string edge; buf >> edge;
 
@@ -413,7 +411,7 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 	cModule* mod = getManagedModule(nodeId);
 
 	// is it in the ROI?
-	bool inRoi = isInRegionOfInterest(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
+	bool inRoi = isInRegionOfInterest(p, edge, speed, angle * M_PI / 180.0, allowed_speed);
 	if (!inRoi) {
 		if (mod) {
 			deleteModule(nodeId);
@@ -442,8 +440,8 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 		cModule* submod = iter();
 		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
 		if (!mm) continue;
-		if (debug) EV << "module " << nodeId << " moving to " << pxi << "," << pyi << endl;
-		mm->nextPosition(pxi, pyi, edge, speed, angle * M_PI / 180.0, allowed_speed);
+		if (debug) EV << "module " << nodeId << " moving to " << p.x << "," << p.y << endl;
+		mm->nextPosition(p, edge, speed, angle * M_PI / 180.0, allowed_speed);
 	}
 }
 

@@ -104,7 +104,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		 * returns whether a given position lies within the simulation's region of interest.
 		 * Modules are destroyed and re-created as managed vehicles leave and re-enter the ROI
 		 */
-		bool isInRegionOfInterest(int x, int y, std::string road_id, double speed, double angle, double allowed_speed);
+		bool isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed);
 
 		/**
 		 * Byte-buffer that stores values in TraCI byte-order
