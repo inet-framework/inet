@@ -1,12 +1,17 @@
-// $Id$
-//-------------------------------------------------------------------------------
-//	Scheduler.h --
-//
-//	This file declares 'Scheduler' and its derived classes for hybrid
-//	TDM/WDM-PON OLT.
-//
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
-//-------------------------------------------------------------------------------
+///
+/// @file   Scheduler.h
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   Tue Jun 30 12:19:39 2009
+///
+/// @brief  Declares 'Scheduler' and its derived classes for hybrid
+///			TDM/WDM-PON OLT.
+///
+/// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+///
 
 
 // For Trace of TX & RX usage
@@ -25,18 +30,15 @@
 #include "EtherFrame_m.h"
 //#include "Monitor.h"
 
-class Scheduler: public cSimpleModule {
-	//--------------------------------------------------------------------------
-	//	Member variables
-	//--------------------------------------------------------------------------
 
+class Scheduler: public cSimpleModule {
 protected:
 	// NED parameters (as defined in NED files)
 	int cwMax;
 	int numReceivers;
 	int numTransmitters;
 	int numOnus; //	= numChannels (now obsolete)
-	int numUsersPerOnu;
+	//	int numUsersPerOnu;
 	int queueSizePoll; // Size of FIFO queue for polling frames [bit]
 	simtime_t maxTxDelay;
 	simtime_t onuTimeout;
@@ -56,13 +58,10 @@ protected:
 	HybridPonMsgVector pollEvent;
 	/* 	TimeVector  pollOnu; */
 
-//	// For monitoring
-//	Monitor *monitor;
+	//	// For monitoring
+	//	Monitor *monitor;
 
-	//--------------------------------------------------------------------------
-	//	Member functions
-	//--------------------------------------------------------------------------
-
+protected:
 	// Misc.
 	void debugSchedulerStatus(void);
 	virtual void debugSnapshot(void);
@@ -74,16 +73,16 @@ protected:
 	virtual void initializeSpecific(void) = 0; // "
 	virtual void finishSpecific(void) = 0; // "
 
-//	// QUICK DEBUG */
-//	simtime_t debugRX(void);
-//	// QUICK DEBUG
+	//	// QUICK DEBUG */
+	//	simtime_t debugRX(void);
+	//	// QUICK DEBUG
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
 	void transmitPollFrame(HybridPonMessage *msg);
 	virtual void receiveHybridPonFrame(HybridPonFrame *msg);
-//	virtual void receiveIpPacket(IpPacket *pkt) = 0; // pure virtual function
-    virtual void receiveEthernetFrame(EtherFrame *frame) = 0; // pure virtual function
+	//	virtual void receiveIpPacket(IpPacket *pkt) = 0; // pure virtual function
+	virtual void receiveEthernetFrame(EtherFrame *frame) = 0; // pure virtual function
 
 	// Scheduling
 	virtual simtime_t seqSchedule(int onu, HybridPonFrame *ponFrameToOnu);
@@ -94,48 +93,38 @@ protected:
 	void finish(void);
 };
 
+
 //------------------------------------------------------------------------------
-// Classes based on sequential operation mode
+// Classes for sequential schedulers
 //------------------------------------------------------------------------------
 
 class Sequential: public Scheduler {
 protected:
-	//--------------------------------------------------------------------------
-	//	Member variables
-	//--------------------------------------------------------------------------
-
 	// NED parameters (as defined in NED files)
 	int queueSize; // Size of FIFO queue for data frames [bit]
 
 	// Status variables
 	int busyQueue; // Counter to emulate a FIFO for us & ds data frames
 
-
-	//--------------------------------------------------------------------------
-	//	Member functions
-	//--------------------------------------------------------------------------
-
+protected:
 	// Misc.
 	virtual void handleGrant(int lambda, HybridPonFrame *grant);
 	virtual void initializeSpecific(void);
 	virtual void finishSpecific(void);
 
 	// Event handling
-//	virtual void receiveIpPacket(IpPacket *pkt);
-    virtual void receiveEthernetFrame(EtherFrame *frame);
+	//	virtual void receiveIpPacket(IpPacket *pkt);
+	virtual void receiveEthernetFrame(EtherFrame *frame);
 	void transmitDataFrame(DummyPacket *msg);
 
 	// OMNeT++
 	virtual void handleMessage(cMessage *msg);
 };
 
+
 class SSSF: public Scheduler // SSSF (Sequential Scheduling with Schedule-time Framing)
 {
 protected:
-	//--------------------------------------------------------------------------
-	//	Member variables
-	//--------------------------------------------------------------------------
-
 	// NED parameters (as defined in NED files)
 	int voqSize; // Size of VOQ [bit]
 	//    int             rsDepth;        // Max. # of checking in ONU timeout rescheduling
@@ -173,11 +162,7 @@ protected:
 	IntVector dsArrvCtr; // vector of downstream arrival (bit) counters
 	IntVector dsTxCtr; // vector of downstream TX (bit) counters
 
-
-	//--------------------------------------------------------------------------
-	//	Member functions
-	//--------------------------------------------------------------------------
-
+protected:
 	// Misc.
 	virtual int assignGrants(int ch, int usRequest);
 	void debugOnuPollListStatus(void);
@@ -192,8 +177,8 @@ protected:
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
-//	virtual void receiveIpPacket(IpPacket *pkt);
-    virtual void receiveEthernetFrame(EtherFrame *frame);
+	//	virtual void receiveIpPacket(IpPacket *pkt);
+	virtual void receiveEthernetFrame(EtherFrame *frame);
 	virtual void receiveHybridPonFrame(HybridPonFrame *frame);
 	virtual void transmitDataFrame(DummyPacket *msg);
 

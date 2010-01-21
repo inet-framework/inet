@@ -15,9 +15,9 @@ package inet.linklayer.hybridpon;
 simple LambdaSplitter
 {
     parameters:
-		@node();
-		@display("i=abstract/opticalswitch_s");
+        @node();
+        @display("i=abstract/opticalswitch_s");
     gates:
-        inout muxg;		// a gate for WDM-multiplexed optical streams
         inout demuxg[];	// gates for WDM-demultiplexed optical streams
+        inout muxg;		// a gate for WDM-multiplexed optical streams
 }

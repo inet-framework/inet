@@ -46,10 +46,14 @@ network ARPTest
             @display("i=device/router;p=324,161");
         }
         onu1: Onu {
-            @display("i=device/pc2;p=171,95");
+            parameters:
+                lambda = 0;
+                @display("i=device/pc2;p=171,95");
         }
         onu2: Onu {
-            @display("i=device/pc2;p=171,218");
+            parameters:
+                lambda = 1;
+                @display("i=device/pc2;p=171,218");
         }
         awg: LambdaSplitter {
             @display("i=abstract/opticalswitch_s;p=256,161");

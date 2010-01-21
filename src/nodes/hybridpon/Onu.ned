@@ -19,46 +19,41 @@ import inet.nodes.ethernet.EtherSwitch;
 module Onu
 {
     parameters:
-		@node();
-        @display("bgb=212,228;bgp=2,2");
+        @node();
+        @display("bgb=188,228;bgp=2,2");
         int lambda; // wavelength assigned to this ONU
         int numUsersPerOnu; // how many users in this ONU
         int queueSize @unit(bit); // size of FIFO queue in the Mac [bit]
     gates:
-//        output fromMacToMonitor;
-		inout pong;	/// PON I/F (i.e., toward AWG)
-		inout ethg[numUsersPerOnu];
+        //        output fromMacToMonitor;
+        inout pong;	/// PON I/F (i.e., toward AWG)
+        inout ethg[numUsersPerOnu];
     submodules:
         mac: HybridPonMac {
             parameters:
-//                @display("i=block/subqueue;p=114,166");
-                @display("i=block/subqueue");                
+                //                @display("i=block/subqueue;p=114,166");
+                @display("i=block/subqueue;p=92,164");
                 queueSize = queueSize;
-//			gates:
-//				fromUni[sizeof(ethg)];
-//				toUni[sizepf(ethg)];
         }
         switch: EtherSwitch {
             parameters:
-//                @display("p=145,257,row,110;q=l2queue");
-        }        
-//        eth[sizeof(ethGate)]: EtherMAC {
-//            parameters:
-//                promiscuous = true;
-//                queueModule = "";
-//                @display("p=70,150,row;q=queue");
-//        }        
-//        eth[sizeof(ethGate)]: EtherMac {
-//            parameters:
-//                @display("p=145,257,row,110;q=l2queue");
-//        }
+                @display("p=92,59");
+        }
+    //        eth[sizeof(ethGate)]: EtherMAC {
+    //            parameters:
+    //                promiscuous = true;
+    //                queueModule = "";
+    //                @display("p=70,150,row;q=queue");
+    //        }        
+    //        eth[sizeof(ethGate)]: EtherMac {
+    //            parameters:
+    //                @display("p=145,257,row,110;q=l2queue");
+    //        }
     connections:
-//        mac.toMonitor --> fromMacToMonitor;
-		pong <--> mac.pong;
+        //        mac.toMonitor --> fromMacToMonitor;
+        pong <--> mac.pong;
         for i=0..numUsersPerOnu-1 {
             ethg[i] <--> switch.ethg[i];
-//            eth[i].netwOut --> mac.fromUni[i];
-//            eth[i].netwIn <-- mac.toUni[i];
         }
         mac.ethg <--> switch.ethg[numUserPerOnu];
 }

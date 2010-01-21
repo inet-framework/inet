@@ -5,7 +5,7 @@
 //	This file implements 'Sequential' class, derived from the 'Scheduler'
 //  class, for PON OLT.
 //
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//	Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
 //------------------------------------------------------------------------------
 
 
@@ -21,7 +21,7 @@ Define_Module(Sequential);
 
 
 //------------------------------------------------------------------------------
-// Sequential::receiveIpPacket --
+// Sequential::receiveEthernetFrame --
 //
 //		receives an Ethernet frame from the switch.
 //

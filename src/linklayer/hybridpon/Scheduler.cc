@@ -1,11 +1,15 @@
-// $Id$
-//------------------------------------------------------------------------------
-//	Scheduler.cc --
-//
-//	This file implements 'Scheduler' class for PON OLT.
-//
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
-//------------------------------------------------------------------------------
+///
+/// @file   Scheduler.cc
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   Tue Jun 30 12:19:39 2009
+///
+/// @brief  Implements 'Scheduler' class for hybrid TDM/WDM-PON OLT.
+///
+/// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
 
 
 // For debugging
@@ -228,7 +232,7 @@ void Scheduler::debugSnapshot(void)
     cerr << "- numOnus=" << numOnus << endl;
     cerr << "- numReceivers=" << numReceivers << endl;
     cerr << "- numTransmitters=" << numTransmitters << endl;
-    cerr << "- numUsersPerOnu=" << numUsersPerOnu << endl;
+//    cerr << "- numUsersPerOnu=" << numUsersPerOnu << endl;
     cerr << "- queueSizePoll=" << queueSizePoll << endl;
     cerr << "- maxTxDelay=" << maxTxDelay << endl;
     cerr << "- cwMax=" << cwMax << endl;
@@ -467,7 +471,7 @@ void Scheduler::initialize(void)
 	numReceivers = par("numReceivers");
 	numTransmitters = par("numTransmitters");
 	numOnus = par("numOnus");
-	numUsersPerOnu = par("numUsersPerOnu");
+//	numUsersPerOnu = par("numUsersPerOnu");
 	onuTimeout = par("onuTimeout");
 	queueSizePoll = par("queueSizePoll");
 	distances = ((const char *) par("distances"));

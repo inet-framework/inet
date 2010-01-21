@@ -5,7 +5,7 @@
 /// 
 /// @brief  Defines 'HybridPonFrame' and 'HybridPonMessage' message objects.
 /// 
-/// @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
+/// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
@@ -29,21 +29,6 @@ packet HybridPonMessage
 };
 
 
-// packet IpPacket
-// {
-//     int srcAddress;
-//     int dstnAddress;
-//     long seqNumber;
-// };
-
-
-// packet EthFrame extends IpPacket
-// {
-//     int header;
-//     int fcs;
-// };
-
-
 //
 // Common base class for classes representing PON frame types,
 // containing their common header fields.
@@ -57,7 +42,7 @@ packet HybridPonMessage
 //
 packet HybridPonFrame extends cPacket
 {
-    int lambda;			// wavelength channel
+//    int lambda;			// wavelength channel
     
     // 8-Bit "Flags" field
     //======================================
