@@ -1,9 +1,9 @@
 ///
-/// @file   WdmLayer.cc
+/// @file   OltWdmLayer.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Jan/21/2010
 ///
-/// @brief  Declares 'WdmLayer' class for a hybrid TDM/WDM-PON.
+/// @brief  Declares 'OltWdmLayer' class for a hybrid TDM/WDM-PON OLT.
 ///
 /// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -17,18 +17,18 @@
 
 
 #include <stdlib.h>
-#include "WdmLayer.h"
+#include "OltWdmLayer.h"
 
 // Register modules.
-Define_Module(WdmLayer)
+Define_Module(OltWdmLayer)
 
-void WdmLayer::initialize() {
-	inBaseId = getBaseId("demuxg$i");
-	outBaseId = getBaseId("demuxg$o");
+void OltWdmLayer::initialize() {
+	//	inBaseId = gateBaseId("demuxg$i");
+	baseId = gateBaseId("demuxg$o");
 	//	gateSize = gateSize("demuxg$i");
 }
 
-void WdmLayer::handleMessage(cMessage *msg) {
+void OltWdmLayer::handleMessage(cMessage *msg) {
 #ifdef DEBUG_WDM_LAYER
 	ev << getFullPath() << ": handleMessage called" << endl;
 #endif
@@ -45,15 +45,16 @@ void WdmLayer::handleMessage(cMessage *msg) {
 
 		// Decapsulate a frame and send it to the upper layer
 		cPacket *frame = opticalFrame->decapsulate();
-		send(frame, "demuxg", outBaseId + i); //ownership problem here or up there?
+		send(frame, "demuxg", baseId + i); //ownership problem here or up there?
 		delete opticalFrame;
 	} else {
 		// This is the frame from the DEMUX gate (i.e., from the upper layer).
 
-		int i = findGate("demuxg$i") - inBaseId; // get channel index
+		int i = msg->getArrivalGate()->getIndex(); // get a gate index which will become a channel index for an optical frame
+		//		int i = findGate("demuxg$i") - inBaseId; // get channel index
 		OpticalFrame *opticalFrame = new OpticalFrame();
 		opticalFrame->setLambda(i);
-		opticalFrame->encapsulate(msg);
+		opticalFrame->encapsulate((cPacket *) msg);
 		send(opticalFrame, "muxg");
 
 		//		for (int i=0; i<=gateSize; i++) {
@@ -77,5 +78,5 @@ void WdmLayer::handleMessage(cMessage *msg) {
 	} // end of for loop
 }
 
-void WdmLayer::finish() {
+void OltWdmLayer::finish() {
 }

@@ -16,7 +16,7 @@
 package inet.nodes.hybridpon;
 
 import inet.linklayer.hybridpon.IScheduler;
-import inet.linklayer.hybridpon.WdmLayer;
+import inet.linklayer.hybridpon.OltWdmLayer;
 import inet.nodes.ethernet.EtherSwitch;
 
 
@@ -40,7 +40,7 @@ module Olt
                 numOnus = numOnus;
                 @display("p=90,118");
         }
-        wdm: WdmLayer {
+        wdm: OltWdmLayer {
             parameters:
                 @display("p=90,199");
         }

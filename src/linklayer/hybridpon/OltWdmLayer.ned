@@ -1,9 +1,9 @@
 ///
-/// @file   WdmLayer.ned
+/// @file   OltWdmLayer.ned
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Thu Jan 21 15:43:39 2010
 ///
-/// @brief  Defines interfaces for a WDM layer module.
+/// @brief  Defines interfaces for a WDM layer module in a hybrid TDM/WDM-PON OLT.
 ///
 /// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -16,7 +16,7 @@
 package inet.linklayer.hybridpon;
 
 
-simple WdmLayer
+simple OltWdmLayer
 {
     parameters:
 		@node();

@@ -1,9 +1,9 @@
 ///
-/// @file   WdmLayer.h
+/// @file   OltWdmLayer.h
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Jan/21/2010
 ///
-/// @brief  Declares 'WdmLayer' class for a hybrid TDM/WDM-PON.
+/// @brief  Declares 'OltWdmLayer' class for a hybrid TDM/WDM-PON.
 ///
 /// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -19,9 +19,9 @@
 #include <omnetpp.h>
 #include "HybridPon.h"
 
-class WdmLayer: public cSimpleModule {
-	int inBaseId; // base ID of demuxg$i gate vector
-	int outBaseId; // base ID of demuxg$o gate vector
+class OltWdmLayer: public cSimpleModule {
+	//	int inBaseId; // base ID of demuxg$i gate vector
+	int baseId; // base ID of demuxg$o gate vector
 	//	inu	gateSize;	// size of demuxg gate vector
 
 	virtual void initialize();

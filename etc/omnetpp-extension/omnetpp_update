@@ -1,9 +1,9 @@
 #!/bin/sh
 cd `dirname $0`/../..
 INETROOT=`pwd`
-OMNETPPROOT=$INETROOT/../omnetpp-4.0
+OMNETPPROOT=$INETROOT/../omnetpp-4.1b1
 
-# Check root directory of OMNeT++ 4.0.
+# Check root directory of OMNeT++ 4.
 if [ -d $OMNETPPROOT ]
 then
 	echo "Cheking root directories for INET and OMNeT++ ..."
@@ -11,7 +11,7 @@ then
 	echo "- OMNETPPROOT=$OMNETPPROOT"
 	echo ""
 else
-	echo "Oops! I cannot find OMNeT++ 4.0 root directory."
+	echo "Oops! I cannot find OMNeT++ 4 root directory."
 	echo "Check this shell script to fix it."
 	exit 1
 fi
