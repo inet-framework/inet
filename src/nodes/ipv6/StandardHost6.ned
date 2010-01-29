@@ -27,7 +27,7 @@ import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.RoutingTable6;
-import inet.transport.tcp.TCP;
+import inet.transport.tcp.ITCP;
 import inet.transport.udp.UDP;
 
 
@@ -42,6 +42,7 @@ module StandardHost6
         int numUdpApps = default(0);
         string tcpAppType = default("");
         string udpAppType = default("");
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         @display("i=device/laptop");
     gates:
         inout pppg[];
@@ -64,7 +65,7 @@ module StandardHost6
             parameters:
                 @display("p=163,67");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=163,154");
         }
