@@ -1,0 +1,20 @@
+Place 3rd party libraries and software here. Some components of the INET
+framework expects their external components here. Supported software:
+
+- Network Simulation Cradle (realworld TCP implementaions from Linux/OpenBSD/FreeBSD/lwIP)
+
+  Download NSC from: http://www.wand.net.nz/~stj2/nsc/
+
+  Extract the 'nsc-0.5.1.tar.bz2' tarball in this directory and build it.
+  $ tar xvfj nsc-0.5.1.tar.bz2
+  $ cd nsc-0.5.1
+  $ python scons.py
+
+  If you have a version of NSC other than 0.5.1 update the <inet_root>/src/makefrag
+  file and then regenerate your makefiles using (in the <inet_root> directory):
+
+  $ make makefiles
+
+  Then rebuild INET.
+  $ make cleanall
+  $ make

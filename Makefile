@@ -10,7 +10,11 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep --make-so -o inet -O out
+	@export NSC_VERSION=`ls -d 3rdparty/nsc* 2>/dev/null | sed 's/^.*-//'`; \
+	if [ "$$NSC_VERSION" != "" ]; then \
+	export NSC_VERSION_DEF=-KNSC_VERSION=$$NSC_VERSION; \
+	fi; \
+	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
