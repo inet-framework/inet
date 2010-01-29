@@ -91,7 +91,7 @@ void TraCIMobility::initialize(int stage)
 		nextPos = Coord(-1,-1);
 		road_id = -1; WATCH(road_id);
 		speed = -1; WATCH(speed);
-		angle = -1; WATCH(angle);
+		angle = M_PI; WATCH(angle);
 		allowed_speed = -1; WATCH(allowed_speed);
 
 		startAccidentMsg = 0;

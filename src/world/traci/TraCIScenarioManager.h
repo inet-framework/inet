@@ -230,6 +230,17 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		 * convert OMNeT++ coordinates to TraCI coordinates
 		 */
 		Coord omnet2traci(Coord coord) const;
+
+		/**
+		 * convert TraCI angle to OMNeT++ angle (in rad)
+		 */
+		double traci2omnetAngle(double angle) const;
+
+		/**
+		 * convert OMNeT++ angle (in rad) to TraCI angle
+		 */
+		double omnet2traciAngle(double angle) const;
+
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);

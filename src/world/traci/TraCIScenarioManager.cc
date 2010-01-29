@@ -404,14 +404,15 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 
 	float speed; buf >> speed;
 
-	float angle; buf >> angle;
+	float angle_traci; buf >> angle_traci;
+	float angle = traci2omnetAngle(angle_traci);
 
 	float allowed_speed; buf >> allowed_speed;
 
 	cModule* mod = getManagedModule(nodeId);
 
 	// is it in the ROI?
-	bool inRoi = isInRegionOfInterest(p, edge, speed, angle * M_PI / 180.0, allowed_speed);
+	bool inRoi = isInRegionOfInterest(p, edge, speed, angle, allowed_speed);
 	if (!inRoi) {
 		if (mod) {
 			deleteModule(nodeId);
@@ -441,7 +442,7 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
 		if (!mm) continue;
 		if (debug) EV << "module " << nodeId << " moving to " << p.x << "," << p.y << endl;
-		mm->nextPosition(p, edge, speed, angle * M_PI / 180.0, allowed_speed);
+		mm->nextPosition(p, edge, speed, angle, allowed_speed);
 	}
 }
 
@@ -489,6 +490,36 @@ Coord TraCIScenarioManager::traci2omnet(Coord coord) const {
 
 Coord TraCIScenarioManager::omnet2traci(Coord coord) const {
 	return Coord(coord.x + netbounds1.x - margin, (netbounds2.y - netbounds1.y) - (coord.y - netbounds1.y) + margin);
+}
+
+double TraCIScenarioManager::traci2omnetAngle(double angle) const {
+
+	// convert to rad	
+	angle = angle * M_PI / 180.0;
+
+	// rotate angle so 0 is east (in TraCI's angle interpretation 0 is south)
+	angle = 1.5*M_PI - angle; 
+
+	// normalize angle to -M_PI <= angle < M_PI
+	while (angle < -M_PI) angle += 2*M_PI;
+	while (angle >= M_PI) angle -= 2*M_PI;
+
+	return angle;
+}
+
+double TraCIScenarioManager::omnet2traciAngle(double angle) const {
+
+	// rotate angle so 0 is south (in OMNeT++'s angle interpretation 0 is east)
+	angle = 1.5*M_PI - angle; 
+
+	// convert to degrees
+	angle = angle * 180 / M_PI;
+
+	// normalize angle to 0 <= angle < 360
+	while (angle < 0) angle += 360;
+	while (angle >= 360) angle -= 360;
+
+	return angle;
 }
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv) {

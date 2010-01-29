@@ -85,8 +85,11 @@ class INET_API TraCIMobility : public BasicMobility
 			if (speed == -1) throw std::runtime_error("TraCIMobility::getSpeed called with no speed set yet");
 			return speed;
 		}
-		virtual double getAngle() {
-			if (angle == -1) throw std::runtime_error("TraCIMobility::getAngle called with no angle set yet");
+		/**
+		 * returns angle in rads, 0 being east, with -M_PI <= angle < M_PI. 
+		 */
+		virtual double getAngleRad() {
+			if (angle == M_PI) throw std::runtime_error("TraCIMobility::getAngleRad called with no angle set yet");
 			return angle;
 		}
 		virtual double getAllowedSpeed() {
