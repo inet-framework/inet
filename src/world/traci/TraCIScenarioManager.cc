@@ -234,6 +234,9 @@ void TraCIScenarioManager::finish()
 		::close(socket);
 		socket = -1;
 	}
+	while (hosts.begin() != hosts.end()) {
+		deleteModule(hosts.begin()->first);
+	}	
 }
 
 void TraCIScenarioManager::handleMessage(cMessage *msg)
