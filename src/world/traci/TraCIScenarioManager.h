@@ -90,7 +90,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void connect();
 		virtual void init_traci();
 
-		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString);
+		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
 		cModule* getManagedModule(int32_t nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
 		void deleteModule(int32_t nodeId);
 

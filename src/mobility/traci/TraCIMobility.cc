@@ -70,7 +70,10 @@ void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
 
 void TraCIMobility::initialize(int stage)
 {
-	BasicMobility::initialize(stage);
+	// skip stage 1 initialisation of BasicMobility as this messes with pos.x/pos.y and triggers an NB update with these wrong values
+	if (stage != 1) {
+		BasicMobility::initialize(stage);
+	}
 
 	if (stage == 1)
 	{
@@ -86,22 +89,29 @@ void TraCIMobility::initialize(int stage)
 		statistics.initialize();
 		statistics.watch(*this);
 
-		external_id = -1;
+		if (!isPreInitialized) {
+			external_id = -1;
+			nextPos = Coord(-1,-1);
+			road_id = -1; 
+			speed = -1; 
+			angle = M_PI; 
+			allowed_speed = -1; 
+			pos.x = -1; 
+			pos.y = -1; 
+		}
+		isPreInitialized = false;
 
-		nextPos = Coord(-1,-1);
-		road_id = -1; WATCH(road_id);
-		speed = -1; WATCH(speed);
-		angle = M_PI; WATCH(angle);
-		allowed_speed = -1; WATCH(allowed_speed);
+		WATCH(road_id);
+		WATCH(speed);
+		WATCH(angle);
+		WATCH(allowed_speed);
+		WATCH(pos.x);
+		WATCH(pos.y);
 
 		startAccidentMsg = 0;
 		stopAccidentMsg = 0;
 		manager = 0;
 		last_speed = -1;
-
-
-		pos.x = -1; WATCH(pos.x);
-		pos.y = -1; WATCH(pos.y);
 
 		if (accidentCount > 0) {
 			simtime_t accidentStart = par("accidentStart");
@@ -109,6 +119,8 @@ void TraCIMobility::initialize(int stage)
 			stopAccidentMsg = new cMessage("scheduledAccidentResolved");
 			scheduleAt(simTime() + accidentStart, startAccidentMsg);
 		}
+
+		updatePosition();
 	}
 
 }
@@ -121,6 +133,8 @@ void TraCIMobility::finish()
 
 	cancelAndDelete(startAccidentMsg);
 	cancelAndDelete(stopAccidentMsg);
+
+	isPreInitialized = false;
 }
 
 void TraCIMobility::handleSelfMsg(cMessage *msg)
@@ -140,9 +154,25 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 }
 
+void TraCIMobility::preInitialize(int32_t external_id, const Coord& position, std::string road_id, double speed, double angle, double allowed_speed)
+{
+	if (debug) EV << "pre-initializing to " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
+
+	this->external_id = external_id;
+	nextPos = position;
+	pos = position;
+	this->road_id = road_id;
+	this->speed = speed;
+	this->angle = angle;
+	this->allowed_speed = allowed_speed;
+
+	isPreInitialized = true;
+}
+
 void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed)
 {
 	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
+	isPreInitialized = false;
 	nextPos = position;
 	this->road_id = road_id;
 	this->speed = speed;
@@ -161,7 +191,7 @@ void TraCIMobility::changePosition()
 
 	// keep speed statistics
 	if ((pos.x != -1) && (pos.y != -1)) {
-		double distance = sqrt(((pos.x - nextPos.x) * (pos.x - nextPos.x)) + ((pos.y - nextPos.y) * (pos.y - nextPos.y)));
+		double distance = pos.distance(nextPos);
 		statistics.totalDistance += distance;
 		statistics.totalTime += updateInterval;
 		if (speed != -1) {
@@ -184,8 +214,7 @@ void TraCIMobility::changePosition()
 		}
 	}
 
-	pos.x = nextPos.x;
-	pos.y = nextPos.y;
+	pos = nextPos;
 	fixIfHostGetsOutside();
 	updatePosition();
 }

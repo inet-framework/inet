@@ -321,7 +321,7 @@ void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficL
 }
 
 // name: host;Car;i=vehicle.gif
-void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString) {
+void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id, double speed, double angle, double allowed_speed) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");
 
 	int32_t nodeVectorIndex = nodeId;
@@ -338,6 +338,15 @@ void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::stri
 	mod->getDisplayString().parse(displayString.c_str());
 	mod->buildInside();
 	mod->scheduleStart(simTime()+updateInterval);
+
+	// pre-initialize TraCIMobility
+	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
+		cModule* submod = iter();
+		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
+		if (!mm) continue;
+		mm->preInitialize(nodeId, position, road_id, speed, angle, allowed_speed);
+	}
+
 	mod->callInitialize();
 	hosts[nodeId] = mod;
 }
@@ -414,26 +423,17 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 
 	if (!mod) {
 		// no such module - need to create
-
-		addModule(nodeId, moduleType, moduleName, moduleDisplayString);
-		mod = getManagedModule(nodeId);
-		if (!mod) error("Failed to create vehicle #%d", nodeId);
+		addModule(nodeId, moduleType, moduleName, moduleDisplayString, p, edge, speed, angle, allowed_speed);
+		if (debug) EV << "Added vehicle #" << nodeId << endl;
+	} else {
+		// module existed - update position
 		for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
 			cModule* submod = iter();
 			TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
 			if (!mm) continue;
-			mm->setExternalId(nodeId);
+			if (debug) EV << "module " << nodeId << " moving to " << p.x << "," << p.y << endl;
+			mm->nextPosition(p, edge, speed, angle, allowed_speed);
 		}
-		if (debug) EV << "Added vehicle #" << nodeId << endl;
-		
-	}
-
-	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-		cModule* submod = iter();
-		TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
-		if (!mm) continue;
-		if (debug) EV << "module " << nodeId << " moving to " << p.x << "," << p.y << endl;
-		mm->nextPosition(p, edge, speed, angle, allowed_speed);
 	}
 }
 

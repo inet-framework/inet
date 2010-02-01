@@ -60,11 +60,12 @@ class INET_API TraCIMobility : public BasicMobility
 				void recordScalars(cSimpleModule& module);
 		};
 
-		TraCIMobility() : BasicMobility() {}
+		TraCIMobility() : BasicMobility(), isPreInitialized(false) {}
 		virtual void initialize(int);
 		virtual void finish();
 
 		virtual void handleSelfMsg(cMessage *msg);
+		virtual void preInitialize(int32_t external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
 		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
 		virtual void changePosition();
 		virtual void setExternalId(int32_t external_id) {
@@ -124,6 +125,8 @@ class INET_API TraCIMobility : public BasicMobility
 		cOutVector currentCO2EmissionVec; /**< vector plotting current CO2 emission */
 
 		Statistics statistics; /**< everything statistics-related */
+
+		bool isPreInitialized; /**< true if preInitialize() has been called immediately before initialize() */
 
 		int32_t external_id; /**< updated by setExternalId() */
 
