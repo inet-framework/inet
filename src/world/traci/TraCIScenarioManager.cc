@@ -44,17 +44,11 @@ void TraCIScenarioManager::initialize()
 	autoShutdown = par("autoShutdown");
 	margin = par("margin");
 
-	packetNo = 0;
-
-	traCISimulationEnded = false;
 	executeOneTimestepTrigger = new cMessage("step");
 	scheduleAt(0, executeOneTimestepTrigger);
 
 	cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
 	if (cc == 0) error("Could not find a ChannelControl module named channelcontrol");
-
-	statsSimStart = time(NULL);
-	currStep = 0;
 
 	if (debug) EV << "TraCIScenarioManager connecting to TraCI server" << endl;
 	socket = -1;
@@ -65,7 +59,6 @@ void TraCIScenarioManager::initialize()
 }
 
 std::string TraCIScenarioManager::receiveTraCIMessage() {
-	if(traCISimulationEnded) error("Simulation has ended");
 	if (socket < 0) error("Connection to TraCI server lost");
 
 	uint32_t msgLength;
@@ -105,7 +98,6 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 }
 
 void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
-	if(traCISimulationEnded) error("Simulation has ended");
 	if (socket < 0) error("Connection to TraCI server lost");
 
 	{
@@ -260,10 +252,6 @@ void TraCIScenarioManager::handleSelfMsg(cMessage *msg)
 		return;
 	}
 	error("TraCIScenarioManager received unknown self-message");
-}
-
-bool TraCIScenarioManager::isTraCISimulationEnded() const {
-	return traCISimulationEnded;
 }
 
 void TraCIScenarioManager::commandSetMaximumSpeed(int32_t nodeId, float maxSpeed) {

@@ -56,7 +56,6 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		virtual void finish();
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);
-		virtual bool isTraCISimulationEnded() const;
 
 		void commandSetMaximumSpeed(int32_t nodeId, float maxSpeed);
 		void commandChangeRoute(int32_t nodeId, std::string roadId, double travelTime);
@@ -78,15 +77,10 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		int margin;
 
 		int socket;
-		long statsSimStart;
-		int currStep;
 		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
 		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
-		bool traCISimulationEnded;
-		int packetNo; /**< current packet number (for debugging) */
 		std::map<int32_t, cModule*> hosts; /**< vector of all hosts managed by us */
-		std::map<int32_t, simtime_t> lastUpdate; /**< vector of all hosts' last update time */
 		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
 
 		ChannelControl* cc;
