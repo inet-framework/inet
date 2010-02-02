@@ -89,7 +89,7 @@ void EtherLLC::updateDisplayString()
 void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 {
     if (msg->getByteLength() > (MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
-        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", msg->getByteLength(), MAX_ETHERNET_DATA);
+        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
 
