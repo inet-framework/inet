@@ -322,13 +322,17 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 
 void TCPConnection::configureStateVariables()
 {
+    long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
+    if (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0)
+        throw cRuntimeError("Invalid advertisedWindow parameter: %d", advertisedWindowPar);
+
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACKs enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // increased initial window (=2*SMSS) (RFC 2581) enabled/disabled
-    state->rcv_wnd = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
-    state->rcv_adv = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
-    state->maxRcvBuffer = tcpMain->par("advertisedWindow"); // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
+    state->rcv_wnd = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
+    state->rcv_adv = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
+    state->maxRcvBuffer = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
     state->snd_mss = tcpMain->par("mss").longValue(); // maximum segment size
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 	if (state->sack_support)
