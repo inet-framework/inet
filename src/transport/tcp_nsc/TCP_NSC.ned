@@ -82,7 +82,7 @@ import inet.transport.tcp.ITCP;
 simple TCP_NSC like ITCP
 {
     parameters:
-        double advertisedWindow = default(65536); // in bytes
+        double advertisedWindow = default(7504); // in bytes (14*536 = 14*mss), corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         string sendQueueClass = default("TCP_NSC_VirtualDataSendQueue"); // string
         string receiveQueueClass = default("TCP_NSC_VirtualDataReceiveQueue");
     gates:

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,36 +16,40 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.inet.nsctest;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.StandardHost;
+
+
+package inet.examples.ipv6.ipv6nclients;
+
+import inet.networklayer.autorouting.FlatNetworkConfigurator6;
+import inet.nodes.ipv6.Router6;
+import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
-network NSCTest
+network NClientsPPP
 {
-    @display("bgb=232,193");
+    parameters:
+        int n;
     types:
-        channel C extends DatarateChannel
+        channel fiberline extends DatarateChannel
         {
-            datarate = 1Mbps;
-            delay = 0.1us;
+            delay = 1us;
+            datarate = 512Mbps;
         }
     submodules:
-        client1: StandardHost {
-            parameters:
-                @display("p=53,67;i=device/pc3");
-        }
-        server: StandardHost {
-            parameters:
-                @display("p=181,67;i=device/pc2");
-        }
-        configurator: FlatNetworkConfigurator {
-            parameters:
-                @display("p=109,142");
-        }
+        configurator: FlatNetworkConfigurator6;
+        r1: Router6;
+        r2: Router6;
+        r3: Router6;
+        cli[n]: StandardHost6;
+        srv: StandardHost6;
     connections:
-        client1.pppg++ <--> C <--> server.pppg++;
+        for i=0..n-1 {
+            cli[i].pppg++ <--> fiberline <--> r1.pppg++;
+        }
+        r1.pppg++ <--> fiberline <--> r2.pppg++;
+        r2.pppg++ <--> fiberline <--> r3.pppg++;
+        r3.pppg++ <--> fiberline <--> srv.pppg++;
 }
 

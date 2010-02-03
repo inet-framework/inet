@@ -84,6 +84,31 @@ struct nsc_iphdr
     /*The options start here. */
 } __attribute__((packed));
 
+struct nsc_ipv6hdr
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint32_t flow:20;
+    uint32_t ds:8;
+    uint32_t version:4;
+#elif BYTE_ORDER == BIG_ENDIAN
+    uint32_t version:4;
+    uint32_t ds:8;
+    uint32_t flow:20;
+#else
+# error "Please check BYTE_ORDER declaration"
+#endif
+    uint16_t len;
+    uint8_t next_header;
+    uint8_t hop_limit;
+    uint16_t id;
+    uint16_t frag_off;
+    uint8_t ttl;
+    uint8_t protocol;
+    uint16_t check;
+    uint32_t saddr[4];
+    uint32_t daddr[4];
+} __attribute__((packed));
+
 static char *flags2str(unsigned char flags)
 {
     static char buf[512];
@@ -128,8 +153,46 @@ TCP_NSC::TCP_NSC()
     pNsiTimerM(NULL),
     isAliveM(false),
     curAddrCounterM(0),
-    curConnM(NULL)
+    curConnM(NULL),
+
+    // statistics:
+    sndWndVector(NULL),
+    rcvWndVector(NULL),
+    rcvAdvVector(NULL),
+    sndNxtVector(NULL),
+    sndAckVector(NULL),
+    rcvSeqVector(NULL),
+    rcvAckVector(NULL),
+    unackedVector(NULL),
+    dupAcksVector(NULL),
+    pipeVector(NULL),
+    sndSacksVector(NULL),
+    rcvSacksVector(NULL),
+    rcvOooSegVector(NULL),
+    sackedBytesVector(NULL),
+    tcpRcvQueueBytesVector(NULL),
+    tcpRcvQueueDropsVector(NULL)
 {
+    // statistics:
+    if (true) // (getTcpMain()->recordStatistics)
+    {
+        //sndWndVector = new cOutVector("send window");
+        //rcvWndVector = new cOutVector("receive window");
+        //rcvAdvVector = new cOutVector("advertised window");
+        sndNxtVector = new cOutVector("sent seq");
+        sndAckVector = new cOutVector("sent ack");
+        rcvSeqVector = new cOutVector("rcvd seq");
+        rcvAckVector = new cOutVector("rcvd ack");
+        //unackedVector = new cOutVector("unacked bytes");
+        //dupAcksVector = new cOutVector("rcvd dupAcks");
+        //pipeVector = new cOutVector("pipe");
+        //sndSacksVector = new cOutVector("sent sacks");
+        //rcvSacksVector = new cOutVector("rcvd sacks");
+        //rcvOooSegVector = new cOutVector("rcvd oooseg");
+        //sackedBytesVector = new cOutVector("rcvd sackedBytes");
+        //tcpRcvQueueBytesVector = new cOutVector("tcpRcvQueueBytes");
+        //tcpRcvQueueDropsVector = new cOutVector("tcpRcvQueueDrops");
+    }
 }
 
 // return mapped remote ip in host byte order
@@ -175,21 +238,6 @@ IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 }
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
-void TCP_NSC::decode_tcpip(const void *data, int len)
-{
-    nsc_iphdr *ih = (nsc_iphdr *)data;
-    tcpEV << this << ": IP " << ih->version << " len " << ih->ihl
-        << " protocol " << (unsigned int)(ih->protocol)
-        << " saddr " << (ih->saddr)
-        << " daddr " << (ih->daddr)
-        << "\n";
-
-    int hdr_len = ntohs(ih->tot_len) - 4 * ih->ihl;
-    if (hdr_len > len - (int)sizeof(nsc_iphdr))
-        hdr_len = len - sizeof(nsc_iphdr);
-    decode_tcp( ((char *)(ih)) + 4 * ih->ihl, hdr_len);
-}
-
 void TCP_NSC::decode_tcp(const void *packet_data, int hdr_len)
 {
     struct tcphdr const *tcp = (struct tcphdr const*)packet_data;
@@ -207,7 +255,7 @@ void TCP_NSC::decode_tcp(const void *packet_data, int hdr_len)
 
     if(hdr_len > 20)
     {
-        unsigned char const *opt = (unsigned char const*)packet_data + 20;
+        unsigned char const *opt = (unsigned char const*)packet_data + sizeof(struct tcphdr);
 
         tcpEV << this << ": " << ("Options: ");
         while(
@@ -308,6 +356,7 @@ void TCP_NSC::initialize()
 
     loadStack(stackName, bufferSize);
     pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
+//    pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1480); //FIXME HACK for IPv6
     pStackM->add_default_gateway(localInnerGwS.str().c_str());
     isAliveM = true;
 }
@@ -322,6 +371,24 @@ TCP_NSC::~TCP_NSC()
         delete (*i).second.pNscSocketM;
         tcpAppConnMapM.erase(i);
     }
+
+    // statistics
+    delete sndWndVector;
+    delete rcvWndVector;
+    delete rcvAdvVector;
+    delete sndNxtVector;
+    delete sndAckVector;
+    delete rcvSeqVector;
+    delete rcvAckVector;
+    delete unackedVector;
+    delete dupAcksVector;
+    delete sndSacksVector;
+    delete rcvSacksVector;
+    delete rcvOooSegVector;
+    delete tcpRcvQueueBytesVector;
+    delete tcpRcvQueueDropsVector;
+    delete pipeVector;
+    delete sackedBytesVector;
 }
 
 // send a TCP_I_ESTABLISHED msg to Application Layer
@@ -377,11 +444,34 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         inetSockPair.remoteM.ipAddrM = controlInfo->getSrcAddr();
         inetSockPair.localM.ipAddrM = controlInfo->getDestAddr();
         delete controlInfo;
+        {
+            // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
+            //       with IP header size difference
+            unsigned short numOptions = tcpsegP->getOptionsArraySize();
+            for (unsigned short i=0; i < numOptions; i++)
+            {
+                TCPOption& option = tcpsegP->getOptions(i);
+                if(option.getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE)
+                {
+                    unsigned int value = option.getValues(0);
+                    value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
+                    option.setValues(0, value);
+                    //tcpsegP->setOptions(i, option);
+                }
+            }
+        }
     }
     else
     {
         error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
+
+    // statistics:
+    if (rcvSeqVector)
+        rcvSeqVector->record(tcpsegP->getSequenceNo());
+    if (rcvAckVector)
+        rcvAckVector->record(tcpsegP->getAckNo());
+
     inetSockPair.remoteM.portM = tcpsegP->getSrcPort();
     inetSockPair.localM.portM = tcpsegP->getDestPort();
     nscSockPair.remoteM.portM = tcpsegP->getSrcPort();
@@ -869,6 +959,13 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     {
         conn->receiveQueueM->notifyAboutSending(tcpseg);
     }
+
+    // record seq (only if we do send data) and ackno
+    if (sndNxtVector && tcpseg->getPayloadLength()!=0)
+        sndNxtVector->record(tcpseg->getSequenceNo());
+    if (sndAckVector)
+        sndAckVector->record(tcpseg->getAckNo());
+
     send(tcpseg, output);
 }
 
