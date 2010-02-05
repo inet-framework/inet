@@ -39,7 +39,7 @@ network ExtClient {
                 @display("p=29,90;i=laptop3");
 	}
     connections allowunconnected:
-	
+
 }
 
 

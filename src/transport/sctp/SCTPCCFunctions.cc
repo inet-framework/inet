@@ -34,7 +34,7 @@ void SCTPAssociation::cwndUpdateAfterSack(bool rtxNecessary, SCTPPathVariables* 
 	if (rtxNecessary == true && state->fastRecoveryActive == false) 
 	{
 		for (SCTPPathMap::iterator iter=sctpPathMap.begin(); iter!=sctpPathMap.end(); iter++)
-		{	
+		{
 			path=iter->second;
 			if (path->requiresRtx) 
 			{
@@ -45,7 +45,7 @@ void SCTPAssociation::cwndUpdateAfterSack(bool rtxNecessary, SCTPPathVariables* 
 				path->partialBytesAcked = 0;
 				/* get and store the time when CWND was adjusted here */
 				path->cwndAdjustmentTime = simulation.getSimTime();
-				
+			
 				if (state->fastRecoverySupported) 
 				{
 					state->highestTsnAcked = state->lastTsnAck;
@@ -61,13 +61,13 @@ void SCTPAssociation::cwndUpdateAfterSack(bool rtxNecessary, SCTPPathVariables* 
 					state->fastRecoveryExitPoint = state->highestTsnAcked;
 					 
 					sctpEV3<<"===> ENTERING FAST RECOVERY.....Exit Point == "<< state->fastRecoveryExitPoint<<"\n";
-					
-					
+				
+				
 				} /* end: if (fast_recovery_supported */
 			}	  /* end: if (path_requires_rtx... 	*/
 		}		  /* end: for (counter...  			*/
 	} 			  /* end: if (rtx_necessary			*/    
-	
+
 }
 
 void SCTPAssociation::cwndUpdateAfterCwndTimeout(SCTPPathVariables* path)
@@ -81,7 +81,7 @@ void SCTPAssociation::cwndUpdateAfterCwndTimeout(SCTPPathVariables* path)
 	path->pathCwnd->record(path->cwnd);
 	 
 	sctpEV3<<"CWND timer run off: readjusting CWND(path=="<<path->remoteAddress<<") = "<<path->cwnd<<"\n";
-	
+
 	path->cwndAdjustmentTime = simulation.getSimTime();
 }
 
@@ -116,14 +116,14 @@ void SCTPAssociation::cwndUpdateMaxBurst(SCTPPathVariables* path)
 
 void SCTPAssociation::cwndUpdateBytesAcked(uint32 ackedBytes, uint32 osb, bool ctsnaAdvanced, IPvXAddress pathId, uint32 pathOsb, uint32 newOsb)
 {
-	SCTPPathVariables* path=getPath(pathId);	
-	
+	SCTPPathVariables* path=getPath(pathId);
+
 	 
 	sctpEV3<<simulation.getSimTime()<<" fcAdjustCounters: path="<<pathId<<" cwnd="<<path->cwnd<<" ssthresh="<<path->ssthresh<<" pathOsbBefore="<<pathOsb<<" osbBefore="<<osb<<" ackedBytes="<<ackedBytes<<"\n";
-	
-	
+
+
 	if (path->cwnd <=path->ssthresh) 
-	{	
+	{
 		// SLOW START 
 		for (SCTPPathMap::iterator iter=sctpPathMap.begin(); iter!=sctpPathMap.end(); iter++)
 		{
@@ -136,14 +136,14 @@ void SCTPAssociation::cwndUpdateBytesAcked(uint32 ackedBytes, uint32 osb, bool c
 		if ((ctsnaAdvanced == true && pathOsb >= path->cwnd))
 		{
 			path->cwndAdjustmentTime = simulation.getSimTime();
-			
+		
 			path->cwnd += (int32)min(path->pmtu, ackedBytes);
 			path->pathCwnd->record(path->cwnd);
 			 
 			sctpEV3<<simulation.getSimTime()<<" SLOW START: Setting CWND of path "<<pathId<<" to "<<path->cwnd<<" bytes. Osb = "<<pathOsb<<"\n";
-			
-		}
 		
+		}
+	
 	} 
 	else 
 	{
@@ -152,7 +152,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(uint32 ackedBytes, uint32 osb, bool c
 	sctpEV3<<"partialBytesAcked="<<path->partialBytesAcked<<"  cwnd="<<path->cwnd<<"  osb="<<osb<<" advanced="<<ctsnaAdvanced<<"  fastRecoveryActive="<<state->fastRecoveryActive<<"\n";
 		if ((path->partialBytesAcked  >= path->cwnd) &&
 			(osb >= path->cwnd) && (ctsnaAdvanced == true)) 
-		{		
+		{	
 			path->cwnd += path->pmtu;
 			path->pathCwnd->record(path->cwnd);
 			path->partialBytesAcked = 
@@ -161,13 +161,13 @@ void SCTPAssociation::cwndUpdateBytesAcked(uint32 ackedBytes, uint32 osb, bool c
 
 			/* get and store the time when CWND was adjusted here */
 			path->cwndAdjustmentTime = simulation.getSimTime();
-			
+		
 			 
 			sctpEV3<<"CONG.AVOID.: Setting CWND of path "<<pathId<<" to "<<path->cwnd<<" bytes\n";
-			
+		
 		}
 	}
-			
+		
 
 	if (newOsb == 0) path->partialBytesAcked = 0;
 }

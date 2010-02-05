@@ -385,8 +385,8 @@ if [ "$conf" = "$HMIP" ]; then
 	convpcoaf $XMLFILE
 	XMLFILE=$XMLFILE-$PCOAF
 	run_sim $PCOAF-$ARIMP
-	
-	XMLFILE=$INIFILE	
+
+	XMLFILE=$INIFILE
 	convhmip $XMLFILE
 	XMLFILE=$XMLFILE-$HMIP
 	run_sim $conf-$ARIMP

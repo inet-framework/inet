@@ -28,7 +28,7 @@ class SCTPSerializer
 {
     public:
         SCTPSerializer() {}
-	
+
         /**
          * Serializes an SCTPMessage for transmission on the wire.
          * The checksum is NOT filled in. (The kernel does that when sending
@@ -42,8 +42,8 @@ class SCTPSerializer
          */
         //void parse(uint8 *buf, uint32 bufsize, IPDatagram *dest);
 	void parse(uint8 *buf, uint32 bufsize, SCTPMessage *dest);
-	
-	static uint32 checksum(uint8 *buf, register uint32 len);	
+
+	static uint32 checksum(uint8 *buf, register uint32 len);
 };
 
 #endif

@@ -52,7 +52,7 @@ class ExtInterface : public cSimpleModule
 
 	// access to real network interface via Scheduler class:
 	cSocketRTScheduler *rtScheduler;
-	
+
     InterfaceEntry *registerInterface();
     void displayBusy();
     void displayIdle();

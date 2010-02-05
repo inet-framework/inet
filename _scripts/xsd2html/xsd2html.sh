@@ -78,7 +78,7 @@ if [ "$have_dot" = "yes" ]; then
 	echo
 	echo 'see warnings from '$DOT' in '$outdir'/dot.err';
     else
-	rm $outdir/dot.err	
+	rm $outdir/dot.err
     fi
 fi
 

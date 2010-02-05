@@ -42,16 +42,16 @@ uint32 i;
 	{
 		for (i=0; i<inStreams; i++)
 		{
-			SCTPReceiveStream* rcvStream = new SCTPReceiveStream();	
-				
+			SCTPReceiveStream* rcvStream = new SCTPReceiveStream();
+			
 			this->receiveStreams[i]=rcvStream;
 			rcvStream->setStreamId(i);
-			
+		
 			this->state->numMsgsReq[i]=0;
 		}
 		for (i=0; i<outStreams; i++)
 		{
-			SCTPSendStream* sendStream = new SCTPSendStream(i);		
+			SCTPSendStream* sendStream = new SCTPSendStream(i);	
 			this->sendStreams[i]=sendStream;
 			sendStream->setStreamId(i);
 		}
@@ -61,10 +61,10 @@ uint32 i;
 
 int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data is sent, but we just want to peek
 {
-	
+
 	uint32 sid = 0;
 	int32 num = 0;
-	
+
 	//num = numUsableStreams();
 	num = (this->*ssFunctions.ssUsableStreams)();
 
@@ -73,7 +73,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 		sid = (state->lastStreamScheduled + 1) % outboundStreams;
 		 
 		sctpEV3<<"streamScheduler sid="<<sid<<" lastStream="<<state->lastStreamScheduled<<" outboundStreams="<<outboundStreams<<"\n";
-		
+	
 		num = (this->*ssFunctions.ssUsableStreams)();
 		while (sid!=state->lastStreamScheduled)
 		{
@@ -82,7 +82,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 			cQueue* strQ=stream->getUnorderedStreamQ();
 			 
 			sctpEV3<<"Laenge unordered StreamQueue Nr "<<sid<<" = "<<strQ->length()<<"\n";
-			
+		
 			if (strQ && strQ->length()>0) 
 			{
 				sid =(iter->first);
@@ -94,7 +94,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 			strQ=stream->getStreamQ();
 			 
 			sctpEV3<<"Laenge StreamQueue Nr "<<sid<<" = "<<strQ->length()<<"\n";
-			
+		
 			if (strQ && strQ->length()>0) 
 			{
 				sid =(iter->first);
@@ -108,7 +108,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 				sid = (sid+1)%outboundStreams;
 				 
 				sctpEV3<<"new sid="<<sid<<"\n";
-				
+			
 			}
 		}
 	}
@@ -132,11 +132,11 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 			}
 		}
 	}
-		
+	
 
 	 
 	sctpEV3<<"Stream Scheduler: found no stream with data queued !\n";
-	
+
 	return (-1);
 }
 
@@ -144,7 +144,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 int32 SCTPAssociation::numUsableStreams(void)
 {
 	int32 count=0;
-	
+
 
 	for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); iter++)
 		if (iter->second->getStreamQ()->length()>0 || iter->second->getUnorderedStreamQ()->length()>0)

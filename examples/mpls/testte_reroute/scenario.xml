@@ -8,7 +8,7 @@
 			<paths>
 				<path>
 					<lspid>101</lspid>
-	
+
 					<bandwidth>400000</bandwidth>
 					<route>
 						<node>10.1.1.1</node>

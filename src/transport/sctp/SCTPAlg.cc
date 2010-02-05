@@ -24,7 +24,7 @@ Register_Class(SCTPAlg);
 SCTPAlg::SCTPAlg() : SCTPAlgorithm()
 {
     state = NULL;
-	
+
 }
 
 SCTPAlg::~SCTPAlg()

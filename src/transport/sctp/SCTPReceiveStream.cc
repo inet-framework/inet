@@ -48,7 +48,7 @@ uint32 delivery = 0;	//0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && d
 		{
 			delivery = 2;
 		}
-		
+	
 	} 
 	else if (dchunk->ordered) 
 	{
@@ -58,12 +58,12 @@ uint32 delivery = 0;	//0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && d
 		if (orderedQ->getQueueSize()>0) 
 		{
 			/* dequeue first from orderedQ */
-			
+		
 			chunk = orderedQ-> dequeueVarBySsn(expectedStreamSeqNum);
 			if (chunk)
 			{	 
 				if (deliveryQ->checkAndInsertVar(chunk->tsn, chunk))
-				{ 					
+				{ 				
 					++expectedStreamSeqNum;
 					if (expectedStreamSeqNum > 65535) 
 						expectedStreamSeqNum = 0;
@@ -71,8 +71,8 @@ uint32 delivery = 0;	//0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && d
 				}
 			}
 		}
-		
-	} 
 	
+	} 
+
 	return delivery;
 }

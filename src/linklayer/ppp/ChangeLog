@@ -8,7 +8,7 @@
 
 	* performance: remember output gate pointer instead of looking up 
 	gate by name for each send()
-	
+
 2005-07-14  Andras Varga
 
 	* PPPModule renamed to PPP
