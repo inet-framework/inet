@@ -127,6 +127,9 @@ void TCPSocket::listen(bool fork)
     openCmd->setLocalPort(localPrt);
     openCmd->setConnId(connId);
     openCmd->setFork(fork);
+    openCmd->setSendQueueClass(sendQueueClass.c_str());
+    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
@@ -151,6 +154,9 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
+    openCmd->setSendQueueClass(sendQueueClass.c_str());
+    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);

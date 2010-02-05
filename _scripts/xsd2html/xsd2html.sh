@@ -13,7 +13,7 @@ outdir=html
 
 if [ -n $DOT ]; then
     have_dot=yes
-fi    
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in

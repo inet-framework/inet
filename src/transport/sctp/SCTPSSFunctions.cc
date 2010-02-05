@@ -18,12 +18,12 @@
 
 /************************************************************
 
-To add new streamSchedulers 
-- the appropriate functions have to be implemented, preferably 
-	in this file. 
-- in SCTPAssociation.h an entry has to be added to 
+To add new streamSchedulers
+- the appropriate functions have to be implemented, preferably
+	in this file.
+- in SCTPAssociation.h an entry has to be added to
 	enum SCTPStreamSchedulers.
-- in SCTPAssociationBase.cc in the contructor for SCTPAssociation 
+- in SCTPAssociationBase.cc in the contructor for SCTPAssociation
 	the new functions have to be assigned. Compare the entries
 	for ROUND_ROBIN.
 
@@ -36,22 +36,22 @@ To add new streamSchedulers
 void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
 uint32 i;
-	 
+
 	sctpEV3<<"initStreams instreams="<<inStreams<<"  outstream="<<outStreams<<"\n";
 	if (receiveStreams.size()==0 && sendStreams.size()==0)
 	{
 		for (i=0; i<inStreams; i++)
 		{
 			SCTPReceiveStream* rcvStream = new SCTPReceiveStream();
-			
+
 			this->receiveStreams[i]=rcvStream;
 			rcvStream->setStreamId(i);
-		
+
 			this->state->numMsgsReq[i]=0;
 		}
 		for (i=0; i<outStreams; i++)
 		{
-			SCTPSendStream* sendStream = new SCTPSendStream(i);	
+			SCTPSendStream* sendStream = new SCTPSendStream(i);
 			this->sendStreams[i]=sendStream;
 			sendStream->setStreamId(i);
 		}
@@ -71,19 +71,19 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 	if (num > 1)
 	{
 		sid = (state->lastStreamScheduled + 1) % outboundStreams;
-		 
+
 		sctpEV3<<"streamScheduler sid="<<sid<<" lastStream="<<state->lastStreamScheduled<<" outboundStreams="<<outboundStreams<<"\n";
-	
+
 		num = (this->*ssFunctions.ssUsableStreams)();
 		while (sid!=state->lastStreamScheduled)
 		{
 			SCTPSendStreamMap::iterator iter=sendStreams.find(sid);
 			SCTPSendStream* stream=iter->second;
 			cQueue* strQ=stream->getUnorderedStreamQ();
-			 
+
 			sctpEV3<<"Laenge unordered StreamQueue Nr "<<sid<<" = "<<strQ->length()<<"\n";
-		
-			if (strQ && strQ->length()>0) 
+
+			if (strQ && strQ->length()>0)
 			{
 				sid =(iter->first);
 
@@ -92,10 +92,10 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 				return sid;
 			}
 			strQ=stream->getStreamQ();
-			 
+
 			sctpEV3<<"Laenge StreamQueue Nr "<<sid<<" = "<<strQ->length()<<"\n";
-		
-			if (strQ && strQ->length()>0) 
+
+			if (strQ && strQ->length()>0)
 			{
 				sid =(iter->first);
 
@@ -106,9 +106,9 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 			else
 			{
 				sid = (sid+1)%outboundStreams;
-				 
+
 				sctpEV3<<"new sid="<<sid<<"\n";
-			
+
 			}
 		}
 	}
@@ -132,9 +132,9 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 			}
 		}
 	}
-	
 
-	 
+
+
 	sctpEV3<<"Stream Scheduler: found no stream with data queued !\n";
 
 	return (-1);

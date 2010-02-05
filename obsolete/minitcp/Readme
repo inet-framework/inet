@@ -1,7 +1,7 @@
 MiniTCP
 -------
 
-This is a minimalistic TCP implementation from Joungwoong Lee, but it is 
+This is a minimalistic TCP implementation from Joungwoong Lee, but it is
 supposed to have the correct retransmission behaviour. No makefile or examples
 yet, I'll add them later.
 

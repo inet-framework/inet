@@ -36,7 +36,7 @@ SCTPSocket::SCTPSocket()
 }
 
 
-SCTPSocket:: ~SCTPSocket() 
+SCTPSocket:: ~SCTPSocket()
 {
 	localAddresses.clear();
 }
@@ -78,7 +78,7 @@ void SCTPSocket::bind(int lPort)
 
 void SCTPSocket::bind(IPvXAddress lAddr, int lPort)
 {
-	 
+
 	sctpEV3<<"bind address "<<lAddr<<"\n";
 
 	if (sockstate!=NOT_BOUND)
@@ -124,7 +124,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
 	openCmd->setNumRequests(requests);
 	openCmd->setMessagesToPush(messagesToPush);
 	msg->setControlInfo(openCmd);
-	 
+
 	sctpEV3<<"Assoc "<<assocId<<"::send PassiveOPEN to SCTP from socket:listen \n";
 
 	sendToSCTP(msg);
@@ -133,7 +133,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
 
 void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests)
 {
-sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";	 
+sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
 	if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
 		opp_error( "SCTPSocket::connect(): connect() or listen() already called");
 	cPacket *msg = new cPacket("Associate", SCTP_C_ASSOCIATE);
@@ -154,7 +154,7 @@ sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
 
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, uint32 numRequests)
 {
-	sctpEV3<<"Socket connectx. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";	 
+	sctpEV3<<"Socket connectx. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
 	if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
 		opp_error( "SCTPSocket::connect(): connect() or listen() already called");
 	cPacket *msg = new cPacket("Associate", SCTP_C_ASSOCIATE);
@@ -196,7 +196,7 @@ void SCTPSocket::send(cPacket *msg, bool last, bool primary)
 
 
 void SCTPSocket::sendNotification(cPacket *msg)
-{	 
+{
 	if (sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED)
 		opp_error("SCTPSocket::send(): not connected or connecting");
 	sendToSCTP(msg);
@@ -237,9 +237,9 @@ void SCTPSocket::abort()
 	{
 		cPacket *msg = new cPacket("ABORT", SCTP_C_ABORT);
 		SCTPCommand *cmd = new SCTPCommand();
-		 
+
 		//sctpEV3<<"Message cmd="<<&cmd<<"\n";
-	
+
 		cmd->setAssocId(assocId);
 		msg->setControlInfo(cmd);
 		sendToSCTP(msg);
@@ -257,7 +257,7 @@ void SCTPSocket::requestStatus()
 }
 
 bool SCTPSocket::belongsToSocket(cPacket *msg)
-{  
+{
 	bool ret= dynamic_cast<SCTPCommand *>(msg->getControlInfo()) &&
            ((SCTPCommand *)(msg->getControlInfo()))->getAssocId()==assocId;
 	sctpEV3<<"assoc="<<((SCTPCommand *)(msg->getControlInfo()))->getAssocId()<<"\n";
@@ -281,17 +281,17 @@ void SCTPSocket::processMessage(cPacket *msg)
 	switch (msg->getKind())
 	{
 		case SCTP_I_DATA:
-			 
+
 			sctpEV3<<"SCTP_I_DATA\n";
-		
-			if (cb) 
+
+			if (cb)
 				cb->socketDataArrived(assocId, yourPtr, msg, false);
 			break;
 		case SCTP_I_DATA_NOTIFICATION:
-			 
+
 			sctpEV3<<"SCTP_I_NOTIFICATION\n";
-		
-			if (cb) 
+
+			if (cb)
 				cb->socketDataNotificationArrived(assocId, yourPtr, msg);
 			break;
 		case SCTP_I_SEND_MSG:
@@ -299,7 +299,7 @@ void SCTPSocket::processMessage(cPacket *msg)
 				cb->sendRequestArrived();
 			break;
 		case SCTP_I_ESTABLISHED:
-		{	 
+		{
 			sockstate = CONNECTED;
 			SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
 			localAddr = connectInfo->getLocalAddr();
@@ -309,7 +309,7 @@ void SCTPSocket::processMessage(cPacket *msg)
 			fsmStatus = connectInfo->getStatus();
 			inboundStreams = connectInfo->getInboundStreams();
 			outboundStreams = connectInfo->getOutboundStreams();
-		
+
 			if (cb)
 				cb->socketEstablished(assocId, yourPtr);
 			delete connectInfo;

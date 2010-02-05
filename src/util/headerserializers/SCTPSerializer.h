@@ -20,9 +20,8 @@
 
 #include "SCTPMessage.h"
 
-//#include "Checksum.h"
 /**
- * Converts between IPDatagram and binary (network byte order) IP header.
+ * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
 class SCTPSerializer
 {
@@ -35,15 +34,14 @@ class SCTPSerializer
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
          */
-       // int32 serialize(IPDatagram *dgram, uint8 *buf, uint32 bufsize);
-	int32 serialize(SCTPMessage *msg, uint8 *buf, uint32 bufsize);
-        /**
-         * Puts a packet sniffed from the wire into an SCTPMessage. 
-         */
-        //void parse(uint8 *buf, uint32 bufsize, IPDatagram *dest);
-	void parse(uint8 *buf, uint32 bufsize, SCTPMessage *dest);
+        int32 serialize(const SCTPMessage *msg, uint8 *buf, uint32 bufsize);
 
-	static uint32 checksum(uint8 *buf, register uint32 len);
+        /**
+         * Puts a packet sniffed from the wire into an SCTPMessage.
+         */
+        void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
+
+        static uint32 crc32(const uint8 *buf, register uint32 len);
 };
 
 #endif

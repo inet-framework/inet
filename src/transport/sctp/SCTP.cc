@@ -22,8 +22,6 @@
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "IPDatagram.h"
-//#include "omnetpp.h"
-//#include "cconfig.h"
 
 
 Define_Module(SCTP);
@@ -35,20 +33,20 @@ bool SCTP::logverbose;
 int32 SCTP::nextConnId = 0;
 
 
-static std::ostream & operator<<(std::ostream & os, const SCTP::SockPair& sp)
+static std::ostream& operator<<(std::ostream& os, const SCTP::SockPair& sp)
 {
 	os << "loc=" << (sp.localAddr) << ":" << sp.localPort << " "
 		<< "rem=" << (sp.remoteAddr) << ":" << sp.remotePort;
 	return os;
 }
 
-static std::ostream & operator<<(std::ostream & os, const SCTP::AppConnKey& app)
+static std::ostream& operator<<(std::ostream& os, const SCTP::AppConnKey& app)
 {
 	os << "assocId=" << app.assocId << " appGateIndex=" << app.appGateIndex;
 	return os;
 }
 
-static std::ostream & operator<<(std::ostream & os, const SCTPAssociation& conn)
+static std::ostream& operator<<(std::ostream& os, const SCTPAssociation& conn)
 {
 	os << "assocId=" << conn.assocId << " " << SCTPAssociation::stateName(conn.getFsmState())
 		<< " state={" << const_cast<SCTPAssociation&>(conn).getState()->info() << "}";

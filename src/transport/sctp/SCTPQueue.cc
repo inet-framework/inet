@@ -56,7 +56,7 @@ bool SCTPQueue::checkAndInsertVar(uint32 key,SCTPDataVariables *datVar)
 	{
 		payloadQueue[key]=datVar;
 	}
-	
+
 	return true;
 }
 
@@ -75,9 +75,9 @@ SCTPDataVariables *SCTPQueue::extractMessage()
 		return datVar;
 	}
 	else
-		 
+
 		sctpEV3<<"Queue is empty\n";
-	
+
 	 return NULL;
 }
 
@@ -91,9 +91,9 @@ SCTPDataVariables *SCTPQueue::getAndExtractMessage(uint32 tsn)
 		return datVar;
 	}
 	else
-		 
+
 		sctpEV3<<"Queue is empty\n";
-	
+
 	 return NULL;
 }
 
@@ -107,7 +107,7 @@ void SCTPQueue::printQueue()
 		key = i->first;
 		sctpEV3<<key<<"\t";
 	}
-	 
+
 	sctpEV3<<"\n";
 
 }

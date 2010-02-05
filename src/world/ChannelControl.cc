@@ -136,19 +136,21 @@ double ChannelControl::calcInterfDist()
     return interfDistance;
 }
 
-ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord& initialPos)
+ChannelControl::HostRef ChannelControl::registerHost(cModule *host, const Coord& initialPos, cGate *radioInGate)
 {
     Enter_Method_Silent();
     if (lookupHost(host) != NULL)
         error("ChannelControl::registerHost(): host (%s)%s already registered",
               host->getClassName(), host->getFullPath().c_str());
+    if (!radioInGate)
+        radioInGate = host->gate("radioIn"); // throws error if gate does not exist
 
     HostEntry he;
     he.host = host;
+    he.radioInGate = radioInGate;
     he.pos = initialPos;
-    he.isModuleListValid = false;
-    // TODO: get it from caller
-    he.channel = 0;
+    he.isNeighborListValid = false;
+    he.channel = 0;  // for now
     hosts.push_back(he);
     return &hosts.back(); // last element
 }
@@ -162,17 +164,17 @@ ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
     return 0;
 }
 
-const ChannelControl::ModuleList& ChannelControl::getNeighbors(HostRef h)
+const ChannelControl::HostRefVector& ChannelControl::getNeighbors(HostRef h)
 {
     Enter_Method_Silent();
-    if (!h->isModuleListValid)
+    if (!h->isNeighborListValid)
     {
-        h->neighborModules.clear();
+        h->neighborList.clear();
         for (std::set<HostRef>::const_iterator it = h->neighbors.begin(); it != h->neighbors.end(); it++)
-            h->neighborModules.push_back((*it)->host);
-        h->isModuleListValid = true;
+            h->neighborList.push_back(*it);
+        h->isNeighborListValid = true;
     }
-    return h->neighborModules;
+    return h->neighborList;
 }
 
 void ChannelControl::updateConnections(HostRef h)
@@ -195,7 +197,7 @@ void ChannelControl::updateConnections(HostRef h)
             if (h->neighbors.insert(hi).second == true)
             {
                 hi->neighbors.insert(h);
-                h->isModuleListValid = hi->isModuleListValid = false;
+                h->isNeighborListValid = hi->isNeighborListValid = false;
             }
         }
         else
@@ -204,7 +206,7 @@ void ChannelControl::updateConnections(HostRef h)
             if (h->neighbors.erase(hi))
             {
                 hi->neighbors.erase(h);
-                h->isModuleListValid = hi->isModuleListValid = false;
+                h->isNeighborListValid = hi->isNeighborListValid = false;
             }
         }
     }
@@ -284,3 +286,32 @@ void ChannelControl::purgeOngoingTransmissions()
         }
     }
 }
+
+void ChannelControl::sendToChannel(cSimpleModule *srcRadioMod, HostRef srcHost, AirFrame *airFrame)
+{
+    // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
+
+    // loop through all hosts in range
+    const HostRefVector& neighbors = getNeighbors(srcHost);
+    int n = neighbors.size();
+    int channel = airFrame->getChannelNumber();
+    for (int i=0; i<n; i++)
+    {
+        HostRef h = neighbors[i];
+        if (h->channel == channel)
+        {
+            coreEV << "sending message to host listening on the same channel\n";
+            // account for propagation delay, based on distance in meters
+            // Over 300m, dt=1us=10 bit times @ 10Mbps
+            simtime_t delay = srcHost->pos.distance(h->pos) / LIGHT_SPEED;
+            srcRadioMod->sendDirect(airFrame->dup(), delay, airFrame->getDuration(), h->radioInGate);
+        }
+        else
+            coreEV << "skipping host listening on a different channel\n";
+    }
+
+    // register transmission
+    addOngoingTransmission(srcHost, airFrame);
+}
+
+

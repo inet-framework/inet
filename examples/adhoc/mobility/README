@@ -17,6 +17,6 @@ Scripted ones:
  - BonnMotionMobility
  - ...
 
-There are several runs defined in omnetpp.ini, each one uses a 
-different mobility model. You can select a given run by specifying 
+There are several runs defined in omnetpp.ini, each one uses a
+different mobility model. You can select a given run by specifying
 the -r <num> option on the command line.

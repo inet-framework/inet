@@ -37,7 +37,7 @@
 // helper functions
 //
 inline uint32 uint32rand() {
-	return (uint32)intrand(0xffff) << 16 + (uint32)intrand(0xffff);
+	return ((uint32)intrand(0xffff) << 16) + (uint32)intrand(0xffff);
 }
 
 void SCTPAssociation::printSctpPathMap()
@@ -1204,6 +1204,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		}
 		if (bytesToSend > 0 || bytes.chunk || bytes.packet || (bytes.chunk && probing))
 		{
+	        //FIXME  suggest parentheses around && within ||
 			if (tcount>0 || scount>0 && (!(state->nagleEnabled && osb>0)||(uint32)scount>=pathVar->pmtu-32 ))
 			{
 				sctpmsg = new SCTPMessage();
@@ -2418,6 +2419,7 @@ IPvXAddress SCTPAssociation::getNextDestination(SCTPDataVariables* chk)
 			dpi=iter->first;
 
 		} while (iter->first != last && iter->second->activePath == false || iter->second->confirmed==false);
+        //FIXME  on prev line suggest parentheses around && within ||
 	}
 
 
@@ -2500,15 +2502,17 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 				sctpEV3<<"bookedSumSendStreams="<<qCounter.bookedSumSendStreams<<" bytes.bytesToSend="<<bytes.bytesToSend<<"\n";
 				diff = iter->second->cwnd - osb - bytes.bytesToSend;
 				if (diff>0)
-				if (qCounter.bookedSumSendStreams > (uint32)diff)
 				{
-					bytes.bytesToSend =  iter->second->cwnd - osb ;
-					sctpEV3<<"bytesToSend are limited by cwnd: "<<bytes.bytesToSend<<"\n";
-				}
-				else
-				{
-					bytes.bytesToSend += qCounter.bookedSumSendStreams;
-					sctpEV3<<"send all stored bytes: "<<bytes.bytesToSend<<"\n";
+					if (qCounter.bookedSumSendStreams > (uint32)diff)
+					{
+						bytes.bytesToSend =  iter->second->cwnd - osb ;
+						sctpEV3<<"bytesToSend are limited by cwnd: "<<bytes.bytesToSend<<"\n";
+					}
+					else
+					{
+						bytes.bytesToSend += qCounter.bookedSumSendStreams;
+						sctpEV3<<"send all stored bytes: "<<bytes.bytesToSend<<"\n";
+					}
 				}
 			}
 		}

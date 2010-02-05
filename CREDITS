@@ -13,14 +13,14 @@ Patch for getting Ethernet and ARP working with IP; ARPTest example, 2004:
 INET Framework maintainer:
 * Andras Varga          <andras@omnetpp.org>
 
-The INET Framework is loosely based on the IPSuite from University of 
-Karlsruhe. After by extensive restructuring and rewrite, very little 
-of the original code could be kept -- most if it has been completely 
+The INET Framework is loosely based on the IPSuite from University of
+Karlsruhe. After by extensive restructuring and rewrite, very little
+of the original code could be kept -- most if it has been completely
 rewritten in 2003-2004 by Andras Varga.
 
-Changes include: UDP, IP, PPP, TCP reimplemented; TCPSocket added; 
+Changes include: UDP, IP, PPP, TCP reimplemented; TCPSocket added;
 Ethernet and MPLS models integrated; extensive refactoring on MPLS
-and RSVP; LDP reimplemented; added ARP; added app models for TCP and 
+and RSVP; LDP reimplemented; added ARP; added app models for TCP and
 Ethernet; added network configurators; added neddoc documentation.
 
 

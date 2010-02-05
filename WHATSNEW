@@ -1,6 +1,9 @@
 Recent changes in the INET Framework
 ====================================
 
+- added new TCP impelemantation based on Network Simulation Cradle
+- added new default TCP implementation (supporting SACK and other new features)
+
 INET-20090325
 -------------
 - tagged version for OMNeT++ 4.0 final

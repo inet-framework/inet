@@ -45,6 +45,10 @@ source files yourself.
 It is a workable approach to compile your C++ code as shared library (.so on
 Linux/Unix), and get the INET executable load it dynamically.
 
+If you want to use extarnal intefaces in INET, please install libpcap-dev (on linux)
+or winpcap (on windows from www.winpcap.org), then re-run the omnetpp configuration
+script (./configure). You should also enable the pcap support by editing the
+src/makefrag and the regeneration the INET makefiles (with the "make makefiles" command)
 
 Directory structure
 -------------------
@@ -77,7 +81,9 @@ Bottom-up:
 
    transport/            transport layer protocols
      contract/           API to transport layer functionality
-     tcp/                TCP protocol
+     tcp/                TCP protocol (supporting SACK) (default TCP implementation)
+     tcp_nsc/            TCP protocol using Network Simulation Cradle
+     tcp_old/            TCP old (obsolete) TCP implementation (without SACK) for refeence only
      udp/                UDP protocol
      rtp/                Realtime Transport Protocol (not yet integrated)
      sctp/               Stream Control Transmission Protocol

@@ -74,7 +74,7 @@ class SCTPMessage;
  * The third object is subclassed from SCTPAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"
  * from SCTPAssociation into SCTPAlgorithm: delayed acks, slow start, fast rexmit,
- * etc. are all implemented in SCTPAlgorithm subclasses. 
+ * etc. are all implemented in SCTPAlgorithm subclasses.
  *
  * The concrete SCTPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
@@ -147,12 +147,12 @@ class SCTP : public cSimpleModule
 			double throughput;
 			simtime_t lifeTime;
 		}AssocStat;
-	
+
 		typedef std::map<int32,AssocStat> AssocStatMap;
 		AssocStatMap assocStatMap;
 		typedef std::map<VTagPair,int32> SctpVTagMap;
 		SctpVTagMap sctpVTagMap;
-	
+
 	protected:
 		typedef std::map<AppConnKey,SCTPAssociation*> SctpAppConnMap;
 		typedef std::map<SockPair,SCTPAssociation*> SctpConnMap;
@@ -160,7 +160,7 @@ class SCTP : public cSimpleModule
 
 		SctpAppConnMap sctpAppConnMap;
 		SctpConnMap sctpConnMap;
-	
+
 		int32 sizeConnMap;
 		static int32 nextConnId;
 
@@ -176,7 +176,7 @@ class SCTP : public cSimpleModule
 		static bool testing;    // switches between sctpEV and testingEV
 		static bool logverbose; // if !testing, turns on more verbose logging
 		void printInfoConnMap();
-	
+
 		void removeAssociation(SCTPAssociation *assoc);
 		simtime_t testTimeout;
 		uint32 numGapReports;
@@ -213,7 +213,7 @@ class SCTP : public cSimpleModule
 		* which associates connections with their apps).
 		*/
 		static int32 getNewConnId() {return ++nextConnId;}
-	
+
 		SCTPAssociation* getAssoc(int32 assocId);
 		SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
 		SctpVTagMap getVTagMap() {return sctpVTagMap;};

@@ -2,7 +2,7 @@ ifconfig:
 
 # ethernet card 0 of router - connected to RT3
 name: eth0
-    inet_addr: 192.168.20.6 
+    inet_addr: 192.168.20.6
     Mask: 255.255.255.255
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500

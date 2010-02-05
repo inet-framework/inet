@@ -53,7 +53,7 @@ enum SctpState
 	SCTP_S_CLOSED            = 0,
 	SCTP_S_COOKIE_WAIT       = FSM_Steady(1),
 	SCTP_S_COOKIE_ECHOED     = FSM_Steady(2),
-	SCTP_S_ESTABLISHED       = FSM_Steady(3),    
+	SCTP_S_ESTABLISHED       = FSM_Steady(3),
 	SCTP_S_SHUTDOWN_PENDING  = FSM_Steady(4),
 	SCTP_S_SHUTDOWN_SENT     = FSM_Steady(5),
 	SCTP_S_SHUTDOWN_RECEIVED = FSM_Steady(6),
@@ -79,10 +79,10 @@ enum SCTPEventCode
 	SCTP_E_RCV_INIT_ACK,
 	SCTP_E_RCV_COOKIE_ACK,
 	SCTP_E_RCV_SHUTDOWN,
-	SCTP_E_RCV_SHUTDOWN_ACK,  
+	SCTP_E_RCV_SHUTDOWN_ACK,
 	SCTP_E_RCV_SHUTDOWN_COMPLETE,
 	SCTP_E_NO_MORE_OUTSTANDING,
-	SCTP_E_TIMEOUT_INIT_TIMER,     
+	SCTP_E_TIMEOUT_INIT_TIMER,
 	SCTP_E_TIMEOUT_SHUTDOWN_TIMER,
 	SCTP_E_TIMEOUT_RTX_TIMER,
 	SCTP_E_TIMEOUT_HEARTBEAT_TIMER,
@@ -98,18 +98,18 @@ enum SCTPEventCode
 
 enum SCTPChunkTypes
 {
-	DATA			= 0, 
-	INIT			= 1, 
-	INIT_ACK		= 2, 
+	DATA			= 0,
+	INIT			= 1,
+	INIT_ACK		= 2,
 	SACK			= 3,
-	HEARTBEAT		= 4, 
-	HEARTBEAT_ACK		= 5, 
-	ABORT			= 6, 
-	SHUTDOWN		= 7, 
-	SHUTDOWN_ACK		= 8, 
-	ERRORTYPE		= 9, 
-	COOKIE_ECHO		= 10, 
-	COOKIE_ACK		= 11, 
+	HEARTBEAT		= 4,
+	HEARTBEAT_ACK		= 5,
+	ABORT			= 6,
+	SHUTDOWN		= 7,
+	SHUTDOWN_ACK		= 8,
+	ERRORTYPE		= 9,
+	COOKIE_ECHO		= 10,
+	COOKIE_ACK		= 11,
 	SHUTDOWN_COMPLETE	= 14,
 
 };
@@ -163,7 +163,7 @@ enum SCTPStreamSchedulers
 #define PATH_MAX_RETRANS				5
 
 #define SCTP_TIMEOUT_INIT_REXMIT     			3    // initially 3 seconds
-#define SCTP_TIMEOUT_INIT_REXMIT_MAX 			240  // 4 mins 
+#define SCTP_TIMEOUT_INIT_REXMIT_MAX 			240  // 4 mins
 #define SACK_DELAY              			0.2
 #define RTO_BETA					0.25
 #define RTO_ALPHA					0.125
@@ -262,7 +262,7 @@ class SCTPPathVariables : public cPolymorphic
 		simtime_t rttvar;
 		cMessage *HeartbeatTimer;
 		cMessage *HeartbeatIntervalTimer;
-		cMessage *CwndTimer; 
+		cMessage *CwndTimer;
 		cMessage *T3_RtxTimer;
 		cOutVector *pathSsthresh;
 		cOutVector *pathCwnd;
@@ -354,7 +354,7 @@ class SCTPStateVariables : public cPolymorphic
 		int32 cookieLifeTime;
 		/** Counter for init and cookie retransmissions */
 		int16 initRetransCounter;
-		//int16 numParam; 
+		//int16 numParam;
 		simtime_t initRexmitTimeout;
 		/** pointer to the init chunk data structure (for retransmissions) */
 		SCTPInitChunk *initChunk;
@@ -385,7 +385,7 @@ class SCTPAssociation : public cObject
 		bool listen;
 		uint32 localVTag;   // local verification tag
 		uint32 peerVTag;    // remote verification tag
-	
+
 		// timers
 		cMessage *T1_InitTimer;
 		cMessage *T2_ShutdownTimer;
@@ -402,7 +402,7 @@ class SCTPAssociation : public cObject
 		uint32 numberOfRemoteAddresses;
 
 		uint32 initTsn; //DATA
-		uint32 initPeerTsn; 
+		uint32 initPeerTsn;
 		uint32 inboundStreams;
 		uint32 outboundStreams;
 		uint32 sackFrequency;
@@ -414,16 +414,16 @@ class SCTPAssociation : public cObject
 		cOutVector *quBytes;
 		cOutVector *cumTsnAck;
 		cOutVector* sendQueue;
-	
+
 		SCTP *sctpMain;  // SCTP module
 
 		// SCTP state machine
 		cFSM* fsm;
-	
+
 		// map for storing the path parameters
 		typedef std::map<IPvXAddress,SCTPPathVariables*> SCTPPathMap;
 		SCTPPathMap sctpPathMap;
-	
+
 		//map for storing the queued bytes per path
 		typedef std::map<IPvXAddress, uint32> CounterMap;
 		typedef struct counter {
@@ -441,7 +441,7 @@ class SCTPAssociation : public cObject
 
 		typedef std::map<uint32, SCTPSendStream*> SCTPSendStreamMap;
 		SCTPSendStreamMap sendStreams;
-	
+
 		typedef std::map<uint32, SCTPReceiveStream*> SCTPReceiveStreamMap;
 
 		SCTPReceiveStreamMap receiveStreams;
@@ -453,7 +453,7 @@ class SCTPAssociation : public cObject
 			uint32 bytesToSend;
 		} BytesToBeSent;
 		BytesToBeSent bytes;
-	
+
 
 		typedef struct congestionControlFunctions {
 			void (SCTPAssociation::*ccInitParams)(SCTPPathVariables* path);
@@ -480,12 +480,12 @@ class SCTPAssociation : public cObject
 		* If fullSegments is set, don't send segments smaller than MSS (needed for Nagle).
 		* Returns true if some data was actually sent.
 		*/
-	
+
 		void sendAll(IPvXAddress pathId);
-	
+
 		/** Utility: returns name of SCTP_I_xxx constants */
 		static const char *indicationName(int32 code);
-	
+
 		/* @name Various getters */
 		//@{
 		int32 getFsmState() const {return fsm->getState();};
@@ -495,51 +495,51 @@ class SCTPAssociation : public cObject
 		SCTPAlgorithm *getSctpAlgorithm() {return sctpAlgorithm;};
 		SCTP *getSctpMain() {return sctpMain;};
 		cFSM* getFsm() {return fsm;};
-	
+
 		cMessage *getInitTimer() {return T1_InitTimer;};
 		cMessage *getShutdownTimer() {return T2_ShutdownTimer;};
 		cMessage *getSackTimer() {return SackTimer;};
-	
+
 		/** Utility: returns name of SCTP_S_xxx constants */
 		static const char *stateName(int32 state);
-	
+
 		uint32 chunkToInt(char* type);
-	
-	
+
+
 		/* Process self-messages (timers).
 		* Normally returns true. A return value of false means that the
 		* connection structure must be deleted by the caller (SCTPMain).
 		*/
 		bool processTimer(cMessage *msg);
-	
-		
+
+
 		/**
 		* Process incoming SCTP segment. Normally returns true. A return value
 		* of false means that the connection structure must be deleted by the
 		* caller (SCTP).
 		*/
 		bool processSCTPMessage(SCTPMessage *sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr);
-	
+
 		/**
 		* Process commands from the application.
 		* Normally returns true. A return value of false means that the
 		* connection structure must be deleted by the caller (SCTP).
 		*/
 		bool processAppCommand(cPacket *msg);
-	
+
 		void removePath();
 		void removePath(IPvXAddress addr);
 		void removeLastPath(IPvXAddress addr);
 		void deleteStreams();
 		void stopTimer(cMessage* timer);
 		void stopTimers();
-	
+
 		SCTPPathVariables* getPath(IPvXAddress pid);
-		void printSctpPathMap();	
+		void printSctpPathMap();
 
 	protected:
-	
-			
+
+
 
 
 		/** @name FSM transitions: analysing events and executing state transitions */
@@ -553,7 +553,7 @@ class SCTPAssociation : public cObject
 
 		/** @name Processing app commands. Invoked from processAppCommand(). */
 		//@{
-		void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg); 
+		void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
 		void process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
 		void process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
 		void process_CLOSE(SCTPEventCode& event);
@@ -589,7 +589,7 @@ class SCTPAssociation : public cObject
 		void process_TIMEOUT_SHUTDOWN(SCTPEventCode& event);
 		int32 updateCounters(SCTPPathVariables* path);
 		//@}
-	
+
 		void startTimer(cMessage* timer, simtime_t timeout);
 
 		/** Utility: clone a listening association. Used for forking. */
@@ -597,7 +597,7 @@ class SCTPAssociation : public cObject
 
 		/** Utility: creates send/receive queues and sctpAlgorithm */
 		void initAssociation(SCTPOpenCommand *openCmd);
-		
+
 		/** Methods dealing with the handling of TSNs  **/
 		bool tsnIsDuplicate(uint32 tsn);
 		bool advanceCtsna();
@@ -658,8 +658,8 @@ class SCTPAssociation : public cObject
 		void printConnBrief();
 		/** Utility: prints important header fields */
 		static void printSegmentBrief(SCTPMessage *sctpmsg);
-	
-	
+
+
 
 		/** Utility: returns name of SCTP_E_xxx constants */
 		static const char *eventName(int32 event);
@@ -667,22 +667,22 @@ class SCTPAssociation : public cObject
 		void addPath(IPvXAddress addr);
 		IPvXAddress getNextDestination(SCTPDataVariables* chk);
 		IPvXAddress getNextAddress(IPvXAddress dpi);
-	
+
 		void bytesAllowedToSend(IPvXAddress dpi);
-		
+
 		void pathStatusIndication(IPvXAddress pid, bool status);
 
 		bool allPathsInactive(void);
 		uint32 getLevel(IPvXAddress addr);
-	
+
 		/**
 		* Manipulating chunks
 		*/
 		SCTPDataChunk* transformDataChunk(SCTPDataVariables* datVar);
 		SCTPDataVariables* makeVarFromMsg(SCTPDataChunk* datachunk);
-	
+
 		/**
-		*Dealing with streams 
+		*Dealing with streams
 		*/
 
 		int32 streamScheduler(bool peek);
@@ -718,7 +718,7 @@ class SCTPAssociation : public cObject
 		void pmClearPathCounter(IPvXAddress pid);
 		void pmRttMeasurement(IPvXAddress pathId, simtime_t rttEstimate, int32 acknowledgedBytes);
 		void fcAdjustCounters(uint32 ackedBytes, uint32 osb, bool ctsnaAdvanced, IPvXAddress pathId, uint32 pathOsb, uint32 newOsb);
-	
+
 		/**
 		* Compare TSNs
 		*/
@@ -729,9 +729,9 @@ class SCTPAssociation : public cObject
 		int32 tsnBetween (uint32 tsn1, uint32 midtsn, uint32 tsn2) { return ((tsn2-tsn1)>=(midtsn-tsn1)); }
 
 		int16 ssnGt (uint16 ssn1, uint16 ssn2) { return ((int16)(ssn1-ssn2)>0); }
-	
+
 		uint32 subBytes(uint32 osb, uint32 bytes) {return (((int32)(osb-bytes)>0)?osb-bytes:0);}
-	
+
 		void disposeOf(SCTPMessage* sctpmsg);
 		void printOutstandingTsns();
 

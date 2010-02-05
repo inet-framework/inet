@@ -1,0 +1,29 @@
+In this example the network consists of one client and one server only.
+
+The default TCP implementation can be replaced using the StandardHost's tcpType 
+parameter. This example uses the Network Simulation Cradle library which contains
+real-world tcp implementations taken from Linux 2.6, OpenBSD, FreeBSD and lwIP.
+It can be downloaded from: http://www.wand.net.nz/~stj2/nsc/
+
+The NSC library must be present in <inet_root>/3rdparty/nsc-0.5.1 directory. 
+If you have a different version of the library you MUST modify the 
+'<inet_root>/src/makefrag' file and adjust the name and version number of the NSC 
+distribution. You have to regenerate the makefiles after changing the 'makefrag' 
+file. Execute:
+
+  $ make makefiles
+
+from the <inet_root> directory or rebuild INET from the IDE.
+
+To successfully build INET with NSC support you must first compile the NSC libraries
+in 3rdparty/nsc-0.5.1 . Execute:
+
+  $ python scons.py
+
+and then you should build INET:
+
+  $ make
+
+This example demonstrates how to use different TCP implementations on different hosts
+in the same network. Just adjust the 'tcpType' parameter for the hosts that want to use
+TCP implementations other than the default.

@@ -26,7 +26,7 @@
 class INET_API MPLSPacket: public cPacket
 {
   protected:
-    typedef std::stack<int> LabelStack;
+    typedef std::vector<int> LabelStack; // note: last element is the top of stack
     LabelStack labels;
 
   public:
@@ -43,19 +43,24 @@ class INET_API MPLSPacket: public cPacket
     virtual MPLSPacket *dup() const {return new MPLSPacket(*this);}
 
     /**
+     * Returns a string with the labels, starting with the top of stack.
+     */
+    virtual std::string info() const;
+
+    /**
      * Swap Label operation
      */
-    inline void swapLabel(int newLabel)  {labels.top()=newLabel;}
+    inline void swapLabel(int newLabel)  {labels.back()=newLabel;}
 
     /**
      * Pushes new label on the label stack
      */
-    inline void pushLabel(int newLabel)  {labels.push(newLabel);addBitLength(32);}
+    inline void pushLabel(int newLabel)  {labels.push_back(newLabel);addBitLength(32);}
 
     /**
      * Pops the top label
      */
-    inline void popLabel()  {labels.pop();addBitLength(-32);}
+    inline void popLabel()  {labels.pop_back();addBitLength(-32);}
 
     /**
      * Returns true if the label stack is not empty
@@ -65,7 +70,7 @@ class INET_API MPLSPacket: public cPacket
     /**
      * Returns the top label
      */
-    inline int getTopLabel()  {return labels.top();}
+    inline int getTopLabel()  {return labels.back();}
 };
 
 #endif

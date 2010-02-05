@@ -19,14 +19,13 @@ package inet.linklayer.ext;
 
 simple ExtInterface
 {
-    parameters:
-        string filterString;
-        string device;
-        int mtu = default(1500);
-        @display("i=block/ifcard");
-    gates:
-        input netwIn;
-        output netwOut;
+	parameters:
+		string filterString;
+		string device;
+		int mtu = default(1500);
+	gates:
+		input netwIn;
+		output netwOut;
 }
 
 

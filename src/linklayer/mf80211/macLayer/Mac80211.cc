@@ -143,7 +143,7 @@ void Mac80211::handleUpperMsg(cPacket *msg)
 {
     if (msg->getByteLength() > 2312)
         error("packet from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->getClassName(), msg->getName(), msg->getByteLength());
+              msg->getClassName(), msg->getName(), (int)(msg->getByteLength()));
 
     if (maxQueueSize && (int)fromUpperLayer.size() == maxQueueSize)
     {

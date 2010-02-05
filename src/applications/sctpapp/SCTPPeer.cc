@@ -104,7 +104,7 @@ void SCTPPeer::sendOrSchedule(cPacket *msg)
 
 void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
 {
-uint32 numBytes;	 
+uint32 numBytes;
 	cPacket* cmsg = new cPacket("CMSG");
 	SCTPSimpleMessage* msg=new SCTPSimpleMessage("Server");
 	numBytes=(long)par("requestLength");
@@ -152,7 +152,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
 	if (msg->isSelfMessage())
 	{
-	
+
 		handleTimer(msg);
 	}
 	switch (msg->getKind())
@@ -167,7 +167,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 			cmd->setAssocId(id);
 			cmd->setSid(ind->getSid());
 			cmd->setNumMsgs(ind->getNumMsgs());
-			cmsg->setControlInfo(cmd);  
+			cmsg->setControlInfo(cmd);
 			delete ind;
 			delete msg;
 			cmsg->setKind(SCTP_C_ABORT);
@@ -196,7 +196,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 				endToEndDelay[serverAssocId] = new cOutVector(text);
 				sprintf(text, "Hist: EndToEndDelay of assoc %d",serverAssocId);
 				histEndToEndDelay[serverAssocId] = new cDoubleHistogram(text);
-	
+
 				//delete connectInfo;
 				delete msg;
 				if ((long) par("numPacketsToSendPerClient") > 0)
@@ -230,18 +230,18 @@ void SCTPPeer::handleMessage(cMessage *msg)
 								numRequestsToSend--;
 								i->second = numRequestsToSend;
 							}
-						
+
 							cPacket* cmsg = new cPacket("Queue");
 							SCTPInfo* qinfo = new SCTPInfo();
 							qinfo->setText(queueSize);
 							cmsg->setKind(SCTP_C_QUEUE);
 							qinfo->setAssocId(id);
-							cmsg->setControlInfo(qinfo);  
+							cmsg->setControlInfo(qinfo);
 							sendOrSchedule(cmsg);
 						}
-					
+
 						sctpEV3<<"!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
-					
+
 						RcvdPacketsPerAssoc::iterator j=rcvdPacketsPerAssoc.find(serverAssocId);
 						if (j->second == 0 && (simtime_t)par("waitToClose")>0)
 						{
@@ -258,7 +258,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 							SCTPCommand* cmd = new SCTPCommand();
 							cmsg->setKind(SCTP_C_SHUTDOWN);
 							cmd->setAssocId(serverAssocId);
-							cmsg->setControlInfo(cmd); 
+							cmsg->setControlInfo(cmd);
 							sendOrSchedule(cmsg);
 						}
 					}
@@ -277,7 +277,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 			cmd->setSid(ind->getSid());
 			cmd->setNumMsgs(ind->getNumMsgs());
 			cmsg->setKind(SCTP_C_RECEIVE);
-			cmsg->setControlInfo(cmd);  
+			cmsg->setControlInfo(cmd);
 			delete ind;
 			delete msg;
 			if (!cmsg->isScheduled() && schedule==false)
@@ -318,7 +318,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 							SCTPInfo* qinfo = new SCTPInfo();
 							cmsg->setKind(SCTP_C_NO_OUTSTANDING);
 							qinfo->setAssocId(id);
-							cmsg->setControlInfo(qinfo);  
+							cmsg->setControlInfo(qinfo);
 							sendOrSchedule(cmsg);
 						}
 					}
@@ -367,7 +367,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 					SCTPInfo* qinfo = new SCTPInfo();
 					cmsg->setKind(SCTP_C_NO_OUTSTANDING);
 					qinfo->setAssocId(id);
-					cmsg->setControlInfo(qinfo);  
+					cmsg->setControlInfo(qinfo);
 					sendOrSchedule(cmsg);
 				}
 				delete command;
@@ -394,7 +394,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
 	SCTPCommand* cmd;
 	int32 id;
 
-	 
+
 	sctpEV3<<"SCTPPeer::handleTimer\n";
 
 	SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->getControlInfo());
@@ -405,7 +405,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
 			connect();
 			break;
 		case SCTP_C_SEND:
-		
+
 			if (numRequestsToSend>0)
 			{
 				generateAndSend(connectInfo);
@@ -420,7 +420,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
 			cmd = new SCTPCommand();
 			id = atoi(msg->getName());
 			cmd->setAssocId(id);
-			cmsg->setControlInfo(cmd);  
+			cmsg->setControlInfo(cmd);
 			sendOrSchedule(cmsg);
 			break;
 		case SCTP_C_RECEIVE:
@@ -442,7 +442,7 @@ void SCTPPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *m
 	cmd->setSid(ind->getSid());
 	cmd->setNumMsgs(ind->getNumMsgs());
 	cmsg->setKind(SCTP_C_RECEIVE);
-	cmsg->setControlInfo(cmd);  
+	cmsg->setControlInfo(cmd);
 	delete ind;
 	clientSocket.sendNotification(cmsg);
 }
@@ -504,7 +504,7 @@ void SCTPPeer::sendRequest(bool last)
 	long numBytes = par("requestLength");
 	if (numBytes < 1)
 		numBytes=1;
-	 
+
 	sctpEV3 << "SCTPClient: sending " << numBytes << " data bytes\n";
 
 	cPacket* cmsg = new cPacket("AppData");
@@ -538,7 +538,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 	// determine number of requests in this session
 	numRequestsToSend = (long) par("numRequestsPerSession");
 	numPacketsToReceive = (long) par("numPacketsToReceive");
-	if (numRequestsToSend<1) 
+	if (numRequestsToSend<1)
 		numRequestsToSend = 0;
 	// perform first request (next one will be sent when reply arrives)
 	if (numRequestsToSend>0)
@@ -552,7 +552,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 			}
 			timeMsg->setKind(MSGKIND_SEND);
 			scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeMsg);
-		
+
 		}
 		else
 		{
@@ -577,7 +577,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 					numRequestsToSend--;
 				}
 			}
-		
+
 			if (numPacketsToReceive == 0 && (simtime_t)par("waitToClose")>0)
 			{
 				timeMsg->setKind(MSGKIND_ABORT);
@@ -599,7 +599,7 @@ void SCTPPeer::sendQueueRequest()
 	qinfo->setText(queueSize);
 	cmsg->setKind(SCTP_C_QUEUE);
 	qinfo->setAssocId(clientSocket.getConnectionId());
-	cmsg->setControlInfo(qinfo);  
+	cmsg->setControlInfo(qinfo);
 	clientSocket.sendRequest(cmsg);
 
 }
@@ -617,7 +617,7 @@ int32 count = 0;
 			sendRequest();
 		else
 			sendRequest(false);
-	
+
 		if (numRequestsToSend == 0)
 		{
 			sctpEV3<<"no more packets to send, call shutdown\n";
@@ -632,7 +632,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
 {
 	// *redefine* to perform or schedule next sending
 	packetsRcvd++;
-	 
+
 	sctpEV3<<"Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
 
 	SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->getControlInfo());
@@ -674,7 +674,7 @@ void SCTPPeer::shutdownReceivedArrived(int32 connId)
 		SCTPInfo* qinfo = new SCTPInfo();
 		cmsg->setKind(SCTP_C_NO_OUTSTANDING);
 		qinfo->setAssocId(connId);
-		cmsg->setControlInfo(qinfo);  
+		cmsg->setControlInfo(qinfo);
 		clientSocket.sendNotification(cmsg);
 	}
 }

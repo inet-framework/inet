@@ -32,7 +32,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 IPvXAddress lAddr, rAddr;
 
 	SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
-	 
+
 	ev<<"SCTPAssociationEventProc:process_ASSOCIATE\n";
 
 	switch(fsm->getState())
@@ -52,7 +52,7 @@ IPvXAddress lAddr, rAddr;
 		localPort = openCmd->getLocalPort();
 		remotePort = openCmd->getRemotePort();
 		state->numRequests = openCmd->getNumRequests();
-	
+
 		if (rAddr.isUnspecified() || remotePort==0)
 		opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
@@ -65,7 +65,7 @@ IPvXAddress lAddr, rAddr;
 		sctpMain->updateSockPair(this, lAddr, rAddr, localPort, remotePort);
 		state->localRwnd = (long)sctpMain->par("arwnd");
 		sendInit();
-		startTimer(T1_InitTimer,state->initRexmitTimeout); 
+		startTimer(T1_InitTimer,state->initRexmitTimeout);
 		break;
 
 	default:
@@ -78,7 +78,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 {
 	IPvXAddress lAddr;
 	int16 localPort;
-    
+
 	SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
 
 	sctpEV3<<"SCTPAssociationEventProc:process_OPEN_PASSIVE\n";
@@ -95,11 +95,11 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 			state->localRwnd = (long)sctpMain->par("arwnd");
 			state->numRequests = openCmd->getNumRequests();
 			state->messagesToPush = openCmd->getMessagesToPush();
-		
+
 			if (localPort==0)
 				opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
-			sctpEV3 << "Assoc "<<assocId<<"::Starting to listen on: " << lAddr << ":" << localPort << "\n"; 
-	
+			sctpEV3 << "Assoc "<<assocId<<"::Starting to listen on: " << lAddr << ":" << localPort << "\n";
+
 			sctpMain->updateSockPair(this, lAddr, IPvXAddress(), localPort, 0);
 			break;
 		default:
@@ -115,17 +115,17 @@ SCTPSendStream* stream;
 	SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
 	switch(fsm->getState())
 	{
-		case SCTP_S_ESTABLISHED:  
-			 
+		case SCTP_S_ESTABLISHED:
+
 			sctpEV3<<"SCTPAssociationEventProc: process_SEND  localAddr="<<localAddr<<"  remoteAddr="<<remoteAddr<<"  appGateIndex="<<appGateIndex<<"  assocId="<<assocId<<"\n";
-		
+
 			SCTPSimpleMessage* smsg = check_and_cast<SCTPSimpleMessage*>((msg->decapsulate()));
 			SCTP::AssocStatMap::iterator iter=sctpMain->assocStatMap.find(assocId);
 			iter->second.sentBytes+=smsg->getBitLength()/8;
 			pkSize = smsg->getBitLength()+SCTP_DATA_CHUNK_LENGTH*8;
-		
+
 				/* check that message is shorter than the MSS, else use segmentation */
-			if (pkSize <= SCTP_MAX_PAYLOAD * 8) 
+			if (pkSize <= SCTP_MAX_PAYLOAD * 8)
 			{
 				streamId = sendCommand->getSid();
 				sendUnordered = sendCommand->getSendUnordered();
@@ -164,7 +164,7 @@ SCTPSendStream* stream;
 					stream->getUnorderedStreamQ()->insert(datMsg);
 				}
 				else
-				{ 
+				{
 					datMsg->setOrdered(true);
 					stream->getStreamQ()->insert(datMsg);
 
@@ -196,13 +196,13 @@ SCTPSendStream* stream;
 void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand *sctpCommand)
 {
  	SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
-	if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) 
+	if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0)
 	{
-		 
+
 		sctpEV3<<"Application tries to read from invalid stream id....\n";
-	
+
 	}
-	 
+
 	state->numMsgsReq[sendCommand->getSid()]+= sendCommand->getNumMsgs();
 	pushUlp();
 }
@@ -222,23 +222,23 @@ void SCTPAssociation::process_QUEUE(SCTPCommand *sctpCommand)
 
 void SCTPAssociation::process_CLOSE(SCTPEventCode& event)
 {
-	 
+
 	sctpEV3<<"SCTPAssociationEventProc:process_CLOSE; assoc="<<assocId<<"\n";
 
 	switch(fsm->getState())
 	{
-		case SCTP_S_ESTABLISHED: 
+		case SCTP_S_ESTABLISHED:
 			sendAll(state->primaryPathIndex);
-			
+
 			if (remoteAddr!=state->primaryPathIndex)
 				sendAll(remoteAddr);
-				
+
 			sendShutdown();
 			break;
 		case SCTP_S_SHUTDOWN_RECEIVED:
 			if (getOutstandingBytes()==0)
 				sendShutdownAck(remoteAddr);
-			break;         
+			break;
     }
 }
 
@@ -247,7 +247,7 @@ void SCTPAssociation::process_ABORT(SCTPEventCode& event)
 	sctpEV3<<"SCTPAssociationEventProc:process_ABORT\n";
 	switch(fsm->getState())
 	{
-		case SCTP_S_ESTABLISHED: 
+		case SCTP_S_ESTABLISHED:
 			if (state->ackState < sackFrequency)
 			{
 				state->ackState = sackFrequency;
@@ -256,7 +256,7 @@ void SCTPAssociation::process_ABORT(SCTPEventCode& event)
 					sendAll(remoteAddr);
 			}
 			sendAbort();
-			break;         
+			break;
     	}
 
 }

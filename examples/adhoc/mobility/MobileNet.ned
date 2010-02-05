@@ -34,7 +34,7 @@ network MobileNet
     submodules:
         host[numHosts]: PlainMobilityHost {
             parameters:
-                @display("r=,,#707070");
+                @display("p=300,300;r=,,#707070");
         }
         channelcontrol: ChannelControl {
             parameters:

@@ -86,7 +86,7 @@ class SCTPQueue : public cPolymorphic
 	bool deleteMsg(uint32 tsn);
 
 	int32 getNumBytes();
-	
+
 	SCTPDataVariables* dequeueVarBySsn(uint16 ssn);
 };
 

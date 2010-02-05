@@ -1,13 +1,11 @@
 Qeueing (we have: FIFO, RED):
   CBQ
-  WFQ 
+  WFQ
   RIO
   Round Robin
   Fair queueing Round Robin
 
 TCP:
-  SACK
-  New Reno
   Vegas
 
 WiMAX (done, see Numbat project)

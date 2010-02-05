@@ -45,7 +45,7 @@ network DemoNetworkEth
         linemonitor[n]: TCPDump;
     connections:
         for i=0..n-1 {
-// FIXME adjust to the new TCPDump module            
+// FIXME adjust to the new TCPDump module
 //            cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
 //            linemonitor[i].b <--> ethernetline <--> r1.ethg++;
             cli[i].ethg++ <--> ethernetline <--> r1.ethg++;

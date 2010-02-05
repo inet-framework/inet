@@ -27,6 +27,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
 #include "PingPayload_m.h"
+#include "TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
@@ -36,7 +37,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 using namespace INETFw;
 
 
-int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
+int ICMPSerializer::serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
 {
     struct icmp *icmp = (struct icmp *) (buf);
     int packetLength;
@@ -55,9 +56,9 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             unsigned int datalen = (pp->getByteLength() - 4);
             for (unsigned int i=0; i < datalen; i++)
                 if (i < pp->getDataArraySize()) {
-                	icmp->icmp_data[i] = pp->getData(i);
+                    icmp->icmp_data[i] = pp->getData(i);
                 } else {
-                	icmp->icmp_data[i] = 'a';
+                    icmp->icmp_data[i] = 'a';
                 }
             packetLength += datalen;
             break;
@@ -98,11 +99,11 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             break;
         }
     }
-    icmp->icmp_cksum = checksum(buf, packetLength);
+    icmp->icmp_cksum = TCPIPchecksum::checksum(buf, packetLength);
     return packetLength;
 }
 
-void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt)
+void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt)
 {
     struct icmp *icmp = (struct icmp*) buf;
 
@@ -154,24 +155,4 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             break;
         }
     }
-}
-
-unsigned short ICMPSerializer::checksum(unsigned char *addr, unsigned int count)
-{
-    long sum = 0;
-
-    while (count > 1)  {
-        sum += *((unsigned short *&)addr)++;
-        if (sum & 0x80000000)
-            sum = (sum & 0xFFFF) + (sum >> 16);
-        count -= 2;
-    }
-
-    if (count)
-        sum += *(unsigned char *)addr;
-
-    while (sum >> 16)
-        sum = (sum & 0xffff) + (sum >> 16);
-
-    return ~sum;
 }

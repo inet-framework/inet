@@ -34,9 +34,6 @@ cplusplus {{
 // attach it to the packet with the C++ method setControlInfo(),
 // the send it to the IPv6 module.
 //
-// When IPv6 delivers packets to higher layers, it also attaches
-// similar IPv6ControlInfo objects to them.
-//
 // When sending, the following fields are required:
 // - protocol: a value from IPProtocolId
 // - destAddr
@@ -45,6 +42,15 @@ cplusplus {{
 // - srcAddr: it will be set to the address of the outgoing interface
 // - timeToLive
 //
+// When IPv6 delivers a packet to higher layers, it also attaches an 
+// IPv6ControlInfo to it. It fills in the following fields: 
+//  - srcAddr, destAddr, protocol, hopLimit: values from the original datagram
+//  - interfaceId: the interface on which the datagram arrived, or -1 if it was
+//    created locally
+//
+// IPv6 also puts the original datagram object into the control info, because
+// it may be needed by higher layers.
+//
 class IPv6ControlInfo
 {
     @customize(true);
@@ -52,8 +58,8 @@ class IPv6ControlInfo
     IPv6Address destAddr; // destination IPv6 address
     IPv6Address srcAddr;  // source IPv6 address
     short hopLimit;       // hop limit
-    int interfaceId = -1; // interface on which dgram was received/should
-                              // be sent (see InterfaceTable)
+    int interfaceId = -1; // interface on which the datagram was received, or
+                          // should be sent (see InterfaceTable)
 }
 
 

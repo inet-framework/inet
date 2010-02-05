@@ -42,7 +42,7 @@ struct pcap_hdr {
 
 /* "libpcap" record header. */
 struct pcaprec_hdr {
-    int32           ts_sec;     /* timestamp seconds */
+    int32   ts_sec;     /* timestamp seconds */
     uint32  ts_usec;    /* timestamp microseconds */
     uint32  incl_len;   /* number of octets of packet saved in file */
     uint32  orig_len;   /* actual length of packet */
@@ -72,15 +72,13 @@ class TCPDumper
         ~TCPDumper();
         void ipDump(const char *label, IPDatagram *dgram, const char *comment=NULL);
         void sctpDump(const char *label, SCTPMessage *sctpmsg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
-        // dumps arbitary text
         void dump(const char *label, const char *msg);
         void tcpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
         void tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
         void dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment=NULL);//FIXME: Temporary hack
         void udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment);
-        char* intToChunk(int32 type);
+        const char *intToChunk(int32 type);
         FILE *dumpfile;
-
 };
 
 
@@ -92,7 +90,6 @@ class TCPDump : public cSimpleModule
     protected:
         TCPDumper tcpdump;
     public:
-
         TCPDump();
         ~TCPDump();
         TCPDump(const char *name, cModule *parent);

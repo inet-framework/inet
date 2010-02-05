@@ -61,7 +61,7 @@ class ExtInterface : public cSimpleModule
   private:
     const char *tag_color;
     const char *tag_width;
-    
+
   public:
    // Module_Class_Members(ExtInterface, cSimpleModule, 0);
 

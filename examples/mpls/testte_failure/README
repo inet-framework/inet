@@ -1,4 +1,4 @@
-The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt
 from scratch by Vojta Janota since the INET-20050922 release. This network
 already features the new simulation models.
 

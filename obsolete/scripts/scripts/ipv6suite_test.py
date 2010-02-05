@@ -90,7 +90,7 @@ from difflib import ndiff
 
 class IPv6SuiteInit(Resource):
 
-    """ A particular build config that tests can depend on and use. 
+    """ A particular build config that tests can depend on and use.
 """
 
     arguments = [
@@ -124,7 +124,7 @@ class IPv6SuiteInit(Resource):
 #       default_value="true",
 #       )
         ]
-    
+
     def SetUp(self, context, result):
 #        if not context.has_key("IPv6Suite.srcDir"):
             # By default we assume there is a compiler.
@@ -136,20 +136,20 @@ class IPv6SuiteInit(Resource):
                               "srcDir does not exist. Where will we get source"
                               "files from?")
             return
-        
-        
+
+
         buildDir = context["IPv6Suite.buildDir"]
         buildDir = os.path.abspath(buildDir)
         context["IPv6Suite.buildDir"] = buildDir
-            
+
         buildDir = os.path.join(buildDir, IdToDir(self))
-        
+
         self.wipe_build_dir = qm.parse_boolean(context["IPv6Suite.wipe_build_dir"])
         #Can't use bool since the boolean_value is a string of 'true|false' and since bool
         # thinks of any string as true except empty or none.
         #self.wipe_build_dir = bool(self.wipe_build_dir)
-        
-        #We want clean builds especially when previously failed ones may have broken generated code        
+
+        #We want clean builds especially when previously failed ones may have broken generated code
         if self.wipe_build_dir and os.path.exists(buildDir):
             shutil.rmtree(buildDir)
 
@@ -157,12 +157,12 @@ class IPv6SuiteInit(Resource):
 
         if self.wipe_build_dir:
             print "Wiping all files"
-            
+
         context["IPv6Suite.myBuildDir"] = buildDir
         self.myBuildDir = buildDir
         #srcdir/test is where we store the related input files like ini/xml etc.
         #Well database of qmtest would be where we store these input files but what structure underneath?
-        
+
         make_executable = RedirectedExecutable()
         #We actually want a gui to relace this value if possible?
         cmake_defines = string.split(self.ipv6suite_build_options)
@@ -204,15 +204,15 @@ class IPv6SuiteInit(Resource):
                                    "command": " ".join(make_command),
                                    })
                 return
-        
+
     def CleanUp(self, result):
         if self.wipe_build_dir:
             shutil.rmtree( self.myBuildDir)
         #Should catch exception and return it as a result with annotation so we can see in HTML or console
-        
+
 class IPv6SuiteTest(ExecTestBase):
 #class IPv6SuiteTest(ShellCommandTest):
-    
+
     """ Test class for IPv6Suite regression testing. Each test case shall
 have fields that are customised for a particular network scenario. Please look
 at the description of each argument for this class for more detail.
@@ -220,7 +220,7 @@ at the description of each argument for this class for more detail.
 There is a directory of files that are to be used as inputs to the simulation
 inc. XML/ini.
 """
-    arguments = [       
+    arguments = [
         qm.fields.TextField(
         name="scenario",
         title="Name of executable scenario to run",
@@ -260,7 +260,7 @@ inc. XML/ini.
         multiline="true",
         default_value="Please provide a description for what this test is doing. REMOVE this template test"
         ),
-        
+
         qm.fields.TextField(
         name="input_dir",
         title="Input files directory",
@@ -276,7 +276,7 @@ inc. XML/ini.
         If default value is null then the input_dir =
         os.path.join(self.GetDatabase().GetRoot(), "input", IdToDir(self)).
 
-        
+
         TODO: create a resource for input files so that i.e. default.ini is a
         resource file. Then dependent runs will have the resources copied first
         before the files are copied from here saving duplication of files etc.
@@ -301,7 +301,7 @@ inc. XML/ini.
         ]
 
 # run script?
-  
+
     def Run(self, context, result):
 ##         print self.GetDatabase().GetRoot()
 ##         print self.GetId()
@@ -311,13 +311,13 @@ inc. XML/ini.
         if self.scenario == "":
             return result.SetOutcome(result.ERROR, " scenario cannot be empty")
 
-        buildDir = context["IPv6Suite.myBuildDir"]    
+        buildDir = context["IPv6Suite.myBuildDir"]
         if not os.path.isdir(buildDir):
             result.SetOutcome(result.ERROR, "Build Dir " + buildDir + " does not exist")
             return
 
         input_directories = "input"
-        
+
         if self.input_dir == "":
             self.testName = IdToDir(self)
             self.input_dir = self.testName
@@ -347,12 +347,12 @@ inc. XML/ini.
                     self.scenario = os.path.join(path, f)
                     names = []
                     break
-        
+
         if not os.path.isfile(self.scenario):
             #Find it
             os.path.walk(os.path.join(buildDir, "Examples"), findFile, self.scenario)
 ##            os.path.walk(os.path.join(buildDir, "exe"), findFile, self.scenario)
-            
+
         if not os.path.isfile(self.scenario):
             return result.SetOutcome(result.ERROR, " scenario " + self.scenario + " was NOT found ")
 
@@ -367,7 +367,7 @@ inc. XML/ini.
             for f in names:
                 if os.path.isfile(os.path.join(path, f)):
                     shutil.copy2(os.path.join(path, f), runDir)
-                    
+
         os.path.walk(input_dir, copyInputFiles, "")
 
         def fixPaths(unused, path, names):
@@ -377,7 +377,7 @@ inc. XML/ini.
                     if re.search(r'\.ini$|\.xml$',f):
                         os.system("perl -i -pwe \"s|../../Etc/||\" " + os.path.join(path, f))
 
-        
+
         os.path.walk(runDir, fixPaths, "")
 
         dtdname = "netconf2.dtd"
@@ -385,7 +385,7 @@ inc. XML/ini.
         dtdfile = os.path.join(runDir, dtdname)
         default_ini = os.path.join(runDir, default_ini_name)
         for f in [ default_ini, dtdfile]:
-            if not os.path.exists(f):                
+            if not os.path.exists(f):
                 shutil.copy2(os.path.join(context["IPv6Suite.srcDir"], "Etc", os.path.basename(f)), runDir)
 
         cwd = os.getcwd()
@@ -404,14 +404,14 @@ inc. XML/ini.
 ##        self.RunProgram('/tmp/IPv6Suite/build-init/ipv6suite/testnew/MIPv6Network', ['/tmp/IPv6Suite/build-init/ipv6suite/testnew/MIPv6Network', '-r1'], context, result)
 ## #        self.RunProgram("/bin/echo", ["/bin/echo", "hello ", " world"], context, result)
         if result.GetOutcome() == Result.PASS:
-            self.CompareFiles(context, result, input_dir, runDir)            
-        
+            self.CompareFiles(context, result, input_dir, runDir)
+
         os.chdir(cwd)
 
     def CompareFiles(self, context, result, input_dir, runDir):
-        
+
         expected_directories = "expected"
-        
+
         if self.compare_dir == "":
             compare_dir = os.path.join(self.GetDatabase().GetRoot(), expected_directories, IdToDir(self))
         else:
@@ -427,7 +427,7 @@ inc. XML/ini.
 
         if generateExpectedResults:
             print "Generating expected results for test " + self.GetId() + " into " + compare_dir
-            
+
         if not generateExpectedResults and not os.path.exists(compare_dir):
             return result.SetOutcome(result.ERROR, " compare_dir "+ self.compare_dir + " does not exist")
 
@@ -478,7 +478,7 @@ inc. XML/ini.
             os.path.walk(runDir, copyOutputFiles, compare_dir)
 
 
-        
+
 ## Copied from ExecTestBase.RunProgram and modified so that stdout/stderr is always displayed
     def RunProgram(self, program, arguments, context, result):
         """Run the 'program'.
@@ -525,7 +525,7 @@ inc. XML/ini.
 
         if not re.search(r'End run of OMNeT',e.stdout) and not re.search(r'Calling finish', e.stdout):
             return result.Fail("Simulation did not end properly")
-            
+
         # If the process terminated normally, check the outputs.
         if sys.platform == "win32" or os.WIFEXITED(exit_status):
             # There are no causes of failure yet.
@@ -557,7 +557,7 @@ inc. XML/ini.
 ##                     = result.Quote(self.stderr)
 ##             # If anything went wrong, the test failed.
 ##             if causes:
-##                 result.Fail("Unexpected %s." % string.join(causes, ", ")) 
+##                 result.Fail("Unexpected %s." % string.join(causes, ", "))
 
         elif os.WIFSIGNALED(exit_status):
             # The target program terminated with a signal.  Construe
@@ -566,7 +566,7 @@ inc. XML/ini.
 ##             result.Fail("Program terminated by signal.")
             result["ExecTest.signal_number"] = signal_number
             # Get the output generated by the program.
-            
+
         elif os.WIFSTOPPED(exit_status):
             # The target program was stopped.  Construe that as a
             # test failure.

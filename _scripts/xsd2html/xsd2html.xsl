@@ -3,7 +3,7 @@
  Author: Andras Varga, based on xsd2html.xsl by Christopher R. Maden
  http://crism.maden.org/consulting/pub/xsl/xsd2html.xsl
 -->
-<xsl:stylesheet version="1.0" 
+<xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:date="http://exslt.org/dates-and-times"
@@ -68,7 +68,7 @@
          <xsl:call-template name="toc"/>
       </xsl:with-param>
    </xsl:call-template>
-   
+
    <!-- generate html -->
    <xsl:call-template name="write-html-page">
       <xsl:with-param name="href" select="'overview.html'"/>
@@ -156,11 +156,11 @@
       <xsl:value-of select="@name"/> [URL="<xsl:value-of select="@name"/>.html",fillcolor="#fff700",tooltip="element <xsl:value-of select="@name"/>"];
       <xsl:for-each select=".//xs:element[@ref]">
          <xsl:value-of select="@ref"/> [URL="<xsl:value-of select="@ref"/>.html",fillcolor="#fffcaf",tooltip="element <xsl:value-of select="@ref"/>"];
-         <xsl:value-of select="$name"/> -> <xsl:value-of select="@ref"/>; 
+         <xsl:value-of select="$name"/> -> <xsl:value-of select="@ref"/>;
       </xsl:for-each>
       <xsl:for-each select="//xs:element[.//xs:element[@ref=$name]]">
          <xsl:value-of select="@name"/> [URL="<xsl:value-of select="@name"/>.html",fillcolor="#fffcaf",tooltip="element <xsl:value-of select="@name"/>"];
-         <xsl:value-of select="@name"/> -> <xsl:value-of select="$name"/>; 
+         <xsl:value-of select="@name"/> -> <xsl:value-of select="$name"/>;
       </xsl:for-each>
    }
 </xsl:template>
@@ -219,8 +219,8 @@
 
 <xsl:template match="xs:attribute"/>
 <xsl:template match="xs:attributeGroup[@ref]" mode="attGroup">
-    <h3>Attribute Group <a href="{@ref}.html"> <xsl:value-of select="@ref"/> 
-      </a> </h3>                      
+    <h3>Attribute Group <a href="{@ref}.html"> <xsl:value-of select="@ref"/>
+      </a> </h3>
 </xsl:template>
 <xsl:template match="xs:attributeGroup[@name]">
     <xsl:call-template name="write-html-page">
@@ -231,7 +231,7 @@
           <xsl:value-of select="@name"/>
         </h2>
         <table border="1">
-          <xsl:apply-templates select="descendant::xs:attribute" 
+          <xsl:apply-templates select="descendant::xs:attribute"
             mode="attributes"/>
         </table>
       </xsl:with-param>
@@ -353,7 +353,7 @@
            </table>
          </xsl:if>
           <xsl:if test="descendant::xs:attributeGroup[@ref]">
-            <xsl:apply-templates select="descendant::xs:attributeGroup" 
+            <xsl:apply-templates select="descendant::xs:attributeGroup"
               mode="attGroup"/>
           </xsl:if>
       </xsl:with-param>
@@ -450,7 +450,7 @@
             <xsl:value-of select="$name"/> -> <xsl:value-of select="@ref"/>;
          </xsl:for-each>
       </xsl:for-each>
-   } 
+   }
 </xsl:template>
 
 <xsl:template match="xs:choice/xs:sequence | xs:sequence/xs:sequence">

@@ -4,7 +4,7 @@ cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; 
 INET_ROOT=`pwd`
 
 if [ "$BUILDID" = "" ]; then
-# generate our own build identifier   
+# generate our own build identifier
     export BUILDID=`date +%Y%m%d`
 fi
 
@@ -24,9 +24,9 @@ fi
 rm -rf $DIRNAME/_scripts
 rm -rf $DIRNAME/obsolete
 
-# pack and create tar.gz archives 
+# pack and create tar.gz archives
 echo Creating $FILENAME.
 rm -f $FILENAME
-tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;} 
+tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;}
 rm -rf /tmp/$DIRNAME
 

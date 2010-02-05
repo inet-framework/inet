@@ -1,1 +1,20 @@
-LIBS += $(PCAP_LIBS)
+# if you want to use external interfaces with inet, you should install
+# winpcap (on windows) or libpcap-dev (on linux) and re-run ./configure in
+# the omnetpp root directory and comment out the following line:
+HAVE_PCAP=no
+
+ifeq ($(HAVE_PCAP),yes)
+  # link with PCAP libs too
+  LIBS += $(PCAP_LIBS)
+else
+  # remove the HAVE_PCAP define if we do not need PCAP
+  CFLAGS := $(filter-out -DHAVE_PCAP,$(CFLAGS))
+endif
+
+# TCP implementaion using the Network Simulation Cradle
+NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
+
+ifneq ($(NSC_VERSION),)
+  CFLAGS += -DWITH_TCP_NSC -I../3rdparty/nsc-$(NSC_VERSION)/sim
+  LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+endif

@@ -70,4 +70,12 @@ std::string IPv4InterfaceData::detailedInfo() const
     return out.str();
 }
 
+bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPAddress& multicastAddress) const
+{
+    int n = getMulticastGroups().size();
+    for (int i=0; i<n; i++)
+        if (multicastAddress.equals(getMulticastGroups()[i]))
+            return true;
+    return false;
+}
 

@@ -20,22 +20,22 @@ package inet.applications.sctpapp;
 
 simple SCTPServer like SCTPApp
 {
-    parameters:
-        string address = default(""); // may be left empty ("")
-        int port = default(0); // port number to listen on
-        int echoFactor = default(0);
-        volatile double echoDelay @unit(s) = default(0s);
-        double delayFirstRead @unit(s) = default(0s);
-        volatile double readingInterval @unit(s) = default(0s);
-        int messagesToPush = default(0);
-        int numPacketsToSendPerClient = default(0);  // number of requests sent per session
-        int numPacketsToReceivePerClient = default(1);
-        int requestLength = default(1452); // length of a request (bytes)
-        volatile double thinkTime @unit(s) = default(0s); // time gap between requests
-        double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-        bool ordered = default(true);
-        int outboundStreams = default(1);
-        int queueSize = default(0);
+	parameters:
+	    string address = default(""); // may be left empty ("")
+		int port = default(0); // port number to listen on
+		int echoFactor = default(0);
+		volatile double echoDelay @unit(s) = default(0s);
+		double delayFirstRead @unit(s) = default(0s);
+		volatile double readingInterval @unit(s) = default(0s);
+		int messagesToPush = default(0);
+		int numPacketsToSendPerClient = default(0);  // number of requests sent per session
+		int numPacketsToReceivePerClient = default(1);
+		int requestLength = default(1452); // length of a request (bytes)
+		volatile double thinkTime @unit(s) = default(0s); // time gap between requests
+		double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
+		bool ordered = default(true);
+		int outboundStreams = default(1);
+		int queueSize = default(0);
         @display("i=block/app");
     gates:
         input sctpIn @labels(SCTPCommand/up);

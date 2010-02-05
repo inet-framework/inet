@@ -1,0 +1,28 @@
+The external interface makes it possible to connect the simulation with real
+networks.
+
+In this example the network consists of eight clients, four switches,
+three routers, and an extRouter, which connects the simulation
+to a real host.
+
+This network can be used to apply traceroute, a tool to trace the
+path through the network to a specified host.
+
+To run this examples, some parameters have to be adjusted in the omnetpp.ini.
+
+- Set **.ext[0].device to the device name of the interface of the computer
+  running the simulation.
+- On your server, add a route to the nets 10.2. and 10.3., and set
+  the gateway to the IP address of the computer on which the simulation is
+  running.
+
+Start the simulation with root privileges. To get realistic round trip times
+you should choose the express mode.
+
+Type traceroute 10.2.1.1 at the command prompt of the external machine.
+
+
+
+
+
+
