@@ -23,6 +23,7 @@ import inet.examples.ethernet.lans.ethernetline;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
+import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
@@ -45,8 +46,8 @@ network NClientsEth
         r1: Router6;
         r2: Router6;
         r3: Router6;
-        cli[n]: StandardHost6NSC;
-        srv: StandardHost6NSC;
+        cli[n]: StandardHost6;
+        srv: StandardHost6;
         hub: EtherHub;
     connections:
         for i=0..n-1 {
