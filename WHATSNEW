@@ -1,8 +1,17 @@
 Recent changes in the INET Framework
 ====================================
 
-- added new TCP impelemantation based on Network Simulation Cradle
-- added new default TCP implementation (supporting SACK and other new features)
+- added support for Sam Jensen's Network Simulation Cradle,
+  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks
+  available in simulations. Currently NSC supports the FreeBSD, OpenBSD,
+  lwIP and Linux stacks. Our TCP_NSC module (transport/tcp_nsc) is
+  a drop-in replacement for the normal TCP module (transport/tcp),
+  and can be activated with a single parameter setting in StandardHost.
+  See src/transport/tcp_nsc, 3rdparty/README, and examples/inet/simpletest.
+
+- added TCP SACK and New Reno implementation by Thomas Reschka.
+  The original TCP version is still available as TCP_old.
+  See src/transport/tcp/ChangeLog for details.
 
 INET-20090325
 -------------

@@ -1,13 +1,14 @@
 Place 3rd party libraries and software here. Some components of the INET
-framework expects their external components here. 
+Framework expect to find their external components here. 
 
-Supported softwares:
+Supported software:
 
-- Network Simulation Cradle (realworld TCP implementaions from Linux/OpenBSD/FreeBSD/lwIP)
+- Network Simulation Cradle (real-world TCP implementations from Linux/OpenBSD/FreeBSD/lwIP)
 
   Download NSC from: http://www.wand.net.nz/~stj2/nsc/
 
   Extract the 'nsc-0.5.1.tar.bz2' tarball in this directory and build it.
+
   $ tar xvfj nsc-0.5.1.tar.bz2
   $ cd nsc-0.5.1
   $ python scons.py
@@ -16,8 +17,9 @@ Supported softwares:
   liblinux2.6.26.so, liblwip.so, libopenbsd3.5.so in the nsc-0.5.1 directory.
 
   Then rebuild INET.
+
   $ make cleanall
   $ make
 
   To test if your build was correct, try the examples/inet/simpletest
-  example and choose a configuration which uses NSC as the TCP implementation.
+  example, and choose a configuration which uses NSC as the TCP implementation.
