@@ -245,14 +245,14 @@ uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
     ASSERT(srcIp.wordCount() == destIp.wordCount());
 
     //sum += srcip;
-    sum += TCPIPchecksum::_checksum(srcIp.words(), sizeof(uint32)*srcIp.wordCount());
+    sum += htons(TCPIPchecksum::_checksum(srcIp.words(), sizeof(uint32)*srcIp.wordCount()));
 
     //sum += destip;
-    sum += TCPIPchecksum::_checksum(destIp.words(), sizeof(uint32)*destIp.wordCount());
+    sum += htons(TCPIPchecksum::_checksum(destIp.words(), sizeof(uint32)*destIp.wordCount()));
 
-    sum += count; // TCP length
+    sum += htons(count); // TCP length
 
-    sum += IP_PROT_TCP; // PTCL
+    sum += htons(IP_PROT_TCP); // PTCL
 
     while (sum >> 16)
         sum = (sum & 0xFFFF) + (sum >> 16);
