@@ -726,6 +726,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         //  state should be changed to SYN-RECEIVED.
         //"
         state->rcv_nxt = tcpseg->getSequenceNo()+1;
+        state->rcv_adv = state->rcv_nxt + state->rcv_wnd; // TODO is it good?
         state->irs = tcpseg->getSequenceNo();
         receiveQueue->init(state->rcv_nxt);   // FIXME may init twice...
         selectInitialSeqNum();
@@ -857,6 +858,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
         //   are thereby acknowledged should be removed.
         //
         state->rcv_nxt = tcpseg->getSequenceNo()+1;
+        state->rcv_adv = state->rcv_nxt + state->rcv_wnd; // TODO is it good?
         state->irs = tcpseg->getSequenceNo();
         receiveQueue->init(state->rcv_nxt);
 
