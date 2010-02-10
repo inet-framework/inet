@@ -153,18 +153,18 @@ package inet.transport.tcp;
 //    replacement of the fast recovery algorithm (RFC2581) integrated to
 //    TCPReno but not to TCPNewReno, TCPTahoe, TCPNoCongestionControl and DumbTCP.
 //  - changes from RFC 2001 to RFC 2581:
-//	  - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
-//	    when the incoming segment fills in all or part of a gap in the sequence space."
-//	- TCP header options:
-//	  - EOL: End of option list.
-//	  - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
-//	  - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
-//	    (local parameter) and the value specified in the MSS option
-//	    received during connection startup. Based on [RFC 2581, page 1].
-//	  - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
-//	    PERMITTED during connection startup.
-//	  - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
-//	- flow control: finite receive buffer size (initiated by parameter
+//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
+//        when the incoming segment fills in all or part of a gap in the sequence space."
+//    - TCP header options:
+//      - EOL: End of option list.
+//      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
+//      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
+//        (local parameter) and the value specified in the MSS option
+//        received during connection startup. Based on [RFC 2581, page 1].
+//      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
+//        PERMITTED during connection startup.
+//      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
+//    - flow control: finite receive buffer size (initiated by parameter
 //      advertisedWindow). If receive buffer is exhausted (by out-of-order
 //      segments) and the payload length of a new received segment
 //      is higher than free receiver buffer, the new segment will be dropped.
@@ -206,10 +206,10 @@ package inet.transport.tcp;
 //  - KEEPALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm possibly not precisely implemented
 //  - Re-starting Idle Connections (RFC 2581)
-//	  RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//	  more than one retransmission timeout, cwnd is reduced to the value
-//	  of the restart window (RW) before transmission begins.
-//	  For the purposes of this standard, we define RW = IW."
+//      RFC 2581, pages 7 and 8: "When TCP has not received a segment for
+//      more than one retransmission timeout, cwnd is reduced to the value
+//      of the restart window (RW) before transmission begins.
+//      For the purposes of this standard, we define RW = IW."
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.

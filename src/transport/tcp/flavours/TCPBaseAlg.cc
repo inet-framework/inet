@@ -69,7 +69,7 @@ TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
     // "The algorithm specified in this document uses a variable "recover",
     // whose initial value is the initial send sequence number."
     recover = iss;
-	firstPartialACK = false;
+    firstPartialACK = false;
 }
 
 std::string TCPBaseAlgStateVariables::info() const
@@ -149,49 +149,49 @@ void TCPBaseAlg::established(bool active)
 {
     // initialize cwnd (we may learn SMSS during connection setup)
 
-	// RFC 3390, page 2: "The upper bound for the initial window is given more precisely in
-	// (1):
-	//
-	//	 min (4*MSS, max (2*MSS, 4380 bytes))                        (1)
-	//
-	// Note: Sending a 1500 byte packet indicates a maximum segment size
-	// (MSS) of 1460 bytes (assuming no IP or TCP options).  Therefore,
-	// limiting the initial window's MSS to 4380 bytes allows the sender to
-	// transmit three segments initially in the common case when using 1500
-	// byte packets.
-	//
-	// Equivalently, the upper bound for the initial window size is based on
-	// the MSS, as follows:
-	//
-	//   If (MSS <= 1095 bytes)
-	//	   then win <= 4 * MSS;
-	//   If (1095 bytes < MSS < 2190 bytes)
-	//	   then win <= 4380;
-	//   If (2190 bytes <= MSS)
-	//	   then win <= 2 * MSS;
-	//
-	// This increased initial window is optional: a TCP MAY start with a
-	// larger initial window.  However, we expect that most general-purpose
-	// TCP implementations would choose to use the larger initial congestion
-	// window given in equation (1) above.
-	//
-	// This upper bound for the initial window size represents a change from
-	// RFC 2581 [RFC2581], which specified that the congestion window be
-	// initialized to one or two segments.
-	// (...)
-	// If the SYN or SYN/ACK is
-	// lost, the initial window used by a sender after a correctly
-	// transmitted SYN MUST be one segment consisting of MSS bytes."
+    // RFC 3390, page 2: "The upper bound for the initial window is given more precisely in
+    // (1):
+    //
+    //   min (4*MSS, max (2*MSS, 4380 bytes))                        (1)
+    //
+    // Note: Sending a 1500 byte packet indicates a maximum segment size
+    // (MSS) of 1460 bytes (assuming no IP or TCP options).  Therefore,
+    // limiting the initial window's MSS to 4380 bytes allows the sender to
+    // transmit three segments initially in the common case when using 1500
+    // byte packets.
+    //
+    // Equivalently, the upper bound for the initial window size is based on
+    // the MSS, as follows:
+    //
+    //   If (MSS <= 1095 bytes)
+    //     then win <= 4 * MSS;
+    //   If (1095 bytes < MSS < 2190 bytes)
+    //     then win <= 4380;
+    //   If (2190 bytes <= MSS)
+    //     then win <= 2 * MSS;
+    //
+    // This increased initial window is optional: a TCP MAY start with a
+    // larger initial window.  However, we expect that most general-purpose
+    // TCP implementations would choose to use the larger initial congestion
+    // window given in equation (1) above.
+    //
+    // This upper bound for the initial window size represents a change from
+    // RFC 2581 [RFC2581], which specified that the congestion window be
+    // initialized to one or two segments.
+    // (...)
+    // If the SYN or SYN/ACK is
+    // lost, the initial window used by a sender after a correctly
+    // transmitted SYN MUST be one segment consisting of MSS bytes."
     if (state->increased_IW_enabled && state->syn_rexmit_count==0)
-	{
-		state->snd_cwnd = std::min (4*(int)state->snd_mss, std::max(2*(int)state->snd_mss, 4380));
+    {
+        state->snd_cwnd = std::min (4*(int)state->snd_mss, std::max(2*(int)state->snd_mss, 4380));
         tcpEV << "Enabled increased initial window, CWND is set to: " << state->snd_cwnd << "\n";
-	}
-	// RFC 2001, page 3:
-	// " 1.  Initialization for a given connection sets cwnd to one segment
+    }
+    // RFC 2001, page 3:
+    // " 1.  Initialization for a given connection sets cwnd to one segment
     // and ssthresh to 65535 bytes."
-	else
-		state->snd_cwnd = state->snd_mss; // RFC 2001
+    else
+        state->snd_cwnd = state->snd_mss; // RFC 2001
 
     if (active)
     {
@@ -267,9 +267,9 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
     // cancel round-trip time measurement
     state->rtseq_sendtime = 0;
 
-	state->numRtos++;
-	if (numRtosVector)
-		numRtosVector->record(state->numRtos);
+    state->numRtos++;
+    if (numRtosVector)
+        numRtosVector->record(state->numRtos);
 
     // if sacked_enabled reset sack related flags
     if (state->sack_enabled)
@@ -277,18 +277,18 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
         conn->rexmitQueue->resetSackedBit();
         conn->rexmitQueue->resetRexmittedBit();
 
-		// RFC 3517, page 8: "If an RTO occurs during loss recovery as specified in this document,
-		// RecoveryPoint MUST be set to HighData.  Further, the new value of
-		// RecoveryPoint MUST be preserved and the loss recovery algorithm
-		// outlined in this document MUST be terminated.  In addition, a new
-		// recovery phase (as described in section 5) MUST NOT be initiated
-		// until HighACK is greater than or equal to the new value of
-		// RecoveryPoint."
+        // RFC 3517, page 8: "If an RTO occurs during loss recovery as specified in this document,
+        // RecoveryPoint MUST be set to HighData.  Further, the new value of
+        // RecoveryPoint MUST be preserved and the loss recovery algorithm
+        // outlined in this document MUST be terminated.  In addition, a new
+        // recovery phase (as described in section 5) MUST NOT be initiated
+        // until HighACK is greater than or equal to the new value of
+        // RecoveryPoint."
         if (state->lossRecovery)
         {
-			state->recoveryPoint = state->snd_max; // HighData = snd_max
-			tcpEV << "Loss Recovery terminated.\n";
-			state->lossRecovery = false;
+            state->recoveryPoint = state->snd_max; // HighData = snd_max
+            tcpEV << "Loss Recovery terminated.\n";
+            state->lossRecovery = false;
         }
     }
 
@@ -424,14 +424,14 @@ void TCPBaseAlg::receivedOutOfOrderSegment()
 
 void TCPBaseAlg::receiveSeqChanged()
 {
-	// RFC 2581, page 6:
-	// "3.2 Fast Retransmit/Fast Recovery
-	// (...)
-	// In addition, a TCP receiver SHOULD send an immediate ACK
-	// when the incoming segment fills in all or part of a gap in the
-	// sequence space."
-	if (state->lossRecovery)
-		state->ack_now = true; // although not mentioned in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861] seems like we have to set ack_now
+    // RFC 2581, page 6:
+    // "3.2 Fast Retransmit/Fast Recovery
+    // (...)
+    // In addition, a TCP receiver SHOULD send an immediate ACK
+    // when the incoming segment fills in all or part of a gap in the
+    // sequence space."
+    if (state->lossRecovery)
+        state->ack_now = true; // although not mentioned in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861] seems like we have to set ack_now
 
     if (!state->delayed_acks_enabled)
     {
@@ -556,9 +556,9 @@ void TCPBaseAlg::receivedDuplicateAck()
 {
     tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
 
-	bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
-	if (state->dupacks < DUPTHRESH && state->limited_transmit_enabled) // DUPTRESH = 3
-		conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
+    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
+    if (state->dupacks < DUPTHRESH && state->limited_transmit_enabled) // DUPTRESH = 3
+        conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
 
     //
     // Leave to subclasses (e.g. TCPTahoe, TCPReno) whatever they want to do
@@ -610,7 +610,7 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
 
 void TCPBaseAlg::restartRexmitTimer()
 {
-	if (rexmitTimer->isScheduled())
-		cancelEvent(rexmitTimer);
+    if (rexmitTimer->isScheduled())
+        cancelEvent(rexmitTimer);
     startRexmitTimer();
 }

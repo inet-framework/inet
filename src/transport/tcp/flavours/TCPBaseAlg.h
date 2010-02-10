@@ -70,7 +70,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
     /// RFC 3782 variables
     //@{
     uint32 recover;            ///< recover (RFC 3782)
-	bool firstPartialACK;      ///< first partial acknowledgement (RFC 3782)
+    bool firstPartialACK;      ///< first partial acknowledgement (RFC 3782)
     //@}
 };
 

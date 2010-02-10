@@ -324,27 +324,27 @@ void TCPConnection::configureStateVariables()
 {
     long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
     if (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0)
-        throw cRuntimeError("Invalid advertisedWindow parameter: %d", advertisedWindowPar);
+        throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
 
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACKs enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // increased initial window (=2*SMSS) (RFC 2581) enabled/disabled
-    state->rcv_wnd = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
-    state->rcv_adv = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
-    state->maxRcvBuffer = advertisedWindowPar; // advertisedWindow/maxRcvBuffer is used as initial value for rcv_wnd and rcv_avd
+    state->rcv_wnd = advertisedWindowPar;
+    state->rcv_adv = advertisedWindowPar;
+    state->maxRcvBuffer = advertisedWindowPar;
     state->snd_mss = tcpMain->par("mss").longValue(); // maximum segment size
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
-	if (state->sack_support)
-	{
-		std::string algorithmName1 = "TCPReno";
-		std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
-		if (algorithmName1!=algorithmName2) // TODO add additional checks for new SACK supporting algorithms here once they are implemented
-		{
-			EV << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno" << endl;
-			ASSERT(false);
-		}
-	}
+    if (state->sack_support)
+    {
+        std::string algorithmName1 = "TCPReno";
+        std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
+        if (algorithmName1!=algorithmName2) // TODO add additional checks for new SACK supporting algorithms here once they are implemented
+        {
+            EV << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno" << endl;
+            ASSERT(false);
+        }
+    }
 }
 
 void TCPConnection::selectInitialSeqNum()
@@ -363,29 +363,25 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
     // There are four cases for the acceptability test for an incoming segment:
-    uint32 seg_len = tcpseg->getPayloadLength();
+    uint32 len = tcpseg->getPayloadLength();
     uint32 seqNo = tcpseg->getSequenceNo();
 
-    if (seg_len == 0 && state->rcv_wnd == 0) {
-        return (seqNo == state->rcv_nxt);
+    if (len == 0)
+    {
+        if (state->rcv_wnd == 0)
+            return seqNo == state->rcv_nxt;
+        else // rcv_wnd > 0
+            return seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd);
     }
-
-    else if (seg_len == 0 && state->rcv_wnd > 0) {
-        return (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt
-                + state->rcv_wnd));
+    else // len > 0
+    {
+        if (state->rcv_wnd == 0)
+            return false;
+        else // rcv_wnd > 0
+            return (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd))
+                       ||
+                   (seqLE(state->rcv_nxt, seqNo + len - 1) && seqLess(seqNo + len - 1, state->rcv_nxt + state->rcv_wnd));
     }
-
-    else if (seg_len > 0 && state->rcv_wnd == 0) {
-        return false; // not acceptable
-    }
-
-    else if (seg_len > 0 && state->rcv_wnd > 0) {
-        return ((seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt
-                + state->rcv_wnd)) || (seqLE(state->rcv_nxt, seqNo + seg_len
-                - 1) && seqLess(seqNo + seg_len - 1, state->rcv_nxt
-                + state->rcv_wnd)));
-    } else
-        return false;
 }
 
 void TCPConnection::sendSyn()
@@ -518,10 +514,10 @@ void TCPConnection::sendSegment(uint32 bytes)
 {
     if (state->sack_enabled && state->afterRto)
     {
-		// check rexmitQ and try to forward snd_nxt before sending new data
-		uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
-		state->snd_nxt = state->snd_nxt + forward;
-	}
+        // check rexmitQ and try to forward snd_nxt before sending new data
+        uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
+        state->snd_nxt = state->snd_nxt + forward;
+    }
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
@@ -542,9 +538,9 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     state->snd_nxt += bytes;
 
-	// check if afterRto bit can be reset
-	if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
-		state->afterRto = false;
+    // check if afterRto bit can be reset
+    if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
+        state->afterRto = false;
 
     if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
     {
@@ -558,13 +554,13 @@ void TCPConnection::sendSegment(uint32 bytes)
 
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // changed from int congestionWindow to uint32 congestionWindow 2009-08-05 by T.R.
 {
-	if (!state->afterRto)
+    if (!state->afterRto)
     // we'll start sending from snd_max
     state->snd_nxt = state->snd_max;
 
-	uint32 old_highRxt = 0;
-	if (state->sack_enabled)
-		old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    uint32 old_highRxt = 0;
+    if (state->sack_enabled)
+        old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
     // check how many bytes we have
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
@@ -640,12 +636,12 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // 
     tcpAlgorithm->ackSent();
     if (state->sack_enabled && state->lossRecovery && old_highRxt != state->highRxt)
     {
-		// Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-		tcpEV << "Retransmission sent during recovery, restarting REXMIT timer.\n";
-		tcpAlgorithm->restartRexmitTimer();
-	}
-	else // don't measure RTT for retransmitted packets
-		tcpAlgorithm->dataSent(old_snd_nxt);
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        tcpEV << "Retransmission sent during recovery, restarting REXMIT timer.\n";
+        tcpAlgorithm->restartRexmitTimer();
+    }
+    else // don't measure RTT for retransmitted packets
+        tcpAlgorithm->dataSent(old_snd_nxt);
 
     return true;
 }
@@ -695,11 +691,11 @@ void TCPConnection::retransmitOneSegment()
 
     if (state->sack_enabled)
     {
-		// RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
-		// starting with sequence number HighACK + 1.  To prevent repeated
-		// retransmission of the same data, set HighRxt to the highest
-		// sequence number in the retransmitted segment."
-    	state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+        // RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
+        // starting with sequence number HighACK + 1.  To prevent repeated
+        // retransmission of the same data, set HighRxt to the highest
+        // sequence number in the retransmitted segment."
+        state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     }
 }
 
@@ -905,7 +901,7 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
                             state->sackedBytes_old = state->sackedBytes; // needed for RFC 3042 to check if last dupAck contained new sack information
                             state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
                             if (sackedBytesVector)
-                            	sackedBytesVector->record(state->sackedBytes);
+                                sackedBytesVector->record(state->sackedBytes);
                         }
                     }
                     else
@@ -1040,10 +1036,10 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     TCPOption option;
     uint options_len = 0;
     uint used_options_len = 0;
-	uint m = 0; // number of sack blocks to be sent in current segment
+    uint m = 0; // number of sack blocks to be sent in current segment
     uint n = 0; // number of sack blocks in sacks_array before sending current segment
     bool skip_sacks_array = false; // set if dsack is subsets of a bigger sack block recently reported
-	bool overlap = false; // set if recently reported sack blocks are subsets of "sacks_array[0]"
+    bool overlap = false; // set if recently reported sack blocks are subsets of "sacks_array[0]"
 
     uint32 start = state->start_seqno;
     uint32 end = state->end_seqno;
@@ -1069,10 +1065,10 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     {
         if (state->sacks_array[a].getStart() != 0)
             m++;
-		else
-			break;
-	}
-	n = m + 1; // +1 for new the new sack block
+        else
+            break;
+    }
+    n = m + 1; // +1 for new the new sack block
 
     // 2 padding bytes are prefixed
     if (tcpseg->getOptionsArraySize()>0)
@@ -1190,14 +1186,14 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         {
             matched = true;
             i++;
-			overlap = true;
+            overlap = true;
         }
         if (matched)
             state->sacks_array[a+1] = state->sacks_array[a+i];
     }
 
-	if (!skip_sacks_array && overlap && m<4)
-		n--;
+    if (!skip_sacks_array && overlap && m<4)
+        n--;
 
     option.setKind(TCPOPTION_SACK);
     option.setLength(8*n+2);
@@ -1236,13 +1232,13 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
             tcpEV << ".." << option.getValues(t) << ")";
             if (t==1)
             {
-				if (state->snd_dsack)
-					tcpEV << " (D-SACK)";
-				else if (seqLE(option.getValues(t),state->rcv_nxt))
-				{
-					tcpEV << " (received segment filled out a gap)";
-					state->snd_dsack = true; // Note: Set snd_dsack to delete first sack from sacks_array
-				}
+                if (state->snd_dsack)
+                    tcpEV << " (D-SACK)";
+                else if (seqLE(option.getValues(t),state->rcv_nxt))
+                {
+                    tcpEV << " (received segment filled out a gap)";
+                    state->snd_dsack = true; // Note: Set snd_dsack to delete first sack from sacks_array
+                }
             }
             tcpEV << "\n";
         }
@@ -1306,22 +1302,22 @@ void TCPConnection::updateRcvWnd()
     if (win < (state->maxRcvBuffer / 4) && win < state->snd_mss)
         win = 0;
 
-	// Do not shrink window
-	// (rcv_adv minus rcv_nxt) is the amount of space still available to the sender that was previously advertised
+    // Do not shrink window
+    // (rcv_adv minus rcv_nxt) is the amount of space still available to the sender that was previously advertised
     if (win < state->rcv_adv - state->rcv_nxt)
         win = state->rcv_adv - state->rcv_nxt;
 
-	// Observe upper limit for advertised window on this connection
+    // Observe upper limit for advertised window on this connection
     if (win > TCP_MAX_WIN) // TCP_MAX_WIN = 65535 (16 bit)
         win = TCP_MAX_WIN; // Note: The window size is limited to a 16 bit value in the TCP header.
-	// Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
+    // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
-	// update rcv_adv if needed
-	if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv))
-	{
-		state->rcv_adv = state->rcv_nxt + win;
-    	if (rcvAdvVector)
-        	rcvAdvVector->record(state->rcv_adv);
+    // update rcv_adv if needed
+    if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv))
+    {
+        state->rcv_adv = state->rcv_nxt + win;
+        if (rcvAdvVector)
+            rcvAdvVector->record(state->rcv_adv);
     }
 
     state->rcv_wnd = win;
@@ -1347,40 +1343,40 @@ void TCPConnection::updateWndInfo(TCPSegment *tcpseg)
 
 bool TCPConnection::isLost(uint32 seqNum)
 {
-	ASSERT (state->sack_enabled);
+    ASSERT (state->sack_enabled);
     // RFC 3517, page 3: "This routine returns whether the given sequence number is
     // considered to be lost.  The routine returns true when either
     // DupThresh discontiguous SACKed sequences have arrived above
     // 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
     // than 'SeqNum' have been SACKed.  Otherwise, the routine returns
     // false."
-	bool isLost = false;
+    bool isLost = false;
 
     ASSERT(seqGE(seqNum,state->snd_una)); // HighAck = snd_una
 
-    if (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH ||		// DUPTHRESH = 3
-    	rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss))
-    	isLost = true;
+    if (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH ||     // DUPTHRESH = 3
+        rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss))
+        isLost = true;
     else
-    	isLost = false;
+        isLost = false;
 
     return isLost;
 }
 
 void TCPConnection::setPipe()
 {
-	ASSERT (state->sack_enabled);
+    ASSERT (state->sack_enabled);
     // RFC 3517, pages 1 and 2: "
     // "HighACK" is the sequence number of the highest byte of data that
-	// has been cumulatively ACKed at a given point.
-	//
+    // has been cumulatively ACKed at a given point.
+    //
     // "HighData" is the highest sequence number transmitted at a given
     // point.
     //
     // "HighRxt" is the highest sequence number which has been
     // retransmitted during the current loss recovery phase.
     //
-	// "Pipe" is a sender's estimate of the number of bytes outstanding
+    // "Pipe" is a sender's estimate of the number of bytes outstanding
     // in the network.  This is used during recovery for limiting the
     // sender's sending rate.  The pipe variable allows TCP to use a
     // fundamentally different congestion control than specified in
@@ -1392,323 +1388,323 @@ void TCPConnection::setPipe()
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
 
-	// RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
-	// and MUST set the "pipe" variable to an estimate of the number of
-	// octets that are currently in transit between the TCP sender and
-	// the TCP receiver.  After initializing pipe to zero the following
-	// steps are taken for each octet 'S1' in the sequence space between
-	// HighACK and HighData that has not been SACKed:"
-	for (uint32 s1=state->snd_una; s1<state->snd_max; s1=s1+state->snd_mss) // Note: Would be better use byte ranges
-	{
-		if (rexmitQueue->getSackedBit(s1)==false)
-		{
-			// RFC 3517, page 3: "(a) If IsLost (S1) returns false:
-			//
-			//     Pipe is incremented by 1 octet.
-			//
-			//     The effect of this condition is that pipe is incremented for
-			//     packets that have not been SACKed and have not been determined
-			//     to have been lost (i.e., those segments that are still assumed
-			//     to be in the network)."
-			if (isLost(s1)==false)
-				state->pipe++;
+    // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
+    // and MUST set the "pipe" variable to an estimate of the number of
+    // octets that are currently in transit between the TCP sender and
+    // the TCP receiver.  After initializing pipe to zero the following
+    // steps are taken for each octet 'S1' in the sequence space between
+    // HighACK and HighData that has not been SACKed:"
+    for (uint32 s1=state->snd_una; s1<state->snd_max; s1=s1+state->snd_mss) // Note: Would be better use byte ranges
+    {
+        if (rexmitQueue->getSackedBit(s1)==false)
+        {
+            // RFC 3517, page 3: "(a) If IsLost (S1) returns false:
+            //
+            //     Pipe is incremented by 1 octet.
+            //
+            //     The effect of this condition is that pipe is incremented for
+            //     packets that have not been SACKed and have not been determined
+            //     to have been lost (i.e., those segments that are still assumed
+            //     to be in the network)."
+            if (isLost(s1)==false)
+                state->pipe++;
 
-			// RFC 3517, pages 3 and 4: "(b) If S1 <= HighRxt:
-			//
-			//     Pipe is incremented by 1 octet.
-			//
-			//     The effect of this condition is that pipe is incremented for
-			//     the retransmission of the octet.
-			//
-			//  Note that octets retransmitted without being considered lost are
-			//  counted twice by the above mechanism."
-			if (seqLE(s1,state->highRxt))
-				state->pipe++;
-		}
-	}
+            // RFC 3517, pages 3 and 4: "(b) If S1 <= HighRxt:
+            //
+            //     Pipe is incremented by 1 octet.
+            //
+            //     The effect of this condition is that pipe is incremented for
+            //     the retransmission of the octet.
+            //
+            //  Note that octets retransmitted without being considered lost are
+            //  counted twice by the above mechanism."
+            if (seqLE(s1,state->highRxt))
+                state->pipe++;
+        }
+    }
 
-	state->pipe = state->pipe * state->snd_mss; // TODO - remove this line if using byte ranges
-	if (pipeVector)
-		pipeVector->record(state->pipe);
+    state->pipe = state->pipe * state->snd_mss; // TODO - remove this line if using byte ranges
+    if (pipeVector)
+        pipeVector->record(state->pipe);
 }
 
 uint32 TCPConnection::nextSeg()
 {
-	ASSERT (state->sack_enabled);
-	// RFC 3517, page 5: "This routine uses the scoreboard data structure maintained by the
-	// Update() function to determine what to transmit based on the SACK
-	// information that has arrived from the data receiver (and hence
-	// been marked in the scoreboard).  NextSeg () MUST return the
-	// sequence number range of the next segment that is to be
-	// transmitted, per the following rules:"
+    ASSERT (state->sack_enabled);
+    // RFC 3517, page 5: "This routine uses the scoreboard data structure maintained by the
+    // Update() function to determine what to transmit based on the SACK
+    // information that has arrived from the data receiver (and hence
+    // been marked in the scoreboard).  NextSeg () MUST return the
+    // sequence number range of the next segment that is to be
+    // transmitted, per the following rules:"
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     uint32 seqNum = 0;
     bool found = false;
 
-	// RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
-	// meets the following three criteria for determining loss, the
-	// sequence range of one segment of up to SMSS octets starting
-	// with S2 MUST be returned.
-	//
-	// (1.a) S2 is greater than HighRxt.
-	//
-	// (1.b) S2 is less than the highest octet covered by any
-	//		 received SACK.
-	//
-	// (1.c) IsLost (S2) returns true."
-	for (uint32 s2=state->snd_una; s2<state->snd_max; s2=s2+state->snd_mss) // Note: Would be better use byte ranges
-	{
-		if (rexmitQueue->getSackedBit(s2)==false)
-		{
-			if (seqGE(s2,state->highRxt) &&
-				seqLE(s2,(rexmitQueue->getHighestSackedSeqNum())) &&
-				isLost(s2))
-			{
-				seqNum = s2;
-				found = true;
-				return seqNum;
-			}
-		}
-	}
-
-	// RFC 3517, page 5: "(2) If no sequence number 'S2' per rule (1) exists but there
-	// exists available unsent data and the receiver's advertised
-	// window allows, the sequence range of one segment of up to SMSS
-	// octets of previously unsent data starting with sequence number
-	// HighData+1 MUST be returned."
-	if (!found)
+    // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
+    // meets the following three criteria for determining loss, the
+    // sequence range of one segment of up to SMSS octets starting
+    // with S2 MUST be returned.
+    //
+    // (1.a) S2 is greater than HighRxt.
+    //
+    // (1.b) S2 is less than the highest octet covered by any
+    //       received SACK.
+    //
+    // (1.c) IsLost (S2) returns true."
+    for (uint32 s2=state->snd_una; s2<state->snd_max; s2=s2+state->snd_mss) // Note: Would be better use byte ranges
     {
-		// check how many unsent bytes we have
-		ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
-		ulong maxWindow = state->snd_wnd;
-		// effectiveWindow: number of bytes we're allowed to send now
-		ulong effectiveWin = maxWindow - state->pipe;
-		if (buffered > 0 && effectiveWin >= state->snd_mss)
-		{
-			seqNum = state->snd_max; // HighData = snd_max
-			found = true;
-			return seqNum;
-		}
-	}
+        if (rexmitQueue->getSackedBit(s2)==false)
+        {
+            if (seqGE(s2,state->highRxt) &&
+                seqLE(s2,(rexmitQueue->getHighestSackedSeqNum())) &&
+                isLost(s2))
+            {
+                seqNum = s2;
+                found = true;
+                return seqNum;
+            }
+        }
+    }
 
-	// RFC 3517, pages 5 and 6: "(3) If the conditions for rules (1) and (2) fail, but there exists
-	// an unSACKed sequence number 'S3' that meets the criteria for
-	// detecting loss given in steps (1.a) and (1.b) above
-	// (specifically excluding step (1.c)) then one segment of up to
-	// SMSS octets starting with S3 MAY be returned.
-	//
-	// Note that rule (3) is a sort of retransmission "last resort".
-	// It allows for retransmission of sequence numbers even when the
-	// sender has less certainty a segment has been lost than as with
-	// rule (1).  Retransmitting segments via rule (3) will help
-	// sustain TCP's ACK clock and therefore can potentially help
-	// avoid retransmission timeouts.  However, in sending these
-	// segments the sender has two copies of the same data considered
-	// to be in the network (and also in the Pipe estimate).  When an
-	// ACK or SACK arrives covering this retransmitted segment, the
-	// sender cannot be sure exactly how much data left the network
-	// (one of the two transmissions of the packet or both
-	// transmissions of the packet).  Therefore the sender may
-	// underestimate Pipe by considering both segments to have left
-	// the network when it is possible that only one of the two has.
-	//
-	// We believe that the triggering of rule (3) will be rare and
-	// that the implications are likely limited to corner cases
-	// relative to the entire recovery algorithm.  Therefore we leave
-	// the decision of whether or not to use rule (3) to
-	// implementors."
-	if (!found)
+    // RFC 3517, page 5: "(2) If no sequence number 'S2' per rule (1) exists but there
+    // exists available unsent data and the receiver's advertised
+    // window allows, the sequence range of one segment of up to SMSS
+    // octets of previously unsent data starting with sequence number
+    // HighData+1 MUST be returned."
+    if (!found)
     {
-		for (uint32 s3=state->snd_una; s3<state->snd_max; s3=s3+state->snd_mss) // Note: Would be better use byte ranges
-		{
-			if (rexmitQueue->getSackedBit(s3)==false)
-			{
-				if (seqGE(s3,state->highRxt) &&
-					seqLE(s3,(rexmitQueue->getHighestSackedSeqNum())))
-				{
-					seqNum = s3;
-					found = true;
-					return seqNum;
-				}
-			}
-		}
-	}
+        // check how many unsent bytes we have
+        ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
+        ulong maxWindow = state->snd_wnd;
+        // effectiveWindow: number of bytes we're allowed to send now
+        ulong effectiveWin = maxWindow - state->pipe;
+        if (buffered > 0 && effectiveWin >= state->snd_mss)
+        {
+            seqNum = state->snd_max; // HighData = snd_max
+            found = true;
+            return seqNum;
+        }
+    }
 
-	// RFC 3517, page 6: "(4) If the conditions for each of (1), (2), and (3) are not met,
-	// then NextSeg () MUST indicate failure, and no segment is
-	// returned."
-	if (!found)
-    	seqNum = 0;
+    // RFC 3517, pages 5 and 6: "(3) If the conditions for rules (1) and (2) fail, but there exists
+    // an unSACKed sequence number 'S3' that meets the criteria for
+    // detecting loss given in steps (1.a) and (1.b) above
+    // (specifically excluding step (1.c)) then one segment of up to
+    // SMSS octets starting with S3 MAY be returned.
+    //
+    // Note that rule (3) is a sort of retransmission "last resort".
+    // It allows for retransmission of sequence numbers even when the
+    // sender has less certainty a segment has been lost than as with
+    // rule (1).  Retransmitting segments via rule (3) will help
+    // sustain TCP's ACK clock and therefore can potentially help
+    // avoid retransmission timeouts.  However, in sending these
+    // segments the sender has two copies of the same data considered
+    // to be in the network (and also in the Pipe estimate).  When an
+    // ACK or SACK arrives covering this retransmitted segment, the
+    // sender cannot be sure exactly how much data left the network
+    // (one of the two transmissions of the packet or both
+    // transmissions of the packet).  Therefore the sender may
+    // underestimate Pipe by considering both segments to have left
+    // the network when it is possible that only one of the two has.
+    //
+    // We believe that the triggering of rule (3) will be rare and
+    // that the implications are likely limited to corner cases
+    // relative to the entire recovery algorithm.  Therefore we leave
+    // the decision of whether or not to use rule (3) to
+    // implementors."
+    if (!found)
+    {
+        for (uint32 s3=state->snd_una; s3<state->snd_max; s3=s3+state->snd_mss) // Note: Would be better use byte ranges
+        {
+            if (rexmitQueue->getSackedBit(s3)==false)
+            {
+                if (seqGE(s3,state->highRxt) &&
+                    seqLE(s3,(rexmitQueue->getHighestSackedSeqNum())))
+                {
+                    seqNum = s3;
+                    found = true;
+                    return seqNum;
+                }
+            }
+        }
+    }
+
+    // RFC 3517, page 6: "(4) If the conditions for each of (1), (2), and (3) are not met,
+    // then NextSeg () MUST indicate failure, and no segment is
+    // returned."
+    if (!found)
+        seqNum = 0;
 
     return seqNum;
 }
 
 void TCPConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
 {
-	ASSERT (state->sack_enabled && state->lossRecovery);
-	// RFC 3517 pages 7 and 8: "(5) In order to take advantage of potential additional available
-	// cwnd, proceed to step (C) below.
-	// (...)
-	// (C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
-	// segments as follows:
-	// (...)
-	// (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)"
-	while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-	{
-		// RFC 3517 pages 7 and 8: "(C.1) The scoreboard MUST be queried via NextSeg () for the
-		// sequence number range of the next segment to transmit (if any),
-		// and the given segment sent.  If NextSeg () returns failure (no
-		// data to send) return without sending anything (i.e., terminate
-		// steps C.1 -- C.5)."
-		uint32 seqNum = nextSeg(); // if nextSeg() returns 0 (=failure): terminate steps C.1 -- C.5
-		if (seqNum != 0)
-		{
-			sendSegmentDuringLossRecoveryPhase(seqNum);
-			// RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
-			// network must be updated by incrementing pipe by the number of
-			// octets transmitted in (C.1)."
-			state->pipe = state->pipe + state->snd_mss;
-		}
-		else // nextSeg () returns failure: terminate steps C.1 -- C.5
-			break;
-	}
+    ASSERT (state->sack_enabled && state->lossRecovery);
+    // RFC 3517 pages 7 and 8: "(5) In order to take advantage of potential additional available
+    // cwnd, proceed to step (C) below.
+    // (...)
+    // (C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+    // segments as follows:
+    // (...)
+    // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)"
+    while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
+    {
+        // RFC 3517 pages 7 and 8: "(C.1) The scoreboard MUST be queried via NextSeg () for the
+        // sequence number range of the next segment to transmit (if any),
+        // and the given segment sent.  If NextSeg () returns failure (no
+        // data to send) return without sending anything (i.e., terminate
+        // steps C.1 -- C.5)."
+        uint32 seqNum = nextSeg(); // if nextSeg() returns 0 (=failure): terminate steps C.1 -- C.5
+        if (seqNum != 0)
+        {
+            sendSegmentDuringLossRecoveryPhase(seqNum);
+            // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
+            // network must be updated by incrementing pipe by the number of
+            // octets transmitted in (C.1)."
+            state->pipe = state->pipe + state->snd_mss;
+        }
+        else // nextSeg () returns failure: terminate steps C.1 -- C.5
+            break;
+    }
 }
 
 void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 {
-	ASSERT (state->sack_enabled && state->lossRecovery);
-	// start sending from seqNum
-	state->snd_nxt = seqNum;
+    ASSERT (state->sack_enabled && state->lossRecovery);
+    // start sending from seqNum
+    state->snd_nxt = seqNum;
 
-	uint32 old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    uint32 old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
-	// no need to check cwnd and rwnd - has already be done before
-	// no need to check nagle - sending mss bytes
-	sendSegment(state->snd_mss);
+    // no need to check cwnd and rwnd - has already be done before
+    // no need to check nagle - sending mss bytes
+    sendSegment(state->snd_mss);
 
-	uint32 sentSeqNum = seqNum + state->snd_mss;
+    uint32 sentSeqNum = seqNum + state->snd_mss;
 
-	// RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
-	// HighRxt MUST be set to the highest sequence number of the
-	// retransmitted segment."
-	if (seqLE(sentSeqNum, state->snd_max)) // HighData = snd_max
-	{
-		ASSERT (sentSeqNum==rexmitQueue->getHighestRexmittedSeqNum());
-		state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
-	}
-	// RFC 3517 page 8: "(C.3) If any of the data octets sent in (C.1) are above HighData,
-	// HighData must be updated to reflect the transmission of
-	// previously unsent data."
-	else if (seqGE(sentSeqNum, state->snd_max)) // HighData = snd_max
-		state->snd_max = sentSeqNum;
+    // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
+    // HighRxt MUST be set to the highest sequence number of the
+    // retransmitted segment."
+    if (seqLE(sentSeqNum, state->snd_max)) // HighData = snd_max
+    {
+        ASSERT (sentSeqNum==rexmitQueue->getHighestRexmittedSeqNum());
+        state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    }
+    // RFC 3517 page 8: "(C.3) If any of the data octets sent in (C.1) are above HighData,
+    // HighData must be updated to reflect the transmission of
+    // previously unsent data."
+    else if (seqGE(sentSeqNum, state->snd_max)) // HighData = snd_max
+        state->snd_max = sentSeqNum;
 
     if (unackedVector)
-    	unackedVector->record(state->snd_max - state->snd_una);
+        unackedVector->record(state->snd_max - state->snd_una);
 
-	// RFC 3517, page 9: "6   Managing the RTO Timer
-	//
-	// The standard TCP RTO estimator is defined in [RFC2988].  Due to the
-	// fact that the SACK algorithm in this document can have an impact on
-	// the behavior of the estimator, implementers may wish to consider how
-	// the timer is managed.  [RFC2988] calls for the RTO timer to be
-	// re-armed each time an ACK arrives that advances the cumulative ACK
-	// point.  Because the algorithm presented in this document can keep the
-	// ACK clock going through a fairly significant loss event,
-	// (comparatively longer than the algorithm described in [RFC2581]), on
-	// some networks the loss event could last longer than the RTO.  In this
-	// case the RTO timer would expire prematurely and a segment that need
-	// not be retransmitted would be resent.
-	//
-	// Therefore we give implementers the latitude to use the standard
-	// [RFC2988] style RTO management or, optionally, a more careful variant
-	// that re-arms the RTO timer on each retransmission that is sent during
-	// recovery MAY be used.  This provides a more conservative timer than
-	// specified in [RFC2988], and so may not always be an attractive
-	// alternative.  However, in some cases it may prevent needless
-	// retransmissions, go-back-N transmission and further reduction of the
-	// congestion window."
+    // RFC 3517, page 9: "6   Managing the RTO Timer
+    //
+    // The standard TCP RTO estimator is defined in [RFC2988].  Due to the
+    // fact that the SACK algorithm in this document can have an impact on
+    // the behavior of the estimator, implementers may wish to consider how
+    // the timer is managed.  [RFC2988] calls for the RTO timer to be
+    // re-armed each time an ACK arrives that advances the cumulative ACK
+    // point.  Because the algorithm presented in this document can keep the
+    // ACK clock going through a fairly significant loss event,
+    // (comparatively longer than the algorithm described in [RFC2581]), on
+    // some networks the loss event could last longer than the RTO.  In this
+    // case the RTO timer would expire prematurely and a segment that need
+    // not be retransmitted would be resent.
+    //
+    // Therefore we give implementers the latitude to use the standard
+    // [RFC2988] style RTO management or, optionally, a more careful variant
+    // that re-arms the RTO timer on each retransmission that is sent during
+    // recovery MAY be used.  This provides a more conservative timer than
+    // specified in [RFC2988], and so may not always be an attractive
+    // alternative.  However, in some cases it may prevent needless
+    // retransmissions, go-back-N transmission and further reduction of the
+    // congestion window."
     tcpAlgorithm->ackSent();
     if (old_highRxt != state->highRxt)
     {
-		// Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
         tcpEV << "Retransmission sent during recovery, restarting REXMIT timer.\n";
-   		tcpAlgorithm->restartRexmitTimer();
-	}
-	else // don't measure RTT for retransmitted packets
-		tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
+        tcpAlgorithm->restartRexmitTimer();
+    }
+    else // don't measure RTT for retransmitted packets
+        tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
 }
 
 void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow)
 {
-	ASSERT (state->limited_transmit_enabled);
-	// RFC 3042, page 3:
-	// "When a TCP sender has previously unsent data queued for transmission
-	// it SHOULD use the Limited Transmit algorithm, which calls for a TCP
-	// sender to transmit new data upon the arrival of the first two
-	// consecutive duplicate ACKs when the following conditions are
-	// satisfied:
-	//
-	//	* The receiver's advertised window allows the transmission of the
-	//	segment.
-	//
-	//	* The amount of outstanding data would remain less than or equal
-	//	to the congestion window plus 2 segments.  In other words, the
-	//	sender can only send two segments beyond the congestion window
-	//	(cwnd).
-	//
-	// The congestion window (cwnd) MUST NOT be changed when these new
-	// segments are transmitted.  Assuming that these new segments and the
-	// corresponding ACKs are not dropped, this procedure allows the sender
-	// to infer loss using the standard Fast Retransmit threshold of three
-	// duplicate ACKs [RFC2581].  This is more robust to reordered packets
-	// than if an old packet were retransmitted on the first or second
-	// duplicate ACK.
-	//
-	// Note: If the connection is using selective acknowledgments [RFC2018],
-	// the data sender MUST NOT send new segments in response to duplicate
-	// ACKs that contain no new SACK information, as a misbehaving receiver
-	// can generate such ACKs to trigger inappropriate transmission of data
-	// segments.  See [SCWA99] for a discussion of attacks by misbehaving
-	// receivers."
-	if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old!=state->sackedBytes))
-	{
-		// check how many bytes we have
-		ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
+    ASSERT (state->limited_transmit_enabled);
+    // RFC 3042, page 3:
+    // "When a TCP sender has previously unsent data queued for transmission
+    // it SHOULD use the Limited Transmit algorithm, which calls for a TCP
+    // sender to transmit new data upon the arrival of the first two
+    // consecutive duplicate ACKs when the following conditions are
+    // satisfied:
+    //
+    //  * The receiver's advertised window allows the transmission of the
+    //  segment.
+    //
+    //  * The amount of outstanding data would remain less than or equal
+    //  to the congestion window plus 2 segments.  In other words, the
+    //  sender can only send two segments beyond the congestion window
+    //  (cwnd).
+    //
+    // The congestion window (cwnd) MUST NOT be changed when these new
+    // segments are transmitted.  Assuming that these new segments and the
+    // corresponding ACKs are not dropped, this procedure allows the sender
+    // to infer loss using the standard Fast Retransmit threshold of three
+    // duplicate ACKs [RFC2581].  This is more robust to reordered packets
+    // than if an old packet were retransmitted on the first or second
+    // duplicate ACK.
+    //
+    // Note: If the connection is using selective acknowledgments [RFC2018],
+    // the data sender MUST NOT send new segments in response to duplicate
+    // ACKs that contain no new SACK information, as a misbehaving receiver
+    // can generate such ACKs to trigger inappropriate transmission of data
+    // segments.  See [SCWA99] for a discussion of attacks by misbehaving
+    // receivers."
+    if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old!=state->sackedBytes))
+    {
+        // check how many bytes we have
+        ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
 
-		if (buffered >= state->snd_mss || (!fullSegmentsOnly && buffered > 0))
-		{
-			ulong outstandingData = state->snd_max - state->snd_una;
-			// check conditions from RFC 3042
-			if (outstandingData + state->snd_mss <= state->snd_wnd &&
-				outstandingData + state->snd_mss <= congestionWindow + 2*state->snd_mss)
-			{
-				uint32 effectiveWin = std::min (state->snd_wnd, congestionWindow) - outstandingData + 2*state->snd_mss; // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
-				// bytes: number of bytes we're allowed to send now
-				uint32 bytes = std::min(effectiveWin, state->snd_mss);
-				if (bytes >= state->snd_mss || (!fullSegmentsOnly && bytes > 0))
-				{
-					uint32 old_snd_nxt = state->snd_nxt;
-					// we'll start sending from snd_max
-					state->snd_nxt = state->snd_max;
+        if (buffered >= state->snd_mss || (!fullSegmentsOnly && buffered > 0))
+        {
+            ulong outstandingData = state->snd_max - state->snd_una;
+            // check conditions from RFC 3042
+            if (outstandingData + state->snd_mss <= state->snd_wnd &&
+                outstandingData + state->snd_mss <= congestionWindow + 2*state->snd_mss)
+            {
+                uint32 effectiveWin = std::min (state->snd_wnd, congestionWindow) - outstandingData + 2*state->snd_mss; // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
+                // bytes: number of bytes we're allowed to send now
+                uint32 bytes = std::min(effectiveWin, state->snd_mss);
+                if (bytes >= state->snd_mss || (!fullSegmentsOnly && bytes > 0))
+                {
+                    uint32 old_snd_nxt = state->snd_nxt;
+                    // we'll start sending from snd_max
+                    state->snd_nxt = state->snd_max;
 
-					tcpEV << "Limited Transmit algorithm enabled. Sending one new segment.\n";
-					sendSegment(bytes);
+                    tcpEV << "Limited Transmit algorithm enabled. Sending one new segment.\n";
+                    sendSegment(bytes);
 
-					state->snd_max = std::max (state->snd_nxt, state->snd_max);
+                    state->snd_max = std::max (state->snd_nxt, state->snd_max);
 
-					if (unackedVector)
-						unackedVector->record(state->snd_max - state->snd_una);
+                    if (unackedVector)
+                        unackedVector->record(state->snd_max - state->snd_una);
 
-					// reset snd_nxt if needed
-					if (state->afterRto)
-						state->snd_nxt = old_snd_nxt + bytes;
+                    // reset snd_nxt if needed
+                    if (state->afterRto)
+                        state->snd_nxt = old_snd_nxt + bytes;
 
-					// notify
-					tcpAlgorithm->ackSent();
-					tcpAlgorithm->dataSent(old_snd_nxt);
-				}
-			}
-		}
-	}
+                    // notify
+                    tcpAlgorithm->ackSent();
+                    tcpAlgorithm->dataSent(old_snd_nxt);
+                }
+            }
+        }
+    }
 }
