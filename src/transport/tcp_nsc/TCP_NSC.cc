@@ -514,6 +514,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         totalTcpLen = TCPSerializer().serialize(tcpsegP, (unsigned char *)tcph, totalTcpLen);
         //TODO the PayLoad data are destroyed...
     }
+
+    // calculate TCP checksum
+    tcph->th_sum = 0;
+    tcph->th_sum = TCPSerializer().checksum(tcph, totalTcpLen, nscSockPair.remoteM.ipAddrM, nscSockPair.localM.ipAddrM);
+
     size_t totalIpLen = ipHdrLen + totalTcpLen;
     ih->tot_len = htons(totalIpLen);
     ih->check = 0;
