@@ -156,10 +156,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     static const IPvXAddress remoteFirstInnerIpS; // first remote NSC IP addr
 
     static const char * stackNameParamNameS; // name of stackname parameter
-    static const char * defaultStackNameS;     // default stackname value
-
     static const char * bufferSizeParamNameS; // name of buffersize parameter
-    static const int defaultBufferSizeS;      // default buffersize value
+    static const char * advertisedWindowParamNameS; // name of advertisedWindow parameter
 
     // statistics
     cOutVector *sndWndVector;   // snd_wnd

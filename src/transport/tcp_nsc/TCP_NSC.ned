@@ -82,7 +82,10 @@ import inet.transport.tcp.ITCP;
 simple TCP_NSC like ITCP
 {
     parameters:
-        double advertisedWindow = default(7504); // in bytes (14*536 = 14*mss), corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        // TODO advertisedWindow parameter not used yet
+        int advertisedWindow = default(7504); // in bytes (14*536 = 14*mss), corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        string TcpNscStackName = default("liblinux2.6.26.so"); // string
+        int TcpNscBufferSize = default(80000);
         string sendQueueClass = default("TCP_NSC_VirtualDataSendQueue"); // string
         string receiveQueueClass = default("TCP_NSC_VirtualDataReceiveQueue");
     gates:

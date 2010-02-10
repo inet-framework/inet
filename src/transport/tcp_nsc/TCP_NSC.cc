@@ -47,10 +47,10 @@ const IPvXAddress TCP_NSC::localInnerGwS("1.0.0.254");
 const IPvXAddress TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 
 const char * TCP_NSC::stackNameParamNameS = "TcpNscStackName";
-const char * TCP_NSC::defaultStackNameS = "liblinux2.6.26.so";
 
 const char * TCP_NSC::bufferSizeParamNameS = "TcpNscBufferSize";
-const int TCP_NSC::defaultBufferSizeS = 80000;
+
+const char * TCP_NSC::advertisedWindowParamNameS = "advertisedWindow";
 
 bool TCP_NSC::testingS;
 bool TCP_NSC::logverboseS;
@@ -343,21 +343,16 @@ void TCP_NSC::initialize()
     testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
-    const char * stackName = defaultStackNameS;
+    const char* stackName = this->par(stackNameParamNameS).stringValue();
 
-//    if(netw->hasPar(stackNameParamNameS))
-//        stackName = netw->par(stackNameParamNameS).stringValue();
-    if(this->hasPar(stackNameParamNameS))
-        stackName = this->par(stackNameParamNameS).stringValue();
+    int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
 
-    int bufferSize = defaultBufferSizeS;
-    if(this->hasPar(bufferSizeParamNameS))
-        bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+    int advertisedWindow = (int)(this->par(advertisedWindowParamNameS).longValue());
 
     loadStack(stackName, bufferSize);
     pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
-//    pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1480); //FIXME HACK for IPv6
     pStackM->add_default_gateway(localInnerGwS.str().c_str());
+
     isAliveM = true;
 }
 
