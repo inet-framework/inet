@@ -46,11 +46,9 @@ const IPvXAddress TCP_NSC::localInnerMaskS("255.255.255.0");
 const IPvXAddress TCP_NSC::localInnerGwS("1.0.0.254");
 const IPvXAddress TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 
-const char * TCP_NSC::stackNameParamNameS = "TcpNscStackName";
+const char * TCP_NSC::stackNameParamNameS = "stackName";
 
-const char * TCP_NSC::bufferSizeParamNameS = "TcpNscBufferSize";
-
-const char * TCP_NSC::advertisedWindowParamNameS = "advertisedWindow";
+const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 
 bool TCP_NSC::testingS;
 bool TCP_NSC::logverboseS;
@@ -178,7 +176,6 @@ TCP_NSC::TCP_NSC()
     {
         //sndWndVector = new cOutVector("send window");
         //rcvWndVector = new cOutVector("receive window");
-        //rcvAdvVector = new cOutVector("advertised window");
         sndNxtVector = new cOutVector("sent seq");
         sndAckVector = new cOutVector("sent ack");
         rcvSeqVector = new cOutVector("rcvd seq");
@@ -346,8 +343,6 @@ void TCP_NSC::initialize()
     const char* stackName = this->par(stackNameParamNameS).stringValue();
 
     int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
-
-    int advertisedWindow = (int)(this->par(advertisedWindowParamNameS).longValue());
 
     loadStack(stackName, bufferSize);
     pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);

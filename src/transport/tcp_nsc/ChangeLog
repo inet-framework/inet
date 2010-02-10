@@ -1,3 +1,7 @@
+2010-02-10 Andras Bojthe, Rudolf Hornig
+
+    * Added parameters for configuring the NSC TCP stack (stack type, buffer size)
+
 2010-01-29 Andras Bojthe, Rudolf Hornig
 
     * Added support for NSC TCP modules. This is a new TCP implementation based

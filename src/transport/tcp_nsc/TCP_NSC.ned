@@ -82,11 +82,10 @@ import inet.transport.tcp.ITCP;
 simple TCP_NSC like ITCP
 {
     parameters:
-        // TODO advertisedWindow parameter not used yet
-        int advertisedWindow = default(7504); // in bytes (14*536 = 14*mss), corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
-        string TcpNscStackName = default("liblinux2.6.26.so"); // string
-        int TcpNscBufferSize = default(80000);
-        string sendQueueClass = default("TCP_NSC_VirtualDataSendQueue"); // string
+        // full library name of the tcp stack implementation
+        string stackName = default("liblinux2.6.26.so") @choice("liblinux2.6.10.so","liblinux2.6.18.so","liblinux2.6.26.so","liblwip.so","libopenbsd3.5.so","libfreebsd5.3.so");
+        int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack
+        string sendQueueClass = default("TCP_NSC_VirtualDataSendQueue");
         string receiveQueueClass = default("TCP_NSC_VirtualDataReceiveQueue");
     gates:
         input appIn[];

@@ -157,7 +157,6 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     static const char * stackNameParamNameS; // name of stackname parameter
     static const char * bufferSizeParamNameS; // name of buffersize parameter
-    static const char * advertisedWindowParamNameS; // name of advertisedWindow parameter
 
     // statistics
     cOutVector *sndWndVector;   // snd_wnd

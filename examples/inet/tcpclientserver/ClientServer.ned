@@ -16,14 +16,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.inet.simpletest;
+package inet.examples.inet.tcpclientserver;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network SimpleTest
+network ClientServer
 {
     @display("bgb=232,193");
     types:
