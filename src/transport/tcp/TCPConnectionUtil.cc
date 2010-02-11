@@ -621,7 +621,11 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // 
             sendSegment(state->snd_mss);
             bytesToSend -= state->snd_mss;
         }
-        if (bytesToSend>0)
+        // check how many bytes we have - last packet could be less then state->snd_mss
+        buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+        if (bytesToSend==buffered) // last packet
+            sendSegment(bytesToSend);
+        else if (bytesToSend>0)
            tcpEV << bytesToSend << " bytes of space left in effectiveWindow\n";
     }
 #endif
