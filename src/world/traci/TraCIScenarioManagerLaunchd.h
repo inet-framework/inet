@@ -41,6 +41,7 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 	protected:
 
 		cXMLElement* launchConfig; /**< launch configuration to send to sumo-launchd */
+		int seed; /**< seed value to set in launch configuration, if missing (-1: current run number) */
 
 		virtual void init_traci();
 };

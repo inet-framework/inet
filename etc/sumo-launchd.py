@@ -31,6 +31,7 @@ structure:
 <?xml version="1.0"?>
 <launch>
   <basedir path="/home/sommer/src/inet/examples/erlangen6" />
+  <seed value="1234" />
   <copy file="net.net.xml" />
   <copy file="routes.rou.xml" />
   <copy file="sumo.sumo.cfg" type="config" />
@@ -159,16 +160,24 @@ def parse_launch_configuration(launch_xml_string):
         raise RuntimeError('launch config contains %d <basedir> nodes, expected at most 1' % (len(basedir_nodes)))
     elif len(basedir_nodes) == 1:
         basedir = basedir_nodes[0].getAttribute("path")
-
     logging.debug("Base dir is %s" % basedir)
+
+    # get "launch.seed"
+    seed = 23423
+    seed_nodes = [x for x in launch_node.getElementsByTagName("seed") if x.parentNode==launch_node]
+    if len(seed_nodes) > 1:
+        raise RuntimeError('launch config contains %d <seed> nodes, expected at most 1' % (len(seed_nodes)))
+    elif len(seed_nodes) == 1:
+        seed = int(seed_nodes[0].getAttribute("value"))
+    logging.debug("Seed is %d" % seed)
 
     # get list of "launch.copy" entries
     copy_nodes = [x for x in launch_node.getElementsByTagName("copy") if x.parentNode==launch_node]
     
-    return (basedir, copy_nodes)
+    return (basedir, copy_nodes, seed)
 
 
-def run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock, keep_temp):
+def run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp):
     """
     Actually run SUMO.
     """
@@ -184,7 +193,7 @@ def run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket
     sumo_status = None
     try:
         cmd = [sumo_command, "-c", config_file_name] 
-        logging.info("Starting SUMO (%s) on port %d" % (" ".join(cmd), remote_port))
+        logging.info("Starting SUMO (%s) on port %d, seed %d" % (" ".join(cmd), remote_port, seed))
         sumo = subprocess.Popen(cmd, cwd=runpath, stdin=None, stdout=sumoLogOut, stderr=sumoLogErr, close_fds=True)
 
         sumo_socket = None
@@ -282,7 +291,26 @@ def run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket
     return result_xml
 
 
-def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port):
+def set_sumoconfig_option(config_parser, config_xml, key, value):
+    """
+    Add or replace named config option
+    """
+
+    key_nodes = config_xml.getElementsByTagName(key)
+    if len(key_nodes) > 1:
+        raise RuntimeError('config file "%s" contains %d <%s> nodes, expected at most 1' % (file_dst_name, key, len(key_nodes)))
+    elif len(key_nodes) < 1:
+        key_node = config_parser.createElement(key)
+        key_node.appendChild(config_parser.createTextNode(str(value)))
+        config_xml.appendChild(key_node)
+    else:
+        key_node = key_nodes[0]
+        for n in key_node.childNodes:
+            key_node.removeChild(n)
+        key_node.appendChild(config_parser.createTextNode(str(value)))
+
+
+def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed):
     """
     Copy (and modify) files, return config file name
     """
@@ -320,26 +348,16 @@ def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port):
         if file_contents == None:
             raise RuntimeError('<copy> node with no contents: %s' % copy_node.toxml())
 
-        # Needs to be parsed?
+        # Is this our config file?
         if copy_node.getAttribute("type") == "config":
             config_file_name = file_dst_name
 
             config_parser = xml.dom.minidom.parseString(file_contents)
             config_xml = config_parser.documentElement
 
-            # get or create "launch.config.**.remote-port"
-            remote_port_nodes = config_xml.getElementsByTagName("remote-port")
-            if len(remote_port_nodes) > 1:
-                raise RuntimeError('config file "%s" contains %d <remote-port> nodes, expected at most 1' % (file_dst_name, len(remote_port_nodes)))
-            elif len(remote_port_nodes) < 1:
-                remote_port_node = config_parser.createElement("remote-port")
-                remote_port_node.appendChild(config_parser.createTextNode(str(remote_port)))
-                config_xml.appendChild(remote_port_node)
-            else:
-                remote_port_node = remote_port_nodes[0]
-                for n in remote_port_node.childNodes:
-                    remote_port_node.removeChild(n)
-                remote_port_node.appendChild(config_parser.createTextNode(str(remote_port)))
+            set_sumoconfig_option(config_parser, config_xml, "remote-port", remote_port)
+            set_sumoconfig_option(config_parser, config_xml, "srand", seed)
+            set_sumoconfig_option(config_parser, config_xml, "abs-rand", "false")
 
             file_contents = config_xml.toxml()
 
@@ -374,7 +392,7 @@ def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, 
     unused_port_lock = UnusedPortLock()
     try:    
         # parse launch configuration 
-        (basedir, copy_nodes) = parse_launch_configuration(launch_xml_string)
+        (basedir, copy_nodes, seed) = parse_launch_configuration(launch_xml_string)
 
         # find remote_port
         logging.debug("Finding free port number...")
@@ -383,10 +401,10 @@ def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, 
         logging.debug("...found port %d" % remote_port)
 
         # copy (and modify) files
-        config_file_name = copy_and_modify_files(basedir, copy_nodes, runpath, remote_port)
+        config_file_name = copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed)
         
         # run SUMO
-        result_xml = run_sumo(runpath, sumo_command, config_file_name, remote_port, client_socket, unused_port_lock, keep_temp)
+        result_xml = run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp)
 
     finally:
         unused_port_lock.__exit__()

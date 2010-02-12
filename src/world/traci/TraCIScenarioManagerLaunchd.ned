@@ -36,6 +36,7 @@ simple TraCIScenarioManagerLaunchd
         string host = default("localhost");  // TraCI server hostname
         int port = default(9999);  // TraCI server port
         xml launchConfig; // launch configuration to send to sumo-launchd
+        int seed = default(-1); // seed value to set in launch configuration, if missing (-1: current run number)
         bool autoShutdown = default(true);  // Shutdown module as soon as no more vehicles are in the simulation
         int margin = default(25);  // margin to add to all received vehicle positions
 }
