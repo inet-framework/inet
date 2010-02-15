@@ -13,8 +13,8 @@
 ///
 
 
-#ifndef __WDM_LAYER_H
-#define __WDM_LAYER_H
+#ifndef __OLT_WDM_LAYER_H
+#define __OLT_WDM_LAYER_H
 
 #include <omnetpp.h>
 #include "HybridPon.h"
@@ -29,4 +29,4 @@ class OltWdmLayer: public cSimpleModule {
 	virtual void finish();
 };
 
-#endif  // ____WDM_LAYER_H
+#endif  // ____OLT_WDM_LAYER_H

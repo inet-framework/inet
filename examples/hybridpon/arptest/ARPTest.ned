@@ -25,7 +25,7 @@ import ned.DatarateChannel;
 
 network ARPTest
 {
-    @display("bgb=687,326;bgl=2");
+    @display("bgb=611,326;bgl=2");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -58,20 +58,20 @@ network ARPTest
         awg: LambdaSplitter {
             @display("i=abstract/opticalswitch_s;p=256,161");
         }
-        //        switch: EtherSwitch {
-        //            @display("p=202,156");
+        //                switch: EtherSwitch {
+        //                    @display("p=202,156");
+        //                }
+        //        net: Router {
+        //            @display("p=510,161");
         //        }
-        net: Router {
-            @display("p=510,161");
-        }
         router: Router {
             @display("p=410,161");
         }
         server: StandardHost {
-            @display("p=634,161;i=device/server_l");
+            @display("p=552,161;i=device/server_l");
         }
         configurator: FlatNetworkConfigurator {
-            @display("p=541,265");
+            @display("p=318,30");
         }
     connections:
         client.ethg++ <--> onu1.ethg++;
@@ -81,7 +81,6 @@ network ARPTest
         onu2.pong <--> awg.demuxg++;
         awg.muxg <--> olt.pong;
         olt.ethg <--> router.ethg++;
-        router.pppg++ <--> fiberline <--> net.pppg++;
-        net.pppg++ <--> fiberline <--> server.pppg++;
+        router.pppg++ <--> fiberline <--> server.pppg++;
 }
 

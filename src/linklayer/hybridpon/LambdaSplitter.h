@@ -2,10 +2,10 @@
 //------------------------------------------------------------------------------
 //	LambdaSplitter.h --
 //
-//	This file declares the 'LambdaSplitter' modelling an AWG
+//	This file declares the 'LambdaSplitter' class, modelling an AWG
 //  in the path of PON.
 //
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//	Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
 //------------------------------------------------------------------------------
 
 

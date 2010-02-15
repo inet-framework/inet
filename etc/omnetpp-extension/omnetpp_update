@@ -1,9 +1,10 @@
-#!/bin/sh
+#!/bin/bash
+
 cd `dirname $0`/../..
 INETROOT=`pwd`
-OMNETPPROOT=$INETROOT/../omnetpp-4.1b1
+OMNETPPROOT=$INETROOT/../omnetpp-4.1b2
 
-# Check root directory of OMNeT++ 4.
+# Check root directory of OMNeT++ 4
 if [ -d $OMNETPPROOT ]
 then
 	echo "Cheking root directories for INET and OMNeT++ ..."
@@ -16,11 +17,20 @@ else
 	exit 1
 fi
 
+# Get a list of relative paths for updated files
+updatedFiles=`cd $INETROOT/etc/omnetpp-extension/root; find . \( -name "*.cc" -o -name "*.h" \) -print`
+
 cd $OMNETPPROOT
 echo "Updating OMNeT++ in `pwd` ..."
 
 echo "- Copying files from $INETROOT/etc/omnetpp-extension/root ..."
-cp -a $INETROOT/etc/omnetpp-extension/root/* .
+for file in $updatedFiles
+do
+	if [ -e $file ]; then
+		mv $file $file.org
+	fi
+	cp $INETROOT/etc/omnetpp-extension/root/$file $file
+done
 
 echo "- Making ..."
 make

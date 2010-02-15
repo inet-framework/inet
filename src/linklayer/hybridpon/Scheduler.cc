@@ -292,9 +292,8 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg) {
 		HybridPonFrame *ponFrameToOnu =
 				new HybridPonFrame("", HYBRID_PON_FRAME);
 //		ponFrameToOnu->setLambda(lambda);
-		ponFrameToOnu->setFrameType(0);
-		ponFrameToOnu->setGrant(0); // Only for data (user frames), not including
-		// CW for overhead & report fields
+		ponFrameToOnu->setFrameType(0);	// for "Normal Data"
+		ponFrameToOnu->setGrant(0); // Only for data (user frames), not including CW for overhead & report fields
 		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
 #ifdef DEBUG_SCHEDULER
