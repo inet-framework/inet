@@ -519,6 +519,11 @@ void TCPConnection::sendSegment(uint32 bytes)
         state->snd_nxt = state->snd_nxt + forward;
     }
 
+    ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+    if (bytes > buffered) { // last segment?
+        bytes = buffered;
+    }
+
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
 

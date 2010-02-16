@@ -120,4 +120,11 @@ void DumbTCP::dataSent(uint32)
     conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
 
+void DumbTCP::restartRexmitTimer()
+{
+	// NO retransmit timer in dumb TCP
+}
+
+
+
 

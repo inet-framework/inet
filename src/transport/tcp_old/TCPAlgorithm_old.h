@@ -160,6 +160,11 @@ class INET_API TCPAlgorithm : public cPolymorphic
      */
     virtual void dataSent(uint32 fromseq) = 0;
 
+    /**
+     * Restart REXMIT timer.
+     */
+    virtual void restartRexmitTimer() = 0;
+
 };
 
 }
