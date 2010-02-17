@@ -39,5 +39,7 @@ simple TraCIScenarioManagerLaunchd
         int seed = default(-1); // seed value to set in launch configuration, if missing (-1: current run number)
         bool autoShutdown = default(true);  // Shutdown module as soon as no more vehicles are in the simulation
         int margin = default(25);  // margin to add to all received vehicle positions
+        string roiRoads = default("");  // which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty
+        string roiRects = default("");  // which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty
 }
 

@@ -43,6 +43,32 @@ void TraCIScenarioManager::initialize()
 	port = par("port");
 	autoShutdown = par("autoShutdown");
 	margin = par("margin");
+	std::string roiRoads_s = par("roiRoads");
+	std::string roiRects_s = par("roiRects");
+
+	// parse roiRoads
+	roiRoads.clear();
+	std::istringstream roiRoads_i(roiRoads_s);
+	std::string road;
+	while (std::getline(roiRoads_i, road, ' ')) {
+		roiRoads.push_back(road);
+	}
+
+	// parse roiRects
+	roiRects.clear();
+	std::istringstream roiRects_i(roiRects_s);
+	std::string rect;
+	while (std::getline(roiRects_i, rect, ' ')) {
+		std::istringstream rect_i(rect);
+		double x1; rect_i >> x1; if (!rect_i) error("parse error in roiRects");
+		char c1; rect_i >> c1;
+		double y1; rect_i >> y1; if (!rect_i) error("parse error in roiRects");
+		char c2; rect_i >> c2;
+		double x2; rect_i >> x2; if (!rect_i) error("parse error in roiRects");
+		char c3; rect_i >> c3;
+		double y2; rect_i >> y2; if (!rect_i) error("parse error in roiRects");
+		roiRects.push_back(std::pair<Coord, Coord>(Coord(x1,y1), Coord(x2, y2)));
+	}
 
 	executeOneTimestepTrigger = new cMessage("step");
 	scheduleAt(0, executeOneTimestepTrigger);
@@ -369,7 +395,18 @@ void TraCIScenarioManager::deleteModule(int32_t nodeId) {
 }
 
 bool TraCIScenarioManager::isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed) {
-	return true;
+	if ((roiRoads.size() == 0) && (roiRects.size() == 0)) return true;
+	if (roiRoads.size() > 0) {
+		for (std::list<std::string>::const_iterator i = roiRoads.begin(); i != roiRoads.end(); ++i) {
+			if (road_id == *i) return true;
+		}
+	}
+	if (roiRects.size() > 0) {
+		for (std::list<std::pair<Coord, Coord> >::const_iterator i = roiRects.begin(); i != roiRects.end(); ++i) {
+			if ((position.x >= i->first.x) && (position.y >= i->first.y) && (position.x <= i->second.x) && (position.y <= i->second.y)) return true;
+		}
+	}
+	return false;
 }
 
 void TraCIScenarioManager::processObjectCreation(uint8_t domain, int32_t nodeId) {
