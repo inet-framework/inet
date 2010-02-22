@@ -34,8 +34,8 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
 }
 
 UDPVideoStreamSvr::UDPVideoStreamSvr() :
-    servedStreamBytesSignal(SIMSIGNAL_NULL),
-    sentBytesSignal(SIMSIGNAL_NULL)
+    reqStreamBytesSignal(SIMSIGNAL_NULL),
+    sentPkBytesSignal(SIMSIGNAL_NULL)
 {
 }
 
@@ -55,8 +55,8 @@ void UDPVideoStreamSvr::initialize()
     // statistics
     numStreams = 0;
     numPkSent = 0;
-    servedStreamBytesSignal = registerSignal("servedStreamBytes");
-    sentBytesSignal = registerSignal("sentBytes");
+    reqStreamBytesSignal = registerSignal("reqStreamBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
 
 
     WATCH_PTRVECTOR(streamVector);
@@ -103,7 +103,7 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     sendStreamData(timer);
 
     numStreams++;
-    emit(servedStreamBytesSignal, d->videoSize);
+    emit(reqStreamBytesSignal, d->videoSize);
 }
 
 
@@ -122,7 +122,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     d->bytesLeft -= pktLen;
     d->numPkSent++;
     numPkSent++;
-    emit(sentBytesSignal, pktLen);
+    emit(sentPkBytesSignal, pktLen);
 
     // reschedule timer if there's bytes left to send
     if (d->bytesLeft!=0)

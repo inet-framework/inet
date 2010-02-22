@@ -34,8 +34,8 @@ class INET_API EtherEncap : public cSimpleModule
     long totalFromHigherLayer;  // total number of packets received from higher layer
     long totalFromMAC;          // total number of frames received from MAC
     long totalPauseSent;        // total number of PAUSE frames sent
-    simsignal_t receivedBytesFromHigherLayerSignal;
-    simsignal_t receivedBytesFromMACSignal;
+    simsignal_t rcvdPkBytesFromHLSignal;
+    simsignal_t rcvdPkBytesFromMACSignal;
     simsignal_t sentPauseSignal;
 
   protected:

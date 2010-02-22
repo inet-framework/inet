@@ -30,8 +30,9 @@ void DuplicatesGenerator::initialize()
     WATCH(generateFurtherDuplicates);
 
     //statistics
-    receivedPacketSignal = registerSignal("receivedPacket");
-    duplicatedPacketSignal = registerSignal("duplicatedPacket");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    duplPkBytesSignal = registerSignal("duplPkBytes");
 
 	const char *vector = par("duplicatesVector");
     parseVector(vector);
@@ -48,7 +49,10 @@ void DuplicatesGenerator::initialize()
 void DuplicatesGenerator::handleMessage(cMessage *msg)
 {
 	numPackets++;
-	emit(receivedPacketSignal, 1L);
+    cPacket *packet = PK(msg);
+    long curBytes = (long)(packet->getByteLength());
+
+    emit(rcvdPkBytesSignal, curBytes);
 
 	if (generateFurtherDuplicates)
 	{
@@ -58,7 +62,8 @@ void DuplicatesGenerator::handleMessage(cMessage *msg)
 			cMessage *dupmsg = (cMessage*) msg->dup();
 			send(dupmsg, "out");
 			numDuplicated++;
-			emit(duplicatedPacketSignal, 1L);
+			emit(duplPkBytesSignal, curBytes);
+            emit(sentPkBytesSignal, curBytes);
 			duplicatesVector.erase(duplicatesVector.begin());
 			if (duplicatesVector.size()==0)
 			{
@@ -68,6 +73,7 @@ void DuplicatesGenerator::handleMessage(cMessage *msg)
 		}
 	}
 	send(msg, "out");
+    emit(sentPkBytesSignal, curBytes);
 }
 
 void DuplicatesGenerator::parseVector(const char *vector)

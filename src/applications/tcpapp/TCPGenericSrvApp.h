@@ -37,8 +37,8 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
     long bytesSent;
 
     //statistics:
-    simsignal_t receivedBytesSignal;
-    simsignal_t sentBytesSignal;
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t sentPkBytesSignal;
 
   protected:
     virtual void sendBack(cMessage *msg);

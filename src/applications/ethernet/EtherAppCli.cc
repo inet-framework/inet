@@ -44,8 +44,8 @@ void EtherAppCli::initialize(int stage)
         // statistics
         packetsSent = packetsReceived = 0;
         endToEndDelaySignal = registerSignal("endToEndDelay");
-        sentPacketSignal = registerSignal("sentPacket");
-        receivedPacketSignal = registerSignal("receivedPacket");
+        sentPkBytesSignal = registerSignal("sentPkBytes");
+        rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
@@ -138,7 +138,7 @@ void EtherAppCli::sendPacket()
 
     send(datapacket, "out");
     packetsSent++;
-    emit(sentPacketSignal,1L);
+    emit(sentPkBytesSignal, len);
 }
 
 void EtherAppCli::receivePacket(cPacket *msg)
@@ -147,7 +147,7 @@ void EtherAppCli::receivePacket(cPacket *msg)
 
     packetsReceived++;
     simtime_t lastEED = simTime() - msg->getCreationTime();
-    emit(rxPkBytesSignal, (long)(msg->getByteLength()));
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     emit(endToEndDelaySignal, lastEED);
 
     delete msg;

@@ -26,7 +26,7 @@ void TCPSinkApp::initialize()
 
     bytesRcvd = 0;
     WATCH(bytesRcvd);
-    receivedBytesSignal = registerSignal("receivedBytes");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
@@ -46,7 +46,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
     {
         long packetLength = PK(msg)->getByteLength();
         bytesRcvd += packetLength;
-        emit(receivedBytesSignal, packetLength);
+        emit(rcvdPkBytesSignal, packetLength);
         delete msg;
 
         if (ev.isGUI())

@@ -123,15 +123,15 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 //    cOutVector numPauseFramesRcvdVector;
 //    cOutVector numPauseFramesSentVector;
 
-    simsignal_t sentBytesSignal;
-    simsignal_t receivedBytesOkSignal;
-    simsignal_t passedBytesToHigherLayerSignal;
-    simsignal_t sentPauseSignal;
-    simsignal_t receivedPauseSignal;
-    simsignal_t receivedBytesFromHigherLayerSignal;
-    simsignal_t droppedBytesNotForUsSignal;
-    simsignal_t droppedBytesBitErrorSignal;
-    simsignal_t droppedMsgIfaceDownSignal;
+    simsignal_t txPkBytesSignal;
+    simsignal_t rxPkBytesOkSignal;
+    simsignal_t passedUpPkBytesSignal;
+    simsignal_t txPausePkUnitsSignal;
+    simsignal_t rxPausePkUnitsSignal;
+    simsignal_t rxPkBytesFromHLSignal;
+    simsignal_t droppedPkBytesNotForUsSignal;
+    simsignal_t droppedPkBytesBitErrorSignal;
+    simsignal_t droppedPkBytesIfaceDownSignal;
 
   public:
     EtherMACBase();

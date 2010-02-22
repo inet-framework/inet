@@ -38,10 +38,10 @@ class INET_API EtherLLC : public cSimpleModule
     long totalPassedUp;         // total number of packets passed up to higher layer
     long droppedUnknownDSAP;    // frames dropped because no such DSAP was registered here
     simsignal_t dsapSignal;
-    simsignal_t receivedBytesFromHigherLayerSignal;
-    simsignal_t receivedBytesFromMACSignal;
-    simsignal_t passedUpBytesSignal;
-    simsignal_t droppedBytesUnknownDSAPSignal;
+    simsignal_t rcvdPkBytesFromHLSignal;
+    simsignal_t rcvdPkBytesFromMACSignal;
+    simsignal_t passedUpPkBytesSignal;
+    simsignal_t droppedPkBytesUnknownDSAPSignal;
     simsignal_t sendPauseSignal;
 
   protected:

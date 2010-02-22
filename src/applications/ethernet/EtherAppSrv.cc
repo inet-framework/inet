@@ -31,8 +31,8 @@ void EtherAppSrv::initialize()
     // statistics
     packetsSent = packetsReceived = 0;
     endToEndDelaySignal = registerSignal("endToEndDelay");
-    sentPacketSignal = registerSignal("sentPacket");
-    receivedPacketSignal = registerSignal("receivedPacket");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     WATCH(packetsSent);
     WATCH(packetsReceived);
@@ -48,7 +48,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     packetsReceived++;
     simtime_t lastEED = simTime() - msg->getCreationTime();
-    emit(receivedPacketSignal, (long)(req->getByteLength()));
+    emit(rcvdPkBytesSignal, (long)(req->getByteLength()));
     emit(endToEndDelaySignal, lastEED);
 
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
@@ -84,7 +84,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
 }
 
-void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
+void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr)
 {
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
@@ -93,7 +93,7 @@ void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
     datapacket->setControlInfo(etherctrl);
     send(datapacket, "out");
     packetsSent++;
-    emit(sentPacketSignal,1L);
+    emit(sentPkBytesSignal, (long)(datapacket->getByteLength()));
 }
 
 void EtherAppSrv::registerDSAP(int dsap)
@@ -111,5 +111,3 @@ void EtherAppSrv::registerDSAP(int dsap)
 void EtherAppSrv::finish()
 {
 }
-
-

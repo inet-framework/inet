@@ -52,9 +52,9 @@ simple PingApp
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
         @signal[endToEndDelay](title="delay";modeHint=histogram,stats);
-        @signal[droppedPacket](title="dropped packets";modeHint=histogram,stats);
-        @signal[sentPacket](title="sent packets";modeHint=histogram,count);
-        @signal[outOfOrderArrival](title="Out of order arrival";modeHint=hints,count);
+        @signal[drop](title="dropped packets";modeHint=stats);
+        @signal[sentPacket](title="sent packets";modeHint=count);
+        @signal[outOfOrderArrival](title="Out of order arrival packets";modeHint=count);
     gates:
         input pingIn;
         output pingOut;

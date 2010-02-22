@@ -31,7 +31,9 @@ class INET_API Sink : public cSimpleModule
     long numBits;
     double throughput; // bit/sec
     double packetPerSec;
-    simsignal_t receivedBitsSignal;
+
+    //statistics:
+    simsignal_t rcvdPkBytesSignal;
 
   protected:
     virtual void initialize();

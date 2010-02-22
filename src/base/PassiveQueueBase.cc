@@ -29,8 +29,9 @@ void PassiveQueueBase::initialize()
     // statistics
     numQueueReceived = 0;
     numQueueDropped = 0;
-    receivedPacketSignal = registerSignal("receivedPacket");
-    droppedPacketSignal = registerSignal("droppedPacket");
+    rcvdPacketSignal = registerSignal("rcvdPacket");
+    dropSignal = registerSignal("drop");
+    queueingTimeSignal = registerSignal("queueingTime");
 
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
@@ -39,7 +40,8 @@ void PassiveQueueBase::initialize()
 void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
-    emit(BytesSignal, packet->getByteLength());
+
+    emit(rcvdPacketSignal, 1L);
     if (packetRequested>0)
     {
         packetRequested--;
@@ -47,11 +49,12 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     }
     else
     {
+        msg->setTimestamp();
         bool dropped = enqueue(msg);
         if (dropped)
         {
             numQueueDropped++;
-            emit(droppedPacketSignal, 1L);
+            emit(dropSignal, 1L);
         }
     }
 
@@ -74,6 +77,7 @@ void PassiveQueueBase::requestPacket()
     }
     else
     {
+        emit(queueingTimeSignal, simTime() - msg->getTimestamp());
         sendOut(msg);
     }
 }

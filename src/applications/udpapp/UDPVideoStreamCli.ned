@@ -31,7 +31,8 @@ simple UDPVideoStreamCli like UDPApp
         int serverPort;
         double startTime @unit("s") = default(1s);
         @display("i=block/app");
-        @signal[endToEndDelay](title="End-to-end delay";modeHint=hints;);
+        @signal[endToEndDelay](title="End-to-end delay";modeHint=histogram,stats);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

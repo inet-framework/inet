@@ -33,6 +33,8 @@ void EtherHub::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
+    pkBytesSignal = registerSignal("pkBytes");
+
     ports = gateSize("ethg");
 
     // autoconfig: tell everyone that full duplex is not possible over shared media
@@ -52,7 +54,7 @@ void EtherHub::handleMessage(cMessage *msg)
     EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;
-    emit(receivedPacketSignal, 1L);
+    emit(pkBytesSignal, (long)(PK(msg)->getByteLength()));
 
     if (ports<=1)
     {
@@ -77,4 +79,3 @@ void EtherHub::finish ()
     if (t>0)
         recordScalar("messages/sec", numMessages/t);
 }
-

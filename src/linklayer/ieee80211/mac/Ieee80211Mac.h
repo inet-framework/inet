@@ -226,8 +226,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     long numReceived;
     long numSentBroadcast;
     long numReceivedBroadcast;
-    cOutVector stateVector;
-    cOutVector radioStateVector;
+    simsignal_t stateSignal;
+    simsignal_t radioStateSignal;
     //@}
 
   public:

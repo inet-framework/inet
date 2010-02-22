@@ -29,10 +29,10 @@ void EtherLLC::initialize()
     dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
 
     dsapSignal = registerSignal("dsap");
-    receivedBytesFromHigherLayerSignal = registerSignal("receivedBytesFromHigherLayer");
-    receivedBytesFromMACSignal = registerSignal("receivedBytesFromMAC");
-    passedUpBytesSignal = registerSignal("passedUpBytes");
-    droppedBytesUnknownDSAPSignal = registerSignal("droppedBytesUnknown");
+    rcvdPkBytesFromHLSignal =  registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
+    passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+    droppedPkBytesUnknownDSAPSignal = registerSignal("droppedPkBytesUnknownDSAP");
     sendPauseSignal = registerSignal("sendPause");
 
     WATCH(dsapsRegistered);
@@ -100,7 +100,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
         error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
-    emit(receivedBytesFromHigherLayerSignal, (long)(msg->getByteLength()));
+    emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
@@ -140,7 +140,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     {
         EV << "No higher layer registered for DSAP="<< sap <<", discarding frame `" << frame->getName() <<"'\n";
         droppedUnknownDSAP++;
-        emit(droppedBytesUnknownDSAPSignal, (long)(frame->getByteLength()));
+        emit(droppedPkBytesUnknownDSAPSignal, (long)(frame->getByteLength()));
         delete frame;
         return;
     }
@@ -160,7 +160,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
     send(higherlayermsg, "upperLayerOut", port);
     totalPassedUp++;
-    emit(passedUpBytesSignal, (long)(frame->getByteLength()));
+    emit(passedUpPkBytesSignal, (long)(frame->getByteLength()));
     delete frame;
 }
 

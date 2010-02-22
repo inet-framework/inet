@@ -51,7 +51,7 @@ void PingApp::initialize()
     // statistics
     delayStat.setName("pingRTT");
     endToEndDelaySignal = registerSignal("endToEndDelay");
-    droppedPacketSignal = registerSignal("droppedPacket");
+    dropSignal = registerSignal("drop");
     sentPacketSignal = registerSignal("sentPacket");
     outOfOrderArrivalSignal = registerSignal("outOfOrderArrival");
 
@@ -198,7 +198,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         // jump in the sequence: count pings in gap as lost
         long jump = seqNo - expectedReplySeqNo;
         dropCount += jump;
-        emit(droppedPacketSignal, jump);
+        emit(dropSignal, jump);
 
         // expect sequence numbers to continue from here
         expectedReplySeqNo = seqNo+1;
@@ -208,7 +208,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         // ping arrived too late: count as out of order arrival
         EV << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
-        emit(outOfOrderArrivalSignal, 1L);
+        emit(outOfOrderArrivalSignal, rtt);
     }
 }
 
@@ -221,7 +221,6 @@ void PingApp::finish()
     }
 
     // record statistics
-    recordScalar("Out-of-order ping arrivals", outOfOrderArrivalCount);
     recordScalar("Pings outstanding at end", sendSeqNo-expectedReplySeqNo);
 
     recordScalar("Ping drop rate (%)", 100 * dropCount / (double)sendSeqNo);
@@ -242,5 +241,3 @@ void PingApp::finish()
          << "   variance:" << delayStat.getVariance() << endl;
     cout <<"--------------------------------------------------------" << endl;
 }
-
-

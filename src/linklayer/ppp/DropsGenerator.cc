@@ -30,8 +30,9 @@ void DropsGenerator::initialize()
     WATCH(generateFurtherDrops);
 
     //statistics
-    receivedPacketSignal = registerSignal("receivedPacket");
-    droppedPacketSignal = registerSignal("droppedPacket");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    droppedPkBytesSignal = registerSignal("droppedPkBytes");
 
     const char *vector = par("dropsVector");
     parseVector(vector);
@@ -48,7 +49,9 @@ void DropsGenerator::initialize()
 void DropsGenerator::handleMessage(cMessage *msg)
 {
     numPackets++;
-    emit(receivedPacketSignal, 1L);
+    cPacket *packet = PK(msg);
+    long curBytes = (long)(packet->getByteLength());
+    emit(rcvdPkBytesSignal, curBytes);
 
     if (generateFurtherDrops)
     {
@@ -57,7 +60,7 @@ void DropsGenerator::handleMessage(cMessage *msg)
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
             delete msg;
             numDropped++;
-            emit(droppedPacketSignal, 1L);
+            emit(droppedPkBytesSignal, curBytes);
             dropsVector.erase(dropsVector.begin());
             if (dropsVector.size()==0)
             {
@@ -68,6 +71,7 @@ void DropsGenerator::handleMessage(cMessage *msg)
 
         }
     }
+    emit(sentPkBytesSignal, curBytes);
     send(msg, "out");
 }
 

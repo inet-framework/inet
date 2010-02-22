@@ -29,7 +29,7 @@ simple TCPSinkApp like TCPApp
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
         @display("i=block/sink");
-        @signal[receivedBytes](title="Received bytes";modeHint=sum,count);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=sum,count);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

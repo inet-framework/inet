@@ -29,8 +29,8 @@ void TCPGenericSrvApp::initialize()
 
     //statistics
     msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
-    receivedBytesSignal = registerSignal("receivedBytes");
-    sentBytesSignal = registerSignal("sentBytes");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
 
 
     WATCH(msgsRcvd);
@@ -60,7 +60,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
 	{
 		msgsSent++;
 		bytesSent += appmsg->getByteLength();
-		emit(sentBytesSignal, (long)(appmsg->getByteLength()));
+		emit(sentPkBytesSignal, (long)(appmsg->getByteLength()));
 
 		EV << "sending \"" << appmsg->getName() << "\" to TCP, " << appmsg->getByteLength() << " bytes\n";
 	}
@@ -98,7 +98,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
         msgsRcvd++;
         bytesRcvd += appmsg->getByteLength();
-        emit(receivedBytesSignal, (long)(appmsg->getByteLength()));
+        emit(rcvdPkBytesSignal, (long)(appmsg->getByteLength()));
 
         long requestedBytes = appmsg->getExpectedReplyLength();
 

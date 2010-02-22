@@ -27,7 +27,7 @@ void Sink::initialize()
     numBits = 0;
     throughput = 0;
     packetPerSec = 0;
-    receivedBitsSignal = registerSignal("receivedBits");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     WATCH(numPackets);
     WATCH(numBits);
@@ -38,9 +38,9 @@ void Sink::initialize()
 void Sink::handleMessage(cMessage *msg)
 {
     numPackets++;
-    long receivedBits = PK(msg)->getBitLength();
-    numBits += receivedBits;
-    emit(receivedBitsSignal, receivedBits);
+    cPacket *packet = PK(msg);
+    numBits += packet->getBitLength();
+    emit(rcvdPkBytesSignal, (long)(packet->getByteLength()));
     throughput = numBits / simTime();
     packetPerSec = numPackets / simTime();
 
