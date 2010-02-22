@@ -29,7 +29,8 @@ void DropTailQueue::initialize()
 
     //statistics
     queueLengthSignal = registerSignal("queueLength");
-    emit(queueLengthSignal, 0L);
+    droppedPkBytesSignal = registerSignal("droppedPkBytes");
+    emit(queueLengthSignal, (long)(queue.length()));
 
     outGate = gate("out");
 
@@ -39,9 +40,12 @@ void DropTailQueue::initialize()
 
 bool DropTailQueue::enqueue(cMessage *msg)
 {
+    cPacket *packet = PK(msg);
+
     if (frameCapacity && queue.length() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
+        emit(droppedPkBytesSignal, (long)(packet->getByteLength()));
         delete msg;
         return true;
     }
@@ -58,7 +62,7 @@ cMessage *DropTailQueue::dequeue()
     if (queue.empty())
         return NULL;
 
-   cMessage *pk = (cMessage *)queue.pop();
+    cPacket *pk = (cPacket *)queue.pop();
 
     // statistics
     emit(queueLengthSignal, (long)(queue.length()));
@@ -70,5 +74,3 @@ void DropTailQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
 }
-
-

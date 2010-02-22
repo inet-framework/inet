@@ -30,7 +30,7 @@ void PassiveQueueBase::initialize()
     numQueueReceived = 0;
     numQueueDropped = 0;
     rcvdPacketSignal = registerSignal("rcvdPacket");
-    dropSignal = registerSignal("drop");
+    droppedPacketSignal = registerSignal("droppedPacket");
     queueingTimeSignal = registerSignal("queueingTime");
 
     WATCH(numQueueReceived);
@@ -54,7 +54,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         if (dropped)
         {
             numQueueDropped++;
-            emit(dropSignal, 1L);
+            emit(droppedPacketSignal, 1L);
         }
     }
 
@@ -85,4 +85,3 @@ void PassiveQueueBase::requestPacket()
 void PassiveQueueBase::finish()
 {
 }
-

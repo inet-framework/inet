@@ -37,6 +37,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
 
     // statistics
     simsignal_t queueLengthSignal;
+    simsignal_t droppedPkBytesSignal;
 
   protected:
     virtual void initialize();
