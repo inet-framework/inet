@@ -30,7 +30,7 @@ void REDQueue::initialize()
     //statistics
     queueLengthSignal = registerSignal("queueLength");
     avgQueueLengthSignal = registerSignal("avgQueueLength");
-    earlyDropPacketSignal = registerSignal("earlyDropPacket");
+    earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
 
     // configuration
     wq = par("wq");
@@ -107,7 +107,7 @@ bool REDQueue::enqueue(cMessage *msg)
             mark = true;
             count = 0;
             numEarlyDrops++;
-            emit(earlyDropPacketSignal, 1L);
+            emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
         }
     }
     else if (maxth <= avg)

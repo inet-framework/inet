@@ -38,9 +38,16 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     // statistics
     int numQueueReceived;
     int numQueueDropped;
+
+    /** Emit signal with value 1 when receive a packet. */
     simsignal_t rcvdPacketSignal;
-    simsignal_t sentPacketSignal;
+
+    /** Emit signal with value 1 when dropped a packet (enqueue returns true). */
     simsignal_t droppedPacketSignal;
+
+    /** Emit signal with value of delaying when sent out a packet.
+     * It's use setTimestamp() and getTimestamp() functions of cMessage for measure delaying time.
+     */
     simsignal_t queueingTimeSignal;
 
   protected:
@@ -74,5 +81,3 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 };
 
 #endif
-
-

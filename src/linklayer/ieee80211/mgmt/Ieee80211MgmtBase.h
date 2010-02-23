@@ -51,7 +51,6 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
 
     // queue statistics
     simsignal_t dataQueueLenSignal;
-    simsignal_t droppedPacketSignal;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -109,6 +108,4 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     //@}
 };
 
-#endif
-
-
+#endif //IEEE80211_MGMT_BASE_H

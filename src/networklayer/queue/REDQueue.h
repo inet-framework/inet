@@ -49,7 +49,7 @@ class INET_API REDQueue : public PassiveQueueBase
     // statistics
     simsignal_t queueLengthSignal;
     simsignal_t avgQueueLengthSignal;
-    simsignal_t earlyDropPacketSignal;
+    simsignal_t earlyDropPkBytesSignal;
 
   protected:
     virtual void initialize();
