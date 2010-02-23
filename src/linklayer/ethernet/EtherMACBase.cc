@@ -165,10 +165,6 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
 
-//    numDroppedIfaceDownVector.setName("framesDroppedIfaceDown");
-//    numDroppedBitErrorVector.setName("framesDroppedBitError");
-//    numDroppedNotForUsVector.setName("framesDroppedNotForUs");
-
     txPkBytesSignal = registerSignal("txPkBytes");
     rxPkBytesOkSignal = registerSignal("rxPkBytesOk");
     txPausePkUnitsSignal = registerSignal("txPausePkUnits");
@@ -576,11 +572,6 @@ void EtherMACBase::finish()
         recordScalar("simulated time", t);
         recordScalar("txrate (Mb)", txrate/1000000);
         recordScalar("full duplex", duplexMode);
-        recordScalar("frames from higher layer", numFramesFromHL);
-        recordScalar("frames from higher layer dropped (iface down)", numDroppedIfaceDown);
-        recordScalar("frames dropped (bit error)",  numDroppedBitError);
-        recordScalar("frames dropped (not for us)", numDroppedNotForUs);
-        recordScalar("frames passed up to HL", numFramesPassedToHL);
 
         if (t>0)
         {
