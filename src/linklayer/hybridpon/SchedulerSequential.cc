@@ -5,7 +5,7 @@
 //	This file implements 'Sequential' class, derived from the 'Scheduler'
 //  class, for PON OLT.
 //
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//	Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
 //------------------------------------------------------------------------------
 
 
@@ -21,50 +21,54 @@ Define_Module(Sequential);
 
 
 //------------------------------------------------------------------------------
-// Sequential::receiveIpPacket --
+// Sequential::receiveEthernetFrame --
 //
-//		receives an IP packet from the upper layer.
+//		receives an Ethernet frame from the switch.
 //
 // Arguments:
-// 		IpPacket *pkt;
+// 		EtherFrame	*frame;
 //
 // Results:
 //		A PON frame is generated, and unless a buffer overflow occurs,
 //      its transmission is scheduled.
 //------------------------------------------------------------------------------
 
-void Sequential::receiveIpPacket(IpPacket *pkt)
+//void Sequential::receiveIpPacket(IpPacket *pkt)
+void Sequential::receiveEthernetFrame(EtherFrame *frame)
 {
 #ifdef DEBUG_SCHEDULER
-    ev << getFullPath() << ": IP packet received" << endl;
+    ev << getFullPath() << ": Ethernet frame received" << endl;
 #endif
 
     // Check if there is room in the queue for a PON frame
-    // corresponding to the incoming IP packet
-    if (busyQueue + pkt->getBitLength() + ETH_OVERHEAD_SIZE + DS_DATA_OVERHEAD_SIZE <= queueSize) {
+    // corresponding to the incoming Ethernet frame
+//    if (busyQueue + pkt->getBitLength() + ETH_OVERHEAD_SIZE + DS_DATA_OVERHEAD_SIZE <= queueSize) {
+    if (busyQueue + frame->getBitLength() + DS_DATA_OVERHEAD_SIZE <= queueSize) {
 
-        // **** for now, this is how we determine to which ONU it is addressed
-        // **** assumes equal number of users per onu, as we have been doing
-        int lambda = pkt->getDstnAddress()/numUsersPerOnu;
+//        // **** for now, this is how we determine to which ONU it is addressed
+//        // **** assumes equal number of users per onu, as we have been doing
+//        int lambda = pkt->getDstnAddress()/numUsersPerOnu;
+    	// Now the addressing is handled by the Ethernet switch (bridge).
 
 #ifdef DEBUG_SCHEDULER
         ev << getFullPath() << ": dstnAddress = " << pkt->getDstnAddress() << ", destination ONU = " << lambda << endl;
 #endif
 
-        // Encapsulate IP packet in Ethernet frame
-        EthFrame *ethFrame = new EthFrame();
-        ethFrame->setBitLength(ETH_OVERHEAD_SIZE); // including preamble, DA, SA, FT, & CRC fields
-        ethFrame->encapsulate(pkt);
-        int frameLength = ethFrame->getBitLength();
+//        // Encapsulate IP packet in Ethernet frame
+//        EthFrame *ethFrame = new EthFrame();
+//        ethFrame->setBitLength(ETH_OVERHEAD_SIZE); // including preamble, DA, SA, FT, & CRC fields
+//        ethFrame->encapsulate(pkt);
+        int frameLength = frame->getBitLength();
 
         // Create ponFrame
         HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
         ponFrameToOnu->setLambda(lambda);
-        ponFrameToOnu->setId(true);
+//        ponFrameToOnu->setId(true);
+        ponFrameToOnu->setFrameType(0);		// 0 -> "normal data"
         // detected by Joseph Kim, 12/14/2003
         // ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + pkt->getBitLength());
         ponFrameToOnu->setBitLength(frameLength + DS_DATA_OVERHEAD_SIZE);
-        (ponFrameToOnu->getEncapsulatedEthFrames()).insert(ethFrame);
+        (ponFrameToOnu->getEncapsulatedFrames()).insert(frame);
 
         // We emulate a queueing operation using a counter (busyQueue) and
         // an additional event scheduled for a messsage deletion from a queue
@@ -76,11 +80,12 @@ void Sequential::receiveIpPacket(IpPacket *pkt)
         scheduleAt(txTime, msg);
     }
     else {
-        monitor->recordLossStats(pkt->getSrcAddress(), pkt->getDstnAddress(), pkt->getBitLength());
+//        monitor->recordLossStats(pkt->getSrcAddress(), pkt->getDstnAddress(), pkt->getBitLength());
+    	// *** need to implement statistics gathering routines here ***
 #ifdef DEBUG_SCHEDULER
         ev << getFullPath() << ": IP packet dropped due to buffer overflow!" << endl;
 #endif
-        delete (IpPacket *) pkt;
+//        delete (IpPacket *) pkt;
     }
 }
 
@@ -185,12 +190,12 @@ void Sequential::handleMessage(cMessage *msg)
     case ONU_POLL:
         sendOnuPoll((HybridPonMessage *)msg);
         break;
-    case IP_PACKET:
-        // Check if the IP packet received is from an IP Packet generator.
-        if ( (msg->getArrivalGateId() == gate("fromPacketGenerator")->getId()) ) {
-            receiveIpPacket((IpPacket *)msg);
-        }
-        break;
+//    case IP_PACKET:
+//        // Check if the IP packet received is from an IP Packet generator.
+//        if ( (msg->getArrivalGateId() == gate("fromPacketGenerator")->getId()) ) {
+//            receiveIpPacket((IpPacket *)msg);
+//        }
+//        break;
     case HYBRID_PON_FRAME:
         // Check if the PON frame received is from an ONU.
         if ( msg->getArrivalGateId() == gate("in")->getId() ) {
@@ -204,6 +209,12 @@ void Sequential::handleMessage(cMessage *msg)
         transmitPollFrame((HybridPonMessage *)msg);
         break;
     default:
+    	// Check if the received message is from the Ethernet switch.
+    	if ( (msg->getArrivalGate() == gate("fromSwitch")) ) {
+    		receiveEthernetFrame((EtherFrame *)msg);
+    		break;
+    	}
+
         ev << getFullPath() << ": Unexpected message type: " << msg->getKind() << endl;
         exit(1);
 	}	// end of switch()

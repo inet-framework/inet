@@ -21,7 +21,7 @@
 			<arguments>
 				<dictionary>
 					<key>?children?</key>
-					<value>?name?=outputEntries\|?children?=?name?=entry\\\\\\\\\\\\\\\|\\\\\\\|\||</value>
+					<value>?name?=outputEntries\|?children?=?name?=entry\\\\\\\|\\\|\||</value>
 				</dictionary>
 				<dictionary>
 					<key>?name?</key>

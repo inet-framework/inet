@@ -32,8 +32,10 @@ simple SSSF like IScheduler
 
     gates:
         input in;					// to receive PON frames from ONUs
-        input fromPacketGenerator;	// to receive generated IP packets
+//        input fromPacketGenerator;	// to receive generated IP packets
+		input fromSwitch[];			// from Ethernet switch (bridge)
         output out;					// to send PON frames to ONUs
-        output toMonitor;			// to monitor
-        output toPacketSink;		// to sink received IP packets
+//        output toMonitor;			// to monitor
+//        output toPacketSink;		// to sink received IP packets
+		output toSwitch[];			// to Ethernet switch (bridge)
 }

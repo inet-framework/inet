@@ -15,7 +15,9 @@
 package inet.examples.hybridpon.arptest;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.linklayer.hybridpon.LambdaSplitter;
+import inet.nodes.hybridpon.Olt;
+import inet.nodes.hybridpon.Onu;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
@@ -23,6 +25,7 @@ import ned.DatarateChannel;
 
 network ARPTest
 {
+    @display("bgb=611,326;bgl=2");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -31,35 +34,53 @@ network ARPTest
         }
     submodules:
         client: StandardHost {
-            @display("p=71,64;i=device/laptop_l");
+            @display("p=42,95;i=device/laptop_l");
         }
         host1: StandardHost {
-            @display("p=65,131;i=device/pc");
+            @display("p=42,172;i=device/pc");
         }
         host2: StandardHost {
-            @display("p=60,191;i=device/pc");
+            @display("p=42,257;i=device/pc");
         }
-        switch: EtherSwitch {
-            @display("p=202,156");
+        olt: Olt {
+            @display("i=device/router;p=324,161");
         }
-        net: Router {
-            @display("p=394,166");
+        onu1: Onu {
+            parameters:
+                lambda = 0;
+                @display("i=device/pc2;p=171,95");
         }
+        onu2: Onu {
+            parameters:
+                lambda = 1;
+                @display("i=device/pc2;p=171,218");
+        }
+        awg: LambdaSplitter {
+            @display("i=abstract/opticalswitch_s;p=256,161");
+        }
+        //                switch: EtherSwitch {
+        //                    @display("p=202,156");
+        //                }
+        //        net: Router {
+        //            @display("p=510,161");
+        //        }
         router: Router {
-            @display("p=311,74");
+            @display("p=410,161");
         }
         server: StandardHost {
-            @display("p=512,58;i=device/server_l");
+            @display("p=552,161;i=device/server_l");
         }
         configurator: FlatNetworkConfigurator {
-            @display("p=495,160");
+            @display("p=318,30");
         }
     connections:
-        client.ethg++ <--> switch.ethg++;
-        switch.ethg++ <--> host1.ethg++;
-        switch.ethg++ <--> host2.ethg++;
-        router.ethg++ <--> switch.ethg++;
-        router.pppg++ <--> fiberline <--> net.pppg++;
-        server.pppg++ <--> fiberline <--> net.pppg++;
+        client.ethg++ <--> onu1.ethg++;
+        host1.ethg++ <--> onu2.ethg++;
+        host2.ethg++ <--> onu2.ethg++;
+        onu1.pong <--> awg.demuxg++;
+        onu2.pong <--> awg.demuxg++;
+        awg.muxg <--> olt.pong;
+        olt.ethg <--> router.ethg++;
+        router.pppg++ <--> fiberline <--> server.pppg++;
 }
 

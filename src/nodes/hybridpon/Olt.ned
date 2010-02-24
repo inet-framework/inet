@@ -1,45 +1,55 @@
-// $Id$
-//------------------------------------------------------------------------------
-//	Olt.ned --
-//
-//	This file defines a PON OLT module.
-//
-//  Copyright (C) 2009 Kyeong Soo (Joseph) Kim
-//------------------------------------------------------------------------------
+///
+/// @file   Olt.ned
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   Thu Jan 21, 2010
+///
+/// @brief  Defines a hybrid TDM/WDM-PON OLT module.
+///
+/// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+///
 
 
 package inet.nodes.hybridpon;
 
 import inet.linklayer.hybridpon.IScheduler;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.hybridpon.OltWdmLayer;
+import inet.nodes.ethernet.EtherSwitch;
 
 
 module Olt
 {
     parameters:
-        @display("bgb=188,169;bgp=2,2");
+        @display("i=device/router;bgb=177,239");
         int numOnus;	// number of ONUs connected to OLT
         string schType;	// type of 'Scheduler' (algorithm and operation mode)
     gates:
-		inout ponGate;		// to and from PON (i.e., splitter)
-		inout ethGate;		// to and from network (i.e., metro/backbone)
-        output fromSchedulerToMonitor;
-        output fromIpPktGeneratorToMonitor;
-        output fromIpPktSinkToMonitor;
+        inout pong;		// PON I/F (i.e., toward AWG)
+        inout ethg;		// Network I/F (i.e., with metro/backbone Ethernet switch)
+    //        output fromSchedulerToMonitor;
     submodules:
+        switch: EtherSwitch {
+            parameters:
+                @display("p=90,48");
+        }
         scheduler: <schType> like IScheduler {
             parameters:
-                @display("i=block/classifier;p=94,116");
                 numOnus = numOnus;
+                @display("p=90,118");
         }
-        eth: EthernetInterface {
+        wdm: OltWdmLayer {
             parameters:
-                @display("p=145,257,row,110;q=l2queue");
+                @display("p=90,199");
         }
     connections:
-        scheduler.toMonitor --> fromSchedulerToMonitor;
-		ponGate <--> scheduler.phy
-		ethGate <--> eth.phys
-		eth.netwOut --> scheduler.ifIn
-		eth.netwIn <-- scheduler.ifOut
+        //        scheduler.toMonitor --> fromSchedulerToMonitor;
+        ethg <--> switch.ethg[numOnus];
+        for i=0..numOnus-1 {
+            switch.ethg[i] <--> scheduler.ethg[i];
+            scheduler.wdmg[i] <--> wdm.demuxg[i];
+        }
+        pong <--> wdm.muxg;
 }

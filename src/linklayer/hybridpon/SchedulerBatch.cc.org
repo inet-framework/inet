@@ -12,6 +12,7 @@
 // For debugging
 // #define DEBUG_SCHEDULER
 
+#include <assert.h>
 #include <sstream>
 #include "Scheduler.h"
 
@@ -121,8 +122,8 @@ void Batch::sendOnuPoll(HybridPonMessage *msg)
 	// Get the ONU index from the message.
     int idx = msg->getOnuIdx();
 
-    // Record ONU Timeout.
-    monitor->recordOnuTimeout(idx);
+//    // Record ONU Timeout.
+//    monitor->recordOnuTimeout(idx);
 
 	// Check the VOQ if there is room for a polling frame.
 	if (voqBitCtr[idx+numOnus] + POLL_FRAME_SIZE <= voqSize) {	// idx+numOnus -> VOQ index!
@@ -287,41 +288,46 @@ void Batch::batchSchedule(cMessage *batchMsg)
 
 
 //------------------------------------------------------------------------------
-// Batch::receiveIpPacket --
+// Batch::receiveEthernetFrame --
 //
-//		receives an IP packet from the upper layer.
+//		receives an Ethernet frame from the switch.
 //
 // Arguments:
-// 		IpPacket *pkt;
+// 		EtherFrame	*frame;
 //
 // Results:
 //		A PON frame is generated, and unless a buffer overflow occurs,
 //      its transmission is scheduled.
 //------------------------------------------------------------------------------
 
-void Batch::receiveIpPacket(IpPacket *pkt)
+//void Batch::receiveIpPacket(IpPacket *pkt)
+void Batch::receiveEthernetFrame(EtherFrame *frame)
 {
 #ifdef DEBUG_SCHEDULER
-    ev << getFullPath() << ": IP packet received" << endl;
+    ev << getFullPath() << ": Ethernet frame received" << endl;
 #endif
 
-    // **** for now, this is how we determine to which ONU it is addressed
-    // **** assumes equal number of users per onu, as we have been doing
-    int lambda = pkt->getDstnAddress()/numUsersPerOnu;
+//    // **** for now, this is how we determine to which ONU it is addressed
+//    // **** assumes equal number of users per onu, as we have been doing
+//    int lambda = pkt->getDstnAddress()/numUsersPerOnu;
+    // Now the addressing is handled by the Ethernet switch (bridge).
 
     // Check if there is room in the VOQ for a PON frame
-    // corresponding to the incoming IP packet
-    if ( voqBitCtr[lambda] + pkt->getBitLength() + ETH_OVERHEAD_SIZE + DS_DATA_OVERHEAD_SIZE <= voqSize ) {
+    // corresponding to the incoming Ethernet frame
+//    if ( voqBitCtr[lambda] + pkt->getBitLength() + ETH_OVERHEAD_SIZE + DS_DATA_OVERHEAD_SIZE <= voqSize ) {
+    if ( voqBitCtr[lambda] + frame->getBitLength() + DS_DATA_OVERHEAD_SIZE <= voqSize ) {
 
 #ifdef DEBUG_SCHEDULER
         ev << getFullPath() << ": dstnAddress = " << pkt->getDstnAddress() << ", destination ONU = " << lambda << endl;
 #endif
 
-        // Encapsulate IP packet in Ethernet frame
-        EthFrame *ethFrame = new EthFrame();
-        ethFrame->setBitLength(ETH_HEADER_SIZE + ETH_CRC_SIZE);
-        ethFrame->encapsulate(pkt);
-        int frameLength = ethFrame->getBitLength();
+//        // Encapsulate IP packet in Ethernet frame
+//        EthFrame *ethFrame = new EthFrame();
+//        ethFrame->setBitLength(ETH_HEADER_SIZE + ETH_CRC_SIZE);
+//        ethFrame->encapsulate(pkt);
+//        int frameLength = ethFrame->getBitLength();
+        int frameLength = frame->getBitLength();
+
 
         // Create ponFrame
         HybridPonFrame *ponFrameToOnu = new HybridPonFrame("", HYBRID_PON_FRAME);
@@ -330,7 +336,7 @@ void Batch::receiveIpPacket(IpPacket *pkt)
         // detected by Joseph Kim, 12/14/2003
         // ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + pkt->getBitLength());
         ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + frameLength);
-        (ponFrameToOnu->getEncapsulatedEthFrames()).insert(ethFrame);
+        (ponFrameToOnu->getEncapsulatedFrames()).insert(frame);
         voqBitCtr[lambda] += ponFrameToOnu->getBitLength();
         voq[lambda].insert(ponFrameToOnu);
 
@@ -339,11 +345,11 @@ void Batch::receiveIpPacket(IpPacket *pkt)
         vQueueOctet[lambda].record(voqBitCtr[lambda]/8);
     }
     else {
-        monitor->recordLossStats(pkt->getSrcAddress(), pkt->getDstnAddress(), pkt->getBitLength() );
+//        monitor->recordLossStats(frame->getSrcAddress(), frame->getDstnAddress(), frame->getBitLength() );
 #ifdef DEBUG_SCHEDULER
-        ev << getFullPath() << ": IP packet dropped due to buffer overflow!" << endl;
+        ev << getFullPath() << ": Ethernet frame dropped due to buffer overflow!" << endl;
 #endif
-        delete (IpPacket *) pkt;
+//        delete (IpPacket *) pkt;
     }
 }
 

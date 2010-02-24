@@ -5,7 +5,7 @@
 //	This file implements 'LambdaSplitter' class, modelling an AWG in the path
 //  of PONs.
 //
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+//	Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
 //------------------------------------------------------------------------------
 
 

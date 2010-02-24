@@ -29,8 +29,8 @@
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.414982452" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1406305899" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 <option id="gnu.cpp.compiler.option.include.paths.591923549" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/include"/>
-<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/mingw/lib/gcc/mingw32/4.2.1-sjlj/include/c++"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.1b1/mingw/include"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.1b1/mingw/lib/gcc/mingw32/4.4.0/include/c++"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -446,6 +446,7 @@
 <listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\include&quot;"/>
 <listOptionValue builtIn="false" value="&quot;E:\Tools\omnetpp\omnetpp-4.0\mingw\lib\gcc\mingw32\4.2.1-sjlj\include\c++&quot;"/>
 <listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/src/common/platdep"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.1b1/mingw/lib/gcc/mingw32/4.4.0/include/c++"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.924398200" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -462,6 +463,7 @@
 <tool id="cdt.managedbuild.tool.gnu.assembler.base.2035203959" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 <option id="gnu.both.asm.option.include.paths.1851658759" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.0/src/common"/>
+<listOptionValue builtIn="false" value="E:/Tools/omnetpp/omnetpp-4.1b1/mingw/lib/gcc/mingw32/4.4.0/include/c++"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1233807828" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>

@@ -1,9 +1,9 @@
 ///
 /// @file   HybridPonMac.h
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Tue Jun 30 12:21:53 2009
+/// @date   Jun/30/2009
 ///
-/// @brief  Declares 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
+/// @brief  Declares 'HybridPonMac' class for a hybrid TDM/WDM-PON ONU.
 ///
 /// @remarks Copyright (C) 2009 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
