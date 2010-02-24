@@ -34,7 +34,7 @@
 //
 // Arguments:
 //      int onu;
-//      HybridPonFrame *ponFrameToOnu;
+//      HybridPonDsFrame *ponFrameToOnu;
 //
 // Results:
 //      If the frame is for downstream data, its transmission is scheduled
@@ -46,7 +46,7 @@
 //      '-1' is returned, indicating TX failure.
 //------------------------------------------------------------------------------
 
-simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
+simtime_t Scheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu) {
 	int d = onu;
 	int l = ponFrameToOnu->getBitLength();
 	int i = 0;
@@ -75,7 +75,7 @@ simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
 	}
 
 #ifdef DEBUG_SCHEDULER
-	if (ponFrameToOnu->getId() == true) {
+	if (ponFrameToOnu->getFrameType() == 0) {
 		ev << getFullPath() << ": seqSchedule called for downstream data PON frame for ONU["
 		<< onu << "]" << endl;
 	}
@@ -93,8 +93,8 @@ simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
 		}
 	}
 
-	if (ponFrameToOnu->getId() == false) {
-		// if the frame is for a grant and CW for upstream traffic from ONU.
+	if (ponFrameToOnu->getFrameType() == 1) {
+		// This is a grant frame providing optical CW burst for upstream traffic from ONU.
 
 		// pick the earliest available receiver
 		j = 0;
@@ -120,7 +120,7 @@ simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
 			ev << getFullPath() << ": TX of grant PON frame cancelled due to excessive scheduling delay!"
 			<< endl;
 #endif
-			delete (HybridPonFrame *) ponFrameToOnu;
+			delete (HybridPonDsFrame *) ponFrameToOnu;
 			return simtime_t(-1.0);
 		}
 #ifdef DEBUG_SCHEDULER
@@ -133,7 +133,7 @@ simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
 		RX[j] = t + l / BITRATE + RTT[d];
 		// schedule reception at time t+RTT[d] using RX[j] and CH[d]
 	} else {
-		// if packet is for downstream traffic
+		// This is a normal data frame.
 
 		// schedule transmission time
 		// t = max (transmitter is free, channel is free)
@@ -161,7 +161,7 @@ simtime_t Scheduler::seqSchedule(int onu, HybridPonFrame *ponFrameToOnu) {
 				<< endl;
 	}
 #ifdef DEBUG_SCHEDULER
-	if (ponFrameToOnu->getId() == true) {
+	if (ponFrameToOnu->getFrameType() == 0) {
 		ev << getFullPath() << ": seqSchedule downstream ponFrame scheduled at time = " << t << endl;
 		ev << getFullPath() << ": using TX[" << i << "] and CH[" << d << "]" << endl;
 	}
@@ -289,11 +289,13 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg) {
 		// There's room for the frame in the queue.
 
 		// Create a polling ponFrame.
-		HybridPonFrame *ponFrameToOnu =
-				new HybridPonFrame("", HYBRID_PON_FRAME);
+		HybridPonDsGrantFrame *ponFrameToOnu =
+				new HybridPonDsGrantFrame("", HYBRID_PON_FRAME);
 //		ponFrameToOnu->setLambda(lambda);
-		ponFrameToOnu->setFrameType(0);	// for "Normal Data"
-		ponFrameToOnu->setGrant(0); // Only for data (user frames), not including CW for overhead & report fields
+		ponFrameToOnu->setFrameType(1);	// for "Grant"
+		ponFrameToOnu->setGrant(0);		// no CW burst for data (user frames)
+										// - "grant" field doesn't count CW for overhead & report fields
+										// - which are included in setting bit length by default.
 		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
 #ifdef DEBUG_SCHEDULER
@@ -343,21 +345,21 @@ void Scheduler::sendOnuPoll(HybridPonMessage *msg) {
 //		receives a PON frame from the WDM layer (i.e., from ONU).
 //
 // Arguments:
-// 		HybridPonFrame *frame;
+// 		HybridPonUsFrame *frame;
 //
 // Results:
 //      Upstream Ethernet frames, if any in the received frame, is sent to a
 //      switch (Ethernet bridge in the current implementation) and a downstream
-//      grant PON frame based on the request received from the ONU, is made and
+//      grant PON frame based on the report received from the ONU, is made and
 //      scheduled for transmission through seqSchedule().
 //------------------------------------------------------------------------------
 
-void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu) {
-	// get the channel information from the gate index
-	int lambda = ponFrameFromOnu->getArrivalGate()->getIndex();
+void Scheduler::receiveHybridPonFrame(HybridPonUsFrame *ponFrameFromOnu) {
+	// get the channel (wavelength) information from the gate index
+	int channel = ponFrameFromOnu->getArrivalGate()->getIndex();
 
 #ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << ": PON frame received from ONU [" << lambda << "]" << endl;
+	ev << getFullPath() << ": PON frame received from ONU [" << channel << "]" << endl;
 #endif
 
 	// deliver Ethernet frames to a switch
@@ -376,43 +378,44 @@ void Scheduler::receiveHybridPonFrame(HybridPonFrame *ponFrameFromOnu) {
 		//        ev << getFullPath() << ": Packet removed from Ethernet Frame" << endl;
 		//#endif
 
-		send(etherFrame, "ethg$o", lambda);
+		send(etherFrame, "ethg$o", channel);
 	}
 
-	// Handle request
+	// Handle report
 	//	int lambda = ponFrameFromOnu->getLambda();
-	int request = ponFrameFromOnu->getRequest();
+	int report = ponFrameFromOnu->getReport();
 
-	// Generate and schedule new grant if needed
-	if (request > 0) {
+	// Generate and schedule a grant frame if needed
+	if (report > 0) {
 
 #ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": Processing request for " << request << " bits from ONU ["
-		<< lambda << "]" << endl;
+		ev << getFullPath() << ": Processing report for " << report << " bits from ONU ["
+		<< channel << "]" << endl;
 #endif
-		HybridPonFrame *ponFrameToOnu =
-				new HybridPonFrame("", HYBRID_PON_FRAME);
+		HybridPonDsGrantFrame *ponFrameToOnu =
+				new HybridPonDsGrantFrame("", HYBRID_PON_FRAME);
 //		ponFrameToOnu->setLambda(lambda);
-		ponFrameToOnu->setFrameType(0);
-		if (request > cwMax) {
+		ponFrameToOnu->setFrameType(1);
+		if (report > cwMax) {
 			// Limit the size of max. grant to 'cwMax'.
-			request = cwMax;
+			report = cwMax;
 		}
-		ponFrameToOnu->setGrant(request); // Note that the grant here is only for data, i.e.,
-		// Ethernet frames, not including overhead & report field.
-		ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE
-				+ GRANT_SIZE + PREAMBLE_SIZE + DELIMITER_SIZE + REQUEST_SIZE
-				+ request);
+		ponFrameToOnu->setGrant(report);
+			// Note that the grant here is only for data, i.e.,
+			// Ethernet frames, not including overhead & report field.
+		ponFrameToOnu->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + FLAG_SIZE
+				+ GRANT_SIZE + PREAMBLE_SIZE + DELIMITER_SIZE + REPORT_SIZE
+				+ report);
 
 #ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": scheduling downstream grant for " << request << " bits for ONU ["
-		<< lambda << "]" << endl;
+		ev << getFullPath() << ": scheduling downstream grant for " << report << " bits for ONU ["
+		<< channel << "]" << endl;
 #endif
 
 		// Handle the generated grant PON frame specific to operation mode.
-		handleGrant(lambda, ponFrameToOnu);
+		handleGrant(channel, ponFrameToOnu);
 	}
-	delete (HybridPonFrame *) ponFrameFromOnu;
+	delete (HybridPonUsFrame *) ponFrameFromOnu;
 }
 
 //------------------------------------------------------------------------------
@@ -493,9 +496,9 @@ void Scheduler::initialize(void) {
 	// 	pollOnu.assign(numOnus, simtime_t(onuTimeout));
 
 	//	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << ": monitor pointing to module: " << monitor->getId() << endl;
-#endif
+//#ifdef DEBUG_SCHEDULER
+//	ev << getFullPath() << ": monitor pointing to module: " << monitor->getFrameType() << endl;
+//#endif
 
 	// Schedule the first poll to all ONUs.
 	//  simtime_t t;

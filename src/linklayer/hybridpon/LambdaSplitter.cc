@@ -22,7 +22,13 @@ Define_Module(LambdaSplitter)
 
 void LambdaSplitter::initialize()
 {
-	numPorts = gateSize("demuxGate");
+	int numPorts = this->gateSize("demuxg$i");
+
+	// set "flow-through" reception mode for all input gates
+    for (int i=0; i < numPorts; i++) {
+        gate("demuxg$i", i)->setDeliverOnReceptionStart(true);
+        gate("muxg$i", i)->setDeliverOnReceptionStart(true);
+    }
 }
 
 
@@ -34,7 +40,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
 	ev << getFullPath() << ": handleMessage called" << endl;
 #endif
 
-	if ( msg->getArrivalGateId() == findGate("muxGate") ) {
+	if ( msg->getArrivalGateId() == findGate("muxg") ) {
         // This is a downstream frame from the OLT to an ONU.
 
 #ifdef DEBUG_LAMBDA_SPLITTER
@@ -43,7 +49,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
 
 		int i=opticalFrame->getLambda();
 		//ownership problem here or up there?
-		send(opticalFrame, "demuxGate", i);
+		send(opticalFrame, "demuxg", i);
 
 // #ifdef DEBUG_LAMBDA_SPLITTER
 // 		ev << getFullPath() << ": scheduled to be sent at " << simTime() + delay << endl;
@@ -54,7 +60,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
         // This is an upstream frame from an ONU to the OLT.
 
 		for (int i=0; i<=numPorts; i++) {
-			if ( msg->getArrivalGateId() == findGate("demuxGate",i) ) {
+			if ( msg->getArrivalGateId() == findGate("demuxg",i) ) {
 
 #ifdef DEBUG_LAMBDA_SPLITTER
 				ev << "hello: " << msg->getArrivalGateId() << ", " << findGate("demuxGate",i)
@@ -64,7 +70,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
 
 				if ( opticalFrame->getLambda() == i) {
 // 					sendDelayed (opticalFrame, RTT[i]/2.0, "muxGate");
-                    send(opticalFrame, "muxGate");
+                    send(opticalFrame, "muxg");
 
 #ifdef DEBUG_LAMBDA_SPLITTER
                     ev << getFullPath() << ": scheduled to be sent at " << simTime() + delay << endl;

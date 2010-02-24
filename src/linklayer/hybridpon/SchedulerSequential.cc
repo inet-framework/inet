@@ -133,7 +133,7 @@ void Sequential::handleGrant(int lambda, HybridPonFrame *grant)
 //		The message has been deleted.
 //------------------------------------------------------------------------------
 
-void Sequential::transmitDataFrame(DummyPacket *msg)
+void Sequential::transmitPonFrame(DummyPacket *msg)
 {
 #ifdef DEBUG_SCHEDULER
     ev << getFullPath() << ": Actual transmission of scheduled message" << endl;
@@ -203,7 +203,7 @@ void Sequential::handleMessage(cMessage *msg)
         }
         break;
     case ACTUAL_TX:
-        transmitDataFrame((DummyPacket *)msg);
+        transmitPonFrame((DummyPacket *)msg);
         break;
     case ACTUAL_TX_POLL:
         transmitPollFrame((HybridPonMessage *)msg);

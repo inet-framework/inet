@@ -22,61 +22,52 @@
 // Register modules.
 Define_Module(OltWdmLayer)
 
-void OltWdmLayer::initialize() {
-	//	inBaseId = gateBaseId("demuxg$i");
-	baseId = gateBaseId("demuxg$o");
-	//	gateSize = gateSize("demuxg$i");
+void OltWdmLayer::initialize()
+{
 }
 
-void OltWdmLayer::handleMessage(cMessage *msg) {
+void OltWdmLayer::handleMessage(cMessage *msg)
+{
 #ifdef DEBUG_WDM_LAYER
 	ev << getFullPath() << ": handleMessage called" << endl;
 #endif
 
-	if (msg->getArrivalGateId() == findGate("muxg$i")) {
-		// This is the optical frame from the MUX gate (i.e., from the optical fiber).
+	// get the full name of arrival gate
+	std::string inGate = msg->getArrivalGate()->getFullName();
+
+	if (inGate.compare(0, 6, "muxg$i") == 0)
+	{
+		// optical frame from the MUX gate (i.e., the optical fiber).
 
 		OpticalFrame *opticalFrame = check_and_cast<OpticalFrame *> (msg);
-		int i = opticalFrame->getLambda();
+		int ch = opticalFrame->getLambda();
 
 #ifdef DEBUG_WDM_LAYER
-		ev << getFullPath() << ": optical frame with a channel index = " << i << endl;
+		ev << getFullPath() << ": optical frame with a WDM channel = " << ch << endl;
 #endif
 
-		// Decapsulate a frame and send it to the upper layer
-		cPacket *frame = opticalFrame->decapsulate();
-		send(frame, "demuxg", baseId + i); //ownership problem here or up there?
+		// decapsulate a PON frame and send it to the upper layer
+		HybridPonUsFrame *frame = check_and_cast<HybridPonUsFrame *> (
+				opticalFrame->decapsulate());
+		frame->setChannel(ch);
+		send(frame, "demuxg$o", ch); //ownership problem here or up there?
 		delete opticalFrame;
-	} else {
-		// This is the frame from the DEMUX gate (i.e., from the upper layer).
+	}
+	else
+	{
+		// PON frame from the DEMUX gate (i.e., the upper layer)
 
-		int i = msg->getArrivalGate()->getIndex(); // get a gate index which will become a channel index for an optical frame
-		//		int i = findGate("demuxg$i") - inBaseId; // get channel index
+		HybridPonDsFrame *frame = check_and_cast<HybridPonDsFrame *> (msg);
+		int ch = frame->getChannel();
+
+		// encapsulate a PON frame into an optical frame and send it to the PON I/F
 		OpticalFrame *opticalFrame = new OpticalFrame();
-		opticalFrame->setLambda(i);
-		opticalFrame->encapsulate((cPacket *) msg);
-		send(opticalFrame, "muxg");
-
-		//		for (int i=0; i<=gateSize; i++) {
-		//			if ( msg->getArrivalGateId() == findGate("demuxGate",i) ) {
-		//
-		//#ifdef DEBUG_WDM_LAYER
-		//				ev << "hello: " << msg->getArrivalGateId() << ", " << findGate("demuxGate",i)
-		//				   << ", " << findGate("muxGate") << endl;
-		//				ev << getFullPath() << ": Upstream opticalFrame from onu[" << i << "]" << endl;
-		//#endif
-		//
-		//				if ( opticalFrame->getLambda() == i) {
-		//                    send(opticalFrame, "muxg");
-		//				}
-		//				else {
-		//					ev << getFullPath() << ": error: received frame from ONU[" << i
-		//                       << "] on wavelength " << opticalFrame->getLambda() << endl;
-		//                    exit(1);
-		//				}
-		//			}
-	} // end of for loop
+		opticalFrame->setLambda(ch);
+		opticalFrame->encapsulate(frame);
+		send(opticalFrame, "muxg$o", ch);
+	}
 }
 
-void OltWdmLayer::finish() {
+void OltWdmLayer::finish()
+{
 }

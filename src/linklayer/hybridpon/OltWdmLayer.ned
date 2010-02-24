@@ -22,6 +22,6 @@ simple OltWdmLayer
 		@node();
 		@display("i=abstract/opticalswitch_s");
     gates:
-        inout demuxg[];	// I/F for WDM-demultiplexed optical streams
-        inout muxg;		// I/F for WDM-multiplexed optical streams
+        inout demuxg[];	// I/F for WDM-demultiplexed (electrical or optical) streams
+        inout muxg[];	// I/F for WDM-multiplexed optical streams
 }

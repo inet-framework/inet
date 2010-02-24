@@ -40,34 +40,69 @@ packet HybridPonMessage
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
 //  - crc: represented by cMessage::hasBitError()
 //
-packet HybridPonFrame extends cPacket
+packet HybridPonDsFrame extends cPacket
 {
-//    int lambda;			// wavelength channel
-    
     // 8-Bit "Flags" field
     //======================================
     // Bit	Field			Values
     //======================================
     // 0-3	Frame Type		0 - Normal data
-    //						1 - Grant
-    //						2-15 - Unused
+    //						1 - GRANT
+    //						2 - REGISTER_REQ
+    //						3 - REGISTER_ACK (?)
+    //						4-15 - Unused
     short frameType;
     // 4	Force Report	0 - No action required
     //						1 - ONU should report in the corresponding upstream frame
     // 5-7	Unused	
-    
-    // 16-Bit "Grant"
-    int grant;
-    
-    // 16-Bit "Report"
-    int request;
-    
-    // Encapsulated frames
+
+    // The following are not actual fields of a frame; they rather provide
+    // parameters of "service primitives" in service specifications related
+    // with MAC and PHY layers.
+ 
+    //    int lambda;			// wavelength channel
+    int channel;	// wavelength channel (serves as ONU ID like LLID in EPON)
+};
+
+packet HybridPonDsDataFrame extends HybridPonDsFrame
+{
+	// Encapsulated frames
     cPacketQueue encapsulatedFrames;
 };
 
+packet HybridPonDsGrantFrame extends HybridPonDsFrame
+{
+    // 16-Bit "Grant"
+    int grant;
+};
 
-packet DummyPacket extends HybridPonFrame
+packet HybridPonDsControlFrame extends HybridPonDsGrantFrame
+{
+    // Add fields
+}; 
+
+packet HybridPonUsFrame extends cPacket
+{   
+    // 16-Bit "Report"
+    int report;
+    
+   	// Encapsulated frames
+    cPacketQueue encapsulatedFrames;
+    
+    // The following are not actual fields of a frame; they rather provide
+    // parameters of "service primitives" in service specifications related
+    // with MAC and PHY layers.
+ 
+    //    int lambda;			// wavelength channel
+    int channel;	// wavelength channel (serves as ONU ID like LLID in EPON)    
+};
+
+packet HybridPonUsControlFrame extends cPacket
+{
+    // Add fields
+};
+
+packet DummyPacket extends HybridPonDsFrame
 {
     int idx;
 };

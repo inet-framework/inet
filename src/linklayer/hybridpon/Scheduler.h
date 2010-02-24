@@ -1,7 +1,7 @@
 ///
 /// @file   Scheduler.h
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Tue Jun 30 12:19:39 2009
+/// @date   Jun/30/2009
 ///
 /// @brief  Declares 'Scheduler' and its derived classes for hybrid
 ///			TDM/WDM-PON OLT.
@@ -24,13 +24,18 @@
 
 #include <omnetpp.h>
 #include "HybridPon.h"
-#include "HybridPonFrame_m.h"
+//#include "HybridPonFrame_m.h"
 //#include "MACAddress.h"
 //#include "Ethernet.h"
-#include "EtherFrame_m.h"
+//#include "EtherFrame_m.h"
 //#include "Monitor.h"
 
 
+///
+/// @class Scheduler
+/// @brief Implements Scheduler module in a hybrid TDM/WDM-PON OLT.
+/// @ingroup hybridpon
+///
 class Scheduler: public cSimpleModule {
 protected:
 	// NED parameters (as defined in NED files)
@@ -69,7 +74,7 @@ protected:
 	{
 		return scheduleAt(t, msg);
 	}
-	virtual void handleGrant(int lambda, HybridPonFrame *grant) = 0; // pure virtual function
+	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant) = 0; // pure virtual function
 	virtual void initializeSpecific(void) = 0; // "
 	virtual void finishSpecific(void) = 0; // "
 
@@ -80,12 +85,12 @@ protected:
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
 	void transmitPollFrame(HybridPonMessage *msg);
-	virtual void receiveHybridPonFrame(HybridPonFrame *msg);
-	//	virtual void receiveIpPacket(IpPacket *pkt) = 0; // pure virtual function
+	virtual void receiveHybridPonFrame(HybridPonUsFrame *msg);
+//	virtual void receiveIpPacket(IpPacket *pkt) = 0; // pure virtual function
 	virtual void receiveEthernetFrame(EtherFrame *frame) = 0; // pure virtual function
 
 	// Scheduling
-	virtual simtime_t seqSchedule(int onu, HybridPonFrame *ponFrameToOnu);
+	virtual simtime_t seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu);
 
 	// OMNeT++
 	void initialize(void);
@@ -108,14 +113,14 @@ protected:
 
 protected:
 	// Misc.
-	virtual void handleGrant(int lambda, HybridPonFrame *grant);
+	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant);
 	virtual void initializeSpecific(void);
 	virtual void finishSpecific(void);
 
 	// Event handling
-	//	virtual void receiveIpPacket(IpPacket *pkt);
+//	virtual void receiveIpPacket(IpPacket *pkt);
 	virtual void receiveEthernetFrame(EtherFrame *frame);
-	void transmitDataFrame(DummyPacket *msg);
+	void transmitPonFrame(DummyPacket *msg);
 
 	// OMNeT++
 	virtual void handleMessage(cMessage *msg);
@@ -155,7 +160,7 @@ protected:
 	IntVector grantCtr; // vector of queued grant counters
 	DoubleVector vRate; // vector of estimated ONU incoming rate
 	IntVector vGrant; // vector of previous grants
-	IntVector vRequest; // vector of previous requests
+	IntVector vReport; // vector of previous reports
 	TimeVector vRxTime; // vector of previous PON frame RX times
 
 	// For estimating OLT incoming (downstream) rate [0...numOnus-1]
@@ -164,23 +169,23 @@ protected:
 
 protected:
 	// Misc.
-	virtual int assignGrants(int ch, int usRequest);
+	virtual int assignGrants(int ch, int usReport);
 	void debugOnuPollListStatus(void);
 	cMessage *cancelOnuPoll(HybridPonMessage *msg); // wrapper function for cancelEvent()
 	virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg);
 	inline virtual void rescheduleOnuPolls(void) {
 	}
 	; // to make it optimized away by the compiler
-	virtual void handleGrant(int lambda, HybridPonFrame *grant);
+	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant);
 	virtual void initializeSpecific(void);
 	virtual void finishSpecific(void);
 
 	// Event handling
 	virtual void sendOnuPoll(HybridPonMessage *msg);
-	//	virtual void receiveIpPacket(IpPacket *pkt);
+//	virtual void receiveIpPacket(IpPacket *pkt);
 	virtual void receiveEthernetFrame(EtherFrame *frame);
-	virtual void receiveHybridPonFrame(HybridPonFrame *frame);
-	virtual void transmitDataFrame(DummyPacket *msg);
+	virtual void receiveHybridPonFrame(HybridPonUsFrame *frame);
+	virtual void transmitPonFrame(DummyPacket *msg);
 
 #ifdef TRACE_TXRX
 	void releaseTx(DummyPacket *msg);
@@ -195,7 +200,7 @@ protected:
 	simtime_t getTxTime(const int ch, const bool isGrant, int &txIdx,
 			int &rxIdx);
 	void scheduleFrame(const simtime_t txTime, const int ch, const int txIdx,
-			const int rxIdx, HybridPonFrame *ponFrameToOnu);
+			const int rxIdx, HybridPonDsFrame *ponFrameToOnu);
 
 	// OMNeT++
 	virtual void handleMessage(cMessage *msg);
@@ -225,7 +230,7 @@ protected:
 //	//--------------------------------------------------------------------------
 //
 //	// Misc.
-//	virtual int		assignGrants(int ch, int usRequest);
+//	virtual int		assignGrants(int ch, int usReport);
 //};
 
 

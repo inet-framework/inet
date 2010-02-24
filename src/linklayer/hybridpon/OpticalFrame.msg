@@ -1,7 +1,7 @@
 ///
 /// @file   OpticalFrame.msg
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Tue Jun 30 17:46:46 2009
+/// @date   Jun/30/2009
 /// 
 /// @brief  Defines 'OpticalFrame' message object.
 ///
@@ -16,4 +16,5 @@
 packet OpticalFrame
 {
     int lambda;         // optical wavelength on which the frame is sent
+//    We can add physical layer parameters later (e.g., optical transmitted power).
 }

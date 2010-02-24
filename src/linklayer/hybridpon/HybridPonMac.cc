@@ -13,194 +13,203 @@
 ///
 
 
-// #define DEBUG_SLOT_MGR
+// For debugging
+// #define DEBUG_HYBRID_PON_MAC
 
 
 #include "HybridPonMac.h"
 
-
 // Register modules.
-Define_Module(HybridPonMac);
-
+Define_Module(HybridPonMac)
 
 ///
-/// Handle a user frame from UNIs. Put the frame into a FIFO, if there
-/// is enough space. Otherwise, drop it.
-/// @param[in] frame a cPacket pointer
+/// Handle an Ethernet frame from UNIs.
+/// Put the Ethernet frame into a FIFO, if there is enough space.
+/// Otherwise, drop it.
 ///
-void HybridPonMac::handleFrameFromUni(cPacket *frame)
+/// @param[in] frame a EtherFrame pointer
+///
+void HybridPonMac::handleEthernetFrameFromUni(EtherFrame *frame)
 {
-#ifdef DEBUG_HYBRIDPONMAC
-    ev << getFullPath() << ": A frame from UNI received" << endl;
+#ifdef DEBUG_HYBRID_PON_MAC
+	ev << getFullPath() << ": A frame from UNI received" << endl;
 #endif
 
-//     if ( busyQueue + frame->getBitLength() + ETH_OVERHEAD_SIZE <= queueSize) {
-//         EthFrame *ethFrame = new EthFrame();
-//         ethFrame->setBitLength(ETH_OVERHEAD_SIZE);
-//         ethFrame->encapsulate(pkt);
-//         busyQueue += ethFrame->getBitLength();
-//         queue.insert( ethFrame );
+	if (busyQueue + frame->getBitLength() <= queueSize)
+	{
+		busyQueue += frame->getBitLength();
+		queue.insert(frame);
 
-#ifdef DEBUG_HYBRIDPONMAC
-        ev << getFullPath() << ": busyQueue = " << busyQueue << endl;
+#ifdef DEBUG_HYBRID_PON_MAC
+		ev << getFullPath() << ": busyQueue = " << busyQueue << endl;
 #endif
-//     }
-//     else {
-//         monitor->recordLossStats(frame->getSrcAddress(), frame->getDstnAddress(), frame->getBitLength() );
-//         delete frame;
 
-#ifdef DEBUG_HYBRIDPONMAC
-        ev << getFullPath() << ": A frame from UNI dropped!" << endl;
+	}
+	else
+	{
+		//	         monitor->recordLossStats(frame->getSrcAddress(), frame->getDstnAddress(), frame->getBitLength() );
+		delete frame;
+
+#ifdef DEBUG_HYBRID_PON_MAC
+		ev << getFullPath() << ": A frame from UNI dropped!" << endl;
 #endif
-//    }
+	}
 }
 
-
 ///
-/// Handle a PON frame from PON. Extract user frames from it and send
-/// them to UNIs.
+/// Handle a data PON frame from the PON I/F.
+/// Extract Ethernet frames from it and send them to the upper layer (i.e., Ethernet switch).
 ///
-/// @param[in] frame a HybridPonFrame pointer
-/// @todo Implement local switching for multiple UNIs.
+/// @param[in] frame a HybridPonDsDataFrame pointer
 ///
-void HybridPonMac::handleDataFromPon(HybridPonFrame *frame)
+void HybridPonMac::handleDataFromPon(HybridPonDsDataFrame *frame)
 {
-#ifdef DEBUG_HYBRIDPONMAC
-    ev << getFullPath() << ": PON frame received with downstream data" << endl;
+#ifdef DEBUG_HYBRID_PON_MAC
+	ev << getFullPath() << ": data PON frame received" << endl;
 #endif
 
-    cQueue &frameQueue = frame->getEncapsulatedFrames();
-    while(!frameQueue.empty()) {
-        cPacket *frame = (cPacket *)frameQueue.pop();
- //       IpPacket *pkt = (IpPacket *)ethFrame->decapsulate();
-        send(frame, "toUni", 0);  /**< @todo Support multiple UNIs with local switching. */
-        delete (cPacket *) frame;
-    }
-    delete frame;
+	cQueue &frameQueue = frame->getEncapsulatedFrames();
+	while (!frameQueue.empty())
+	{
+		EtherFrame *etherFrame =
+				check_and_cast<EtherFrame *> (frameQueue.pop());
+		send(etherFrame, "ethg$o");
+	}
+	delete frame;
 }
 
-
 ///
-/// Handle a PON frame from PON including a grant for ONU upstream
-/// data. Creates a new PON frame, encapsulate user frames from the
-/// FIFO queue in it, and send it to OLT.
+/// Handle a grant PON frame from the PON I/F.
+/// Creates a new PON frame, encapsulate Ethernet frames from the FIFO queue in it,
+/// and send it back to the PON I/F.
 ///
-/// @param[in] frame a HybridPonFrame pointer
+/// @param[in] frame a HybridPonDsGrantFrame pointer
 ///
-void HybridPonMac::handleGrantFromPon(HybridPonFrame *ponFrameDs)
+void HybridPonMac::handleGrantFromPon(HybridPonDsGrantFrame *ponFrameDs)
 {
-#ifdef DEBUG_HYBRIDPONMAC
-    ev << getFullPath() << ": PON frame with grant received =" << PonFrameDs->getGrant() << endl;
+#ifdef DEBUG_HYBRID_PON_MAC
+	ev << getFullPath() << ": grant PON frame received =" << PonFrameDs->getGrant() << endl;
 #endif
 
-    HybridPonFrame *ponFrameUs = new HybridPonFrame("", HYBRID_PON_FRAME);
-    ponFrameUs->setLambda(lambda);
-    cPacketQueue &frameQueue = ponFrameUs->getEncapsulatedFrames();
-    int encapsulatedFramesSize = 0;
+	HybridPonUsFrame *ponFrameUs = new HybridPonUsFrame("", HYBRID_PON_FRAME);
+	cPacketQueue &frameQueue = ponFrameUs->getEncapsulatedFrames();
+	int encapsulatedFramesSize = 0;
 
-    // First, check the grant size for upstream data to determine
-    // if it's for polling (request) only or polling and upstream data.
+	// First, check the grant size for upstream data to determine
+	// whether it's for report only (polling) or both report and upstream data.
 	int grant = ponFrameDs->getGrant();
-    if (grant > 0) {
-        // It's for both polling (request) and upstream data.
+	if (grant > 0)
+	{
+		// It's for both report and upstream data.
 
-        if (queue.empty() != true) {
-            cPacket *frame = (cPacket *)queue.front();
-            while ( grant >= (frame->getBitLength() + encapsulatedFramesSize) ) {
-                // The length of the 1st frame in the FIFO queue is less than or
-                // equal to the remaining data grant.
+		if (queue.empty() != true)
+		{
+			EtherFrame *frame = check_and_cast<EtherFrame *>(queue.front());
+			while (grant >= (frame->getBitLength() + encapsulatedFramesSize))
+			{
+				// The length of the 1st frame in the FIFO queue is less than or
+				// equal to the remaining data grant.
 
-                frame = (cPacket *)queue.pop();
-                encapsulatedFramesSize += frame->getBitLength();
-                busyQueue -= frame->getBitLength();
-                frameQueue.insert(frame);
+				frame = check_and_cast<EtherFrame *>(queue.pop());
+				encapsulatedFramesSize += frame->getBitLength();
+				busyQueue -= frame->getBitLength();
+				frameQueue.insert(frame);
 
-                if (queue.empty() == true) {
-                    break;
-                }
-                else {
-                    frame = (cPacket *)queue.front();
-                }
-            }   // end of while loop
-        }
-    }
+				if (queue.empty() == true)
+				{
+					break;
+				}
+				else
+				{
+					frame = check_and_cast<EtherFrame *>(queue.front());
+				}
+			}	// end of while()
+		}	// end of if()
+	}	// end of if()
 
-    // Set request and other fields of the new upstream PON frame.
-    ponFrameUs->setRequest(busyQueue);
-    ponFrameUs->setLambda(lambda);
-    ponFrameUs->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + REQUEST_SIZE + encapsulatedFramesSize);
+	// set report and other fields of the new upstream PON frame.
+	ponFrameUs->setReport(busyQueue);
+	ponFrameUs->setChannel(ponFrameDs->getChannel());
+	ponFrameUs->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + REPORT_SIZE
+			+ encapsulatedFramesSize);
 
-#ifdef DEBUG_HYBRIDPONMAC
-    ev << getFullPath() << ": PON frame sent upstream with length = " <<
-        ponFrameUs->getBitLength() << " and request = " << ponFrameUs->getRequest() << endl;
+#ifdef DEBUG_HYBRID_PON_MAC
+	ev << getFullPath() << ": PON frame sent upstream with length = " <<
+	ponFrameUs->getBitLength() << " and report = " << ponFrameUs->getReport() << endl;
 #endif
 
-    // Here we don't include transmission delay because in PON,
-    // the ONU only modulates incoming CW burst, not receives it as usual.
-    send(ponFrameUs, "toOlt");
+	// the upstream PON -- made out of the optical CW burst from the OLT -- is transmitted
+	// at the start of the optical CW burst (i.e., grant field) in the corresponding downstream
+	// PON frame.
+	sendDelayed(ponFrameUs, simtime_t(DS_GRANT_OVERHEAD_SIZE/BITRATE), "wdmg$o");
 
-    delete ponFrameDs;
+	delete ponFrameDs;
 }
-
 
 ///
 /// Initialize member variables and allocate memory for them, if needed.
 ///
 void HybridPonMac::initialize()
 {
-	lambda = (int) getParentModule()->par("lambda");
+//	channel = (int) getParentModule()->par("lambda");
 	queueSize = par("queueSize");
-    busyQueue = 0;
+	busyQueue = 0;
 
-// 	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
-// #ifdef DEBUG_HYBRIDPONMAC
-// 	ev << getFullPath() << ": monitor pointing to module with id = " << monitor->getId() << endl;
-// #endif
+	// 	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
+	// #ifdef DEBUG_HYBRID_PON_MAC
+	// 	ev << getFullPath() << ": monitor pointing to module with id = " << monitor->getId() << endl;
+	// #endif
 }
-
 
 ///
 /// Handle messages by calling appropriate functions for their
 /// processing. Start simulation and run until it will be terminated by
 /// kernel.
 ///
-/// @param[in] msg
+/// @param[in] msg a cMessage pointer
 ///
 void HybridPonMac::handleMessage(cMessage *msg)
 {
-#ifdef TRACE_MSG
-	ev.printf();
-	PrintMsg(*msg);
-#endif
+	//#ifdef TRACE_MSG
+	//	ev.printf();
+	//	PrintMsg(*msg);
+	//#endif
 
-	if (msg->getArrivalGateId() == findGate("ponGate$i")) {
-		// It is a PON frame from the OLT.
+	if (msg->getArrivalGateId() == findGate("wdmg$i"))
+	{
+		// PON frame from the WDM layer
 
 		// Check if the message type is correct.
-		assert ( msg->getKind() == HYBRID_PON_FRAME );
+		ASSERT( msg->getKind() == HYBRID_PON_FRAME );
+
+		int frameType =
+				(check_and_cast<HybridPonDsFrame *> (msg))->getFrameType();
 
 		//HybridPonFrame *ponFrameFromOlt = (HybridPonFrame *)msg;
-		if ( ((HybridPonFrame *)msg)->getFrameType() == 0 ) {
-			// It's a PON frame with downstream data.
-			handleDataFromPon((HybridPonFrame *)msg);
+		if (frameType == 0)
+		{
+			// downstream data
+			handleDataFromPon(check_and_cast<HybridPonDsDataFrame *> (msg));
 		}
-		else {
-			// It's a PON frame with grant.
-			handleGrantFromPon((HybridPonFrame *)msg);
+		else if (frameType == 1)
+		{
+			// grant
+			handleGrantFromPon(check_and_cast<HybridPonDsGrantFrame *> (msg));
 		}
 	}
-	else if (1) {	// TODO: Insert a condition to check the input gate of the message.
-		// It is a frame from the UNIs.
+	else if (msg->getArrivalGateId() == findGate("ethg$i"))
+	{
+		// Ethernet frame from the upper layer (i.e., Ethernet switch)
 
-		handleFrameFromUni((cPacket *)msg);
+		handleEthernetFrameFromUni(check_and_cast<EtherFrame *> (msg));
 	}
-	else {
-		ev << getFullPath() << ": ERROR: unexpected message kind " << msg->getKind() << "received." << endl;
-		delete (cMessage *) msg;
-		exit(1);
+	else
+	{
+		// unknown type of message
+		error("%s: ERROR: unexpected message kind %d received",
+				getFullPath().c_str(), msg->getKind());
 	}
 }
-
 
 ///
 /// Do post-processing.

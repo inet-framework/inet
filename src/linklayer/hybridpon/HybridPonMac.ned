@@ -14,11 +14,12 @@ package inet.linklayer.hybridpon;
 simple HybridPonMac
 {
     parameters:
+        @display("i=block/subqueue;p=92,124");
         int queueSize;        // size of FIFO queue
     gates:
-//        output toMonitor;				// to monitor
-		inout	pong;	// PON I/F (i.e., toward AWG)
-		inout	ethg;	// I/F Ethernet switch
-//		input	fromUni[numUnisPerOnu];	// from users (through UNIs)
-//		output	toUni[numUnisPerOnu];	// to users (through UNIs)
+        //        output toMonitor;				// to monitor
+        // I/F with Ethernet switch
+        inout ethg;	// I/F with Ethernet switch
+        // I/F with WDM Optical Layer
+        inout wdmg;	// I/F with WDM Optical Layer
 }

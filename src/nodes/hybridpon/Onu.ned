@@ -10,35 +10,41 @@
 
 package inet.nodes.hybridpon;
 
-import inet.linklayer.hybridpon.HybridPonMac;
 import inet.nodes.ethernet.EtherSwitch;
 //import inet.linklayer.ethernet.EtherMAC;
 //import inet.linklayer.ethernet.EthernetInterface;
-
+import inet.linklayer.hybridpon.HybridPonMac;
+import inet.linklayer.hybridpon.OnuWdmLayer;
 
 module Onu
 {
     parameters:
         @node();
-        @display("bgb=188,228;bgp=2,2");
-        int lambda; // wavelength assigned to this ONU
+        @display("i=device/smallrouter;bgb=188,228;bgp=2,2");
+        int lambda; // WDM channel assigned to this ONU
         int numUsersPerOnu; // how many users in this ONU
         int queueSize @unit(bit); // size of FIFO queue in the Mac [bit]
     gates:
+        inout ethg[numUsersPerOnu];	// User Network I/F
+        inout pong;					// PON I/F (i.e., toward AWG)
         //        output fromMacToMonitor;
-        inout pong;	/// PON I/F (i.e., toward AWG)
-        inout ethg[numUsersPerOnu];
     submodules:
-        mac: HybridPonMac {
-            parameters:
-                //                @display("i=block/subqueue;p=114,166");
-                @display("i=block/subqueue;p=92,164");
-                queueSize = queueSize;
-        }
         switch: EtherSwitch {
             parameters:
                 @display("p=92,59");
         }
+        mac: HybridPonMac {
+            parameters:
+                @display("p=92,124");
+                queueSize = queueSize;
+        }
+        wdm: OnuWdmLayer {
+            parameters:
+                @display("p=92,185");
+        }
+    //        etherSwitch: EtherSwitch {
+    //            @display("p=92,60");
+    //        }
     //        eth[sizeof(ethGate)]: EtherMAC {
     //            parameters:
     //                promiscuous = true;
@@ -51,9 +57,10 @@ module Onu
     //        }
     connections:
         //        mac.toMonitor --> fromMacToMonitor;
-        pong <--> mac.pong;
         for i=0..numUsersPerOnu-1 {
-            ethg[i] <--> switch.ethg[i];
+            ethg++ <--> switch.ethg++;
         }
-        mac.ethg <--> switch.ethg[numUserPerOnu];
+        switch.ethg[numUserPerOnu] <--> mac.ethg;
+        mac.wdmg <--> wdm.demuxg;
+        wdm.muxg <--> pong;
 }

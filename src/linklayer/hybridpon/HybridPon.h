@@ -24,6 +24,11 @@
 #include <omnetpp.h>
 #include "HybridPonFrame_m.h"
 #include "OpticalFrame_m.h"
+#include "MACAddress.h"
+#include "EtherFrame_m.h"
+#include "Ethernet.h"
+
+
 using namespace std;
 
 
@@ -43,16 +48,16 @@ const double    INF                 = 10.0e+10;
 const int		PREAMBLE_SIZE		= 8;
 const int		DELIMITER_SIZE		= 16;
 //const int		ID_SIZE				= 1;
-const int		ID_SIZE				= 8;
+const int		FLAG_SIZE				= 8;
 const int		GRANT_SIZE			= 16;
-const int		REQUEST_SIZE		= 16;
+const int		REPORT_SIZE		= 16;
 const int       POLL_FRAME_SIZE     = 2*(PREAMBLE_SIZE + DELIMITER_SIZE)
-    + ID_SIZE + GRANT_SIZE + REQUEST_SIZE;
-const int       DS_DATA_OVERHEAD_SIZE    = PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE;
+    + FLAG_SIZE + GRANT_SIZE + REPORT_SIZE;
+const int       DS_DATA_OVERHEAD_SIZE    = PREAMBLE_SIZE + DELIMITER_SIZE + FLAG_SIZE;
     // Every fields to be added to a DS Ethernet frame
-const int       DS_GRANT_OVERHEAD_SIZE	 = PREAMBLE_SIZE + DELIMITER_SIZE + ID_SIZE + GRANT_SIZE;
+const int       DS_GRANT_OVERHEAD_SIZE	 = PREAMBLE_SIZE + DELIMITER_SIZE + FLAG_SIZE + GRANT_SIZE;
     // Every fields to be added to a grant (CW)
-const int       US_DATA_OVERHEAD_SIZE    = PREAMBLE_SIZE + DELIMITER_SIZE + REQUEST_SIZE;
+const int       US_DATA_OVERHEAD_SIZE    = PREAMBLE_SIZE + DELIMITER_SIZE + REPORT_SIZE;
     // Every fields to be added to US Ethernet frames
 
 // - For Ethernet frame
@@ -75,7 +80,7 @@ enum MessageType {
 /* 	ETH_FRAME           = 200, */
 	HYBRID_PON_FRAME	= 300,
 
-	// Messages to interact with Fifos at ONUs and OLTs
+	// Messages to interact with FIFOs at ONUs and OLTs
 	ETH_FRAME_REQUEST   = 500,
 	STATUS_REQUEST      = 501,
 	STATUS_REPLY        = 502,

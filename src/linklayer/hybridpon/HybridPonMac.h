@@ -32,19 +32,19 @@ class HybridPonMac : public cSimpleModule
 {
 protected:
 	// NED parameters
-	int lambda;                 ///< wavelength channel number assigned to an ONU
-    int queueSize;              ///< size of FIFO queue [bits]
+//	int channel;	///< wavelength channel number assigned to an ONU
+    int queueSize;	///< size of FIFO queue [bits]
 
 	// status variables
-    int busyQueue;              ///< current queue length [bits]
-    cQueue queue;               ///< FIFO queue holding frames from UNIs
+    int busyQueue;	///< current queue length [bits]
+    cQueue queue;	///< FIFO queue holding frames from UNIs
 /* 	Monitor *monitor;   // 'Monitor' node */
 
 protected:
 	// event handling functions
-    void handleFrameFromUni(cPacket *frame);
-    void handleDataFromPon(HybridPonFrame *frame);
-    void handleGrantFromPon(HybridPonFrame *frame);
+    void handleEthernetFrameFromUni(EtherFrame *frame);
+    void handleDataFromPon(HybridPonDsDataFrame *frame);
+    void handleGrantFromPon(HybridPonDsGrantFrame *frame);
 
     // functions from OMNeT++
     virtual void initialize(void);

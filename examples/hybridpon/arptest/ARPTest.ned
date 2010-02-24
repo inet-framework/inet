@@ -32,31 +32,42 @@ network ARPTest
             delay = 1us;
             datarate = 512Mbps;
         }
+        channel fiber_10g extends DatarateChannel
+        {
+            delay = 1us;
+            datarate = 10Gbps;
+        }
     submodules:
         client: StandardHost {
-            @display("p=42,95;i=device/laptop_l");
+            parameters:
+                @display("p=42,95;i=device/laptop");
         }
         host1: StandardHost {
-            @display("p=42,172;i=device/pc");
+            parameters:
+                @display("p=42,172;i=device/pc");
         }
         host2: StandardHost {
-            @display("p=42,257;i=device/pc");
+            parameters:
+                @display("p=42,257;i=device/pc");
         }
         olt: Olt {
-            @display("i=device/router;p=324,161");
+            parameters:
+                numOnus = 2;
+                @display("p=324,161");
         }
         onu1: Onu {
             parameters:
                 lambda = 0;
-                @display("i=device/pc2;p=171,95");
+                @display("p=171,95");
         }
         onu2: Onu {
             parameters:
                 lambda = 1;
-                @display("i=device/pc2;p=171,218");
+                @display("p=171,218");
         }
         awg: LambdaSplitter {
-            @display("i=abstract/opticalswitch_s;p=256,161");
+            parameters:
+                @display("p=256,161");
         }
         //                switch: EtherSwitch {
         //                    @display("p=202,156");
@@ -65,22 +76,27 @@ network ARPTest
         //            @display("p=510,161");
         //        }
         router: Router {
-            @display("p=410,161");
+            parameters:
+                @display("p=410,161");
         }
         server: StandardHost {
-            @display("p=552,161;i=device/server_l");
+            parameters:
+                @display("p=552,161;i=device/server_l");
         }
         configurator: FlatNetworkConfigurator {
-            @display("p=318,30");
+            parameters:
+                @display("p=318,30");
         }
     connections:
         client.ethg++ <--> onu1.ethg++;
         host1.ethg++ <--> onu2.ethg++;
         host2.ethg++ <--> onu2.ethg++;
-        onu1.pong <--> awg.demuxg++;
-        onu2.pong <--> awg.demuxg++;
-        awg.muxg <--> olt.pong;
-        olt.ethg <--> router.ethg++;
+        onu1.pong <--> fiber_10g <--> awg.demuxg++;
+        onu2.pong <--> fiber_10g <--> awg.demuxg++;
+        for i=0..numOnus-1 {
+        	awg.muxg++ <--> fiber_10g <--> olt.pong++;
+        }
+        olt.ethg++ <--> router.ethg++;
         router.pppg++ <--> fiberline <--> server.pppg++;
 }
 
