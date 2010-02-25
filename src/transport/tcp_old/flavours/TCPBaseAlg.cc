@@ -439,5 +439,11 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
     }
 }
 
+void TCPBaseAlg::restartRexmitTimer()
+{
+    if (rexmitTimer->isScheduled())
+        cancelEvent(rexmitTimer);
+    startRexmitTimer();
+}
 
 

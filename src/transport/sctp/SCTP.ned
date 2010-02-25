@@ -17,9 +17,9 @@
 
 package inet.transport.sctp;
 
-simple SCTP //
+simple SCTP
 {
-        parameters:
+    parameters:
         int numGapReports = default(3);
         double rtoMin @unit(s) = default(1s);
         double rtoMax @unit(s) = default(60s);
@@ -42,14 +42,14 @@ simple SCTP //
         bool fragment = default(false);
         int sendQueueLimit = default(0);
         int ccModule = default(0); // RFC4960=0
-	int ssModule = default(0); //ROUND_ROBIN=0
+        int ssModule = default(0); //ROUND_ROBIN=0
         int arwnd = default(65535);
-	int swsLimit = default(3000); //Limit for SWS
+        int swsLimit = default(3000); //Limit for SWS
     gates:
-        input from_appl[];
-        input from_ip;
-        input from_ipv6;
-        output to_appl[];
-        output to_ip;
-        output to_ipv6;
+        input from_appl[] @labels(SCTPCommand/down);
+        input from_ip @labels(SCTPPacket,IPControlInfo/up);
+        input from_ipv6 @labels(SCTPPacket,IPv6ControlInfo/up);
+        output to_appl[] @labels(SCTPCommand/up);
+        output to_ip @labels(SCTPPacket,IPControlInfo/down);
+        output to_ipv6 @labels(SCTPPacket,IPv6ControlInfo/down);
 }

@@ -20,17 +20,19 @@ import inet.networklayer.extras.Dummy;
 // Failed router. Discards all incoming traffic and generates nothing. Its
 // interface (gates, parameters) is fully compatible with the RSVP_LSR router
 // and node failures may thus be simulated by replacing the RSVP_LSR
-// with \FAILED_LSR.
+// with \RSVP_FAILED.
 //
 module RSVP_FAILED
 {
     parameters:
+        @labels(node);
+        @display("i=abstract/router;i2=status/noentry");
         int namid;
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

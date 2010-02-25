@@ -29,26 +29,29 @@
 Define_Module(RTPPayloadReceiver);
 
 
-RTPPayloadReceiver::~RTPPayloadReceiver() {
+RTPPayloadReceiver::~RTPPayloadReceiver()
+{
     closeOutputFile();
     delete _packetArrival;
-};
+}
 
 
-void RTPPayloadReceiver::initialize() {
+void RTPPayloadReceiver::initialize()
+{
     const char *fileName = par("outputFileName");
     openOutputFile(fileName);
     char logName[100];
     sprintf (logName, "outputLogLoss%d.log", getId());
     _outputLogLoss.open(logName);
     _packetArrival = new cOutVector("packet arrival");
-};
+}
 
 
-void RTPPayloadReceiver::handleMessage(cMessage *msg) {
-    RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
+void RTPPayloadReceiver::handleMessage(cMessage *msg)
+{
+    RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
     if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
-        RTPPacket *packet = (RTPPacket *)(rinp->decapsulate());
+        RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->decapsulate());
         processPacket(packet);
         delete rinp;
     }
@@ -56,20 +59,23 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg) {
         error("RTPInnerPacket of wrong type received");
         delete rinp;
     }
-};
+}
 
 
-void RTPPayloadReceiver::processPacket(RTPPacket *packet) {
+void RTPPayloadReceiver::processPacket(RTPPacket *packet)
+{
     _packetArrival->record((double)(packet->getTimeStamp()));
-};
+}
 
 
-void RTPPayloadReceiver::openOutputFile(const char *fileName) {
+void RTPPayloadReceiver::openOutputFile(const char *fileName)
+{
     _outputFileStream.open(fileName);
-};
+}
 
 
-void RTPPayloadReceiver::closeOutputFile() {
+void RTPPayloadReceiver::closeOutputFile()
+{
     _outputFileStream.close();
     _outputLogLoss.close();
-};
+}

@@ -148,8 +148,8 @@ simple EtherMAC
         int mtu = default(1500);
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn;    // to EtherLLC or MACRelayUnitPP
-        output upperLayerOut;  // to EtherLLC or MACRelayUnitPP
-        inout phys @labels (ether); // to physical layer or the network
+        input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
+        output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
+        inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

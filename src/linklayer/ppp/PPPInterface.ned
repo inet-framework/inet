@@ -36,7 +36,7 @@ module PPPInterface
     gates:
         input netwIn;
         output netwOut;
-        inout phys;
+        inout phys @labels(PPPFrame);
     submodules:
         queue: <queueType> like OutputQueue {
             parameters:

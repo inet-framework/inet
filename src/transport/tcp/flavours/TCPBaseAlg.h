@@ -70,7 +70,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
     /// RFC 3782 variables
     //@{
     uint32 recover;            ///< recover (RFC 3782)
-	bool firstPartialACK;      ///< first partial acknowledgement (RFC 3782)
+    bool firstPartialACK;      ///< first partial acknowledgement (RFC 3782)
     //@}
 };
 
@@ -185,9 +185,6 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 
-    /**
-     * Restart REXMIT timer.
-     */
     virtual void restartRexmitTimer();
 };
 

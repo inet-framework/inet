@@ -33,7 +33,7 @@ void TCPTahoe::recalculateSlowStartThreshold()
     // set ssthresh to flight size/2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
     uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
-	// uint32 flight_size = state->snd_max - state->snd_una;
+    // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size/2, 2*state->snd_mss);
     if (ssthreshVector) ssthreshVector->record(state->ssthresh);
 }
@@ -136,8 +136,8 @@ void TCPTahoe::receivedDuplicateAck()
         // cancelEvent(rexmitTimer);
         // startRexmitTimer();
         // state->rtseq_sendtime = 0;
-		// FIXED 2009-10-27 by T.R. Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-		// Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+        // FIXED 2009-10-27 by T.R. Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
 }
 

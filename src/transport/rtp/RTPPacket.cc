@@ -24,7 +24,8 @@
 Register_Class(RTPPacket);
 
 
-RTPPacket::RTPPacket(const char *name) : cPacket(name) {
+RTPPacket::RTPPacket(const char *name) : cPacket(name)
+{
     _version = 2;
     _padding = 0;
     _extension = 0;
@@ -37,27 +38,31 @@ RTPPacket::RTPPacket(const char *name) : cPacket(name) {
 
     // a standard rtp packet without csrcs and data has a length of 12 bytes
     setByteLength(getFixedHeaderLength());
-};
+}
 
 
-RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket() {
+RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket()
+{
     setName(packet.getName());
     operator=(packet);
-};
+}
 
 
-RTPPacket::~RTPPacket() {
+RTPPacket::~RTPPacket()
+{
     // when csrcList is implemented this
     // should free the memory used for it
-};
+}
 
 
-RTPPacket *RTPPacket::dup() const {
+RTPPacket *RTPPacket::dup() const
+{
     return new RTPPacket(*this);
-};
+}
 
 
-RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
+RTPPacket& RTPPacket::operator=(const RTPPacket& packet)
+{
     cPacket::operator=(packet);
     _version = packet._version;
     _padding = packet._padding;
@@ -69,88 +74,103 @@ RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
     _timeStamp = packet._timeStamp;
     _ssrc = packet._ssrc;
     return *this;
-};
+}
 
 
-std::string RTPPacket::info() {
+std::string RTPPacket::info()
+{
     std::stringstream out;
     out << "RTPPacket: payloadType=" << _payloadType << " payloadLength=" << getPayloadLength();
     return out.str();
-};
+}
 
 
-void RTPPacket::dump() {
+void RTPPacket::dump()
+{
     ev << "RTPPacket:" << endl;
     ev << "  payloadType = " << _payloadType << endl;
     ev << "  sequenceNumber = " << _sequenceNumber << endl;
     ev << "  timeStamp = " << _timeStamp << endl;
     ev << "  payloadLength = " << getPayloadLength() << endl;
-};
+}
 
 
-int RTPPacket::getMarker() {
+int RTPPacket::getMarker()
+{
     return _marker;
-};
+}
 
 
-void RTPPacket::setMarker(int marker) {
+void RTPPacket::setMarker(int marker)
+{
     _marker = marker;
-};
+}
 
 
-int RTPPacket::getPayloadType() {
+int RTPPacket::getPayloadType()
+{
     return _payloadType;
-};
+}
 
 
-void RTPPacket::setPayloadType(int payloadType) {
+void RTPPacket::setPayloadType(int payloadType)
+{
     _payloadType = payloadType;
-};
+}
 
 
-uint16 RTPPacket::getSequenceNumber() {
+uint16 RTPPacket::getSequenceNumber()
+{
     return _sequenceNumber;
-};
+}
 
 
-void RTPPacket::setSequenceNumber(uint16 sequenceNumber) {
+void RTPPacket::setSequenceNumber(uint16 sequenceNumber)
+{
     _sequenceNumber = sequenceNumber;
-};
+}
 
 
-uint32 RTPPacket::getTimeStamp() {
+uint32 RTPPacket::getTimeStamp()
+{
     return _timeStamp;
-};
+}
 
 
-void RTPPacket::setTimeStamp(uint32 timeStamp) {
+void RTPPacket::setTimeStamp(uint32 timeStamp)
+{
     _timeStamp = timeStamp;
-};
+}
 
 
-uint32 RTPPacket::getSSRC() {
+uint32 RTPPacket::getSSRC()
+{
     return _ssrc;
-};
+}
 
 
-void RTPPacket::setSSRC(uint32 ssrc) {
+void RTPPacket::setSSRC(uint32 ssrc)
+{
     _ssrc = ssrc;
-};
+}
 
-int RTPPacket::getFixedHeaderLength() {
+int RTPPacket::getFixedHeaderLength()
+{
     return 12;
-};
+}
 
-int RTPPacket::getHeaderLength() {
+int RTPPacket::getHeaderLength()
+{
     // fixed header is 12 bytes long,
     // add 4 bytes for every csrc identifier
     return(getFixedHeaderLength() + 4 * _csrcCount);
-};
+}
 
 
-int RTPPacket::getPayloadLength() {
+int RTPPacket::getPayloadLength()
+{
     return(getByteLength() - getHeaderLength());
-};
+}
 
 
 

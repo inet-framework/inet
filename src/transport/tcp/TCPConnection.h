@@ -121,9 +121,9 @@ enum TCPEventCode
 #define MAX_SYN_REXMIT_COUNT     12     // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 
 #define MAX_SACK_BLOCKS           60    // will only be used with SACK
-#define DUPTHRESH				   3	// used for TCPTahoe, TCPReno and SACK (RFC 3517)
+#define DUPTHRESH                  3    // used for TCPTahoe, TCPReno and SACK (RFC 3517)
 
-#define TCP_MAX_WIN			   65535	// largest value (16 bit) for (unscaled) window size
+#define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
 
 /** @name Comparing sequence numbers */
 //@{
@@ -176,7 +176,7 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 rcv_wnd;      // receive window
     uint32 rcv_up;       // receive urgent pointer;
     uint32 irs;          // initial receive sequence number
-    uint32 rcv_adv;		 // advertised window
+    uint32 rcv_adv;      // advertised window
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TCPAlgorithm)
@@ -209,7 +209,7 @@ class INET_API TCPStateVariables : public cPolymorphic
                                 //   - a persist probe is received
                                 //   - FIN is received
 
-    bool afterRto; 				// set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
+    bool afterRto;              // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
 
     // SACK related variables
     bool sack_support;       // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
@@ -221,10 +221,10 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool snd_sack;           // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack;          // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
     Sack sacks_array[MAX_SACK_BLOCKS]; // MAX_SACK_BLOCKS is set to 60
-    uint32 highRxt;			 // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
-	uint32 pipe;			 // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
-    uint32 recoveryPoint;	 // RFC 3517
-    uint32 sackedBytes;    	 // number of sackedBytes
+    uint32 highRxt;          // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
+    uint32 pipe;             // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
+    uint32 recoveryPoint;    // RFC 3517
+    uint32 sackedBytes;      // number of sackedBytes
     uint32 sackedBytes_old;  // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery;       // indicates if algorithm is in loss recovery phase
 
@@ -340,12 +340,12 @@ class INET_API TCPConnection
     cOutVector *unackedVector;  // number of bytes unacknowledged
 
     cOutVector *dupAcksVector;   // current number of received dupAcks
-    cOutVector *pipeVector;    	 // current sender's estimate of bytes outstanding in the network
+    cOutVector *pipeVector;      // current sender's estimate of bytes outstanding in the network
     cOutVector *sndSacksVector;  // number of sent Sacks
     cOutVector *rcvSacksVector;  // number of received Sacks
     cOutVector *rcvOooSegVector; // number of received out-of-order segments
 
-    cOutVector *sackedBytesVector;		  // current number of received sacked bytes
+    cOutVector *sackedBytesVector;        // current number of received sacked bytes
     cOutVector *tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
     cOutVector *tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
 
@@ -614,7 +614,7 @@ class INET_API TCPConnection
     /**
      * Utility: send one new segment from snd_max if allowed (RFC 3042).
      */
-	virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow);
+    virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow);
 
 };
 

@@ -34,6 +34,8 @@ module TCPSpoofingHost
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=device/pc2;i2=status/excl");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
@@ -42,8 +44,8 @@ module TCPSpoofingHost
         int namid;
         string routingFile = default("");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:

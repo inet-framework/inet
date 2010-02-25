@@ -26,6 +26,7 @@ simple DropTailQueue like OutputQueue
 {
     parameters:
         int frameCapacity = default(100);
+        @display("i=block/queue");
     gates:
         input in;
         output out;

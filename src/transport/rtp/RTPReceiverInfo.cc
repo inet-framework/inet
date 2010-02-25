@@ -51,12 +51,12 @@ RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     //_packetLostOutVector.setName("Packet Lost");
 
     //packetSequenceLostLogFile = NULL;
-};
+}
 
 RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo()
 {
     operator=(receiverInfo);
-};
+}
 
 RTPReceiverInfo::~RTPReceiverInfo()
 {
@@ -88,11 +88,12 @@ RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
     _itemsReceived = receiverInfo._itemsReceived;
 
     return *this;
-};
+}
 
-RTPReceiverInfo *RTPReceiverInfo::dup() const {
+RTPReceiverInfo *RTPReceiverInfo::dup() const
+{
     return new RTPReceiverInfo(*this);
-};
+}
 
 void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arrivalTime)
 {
@@ -135,23 +136,23 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
                 _sequenceNumberCycles += 0x00010000;
                 _highestSequenceNumber = packet->getSequenceNumber();
             }
-        };
+        }
         // calculate interarrival jitter
         if (_clockRate != 0) {
             simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;
-        };
+        }
 
         _lastPacketRTPTimeStamp = packet->getTimeStamp();
         _lastPacketArrivalTime = arrivalTime;
-    };
+    }
 
     //_jitterOutVector.record((uint32)_jitter);
 
     RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
-};
+}
 
 void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
 {
@@ -171,14 +172,14 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
     _itemsReceived++;
 
     delete report;
-};
+}
 
 void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
     RTPParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
     _itemsReceived++;
     _inactiveIntervals = 0;
-};
+}
 
 ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
@@ -195,7 +196,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         uint8 fractionLost = 0;
         if (packetsLostInInterval > 0) {
             fractionLost = (packetsLostInInterval << 8) / packetsExpectedInInterval;
-        };
+        }
 
         receptionReport->setFractionLost(fractionLost);
         receptionReport->setPacketsLostCumulative(packetsLost);
@@ -216,7 +217,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
     }
     else
         return NULL;
-};
+}
 
 void RTPReceiverInfo::nextInterval(simtime_t now)
 {
@@ -227,22 +228,23 @@ void RTPReceiverInfo::nextInterval(simtime_t now)
     _highestSequenceNumberPrior = _highestSequenceNumber + _sequenceNumberCycles;
     _packetsReceivedPrior = _packetsReceived;
     RTPParticipantInfo::nextInterval(now);
-};
+}
 
 bool RTPReceiverInfo::isActive()
 {
     return (_inactiveIntervals < 5);
-};
+}
 
 bool RTPReceiverInfo::isValid()
 {
     return (_itemsReceived >= 5);
-};
+}
 
-bool RTPReceiverInfo::toBeDeleted(simtime_t now) {
+bool RTPReceiverInfo::toBeDeleted(simtime_t now)
+{
     // an rtp system should be removed from the list of known systems
     // when it hasn't been validated and hasn't been active for
     // 5 rtcp intervals or if it has been validated and has been
     // inactive for 30 minutes
     return (!isValid() && !isActive()) || (isValid() && !isActive() && (now - _startOfInactivity > 60.0 * 30.0));
-};
+}

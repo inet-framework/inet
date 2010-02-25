@@ -82,7 +82,7 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 
-	virtual void restartRexmitTimer();
+    virtual void restartRexmitTimer();
 };
 
 #endif

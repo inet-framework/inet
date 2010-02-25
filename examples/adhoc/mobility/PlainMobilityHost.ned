@@ -33,6 +33,7 @@ module PlainMobilityHost
 {
     parameters:
         @node();
+        @labels(node);
         string mobilityType;
         @display("i=device/pocketpc_s");
     gates:

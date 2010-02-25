@@ -28,52 +28,55 @@ import inet.nodes.inet.NetworkLayer;
 
 
 //
-// \External router.
+// External router.
 //
 module ExtRouter
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
+        @display("i=abstract/router;i2=status/connect");
         string routingFile = default("");
         int numExtInterfaces = default(0);
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
                 namid = -1; // auto
-            @display("p=330,60;i=block/sink");
-	}
+                @display("p=330,60;i=block/sink");
+        }
         notificationBoard: NotificationBoard {
             @display("p=60,60;i=block/control");
-	}
+        }
         interfaceTable: InterfaceTable {
             @display("p=150,60;i=block/table");
-	}
+        }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "auto";
                 routingFile = routingFile;
-            @display("p=240,60;i=block/table");
-	}
+                @display("p=240,60;i=block/table");
+        }
         networkLayer: NetworkLayer {
-	           @display("p=184,133;i=block/fork;q=queue");
+            @display("p=184,133;i=block/fork;q=queue");
             gates:
                 //ifIn[sizeof(out)+sizeof(ethOut)+sizeof(extOut)],
                 //ifOut[sizeof(out)+sizeof(ethOut)+sizeof(extOut)];
-	     ifIn[sizeof(pppg)+sizeof(ethg)+1];
-             ifOut[sizeof(pppg)+sizeof(ethg)+1];
-	}
+                ifIn[sizeof(pppg)+sizeof(ethg)+1];
+                ifOut[sizeof(pppg)+sizeof(ethg)+1];
+        }
         ppp[sizeof(pppg)]: PPPInterface {
             @display("p=178,265,row,110;q=l2queue;i=block/ifcard");
-	}
+        }
         eth[sizeof(ethg)]: EthernetInterface {
             @display("p=297,265,row,110;q=l2queue;i=block/ifcard");
-	}
+        }
         ext[numExtInterfaces]: ExtInterface {
             @display("p=50,265,row,110;i=block/ifcard");
-	}
+        }
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
@@ -87,11 +90,11 @@ module ExtRouter
             eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
             eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
         }
-	for i=0..numExtInterfaces-1 {
+        for i=0..numExtInterfaces-1 {
             ext[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             ext[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
-	}
-	//ext.netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
+        }
+    //ext.netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
         //ext.netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)];
 }
 

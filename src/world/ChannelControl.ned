@@ -50,5 +50,6 @@ simple ChannelControl
         double carrierFrequency @unit("Hz") = default(2.4GHz); // carrier frequency of the channel (in Hz)
         int numChannels = default(1); // number of radio channels (frequencies)
         @display("i=misc/sun");
+        @labels(node);
 }
 

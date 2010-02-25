@@ -45,10 +45,11 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 // @see BasicMacLayer, SnrDecider, SnrEval
 //
 // @author Daniel Willkomm
+//
 module SnrNic
 {
     parameters:
-        @display("p=10,10;b=101,180,rect;o=white");
+        @display("i=block/ifcard");
     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers

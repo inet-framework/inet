@@ -45,7 +45,7 @@ simple Ieee80211MgmtAP like Ieee80211Mgmt
     gates:
         input uppergateIn; // from MACRelayUnit; can be left unconnected
         output uppergateOut; // to MACRelayUnit; can be left unconnected
-        input macIn; // from Ieee80211Mac
-        output macOut; // to Ieee80211Mac
+        input macIn @labels(Ieee80211Frame); // from Ieee80211Mac
+        output macOut @labels(Ieee80211Frame); // to Ieee80211Mac
 }
 

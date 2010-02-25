@@ -28,6 +28,7 @@ simple DropTailQoSQueue like OutputQueue
     parameters:
         int frameCapacity = default(100);  // per-subqueue capacity
         string classifierClass;  // class that inherits from IQoSClassifier
+        @display("i=block/queue");
     gates:
         input in;
         output out;

@@ -38,19 +38,19 @@ module NetworkLayer
         bool proxyARP = default(true);
         @display("i=block/fork");
     gates:
-        input ifIn[];
-        input tcpIn;
-        input udpIn;
-        input sctpIn;   //I.R.
-        input rsvpIn;
-        input ospfIn;
+        input ifIn[] @labels(IPDatagram);
+        input tcpIn @labels(TCPSegment,IPControlInfo/down);
+        input udpIn @labels(UDPPacket,IPControlInfo/down);
+        input sctpIn @labels(IPControlInfo/down,SCTPPacket);   //I.R.
+        input rsvpIn @labels(IPControlInfo/down);
+        input ospfIn @labels(IPControlInfo/down);
         input pingIn;
         output ifOut[];
-        output TCPOut;
-        output udpOut;
-        output sctpOut; //I.R.
-        output rsvpOut;
-        output ospfOut;
+        output tcpOut @labels(TCPSegment,IPControlInfo/up);
+        output udpOut @labels(UDPPacket,IPControlInfo/up);
+        output sctpOut @labels(IPControlInfo/up,SCTPPacket); //I.R.
+        output rsvpOut @labels(IPControlInfo/up);
+        output ospfOut @labels(IPControlInfo/up);
         output pingOut;
 
     submodules:
@@ -87,7 +87,7 @@ module NetworkLayer
         }
     connections allowunconnected:
         // transport Layer
-        ip.transportOut[0] --> TCPOut;
+        ip.transportOut[0] --> tcpOut;
         ip.transportIn[0] <-- tcpIn;
 
         ip.transportOut[1] --> udpOut;

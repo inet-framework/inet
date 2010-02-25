@@ -38,10 +38,11 @@ struct tcphdr
 #  if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t th_x2:4;           /* (unused) */
     uint8_t th_offs:4;         /* data offset */
-#  endif
-#  if BYTE_ORDER == BIG_ENDIAN
+#  elif BYTE_ORDER == BIG_ENDIAN
     uint8_t th_offs:4;         /* data offset */
     uint8_t th_x2:4;           /* (unused) */
+#else
+# error "Please check BYTE_ORDER declaration"
 #  endif
     uint8_t th_flags;
     uint16_t th_win;           /* window */

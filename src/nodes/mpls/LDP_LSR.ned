@@ -39,15 +39,16 @@ module LDP_LSR
 {
     parameters:
         @node();
+        @labels(node,mpls-node);
+        @display("i=abstract/router");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
         int namid;
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
-        @display("i=abstract/router");
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -133,7 +134,7 @@ module LDP_LSR
         udp.ipIn <-- networkLayer.udpOut;
 
         tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.TCPOut;
+        tcp.ipIn <-- networkLayer.tcpOut;
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;

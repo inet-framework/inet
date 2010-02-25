@@ -162,7 +162,7 @@ bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum)
         }
     }
 
-	return found;
+    return found;
 }
 
 uint32 TCPSACKRexmitQueue::getQueueLength()
@@ -264,7 +264,7 @@ uint32 TCPSACKRexmitQueue::getTotalAmountOfSackedBytes()
     {
         if (i->sacked)
         {
-        	counter++;
+            counter++;
             bytes = bytes + (i->endSeqNum - i->beginSeqNum);
         }
         i++;
@@ -283,18 +283,18 @@ uint32 TCPSACKRexmitQueue::getAmountOfSackedBytes(uint32 seqNum)
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end() && seqLess(i->beginSeqNum, seqNum)) // search for seqNum
     {
-    	i++;
+        i++;
         if (i->beginSeqNum == seqNum)
             break;
     }
 
-	ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
+    ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
 
     while (i!=rexmitQueue.end())
     {
         if (i->sacked)
         {
-        	counter++;
+            counter++;
             bytes = bytes + (i->endSeqNum - i->beginSeqNum);
         }
         i++;
@@ -313,29 +313,29 @@ uint32 TCPSACKRexmitQueue::getNumOfDiscontiguousSacks(uint32 seqNum)
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end() && seqLess(i->beginSeqNum, seqNum)) // search for seqNum
     {
-    	i++;
+        i++;
         if (i->beginSeqNum == seqNum)
             break;
     }
 
-	ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
+    ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
 
     // search for discontiguous sacked regions
     while (i!=rexmitQueue.end())
     {
-		if (i->sacked)
-		{
-			counter++;
-			uint32 tmp = i->endSeqNum;
-			i++;
-    		while (i->sacked && i->beginSeqNum == tmp && i!=rexmitQueue.end()) // adjacent sacked regions?
-    		{
-    			tmp = i->endSeqNum;
-    			i++;
-			}
-		}
-		else
-			i++;
+        if (i->sacked)
+        {
+            counter++;
+            uint32 tmp = i->endSeqNum;
+            i++;
+            while (i->sacked && i->beginSeqNum == tmp && i!=rexmitQueue.end()) // adjacent sacked regions?
+            {
+                tmp = i->endSeqNum;
+                i++;
+            }
+        }
+        else
+            i++;
     }
     return counter;
 }

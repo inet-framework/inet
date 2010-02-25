@@ -31,6 +31,7 @@ simple NAMTrace
         string logfile = default("");  // the name of the logfile ("trace.nam")
         string prolog = default("");
         @display("i=old/floppy1");
+        @labels(node);
 }
 
 

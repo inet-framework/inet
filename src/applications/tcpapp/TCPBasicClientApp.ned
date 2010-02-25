@@ -75,8 +75,9 @@ simple TCPBasicClientApp like TCPApp
         volatile double thinkTime @unit("s"); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
+        @display("i=block/app");
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

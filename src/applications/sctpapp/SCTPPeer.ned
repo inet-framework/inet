@@ -38,8 +38,9 @@ simple SCTPPeer like SCTPApp
 		double startTime @unit(s) = default(1s); // time first session begins
 		int numRequestsPerSession = default(1);  // number of requests sent per session
 		int numPacketsToReceive = default(0);
-	gates:
-		input sctpIn;
-		output sctpOut;
+        @display("i=block/app");
+    gates:
+        input sctpIn @labels(SCTPCommand/up);
+        output sctpOut @labels(SCTPCommand/down);
 }
 

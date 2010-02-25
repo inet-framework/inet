@@ -1204,6 +1204,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		}
 		if (bytesToSend > 0 || bytes.chunk || bytes.packet || (bytes.chunk && probing))
 		{
+	        //FIXME  suggest parentheses around && within ||
 			if (tcount>0 || scount>0 && (!(state->nagleEnabled && osb>0)||(uint32)scount>=pathVar->pmtu-32 ))
 			{
 				sctpmsg = new SCTPMessage();
@@ -2418,6 +2419,7 @@ IPvXAddress SCTPAssociation::getNextDestination(SCTPDataVariables* chk)
 			dpi=iter->first;
 
 		} while (iter->first != last && iter->second->activePath == false || iter->second->confirmed==false);
+        //FIXME  on prev line suggest parentheses around && within ||
 	}
 
 

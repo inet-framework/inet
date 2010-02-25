@@ -29,9 +29,10 @@ simple UDPEchoApp like UDPApp
         volatile int messageLength @unit("B"); // length of messages to generate, int bytes
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        @display("i=block/app");
     gates:
-        input udpIn;
-        output udpOut;
+        input udpIn @labels(UDPControlInfo/up);
+        output udpOut @labels(UDPControlInfo/down);
 }
 
 

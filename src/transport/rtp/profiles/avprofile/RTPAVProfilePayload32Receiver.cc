@@ -33,18 +33,20 @@ int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
     return ((RTPPacket *)packet1)->getSequenceNumber() - ((RTPPacket *)packet2)->getSequenceNumber();
 }
 
-RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver() {
+RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver()
+{
     delete _queue;
-};
+}
 
 
-void RTPAVProfilePayload32Receiver::initialize() {
+void RTPAVProfilePayload32Receiver::initialize()
+{
     RTPPayloadReceiver::initialize();
     _payloadType = 32;
     _queue = new cQueue("IncomingQueue", &compareRTPPacketsBySequenceNumber);
     _lowestAllowedTimeStamp = 0;
     _highestSequenceNumber = 0;
-};
+}
 
 
 void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
@@ -65,7 +67,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                 //sprintf(line, "%i", i);
                 _outputLogLoss << i << endl;
             }
-         };
+         }
          }
 
     if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) || (rtpPacket->getSequenceNumber()<= _highestSequenceNumber)) {
@@ -109,14 +111,14 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 
                 delete mpegPacket;
                 delete readPacket;
-            };
+            }
 
             // we start the next frame
             // set the allowed time stamp
             if (nextTimeStamp) {
                 _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
                 _queue->insert(rtpPacket);
-            };
+            }
 
             // we have calculated a frame
             if (frameSize > 0) {
@@ -144,4 +146,6 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
             _queue->insert(rtpPacket);
         }
     }
-};
+}
+
+

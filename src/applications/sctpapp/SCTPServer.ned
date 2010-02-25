@@ -36,8 +36,9 @@ simple SCTPServer like SCTPApp
 		bool ordered = default(true);
 		int outboundStreams = default(1);
 		int queueSize = default(0);
-	gates:
-		input sctpIn;
-		output sctpOut;
+        @display("i=block/app");
+    gates:
+        input sctpIn @labels(SCTPCommand/up);
+        output sctpOut @labels(SCTPCommand/down);
 }
 

@@ -25,7 +25,7 @@ package inet.linklayer.radio;
 // @see Radio
 // @author Andras Varga
 //
-simple GenericRadio
+simple GenericRadio like Radio
 {
     parameters:
         int channelNumber = default(0); // channel identifier
@@ -38,9 +38,10 @@ simple GenericRadio
         int headerLengthBits @unit(b); // length of physical layer framing (preamble, etc)
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
+        @display("i=block/wrxtx");
     gates:
-        input uppergateIn;   // from higher layer protocol (MAC)
-        output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
-        input radioIn; // to receive frames (AirFrame) on the radio channel
+        input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
+        output uppergateOut @labels(PhyControlInfo/up); // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        input radioIn @labels(AirFrame); // to receive frames (AirFrame) on the radio channel
 }
 

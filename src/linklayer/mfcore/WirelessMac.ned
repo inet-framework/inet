@@ -34,6 +34,7 @@ package inet.linklayer.mfcore;
 //
 simple WirelessMac
 {
+    @display("i=block/ifcard");
     gates:
         input uppergateIn; // from the network layer
         output uppergateOut; // to the network layer

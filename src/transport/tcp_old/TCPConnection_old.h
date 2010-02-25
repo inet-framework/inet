@@ -120,6 +120,8 @@ enum TCPEventCode
 
 #define MAX_SYN_REXMIT_COUNT     12     // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 
+#define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
+
 /** @name Comparing sequence numbers */
 //@{
 inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}

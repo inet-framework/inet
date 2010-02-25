@@ -23,6 +23,7 @@ out/
 backups
 *~
 xxx
+/3rdparty
 
 # added by Joseph Kim
 doc/doxy

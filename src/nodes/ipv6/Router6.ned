@@ -32,10 +32,11 @@ module Router6
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
         @display("i=abstract/router");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

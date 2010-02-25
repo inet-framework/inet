@@ -43,6 +43,8 @@ module StandardHost
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
+        @display("i=device/pc2");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int numSctpApps = default(0);
@@ -54,10 +56,9 @@ module StandardHost
         int namid = default(-1);
         string routingFile = default("");
         int numExtInterfaces = default(0);
-        @display("i=device/pc2");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -142,7 +143,7 @@ module StandardHost
         }
 
         tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.TCPOut;
+        tcp.ipIn <-- networkLayer.tcpOut;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;
