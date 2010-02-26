@@ -736,204 +736,206 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
 
     for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
     {
-        TCPOption option = tcpseg->getOptions(i);
+        const TCPOption& option = tcpseg->getOptions(i);
         short kind = option.getKind();
         short length = option.getLength();
         tcpEV << "Received option of kind " << kind << " with length " << length << "\n";
         bool lengthMatched = false;
-
         switch(kind)
         {
             case TCPOPTION_END_OF_OPTION_LIST: // EOL=0
-            {
                 if (length == 1)
                 {
                     lengthMatched = true;
                     tcpEV << "TCP Header Option EOL received\n";
                 }
                 break;
-            }
             case TCPOPTION_NO_OPERATION: // NOP=1
-            {
                 if (length == 1)
                 {
                     lengthMatched = true;
                     tcpEV << "TCP Header Option NOP received\n";
                 }
                 break;
-            }
             case TCPOPTION_MAXIMUM_SEGMENT_SIZE: // MSS=2
-            {
-                if (length == 4)
-                {
-                    lengthMatched = true;
-                    if (option.getValuesArraySize()!=0)
-                    {
-                        if (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)
-                        {
-                            // RFC 2581, page 1:
-                            // "The SMSS is the size of the largest segment that the sender can transmit.
-                            // This value can be based on the maximum transmission unit of the network,
-                            // the path MTU discovery [MD90] algorithm, RMSS (see next item), or other
-                            // factors.  The size does not include the TCP/IP headers and options."
-                            //
-                            // "The RMSS is the size of the largest segment the receiver is willing to accept.
-                            // This is the value specified in the MSS option sent by the receiver during
-                            // connection startup.  Or, if the MSS option is not used, 536 bytes [Bra89].
-                            // The size does not include the TCP/IP headers and options."
-                            //
-                            //
-                            // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
-                            // the value specified in the MSS option received during connection startup.
-                            state->snd_mss = std::min(state->snd_mss, (uint32) option.getValues(0));
-                            if (state->snd_mss==0)
-                                state->snd_mss = 536;
-                            tcpEV << "TCP Header Option MSS received, SMSS is set to: " << state->snd_mss << "\n";
-                        }
-                        else
-                            tcpEV << "ERROR: TCP Header Option MSS received, but in unexpected state\n";
-                    }
-                    else
-                        tcpEV << "ERROR: TCP Header Option MSS received, but no SMSS value present\n";
-                }
+                lengthMatched = processMSSOption(tcpseg, option);
                 break;
-            }
             case TCPOPTION_SACK_PERMITTED: // SACK_PERMITTED=4
-            {
-                if (length == 2)
-                {
-                    lengthMatched = true;
-                    if (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)
-                    {
-                        state->rcv_sack_perm = true;
-                        state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
-                        tcpEV << "TCP Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to: " << state->sack_enabled << "\n";
-                    }
-                    else
-                        tcpEV << "ERROR: TCP Header Option SACK_PERMITTED received, but in unexpected state\n";
-                }
+                lengthMatched = processSACKPermittedOption(tcpseg, option);
                 break;
-            }
             case TCPOPTION_SACK: // SACK=5
-            {
-                if (length%8 == 2)
-                {
-                    lengthMatched = true;
-                    if (state->sack_enabled) // not need to check the state here?
-                    {
-                        // temporary variable
-                        int n = option.getValuesArraySize()/2;
-                        if (n>0) // sacks present?
-                        {
-                            tcpEV << n << " SACK(s) received:\n";
-                            uint count=0;
-                            for (int i=0; i<n; i++)
-                            {
-                                Sack tmp;
-                                tmp.setStart(option.getValues(count));
-                                count++;
-                                tmp.setEnd(option.getValues(count));
-                                count++;
-
-                                uint32 sack_range = tmp.getEnd() - tmp.getStart();
-                                tcpEV << (i+1) << ". SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ")\n";
-
-                                // check for D-SACK
-                                if (i==0 && seqLess(tmp.getEnd(), tcpseg->getAckNo()))
-                                {
-                                    // RFC 2883, page 8:
-                                    // "In order for the sender to check that the first (D)SACK block of an
-                                    // acknowledgement in fact acknowledges duplicate data, the sender
-                                    // should compare the sequence space in the first SACK block to the
-                                    // cumulative ACK which is carried IN THE SAME PACKET.  If the SACK
-                                    // sequence space is less than this cumulative ACK, it is an indication
-                                    // that the segment identified by the SACK block has been received more
-                                    // than once by the receiver.  An implementation MUST NOT compare the
-                                    // sequence space in the SACK block to the TCP state variable snd.una
-                                    // (which carries the total cumulative ACK), as this may result in the
-                                    // wrong conclusion if ACK packets are reordered."
-                                    tcpEV << "Received D-SACK below cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ")\n";
-                                }
-                                else if (i==0 && seqGE(tmp.getEnd(), tcpseg->getAckNo()) && n>1)
-                                {
-                                    // RFC 2883, page 8:
-                                    // "If the sequence space in the first SACK block is greater than the
-                                    // cumulative ACK, then the sender next compares the sequence space in
-                                    // the first SACK block with the sequence space in the second SACK
-                                    // block, if there is one.  This comparison can determine if the first
-                                    // SACK block is reporting duplicate data that lies above the cumulative
-                                    // ACK."
-                                    Sack tmp2;
-                                    tmp2.setStart(option.getValues(2));
-                                    tmp2.setEnd(option.getValues(3));
-
-                                    if (seqGE(tmp.getStart(), tmp2.getStart()) && seqLE(tmp.getEnd(), tmp2.getEnd()))
-                                    {tcpEV << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ") SACK:" << " [" << tmp2.getStart() << ".." << tmp2.getEnd() << ")\n";}
-                                }
-
-                                // splitt sack_range to smss_sized pieces
-                                uint32 tmp_sack_range = sack_range;
-                                uint32 counter = 1; // at least one piece has been received
-
-                                while (tmp_sack_range > state->snd_mss) // to check how many smss_sized pieces are covered by this single sack_range
-                                {
-                                    tmp_sack_range = tmp_sack_range - state->snd_mss;
-                                    counter++;
-                                }
-
-                                // find smss_sized_sack in send queue and set "sacked" bit
-                                uint32 mss_sized_sack = tmp.getStart();
-                                for (uint j=0;j<counter;j++)
-                                {
-                                    if (j+1==counter) // the last part does not need to be smss_sized (nagle off)
-                                    {
-                                        if (seqGE(mss_sized_sack,state->snd_una))
-                                            rexmitQueue->setSackedBit(mss_sized_sack,mss_sized_sack+tmp_sack_range);
-                                        else
-                                            tcpEV << "Received old sack. Sacked segment number is below snd_una\n";
-                                    }
-                                    else
-                                    {
-                                        if (seqGE(mss_sized_sack,state->snd_una))
-                                            rexmitQueue->setSackedBit(mss_sized_sack,mss_sized_sack+state->snd_mss);
-                                        else
-                                            tcpEV << "Received old sack. Sacked segment number is below snd_una\n";
-                                    }
-                                    mss_sized_sack = mss_sized_sack + state->snd_mss;
-                                }
-                            }
-                            state->rcv_sacks = state->rcv_sacks + n; // total counter, no current number
-                            if (rcvSacksVector)
-                                rcvSacksVector->record(state->rcv_sacks);
-
-                            // update scoreboard
-                            state->sackedBytes_old = state->sackedBytes; // needed for RFC 3042 to check if last dupAck contained new sack information
-                            state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
-                            if (sackedBytesVector)
-                                sackedBytesVector->record(state->sackedBytes);
-                        }
-                    }
-                    else
-                        tcpEV << "ERROR: " << (length/2) << ". SACK(s) received, but sack_enabled is set to " << state->sack_enabled << "\n";
-                }
+                lengthMatched = processSACKOption(tcpseg, option);
                 break;
-            }
 
             // TODO add new TCPOptions here once they are implemented
 
             // TODO delegate to TCPAlgorithm as well -- it may want to recognized additional options
 
             default:
-            {
                 lengthMatched = true;
                 tcpEV << "ERROR: Received option of kind " << kind << " with length " << length << " which is currently not supported\n";
                 break;
-            }
         }
 
         if (!lengthMatched)
             tcpEV << "ERROR: Received option of kind " << kind << " with incorrect length " << length << "\n";
     }
+}
+
+bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option)
+{
+    if (option.getLength() != 4)
+        return false;
+
+    if (option.getValuesArraySize()!=0)
+    {
+        if (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)
+        {
+            // RFC 2581, page 1:
+            // "The SMSS is the size of the largest segment that the sender can transmit.
+            // This value can be based on the maximum transmission unit of the network,
+            // the path MTU discovery [MD90] algorithm, RMSS (see next item), or other
+            // factors.  The size does not include the TCP/IP headers and options."
+            //
+            // "The RMSS is the size of the largest segment the receiver is willing to accept.
+            // This is the value specified in the MSS option sent by the receiver during
+            // connection startup.  Or, if the MSS option is not used, 536 bytes [Bra89].
+            // The size does not include the TCP/IP headers and options."
+            //
+            //
+            // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
+            // the value specified in the MSS option received during connection startup.
+            state->snd_mss = std::min(state->snd_mss, (uint32) option.getValues(0));
+            if (state->snd_mss==0)
+                state->snd_mss = 536;
+            tcpEV << "TCP Header Option MSS received, SMSS is set to: " << state->snd_mss << "\n";
+        }
+        else
+            tcpEV << "ERROR: TCP Header Option MSS received, but in unexpected state\n";
+    }
+    else
+        tcpEV << "ERROR: TCP Header Option MSS received, but no SMSS value present\n";
+    return true;
+}
+
+bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option)
+{
+    if (option.getLength() != 2)
+        return false;
+
+    if (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)
+    {
+        state->rcv_sack_perm = true;
+        state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
+        tcpEV << "TCP Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to: " << state->sack_enabled << "\n";
+    }
+    else
+        tcpEV << "ERROR: TCP Header Option SACK_PERMITTED received, but in unexpected state\n";
+    return true;
+}
+
+bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& option)
+{
+    if (option.getLength() % 8 != 2)
+        return false;
+
+    if (state->sack_enabled) // not need to check the state here?
+    {
+        // temporary variable
+        int n = option.getValuesArraySize()/2;
+        if (n>0) // sacks present?
+        {
+            tcpEV << n << " SACK(s) received:\n";
+            uint count=0;
+            for (int i=0; i<n; i++)
+            {
+                Sack tmp;
+                tmp.setStart(option.getValues(count));
+                count++;
+                tmp.setEnd(option.getValues(count));
+                count++;
+
+                uint32 sack_range = tmp.getEnd() - tmp.getStart();
+                tcpEV << (i+1) << ". SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ")\n";
+
+                // check for D-SACK
+                if (i==0 && seqLess(tmp.getEnd(), tcpseg->getAckNo()))
+                {
+                    // RFC 2883, page 8:
+                    // "In order for the sender to check that the first (D)SACK block of an
+                    // acknowledgement in fact acknowledges duplicate data, the sender
+                    // should compare the sequence space in the first SACK block to the
+                    // cumulative ACK which is carried IN THE SAME PACKET.  If the SACK
+                    // sequence space is less than this cumulative ACK, it is an indication
+                    // that the segment identified by the SACK block has been received more
+                    // than once by the receiver.  An implementation MUST NOT compare the
+                    // sequence space in the SACK block to the TCP state variable snd.una
+                    // (which carries the total cumulative ACK), as this may result in the
+                    // wrong conclusion if ACK packets are reordered."
+                    tcpEV << "Received D-SACK below cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ")\n";
+                }
+                else if (i==0 && seqGE(tmp.getEnd(), tcpseg->getAckNo()) && n>1)
+                {
+                    // RFC 2883, page 8:
+                    // "If the sequence space in the first SACK block is greater than the
+                    // cumulative ACK, then the sender next compares the sequence space in
+                    // the first SACK block with the sequence space in the second SACK
+                    // block, if there is one.  This comparison can determine if the first
+                    // SACK block is reporting duplicate data that lies above the cumulative
+                    // ACK."
+                    Sack tmp2;
+                    tmp2.setStart(option.getValues(2));
+                    tmp2.setEnd(option.getValues(3));
+
+                    if (seqGE(tmp.getStart(), tmp2.getStart()) && seqLE(tmp.getEnd(), tmp2.getEnd()))
+                    {tcpEV << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ") SACK:" << " [" << tmp2.getStart() << ".." << tmp2.getEnd() << ")\n";}
+                }
+
+                // splitt sack_range to smss_sized pieces
+                uint32 tmp_sack_range = sack_range;
+                uint32 counter = 1; // at least one piece has been received
+
+                while (tmp_sack_range > state->snd_mss) // to check how many smss_sized pieces are covered by this single sack_range
+                {
+                    tmp_sack_range = tmp_sack_range - state->snd_mss;
+                    counter++;
+                }
+
+                // find smss_sized_sack in send queue and set "sacked" bit
+                uint32 mss_sized_sack = tmp.getStart();
+                for (uint j=0;j<counter;j++)
+                {
+                    if (j+1==counter) // the last part does not need to be smss_sized (nagle off)
+                    {
+                        if (seqGE(mss_sized_sack,state->snd_una))
+                            rexmitQueue->setSackedBit(mss_sized_sack,mss_sized_sack+tmp_sack_range);
+                        else
+                            tcpEV << "Received old sack. Sacked segment number is below snd_una\n";
+                    }
+                    else
+                    {
+                        if (seqGE(mss_sized_sack,state->snd_una))
+                            rexmitQueue->setSackedBit(mss_sized_sack,mss_sized_sack+state->snd_mss);
+                        else
+                            tcpEV << "Received old sack. Sacked segment number is below snd_una\n";
+                    }
+                    mss_sized_sack = mss_sized_sack + state->snd_mss;
+                }
+            }
+            state->rcv_sacks = state->rcv_sacks + n; // total counter, no current number
+            if (rcvSacksVector)
+                rcvSacksVector->record(state->rcv_sacks);
+
+            // update scoreboard
+            state->sackedBytes_old = state->sackedBytes; // needed for RFC 3042 to check if last dupAck contained new sack information
+            state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
+            if (sackedBytesVector)
+                sackedBytesVector->record(state->sackedBytes);
+        }
+    }
+    else
+        tcpEV << "ERROR: " << (option.getLength()/2) << ". SACK(s) received, but sack_enabled is set to " << state->sack_enabled << "\n";
+    return true;
 }
 
 TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)

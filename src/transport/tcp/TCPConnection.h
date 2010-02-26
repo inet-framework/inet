@@ -389,6 +389,13 @@ class INET_API TCPConnection
     virtual bool processAckInEstabEtc(TCPSegment *tcpseg);
     //@}
 
+    /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return indicates whether length is OK */
+    //@{
+    virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOption& option);
+    //@}
+
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{
     virtual void process_TIMEOUT_2MSL();
