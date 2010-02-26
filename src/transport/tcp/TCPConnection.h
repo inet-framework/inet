@@ -574,9 +574,9 @@ class INET_API TCPConnection
     virtual bool processAppCommand(cMessage *msg);
 
     /**
-     * RFC 3517, page 3: "This routine returns whether the given sequence number is
-     * considered to be lost.  The routine returns true when either
-     * DupThresh discontiguous SACKed sequences have arrived above
+     * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
+     * sequence number is considered to be lost.  The routine returns true when
+     * either DupThresh discontiguous SACKed sequences have arrived above
      * 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
      * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
      * false."
@@ -584,18 +584,18 @@ class INET_API TCPConnection
     virtual bool isLost(uint32 seqNum);
 
     /**
-     * RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
-     * and MUST set the "pipe" variable to an estimate of the number of
-     * octets that are currently in transit between the TCP sender and
-     * the TCP receiver."
+     * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
+     * space from HighACK to HighData and MUST set the "pipe" variable to an
+     * estimate of the number of octets that are currently in transit between
+     * the TCP sender and the TCP receiver."
      */
     virtual void setPipe();
 
     /**
-     * RFC 3517, page 3: "This routine uses the scoreboard data structure maintained by the
-     * Update() function to determine what to transmit based on the SACK
-     * information that has arrived from the data receiver (and hence
-     * been marked in the scoreboard).  NextSeg () MUST return the
+     * For SACK TCP. RFC 3517, page 3: "This routine uses the scoreboard data
+     * structure maintained by the Update() function to determine what to transmit
+     * based on the SACK information that has arrived from the data receiver
+     * (and hence been marked in the scoreboard).  NextSeg () MUST return the
      * sequence number range of the next segment that is to be
      * transmitted..."
      */
