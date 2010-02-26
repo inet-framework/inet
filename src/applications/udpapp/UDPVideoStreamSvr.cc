@@ -47,6 +47,8 @@ UDPVideoStreamSvr::~UDPVideoStreamSvr()
 
 void UDPVideoStreamSvr::initialize()
 {
+    this->UDPAppBase::initialize();
+
     waitInterval = &par("waitInterval");
     packetLen = &par("packetLen");
     videoSize = &par("videoSize");
@@ -57,7 +59,6 @@ void UDPVideoStreamSvr::initialize()
     numPkSent = 0;
     reqStreamBytesSignal = registerSignal("reqStreamBytes");
     sentPkBytesSignal = registerSignal("sentPkBytes");
-
 
     WATCH_PTRVECTOR(streamVector);
 

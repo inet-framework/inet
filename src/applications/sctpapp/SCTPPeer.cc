@@ -133,7 +133,7 @@ uint32 numBytes;
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
     packetsSent++;
-    bytesSent+=msg->getBitLength()/8;
+    bytesSent += msg->getByteLength();
     emit(sentPkBytesSignal, (long)(msg->getByteLength()));
     sendOrSchedule(cmsg);
 }
@@ -651,7 +651,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     {
         SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
-        echoedBytesSent+=smsg->getBitLength()/8;
+        echoedBytesSent += smsg->getByteLength();
         emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
         cmsg->encapsulate(smsg);
         if (ind->getSendUnordered())
