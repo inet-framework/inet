@@ -379,8 +379,8 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
             return false;
         else // rcv_wnd > 0
             return (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd))
-                       ||
-                   (seqLE(state->rcv_nxt, seqNo + len - 1) && seqLess(seqNo + len - 1, state->rcv_nxt + state->rcv_wnd));
+            ||
+            (seqLE(state->rcv_nxt, seqNo + len - 1) && seqLess(seqNo + len - 1, state->rcv_nxt + state->rcv_wnd));
     }
 }
 
@@ -560,8 +560,8 @@ void TCPConnection::sendSegment(uint32 bytes)
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // changed from int congestionWindow to uint32 congestionWindow 2009-08-05 by T.R.
 {
     if (!state->afterRto)
-    // we'll start sending from snd_max
-    state->snd_nxt = state->snd_max;
+        // we'll start sending from snd_max
+        state->snd_nxt = state->snd_max;
 
     uint32 old_highRxt = 0;
     if (state->sack_enabled)
@@ -580,7 +580,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // 
     if (effectiveWin <= 0)
     {
         tcpEV << "Effective window is zero (advertised window " << state->snd_wnd <<
-                 ", congestion window " << congestionWindow << "), cannot send.\n";
+            ", congestion window " << congestionWindow << "), cannot send.\n";
         return false;
     }
 
@@ -592,13 +592,13 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // 
     if (fullSegmentsOnly && bytesToSend < state->snd_mss && buffered > (ulong) effectiveWin) // last segment could be less then state->snd_mss
     {
         tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
-              << ", in buffer " << buffered << ")\n";
+            << ", in buffer " << buffered << ")\n";
         return false;
     }
 
     // start sending 'bytesToSend' bytes
     tcpEV << "Will send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin
-          << ", in buffer " << buffered << " bytes)\n";
+        << ", in buffer " << buffered << " bytes)\n";
 
     uint32 old_snd_nxt = state->snd_nxt;
     ASSERT(bytesToSend>0);
@@ -626,12 +626,12 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // 
             sendSegment(state->snd_mss);
             bytesToSend -= state->snd_mss;
         }
-		// check how many bytes we have - last segment could be less then state->snd_mss
-		buffered = sendQueue->getBytesAvailable(state->snd_nxt);
-		if (bytesToSend==buffered && buffered!=0) // last segment?
+        // check how many bytes we have - last segment could be less then state->snd_mss
+        buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+        if (bytesToSend==buffered && buffered!=0) // last segment?
             sendSegment(bytesToSend);
         else if (bytesToSend>0)
-           tcpEV << bytesToSend << " bytes of space left in effectiveWindow\n";
+            tcpEV << bytesToSend << " bytes of space left in effectiveWindow\n";
     }
 #endif
 
@@ -868,7 +868,7 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
                                     tmp2.setEnd(option.getValues(3));
 
                                     if (seqGE(tmp.getStart(), tmp2.getStart()) && seqLE(tmp.getEnd(), tmp2.getEnd()))
-                                        {tcpEV << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ") SACK:" << " [" << tmp2.getStart() << ".." << tmp2.getEnd() << ")\n";}
+                                    {tcpEV << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo() << " D-SACK:" << " [" << tmp.getStart() << ".." << tmp.getEnd() << ") SACK:" << " [" << tmp2.getStart() << ".." << tmp2.getEnd() << ")\n";}
                                 }
 
                                 // splitt sack_range to smss_sized pieces
@@ -1189,9 +1189,9 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
             break;
 
         while ((state->sacks_array[a].getStart() == state->sacks_array[a+i].getStart() ||
-                state->sacks_array[a].getEnd() == state->sacks_array[a+i].getStart() ||
-                state->sacks_array[a].getEnd() == state->sacks_array[a+i].getEnd())
-                && a+i < MAX_SACK_BLOCKS && state->sacks_array[a].getStart()!=0) // MAX_SACK_BLOCKS is set to 60
+            state->sacks_array[a].getEnd() == state->sacks_array[a+i].getStart() ||
+            state->sacks_array[a].getEnd() == state->sacks_array[a+i].getEnd())
+            && a+i < MAX_SACK_BLOCKS && state->sacks_array[a].getStart()!=0) // MAX_SACK_BLOCKS is set to 60
         {
             matched = true;
             i++;
