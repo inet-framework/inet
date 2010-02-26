@@ -85,22 +85,29 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
     // distinguish by type
-    if (rinp->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_RTCP) {
+    switch(rinp->getType())
+    {
+    case RTPInnerPacket::RTP_INP_INITIALIZE_RTCP:
         initializeRTCP(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED:
         senderModuleInitialized(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_DATA_OUT:
         dataOut(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_DATA_IN:
         dataIn(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_LEAVE_SESSION) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_LEAVE_SESSION:
         leaveSession(rinp);
-    }
-    else {
+        break;
+
+    default:
         error("unknown RTPInnerPacket type");
     }
 }
