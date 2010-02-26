@@ -43,7 +43,7 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 		int ch = opticalFrame->getLambda();
 
 #ifdef DEBUG_WDM_LAYER
-		ev << getFullPath() << ": optical frame with a WDM channel = " << ch << endl;
+		ev << getFullPath() << ": Optical frame with a WDM channel = " << ch << endl;
 #endif
 
 		// decapsulate a PON frame and send it to the upper layer
@@ -59,6 +59,10 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 
 		HybridPonDsFrame *frame = check_and_cast<HybridPonDsFrame *> (msg);
 		int ch = frame->getChannel();
+
+#ifdef DEBUG_WDM_LAYER
+		ev << getFullPath() << ": PON frame with a channel index = " << ch << endl;
+#endif
 
 		// encapsulate a PON frame into an optical frame and send it to the PON I/F
 		OpticalFrame *opticalFrame = new OpticalFrame();

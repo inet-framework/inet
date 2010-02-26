@@ -16,11 +16,12 @@
 #ifndef __OLT_WDM_LAYER_H
 #define __OLT_WDM_LAYER_H
 
-#include <omnetpp.h>
 #include "HybridPon.h"
 
 class OltWdmLayer: public cSimpleModule
 {
+protected:
+	//OMNeT++
 	virtual void initialize();
 	virtual void handleMessage(cMessage *msg);
 	virtual void finish();

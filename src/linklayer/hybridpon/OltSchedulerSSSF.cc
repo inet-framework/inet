@@ -1,13 +1,14 @@
 ///
-/// @file   SchedulerSSSF.cc
+/// @file   OltSchedulerSSSF.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Feb/22/2010
 ///
-/// @brief  Implements 'SSSF' scheduler class for a hybrid TDM/WDM-PON OLT.
+/// @brief  Implements 'OltSchedulerSSSF' class for a hybrid TDM/WDM-PON OLT.
 ///
 /// @note
-/// This file implements an 'SSSF' class for the "Sequential Scheduling with
-///	Schedule-time Framing (S^3F)" algorithm reported in [1] for SUCCESS WDM-PON.
+/// This file implements an 'OltSchedulerSSSF' class for the "Sequential
+/// Scheduling with	Schedule-time Framing (S^3F)" algorithm reported in
+/// [1] for SUCCESS-HPON.
 ///
 /// @par
 ///	This scheduler has the following features:
@@ -42,35 +43,30 @@
 
 
 // For debugging
-// #define DEBUG_SCHEDULER
+// #define DEBUG_OLT_SCHEDULER_SSF
 
 
-#include "Scheduler.h"
+#include "OltScheduler.h"
 
 // Register module.
-Define_Module(SSSF)
+Define_Module(OltSchedulerSSSF)
 
 //------------------------------------------------------------------------------
 //	Misc. functions
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// SSSF::assignGrants --
-//
-//		Assigns grants for both up- and downstream traffic.
-//
-// Arguments:
-//		int		ch;			// Channel index
-//		int		usReport;	// Report from an ONU for upstream traffic
-//
-// Results:
-//      Grants are assigned to both up- and downstream traffic proportional
-//		to their reports (ONU upstream queue status for upstream and
-//		OLT VOQ status for downstream, respectively).
-//		Note that we limit each size of grant to 'cwMax' independently.
-//------------------------------------------------------------------------------
-
-int SSSF::assignGrants(int ch, int usReport)
+///
+/// Assigns grants for both up- and downstream traffic.
+/// Grants are assigned to both up- and downstream traffic proportional
+/// to their reports (ONU upstream queue status for upstream and OLT VOQ
+/// status for downstream, respectively).
+/// Note that we limit each size of grant to 'cwMax' independently.
+///
+/// @param[in] ch		channel index
+/// @param[in] usReport	report from ONU for upstream traffic
+/// @return				the amount of grants assigned for upstream traffic
+///
+int OltSchedulerSSSF::assignGrants(int ch, int usReport)
 {
 	////////////////////////////////////////////////////////////////////////
 	// Assign grants to upstream (via 'return') and downstream traffic (via
@@ -83,7 +79,7 @@ int SSSF::assignGrants(int ch, int usReport)
 	int dsReport = voqBitCtr[ch];
 	if (txQueue[ch].empty() == false)
 	{
-		HybridPonFrame *frame = (HybridPonFrame *) txQueue[ch].front();
+		HybridPonDsDataFrame *frame = (HybridPonDsDataFrame *) txQueue[ch].front();
 		dsReport -= frame->getBitLength() - DS_DATA_OVERHEAD_SIZE;
 	}
 
@@ -91,18 +87,11 @@ int SSSF::assignGrants(int ch, int usReport)
 	return min(usReport, cwMax);
 }
 
-//------------------------------------------------------------------------------
-// SSSF::debugOnuPollListStatus --
-//
-//		Generates a snapshot of 'onuPollList' status.
-//
-// Arguments:
-//
-// Results:
-//      Prints out all the elements of 'onuPollList' to the event window.
-//------------------------------------------------------------------------------
-
-void SSSF::debugOnuPollListStatus(void)
+///
+/// Generates a snapshot of 'onuPollList' status.
+/// Prints out all the elements of 'onuPollList' to the event window.
+///
+void OltSchedulerSSSF::debugOnuPollListStatus(void)
 {
 	ev << "onuPollList status at " << simTime() << " sec.:" << endl;
 	ev << "Number of elements = " << onuPollList.size() << endl;
@@ -116,603 +105,16 @@ void SSSF::debugOnuPollListStatus(void)
 	}
 }
 
-//------------------------------------------------------------------------------
-// SSSF::cancelOnuPoll --
-//
-//		Cancels an ONU poll message and removes a corresponding element
-//		from the 'onuPollList'.
-//
-// Arguments:
-//      cMessage    msg;    ONU_POLL event
-//
-// Results:
-//      The given message is cancelled in the main event list and the corresponding
-//		element (i.e., the one with the same channel) is removed from 'onuPollList'.
-//      It returns the pointer to the cancelled message.
-//		Otherwise, 'NULL' is returned.
-//------------------------------------------------------------------------------
-
-cMessage *SSSF::cancelOnuPoll(HybridPonMessage *msg)
-{
-	if (onuPollList.empty())
-	{
-		// Something wrong!
-		error(
-				"%s::cancelOnuPoll: Tried to remove an element from empty 'onuPollList'",
-				getFullPath().c_str());
-	}
-	else
-	{
-		// Find the element with the same 'channel' as the given message.
-		int ch = msg->getOnuIdx(); // get ONU/channel index.
-		OnuPollList::iterator iter;
-		for (iter = onuPollList.begin(); iter != onuPollList.end(); ++iter)
-		{
-			if ((*iter).channel == ch)
-			{
-				onuPollList.erase(iter); // Remove it from the list.
-				return cancelEvent(msg); // Do normal event cancellation.
-			}
-		}
-	}
-	return NULL;
-}
-
-//------------------------------------------------------------------------------
-// SSSF::scheduleOnuPoll --
-//
-//		Schedules an ONU poll message and maintains a sorted list of pairs of
-//		the channel and scheduling time of the message.
-//
-// Arguments:
-//      simtime_t   t;      scheduling time
-//      cMessage    msg;    ONU_POLL event
-//
-// Results:
-//      The given message is scheduled in the main event list and its channel
-//      and scheduling time is stored in the sorted list (ascending order
-//      based on the scheduling time).
-//      It returns 0 for compatibility with the 'scheduleAt()' function.
-//------------------------------------------------------------------------------
-
-int SSSF::scheduleOnuPoll(simtime_t t, HybridPonMessage *msg)
-{
-	// Maintain a sorted list of the scheduled ONU poll events.
-	OnuPoll poll;
-	poll.channel = msg->getOnuIdx();
-	poll.time = t;
-	OnuPollList::iterator iter;
-	bool inserted = false;
-	for (iter = onuPollList.begin(); iter != onuPollList.end(); ++iter)
-	{
-		if (t < (*iter).time)
-		{
-			onuPollList.insert(iter, poll);
-			inserted = true;
-			break;
-		}
-	}
-	if (!inserted)
-	{
-		// The current message has the latest (largest) scheduling time.
-		// So, append it at the end of the list.
-		onuPollList.push_back(poll);
-	}
-
-	return scheduleAt(t, msg); // Do normal message schedule.
-}
-
-////------------------------------------------------------------------------------
-//// SSSF::rescheduleOnuPolls --
-////
-////		Reschedules scheduled ONU poll messages based on the scheduled time concept.
-////
-//// Arguments:
-////
-//// Results:
-////      If there is any 'ONU_POLL' message whose scheduled time is less than
-////		the scheduled TX time of the corresponding polling frame as of now,
-////		the message is rescheduled for now immediately.
-////      Otherwise, nothing happens.
-////------------------------------------------------------------------------------
-//
-//void SSSF::rescheduleOnuPolls(void)
-//{
-//	int ctr = 0;        // Counter for the # of checking for rescheduling
-//	OnuPollList::iterator iter;
-//
-//	for (iter = onuPollList.begin(); iter != onuPollList.end(); iter++) {
-//		// Check if the # of checking exceeds the rescheduling depth.
-//		ctr++;
-//		if (ctr > rsDepth) {
-//			break;
-//		}
-//
-//		int ch = (*iter).channel;
-//		simtime_t t = (*iter).time;
-//
-//		// Get a scheduled TX time for this channel now.
-//		int txIdx, rxIdx;
-//		simtime_t txTime = getTxTime(ch, true, txIdx, rxIdx);
-//
-//		// Check if the scheduled TX time is equal to or greater than the scheduled ONU timeout.
-//		if (txTime >= t) {
-//
-//			// Cancel the 'ONU_POLL' message and reschedule it right now.
-//			if (pollEvent[ch]->isScheduled()) {
-//				cancelOnuPoll(pollEvent[ch]);
-//				scheduleOnuPoll(simTime(), pollEvent[ch]);
-//			}
-//			else {
-//				error("%s::rescheduleOnuPolls: Error in ONU poll rescheduling", getFullPath().c_str());
-//			}
-//
-//			// Should break here because the iterator is invalidated!
-//			break;
-//		}
-//	}   // end of for()
-////      const int		ch;			// channel index
-//}
-
-
-//------------------------------------------------------------------------------
-//	Scheduling functions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// SSSF::getTxTime --
-//
-//		frame based on the sequential scheduling algorithm.
-//
-// Arguments:
-//      const bool		isGrant;	// flag for grant
-//		int				&txIdx;		// TX index
-//		int				&rxIdx;		// RX index
-//
-// Results:
-//      Calculates the earliest possible transmission time for given channel and
-//		The earliest possible transmission time is returned.
-//		Also, 'txIdx' and 'rxIdx' (only for a grant) are set to indices
-//		of the earliest available TX and RX, respectively.
-//------------------------------------------------------------------------------
-
-simtime_t SSSF::getTxTime(const int ch, const bool isGrant, int &txIdx,
-		int &rxIdx)
-{
-	// Initialize variables.
-	//	int d = ch;
-	simtime_t t;
-	simtime_t now = simTime();
-
-	// Update all CH[], TX[], RX[] that are less than the current simulation
-	// time to the current simulation time.
-	for (int i = 0; i < numOnus; i++)
-	{
-		if (CH[i] < now)
-		{
-			CH[i] = now;
-		}
-	}
-	for (int i = 0; i < numTransmitters; i++)
-	{
-		if (TX[i] < now)
-		{
-			TX[i] = now;
-		}
-	}
-	for (int i = 0; i < numReceivers; i++)
-	{
-		if (RX[i] < now)
-		{
-			RX[i] = now;
-		}
-	}
-
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << "::getTxTime() is called for a "
-	<< (isGrant ? "grant" : "data")
-	<< " PON frame for ONU[" << ch << "]" << endl;
-#endif
-
-	// Pick the earliest available transmitter.
-	txIdx = 0;
-	for (int i = 1; i < numTransmitters; i++)
-	{
-		if (TX[i] <= TX[txIdx])
-		{
-			txIdx = i;
-		}
-	}
-
-	if (isGrant)
-	{ // This is a grant frame.
-
-		// Pick the earliest available receiver.
-		rxIdx = 0;
-		for (int i = 1; i < numReceivers; i++)
-		{
-			if (RX[i] <= RX[rxIdx])
-			{
-				rxIdx = i;
-			}
-		}
-
-		// Schedule transmission time 't' as follows:
-		// t = max(receiver is free, transmitter is free, channel is free)
-		t = max(max(RX[rxIdx] + GUARD_TIME - RTT[ch] - DS_GRANT_OVERHEAD_SIZE
-				/ BITRATE, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
-	}
-	else
-	{ // This is a data frame.
-
-		// Schedule transmission time 't' as follows:
-		// t = max(transmitter is free, channel is free)
-		t = max(TX[txIdx] + GUARD_TIME, CH[ch] + GUARD_TIME);
-	}
-
-	return t; // Return the calculated transmission time.
-}
-
-//------------------------------------------------------------------------------
-// SSSF::scheduleFrame --
-//
-//      Schedules the transmission (and the upstream reception as well for a grant)
-//		of a PON frame based on the sequential scheduling algorithm.
-//
-// Arguments:
-//		const simtime_t		txTime;
-//      const int			ch;
-//		const int			txIdx;
-//		const int			rxIdx;
-//      HybridPonDsFrame	*ponFrameToOnu;
-//
-// Results:
-//		Global status variables are updated and the frame transmission is scheduled.
-//------------------------------------------------------------------------------
-
-void SSSF::scheduleFrame(const simtime_t txTime, const int ch, const int txIdx,
-		const int rxIdx, HybridPonDsFrame *ponFrameToOnu)
-{
-	// DEBUG: Check if the scheduled TX time is already passed.
-	ASSERT( txTime >= simTime() );
-
-	// Get frame attributes and initialize variables used frequently.
-	bool id = ponFrameToOnu->getId();
-	simtime_t txDelay = ponFrameToOnu->getBitLength() / BITRATE;
-
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << "::scheduleFrame() called for a " << (id ? "data" : "grant")
-	<< "PON frame for ONU[" << ch << "]" << endl;
-#endif
-
-	// Update transmitter and channel available times.
-	CH[ch] = txTime + txDelay;
-	TX[txIdx] = txTime + txDelay;
-
-	// For a grant, update the receiver available time as well.
-	if (!id)
-	{
-		RX[rxIdx] = txTime + txDelay + RTT[ch];
-		// Note that the RX[rxIdx] is scheduled for reception via CH[ch] at 'txTime+RTT[ch]'
-		// and will be available after the frame reception ('txDelay').
-
-#ifdef TRACE_TXRX
-		// Schedule a frame reception to record RX usage.
-		DummyPacket *msg = new DummyPacket("Frame RX", RECEIVE_RX);
-		msg->setLambda(ch);
-		msg->setIdx(rxIdx);
-		msg->setBitLength(ponFrameToOnu->getBitLength());
-		scheduleAt(txTime + RTT[ch], msg);
-#endif
-	}
-
-#ifdef DEBUG_SCHEDULER
-	if (id)
-	{
-		ev << getFullPath() << ": A data frame scheduled at " << txTime << " sec." << endl;
-		ev << getFullPath() << ": using TX[" << txIdx << "] and CH[" << ch << "]" << endl;
-	}
-	else
-	{
-		ev << getFullPath() << ": A grant frame scheduled at " << txTime << " sec." << endl;
-		ev << getFullPath() << ": using TX[" << txIdx << "], CH[" << ch << "] and reception at time = "
-		<< txTime + RTT[ch] << " using RX [" << rxIdx << "]" << endl;
-	}
-#endif
-
-	//    //	 Finally, schedule a frame transmission at 'txTime'.
-	// Finally, schedule a frame transmission immediately.
-	// - Frame transmission delay will be handled by channel & gate themselves.
-	DummyPacket *msg = new DummyPacket("Actual Frame TX", ACTUAL_TX);
-	msg->setLambda(ch);
-	msg->setId(id);
-#ifdef TRACE_TXRX
-	msg->setIdx(txIdx);
-#endif
-	//	scheduleAt(txTime, msg);
-	scheduleAt(simtime_t(0.0), msg);
-}
-
-//------------------------------------------------------------------------------
-//	Event handling functions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// SSSF::sendOnuPoll --
-//
-//		Generates a polling PON frame for transmission.
-//
-// Arguments:
-//      cMessage	*msg;
-//
-// Results:
-//		A polling PON frame is generated for a given ONU and
-//		delivered to 'handleGrant()' for granting and transmission.
-//------------------------------------------------------------------------------
-
-void SSSF::sendOnuPoll(HybridPonMessage *msg)
-{
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
-#endif
-
-	// Get the channel.ONU index.
-	int ch = msg->getOnuIdx();
-
-	////////////////////////////////////////////////////////////////////////////
-	// Note that handling 'onuPollList' is the job of calling function!!!
-	////////////////////////////////////////////////////////////////////////////
-	//// Remove the 1st element from the 'onuPollList'.
-	//ASSERT(!onuPollList.empty());
-	//ASSERT((onuPollList.front()).channel == ch);
-	//onuPollList.pop_front();
-
-	//    // Record ONU Timeout.
-	//    monitor->recordOnuTimeout(ch);
-
-	// Check the VOQ if there is room for a polling frame.
-	if (voqBitCtr[ch + numOnus] + POLL_FRAME_SIZE <= voqSize)
-	{ // ch+numOnus -> VOQ index!
-
-		// Create a polling (i.e., grant with size 0) frame.
-		HybridPonFrame *ponFrameToOnu =
-				new HybridPonFrame("", HYBRID_PON_FRAME);
-		ponFrameToOnu->setLambda(ch);
-		//		ponFrameToOnu->setId(false);
-		ponFrameToOnu->getFrameType(1); // 1 -> grant
-		ponFrameToOnu->setGrant(0); // Only for payload portion (for Ethernet frames),
-		// not including CW for overhead & report fields
-		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
-
-#ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << "::sendOnuPoll: Destination ONU = " << ch << endl;
-#endif
-
-		// Handle the generated polling frame.
-		handleGrant(ch, ponFrameToOnu);
-	}
-	else
-	{
-		// Check any duplicated poll message.
-		ASSERT(!pollEvent[ch]->isScheduled());
-		//if (pollEvent[ch]->isScheduled())
-		//	cancelOnuPoll(pollEvent[ch]);
-
-		// Reset ONU Timeout.
-		scheduleOnuPoll(simTime() + onuTimeout, pollEvent[ch]); // From 'now'
-	}
-}
-
-//------------------------------------------------------------------------------
-// SSSF::receiveEthernetFrame --
-//
-//		receives an Ethernet frame from the switch.
-//
-// Arguments:
-// 		EtherFrame	*frame;
-//
-// Results:
-//		If there is a room in the VOQ, the frame is appended at the end of it.
-//		If this is an HOL frame (i.e., no other Ethernet frames in the VOQ),
-//		it is encapsulated in a PON frame, scheduled for transmission, and
-//		put into a TX queue.
-//		If there is no room in the VOQ, the frame is dropped.
-//------------------------------------------------------------------------------
-
-//void SSSF::receiveIpPacket(IpPacket *pkt)
-void SSSF::receiveEthernetFrame(EtherFrame *frame)
-{
-	//	// Get packet attributes.
-	//    int srcAddress = pkt->getSrcAddress();
-	//    int dstnAddress = pkt->getDstnAddress();
-	//    long length = pkt->getBitLength();
-	//    int lambda = dstnAddress / numUsersPerOnu;
-	//		// For now, this is how we determine to which ONU it is addressed.
-	//	    // Here we assume equal number of users per onu, as we have been doing.
-
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << ": IP packet received" << endl;
-	ev << getFullPath() << ": dstnAddress = " << dstnAddress
-	<< ", destination ONU = " << lambda << endl;
-#endif
-
-	// Check if there is a room in the VOQ for an Ethernet frame encapsulating
-	// the IP packet.
-	if (voqBitCtr[lambda] + length + ETH_OVERHEAD_SIZE <= voqSize)
-	{
-
-		// Encapsulate the IP packet in an Ethernet frame.
-		EthFrame *ethFrame = new EthFrame();
-		ethFrame->setBitLength(ETH_OVERHEAD_SIZE); // including preamble, DA, SA, FT, & CRC fields
-		ethFrame->encapsulate(pkt);
-		int frameLength = ethFrame->getBitLength();
-
-		// Update the arrival counter for OLT incoming rate estimation.
-		dsArrvCtr[lambda] += frameLength; // Bit
-
-		// Schedule a frame transmission if both the VOQ and the TX queue are empty.
-		// *** Note that we allow the schedule of frame transmission when VOQ (& TXQ)
-		// *** is empty irrespective of the size of the remaining grant.
-		if (voqBitCtr[lambda] == 0)
-		{
-
-			// DEBUG: Check VOQ and TX queue.
-			ASSERT( (voq[lambda].empty() == true) && (txQueue[lambda].empty() == true) );
-
-			// Encapsulate the Ethernet frame in a PON frame.
-			HybridPonFrame *ponFrameToOnu = new HybridPonFrame("",
-					HYBRID_PON_FRAME);
-			ponFrameToOnu->setLambda(lambda);
-			ponFrameToOnu->setId(true);
-			ponFrameToOnu->setBitLength(frameLength + DS_DATA_OVERHEAD_SIZE);
-			(ponFrameToOnu->getEncapsulatedEthFrames()).insert(ethFrame);
-
-			// Schedule transmission.
-			int txIdx, rxIdx;
-			simtime_t txTime = getTxTime(lambda, false, txIdx, rxIdx); // 'false' -> DS data frame.
-			scheduleFrame(txTime, lambda, txIdx, rxIdx, ponFrameToOnu);
-
-			// Store the PON frame in a TX queue.
-			txQueue[lambda].insert(ponFrameToOnu);
-
-			// Update the DS TX counter.
-			dsTxCtr[lambda] -= frameLength;
-		}
-		else
-		{
-			voq[lambda].insert(ethFrame); // Append the frame at the end of the VOQ.
-		}
-
-		////////////////////////////////////////////////////////////////////////
-		// Here, we treat the VOQ and the TX queue as one logical queue
-		// in handling VOQ bit and frame length counters.
-		////////////////////////////////////////////////////////////////////////
-
-		// Update the VOQ bit counter.
-		voqBitCtr[lambda] += frameLength;
-
-		// Record updated VOQ statistics.
-		vQueueOctet[lambda].record(voqBitCtr[lambda] / 8); // Octet
-		vQueueLength[lambda].record(voq[lambda].length()
-				+ txQueue[lambda].length()); // # of frames
-	}
-	else
-	{
-#ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": IP packet dropped due to VOQ buffer overflow!" << endl;
-#endif
-
-		//		// Record packet loss statistics.
-		//		monitor->recordLossStats(srcAddress, dstnAddress, length);
-
-		//		delete (IpPacket *) pkt;
-	}
-}
-
 ///
-/// Receives a PON frame from an ONU.
-/// Upstream IP packets, if any in the received frame, are sent to the upper
-/// layer (i.e., IP packet sink) and if VOQ is empty, a grant based on the
-/// report from the ONU is generated and scheduled for transmission.
-/// Otherwise, no grant is generated.
+/// Handles a grant PON frame to the PON I/F (i.e., ONU).
+/// Regrants the grant, if it is for a poll, and schedules it for transmission
+/// through a sequential scheduler.
+/// Resets the ONU Timeout.
 ///
-/// @param[in] frame a HybridPonUsFrame pointer
+/// @param[in] ch		a WDM channel index
+/// @param[in] grant	a HybridPonDsGrantFrame pointer
 ///
-void SSSF::receiveHybridPonFrame(HybridPonUsFrame *ponFrameFromOnu)
-{
-#ifdef DEBUG_SCHEDULER
-	ev << getFullPath() << ": PON frame received from ONU [" << ponFrameFromOnu->getChannel() << "]" << endl;
-#endif
-
-	// Extract Ethernet frames from the PON frame, then IP packets from
-	// the Ethernet frames.
-	cQueue &ethFrameQueue = ponFrameFromOnu->getEncapsulatedEthFrames();
-	while (ethFrameQueue.empty() == false)
-	{
-		EthFrame *ethFrame = (EthFrame *) ethFrameQueue.pop();
-
-#ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
-#endif
-
-		IpPacket *pkt = (IpPacket *) ethFrame->decapsulate();
-		send(pkt, "toPacketSink");
-		delete (EthFrame *) ethFrame;
-
-#ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": Packet removed from Ethernet Frame" << endl;
-#endif
-	}
-
-	int lambda = ponFrameFromOnu->getLambda();
-
-	// Assign grants for both up- and downstream traffic based on the report.
-	int usReport = ponFrameFromOnu->getReport();
-	int grant = assignGrants(lambda, usReport);
-
-	// Update status variables and reset counters.
-	vReport[lambda] = usReport;
-	vRxTime[lambda] = simTime();
-	dsArrvCtr[lambda] = 0; // Reset DS arrival counter.
-
-	// Generate and schedule a new grant frame if the assigned grant is nonzero
-	// and the VOQ is empty (i.e., there has been no rescheduling of ONU timeout
-	// event since last grant TX).
-	int voqIdx = lambda + numOnus;
-	if ((grant > 0) && (voq[voqIdx].empty() == true))
-	{
-
-		// Check if the VOQ has a room enough for a grant frame.
-		long length = POLL_FRAME_SIZE + grant; // PON frame length for the given grant
-		if (voqBitCtr[voqIdx] + length <= voqSize)
-		{
-			HybridPonFrame *ponFrameToOnu = new HybridPonFrame("",
-					HYBRID_PON_FRAME);
-			ponFrameToOnu->setLambda(lambda);
-			ponFrameToOnu->setId(false);
-			ponFrameToOnu->setGrant(grant);
-			// Note that the grant here is only for payload, i.e., Ethernet frames,
-			// not including overhead & report field.
-			ponFrameToOnu->setBitLength(length);
-
-#ifdef DEBUG_SCHEDULER
-			ev << getFullPath() << ": Scheduling a grant for " << grant
-			<< " bits for ONU [" << lambda << "]" << endl;
-#endif
-
-			// Handle the generated grant.
-			handleGrant(lambda, ponFrameToOnu);
-		}
-		else
-		{ // No grant is generated.
-			// Reset ONU timeout.
-			if (pollEvent[lambda]->isScheduled())
-			{
-				cancelOnuPoll(pollEvent[lambda]);
-			}
-			scheduleOnuPoll(simTime() + onuTimeout, pollEvent[lambda]); // From 'now'
-		}
-
-	} // end of if () for report and VOQ emptiness check
-
-	delete (HybridPonFrame *) ponFrameFromOnu;
-}
-
-//------------------------------------------------------------------------------
-// SSSF::handleGrant --
-//
-//		Handles a grant PON frame to an ONU.
-//
-// Arguments:
-//      int             lambda;
-// 		HybridPonFrame    *grant;
-//
-// Results:
-//      The grant is regranted, if it is a poll, and scheduled for transmission
-//		through a sequnetial scheduler. Also, the ONU Timeout is reset.
-//------------------------------------------------------------------------------
-
-void SSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
+void OltSchedulerSSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
 {
 	int length = grant->getBitLength();
 	int voqIdx = lambda + numOnus;
@@ -794,6 +196,572 @@ void SSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
 	rescheduleOnuPolls();
 }
 
+//------------------------------------------------------------------------------
+// OltSchedulerSSSF::cancelOnuPoll --
+//
+//		Cancels an ONU poll message and removes a corresponding element
+//		from the 'onuPollList'.
+//
+// Arguments:
+//      cMessage    msg;    ONU_POLL event
+//
+// Results:
+//      The given message is cancelled in the main event list and the corresponding
+//		element (i.e., the one with the same channel) is removed from 'onuPollList'.
+//      It returns the pointer to the cancelled message.
+//		Otherwise, 'NULL' is returned.
+//------------------------------------------------------------------------------
+
+cMessage *OltSchedulerSSSF::cancelOnuPoll(HybridPonMessage *msg)
+{
+	if (onuPollList.empty())
+	{
+		// Something wrong!
+		error(
+				"%s::cancelOnuPoll: Tried to remove an element from empty 'onuPollList'",
+				getFullPath().c_str());
+	}
+	else
+	{
+		// Find the element with the same 'channel' as the given message.
+		int ch = msg->getOnuIdx(); // get ONU/channel index.
+		OnuPollList::iterator iter;
+		for (iter = onuPollList.begin(); iter != onuPollList.end(); ++iter)
+		{
+			if ((*iter).channel == ch)
+			{
+				onuPollList.erase(iter); // Remove it from the list.
+				return cancelEvent(msg); // Do normal event cancellation.
+			}
+		}
+	}
+	return NULL;
+}
+
+//------------------------------------------------------------------------------
+// OltSchedulerSSSF::scheduleOnuPoll --
+//
+//		Schedules an ONU poll message and maintains a sorted list of pairs of
+//		the channel and scheduling time of the message.
+//
+// Arguments:
+//      simtime_t   t;      scheduling time
+//      cMessage    msg;    ONU_POLL event
+//
+// Results:
+//      The given message is scheduled in the main event list and its channel
+//      and scheduling time is stored in the sorted list (ascending order
+//      based on the scheduling time).
+//      It returns 0 for compatibility with the 'scheduleAt()' function.
+//------------------------------------------------------------------------------
+
+int OltSchedulerSSSF::scheduleOnuPoll(simtime_t t, HybridPonMessage *msg)
+{
+	// Maintain a sorted list of the scheduled ONU poll events.
+	OnuPoll poll;
+	poll.channel = msg->getOnuIdx();
+	poll.time = t;
+	OnuPollList::iterator iter;
+	bool inserted = false;
+	for (iter = onuPollList.begin(); iter != onuPollList.end(); ++iter)
+	{
+		if (t < (*iter).time)
+		{
+			onuPollList.insert(iter, poll);
+			inserted = true;
+			break;
+		}
+	}
+	if (!inserted)
+	{
+		// The current message has the latest (largest) scheduling time.
+		// So, append it at the end of the list.
+		onuPollList.push_back(poll);
+	}
+
+	return scheduleAt(t, msg); // Do normal message schedule.
+}
+
+////------------------------------------------------------------------------------
+//// OltSchedulerSSSF::rescheduleOnuPolls --
+////
+////		Reschedules scheduled ONU poll messages based on the scheduled time concept.
+////
+//// Arguments:
+////
+//// Results:
+////      If there is any 'ONU_POLL' message whose scheduled time is less than
+////		the scheduled TX time of the corresponding polling frame as of now,
+////		the message is rescheduled for now immediately.
+////      Otherwise, nothing happens.
+////------------------------------------------------------------------------------
+//
+//void SSSF::rescheduleOnuPolls(void)
+//{
+//	int ctr = 0;        // Counter for the # of checking for rescheduling
+//	OnuPollList::iterator iter;
+//
+//	for (iter = onuPollList.begin(); iter != onuPollList.end(); iter++) {
+//		// Check if the # of checking exceeds the rescheduling depth.
+//		ctr++;
+//		if (ctr > rsDepth) {
+//			break;
+//		}
+//
+//		int ch = (*iter).channel;
+//		simtime_t t = (*iter).time;
+//
+//		// Get a scheduled TX time for this channel now.
+//		int txIdx, rxIdx;
+//		simtime_t txTime = getTxTime(ch, true, txIdx, rxIdx);
+//
+//		// Check if the scheduled TX time is equal to or greater than the scheduled ONU timeout.
+//		if (txTime >= t) {
+//
+//			// Cancel the 'ONU_POLL' message and reschedule it right now.
+//			if (pollEvent[ch]->isScheduled()) {
+//				cancelOnuPoll(pollEvent[ch]);
+//				scheduleOnuPoll(simTime(), pollEvent[ch]);
+//			}
+//			else {
+//				error("%s::rescheduleOnuPolls: Error in ONU poll rescheduling", getFullPath().c_str());
+//			}
+//
+//			// Should break here because the iterator is invalidated!
+//			break;
+//		}
+//	}   // end of for()
+////      const int		ch;			// channel index
+//}
+
+
+//------------------------------------------------------------------------------
+//	Scheduling functions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// OltSchedulerSSSF::getTxTime --
+//
+//		frame based on the sequential scheduling algorithm.
+//
+// Arguments:
+//      const bool		isGrant;	// flag for grant
+//		int				&txIdx;		// TX index
+//		int				&rxIdx;		// RX index
+//
+// Results:
+//      Calculates the earliest possible transmission time for given channel and
+//		The earliest possible transmission time is returned.
+//		Also, 'txIdx' and 'rxIdx' (only for a grant) are set to indices
+//		of the earliest available TX and RX, respectively.
+//------------------------------------------------------------------------------
+
+simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
+		int &txIdx, int &rxIdx)
+{
+	// Initialize variables.
+	//	int d = ch;
+	simtime_t t;
+	simtime_t now = simTime();
+
+	// Update all CH[], TX[], RX[] that are less than the current simulation
+	// time to the current simulation time.
+	for (int i = 0; i < numOnus; i++)
+	{
+		if (CH[i] < now)
+		{
+			CH[i] = now;
+		}
+	}
+	for (int i = 0; i < numTransmitters; i++)
+	{
+		if (TX[i] < now)
+		{
+			TX[i] = now;
+		}
+	}
+	for (int i = 0; i < numReceivers; i++)
+	{
+		if (RX[i] < now)
+		{
+			RX[i] = now;
+		}
+	}
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	ev << getFullPath() << "::getTxTime() is called for a "
+	<< (isGrant ? "grant" : "data")
+	<< " PON frame for ONU[" << ch << "]" << endl;
+#endif
+
+	// Pick the earliest available transmitter.
+	txIdx = 0;
+	for (int i = 1; i < numTransmitters; i++)
+	{
+		if (TX[i] <= TX[txIdx])
+		{
+			txIdx = i;
+		}
+	}
+
+	if (isGrant)
+	{ // This is a grant frame.
+
+		// Pick the earliest available receiver.
+		rxIdx = 0;
+		for (int i = 1; i < numReceivers; i++)
+		{
+			if (RX[i] <= RX[rxIdx])
+			{
+				rxIdx = i;
+			}
+		}
+
+		// Schedule transmission time 't' as follows:
+		// t = max(receiver is free, transmitter is free, channel is free)
+		t = max(max(RX[rxIdx] + GUARD_TIME - RTT[ch] - DS_GRANT_OVERHEAD_SIZE
+				/ BITRATE, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
+	}
+	else
+	{ // This is a data frame.
+
+		// Schedule transmission time 't' as follows:
+		// t = max(transmitter is free, channel is free)
+		t = max(TX[txIdx] + GUARD_TIME, CH[ch] + GUARD_TIME);
+	}
+
+	return t; // Return the calculated transmission time.
+}
+
+//------------------------------------------------------------------------------
+// OltSchedulerSSSF::scheduleFrame --
+//
+//      Schedules the transmission (and the upstream reception as well for a grant)
+//		of a PON frame based on the sequential scheduling algorithm.
+//
+// Arguments:
+//		const simtime_t		txTime;
+//      const int			ch;
+//		const int			txIdx;
+//		const int			rxIdx;
+//      HybridPonDsFrame	*ponFrameToOnu;
+//
+// Results:
+//		Global status variables are updated and the frame transmission is scheduled.
+//------------------------------------------------------------------------------
+
+void OltSchedulerSSSF::scheduleFrame(const simtime_t txTime, const int ch,
+		const int txIdx, const int rxIdx, HybridPonDsFrame *ponFrameToOnu)
+{
+	// DEBUG: Check if the scheduled TX time is already passed.
+	ASSERT( txTime >= simTime() );
+
+	// Get frame attributes and initialize variables used frequently.
+	short frameType = ponFrameToOnu->getFrameType();
+	simtime_t txDelay = ponFrameToOnu->getBitLength() / BITRATE;
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	ev << getFullPath() << "::scheduleFrame() called for a " << (id ? "data" : "grant")
+	<< "PON frame for ONU[" << ch << "]" << endl;
+#endif
+
+	// Update transmitter and channel available times.
+	CH[ch] = txTime + txDelay;
+	TX[txIdx] = txTime + txDelay;
+
+	// For a grant, update the receiver available time as well.
+	if (frameType == 1)
+	{
+		RX[rxIdx] = txTime + txDelay + RTT[ch];
+		// Note that the RX[rxIdx] is scheduled for reception via CH[ch] at 'txTime+RTT[ch]'
+		// and will be available after the frame reception ('txDelay').
+
+#ifdef TRACE_TXRX
+		// Schedule a frame reception to record RX usage.
+		DummyPacket *msg = new DummyPacket("Frame RX", RECEIVE_RX);
+		msg->setChannel(ch);
+		msg->setIdx(rxIdx);
+		msg->setBitLength(ponFrameToOnu->getBitLength());
+		scheduleAt(txTime + RTT[ch], msg);
+#endif
+	}
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	if (id)
+	{
+		ev << getFullPath() << ": A data frame scheduled at " << txTime << " sec." << endl;
+		ev << getFullPath() << ": using TX[" << txIdx << "] and CH[" << ch << "]" << endl;
+	}
+	else
+	{
+		ev << getFullPath() << ": A grant frame scheduled at " << txTime << " sec." << endl;
+		ev << getFullPath() << ": using TX[" << txIdx << "], CH[" << ch << "] and reception at time = "
+		<< txTime + RTT[ch] << " using RX [" << rxIdx << "]" << endl;
+	}
+#endif
+
+	//    //	 Finally, schedule a frame transmission at 'txTime'.
+	// Finally, schedule a frame transmission immediately.
+	// - Frame transmission delay will be handled by channel & gate themselves.
+	DummyPacket *msg = new DummyPacket("Actual Frame TX", ACTUAL_TX);
+	msg->setChannel(ch);
+	msg->setFrameType(frameType);
+#ifdef TRACE_TXRX
+	msg->setIdx(txIdx);
+#endif
+	//	scheduleAt(txTime, msg);
+	scheduleAt(simtime_t(0.0), msg);
+}
+
+//------------------------------------------------------------------------------
+//	Event handling functions
+//------------------------------------------------------------------------------
+
+///
+/// Handles an Ethernet frame from SNI (i.e., Ethernet switch).
+/// Puts the Ethernet frame into a VOQ, if there is enough space; in case
+/// there is no other frame in the VOQ, encapsulates the Ethernet frame
+/// in a data PON frame, and schedules the data PON frame for transmission
+/// and puts it into a TX queue.
+/// Otherwise, drops it.
+///
+/// @param[in] frame	an EtherFrame pointer
+///
+void OltSchedulerSSSF::handleEthernetFrameFromSni(EtherFrame *frame)
+{
+	//	// Get packet attributes.
+	//    int srcAddress = pkt->getSrcAddress();
+	//    int dstnAddress = pkt->getDstnAddress();
+	//    long length = pkt->getBitLength();
+	//    int lambda = dstnAddress / numUsersPerOnu;
+	//		// For now, this is how we determine to which ONU it is addressed.
+	//	    // Here we assume equal number of users per onu, as we have been doing.
+
+	int ch = frame->getArrivalGate()->getIndex();
+	int frameLength = frame->getBitLength();
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	ev << getFullPath() << ": Ethernet frame from the SNI with a channel = " << ch << endl;
+	//	ev << getFullPath() << ": dstnAddress = " << dstnAddress
+	//	<< ", destination ONU = " << ch << endl;
+#endif
+
+	// check if there is a room in the VOQ.
+	if (voqBitCtr[ch] + frameLength <= voqSize)
+	{
+		//		// Encapsulate the IP packet in an Ethernet frame.
+		//		EthFrame *ethFrame = new EthFrame();
+		//		ethFrame->setBitLength(ETH_OVERHEAD_SIZE); // including preamble, DA, SA, FT, & CRC fields
+		//		ethFrame->encapsulate(pkt);
+		//		int frameLength = ethFrame->getBitLength();
+
+		// update the arrival counter for OLT incoming rate estimation.
+		dsArrvCtr[ch] += frameLength; // in bits
+
+		// schedule a frame transmission if both the VOQ and the TX queue are empty.
+		// *** Note that we allow the schedule of frame transmission when VOQ (& TXQ)
+		// *** is empty irrespective of the size of the remaining grant.
+		if (voqBitCtr[ch] == 0)
+		{
+			// DEBUG: Check VOQ and TX queue.
+			ASSERT( (voq[ch].empty() == true) && (txQueue[ch].empty() == true) );
+
+			// encapsulate the Ethernet frame in a downstream data PON frame.
+			HybridPonDsDataFrame *ponFrameToOnu = new HybridPonDsDataFrame("",
+					HYBRID_PON_FRAME);
+			ponFrameToOnu->setChannel(ch);
+			ponFrameToOnu->setFrameType(0);
+			ponFrameToOnu->setBitLength(frameLength + DS_DATA_OVERHEAD_SIZE);
+			(ponFrameToOnu->getEncapsulatedFrames()).insert(frame);
+
+			// schedule transmission.
+			int txIdx, rxIdx;
+			simtime_t txTime = getTxTime(ch, false, txIdx, rxIdx); ///< 'false' -> DS data frame.
+			scheduleFrame(txTime, ch, txIdx, rxIdx, ponFrameToOnu);
+
+			// put the PON frame into a TX queue.
+			txQueue[ch].insert(ponFrameToOnu);
+
+			// Update the DS TX counter.
+			dsTxCtr[ch] -= frameLength;
+		}
+		else
+		{
+			voq[ch].insert(frame); ///< put the Ethernet frame into the VOQ.
+		}
+
+		////////////////////////////////////////////////////////////////////////
+		// Here, we treat the VOQ and the TX queue as one logical queue
+		// in handling VOQ bit and frame length counters.
+		////////////////////////////////////////////////////////////////////////
+
+		// update the VOQ bit counter.
+		voqBitCtr[ch] += frameLength;
+
+		// record updated VOQ statistics.
+		vQueueOctet[ch].record(voqBitCtr[ch] / 8); ///< in octet
+		vQueueLength[ch].record(voq[ch].length() + txQueue[ch].length()); ///< the number of frames
+	}
+	else
+	{
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+		ev << getFullPath() << ": Ethernet frame dropped due to VOQ buffer overflow!" << endl;
+#endif
+
+		//		// Record packet loss statistics.
+		//		monitor->recordLossStats(srcAddress, dstnAddress, length);
+		delete frame;
+	}
+}
+
+///
+/// Handles a data PON frame from the PON I/F (i.e., ONU).
+/// Extracts Ethernet frames from it, if any, and sends them to
+/// the upper layer (i.e., Ethernet switch).
+/// Generates a grant based on the report from the ONU and schedules it
+/// for transmission, only when the grant VOQ is empty.
+///
+/// @param[in] frame a HybridPonUsFrame pointer
+///
+void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
+{
+	int ch = ponFrameFromOnu->getChannel();
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	ev << getFullPath() << ": data PON frame received with a WDM channel = " ch << endl;
+#endif
+
+	// extract Ethernet frames
+	cQueue &etherFrameQueue = ponFrameFromOnu->getEncapsulatedFrames();
+	while (etherFrameQueue.empty() == false)
+	{
+		EtherFrame *etherFrame = (EtherFrame *) etherFrameQueue.pop();
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+		ev << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
+#endif
+
+		send(etherFrame, "ethg$o", ch);
+	}
+
+	// assign grants for both up- and downstream traffic based on the report
+	int usReport = ponFrameFromOnu->getReport();
+	int grant = assignGrants(ch, usReport);
+
+	// Update status variables and reset counters.
+	vReport[ch] = usReport;
+	vRxTime[ch] = simTime();
+	dsArrvCtr[ch] = 0; // Reset DS arrival counter.
+
+	// generate and schedule a new grant frame if the assigned grant is nonzero
+	// and the VOQ is empty (i.e., there has been no rescheduling of ONU timeout
+	// event since last grant TX).
+	int voqIdx = ch + numOnus;
+	if ((grant > 0) && (voq[voqIdx].empty() == true))
+	{
+		// check if the VOQ has a room enough for a grant frame
+		long length = POLL_FRAME_SIZE + grant; // PON frame length for the given grant
+		if (voqBitCtr[voqIdx] + length <= voqSize)
+		{
+			HybridPonDsGrantFrame *ponFrameToOnu = new HybridPonDsGrantFrame("",
+					HYBRID_PON_FRAME);
+			ponFrameToOnu->setChannel(ch);
+			ponFrameToOnu->setFrameType(1);
+			ponFrameToOnu->setGrant(grant);
+			// note that the grant here is only for payload, i.e., Ethernet frames,
+			// not including overhead & report field.
+			ponFrameToOnu->setBitLength(length);
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+			ev << getFullPath() << ": Scheduling a grant for " << grant
+			<< " bits with a WDM channel = " << ch << endl;
+#endif
+
+			// handle the generated grant.
+			handleGrant(ch, ponFrameToOnu);
+		}
+		else
+		{
+			// no grant is generated.
+			// reset ONU timeout.
+			if (pollEvent[ch]->isScheduled())
+			{
+				cancelOnuPoll(pollEvent[ch]);
+			}
+			scheduleOnuPoll(simTime() + onuTimeout, pollEvent[ch]); // From 'now'
+		}
+
+	} // end of if () for report and VOQ emptiness check
+
+	delete ponFrameFromOnu;
+}
+
+//------------------------------------------------------------------------------
+// OltSchedulerSSSF::sendOnuPoll --
+//
+//		Generates a polling PON frame for transmission.
+//
+// Arguments:
+//      cMessage	*msg;
+//
+// Results:
+//		A polling PON frame is generated for a given ONU and
+//		delivered to 'handleGrant()' for granting and transmission.
+//------------------------------------------------------------------------------
+
+void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
+{
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+	ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
+#endif
+
+	// Get the channel.ONU index.
+	int ch = msg->getOnuIdx();
+
+	////////////////////////////////////////////////////////////////////////////
+	// Note that handling 'onuPollList' is the job of calling function!!!
+	////////////////////////////////////////////////////////////////////////////
+	//// Remove the 1st element from the 'onuPollList'.
+	//ASSERT(!onuPollList.empty());
+	//ASSERT((onuPollList.front()).channel == ch);
+	//onuPollList.pop_front();
+
+	//    // Record ONU Timeout.
+	//    monitor->recordOnuTimeout(ch);
+
+	// Check the VOQ if there is room for a polling frame.
+	if (voqBitCtr[ch + numOnus] + POLL_FRAME_SIZE <= voqSize)
+	{ // ch+numOnus -> VOQ index!
+
+		// Create a polling (i.e., grant with size 0) frame.
+		HybridPonDsGrantFrame *ponFrameToOnu =
+				new HybridPonDsGrantFrame("", HYBRID_PON_FRAME);
+		ponFrameToOnu->setChannel(ch);
+		//		ponFrameToOnu->setId(false);
+		ponFrameToOnu->setFrameType(1); // 1 -> grant
+		ponFrameToOnu->setGrant(0); // Only for payload portion (for Ethernet frames),
+		// not including CW for overhead & report fields
+		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+		ev << getFullPath() << "::sendOnuPoll: Destination ONU = " << ch << endl;
+#endif
+
+		// Handle the generated polling frame.
+		handleGrant(ch, ponFrameToOnu);
+	}
+	else
+	{
+		// Check any duplicated poll message.
+		ASSERT(!pollEvent[ch]->isScheduled());
+		//if (pollEvent[ch]->isScheduled())
+		//	cancelOnuPoll(pollEvent[ch]);
+
+		// Reset ONU Timeout.
+		scheduleOnuPoll(simTime() + onuTimeout, pollEvent[ch]); // From 'now'
+	}
+}
+
 ///
 /// Transmits an HOL frame from a TX queue (for DS) or a VOQ (for US).
 /// The PON frame is popped from a TX queue (or VOQ in case of upstream)
@@ -803,9 +771,9 @@ void SSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
 ///
 /// @param[in] msg a DummyPacket pointer
 ///
-void SSSF::transmitPonFrame(DummyPacket *msg)
+void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 {
-#ifdef DEBUG_SCHEDULER
+#ifdef DEBUG_OLT_SCHEDULER_SSF
 	ev << getFullPath() << ": Actual transmission of a scheduled PON frame" << endl;
 #endif
 
@@ -814,15 +782,14 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 	int ch = msg->getChannel();
 	int voqIdx = (isData ? ch : ch + numOnus);
 	int numFrames = 0; // Keep the # of frames encapsulated in DS PON frame.
-	//	HybridPonDsDataFrame *frame;
+	HybridPonDsDataFrame *frame;
 
-	if (isData)
+	if (isData == true)
 	{
-		// Downstream data frame.
+		// downstream data PON frame
 
 		ASSERT(txQueue[ch].length() == 1); // DEBUG: Check TX Queue.
-		HybridPonDsDataFrame *frame =
-				(HybridPonDsDataFrame *) (txQueue[ch].pop()); // Pop the frame from the TX queue.
+		frame = (HybridPonDsDataFrame *) (txQueue[ch].pop()); // Pop the frame from the TX queue.
 
 		// Schedule the transmission of a PON frame if the VOQ is not empty.
 		// *** Note that we allow the schedule of at least one frame transmission
@@ -832,34 +799,34 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 		{
 
 			// Initialize a PON frame and a pointer to encapsulated Ethernet frames.
-			HybridPonFrame *ponFrameToOnu = new HybridPonFrame("",
+			HybridPonDsDataFrame *ponFrameToOnu = new HybridPonDsDataFrame("",
 					HYBRID_PON_FRAME);
-			cQueue &ethFrameQueue = ponFrameToOnu->getEncapsulatedEthFrames();
+			cQueue &etherFrameQueue = ponFrameToOnu->getEncapsulatedFrames();
 
-			EthFrame *ethFrame;
+			EtherFrame *etherFrame;
 			long numBits = 0L;
 			numFrames = 0;
 			do
 			{
-				ethFrame = (EthFrame *) voq[voqIdx].pop();
-				long frameLength = ethFrame->getBitLength();
+				etherFrame = (EtherFrame *) voq[voqIdx].pop();
+				long frameLength = etherFrame->getBitLength();
 				dsTxCtr[ch] -= frameLength;
 				numBits += frameLength;
 				numFrames++;
-				ethFrameQueue.insert(ethFrame);
+				etherFrameQueue.insert(etherFrame);
 				if (voq[voqIdx].empty() == true)
 				{
 					break;
 				}
 				else
 				{
-					ethFrame = (EthFrame *) voq[voqIdx].front();
+					etherFrame = (EtherFrame *) voq[voqIdx].front();
 				}
-			} while (dsTxCtr[ch] >= ethFrame->getBitLength());
+			} while (dsTxCtr[ch] >= etherFrame->getBitLength());
 
 			// Set PON frame fields.
-			ponFrameToOnu->setLambda(ch);
-			ponFrameToOnu->setId(true);
+			ponFrameToOnu->setChannel(ch);
+			ponFrameToOnu->setFrameType(0);
 			ponFrameToOnu->setBitLength(numBits + DS_DATA_OVERHEAD_SIZE);
 
 			// Schedule the created PON frame.
@@ -867,13 +834,13 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 			simtime_t txTime = getTxTime(ch, false, txIdx, rxIdx); // 'false' -> DS data frame
 			scheduleFrame(txTime, ch, txIdx, rxIdx, ponFrameToOnu);
 
-			// Store the scheduled PON frame in the TX queue.
+			// store the scheduled PON frame in the TX queue
 			txQueue[ch].insert(ponFrameToOnu);
 		} // end of 'if (voq ... )'
 	} // end of 'if'
 	else
 	{
-		// Grant frame.
+		// grant PON frame
 
 		ASSERT(voq[voqIdx].empty() == false); // DEBUG: Check VOQ.
 		HybridPonDsGrantFrame *frame =
@@ -907,8 +874,8 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 	// Send the frame to the ONU.
 	// Here we include a transmission delay because it has not been taken
 	// into account elsewhere.
-	simtime_t txDelay = frame->getBitLength() / BITRATE;
-	sendDelayed(frame, txDelay, "out");
+	simtime_t txDelay(frame->getBitLength() / BITRATE);
+	sendDelayed(frame, txDelay, "wdmg$o", ch);
 
 #ifdef TRACE_TXRX
 	// Record TX usage.
@@ -927,7 +894,7 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 
 #ifdef TRACE_TXRX
 //------------------------------------------------------------------------------
-// SSSF::releaseTx --
+// OltSchedulerSSSF::releaseTx --
 //
 //		Records release of TX.
 //
@@ -938,7 +905,7 @@ void SSSF::transmitPonFrame(DummyPacket *msg)
 //		Release of TX is recorded and the 'msg' is deleted.
 //------------------------------------------------------------------------------
 
-void SSSF::releaseTx(DummyPacket *msg)
+void OltSchedulerSSSF::releaseTx(DummyPacket *msg)
 {
 	int ch = msg->getLambda();
 	int txIdx = msg->getIdx();
@@ -950,7 +917,7 @@ void SSSF::releaseTx(DummyPacket *msg)
 }
 
 //------------------------------------------------------------------------------
-// SSSF::receiveRx --
+// OltSchedulerSSSF::receiveRx --
 //
 //		Records use of RX.
 //
@@ -961,7 +928,7 @@ void SSSF::releaseTx(DummyPacket *msg)
 //		Use of RX is recorded and 'RELEASE_RX' event is scheduled.
 //------------------------------------------------------------------------------
 
-void SSSF::receiveRx(DummyPacket *msg)
+void OltSchedulerSSSF::receiveRx(DummyPacket *msg)
 {
 	int ch = msg->getLambda();
 	int rxIdx = msg->getIdx();
@@ -977,7 +944,7 @@ void SSSF::receiveRx(DummyPacket *msg)
 }
 
 //------------------------------------------------------------------------------
-// SSSF::releaseRx --
+// OltSchedulerSSSF::releaseRx --
 //
 //		Records release of RX.
 //
@@ -988,7 +955,7 @@ void SSSF::receiveRx(DummyPacket *msg)
 //		Release of RX is recorded and the 'msg' is deleted.
 //------------------------------------------------------------------------------
 
-void SSSF::releaseRx(DummyPacket *msg)
+void OltSchedulerSSSF::releaseRx(DummyPacket *msg)
 {
 	int ch = msg->getLambda();
 	int rxIdx = msg->getIdx();
@@ -1000,34 +967,29 @@ void SSSF::releaseRx(DummyPacket *msg)
 }
 #endif
 
-//------------------------------------------------------------------------------
-// SSSF::initializeSpecific --
-//
-//		Does initialization specific to an improved sequential mode.
-//
-// Arguments:
-//
-// Results:
-//		All member variables are allocated memories and initialized.
-//------------------------------------------------------------------------------
-
-void SSSF::initializeSpecific(void)
+///
+/// Initializes member variables & activities and allocates memories
+/// for them, if needed.
+///
+void OltSchedulerSSSF::initialize(void)
 {
-	// Initialize NED parameters.
+	OltScheduler::initialize();
+
+	// initialize OltSchedulerSSSF NED parameters
 	voqSize = par("voqSize");
 	//	rsDepth = par("rsDepth");
 
-	// Initialize VOQ counters.
-	// Note that the indexing is as follows:
+	// initialize VOQ counters
+	// note that the indexing is as follows:
 	// - Downstream data:       [0...numOnus-1]
 	// - Upstream grants/polls: [numOnus...2*numOnus-1]
 	voq = new Voq[2 * numOnus];
 	voqBitCtr.assign(2 * numOnus, 0);
 
-	// Initialize TX queues for Seq. Scheduler Ver. 4 & 5.
+	// initialize TX queues for Seq. Scheduler Ver. 4 & 5
 	txQueue = new Voq[numOnus];
 
-	// Initialize cOutVector objects for VOQ trace.
+	// initialize cOutVector objects for VOQ trace
 	vQueueLength = new cOutVector[2 * numOnus];
 	vQueueOctet = new cOutVector[2 * numOnus];
 	ostringstream vectorName;
@@ -1046,7 +1008,7 @@ void SSSF::initializeSpecific(void)
 	}
 
 #ifdef TRACE_TXRX
-	// Initialize cOutVector objects for TX & RX usage trace.
+	// initialize cOutVector objects for TX & RX usage trace
 	vTxUsage = new cOutVector[numTransmitters];
 	for (int txIdx = 0; txIdx < numTransmitters; txIdx++)
 	{
@@ -1063,18 +1025,18 @@ void SSSF::initializeSpecific(void)
 	}
 #endif
 
-	// Initialize vectors for ONU incoming rate estimation.
+	// initialize vectors for ONU incoming rate estimation
 	grantCtr.assign(numOnus, 0);
 	vRate.assign(numOnus, 0.0);
 	vGrant.assign(numOnus, 0);
 	vReport.assign(numOnus, 0);
 	vRxTime.assign(numOnus, simtime_t(0.0));
 
-	// Initialize vectors for OLT incoming rate estimation.
+	// initialize vectors for OLT incoming rate estimation
 	dsArrvCtr.assign(numOnus, 0);
 	dsTxCtr.assign(numOnus, 0);
 
-	// Initialize vectors for grant PON frame Trace.
+	// initialize vectors for grant PON frame Trace
 	vTxTime.assign(numOnus, simtime_t(0.0));
 }
 
@@ -1084,18 +1046,42 @@ void SSSF::initializeSpecific(void)
 ///
 /// @param[in] msg a cMessage pointer
 ///
-void SSSF::handleMessage(cMessage *msg)
+void OltSchedulerSSSF::handleMessage(cMessage *msg)
 {
 	// Check the # of elements in 'onuPollList'.
 	ASSERT(onuPollList.size() <= unsigned(numOnus));
 
-	if (msg->isSelfMessage())
+	if (msg->isSelfMessage() == false)
+	{
+		// get the full name of arrival gate.
+		std::string inGate = msg->getArrivalGate()->getFullName();
+
+#ifdef DEBUG_OLT_SCHEDULER_SSF
+		ev << getFullPath() << ": A frame from " << inGate << " received" << endl;
+#endif
+
+		if (inGate.compare(0, 6, "ethg$i") == 0)
+		{
+			// Ethernet frame from the upper layer (i.e., Ethernet switch)
+			handleEthernetFrameFromSni(check_and_cast<EtherFrame *> (msg));
+		}
+		else if (inGate.compare(0, 6, "pong$i") == 0)
+		{
+			// PON frame from the lower layer (i.e., PON I/F)
+			handleDataPonFrameFromPon(check_and_cast<HybridPonUsFrame *> (msg));
+		}
+		else
+		{
+			// unkown message.
+			error("%s: Unknown message received", getFullPath().c_str());
+		}
+	} // end of if()
+	else
 	{
 		// this is a self message to indicate an event.
 
 		switch (msg->getKind())
 		{
-
 		case ONU_POLL:
 #ifdef TRACE_ONU_POLL_LIST
 			debugOnuPollListStatus();
@@ -1133,47 +1119,17 @@ void SSSF::handleMessage(cMessage *msg)
 			error("%s: Unexpected message type: %d", getFullPath().c_str(),
 					msg->getKind());
 		} // end of switch()
-	} // end of if()
-	else
-	{
-		// get the full name of arrival gate.
-		std::string inGate = msg->getArrivalGate()->getFullName();
-
-#ifdef DEBUG_SCHEDULER
-		ev << getFullPath() << ": A frame from " << inGate << " received" << endl;
-#endif
-
-		if (inGate.compare(0, 6, "ethg$i") == 0)
-		{
-			// Ethernet frame from the upper layer (i.e., Ethernet switch)
-			receiveEthernetFrame(check_and_cast<EtherFrame *> (msg));
-		}
-		else if (inGate.compare(0, 6, "pong$i") == 0)
-		{
-			// PON frame from the lower layer (i.e., PON I/F)
-			receiveHybridPonFrame(check_and_cast<HybridPonUsFrame *> (msg));
-		}
-		else
-		{
-			// unkown message.
-			error("%s: Unknown message received", getFullPath().c_str());
-		}
 	} // end of else
 }
 
-//------------------------------------------------------------------------------
-// SSSF::finishSpecific
-//
-//		Does finalization specific to improved sequential mode.
-//
-// Arguments:
-//
-// Results:
-//		Manually allocated memories for member variables are deallocated.
-//------------------------------------------------------------------------------
-
-void SSSF::finishSpecific(void)
+///
+/// Does post processing and deallocates memories manually allocated
+/// for member variables.
+///
+void OltSchedulerSSSF::finish(void)
 {
+	OltScheduler::finish();
+
 	delete[] voq;
 	delete[] txQueue;
 	delete[] vQueueLength;

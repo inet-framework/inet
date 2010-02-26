@@ -1,9 +1,9 @@
 ///
-/// @file   OnuWdmLayer.ned
+/// @file   OnuMacLayer.ned
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Thu Feb 22 10:10:00 2010
+/// @date   Feb/25/2010
 ///
-/// @brief  Defines WDM layer module in a hybrid TDM/WDM-PON ONU.
+/// @brief  Defines MAC layer module in a hybrid TDM/WDM-PON ONU.
 ///
 /// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -12,16 +12,18 @@
 ///          You must not remove this notice, or any other, from this software.
 ///
 
-
 package inet.linklayer.hybridpon;
 
 
-simple OnuWdmLayer
+simple OnuMacLayer
 {
     parameters:
-		@node();
-		@display("i=abstract/opticalswitch_s");
+        @display("i=block/subqueue;p=92,124");
+        int queueSize;        // size of FIFO queue
     gates:
-        inout demuxg;	// I/F for WDM-demultiplexed (electrical or optical) streams
-        inout muxg;		// I/F for WDM-multiplexed optical streams
+        //        output toMonitor;				// to monitor
+        // I/F with Ethernet switch
+        inout ethg;	// I/F with Ethernet switch
+        // I/F with WDM Optical Layer
+        inout wdmg;	// I/F with WDM Optical Layer
 }

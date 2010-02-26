@@ -1,7 +1,7 @@
 ///
 /// @file   Olt.ned
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Thu Jan 21, 2010
+/// @date   Jan/21/2010
 ///
 /// @brief  Defines a hybrid TDM/WDM-PON OLT module.
 ///
@@ -16,7 +16,7 @@
 package inet.nodes.hybridpon;
 
 import inet.nodes.ethernet.EtherSwitch;
-import inet.linklayer.hybridpon.IScheduler;
+import inet.linklayer.hybridpon.IOltScheduler;
 import inet.linklayer.hybridpon.OltWdmLayer;
 
 module Olt
@@ -25,20 +25,22 @@ module Olt
         @node();
         @display("i=device/router;bgb=177,239");
         int numOnus;	// number of ONUs connected to OLT
-        string schType;	// type of 'Scheduler' (algorithm and operation mode)
+        int numReceivers;	// number of receivers
+        int numTransmitters;	// number of transmitters
+        string schType = default("OltSchedulerSSSF");	// type of 'Scheduler' (algorithm and operation mode)
     gates:
         inout ethg[];	// Service Network I/F (i.e., with metro/backbone)
-        inout pong[];	// PON I/F (i.e., toward AWG)
+        inout pong[];	// PON I/F (i.e., with AWG)
     //        output fromSchedulerToMonitor;
     submodules:
         switch: EtherSwitch {
             parameters:
                 @display("p=90,48");
         }
-        scheduler: <schType> like IScheduler {
+        scheduler: <schType> like IOltScheduler {
             parameters:
-                numOnus = numOnus;
                 @display("p=90,118");
+//                numOnus = numOnus;
         }
         wdm: OltWdmLayer {
             parameters:

@@ -25,7 +25,9 @@ import ned.DatarateChannel;
 
 network ARPTest
 {
-    @display("bgb=611,326;bgl=2");
+    parameters:
+        int numOnus = 2;
+	    @display("bgb=611,326;bgl=2");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -57,12 +59,12 @@ network ARPTest
         }
         onu1: Onu {
             parameters:
-                lambda = 0;
+//                lambda = 0;
                 @display("p=171,95");
         }
         onu2: Onu {
             parameters:
-                lambda = 1;
+//                lambda = 1;
                 @display("p=171,218");
         }
         awg: LambdaSplitter {
@@ -99,4 +101,3 @@ network ARPTest
         olt.ethg++ <--> router.ethg++;
         router.pppg++ <--> fiberline <--> server.pppg++;
 }
-

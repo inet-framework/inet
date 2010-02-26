@@ -34,7 +34,7 @@ Define_Module(Sequential);
 //------------------------------------------------------------------------------
 
 //void Sequential::receiveIpPacket(IpPacket *pkt)
-void Sequential::receiveEthernetFrame(EtherFrame *frame)
+void OltSchedulerSequential::receiveEthernetFrame(EtherFrame *frame)
 {
 #ifdef DEBUG_SCHEDULER
     ev << getFullPath() << ": Ethernet frame received" << endl;
@@ -103,7 +103,7 @@ void Sequential::receiveEthernetFrame(EtherFrame *frame)
 //      The grant PON frame is scheduled for TX through seqSchedule().
 //------------------------------------------------------------------------------
 
-void Sequential::handleGrant(int lambda, HybridPonFrame *grant)
+void OltSchedulerSequential::handleGrant(int lambda, HybridPonFrame *grant)
 {
     if (seqSchedule(lambda, grant) < 0.0) {
         // Scheduling cancelled!
@@ -133,7 +133,7 @@ void Sequential::handleGrant(int lambda, HybridPonFrame *grant)
 //		The message has been deleted.
 //------------------------------------------------------------------------------
 
-void Sequential::transmitPonFrame(DummyPacket *msg)
+void OltSchedulerSequential::transmitPonFrame(DummyPacket *msg)
 {
 #ifdef DEBUG_SCHEDULER
     ev << getFullPath() << ": Actual transmission of scheduled message" << endl;
@@ -158,7 +158,7 @@ void Sequential::transmitPonFrame(DummyPacket *msg)
 //		All member variables are allocated memory and initialized.
 //------------------------------------------------------------------------------
 
-void Sequential::initializeSpecific(void)
+void OltSchedulerSequential::initializeSpecific(void)
 {
     // Initialize NED parameters.
 	queueSize = par("queueSize");
@@ -179,7 +179,7 @@ void Sequential::initializeSpecific(void)
 //		Simulation starts and runs until it will be terminated by kernel.
 //------------------------------------------------------------------------------
 
-void Sequential::handleMessage(cMessage *msg)
+void OltSchedulerSequential::handleMessage(cMessage *msg)
 {
 #ifdef TRACE_MSG
 	ev.printf();
@@ -232,6 +232,6 @@ void Sequential::handleMessage(cMessage *msg)
 //		Any manually allocated memories for member variables have been deallocated.
 //------------------------------------------------------------------------------
 
-void Sequential::finishSpecific(void)
+void OltSchedulerSequential::finishSpecific(void)
 {
 }

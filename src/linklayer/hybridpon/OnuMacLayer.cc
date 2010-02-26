@@ -1,9 +1,9 @@
 ///
-/// @file   HybridPonMac.cc
+/// @file   OnuMacLayer.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Jun/30/2009
 ///
-/// @brief  Implements 'HybridPonMac' class for a Hybrid TDM/WDM-PON ONU.
+/// @brief  Implements 'OnuMacLayer' class for a Hybrid TDM/WDM-PON ONU.
 ///
 /// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -14,24 +14,24 @@
 
 
 // For debugging
-// #define DEBUG_HYBRID_PON_MAC
+// #define DEBUG_ONU_MAC_LAYER
 
 
-#include "HybridPonMac.h"
+#include "OnuMacLayer.h"
 
 // Register modules.
-Define_Module(HybridPonMac)
+Define_Module(OnuMacLayer)
 
 ///
-/// Handle an Ethernet frame from UNIs.
-/// Put the Ethernet frame into a FIFO, if there is enough space.
-/// Otherwise, drop it.
+/// Handles an Ethernet frame from UNI (i.e., Ethernet switch).
+/// Puts the Ethernet frame into a FIFO, if there is enough space.
+/// Otherwise, drops it.
 ///
-/// @param[in] frame a EtherFrame pointer
+/// @param[in] frame	an EtherFrame pointer
 ///
-void HybridPonMac::handleEthernetFrameFromUni(EtherFrame *frame)
+void OnuMacLayer::handleEthernetFrameFromUni(EtherFrame *frame)
 {
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 	ev << getFullPath() << ": A frame from UNI received" << endl;
 #endif
 
@@ -40,7 +40,7 @@ void HybridPonMac::handleEthernetFrameFromUni(EtherFrame *frame)
 		busyQueue += frame->getBitLength();
 		queue.insert(frame);
 
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 		ev << getFullPath() << ": busyQueue = " << busyQueue << endl;
 #endif
 
@@ -50,21 +50,21 @@ void HybridPonMac::handleEthernetFrameFromUni(EtherFrame *frame)
 		//	         monitor->recordLossStats(frame->getSrcAddress(), frame->getDstnAddress(), frame->getBitLength() );
 		delete frame;
 
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 		ev << getFullPath() << ": A frame from UNI dropped!" << endl;
 #endif
 	}
 }
 
 ///
-/// Handle a data PON frame from the PON I/F.
-/// Extract Ethernet frames from it and send them to the upper layer (i.e., Ethernet switch).
+/// Handles a data PON frame from the PON I/F (i.e., OLT).
+/// Extracts Ethernet frames from it and sends them to the upper layer (i.e., Ethernet switch).
 ///
 /// @param[in] frame a HybridPonDsDataFrame pointer
 ///
-void HybridPonMac::handleDataFromPon(HybridPonDsDataFrame *frame)
+void OnuMacLayer::handleDataPonFrameFromPon(HybridPonDsDataFrame *frame)
 {
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 	ev << getFullPath() << ": data PON frame received" << endl;
 #endif
 
@@ -79,15 +79,15 @@ void HybridPonMac::handleDataFromPon(HybridPonDsDataFrame *frame)
 }
 
 ///
-/// Handle a grant PON frame from the PON I/F.
-/// Creates a new PON frame, encapsulate Ethernet frames from the FIFO queue in it,
-/// and send it back to the PON I/F.
+/// Handles a grant PON frame from the PON I/F (i.e., OLT).
+/// Creates a new PON frame, encapsulates Ethernet frames from the FIFO queue in it,
+/// and sends it back to the PON I/F.
 ///
 /// @param[in] frame a HybridPonDsGrantFrame pointer
 ///
-void HybridPonMac::handleGrantFromPon(HybridPonDsGrantFrame *ponFrameDs)
+void OnuMacLayer::handleGrantPonFrameFromPon(HybridPonDsGrantFrame *ponFrameDs)
 {
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 	ev << getFullPath() << ": grant PON frame received =" << PonFrameDs->getGrant() << endl;
 #endif
 
@@ -133,7 +133,7 @@ void HybridPonMac::handleGrantFromPon(HybridPonDsGrantFrame *ponFrameDs)
 	ponFrameUs->setBitLength(PREAMBLE_SIZE + DELIMITER_SIZE + REPORT_SIZE
 			+ encapsulatedFramesSize);
 
-#ifdef DEBUG_HYBRID_PON_MAC
+#ifdef DEBUG_ONU_MAC_LAYER
 	ev << getFullPath() << ": PON frame sent upstream with length = " <<
 	ponFrameUs->getBitLength() << " and report = " << ponFrameUs->getReport() << endl;
 #endif
@@ -147,28 +147,27 @@ void HybridPonMac::handleGrantFromPon(HybridPonDsGrantFrame *ponFrameDs)
 }
 
 ///
-/// Initialize member variables and allocate memory for them, if needed.
+/// Initializes member variables and allocates memory for them, if needed.
 ///
-void HybridPonMac::initialize()
+void OnuMacLayer::initialize()
 {
 //	channel = (int) getParentModule()->par("lambda");
 	queueSize = par("queueSize");
 	busyQueue = 0;
 
 	// 	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
-	// #ifdef DEBUG_HYBRID_PON_MAC
+	// #ifdef DEBUG_ONU_MAC_LAYER
 	// 	ev << getFullPath() << ": monitor pointing to module with id = " << monitor->getId() << endl;
 	// #endif
 }
 
 ///
-/// Handle messages by calling appropriate functions for their
-/// processing. Start simulation and run until it will be terminated by
-/// kernel.
+/// Handles messages by calling appropriate functions for their processing.
+/// Starts simulation and run until it will be terminated by kernel.
 ///
 /// @param[in] msg a cMessage pointer
 ///
-void HybridPonMac::handleMessage(cMessage *msg)
+void OnuMacLayer::handleMessage(cMessage *msg)
 {
 	//#ifdef TRACE_MSG
 	//	ev.printf();
@@ -189,12 +188,12 @@ void HybridPonMac::handleMessage(cMessage *msg)
 		if (frameType == 0)
 		{
 			// downstream data
-			handleDataFromPon(check_and_cast<HybridPonDsDataFrame *> (msg));
+			handleDataPonFrameFromPon(check_and_cast<HybridPonDsDataFrame *> (msg));
 		}
 		else if (frameType == 1)
 		{
 			// grant
-			handleGrantFromPon(check_and_cast<HybridPonDsGrantFrame *> (msg));
+			handleGrantPonFrameFromPon(check_and_cast<HybridPonDsGrantFrame *> (msg));
 		}
 	}
 	else if (msg->getArrivalGateId() == findGate("ethg$i"))
@@ -212,8 +211,8 @@ void HybridPonMac::handleMessage(cMessage *msg)
 }
 
 ///
-/// Do post-processing.
+/// Does post-processing.
 ///
-void HybridPonMac::finish()
+void OnuMacLayer::finish()
 {
 }

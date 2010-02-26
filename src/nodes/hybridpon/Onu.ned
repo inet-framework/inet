@@ -1,19 +1,22 @@
-// $Id$
-//------------------------------------------------------------------------------
-//	Onu.ned --
-//
-//	This file defines a PON ONU module.
-//
-//	Copyright (C) 2009 Kyeong Soo (Joseph) Kim
-//------------------------------------------------------------------------------
+///
+/// @file   Onu.ned
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   Feb/25/2010
+///
+/// @brief  Defines a hybrid TDM/WDM-PON ONU module.
+///
+/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+///
 
 
 package inet.nodes.hybridpon;
 
 import inet.nodes.ethernet.EtherSwitch;
-//import inet.linklayer.ethernet.EtherMAC;
-//import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.hybridpon.HybridPonMac;
+import inet.linklayer.hybridpon.OnuMacLayer;
 import inet.linklayer.hybridpon.OnuWdmLayer;
 
 module Onu
@@ -21,19 +24,19 @@ module Onu
     parameters:
         @node();
         @display("i=device/smallrouter;bgb=188,228;bgp=2,2");
-        int lambda; // WDM channel assigned to this ONU
-        int numUsersPerOnu; // how many users in this ONU
-        int queueSize @unit(bit); // size of FIFO queue in the Mac [bit]
+        int queueSize @unit(bit) = default(8e7b); // size of FIFO queue in the Mac [bit]
+//        int ch; // WDM channel assigned to this ONU
+//        int numUsersPerOnu; // how many users in this ONU
     gates:
-        inout ethg[numUsersPerOnu];	// User Network I/F
-        inout pong;					// PON I/F (i.e., toward AWG)
+        inout ethg[];	// User Network I/F
+        inout pong;		// PON I/F (i.e., with AWG)
         //        output fromMacToMonitor;
     submodules:
         switch: EtherSwitch {
             parameters:
                 @display("p=92,59");
         }
-        mac: HybridPonMac {
+        mac: OnuMacLayer {
             parameters:
                 @display("p=92,124");
                 queueSize = queueSize;
@@ -42,25 +45,12 @@ module Onu
             parameters:
                 @display("p=92,185");
         }
-    //        etherSwitch: EtherSwitch {
-    //            @display("p=92,60");
-    //        }
-    //        eth[sizeof(ethGate)]: EtherMAC {
-    //            parameters:
-    //                promiscuous = true;
-    //                queueModule = "";
-    //                @display("p=70,150,row;q=queue");
-    //        }        
-    //        eth[sizeof(ethGate)]: EtherMac {
-    //            parameters:
-    //                @display("p=145,257,row,110;q=l2queue");
-    //        }
     connections:
         //        mac.toMonitor --> fromMacToMonitor;
-        for i=0..numUsersPerOnu-1 {
+        for i=0..sizeof(ethg)-1 {
             ethg++ <--> switch.ethg++;
         }
-        switch.ethg[numUserPerOnu] <--> mac.ethg;
+        switch.ethg++ <--> mac.ethg;
         mac.wdmg <--> wdm.demuxg;
         wdm.muxg <--> pong;
 }
