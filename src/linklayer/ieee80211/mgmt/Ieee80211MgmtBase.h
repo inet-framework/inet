@@ -72,7 +72,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void sendOrEnqueue(cPacket *frame);
 
     /** Redefined from PassiveQueueBase. */
-    virtual bool enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg);
 
     /** Redefined from PassiveQueueBase. */
     virtual cMessage *dequeue();

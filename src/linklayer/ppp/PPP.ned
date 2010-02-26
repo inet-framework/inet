@@ -50,10 +50,16 @@ simple PPP
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
         int mtu = default(4470);
         @display("i=block/rxtx");
+        @signal[txState](title="TX State"; modeHint=timeavg;interpolationmode=sample-hold;);
+        @signal[txPkBytes](title="TX packet bytes"; modeHint=sum,count);
+        @signal[rxPkBytesOk](title="RX packet bytes OK"; modeHint=sum,count);
+        @signal[droppedPkBytesBitError](title="Dropped packet bytes bit error"; modeHint=sum,count);
+        @signal[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; modeHint=sum,count);
+        @signal[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; modeHint=sum,count);
+        @signal[passedUpPkBytes](title="Passed packet bytes to higher layer"; modeHint=sum,count);
+
     gates:
         input netwIn;
         output netwOut;
         inout phys @labels(PPPFrame);
 }
-
-

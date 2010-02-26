@@ -29,6 +29,7 @@ void UDPSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     int port = par("localPort");
     if (port!=-1)
@@ -51,6 +52,7 @@ void UDPSink::handleMessage(cMessage *msg)
 void UDPSink::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     printPacket(msg);
     delete msg;
 

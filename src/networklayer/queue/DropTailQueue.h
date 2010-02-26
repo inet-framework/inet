@@ -37,7 +37,6 @@ class INET_API DropTailQueue : public PassiveQueueBase
 
     // statistics
     simsignal_t queueLengthSignal;
-    simsignal_t droppedPkBytesSignal;
 
   protected:
     virtual void initialize();
@@ -45,7 +44,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual bool enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg);
 
     /**
      * Redefined from PassiveQueueBase.

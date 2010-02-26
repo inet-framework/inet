@@ -102,7 +102,7 @@ void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
     PassiveQueueBase::handleMessage(frame);
 }
 
-bool Ieee80211MgmtBase::enqueue(cMessage *msg)
+cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
 {
     ASSERT(dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg)!=NULL);
     bool isDataFrame = dynamic_cast<Ieee80211DataFrame *>(msg)!=NULL;
@@ -111,19 +111,18 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     {
         // management frames are inserted into mgmtQueue
         mgmtQueue.insert(msg);
-        return false;
+        return NULL;
     }
     else if (frameCapacity && dataQueue.length() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
-        delete msg;
-        return true;
+        return msg;
     }
     else
     {
         dataQueue.insert(msg);
         emit(dataQueueLenSignal, (long)(dataQueue.length()));
-        return false;
+        return NULL;
     }
 }
 

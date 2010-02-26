@@ -34,8 +34,9 @@ moduleinterface OutputQueue
     parameters:
         @display("i=block/queue");
         // From PassiveQueueBase:
-        @signal[rcvdPacket](title="Received packets";modeHint=count);
-        @signal[droppedPacket](title="Dropped packets";modeHint=count);
+        @signal[rcvdPkBytes](title="Received packet Bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Received packet Bytes";modeHint=count,sum);
+        @signal[droppedPkBytes](title="Dropped packet Bytes";modeHint=count,sum);
         @signal[queueingTime](title="Delaying time of packets";unit=s;modeHint=histogram,stats);
     gates:
         input in;

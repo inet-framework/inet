@@ -209,6 +209,10 @@ class INET_API RTP : public cSimpleModule
 
     protected:
         int appInGate, profileInGate, rtcpInGate, udpInGate;
+
+        //statistics:
+        simsignal_t rcvdPkBytesSignal;
+        simsignal_t endToEndDelaySignal;
 };
 
 #endif

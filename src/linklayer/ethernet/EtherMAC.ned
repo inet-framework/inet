@@ -149,15 +149,15 @@ simple EtherMAC
         @display("i=block/rxtx");
         @signal[collision](title="Collision";modeHint=count);
         @signal[backoff](title="Backoff";modeHint=count);
-        @signal[txPkBytes](title="Sent bytes";modeHint=sum,count);
-        @signal[rxPkBytesOk](title="title";modeHint=sum,count);
-        @signal[passedUpPkBytes](title="Passed bytes to higher layer";modeHint=sum,count);
+        @signal[txPkBytes](title="TX bytes";modeHint=sum,count);
+        @signal[rxPkBytesOk](title="RX bytes";modeHint=sum,count);
+        @signal[passedUpPkBytes](title="Passed up packet bytes to higher layer";modeHint=sum,count);
         @signal[txPausePkUnits](title="Sent pause";modeHint=count,stats);
         @signal[rxPausePkUnits](title="Received pause";modeHint=count,stats);
-        @signal[rxPkBytesFromHL](title="Received bytes from higher layer";modeHint=sum,count);
-        @signal[droppedPkBytesNotForUs](title="Dropped bytes not for us";modeHint=sum,count);
-        @signal[droppedPkBytesBitError](title="Dropped bytes bit error";modeHint=sum,count);
-        @signal[droppedPkBytesIfaceDown](title="Dropped msg Iface down";modeHint=sum,count);
+        @signal[rxPkBytesFromHL](title="Received packet bytes from higher layer";modeHint=sum,count);
+        @signal[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";modeHint=sum,count);
+        @signal[droppedPkBytesBitError](title="Dropped packet bytes bit error";modeHint=sum,count);
+        @signal[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";modeHint=sum,count);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP

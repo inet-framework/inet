@@ -43,6 +43,11 @@ void SCTPClient::initialize()
     WATCH(packetsRcvd);
     WATCH(bytesSent);
     WATCH(bytesRcvd);
+
+	sentPkBytesSignal = registerSignal("sentPkBytes");
+	rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+	sentEchoedPkBytesSignal = registerSignal("sentEchoedPkBytes");
+
     // parameters
     address=par("address");
 
@@ -260,14 +265,17 @@ void SCTPClient::sendRequestArrived()
 void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 {
     packetsRcvd++;
+
     sctpEV3<<"Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
     SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->removeControlInfo());
+	emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     bytesRcvd+=msg->getByteLength();
     if (echoFactor > 0)
     {
         SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
-        echoedBytesSent+=smsg->getBitLength()/8;
+		echoedBytesSent += smsg->getByteLength();
+		emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
         cmsg->encapsulate(smsg);
         if (ind->getSendUnordered())
             cmsg->setKind(SCTP_C_SEND_UNORDERED);
@@ -321,6 +329,7 @@ void SCTPClient::sendRequest(bool last)
         last = true;
     socket.send(cmsg, last);
     bytesSent+=sendBytes;
+    emit(sentPkBytesSignal, (long)sendBytes);
 }
 
 void SCTPClient::handleTimer(cMessage *msg)

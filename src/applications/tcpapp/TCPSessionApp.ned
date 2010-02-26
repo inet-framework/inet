@@ -69,6 +69,10 @@ simple TCPSessionApp like TCPApp
         string sendScript = default("");
         double tClose @unit("s") = default(2s);
         @display("i=block/app");
+        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes"; modeHint=count,sum);
+        @signal[rcvdIndications](title="Received indications"; modeHint=count); //enum msg->getKind()
+
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

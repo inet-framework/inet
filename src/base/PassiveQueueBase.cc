@@ -19,6 +19,12 @@
 #include <omnetpp.h>
 #include "PassiveQueueBase.h"
 
+static long getMsgByteLength(cMessage* msg)
+{
+    if (msg->isPacket())
+        return (long)(((cPacket*)msg)->getByteLength());
+    return 0; // Unknown value
+}
 
 void PassiveQueueBase::initialize()
 {
@@ -29,33 +35,41 @@ void PassiveQueueBase::initialize()
     // statistics
     numQueueReceived = 0;
     numQueueDropped = 0;
-    rcvdPacketSignal = registerSignal("rcvdPacket");
-    droppedPacketSignal = registerSignal("droppedPacket");
-    queueingTimeSignal = registerSignal("queueingTime");
-
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    droppedPkBytesSignal = registerSignal("droppedPkBytes");
+    queueingTimeSignal = registerSignal("queueingTime");
+
+    msgId2TimeMap.clear();
 }
 
 void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
 
-    emit(rcvdPacketSignal, 1L);
+    long msgBytes = getMsgByteLength(msg);
+
+    emit(rcvdPkBytesSignal, msgBytes);
     if (packetRequested>0)
     {
         packetRequested--;
+        emit(sentPkBytesSignal, msgBytes);
         emit(queueingTimeSignal, 0L);
         sendOut(msg);
     }
     else
     {
-        msg->setTimestamp();
-        bool dropped = enqueue(msg);
-        if (dropped)
+        msgId2TimeMap[msg->getId()] = simTime();
+        cMessage *droppedMsg = enqueue(msg);
+        if (droppedMsg)
         {
             numQueueDropped++;
-            emit(droppedPacketSignal, 1L);
+            emit(droppedPkBytesSignal, getMsgByteLength(droppedMsg));
+            msgId2TimeMap.erase(droppedMsg->getId());
+            delete droppedMsg;
         }
     }
 
@@ -78,11 +92,14 @@ void PassiveQueueBase::requestPacket()
     }
     else
     {
-        emit(queueingTimeSignal, simTime() - msg->getTimestamp());
+        emit(sentPkBytesSignal, getMsgByteLength(msg));
+        emit(queueingTimeSignal, simTime() - msgId2TimeMap[msg->getId()]);
+        msgId2TimeMap.erase(msg->getId());
         sendOut(msg);
     }
 }
 
 void PassiveQueueBase::finish()
 {
+    msgId2TimeMap.clear();
 }

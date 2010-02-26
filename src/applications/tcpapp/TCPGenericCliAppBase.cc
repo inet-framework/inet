@@ -93,7 +93,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     socket.send(msg);
 
     packetsSent++;
-    bytesSent+=numBytes;
+    bytesSent += numBytes;
     emit(sentPkBytesSignal, (long int)numBytes);
 }
 
@@ -113,8 +113,8 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
-    bytesRcvd+=msg->getByteLength();
-    emit(rcvdPkBytesSignal, (long int)(msg->getByteLength()));
+    bytesRcvd += msg->getByteLength();
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
 
     delete msg;
 }

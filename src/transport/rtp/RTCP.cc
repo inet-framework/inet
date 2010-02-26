@@ -50,6 +50,9 @@ void RTCP::initialize()
     _averagePacketSize = 0.0;
 
     _participantInfos = new cArray("ParticipantInfos");
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
 RTCP::~RTCP()
@@ -202,6 +205,8 @@ void RTCP::connectRet()
 void RTCP::readRet(cPacket *sifpIn)
 {
     RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
+    emit(rcvdPkBytesSignal, (long)(sifpIn->getByteLength()));
+    emit(endToEndDelaySignal, simTime()-sifpIn->getCreationTime());
     processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
 }
 

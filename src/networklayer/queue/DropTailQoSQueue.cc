@@ -25,7 +25,7 @@ Define_Module(DropTailQoSQueue);
 DropTailQoSQueue::DropTailQoSQueue()
 {
     queues = NULL;
-    numQueues = NULL;
+    numQueues = 0;
 }
 
 DropTailQoSQueue::~DropTailQoSQueue()
@@ -57,7 +57,7 @@ void DropTailQoSQueue::initialize()
     }
 }
 
-bool DropTailQoSQueue::enqueue(cMessage *msg)
+cMessage *DropTailQoSQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
     cQueue *queue = queues[queueIndex];
@@ -65,13 +65,12 @@ bool DropTailQoSQueue::enqueue(cMessage *msg)
     if (frameCapacity && queue->length() >= frameCapacity)
     {
         EV << "Queue " << queueIndex << " full, dropping packet.\n";
-        delete msg;
-        return true;
+        return msg;
     }
     else
     {
         queue->insert(msg);
-        return false;
+        return NULL;
     }
 }
 
@@ -79,8 +78,10 @@ cMessage *DropTailQoSQueue::dequeue()
 {
     // queue 0 is highest priority
     for (int i=0; i<numQueues; i++)
+    {
         if (!queues[i]->empty())
             return (cMessage *)queues[i]->pop();
+    }
     return NULL;
 }
 
@@ -88,5 +89,3 @@ void DropTailQoSQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
 }
-
-

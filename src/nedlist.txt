@@ -1,0 +1,107 @@
+FONTOS
+simple SCTPClient like SCTPApp - ok
+simple SCTPPeer like SCTPApp - ok
+simple SCTPServer like SCTPApp -- ez nagyon zavaros kód.... ha delay != 0, akkor a generateAndSend,sendOrSchedule,handlemessage,handleTimer,generateAndSend körbe-körbe, és msg törlés sincs...
+
+simple UDP - ???
+
+simple UDPBasicApp like UDPApp - ok
+simple UDPEchoApp like UDPApp - ok
+simple UDPSink like UDPApp - ok
+
+simple RTPApplication - ??? - Activity()
+
+simple TCPSpoof
+simple TelnetApp like TCPApp    - ok (TCPGenericCliAppBase)
+simple TCPSessionApp like TCPApp - ok
+simple TCPSrvHostApp like TCPApp - tömbös kéne
+simple TCPEchoApp like TCPApp - ok
+
+simple PPP - ok
+simple RTP - ok
+simple RTCP - ok
+simple IPTrafSink like IPTrafficGenerator
+simple IPTrafGen like IPTrafficGenerator
+-----------------------------------------------------------------------
+KÉSŐBB
+simple TCP_NSC like ITCP
+simple TCP like ITCP
+simple TCP_old like ITCP
+simple SCTP
+simple RTPPayloadSender like IRTPPayloadSender
+simple RTPAVProfilePayload10Sender like IRTPPayloadSender
+simple RTPAVProfilePayload32Sender like IRTPPayloadSender
+simple RTPAVProfileSampleBasedAudioSender like IRTPPayloadSender
+simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
+simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
+simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
+simple RTPProfile
+simple RTPAVProfile
+simple ThruputMeter
+simple ExtInterface
+simple Ieee80211MgmtSTASimplified like Ieee80211Mgmt
+simple Ieee80211MgmtSTA like Ieee80211Mgmt
+simple Ieee80211MgmtAP like Ieee80211Mgmt
+simple Ieee80211MgmtAdhoc like Ieee80211Mgmt
+simple Ieee80211MgmtAPSimplified like Ieee80211Mgmt
+simple Decider80211
+simple SnrDecider
+simple ErrAndCollDecider
+simple GilbertElliotSnr
+simple SnrEval80211
+simple SnrEval
+simple CSMAMacLayer
+simple Mac80211
+simple EtherBus
+simple GenericRadio like Radio
+simple Ieee80211Radio like Radio
+simple BasicDecider
+simple WirelessMac
+simple BasicSnrEval
+simple ICMPv6
+simple IPv6NeighbourDiscovery
+simple RSVP
+simple SimpleClassifier
+simple LDP
+simple IPv6
+simple RoutingTable6
+simple IPv6ErrorHandling
+simple LIBTable
+simple MPLS
+simple OSPFRouting
+simple LinkStateRouting
+simple RoutingTable
+simple ErrorHandling
+simple ICMP
+simple DropTailQoSQueue like OutputQueue
+simple TCPDump {
+simple NAMTraceWriter
+-----------------------------------------------------------------------
+NEMKELL
+simple Blackboard
+simple NotificationBoard
+simple Join
+simple InterfaceTable
+simple TurtleMobility like BasicMobility
+simple NullMobility like BasicMobility
+simple MassMobility like BasicMobility
+simple RectangleMobility like BasicMobility
+simple RandomWPMobility like BasicMobility
+simple ConstSpeedMobility like BasicMobility
+simple LinearMobility like BasicMobility
+simple CircleMobility like BasicMobility
+simple ANSimMobility like BasicMobility
+simple BonnMotionMobility like BasicMobility
+simple ScenarioManager
+simple NAMTrace
+simple ChannelControl
+simple ChannelInstaller
+simple FlatNetworkConfigurator6
+simple FlatNetworkConfigurator
+simple NetworkConfigurator
+simple NetworkInfo
+simple FailureManager
+simple Dummy
+simple TED
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------

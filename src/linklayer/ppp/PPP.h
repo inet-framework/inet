@@ -57,6 +57,14 @@ class INET_API PPP : public cSimpleModule, public INotifiable
     long numBitErr;
     long numDroppedIfaceDown;
 
+    simsignal_t txStateSignal;
+    simsignal_t txPkBytesSignal;
+    simsignal_t rxPkBytesOkSignal;
+    simsignal_t droppedPkBytesIfaceDownSignal;
+    simsignal_t droppedPkBytesBitErrorSignal;
+    simsignal_t passedUpPkBytesSignal;
+    simsignal_t rcvdPkBytesFromHLSignal;
+
   protected:
     virtual InterfaceEntry *registerInterface(double datarate);
     virtual void startTransmitting(cPacket *msg);
@@ -79,5 +87,3 @@ class INET_API PPP : public cSimpleModule, public INotifiable
 };
 
 #endif
-
-

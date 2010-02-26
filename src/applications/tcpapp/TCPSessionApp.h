@@ -39,6 +39,9 @@ class INET_API TCPSessionApp : public cSimpleModule
     int packetsRcvd;
     int bytesRcvd;
     int indicationsRcvd;
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t sentPkBytesSignal;
+    simsignal_t rcvdIndicationsSignal;
 
   public:
     TCPSessionApp() : cSimpleModule(65536) {}

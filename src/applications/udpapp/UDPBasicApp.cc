@@ -39,6 +39,8 @@ void UDPBasicApp::initialize(int stage)
     numReceived = 0;
     WATCH(numSent);
     WATCH(numReceived);
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     localPort = par("localPort");
     destPort = par("destPort");
@@ -79,6 +81,8 @@ void UDPBasicApp::sendPacket()
 {
     cPacket *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr();
+
+    emit(sentPkBytesSignal, (long)(payload->getByteLength()));
     sendToUDP(payload, localPort, destAddr, destPort);
 
     numSent++;
@@ -111,8 +115,8 @@ void UDPBasicApp::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
     printPacket(msg);
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     delete msg;
 
     numReceived++;
 }
-

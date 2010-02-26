@@ -32,6 +32,8 @@ void REDQueue::initialize()
     avgQueueLengthSignal = registerSignal("avgQueueLength");
     earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
 
+    emit(queueLengthSignal, (long)(queue.length()));
+
     // configuration
     wq = par("wq");
     minth = par("minth");
@@ -53,7 +55,7 @@ void REDQueue::initialize()
     WATCH(numEarlyDrops);
 }
 
-bool REDQueue::enqueue(cMessage *msg)
+cMessage *REDQueue::enqueue(cMessage *msg)
 {
     //"
     // for each packet arrival
@@ -124,8 +126,7 @@ bool REDQueue::enqueue(cMessage *msg)
     // carry out decision
     if (mark || queue.length()>=maxth) // maxth is also the "hard" limit
     {
-        delete msg;
-        return true;
+        return msg;
     }
     else
     {
@@ -133,7 +134,7 @@ bool REDQueue::enqueue(cMessage *msg)
 
         emit(queueLengthSignal, (long)(queue.length()));
 
-        return false;
+        return NULL;
     }
 }
 

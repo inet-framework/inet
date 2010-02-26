@@ -229,8 +229,11 @@ class INET_API RTCP : public cSimpleModule
          * one of this size has been sent or received.
          */
         virtual void calculateAveragePacketSize(int size);
+
+    protected:
+        //statistics
+        simsignal_t rcvdPkBytesSignal;
+        simsignal_t endToEndDelaySignal;
 };
 
 #endif
-
-

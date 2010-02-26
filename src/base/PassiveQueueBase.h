@@ -19,6 +19,8 @@
 #ifndef __INET_PASSIVEQUEUEBASE_H
 #define __INET_PASSIVEQUEUEBASE_H
 
+#include <map>
+
 #include <omnetpp.h>
 #include "IPassiveQueue.h"
 
@@ -32,6 +34,9 @@
 class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 {
   protected:
+    typedef std::map<long, simtime_t> MsgId2TimeMap;
+    MsgId2TimeMap msgId2TimeMap;
+
     // state
     int packetRequested;
 
@@ -39,15 +44,13 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int numQueueReceived;
     int numQueueDropped;
 
-    /** Emit signal with value 1 when receive a packet. */
-    simsignal_t rcvdPacketSignal;
-
-    /** Emit signal with value 1 when dropped a packet (enqueue returns true). */
-    simsignal_t droppedPacketSignal;
-
-    /** Emit signal with value of delaying when sent out a packet.
-     * It's use setTimestamp() and getTimestamp() functions of cMessage for measure delaying time.
-     */
+    /** Signal with size (or 0 if unknown) of packet when received it */
+    simsignal_t rcvdPkBytesSignal;
+    /** Signal with size (or 0 if unknown) of packet when sent out it */
+    simsignal_t sentPkBytesSignal;
+    /** Signal with size (or 0 if unknown) of packet when dropped it */
+    simsignal_t droppedPkBytesSignal;
+    /** Signal with value of delaying time when sent out a packet. */
     simsignal_t queueingTimeSignal;
 
   protected:
@@ -57,9 +60,9 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 
     /**
      * Inserts packet into the queue or the priority queue, or drops it
-     * (or another packet). Returns true if a packet was dropped.
+     * (or another packet). Returns NULL if successful, or the pointer of the dropped packet.
      */
-    virtual bool enqueue(cMessage *msg) = 0;
+    virtual cMessage *enqueue(cMessage *msg) = 0;
 
     /**
      * Returns a packet from the queue, or NULL if the queue is empty.

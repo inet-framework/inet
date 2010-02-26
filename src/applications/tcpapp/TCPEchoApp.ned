@@ -44,8 +44,10 @@ simple TCPEchoApp like TCPApp
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
         @display("i=block/app");
+        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes"; modeHint=count,sum);
+
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
-

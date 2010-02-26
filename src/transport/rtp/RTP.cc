@@ -47,6 +47,9 @@ void RTP::initialize()
     profileInGate = findGate("profileIn");
     rtcpInGate = findGate("rtcpIn");
     udpInGate = findGate("udpIn");
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
 
@@ -351,6 +354,9 @@ void RTP::readRet(cMessage *sifp)
     if ( ! _leaveSession)
     {
          RTPPacket *msg = check_and_cast<RTPPacket *>(sifp);
+
+         emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+         emit(endToEndDelaySignal, simTime()-msg->getCreationTime());
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");

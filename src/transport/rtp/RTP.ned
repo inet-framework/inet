@@ -14,6 +14,9 @@ simple RTP
 {
     parameters:
         @display("i=block/buffer");
+        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
+        @signal[endToEndDelay](title="End to end delay"; modeHint=stats,histogram);
+
     gates:
         input appIn @labels(RTPInterfacePacket/down);
         input profileIn @labels(RTPInnerPacket);
@@ -24,5 +27,3 @@ simple RTP
         output rtcpOut @labels(RTPInnerPacket);
         output udpOut @labels(UDPControlInfo/down);
 }
-
-

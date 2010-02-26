@@ -27,6 +27,7 @@ simple UDPSink like UDPApp
     parameters:
         int localPort; // if -1, app doesn't bind in UDP
         @display("i=block/sink");
+        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
