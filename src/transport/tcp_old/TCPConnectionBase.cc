@@ -57,7 +57,7 @@ TCPStateVariables::TCPStateVariables()
     snd_fin_seq = 0;
     fin_rcvd = false;
     rcv_fin_seq = 0;
-
+    afterRto = false;
 }
 
 std::string TCPStateVariables::info() const

@@ -44,15 +44,21 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     if (event==TCP_E_ABORT)
         return;
 
-    // begin Slow Start (RFC2001)
+    // begin Slow Start (RFC 2581)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
     if (cwndVector) cwndVector->record(state->snd_cwnd);
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
+    state->afterRto = true;
+
     // Reno retransmits all data (unlike Tahoe which transmits only the segment)
-    conn->retransmitData();
+    // conn->retransmitData();
+    // After REXMIT timeout TCP Reno should start slow start with snd_cwnd = snd_mss.
+    // If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
+    // therefore "sendData();" has been modified and is called to rexmit outstanding data.
+    conn->retransmitOneSegment();
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
@@ -129,10 +135,6 @@ void TCPReno::receivedDuplicateAck()
     {
         tcpEV << "Reno on dupAck=3: perform Fast Retransmit, and enter Fast Recovery:";
 
-        // Fast Retransmission: retransmit missing segment without waiting
-        // for the REXMIT timer to expire
-        conn->retransmitOneSegment();
-
         // enter slow start
         // "set cwnd to ssthresh plus 3 times the segment size." (rfc 2001)
         recalculateSlowStartThreshold();
@@ -141,12 +143,13 @@ void TCPReno::receivedDuplicateAck()
 
         tcpEV << "set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
-        // restart retransmission timer (with rexmit_count=0), and cancel round-trip time measurement
-        // (see p972 "29.4 Fast Retransmit and Fast Recovery Algorithms" of
-        // TCP/IP Illustrated, Vol2) -- but that's probably New Reno
-        cancelEvent(rexmitTimer);
-        startRexmitTimer();
-        state->rtseq_sendtime = 0;
+        // Fast Retransmission: retransmit missing segment without waiting
+        // for the REXMIT timer to expire
+        conn->retransmitOneSegment();
+
+        // Do not restart REXMIT timer.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
     else if (state->dupacks > 3)
     {

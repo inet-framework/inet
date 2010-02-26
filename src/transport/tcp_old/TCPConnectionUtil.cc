@@ -453,6 +453,10 @@ void TCPConnection::sendSegment(int bytes)
 
     state->snd_nxt += bytes;
 
+    // check if afterRto bit can be reset
+    if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
+        state->afterRto = false;
+	
     if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
     {
         tcpEV << "Setting FIN on segment\n";
@@ -465,8 +469,11 @@ void TCPConnection::sendSegment(int bytes)
 
 bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
 {
-    // we'll start sending from snd_max
-    state->snd_nxt = state->snd_max;
+    if (!state->afterRto) 
+    {
+        // we'll start sending from snd_max
+        state->snd_nxt = state->snd_max;
+    }
 
     // check how many bytes we have
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
@@ -537,7 +544,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    state->snd_max = state->snd_nxt;
+    state->snd_max = std::max (state->snd_nxt, state->snd_max);
     if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
     // notify (once is enough)

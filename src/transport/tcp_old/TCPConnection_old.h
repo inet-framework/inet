@@ -193,6 +193,8 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool fin_rcvd;       // whether FIN received or not
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
 
+    bool afterRto;       // set when the retransmission timer expires, reset when snd_nxt == snd_max or snd_una == snd_max
+
     //bool rcv_up_valid;
     //uint32 rcv_buf_seq;
     //unsigned long rcv_buff;

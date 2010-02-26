@@ -1,3 +1,7 @@
+2010-02-26 Andras Varga
+
+	* patch from Thomas Reschka:
+
 2009-03-01 Andras Varga
 
 	* fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
