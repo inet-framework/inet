@@ -516,6 +516,8 @@ class INET_API TCPConnection
     static const char *eventName(int event);
     /** Utility: returns name of TCP_I_xxx constants */
     static const char *indicationName(int code);
+    /** Utility: returns name of TCPOPTION_xxx constants */
+    static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
     /** Utility: update receive window (rcv_wnd) */

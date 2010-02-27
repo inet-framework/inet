@@ -106,6 +106,19 @@ const char *TCPConnection::indicationName(int code)
 #undef CASE
 }
 
+const char *TCPConnection::optionName(int option)
+{
+    switch (option)
+    {
+        case TCPOPTION_END_OF_OPTION_LIST:   return "EOL";
+        case TCPOPTION_NO_OPERATION:         return "NOP";
+        case TCPOPTION_MAXIMUM_SEGMENT_SIZE: return "MSS";
+        case TCPOPTION_SACK_PERMITTED:       return "SACK_PERMITTED";
+        case TCPOPTION_SACK:                 return "SACK";
+        default:                             return "unknown";
+    }
+}
+
 void TCPConnection::printConnBrief()
 {
     tcpEV << "Connection ";
@@ -739,42 +752,31 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
         const TCPOption& option = tcpseg->getOptions(i);
         short kind = option.getKind();
         short length = option.getLength();
-        tcpEV << "Received TCP option of kind " << kind << " with length " << length << "\n";
+        tcpEV << "Option type " << kind << " (" << optionName(kind) << "), length " << length << "\n";
         bool ok = true;
         switch(kind)
         {
             case TCPOPTION_END_OF_OPTION_LIST: // EOL=0
-                tcpEV << "Option type: EOL\n";
-                if (length != 1)
-                {
-                    tcpEV << "ERROR: EOL option length incorrect\n";
-                    ok = false;
-                }
-                break;
             case TCPOPTION_NO_OPERATION: // NOP=1
-                tcpEV << "Option type: NOP\n";
                 if (length != 1)
                 {
-                    tcpEV << "ERROR: NOP option length incorrect\n";
+                    tcpEV << "ERROR: option length incorrect\n";
                     ok = false;
                 }
                 break;
             case TCPOPTION_MAXIMUM_SEGMENT_SIZE: // MSS=2
-                tcpEV << "Option type: MSS\n";
                 ok = processMSSOption(tcpseg, option);
                 break;
             case TCPOPTION_SACK_PERMITTED: // SACK_PERMITTED=4
-                tcpEV << "Option type: SACK_PERMITTED\n";
                 ok = processSACKPermittedOption(tcpseg, option);
                 break;
             case TCPOPTION_SACK: // SACK=5
-                tcpEV << "Option type: SACK\n";
                 ok = processSACKOption(tcpseg, option);
                 break;
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TCPAlgorithm as well -- it may want to recognized additional options
             default:
-                tcpEV << "ERROR: Unsupported option received, kind=" << kind << "\n";
+                tcpEV << "ERROR: Unsupported TCP option kind " << kind << "\n";
                 break;
         }
         (void)ok; // unused
@@ -785,13 +787,7 @@ bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option
 {
     if (option.getLength() != 4)
     {
-        tcpEV << "ERROR: MSS option length incorrect\n";
-        return false;
-    }
-
-    if (option.getValuesArraySize() == 0)
-    {
-        tcpEV << "ERROR: TCP Header Option MSS received, but no SMSS value present\n";
+        tcpEV << "ERROR: option length incorrect\n";
         return false;
     }
 
@@ -799,6 +795,12 @@ bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option
     {
         tcpEV << "ERROR: TCP Header Option MSS received, but in unexpected state\n";
         return false;
+    }
+
+    if (option.getValuesArraySize() == 0)
+    {
+        // since option.getLength() was already checked, this is a programming error not a TCP error
+        throw cRuntimeError("TCPOption for MSS does not contain the data its getLength() promises");
     }
 
     // RFC 2581, page 1:
@@ -826,7 +828,7 @@ bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOpti
 {
     if (option.getLength() != 2)
     {
-        tcpEV << "ERROR: SACK_PERMITTED option length incorrect\n";
+        tcpEV << "ERROR: length incorrect\n";
         return false;
     }
 
@@ -846,7 +848,7 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
 {
     if (option.getLength() % 8 != 2)
     {
-        tcpEV << "ERROR: SACK option length incorrect\n";
+        tcpEV << "ERROR: option length incorrect\n";
         return false;
     }
 
@@ -856,7 +858,6 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
         return false;
     }
 
-    // temporary variable
     int n = option.getValuesArraySize()/2;
     if (n > 0) // sacks present?
     {
