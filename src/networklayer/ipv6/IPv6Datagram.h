@@ -77,6 +77,7 @@ class INET_API IPv6ExtensionHeader : public IPv6ExtensionHeader_Base
     IPv6ExtensionHeader() : IPv6ExtensionHeader_Base() {}
     IPv6ExtensionHeader(const IPv6ExtensionHeader& other) : IPv6ExtensionHeader_Base() {operator=(other);}
     IPv6ExtensionHeader& operator=(const IPv6ExtensionHeader& other) {IPv6ExtensionHeader_Base::operator=(other); return *this;}
+    virtual IPv6ExtensionHeader *dup() const {throw cRuntimeError(this, "dup() should be redefined");}
     virtual IPProtocolId getExtensionType() const;
     virtual int getByteLength() const;
 };
