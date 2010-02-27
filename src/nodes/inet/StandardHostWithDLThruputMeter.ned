@@ -30,7 +30,7 @@ import inet.linklayer.ppp.PPPInterfaceWithDLThruputMeter;
 import inet.linklayer.ext.ExtInterface; //I.R.
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.transport.tcp.TCP;
+import inet.transport.tcp.ITCP;
 import inet.transport.udp.UDP;
 import inet.transport.sctp.SCTP;    //I.R.
 import inet.util.TCPDump;   //I.R.
@@ -50,6 +50,7 @@ module StandardHostWithDLThruputMeter
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");    //I.R.
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
@@ -83,7 +84,7 @@ module StandardHostWithDLThruputMeter
             parameters:
                 @display("p=163,54");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=163,141");
         }

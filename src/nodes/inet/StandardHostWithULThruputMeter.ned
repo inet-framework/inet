@@ -30,7 +30,7 @@ import inet.linklayer.ppp.PPPInterfaceWithULThruputMeter;
 import inet.linklayer.ext.ExtInterface; //I.R.
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.transport.tcp.TCP;
+import inet.transport.tcp.ITCP;
 import inet.transport.udp.UDP;
 import inet.transport.sctp.SCTP;    //I.R.
 import inet.util.TCPDump;   //I.R.
@@ -51,6 +51,7 @@ module StandardHostWithULThruputMeter
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");    //I.R.
         bool IPForward = default(false);
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         int namid = default(-1);
         string routingFile = default("");
         int numExtInterfaces = default(0);
@@ -83,7 +84,7 @@ module StandardHostWithULThruputMeter
             parameters:
                 @display("p=163,54");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=163,141");
         }
