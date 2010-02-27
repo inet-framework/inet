@@ -42,7 +42,7 @@
 //      If the frame is for grant for either upstream data in ONU or polling ONU,
 //      and the scheduled TX time is less than a given maximum bound, its
 //      transmission is scheduled and the scheduled TX time is returned;
-//      otherwise, the transmission is cancelled, the frame is deleted, and
+//      otherwise, the transmission is canceled, the frame is deleted, and
 //      '-1' is returned, indicating TX failure.
 //------------------------------------------------------------------------------
 
@@ -511,7 +511,6 @@ void OltScheduler::initialize(void)
 	busyQueuePoll = 0;
 	RTT.assign(numOnus, simtime_t(0.0));
 
-	// TODO: Implement ranging procedure to register and measure RTT of ONUs.
 //	// Parse 'distances' into RTT array.
 //	if (distances.size() > 0)
 //	{
@@ -537,22 +536,15 @@ void OltScheduler::initialize(void)
 	pollEvent.assign(numOnus, (HybridPonMessage *) NULL);
 	// 	pollOnu.assign(numOnus, simtime_t(onuTimeout));
 
-	//	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
-	//#ifdef DEBUG_OLT_SCHEDULER
-	//	ev << getFullPath() << ": monitor pointing to module: " << monitor->getFrameType() << endl;
-	//#endif
-
-	// Schedule the first poll to all ONUs.
+	// schedule the first poll to all ONUs
+	// TODO: Implement ranging procedure to register and measure RTT of ONUs.
 	//  simtime_t t;
 	for (int i = 0; i < numOnus; i++)
 	{
 		pollEvent[i] = new HybridPonMessage("", ONU_POLL);
-
-		// Set the ONU index.
-		pollEvent[i]->setOnuIdx(i);
-
-		// 'scheduleOnuPoll(time, pollMsg)' is a wrapper function for ' scheduleAt(simTime(), pollEvent[i])';
+		pollEvent[i]->setOnuIdx(i);	///< set the ONU index
 		scheduleOnuPoll(simTime(), pollEvent[i]);
+
 #ifdef DEBUG_OLT_SCHEDULER
 		ev << getFullPath() << ": pollEvent [" << i << "] = for ONU[" << pollEvent[i]->length()
 		<< "] scheduled at time " << simTime() + t << endl;

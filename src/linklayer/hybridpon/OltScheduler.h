@@ -62,8 +62,8 @@ protected:
 	// Misc.
 	void debugSchedulerStatus(void);
 	virtual void debugSnapshot(void);
-	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant) = 0; // pure virtual function
-	virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg) ///< wrapper function
+	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant) = 0;	///< pure virtual function
+	inline virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg) ///< wrapper function
 	{
 		return scheduleAt(t, msg);
 	}

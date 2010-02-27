@@ -696,26 +696,19 @@ void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromO
 	delete ponFrameFromOnu;
 }
 
-//------------------------------------------------------------------------------
-// OltSchedulerSSSF::sendOnuPoll --
-//
-//		Generates a polling PON frame for transmission.
-//
-// Arguments:
-//      cMessage	*msg;
-//
-// Results:
-//		A polling PON frame is generated for a given ONU and
-//		delivered to 'handleGrant()' for granting and transmission.
-//------------------------------------------------------------------------------
-
+///
+/// Generates a polling PON frame and delivers to 'handleGrant()'
+/// for granting and transmission.
+///
+/// @param[in] msg	a HybridPonMessage pointer
+///
 void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
 {
 #ifdef DEBUG_OLT_SCHEDULER_SSF
 	ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
 #endif
 
-	// Get the channel.ONU index.
+	// get the channel from the ONU index
 	int ch = msg->getOnuIdx();
 
 	////////////////////////////////////////////////////////////////////////////
@@ -729,36 +722,34 @@ void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
 	//    // Record ONU Timeout.
 	//    monitor->recordOnuTimeout(ch);
 
-	// Check the VOQ if there is room for a polling frame.
-	if (voqBitCtr[ch + numOnus] + POLL_FRAME_SIZE <= voqSize)
-	{ // ch+numOnus -> VOQ index!
-
-		// Create a polling (i.e., grant with size 0) frame.
+	// check the VOQ if there is room for a polling frame
+	if (voqBitCtr[ch + numOnus] + POLL_FRAME_SIZE <= voqSize)	///< 'ch+numOnus' is VOQ index
+	{
+		// create a polling (i.e., grant with size 0) frame
 		HybridPonDsGrantFrame *ponFrameToOnu =
 				new HybridPonDsGrantFrame("", HYBRID_PON_FRAME);
 		ponFrameToOnu->setChannel(ch);
 		//		ponFrameToOnu->setId(false);
-		ponFrameToOnu->setFrameType(1); // 1 -> grant
-		ponFrameToOnu->setGrant(0); // Only for payload portion (for Ethernet frames),
-		// not including CW for overhead & report fields
+		ponFrameToOnu->setFrameType(1);	///< 1 -> grant
+		ponFrameToOnu->setGrant(0);	///< only for payload (for Ethernet frames), not including CW for overhead & report fields
 		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
 #ifdef DEBUG_OLT_SCHEDULER_SSF
 		ev << getFullPath() << "::sendOnuPoll: Destination ONU = " << ch << endl;
 #endif
 
-		// Handle the generated polling frame.
+		// handle the generated polling frame
 		handleGrant(ch, ponFrameToOnu);
 	}
 	else
 	{
-		// Check any duplicated poll message.
+		// check any duplicated poll message
 		ASSERT(!pollEvent[ch]->isScheduled());
 		//if (pollEvent[ch]->isScheduled())
 		//	cancelOnuPoll(pollEvent[ch]);
 
-		// Reset ONU Timeout.
-		scheduleOnuPoll(simTime() + onuTimeout, pollEvent[ch]); // From 'now'
+		// reset ONU Timeout
+		scheduleOnuPoll(simTime() + onuTimeout, pollEvent[ch]);
 	}
 }
 
@@ -1072,7 +1063,7 @@ void OltSchedulerSSSF::handleMessage(cMessage *msg)
 		}
 		else
 		{
-			// unkown message.
+			// unkown message
 			error("%s: Unknown message received", getFullPath().c_str());
 		}
 	} // end of if()
