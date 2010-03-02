@@ -33,6 +33,8 @@ class INET_API IPTrafSink : public cSimpleModule
 {
   protected:
     int numReceived;
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t endToEndDelaySignal;
 
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
@@ -58,6 +60,7 @@ class INET_API IPTrafGen : public IPTrafSink
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
+    simsignal_t sentPkBytesSignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();

@@ -95,6 +95,11 @@ void UDP::initialize()
     WATCH(numPassedUp);
     WATCH(numDroppedWrongPort);
     WATCH(numDroppedBadChecksum);
+    rxPkBytesSignal = registerSignal("rxPkBytes");
+    txPkBytesSignal = registerSignal("txPkBytes");
+    passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+    droppedPkBytesWrongPortSignal = registerSignal("droppedPkBytesWrongPort");
+    droppedPkBytesBadChecksumSignal = registerSignal("droppedPkBytesBadChecksum");
 }
 
 void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
@@ -275,6 +280,7 @@ void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, 
     udpCtrl->setInterfaceId(ipCtrl->getInterfaceId());
     payload->setControlInfo(udpCtrl);
 
+    emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
@@ -292,12 +298,14 @@ void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl
     udpCtrl->setInterfaceId(ipCtrl->getInterfaceId());
     payload->setControlInfo(udpCtrl);
 
+    emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
 
 void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
 {
+    emit(droppedPkBytesWrongPortSignal, (long)(udpPacket->getByteLength()));
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
@@ -407,13 +415,15 @@ void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& 
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
 {
+    emit(rxPkBytesSignal, (long)(udpPacket->getByteLength()));
     // simulate checksum: discard packet if it has bit error
     EV << "Packet " << udpPacket->getName() << " received from network, dest port " << udpPacket->getDestinationPort() << "\n";
     if (udpPacket->hasBitError())
     {
         EV << "Packet has bit error, discarding\n";
-        delete udpPacket;
+        emit(droppedPkBytesBadChecksumSignal, (long)(udpPacket->getByteLength()));
         numDroppedBadChecksum++;
+        delete udpPacket;
         return;
     }
 
@@ -504,6 +514,7 @@ void UDP::processMsgFromApp(cPacket *appData)
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
+        emit(txPkBytesSignal, (long)(udpPacket->getByteLength()));
         send(udpPacket,"ipOut");
     }
     else
@@ -518,6 +529,7 @@ void UDP::processMsgFromApp(cPacket *appData)
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
+        emit(txPkBytesSignal, (long)(udpPacket->getByteLength()));
         send(udpPacket,"ipv6Out");
     }
     numSent++;

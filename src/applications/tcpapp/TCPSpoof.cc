@@ -21,6 +21,7 @@ Define_Module(TCPSpoof);
 
 void TCPSpoof::initialize()
 {
+    sentPkBytesSignal = registerSignal("sentPkBytes");
     simtime_t t = par("t").doubleValue();
     scheduleAt(t, new cMessage("timer"));
 }
@@ -71,6 +72,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         controlInfo->setDestAddr(dest.get4());
         tcpseg->setControlInfo(controlInfo);
 
+        emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
         send(tcpseg,"ipv4Out");
     }
     else
@@ -82,6 +84,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         controlInfo->setDestAddr(dest.get6());
         tcpseg->setControlInfo(controlInfo);
 
+        emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
         send(tcpseg,"ipv6Out");
     }
 }

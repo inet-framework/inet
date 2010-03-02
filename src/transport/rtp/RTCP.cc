@@ -204,9 +204,9 @@ void RTCP::connectRet()
 
 void RTCP::readRet(cPacket *sifpIn)
 {
-    RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
+    RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(sifpIn->decapsulate());
     emit(rcvdPkBytesSignal, (long)(sifpIn->getByteLength()));
-    emit(endToEndDelaySignal, simTime()-sifpIn->getCreationTime());
+    emit(endToEndDelaySignal, simTime() - sifpIn->getCreationTime());
     processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
 }
 
@@ -544,5 +544,10 @@ RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 void RTCP::calculateAveragePacketSize(int size)
 {
     // add size of ip and udp header to given size before calculating
-    _averagePacketSize = ((double)(_packetsCalculated) * _averagePacketSize + (double)(size + 20 + 8)) / (double)(++_packetsCalculated);
+#if 1
+    double sumPacketSize = (double)(_packetsCalculated) * _averagePacketSize  + (double)(size + 20 + 8);
+    _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
+#else
+    _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
+#endif
 }

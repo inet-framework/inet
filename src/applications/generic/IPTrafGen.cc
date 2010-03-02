@@ -31,6 +31,8 @@ void IPTrafSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
 void IPTrafSink::handleMessage(cMessage *msg)
@@ -73,6 +75,8 @@ void IPTrafSink::printPacket(cPacket *msg)
 
 void IPTrafSink::processPacket(cPacket *msg)
 {
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(endToEndDelaySignal, simTime()-msg->getCreationTime());
     EV << "Received packet: ";
     printPacket(msg);
     delete msg;
@@ -97,6 +101,7 @@ void IPTrafGen::initialize(int stage)
         return;
 
     IPTrafSink::initialize();
+    sentPkBytesSignal = registerSignal("sentPkBytes");
 
     protocol = par("protocol");
     msgByteLength = par("packetLength");
@@ -149,6 +154,7 @@ void IPTrafGen::sendPacket()
         EV << "Sending packet: ";
         printPacket(payload);
 
+        emit(sentPkBytesSignal, (long)(payload->getByteLength()));
         send(payload, "ipOut");
     }
     else
@@ -192,5 +198,3 @@ void IPTrafGen::handleMessage(cMessage *msg)
         getDisplayString().setTagArg("t",0,buf);
     }
 }
-
-

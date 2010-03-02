@@ -53,6 +53,12 @@ simple UDP
 {
     parameters:
         @display("i=block/transport");
+        @signal[rxPkBytes](title="Received packet bytes"; modeHint=count,sum);
+        @signal[txPkBytes](title="Sent packet bytes"; modeHint=count,sum);
+        @signal[passedUpPkBytes](title="Passed up packet bytes"; modeHint=count,sum);
+        @signal[droppedPkBytesWrongPort](title="Dropped packet bytes wrong port"; modeHint=count,sum);
+        @signal[droppedPkBytesBadChecksum](title="Dropped packet bytes checksum error"; modeHint=count,sum);
+
     gates:
         input appIn[] @labels(UDPControlInfo/down);
         input ipIn @labels(UDPPacket,IPControlInfo/up);
@@ -61,5 +67,3 @@ simple UDP
         output ipOut @labels(UDPPacket,IPControlInfo/down);
         output ipv6Out @labels(UDPPacket,IPv6ControlInfo/down);
 }
-
-

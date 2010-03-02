@@ -36,6 +36,8 @@ simple TCPSpoof
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");
+        @signal[sentPkBytesSignal](title="Sent packet bytes";modeHint=count,sum);
+
     gates:
         output ipv4Out @labels(TCPSegment,IPControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
