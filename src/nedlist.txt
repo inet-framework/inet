@@ -18,7 +18,7 @@ simple RTCP - ok
 simple IPTrafSink like IPTrafficGenerator - ok
 simple IPTrafGen like IPTrafficGenerator - ok
 
-simple GenericRadio like Radio
+simple GenericRadio like Radio - ok
 simple Ieee80211Radio like Radio
 
 simple Ieee80211MgmtSTASimplified like Ieee80211Mgmt

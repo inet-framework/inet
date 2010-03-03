@@ -206,6 +206,11 @@ class INET_API AbstractRadio : public ChannelAccess
      * -85 dBm
      */
     double sensitivity;
+
+    // statistics:
+    simsignal_t bitrateSignal;
+    simsignal_t radioStateSignal; //enum
+    simsignal_t channelNumberSignal;
 };
 
 #endif
