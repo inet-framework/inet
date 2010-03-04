@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <label x:text="Create a new Inet simulation." x:style="WRAP">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
+
+    <!-- Network Parameters { -->
+    <group text="Network parameters">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- numClients -->
+    <label text="Number of clients:"/>
+    <spinner x:id="numClients" minimum="1" maximum="10" x:style="BORDER"/>
+
+    <!-- ipProtocol:IPv4/IPv6 -->
+<!--    <label text="IP protocol:"/>
+    <combo x:id="ipProtocol" x:style="BORDER|READ_ONLY">
+      <add x:p0="IPv4"/>
+      <add x:p0="IPv6"/>
+    </combo>
+-->
+    <group text="IP layer">
+        <layoutData x:class="GridData" horizontalSpan="2"/>
+        <layout x:class="GridLayout"/>
+        <x:children>
+            <button x:id="ipv4Layer" text="IPv4" x:style="RADIO"/>
+            <button x:id="ipv6Layer" text="IPv6" x:style="RADIO"/>
+        </x:children>
+    </group>
+    
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Traffic Parameters { -->
+    <group text="Traffic parameters">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <group text="TCP traffic">
+        <layoutData x:class="GridData" horizontalSpan="2"/>
+        <layout x:class="GridLayout"/>
+        <x:children>
+    <!-- noneTcpTraffic? -->
+    <button x:id="noneTcpTraffic" text="None traffic on TCP" x:style="RADIO">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- tcpTraffic? -->
+    <button x:id="tcpDataTraffic" text="Data traffic (on TCP)" x:style="RADIO">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- telnetTraffic? -->
+    <button x:id="telnetTraffic" text="Telnet traffic (on TCP)" x:style="RADIO">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+        </x:children>
+    </group>
+
+    <!-- serverTcpLayer:TCP/TCP_old/TCP_NSC -->
+    <label text="Server TCP layer:"/>
+    <combo x:id="serverTcpLayer" x:style="BORDER|READ_ONLY">
+      <add x:p0="TCP"/>
+      <add x:p0="TCP_old"/>
+      <add x:p0="TCP_NSC"/>
+    </combo>
+
+    <!-- clientTcpLayer:TCP/TCP_old/TCP_NSC -->
+    <label text="Client TCP layer:"/>
+    <combo x:id="clientTcpLayer" x:style="BORDER|READ_ONLY">
+      <add x:p0="TCP"/>
+      <add x:p0="TCP_old"/>
+      <add x:p0="TCP_NSC"/>
+    </combo>
+
+    <!-- -- -->
+    <label x:style="SEPARATOR|HORIZONTAL">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
+    <!-- pingTraffic? -->
+    <button x:id="pingTraffic" text="Ping traffic" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- videoStreamUdpTraffic? -->
+    <button x:id="videoStreamUdpTraffic" text="Video Stream traffic (on UDP, only for IPv4 yet)" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- sctpTraffic? -->
+    <button x:id="sctpTraffic" text="SCTP traffic (generate only for IPv4 yet)" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>

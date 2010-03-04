@@ -8,7 +8,8 @@ Inet
 new inet4/6 simulation:
     - (with/out explicit routing table)
     - inet4/inet6
-    - tcptype tcp/tcp_old/tcp_nsc
+    - server tcptype: tcp/tcp_old/tcp_nsc
+    - client tcptype: tcp/tcp_old/tcp_nsc
     - tcp Y/N
     - udp Y/N
     - stcp Y/N
