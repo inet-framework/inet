@@ -1,3 +1,14 @@
+TODO: IPv6 works only eth, not work on ppp. See examples/ipv6/nclients.
+
+TODO: VideoStrmReq problem on IPv6: 
+      "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
+
+TODO: add SCTP for StandardHost6 (IPv6)
+
+BUG:  if SCTPServer.echoFactor not 0, then will a runtime error:
+      "Error in module (SCTP) P5.server.sctp (id=22): User error: stream with id 2 not found."
+      Network: IPv4; 1 server, 1 router, 10 client
+
 TODO: labelling:
   - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
     i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
