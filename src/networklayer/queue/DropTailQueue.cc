@@ -30,7 +30,7 @@ void DropTailQueue::initialize()
 
     //statistics
     queueLengthSignal = registerSignal("queueLength");
-    emit(queueLengthSignal, (long)(queue.length()));
+    emit(queueLengthSignal, queue.length());
 
     outGate = gate("out");
 
@@ -48,7 +48,7 @@ cMessage *DropTailQueue::enqueue(cMessage *msg)
     else
     {
         queue.insert(msg);
-        emit(queueLengthSignal, (long)(queue.length()));
+        emit(queueLengthSignal, queue.length());
         return NULL;
     }
 }
@@ -61,7 +61,7 @@ cMessage *DropTailQueue::dequeue()
     cMessage *msg = (cMessage *)queue.pop();
 
     // statistics
-    emit(queueLengthSignal, (long)(queue.length()));
+    emit(queueLengthSignal, queue.length());
 
     return msg;
 }

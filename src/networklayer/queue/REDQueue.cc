@@ -32,7 +32,7 @@ void REDQueue::initialize()
     avgQueueLengthSignal = registerSignal("avgQueueLength");
     earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
 
-    emit(queueLengthSignal, (long)(queue.length()));
+    emit(queueLengthSignal, queue.length());
 
     // configuration
     wq = par("wq");
@@ -132,7 +132,7 @@ cMessage *REDQueue::enqueue(cMessage *msg)
     {
         queue.insert(msg);
 
-        emit(queueLengthSignal, (long)(queue.length()));
+        emit(queueLengthSignal, queue.length());
 
         return NULL;
     }
@@ -151,7 +151,7 @@ cMessage *REDQueue::dequeue()
     if (queue.length()==0)
         q_time = simTime();
 
-    emit(queueLengthSignal, (long)(queue.length()));
+    emit(queueLengthSignal, queue.length());
 
     return pk;
 }

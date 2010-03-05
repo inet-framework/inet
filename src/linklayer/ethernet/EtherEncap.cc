@@ -154,7 +154,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     send(frame, "lowerLayerOut");
     delete msg;
 
-    emit(sentPauseSignal, (long)(pauseUnits));
+    emit(sentPauseSignal, pauseUnits);
     totalPauseSent++;
 }
 

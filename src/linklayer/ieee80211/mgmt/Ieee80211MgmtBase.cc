@@ -121,7 +121,7 @@ cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
     else
     {
         dataQueue.insert(msg);
-        emit(dataQueueLenSignal, (long)(dataQueue.length()));
+        emit(dataQueueLenSignal, dataQueue.length());
         return NULL;
     }
 }
@@ -139,7 +139,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
     cMessage *pk = (cMessage *)dataQueue.pop();
 
     // statistics
-    emit(dataQueueLenSignal, (long)(dataQueue.length()));
+    emit(dataQueueLenSignal, dataQueue.length());
     return pk;
 }
 

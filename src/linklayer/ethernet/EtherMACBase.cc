@@ -356,7 +356,7 @@ void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
         pauseUnits = pauseFrame->getPauseTime();
         delete frame;
         numPauseFramesRcvd++;
-        emit(rxPausePkUnitsSignal, (long)pauseUnits);
+        emit(rxPausePkUnitsSignal, pauseUnits);
         processPauseCommand(pauseUnits);
     }
     else
@@ -383,13 +383,13 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
-    emit(rxPkBytesOkSignal, (long)curBytes);
+    emit(rxPkBytesOkSignal, curBytes);
 
     if (!checkDestinationAddress(frame))
         return;
 
     numFramesPassedToHL++;
-    emit(passedUpPkBytesSignal, (long)curBytes);
+    emit(passedUpPkBytesSignal, curBytes);
 
     // pass up to upper layer
     send(frame, "upperLayerOut");
@@ -462,12 +462,12 @@ void EtherMACBase::handleEndTxPeriod()
     unsigned long curBytes = frame->getByteLength();
     numFramesSent++;
     numBytesSent += curBytes;
-    emit(txPkBytesSignal, (long)curBytes);
+    emit(txPkBytesSignal, curBytes);
 
     if (dynamic_cast<EtherPauseFrame*>(frame)!=NULL)
     {
         numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, (long)(((EtherPauseFrame*)(frame))->getPauseTime()));
+        emit(txPausePkUnitsSignal, ((EtherPauseFrame*)(frame))->getPauseTime());
     }
 
     EV << "Transmission of " << frame << " successfully completed\n";

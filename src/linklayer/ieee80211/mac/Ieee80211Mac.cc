@@ -330,7 +330,7 @@ void Ieee80211Mac::receiveChangeNotification(int category, const cPolymorphic *d
     {
         RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
 
-        emit(radioStateSignal, (long)newRadioState);
+        emit(radioStateSignal, newRadioState);
 
         radioState = newRadioState;
 
@@ -354,7 +354,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     int frameType = frame ? frame->getType() : -1;
     int msgKind = msg->getKind();
     logState();
-    emit(stateSignal, (long)(fsm.getState()));
+    emit(stateSignal, fsm.getState());
 
     if (frame && isLowerMsg(frame))
     {
@@ -584,7 +584,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     }
 
     logState();
-    emit(stateSignal, (long)(fsm.getState()));
+    emit(stateSignal, fsm.getState());
 }
 
 /****************************************************************

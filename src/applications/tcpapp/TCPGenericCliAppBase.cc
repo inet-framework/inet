@@ -94,7 +94,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
 
     packetsSent++;
     bytesSent += numBytes;
-    emit(sentPkBytesSignal, (long int)numBytes);
+    emit(sentPkBytesSignal, numBytes);
 }
 
 void TCPGenericCliAppBase::setStatusString(const char *s)

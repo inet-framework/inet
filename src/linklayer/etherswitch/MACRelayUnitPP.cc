@@ -149,7 +149,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
     }
 
     // Record statistics of buffer usage levels
-    emit(usedBufferBytesSignal, (long)bufferUsed);
+    emit(usedBufferBytesSignal, bufferUsed);
 }
 
 void MACRelayUnitPP::processFrame(cMessage *msg)
@@ -166,7 +166,7 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     printAddressTable();
 
     bufferUsed -= length;
-    emit(usedBufferBytesSignal, (long)bufferUsed);
+    emit(usedBufferBytesSignal, bufferUsed);
     emit(processedBytesSignal, length);
 
     numProcessedFrames++;

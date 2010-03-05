@@ -231,7 +231,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
         frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");
-    emit(sendPauseSignal, (long)(pauseUnits));
+    emit(sendPauseSignal, pauseUnits);
 
     delete msg;
 }
