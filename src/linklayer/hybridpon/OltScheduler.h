@@ -32,7 +32,7 @@ class OltScheduler: public cSimpleModule
 {
 protected:
 	// OLT NED parameters
-	int numOnus;	///< number of ONUs (= number of channels)
+
 	int numReceivers;	///< number of tunable receivers
 	int numTransmitters;	///< number of tunable transmitters
 
@@ -41,10 +41,11 @@ protected:
 	simtime_t maxTxDelay;	///< max. limit to TX scheduling delay [sec]
 	simtime_t onuTimeout;	///< polling cycle from OLT to ONU [sec]
 	int queueSizePoll;	///< size of FIFO queue for polling frames [bit]
-//	int numUsersPerOnu;
-//	string distances;
 
-	// Status variables
+    // configuration variables
+	int numOnus;	///< number of ONUs (= number of WDM channels)
+
+	// status variables
 	int busyQueuePoll;	///< counter to emulate a FIFO for polling frames
 	TimeVector RTT;
 	TimeVector CH;

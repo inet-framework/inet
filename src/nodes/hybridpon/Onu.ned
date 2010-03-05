@@ -23,18 +23,18 @@ module Onu
 {
     parameters:
         @node();
+        @labels(node,hybridpon-node);
         @display("i=device/smallrouter;bgb=188,228;bgp=2,2");
         int queueSize @unit(bit) = default(8e7b); // size of FIFO queue in the Mac [bit]
-//        int ch; // WDM channel assigned to this ONU
-//        int numUsersPerOnu; // how many users in this ONU
     gates:
-        inout ethg[];	// User Network I/F
-        inout pong;		// PON I/F (i.e., with AWG)
-        //        output fromMacToMonitor;
+        inout ethg[] @labels(EtherFrame-conn);	// User Network I/F
+        inout pong @labels(OpticalFrame-conn);	// I/F (i.e., with AWG)
     submodules:
         switch: EtherSwitch {
             parameters:
                 @display("p=92,59");
+			gates:
+				ethg[sizeof(ethg)+1];
         }
         mac: OnuMacLayer {
             parameters:
@@ -46,7 +46,6 @@ module Onu
                 @display("p=92,185");
         }
     connections:
-        //        mac.toMonitor --> fromMacToMonitor;
         for i=0..sizeof(ethg)-1 {
             ethg++ <--> switch.ethg++;
         }

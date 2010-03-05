@@ -1,29 +1,31 @@
 Hybrid TDM/WDM-Passive Optical Network (PON)
 ============================================
 
-* Shortdesc: "hybridpon" is an implementation of hybrid TDM/WDM-PON
+* Shortdesc: Simulation models for hybrid TDM/WDM-PON
 * Author: Kyeong Soo (Joseph) Kim (kyeongsoo.kim@gmail.com)
 * License: GPLv2
 * Requires: OMNeT++ 4.0 or later
 
-The 'hybridpon' provides essential components at Physical and Data
-Link Layers to build simulation models for various flavors of hybrid
-TDM/WDM-PON systems.
+The "hybridpon" provides essential components at Physical and MAC
+layers to build simulation models for various flavors of hybrid time
+division multiplexing (TDM)/wavelength division multiplexing
+(WDM)-passive optical network (PON) systems.
 
 
 * Features:
-Modular design allowing dynamic loading of different MAC and
-schedulers at run time
+Modular design allows dynamic loading of different MAC and schedulers
+at run time.
 
 
 * Notes:
 This project was originally started as a joint work between Stanford
 Networking Research Center (SNRC), Photonics & Networking Research Lab
 (PNRL), Stanford, and Advanced System Technology (AST),
-STMicrolectronics.
+STMicrolectronics, and resulted in Stanford University Access-Hybrid
+PON (SUCCESS-HPON) simulation models for OMNeT++ version 3.
   
-With the OMNeT++ 4.0 which brings a lot of fundamental changes all
-over the simulation framework, supporting packages, and models,
-however, we decided to start from scratch and now the whole code base
-(i.e., "inet-hnrl") is being developed and maintained by Hybrid
-Networking Research Lab (HNRL), Swansea University, Wales, UK.
+To integrate the models into INET/OMNeT++ for working with
+full-fledged TCP/IP models and extend them to other flavors of hybrid
+PONs, however, we decided to virtually start from scratch. Now the
+whole code base (i.e., "inet-hnrl") is maintained by Hybrid Networking
+Research Lab (HNRL), Swansea University, Wales, UK.

@@ -404,10 +404,9 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 		}
 	}
 
-	if (isGrant)
-	{ // This is a grant frame.
-
-		// Pick the earliest available receiver.
+	if (isGrant == true)
+	{
+		// pick the earliest available receiver
 		rxIdx = 0;
 		for (int i = 1; i < numReceivers; i++)
 		{
@@ -423,7 +422,8 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 				/ BITRATE, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
 	}
 	else
-	{ // This is a data frame.
+	{
+		// data frame
 
 		// Schedule transmission time 't' as follows:
 		// t = max(transmitter is free, channel is free)
@@ -500,17 +500,15 @@ void OltSchedulerSSSF::scheduleFrame(const simtime_t txTime, const int ch,
 	}
 #endif
 
-	//    //	 Finally, schedule a frame transmission at 'txTime'.
-	// Finally, schedule a frame transmission immediately.
-	// - Frame transmission delay will be handled by channel & gate themselves.
+	// Finally, schedule a frame transmission at 'txTime'.
 	DummyPacket *msg = new DummyPacket("Actual Frame TX", ACTUAL_TX);
 	msg->setChannel(ch);
 	msg->setFrameType(frameType);
 #ifdef TRACE_TXRX
 	msg->setIdx(txIdx);
 #endif
-	//	scheduleAt(txTime, msg);
-	scheduleAt(simtime_t(0.0), msg);
+    scheduleAt(txTime, msg);
+//	scheduleAt(simtime_t(0.0), msg);
 }
 
 //------------------------------------------------------------------------------
@@ -574,20 +572,20 @@ void OltSchedulerSSSF::handleEthernetFrameFromSni(EtherFrame *frame)
 			ponFrameToOnu->setBitLength(frameLength + DS_DATA_OVERHEAD_SIZE);
 			(ponFrameToOnu->getEncapsulatedFrames()).insert(frame);
 
-			// schedule transmission.
+			// schedule transmission
 			int txIdx, rxIdx;
 			simtime_t txTime = getTxTime(ch, false, txIdx, rxIdx); ///< 'false' -> DS data frame.
 			scheduleFrame(txTime, ch, txIdx, rxIdx, ponFrameToOnu);
 
-			// put the PON frame into a TX queue.
+			// put the PON frame into a TX queue
 			txQueue[ch].insert(ponFrameToOnu);
 
-			// Update the DS TX counter.
+			// update the DS TX counter
 			dsTxCtr[ch] -= frameLength;
 		}
 		else
 		{
-			voq[ch].insert(frame); ///< put the Ethernet frame into the VOQ.
+			voq[ch].insert(frame); ///< put the Ethernet frame into the VOQ
 		}
 
 		////////////////////////////////////////////////////////////////////////
@@ -608,6 +606,7 @@ void OltSchedulerSSSF::handleEthernetFrameFromSni(EtherFrame *frame)
 		ev << getFullPath() << ": Ethernet frame dropped due to VOQ buffer overflow!" << endl;
 #endif
 
+        // TODO: Implement statistics recording.
 		//		// Record packet loss statistics.
 		//		monitor->recordLossStats(srcAddress, dstnAddress, length);
 		delete frame;
@@ -719,6 +718,7 @@ void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
 	//ASSERT((onuPollList.front()).channel == ch);
 	//onuPollList.pop_front();
 
+    // TODO: Implement statistics recording.
 	//    // Record ONU Timeout.
 	//    monitor->recordOnuTimeout(ch);
 
@@ -773,14 +773,15 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 	int ch = msg->getChannel();
 	int voqIdx = (isData ? ch : ch + numOnus);
 	int numFrames = 0; // Keep the # of frames encapsulated in DS PON frame.
-	HybridPonDsDataFrame *frame;
+	long frameLength = 0;
+//	HybridPonDsDataFrame *frame;
 
 	if (isData == true)
 	{
 		// downstream data PON frame
 
 		ASSERT(txQueue[ch].length() == 1); // DEBUG: Check TX Queue.
-		frame = (HybridPonDsDataFrame *) (txQueue[ch].pop()); // Pop the frame from the TX queue.
+		HybridPonDsDataFrame *frame = check_and_cast<HybridPonDsDataFrame *>(txQueue[ch].pop());	///< pop the frame from the TX queue.
 
 		// Schedule the transmission of a PON frame if the VOQ is not empty.
 		// *** Note that we allow the schedule of at least one frame transmission
@@ -788,8 +789,7 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 		// *** 'dsTxCtr[ch]').
 		if (voq[voqIdx].empty() == false)
 		{
-
-			// Initialize a PON frame and a pointer to encapsulated Ethernet frames.
+			// initialize a PON frame and a pointer to encapsulated Ethernet frames
 			HybridPonDsDataFrame *ponFrameToOnu = new HybridPonDsDataFrame("",
 					HYBRID_PON_FRAME);
 			cQueue &etherFrameQueue = ponFrameToOnu->getEncapsulatedFrames();
@@ -800,9 +800,9 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 			do
 			{
 				etherFrame = (EtherFrame *) voq[voqIdx].pop();
-				long frameLength = etherFrame->getBitLength();
-				dsTxCtr[ch] -= frameLength;
-				numBits += frameLength;
+				long etherFrameLength = etherFrame->getBitLength();
+				dsTxCtr[ch] -= etherFrameLength;
+				numBits += etherFrameLength;
 				numFrames++;
 				etherFrameQueue.insert(etherFrame);
 				if (voq[voqIdx].empty() == true)
@@ -828,14 +828,16 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 			// store the scheduled PON frame in the TX queue
 			txQueue[ch].insert(ponFrameToOnu);
 		} // end of 'if (voq ... )'
+
+		frameLength = frame->getBitLength();
+	    send(frame, "wdmg$o", ch);  ///< send the frame to the WDM layer
 	} // end of 'if'
 	else
 	{
 		// grant PON frame
 
 		ASSERT(voq[voqIdx].empty() == false); // DEBUG: Check VOQ.
-		HybridPonDsGrantFrame *frame =
-				(HybridPonDsGrantFrame *) (voq[voqIdx].pop()); // Pop the HOL frame from the VOQ.
+		HybridPonDsGrantFrame *frame = check_and_cast<HybridPonDsGrantFrame *>(voq[voqIdx].pop()); ///< pop the HOL frame from the VOQ.
 
 		// Update previous grant and queued grant counters.
 		int grant = frame->getGrant();
@@ -845,36 +847,38 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 
 		// Record grant PON frame statistics.
 		simtime_t now = simTime();
+        // TODO: Implement statistics recording.
 		//		monitor->recordGrantStats(ch, frame->getBitLength(), frame->getGrant(),
 		//				now - vTxTime[ch]);
 		vTxTime[ch] = now;
+
+		frameLength = frame->getBitLength();
+	    send(frame, "wdmg$o", ch);  ///< send the frame to the WDM layer
 	} // end of 'else'
 
 	ASSERT(voqBitCtr[voqIdx] >= 0); // DEBUG: Check VOQ counter before updating.
-	voqBitCtr[voqIdx] -= frame->getBitLength()
-			- (isData ? DS_DATA_OVERHEAD_SIZE : 0);
+	voqBitCtr[voqIdx] -= frameLength - (isData ? DS_DATA_OVERHEAD_SIZE : 0);
 	// Update VOQ counter.
 	// For DS data, the PON frame OH should be excluded.
 	ASSERT(voqBitCtr[voqIdx] >= 0); // DEBUG: Check VOQ counter after updating.
 
-	// Record updated VOQ statistics.
+	// record updated VOQ statistics
 	vQueueOctet[ch].record(voqBitCtr[voqIdx] / 8); // Octet
 	vQueueLength[ch].record(voq[voqIdx].length() + (isData ? numFrames : 0)); // # of frames
 	// For DS data, count the # of frames in both VOQ and TX queue.
 
-	// Send the frame to the ONU.
-	// Here we include a transmission delay because it has not been taken
-	// into account elsewhere.
-	simtime_t txDelay(frame->getBitLength() / BITRATE);
-	sendDelayed(frame, txDelay, "wdmg$o", ch);
+// 	// Here we include a transmission delay because it has not been taken
+// 	// into account elsewhere.
+// 	simtime_t txDelay(frame->getBitLength() / BITRATE);
+// 	sendDelayed(frame, txDelay, "wdmg$o", ch);
 
 #ifdef TRACE_TXRX
-	// Record TX usage.
+	// record TX usage
 	int txIdx = msg->getIdx();
 	vTxUsage[txIdx].record(0); // '0' denotes 'release'.
 	vTxUsage[txIdx].record(ch+1); // A channel index starts from 1.
 
-	// Schedule the release of TX to record TX usage.
+	// schedule the release of TX to record TX usage
 	// *** Note that we reuse the incoming message 'msg'.
 	msg->setKind(RELEASE_TX);
 	scheduleAt(simTime() + txDelay, msg);
@@ -1056,14 +1060,16 @@ void OltSchedulerSSSF::handleMessage(cMessage *msg)
 			// Ethernet frame from the upper layer (i.e., Ethernet switch)
 			handleEthernetFrameFromSni(check_and_cast<EtherFrame *> (msg));
 		}
-		else if (inGate.compare(0, 6, "pong$i") == 0)
+		else if (inGate.compare(0, 6, "wdmg$i") == 0)
 		{
 			// PON frame from the lower layer (i.e., PON I/F)
 			handleDataPonFrameFromPon(check_and_cast<HybridPonUsFrame *> (msg));
 		}
 		else
 		{
-			// unkown message
+			// unknown message
+			ev << getFullPath() << ": An unknown message received from " <<
+					inGate << endl;
 			error("%s: Unknown message received", getFullPath().c_str());
 		}
 	} // end of if()

@@ -54,17 +54,14 @@ network ARPTest
         }
         olt: Olt {
             parameters:
-                numOnus = 2;
                 @display("p=324,161");
         }
         onu1: Onu {
             parameters:
-//                lambda = 0;
                 @display("p=171,95");
         }
         onu2: Onu {
             parameters:
-//                lambda = 1;
                 @display("p=171,218");
         }
         awg: LambdaSplitter {

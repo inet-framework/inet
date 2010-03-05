@@ -10,42 +10,36 @@
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
 ///          You must not remove this notice, or any other, from this software.
+///
 
 
-// For debugging
+// for debugging
 // #define DEBUG_OLT_SCHEDULER
 
 
 #include "OltScheduler.h"
 
-//// Register module.
-//Define_Module(Scheduler);
+//// register module
+//Define_Module(Scheduler)
 
 
 //------------------------------------------------------------------------------
 //	Scheduling functions
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Scheduler::seqSchedule --
-//
-//      schedules downstream TX of PON frames (either data or grants for
-//      upstream traffic at ONUs) based on the sequential scheduling algorithm.
-//
-// Arguments:
-//      int onu;
-//      HybridPonDsFrame *ponFrameToOnu;
-//
-// Results:
-//      If the frame is for downstream data, its transmission is scheduled
-//      and the scheduled TX time is returned.
-//      If the frame is for grant for either upstream data in ONU or polling ONU,
-//      and the scheduled TX time is less than a given maximum bound, its
-//      transmission is scheduled and the scheduled TX time is returned;
-//      otherwise, the transmission is canceled, the frame is deleted, and
-//      '-1' is returned, indicating TX failure.
-//------------------------------------------------------------------------------
-
+///
+/// Schedules downstream TX of PON frames (either data or grants) based
+/// on the sequential scheduling algorithm.
+/// Schedules a frame transmission and returns its scheduled TX time,
+/// if either the frame is for downstream data or the frame is for grant
+/// AND the scheduled TX time is less than a given maximum bound.
+/// Otherwise, cancels the transmission, removes the frame, and
+/// returns -1.0 indicating TX failure.
+///
+/// @param[in] onu				an integer for a channel index
+/// @param[in] ponFrameToOnu	a HybridPonDsFrame pointer
+/// @return						scheduled transmission time (-1.0 for failure)
+///
 simtime_t OltScheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu)
 {
 	int d = onu;
@@ -497,39 +491,20 @@ void OltScheduler::initialize(void)
 	// initialize OLT NED parameters
 	numReceivers = getParentModule()->par("numReceivers");
 	numTransmitters = getParentModule()->par("numTransmitters");
-	numOnus = getParentModule()->par("numOnus");
 
 	// initialize OltScheduler NED parameters
 	cwMax = par("cwMax");
 	maxTxDelay = par("maxTxDelay");
 	onuTimeout = par("onuTimeout");
 	queueSizePoll = par("queueSizePoll");
-//	distances = ((const char *) par("distances"));
-	//	numChannels = par("numChannels");
-	//	numUsersPerOnu = par("numUsersPerOnu");
 
+    // initialize configuration and status variables
+//	numOnus = getParentModule()->par("numOnus");
+    numOnus = gateSize("wdmg$o");   ///< = number of WDM channels
 	busyQueuePoll = 0;
+
+    // initilaize vectors
 	RTT.assign(numOnus, simtime_t(0.0));
-
-//	// Parse 'distances' into RTT array.
-//	if (distances.size() > 0)
-//	{
-//		int i = 0;
-//		string::size_type idx1 = 0, idx2 = 0;
-//		while ((idx1 != string::npos) && (idx2 != string::npos))
-//		{
-//			idx2 = distances.find(' ', idx1);
-//			double dist = (atof((distances.substr(idx1, idx2)).c_str()));
-//			double rtt = (dist * 2) / SPEED_OF_LIGHT;
-//			RTT[i] = (simtime_t) rtt;
-//			if (idx2 != string::npos)
-//			{
-//				idx1 = distances.find_first_not_of(' ', idx2 + 1);
-//			}
-//			i++;
-//		}
-//	}
-
 	CH.assign(numOnus, simtime_t(0.0));
 	TX.assign(numTransmitters, simtime_t(0.0));
 	RX.assign(numReceivers, simtime_t(0.0));
@@ -558,4 +533,21 @@ void OltScheduler::initialize(void)
 ///
 void OltScheduler::finish(void)
 {
+    // TODO: Implement statistics recording here
+//     // record session statistics
+//     if (numSessionsFinished > 0) {
+//         double avgSessionDelay = sumSessionDelays/double(numSessionsFinished);
+//         double avgSessionThroughput = bytesRcvdAtSessionEnd/sumSessionDelays;
+//         double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;
+
+//         recordScalar("number of finished sessions", numSessionsFinished);
+//         recordScalar("average session delay [s]", avgSessionDelay);
+//         recordScalar("average session throughput [B/s]", avgSessionThroughput);
+//         recordScalar("mean session transfer rate [B/s]", meanSessionTransferRate);
+
+//         EV << getFullPath() << ": closed " << numSessionsFinished << " sessions\n";
+//         EV << getFullPath() << ": experienced " << avgSessionDelay << " [s] average session delay\n";
+//         EV << getFullPath() << ": experienced " << avgSessionThroughput << " [B/s] average session throughput\n";
+//         EV << getFullPath() << ": experienced " << meanSessionTransferRate << " [B/s] mean session transfer rate\n";
+//     }
 }

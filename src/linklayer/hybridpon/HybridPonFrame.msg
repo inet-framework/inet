@@ -1,9 +1,9 @@
 ///
 /// @file   HybridPonFrame.msg
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Tue Jun 30 12:19:39 2009
+/// @date   Jun/30/2009
 /// 
-/// @brief  Defines 'HybridPonFrame' and 'HybridPonMessage' message objects.
+/// @brief  Defines self-messages and frames for hybridpon models.
 /// 
 /// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///

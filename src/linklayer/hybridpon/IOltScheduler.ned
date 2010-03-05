@@ -19,13 +19,9 @@ moduleinterface IOltScheduler
 {
     parameters:
         @display("i=block/subqueue");
-//        int numOnus;	// number of ONUs/channels
-//        int numReceivers;	// number of receivers
-//        int numTransmitters;	// number of transmitters
         int cwMax @unit(bit);	// maximum grant to ONU [bit]        
         double maxTxDelay @unit(s);	// max. limit to TX scheduling delay [sec]
-        double onuTimeout @unit(s);	// polling cycle from OLT to ONU [sec]
-//        int numUsersPerOnu;			// number of users per ONU        
+        double onuTimeout @unit(s);	// polling cycle from OLT to ONU [sec]        
 //        double queueSizePoll @unit(bit);	// size of FIFO queue for polling frames [bit]
 //        string distances;			// string for ONU distances from OLT [km]
 
@@ -42,13 +38,6 @@ moduleinterface IOltScheduler
 //											// EdfWithLqf scheduler
 
     gates:
-//        input in;					// to receive PON frames from ONUs
-////        input fromPacketGenerator;	// to receive generated IP packets
-//		input fromSwitch[];			// from Ethernet switch (bridge)
-//        output out;					// to send PON frames to ONUs
-////        output toMonitor;			// to monitor
-////        output toPacketSink;		// to sink received IP packets
-//		output toSwitch[];			// to Ethernet switch (bridge)
 		inout ethg[];	// I/F with Ethernet switch
 		inout wdmg[];	// I/F with WDM Optical Layer
 }

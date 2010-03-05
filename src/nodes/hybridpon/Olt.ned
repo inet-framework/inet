@@ -23,35 +23,41 @@ module Olt
 {
     parameters:
         @node();
+        @labels(node,hybridpon-node);
         @display("i=device/router;bgb=177,239");
-        int numOnus;	// number of ONUs connected to OLT
-        int numReceivers;	// number of receivers
-        int numTransmitters;	// number of transmitters
-        string schType = default("OltSchedulerSSSF");	// type of 'Scheduler' (algorithm and operation mode)
+        int numReceivers = default(1);	// number of receivers
+        int numTransmitters = default(2);	// number of transmitters
+        string schType = default("OltSchedulerSSSF");	// type of 'Scheduler'
+														// (algorithm and operation mode)
     gates:
-        inout ethg[];	// Service Network I/F (i.e., with metro/backbone)
-        inout pong[];	// PON I/F (i.e., with AWG)
-    //        output fromSchedulerToMonitor;
+        inout ethg[] @labels(EtherFrame-conn);	// Service Network I/F (i.e., with metro/backbone)
+        inout pong[] @labels(OpticalFrame-conn);	// PON I/F (i.e., with AWG)
     submodules:
         switch: EtherSwitch {
             parameters:
                 @display("p=90,48");
+			gates:
+				ethg[sizeof(ethg)+sizeof(pong)];
         }
         scheduler: <schType> like IOltScheduler {
             parameters:
                 @display("p=90,118");
-//                numOnus = numOnus;
+			gates:
+				ethg[sizeof(pong)];
+				wdmg[sizeof(pong)];
         }
         wdm: OltWdmLayer {
             parameters:
                 @display("p=90,199");
+			gates:
+				demuxg[sizeof(pong)];
+				muxg[sizeof(pong)];
         }
     connections:
-        //        scheduler.toMonitor --> fromSchedulerToMonitor;
         for i=0..sizeof(ethg)-1 {
             ethg++ <--> switch.ethg++;
         }
-        for i=0..numOnus-1 {
+        for i=0..sizeof(pong)-1 {
             switch.ethg++ <--> scheduler.ethg++;
             scheduler.wdmg++ <--> wdm.demuxg++;
             wdm.muxg++ <--> pong++;
