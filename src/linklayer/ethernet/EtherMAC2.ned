@@ -154,15 +154,15 @@ simple EtherMAC2
         string queueModule = default("");    // name of optional external queue module
         int mtu = default(1500);
         @display("i=block/queue");
-        @signal[txPkBytes](title="Sent bytes";modeHint=sum,count);
-        @signal[rxPkBytesOk](title="title";modeHint=sum,count);
-        @signal[droppedPkBytesIfaceDown](title="Dropped msg Iface down";modeHint=sum,count);
-        @signal[droppedPkBytesBitError](title="Dropped bytes bit error";modeHint=sum,count);
-        @signal[droppedPkBytesNotForUs](title="Dropped bytes not for us";modeHint=sum,count);
-        @signal[passedUpPkBytes](title="Passed bytes to higher layer";modeHint=sum,count);
-        @signal[rxPausePkUnits](title="Received pause";modeHint=count,stats);
-        @signal[txPausePkUnits](title="Sent pause";modeHint=count,stats);
-        @signal[rxPkBytesFromHL](title="Received bytes from higher layer";modeHint=sum,count);
+        @statistic[txPkBytes](title="Sent bytes";record=sum,count);
+        @statistic[rxPkBytesOk](title="title";record=sum,count);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped msg Iface down";record=sum,count);
+        @statistic[droppedPkBytesBitError](title="Dropped bytes bit error";record=sum,count);
+        @statistic[droppedPkBytesNotForUs](title="Dropped bytes not for us";record=sum,count);
+        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";record=sum,count);
+        @statistic[rxPausePkUnits](title="Received pause";record=count,stats);
+        @statistic[txPausePkUnits](title="Sent pause";record=count,stats);
+        @statistic[rxPkBytesFromHL](title="Received bytes from higher layer";record=sum,count);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP

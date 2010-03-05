@@ -54,12 +54,12 @@ simple EtherLLC
 {
     parameters:
         @display("i=block/fork");
-        @signal[dsap](title="dsap registering";modeHint=sum);
-        @signal[rcvdPkBytesFromHL](title="Received packet bytes from higher layer";modeHint=sum,count);
-        @signal[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";modeHint=sum,count);
-        @signal[passedUpPkBytes](title="passed up bytes";modeHint=sum,count);
-        @signal[droppedPkBytesUnknownDSAP](title="Dropped bytes unknown DSAP";modeHint=sum,count);
-        @signal[sendPauseSignal](title="send Pause";modeHint=count);
+        @statistic[dsap](title="dsap registering";record=sum);
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer";record=sum,count);
+        @statistic[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";record=sum,count);
+        @statistic[passedUpPkBytes](title="passed up bytes";record=sum,count);
+        @statistic[droppedPkBytesUnknownDSAP](title="Dropped bytes unknown DSAP";record=sum,count);
+        @statistic[sendPauseSignal](title="send Pause";record=count);
     gates:
         input upperLayerIn[];   // higher layer protocols or applications
         output upperLayerOut[]; // higher layer protocols or applications

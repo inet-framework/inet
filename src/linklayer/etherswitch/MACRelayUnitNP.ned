@@ -45,9 +45,9 @@ simple MACRelayUnitNP like MACRelayUnit
         int highWatermark @unit("B") = default(512KB);  // buffer usage threshold to send PAUSE frame
         int pauseUnits = default(300);  // time to put in PAUSE frames (in units of 512 bit times)
         @display("i=block/switch");
-        @signal[usedBufferBytes](title="Used buffer bytes";modeHint=histogram);
-        @signal[processedBytes](title="title";modeHint=count,sum);
-        @signal[droppedBytes](title="title";modeHint=count,sum);
+        @statistic[usedBufferBytes](title="Used buffer bytes";record=histogram);
+        @statistic[processedBytes](title="title";record=count,sum);
+        @statistic[droppedBytes](title="title";record=count,sum);
     gates:
         input lowerLayerIn[] @labels(EtherFrame);
         output lowerLayerOut[] @labels(EtherFrame);

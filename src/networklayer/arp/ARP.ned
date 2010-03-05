@@ -42,10 +42,10 @@ simple ARP
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool proxyARP = default(true);        // sets proxy \ARP mode (replying to \ARP requests for the addresses for which a routing table entry exists)
         @display("i=block/layer");
-        @signal[sentReq](title="ARP request sent";modeHint=count);
-        @signal[sentReplies](title="ARP replies sent";modeHint=count);
-        @signal[initiatedResolution](title="ARP initiated resolutions";modeHint=count);
-        @signal[failedResolution](title="failed ARP resolutions sent";modeHint=count);
+        @statistic[sentReq](title="ARP request sent";record=count);
+        @statistic[sentReplies](title="ARP replies sent";record=count);
+        @statistic[initiatedResolution](title="ARP initiated resolutions";record=count);
+        @statistic[failedResolution](title="failed ARP resolutions sent";record=count);
     gates:
         input ipIn @labels(ARPPacket,IPDatagram);
         output nicOut[] @labels(ARPPacket);

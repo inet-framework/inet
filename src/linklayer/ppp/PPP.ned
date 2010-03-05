@@ -50,13 +50,13 @@ simple PPP
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
         int mtu = default(4470);
         @display("i=block/rxtx");
-        @signal[txState](title="TX State"; modeHint=timeavg;interpolationmode=sample-hold;);
-        @signal[txPkBytes](title="TX packet bytes"; modeHint=sum,count);
-        @signal[rxPkBytesOk](title="RX packet bytes OK"; modeHint=sum,count);
-        @signal[droppedPkBytesBitError](title="Dropped packet bytes bit error"; modeHint=sum,count);
-        @signal[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; modeHint=sum,count);
-        @signal[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; modeHint=sum,count);
-        @signal[passedUpPkBytes](title="Passed packet bytes to higher layer"; modeHint=sum,count);
+        @statistic[txState](title="TX State"; record=timeavg;interpolationmode=sample-hold);
+        @statistic[txPkBytes](title="TX packet bytes"; record=sum,count);
+        @statistic[rxPkBytesOk](title="RX packet bytes OK"; record=sum,count);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; record=sum,count);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; record=sum,count);
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; record=sum,count);
+        @statistic[passedUpPkBytes](title="Passed packet bytes to higher layer"; record=sum,count);
 
     gates:
         input netwIn;

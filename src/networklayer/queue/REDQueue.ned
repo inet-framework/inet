@@ -90,9 +90,9 @@ simple REDQueue like OutputQueue
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
         @display("i=block/queue");
-        @signal[earlyDropPkBytes](title="Early dropped packet bytes";modeHint=count,sum);
-        @signal[avgQueueLength](title="Avg queue length";modeHint=histogram,stats);
-        @signal[queueLength](title="Queue length";modeHint=histogram,stats;interpolationmode=sample-hold;);
+        @statistic[earlyDropPkBytes](title="Early dropped packet bytes";record=count,sum);
+        @statistic[avgQueueLength](title="Avg queue length";record=histogram,stats);
+        @statistic[queueLength](title="Queue length";record=histogram,stats;interpolationmode=sample-hold);
     gates:
         input in;
         output out;

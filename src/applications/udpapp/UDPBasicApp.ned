@@ -42,8 +42,8 @@ simple UDPBasicApp like UDPApp
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
         @display("i=block/app");
-        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[sentPkBytes](title="Sent packet bytes"; modeHint=count,sum);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

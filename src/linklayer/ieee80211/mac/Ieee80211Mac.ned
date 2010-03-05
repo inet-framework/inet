@@ -66,8 +66,8 @@ simple Ieee80211Mac
         int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
         int mtu = default(1500);
         @display("i=block/layer");
-        @signal[state](title="State";modeHint=auto;interpolationmode=sample-hold;); // ENUM!!
-        @signal[radioState](title="Radio state";modeHint=auto;interpolationmode=sample-hold;); // ENUM!!
+        @statistic[state](title="State";record=auto;interpolationmode=sample-hold); // ENUM!!
+        @statistic[radioState](title="Radio state";record=auto;interpolationmode=sample-hold); // ENUM!!
     gates:
         input uppergateIn @labels(Ieee80211Frame);
         output uppergateOut @labels(Ieee80211Frame);

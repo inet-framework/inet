@@ -147,17 +147,17 @@ simple EtherMAC
         string queueModule = default("");    // name of optional external queue module
         int mtu = default(1500);
         @display("i=block/rxtx");
-        @signal[collision](title="Collision";modeHint=count);
-        @signal[backoff](title="Backoff";modeHint=count);
-        @signal[txPkBytes](title="TX bytes";modeHint=sum,count);
-        @signal[rxPkBytesOk](title="RX bytes";modeHint=sum,count);
-        @signal[passedUpPkBytes](title="Passed up packet bytes to higher layer";modeHint=sum,count);
-        @signal[txPausePkUnits](title="Sent pause";modeHint=count,stats);
-        @signal[rxPausePkUnits](title="Received pause";modeHint=count,stats);
-        @signal[rxPkBytesFromHL](title="Received packet bytes from higher layer";modeHint=sum,count);
-        @signal[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";modeHint=sum,count);
-        @signal[droppedPkBytesBitError](title="Dropped packet bytes bit error";modeHint=sum,count);
-        @signal[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";modeHint=sum,count);
+        @statistic[collision](title="Collision";record=count);
+        @statistic[backoff](title="Backoff";record=count);
+        @statistic[txPkBytes](title="TX bytes";record=sum,count);
+        @statistic[rxPkBytesOk](title="RX bytes";record=sum,count);
+        @statistic[passedUpPkBytes](title="Passed up packet bytes to higher layer";record=sum,count);
+        @statistic[txPausePkUnits](title="Sent pause";record=count,stats);
+        @statistic[rxPausePkUnits](title="Received pause";record=count,stats);
+        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer";record=sum,count);
+        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";record=sum,count);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error";record=sum,count);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";record=sum,count);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP

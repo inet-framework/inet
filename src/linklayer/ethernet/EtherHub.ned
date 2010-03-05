@@ -37,7 +37,7 @@ simple EtherHub
     parameters:
         @node();
         @display("i=device/hub");
-        @signal[pkBytes](title="Handled packet bytes";modeHint=count,sum);
+        @statistic[pkBytes](title="Handled packet bytes";record=count,sum);
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
 }

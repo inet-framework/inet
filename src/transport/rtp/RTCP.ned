@@ -7,8 +7,8 @@ simple RTCP
 {
     parameters:
         @display("i=block/control");
-        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[endToEndDelay](title="End to end delay"; modeHint=stats,histogram);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram);
 
     gates:
         input rtpIn @labels(RTPInnerPacket);

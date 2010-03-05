@@ -14,8 +14,8 @@ simple RTP
 {
     parameters:
         @display("i=block/buffer");
-        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[endToEndDelay](title="End to end delay"; modeHint=stats,histogram);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram);
 
     gates:
         input appIn @labels(RTPInterfacePacket/down);
