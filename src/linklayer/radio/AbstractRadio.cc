@@ -104,8 +104,8 @@ void AbstractRadio::initialize(int stage)
 
         // statistics
         emit(bitrateSignal, rs.getBitrate());
-        emit(radioStateSignal, (long)rs.getState());
-        emit(channelNumberSignal, (long)rs.getChannelNumber());
+        emit(radioStateSignal, rs.getState());
+        emit(channelNumberSignal, rs.getChannelNumber());
     }
 }
 
@@ -307,7 +307,7 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
                 this->newChannel = newChannel;
             } else
             {
-                emit(channelNumberSignal, (long)rs.getChannelNumber());
+                emit(channelNumberSignal, rs.getChannelNumber());
                 changeChannel(newChannel); // change channel right now
             }
         }
@@ -578,7 +578,7 @@ void AbstractRadio::changeChannel(int channel)
     // do channel switch
     EV << "Changing to channel #" << channel << "\n";
 
-    emit(channelNumberSignal, (long)channel);
+    emit(channelNumberSignal, channel);
     rs.setChannelNumber(channel);
     cc->updateHostChannel(myHostRef, channel);
     ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
@@ -651,7 +651,7 @@ void AbstractRadio::setRadioState(RadioState::State newState)
 {
     if(rs.getState() != newState)
     {
-        emit(radioStateSignal, (long)newState);
+        emit(radioStateSignal, newState);
     }
     rs.setState(newState);
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);

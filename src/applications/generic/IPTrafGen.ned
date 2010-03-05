@@ -27,8 +27,8 @@ simple IPTrafSink like IPTrafficGenerator
 {
     parameters:
         @display("i=block/sink");
-        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[endToEndDelay](title="End to end delay"; modeHint=stats,histogram);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
 
     gates:
         input ipIn @labels(IPControlInfo/up);
@@ -60,9 +60,9 @@ simple IPTrafGen like IPTrafficGenerator
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
         @display("i=block/source");
-        @signal[rcvdPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[sentPkBytes](title="Sent packet bytes"; modeHint=count,sum);
-        @signal[endToEndDelay](title="End to end delay"; modeHint=stats,histogram);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
 
     gates:
         input ipIn @labels(IPControlInfo/up);

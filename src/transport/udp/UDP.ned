@@ -53,11 +53,11 @@ simple UDP
 {
     parameters:
         @display("i=block/transport");
-        @signal[rxPkBytes](title="Received packet bytes"; modeHint=count,sum);
-        @signal[txPkBytes](title="Sent packet bytes"; modeHint=count,sum);
-        @signal[passedUpPkBytes](title="Passed up packet bytes"; modeHint=count,sum);
-        @signal[droppedPkBytesWrongPort](title="Dropped packet bytes wrong port"; modeHint=count,sum);
-        @signal[droppedPkBytesBadChecksum](title="Dropped packet bytes checksum error"; modeHint=count,sum);
+        @statistic[rxPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[txPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[passedUpPkBytes](title="Passed up packet bytes"; record=count,sum,vector);
+        @statistic[droppedPkBytesWrongPort](title="Dropped packet bytes wrong port"; record=count,sum,vector);
+        @statistic[droppedPkBytesBadChecksum](title="Dropped packet bytes checksum error"; record=count,sum,vector);
 
     gates:
         input appIn[] @labels(UDPControlInfo/down);
