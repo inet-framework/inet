@@ -155,7 +155,7 @@ simple EtherMAC2
         int mtu = default(1500);
         @display("i=block/queue");
         @statistic[txPkBytes](title="Sent bytes";record=sum,count,vector);
-        @statistic[rxPkBytesOk](title="title";record=sum,count,vector);
+        @statistic[rxPkBytesOk](title="Received bytes";record=sum,count,vector);
         @statistic[droppedPkBytesIfaceDown](title="Dropped msg Iface down";record=sum,count,vector);
         @statistic[droppedPkBytesBitError](title="Dropped bytes bit error";record=sum,count,vector);
         @statistic[droppedPkBytesNotForUs](title="Dropped bytes not for us";record=sum,count,vector);
