@@ -44,8 +44,8 @@ simple TCPEchoApp like TCPApp
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
         @display("i=block/app");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
 
     gates:
         input tcpIn @labels(TCPCommand/up);

@@ -26,7 +26,7 @@ simple Sink
 {
     parameters:
         @display("i=block/sink");
-        @statistic[rcvdPkBytes](title="Received bytes";record=count,sum);
+        @statistic[rcvdPkBytes](title="Received bytes";record=count,sum,vector);
     gates:
         input in[];
 }

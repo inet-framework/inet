@@ -41,9 +41,9 @@ simple SCTPClient like SCTPApp
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
         bool finishEndsSimulation = default(false);
-        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum);
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum);
-        @statistic[sentEchoedPkBytes](title="Sent echoed packet bytes";record=count,sum);
+        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
+        @statistic[sentEchoedPkBytes](title="Sent echoed packet bytes";record=count,sum,vector);
 
     gates:
         input sctpIn;

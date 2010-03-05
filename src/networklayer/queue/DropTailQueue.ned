@@ -27,7 +27,7 @@ simple DropTailQueue like OutputQueue
     parameters:
         int frameCapacity = default(100);
         @display("i=block/queue");
-        @statistic[queueLength](title="Used queue length"; record=histogram,stats; interpolationmode=sample-hold);
+        @statistic[queueLength](title="Used queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;

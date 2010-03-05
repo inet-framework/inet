@@ -69,9 +69,9 @@ simple TCPSessionApp like TCPApp
         string sendScript = default("");
         double tClose @unit("s") = default(2s);
         @display("i=block/app");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum);
-        @statistic[rcvdIndications](title="Received indications"; record=count); //enum msg->getKind()
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[rcvdIndications](title="Received indications"; record=count,vector); //enum msg->getKind()
 
     gates:
         input tcpIn @labels(TCPCommand/up);
