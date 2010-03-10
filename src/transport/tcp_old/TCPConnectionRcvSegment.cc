@@ -457,6 +457,39 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 {
                     tcpEV << "All segments arrived up to the FIN segment, advancing rcv_nxt over the FIN\n";
                     state->rcv_nxt = state->rcv_fin_seq+1;
+                    // state transitions will be done in the state machine, here we just set
+                    // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)
+                    event = TCP_E_RCV_FIN;
+                    switch (fsm.getState())
+                    {
+                        case TCP_S_FIN_WAIT_1:
+                            if (state->fin_ack_rcvd)
+                            {
+                                event = TCP_E_RCV_FIN_ACK;
+                                // start the time-wait timer, turn off the other timers
+                                cancelEvent(finWait2Timer);
+                                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                                // we're entering TIME_WAIT, so we can signal CLOSED the user
+                                // (the only thing left to do is wait until the 2MSL timer expires)
+                                sendIndicationToApp(TCP_I_CLOSED);
+                            }
+                            break;
+                        case TCP_S_FIN_WAIT_2:
+                            // Start the time-wait timer, turn off the other timers.
+                            cancelEvent(finWait2Timer);
+                            scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                            // we're entering TIME_WAIT, so we can signal CLOSED the user
+                            // (the only thing left to do is wait until the 2MSL timer expires)
+                            sendIndicationToApp(TCP_I_CLOSED);
+                            break;
+                        case TCP_S_TIME_WAIT:
+                            // Restart the 2 MSL time-wait timeout.
+                            cancelEvent(the2MSLTimer);
+                            scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                            break;
+                    }
                     sendIndicationToApp(TCP_I_PEER_CLOSED);
                 }
             }
@@ -486,6 +519,39 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             // advance rcv_nxt over FIN now
             tcpEV << "FIN arrived, advancing rcv_nxt over the FIN\n";
             state->rcv_nxt++;
+            // state transitions will be done in the state machine, here we just set
+            // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)
+            event = TCP_E_RCV_FIN;
+            switch (fsm.getState())
+            {
+                case TCP_S_FIN_WAIT_1:
+                    if (state->fin_ack_rcvd)
+                    {
+                        event = TCP_E_RCV_FIN_ACK;
+                        // start the time-wait timer, turn off the other timers
+                        cancelEvent(finWait2Timer);
+                        scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                        // we're entering TIME_WAIT, so we can signal CLOSED the user
+                        // (the only thing left to do is wait until the 2MSL timer expires)
+                        sendIndicationToApp(TCP_I_CLOSED);
+                    }
+                    break;
+                case TCP_S_FIN_WAIT_2:
+                    // Start the time-wait timer, turn off the other timers.
+                    cancelEvent(finWait2Timer);
+                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                    // we're entering TIME_WAIT, so we can signal CLOSED the user
+                    // (the only thing left to do is wait until the 2MSL timer expires)
+                    sendIndicationToApp(TCP_I_CLOSED);
+                    break;
+                case TCP_S_TIME_WAIT:
+                    // Restart the 2 MSL time-wait timeout.
+                    cancelEvent(the2MSLTimer);
+                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                    break;
+            }
             sendIndicationToApp(TCP_I_PEER_CLOSED);
         }
         else
@@ -497,40 +563,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         }
 
         // TBD do PUSH stuff
-
-        // state transitions will be done in the state machine, here we just set
-        // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)
-        event = TCP_E_RCV_FIN;
-        switch (fsm.getState())
-        {
-            case TCP_S_FIN_WAIT_1:
-                if (state->fin_ack_rcvd)
-                {
-                    event = TCP_E_RCV_FIN_ACK;
-                    // start the time-wait timer, turn off the other timers
-                    cancelEvent(finWait2Timer);
-                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
-
-                    // we're entering TIME_WAIT, so we can signal CLOSED the user
-                    // (the only thing left to do is wait until the 2MSL timer expires)
-                    sendIndicationToApp(TCP_I_CLOSED);
-                }
-                break;
-            case TCP_S_FIN_WAIT_2:
-                // Start the time-wait timer, turn off the other timers.
-                cancelEvent(finWait2Timer);
-                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
-
-                // we're entering TIME_WAIT, so we can signal CLOSED the user
-                // (the only thing left to do is wait until the 2MSL timer expires)
-                sendIndicationToApp(TCP_I_CLOSED);
-                break;
-            case TCP_S_TIME_WAIT:
-                // Restart the 2 MSL time-wait timeout.
-                cancelEvent(the2MSLTimer);
-                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
-                break;
-        }
     }
 
     if (old_rcv_nxt!=state->rcv_nxt)
