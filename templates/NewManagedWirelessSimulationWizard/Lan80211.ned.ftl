@@ -16,15 +16,26 @@ import inet.world.ChannelControl;
 network ${targetTypeName}
 {
     parameters:
+<#if parametric>
         int numOfHosts;
+</#if>
         int playgroundSizeX;
         int playgroundSizeY;
 
     submodules:
+<#if parametric>
         host[numOfHosts]: WirelessHostSimplified
         {
             @display("r=,,#707070");
         }
+<#else>
+    <#list 0..numOfHosts?number-1 as i>
+        host${i}: WirelessHostSimplified
+        {
+            @display("r=,,#707070");
+        }
+    </#list>
+</#if>
 
         ap: WirelessAPSimplified
         {

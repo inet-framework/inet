@@ -25,17 +25,32 @@
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
 
-    <!-- numOfHosts% -->
-    <label text="Num of hosts:"/>
-    <spinner x:id="numOfHosts" minimum="2" maximum="100" x:style="BORDER"/>
+        <!-- numOfHosts% -->
+        <label text="Number of hosts:"/>
+        <spinner x:id="numOfHosts" minimum="2" maximum="100" x:style="BORDER"/>
+        <!--  -->
+        <!-- } -->
+      </x:children>
+    </group>
 
-    <!--  -->
+    <group text="NED Topology Type">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+    <!-- Static/Dynamic -->
+    <composite>
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+      <layout x:class="GridLayout"/>
+      <x:children>
+        <button x:id="static" text="Static" x:style="RADIO"/>
+        <button x:id="parametric" text="Parametric" x:style="RADIO"/>
+      </x:children>
+    </composite>
 
     <!-- } -->
       </x:children>
     </group>
 
-    <!--  -->
 
   </x:children>
 </xswt>

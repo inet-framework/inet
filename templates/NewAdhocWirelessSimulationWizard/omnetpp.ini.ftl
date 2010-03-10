@@ -3,6 +3,15 @@ network = ${targetTypeName}
 #record-eventlog = true
 #eventlog-message-detail-pattern = *:(not declaredOn(cMessage) and not declaredOn(cNamedObject) and not declaredOn(cObject))
 
+<#if parametric>
+*.numHosts = ${numOfHosts}
+    <#assign host_0 = "host[0]">
+    <#assign host_all = "host[*]">
+<#else>
+    <#assign host_0 = "host0">
+    <#assign host_all = "host*">
+</#if>
+
 num-rngs = 3
 **.mobility.rng-0 = 1
 **.wlan.mac.rng-0 = 2
@@ -14,7 +23,7 @@ tkenv-plugin-path = ../../../etc/plugins
 *.playgroundSizeY = 400
 **.debug = true
 **.coreDebug = false
-**.host*.**.channelNumber = 0
+**.${host_all}.**.channelNumber = 0
 
 # channel physical parameters
 *.channelcontrol.carrierFrequency = 2.4GHz
@@ -24,18 +33,18 @@ tkenv-plugin-path = ../../../etc/plugins
 *.channelcontrol.numChannels = 1
 
 # mobility
-**.host*.mobility.x = -1
-**.host*.mobility.y = -1
+**.${host_all}.mobility.x = -1
+**.${host_all}.mobility.y = -1
 
-**.host*.mobilityType = "inet.mobility.MassMobility"
-**.host*.mobility.changeInterval = truncnormal(2s, 0.5s)
-**.host*.mobility.changeAngleBy = normal(0deg, 30deg)
-**.host*.mobility.speed = truncnormal(20mps, 8mps)
-**.host*.mobility.updateInterval = 100ms
+**.${host_all}.mobilityType = "inet.mobility.MassMobility"
+**.${host_all}.mobility.changeInterval = truncnormal(2s, 0.5s)
+**.${host_all}.mobility.changeAngleBy = normal(0deg, 30deg)
+**.${host_all}.mobility.speed = truncnormal(20mps, 8mps)
+**.${host_all}.mobility.updateInterval = 100ms
 
-# ping app (host[0] pinged by others)
-*.host[0].pingApp.destAddr = ""
-*.host[*].pingApp.destAddr = "host[0]"
+# ping app (${host_0} pinged by others)
+*.${host_0}.pingApp.destAddr = ""
+*.${host_all}.pingApp.destAddr = "${host_0}"
 **.pingApp.startTime = uniform(1s,5s)
 
 # nic settings
@@ -55,5 +64,3 @@ tkenv-plugin-path = ../../../etc/plugins
 **.wlan.radio.pathLossAlpha = 2
 **.wlan.radio.snirThreshold = 4dB
 
-
-*.numHosts = ${numOfHosts}
