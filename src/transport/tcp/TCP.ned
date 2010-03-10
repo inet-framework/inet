@@ -20,7 +20,18 @@ package inet.transport.tcp;
 
 //
 // \TCP protocol implementation.
-// Supports RFC 793, 1122, 2001, 2018, 2581, 2883, 3042, 3390, 3517
+// This implementation supports:
+//   - RFC  793 - Transmission Control Protocol
+//   - RFC  896 - Congestion Control in IP/TCP Internetworks
+//   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+//   - RFC 2018 - TCP Selective Acknowledgment Options
+//   - RFC 2581 - TCP Congestion Control
+//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+//   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//   - RFC 3390 - Increasing TCP's Initial Window
+//   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
+//                Algorithm for TCP
+//   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
 // Compatible with both IPv4 and IPv6.
 //
 // A \TCP segment is represented by the class TCPSegment.
@@ -113,9 +124,9 @@ package inet.transport.tcp;
 //      (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
 //      for DumbTCP).
 //
-//   -# use the parameter (increasedIWEnabled) to change initial window
+//   -# use the module parameter (increasedIWEnabled) to change Initial Window
 //      from one segment (RFC 2001) (based on MSS) to maximal four segments
-//      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390). integrated to
+//      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390) integrated to
 //      TCPBaseAlg (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl
 //      but not for DumbTCP).
 //
@@ -131,16 +142,16 @@ package inet.transport.tcp;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    rfc 763 but may not be what you'd expect.
+//    RFC 763 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
 // <b>Standards</b>
 //
 // The TCP module itself implements the following:
-//  - all RFC793 \TCP states and state transitions
-//  - connection setup and teardown as in RFC793
-//  - generally, RFC793 compliant segment processing
+//  - all RFC 793 \TCP states and state transitions
+//  - connection setup and teardown as in RFC 793
+//  - generally, RFC 793 compliant segment processing
 //  - all socked commands (except RECEIVE) and indications
 //  - receive buffer to cache above-sequence data and data not yet forwarded
 //    to the user
@@ -172,16 +183,14 @@ package inet.transport.tcp;
 
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - delayed acks, with 200ms timeout (optional)
-//  - Nagle's algorithm (optional)
+//  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
 //  - \TCPTahoe (Fast Retransmit), \TCPReno (Fast Retransmit and Fast Recovery), \TCPNewReno (Fast Retransmit and Fast Recovery)
-//  - A module parameter (increasedIWEnabled) to change initial window from one
-//    segment (RFC 2001) (based on MSS) to maximal four segments
-//    (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390). Integrated to TCPBaseAlg
+//  - RFC 3390 - Increased Initial Window (optional) integrated to TCPBaseAlg
 //    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
 //    for DumbTCP).
-//  - RFC 3042 - Limited Transmit algorithm. Integrated to TCPBaseAlg
+//  - RFC 3042 - Limited Transmit algorithm (optional) integrated to TCPBaseAlg
 //    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
 //    for DumbTCP).
 //
@@ -203,8 +212,8 @@ package inet.transport.tcp;
 //    For the purposes of this standard, we define RW = IW."
 //
 // TCPNewReno/TCPReno/TCPTahoe issues and missing features:
-//  - KEEPALIVE not implemented (idle connections never time out)
-//  - Nagle's algorithm possibly not precisely implemented
+//  - KEEP-ALIVE not implemented (idle connections never time out)
+//  - Nagle's algorithm (RFC 896) possibly not precisely implemented
 //  - Re-starting Idle Connections (RFC 2581)
 //      RFC 2581, pages 7 and 8: "When TCP has not received a segment for
 //      more than one retransmission timeout, cwnd is reduced to the value
@@ -228,7 +237,7 @@ simple TCP like ITCP
         bool delayedAcksEnabled = default(false); // delayed ACKs enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
-        bool increasedIWEnabled = default(false); // increased initial window (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390) enabled/disabled
+        bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         int mss = default(536); // maximum segment size (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP

@@ -448,7 +448,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // otherwise it stays the same but the data must be cached nevertheless
                 // (to avoid "Failure to retain above-sequence data" problem, RFC 2525
                 // section 2.5).
-                // uint32 old_rcv_nxt = state->rcv_nxt; // The same has already be done in line 401 - FIXED 2009-08-05 by T.R.
 
                 uint32 old_usedRcvBuffer = state->usedRcvBuffer;
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpseg);

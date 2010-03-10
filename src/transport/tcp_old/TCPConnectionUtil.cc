@@ -469,7 +469,7 @@ void TCPConnection::sendSegment(int bytes)
 
 bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
 {
-    if (!state->afterRto) 
+    if (!state->afterRto)
     {
         // we'll start sending from snd_max
         state->snd_nxt = state->snd_max;
@@ -501,14 +501,14 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
 
     if (fullSegmentsOnly && bytesToSend < state->snd_mss)
     {
-        tcpEV << "Cannot send, not enough data for a full segment (MSS=" << state->snd_mss
-              << ", in buffer " << buffered << ")\n";
+        tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
+            << ", in buffer " << buffered << ")\n";
         return false;
     }
 
     // start sending 'bytesToSend' bytes
     tcpEV << "Will send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin
-          << ", in buffer " << buffered << " bytes)\n";
+        << ", in buffer " << buffered << " bytes)\n";
 
     uint32 old_snd_nxt = state->snd_nxt;
     ASSERT(bytesToSend>0);
@@ -530,7 +530,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     }
     else
     {
-        // send whole segments only
+        // send whole segments only (nagle_enabled)
         while (bytesToSend>=state->snd_mss)
         {
             sendSegment(state->snd_mss);
@@ -606,6 +606,7 @@ void TCPConnection::retransmitData()
     ulong bytesToSend = state->snd_max - state->snd_nxt;
     ASSERT(bytesToSend!=0);
 
+    // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend>0)
     {
         ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);

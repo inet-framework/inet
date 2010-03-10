@@ -80,7 +80,7 @@ enum TCPEventCode
     TCP_E_IGNORE,
 
     // app commands
-    // (note: no RECEIVE command, data are automatically passed up)
+    // (Note: no RECEIVE command, data are automatically passed up)
     TCP_E_OPEN_ACTIVE,
     TCP_E_OPEN_PASSIVE,
     TCP_E_SEND,
@@ -95,9 +95,9 @@ enum TCPEventCode
     TCP_E_RCV_SYN_ACK,
     TCP_E_RCV_FIN,
     TCP_E_RCV_FIN_ACK,
-    TCP_E_RCV_RST,  // covers RST+ACK too
+    TCP_E_RCV_RST, // covers RST+ACK too
 
-    TCP_E_RCV_UNEXP_SYN,  // unexpected SYN
+    TCP_E_RCV_UNEXP_SYN, // unexpected SYN
 
     // timers
     TCP_E_TIMEOUT_2MSL,     // RFC 793, a.k.a. TIME-WAIT timer
@@ -180,7 +180,7 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TCPAlgorithm)
-    int syn_rexmit_count;   // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
+    int syn_rexmit_count; // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout; // current SYN/SYN+ACK retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
@@ -196,8 +196,8 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     bool nagle_enabled;         // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;  // set if delayed ACKs are enabled
-    bool limited_transmit_enabled;  // set if Limited Transmit algorithm (RFC3042) is enabled
-    bool increased_IW_enabled;  // set if increased initial window (=2*SMSS) (RFC 2581) is enabled
+    bool limited_transmit_enabled; // set if Limited Transmit algorithm (RFC 3042) is enabled
+    bool increased_IW_enabled;  // set if Increased Initial Window (RFC 3390) is enabled
 
     uint32 full_sized_segment_counter;// this counter is needed for delayed ACKs
     bool ack_now;               // send ACK immediately, needed if delayed_acks_enabled is set
@@ -305,7 +305,7 @@ class INET_API TCPConnection
     int remotePort;
 
   protected:
-    TCP *tcpMain;  // TCP module
+    TCP *tcpMain; // TCP module
 
     // TCP state machine
     cFSM fsm;
@@ -327,7 +327,7 @@ class INET_API TCPConnection
     cMessage *the2MSLTimer;
     cMessage *connEstabTimer;
     cMessage *finWait2Timer;
-    cMessage *synRexmitTimer;  // for retransmitting SYN and SYN+ACK
+    cMessage *synRexmitTimer; // for retransmitting SYN and SYN+ACK
 
     // statistics
     cOutVector *sndWndVector;   // snd_wnd
@@ -443,7 +443,7 @@ class INET_API TCPConnection
      * If fullSegmentsOnly is set, don't send segments smaller than SMSS (needed for Nagle).
      * Returns true if some data was actually sent.
      */
-    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow); /* changed from "int congestionWindow = -1" to "uint32 congestionWindow" 2009-08-05 by T.R. */
+    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow);
 
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
@@ -491,7 +491,7 @@ class INET_API TCPConnection
 
   protected:
     /** Utility: cancel a timer */
-    cMessage *cancelEvent(cMessage *msg)  {return tcpMain->cancelEvent(msg);}
+    cMessage *cancelEvent(cMessage *msg) {return tcpMain->cancelEvent(msg);}
 
     /** Utility: send IP packet */
     static void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);

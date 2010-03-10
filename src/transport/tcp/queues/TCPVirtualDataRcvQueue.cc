@@ -172,8 +172,8 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
     uint32 bytes=0;
 
     RegionList::iterator i = regionList.begin();
-    if (i==regionList.end())    // is queue empty?
-        {return 0;}
+    if (i==regionList.end()) // is queue empty?
+        return 0;
 
     while (i!=regionList.end())
     {

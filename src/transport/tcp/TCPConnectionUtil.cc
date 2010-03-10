@@ -340,9 +340,9 @@ void TCPConnection::configureStateVariables()
         throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
 
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACKs enabled/disabled
-    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm enabled/disabled
+    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
-    state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // increased initial window (=2*SMSS) (RFC 2581) enabled/disabled
+    state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->rcv_wnd = advertisedWindowPar;
     state->rcv_adv = advertisedWindowPar;
     state->maxRcvBuffer = advertisedWindowPar;
@@ -533,9 +533,8 @@ void TCPConnection::sendSegment(uint32 bytes)
     }
 
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
-    if (bytes > buffered) { // last segment?
+    if (bytes > buffered) // last segment?
         bytes = buffered;
-    }
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
@@ -570,11 +569,13 @@ void TCPConnection::sendSegment(uint32 bytes)
     sendToIP(tcpseg);
 }
 
-bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow) // changed from int congestionWindow to uint32 congestionWindow 2009-08-05 by T.R.
+bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     if (!state->afterRto)
+	{
         // we'll start sending from snd_max
         state->snd_nxt = state->snd_max;
+    }
 
     uint32 old_highRxt = 0;
     if (state->sack_enabled)

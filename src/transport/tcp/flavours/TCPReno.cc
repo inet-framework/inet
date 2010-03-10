@@ -77,7 +77,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
 
     state->afterRto = true;
 
-    conn->retransmitOneSegment(); // FIXED 2009-08-05 by T.R.
+    conn->retransmitOneSegment();
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
@@ -106,7 +106,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             // by at most SMSS bytes for each ACK received that acknowledges new data."
             state->snd_cwnd += state->snd_mss;
 
-            // NOTE: we could increase cwnd based on the number of bytes being
+            // Note: we could increase cwnd based on the number of bytes being
             // acknowledged by each arriving ACK, rather than by the number of ACKs
             // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
             // described in RFC 3465. This RFC is experimental and probably not
@@ -131,10 +131,10 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             if (cwndVector) cwndVector->record(state->snd_cwnd);
 
             //
-            // NOTE: some implementations use extra additive constant mss/8 here
+            // Note: some implementations use extra additive constant mss/8 here
             // which is known to be incorrect (RFC 2581 p5)
             //
-            // NOTE 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+            // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
             // would require maintaining a bytes_acked variable here which we don't do
             //
 
@@ -239,7 +239,7 @@ void TCPReno::receivedDuplicateAck()
         // enter Fast Recovery
         recalculateSlowStartThreshold();
         // "set cwnd to ssthresh plus 3*SMSS." (RFC 2581)
-        state->snd_cwnd = state->ssthresh + 3*state->snd_mss;  // 20051129 (1)
+        state->snd_cwnd = state->ssthresh + 3*state->snd_mss; // 20051129 (1)
         if (cwndVector) cwndVector->record(state->snd_cwnd);
 
         tcpEV << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
@@ -248,13 +248,8 @@ void TCPReno::receivedDuplicateAck()
         // for the REXMIT timer to expire
         conn->retransmitOneSegment();
 
-        // restart retransmission timer (with rexmit_count=0), and cancel round-trip time measurement
-        // (see p972 "29.4 Fast Retransmit and Fast Recovery Algorithms" of
-        // TCP/IP Illustrated, Vol2) -- but that's probably New Reno
-        // cancelEvent(rexmitTimer);
-        // startRexmitTimer();
-        // state->rtseq_sendtime = 0;
-        // FIXED 2009-10-27 by T.R. Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Do not restart REXMIT timer.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
 
         if (state->sack_enabled)

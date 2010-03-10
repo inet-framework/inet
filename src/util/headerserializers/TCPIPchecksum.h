@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
-//               2009 Thomas Reschka, Zoltan Bojthe
+//               2009 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,7 +29,7 @@
 #include "headers/tcp.h"
 
 /**
- * Converts between TCPSegment and binary (network byte order) TCP header.
+ * Calculates checksum.
  */
 class TCPIPchecksum
 {

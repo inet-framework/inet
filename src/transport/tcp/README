@@ -2,10 +2,21 @@ TCP
 ===
 
 This folder contains the "base part" of TCP, basically the operation
-described in RFC793. This base algorithm can be extended and customized via
+described in RFC 793. This base algorithm can be extended and customized via
 "flavour" and "queue" classes that implement the TCPAlgorith, TCPSendQueue
 and TCPReceiveQueue classes, and are selected via TCP's NED parameters.
-This implementation supports RFCs: 793, 1122, 2018, 2581, 2883, 3042, 3390, 3517, 3782.
+This implementation supports:
+  - RFC  793 - Transmission Control Protocol
+  - RFC  896 - Congestion Control in IP/TCP Internetworks
+  - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+  - RFC 2018 - TCP Selective Acknowledgment Options
+  - RFC 2581 - TCP Congestion Control
+  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+  - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+  - RFC 3390 - Increasing TCP's Initial Window
+  - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
+               Algorithm for TCP
+  - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
 The old version of TCP is deprecated and can be found in the tcp_old directory under
 the tcp_old namespace.
 
