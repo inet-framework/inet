@@ -60,13 +60,13 @@ network ${targetTypeName}
                 @display("p=${srvXpos},100");
         }
 
-        <#list 1..numClients?number as i>
+<#list 1..numClients?number as i>
         client${i}: ${hostModule}
         {
             parameters:
                 @display("p=${i*60-20},160;i=device/pc3");
         }
-        </#list>
+</#list>
 
 <#if ipv4Layer>
     connections:
