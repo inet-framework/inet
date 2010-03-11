@@ -460,7 +460,7 @@ void TCPConnection::sendSegment(int bytes)
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
         state->afterRto = false;
-	
+
     if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
     {
         tcpEV << "Setting FIN on segment\n";
