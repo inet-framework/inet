@@ -523,7 +523,7 @@ class INET_API TCPConnection
     /** Utility: update receive window (rcv_wnd) */
     virtual void updateRcvWnd();
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TCPSegment *tcpseg);
+    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 
   public:
     /**

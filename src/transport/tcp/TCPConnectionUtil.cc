@@ -1348,13 +1348,14 @@ void TCPConnection::updateRcvWnd()
     state->rcv_wnd = win;
 }
 
-void TCPConnection::updateWndInfo(TCPSegment *tcpseg)
+void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
 {
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982]:
-    if (tcpseg->getAckBit()
+    if (doAlways || (tcpseg->getAckBit()
         && (seqLess(state->snd_wl1, tcpseg->getSequenceNo()) ||
         (state->snd_wl1 == tcpseg->getSequenceNo()&& seqLE(state->snd_wl2, tcpseg->getAckNo())) ||
         (state->snd_wl2 == tcpseg->getAckNo()&& tcpseg->getWindow() > state->snd_wnd)))
+        )
     {
         // send window should be updated
         tcpEV << "Updating send window from segment: new wnd=" << tcpseg->getWindow() << "\n";

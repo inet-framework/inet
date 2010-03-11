@@ -769,7 +769,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
 
         // although not mentioned in RFC 793, seems like we have to pick up
         // initial snd_wnd from the segment here.
-        updateWndInfo(tcpseg);
+        updateWndInfo(tcpseg, true);
 
         if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
             readHeaderOptions(tcpseg);
@@ -908,7 +908,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
 
             // although not mentioned in RFC 793, seems like we have to pick up
             // initial snd_wnd from the segment here.
-            updateWndInfo(tcpseg);
+            updateWndInfo(tcpseg, true);
         }
 
         // this also seems to be a good time to learn our local IP address
