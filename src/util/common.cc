@@ -80,3 +80,42 @@ EroVector routeToEro(IPAddressVector rro)
 
     return ero;
 }
+uint32 getLevel(IPvXAddress addr)
+{
+    if (addr.isIPv6())
+    {
+        if (addr.get6().getScope()==IPv6Address::UNSPECIFIED || addr.get6().getScope()==IPv6Address::MULTICAST)
+            return 0;
+        if (addr.get6().getScope()==IPv6Address::LOOPBACK)
+            return 1;
+        if (addr.get6().getScope()==IPv6Address::LINK)
+            return 2;
+        if (addr.get6().getScope()==IPv6Address::SITE)
+            return 3;
+    }
+    else
+    {
+        //Addresses usable with SCTP, but not as destination or source address
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("0.0.0.0"), IPAddress("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("224.0.0.0"), IPAddress("240.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("198.18.0.0"), IPAddress("255.255.255.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.88.99.0"), IPAddress("255.255.255.0")))
+            return 0;
+
+        //Loopback
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("127.0.0.0"), IPAddress("255.0.0.0")))
+        return 1;
+
+        //Link-local
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("169.254.0.0"), IPAddress("255.255.0.0")))
+            return 2;
+
+        //Private
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("10.0.0.0"), IPAddress("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("172.16.0.0"), IPAddress("255.240.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.168.0.0"), IPAddress("255.255.0.0")))
+            return 3;
+     }
+    //Global
+    return 4;
+}

@@ -30,7 +30,7 @@
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above algorithms.
  */
-class SCTPAlgorithm : public cPolymorphic
+class INET_API SCTPAlgorithm : public cPolymorphic
 {
   protected:
     SCTPAssociation *assoc; // we belong to this association
@@ -41,16 +41,16 @@ class SCTPAlgorithm : public cPolymorphic
     /**
      * Ctor.
      */
-    SCTPAlgorithm() {assoc = NULL; transmissionQ = NULL; retransmissionQ = NULL;}
+    SCTPAlgorithm() { assoc = NULL; transmissionQ = NULL; retransmissionQ = NULL; }
 
     /**
      * Virtual dtor.
      */
     virtual ~SCTPAlgorithm() {}
 
-    void setAssociation(SCTPAssociation *_assoc)  {
-        assoc = _assoc;
-        transmissionQ = assoc->getTransmissionQueue();
+    inline void setAssociation(SCTPAssociation* _assoc)  {
+        assoc           = _assoc;
+        transmissionQ   = assoc->getTransmissionQueue();
         retransmissionQ = assoc->getRetransmissionQueue();
     }
 
@@ -64,7 +64,7 @@ class SCTPAlgorithm : public cPolymorphic
 
     virtual void processTimer(cMessage *timer, SCTPEventCode& event) = 0;
 
-    virtual void sendCommandInvoked(IPvXAddress addr) = 0;
+    virtual void sendCommandInvoked(SCTPPathVariables* path) = 0;
 
     virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
 

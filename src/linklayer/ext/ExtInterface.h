@@ -41,7 +41,7 @@ class ExtInterface : public cSimpleModule
   protected:
     bool connected;
     uint8 buffer[1<<16];
-	const char *device;
+    const char *device;
 
     InterfaceEntry *interfaceEntry;  // points into RoutingTable
 
@@ -50,8 +50,8 @@ class ExtInterface : public cSimpleModule
     uint64 numRcvd;
     uint64 numDropped;
 
-	// access to real network interface via Scheduler class:
-	cSocketRTScheduler *rtScheduler;
+    // access to real network interface via Scheduler class:
+    cSocketRTScheduler *rtScheduler;
 
     InterfaceEntry *registerInterface();
     void displayBusy();
@@ -69,7 +69,7 @@ class ExtInterface : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-	virtual void finish();
+    virtual void finish();
 };
 
 #endif

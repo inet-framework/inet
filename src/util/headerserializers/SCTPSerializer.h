@@ -41,7 +41,7 @@ class SCTPSerializer
          */
         void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
 
-        static uint32 crc32(const uint8 *buf, register uint32 len);
+        static uint32 checksum(const uint8 *buf, register uint32 len);
 };
 
 #endif

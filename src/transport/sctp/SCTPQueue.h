@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2005-2009 Irene Ruengeler
+// Copyright (C) 2009-2010 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -8,7 +9,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -19,12 +20,14 @@
 #define __SCTPQUEUE_H
 
 #include <omnetpp.h>
-#include "SCTPAssociation.h"
+#include "INETDefs.h"
+#include "IPvXAddress.h"
+#include "SCTP.h"
 
 
-class SCTPMessage;
-class SCTPCommand;
 class SCTPDataVariables;
+class SCTPAssociation;
+
 
 /**
  * Abstract base class for SCTP receive queues. This class represents
@@ -43,53 +46,55 @@ class SCTPDataVariables;
  *
  * @see SCTPSendQueue
  */
-class SCTPQueue : public cPolymorphic
+class INET_API SCTPQueue : public cPolymorphic
 {
-  protected:
-    SCTPAssociation *assoc; // SCTP connection object
+    public:
+    /**
+      * Constructor.
+      */
+     SCTPQueue();
+
+     /**
+      * Virtual destructor.
+      */
+     ~SCTPQueue();
+
+    bool checkAndInsertChunk(const uint32 key, SCTPDataVariables* chunk);
+    /* returns true if new data is inserted and false if data was present */
+
+    SCTPDataVariables* getAndExtractChunk(const uint32 tsn);
+    SCTPDataVariables* extractMessage();
+
+    void printQueue() const;
+
+    uint32 getQueueSize() const;
+
+    SCTPDataVariables* getFirstChunk() const;
+
+    cMessage* getMsg(const uint32 key) const;
+
+    SCTPDataVariables* getChunk(const uint32 key) const;
+
+    SCTPDataVariables* getChunkFast(const uint32 tsn, bool& firstTime);
+
+    void removeMsg(const uint32 key);
+
+    bool deleteMsg(const uint32 tsn);
+
+    int32 getNumBytes() const;
+
+    SCTPDataVariables* dequeueChunkBySSN(const uint16 ssn);
 
 
   public:
-    typedef std::map<uint32, SCTPDataVariables *> PayloadQueue;
-  PayloadQueue payloadQueue;
-    /**
-     * Ctor.
-     */
-    SCTPQueue();
+     typedef std::map<uint32, SCTPDataVariables*> PayloadQueue;
+     PayloadQueue payloadQueue;
 
-    /**
-     * Virtual dtor.
-     */
-    ~SCTPQueue();
+  protected:
+     SCTPAssociation* assoc;    // SCTP connection object
 
-//	uint32 insertMessage(uint32 key,SCTPDataVariables* datVar);
-
-	bool checkAndInsertVar(uint32 key,SCTPDataVariables *datVar); /* returns true if new data is inserted and false if data was present*/
-
-    SCTPDataVariables *getAndExtractMessage(uint32 tsn);
-    SCTPDataVariables *extractMessage();
-
-	void printQueue();
-
-	uint32 getQueueSize();
-
-	SCTPDataVariables* getFirstVar();
-
-	cMessage* getMsg(uint32 key);
-
-	SCTPDataVariables* getVar(uint32 key);
-
-	SCTPDataVariables* getNextVar(uint32 key, uint32 toTsn);
-
-	void removeMsg(uint32 key);
-
-	bool deleteMsg(uint32 tsn);
-
-	int32 getNumBytes();
-
-	SCTPDataVariables* dequeueVarBySsn(uint16 ssn);
+  private:
+     PayloadQueue::iterator GetChunkFastIterator;
 };
 
 #endif
-
-
