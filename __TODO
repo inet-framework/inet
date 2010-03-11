@@ -1,4 +1,31 @@
+TODO: set up nightly builds: 
+   - should report build errors/warnings;
+   - should run etc/runallexamples and report the results (runtime errors, fingerprint mismatches, etc)
+
+TODO: execute etc/runallexamples, and fix errors (last run: May 2008)
+
+TODO: implement missing models:
+   Qeueing (we have: FIFO, RED): CBQ, WFQ, RIO, Round Robin, Fair queueing Round Robin
+   Suggested by VR:
+     Wired: Circuit Switch, ATM(AAL2/AAL5,CBR/VBR/ABR), IP over ATM, PNNI, MPLS, DiffServ
+     Wireless:  Adhoc routing:FSR/DSDV/ZRP/TORA/LENMMAR;Adhoc MAC:802.11, WTRP,
+     TDMA; QoS supports for cross-layer design
+     and also, Group Mobility,  etc.
+
+TODO: integrate models:
+   HTTPTools, VoIPTools, HIPSim++, MobileWiMAX, ...
+
+TODO: for omnetpp-4.1: eliminate NotificationBoard, use signals instead
+
+TODO: PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
+
 TODO: IPv6 works only eth, not work on ppp. See examples/ipv6/nclients.
+
+TODO: implement node failure/recovery by using signals mechanism
+
+TODO: port NAM trace writer to use signals mechanism
+
+TODO: pcacp file recording using signals mechanism
 
 TODO: VideoStrmReq problem on IPv6: 
       "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
