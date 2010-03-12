@@ -89,7 +89,7 @@ class TCPDumper
         const char* intToChunk(int32 type);
         FILE *dumpfile;
     private:
-        int32 verbosity;
+        int verbosity;
 };
 
 
@@ -103,30 +103,14 @@ class INET_API TCPDump : public cSimpleModule
         TCPDumper tcpdump;
         unsigned int snaplen;
         unsigned long first, last, space;
-        pthread_mutex_t recordMutex;
-        pthread_cond_t read;
-        pthread_t tid;
-        volatile bool m_stoprequested;
-        volatile bool m_running;
-        void writeToBuffer(struct pcaprec_hdr* data1, uint32* data2,
-                unsigned char* data3, int length);
-        void readFromBuffer();
 
-        static void* handleThread(void *obj)
-        {
-            //All we do here is call the do_work() function
-            reinterpret_cast<TCPDump *>(obj)->readFromBuffer();
-            return NULL;
-        }
     public:
 
         TCPDump();
         ~TCPDump();
-        TCPDump(const char *name, cModule *parent);
         virtual void handleMessage(cMessage *msg);
         virtual void initialize();
         virtual void finish();
-        int32 verbose;    // T.D. 16.12.09: Added option to turn "verbose" mode off (it is very CPU-intensive!)
 };
 
 #endif

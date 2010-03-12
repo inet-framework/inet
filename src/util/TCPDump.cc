@@ -126,9 +126,8 @@ void TCPDumper::sctpDump(const char *label, SCTPMessage *sctpmsg, const std::str
 
           }
      }
-     int32 verbose = 1;
 
-     if (verbose == 1)
+     if (verbosity >= 1)
      {
           out << endl;
           for (uint32 i=0; i<numberOfChunks; i++)
@@ -356,11 +355,6 @@ void TCPDumper::dump(const char *label, const char *msg)
 //----
 
 Define_Module(TCPDump);
-
-TCPDump::TCPDump(const char *name, cModule *parent) :
-  cSimpleModule(name, parent, 0), tcpdump(ev.getOStream())
-{
-}
 
 TCPDump::TCPDump() : cSimpleModule(), tcpdump(ev.getOStream())
 {

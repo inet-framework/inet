@@ -90,7 +90,7 @@ void SCTP::bindPortForUDP()
 
 void SCTP::initialize()
 {
-    nextEphemeralPort = (uint16)(random()%10000 + 30000);
+    nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
     //sctpEV3<<"SCTPMain initialize\n";
 
