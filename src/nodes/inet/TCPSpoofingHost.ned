@@ -41,7 +41,7 @@ module TCPSpoofingHost
         string tcpAppType = default("");
         string udpAppType = default("");
         bool IPForward = default(false);
-        int namid;
+        int namid = default(-1);
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);

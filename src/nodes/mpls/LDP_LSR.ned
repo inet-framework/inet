@@ -43,7 +43,7 @@ module LDP_LSR
         @display("i=abstract/router");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
-        int namid;
+        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");

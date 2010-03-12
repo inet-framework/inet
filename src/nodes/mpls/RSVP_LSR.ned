@@ -41,7 +41,7 @@ module RSVP_LSR
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
-        int namid;
+        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
