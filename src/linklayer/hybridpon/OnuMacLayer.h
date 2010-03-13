@@ -31,6 +31,9 @@ protected:
 	//	int channel;	///< wavelength channel number assigned to an ONU
 	int queueSize; ///< size of FIFO queue [bits]
 
+	// configuration variables
+	double lineRate; ///< line rate of optical channel
+
 	// status variables
 	int busyQueue; ///< current queue length [bits]
 	cQueue queue; ///< FIFO queue holding frames from UNIs

@@ -141,7 +141,7 @@ void OnuMacLayer::handleGrantPonFrameFromPon(HybridPonDsGrantFrame *ponFrameDs)
 	// the upstream PON -- made out of the optical CW burst from the OLT -- is transmitted
 	// at the start of the optical CW burst (i.e., grant field) in the corresponding downstream
 	// PON frame.
-	sendDelayed(ponFrameUs, simtime_t(DS_GRANT_OVERHEAD_SIZE/BITRATE), "wdmg$o");
+	sendDelayed(ponFrameUs, simtime_t(DS_GRANT_OVERHEAD_SIZE/lineRate), "wdmg$o");
 
 	delete ponFrameDs;
 }
@@ -152,8 +152,14 @@ void OnuMacLayer::handleGrantPonFrameFromPon(HybridPonDsGrantFrame *ponFrameDs)
 void OnuMacLayer::initialize()
 {
 //	channel = (int) getParentModule()->par("lambda");
+	cModule *olt = getParentModule();
+	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("pong$o")->getChannel());
+	lineRate = chan->getDatarate();
 	queueSize = par("queueSize");
 	busyQueue = 0;
+
+	EV << "ONU initialization results:" << endl;
+	EV << "- Line rate = " << lineRate << endl;
 
 	// 	monitor = (Monitor *) ( gate("toMonitor")->getPathEndGate()->getOwnerModule() );
 	// #ifdef DEBUG_ONU_MAC_LAYER

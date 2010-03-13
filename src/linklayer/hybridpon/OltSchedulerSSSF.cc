@@ -93,15 +93,15 @@ int OltSchedulerSSSF::assignGrants(int ch, int usReport)
 ///
 void OltSchedulerSSSF::debugOnuPollListStatus(void)
 {
-	ev << "onuPollList status at " << simTime() << " sec.:" << endl;
-	ev << "Number of elements = " << onuPollList.size() << endl;
+	EV << "onuPollList status at " << simTime() << " sec.:" << endl;
+	EV << "Number of elements = " << onuPollList.size() << endl;
 	OnuPollList::const_iterator iter;
 	int i;
 	for (iter = onuPollList.begin(), i = 0; iter != onuPollList.end(); ++iter, ++i)
 	{
-		ev << "onuPollList[" << i << "]:" << endl;
-		ev << "\t- channel =\t" << (*iter).channel << endl;
-		ev << "\t- time =\t" << (*iter).time << endl;
+		EV << "onuPollList[" << i << "]:" << endl;
+		EV << "\t- channel =\t" << (*iter).channel << endl;
+		EV << "\t- time =\t" << (*iter).time << endl;
 	}
 }
 
@@ -114,10 +114,10 @@ void OltSchedulerSSSF::debugOnuPollListStatus(void)
 /// @param[in] ch		a WDM channel index
 /// @param[in] grant	a HybridPonDsGrantFrame pointer
 ///
-void OltSchedulerSSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
+void OltSchedulerSSSF::handleGrant(int ch, HybridPonDsGrantFrame *grant)
 {
 	int length = grant->getBitLength();
-	int voqIdx = lambda + numOnus;
+	int voqIdx = ch + numOnus;	///< refer to the voq definition for its indexing
 
 	////////////////////////////////////////////////////////////////////////////
 	// Note that checking the VOQ for room for a given grant is the job
@@ -128,43 +128,56 @@ void OltSchedulerSSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
 
 	// First, get a TX time based on sequential scheduling algorithm.
 	int rxIdx, txIdx;
-	simtime_t txTime = getTxTime(lambda, true, txIdx, rxIdx); // 'true' means this frame is a grant.
+	simtime_t txTime = getTxTime(ch, true, txIdx, rxIdx); // 'true' means this frame is a grant.
 
-	////////////////////////////////////////////////////////////////////////
-	// Adjust the grant size based on the scheduled TX time, cwMax, and VOQ status.
-	// Now only for polls (i.e., those resulting from ONU timeout).
-	////////////////////////////////////////////////////////////////////////
+
 	if (grant->getGrant() == 0)
 	{
-		// Estimated (predicted) grant has the following three components:
-		// Previous report;
-		// + Traffic newly arrived at ONU since last report;
-		// - Any pending grants (in the VOQ)
-		int estGrant = int(vReport[lambda] + vRate[lambda] * (txTime.dbl()
-				- vRxTime[lambda].dbl() + RTT[lambda].dbl()) - grantCtr[lambda]
-				+ 0.5); // 0.5 added to round it off.
+		// do special processing for a polling frame
 
-		// Limit the grant based on 'cwMax' and available room in the VOQ.
-		// Note that the current frame length hasn't been added to voqBitCtr!
-		estGrant = min(min(cwMax, voqSize - voqBitCtr[voqIdx] - length),
-				estGrant);
-
-		if (estGrant >= MIN_ETH_FRAME_SIZE)
+		if (onuRegistered[ch] == false)
 		{
-			// Update the grant only when the new one is equal to or greater than
-			// the min. Eth. frame size.
+			// start the ranging process if the ONU hasn't been registered.
+			// TODO: Implement full discovery procedure later.
 
-			grant->setGrant(estGrant);
-			length += estGrant;
-			grant->setBitLength(length); // Adjust the frame length accordingly.
+			rangingTimer[ch] = txTime;
 		}
-	}
+		else
+		{
+			////////////////////////////////////////////////////////////////////////
+			// Adjust the grant size based on the scheduled TX time, cwMax, and VOQ status.
+			// Now only for polls (i.e., those resulting from ONU timeout).
+			////////////////////////////////////////////////////////////////////////
+
+			// Estimated (predicted) grant has the following three components:
+			// Previous report;
+			// + Traffic newly arrived at ONU since last report;
+			// - Any pending grants (in the VOQ)
+			int estGrant = int(vReport[ch] + vRate[ch] * (txTime.dbl()
+					- vRxTime[ch].dbl() + RTT[ch].dbl()) - grantCtr[ch] + 0.5); // 0.5 added to round it off.
+
+			// Limit the grant based on 'cwMax' and available room in the VOQ.
+			// Note that the current frame length hasn't been added to voqBitCtr!
+			estGrant = min(min(cwMax, voqSize - voqBitCtr[voqIdx] - length),
+					estGrant);
+
+			if (estGrant >= MIN_ETH_FRAME_SIZE)
+			{
+				// Update the grant only when the new one is equal to or greater than
+				// the min. Eth. frame size.
+
+				grant->setGrant(estGrant);
+				length += estGrant;
+				grant->setBitLength(length); // Adjust the frame length accordingly.
+			}
+		}
+	}	// end of polling frame processing
 
 	// Update the queued grants counter.
-	grantCtr[lambda] += grant->getGrant();
+	grantCtr[ch] += grant->getGrant();
 
 	// Finally, schedule the transmission of the grant.
-	scheduleFrame(txTime, lambda, txIdx, rxIdx, grant);
+	scheduleFrame(txTime, ch, txIdx, rxIdx, grant);
 
 	// Append the grant at the end of the VOQ and update the VOQ bit counter.
 	voqBitCtr[voqIdx] += length;
@@ -186,11 +199,11 @@ void OltSchedulerSSSF::handleGrant(int lambda, HybridPonDsGrantFrame *grant)
 	//  - 'transmission end time (=scheduled TX time + TX delay)'
 	//			if the grant is successfully scheduled.
 	////////////////////////////////////////////////////////////////////////////
-	if (pollEvent[lambda]->isScheduled())
+	if (pollEvent[ch]->isScheduled())
 	{
-		cancelOnuPoll(pollEvent[lambda]);
+		cancelOnuPoll(pollEvent[ch]);
 	}
-	scheduleOnuPoll(txTime + length / BITRATE + onuTimeout, pollEvent[lambda]); // From transmission end (including tx. delay) time
+	scheduleOnuPoll(txTime + length / lineRate + onuTimeout, pollEvent[ch]); // From transmission end (including tx. delay) time
 
 	// Reschedule any scheduled ONU polls, if needed.
 	rescheduleOnuPolls();
@@ -419,7 +432,7 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 		// Schedule transmission time 't' as follows:
 		// t = max(receiver is free, transmitter is free, channel is free)
 		t = max(max(RX[rxIdx] + GUARD_TIME - RTT[ch] - DS_GRANT_OVERHEAD_SIZE
-				/ BITRATE, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
+				/ lineRate, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
 	}
 	else
 	{
@@ -458,7 +471,7 @@ void OltSchedulerSSSF::scheduleFrame(const simtime_t txTime, const int ch,
 
 	// Get frame attributes and initialize variables used frequently.
 	short frameType = ponFrameToOnu->getFrameType();
-	simtime_t txDelay = ponFrameToOnu->getBitLength() / BITRATE;
+	simtime_t txDelay = ponFrameToOnu->getBitLength() / lineRate;
 
 #ifdef DEBUG_OLT_SCHEDULER_SSF
 	ev << getFullPath() << "::scheduleFrame() called for a " << (id ? "data" : "grant")
@@ -630,6 +643,17 @@ void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromO
 	ev << getFullPath() << ": data PON frame received with a WDM channel = " ch << endl;
 #endif
 
+	if (onuRegistered[ch] == false)
+	{
+		// finish the ranging process if the ONU hasn't been registered.
+		// TODO: Implement full discovery procedure later.
+
+		RTT[ch] = simTime() - rangingTimer[ch] - simtime_t(POLL_FRAME_SIZE / lineRate);
+		onuRegistered[ch] = true;
+
+		EV << "ONU[" << ch << "] ranged with RTT = " << RTT[ch] << endl;
+	}
+
 	// extract Ethernet frames
 	cQueue &etherFrameQueue = ponFrameFromOnu->getEncapsulatedFrames();
 	while (etherFrameQueue.empty() == false)
@@ -637,7 +661,7 @@ void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromO
 		EtherFrame *etherFrame = (EtherFrame *) etherFrameQueue.pop();
 
 #ifdef DEBUG_OLT_SCHEDULER_SSF
-		ev << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
+		EV << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
 #endif
 
 		send(etherFrame, "ethg$o", ch);
@@ -704,7 +728,7 @@ void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromO
 void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
 {
 #ifdef DEBUG_OLT_SCHEDULER_SSF
-	ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
+	EV << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
 #endif
 
 	// get the channel from the ONU index
@@ -730,12 +754,12 @@ void OltSchedulerSSSF::sendOnuPoll(HybridPonMessage *msg)
 				new HybridPonDsGrantFrame("", HYBRID_PON_FRAME);
 		ponFrameToOnu->setChannel(ch);
 		//		ponFrameToOnu->setId(false);
-		ponFrameToOnu->setFrameType(1);	///< 1 -> grant
+		ponFrameToOnu->setFrameType(1);	///< type = 1 -> grant
 		ponFrameToOnu->setGrant(0);	///< only for payload (for Ethernet frames), not including CW for overhead & report fields
 		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
 #ifdef DEBUG_OLT_SCHEDULER_SSF
-		ev << getFullPath() << "::sendOnuPoll: Destination ONU = " << ch << endl;
+		EV << getFullPath() << "::sendOnuPoll: Destination ONU = " << ch << endl;
 #endif
 
 		// handle the generated polling frame
@@ -869,7 +893,7 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 
 // 	// Here we include a transmission delay because it has not been taken
 // 	// into account elsewhere.
-// 	simtime_t txDelay(frame->getBitLength() / BITRATE);
+// 	simtime_t txDelay(frame->getBitLength() / lineRate);
 // 	sendDelayed(frame, txDelay, "wdmg$o", ch);
 
 #ifdef TRACE_TXRX
@@ -935,7 +959,7 @@ void OltSchedulerSSSF::receiveRx(DummyPacket *msg)
 	// Schedule the release of RX to record RX usage.
 	// *** Note that we reuse the incoming message 'msg'.
 	msg->setKind(RELEASE_RX);
-	scheduleAt(simTime() + length / BITRATE, msg);
+	scheduleAt(simTime() + length / lineRate, msg);
 }
 
 //------------------------------------------------------------------------------
@@ -1068,7 +1092,7 @@ void OltSchedulerSSSF::handleMessage(cMessage *msg)
 		else
 		{
 			// unknown message
-			ev << getFullPath() << ": An unknown message received from " <<
+			EV << getFullPath() << ": An unknown message received from " <<
 					inGate << endl;
 			error("%s: Unknown message received", getFullPath().c_str());
 		}

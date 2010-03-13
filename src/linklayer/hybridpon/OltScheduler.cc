@@ -78,12 +78,12 @@ simtime_t OltScheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu)
 #ifdef DEBUG_OLT_SCHEDULER
 	if (ponFrameToOnu->getFrameType() == 0)
 	{
-		ev << getFullPath() << ": seqSchedule called for downstream data PON frame for ONU["
+		EV << getFullPath() << ": seqSchedule called for downstream data PON frame for ONU["
 		<< onu << "]" << endl;
 	}
 	else
 	{
-		ev << getFullPath() << ": seqSchedule called for downstream grant PON frame for ONU["
+		EV << getFullPath() << ": seqSchedule called for downstream grant PON frame for ONU["
 		<< onu << "]" << endl;
 	}
 #endif
@@ -128,20 +128,20 @@ simtime_t OltScheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu)
 		if (t - simTime() > maxTxDelay)
 		{
 #ifdef DEBUG_OLT_SCHEDULER
-			ev << getFullPath() << ": TX of grant PON frame cancelled due to excessive scheduling delay!"
+			EV << getFullPath() << ": TX of grant PON frame cancelled due to excessive scheduling delay!"
 			<< endl;
 #endif
 			delete (HybridPonDsFrame *) ponFrameToOnu;
 			return simtime_t(-1.0);
 		}
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": grant PON frame scheduled at time  = " << t << endl;
-		ev << getFullPath() << ": using TX[" << i << "], CH[" << d << "] and reception at time = "
+		EV << getFullPath() << ": grant PON frame scheduled at time  = " << t << endl;
+		EV << getFullPath() << ": using TX[" << i << "], CH[" << d << "] and reception at time = "
 		<< t + RTT[d] + GUARD_TIME << " using RX[" << j << "]" << endl;
 #endif
 
 		// update chosen receiver available time
-		RX[j] = t + l / BITRATE + RTT[d];
+		RX[j] = t + l / lineRate + RTT[d];
 		// schedule reception at time t+RTT[d] using RX[j] and CH[d]
 	}
 	else
@@ -158,8 +158,8 @@ simtime_t OltScheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu)
 	}
 
 	// update transmitter and channel available times
-	CH[d] = t + l / BITRATE;
-	TX[i] = t + l / BITRATE;
+	CH[d] = t + l / lineRate;
+	TX[i] = t + l / lineRate;
 
 	// calculate delay from now for sending time
 	delay = t - simTime();
@@ -169,24 +169,24 @@ simtime_t OltScheduler::seqSchedule(int onu, HybridPonDsFrame *ponFrameToOnu)
 		// Here we included a transmission delay in sending
 		// because the impact of tranmission rate in delay
 		// has not been taken into account elsewhere.
-		sendDelayed(ponFrameToOnu, delay + l / BITRATE, "out");
+		sendDelayed(ponFrameToOnu, delay + l / lineRate, "out");
 	}
 	else
 	{
-		ev << getFullPath()
+		EV << getFullPath()
 				<< ": seqSchedule error: trying to schedule a delayed send with negative delay"
 				<< endl;
 	}
 #ifdef DEBUG_OLT_SCHEDULER
 	if (ponFrameToOnu->getFrameType() == 0)
 	{
-		ev << getFullPath() << ": seqSchedule downstream ponFrame scheduled at time = " << t << endl;
-		ev << getFullPath() << ": using TX[" << i << "] and CH[" << d << "]" << endl;
+		EV << getFullPath() << ": seqSchedule downstream ponFrame scheduled at time = " << t << endl;
+		EV << getFullPath() << ": using TX[" << i << "] and CH[" << d << "]" << endl;
 	}
 	else
 	{
-		ev << getFullPath() << ": seqSchedule downstream-upstream ponFrame scheduled at time = " << t << endl;
-		ev << getFullPath() << ": using TX[" << i << "], CH[" << d << "] and reception at time = "
+		EV << getFullPath() << ": seqSchedule downstream-upstream ponFrame scheduled at time = " << t << endl;
+		EV << getFullPath() << ": using TX[" << i << "], CH[" << d << "] and reception at time = "
 		<< t + RTT[d] << " using RX [" << j << "]" << endl;
 	}
 #endif
@@ -277,35 +277,29 @@ void OltScheduler::debugSnapshot(void)
 //	Event handling functions
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Scheduler::sendOnuPoll --
-//
-//		generates a polling PON frame and schedules its transmission.
-//
-// Arguments:
-//      HybridPonMessage *msg;
-//
-// Results:
-//		A polling PON frame has been generated for a given ONU.
-//      If there's room for the frame in the polling FIFO queue and its
-//      transmission scheduling based on the sequential scheduling algorithm is
-//      successful, its transmission is scheduled and the frame is put into
-//      the queue.
-//      Otherwise, the frame is lost (due to either buffer overflow or excessive
-//      transmission scheduling delay).
-//      The next polling event has been scheduled.
-//------------------------------------------------------------------------------
-
+///
+/// Generates a polling PON frame and schedules its transmission.
+/// A polling PON frame has been generated for a given ONU.
+/// If there's room for the frame in the polling FIFO queue and its
+/// transmission scheduling based on the sequential scheduling algorithm is
+/// successful, its transmission is scheduled and the frame is put into
+/// the queue.
+/// Otherwise, the frame is lost (due to either buffer overflow or excessive
+/// transmission scheduling delay).
+/// The next polling event has been scheduled.
+///
+/// @param[in] msg HybridPonMessage pointer
+///
 void OltScheduler::sendOnuPoll(HybridPonMessage *msg)
 {
 #ifdef DEBUG_OLT_SCHEDULER
-	ev << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
+	EV << getFullPath() << ": pollEvent[" << msg->getOnuIdx() << "] received" << endl;
 #endif
 
-	int lambda = (short) msg->getOnuIdx(); // note that the message length is used as ONU number.
+	int ch = (short) msg->getOnuIdx(); // note that the message length is used as ONU number.
 
 	//    // Record ONU Timeout.
-	//    monitor->recordOnuTimeout(lambda);
+	//    monitor->recordOnuTimeout(ch);
 
 	if (busyQueuePoll + POLL_FRAME_SIZE <= queueSizePoll)
 	{
@@ -322,12 +316,12 @@ void OltScheduler::sendOnuPoll(HybridPonMessage *msg)
 		ponFrameToOnu->setBitLength(POLL_FRAME_SIZE);
 
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << "destination ONU = " << lambda << endl;
+		EV << getFullPath() << "destination ONU = " << ch << endl;
 #endif
 		// We emulate a queueing operation using a counter (busyQueuePoll) and
 		// an additional event scheduled for a messsage deletion from a queue
 		// when it is actually transmitted later.
-		simtime_t txTime = seqSchedule(lambda, ponFrameToOnu);
+		simtime_t txTime = seqSchedule(ch, ponFrameToOnu);
 
 		if (txTime >= 0)
 		{
@@ -346,14 +340,14 @@ void OltScheduler::sendOnuPoll(HybridPonMessage *msg)
 			//             error("Something wrong!");
 			//             exit(1);
 #ifdef DEBUG_OLT_SCHEDULER
-			ev << getFullPath() << ": PON polling frame dropped due to excessive scheduling delay!" << endl;
+			EV << getFullPath() << ": PON polling frame dropped due to excessive scheduling delay!" << endl;
 #endif
 		}
 	}
 	else
 	{
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": PON polling frame dropped due to buffer overflow!" << endl;
+		EV << getFullPath() << ": PON polling frame dropped due to buffer overflow!" << endl;
 #endif
 	}
 
@@ -362,11 +356,11 @@ void OltScheduler::sendOnuPoll(HybridPonMessage *msg)
 	{
 		cancelEvent(msg);
 	}
-	if (pollEvent[lambda]->isScheduled())
+	if (pollEvent[ch]->isScheduled())
 	{
-		cancelEvent(pollEvent[lambda]);
+		cancelEvent(pollEvent[ch]);
 	}
-	scheduleAt(simTime() + onuTimeout, pollEvent[lambda]);
+	scheduleAt(simTime() + onuTimeout, pollEvent[ch]);
 }
 
 //------------------------------------------------------------------------------
@@ -390,7 +384,7 @@ void OltScheduler::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 	int channel = ponFrameFromOnu->getArrivalGate()->getIndex();
 
 #ifdef DEBUG_OLT_SCHEDULER
-	ev << getFullPath() << ": PON frame received from ONU [" << channel << "]" << endl;
+	EV << getFullPath() << ": PON frame received from ONU [" << channel << "]" << endl;
 #endif
 
 	// deliver Ethernet frames to a switch
@@ -400,14 +394,14 @@ void OltScheduler::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 		EtherFrame *etherFrame = (EtherFrame *) etherFrameQueue.pop();
 
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
+		EV << getFullPath() << ": Ethernet frame removed from PON frame" << endl;
 #endif
 
 		//        IpPacket *pkt = (IpPacket *)etherFrame->decapsulate();
 		//        send(pkt, "toPacketSink");
 		//        delete (EtherFrame *) etherFrame;
 		//#ifdef DEBUG_OLT_SCHEDULER
-		//        ev << getFullPath() << ": Packet removed from Ethernet Frame" << endl;
+		//        EV << getFullPath() << ": Packet removed from Ethernet Frame" << endl;
 		//#endif
 
 		send(etherFrame, "ethg$o", channel);
@@ -422,7 +416,7 @@ void OltScheduler::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 	{
 
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": Processing report for " << report << " bits from ONU ["
+		EV << getFullPath() << ": Processing report for " << report << " bits from ONU ["
 		<< channel << "]" << endl;
 #endif
 		HybridPonDsGrantFrame *ponFrameToOnu = new HybridPonDsGrantFrame("",
@@ -442,7 +436,7 @@ void OltScheduler::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 				+ report);
 
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": scheduling downstream grant for " << report << " bits for ONU ["
+		EV << getFullPath() << ": scheduling downstream grant for " << report << " bits for ONU ["
 		<< channel << "]" << endl;
 #endif
 
@@ -469,14 +463,14 @@ void OltScheduler::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 void OltScheduler::transmitPollFrame(HybridPonMessage *msg)
 {
 #ifdef DEBUG_OLT_SCHEDULER
-	ev << getFullPath() << ": Actual transmission of scheduled polling frame" << endl;
+	EV << getFullPath() << ": Actual transmission of scheduled polling frame" << endl;
 #endif
 	busyQueuePoll -= msg->getBitLength();
 	if (busyQueuePoll < 0)
 	{
-		ev << getFullPath()
-				<< ": ERROR: something wrong with busyQueuePoll counter!"
-				<< endl;
+		EV<< getFullPath()
+		<< ": ERROR: something wrong with busyQueuePoll counter!"
+		<< endl;
 		exit(1);
 	}
 	delete (cMessage *) msg;
@@ -499,21 +493,33 @@ void OltScheduler::initialize(void)
 	queueSizePoll = par("queueSizePoll");
 
     // initialize configuration and status variables
-//	numOnus = getParentModule()->par("numOnus");
-    numOnus = gateSize("wdmg$o");   ///< = number of WDM channels
+	cModule *olt = getParentModule();
+	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("pong$o", 0)->getChannel());
+	lineRate = chan->getDatarate();
+	//	numOnus = getParentModule()->par("numOnus");
+	numOnus = gateSize("wdmg$o");   ///< = number of WDM channels
 	busyQueuePoll = 0;
 
+	EV << "OLT initialization results:" << endl;
+	EV << "- Line rate = " << lineRate << endl;
+	EV << "- Number of ONUs = " << numOnus << endl;
+
     // initilaize vectors
+	onuRegistered.assign(numOnus, false);
 	RTT.assign(numOnus, simtime_t(0.0));
 	CH.assign(numOnus, simtime_t(0.0));
 	TX.assign(numTransmitters, simtime_t(0.0));
 	RX.assign(numReceivers, simtime_t(0.0));
+	rangingTimer.assign(numOnus, simtime_t(0.0));
 	pollEvent.assign(numOnus, (HybridPonMessage *) NULL);
 	// 	pollOnu.assign(numOnus, simtime_t(onuTimeout));
 
-	// schedule the first poll to all ONUs
-	// TODO: Implement ranging procedure to register and measure RTT of ONUs.
-	//  simtime_t t;
+	// schedule the first poll to discover ONUs.
+	// note that we implement a simple ranging procedure based on normal grant
+	// and data frames just for now.
+	//
+	// TODO: Implement discovery (including ranging) procedure to register and
+	// measure RTTs of ONUs using control frames.
 	for (int i = 0; i < numOnus; i++)
 	{
 		pollEvent[i] = new HybridPonMessage("", ONU_POLL);
@@ -521,10 +527,11 @@ void OltScheduler::initialize(void)
 		scheduleOnuPoll(simTime(), pollEvent[i]);
 
 #ifdef DEBUG_OLT_SCHEDULER
-		ev << getFullPath() << ": pollEvent [" << i << "] = for ONU[" << pollEvent[i]->length()
+		EV << getFullPath() << ": pollEvent [" << i << "] = for ONU[" << pollEvent[i]->length()
 		<< "] scheduled at time " << simTime() + t << endl;
 #endif
-	}
+
+	}	// end of for()
 }
 
 ///

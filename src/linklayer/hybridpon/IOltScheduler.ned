@@ -23,7 +23,6 @@ moduleinterface IOltScheduler
         double maxTxDelay @unit(s);	// max. limit to TX scheduling delay [sec]
         double onuTimeout @unit(s);	// polling cycle from OLT to ONU [sec]        
 //        double queueSizePoll @unit(bit);	// size of FIFO queue for polling frames [bit]
-//        string distances;			// string for ONU distances from OLT [km]
 
 //        // Parameters specific to sequential scheduling
 //        double queueSize @unit(bit);	// downstream queue memory size [bit]

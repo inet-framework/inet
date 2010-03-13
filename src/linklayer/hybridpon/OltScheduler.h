@@ -32,7 +32,6 @@ class OltScheduler: public cSimpleModule
 {
 protected:
 	// OLT NED parameters
-
 	int numReceivers;	///< number of tunable receivers
 	int numTransmitters;	///< number of tunable transmitters
 
@@ -43,27 +42,30 @@ protected:
 	int queueSizePoll;	///< size of FIFO queue for polling frames [bit]
 
     // configuration variables
+	double lineRate;	///< line rate of optical channel
 	int numOnus;	///< number of ONUs (= number of WDM channels)
 
 	// status variables
 	int busyQueuePoll;	///< counter to emulate a FIFO for polling frames
-	TimeVector RTT;
-	TimeVector CH;
-	TimeVector TX;
-	TimeVector RX;
+	TimeVector RTT;	///< round-trip times to and from ONUs
+	TimeVector CH;	///< WDM channel availability
+	TimeVector TX;	///< tunable transmitter availability
+	TimeVector RX;	///< tunable receiver availability
 
 	// For trace of grant PON frames (interval, grant size and frame length)
 	TimeVector vTxTime;	///< vector of previous grant PON frame TX times
 
-	// For ONU polling
+	// For ONU polling and discovery
 	HybridPonMsgVector pollEvent;
 	/* 	TimeVector  pollOnu; */
+	BoolVector onuRegistered;	///< results of ONU discovery processes
+	TimeVector rangingTimer;	///< timers used for ONU ranging purpose
 
 protected:
 	// Misc.
 	void debugSchedulerStatus(void);
 	virtual void debugSnapshot(void);
-	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant) = 0;	///< pure virtual function
+	virtual void handleGrant(int ch, HybridPonDsGrantFrame *grant) = 0;	///< pure virtual function
 	inline virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg) ///< wrapper function
 	{
 		return scheduleAt(t, msg);
@@ -137,7 +139,7 @@ protected:
 protected:
 	// Misc.
 	virtual int assignGrants(int ch, int usReport);
-	virtual void handleGrant(int lambda, HybridPonDsGrantFrame *grant);
+	virtual void handleGrant(int ch, HybridPonDsGrantFrame *grant);
 	void debugOnuPollListStatus(void);
 	cMessage *cancelOnuPoll(HybridPonMessage *msg);	///< wrapper function for cancelEvent()
 	virtual int scheduleOnuPoll(simtime_t t, HybridPonMessage *msg);

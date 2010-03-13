@@ -2,7 +2,7 @@
 
 cd `dirname $0`/../..
 INETROOT=`pwd`
-OMNETPPROOT=$INETROOT/../omnetpp-4.1b2
+OMNETPPROOT=$INETROOT/../omnetpp-4.1b3
 
 # Check root directory of OMNeT++ 4
 if [ -d $OMNETPPROOT ]

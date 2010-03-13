@@ -22,7 +22,9 @@
 
 class cPacketQueue;
 
-
+//
+// Self-message used for event handling in modules
+//
 packet HybridPonMessage
 {
     int onuIdx;
