@@ -114,8 +114,8 @@ module StandardHost6
         udp.ipv6Out --> networkLayer.udpIn;
         udp.ipv6In <-- networkLayer.udpOut;
 
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
+        networkLayer.pingOut --> pingApp.pingv6In;
+        networkLayer.pingIn <-- pingApp.pingv6Out;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {

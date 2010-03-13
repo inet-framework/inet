@@ -26,10 +26,10 @@ moduleinterface ITCP
 {
         @display("i=block/wheelbarrow");
     gates:
-        input appIn[];
-        input ipIn;
-        input ipv6In;
-        output appOut[];
-        output ipOut;
-        output ipv6Out;
+        input appIn[] @labels(TCPCommand/down);
+        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
+        output appOut[] @labels(TCPCommand/up);
+        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }

@@ -41,7 +41,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
 
     /// persist factor
     //@{
-    uint persist_factor;       ///< factor needed for simplified persist timer calculation
+    uint persist_factor;       ///< factor needed for simplified PERSIST timer calculation
     simtime_t persist_timeout; ///< current persist timeout
     //@}
 
@@ -76,17 +76,19 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
 
 
 /**
- * Includes basic TCP algorithms: adaptive retransmission, persist timer,
+ * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,
  * keep-alive, delayed acks -- EXCLUDING congestion control. Congestion
  * control is implemented in subclasses such as TCPTahoeAlg or TCPRenoAlg.
  *
  * Implements:
  *   - delayed acks
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
- *   - Nagle's algorithm to prevent silly window syndrome
+ *   - Nagle's algorithm (RFC 896) to prevent silly window syndrome
+ *   - Increased Initial Window (RFC 3390)
+ *   - PERSIST timer
  *
  * To be done:
- *   - persist timer, keepalive timer
+ *   - KEEP-ALIVE timer
  *
  * Note: currently the timers and time calculations are done in double
  * and NOT in Unix (200ms or 500ms) ticks. It's possible to write another
@@ -142,7 +144,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     virtual bool sendData();
 
     /** Utility function */
-    cMessage *cancelEvent(cMessage *msg)  {return conn->getTcpMain()->cancelEvent(msg);}
+    cMessage *cancelEvent(cMessage *msg) {return conn->getTcpMain()->cancelEvent(msg);}
 
   public:
     /**

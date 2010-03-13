@@ -373,7 +373,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     }
 
     // state machine
-    // TBD add handling of connection timeout event (keepalive), with transition to CLOSED
+    // TBD add handling of connection timeout event (KEEP-ALIVE), with transition to CLOSED
     // Note: empty "default:" lines are for gcc's benefit which would otherwise spit warnings
     int oldState = fsm.getState();
     switch (fsm.getState())

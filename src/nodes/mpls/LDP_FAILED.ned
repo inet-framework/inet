@@ -30,7 +30,7 @@ module LDP_FAILED
         @display("i=abstract/router;i2=status/noentry");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
-        int namid;
+        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");

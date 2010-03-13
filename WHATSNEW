@@ -1,6 +1,16 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-201003XX
+
+- added "label" annotations to gates and modules to support
+  the enhanced editing functionality and palette filtering 
+  in OMNeT++ 4.1. (modules relevant to the current editing 
+  context will show up first in the palette.)
+
+- added SCTP patch from Michael Tuexen, Irene Ruengeler and
+  Thomas Dreibholz
+
 - added support for Sam Jensen's Network Simulation Cradle,
   http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks
   available in simulations. Currently NSC supports the FreeBSD, OpenBSD,

@@ -135,7 +135,6 @@ class TCPOpenCommand extends TCPCommand
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
     string sendQueueClass;    // may be left empty
-    string rexmitQueueClass;  // may be left empty  // added 2009-08-05 by T.R.
     string receiveQueueClass; // may be left empty
     string tcpAlgorithmClass; // may be left empty
 }
@@ -183,7 +182,7 @@ class TCPStatusInfo extends TCPCommand
     int localPort;
     int remotePort;
 
-    unsigned int snd_mss;       // changed from int to uint 2009-08-05 by T.R.
+    unsigned int snd_mss;
 
     unsigned int snd_una;
     unsigned int snd_nxt;

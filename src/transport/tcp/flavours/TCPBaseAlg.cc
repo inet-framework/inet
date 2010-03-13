@@ -37,11 +37,11 @@
 // segments there SHOULD be an ACK for at least every second
 // segment."
 
-#define DELAYED_ACK_TIMEOUT   0.2   // 200ms (RFC1122: MUST be less than 0.5 seconds)
+#define DELAYED_ACK_TIMEOUT   0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
 #define MAX_REXMIT_COUNT       12   // 12 retries
 #define MIN_REXMIT_TIMEOUT    1.0   // 1s
 //#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
-#define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC1122)
+#define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC 1122)
 #define MIN_PERSIST_TIMEOUT     5   //  5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 
@@ -185,7 +185,7 @@ void TCPBaseAlg::established(bool active)
     if (state->increased_IW_enabled && state->syn_rexmit_count==0)
     {
         state->snd_cwnd = std::min (4*(int)state->snd_mss, std::max(2*(int)state->snd_mss, 4380));
-        tcpEV << "Enabled increased initial window, CWND is set to: " << state->snd_cwnd << "\n";
+        tcpEV << "Enabled Increased Initial Window, CWND is set to: " << state->snd_cwnd << "\n";
     }
     // RFC 2001, page 3:
     // " 1.  Initialization for a given connection sets cwnd to one segment
@@ -303,10 +303,10 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
 
 void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
 {
-    // setup and restart the persist timer
-    // FIXME Calculation of persist timer is not as simple as done here!
+    // setup and restart the PERSIST timer
+    // FIXME Calculation of PERSIST timer is not as simple as done here!
     // It depends on RTT calculations and is bounded to 5-60 seconds.
-    // This simplified persist timer calculation generates values
+    // This simplified PERSIST timer calculation generates values
     // as presented in [Stevens, W.R.: TCP/IP Illustrated, Volume 1, chapter 22.2]
     // (5, 5, 6, 12, 24, 48, 60, 60, 60...)
     if (state->persist_factor == 0)
@@ -315,7 +315,7 @@ void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
         state->persist_factor = state->persist_factor*2;
     state->persist_timeout = state->persist_factor * 1.5; // 1.5 is a factor for typical LAN connection [Stevens, W.R.: TCP/IP Ill. Vol. 1, chapter 22.2]
 
-    // persist timer is bounded to 5-60 seconds
+    // PERSIST timer is bounded to 5-60 seconds
     if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
         state->rexmit_timeout = MIN_PERSIST_TIMEOUT;
     if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
@@ -335,6 +335,17 @@ void TCPBaseAlg::processDelayedAckTimer(TCPEventCode& event)
 void TCPBaseAlg::processKeepAliveTimer(TCPEventCode& event)
 {
     // FIXME TBD
+	// RFC 1122, page 102:
+    // "A "keep-alive" mechanism periodically probes the other
+    // end of a connection when the connection is otherwise
+    // idle, even when there is no data to be sent.  The TCP
+    // specification does not include a keep-alive mechanism
+    // because it could:  (1) cause perfectly good connections
+    // to break during transient Internet failures; (2)
+    // consume unnecessary bandwidth ("if no one is using the
+    // connection, who cares if it is still good?"); and (3)
+    // cost money for an Internet path that charges for
+    // packets."
 }
 
 void TCPBaseAlg::startRexmitTimer()
@@ -357,7 +368,7 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     //
 
     // update smoothed RTT estimate (srtt) and variance (rttvar)
-    const double g = 0.125;   // 1/8; (1-alpha) where alpha=7/8;
+    const double g = 0.125; // 1/8; (1-alpha) where alpha=7/8;
     simtime_t newRTT = tAcked-tSent;
 
     simtime_t& srtt = state->srtt;
@@ -501,7 +512,7 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     }
 
     //
-    // handling of persist timer:
+    // handling of PERSIST timer:
     // If data sender received a zero-sized window, check retransmission timer.
     //  If retransmission timer is not scheduled, start PERSIST timer if not already
     //  running.

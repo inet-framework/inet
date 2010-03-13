@@ -80,7 +80,7 @@ enum TCPEventCode
     TCP_E_IGNORE,
 
     // app commands
-    // (note: no RECEIVE command, data are automatically passed up)
+    // (Note: no RECEIVE command, data are automatically passed up)
     TCP_E_OPEN_ACTIVE,
     TCP_E_OPEN_PASSIVE,
     TCP_E_SEND,
@@ -95,9 +95,9 @@ enum TCPEventCode
     TCP_E_RCV_SYN_ACK,
     TCP_E_RCV_FIN,
     TCP_E_RCV_FIN_ACK,
-    TCP_E_RCV_RST,  // covers RST+ACK too
+    TCP_E_RCV_RST, // covers RST+ACK too
 
-    TCP_E_RCV_UNEXP_SYN,  // unexpected SYN
+    TCP_E_RCV_UNEXP_SYN, // unexpected SYN
 
     // timers
     TCP_E_TIMEOUT_2MSL,     // RFC 793, a.k.a. TIME-WAIT timer
@@ -180,7 +180,7 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TCPAlgorithm)
-    int syn_rexmit_count;   // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
+    int syn_rexmit_count; // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout; // current SYN/SYN+ACK retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
@@ -196,8 +196,8 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     bool nagle_enabled;         // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;  // set if delayed ACKs are enabled
-    bool limited_transmit_enabled;  // set if Limited Transmit algorithm (RFC3042) is enabled
-    bool increased_IW_enabled;  // set if increased initial window (=2*SMSS) (RFC 2581) is enabled
+    bool limited_transmit_enabled; // set if Limited Transmit algorithm (RFC 3042) is enabled
+    bool increased_IW_enabled;  // set if Increased Initial Window (RFC 3390) is enabled
 
     uint32 full_sized_segment_counter;// this counter is needed for delayed ACKs
     bool ack_now;               // send ACK immediately, needed if delayed_acks_enabled is set
@@ -305,7 +305,7 @@ class INET_API TCPConnection
     int remotePort;
 
   protected:
-    TCP *tcpMain;  // TCP module
+    TCP *tcpMain; // TCP module
 
     // TCP state machine
     cFSM fsm;
@@ -327,7 +327,7 @@ class INET_API TCPConnection
     cMessage *the2MSLTimer;
     cMessage *connEstabTimer;
     cMessage *finWait2Timer;
-    cMessage *synRexmitTimer;  // for retransmitting SYN and SYN+ACK
+    cMessage *synRexmitTimer; // for retransmitting SYN and SYN+ACK
 
     // statistics
     cOutVector *sndWndVector;   // snd_wnd
@@ -389,6 +389,13 @@ class INET_API TCPConnection
     virtual bool processAckInEstabEtc(TCPSegment *tcpseg);
     //@}
 
+    /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
+    //@{
+    virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOption& option);
+    //@}
+
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{
     virtual void process_TIMEOUT_2MSL();
@@ -436,7 +443,7 @@ class INET_API TCPConnection
      * If fullSegmentsOnly is set, don't send segments smaller than SMSS (needed for Nagle).
      * Returns true if some data was actually sent.
      */
-    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow); /* changed from "int congestionWindow = -1" to "uint32 congestionWindow" 2009-08-05 by T.R. */
+    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow);
 
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
@@ -484,7 +491,7 @@ class INET_API TCPConnection
 
   protected:
     /** Utility: cancel a timer */
-    cMessage *cancelEvent(cMessage *msg)  {return tcpMain->cancelEvent(msg);}
+    cMessage *cancelEvent(cMessage *msg) {return tcpMain->cancelEvent(msg);}
 
     /** Utility: send IP packet */
     static void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
@@ -509,12 +516,14 @@ class INET_API TCPConnection
     static const char *eventName(int event);
     /** Utility: returns name of TCP_I_xxx constants */
     static const char *indicationName(int code);
+    /** Utility: returns name of TCPOPTION_xxx constants */
+    static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
     /** Utility: update receive window (rcv_wnd) */
     virtual void updateRcvWnd();
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TCPSegment *tcpseg);
+    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 
   public:
     /**
@@ -574,9 +583,9 @@ class INET_API TCPConnection
     virtual bool processAppCommand(cMessage *msg);
 
     /**
-     * RFC 3517, page 3: "This routine returns whether the given sequence number is
-     * considered to be lost.  The routine returns true when either
-     * DupThresh discontiguous SACKed sequences have arrived above
+     * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
+     * sequence number is considered to be lost.  The routine returns true when
+     * either DupThresh discontiguous SACKed sequences have arrived above
      * 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
      * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
      * false."
@@ -584,18 +593,18 @@ class INET_API TCPConnection
     virtual bool isLost(uint32 seqNum);
 
     /**
-     * RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
-     * and MUST set the "pipe" variable to an estimate of the number of
-     * octets that are currently in transit between the TCP sender and
-     * the TCP receiver."
+     * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
+     * space from HighACK to HighData and MUST set the "pipe" variable to an
+     * estimate of the number of octets that are currently in transit between
+     * the TCP sender and the TCP receiver."
      */
     virtual void setPipe();
 
     /**
-     * RFC 3517, page 3: "This routine uses the scoreboard data structure maintained by the
-     * Update() function to determine what to transmit based on the SACK
-     * information that has arrived from the data receiver (and hence
-     * been marked in the scoreboard).  NextSeg () MUST return the
+     * For SACK TCP. RFC 3517, page 3: "This routine uses the scoreboard data
+     * structure maintained by the Update() function to determine what to transmit
+     * based on the SACK information that has arrived from the data receiver
+     * (and hence been marked in the scoreboard).  NextSeg () MUST return the
      * sequence number range of the next segment that is to be
      * transmitted..."
      */

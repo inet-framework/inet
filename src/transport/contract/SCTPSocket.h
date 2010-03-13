@@ -27,11 +27,12 @@
 
 
 class SCTPStatusInfo;
-class SCTPMain;
+class SCTP;
 
 
 
-class SCTPSocket
+
+class  INET_API SCTPSocket
 {
   public:
     /**
@@ -44,92 +45,98 @@ class SCTPSocket
      */
     class CallbackInterface
     {
-      	public:
+      public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int assocId, void *yourPtr, cPacket *msg, bool urgent) = 0;
-	virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
-        virtual void socketEstablished(int assocId, void *yourPtr) {}
+    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
+        virtual void socketEstablished(int assocId, void *yourPtr, uint64 buffer) {}
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
         virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status){}// {delete status;}
-	virtual void sendRequestArrived() {}
-	virtual void shutdownReceivedArrived(int connId) {}
-	virtual void sendqueueFullArrived(int connId) {}
-	virtual void addressAddedArrived(int assocId, IPvXAddress localAddr, IPvXAddress remoteAddr) {}
+    virtual void sendRequestArrived() {}
+    virtual void shutdownReceivedArrived(int connId) {}
+    virtual void sendqueueFullArrived(int connId) {}
+    virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
+    virtual void addressAddedArrived(int assocId, IPvXAddress localAddr, IPvXAddress remoteAddr) {}
     };
 
-    	enum State {NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR};
+    enum State {NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR};
 
-  	protected:
-	int assocId;
-	int sockstate;
+    protected:
+        int assocId;
+        int sockId;
+        int sockstate;
+        bool oneToOne;
 
-	IPvXAddress localAddr;
-	AddressVector localAddresses;
+        IPvXAddress localAddr;
+        AddressVector localAddresses;
 
-	int localPrt;
-	IPvXAddress remoteAddr;
-	AddressVector remoteAddresses;
-	int remotePrt;
-	int fsmStatus;
-	int inboundStreams;
-	int outboundStreams;
-	int lastStream;
+        int localPrt;
+        IPvXAddress remoteAddr;
+        AddressVector remoteAddresses;
+        int remotePrt;
+        int fsmStatus;
+        int inboundStreams;
+        int outboundStreams;
+        int lastStream;
 
 
-	CallbackInterface *cb;
-	void *yourPtr;
+    CallbackInterface *cb;
+    void *yourPtr;
 
-	void sendToSCTP(cPacket *msg);
+  protected:
+    void sendToSCTP(cPacket *msg);
 
-	public:
-	cGate *gateToSctp;
+  public:
+  cGate *gateToSctp;
     /**
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
      */
-    	SCTPSocket();
+   // SCTPSocket();
+    SCTPSocket(bool type = true);
 
     /**
      * Constructor, to be used with forked sockets (see listen()).
      * The assocId will be picked up from the message: it should have arrived
      * from SCTPMain and contain SCTPCommmand control info.
      */
-    	SCTPSocket(cPacket *msg);
+    SCTPSocket(cPacket *msg);
 
     /**
      * Destructor
      */
-   	~SCTPSocket();
+    ~SCTPSocket();
 
     /**
      * Returns the internal connection Id. SCTP uses the (gate index, assocId) pair
      * to identify the connection when it receives a command from the application
      * (or SCTPSocket).
      */
-    	int getConnectionId() const  {return assocId;}
+    int getConnectionId() const  {return assocId;}
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from SCTP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    	int getState()   {return sockstate;}
+    int getState()   {return sockstate;}
 
     /**
      * Returns name of socket state code returned by state().
      */
-    	static const char *stateName(int state);
+    static const char *stateName(int state);
 
     /** @name Getter functions */
     //@{
-  	AddressVector getLocalAddresses()  {return localAddresses;}
-    	int getLocalPort() {return localPrt;}
-
-	AddressVector getRemoteAddresses()  {return remoteAddresses;}
-	int getRemotePort() {return remotePrt;}
-	IPvXAddress getRemoteAddr() {return remoteAddr;}
+  //  IPvXAddress localAddress() {return localAddr;}
+  AddressVector getLocalAddresses()  {return localAddresses;}
+    int getLocalPort() {return localPrt;}
+  //  IPvXAddress remoteAddress() {return remoteAddr;}
+  AddressVector getRemoteAddresses()  {return remoteAddresses;}
+    int getRemotePort() {return remotePrt;}
+    IPvXAddress getRemoteAddr() {return remoteAddr;}
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -139,11 +146,11 @@ class SCTPSocket
      * Sets the gate on which to send to SCTP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
-    	void setOutputGate(cGate *toSctp)  {gateToSctp = toSctp;};
-	void setOutboundStreams(int streams) {outboundStreams = streams;};
-	void setInboundStreams(int streams) {inboundStreams = streams;};
-	int getOutboundStreams() {return outboundStreams;};
-	int getLastStream() {return lastStream;};
+    void setOutputGate(cGate *toSctp)  {gateToSctp = toSctp;};
+    void setOutboundStreams(int streams) {outboundStreams = streams;};
+    void setInboundStreams(int streams) {inboundStreams = streams;};
+    int getOutboundStreams() {return outboundStreams;};
+    int getLastStream() {return lastStream;};
  /**
      * Bind the socket to a local port number.
      */
@@ -153,12 +160,17 @@ class SCTPSocket
      * Bind the socket to a local port number and IP address (useful with
      * multi-homing).
      */
-	void bind(IPvXAddress localAddr, int localPort);
+   void bind(IPvXAddress localAddr, int localPort);
 
-	void bindx(AddressVector localAddr, int localPort);
+    void bindx(AddressVector localAddr, int localPort);
 
-	void addAddress(IPvXAddress addr);
-
+    void addAddress(IPvXAddress addr);
+    //
+    // TBD add support for these options too!
+    //  string sendQueueClass;
+    //  string receiveQueueClass;
+    //  string sctpAlgorithmClass;
+    //
 
     /**
      * Initiates passive OPEN. If fork=true, you'll have to create a new
@@ -167,33 +179,33 @@ class SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-	 void listen(bool fork=false, uint32 requests=0, uint32 messagesToPush=0);
+     void listen(bool fork=false, uint32 requests=0, uint32 messagesToPush=0);
     /**
      * Active OPEN to the given remote socket.
      */
-    	void connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests);
+    void connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests);
 
-	 void connectx(AddressVector remoteAddresses, int32 remotePort, uint32 numRequests);
+     void connectx(AddressVector remoteAddresses, int32 remotePort, uint32 numRequests=0);
     /**
      * Sends data packet.
      */
-    	void send(cPacket *msg, bool last=true, bool primary=true);
+    void send(cPacket *msg, bool last=true, bool primary=true);
 
-	void sendNotification(cPacket *msg);
-    	void sendRequest(cPacket *msg);
+      void sendNotification(cPacket *msg);
+    void sendRequest(cPacket *msg);
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation
      * means "I have no more data to send", and thus results in a one-way
      * connection until the remote SCTP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    	void close();
+    void close();
 
     /**
      * Aborts the association.
      */
-    	void abort();
-	void shutdown();
+    void abort();
+    void shutdown();
     /**
      * Causes SCTP to reply with a fresh SCTPStatusInfo, attached to a dummy
      * message as controlInfo(). The reply message can be recognized by its
@@ -201,7 +213,7 @@ class SCTPSocket
      * the socketStatusArrived() method of the callback object will be
      * called.
      */
-    	void requestStatus();
+    void requestStatus();
     //@}
 
     /** @name Handling of messages arriving from SCTP */
@@ -211,14 +223,14 @@ class SCTPSocket
      * has a SCTPCommand as controlInfo(), and the assocId in it matches
      * that of the socket.)
      */
-    	bool belongsToSocket(cPacket *msg);
+    bool belongsToSocket(cPacket *msg);
 
     /**
      * Returns true if the message belongs to any SCTPSocket instance.
      * (This basically checks if the message has a SCTPCommand attached to
      * it as controlInfo().)
      */
-    	static bool belongsToAnySCTPSocket(cPacket *msg);
+    static bool belongsToAnySCTPSocket(cPacket *msg);
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -241,7 +253,7 @@ class SCTPSocket
      * in that case you don't have to look it up by assocId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    	void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
 
     /**
      * Examines the message (which should have arrived from SCTPMain),
@@ -259,8 +271,11 @@ class SCTPSocket
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
      */
-    	void processMessage(cPacket *msg);
+    void processMessage(cPacket *msg);
     //@}
+
+
+    void setState(int state) {sockstate = state; };
 };
 
 #endif
