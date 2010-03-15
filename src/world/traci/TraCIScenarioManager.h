@@ -206,6 +206,11 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		TraCIBuffer queryTraCI(uint8_t commandId, const TraCIBuffer& buf = TraCIBuffer());
 
 		/**
+		 * sends a single command via TraCI, expects no reply, returns true if successful
+		 */
+		bool queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, std::string* errorMsg = 0);
+
+		/**
 		 * returns byte-buffer containing a TraCI command with optional parameters
 		 */
 		std::string makeTraCICommand(uint8_t commandId, TraCIBuffer buf = TraCIBuffer());

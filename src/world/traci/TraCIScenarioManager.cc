@@ -161,6 +161,18 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCI(uint8_t comma
 	return obuf;
 }
 
+bool TraCIScenarioManager::queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, std::string* errorMsg) {
+	sendTraCIMessage(makeTraCICommand(commandId, buf));
+
+	TraCIBuffer obuf(receiveTraCIMessage());
+	uint8_t cmdLength; obuf >> cmdLength;
+	uint8_t commandResp; obuf >> commandResp; if (commandResp != commandId) error("Expected response to command %d, but got one for command %d", commandId, commandResp);
+	uint8_t result; obuf >> result;
+	std::string description; obuf >> description;
+	if (!obuf.eof()) error("expected only an OK/ERR response, but received additional bytes");
+	return (result == RTYPE_OK);
+}
+
 void TraCIScenarioManager::connect() {
 	in_addr addr;
 	struct hostent* host_ent;
