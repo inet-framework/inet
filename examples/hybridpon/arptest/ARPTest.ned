@@ -27,7 +27,7 @@ network ARPTest
 {
     parameters:
         int numOnus = 2;
-	    @display("bgb=611,326;bgl=2");
+        @display("bgb=611,326;bgl=2");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -93,7 +93,7 @@ network ARPTest
         onu1.pong <--> fiber_10g <--> awg.demuxg++;
         onu2.pong <--> fiber_10g <--> awg.demuxg++;
         for i=0..numOnus-1 {
-        	awg.muxg++ <--> fiber_10g <--> olt.pong++;
+            awg.muxg++ <--> fiber_10g <--> olt.pong++;
         }
         olt.ethg++ <--> router.ethg++;
         router.pppg++ <--> fiberline <--> server.pppg++;
