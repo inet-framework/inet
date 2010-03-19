@@ -346,6 +346,47 @@ void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficL
 	if (!buf.eof()) error("expected only an OK response, but received additional bytes");
 }
 
+std::list<std::pair<float, float> > TraCIScenarioManager::commandGetPolygonShape(std::string polyId) {
+	std::list<std::pair<float, float> > res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_SHAPE) << polyId);
+
+	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX; buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId; if (commandId != RESPONSE_GET_POLYGON_VARIABLE) error("Expected response type RESPONSE_GET_POLYGON_VARIABLE, but got %d", commandId);
+	uint8_t varId; buf >> varId; if (varId != VAR_SHAPE) error("Expected response variable VAR_SHAPE, but got %d", varId);
+	std::string polyId_r; buf >> polyId_r; if (polyId_r != polyId) error("Received response for wrong polyId: expected %s, but got %s", polyId.c_str(), polyId_r.c_str());
+	uint8_t resType_r; buf >> resType_r; if (resType_r != TYPE_POLYGON) error("Received wrong response type: expected %d, but got %d", TYPE_POLYGON, resType_r);
+	uint8_t count; buf >> count;
+	for (uint8_t i = 0; i < count; i++) {
+		float x; buf >> x;
+		float y; buf >> y;
+		Coord pos = traci2omnet(Coord(x, y));
+		res.push_back(std::make_pair(pos.x, pos.y));
+	}
+
+	if (!buf.eof()) error("received additional bytes");
+
+	return res;
+}
+
+void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
+	TraCIBuffer buf;
+	uint8_t count = static_cast<uint8_t>(points.size());
+	buf << static_cast<uint8_t>(VAR_SHAPE) << polyId << static_cast<uint8_t>(TYPE_POLYGON) << count;
+	for (std::list<std::pair<float, float> >::const_iterator i = points.begin(); i != points.end(); ++i) {
+		float x = i->first;
+		float y = i->second;
+		Coord pos = omnet2traci(Coord(x, y));
+		buf << static_cast<float>(pos.x) << static_cast<float>(pos.y);
+	}
+	TraCIBuffer obuf = queryTraCI(CMD_SET_POLYGON_VARIABLE, buf);
+	if (!obuf.eof()) error("received additional bytes");
+}
+
 // name: host;Car;i=vehicle.gif
 void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id, double speed, double angle, double allowed_speed) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");

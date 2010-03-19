@@ -113,6 +113,12 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandStopNode(std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
 			return getManager()->commandStopNode(getExternalId(), roadId, pos, laneid, radius, waittime);
 		}
+		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId) {
+			return getManager()->commandGetPolygonShape(polyId);
+		}
+		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
+			getManager()->commandSetPolygonShape(polyId, points);
+		}
 
 	protected:
 		bool debug; /**< whether to emit debug messages */

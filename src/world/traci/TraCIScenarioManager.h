@@ -23,6 +23,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <list>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -63,6 +64,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void commandStopNode(int32_t nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
 		void commandSetTrafficLightProgram(std::string trafficLightId, std::string program);
 		void commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index);
+		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId);
+		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points);
 
 	protected:
 
