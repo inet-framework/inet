@@ -18,7 +18,7 @@
 //
 
 
-package inet.examples.ngoa.ecr;
+package inet.examples.ngoa.ecr2;
 
 import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;

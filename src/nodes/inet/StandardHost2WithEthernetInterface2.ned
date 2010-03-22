@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -25,7 +25,7 @@ import inet.applications.sctpapp.SCTPApp;
 import inet.applications.tcpapp.TCPApp2;
 import inet.applications.udpapp.UDPApp;
 import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.ethernet.EthernetInterface2;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -40,7 +40,7 @@ import inet.util.TCPDump;
 //
 // \IP host with TCP, UDP layers and applications.
 //
-module StandardHost2
+module StandardHost2WithEthernetInterface2
 {
     parameters:
         @node();
@@ -120,7 +120,7 @@ module StandardHost2
             parameters:
                 @display("p=186,390,row,90;q=txQueue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: EthernetInterface2 {
             parameters:
                 @display("p=336,390,row,90;q=txQueue");
         }

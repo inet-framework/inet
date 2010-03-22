@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -22,10 +22,10 @@ package inet.nodes.inet;
 
 import inet.applications.pingapp.PingApp;
 import inet.applications.sctpapp.SCTPApp;
-import inet.applications.tcpapp.TCPApp2;
+import inet.applications.tcpapp.TCPApp;
 import inet.applications.udpapp.UDPApp;
 import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.ethernet.EthernetInterface2;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -40,13 +40,15 @@ import inet.util.TCPDump;
 //
 // \IP host with TCP, UDP layers and applications.
 //
-module StandardHost2
+module StandardHostWithEthernetInterface2
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
+        @display("i=device/pc2");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        int numSctpApps = default(0); 
+        int numSctpApps = default(0);
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");
@@ -55,10 +57,9 @@ module StandardHost2
         int namid = default(-1);
         string routingFile = default("");
         int numExtInterfaces = default(0);
-        @display("i=device/pc2");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -80,9 +81,8 @@ module StandardHost2
                 routingFile = routingFile;
                 @display("p=57,214");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp2 {
+        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
             parameters:
-                port = index+1024;
                 @display("p=186,54");
         }
         tcp: <tcpType> like ITCP {
@@ -101,7 +101,7 @@ module StandardHost2
             parameters:
                 @display("p=501,54");
         }
-        sctp: SCTP { 
+        sctp: SCTP {
             @display("p=501,141;i=block/wheelbarrow");
         }
         pingApp: PingApp {
@@ -120,11 +120,11 @@ module StandardHost2
             parameters:
                 @display("p=186,390,row,90;q=txQueue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: EthernetInterface2 {
             parameters:
                 @display("p=336,390,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: ExtInterface { 
+        ext[numExtInterfaces]: ExtInterface {
             parameters:
                 @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }

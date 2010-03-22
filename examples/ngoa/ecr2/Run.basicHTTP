@@ -1,0 +1,45 @@
+#
+# This makefile was generated with the following command:
+# /home/kks/omnetpp/bin/opp_runall --export Run.basicHTTP ./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 0..11
+#
+
+.PHONY:  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
+
+all:  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
+
+r0:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 0
+
+r1:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 1
+
+r2:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 2
+
+r3:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 3
+
+r4:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 4
+
+r5:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 5
+
+r6:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 6
+
+r7:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 7
+
+r8:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 8
+
+r9:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 9
+
+r10:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 10
+
+r11:
+	./run -f basicHTTP.ini -u Cmdenv -c TdmPonWithHttp -r 11
+

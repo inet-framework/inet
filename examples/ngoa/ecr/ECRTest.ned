@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2009 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,19 +20,15 @@
 
 package inet.examples.ngoa.ecr;
 
-//import inet.examples.ethernet.lans.ethernetline;
-import ned.DatarateChannel;
+import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.world.ChannelInstaller;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.StandardHost2;
-import inet.nodes.hybridpon.Olt;
-import inet.nodes.hybridpon.Onu;
-import inet.linklayer.hybridpon.LambdaSplitter;
+import inet.world.ChannelInstaller;
 
 
-network EcrTestOfHybridPon
+network ECRTest
 {
     parameters:
         int n;
@@ -40,52 +36,40 @@ network EcrTestOfHybridPon
         double backbone_delay @unit(s) = default(5ms);	// RTT = 10ms
         double distribution_rate @unit(bps) = default(100Mbps);
         double feeder_rate @unit(bps) = default(100Mbps);
-        @display("bgb=597,372");
-    types:
-        channel fiber_10g extends DatarateChannel
-        {
-            delay = 1us;
-            datarate = 10Gbps;
-        }
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
                 channelClass = "ThruputMeteringChannel";
                 channelAttrs = "format=u";
-                @display("p=36,28");
+                @display("p=98,50");
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                @display("p=123,28");
+                @display("p=185,50");
         }
-        server: StandardHost {
+        r1: Router {
             parameters:
-                @display("p=542,193;i=device/server_l");
+                @display("p=185,194");
         }
-        router: Router {
+        r2: Router {
             parameters:
-                @display("p=442,193");
+                @display("p=304,194");
         }
-        olt: Olt {
-            @display("p=353,193");
-        }
-        awg: LambdaSplitter {
+        cli[n]: StandardHost2 {
             parameters:
-                @display("p=237,193");
+                @display("i=device/laptop;p=67,194");
         }
-        onu[n]: Onu {
-            @display("p=129,193");
-        }
-        client[n]: StandardHost2 {
+        srv: StandardHost {
             parameters:
-                @display("i=device/laptop;p=44,193");
+                @display("p=439,194;i=device/server_l");
         }
     connections:
         for i=0..n-1 {
-            client[i].ethg++ <--> onu[i].ethg++;
-            onu[i].pong <--> fiber_10g <--> awg.demuxg++;
-            awg.muxg++ <--> fiber_10g <--> olt.pong++;
+//            cli[i].pppg++ <--> fiberline_100M <--> r1.pppg++;
+			cli[i].pppg++ <--> {datarate=distribution_rate;} <--> r1.pppg++;
         }
-        olt.ethg++ <--> router.ethg++;
-        router.pppg++ <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.pppg++;
+//        r1.pppg++ <--> fiberline_100M <--> r2.pppg++;
+        r1.pppg++ <--> {datarate=feeder_rate;} <--> r2.pppg++;
+//        r2.pppg++ <--> fiberline_1T_10ms_rtt <--> srv.pppg++;
+		r2.pppg++ <--> {delay=backbone_delay; datarate=backbone_rate;} <--> srv.pppg++;
 }
