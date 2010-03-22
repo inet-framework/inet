@@ -22,21 +22,7 @@ moduleinterface IOltScheduler
         int cwMax @unit(bit);	// maximum grant to ONU [bit]        
         double maxTxDelay @unit(s);	// max. limit to TX scheduling delay [sec]
         double onuTimeout @unit(s);	// polling cycle from OLT to ONU [sec]        
-//        double queueSizePoll @unit(bit);	// size of FIFO queue for polling frames [bit]
-
-//        // Parameters specific to sequential scheduling
-//        double queueSize @unit(bit);	// downstream queue memory size [bit]
-//
-//        // Parameters specific to improved sequential scheduling
-//        double rsDepth;					// rescheduling depth
-//
-//        // Parameters specific to batch scheduling
-//        double batchPeriod @unit(s);		// batch scheduling period [sec]
-//        double voqSize @unit(bit);		// VOQ size [bit]
-//        double voqThreshold;				// VOQ threshold (scaling factor) used in
-//											// EdfWithLqf scheduler
-
     gates:
 		inout ethg[];	// I/F with Ethernet switch
-		inout wdmg[];	// I/F with WDM Optical Layer
+		inout wdmg;	// I/F with WDM Layer
 }

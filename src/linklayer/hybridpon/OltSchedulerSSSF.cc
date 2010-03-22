@@ -854,7 +854,7 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 		} // end of 'if (voq ... )'
 
 		frameLength = frame->getBitLength();
-	    send(frame, "wdmg$o", ch);  ///< send the frame to the WDM layer
+	    send(frame, "wdmg$o");  ///< send the frame to the WDM layer
 	} // end of 'if'
 	else
 	{
@@ -877,7 +877,7 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 		vTxTime[ch] = now;
 
 		frameLength = frame->getBitLength();
-	    send(frame, "wdmg$o", ch);  ///< send the frame to the WDM layer
+	    send(frame, "wdmg$o");  ///< send the frame to the WDM layer
 	} // end of 'else'
 
 	ASSERT(voqBitCtr[voqIdx] >= 0); // DEBUG: Check VOQ counter before updating.
@@ -894,7 +894,7 @@ void OltSchedulerSSSF::transmitPonFrame(DummyPacket *msg)
 // 	// Here we include a transmission delay because it has not been taken
 // 	// into account elsewhere.
 // 	simtime_t txDelay(frame->getBitLength() / lineRate);
-// 	sendDelayed(frame, txDelay, "wdmg$o", ch);
+// 	sendDelayed(frame, txDelay, "wdmg$o");
 
 #ifdef TRACE_TXRX
 	// record TX usage
@@ -1086,7 +1086,7 @@ void OltSchedulerSSSF::handleMessage(cMessage *msg)
 		}
 		else if (inGate.compare(0, 6, "wdmg$i") == 0)
 		{
-			// PON frame from the lower layer (i.e., PON I/F)
+			// PON frame from the lower layer (i.e., WDM layer)
 			handleDataPonFrameFromPon(check_and_cast<HybridPonUsFrame *> (msg));
 		}
 		else

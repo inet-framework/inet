@@ -22,5 +22,5 @@ simple OnuMacLayer
         int queueSize @unit(bit) = default(83886080b);	// size of FIFO queue (default is 10 MB)
     gates:
         inout ethg;	// I/F with Ethernet switch
-        inout wdmg;	// I/F with WDM Optical Layer
+        inout wdmg;	// I/F with WDM Layer
 }

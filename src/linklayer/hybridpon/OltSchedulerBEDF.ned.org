@@ -40,5 +40,5 @@ simple BEDF like IScheduler
 ////        output toPacketSink;		// to sink received IP packets
 //		output toSwitch[];			// to Ethernet switch (bridge)
 		inout ethg[];	// I/F with Ethernet switch
-		inout wdmg[];	// I/F with WDM Optical Layer		
+		inout wdmg[];	// I/F with WDM Layer		
 }

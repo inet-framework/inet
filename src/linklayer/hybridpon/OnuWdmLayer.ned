@@ -22,6 +22,6 @@ simple OnuWdmLayer
 		@node();
 		@display("i=abstract/opticalswitch_s");
     gates:
-        inout demuxg;	// I/F for WDM-demultiplexed (electrical or optical) streams
-        inout muxg;		// I/F for WDM-multiplexed optical streams
+        inout pong;	// I/F with PON layer
+        inout phyg;	// I/F with physical medium (i.e., optical fiber)
 }

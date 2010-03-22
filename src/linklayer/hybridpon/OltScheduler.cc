@@ -19,9 +19,6 @@
 
 #include "OltScheduler.h"
 
-//// register module
-//Define_Module(Scheduler)
-
 
 //------------------------------------------------------------------------------
 //	Scheduling functions

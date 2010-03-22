@@ -35,9 +35,9 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 	// get the full name of arrival gate
 	std::string inGate = msg->getArrivalGate()->getFullName();
 
-	if (inGate.compare(0, 6, "muxg$i") == 0)
+	if (inGate.compare(0, 6, "phyg$i") == 0)
 	{
-		// optical frame from the MUX gate (i.e., the optical fiber).
+		// optical frame from the physical medium (i.e., optical fiber).
 
 		OpticalFrame *opticalFrame = check_and_cast<OpticalFrame *> (msg);
 		int ch = opticalFrame->getLambda();
@@ -50,12 +50,12 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 		HybridPonUsFrame *frame = check_and_cast<HybridPonUsFrame *> (
 				opticalFrame->decapsulate());
 		frame->setChannel(ch);
-		send(frame, "demuxg$o", ch); //ownership problem here or up there?
+		send(frame, "pong$o");
 		delete opticalFrame;
 	}
 	else
 	{
-		// PON frame from the DEMUX gate (i.e., the upper layer)
+		// PON frame from the upper layer (i.e., PON layer)
 
 		HybridPonDsFrame *frame = check_and_cast<HybridPonDsFrame *> (msg);
 		int ch = frame->getChannel();
@@ -68,7 +68,7 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 		OpticalFrame *opticalFrame = new OpticalFrame();
 		opticalFrame->setLambda(ch);
 		opticalFrame->encapsulate(frame);
-		send(opticalFrame, "muxg$o", ch);
+		send(opticalFrame, "phyg$o", ch);
 	}
 }
 

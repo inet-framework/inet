@@ -23,8 +23,8 @@ Define_Module(OnuWdmLayer)
 
 void OnuWdmLayer::initialize()
 {
-	// set "flow-through" reception mode for the input gate (muxg$i) for PON I/F
-	gate("muxg$i")->setDeliverOnReceptionStart(true);
+	// set "flow-through" reception mode for the input gate (phyg$i) for physical layer
+	gate("phyg$i")->setDeliverOnReceptionStart(true);
 }
 
 void OnuWdmLayer::handleMessage(cMessage *msg)
@@ -33,9 +33,9 @@ void OnuWdmLayer::handleMessage(cMessage *msg)
 	ev << getFullPath() << ": handleMessage called" << endl;
 #endif
 
-	if (msg->getArrivalGateId() == findGate("muxg$i"))
+	if (msg->getArrivalGateId() == findGate("phyg$i"))
 	{
-		// optical frame from the MUX gate (i.e., the optical fiber)
+		// optical frame from the physical medium (i.e., optical fiber)
 
 		OpticalFrame *opticalFrame = check_and_cast<OpticalFrame *> (msg);
 		int ch = opticalFrame->getLambda();
@@ -48,12 +48,12 @@ void OnuWdmLayer::handleMessage(cMessage *msg)
 		HybridPonDsFrame *frame = check_and_cast<HybridPonDsFrame *> (
 				opticalFrame->decapsulate());
 		frame->setChannel(ch);
-		send(frame, "demuxg$o"); //ownership problem here or up there?
+		send(frame, "pong$o");
 		delete opticalFrame;
 	}
 	else
 	{
-		// PON frame from the DEMUX gate (i.e., the upper layer)
+		// PON frame from the upper layer (i.e., PON layer)
 
 		HybridPonUsFrame *frame = check_and_cast<HybridPonUsFrame *> (msg);
 		int ch = frame->getChannel();
@@ -66,7 +66,7 @@ void OnuWdmLayer::handleMessage(cMessage *msg)
 		OpticalFrame *opticalFrame = new OpticalFrame();
 		opticalFrame->setLambda(ch);
 		opticalFrame->encapsulate(frame);
-		send(opticalFrame, "muxg$o");
+		send(opticalFrame, "phyg$o");
 	}
 }
 

@@ -61,9 +61,7 @@ packet HybridPonDsFrame extends cPacket
     // The following are not actual fields of a frame; they rather provide
     // parameters of "service primitives" in service specifications related
     // with MAC and PHY layers.
- 
-    //    int lambda;			// wavelength channel
-    int channel;	// wavelength channel (serves as ONU ID like LLID in EPON)
+    int channel;	// wavelength channel (serves as ONU ID like LLID in EPON) 
 };
 
 packet HybridPonDsDataFrame extends HybridPonDsFrame
