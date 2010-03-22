@@ -31,7 +31,7 @@ module Olt0
 														// (algorithm and operation mode)
     gates:
         inout ethg[] @labels(EtherFrame-conn);	// Service Network I/F (i.e., with metro/backbone)
-        inout pong[] @labels(OpticalFrame-conn);	// PON I/F (i.e., with AWG)
+        inout phyg[] @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
     submodules:
         switch: EtherSwitch {
             parameters:
@@ -43,15 +43,15 @@ module Olt0
             parameters:
                 @display("p=90,118");
 			gates:
-				ethg[sizeof(pong)];
-				wdmg[sizeof(pong)];
+				ethg[sizeof(phyg)];
+				wdmg;
         }
         wdm: OltWdmLayer {
             parameters:
                 @display("p=90,199");
 			gates:
-				demuxg[sizeof(pong)];
-				muxg[sizeof(pong)];
+				pong;
+				phyg[sizeof(phyg)];
         }
     connections:
         for i=0..sizeof(ethg)-1 {
@@ -59,7 +59,7 @@ module Olt0
         }
         for i=0..sizeof(pong)-1 {
             switch.ethg++ <--> scheduler.ethg++;
-            scheduler.wdmg++ <--> wdm.demuxg++;
-            wdm.muxg++ <--> pong++;
+            wdm.phyg++ <--> phyg++;
         }
+        scheduler.wdmg <--> wdm.pong;
 }

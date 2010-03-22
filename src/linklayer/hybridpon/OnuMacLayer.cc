@@ -152,8 +152,8 @@ void OnuMacLayer::handleGrantPonFrameFromPon(HybridPonDsGrantFrame *ponFrameDs)
 void OnuMacLayer::initialize()
 {
 //	channel = (int) getParentModule()->par("lambda");
-	cModule *olt = getParentModule();
-	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("pong$o")->getChannel());
+	cModule *onu = getParentModule();
+	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(onu->gate("phyg$o")->getChannel());
 	lineRate = chan->getDatarate();
 	queueSize = par("queueSize");
 	busyQueue = 0;

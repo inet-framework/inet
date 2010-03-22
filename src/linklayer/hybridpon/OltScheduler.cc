@@ -491,17 +491,16 @@ void OltScheduler::initialize(void)
 
     // initialize configuration and status variables
 	cModule *olt = getParentModule();
-	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("pong$o", 0)->getChannel());
+	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("phyg$o", 0)->getChannel());
 	lineRate = chan->getDatarate();
-	//	numOnus = getParentModule()->par("numOnus");
-	numOnus = gateSize("wdmg$o");   ///< = number of WDM channels
+	numOnus = olt->gateSize("phyg$o");   ///< = number of ONUs (i.e., WDM channels)
 	busyQueuePoll = 0;
 
 	EV << "OLT initialization results:" << endl;
 	EV << "- Line rate = " << lineRate << endl;
 	EV << "- Number of ONUs = " << numOnus << endl;
 
-    // initilaize vectors
+    // initialize vectors
 	onuRegistered.assign(numOnus, false);
 	RTT.assign(numOnus, simtime_t(0.0));
 	CH.assign(numOnus, simtime_t(0.0));

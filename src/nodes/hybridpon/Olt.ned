@@ -33,15 +33,15 @@ module Olt
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP														
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// Service Network I/F (i.e., with metro/backbone)
-        inout pong[] @labels(OpticalFrame-conn);	// PON I/F (i.e., with AWG)
+        inout ethg[] @labels(EtherFrame-conn);	// service network I/F (i.e., with metro/backbone)
+        inout phyg[] @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
                 @display("p=73,122");
             gates:
-                lowerLayerIn[sizeof(ethg)+sizeof(pong)];
-                lowerLayerOut[sizeof(ethg)+sizeof(pong)];
+                lowerLayerIn[sizeof(ethg)+sizeof(phyg)];
+                lowerLayerOut[sizeof(ethg)+sizeof(phyg)];
         }
         etherMac[sizeof(ethg)]: EtherMAC {
             parameters:
@@ -53,15 +53,15 @@ module Olt
             parameters:
                 @display("p=73,209");
             gates:
-                ethg[sizeof(pong)];
-                wdmg[sizeof(pong)];
+                ethg[sizeof(phyg)];
+                wdmg;
         }
         wdm: OltWdmLayer {
             parameters:
                 @display("p=73,274");
             gates:
-                demuxg[sizeof(pong)];
-                muxg[sizeof(pong)];
+                pong;
+                phyg[sizeof(phyg)];
         }
     connections:
         for i=0..sizeof(ethg)-1 {
@@ -69,10 +69,10 @@ module Olt
             etherMac[i].upperLayerOut --> relayUnit.lowerLayerIn++;
             ethg++ <--> etherMac[i].phys;
         }
-        for i=0..sizeof(pong)-1 {
+        for i=0..sizeof(phyg)-1 {
             relayUnit.lowerLayerOut++ --> scheduler.ethg$i++;
             relayUnit.lowerLayerIn++ <-- scheduler.ethg$o++;
-            scheduler.wdmg++ <--> wdm.demuxg++;
-            wdm.muxg++ <--> pong++;
+            wdm.phyg++ <--> phyg++;
         }
+        scheduler.wdmg <--> wdm.pong;
 }

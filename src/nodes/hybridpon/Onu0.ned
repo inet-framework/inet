@@ -27,8 +27,8 @@ module Onu0
         @display("i=device/smallrouter;bgb=188,228;bgp=2,2");
 //        int queueSize @unit(bit) = default(8e7b); // size of FIFO queue in the Mac [bit]
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// User Network I/F
-        inout pong @labels(OpticalFrame-conn);	// I/F (i.e., with AWG)
+        inout ethg[] @labels(EtherFrame-conn);	// user network I/F
+        inout phyg @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
     submodules:
         switch: EtherSwitch {
             parameters:
@@ -39,7 +39,6 @@ module Onu0
         mac: OnuMacLayer {
             parameters:
                 @display("p=92,124");
-//                queueSize = queueSize;
         }
         wdm: OnuWdmLayer {
             parameters:
@@ -50,6 +49,6 @@ module Onu0
             ethg++ <--> switch.ethg++;
         }
         switch.ethg++ <--> mac.ethg;
-        mac.wdmg <--> wdm.demuxg;
-        wdm.muxg <--> pong;
+        mac.wdmg <--> wdm.pong;
+        wdm.phyg <--> phyg;
 }

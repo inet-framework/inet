@@ -90,10 +90,10 @@ network ARPTest
         client.ethg++ <--> onu1.ethg++;
         host1.ethg++ <--> onu2.ethg++;
         host2.ethg++ <--> onu2.ethg++;
-        onu1.pong <--> fiber_10g <--> awg.demuxg++;
-        onu2.pong <--> fiber_10g <--> awg.demuxg++;
+        onu1.phyg <--> fiber_10g <--> awg.demuxg++;
+        onu2.phyg <--> fiber_10g <--> awg.demuxg++;
         for i=0..numOnus-1 {
-            awg.muxg++ <--> fiber_10g <--> olt.pong++;
+            awg.muxg++ <--> fiber_10g <--> olt.phyg++;
         }
         olt.ethg++ <--> router.ethg++;
         router.pppg++ <--> fiberline <--> server.pppg++;

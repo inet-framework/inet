@@ -29,8 +29,8 @@ module OnuWithEtherMAC2
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// User Network I/F
-        inout pong @labels(OpticalFrame-conn);	// PON I/F (i.e., with AWG)
+        inout ethg[] @labels(EtherFrame-conn);	// user network I/F
+        inout phyg @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
@@ -61,6 +61,6 @@ module OnuWithEtherMAC2
         }
         relayUnit.lowerLayerOut++ --> mac.ethg$i;
         relayUnit.lowerLayerIn++ <-- mac.ethg$o;
-        mac.wdmg <--> wdm.demuxg;
-        wdm.muxg <--> pong;
+        mac.wdmg <--> wdm.pong;
+        wdm.phyg <--> phyg;
 }

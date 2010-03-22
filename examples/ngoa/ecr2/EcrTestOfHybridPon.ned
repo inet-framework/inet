@@ -87,8 +87,8 @@ network EcrTestOfHybridPon
     connections:
         for i=0..n-1 {
             client[i].ethg++ <--> {delay = uni_delay; datarate = uni_rate;} <--> onu[i].ethg++;
-            onu[i].pong <--> {delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg++;
-            awg.muxg++ <--> {delay = feeder_delay; datarate = feeder_rate;} <--> olt.pong++;
+            onu[i].phyg <--> {delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg++;
+            awg.muxg++ <--> {delay = feeder_delay; datarate = feeder_rate;} <--> olt.phyg++;
         }
         olt.ethg++ <--> {delay = backbone_delay; datarate = backbone_rate;} <--> server.ethg++;
 }
