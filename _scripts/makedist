@@ -10,7 +10,7 @@ if [ "$BUILDID" = "" ]; then
 fi
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
-DIRNAME=inet-$BUILDDATE
+DIRNAME=inet
 
 rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
