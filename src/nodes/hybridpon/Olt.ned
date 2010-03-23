@@ -1,25 +1,30 @@
-///
-/// @file   Olt.ned
-/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Jan/21/2010
-///
-/// @brief  Defines a hybrid TDM/WDM-PON OLT module.
-///
-/// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
-///
-/// @remarks This software is written and distributed under the GNU General
-///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
-///          You must not remove this notice, or any other, from this software.
-///
+//
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+//
+// This software is written and distributed under the GNU General
+// Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+// You must not remove this notice, or any other, from this software.
+//
 
 
 package inet.nodes.hybridpon;
 
 import inet.linklayer.etherswitch.MACRelayUnit;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.EtherMAC2;
 import inet.linklayer.hybridpon.IOltScheduler;
 import inet.linklayer.hybridpon.OltWdmLayer;
 
+//
+// Model of a hybrid TDM/WDM-passive optical network (PON) optical line
+// terminal (OLT) providing Ethernet service network interfaces (SNIs)
+// with switching capability (through MACRelayUnit).
+//
+// Note that the Ethernet interfaces (provided by EtherMAC2) support
+// full duplex mode only.
+//
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2010-03-15
+//  
 module Olt
 {
     parameters:
@@ -30,11 +35,11 @@ module Olt
         int numTransmitters = default(2);	// number of transmitters
         string schType = default("OltSchedulerSSSF");	// type of 'Scheduler'
 														// (algorithm and operation mode)
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
+        string relayUnitType = default("MACRelayUnitPP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP														
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// service network I/F (i.e., with metro/backbone)
-        inout phyg[] @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
+        inout ethg[] @labels(EtherFrame-conn);	// service network interface (i.e., with metro/backbone)
+        inout phyg[] @labels(OpticalFrame-conn);	// physical interface (i.e., with optical fiber)
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
@@ -43,7 +48,7 @@ module Olt
                 lowerLayerIn[sizeof(ethg)+sizeof(phyg)];
                 lowerLayerOut[sizeof(ethg)+sizeof(phyg)];
         }
-        etherMac[sizeof(ethg)]: EtherMAC {
+        etherMac[sizeof(ethg)]: EtherMAC2 {
             parameters:
                 promiscuous = true;
                 queueModule = "";

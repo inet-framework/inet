@@ -1,9 +1,9 @@
 ///
 /// @file   LambdaSplitter.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Feb/25/2010
+/// @date   2010-02-25
 ///
-/// @brief  Declares 'LambdaSplitter' class, modelling AWG for a hybrid
+/// @brief  Implements LambdaSplitter class, modelling AWG for a hybrid
 ///			TDM/WDM-PON.
 ///
 /// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
@@ -37,10 +37,6 @@ void LambdaSplitter::initialize()
 
 void LambdaSplitter::handleMessage(cMessage *msg)
 {
-#ifdef DEBUG_LAMBDA_SPLITTER
-	ev << getFullPath() << ": handleMessage called" << endl;
-#endif
-
 	// get the full name of arrival gate.
 	std::string inGate = msg->getArrivalGate()->getFullName();
 
@@ -52,7 +48,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
 		// optical frame from the MUX gate (i.e., the OLT)
 
 #ifdef DEBUG_LAMBDA_SPLITTER
-		ev << getFullPath() << ": OpticalFrame from the OLT with a WDM channel = " << ch << endl;
+		EV << getFullPath() << ": OpticalFrame from the OLT with a WDM channel = " << ch << endl;
 #endif
 
 		send(opticalFrame, "demuxg$o", ch);
@@ -62,7 +58,7 @@ void LambdaSplitter::handleMessage(cMessage *msg)
 		// optical frame from the DEMUX gate (i.e., the ONU)
 
 #ifdef DEBUG_LAMBDA_SPLITTER
-		ev << getFullPath() << ": OpticalFrame from the ONU with a WDM channel = " << ch << endl;
+		EV << getFullPath() << ": OpticalFrame from the ONU with a WDM channel = " << ch << endl;
 #endif
 
 		send(opticalFrame, "muxg$o", ch);

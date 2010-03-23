@@ -1,25 +1,30 @@
-///
-/// @file   Onu.ned
-/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Feb/25/2010
-///
-/// @brief  Defines a hybrid TDM/WDM-PON ONU module.
-///
-/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
-///
-/// @remarks This software is written and distributed under the GNU General
-///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
-///          You must not remove this notice, or any other, from this software.
-///
+//
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+//
+// This software is written and distributed under the GNU General
+// Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+// You must not remove this notice, or any other, from this software.
+//
 
 
 package inet.nodes.hybridpon;
 
 import inet.linklayer.etherswitch.MACRelayUnit;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.EtherMAC2;
 import inet.linklayer.hybridpon.OnuMacLayer;
 import inet.linklayer.hybridpon.OnuWdmLayer;
 
+//
+// A hybrid TDM/WDM-passive optical network (PON) optical network unit
+// (ONU) providing Ethernet user network interfaces (UNIs) with switching
+// capability (through MACRelayUnit).
+//
+// Note that the Ethernet interfaces (provided by EtherMAC2) support
+// full duplex mode only.
+//
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2010-03-15
+//
 module Onu
 {
     parameters:
@@ -29,8 +34,8 @@ module Onu
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// user network I/F
-        inout phyg @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
+        inout ethg[] @labels(EtherFrame-conn);	// user network interface
+        inout phyg @labels(OpticalFrame-conn);	// physical interface (i.e., with optical fiber)
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
@@ -39,7 +44,7 @@ module Onu
                 lowerLayerIn[sizeof(ethg)+1];
                 lowerLayerOut[sizeof(ethg)+1];
         }
-        etherMac[sizeof(ethg)]: EtherMAC {
+        etherMac[sizeof(ethg)]: EtherMAC2 {
             parameters:
                 promiscuous = true;
                 queueModule = "";

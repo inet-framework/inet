@@ -22,6 +22,6 @@ simple OnuWdmLayer
 		@node();
 		@display("i=abstract/opticalswitch_s");
     gates:
-        inout pong;	// I/F with PON layer
-        inout phyg;	// I/F with physical medium (i.e., optical fiber)
+        inout pong;	// interface with PON layer
+        inout phyg;	// interface with physical medium (i.e., optical fiber)
 }

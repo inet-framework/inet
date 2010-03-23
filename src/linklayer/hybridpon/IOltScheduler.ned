@@ -23,6 +23,6 @@ moduleinterface IOltScheduler
         double maxTxDelay @unit(s);	// max. limit to TX scheduling delay [sec]
         double onuTimeout @unit(s);	// polling cycle from OLT to ONU [sec]        
     gates:
-		inout ethg[];	// I/F with Ethernet switch
-		inout wdmg;	// I/F with WDM Layer
+		inout ethg[];	// interface with Ethernet switch
+		inout wdmg;	// interface with WDM Layer
 }

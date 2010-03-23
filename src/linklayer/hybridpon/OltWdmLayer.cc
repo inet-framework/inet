@@ -64,7 +64,7 @@ void OltWdmLayer::handleMessage(cMessage *msg)
 		ev << getFullPath() << ": PON frame with a channel index = " << ch << endl;
 #endif
 
-		// encapsulate a PON frame into an optical frame and send it to the PON I/F
+		// encapsulate a PON frame into an optical frame and send it to the PON interface
 		OpticalFrame *opticalFrame = new OpticalFrame();
 		opticalFrame->setLambda(ch);
 		opticalFrame->encapsulate(frame);

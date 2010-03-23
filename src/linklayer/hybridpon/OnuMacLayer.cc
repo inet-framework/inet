@@ -57,7 +57,7 @@ void OnuMacLayer::handleEthernetFrameFromUni(EtherFrame *frame)
 }
 
 ///
-/// Handles a data PON frame from the PON I/F (i.e., OLT).
+/// Handles a data PON frame from the PON interface (i.e., OLT).
 /// Extracts Ethernet frames from it and sends them to the upper layer (i.e., Ethernet switch).
 ///
 /// @param[in] frame a HybridPonDsDataFrame pointer
@@ -79,11 +79,11 @@ void OnuMacLayer::handleDataPonFrameFromPon(HybridPonDsDataFrame *frame)
 }
 
 ///
-/// Handles a grant PON frame from the PON I/F (i.e., OLT).
+/// Handles a grant PON frame from the PON interface (i.e., OLT).
 /// Creates a new PON frame, encapsulates Ethernet frames from the FIFO queue in it,
-/// and sends it back to the PON I/F.
+/// and sends it back to the PON interface.
 ///
-/// @param[in] frame a HybridPonDsGrantFrame pointer
+/// @param[in] ponFrameDs a HybridPonDsGrantFrame pointer
 ///
 void OnuMacLayer::handleGrantPonFrameFromPon(HybridPonDsGrantFrame *ponFrameDs)
 {

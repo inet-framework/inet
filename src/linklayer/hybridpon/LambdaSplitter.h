@@ -1,9 +1,9 @@
 ///
 /// @file   LambdaSplitter.h
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Feb/25/2010
+/// @date   2010-02-25
 ///
-/// @brief  Declares 'LambdaSplitter' class, modelling AWG in a hybrid TDM/WDM-PON.
+/// @brief  Declares LambdaSplitter class, modelling AWG in a hybrid TDM/WDM-PON.
 ///
 /// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///

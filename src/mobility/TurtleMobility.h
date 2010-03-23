@@ -59,7 +59,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     /** @brief Execute the given statement*/
     virtual void executeStatement(cXMLElement *nextStatement);
 
-    /** @brief Parse attrs in the script -- accepts things like "uniform(10,50) as well */
+    /** @brief Parse attrs in the script -- accepts things like "uniform(10,50)" as well */
     virtual double getValue(const char *s);
 
     /** @brief Advance nextStatement pointer */

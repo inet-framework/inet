@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,56 +20,71 @@
 
 package inet.examples.ngoa.ecr2;
 
-import inet.examples.ethernet.lans.ethernetline;
+//import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.StandardHost2;
-import inet.world.ChannelInstaller;
+//import inet.world.ChannelInstaller;
+//import inet.nodes.inet.RouterWithEtherInterface2;
+import inet.nodes.ethernet.EtherSwitch2;
+import inet.nodes.inet.StandardHostWithEthernetInterface2;
+import inet.nodes.inet.StandardHost2WithEthernetInterface2;
 
 
+//
+// Defines a test network for equivalent circuit rate (ECR)-based
+// study of abstract access network models
+//
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2010-03-23
+//
 network EcrTest
 {
     parameters:
-        int n;
-        double backbone_rate @unit(bps) = default(1Tbps);
-        double backbone_delay @unit(s) = default(5ms);	// RTT = 10ms
-        double distribution_rate @unit(bps) = default(100Mbps);
-        double feeder_rate @unit(bps) = default(100Mbps);
+        int N;	// number of clients (subscribers)
+        double uni_rate @unit(bps) = default(1Gbps);	// transmission rate of ONU Ethernet UNIs
+        double uni_delay @unit(s) = default(0s);	// no delay at UNIs
+        double distribution_rate @unit(bps) = default(1Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)
+        double distribution_delay @unit(s) = default(50us);	// default delay of 50 us corresponds to 10 km fiber
+        double feeder_rate @unit(bps) = default(1Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
+        double feeder_delay @unit(s) = default(50us);	// default delay of 50 us corresponds to 10 km fiber
+        double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
+        double backbone_delay @unit(s) = default(5ms);	// default delay of 5 ms corresponds to RTT of 10 ms
+        @display("bgb=519,372");
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=u";
-                @display("p=98,50");
-        }
+        //        channelInstaller: ChannelInstaller {
+        //            parameters:
+        //                channelClass = "ThruputMeteringChannel";
+        //                channelAttrs = "format=u";
+        //                @display("p=98,50");
+        //        }
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=185,50");
         }
-        r1: Router {
+        client[N]: StandardHost2WithEthernetInterface2 {
             parameters:
-                @display("p=185,194");
+                @display("i=device/laptop;p=44,198");
         }
-        r2: Router {
+        switch1: EtherSwitch2 {
             parameters:
-                @display("p=304,194");
+                @display("p=129,198");
         }
-        cli[n]: StandardHost2 {
+        switch2: EtherSwitch2 {
             parameters:
-                @display("i=device/laptop;p=67,194");
+                @display("p=237,198");
         }
-        srv: StandardHost {
+        switch3: EtherSwitch2 {
             parameters:
-                @display("p=439,194;i=device/server_l");
+                @display("p=353,198");
+        }
+        server: StandardHostWithEthernetInterface2 {
+            parameters:
+                @display("p=462,198;i=device/server_l");
         }
     connections:
-        for i=0..n-1 {
-//            cli[i].pppg++ <--> fiberline_100M <--> r1.pppg++;
-			cli[i].pppg++ <--> {datarate=distribution_rate;} <--> r1.pppg++;
+        for i=0..N-1 {
+            client[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> switch1.ethg++;
         }
-//        r1.pppg++ <--> fiberline_100M <--> r2.pppg++;
-        r1.pppg++ <--> {datarate=feeder_rate;} <--> r2.pppg++;
-//        r2.pppg++ <--> fiberline_1T_10ms_rtt <--> srv.pppg++;
-		r2.pppg++ <--> {delay=backbone_delay; datarate=backbone_rate;} <--> srv.pppg++;
+        switch1.ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> switch2.ethg++;
+        switch2.ethg++ <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> switch3.ethg++;
+        switch3.ethg++ <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg++;
 }

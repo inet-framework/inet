@@ -1,5 +1,5 @@
 ///
-/// @file   Onu.ned
+/// @file   Onu0.ned
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   Feb/25/2010
 ///
@@ -15,7 +15,8 @@
 
 package inet.nodes.hybridpon;
 
-import inet.nodes.ethernet.EtherSwitch;
+import inet.linklayer.etherswitch.MACRelayUnit;
+import inet.linklayer.ethernet.EtherMAC;
 import inet.linklayer.hybridpon.OnuMacLayer;
 import inet.linklayer.hybridpon.OnuWdmLayer;
 
@@ -24,31 +25,42 @@ module Onu0
     parameters:
         @node();
         @labels(node,hybridpon-node);
-        @display("i=device/smallrouter;bgb=188,228;bgp=2,2");
-//        int queueSize @unit(bit) = default(8e7b); // size of FIFO queue in the Mac [bit]
+        @display("i=device/smallrouter;bgb=138,318;bgp=2,2");
+        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
+                                                          // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
-        inout ethg[] @labels(EtherFrame-conn);	// user network I/F
-        inout phyg @labels(OpticalFrame-conn);	// physical I/F (i.e., with optical fiber)
+        inout ethg[] @labels(EtherFrame-conn);	// user network interface
+        inout phyg @labels(OpticalFrame-conn);	// physical interface (i.e., with optical fiber)
     submodules:
-        switch: EtherSwitch {
+        relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
-                @display("p=92,59");
-			gates:
-				ethg[sizeof(ethg)+1];
+                @display("p=69,132");
+            gates:
+                lowerLayerIn[sizeof(ethg)+1];
+                lowerLayerOut[sizeof(ethg)+1];
+        }
+        etherMac[sizeof(ethg)]: EtherMAC {
+            parameters:
+                promiscuous = true;
+                queueModule = "";
+                @display("p=69,51,row;q=queue");
         }
         mac: OnuMacLayer {
             parameters:
-                @display("p=92,124");
+                @display("p=69,213");
         }
         wdm: OnuWdmLayer {
             parameters:
-                @display("p=92,185");
+                @display("p=69,273");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            ethg++ <--> switch.ethg++;
+            etherMac[i].upperLayerIn <-- relayUnit.lowerLayerOut++;
+            etherMac[i].upperLayerOut --> relayUnit.lowerLayerIn++;
+            ethg++ <--> etherMac[i].phys;
         }
-        switch.ethg++ <--> mac.ethg;
+        relayUnit.lowerLayerOut++ --> mac.ethg$i;
+        relayUnit.lowerLayerIn++ <-- mac.ethg$o;
         mac.wdmg <--> wdm.pong;
         wdm.phyg <--> phyg;
 }

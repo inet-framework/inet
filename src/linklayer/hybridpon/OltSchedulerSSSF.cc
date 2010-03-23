@@ -106,7 +106,7 @@ void OltSchedulerSSSF::debugOnuPollListStatus(void)
 }
 
 ///
-/// Handles a grant PON frame to the PON I/F (i.e., ONU).
+/// Handles a grant PON frame to the PON interface (i.e., ONU).
 /// Regrants the grant, if it is for a poll, and schedules it for transmission
 /// through a sequential scheduler.
 /// Resets the ONU Timeout.
@@ -627,13 +627,13 @@ void OltSchedulerSSSF::handleEthernetFrameFromSni(EtherFrame *frame)
 }
 
 ///
-/// Handles a data PON frame from the PON I/F (i.e., ONU).
+/// Handles a data PON frame from the PON interface (i.e., ONU).
 /// Extracts Ethernet frames from it, if any, and sends them to
 /// the upper layer (i.e., Ethernet switch).
 /// Generates a grant based on the report from the ONU and schedules it
 /// for transmission, only when the grant VOQ is empty.
 ///
-/// @param[in] frame a HybridPonUsFrame pointer
+/// @param[in] ponFrameFromOnu	a HybridPonUsFrame pointer
 ///
 void OltSchedulerSSSF::handleDataPonFrameFromPon(HybridPonUsFrame *ponFrameFromOnu)
 {

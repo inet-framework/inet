@@ -29,6 +29,6 @@ simple OltSchedulerSSSF like IOltScheduler
 //        double rsDepth;					// rescheduling depth
 
     gates:
-		inout ethg[];	// I/F with Ethernet switch
-		inout wdmg;	// I/F with WDM Layer		
+		inout ethg[];	// interface with Ethernet switch
+		inout wdmg;	// interface with WDM Layer		
 }
