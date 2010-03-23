@@ -20,7 +20,6 @@
 
 package inet.examples.ngoa.ecr2;
 
-//import inet.examples.ethernet.lans.ethernetline;
 import ned.DatarateChannel;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.world.ChannelInstaller;
@@ -42,25 +41,19 @@ network EcrTestOfHybridPon
         double distribution_rate @unit(bps) = default(1Gbps);
         double feeder_delay @unit(s) = default(50us);	// delay corresponding to 10 km fiber
         double feeder_rate @unit(bps) = default(1Gbps);
-        double backbone_rate @unit(bps) = default(10Gbps);
+        double backbone_rate @unit(bps) = default(100Gbps);
         double backbone_delay @unit(s) = default(5ms);	// RTT = 10ms
         @display("bgb=519,372");
-    types:
-//        channel fiber_10g extends DatarateChannel
-//        {
-//            delay = 1us;
-//            datarate = 10Gbps;
-//        }
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
                 channelClass = "ThruputMeteringChannel";
                 channelAttrs = "format=u";
-                @display("p=36,28");
+                @display("p=62,33");
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                @display("p=123,28");
+                @display("p=160,33");
         }
         client[n]: StandardHost2WithEthernetInterface2 {
             parameters:
@@ -68,7 +61,7 @@ network EcrTestOfHybridPon
         }
         onu[n]: OnuWithEtherMAC2 {
             @display("p=129,198");
-        }        
+        }
         awg: LambdaSplitter {
             parameters:
                 @display("p=237,198");
@@ -83,12 +76,12 @@ network EcrTestOfHybridPon
         server: StandardHostWithEthernetInterface2 {
             parameters:
                 @display("p=462,198;i=device/server_l");
-        }        
+        }
     connections:
         for i=0..n-1 {
-            client[i].ethg++ <--> {delay = uni_delay; datarate = uni_rate;} <--> onu[i].ethg++;
-            onu[i].phyg <--> {delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg++;
-            awg.muxg++ <--> {delay = feeder_delay; datarate = feeder_rate;} <--> olt.phyg++;
+            client[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg++;
+            onu[i].phyg <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg++;
+            awg.muxg++ <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> olt.phyg++;
         }
-        olt.ethg++ <--> {delay = backbone_delay; datarate = backbone_rate;} <--> server.ethg++;
+        olt.ethg++ <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg++;
 }
