@@ -1,13 +1,13 @@
 ///
 /// @file   OltSchedulerSSSF.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Feb/22/2010
+/// @date   2010-02-22
 ///
 /// @brief  Implements 'OltSchedulerSSSF' class for a hybrid TDM/WDM-PON OLT.
 ///
 /// @note
-/// This file implements an 'OltSchedulerSSSF' class for the "Sequential
-/// Scheduling with	Schedule-time Framing (S^3F)" algorithm reported in
+/// This file implements an 'OltSchedulerSSSF' class for the &quot;Sequential
+/// Scheduling with	Schedule-time Framing (S<sup>3</sup>F)&quot; algorithm reported in
 /// [1] for SUCCESS-HPON.
 ///
 /// @par
@@ -26,11 +26,11 @@
 ///		traffic with independent max. size limitation.
 /// </ul>
 ///
-///  @par References:
-///  <ol>
-///	 <li>Kyeong Soo Kim, David Gutierrez, Fu-Tai An, and Leonid G. Kazovsky,
-///		"Design and performance analysis of scheduling algorithms for WDM-PON
-///		under SUCCESS-HPON architecture," IEEE/OSA Journal of Lightwave Technology,
+/// @par References:
+/// <ol>
+///	<li>Kyeong Soo Kim, David Gutierrez, Fu-Tai An, and Leonid G. Kazovsky,
+///		&quot;Design and performance analysis of scheduling algorithms for WDM-PON
+///		under SUCCESS-HPON architecture,&quot; IEEE/OSA Journal of Lightwave Technology,
 ///		vol. 23, no. 11, pp. 3716-3731, Nov. 2005.
 /// </ol>
 ///

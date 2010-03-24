@@ -1,20 +1,21 @@
-///
-/// @file   IOltScheduler.ned
-/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Feb/25/2010
-///
-/// @brief  Defines interfaces for a scheduler module in a hybrid TDM/WDM-PON OLT.
-///
-/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
-///
-/// @remarks This software is written and distributed under the GNU General
-///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
-///          You must not remove this notice, or any other, from this software.
-///
+//
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+//
+// This software is written and distributed under the GNU General
+// Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+// You must not remove this notice, or any other, from this software.
+//
+
 
 package inet.linklayer.hybridpon;
 
-
+//
+// Interface for Olt scheduler implementations.
+// All Olt schedulers should implement this (e.g., OltSchedulerSSSF).
+//
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2010-02-25
+//
 moduleinterface IOltScheduler
 {
     parameters:

@@ -309,14 +309,26 @@ double pareto_shifted(double a, double b, double c, int rng)
 //  Contributions from Kyeong Soo (Joseph) Kim
 //----------------------------------------------------------------------------
 
-// Now it's based on simple procedural truncation at both ends.
-// Later it will be updated based on the algorithm in [1].
-// [1] Robert, Christian P. (1995), Simulation of truncated normal variables,
-//     Statistics and Computing 5, 121–125. (* online version available at:
-//     http://arxiv.org/PS_cache/arxiv/pdf/0907/0907.4010v1.pdf *)
+///
+/// Implementation of a truncated log normal function based on simple
+/// procedural truncation at both ends. It will be updated later based
+/// on the algorithm in [1].
+///
+/// @par References:
+/// <ol>
+/// <li>Robert, Christian P. (1995), Simulation of truncated normal variables,
+///     Statistics and Computing 5, 121-125. [Online] Available:
+///     <a href="http://arxiv.org/PS_cache/arxiv/pdf/0907/0907.4010v1.pdf">http://arxiv.org/PS_cache/arxiv/pdf/0907/0907.4010v1.pdf</a>
+/// </li>
+/// <li>Saralees Nadarajah and Samuel Kotz,&quot;R programs for truncated distributions,&quot;
+///     Journal of Statistical Software, Vol. 16, Code Snippet 2, Aug. 2006. [Online] Available:
+///     <a href="http://www.jstatsoft.org/v16/c02/paper">http://www.jstatsoft.org/v16/c02/paper</a>
+/// </ol>
+///
 double trunc_lognormal(double m, double w, double min, double max, bool t, int rng)
 {
 	double res;
+
 	do {
 		res = lognormal(m, w, rng);
 	} while ((res < min) || (res > max));

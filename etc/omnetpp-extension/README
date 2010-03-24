@@ -1,5 +1,5 @@
 This directory includes various files extending the original OMNeT++ ver. 4.0
-(as of 10/22/2009).
+(as of 2009-10-22).
 
 Before starting "make" in the original omnetpp root directory, copy (& overwrite)
 the files under "root" directory to the original root directory. The whole

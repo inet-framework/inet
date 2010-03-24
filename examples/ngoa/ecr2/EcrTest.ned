@@ -39,16 +39,16 @@ import inet.nodes.inet.StandardHost2WithEthernetInterface2;
 network EcrTest
 {
     parameters:
-        int N;	// number of clients (subscribers)
+        int N;	// number of subscribers (ONUs); we assume that there is only one client per ONU.
         double uni_rate @unit(bps) = default(1Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(1Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)
-        double distribution_delay @unit(s) = default(50us);	// default delay of 50 us corresponds to 10 km fiber
+        double distribution_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double feeder_rate @unit(bps) = default(1Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
-        double feeder_delay @unit(s) = default(50us);	// default delay of 50 us corresponds to 10 km fiber
+        double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
-        double backbone_delay @unit(s) = default(5ms);	// default delay of 5 ms corresponds to RTT of 10 ms
-        @display("bgb=519,372");
+        double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in feeder and distribution fiber
+        @display("bgb=519,184");
     submodules:
         //        channelInstaller: ChannelInstaller {
         //            parameters:
@@ -58,27 +58,27 @@ network EcrTest
         //        }
         configurator: FlatNetworkConfigurator {
             parameters:
-                @display("p=185,50");
+                @display("p=52,42");
         }
         client[N]: StandardHost2WithEthernetInterface2 {
             parameters:
-                @display("i=device/laptop;p=44,198");
+                @display("i=device/laptop;p=46,119");
         }
         switch1: EtherSwitch2 {
             parameters:
-                @display("p=129,198");
+                @display("p=131,119");
         }
         switch2: EtherSwitch2 {
             parameters:
-                @display("p=237,198");
+                @display("p=239,119");
         }
         switch3: EtherSwitch2 {
             parameters:
-                @display("p=353,198");
+                @display("p=355,119");
         }
         server: StandardHostWithEthernetInterface2 {
             parameters:
-                @display("p=462,198;i=device/server_l");
+                @display("p=464,119;i=device/server_l");
         }
     connections:
         for i=0..N-1 {
