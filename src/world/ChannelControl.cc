@@ -166,8 +166,8 @@ void ChannelControl::unregisterHost(cModule *host)
             for (HostList::iterator i2 = hosts.begin(); i2 != hosts.end(); ++i2) {
                 HostRef h2 = &*i2;
                 h2->neighbors.erase(h);
-                h2->isModuleListValid = false;
-                h->isModuleListValid = false;
+                h2->isNeighborListValid = false;
+                h->isNeighborListValid = false;
             }
 
             // erase host from registered hosts
