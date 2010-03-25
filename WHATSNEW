@@ -1,27 +1,24 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-201003XX
+INET-20100323
+-------------
+- added "label" annotations to gates and modules to support the adaptive palette
+  filtering and gate matching in the connection chooser (OMNeT++ 4.1).
 
-- added "label" annotations to gates and modules to support
-  the enhanced editing functionality and palette filtering 
-  in OMNeT++ 4.1. (modules relevant to the current editing 
-  context will show up first in the palette.)
-
-- added SCTP patch from Michael Tuexen, Irene Ruengeler and
+- updated SCTP implementation by Michael Tuexen, Irene Ruengeler and
   Thomas Dreibholz
 
 - added support for Sam Jensen's Network Simulation Cradle,
-  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks
-  available in simulations. Currently NSC supports the FreeBSD, OpenBSD,
-  lwIP and Linux stacks. Our TCP_NSC module (transport/tcp_nsc) is
-  a drop-in replacement for the normal TCP module (transport/tcp),
-  and can be activated with a single parameter setting in StandardHost.
-  See src/transport/tcp_nsc, 3rdparty/README, and examples/inet/simpletest.
+  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks available 
+  in simulations. Currently NSC supports the FreeBSD, OpenBSD, lwIP and Linux 
+  stacks. The TCP_NSC module (transport/tcp_nsc) is a drop-in replacement for the 
+  normal TCP module (transport/tcp), and can be activated with a single parameter 
+  setting in StandardHost. See src/transport/tcp_nsc, 3rdparty/README, and 
+  examples/inet/tcpclientserver.
 
-- added TCP SACK and New Reno implementation by Thomas Reschka.
-  The original TCP version is still available as TCP_old.
-  See src/transport/tcp/ChangeLog for details.
+- added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP 
+  version is still available as TCP_old. See src/transport/tcp/ChangeLog for details.
 
 INET-20090325
 -------------

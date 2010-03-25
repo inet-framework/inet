@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2003 Andras Varga
+// Copyright (C) 2010 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,9 +19,9 @@
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
-// <center>release ##BUILDID##</center>
+// <center>release 20100323-defe196</center>
 //
-// <nohtml>INET Framework contains IPv4, IPv6, TCP, UDP protocol implementations,
+// <nohtml>INET Framework contains IPv4, IPv6, TCP, SCTP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
 // with \RSVP-TE and LDP signalling. Link-layer models are PPP, Ethernet and 802.11.
 // Static routing can be set up using network autoconfigurators, or one can use
@@ -32,26 +32,15 @@
 // for mobility and wireless communication has been derived from the
 // <a href="http://mobility-fw.sourceforge.net" target="_blank">Mobility Framework</a>.
 //
-// <b>This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
-// which supports both ad-hoc and infrastructure mode.</b>
-//
 // There are several other bugfixes and improvements as well; see the
-// <tt>WHATSNEW</tt> file in the distribution.
-//
-// Recent additions: \MPLS, \RSVP-TE and \LDP models revised/rewritten (Vojta Janota);
-// dynamic routing (OSPFv2 and RIP) provided by the Quagga Linux/*nix routing daemon
-// (ported into the INET Framework by Vojta Janota);
-// and a cleanroom \OSPFv2 model (by Andras Babos).
-//
-// <a href="history.html">History and contributors</a>.
+// <tt><a href="../doxy/whatsnew.html">WHATSNEW</a></tt> file in the distribution.
 //
 // Introductory material:
-//  - <a href="inet-architecture.html">INET Framework architecture</a> <b>(NEW!)</b>
+//  - <a href="inet-architecture.html">INET Framework architecture</a>
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
-//  - <a href="../tcp-tutorial/index.html" target="_top">Getting started with TCP</a>
 //
 // A few useful starting points for browsing the documentation:
-//  - the <a href="full-usage-diagram.html">Usage Diagram</a>
+//  - the <a href="full-ned-usage-diagram.html">Usage Diagram</a>
 //    includes all modules and networks
 //  - example networks: NClients, BulkTransfer, MulticastNetwork,
 //    ARPTest, MixedLAN, etc.
@@ -95,6 +84,8 @@
 //
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>
+//
+// <a href="history.html">History and contributors</a>.
 //
 // @page history.html, History
 //
@@ -151,6 +142,15 @@
 // who was visiting Monash between February and June 2005. This \IPv6 model
 // got first included in the July 2005 INET snapshot, and gradually refined
 // afterwards.
+//
+// The \SCTP implementation was contributed by Michael Tuexen, Irene Ruengeler 
+// and Thomas Dreibholz
+//
+// Support for Sam Jensen's Network Simulation Cradle,
+// which makes real-world \TCP stacks available in simulations was added
+// by Zoltan Bojthe in 2010.
+//
+// \TCP SACK and New Reno implementation was contributed by Thomas Reschka.
 //
 // Several other people have contributed to the INET Framework by providing
 // feedback, reporting bugs, suggesting features and contributing patches;
