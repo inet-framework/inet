@@ -28,6 +28,22 @@ import inet.nodes.inet.StandardHost2;
 import inet.world.ChannelInstaller;
 
 
+//
+// Implementation of equivalent circuit rate (ECR)-based quantitative
+// analysis framework for next-generation optical access architectures.
+//
+// Initial results based on abstract architecture models were reported at
+// <a href="http://www.omnet-workshop.org/2010/">OMNeT++ 2010 workshop</a>
+// in March 2010 [1].
+//
+// References:
+// -# Kyeong Soo (Joseph) Kim, "An equivalent circuit rate-based study
+//  of next-generation optical access architectures," OMNeT++ 2010 workshop,
+//  Malaga, Spain, Mar. 19, 2010.
+//
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2010-03-25
+//
 network ECRTest
 {
     parameters:

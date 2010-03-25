@@ -246,12 +246,13 @@ void EtherMACBase::calculateParameters()
 
     if (txrate != ETHERNET_TXRATE && txrate != FAST_ETHERNET_TXRATE &&
         txrate != GIGABIT_ETHERNET_TXRATE && txrate != FAST_GIGABIT_ETHERNET_TXRATE &&
-        txrate != XL_GIGABIT_ETHERNET_TXRATE && txrate != C_GIGABIT_ETHERNET_TXRATE)
+        txrate != XL_GIGABIT_ETHERNET_TXRATE && txrate != C_GIGABIT_ETHERNET_TXRATE &&
+        txrate != TERABIT_ETHERNET_TXRATE)
     {
         error("nonstandard transmission rate %g, must be %g, %g, %g or %g bit/sec",
             txrate, ETHERNET_TXRATE, FAST_ETHERNET_TXRATE, GIGABIT_ETHERNET_TXRATE,
             FAST_GIGABIT_ETHERNET_TXRATE, XL_GIGABIT_ETHERNET_TXRATE,
-            C_GIGABIT_ETHERNET_TXRATE);
+            C_GIGABIT_ETHERNET_TXRATE, TERABIT_ETHERNET_TXRATE);
     }
 
     bitTime = 1/(double)txrate;
