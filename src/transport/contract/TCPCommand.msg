@@ -182,7 +182,7 @@ class TCPStatusInfo extends TCPCommand
     int localPort;
     int remotePort;
 
-    int snd_mss;
+    unsigned int snd_mss;
 
     unsigned int snd_una;
     unsigned int snd_nxt;

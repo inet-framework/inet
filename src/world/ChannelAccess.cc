@@ -58,40 +58,8 @@ void ChannelAccess::initialize(int stage)
  */
 void ChannelAccess::sendToChannel(AirFrame *msg)
 {
-    const ChannelControl::ModuleList& neighbors = cc->getNeighbors(myHostRef);
     coreEV << "sendToChannel: sending to gates\n";
 
-    // loop through all hosts in range
-    ChannelControl::ModuleList::const_iterator it;
-    for (it = neighbors.begin(); it != neighbors.end(); ++it)
-    {
-        cModule *mod = *it;
-
-        // we need to send to each radioIn[] gate
-        cGate *radioGate = mod->gate("radioIn");
-
-        if (radioGate == NULL)
-            error("module %s must have a gate called radioIn", mod->getFullPath().c_str());
-
-        for (int i = 0; i < radioGate->size(); i++)
-        {
-            ChannelControl::HostRef h = cc->lookupHost(mod);
-
-            if (h == NULL)
-                error("cannot find module in channel control");
-
-            if (h->channel == msg->getChannelNumber())
-            {
-                coreEV << "sending message to host listening on the same channel\n";
-                // account for propagation delay, based on distance in meters
-                // Over 300m, dt=1us=10 bit times @ 10Mbps
-                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, msg->getDuration(), mod, radioGate->getId() + i);
-            }
-            else
-                coreEV << "skipping host listening on a different channel\n";
-        }
-    }
-
-    // register transmission in ChannelControl
-    cc->addOngoingTransmission(myHostRef, msg);
+    // delegate it to ChannelControl
+    cc->sendToChannel(this, myHostRef, msg);
 }

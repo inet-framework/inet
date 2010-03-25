@@ -1,15 +1,26 @@
-# ignore files generated from messages
-
+# ignore generated files
 *_m.h
 *_m.cc
+src/Makefile
 
-# ignore binary result files
+# ignore binary files
+out/
 *.so
+*.dylib
+*.dll
 *.a
+*.lib
 *.exe
 *.o
 *.obj
+*.pdb
+*.idb
+*.manifest
 .tkenvrc
 
-# ignore project specific files
-src/Makefile
+# ignore backup and temp files
+*.bak
+backups
+*~
+xxx
+/3rdparty

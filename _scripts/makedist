@@ -4,30 +4,41 @@ cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; 
 INET_ROOT=`pwd`
 
 if [ "$BUILDID" = "" ]; then
-# generate our own build identifier   
-    export BUILDID=`date +%Y%m%d`
+  # generate our own build identifier
+  export BUILDDATE=`date +%Y%m%d`
+  export BUILDID=$BUILDDATE-`git describe --tags | awk -F '-g' '{print $2;}'`
 fi
 
-FILENAME=$INET_ROOT/INET-$BUILDID-opp4-src.tgz
-DIRNAME=INET-$BUILDID
+FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
+DIRNAME=inet
 
-rm -rf /tmp/$DIRNAME
+rm -rf $INET_ROOT/out/$DIRNAME
+mkdir -p $INET_ROOT/out/$DIRNAME
 
-svn export . /tmp/$DIRNAME || { echo --- error during SVN export ---; exit 1;}
+git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
+
+# copying documentation
+cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+
+# switch to the destination dir
+cd $INET_ROOT/out/$DIRNAME
+# patching files
+perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
+perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup
-cd /tmp
-todofiles=`find $DIRNAME -name '__*'`
+rm -rf _scripts obsolete doc/src
+
+todofiles=`find . -name '__*'`
 if [ "$todofiles" != "" ]; then
     echo "Removing underscore files: $todofiles"
     rm -rf $todofiles
 fi
-rm -rf $DIRNAME/_scripts
-rm -rf $DIRNAME/obsolete
 
-# pack and create tar.gz archives 
+# pack and create tar.gz archives
 echo Creating $FILENAME.
+cd $INET_ROOT/out
 rm -f $FILENAME
-tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;} 
-rm -rf /tmp/$DIRNAME
-
+tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;}
+rm -rf $INET_ROOT/out/$DIRNAME

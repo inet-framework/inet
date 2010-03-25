@@ -35,7 +35,7 @@ module Ieee80211NicSTASimplified
     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers
-        input radioIn; // to receive AirFrames
+        input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mgmt: Ieee80211MgmtSTASimplified {
             parameters:

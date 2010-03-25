@@ -63,5 +63,6 @@ simple FlatNetworkConfigurator
         string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)
         string netmask = default("255.255.0.0"); // host part of addresses are autoconfigured
         @display("i=block/cogwheel_s");
+        @labels(node);
 }
 

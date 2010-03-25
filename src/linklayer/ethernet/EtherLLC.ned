@@ -57,7 +57,7 @@ simple EtherLLC
     gates:
         input upperLayerIn[];   // higher layer protocols or applications
         output upperLayerOut[]; // higher layer protocols or applications
-        input lowerLayerIn;     // to Ethernet MAC
-        output lowerLayerOut;   // to Ethernet MAC
+        input lowerLayerIn @labels(EtherFrame);     // to Ethernet MAC
+        output lowerLayerOut @labels(EtherFrame);   // to Ethernet MAC
 }
 

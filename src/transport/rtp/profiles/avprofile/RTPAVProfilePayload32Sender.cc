@@ -31,17 +31,19 @@
 
 Define_Module(RTPAVProfilePayload32Sender);
 
-void RTPAVProfilePayload32Sender::initialize() {
+void RTPAVProfilePayload32Sender::initialize()
+{
 
     RTPPayloadSender::initialize();
 
     _clockRate = 90000;
     _payloadType = 32;
-};
+}
 
 
 /*
-void RTPAVProfilePayload32Sender::activity() {
+void RTPAVProfilePayload32Sender::activity()
+{
 
     cMessage *msg = receive();
     RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
@@ -61,7 +63,7 @@ void RTPAVProfilePayload32Sender::activity() {
         cMessage *msgIn;
 
         if (_status == STOPPED) {
-            msgIn = receiveOn(findGate("fromProfile"));
+            msgIn = receiveOn(findGate("profileIn"));
 
         }
         else {
@@ -70,8 +72,8 @@ void RTPAVProfilePayload32Sender::activity() {
 
         }
 
-        if (msgIn->getArrivalGateId() == findGate("fromProfile")) {
-            RTPInnerPacket *rinp = (RTPInnerPacket *)msgIn;
+        if (msgIn->getArrivalGateId() == findGate("profileIn")) {
+            RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msgIn);
             if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
 
 
@@ -102,13 +104,13 @@ void RTPAVProfilePayload32Sender::activity() {
 
 
             moreFrames = sendPacket();
-        };
+        }
         delete msgIn;
 
         if (!moreFrames)
             finish();
     } while (true);
-};
+}
 */
 
 void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
@@ -145,7 +147,7 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     // cPacket *reminderMessage = new cMessage("next frame");
     // scheduleAt(simTime() + _initialDelay, reminderMessage);
     ev << "initializeSenderModule Exit"<<endl;
-};
+}
 
 
 bool RTPAVProfilePayload32Sender::sendPacket()
@@ -173,7 +175,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     }
     else if (strchr(description, 'D')) {
         pictureType = 4;
-    };
+    }
 
     int bytesRemaining = bits / 8;
 
@@ -226,9 +228,9 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
             rinpOut->dataOut(rtpPacket);
 
-            send(rinpOut, "toProfile");
+            send(rinpOut, "profileOut");
 
-        };
+        }
         _frameNumber++;
 
         _reminderMessage = new cMessage("nextFrame");
@@ -240,4 +242,5 @@ bool RTPAVProfilePayload32Sender::sendPacket()
         return false;
     }
     ev << "sendPacket() Exit"<< endl;
-};
+}
+

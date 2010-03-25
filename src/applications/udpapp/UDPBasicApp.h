@@ -33,7 +33,6 @@ class INET_API UDPBasicApp : public UDPAppBase
   protected:
     std::string nodeName;
     int localPort, destPort;
-    int msgByteLength;
     std::vector<IPvXAddress> destAddresses;
 
     static int counter; // counter for generating a global number for each packet

@@ -35,11 +35,12 @@ module EtherSwitch2
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
         @display("i=device/switch");
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
-        inout ethg[];
+        inout ethg[] @labels(EtherFrame-conn);
 
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {

@@ -5,18 +5,18 @@
 
 2008-07-08  Andras Varga
 
-	* RoutingTable: implemented routing cache [code based on OverSim 
+	* RoutingTable: implemented routing cache [code based on OverSim
 	patch]; similar performance optimization for isLocalAddress()
 
-	* IP: performance: remember outputQueue gate pointer instead of 
+	* IP: performance: remember outputQueue gate pointer instead of
 	looking up the gate by name for each send(). Note: could do the
-	same optmization for other gates as well, but this gate is much 
+	same optmization for other gates as well, but this gate is much
 	more often used than the others
 
 2008-07-07  Andras Varga
 
-	* introduced IRoutingTable, to allow users implement their own 
-	RoutingTables and plug them into INET simulations, without any 
+	* introduced IRoutingTable, to allow users implement their own
+	RoutingTables and plug them into INET simulations, without any
 	change to the base INET.
 
 2008-07-02  Andras Varga
@@ -27,8 +27,8 @@
 
 	* wrapped naked data members of IPv4Route into getters/setters
 
-	* RoutingTable: enforce by returning "const" pointers that routes 
-	already added cannot be changed any more (one must delete and 
+	* RoutingTable: enforce by returning "const" pointers that routes
+	already added cannot be changed any more (one must delete and
 	re-add it)
 
 2008-06-29  Andras Varga
@@ -51,8 +51,8 @@
 
 	* RoutingTable: localDeliver() ignores interface netmask [reported by
 	Michael Tuexen]
-	
-	* RoutingTable: interface netmask functionality is now achieved by 
+
+	* RoutingTable: interface netmask functionality is now achieved by
 	routes of type IFACENETMASK added to the routing table. These routes
 	are re-build whenever notification is received that there was a change
 	in the interface IPv4 configurations.

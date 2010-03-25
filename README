@@ -20,7 +20,8 @@ See the WHATSNEW file for recent changes.
 
 GETTING STARTED
 ---------------
-You may start by downloading and installing the INET demo on Windows.
+You may start by downloading and installing the INET framework. Read the INSTALL
+file for further information.
 
 Then you can gather initial experience by following the INET tutorial. After
 that, you can learn the NED language from the OMNeT++ manual & sample
@@ -38,13 +39,16 @@ Finally, you will be ready to run your simulation. As you see, you may use
 the INET framework without writing any C++ code, as long as you use the
 available modules.
 
-Finally, to implement new protocols or modify existing ones, you'll need to
-download the INET source, compile it yourself, then start adding/modifying
-source files yourself.
+To implement new protocols or modify existing ones, you'll need to add your 
+code somewhere under the src directory. If you add new files under the 'src' 
+directory you will need to regenerate the makefiles (using the 'make makefiles' 
+command).
 
-It is a workable approach to compile your C++ code as shared library (.so on
-Linux/Unix), and get the INET executable load it dynamically.
-
+If you want to use external interfaces in INET, please install libpcap-dev (on linux)
+or winpcap (on windows from www.winpcap.org), then re-run the omnetpp configuration
+script (./configure). You should also enable the pcap support by editing the
+src/makefrag and then regenerating the INET makefiles (using the "make makefiles" 
+command).
 
 Directory structure
 -------------------
@@ -60,6 +64,7 @@ Bottom-up:
      ppp/                basic PPP model (framing only)
      mfcore/             Core modules from the Mobility Framework (modified)
      mf80211/            MF's 802.11b ad-hoc mode model (modified)
+     ext/                External interface
 
    network/              L3 (network layer) protocols
      contract/           API to common L3 functionality
@@ -76,9 +81,12 @@ Bottom-up:
 
    transport/            transport layer protocols
      contract/           API to transport layer functionality
-     tcp/                TCP protocol
+     tcp/                TCP protocol (supporting SACK) (default TCP implementation)
+     tcp_nsc/            TCP protocol using Network Simulation Cradle
+     tcp_old/            TCP old (obsolete) TCP implementation (without SACK) for refeence only
      udp/                UDP protocol
      rtp/                Realtime Transport Protocol (not yet integrated)
+     sctp/               Stream Control Transmission Protocol
 
    applications/         application layer
      tcpapp/             TCP application models
@@ -113,4 +121,5 @@ Bottom-up:
    mpls/                 for the MPLS models
    newtcp/               for the TCP model
 
+ 3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
 

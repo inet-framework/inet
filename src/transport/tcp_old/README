@@ -1,0 +1,18 @@
+TCP_old
+=======
+(deprecated)
+
+This directory contains an older, deprecated version of TCP called TCP_old
+(implementing RFC793), which does not support SACK and other features.
+This base algorithm can be extended and customized via "flavour" and "queue"
+classes that implement the TCPAlgorith, TCPSendQueue and TCPReceiveQueue
+classes, and are selected via TCP's NED parameters.
+
+The main class is tcp_old::TCP. To avoid name collisions the old version has
+been placed into the tcp_old namespace. You should specify the namespace prefix
+also if you are configuring the queue and flavour parameters.
+
+Note that it is possible to use different TCP implementations at the same time
+in a simulation, for example you can have some hosts in your simulation
+with TCP_old and others witch with TCP modules. Use the tcpType parameter
+in StandardHost to change the TCP implementation.

@@ -27,10 +27,10 @@
 class TCPConnection;
 class TCPSegment;
 
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
+// macro for normal ev<< logging (Note: deliberately no parens in macro def)
 #define tcpEV (ev.disable_tracing||TCP::testing)?ev:ev
 
-// macro for more verbose ev<< logging (note: deliberately no parens in macro def)
+// macro for more verbose ev<< logging (Note: deliberately no parens in macro def)
 #define tcpEV2 (ev.disable_tracing||TCP::testing||!TCP::logverbose)?ev:ev
 
 // testingEV writes log that automated test cases can check (*.test files)
@@ -57,7 +57,7 @@ class TCPSegment;
  *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
  *    queues with "virtual" bytes (byte counts only)
  *  - TCPAlgorithm: abstract base class for TCP algorithms, and subclasses:
- *    DumbTCP, TCPBaseAlg, TCPTahoeRenoFamily, TCPTahoe, TCPReno.
+ *    DumbTCP, TCPBaseAlg, TCPTahoeRenoFamily, TCPTahoe, TCPReno, TCPNewReno.
  *
  * TCP subclassed from cSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
@@ -87,7 +87,8 @@ class TCPSegment;
  * design of TCPConnection and makes it a lot easier to implement new TCP
  * variations such as NewReno, Vegas or LinuxTCP as TCPAlgorithm subclasses.
  *
- * Currently implemented TCPAlgorithm classes are DumbTCP, TCPTahoe, TCPReno, etc.
+ * Currently implemented TCPAlgorithm classes are TCPReno, TCPTahoe, TCPNewReno,
+ * TCPNoCongestionControl and DumbTCP.
  *
  * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.

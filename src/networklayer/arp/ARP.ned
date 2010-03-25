@@ -43,6 +43,6 @@ simple ARP
         bool proxyARP = default(true);        // sets proxy \ARP mode (replying to \ARP requests for the addresses for which a routing table entry exists)
         @display("i=block/layer");
     gates:
-        input ipIn;
-        output nicOut[];
+        input ipIn @labels(ARPPacket,IPDatagram);
+        output nicOut[] @labels(ARPPacket);
 }

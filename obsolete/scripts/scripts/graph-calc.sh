@@ -23,7 +23,7 @@
 SIM=`basename $PWD`
 DIRS=`find .  -type d -a ! \( -name  'bad*' \)`
 
-#Names of output files 
+#Names of output files
 HVEC=handover
 DVEC=dropcount
 
@@ -45,9 +45,9 @@ defects=0
 local FAIL
 FAIL=f
 
-rm $HVEC.vec $DVEC.vec 
+rm $HVEC.vec $DVEC.vec
 
-for d in $DIRS; 
+for d in $DIRS;
 do
   if [ "$d" = "." ]; then
       continue
@@ -63,14 +63,14 @@ do
   for time in $HTIME; do
       timeInt=`echo $time|cut -d '.' -f 1`
       if [ $timeInt -gt $HLTH ]; then
-	  echo "Run $d is stuffed it has handover of $time" 
+	  echo "Run $d is stuffed it has handover of $time"
 	  #echo "Will remove suspicious values at end of run or just continue here and ignore that run"
 	  FAIL=t
 	  ((defects++))
       fi
   done
 
-  local DCOUNT  
+  local DCOUNT
   DCOUNT=`grep "^1\>" $d/$SIM-$d.vec | cut -f 3`
   for dropc in $DCOUNT; do
       if [ $dropc -gt $DCTH ]; then
@@ -84,13 +84,13 @@ do
       :
   fi
 
-  grep "^2\>" $d/$SIM-$d.vec >> $HVEC.vec 
-  grep "^1\>" $d/$SIM-$d.vec >> $DVEC.vec 
+  grep "^2\>" $d/$SIM-$d.vec >> $HVEC.vec
+  grep "^1\>" $d/$SIM-$d.vec >> $DVEC.vec
 #/tmp/pipe1103-2 2>> /tmp/log1103-1.log
 done
 }
 
-#Removes values that are past the threshold values from the 
+#Removes values that are past the threshold values from the
 function fixStats
 {
 local i
@@ -129,12 +129,12 @@ function graphStats()
     #grace only accepts commands from stdin not data
     #awk '{print $2, $3}' < handover.dat |xmgrace -dpipe 0
     #page size is A5
-    
+
     for v in "${VECS[@]}"; do
 	#Max never worked
 	#xmgrace -block $v.dat -settype xy -bxy 2:3 -hdevice EPS  -pexec "page size 792, 612;histogram(s0,mesh(0,MAX(s0.y),MAX(s0.y)/0.05),off,off)" -hardcopy -printfile $v.eps
 	#gracebat -block $v.dat -settype xy -bxy 2:3 -hdevice EPS  -pexec "page size 792, 612;histogram(s0,mesh(0,$max,$max/$bin),off,off);kill s0;autoscale onread xyaxes" -hardcopy -printfile $v.eps
-	if echo $v|grep hand; then	    
+	if echo $v|grep hand; then
 	    gracebat -hdevice EPS -hardcopy -printfile $v.eps -block $v.dat -settype xy -bxy 2:3 -batch ~/scripts/grace-hist.bat -pexec 'xaxis  ticklabel append "s";legend off;s1 legend "Latency"; subtitle "Mobile IPv6"; title "Handover Latency"; xaxis label "Handover Latency"' -pexec 'histogram(s0,mesh(0,4,20),off,off); kill s0;autoscale'
 	else
 	    gracebat -hdevice EPS -hardcopy -printfile $v.eps -block $v.dat -settype xy -bxy 2:3 -batch ~/scripts/grace-hist.bat -pexec 'legend off; s1 legend "Drop Count"; subtitle "Mobile IPv6"; title "Handover Packet Loss"; xaxis label "Packet Drop Count"; histogram(s0,mesh(0,70,20),off,off); kill s0;autoscale'

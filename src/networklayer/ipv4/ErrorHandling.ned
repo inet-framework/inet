@@ -27,7 +27,7 @@ package inet.networklayer.ipv4;
 simple ErrorHandling
 {
     parameters:
-        @display("i=block/process_s");
+        @display("i=block/sink_s");
     gates:
         input in;
 }

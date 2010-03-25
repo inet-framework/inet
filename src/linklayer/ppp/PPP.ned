@@ -53,7 +53,7 @@ simple PPP
     gates:
         input netwIn;
         output netwOut;
-        inout phys @labels(ppp);
+        inout phys @labels(PPPFrame);
 }
 
 

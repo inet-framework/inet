@@ -1,0 +1,8 @@
+2010-02-10 Andras Varga, Zoltan Bojthe, Rudolf Hornig
+
+    * Added parameters for configuring the NSC TCP stack (stack type, buffer size)
+
+2010-01-29 Andras Varga, Zoltan Bojthe, Rudolf Hornig
+
+    * Added support for NSC TCP modules. This is a new TCP implementation based
+      on Linux/FreeBSD/OpenBSD/lwIP stacks.

@@ -44,8 +44,9 @@ simple TelnetApp like TCPApp
         volatile double thinkTime @unit("s") = default(exponential(10s)); // user waits this much before starting to type new command
         volatile double idleInterval @unit("s") = default(exponential(300s)); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, user waits this much before trying to reconnect
+        @display("i=block/telnet");
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

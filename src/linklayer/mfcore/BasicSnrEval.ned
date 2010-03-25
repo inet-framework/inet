@@ -53,6 +53,6 @@ simple BasicSnrEval
     gates:
         input uppergateIn; // from the MAC layer
         output uppergateOut; // to the decider sub-module
-        input radioIn; // to receive AirFrames
+        input radioIn @labels(AirFrame); // to receive AirFrames
 }
 

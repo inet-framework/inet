@@ -33,34 +33,7 @@ IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
     IPv6Datagram_Base::operator=(other);
 
     for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); ++i)
-    {
-        // addExtensionHeader((*i)->dup()); FIXME unfortunately ExtensionHeader doesn't have dup(),
-        // so for now we have to resort to the following unsafe and unextensible nasty solution
-        IPv6ExtensionHeader *eh = (*i);
-        IPv6ExtensionHeader *dupEh = NULL;
-        if (dynamic_cast<IPv6HopByHopOptionsHeader*>(eh)) {
-            dupEh = new IPv6HopByHopOptionsHeader();
-            *dupEh = *(IPv6HopByHopOptionsHeader *)eh;
-        } else if (dynamic_cast<IPv6RoutingHeader*>(eh)) {
-            dupEh = new IPv6RoutingHeader();
-            *dupEh = *(IPv6RoutingHeader *)eh;
-        } else if (dynamic_cast<IPv6FragmentHeader*>(eh)) {
-            dupEh = new IPv6FragmentHeader();
-            *dupEh = *(IPv6FragmentHeader *)eh;
-        } else if (dynamic_cast<IPv6DestinationOptionsHeader*>(eh)) {
-            dupEh = new IPv6DestinationOptionsHeader();
-            *dupEh = *(IPv6DestinationOptionsHeader *)eh;
-        } else if (dynamic_cast<IPv6AuthenticationHeader*>(eh)) {
-            dupEh = new IPv6AuthenticationHeader();
-            *dupEh = *(IPv6AuthenticationHeader *)eh;
-        } else if (dynamic_cast<IPv6EncapsulatingSecurityPayloadHeader*>(eh)) {
-            dupEh = new IPv6EncapsulatingSecurityPayloadHeader();
-            *dupEh = *(IPv6EncapsulatingSecurityPayloadHeader *)eh;
-        } else {
-            throw cRuntimeError(this, "unrecognised HeaderExtension subclass %s in IPv6Datagram::operator=()", eh->getClassName());
-        }
-        addExtensionHeader(dupEh);
-    }
+        addExtensionHeader((*i)->dup());
 
     return *this;
 }

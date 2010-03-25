@@ -1,6 +1,6 @@
 #
 # Initial MAC address table for MACRelayUnit.
-# 
+#
 # Format:
 #   <hex-address>  <portnumber>
 #
@@ -13,6 +13,6 @@
 #  34bcdeff77a0    3
 #
 
-ab123486cd20	0 
-ab1234efcd20	7 
+ab123486cd20	0
+ab1234efcd20	7
 

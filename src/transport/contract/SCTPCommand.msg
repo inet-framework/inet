@@ -106,9 +106,10 @@ class SCTPOpenCommand extends SCTPCommand
     int localPort = -1;              // required for passive open
     int remotePort = -1;             // required for active open
     bool fork = false;               // used only for passive open
-    string queueClass = "SCTPQueue"; // may be left empty       
+    string queueClass = "SCTPQueue"; // may be left empty
     string sctpAlgorithmClass;       // may be left empty
-    uint32 outboundStreams;	
+    uint32 inboundStreams;
+    uint32 outboundStreams;
     uint32 numRequests;
     uint32 messagesToPush;
 }
@@ -178,4 +179,9 @@ class SCTPInfo extends SCTPCommand
     int text = 0;
 }
 
-
+class SCTPRcvCommand extends SCTPCommand
+{
+    uint32 ppid;
+    uint32 tsn;
+    uint32 cumTsn;
+}

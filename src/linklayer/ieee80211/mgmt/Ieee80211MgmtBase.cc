@@ -92,7 +92,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         EV << "Packet arrived from upper layers: " << pk << "\n";
         if (pk->getByteLength() > 2312)
             error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                  pk->getClassName(), pk->getName(), pk->getByteLength());
+                  pk->getClassName(), pk->getName(), (int)(pk->getByteLength()));
 
         handleUpperMessage(pk);
     }

@@ -294,7 +294,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->getByteLength(), MAX_ETHERNET_FRAME);
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
 
     // must be EtherFrame (or EtherPauseFrame) from upper layer
     bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame)!=NULL);

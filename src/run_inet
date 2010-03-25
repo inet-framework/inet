@@ -1,4 +1,4 @@
-#! /bin/sh 
+#! /bin/sh
 DIR=`dirname $0`
 
 if [ -x $DIR/inet -o -x $DIR/inet.exe ]; then

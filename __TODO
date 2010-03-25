@@ -1,4 +1,59 @@
+TODO: set up nightly builds: 
+   - should report build errors/warnings;
+   - should run etc/runallexamples and report the results (runtime errors, fingerprint mismatches, etc)
+
+TODO: execute etc/runallexamples, and fix errors (last run: May 2008)
+
+TODO: implement missing models:
+   Qeueing (we have: FIFO, RED): CBQ, WFQ, RIO, Round Robin, Fair queueing Round Robin
+   Suggested by VR:
+     Wired: Circuit Switch, ATM(AAL2/AAL5,CBR/VBR/ABR), IP over ATM, PNNI, MPLS, DiffServ
+     Wireless:  Adhoc routing:FSR/DSDV/ZRP/TORA/LENMMAR;Adhoc MAC:802.11, WTRP,
+     TDMA; QoS supports for cross-layer design
+     and also, Group Mobility,  etc.
+
+TODO: integrate models:
+   HTTPTools, VoIPTools, HIPSim++, MobileWiMAX, ...
+
+TODO: for omnetpp-4.1: eliminate NotificationBoard, use signals instead
+
+TODO: PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
+
+TODO: IPv6 works only eth, not work on ppp. See examples/ipv6/nclients.
+
+TODO: implement node failure/recovery by using signals mechanism
+
+TODO: port NAM trace writer to use signals mechanism
+
+TODO: pcacp file recording using signals mechanism
+
+TODO: VideoStrmReq problem on IPv6: 
+      "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
+
+TODO: add SCTP for StandardHost6 (IPv6)
+
+BUG:  if SCTPServer.echoFactor not 0, then will a runtime error:
+      "Error in module (SCTP) P5.server.sctp (id=22): User error: stream with id 2 not found."
+      Network: IPv4; 1 server, 1 router, 10 client
+
+TODO: labelling:
+  - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
+    i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
+  - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
+    to make them unique?
+  - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
+    (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
+
+
+TODO:  finish making gate names consistent! around the SCTP and RTP modules
+TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet
+
 TODO: eliminate ARP overhead for PPP interfaces; 
+
+TODO: UDPSocket::Callback::socketDatagramArrived() - change arg cMessage* to cPacket*
+
+TODO: eliminate ARP overhead for PPP interfaces;
+
   [Ingmar Baumgart email, 2008 dec 10, "INET Framework: ARP performance issue"]
     The only issue which results in about 10% slowdown in our simulations is
     the unnecessary use of the ARP module for PPP interfaces. A quick fix
@@ -18,10 +73,10 @@ TODO:  MTU patch from Irene Rungeler
 TODO: add SCTP to the whatsnew file
 
 - MAKE IT POSSIBLE TO USE DIFFERENT TYPES FOR EACH ELEMENT OF "LIKE" SUBMODULE VECTORS!
-  In StandardHost etc, change 
-      udpApp[numUdpApps]: <udpAppType> like IUDPApp; 
+  In StandardHost etc, change
+      udpApp[numUdpApps]: <udpAppType> like IUDPApp;
   to
-     udpApp[numUdpApps]: <> like IUDPApp; 
+     udpApp[numUdpApps]: <> like IUDPApp;
 
 
 TODO:
@@ -45,7 +100,7 @@ OMNeT++ INET Fw, and come to the conclusion that they are hard to compare,
 due to differences in the radio model and MAC parameterization. Then they go
 on to wrap ns2's 802.11 model into an OMNeT++ simple module, and with that,
 the OMNeT++ simulation (not too surprisingly) shows excellent correspondence
-with the ns2 simulation :) 
+with the ns2 simulation :)
 
 http://i30www.ira.uka.de/research/documents/p2p/2008/towards_comparable_netw
 ork_simulations.pdf
@@ -80,7 +135,7 @@ TODO: IRoutingTable6, ITED, etc!
 
 TODO routingTable optimizations from Gamer!
 
-TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
+TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID.
       if we change it to pointer, messages that are underway in the host during a deleteInterface()
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
       leave a hole in it?
@@ -110,36 +165,36 @@ put all c++ code into "inet" namespace
 - get quagga to work
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
-   in DistanceBasedRadio: decouple transmission range from interference range 
+   in DistanceBasedRadio: decouple transmission range from interference range
    (ie use 2 different module parameters)
 --------
-- model link failures, via isDown() method of InterfaceEntry. L2 modules 
+- model link failures, via isDown() method of InterfaceEntry. L2 modules
   should understand isDown(), and FailureManager should be enhanced with
   linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
 --------
 - create NetworkInterfaces/Base subdirectory: AirFrame, WirelessMacBase,
   ChannelAccess, etc.
 --------
-- Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer 
+- Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
   to use this notification to learn when ProbeRequest or AssociationResponse
   has been transmitted.
 --------
 - ChannelControl: grid; instead of having pMax parameter, it should ask all
   radios and collect pMax from them! (or, directly the range!)
 --------
-- radio models: when calculating the probability of bit errors, snirMIN is 
-  assumed for the whole duration of the frame! This means that if snir 
-  changes along the packet duration, we overestimate the probability of 
+- radio models: when calculating the probability of bit errors, snirMIN is
+  assumed for the whole duration of the frame! This means that if snir
+  changes along the packet duration, we overestimate the probability of
   bit error. (there should be proper integration there)
 --------
-- IReceptionModel: 
+- IReceptionModel:
   - improve it to be able to accomodate antenna gain: calculation function
     should take node positions, antenna directions (maybe this should be in
     some IDirectionalReceptionmodel, plugging into some AbstractDirectionalRadio?)
   - allow for implementing "good/bad channel"-type radio models (Gilbert-Elliot)
     e.g. containsBadChannelState(starttime, endtime)
   - allow the radio model to add extra noise over time, or modify received power
-    over time, e.g. using functions like 
+    over time, e.g. using functions like
       PowerList calculateReceivedPower(...)
       PowerList ambientNoise(...)
     (maybe this should be some IDetailedReceptionModel, plugging into
@@ -147,7 +202,7 @@ put all c++ code into "inet" namespace
 --------
 - AbstractRadio: consider: don't sent up the packet if there're bit errors,
   just fire some specific radio state change notification! would simplify the
-  Ieee80211Mac state machine a lot! 
+  Ieee80211Mac state machine a lot!
 --------
 - tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
 --------

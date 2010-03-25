@@ -179,7 +179,7 @@ class INET_API RTPProfile : public cSimpleModule
         /**
          * The maximum number of incoming data streams this profile
          * module can handle. It is set to the gate size of
-         * "toPayloadReceiver", "fromPayloadReceiver".
+         * "payloadReceiverOut", "payloadReceiverIn".
          */
         int _maxReceivers;
 

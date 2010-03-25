@@ -182,6 +182,18 @@ class INET_API IPvXAddress
     }
 
     /**
+     * Returns length of internal binary representation of address,
+     * (count of 32-bit unsigned integers.)
+     */
+    int wordCount() const {return isv6 ? 4 : 1;}
+
+    /**
+     * Returns pointer to internal binary representation of address,
+     * four 32-bit unsigned integers.
+     */
+    const uint32 *words() const {return d;}
+
+    /**
      * Returns true if the two addresses are equal
      */
     bool equals(const IPAddress& addr) const {
@@ -200,7 +212,7 @@ class INET_API IPvXAddress
      * Returns true if the two addresses are equal
      */
     bool equals(const IPvXAddress& addr) const {
-        return d[0]==addr.d[0] && (!isv6 || (d[1]==addr.d[1] && d[2]==addr.d[2] && d[3]==addr.d[3]));
+        return (isv6 == addr.isv6) && (d[0]==addr.d[0]) && (!isv6 || (d[1]==addr.d[1] && d[2]==addr.d[2] && d[3]==addr.d[3]));
     }
 
     /**

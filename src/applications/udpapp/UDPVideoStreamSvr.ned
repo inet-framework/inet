@@ -41,8 +41,9 @@ simple UDPVideoStreamSvr like UDPApp
         volatile double waitInterval @unit("s"); // interval between sending video stream packets
         volatile int packetLen @unit("B");
         volatile int videoSize @unit("B");
+        @display("i=block/app");
     gates:
-        input udpIn;
-        output udpOut;
+        input udpIn @labels(UDPControlInfo/up);
+        output udpOut @labels(UDPControlInfo/down);
 }
 

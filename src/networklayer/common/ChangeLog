@@ -1,7 +1,7 @@
 2008-07-07  Andras Varga
 
-	* introduced IInterfaceTable, to allow users implement their own 
-	InterfaceTables and plug them into INET simulations, without any 
+	* introduced IInterfaceTable, to allow users implement their own
+	InterfaceTables and plug them into INET simulations, without any
 	change to the base INET.
 
 2008-07-01  Andras Varga
@@ -13,12 +13,12 @@
 	has a vptr due to cObject). Also added backpointer to containing
 	InterfaceTable.
 
-	* InterfaceTable: implemented NotificationBoard-based notifications 
-	about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, 
-	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED. 
+	* InterfaceTable: implemented NotificationBoard-based notifications
+	about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED,
+	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
 	The detail object for all four are the InterfaceEntry.
 
-	* InterfaceTable: created a getInterfaceById() method, NOT to be 
+	* InterfaceTable: created a getInterfaceById() method, NOT to be
 	confused with getInterface(pos)! Ids are stable after deletions,
 	unlike 0..getNumInterfaces()-1 indices
 

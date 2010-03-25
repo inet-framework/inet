@@ -27,7 +27,8 @@ simple EtherAppSrv
 {
     parameters:
         bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        @display("i=block/app");
     gates:
-        input in;
-        output out;
+        input in @labels(Ieee802Ctrl/up);
+        output out @labels(Ieee802Ctrl/down);
 }

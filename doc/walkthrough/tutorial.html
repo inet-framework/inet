@@ -977,9 +977,9 @@ or borrow a decent C++ book. (Or borrow a friend who explains it in a few words 
 <p>
 In the above code, after we successfully extracted the MAC address out of the cache,
 sending of the IP datagram was done via the <tt>sendPacketToMAC()</tt> function.
-This function has been copied below -- it just creates a control info object, 
-puts the MAC address into it, attaches the object to the packet and sends it 
-on gate <tt>"hwOut"</tt> which is connected to Ethernet's <tt>encap</tt> and 
+This function has been copied below -- it just creates a control info object,
+puts the MAC address into it, attaches the object to the packet and sends it
+on gate <tt>"hwOut"</tt> which is connected to Ethernet's <tt>encap</tt> and
 <tt>mac</tt> modules.
 </p>
 
@@ -1001,7 +1001,7 @@ an ARP packet, fill its fields and send it. (Sending actually uses the
 While ARP might not be the most important protocol on earth, it was chosen as the
 topic of this tutorial because it is simple enough to be presented in such
 a short space, and yet it does something interesting -- with the results
-immediately visible. And not least, it is well known and on everybody's desk 
+immediately visible. And not least, it is well known and on everybody's desk
 (who doesn't have Ethernet LAN?).
 </p>
 

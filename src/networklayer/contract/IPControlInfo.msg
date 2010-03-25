@@ -35,9 +35,6 @@ cplusplus {{
 // attach it to the packet with the C++ method setControlInfo(),
 // the send it to the IP module.
 //
-// When IP delivers packets to higher layers, it also attaches
-// similar IPControlInfo objects to them.
-//
 // When sending, the following fields are required:
 // - protocol: a value from IPProtocolId
 // - destAddr
@@ -52,13 +49,22 @@ cplusplus {{
 // - options: \IP Options currently not used
 // - Identifier is currently always chosen by the \IP layer
 //
+// When IP delivers a packet to higher layers, it also attaches an IPControlInfo 
+// to it. It fills in the following fields: 
+//  - srcAddr, destAddr, protocol, diffServCodePoint: values from the original datagram
+//  - interfaceId: the interface on which the datagram arrived, or -1 if it was
+//    created locally
+//
+// IP also puts the original datagram object into the control info, because
+// it may be needed by higher layers (for example, by ICMP for error reporting).
+//
 class IPControlInfo
 {
     @customize(true);
     IPAddress destAddr;   // destination IP address
     IPAddress srcAddr;    // source IP address
-    int interfaceId = -1; // interface on which dgram was received/should
-                              // be sent (see InterfaceTable)
+    int interfaceId = -1; // interface on which the datagram was received, or
+                          // should be sent (see InterfaceTable)
     short protocol enum(IPProtocolId);  // encapsulated protocol
     unsigned char diffServCodePoint;  // for QoS
     short timeToLive;     // maximum hop count

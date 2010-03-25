@@ -35,13 +35,13 @@ class IPSerializer
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
          */
-        int serialize(IPDatagram *dgram, unsigned char *buf, unsigned int bufsize);
+        int serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize);
 
         /**
          * Puts a packet sniffed from the wire into an IPDatagram. Does NOT
          * verify the checksum.
          */
-        void parse(unsigned char *buf, unsigned int bufsize, IPDatagram *dest);
+        void parse(const unsigned char *buf, unsigned int bufsize, IPDatagram *dest);
 };
 
 #endif

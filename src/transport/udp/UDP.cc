@@ -335,31 +335,28 @@ void UDP::processICMPError(cPacket *msg)
         ICMPMessage *icmpMsg = (ICMPMessage *)msg;
         type = icmpMsg->getType();
         code = icmpMsg->getCode();
-        icmpMsg->setBitLength(icmpMsg->getEncapsulatedMsg()->getBitLength()); // trick because payload in ICMP is conceptually truncated
-        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->decapsulate());
+        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
+        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedMsg());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedMsg());
         localAddr = datagram->getSrcAddress();
         remoteAddr = datagram->getDestAddress();
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
         localPort = packet->getSourcePort();
         remotePort = packet->getDestinationPort();
         delete icmpMsg;
-        delete datagram;
-        delete packet;
     }
     else if (dynamic_cast<ICMPv6Message *>(msg))
     {
         ICMPv6Message *icmpMsg = (ICMPv6Message *)msg;
         type = icmpMsg->getType();
         code = -1; // FIXME this is dependent on getType()...
-        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->decapsulate());
+        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
+        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedMsg());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedMsg());
         localAddr = datagram->getSrcAddress();
         remoteAddr = datagram->getDestAddress();
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
         localPort = packet->getSourcePort();
         remotePort = packet->getDestinationPort();
         delete icmpMsg;
-        delete datagram;
-        delete packet;
     }
     EV << "ICMP error received: type=" << type << " code=" << code
        << " about packet " << localAddr << ":" << localPort << " > "

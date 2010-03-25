@@ -37,7 +37,7 @@ simple TCPSpoof
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");
     gates:
-        output ipv4Out;
-        output ipv6Out;
+        output ipv4Out @labels(TCPSegment,IPControlInfo/down);
+        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }
 

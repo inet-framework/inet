@@ -61,6 +61,7 @@ simple ScenarioManager
     parameters:
         xml script;
         @display("i=block/control_s");
+        @labels(node,mpls-node);
 }
 
 

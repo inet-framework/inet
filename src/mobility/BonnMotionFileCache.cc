@@ -39,7 +39,7 @@ BonnMotionFileCache *BonnMotionFileCache::getInstance()
 
 void BonnMotionFileCache::deleteInstance()
 {
-    if (inst) 
+    if (inst)
     {
         delete inst;
         inst = NULL;

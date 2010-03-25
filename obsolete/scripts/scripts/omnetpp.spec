@@ -41,7 +41,7 @@ URL: www.omnetpp.org
 Source0: http://whale.hit.bme.hu/omnetpp/download/release/%{name}-%{version}%{cvsdate}.tar.bz2
 #Source: %{name}-%{version}-src.tgz
 Source1: Doxyfile
-#Workaround module vector of size 0 
+#Workaround module vector of size 0
 Patch0: omnetpp-2.3-IPv6Suite-patch
 #Integrated as of opp3prerelease4
 #Fix bugs identified by valgrind/libcwd
@@ -54,7 +54,7 @@ Group: Applications/Engineering
 BuildRoot: %{_tmppath}/%{name}-root
 Requires: tk >= %{expand: %%(rpm -q --qf %%{VERSION} tk)} perl libxml2
 %if "%{fedora_dist}" == "1"
-BuildRequires: tcl-devel >= 8.3 tk-devel >= 8.3 
+BuildRequires: tcl-devel >= 8.3 tk-devel >= 8.3
 %endif
 %if "%{yoper_dist}" == "0"
 BuildRequires: libxml2-devel
@@ -71,7 +71,7 @@ Requires: intel-icc8  = %{expand: %%(rpm -q --qf %%{VERSION} intel-icc8)}
 %endif
 %if "%{libcwd}" == "1"
 %if "%{use_icc}" == "1"
-Error: Cannot use libcwd when compiling for intel 
+Error: Cannot use libcwd when compiling for intel
 %endif
 BuildRequires: libcwd = %{expand: %%(rpm -q --qf %%{VERSION} libcwd)}
 Requires:  libcwd = %{expand: %%(rpm -q --qf %%{VERSION} libcwd)}
@@ -121,7 +121,7 @@ With libcwd malloc checking in libenvir-cw.so=%{libcwd}
 
 %if "%{patchOmnet}" == "1"
 %patch -p1
-#Patch integrated into omnetpp by Andras so only used for official 3.0 
+#Patch integrated into omnetpp by Andras so only used for official 3.0
 #prerelease 1
 #patch3 -p1
 #if "%{libcwd}" >= "0.99.29"
@@ -200,7 +200,7 @@ make
 #make manual
 make tests
 #Still cannot build in parallel prob cause dependencies are wrong, always missing nedxml lib
-#%{?_smp_mflags}  
+#%{?_smp_mflags}
 
 ##########################################################
 
@@ -223,7 +223,7 @@ mkdir -pv $RPM_BUILD_ROOT%{oshare}/bitmaps
 mkdir -pv $RPM_BUILD_ROOT%{oshare}/tkenv
 mkdir -pv $RPM_BUILD_ROOT%{oshare}/gned
 mkdir -pv $RPM_BUILD_ROOT%{oshare}/plove
-find . -name 'CVS'| xargs rm -fr 
+find . -name 'CVS'| xargs rm -fr
 cp -p include/*.h $RPM_BUILD_ROOT%{oinclude}
 cp -p include/ChangeLog $RPM_BUILD_ROOT%{oinclude}
 cp -p lib/*  $RPM_BUILD_ROOT%{_libdir}
@@ -232,7 +232,7 @@ cp -p bin/*  $RPM_BUILD_ROOT%{_bindir}
 rm -f $RPM_BUILD_ROOT%{_bindir}/makemake
 perl -i -pwe "s|NEDC=.*$|NEDC=%{_bindir}/nedc|g" $RPM_BUILD_ROOT%{_bindir}/opp_makemake
 cp -pr bitmaps/* $RPM_BUILD_ROOT%{oshare}/bitmaps
-cp -p src/tkenv/* $RPM_BUILD_ROOT%{oshare}/tkenv 
+cp -p src/tkenv/* $RPM_BUILD_ROOT%{oshare}/tkenv
 cp -p src/gned/* $RPM_BUILD_ROOT%{oshare}/gned
 cp -p src/plove/*.{tcl,res,rc,ico} $RPM_BUILD_ROOT%{oshare}/plove
 pushd $RPM_BUILD_ROOT%{oshare}
@@ -240,7 +240,7 @@ find . \( -name '*.o' -o -name '*.h' -o -name '*.cc' \) -exec rm {} \;
 popd
 pushd samples
 find . -name '*.o' -exec rm {} \;
-#todo fix the rundemo script for dir where runtcl file is 
+#todo fix the rundemo script for dir where runtcl file is
 popd
 %if "%{libcwd}" == "1"
 cp -p configure.user configure.user.normal
@@ -283,7 +283,7 @@ rm -rf $RPM_BUILD_ROOT
 %if "%{openpkg}" == "0"
 ldconfig
 %endif
-#ldconfig -r %{_prefix} 
+#ldconfig -r %{_prefix}
 
 ##########################################################
 
@@ -291,7 +291,7 @@ ldconfig
 %if "%{openpkg}" == "0"
 ldconfig
 %endif
-#ldconfig -r %{_prefix} 
+#ldconfig -r %{_prefix}
 
 ##########################################################
 
@@ -304,7 +304,7 @@ ldconfig
 
 * Thu Dec  2 2004 Johnny Lai <johnny.lai@eng.monash.edu.au> 3.0-0.a9_12
 - added rpmbuild option shared_libs.
-- added FC3 DISPLAY fix for wish 
+- added FC3 DISPLAY fix for wish
 
 * Fri Nov 19 2004 Johnny Lai <johnny.lai@eng.monash.edu.au> 3.0-0.a9_11
 - updated to a9
@@ -344,7 +344,7 @@ ldconfig
   normal builds
 
 * Sun Sep 28 2003 Johnny Lai <johnny.lai@eng.monash.edu.au> 2.3_20030928-5icc
-- Added intel compiler tag to revision. Tested icc build with: 
+- Added intel compiler tag to revision. Tested icc build with:
   alias iccget='source /opt/intel/compiler70/ia32/bin/iccvars.sh'
   iccget;CC=icc CXX=icpc rpmbuild -ba omnetpp.spec
 
@@ -357,7 +357,7 @@ ldconfig
 
 * Thu Aug 14 2003 Johnny Lai <johnny.lai@eng.monash.edu.au> 2.3_20030816-2
 - Testing distributed nedc compilation patch
-- Patched Makefile.in to build on SMP machines i.e. make -j 2 
+- Patched Makefile.in to build on SMP machines i.e. make -j 2
 
 * Thu Aug 14 2003 Johnny Lai <johnny.lai@eng.monash.edu.au> 2.3_20030814-1
 - Provide tcl.so and tk.so since RH packages don't provide those
@@ -391,7 +391,7 @@ ldconfig
 - Added conditional patch build
 
 * Fri Jun 20 2003 Johnny Lai <johnny.lai@eng.monash.edu.au>
-- removed extraneous _includedir files. 
+- removed extraneous _includedir files.
 - Fixed opp_makemake with correct libdir and includedir
 - Added correct bitmap path
 - Include patch module array of size zero for omnet

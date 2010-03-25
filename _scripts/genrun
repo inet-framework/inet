@@ -42,4 +42,4 @@ for i in $DIRS; do
   svn add $i/run
   echo '..\..\..\src\run_inet %*' >$i/run.cmd
   svn add $i/run.cmd
-done  
+done
