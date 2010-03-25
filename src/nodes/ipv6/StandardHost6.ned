@@ -27,7 +27,7 @@ import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.RoutingTable6;
-import inet.transport.tcp.TCP;
+import inet.transport.tcp.ITCP;
 import inet.transport.udp.UDP;
 
 
@@ -38,14 +38,16 @@ module StandardHost6
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
         string udpAppType = default("");
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         @display("i=device/laptop");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -64,7 +66,7 @@ module StandardHost6
             parameters:
                 @display("p=163,67");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=163,154");
         }
@@ -102,7 +104,7 @@ module StandardHost6
         }
 
         tcp.ipv6Out --> networkLayer.tcpIn;
-        tcp.ipv6In <-- networkLayer.TCPOut;
+        tcp.ipv6In <-- networkLayer.tcpOut;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;
@@ -112,8 +114,8 @@ module StandardHost6
         udp.ipv6Out --> networkLayer.udpIn;
         udp.ipv6In <-- networkLayer.udpOut;
 
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
+        networkLayer.pingOut --> pingApp.pingv6In;
+        networkLayer.pingIn <-- pingApp.pingv6Out;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {

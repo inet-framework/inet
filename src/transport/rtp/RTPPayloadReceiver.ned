@@ -1,13 +1,19 @@
 package inet.transport.rtp;
 
+//
+// Interface for \RTP Payload Receivers.
+//
+// These modules are internal to the RTP module; instances are created
+// and connected dynamically by RTPProfile.
+//
 moduleinterface IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
 
     gates:
-        input fromProfile;
-        output toProfile;
+        input profileIn @labels(RTPInnerPacket);
+        output profileOut @labels(RTPInnerPacket);
 }
 
 simple RTPPayloadReceiver like IRTPPayloadReceiver
@@ -16,8 +22,8 @@ simple RTPPayloadReceiver like IRTPPayloadReceiver
         string outputFileName;
 
     gates:
-        input fromProfile;
-        output toProfile;
+        input profileIn @labels(RTPInnerPacket);
+        output profileOut @labels(RTPInnerPacket);
 }
 
 simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
@@ -26,8 +32,8 @@ simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
         string outputFileName;
 
     gates:
-        input fromProfile;
-        output toProfile;
+        input profileIn @labels(RTPInnerPacket);
+        output profileOut @labels(RTPInnerPacket);
 }
 
 simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
@@ -36,8 +42,8 @@ simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
         string outputFileName;
 
     gates:
-        input fromProfile;
-        output toProfile;
+        input profileIn @labels(RTPInnerPacket);
+        output profileOut @labels(RTPInnerPacket);
 }
 
 simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
@@ -46,6 +52,8 @@ simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
         string outputFileName;
 
     gates:
-        input fromProfile;
-        output toProfile;
+        input profileIn @labels(RTPInnerPacket);
+        output profileOut @labels(RTPInnerPacket);
 }
+
+

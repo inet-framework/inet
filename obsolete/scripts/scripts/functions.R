@@ -47,7 +47,7 @@ jl.boxplotmeanscomp <-function(out, var, data, fn="graph", tit="Handover Improve
       logaxis="y"
     else
       logaxis=""
-    
+
     ##if (fn==NULL)
     ##if (length(fn)==0) #pretty silly don't know why they didn't allow fn==NULL test
     onefile=FALSE #manual recommends this for eps
@@ -59,7 +59,7 @@ jl.boxplotmeanscomp <-function(out, var, data, fn="graph", tit="Handover Improve
 ###    else
 ###      X11()
     ##Assuming we never want to plot just one row
-    if(length(subset) == 1)      
+    if(length(subset) == 1)
       box<-boxplot.n(out ~ var, data=data, log=logaxis,main=tit, xlab=xlab, ylab
                      =ylab,top=TRUE,notch)
     else
@@ -135,7 +135,7 @@ simulateTimes <-  function()
         value[index] <-  time
         index <- index + 1
       }
-    
+
     #Eliminate 0 values
     value <- value[!is.element(value, 0)]
     ping.times <- ping.times[1:length(value)]
@@ -198,12 +198,12 @@ jl.sem <- function(x,y=NULL)
 jl.sed <- function(sem1,sem2)
   {
    #standard error of the difference in two means from same population diff samples
-    sqrt(sem1^2 + sem2^2)    
+    sqrt(sem1^2 + sem2^2)
   }
 
 jl.cis <- function(x,p=0.95,use.t=TRUE, rowLabel="x", columnLabels=c("n", "Mean", "Lower CI limit",
                                                                "Upper CI limit"), unit="")
-  {  
+  {
    means <- mean(x)
    ns <- length(x)
    vars <- var(x)
@@ -223,7 +223,7 @@ jl.cis <- function(x,p=0.95,use.t=TRUE, rowLabel="x", columnLabels=c("n", "Mean"
    }
   }
 
-##Gives back the value of true for odd numbers 
+##Gives back the value of true for odd numbers
 jl.odd <- function(x)
   {
     if (length(x) == 1)

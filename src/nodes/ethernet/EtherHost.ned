@@ -26,16 +26,18 @@ import inet.linklayer.ethernet.EtherMAC;
 
 
 //
-// Example host model with one Ethernet port and several traffic generators
-// to create traffic in the test network.
+// An example host with one Ethernet port and traffic generators that
+// generate Ethernet traffic directly. This host model does not contain
+// higher layer protocols (\IP, \TCP).
 //
 module EtherHost
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
         @display("i=device/pc2");
     gates:
-        inout ethg;
+        inout ethg @labels(EtherFrame-conn);
     submodules:
         cli: EtherAppCli {
             parameters:

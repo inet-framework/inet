@@ -41,9 +41,9 @@ simple EtherEncap
     parameters:
         @display("i=block/square");
     gates:
-        input upperLayerIn;   // higher layer
-        output upperLayerOut; // higher layer
-        input lowerLayerIn;   // to Ethernet MAC
-        output lowerLayerOut; // to Ethernet MAC
+        input upperLayerIn @labels(Ieee802Ctrl/down);   // higher layer
+        output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer
+        input lowerLayerIn @labels(EtherFrame);   // to Ethernet MAC
+        output lowerLayerOut @labels(EtherFrame); // to Ethernet MAC
 }
 

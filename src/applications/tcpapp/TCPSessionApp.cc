@@ -120,7 +120,7 @@ void TCPSessionApp::activity()
     if (active)
         socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
     else
-        socket.listen();
+        socket.listenOnce();
 
     // wait until connection gets established
     while (socket.getState()!=TCPSocket::CONNECTED)

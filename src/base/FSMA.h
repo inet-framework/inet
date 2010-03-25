@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -102,26 +102,26 @@
     bool ___condition_seen = false;                                    \
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
-    EV << "processing event in state machine " << fsm.getName() << endl;  \
-    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, fsm.getStateName()), 0)))
+    EV << "processing event in state machine " << (fsm).getName() << endl;  \
+    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, (fsm).getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
     (ev << "FSM " << ___fsm->getName()                                    \
         << ((exiting) ? ": leaving state  " : ": entering state ")     \
         << ___fsm->getStateName() << endl)
 
-#define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->getState() == s)
+#define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->getState() == (s))
 
 #define FSMA_Event_Transition(transition, condition, target, action)                    \
-    ___condition_seen = true; if (condition && ___is_event)                             \
+    ___condition_seen = true; if ((condition) && ___is_event)                             \
     {                                                                                   \
         ___is_event = false;                                                            \
-        FSMA_Transition(transition, condition, target, action)
+        FSMA_Transition(transition, (condition), target, action)
 
 #define FSMA_No_Event_Transition(transition, condition, target, action)                 \
-    ___condition_seen = true; if (condition && !___is_event)                            \
+    ___condition_seen = true; if ((condition) && !___is_event)                            \
     {                                                                                   \
-        FSMA_Transition(transition, condition, target, action)
+        FSMA_Transition(transition, (condition), target, action)
 
 #define FSMA_Transition(transition, condition, target, action)                          \
         FSMA_Print(true);                                                               \

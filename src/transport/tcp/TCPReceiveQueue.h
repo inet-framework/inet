@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -86,8 +87,35 @@ class INET_API TCPReceiveQueue : public cPolymorphic
      */
     virtual cPacket *extractBytesUpTo(uint32 seq) = 0;
 
+    /**
+     * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
+     */
+    virtual uint32 getAmountOfBufferedBytes() = 0;
+
+    /**
+     * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
+     */
+    virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer) = 0;
+
+    /**
+     * Returns the number of blocks currently buffered in queue.
+     */
+    virtual uint32 getQueueLength() = 0;
+
+    /**
+     * Shows current queue status.
+     */
+    virtual void getQueueStatus() = 0;
+
+    /**
+     * Returns left edge of enqueued region.
+     */
+    virtual uint32 getLE(uint32 fromSeqNum) = 0;
+
+    /**
+     * Returns right edge of enqueued region.
+     */
+    virtual uint32 getRE(uint32 toSeqNum) = 0;
 };
 
 #endif
-
-

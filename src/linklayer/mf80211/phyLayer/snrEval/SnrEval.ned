@@ -52,6 +52,6 @@ simple SnrEval
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)
         output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
-        input radioIn; // to receive frames (AirFrame) on the radio channel
+        input radioIn @labels(AirFrame); // to receive frames (AirFrame) on the radio channel
 }
 

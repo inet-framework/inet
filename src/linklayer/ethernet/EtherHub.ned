@@ -38,6 +38,6 @@ simple EtherHub
         @node();
         @display("i=device/hub");
     gates:
-        inout ethg[];  // to stations; each one represents a port
+        inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
 }
 

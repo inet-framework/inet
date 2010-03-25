@@ -29,6 +29,6 @@ simple LinkStateRouting
         string peers;
         @display("i=block/network2");
     gates:
-        input ipIn;
-        output ipOut;
+        input ipIn @labels(IPControlInfo/up);
+        output ipOut @labels(IPControlInfo/down);
 }

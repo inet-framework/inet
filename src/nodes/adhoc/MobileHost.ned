@@ -43,6 +43,7 @@ module MobileHost
 {
     parameters:
         @node();
+        @labels(node,wireless-node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
@@ -112,7 +113,7 @@ module MobileHost
         }
 
         tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.TCPOut;
+        tcp.ipIn <-- networkLayer.tcpOut;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;

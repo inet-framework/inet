@@ -275,6 +275,7 @@ void OSPF::InterfaceState::CalculateDesignatedRouter(OSPF::Interface* intf)
         }
 
         // if the router is any kind of DR or is no longer one of them, then repeat
+        //FIXME  suggest parentheses around && within ||
         if (((declaredDesignatedRouter.routerID != OSPF::NullRouterID) &&
              ((currentDesignatedRouter.routerID == routerID) &&
               (declaredDesignatedRouter.routerID != routerID)) ||

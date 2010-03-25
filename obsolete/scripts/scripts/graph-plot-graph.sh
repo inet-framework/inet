@@ -40,9 +40,9 @@ function plotvector
 
     local COMMAND_
     COMMAND_="\"$PIPENAME-$1\" using $GFRACTION title \"${LEGENDS[$1]} in $NENAME\" with ${PLOTTYPE[$1]}"
-    if [ "$1" = "1" ]; then    
+    if [ "$1" = "1" ]; then
 	COMMAND="$COMMAND_, \"$PIPENAME-$((i+1))\" using $GFRACTION title \"${LEGENDS[$((i+1))]} in $NENAME\" with ${PLOTTYPE[$1]}"
-    else 
+    else
 	COMMAND=$COMMAND_
     fi
     CLEANPIPE="rm -f $PIPENAME-$1; mknod $PIPENAME-$1 p"
@@ -61,13 +61,13 @@ function plotvector
 function plotgraph
 {
     local FILENAME_
-    
+
     if [ "$PARALLEL" != "p" ]; then
 	FILENAME_=$FILENAME
-    else       
+    else
 	FILENAME_=$FILENAMEI
     fi
-    
+
     #echo "Generating the scripts for gnuplot"
 #Plotting Plottypes
 SUFFIXES=("eed" "comb")
@@ -119,7 +119,7 @@ $CREATEPIPE
 echo "Creating ${OUTPUTPLOT}.${GFORMAT}"
 gnuplot << END
     set terminal postscript ${GFORMAT}
-#produce eps bw as colour uses green 
+#produce eps bw as colour uses green
     set output "${OUTPUTPLOT}.${GFORMAT}"
     set title "$GTITLENAME"
     set xlabel "Time (s)"

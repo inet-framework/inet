@@ -5,9 +5,11 @@ package inet.transport.rtp;
 //
 simple RTCP
 {
+    parameters:
+        @display("i=block/control");
     gates:
-        input fromRTP;
-        input fromUDP;
-        output toRTP;
-        output toUDP;
+        input rtpIn @labels(RTPInnerPacket);
+        input udpIn @labels(UDPControlInfo/up);
+        output rtpOut @labels(RTPInnerPacket);
+        output udpOut @labels(UDPControlInfo/down);
 }

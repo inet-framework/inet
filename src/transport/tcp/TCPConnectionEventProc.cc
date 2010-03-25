@@ -191,6 +191,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
+                tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
                 if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 

@@ -33,12 +33,13 @@ module BurstHost
 {
     parameters:
         @node();
+        @labels(node);
+        @display("i=device/pc3");
         string trafGenType;
         bool IPForward = default(false);
         string routingFile = default("");
-        @display("i=device/pc3");
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

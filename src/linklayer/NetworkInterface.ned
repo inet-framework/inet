@@ -23,6 +23,8 @@ package inet.linklayer;
 //
 moduleinterface INetworkInterface
 {
+    parameters:
+        @display("i=block/ifcard");
     gates:
         input netwIn;
         output netwOut;

@@ -24,6 +24,7 @@ package inet.base;
 //
 simple Join
 {
+    @display("i=block/join");
     gates:
         input in[];
         output out;

@@ -42,7 +42,6 @@ void UDPBasicApp::initialize(int stage)
 
     localPort = par("localPort");
     destPort = par("destPort");
-    msgByteLength = par("messageLength").longValue();
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -72,7 +71,7 @@ cPacket *UDPBasicApp::createPacket()
     sprintf(msgName,"UDPBasicAppData-%d", counter++);
 
     cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(msgByteLength);
+    payload->setByteLength(par("messageLength").longValue());
     return payload;
 }
 

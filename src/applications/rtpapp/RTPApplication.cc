@@ -22,7 +22,8 @@
 Define_Module(RTPApplication)
 
 
-void RTPApplication::initialize() {
+void RTPApplication::initialize()
+{
 
     // read all omnet parameters
 
@@ -64,7 +65,8 @@ void RTPApplication::initialize() {
 }
 
 
-void RTPApplication::activity() {
+void RTPApplication::activity()
+{
 
 
     bool sessionEntered = false;
@@ -87,7 +89,7 @@ void RTPApplication::activity() {
                 RTPInterfacePacket *rifpOut1 = new RTPInterfacePacket("enterSession()");
                 rifpOut1->enterSession(opp_strdup(_commonName), opp_strdup(_profileName), _bandwidth, _destinationAddress, _port);
                 // and send it to the rtp layer
-                send(rifpOut1, "toRTP");
+                send(rifpOut1, "rtpOut");
             }
             else if (!opp_strcmp(msgIn->getName(), "startTransmission")) {
                 ev << "startTransmission"<<endl;
@@ -95,7 +97,7 @@ void RTPApplication::activity() {
                 rscm->setCommand("PLAY");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(PLAY)");
                 rifpOut->senderModuleControl(ssrc, rscm);
-                send(rifpOut, "toRTP");
+                send(rifpOut, "rtpOut");
                 transmissionStarted = true;
 
                 cMessage *msg4 = new cMessage("stopTransmission");
@@ -107,13 +109,13 @@ void RTPApplication::activity() {
                 rscm->setCommand("STOP");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(STOP)");
                 rifpOut->senderModuleControl(ssrc, rscm);
-                send(rifpOut, "toRTP");
+                send(rifpOut, "rtpOut");
             }
             else if (!opp_strcmp(msgIn->getName(), "leaveSession")) {
                 ev<< "leaveSession"<<endl;
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("leaveSession()");
                 rifpOut->leaveSession();
-                send(rifpOut, "toRTP");
+                send(rifpOut, "rtpOut");
             }
         }
         else {
@@ -127,7 +129,7 @@ void RTPApplication::activity() {
                     RTPInterfacePacket *rifpOut = new RTPInterfacePacket("createSenderModule()");
                     rifpOut->createSenderModule(ssrc, _payloadType, opp_strdup(_fileName));
                     ev << "CreateSenderModule"<<endl;
-                    send(rifpOut, "toRTP");
+                    send(rifpOut, "rtpOut");
                 }
                 else {
                     cMessage *msg2 = new cMessage("leaveSession");

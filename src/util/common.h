@@ -22,6 +22,7 @@
 #include <string>
 
 #include "IntServ.h" // IPAddressVector, EroVector
+#include "IPvXAddress.h"
 
 std::string intToString(int i);
 std::string vectorToString(IPAddressVector vec);
@@ -30,6 +31,7 @@ std::string vectorToString(EroVector vec);
 std::string vectorToString(EroVector vec, const char *delim);
 
 EroVector routeToEro(IPAddressVector rro);
+uint32 getLevel(IPvXAddress addr);
 
 #endif
 

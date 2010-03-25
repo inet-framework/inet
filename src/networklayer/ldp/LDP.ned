@@ -41,8 +41,8 @@ simple LDP
         double helloInterval @unit("s") = default(5s);
         @display("i=block/control");
     gates:
-        input tcpIn;
-        input udpIn;
-        output tcpOut;
-        output udpOut;
+        input tcpIn @labels(TCPCommand/up);
+        input udpIn @labels(UDPControlInfo/up);
+        output tcpOut @labels(TCPCommand/down);
+        output udpOut @labels(UDPControlInfo/down);
 }

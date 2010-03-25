@@ -78,7 +78,7 @@ FILENAME=hmip-sait-noro
 #Assumes output vector filename is omnetpp.vec if not change or make
 #graphomnetpp-runs enforce this via modding ini file
 
-echo topdir is $TOPDIR 
+echo topdir is $TOPDIR
 pushd $TOPDIR &>/dev/null
 if [ $? -ne 0 ]; then
     echo "Failed to change to $TOPDIR"

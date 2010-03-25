@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
+//               2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,30 +21,15 @@
 
 
 #include "TCPSegment.h"
+#include "TCPSegment_m.h"
+#include "IPvXAddress.h"
 
 #include "headers/defs.h"
-namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-//#include "headers/ip.h"
+
 #include "headers/tcp.h"
-};
 
-//#include "TCPConnection.h"
-
-#ifndef _MSC_VER
-#include <netinet/in.h>  // htonl, ntohl, ...
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#endif
-
-using namespace INETFw;
-//#include "Checksum.h"
 /**
- * Converts between IPDatagram and binary (network byte order) IP header.
+ * Converts between TCPSegment and binary (network byte order) TCP header.
  */
 class TCPSerializer
 {
@@ -51,19 +37,35 @@ class TCPSerializer
         TCPSerializer() {}
 
         /**
-         * Serializes a TCPMessage for transmission on the wire.
+         * Serializes a TCPSegment for transmission on the wire.
+         * The checksum is NOT filled in.
+         * Returns the length of data written into buffer.
+         * TODO msg why not a const reference?
+         */
+        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
+
+        /**
+         * Serializes a TCPSegment for transmission on the wire.
          * The checksum is NOT filled in. (The kernel does that when sending
          * the frame over a raw socket.)
          * Returns the length of data written into buffer.
+         * TODO msg why not a const reference?
+         * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
          */
-	int serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize, pseudoheader *pseudo);
-        /**
-         * Puts a packet sniffed from the wire into an SCTPMessage.
-         */
-//	void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest);
+        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
+        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
 
-	static unsigned short checksum(unsigned char *addr, unsigned int count);
+        /**
+         * Puts a packet sniffed from the wire into a TCPSegment.
+         * TODO dest why not reference?
+         */
+        void parse(const unsigned char *srcbuf, unsigned int bufsize, TCPSegment *dest);
+
+        /**
+         * Calculate checksum with pseudo header.
+         */
+        static uint16_t checksum(const void *addr, unsigned int count,
+        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
 };
 
 #endif
-

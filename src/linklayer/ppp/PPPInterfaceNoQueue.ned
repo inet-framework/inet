@@ -19,17 +19,22 @@
 
 package inet.linklayer.ppp;
 
+import inet.linklayer.INetworkInterface;
+
+
 //
 // \PPP interface. Assumes inifinite queue.
 //
 // @see PPPInterface
 //
-module PPPInterfaceNoQueue
+module PPPInterfaceNoQueue like INetworkInterface
 {
+    parameters:
+        @display("i=block/ifcard");
     gates:
         input netwIn;
         output netwOut;
-        inout phys;
+        inout phys @labels(PPPFrame);
     submodules:
         ppp: PPP {
             parameters:

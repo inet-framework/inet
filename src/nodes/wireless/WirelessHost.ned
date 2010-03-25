@@ -49,6 +49,8 @@ module WirelessHost
 {
     parameters:
         @node();
+        @labels(node,ethernet-node,wireless-node);
+        @display("i=device/wifilaptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");
@@ -56,10 +58,9 @@ module WirelessHost
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
-        @display("i=device/wifilaptop");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
         input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {
@@ -128,7 +129,7 @@ module WirelessHost
         }
 
         tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.TCPOut;
+        tcp.ipIn <-- networkLayer.tcpOut;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;

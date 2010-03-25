@@ -36,12 +36,14 @@ simple EtherBus
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
+        @display("b=200,5,,,,1");
         string positions;  // positions of taps on the cable in meters, as a sequence
                            // of numbers separated by spaces. If there are too
                            // few values, the distance between the last two positions
                            // is repeated, or 5 meters is used.
         double propagationSpeed @unit("mps") = default(200mps); // signal propagation speed on the bus
     gates:
-        inout ethg[];    // to stations; each one represents a tap
+        inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a tap
 }
 

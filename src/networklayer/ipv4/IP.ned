@@ -91,9 +91,8 @@ simple IP
         double fragmentTimeout @unit("s") = default(60s);
         @display("i=block/routing");
     gates:
-        input transportIn[];
-        output transportOut[];
-        input queueIn[];
-        output queueOut;
+        input transportIn[] @labels(IPControlInfo/down,TCPSegment,UDPPacket);
+        output transportOut[] @labels(IPControlInfo/up,TCPSegment,UDPPacket);
+        input queueIn[] @labels(IPDatagram);
+        output queueOut @labels(IPDatagram);
 }
-

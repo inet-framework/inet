@@ -50,8 +50,8 @@ mplsTest.host4.local_addr = "10.0.0.4";
 
 mplsTest.LSR1.local_addr = "1.0.0.1",
 mplsTest.LSR1.routingFile = "LSR1.rt",
-mplsTest.LSR1.PrtTableFileName = "prt1.table", 
-mplsTest.LSR1.LibTableFileName = "lib1.table";             
+mplsTest.LSR1.PrtTableFileName = "prt1.table",
+mplsTest.LSR1.LibTableFileName = "lib1.table";
 
 mplsTest.LSR2.local_addr = "1.0.0.2",
 mplsTest.LSR2.routingFile = "LSR2.rt",
@@ -65,13 +65,13 @@ mplsTest.LSR3.LibTableFileName = "lib3.table";
 
 mplsTest.LSR4.local_addr = "1.0.0.4",
 mplsTest.LSR4.routingFile = "LSR4.rt",
-mplsTest.LSR4.PrtTableFileName = "prt4.table", 
-mplsTest.LSR4.LibTableFileName = "lib4.table";             
+mplsTest.LSR4.PrtTableFileName = "prt4.table",
+mplsTest.LSR4.LibTableFileName = "lib4.table";
 
 mplsTest.LSR5.local_addr = "1.0.0.5",
 mplsTest.LSR5.routingFile = "LSR5.rt",
-mplsTest.LSR5.PrtTableFileName = "prt5.table", 
-mplsTest.LSR5.LibTableFileName = "lib5.table";             
+mplsTest.LSR5.PrtTableFileName = "prt5.table",
+mplsTest.LSR5.LibTableFileName = "lib5.table";
 
 # [Run 1]
 # mplsTest.

@@ -32,7 +32,7 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    uint ssthresh;  ///< slow start threshold
+    uint32 ssthresh;  ///< slow start threshold
 };
 
 
@@ -43,7 +43,7 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
 class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
 {
   protected:
-    TCPTahoeRenoFamilyStateVariables *&state; // alias to TCLAlgorithm's 'state'
+    TCPTahoeRenoFamilyStateVariables *&state; // alias to TCPAlgorithm's 'state'
 
   public:
     /** Ctor */

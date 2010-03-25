@@ -4,7 +4,7 @@
 #  Copyright (c) 2004 Johnny Lai
 #
 # =DESCRIPTION
-# Part of the cl2html target added for viewcvs delta hyperlink from the 
+# Part of the cl2html target added for viewcvs delta hyperlink from the
 # cvs changelog
 #
 # =REVISION HISTORY
@@ -27,20 +27,20 @@ class PriorCVSRevision
   VERSION       = "$Revision$"
   REVISION_DATE = "$Date$"
   AUTHOR        = "Johnny Lai"
- 
+
   #
   # Returns a version string similar to:
   #  <app_name>:  Version: 1.2 Created on: 2002/05/08 by Jim Freeze
-  # The version number is maintained by CVS. 
+  # The version number is maintained by CVS.
   # The date is the last checkin date of this file.
-  # 
+  #
   def version
     "Version: #{VERSION.split[1]} Created on: " +
       "#{REVISION_DATE.split[1]} by #{AUTHOR}"
   end
 
   def initialize
-    @debug    = false 
+    @debug    = false
     @verbose  = false
     @quit     = false
     @outfilename = false
@@ -79,9 +79,9 @@ class PriorCVSRevision
         system("rdoc -o #{dir} #{__FILE__}")
       }
 
-      opt.on("--verbose", "-v", "print intermediate steps to STDERR"){|@verbose|}                                                     
+      opt.on("--verbose", "-v", "print intermediate steps to STDERR"){|@verbose|}
       opt.on("--output=FILE", "-o", String, "Output to file FILE. By default changes xmlfile"){|@outfilename|
-        
+
       }
       opt.on("--test", "unit test"){|$test|}
 
@@ -91,7 +91,7 @@ class PriorCVSRevision
 
     if @quit
       pp self
-      (print ARGV.options; exit) 
+      (print ARGV.options; exit)
     end
 
   rescue NameError => err
@@ -126,7 +126,7 @@ class PriorCVSRevision
     @doc.write  file = File.new(@outfilename,"w")
     file.close
   end#run
-  
+
   #Returns the revision before currentRevision
   def previousRevision(currentRevision)
     currentRevision.to_s.scan(/[.](.+)$/)

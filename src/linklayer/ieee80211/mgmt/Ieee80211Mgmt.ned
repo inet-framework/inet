@@ -25,9 +25,11 @@ package inet.linklayer.ieee80211.mgmt;
 //
 moduleinterface Ieee80211Mgmt
 {
+    parameters:
+        @display("i=block/cogwheel");
     gates:
         input uppergateIn;
         output uppergateOut;
-        input macIn;
-        output macOut;
+        input macIn @labels(Ieee80211Frame);
+        output macOut @labels(Ieee80211Frame);
 }

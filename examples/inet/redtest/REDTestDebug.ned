@@ -79,12 +79,15 @@ network REDTestDebug
                 @display("p=248,135");
         }
     connections:
-        r1.pppg$o++ --> {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
-        th.out --> dump.a$i;
-        dump.b$o --> r2.pppg$i++;
+// FIXME adjust to the new TCPDump module
+//        r1.pppg$o++ --> {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
+//        th.out --> dump.a$i;
+//        dump.b$o --> r2.pppg$i++;
+//
+//        dump.a$o --> {  datarate = 1.5Mbps; delay = 20ms; } --> r1.pppg$i++;
+//        dump.b$i <-- {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
 
-        dump.a$o --> {  datarate = 1.5Mbps; delay = 20ms; } --> r1.pppg$i++;
-        dump.b$i <-- {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
+        r1.pppg++ <--> {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
 
         s1.pppg++ <--> {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
         s2.pppg++ <--> {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;

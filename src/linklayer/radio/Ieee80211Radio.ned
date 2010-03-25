@@ -30,7 +30,7 @@ package inet.linklayer.radio;
 // @see Radio
 // @author Andras Varga
 //
-simple Ieee80211Radio
+simple Ieee80211Radio like Radio
 {
     parameters:
         int channelNumber = default(0); // channel identifier
@@ -42,8 +42,7 @@ simple Ieee80211Radio
         double sensitivity @unit("mW"); // received signals with power below sensitivity are ignored
         @display("i=block/wrxtx");
     gates:
-        input uppergateIn;   // from higher layer protocol (MAC)
-        output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
-        input radioIn; // to receive frames (AirFrame) on the radio channel
+        input uppergateIn @labels(PhyControlInfo/down,Ieee80211Frame);   // from higher layer protocol (MAC)
+        output uppergateOut @labels(PhyControlInfo/up,Ieee80211Frame); // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        input radioIn @labels(AirFrame); // to receive frames (AirFrame) on the radio channel
 }
-

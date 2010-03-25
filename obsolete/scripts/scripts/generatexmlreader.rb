@@ -33,13 +33,13 @@ class GenerateXMLReader
   VERSION       = "$Revision$"
   REVISION_DATE = "$Date$"
   AUTHOR        = "Johnny Lai"
- 
+
   #
   # Returns a version string similar to:
   #  <app_name>:  Version: 1.2 Created on: 2002/05/08 by Jim Freeze
-  # The version number is maintained by CVS. 
+  # The version number is maintained by CVS.
   # The date is the last checkin date of this file.
-  # 
+  #
   def version
     "Version: #{VERSION.split[1]} Created on: " +
       "#{REVISION_DATE.split[1]} by #{AUTHOR}"
@@ -58,7 +58,7 @@ class GenerateXMLReader
     @elements = Hash.new
     @types = Hash.new
 
-    
+
     @xmlToCpp = { "xs:NMTOKEN", "string",
                  "IfaceType", "string",
                  "xs:string", "string",
@@ -83,7 +83,7 @@ class GenerateXMLReader
     #to do it this way for now
     @attributeToOption = { "Host", nil,
                           "MIPv6", "USE_MOBILITY",
-                          "HMIP", "USE_HMIP"                          
+                          "HMIP", "USE_HMIP"
     }
 
     ### Things we don't want to parse for header generation (array like xml bits)
@@ -121,7 +121,7 @@ class GenerateXMLReader
 
       opt.on("--help", "What you see right now"){ puts opt; exit 0}
 
-      #Try testing with this 
+      #Try testing with this
       #ruby __FILE__ -x -c -s test
       opt.on("-x", "parse arguments and show Usage") {|@quit|}
 
@@ -132,7 +132,7 @@ class GenerateXMLReader
       opt.on("--verbose", "-v", "print intermediate steps to STDERR"){|@verbose|}
 
       opt.on("--schema", "-S", "Use Schema i.e. XSD rather than XML document"){|@opt_schema|}
-      
+
       opt.on_tail("By default splits data according to opt_filter, ",
                   "Subset plots on #{@opt_subset}. Will not create histograms")
 
@@ -184,7 +184,7 @@ class GenerateXMLReader
   def parseSchemaInstance
     @doc.elements.each("netconf/local"){|elem|
       puts elem.attributes["node"]
-    }  
+    }
   end
 
   ###parseSimpleType/Content and ComplexContent prob. similar with respect to
@@ -194,7 +194,7 @@ class GenerateXMLReader
     if not elem.attributes.has_key?("name") then
       throw "anonName argument is nil" if not anonName
     else
-      name = elem.attributes["name"] 
+      name = elem.attributes["name"]
     end
 
     restrictElem = elem.elements["xs:restriction"]
@@ -203,8 +203,8 @@ class GenerateXMLReader
     when "xs:string"
       #anonymous or not does not really indicate whether it is an enumerated type
       #refactor this too.
-      if not elem.attributes.has_key?("name") then      
-        enums=Array.new()      
+      if not elem.attributes.has_key?("name") then
+        enums=Array.new()
         throw "No enumerations in simpleType #{elem}" if not restrictElem.elements["xs:enumeration"]
 
         elem.elements.each("xs:restriction/xs:enumeration"){|e|
@@ -213,16 +213,16 @@ class GenerateXMLReader
         }
         if @verbose then
           print "#{anonName} <= "
-          enums.each{|a| 
+          enums.each{|a|
             print a, " "
-          } 
+          }
           puts
         end
-        #enum = "#{anonName}<=" 
+        #enum = "#{anonName}<="
         enum = ""
         enums.each{|a|
           if enum == "" then
-            enum = "#{a}" 
+            enum = "#{a}"
           else
             enum = enum + ", " + "#{a}"
           end
@@ -257,7 +257,7 @@ class GenerateXMLReader
       when /.*/
         parseElement(elem)
      #when "global"
-     
+
      #        generateTemplate elem
      #        when "local"
       end
@@ -317,8 +317,8 @@ class GenerateXMLReader
           #throw "type #{arrayComp} for element #{elemName} not found in
           #  @elements and @types" if not @types.has_key?(arrayComp)
           if @types.has_key?(arrayComp)
-            puts "#{elemName}: #{arrayComp}" 
-            @elemName = elemName            
+            puts "#{elemName}: #{arrayComp}"
+            @elemName = elemName
             resolveTypeBranch(arrayComp)
           else
             if cppType?(arrayComp) then
@@ -326,7 +326,7 @@ class GenerateXMLReader
             else
 
               throw "Unable to resolve further for element #{elemName} of
-            #{arrayComp}" 
+            #{arrayComp}"
 
             end
 
@@ -346,14 +346,14 @@ class GenerateXMLReader
     begin
       mapXMLToCpp(value)
     rescue
-      return false     
+      return false
     else
-      return true 
+      return true
     end
   end
 
 
-  ##Types can either be basic types or attributeGroups 
+  ##Types can either be basic types or attributeGroups
   def resolveTypeBranch(typeName, arrayComp = nil)
     #    puts "typeName is #{typeName}: #{arrayComp}"
 
@@ -366,7 +366,7 @@ class GenerateXMLReader
     if cppType?(search) then
       return @genClasses[@filename] += (@@indent + cppCode(mapXMLToCpp(search), "_" + @elemName) + "\n")
     end
-    
+
     found = false
     if @types.has_key?(search) then
       found = true
@@ -406,10 +406,10 @@ class GenerateXMLReader
   end
 
 
-  ##Types can either be basic types or attributeGroups 
+  ##Types can either be basic types or attributeGroups
   def resolveTypeBranch2(typeName, arrayComp = nil)
     puts "typeName is #{typeName}: #{arrayComp}"
-    if not arrayComp then      
+    if not arrayComp then
       if @types.has_key?(typeName) then
         value = @types[typeName]
         case value.class.name
@@ -430,7 +430,7 @@ class GenerateXMLReader
             resolveTypeBranch(value, nil)
           end
         else
-          
+
           throw "Structure of @type tree is wrong as #{typeName} has hash type of
     #{@types[typeName].class.name}"
 
@@ -441,7 +441,7 @@ class GenerateXMLReader
       end
     else #arrayComp
       throw "type #{typeName} not found in @types" if not @types.has_key?(typeName)
-      
+
       case arrayComp.class.name
       when "Hash"
         puts "#{typeName}: #{arrayComp.values[0]}"
@@ -449,7 +449,7 @@ class GenerateXMLReader
           @elemName =  arrayComp.keys[0]
           resolveTypeBranch(arrayComp.values[0])
         rescue
-          @genClasses[@filename] += (@@indent + cppCode(mapXMLToCpp(arrayComp.values[0]), "_" + arrayComp.keys[0]) + "\n")         
+          @genClasses[@filename] += (@@indent + cppCode(mapXMLToCpp(arrayComp.values[0]), "_" + arrayComp.keys[0]) + "\n")
         end
 
         #Cheating as no type component is a string only hashes but we call this
@@ -480,10 +480,10 @@ class GenerateXMLReader
       throw "Unknown top level element #{name} as no subelem complexType or attribute type" if not elem.attributes.has_key?("type")
       print "#{name} has type ", elem.attributes["type"], "\n" if @verbose
       throw "Other unhandled elements for #{name}: #{elem}" if elem.elements.size > 0
-      return @elements[name].push(elem.attributes["type"])      
+      return @elements[name].push(elem.attributes["type"])
       #return cppCode(mapXMLToCpp(elem.attributes["type"]), name)
     end
-    
+
     subElem.elements.each(){|e|
       case e.name
       when "attribute"
@@ -505,7 +505,7 @@ class GenerateXMLReader
         parseSimpleContent(e, name)
       else
         throw "Unknown complexType structure encountered: #{e.name} for #{name} element"
-      end      
+      end
     }
 
   end
@@ -531,7 +531,7 @@ END
 
   def parseSequence(elem, topElementName)
     if not elem.elements.each(){|e|
-        throw "no ref for #{topElementName}: #{e}" if not e.attributes.has_key?("ref") 
+        throw "no ref for #{topElementName}: #{e}" if not e.attributes.has_key?("ref")
         puts "ref of #{e.attributes["ref"]} for sequence in #{topElementName}" if @verbose
         @elements[topElementName].push(e.attributes["ref"])
         #mapXMLToCpp(elem.attributes["ref"])
@@ -564,7 +564,7 @@ END
     attName = elem.attributes["name"]
     if not elem.attributes.has_key?("type") then
       puts "no type for attr #{attName} of #{name}" if @verbose
-      
+
       subElem = elem.elements["xs:simpleType"]
       if not subElem then
         subElem = elem.elements["xs:restriction/xs:pattern"]
@@ -577,7 +577,7 @@ END
       else
         parseSimpleType(subElem, attName)
       end
-    else 
+    else
       #read type
       puts cppCode(mapXMLToCpp(elem.attributes["type"]), elem.attributes["name"]) if @verbose
       #cppCode(mapXMLToCpp(elem.attributes["type"]), attName)
@@ -590,7 +590,7 @@ END
   ###for attributeGroup. Perhaps should merge with simpleContent
 
   def parseAttributes(element, topElementName)
-    element.elements.each(){|elem| 
+    element.elements.each(){|elem|
       @elements[topElementName].push(parseAttribute(elem, topElementName))
     }
   end
@@ -598,14 +598,14 @@ END
   def generateXMLWrapManagerBase(netconfElem)
     #get attributes
     #parseAttributes(netconfElem.elements["xs:complexType"], )
-##   netconfElem.elements.each(@@Attributes){|elem|      
+##   netconfElem.elements.each(@@Attributes){|elem|
 ##     puts cppCode(mapXMLToCpp(elem.attributes["type"]), elem.attributes["name"])
 ##   }
 
     #Generate header of c++ class including #includes
     #place attributes as data members
     #Generate implementation and also member functions to access values
-    
+
   end
 
   def mapElementToClass(elemName)
@@ -615,7 +615,7 @@ END
 
   def mapXMLToCpp(schemaType)
     if schemaType =~ /(.*[ ]){1}.*/ then
-      return "enum #{@elemName} { #{schemaType} }; #{@elemName}" 
+      return "enum #{@elemName} { #{schemaType} }; #{@elemName}"
     else
       throw "Unhandled Schema type #{schemaType}" if not @xmlToCpp.has_key?(schemaType)
       return @xmlToCpp[schemaType]

@@ -4,8 +4,8 @@
 
 2008-07-07  Andras Varga
 
-	* removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has 
-	built-in message IDs, message tree IDs and sequence chart 
+	* removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has
+	built-in message IDs, message tree IDs and sequence chart
 	visualization)
 
 	* EtherMAC2: performance: only fire notifications if someone is listening
@@ -13,19 +13,19 @@
 	* EtherMAC2: made notification consistent with PPP: use TxDetails as
 	"details" object
 
-	* EtherMAC, EtherMAC2: performance: remember output gate pointer 
+	* EtherMAC, EtherMAC2: performance: remember output gate pointer
 	instead of looking it up for each send()
 
 2008-06-29  Andras Varga
 
-	* moved class declarations from .cc files into separate .h files 
+	* moved class declarations from .cc files into separate .h files
 	  for EtherHub, EtherLLC, EtherEncap, etc
 
 2006-XX-XX Levente Meszaros
 
 	* created EtherMAC2, which is a simplified, duplex-only version of
  	  EtherMAC (i.e. it does not contain the CSMA/CD algorithm)
-		  
+
 2004-05-10  Andras Varga
 
 	* EtherMAC: auto MAC address assignment
@@ -33,7 +33,7 @@
 	* EtherMAC: auto-configuration of transmission rate and duplex/half duplex i
 	  mode.
 
-	* it's no longer an error if EtherMAC is not connected to the network 
+	* it's no longer an error if EtherMAC is not connected to the network
 	  ("unplugged cable")
 
 	* elaboration of Ethernet frame types: Ethernet II, 802.3 with LLC,

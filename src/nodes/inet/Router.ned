@@ -33,11 +33,12 @@ module Router
 {
     parameters:
         @node();
-        string routingFile = default("");
+        @labels(node,ethernet-node);
         @display("i=abstract/router");
+        string routingFile = default("");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
             parameters:

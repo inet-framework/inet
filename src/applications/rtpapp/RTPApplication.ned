@@ -3,7 +3,7 @@ package inet.applications.rtpapp;
 simple RTPApplication
 {
     parameters:
-        @display("i=old/app");
+        @display("i=block/app");
         string commonName;
         string profileName;
         double bandwidth;  //XXX in bytes(!) per sec
@@ -17,6 +17,6 @@ simple RTPApplication
         double sessionLeaveDelay @unit(s);
 
     gates:
-        output toRTP;
-        input fromRTP;
+        output rtpOut @labels(RTPInterfacePacket/down);
+        input rtpIn @labels(RTPInterfacePacket/up);
 }

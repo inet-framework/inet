@@ -28,11 +28,13 @@ module FailedRouter
 {
     parameters:
         @node();
-        int namid;
+        @labels(node);
+        @display("i=abstract/router;i2=status/noentry");
+        int namid = default(-1);
         string routingFile = default("");
     gates:
-        inout pppg[];
-        inout ethg[];
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

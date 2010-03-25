@@ -32,7 +32,8 @@ simple EtherAppCli
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
         volatile int respLength @unit(B) = default(1KB);  // length of response packets
         bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        @display("i=block/app");
     gates:
-        input in;
-        output out;
+        input in @labels(Ieee802Ctrl/up);
+        output out @labels(Ieee802Ctrl/down);
 }

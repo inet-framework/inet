@@ -34,17 +34,12 @@ class ICMPSerializer
          * Serializes an ICMPMessage for transmission on the wire.
          * Returns the length of data written into buffer.
          */
-        int serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
+        int serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
 
         /**
          * Puts a packet sniffed from the wire into an ICMPMessage.
          */
-        void parse(unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
-
-        /**
-         * Helper: calculate checksum
-         */
-        static unsigned short checksum(unsigned char *addr, unsigned int count);
+        void parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
 };
 
 #endif

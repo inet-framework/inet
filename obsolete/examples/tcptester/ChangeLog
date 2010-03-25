@@ -70,8 +70,8 @@
 
 2000-11-27  Verena Kahmann  <kahmann@quincy.telematik.informatik.uni-karlsruhe.de>
 
-	* tcpmodule.cc (handleMessage): BugFix: initialize and reset of 
-	bool finwait2_sch to show scheduling of FIN_WAIT_2 Timer. 
+	* tcpmodule.cc (handleMessage): BugFix: initialize and reset of
+	bool finwait2_sch to show scheduling of FIN_WAIT_2 Timer.
 
 2000-11-27  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
 
@@ -128,7 +128,7 @@
 	FIXME: MBI        Code/Function might be incorrect
 	These Tags should be used to mark the "code status" or to point out
 	obvious oddities
-	
+
 
 2000-09-29  Verena Kahmann <kahmann@telematik.informatik.uni-karlsruhe.de>
 

@@ -26,7 +26,7 @@ module RTPHost
         @display("i=device/pc2");
 
     gates:
-        inout pppg[];
+        inout pppg[] @labels(PPPFrame-conn);
 
     submodules:
         notificationBoard: NotificationBoard {
@@ -77,8 +77,8 @@ module RTPHost
         }
     connections allowunconnected:
         // transport connections
-        application.toRTP --> rtpLayer.fromApp;
-        application.fromRTP <-- rtpLayer.toApp;
+        application.rtpOut --> rtpLayer.appIn;
+        application.rtpIn <-- rtpLayer.appOut;
 
         rtpLayer.toUDPfromRTP --> udpModule.appIn[0];
         rtpLayer.fromUDPtoRTP <-- udpModule.appOut[0];

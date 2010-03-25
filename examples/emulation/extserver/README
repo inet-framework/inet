@@ -1,0 +1,24 @@
+The external interface makes it possible to connect the simulation with real
+networks.
+In this example the network consists of one client, one router, one internal
+server and one external (real) server.
+
+The client sends 100 MB of data to the external server using TCP for uplink traffic.
+For downlink traffic the external server may send data to the internal server.
+
+To run this example, some parameters have to be adjusted in the omnetpp.ini.
+
+- Set **.ext[0].device to the device name of the interface of the computer
+  running the simulation.
+- Set IP address of the external server to: 192.168.0.111/24 and add a route
+  to routers external interface 192.168.0.100/24 and set the gateway to the
+  IP address of the computer, on which the simulation is running
+  or adjust the omnetpp.ini and mrt files to your networks setup.
+- For uplink traffic use e.g. FileZilla and setup your external server to
+  listen on port 10021.
+- For downlink traffic use e.g. Iperf with following command line:
+  iperf -c 172.0.1.111 -P 1 -i 1 -m -p 10021 -M 1452.0B -l 100.0M -f m -t 0
+
+Start the simulation with root privileges.
+
+IP addresses and routing tables are set up by using mrt files.

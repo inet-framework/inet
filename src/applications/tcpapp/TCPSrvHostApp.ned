@@ -46,8 +46,9 @@ simple TCPSrvHostApp like TCPApp
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
         string serverThreadClass; // class name of "thread" objects to launch on incoming connections
+        @display("i=block/app");
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 

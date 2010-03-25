@@ -1,5 +1,5 @@
 %description:
-Test parsing IPv6 addresses 
+Test parsing IPv6 addresses
 
 %global:
 #include "IPv6Address.h"
