@@ -15,6 +15,8 @@ TODO: implement missing models:
 TODO: integrate models:
    HTTPTools, VoIPTools, HIPSim++, MobileWiMAX, ...
 
+TODO: TCP congestion control algorithms are all present in the Linux kernel, extract and use them in our TCP!
+
 TODO: for omnetpp-4.1: eliminate NotificationBoard, use signals instead
 
 TODO: PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks

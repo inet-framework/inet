@@ -55,7 +55,8 @@ struct TCPPayloadMessage
 // TCP Option Numbers
 // Reference: http://www.iana.org/assignments/tcp-parameters/
 // Date: 2009-08-05
-// TODO Options not yet implemented should stay commented out
+//
+// Note: Options not yet implemented should stay commented out
 //
 enum TCPOptionNumbers
 {
