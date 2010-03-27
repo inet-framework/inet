@@ -25,8 +25,9 @@ import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.world.ChannelInstaller;
 //import inet.nodes.inet.RouterWithEtherInterface2;
 import inet.nodes.ethernet.EtherSwitch2;
-import inet.nodes.inet.StandardHostWithEthernetInterface2;
-import inet.nodes.inet.StandardHost2WithEthernetInterface2;
+//import inet.nodes.inet.StandardHostWithEthernetInterface2;
+import inet.nodes.inet.StandardHost3WithEthernetInterface2;
+import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 
 //
@@ -39,7 +40,7 @@ import inet.nodes.inet.StandardHost2WithEthernetInterface2;
 network EcrTestOfDedicatedAccess
 {
     parameters:
-        int N;	// number of subscribers (ONUs); we assume that there is only one client per ONU.
+        int N;	// number of subscribers (ONUs); we assume that there is only one host per ONU.
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)
@@ -60,7 +61,7 @@ network EcrTestOfDedicatedAccess
             parameters:
                 @display("p=52,42");
         }
-        client[N]: StandardHost2WithEthernetInterface2 {
+        host[N]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
         }
@@ -80,13 +81,13 @@ network EcrTestOfDedicatedAccess
             parameters:
                 @display("p=300,119");
         }
-        server: StandardHostWithEthernetInterface2 {
+        server: StandardServerWithEthernetInterface2 {
             parameters:
                 @display("p=464,119;i=device/server_l");
         }
     connections:
         for i=0..N-1 {
-            client[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> switch1.ethg++;
+            host[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> switch1.ethg++;
         }
         switch1.ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> switch2.ethg++;
 //        switch2.ethg++ <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> switch3.ethg++;

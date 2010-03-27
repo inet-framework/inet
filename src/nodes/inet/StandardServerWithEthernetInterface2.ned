@@ -44,19 +44,19 @@ import inet.util.TCPDump;
 //
 // \IP host with TCP, UDP layers and applications.
 //
-module StandardHost3WithEthernetInterface2
+module StandardServerWithEthernetInterface2
 {
     parameters:
         @node();
         int numTcpApps = default(0);
-        int numHttpApps = default(0);
+        int numHttpSrvs = default(0);
         int numUdpApps = default(0);
-        int numVideoApps = default(0);
+        int numVideoSrvs = default(0);
         int numSctpApps = default(0);
         string tcpAppType = default("n/a");
-        string httpAppType = default("n/a");
+        string httpSrvType = default("n/a");
         string udpAppType = default("n/a");
-        string videoAppType = default("n/a");        
+        string videoSrvType = default("n/a");        
         string sctpAppType = default("n/a");
         string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         bool IPForward = default(false);
@@ -93,9 +93,9 @@ module StandardHost3WithEthernetInterface2
 //                port = index+1024;
                 @display("p=292,54");
         }
-        httpApp[numHttpApps]: <httpAppType> like TCPApp2 {
+        httpSrv[numHttpSrvs]: <httpSrvType> like TCPApp {
             parameters:
-                port = index+1024;
+//                port = index+1024;
                 @display("p=169,54");
         }
         tcp: <tcpType> like ITCP {
@@ -106,7 +106,7 @@ module StandardHost3WithEthernetInterface2
             parameters:
                 @display("p=537,54");
         }
-        videoApp[numVideoApps]: <videoAppType> like UDPApp {
+        videoSrv[numVideoSrvs]: <videoSrvType> like UDPApp {
             parameters:
                 @display("p=412,54");
         }
@@ -160,9 +160,9 @@ module StandardHost3WithEthernetInterface2
             tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        for i=0..numHttpApps-1 {
-            httpApp[i].tcpOut --> tcp.appIn++;
-            httpApp[i].tcpIn <-- tcp.appOut++;
+        for i=0..numHttpSrvs-1 {
+            httpSrv[i].tcpOut --> tcp.appIn++;
+            httpSrv[i].tcpIn <-- tcp.appOut++;
         }
 
         tcp.ipOut --> networkLayer.tcpIn;
@@ -173,9 +173,9 @@ module StandardHost3WithEthernetInterface2
             udpApp[i].udpIn <-- udp.appOut++;
         }
 
-        for i=0..numVideoApps-1 {
-            videoApp[i].udpOut --> udp.appIn++;
-            videoApp[i].udpIn <-- udp.appOut++;
+        for i=0..numVideoSrvs-1 {
+            videoSrv[i].udpOut --> udp.appIn++;
+            videoSrv[i].udpIn <-- udp.appOut++;
         }
 
         udp.ipOut --> networkLayer.udpIn;

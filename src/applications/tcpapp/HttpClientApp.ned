@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -77,6 +78,7 @@ simple HttpClientApp like TCPApp2
         volatile double thinkTime @unit("s") = default(0s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
+        @display("i=block/app");
     gates:
         input tcpIn;
         output tcpOut;
