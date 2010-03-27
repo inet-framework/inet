@@ -631,6 +631,9 @@ def main():
     
     # configure logging
     logging.basicConfig(filename=options.logfile, level=loglevel)
+    if not options.daemonize:
+        logging.getLogger().addHandler(logging.StreamHandler())
+    logging.debug("Logging to %s" % options.logfile)
 
     # this is where we'll spend our time
     wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
