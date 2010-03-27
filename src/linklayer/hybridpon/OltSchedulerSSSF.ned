@@ -14,17 +14,22 @@ package inet.linklayer.hybridpon;
 // algorithm reported in [1] for SUCCESS-HPON.
 //
 // This scheduler has the following features:
-// <li> Based on VOQing (of Ethernet frames for downstream),
-//      one FIFO queue per stream (either up- or downstream).
-//      <ul>
-//      <li> For the sake of implementation simplicity, now we have two
-//           separate physical queues, VOQ and Tx Queue, but they are
-//           handled as one logical queue, esp. in processing bit and
-//           frame length counters;
+// <ul>
+// <li>Based on VOQing (of Ethernet frames for downstream),
+//     one FIFO queue per stream (either up- or downstream).
+//     <ul>
+//     <li>For the sake of implementation simplicity, now we have two
+//         separate physical queues, VOQ and Tx Queue, but they are
+//         handled as one logical queue, esp. in processing bit and
+//         frame length counters;
+//     </li>
 //     </ul>
-// <li> Instant framing of downstream data as in ONU;
-// <li> Granting based on queue statuses for both up- and downstream
-//      traffic with independent max. size limitation.
+// </li>
+// <li>Instant framing of downstream data as in ONU;
+// </li>
+// <li>Granting based on queue statuses for both up- and downstream
+//     traffic with independent max. size limitation.
+// </li>
 // </ul>
 //
 // References:

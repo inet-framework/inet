@@ -480,14 +480,14 @@ void OltScheduler::transmitPollFrame(HybridPonMessage *msg)
 void OltScheduler::initialize(void)
 {
 	// initialize OLT NED parameters
-	numReceivers = getParentModule()->par("numReceivers");
-	numTransmitters = getParentModule()->par("numTransmitters");
+	numReceivers = getParentModule()->par("numReceivers").longValue();
+	numTransmitters = getParentModule()->par("numTransmitters").longValue();
 
 	// initialize OltScheduler NED parameters
-	cwMax = par("cwMax");
+	cwMax = par("cwMax").longValue();
 	maxTxDelay = par("maxTxDelay");
 	onuTimeout = par("onuTimeout");
-	queueSizePoll = par("queueSizePoll");
+	queueSizePoll = par("queueSizePoll").longValue();
 
     // initialize configuration and status variables
 	cModule *olt = getParentModule();

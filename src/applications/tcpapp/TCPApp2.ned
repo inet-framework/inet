@@ -26,6 +26,7 @@ moduleinterface TCPApp2
 {
     parameters:
         int port;
+        @display("i=block/app");
     gates:
         input tcpIn;
         output tcpOut;
