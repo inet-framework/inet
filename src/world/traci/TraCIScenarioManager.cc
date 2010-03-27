@@ -17,12 +17,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <sstream>
+
+#define WANT_WINSOCK2
+#include <platdep/sockets.h>
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
+#include <ws2tcpip.h>
+#else
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#endif
+#define MYSOCKET (*(SOCKET*)socketPtr)
+
 #include "world/traci/TraCIScenarioManager.h"
 #include "world/traci/TraCIConstants.h"
 #include "mobility/traci/TraCIMobility.h"
-
-#include <sstream>
-
 
 Define_Module(TraCIScenarioManager);
 
@@ -77,7 +87,7 @@ void TraCIScenarioManager::initialize()
 	if (cc == 0) error("Could not find a ChannelControl module named channelcontrol");
 
 	if (debug) EV << "TraCIScenarioManager connecting to TraCI server" << endl;
-	socket = -1;
+	socketPtr = 0;
 	connect();
 	init_traci();
 
@@ -85,20 +95,20 @@ void TraCIScenarioManager::initialize()
 }
 
 std::string TraCIScenarioManager::receiveTraCIMessage() {
-	if (socket < 0) error("Connection to TraCI server lost");
+	if (!socketPtr) error("Connection to TraCI server lost");
 
 	uint32_t msgLength;
 	{
 		char buf2[sizeof(uint32_t)];
 		uint32_t bytesRead = 0;
 		while (bytesRead < sizeof(uint32_t)) {
-			int receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf2) + bytesRead, sizeof(uint32_t) - bytesRead, 0);
+			int receivedBytes = ::recv(MYSOCKET, reinterpret_cast<char*>(&buf2) + bytesRead, sizeof(uint32_t) - bytesRead, 0);
 			if (receivedBytes > 0) {
 				bytesRead += receivedBytes;
 			} else {
 				if (errno == EINTR) continue;
 				if (errno == EAGAIN) continue;
-				error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), bytesRead, strerror(errno));
+				error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), bytesRead, strerror(sock_errno()));
 			}
 		}
 		TraCIBuffer(std::string(buf2, sizeof(uint32_t))) >> msgLength;
@@ -110,7 +120,7 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 		if (debug) EV << "Reading TraCI message of " << bufLength << " bytes" << endl;
 		uint32_t bytesRead = 0;
 		while (bytesRead < bufLength) {
-			int receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf) + bytesRead, bufLength - bytesRead, 0);
+			int receivedBytes = ::recv(MYSOCKET, reinterpret_cast<char*>(&buf) + bytesRead, bufLength - bytesRead, 0);
 			if (receivedBytes > 0) {
 				bytesRead += receivedBytes;
 			} else {
@@ -124,18 +134,18 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 }
 
 void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
-	if (socket < 0) error("Connection to TraCI server lost");
+	if (!socketPtr) error("Connection to TraCI server lost");
 
 	{
 		uint32_t msgLength = sizeof(uint32_t) + buf.length();
 		TraCIBuffer buf2 = TraCIBuffer(); buf2 << msgLength;
-		size_t sentBytes = ::send(socket, buf2.str().c_str(), sizeof(uint32_t), 0);
+		size_t sentBytes = ::send(MYSOCKET, buf2.str().c_str(), sizeof(uint32_t), 0);
 		if (sentBytes != sizeof(uint32_t)) error("Could not write %d bytes to TraCI server, sent only %d: %s", sizeof(uint32_t), sentBytes, strerror(errno));
 	}
 
 	{
 		if (debug) EV << "Writing TraCI message of " << buf.length() << " bytes" << endl;
-		size_t sentBytes = ::send(socket, buf.c_str(), buf.length(), 0);
+		size_t sentBytes = ::send(MYSOCKET, buf.c_str(), buf.length(), 0);
 		if (sentBytes != buf.length()) error("Could not write %d bytes to TraCI server, sent only %d: %s", buf.length(), sentBytes, strerror(errno));
 	}
 }
@@ -174,6 +184,8 @@ bool TraCIScenarioManager::queryTraCIOptional(uint8_t commandId, const TraCIBuff
 }
 
 void TraCIScenarioManager::connect() {
+	if (initsocketlibonce() != 0) error("Could not init socketlib");
+
 	in_addr addr;
 	struct hostent* host_ent;
 	struct in_addr saddr;
@@ -194,14 +206,15 @@ void TraCIScenarioManager::connect() {
 	address.sin_port = htons(port);
 	address.sin_addr.s_addr = addr.s_addr;
 
-	socket = ::socket( AF_INET, SOCK_STREAM, 0 );
-	if (socket < 0) error("Could not create socket to connect to TraCI server");
+	socketPtr = new SOCKET();
+	MYSOCKET = ::socket( AF_INET, SOCK_STREAM, 0 );
+	if (MYSOCKET < 0) error("Could not create socket to connect to TraCI server");
 
-	if (::connect(socket, (sockaddr const*)&address, sizeof(address)) < 0) error("Could not connect to TraCI server");
+	if (::connect(MYSOCKET, (sockaddr const*)&address, sizeof(address)) < 0) error("Could not connect to TraCI server");
 
 	{
 		int x = 1;
-		::setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&x, sizeof(x));
+		::setsockopt(MYSOCKET, IPPROTO_TCP, TCP_NODELAY, (const char*)&x, sizeof(x));
 	}
 }
 
@@ -268,9 +281,10 @@ void TraCIScenarioManager::finish()
 		delete executeOneTimestepTrigger;
 		executeOneTimestepTrigger = 0;
 	}
-	if (socket >= 0) {
-		::close(socket);
-		socket = -1;
+	if (socketPtr) {
+		closesocket(MYSOCKET);
+		delete &MYSOCKET;
+		socketPtr = 0;
 	}
 	while (hosts.begin() != hosts.end()) {
 		deleteModule(hosts.begin()->first);

@@ -194,7 +194,7 @@ def run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_
     try:
         cmd = [sumo_command, "-c", config_file_name] 
         logging.info("Starting SUMO (%s) on port %d, seed %d" % (" ".join(cmd), remote_port, seed))
-        sumo = subprocess.Popen(cmd, cwd=runpath, stdin=None, stdout=sumoLogOut, stderr=sumoLogErr, close_fds=True)
+        sumo = subprocess.Popen(cmd, cwd=runpath, stdin=None, stdout=sumoLogOut, stderr=sumoLogErr)
 
         sumo_socket = None
 

@@ -25,12 +25,6 @@
 #include <map>
 #include <list>
 #include <stdexcept>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <errno.h>
 
 #include <omnetpp.h>
 
@@ -81,7 +75,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		std::list<std::string> roiRoads; /**< which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty */
 		std::list<std::pair<Coord, Coord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
 
-		int socket;
+		void* socketPtr;
 		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
 		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
