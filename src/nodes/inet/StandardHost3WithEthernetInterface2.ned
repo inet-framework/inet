@@ -49,11 +49,13 @@ module StandardHost3WithEthernetInterface2
     parameters:
         @node();
         int numTcpApps = default(0);
+        int numFtpApps = default(0);
         int numHttpApps = default(0);
         int numUdpApps = default(0);
         int numVideoApps = default(0);
         int numSctpApps = default(0);
         string tcpAppType = default("n/a");
+        string ftpAppType = default("n/a");
         string httpAppType = default("n/a");
         string udpAppType = default("n/a");
         string videoAppType = default("n/a");        
@@ -90,13 +92,16 @@ module StandardHost3WithEthernetInterface2
         }
         tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
             parameters:
-//                port = index+1024;
                 @display("p=292,54");
         }
+        ftpApp[numFtpApps]: <ftpAppType> like TCPApp {
+            parameters:
+                @display("p=169,54");
+        }        
         httpApp[numHttpApps]: <httpAppType> like TCPApp2 {
             parameters:
                 port = index+1024;
-                @display("p=169,54");
+                @display("p=169,140");
         }
         tcp: <tcpType> like ITCP {
             parameters:
@@ -160,6 +165,11 @@ module StandardHost3WithEthernetInterface2
             tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
+        for i=0..numFtpApps-1 {
+            ftpApp[i].tcpOut --> tcp.appIn++;
+            ftpApp[i].tcpIn <-- tcp.appOut++;
+        }
+        
         for i=0..numHttpApps-1 {
             httpApp[i].tcpOut --> tcp.appIn++;
             httpApp[i].tcpIn <-- tcp.appOut++;

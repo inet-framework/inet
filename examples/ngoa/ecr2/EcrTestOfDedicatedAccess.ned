@@ -40,7 +40,8 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 network EcrTestOfDedicatedAccess
 {
     parameters:
-        int N;	// number of subscribers (ONUs); we assume that there is only one host per ONU.
+//        int N;	// number of ONUs (subscribers)
+        int n;	// number of hosts (users) per ONU (subscriber)
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)
@@ -61,7 +62,7 @@ network EcrTestOfDedicatedAccess
             parameters:
                 @display("p=52,42");
         }
-        host[N]: StandardHost3WithEthernetInterface2 {
+        host[n]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
         }
@@ -86,7 +87,7 @@ network EcrTestOfDedicatedAccess
                 @display("p=464,119;i=device/server_l");
         }
     connections:
-        for i=0..N-1 {
+        for i=0..n-1 {
             host[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> switch1.ethg++;
         }
         switch1.ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> switch2.ethg++;

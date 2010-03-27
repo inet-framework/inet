@@ -24,10 +24,7 @@ import inet.applications.pingapp.PingApp;
 import inet.applications.sctpapp.SCTPApp;
 import inet.applications.tcpapp.TCPApp;
 import inet.applications.tcpapp.TCPApp2;
-//import inet.applications.tcpapp.HttpClientApp;
 import inet.applications.udpapp.UDPApp;
-//import inet.applications.udpapp.UDPVideoStreamCli;
-//import inet.applications.udpapp.VideoApp;
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface2;
 import inet.linklayer.ext.ExtInterface;
@@ -41,6 +38,7 @@ import inet.util.NAMTraceWriter;
 import inet.util.TCPDump;
 
 
+import ned.IdealChannel;
 //
 // \IP host with TCP, UDP layers and applications.
 //
@@ -49,14 +47,16 @@ module StandardServerWithEthernetInterface2
     parameters:
         @node();
         int numTcpApps = default(0);
+        int numFtpSrvs = default(0);
         int numHttpSrvs = default(0);
         int numUdpApps = default(0);
         int numVideoSrvs = default(0);
         int numSctpApps = default(0);
         string tcpAppType = default("n/a");
+        string ftpSrvType = default("n/a");
         string httpSrvType = default("n/a");
         string udpAppType = default("n/a");
-        string videoSrvType = default("n/a");        
+        string videoSrvType = default("n/a");
         string sctpAppType = default("n/a");
         string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         bool IPForward = default(false);
@@ -90,13 +90,15 @@ module StandardServerWithEthernetInterface2
         }
         tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
             parameters:
-//                port = index+1024;
                 @display("p=292,54");
+        }
+        ftpSrv[numFtpSrvs]: <ftpSrvType> like TCPApp {
+            parameters:
+                @display("p=169,54");
         }
         httpSrv[numHttpSrvs]: <httpSrvType> like TCPApp {
             parameters:
-//                port = index+1024;
-                @display("p=169,54");
+                @display("p=169,140");
         }
         tcp: <tcpType> like ITCP {
             parameters:
@@ -158,6 +160,11 @@ module StandardServerWithEthernetInterface2
         for i=0..numTcpApps-1 {
             tcpApp[i].tcpOut --> tcp.appIn++;
             tcpApp[i].tcpIn <-- tcp.appOut++;
+        }
+
+        for i=0..numFtpSrvs-1 {
+            ftpSrv[i].tcpOut --> tcp.appIn++;
+            ftpSrv[i].tcpIn <-- tcp.appOut++;
         }
 
         for i=0..numHttpSrvs-1 {
