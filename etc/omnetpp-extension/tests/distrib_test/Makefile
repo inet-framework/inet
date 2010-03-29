@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for distrib_test2
+# OMNeT++/OMNEST Makefile for distrib_test
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -O out
 #
 
 # Name of target to be created (-o option)
-TARGET = distrib_test2$(EXE_SUFFIX)
+TARGET = distrib_test$(EXE_SUFFIX)
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
@@ -91,7 +91,7 @@ msgheaders: $(MSGFILES:.msg=_m.h)
 
 clean:
 	-rm -rf $O
-	-rm -f distrib_test2 distrib_test2.exe libdistrib_test2.so libdistrib_test2.a libdistrib_test2.dll libdistrib_test2.dylib
+	-rm -f distrib_test distrib_test.exe libdistrib_test.so libdistrib_test.a libdistrib_test.dll libdistrib_test.dylib
 	-rm -f ./*_m.cc ./*_m.h
 	-rm -f results/*_m.cc results/*_m.h
 
