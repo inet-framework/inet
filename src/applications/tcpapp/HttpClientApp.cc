@@ -42,10 +42,12 @@ void HttpClientApp::initialize()
     numEmbeddedObjects = 0;
     numSessionsFinished = 0;
     sumSessionDelays = 0.0;
+    sumSessionSizes = 0.0;
     sumSessionTransferRates = 0.0;
 
     earlySend = false;  // TBD make it parameter
     htmlObjectRcvd = false;
+    warmupFinished = false;
     WATCH(numEmbeddedObjects);
     WATCH(earlySend);
 
@@ -130,6 +132,12 @@ void HttpClientApp::socketEstablished(int connId, void *ptr)
     // So we use a dedicated function for this first request (i.e., "sendHtmlRequest").
     if (!earlySend)
         sendHtmlRequest();
+
+    // start statistics gathering once the warm-up period has passed.
+    if (simTime() >= simulation.getWarmupPeriod())
+	{
+		warmupFinished = true;
+	}
 }
 
 void HttpClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
@@ -164,13 +172,17 @@ void HttpClientApp::socketClosed(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketClosed(connId, ptr);
 
-    // update session statistics
-    numSessionsFinished++;
-    bytesRcvdAtSessionEnd = bytesRcvd;
-    double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
-    int sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
-    sumSessionDelays += sessionDelay;
-    sumSessionTransferRates += sessionSize/sessionDelay;
+    if (warmupFinished == true)
+	{
+		// update session statistics
+		numSessionsFinished++;
+		bytesRcvdAtSessionEnd = bytesRcvd;
+		double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
+		long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
+		sumSessionSizes += sessionSize;	///< counting the size of sessions only after the warm-up period
+		sumSessionDelays += sessionDelay;
+		sumSessionTransferRates += sessionSize / sessionDelay;
+	}
 
     // start another session after a delay
     timeoutMsg->setKind(MSGKIND_CONNECT);
@@ -193,7 +205,7 @@ void HttpClientApp::finish()
     // record session statistics
     if (numSessionsFinished > 0) {
         double avgSessionDelay = sumSessionDelays/double(numSessionsFinished);
-        double avgSessionThroughput = bytesRcvdAtSessionEnd/sumSessionDelays;
+        double avgSessionThroughput = sumSessionSizes/sumSessionDelays;
         double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;
 
         recordScalar("number of finished sessions", numSessionsFinished);
