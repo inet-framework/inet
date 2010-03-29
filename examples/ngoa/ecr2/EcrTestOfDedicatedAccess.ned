@@ -24,7 +24,8 @@ package inet.examples.ngoa.ecr2;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.world.ChannelInstaller;
 //import inet.nodes.inet.RouterWithEtherInterface2;
-import inet.nodes.ethernet.EtherSwitch2;
+//import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+import inet.nodes.ethernet.EtherSwitch3;
 //import inet.nodes.inet.StandardHostWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
@@ -70,7 +71,7 @@ network EcrTestOfDedicatedAccess
 //            parameters:
 //                @display("i=device/laptop;p=46,119");
 //        }
-        switch1: EtherSwitch2 {
+        switch1: EtherSwitch3 {
             parameters:
                 @display("p=131,119");
         }
@@ -78,7 +79,7 @@ network EcrTestOfDedicatedAccess
 //            parameters:
 //                @display("p=239,119");
 //        }
-        switch2: EtherSwitch2 {
+        switch2: EtherSwitch3 {
             parameters:
                 @display("p=300,119");
         }
