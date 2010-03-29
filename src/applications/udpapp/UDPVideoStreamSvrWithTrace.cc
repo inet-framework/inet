@@ -151,7 +151,8 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	d->numPktSent = 0;
 	d->numFrames = numFrames;
 	d->framePeriod = framePeriod;
-	d->currentFrame = long(uniform(1.0, numFrames+1.0)); ///< start frame is randomly selected
+//	d->currentFrame = long(uniform(1.0, numFrames+1.0)); ///< start frame is randomly selected
+	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
 	streamVector.push_back(d);
 
 	// initialize self messages
