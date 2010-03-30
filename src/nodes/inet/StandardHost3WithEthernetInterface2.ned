@@ -94,7 +94,7 @@ module StandardHost3WithEthernetInterface2
             parameters:
                 @display("p=292,54");
         }
-        ftpApp[numFtpApps]: <ftpAppType> like TCPApp {
+        ftpApp[numFtpApps]: <ftpAppType> like TCPApp2 {
             parameters:
                 @display("p=169,54");
         }        
