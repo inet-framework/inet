@@ -29,7 +29,7 @@ package inet.applications.udpapp;
 //
 // The server can serve several clients, and several streams per client.
 //
-// @see UDPVideoStreamCli
+// @see UDPVideoStreamCliWithTrace
 //
 simple UDPVideoStreamSvrWithTrace like UDPApp
 {
@@ -38,7 +38,7 @@ simple UDPVideoStreamSvrWithTrace like UDPApp
         int fps = default(30);	// frames per second (fps) of the trace file
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
-															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.												
+															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.											
         string traceFile;	// name of a video trace file in ASU <i>terse</i> format
         @display("i=block/app");
     gates:

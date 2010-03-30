@@ -78,6 +78,9 @@ void UDPVideoStreamCli::receiveStream(cPacket *msg)
     EV << "Video stream packet:\n";
     printPacket(msg);
     eed.record(simTime() - msg->getCreationTime());
+
+    // TODO: Record packet loss and de-jitter buffer depletion period!!!
+
     delete msg;
 }
 

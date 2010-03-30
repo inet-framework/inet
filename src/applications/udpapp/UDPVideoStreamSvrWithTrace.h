@@ -28,9 +28,9 @@
 ///
 /// @class UDPVideoStreamSvrWithTrace
 /// @brief Implementation of a video streaming server based on the
-/// interface packages originally developed by Signorin Luca
-/// (luca.signorin@inwind.it), University of Ferrara, Italy,
-/// for OMNeT++ 2.2 and later update by Dr. Fitzek for OMNeT++ 3
+///        interface packages originally developed by Signorin Luca
+///        (luca.signorin@inwind.it), University of Ferrara, Italy,
+///        for OMNeT++ 2.2 and later update by Dr. Fitzek for OMNeT++ 3
 ///
 class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
 {
@@ -44,8 +44,10 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         IPvXAddress clientAddr;	///< client address
         int clientPort;			///< client UDP port
 
+        // packet generation
+        unsigned short currentSequenceNumber;	///< current sequence number
+
         // variable for a video trace
-//        long videoSize;           ///< total size of video
         long numFrames;			///< total number of frames for a video trace
         double framePeriod;		///< frame period for a video trace
         long currentFrame;		///< current frame number (will be wrapped around)

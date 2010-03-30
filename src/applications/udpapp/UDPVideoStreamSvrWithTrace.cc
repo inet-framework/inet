@@ -43,6 +43,7 @@
 #include <fstream>
 #include "UDPVideoStreamSvrWithTrace.h"
 #include "UDPControlInfo_m.h"
+#include "UDPVideoStreamPacket_m.h"
 
 
 Define_Module(UDPVideoStreamSvrWithTrace);
@@ -72,9 +73,6 @@ UDPVideoStreamSvrWithTrace::~UDPVideoStreamSvrWithTrace()
 
 void UDPVideoStreamSvrWithTrace::initialize()
 {
-	//    waitInterval = &par("waitInterval");
-	//    packetLen = &par("packetLen");
-	//    videoSize = &par("videoSize");
 	serverPort = par("serverPort");
 	appOverhead = par("appOverhead").longValue();
 	maxPayloadSize = par("maxPayloadSize").longValue();
@@ -83,7 +81,6 @@ void UDPVideoStreamSvrWithTrace::initialize()
 
 	// read frame size data from the trace file into 'frameSizeVector'
 	const char *fileName = par("traceFile").stringValue();
-//	const char *fileName = par("traceFile");
 	std::ifstream fin(fileName);
 	if (fin.is_open())
 	{
@@ -146,12 +143,10 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	VideoStreamData *d = new VideoStreamData;
 	d->clientAddr = ctrl->getSrcAddr();
 	d->clientPort = ctrl->getSrcPort();
-	//    d->videoSize = (*videoSize);
-	//    d->bytesLeft = d->videoSize;
+	d->currentSequenceNumber = intuniform(0, 65535);	///< made random according to RFC 3550
 	d->numPktSent = 0;
 	d->numFrames = numFrames;
 	d->framePeriod = framePeriod;
-//	d->currentFrame = long(uniform(1.0, numFrames+1.0)); ///< start frame is randomly selected
 	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
 	streamVector.push_back(d);
 
@@ -171,9 +166,9 @@ void UDPVideoStreamSvrWithTrace::readFrameSize(cMessage *frameTimer)
 {
 	VideoStreamData *d = (VideoStreamData *) frameTimer->getContextPointer();
 
-	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame when it reaches the last one
 	d->bytesLeft = frameSizeVector[d->currentFrame];
 	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));
+	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
 
 	// schedule next frame start
 	scheduleAt(simTime() + framePeriod, frameTimer);
@@ -187,15 +182,16 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	VideoStreamData *d = (VideoStreamData *) pktTimer->getContextPointer();
 
 	// generate and send a packet
-	cPacket *pkt = new cPacket("VideoStrmPk");
-	//	long pktLen = packetLen->longValue();
-	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize
-			: d->bytesLeft;
+	UDPVideoStreamPacket *pkt = new UDPVideoStreamPacket("UDPVideoStreamPacket");
+	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
+	pkt->setSequenceNumber(d->currentSequenceNumber);
+	// TODO: Add time stamp and other field processing here
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
 	d->bytesLeft -= payloadSize;
 	d->numPktSent++;
+	d->currentSequenceNumber = (d->currentSequenceNumber < 65535) ? d->currentSequenceNumber + 1 : 0;	///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;
 
 	// reschedule timer if there's bytes left to send

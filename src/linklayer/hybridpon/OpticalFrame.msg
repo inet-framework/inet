@@ -1,7 +1,7 @@
 ///
 /// @file   OpticalFrame.msg
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Jun/30/2009
+/// @date   2009-06-30
 /// 
 /// @brief  Defines 'OpticalFrame' message object.
 ///
