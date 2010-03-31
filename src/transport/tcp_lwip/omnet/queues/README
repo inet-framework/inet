@@ -1,0 +1,33 @@
+This directory contains "plug-in" queue classes for TCP. You can configure
+TCP to use a particular queue class by setting its sendQueueClass,
+receiveQueueClass NED parameters to the given class name.
+
+In practice, you do it by adding either this:
+  **.tcp.sendQueueClass="TCPVirtualDataSendQueue"
+  **.tcp.receiveQueueClass="TCPVirtualDataRcvQueue"
+or this:
+  **.tcp.sendQueueClass="TCPMsgBasedSendQueue"
+  **.tcp.receiveQueueClass="TCPMsgBasedRcvQueue"
+to your omnetpp.ini.
+
+(It is also possible for apps to specify it individually for each
+connection in the active/passive open commands, but this is probably not
+that useful in practice).
+
+What are these queue classes anyway? Different simulation scenarios require
+different approaches regarding transmitted data.  In some scenarios,
+only the amount of data ("200 Meg") is important, contents doesn't
+matter. In this case, data can just be represented as plain byte
+counts -- TCPVirtualDataSendQueue/RcvQueue does that.
+
+In other scenarios, contents does matter a lot: maybe the app layer above
+TCP needs to transmit cMessage objects (e.g. a HTTP request is represented
+by a HTTPRequest message class), and you want exactly the same cMessage
+sequence to be reproduced on the receiver side. Here, every cMessage would
+map onto a sequence number range in the TCP stream, and the object is
+passed up to the application when its last byte has arrved on the simulated
+connection. This is done by TCPMsgBasedSendQueue/RcvQueue.
+
+You always choose the ones appropriate for your app model.
+
+

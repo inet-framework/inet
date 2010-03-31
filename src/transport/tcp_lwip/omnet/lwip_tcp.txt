@@ -1,0 +1,50 @@
+IP layer:
+    <-- TCPSEG packet :
+        bejövő csomag, a tcp_input()-hoz kell továbbítani.
+    --> TCPSEG packet :
+        kimenő csomag, az ip_output kapta meg paraméterként
+
+App layer:
+    <-- TCP_C_OPEN_ACTIVE
+    <-- TCP_C_OPEN_PASSIVE
+    <-- TCP_C_CLOSE
+    <-- TCP_C_SEND
+    <-- TCP_C_ABORT
+    <-- TCP_C_STATUS
+
+    --> TCP_I_ESTABLISHED
+    --> TCP_I_CLOSED
+    --> TCP_I_PEER_CLOSED
+    --> TCP_I_TIMED_OUT
+    --> TCP_I_CONNECTION_RESET
+    --> TCP_I_CONNECTION_REFUSED
+    --> TCP_I_DATA
+    --> TCP_I_STATUS
+
+
+LwipTcpLayer :
+    az eredeti lwip.tcp osztállyá alaktva
+        tcp_input() : bejövő IP csomag fogadása
+    interface:
+        ip_output() : kimenő csomag (OMNET)
+        lwip_tcp_event() : események: sent, connected, accepted, received, poll, error. az error kivételével a többi pcb-s, az error viszont megkapja a pcb->callback_arg-ot
+
+LwipTcpStack :
+
+LwipTcpSocket : ( == TcpLwipConnection )
+    a pcb körülöntve...
+    LwipTcpSocket(LwipTcpStack);
+    LwipTcpSocket(LwipTcpStack, pcb, ...); az accept haszálja
+        pcb->callback_arg = this !!! Konstruktorokba!!!
+    event_sent() - újabb send jöhet (nyugtázta a túloldal)
+    event_recv() - TCP_I_DATA
+    event_conn() - TCP_I_ESTABLISHED
+    event_accept() - másolat magáról, új connId, TCP_I_ESTABLISHED
+    event_poll() - semmi
+    event_error() - TCP_I_ERROR, ???
+
+TCP_lwip :
+    omnet tcp class
+    handleMsg, ...
+    ip_output() megvalósítás
+    handleMsg hívja az LwipTcpLayer::tcp_input() fvényt.

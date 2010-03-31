@@ -1,0 +1,20 @@
+/*
+ * CPacket* msg átküldése:
+ * 1. küldés:
+ *   a. process_SEND -nél el kell tenni az msg-t a queueba, számolni az offsetet
+ *   b. send_callback-nál kiszedni a seqno-t, és ha még nem volt elmentve, akkor eltenni,
+ *         ilyenkor konvertálni az eltett pozíciókat....
+ *      az eltett msg-k közül átküldeni azokat, amik a seqno és seqno+len közé esnek
+ *      az eltett msg-k közül törölni azokat, amik régebbiek, mint seqno-winsize
+ * 2. fogadás:
+ *   a. handleMsg-nél eltenni a bejövő üzenetből az (msg,seq) párosokat.
+ *   b. socket.receive-nél sikeres olvasás(ok) után a received.seq lekérdezése, és betenni azokat az msg-ket az üzenetbe,
+ *      amik a received.seq-receivedbytes+1 és received.seq közé esnek, ezeket kivenni a queueból
+ *      - sajnos a hamis üzenetben lévő msg-ket nem tudom hogyan lehetne kiszűrni.
+ *        Ötlet: a bejövő TCPSegment PayLoad-jait együtt eltenni egy segment tárba, az NSC-nek átadott csomagban pedig
+ *        a segment első bájtjára tenni egy 1 bájtos azonosítót, így a pozíció és az ellenőrző bájt már elég jól szűr...
+ *        persze az NSC csomagban a többi bájt 0... így 255 azonos pozíción kezdődő segmentet meg tudok különböztetni.
+ *        NSC-ből olvasásnál pedig a segment tárból kikeresem azokat, amik az adott adatszeleten kezdődnek, és amelyiknek
+ *        egyezik az azonosítóbájtja a megfelelő pozíción, azok payloadjait átteszem a kimenő queueba, amiknek nem, azokat
+ *        pedig eldobom a segment queueból.
+ */
