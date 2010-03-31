@@ -81,6 +81,10 @@ void UDPVideoStreamCliWithTrace::receiveStream(cPacket *msg)
     eed.record(simTime() - msg->getCreationTime());
 
     // TODO: Do packet loss processing based on sequence numbers
+    // -- Initialize simple timer modeling playout buffer (e.g., T=5s).
+    // -- If interarrival time between two packets are within frame period, no change (?)
+    // -- Otherwise, decrease T accordingly (e.g., T - (IA - frame period)?);
+    // -- if T becomes negative, treat the packet as lost one and reset T.
 
     delete msg;
 }

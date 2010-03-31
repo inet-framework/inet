@@ -21,5 +21,9 @@ cplusplus {{
 //
 packet UDPVideoStreamPacket
 {
-    unsigned short sequenceNumber;
+    unsigned short sequenceNumber;	///< packet sequence number
+    long frameNumber;
+    double frameTime;	///< cumulative frame display time
+    char frameType;	///< one of I, P, B
+//    long frameSize;	///< frame size in byte
 }

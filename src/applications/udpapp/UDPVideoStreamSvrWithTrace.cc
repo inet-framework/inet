@@ -24,7 +24,7 @@
 /// @brief  Implements UDPVideoStreamSvrWithTrace class.
 ///
 /// @note
-/// This file implements UDPVideoStreamSvrWithTrace, modelling a video
+/// This file implements UDPVideoStreamSvrWithTrace, modeling a video
 /// streaming server based on trace files in ASU <i>terse</i> format [1].
 /// It is based on the video streaming interface packages originally
 /// developed by Signorin Luca (luca.signorin@inwind.it), University of
@@ -41,6 +41,7 @@
 
 //#include <iostream>
 #include <fstream>
+#include <stdio.h>
 #include "UDPVideoStreamSvrWithTrace.h"
 #include "UDPControlInfo_m.h"
 #include "UDPVideoStreamPacket_m.h"
@@ -48,12 +49,48 @@
 
 Define_Module(UDPVideoStreamSvrWithTrace);
 
+//------------------------------------------------------------------------------
+//	Misc. functions
+//------------------------------------------------------------------------------
+
+///
+/// Tokenizes the input string.
+///
+/// @param[in] str			input string
+/// @param[in] tokens		string vector to include tokens
+/// @param[in] delimiters	string containing delimiter characters
+///
+void Tokenize(const std::string& str, std::vector<std::string>& tokens,
+		const std::string& delimiters = " ")
+{
+	// Skip delimiters at beginning.
+	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+
+	// Find first "non-delimiter".
+	std::string::size_type pos = str.find_first_of(delimiters, lastPos);
+
+	while (std::string::npos != pos || std::string::npos != lastPos)
+	{
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, lastPos);
+	}
+}
+
 inline std::ostream& operator<<(std::ostream& out,
 		const UDPVideoStreamSvrWithTrace::VideoStreamData& d)
 {
 	out << "client=" << d.clientAddr << ":" << d.clientPort
-			<< "  pkts sent=" << d.numPktSent << " current frame=" << d.currentFrame
-			<< "  bytes left=" << d.bytesLeft << " pkt interval= " << d.pktInterval << endl;
+			<< "  seq. number=" << d.currentSequenceNumber
+			<< "  trace format=" << (d.traceFormat == ASU_TERSE ? "ASU_TERSE" : "ASU_VERBOSE")
+			<< "  number of frames=" << d.numFrames << "  frame period=" << d.framePeriod
+			<< "  current frame=" << d.currentFrame << "  pkts sent=" << d.numPktSent
+			<< "  bytes left=" << d.bytesLeft << "  pkt interval= " << d.pktInterval << endl;
 	return out;
 }
 
@@ -79,21 +116,67 @@ void UDPVideoStreamSvrWithTrace::initialize()
 	framePeriod = 1.0 / par("fps").longValue();
 	numFrames = 0;
 
-	// read frame size data from the trace file into 'frameSizeVector'
+	// read frame data from the trace file into corresponding vectors (e.g., frameSizeVector)
 	const char *fileName = par("traceFile").stringValue();
 	std::ifstream fin(fileName);
 	if (fin.is_open())
 	{
+		int currentPosition;
+		std::string line;
+
+		// skip comments
+		do {
+			currentPosition = fin.tellg();	// save the current position
+			std::getline(fin, line);
+		} while (line[0] == '#');
+
+		// file format (i.e., 'terse' or 'verbose') detection
+		StringVector tokens;
+		Tokenize(line, tokens, " \t");
+		traceFormat = (tokens.size() > 2) ? ASU_VERBOSE : ASU_TERSE;
+
+		fin.seekg (currentPosition);	// go back to the first non-comment line
+		long frameNumber = 0;
+		double frameTime = 0.0;
+		std::string frameType("");
 		long frameSize;
-		double psnr_y;
-		while (!fin.eof())
+		double psnr_y = 0.0;
+		double psnr_u = 0.0;
+		double psnr_v = 0.0;
+
+		if (traceFormat == ASU_TERSE)
 		{
-			fin >> frameSize >> psnr_y;
-			frameSizeVector.push_back(frameSize / 8); ///< in byte
-			numFrames++;
+			// file format is ASU_TERSE
+			while (fin >> frameSize >> psnr_y)	///< never use "!fin.eof()" to check the EOF!
+			{
+				frameNumberVector.push_back(frameNumber);
+				frameTimeVector.push_back(frameTime);
+				frameTypeVector.push_back(frameType[0]);	/// only the first character
+				frameSizeVector.push_back(frameSize / 8); ///< in byte
+
+				// manually update the following fields
+				frameNumber++;
+				frameTime += framePeriod;
+
+				numFrames++;
+			}
 		}
+		else
+		{
+			// file format is ASU_VERBOSE
+			while (fin >> frameNumber >> frameTime >> frameType >> frameSize
+					>> psnr_y >> psnr_u >> psnr_v)
+			{
+				frameNumberVector.push_back(frameNumber);
+				frameTimeVector.push_back(frameTime);
+				frameTypeVector.push_back(frameType[0]);	/// only the first character
+				frameSizeVector.push_back(frameSize / 8); ///< in byte
+				numFrames++;
+			}
+		}
+
 		fin.close();
-	}
+	}	// end of if(fin.is_open())
 	else
 	{
 		error("%s: Unable to open the video trace file `%s'",
@@ -120,7 +203,7 @@ void UDPVideoStreamSvrWithTrace::handleMessage(cMessage *msg)
 	{
 		if (msg->getKind() == FRAME_START)
 		{
-			readFrameSize(msg);
+			readFrameData(msg);
 		}
 		else
 		{
@@ -156,16 +239,19 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	d->packetTxMsg = new cMessage("Packet Transmission", PACKET_TX);
 	d->packetTxMsg->setContextPointer(d);
 
-	// read a frame size from the vector and trigger packet transmission
-	readFrameSize(d->frameStartMsg);
+	// read frame data from the vector and trigger packet transmission
+	readFrameData(d->frameStartMsg);
 
 	numStreams++;
 }
 
-void UDPVideoStreamSvrWithTrace::readFrameSize(cMessage *frameTimer)
+void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 {
 	VideoStreamData *d = (VideoStreamData *) frameTimer->getContextPointer();
 
+	d->frameNumber = frameNumberVector[d->currentFrame];
+	d->frameTime = frameTimeVector[d->currentFrame];
+	d->frameType = frameTypeVector[d->currentFrame];
 	d->bytesLeft = frameSizeVector[d->currentFrame];
 	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));
 	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
@@ -186,7 +272,9 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
 	pkt->setSequenceNumber(d->currentSequenceNumber);
-	// TODO: Add time stamp and other field processing here
+	pkt->setFrameNumber(d->frameNumber);
+	pkt->setFrameTime(d->frameTime);
+	pkt->setFrameType(d->frameType);
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
 	d->bytesLeft -= payloadSize;

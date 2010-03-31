@@ -25,6 +25,15 @@
 #include "UDPAppBase.h"
 
 
+// common type declarations
+enum TraceFormat {ASU_TERSE, ASU_VERBOSE}; ///< trace file formats
+enum MessageKind {FRAME_START = 100, PACKET_TX = 200}; ///< kind values for self messages
+typedef std::vector<char> CharVector;
+typedef std::vector<double> DoubleVector;
+typedef std::vector<long> LongVector;
+typedef std::vector<std::string> StringVector;
+
+
 ///
 /// @class UDPVideoStreamSvrWithTrace
 /// @brief Implementation of a video streaming server based on the
@@ -48,9 +57,13 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         unsigned short currentSequenceNumber;	///< current sequence number
 
         // variable for a video trace
+        TraceFormat traceFormat;	///< file format of trace file
         long numFrames;			///< total number of frames for a video trace
         double framePeriod;		///< frame period for a video trace
-        long currentFrame;		///< current frame number (will be wrapped around)
+        long currentFrame;		///< frame to read in the trace (will be wrapped around);
+        long frameNumber;		///< display order of the current frame
+        double frameTime;		///< cumulative display time of the current frame
+        char frameType;			///< type of the current frame
         long bytesLeft;			///< bytes left to transmit in the current frame
         double pktInterval;		///< interval between consecutive packet transmissions in a given frame
 
@@ -61,31 +74,24 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         cMessage *frameStartMsg;  ///< start of each frame
         cMessage *packetTxMsg;    ///< start of each packet transmission
     };
-
-    /// kind values for self messages
-    enum MessageKind
-	{
-		FRAME_START	= 100,
-		PACKET_TX	= 200
-	};
+    typedef std::vector<VideoStreamData *> VideoStreamVector;
 
   protected:
-    typedef std::vector<VideoStreamData *> VideoStreamVector;
     VideoStreamVector streamVector;
-    typedef std::vector<long> LongVector;
-    LongVector frameSizeVector;	///< vector of frame size [byte]
 
     // module parameters
     int serverPort;
     int appOverhead;
     int maxPayloadSize;
-//    cPar *waitInterval;
-//    cPar *packetLen;
-//    cPar *videoSize;
 
     // variables for a trace file
+    TraceFormat traceFormat;	///< file format of trace file
     long numFrames;	///< total number of frames in a trace file
     double framePeriod;
+    LongVector frameNumberVector;	///< vector of frame numbers (display order) (only for verbose trace)
+    DoubleVector frameTimeVector;	///< vector of cumulative frame display times (only for verbose trace)
+    CharVector frameTypeVector;	///< vector of frame types (only for verbose trace)
+    LongVector frameSizeVector;	///< vector of frame sizes [byte]
 
     // statistics
     unsigned int numStreams;  // number of video streams served
@@ -95,8 +101,8 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     // process stream request from client
     virtual void processStreamRequest(cMessage *msg);
 
-    // read a new frame size and update relevant variables
-    virtual void readFrameSize(cMessage *frameTimer);
+    // read new frame data and update relevant variables
+    virtual void readFrameData(cMessage *frameTimer);
 
     // send a packet of the given video stream
     virtual void sendStreamData(cMessage *pktTimer);
