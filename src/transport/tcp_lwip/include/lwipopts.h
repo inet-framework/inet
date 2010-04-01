@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2010 Zoltan Bojthe
+ *
+ * LWIP settings for Omnet/Omnest simulator INET framework.
+ *
+ */
+
 #define NO_SYS 1
 
 

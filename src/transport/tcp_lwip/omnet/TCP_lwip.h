@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2006 Sam Jansen, Andras Varga,
-//               2009 Zoltan Bojthe
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

@@ -38,6 +38,14 @@
  *
  */
 
+/*
+ * Modified for Omnet/Omnest simulator INET framework.
+ * 2010
+ *
+ * Modified by Zoltan Bojthe
+ *
+ */
+
 #include "lwip/opt.h"
 
 #if LWIP_TCP /* don't build if not configured for use in lwipopts.h */

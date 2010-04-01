@@ -30,6 +30,14 @@
  *
  */
 
+/*
+ * Modified for Omnet/Omnest simulator INET framework.
+ * 2010
+ *
+ * Modified by Zoltan Bojthe
+ *
+ */
+
 #ifndef __LWIP_MEMP_H__
 #define __LWIP_MEMP_H__
 

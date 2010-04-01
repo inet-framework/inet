@@ -1,4 +1,12 @@
 /*
+ * Modified for Omnet/Omnest simulator INET framework.
+ * 2010
+ *
+ * Modified by Zoltan Bojthe
+ *
+ */
+
+/*
  * SETUP: Make sure we define everything we will need.
  *
  * We have create three types of pools:

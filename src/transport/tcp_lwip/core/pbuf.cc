@@ -61,6 +61,20 @@
  *
  */
 
+/*
+ * Modified for Omnet/Omnest simulator INET framework.
+ * 2010
+ *
+ * Modified by Zoltan Bojthe
+ *
+ * Changelog:
+ *
+ *   Add pointer conversions from void* to desttype* at memp_malloc/memp_realloc calls.
+ *
+ *   Rename file from pbuf.c to pbuf.cc
+ *
+ */
+
 #include "lwip/opt.h"
 
 #include "lwip/stats.h"

@@ -29,6 +29,15 @@
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
+
+/*
+ * Modified for Omnet/Omnest simulator INET framework.
+ * 2010
+ *
+ * Modified by Zoltan Bojthe
+ *
+ */
+
 #ifndef __LWIP_TCP_H__
 #define __LWIP_TCP_H__
 
