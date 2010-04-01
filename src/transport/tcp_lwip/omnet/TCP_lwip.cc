@@ -281,6 +281,7 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
         // Received FIN:
         conn.sendIndicationToApp(TCP_I_CLOSED);
         // TODO is it good?
+        pLwipTcpLayerM->tcp_recved(conn.pcbM, 0);
     }
     else
     {
