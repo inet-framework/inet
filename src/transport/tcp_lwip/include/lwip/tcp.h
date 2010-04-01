@@ -53,10 +53,13 @@
 #include "lwip/icmp.h"
 #include "lwip/err.h"
 
-#define extern /* */
-
 
 /*-----------------------------------*/
+#ifndef TCP_LOCAL_PORT_RANGE_START
+#define TCP_LOCAL_PORT_RANGE_START 4096
+#define TCP_LOCAL_PORT_RANGE_END   0x7fff
+#endif
+
 class LwipTcpStackIf;
 
 class LwipTcpLayer
@@ -72,11 +75,6 @@ class LwipTcpLayer
     LwipTcpLayer(LwipTcpStackIf &stackIfP);
 
   public:
-#ifndef TCP_LOCAL_PORT_RANGE_START
-#define TCP_LOCAL_PORT_RANGE_START 4096
-#define TCP_LOCAL_PORT_RANGE_END   0x7fff
-#endif
-
     struct tcp_pcb;
 
     /** interface for ip layer */
@@ -105,6 +103,7 @@ class LwipTcpLayer
     /** interface for ip layer */
     struct netif * ip_route(struct ip_addr *addr);
 
+  protected:
     /** interface for ip layer */
     u8_t ip_addr_isbroadcast(struct ip_addr * addr, struct netif * interf);
 
@@ -201,7 +200,18 @@ class LwipTcpLayer
     tcp_hdr* tcp_output_set_header(struct tcp_pcb *pcb, struct pbuf *p, int optlen,
                           u32_t seqno_be /* already in network byte order */);
 
+    /**
+     * Wrapper for originally ::memp_free().
+     * Calls the stackIf.lwip_free_pcb_event() when freeing a pcb pointer.
+     */
     void memp_free(memp_t type, void *ptr);
+
+    /**
+     * return a new free port number
+     */
+    u16_t tcp_new_port(void);
+
+  public:
     /*-----------------------------------*/
 
 /* Functions for interfacing with TCP: */
@@ -213,8 +223,8 @@ void             tcp_tmr     (void);  /* Must be called every
                                          TCP_TMR_INTERVAL
                                          ms. (Typically 250 ms). */
 /* Application program's interface: */
-struct LwipTcpLayer::tcp_pcb * tcp_new     (void);
-struct LwipTcpLayer::tcp_pcb * tcp_alloc   (u8_t prio);
+struct tcp_pcb * tcp_new     (void);
+struct tcp_pcb * tcp_alloc   (u8_t prio);
 
 void             tcp_arg     (struct tcp_pcb *pcb, void *arg);
 void             tcp_accept  (struct tcp_pcb *pcb,
@@ -705,7 +715,7 @@ struct tcp_pcb *tcp_pcb_copy(struct tcp_pcb *pcb);
 void tcp_pcb_purge(struct tcp_pcb *pcb);
 void tcp_pcb_remove(struct tcp_pcb **pcblist, struct tcp_pcb *pcb);
 
-u8_t tcp_segs_free(tcp_seg *seg);
+u8_t tcp_segs_free(struct tcp_seg *seg);
 u8_t tcp_seg_free(struct tcp_seg *seg);
 struct tcp_seg *tcp_seg_copy(struct tcp_seg *seg);
 
@@ -749,6 +759,8 @@ u16_t tcp_eff_send_mss(u16_t sendmss, struct ip_addr *addr);
 #if LWIP_CALLBACK_API
 err_t tcp_recv_null(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err);
 #endif /* LWIP_CALLBACK_API */
+
+#define extern /* */
 
 extern struct tcp_pcb *tcp_input_pcb;
 extern u32_t tcp_ticks;
@@ -856,6 +868,7 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
 
 #endif /* LWIP_DEBUG */
 
+#undef extern /* */
 /*-----------------------------------*/
   protected:
     struct tcp_seg inseg;
@@ -873,7 +886,6 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
     struct tcp_pcb *tcp_bound_pcbs;
   protected:
     /* static for functions */
-    u16_t tcp_new_port(void);
     u16_t port;
 
     /* u32_t tcp_next_iss(void) */
@@ -884,9 +896,6 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
 /*-----------------------------------*/
 };
 
-
 #endif /* LWIP_TCP */
-
-#undef extern /* */
 
 #endif /* __LWIP_TCP_H__ */
