@@ -18,12 +18,15 @@
 #include "lwip/opt.h"
 #include "lwip/tcp.h"
 
+//forward declarations:
 // inet:
 class IPvXAddress;
-
 //lwip:
 struct pbuf;
 
+/**
+ * Interface class between TCP_lwip and LwipTcpLayer
+ */
 class LwipTcpStackIf
 {
   public:
