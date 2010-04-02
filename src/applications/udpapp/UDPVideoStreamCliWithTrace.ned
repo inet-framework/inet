@@ -34,7 +34,7 @@ simple UDPVideoStreamCliWithTrace like UDPApp
         int fps = default(30);	// frames per second (fps) of the trace file
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)
 													// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
-		double startupDelay @unit(s) = default(5s);	// start-up delay resulting from both decoding and networking protocol
+		double startupDelay @unit(s) = default(5s);	// start-up delay resulting from both decoding and networking (e.g., jitter, depacketization)
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);

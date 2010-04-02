@@ -20,7 +20,8 @@
 package inet.applications.udpapp;
 
 //
-// Video streaming server with trace files. To be used with UDPVideoStreamCli.
+// Video streaming server based on trace files from ASU video trace library [1].
+// To be used with UDPVideoStreamCliWithTrace.
 //
 // The server will wait for incoming "video streaming requests".
 // When a request arrives, it starts streaming to the client using a trace file.
@@ -31,6 +32,12 @@ package inet.applications.udpapp;
 //
 // @see UDPVideoStreamCliWithTrace
 //
+// @par References:
+// <ol>
+// <li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
+// </li>
+// </ol>
+//
 simple UDPVideoStreamSvrWithTrace like UDPApp
 {
     parameters:
@@ -39,7 +46,7 @@ simple UDPVideoStreamSvrWithTrace like UDPApp
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.											
-        string traceFile;	// name of a video trace file in ASU <i>terse</i> format
+        string traceFile;	// name of a video trace file in ASU format
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);

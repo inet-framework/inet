@@ -16,10 +16,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-//
-// based on the video streaming app of the similar name by Johnny Lai
-//
+///
+/// @file   UDPVideoStreamCliWithTrace.cc
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   2010-04-02
+///
+/// @brief  Implements UDPVideoStreamCliWithTrace class.
+///
+/// @note
+/// This file implements UDPVideoStreamCliWithTrace, modeling a video
+/// streaming client based on trace files from ASU video trace library [1].
+///
+/// @par References:
+/// <ol>
+///	<li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
+/// </li>
+/// </ol>
+///
 
 #include "UDPVideoStreamCliWithTrace.h"
 #include "IPAddressResolver.h"
@@ -28,31 +41,46 @@
 Define_Module(UDPVideoStreamCliWithTrace);
 
 
-//void UDPVideoStreamCliWithTrace::initialize()
-//{
+void UDPVideoStreamCliWithTrace::initialize()
+{
 //    eed.setName("video stream eed");
 //    simtime_t startTime = par("startTime");
 //
 //    if (startTime>=0)
 //        scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
-//}
 
-//void UDPVideoStreamCliWithTrace::finish()
-//{
-//}
+	UDPVideoStreamCli::initialize();
 
-//void UDPVideoStreamCliWithTrace::handleMessage(cMessage* msg)
-//{
-//    if (msg->isSelfMessage())
-//    {
-//        delete msg;
-//        requestStream();
-//    }
-//    else
-//    {
-//        receiveStream(PK(msg));
-//    }
-//}
+	// initialize module parameters
+	startupDelay = par(startupDelay).doubleValue();	///< unit is second
+
+	// initialize statistics
+	numPktRcvd = 0;
+	numPktLost = 0;
+
+	isFirstPacket = true;
+}
+
+void UDPVideoStreamCliWithTrace::finish()
+{
+	UDPVideoStreamCli::finish();
+
+	recordScalar("packets received", numPktRcvd);
+	recordScalar("packets lost", numPktLost);
+}
+
+void UDPVideoStreamCliWithTrace::handleMessage(cMessage* msg)
+{
+	if (msg->isSelfMessage())
+	{
+		delete msg;
+		requestStream();
+	}
+	else
+	{
+		receiveStream(check_and_cast<UDPVideoStreamPacket *>(msg));
+	}
+}
 
 //void UDPVideoStreamCliWithTrace::requestStream()
 //{
@@ -74,18 +102,48 @@ Define_Module(UDPVideoStreamCliWithTrace);
 //    sendToUDP(msg, localPort, svrAddr, svrPort);
 //}
 
-void UDPVideoStreamCliWithTrace::receiveStream(cPacket *msg)
+void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 {
     EV << "Video stream packet:\n";
-    printPacket(msg);
-    eed.record(simTime() - msg->getCreationTime());
+    printPacket(PK(pkt));
 
-    // TODO: Do packet loss processing based on sequence numbers
-    // -- Initialize simple timer modeling playout buffer (e.g., T=5s).
-    // -- If interarrival time between two packets are within frame period, no change (?)
-    // -- Otherwise, decrease T accordingly (e.g., T - (IA - frame period)?);
-    // -- if T becomes negative, treat the packet as lost one and reset T.
+    // record statistics
+    eed.record(simTime() - pkt->getCreationTime());
 
-    delete msg;
+    numPktRcvd++;
+
+    unsigned short seqNumber = pkt->getSequenceNumber();
+    if (isFirstPacket)
+    {
+    	isFirstPacket = false;
+    }
+    else
+    {
+        // TODO: Implement advanced packet and frame loss processing later:
+        // -- Initialize simple timer modeling playout buffer (e.g., T=5s).
+        // -- If interarrival time between two packets are within frame period, no change (?)
+        // -- Otherwise, decrease T accordingly (e.g., T - (IA - frame period)?);
+        // -- if T becomes negative, treat the packet as lost one and reset T.
+
+    	if ( seqNumber != ((prevSequenceNumber + 1) % 65536) )
+    	{
+    		// previous packet(s) lost before the current one
+
+    		int currnetNumPktLost = seqNumber > prevSequenceNumber ? seqNumber - prevSequenceNumber : seqNumber + 65536 - prevSequenceNumber;
+    		numPktLost += currnetNumPktLost;
+//    		if (seqNumber > prevSequenceNumber)
+//    		{
+//    			numPktLost += seqNumber - prevSequenceNumber;
+//    		}
+//    		else
+//    		{
+//    			numPktLost += seqNumber + 65536 - prevSequenceNumber;
+//    		}
+
+    		EV << currnetNumPktLost << " video stream packet(s) lost" << endl;
+    	}
+    }
+    prevSequenceNumber = seqNumber;
+
+    delete pkt;
 }
-

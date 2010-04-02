@@ -17,15 +17,12 @@
 //
 
 
-//
-// based on the video streaming app of the similar name by Johnny Lai
-//
-
 #ifndef __INET_UDPVIDEOSTREAM_WITHTRACE_H
 #define __INET_UDPVIDEOSTREAM_WITHTRACE_H
 
 #include <omnetpp.h>
 #include "UDPVideoStreamCli.h"
+#include "UDPVideoStreamPacket_m.h"
 
 
 ///
@@ -36,20 +33,29 @@
 class INET_API UDPVideoStreamCliWithTrace : public UDPVideoStreamCli
 {
   protected:
+	// module parameters
+	double startupDelay;
+
     // statistics
 //    cOutVector eed;
+	unsigned long numPktRcvd;	///< number of packets received
+	unsigned long numPktLost;	///< number of packets lost
+
+	// variables for detecting packet losses
+	bool isFirstPacket;	///< indicator of whether the current packet is the first one or not
+	unsigned short prevSequenceNumber;	///< sequence number of the previously received packet
 
   protected:
-//    ///@name Overridden cSimpleModule functions
-//    //@{
-//    virtual void initialize();
-//    virtual void finish();
-//    virtual void handleMessage(cMessage *msg);
-//    //@}
+    ///@name Overridden cSimpleModule functions
+	//@{
+	virtual void initialize();
+	virtual void finish();
+	virtual void handleMessage(cMessage *msg);
+	//@}
 
   protected:
 //    virtual void requestStream();
-    virtual void receiveStream(cPacket *msg);
+    virtual void receiveStream(UDPVideoStreamPacket *pkt);
 };
 
 

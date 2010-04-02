@@ -36,10 +36,14 @@ typedef std::vector<std::string> StringVector;
 
 ///
 /// @class UDPVideoStreamSvrWithTrace
-/// @brief Implementation of a video streaming server based on the
-///        interface packages originally developed by Signorin Luca
-///        (luca.signorin@inwind.it), University of Ferrara, Italy,
-///        for OMNeT++ 2.2 and later update by Dr. Fitzek for OMNeT++ 3
+/// @brief Implementation of a video streaming server based on trace files
+///        from ASU video trace library [1].
+///
+/// @par References:
+/// <ol>
+///	<li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
+/// </li>
+/// </ol>
 ///
 class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
 {
@@ -63,7 +67,8 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         long currentFrame;		///< frame to read in the trace (will be wrapped around);
         long frameNumber;		///< display order of the current frame
         double frameTime;		///< cumulative display time of the current frame
-        char frameType;			///< type of the current frame
+        std::string frameType;	///< type of the current frame
+        long frameSize;			///< size (in byte) of the current frame
         long bytesLeft;			///< bytes left to transmit in the current frame
         double pktInterval;		///< interval between consecutive packet transmissions in a given frame
 
@@ -90,7 +95,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     double framePeriod;
     LongVector frameNumberVector;	///< vector of frame numbers (display order) (only for verbose trace)
     DoubleVector frameTimeVector;	///< vector of cumulative frame display times (only for verbose trace)
-    CharVector frameTypeVector;	///< vector of frame types (only for verbose trace)
+    StringVector frameTypeVector;	///< vector of frame types (I, P, B, and IDR (H.264); only for verbose trace)
     LongVector frameSizeVector;	///< vector of frame sizes [byte]
 
     // statistics

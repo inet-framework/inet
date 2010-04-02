@@ -17,13 +17,22 @@ cplusplus {{
 }}
 
 //
-// Message class representing application layer (e.g., RTP) packet for UDP video streaming application.
+// Message class representing application layer (i.e., RTP) packet for
+// UDP video streaming application. Partial implementation of RFC
+// 3894.
 //
 packet UDPVideoStreamPacket
 {
+    // RTP header fields
     unsigned short sequenceNumber;	///< packet sequence number
-    long frameNumber;
+
+    // part of fragmentation unit (FU) header (1 octet) in RTP payload
+    bool fragmentstart; ///< indicating the start of fragemented NAL units
+    bool fragmentEnd;   ///< indicating the end of fragemented NAL units
+
+    // fields not defined in RFC 3894
+    long frameNumber;   ///< display order of the current frame
     double frameTime;	///< cumulative frame display time
-    char frameType;	///< one of I, P, B
+    string frameType;	///< one of I, P, B and IDT (in case of H.264)
 //    long frameSize;	///< frame size in byte
 }

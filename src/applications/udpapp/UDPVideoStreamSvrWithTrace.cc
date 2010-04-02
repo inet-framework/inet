@@ -25,11 +25,7 @@
 ///
 /// @note
 /// This file implements UDPVideoStreamSvrWithTrace, modeling a video
-/// streaming server based on trace files in ASU <i>terse</i> format [1].
-/// It is based on the video streaming interface packages originally
-/// developed by Signorin Luca (luca.signorin@inwind.it), University of
-/// Ferrara, Italy, for OMNeT++ 2.2 and later update by Dr. Fitzek for
-/// OMNeT++ 3
+/// streaming server based on trace files from ASU video trace library [1].
 ///
 /// @par References:
 /// <ol>
@@ -89,8 +85,10 @@ inline std::ostream& operator<<(std::ostream& out,
 			<< "  seq. number=" << d.currentSequenceNumber
 			<< "  trace format=" << (d.traceFormat == ASU_TERSE ? "ASU_TERSE" : "ASU_VERBOSE")
 			<< "  number of frames=" << d.numFrames << "  frame period=" << d.framePeriod
-			<< "  current frame=" << d.currentFrame << "  pkts sent=" << d.numPktSent
-			<< "  bytes left=" << d.bytesLeft << "  pkt interval= " << d.pktInterval << endl;
+			<< "  current frame=" << d.currentFrame << "  frame number=" << d.frameNumber
+			<< "  frame time=" << d.frameTime << "  frame type=" << d.frameType
+			<< "  pkts sent=" << d.numPktSent << "  bytes left=" << d.bytesLeft
+			<< "  pkt interval= " << d.pktInterval << endl;
 	return out;
 }
 
@@ -151,7 +149,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 			{
 				frameNumberVector.push_back(frameNumber);
 				frameTimeVector.push_back(frameTime);
-				frameTypeVector.push_back(frameType[0]);	/// only the first character
+				frameTypeVector.push_back(frameType);
 				frameSizeVector.push_back(frameSize / 8); ///< in byte
 
 				// manually update the following fields
@@ -169,7 +167,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 			{
 				frameNumberVector.push_back(frameNumber);
 				frameTimeVector.push_back(frameTime);
-				frameTypeVector.push_back(frameType[0]);	/// only the first character
+				frameTypeVector.push_back(frameType);
 				frameSizeVector.push_back(frameSize / 8); ///< in byte
 				numFrames++;
 			}
@@ -183,6 +181,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 				getFullPath().c_str(), fileName);
 	}
 
+	// initialize statistics
 	numStreams = 0;
 	numPktSent = 0;
 
@@ -252,8 +251,9 @@ void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 	d->frameNumber = frameNumberVector[d->currentFrame];
 	d->frameTime = frameTimeVector[d->currentFrame];
 	d->frameType = frameTypeVector[d->currentFrame];
-	d->bytesLeft = frameSizeVector[d->currentFrame];
-	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));
+	d->frameSize = frameSizeVector[d->currentFrame];
+	d->bytesLeft = d->frameSize;
+	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over the frame period
 	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
 
 	// schedule next frame start
@@ -271,25 +271,24 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	UDPVideoStreamPacket *pkt = new UDPVideoStreamPacket("UDPVideoStreamPacket");
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
-	pkt->setSequenceNumber(d->currentSequenceNumber);
-	pkt->setFrameNumber(d->frameNumber);
-	pkt->setFrameTime(d->frameTime);
-	pkt->setFrameType(d->frameType);
+	pkt->setSequenceNumber(d->currentSequenceNumber);	///< in RTP header
+	pkt->setFragmentstart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
+	pkt->setFrameTime(d->frameTime);	///< non-RTP field
+	pkt->setFrameType(d->frameType.c_str());	///> non-RTP field; need conversion between C++ and C strings
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
+	// update the session VideoStreamData and global statistics
 	d->bytesLeft -= payloadSize;
 	d->numPktSent++;
-	d->currentSequenceNumber = (d->currentSequenceNumber < 65535) ? d->currentSequenceNumber + 1 : 0;	///> wrap around to zero if it reaches the maximum value (65535)
+//	d->currentSequenceNumber = (d->currentSequenceNumber < 65535) ? d->currentSequenceNumber + 1 : 0;	///> wrap around to zero if it reaches the maximum value (65535)
+	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % 65536;	///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;
 
-	// reschedule timer if there's bytes left to send
+	// reschedule timer if there are bytes left to send
 	if (d->bytesLeft != 0)
 	{
 		scheduleAt(simTime() + d->pktInterval, pktTimer);
 	}
-	//	else
-	//	{
-	//		delete pktTimer;
-	//		// TBD find VideoStreamData in streamVector and delete it
-	//	}
 }
