@@ -12,9 +12,14 @@
 ///          You must not remove this notice, or any other, from this software.
 ///
 
+
 cplusplus {{
 #include "INETDefs.h"
+#include "UDPVideoStreamWithTrace.h"
 }}
+
+enum FrameType;
+
 
 //
 // Message class representing application layer (i.e., RTP) packet for
@@ -33,6 +38,6 @@ packet UDPVideoStreamPacket
     // fields not defined in RFC 3894
     long frameNumber;   ///< display order of the current frame
     double frameTime;	///< cumulative frame display time
-    string frameType;	///< one of I, P, B and IDT (in case of H.264)
+    int frameType enum(FrameType);	///< one of I, P, B and IDR (in case of H.264)
 //    long frameSize;	///< frame size in byte
 }

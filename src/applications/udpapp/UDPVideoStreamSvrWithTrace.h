@@ -23,15 +23,16 @@
 #include <vector>
 #include <omnetpp.h>
 #include "UDPAppBase.h"
+#include "UDPVideoStreamWithTrace.h"
 
 
 // common type declarations
-enum TraceFormat {ASU_TERSE, ASU_VERBOSE}; ///< trace file formats
+//enum TraceFormat {ASU_TERSE, ASU_VERBOSE}; ///< trace file formats
 enum MessageKind {FRAME_START = 100, PACKET_TX = 200}; ///< kind values for self messages
-typedef std::vector<char> CharVector;
-typedef std::vector<double> DoubleVector;
-typedef std::vector<long> LongVector;
-typedef std::vector<std::string> StringVector;
+//typedef std::vector<char> CharVector;
+//typedef std::vector<double> DoubleVector;
+//typedef std::vector<long> LongVector;
+//typedef std::vector<std::string> StringVector;
 
 
 ///
@@ -67,7 +68,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         long currentFrame;		///< frame to read in the trace (will be wrapped around);
         long frameNumber;		///< display order of the current frame
         double frameTime;		///< cumulative display time of the current frame
-        std::string frameType;	///< type of the current frame
+        FrameType frameType;	///< type of the current frame
         long frameSize;			///< size (in byte) of the current frame
         long bytesLeft;			///< bytes left to transmit in the current frame
         double pktInterval;		///< interval between consecutive packet transmissions in a given frame
@@ -95,7 +96,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     double framePeriod;
     LongVector frameNumberVector;	///< vector of frame numbers (display order) (only for verbose trace)
     DoubleVector frameTimeVector;	///< vector of cumulative frame display times (only for verbose trace)
-    StringVector frameTypeVector;	///< vector of frame types (I, P, B, and IDR (H.264); only for verbose trace)
+    FrameTypeVector frameTypeVector;	///< vector of frame types (I, P, B, and IDR (H.264); only for verbose trace)
     LongVector frameSizeVector;	///< vector of frame sizes [byte]
 
     // statistics

@@ -136,7 +136,8 @@ void UDPVideoStreamSvrWithTrace::initialize()
 		fin.seekg (currentPosition);	// go back to the first non-comment line
 		long frameNumber = 0;
 		double frameTime = 0.0;
-		std::string frameType("");
+		std::string frameTypeString("");
+		FrameType frameType =  I;
 		long frameSize;
 		double psnr_y = 0.0;
 		double psnr_u = 0.0;
@@ -162,11 +163,19 @@ void UDPVideoStreamSvrWithTrace::initialize()
 		else
 		{
 			// file format is ASU_VERBOSE
-			while (fin >> frameNumber >> frameTime >> frameType >> frameSize
+			while (fin >> frameNumber >> frameTime >> frameTypeString >> frameSize
 					>> psnr_y >> psnr_u >> psnr_v)
 			{
 				frameNumberVector.push_back(frameNumber);
 				frameTimeVector.push_back(frameTime);
+				if (frameTypeString.compare("I") == 0)
+					frameType = I;
+				else if (frameTypeString.compare("IDR") == 0)
+					frameType = IDR;
+				else if (frameTypeString.compare("P") == 0)
+					frameType = P;
+				else
+					frameType = B;
 				frameTypeVector.push_back(frameType);
 				frameSizeVector.push_back(frameSize / 8); ///< in byte
 				numFrames++;
@@ -276,7 +285,7 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
-	pkt->setFrameType(d->frameType.c_str());	///> non-RTP field; need conversion between C++ and C strings
+	pkt->setFrameType(d->frameType);	///> non-RTP field
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
 	// update the session VideoStreamData and global statistics
