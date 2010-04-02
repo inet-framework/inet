@@ -129,7 +129,7 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
     	{
     		// previous packet(s) lost before the current one
 
-    		int currnetNumPktLost = seqNumber > prevSequenceNumber ? seqNumber - prevSequenceNumber : seqNumber + 65536 - prevSequenceNumber;
+    		int currnetNumPktLost = seqNumber > prevSequenceNumber ? seqNumber - prevSequenceNumber - 1 : seqNumber + 65536 - prevSequenceNumber - 1;
     		numPktLost += currnetNumPktLost;
 //    		if (seqNumber > prevSequenceNumber)
 //    		{
