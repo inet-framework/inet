@@ -59,7 +59,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         int clientPort;			///< client UDP port
 
         // packet generation
-        unsigned short currentSequenceNumber;	///< current sequence number
+        uint16_t currentSequenceNumber;	///< current (16-bit RTP) sequence number
 
         // variable for a video trace
         TraceFormat traceFormat;	///< file format of trace file

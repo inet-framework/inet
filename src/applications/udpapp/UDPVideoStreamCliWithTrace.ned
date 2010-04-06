@@ -22,6 +22,9 @@ package inet.applications.udpapp;
 //
 // Video streaming client to be used with UDPVideoStreamSvrWithTrace.
 //
+// It reports packet-level as well as frame-level (meaningful only with
+// trace files in <i>verbose</i> format) statistics at the end of simulation.
+//
 // @see UDPVideoStreamSvrWithTrace
 //
 simple UDPVideoStreamCliWithTrace like UDPApp
@@ -30,11 +33,15 @@ simple UDPVideoStreamCliWithTrace like UDPApp
         int localPort;
         string serverAddress;
         int serverPort;
-        double startTime @unit("s") = default(1s);        
+        double startTime @unit("s") = default(1s);
+        double startupDelay @unit(s) = default(5s);	// start-up delay resulting from both decoding and networking (e.g., jitter, depacketization)
         int fps = default(30);	// frames per second (fps) of the trace file
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)
 													// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
-		double startupDelay @unit(s) = default(5s);	// start-up delay resulting from both decoding and networking (e.g., jitter, depacketization)
+		// parameters for trace statistics (default values are for 'Terminator 2'
+		int numTraceFrames = default(17998);	// number of frames in the trace file (needed to handle wrap around of frames by the server)
+		int gopSize = default(12);	// number of frames per GOP
+		int numBFrames = default(2);	// number of B frames between two consecutive I or P frames
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);

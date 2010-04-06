@@ -35,15 +35,29 @@ class INET_API UDPVideoStreamCliWithTrace : public UDPVideoStreamCli
   protected:
 	// module parameters
 	double startupDelay;
+	long numTraceFrames;	///< number of frames in the trace file (needed to handle wrap around of frames by the server)
+	int gopSize;	///< GOP pattern: I-to-I frame distance (N)
+	int numBFrames;	///< GOP pattern: I-to-P frame distance (M)
 
     // statistics
-//    cOutVector eed;
-	unsigned long numPktRcvd;	///< number of packets received
-	unsigned long numPktLost;	///< number of packets lost
+	//    cOutVector eed;
+	bool warmupFinished;	///< if true, start statistics gathering
+	long numPacketsReceived;	///< number of packets received
+	long numPacketsLost;	///< number of packets lost
+    long numFramesReceived; ///< number of frames received (and correctly decoded)
+    long numFramesLost; ///< number of frames lost (or discarded due to unmet dependency)
 
-	// variables for detecting packet losses
-	bool isFirstPacket;	///< indicator of whether the current packet is the first one or not
-	unsigned short prevSequenceNumber;	///< sequence number of the previously received packet
+	// variables for packet and frame loss handling
+//	bool isFirstPacket;	///< indicator of whether the current packet is the first one or not
+	uint16_t prevSequenceNumber;	///< (16-bit RTP) sequence number of the most recently received packet
+    long prevIFrameNumber;   ///< frame number of the most recently received I frame
+    long prevPFrameNumber;   ///< frame number of the most recently received P frame
+	long currentFrameNumber;    ///< frame number whose packets are currently being received
+	long currentDisplayNumber;	///< display number of the current frame number
+// 	long currentGopNumber;
+	FrameType currentFrameType;
+	bool currentFrameDiscard;	///< if true, all the remaining packets of the current frame are to be discarded
+    bool currentFrameFinished;	///< if true, the frame has been successfully received and decoded
 
   protected:
     ///@name Overridden cSimpleModule functions
@@ -54,8 +68,13 @@ class INET_API UDPVideoStreamCliWithTrace : public UDPVideoStreamCli
 	//@}
 
   protected:
-//    virtual void requestStream();
     virtual void receiveStream(UDPVideoStreamPacket *pkt);
+
+  protected:
+    // utility functions
+    inline long displayNumberIFrame(long frameNumber, int numBFrames) {return (frameNumber == 0 ? 0 : frameNumber - numBFrames);}
+    inline long displayNumberPFrame(long frameNumber, int numBFrames) {return (frameNumber - numBFrames);}
+    inline long displayNumberBFrame(long frameNumber) {return (frameNumber - 1);}
 };
 
 

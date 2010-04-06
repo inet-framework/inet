@@ -32,7 +32,7 @@ packet UDPVideoStreamPacket
     unsigned short sequenceNumber;	///< packet sequence number
 
     // part of fragmentation unit (FU) header (1 octet) in RTP payload
-    bool fragmentstart; ///< indicating the start of fragemented NAL units
+    bool fragmentStart; ///< indicating the start of fragemented NAL units
     bool fragmentEnd;   ///< indicating the end of fragemented NAL units
 
     // fields not defined in RFC 3894

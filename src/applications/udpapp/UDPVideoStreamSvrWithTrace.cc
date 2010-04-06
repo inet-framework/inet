@@ -281,7 +281,7 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< in RTP header
-	pkt->setFragmentstart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field

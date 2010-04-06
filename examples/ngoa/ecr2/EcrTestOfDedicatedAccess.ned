@@ -29,7 +29,7 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 //
 // Defines a test network for equivalent circuit rate (ECR)-based
-// study of dedicated access network models
+// study of dedicated access network models.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2010-03-26
