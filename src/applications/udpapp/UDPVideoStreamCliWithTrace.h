@@ -71,9 +71,6 @@ class INET_API UDPVideoStreamCliWithTrace : public UDPVideoStreamCli
   protected:
     // utility functions
     long frameEncodingNumber(long frameNumber, int numBFrames, FrameType frameType);
-//    inline long encodingNumberIFrame(long frameNumber, int numBFrames) {return (frameNumber == 0 ? 0 : frameNumber - numBFrames);}
-//    inline long encodingNumberPFrame(long frameNumber, int numBFrames) {return (frameNumber - numBFrames);}
-//    inline long encodingNumberBFrame(long frameNumber) {return (frameNumber + 1);}
 };
 
 
