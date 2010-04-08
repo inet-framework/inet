@@ -15,4 +15,5 @@ fi
 
 #cd /users/kks/inet/examples/ngoa/ecr
 ulimit -s 65500
-./run -u Cmdenv -f $1 -c $2 -r $RUN > /dev/null 2>&1
+#./run -u Cmdenv -f $1 -c $2 -r $RUN > /dev/null 2>&1
+./run -u Cmdenv -f $1 -c $2 -r $RUN > /dev/null
