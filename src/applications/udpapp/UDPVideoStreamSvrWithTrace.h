@@ -17,8 +17,8 @@
 //
 
 
-#ifndef UDPVIDEOSTREAMSVR_WITHTRACE_H
-#define UDPVIDEOSTREAMSVR_WITHTRACE_H
+#ifndef UDPVIDEOSTREAMSVR_WITH_TRACE_H
+#define UDPVIDEOSTREAMSVR_WITH_TRACE_H
 
 #include <vector>
 #include <omnetpp.h>
@@ -65,8 +65,8 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         TraceFormat traceFormat;	///< file format of trace file
         long numFrames;			///< total number of frames for a video trace
         double framePeriod;		///< frame period for a video trace
-        long currentFrame;		///< frame to read in the trace (will be wrapped around);
-        long frameNumber;		///< display order of the current frame
+        long currentFrame;		///< frame index (starting from 0) to read from the trace (will be wrapped around);
+        long frameNumber;		///< frame number (display order) of the current frame
         double frameTime;		///< cumulative display time of the current frame
         FrameType frameType;	///< type of the current frame
         long frameSize;			///< size (in byte) of the current frame
@@ -127,4 +127,4 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
 };
 
 
-#endif	// UDPVIDEOSTREAMSVR_WITHTRACE_H
+#endif	// UDPVIDEOSTREAMSVR_WITH_TRACE_H

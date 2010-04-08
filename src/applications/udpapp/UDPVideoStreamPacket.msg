@@ -37,7 +37,7 @@ packet UDPVideoStreamPacket
 
     // fields not defined in RFC 3894
     long frameNumber;   ///< display order of the current frame
-    double frameTime;	///< cumulative frame display time
+    double frameTime;	///< cumulative display time of the current frame
     int frameType enum(FrameType);	///< one of I, P, B and IDR (in case of H.264)
 //    long frameSize;	///< frame size in byte
 }

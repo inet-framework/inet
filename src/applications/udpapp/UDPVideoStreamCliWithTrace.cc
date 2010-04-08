@@ -1,21 +1,3 @@
-//
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
-// Copyright (C) 2005 Andras Varga
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-
 ///
 /// @file   UDPVideoStreamCliWithTrace.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
@@ -33,6 +15,13 @@
 /// </li>
 /// </ol>
 ///
+/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+///
+
 
 #include "UDPVideoStreamCliWithTrace.h"
 #include "IPAddressResolver.h"
@@ -41,14 +30,32 @@
 Define_Module(UDPVideoStreamCliWithTrace);
 
 
+long UDPVideoStreamCliWithTrace::frameEncodingNumber(long frameNumber,
+		int numBFrames, FrameType frameType)
+{
+	long encodingNumber;
+
+	switch (frameType)
+	{
+	case IDR:
+	case I:
+		encodingNumber = frameNumber == 0 ? 0 : frameNumber - numBFrames;
+		break;
+	case P:
+		encodingNumber = frameNumber - numBFrames;
+		break;
+	case B:
+		encodingNumber = frameNumber + 1;
+		break;
+	default:
+		error("%s: Unexpected frame type: %d", getFullPath().c_str(), frameType);
+	} // end of switch ()
+
+	return encodingNumber;
+}
+
 void UDPVideoStreamCliWithTrace::initialize()
 {
-//    eed.setName("video stream eed");
-//    simtime_t startTime = par("startTime");
-//
-//    if (startTime>=0)
-//        scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
-
 	UDPVideoStreamCli::initialize();
 
 	// initialize module parameters
@@ -61,11 +68,10 @@ void UDPVideoStreamCliWithTrace::initialize()
 	numPacketsReceived = 0;
 	numPacketsLost = 0;
     numFramesReceived = 0;
-    numFramesLost = 0;
+    numFramesDiscarded = 0;
 
     // initialize flags and other variables
     warmupFinished = false;
-//	isFirstPacket = true;
 }
 
 void UDPVideoStreamCliWithTrace::finish()
@@ -74,6 +80,10 @@ void UDPVideoStreamCliWithTrace::finish()
 
 	recordScalar("packets received", numPacketsReceived);
 	recordScalar("packets lost", numPacketsLost);
+	recordScalar("frames received", numFramesReceived);
+	recordScalar("frames discarded", numFramesDiscarded);
+	recordScalar("decodable frame rate (Q)",
+                 numFramesReceived/double(numFramesReceived+numFramesDiscarded));
 }
 
 void UDPVideoStreamCliWithTrace::handleMessage(cMessage* msg)
@@ -94,37 +104,44 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
     EV << "Video stream packet:\n";
     printPacket(PK(pkt));
 
-    // get some packet info. (including those needed for warm-up processing)
+    // record vector statistics; note that warm-up period handling is automatically done.
+    eed.record(simTime() - pkt->getCreationTime());
+
+    // get packet fields
 	uint16_t seqNumber = uint16_t(pkt->getSequenceNumber());
 	bool isFragmentStart = pkt->getFragmentStart();
     bool isFragmentEnd = pkt->getFragmentEnd();
     long frameNumber = pkt->getFrameNumber();
 	FrameType frameType = FrameType(pkt->getFrameType());
+	long encodingNumber = frameEncodingNumber(frameNumber, numBFrames, frameType);
 
-    // record vector statistics; note that warm-up period handling is automatically done.
-    eed.record(simTime() - pkt->getCreationTime());
-
+    // in the following, the frame statistics will be updated only when
+    // - the end fragment has been received or
+    // - the previously handled frame hasn't been properly processed
 	int currentNumPacketsLost = 0;
 	int currentNumFramesLost = 0;
     if (warmupFinished == false)
     {
-    	// handle warm-up period based on both simulation time and GoP beginning
+    	// handle warm-up flag based on both simulation time and GoP beginning
     	if (simTime() >= simulation.getWarmupPeriod())
+    	{
     		if (frameType == I || frameType == IDR)
+    		{
     			if (isFragmentStart == true)
     			{
                     // initialize variables for handling sequence number and frame number
-                    prevSequenceNumber = (seqNumber > 0) ? (seqNumber - 1) : 65535;
-                    prevPFrameNumber = -1;
+    				prevSequenceNumber = seqNumber;
+                    prevPFrameNumber = (frameNumber > 0) ? frameNumber - numBFrames - 1 : -1;
+                        ///< to avoid loss of B frames after this frame
                     currentFrameNumber = frameNumber;
-                    currentDisplayNumber = displayNumberIFrame(frameNumber, numBFrames);
+                    currentEncodingNumber = encodingNumber;
                     currentFrameType = frameType;
 
                     if (isFragmentEnd == true)
             		{
             			// this frame consists of this packet only
             			currentFrameFinished = true;
-            			prevIFrameNumber = currentFrameNumber;
+            			prevIFrameNumber = frameNumber;
             			numFramesReceived++;	///< count the current frame as well
             		}
             		else
@@ -137,59 +154,76 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 
                     numPacketsReceived++;	///< update packet statistics
     				warmupFinished = true;	///< set the flag
-    			}
-    }	// end of warm-up flag and related processing
+    			}	// end of fragmentStart check
+    		}	// end of frameType check
+    	}	// end of warm-up period check
+    }	// end of warm-up flag check and related processing
     else
 	{
-    	// handle sequence number and detect packet loss
+    	// detect loss of packet(s)
     	// TODO: Later, implement advanced packet and frame loss processing
 		// (e.g., based on client playout modeling related with startup buffering)
-    	if ( seqNumber != (prevSequenceNumber + 1) % 65536 )
+    	if (seqNumber != (prevSequenceNumber + 1) % 65536)
 		{
-			// detected loss of previous packet(s)
-    		currentNumPacketsLost = (seqNumber > prevSequenceNumber) ?
-    				(seqNumber - prevSequenceNumber - 1) : (seqNumber + 65536 - prevSequenceNumber - 1);
-
+			currentNumPacketsLost =
+					(seqNumber > prevSequenceNumber ? seqNumber : seqNumber + 65536)
+					- prevSequenceNumber - 1;
 			EV << currentNumPacketsLost << " video stream packet(s) lost" << endl;
-		}
-        prevSequenceNumber = seqNumber;	///< update the sequence number of previously received packet
 
+			// detect loss of frame(s) between the one previously handled and the current one.
+			// note that the previously handled frame could be the current one as well.
 
-        // note that in the following, the frame statistics will be updated only when
-        // - the end fragment has been received
-        // - the previously handled frame hasn't been properly processed
+			if (encodingNumber > (currentEncodingNumber + 1) % numTraceFrames)
+			{
+				currentNumFramesLost =
+						(encodingNumber > currentEncodingNumber ? encodingNumber : encodingNumber + numTraceFrames)
+						- currentEncodingNumber - 1;
+			}
+
+			// check whether the previously handled frame should be discarded or not
+			// as a result of current packet loss
+			if (currentFrameFinished == false)
+			{
+				currentNumFramesLost++;
+			}
+
+    		// set frame discard flag for non-first packet of frame
+    		if (isFragmentStart == false)
+    		{
+    			currentFrameDiscard =true;
+    		}
+		}	// end of packet and frame loss detection and related-processing
+        prevSequenceNumber = seqNumber;	///< update the sequence number
+
         switch (frameType)
 		{
         case IDR:
         case I:
         	if (isFragmentStart == true)
         	{
-        		// handle frame number and detect frame loss
-        		long displayNumber = displayNumberIFrame(frameNumber, numBFrames);
-        		if ( displayNumber != (currentDisplayNumber + 1) % numTraceFrames )
-        		{
-        			// detected loss of frame(s) between previously handled frame and the current one.
-        			currentNumFramesLost = (displayNumber > currentDisplayNumber) ?
-        					(displayNumber - currentDisplayNumber - 1) : (displayNumber + numTraceFrames - currentDisplayNumber - 1);
-        		}
+//        		// handle frame number and detect frame loss
+//        		long encodingNumber = encodingNumberIFrame(frameNumber, numBFrames);
+//        		if (encodingNumber != (currentEncodingNumber + 1) % numTraceFrames)
+//        		{
+//        			currentNumFramesLost =
+//        					(encodingNumber > currentEncodingNumber ? encodingNumber : encodingNumber + numTraceFrames)
+//        					- currentEncodingNumber - 1;
+//        		}
 
-        		// check whether the previous frame has been processed completely
-    			if (currentFrameFinished == false)
-    			{
-    				// there must be packet losses before the finish of its processing,
-    				// so include the previously handled frame in the loss count.
-    				currentNumFramesLost++;
-    			}
+//        		// check whether the previous frame has been processed completely
+//        		// (i.e., due to packet losses)
+//    			if (currentFrameFinished == false)
+//    			{
+//    				// there must be packet losses before the finish of its processing,
+//    				// so include the previously handled frame in the loss count.
+//    				currentNumFramesLost++;
+//    			}
 
-        		// update frame-related flags and variables
-				currentFrameNumber = frameNumber;
-				currentDisplayNumber = displayNumberIFrame(currentFrameNumber, numBFrames);
-				currentFrameType = frameType;
         		if (isFragmentEnd == true)
         		{
         			// this frame consists of this packet only
         			currentFrameFinished = true;
-        			prevIFrameNumber = currentFrameNumber;
+        			prevIFrameNumber = frameNumber;
         			numFramesReceived++;	///< count the current frame as well
         		}
         		else
@@ -198,14 +232,19 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
         			currentFrameDiscard = false;
 					currentFrameFinished = false;
         		}
+
+        		// update frame-related flags and variables
+				currentFrameNumber = frameNumber;
+				currentEncodingNumber = encodingNumber;
+				currentFrameType = frameType;
         	}	// end of processing of the first packet of I/IDR frame
         	else
         	{
-        		// check whether there has been any packet loss in the same frame
-        		if (currentNumPacketsLost > 0)
-        		{
-        			currentFrameDiscard =true;
-        		}
+//        		// check whether there has been any packet loss in the same frame
+//        		if (currentNumPacketsLost > 0)
+//        		{
+//        			currentFrameDiscard =true;
+//        		}
         		if (isFragmentEnd == true)
             	{
         			if (currentFrameDiscard == false)
@@ -216,7 +255,7 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
         			}
         			else
         			{
-        				numFramesLost++;
+        				currentNumFramesLost++;
         			}
         			currentFrameFinished = true;
             	}
@@ -226,32 +265,143 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
         case P:
         	if (isFragmentStart == true)
         	{
-				if (prevIFrameNumber == currentFrameNumber - numBFrames - 1 || prevPFrameNumber == currentFrameNumber - numBFrames - 1)
+//				// handle frame number and detect frame loss
+//        		long encodingNumber = encodingNumberPFrame(frameNumber, numBFrames);
+//				if ( encodingNumber != (currentEncodingNumber + 1) % numTraceFrames )
+//				{
+//                    // detected loss of frame(s) between previous and current frames
+//        			currentNumFramesLost =
+//                        (encodingNumber > currentEncodingNumber ? encodingNumber : encodingNumber + numTraceFrames)
+//                        - currentEncodingNumber - 1;
+//				}
+//
+//				// check whether the previous frame has been processed completely
+//				if (currentFrameFinished == false)
+//				{
+//					// there must be packet losses before the finish of its processing,
+//					// so include the previously handled frame in the loss count.
+//					currentNumFramesLost++;
+//				}
+
+        		if (
+                    prevIFrameNumber == frameNumber - numBFrames - 1 ||
+                    prevPFrameNumber == frameNumber - numBFrames - 1
+                    )
 				{
-					// I or P frame that the current frame depends was successfully-decoded
+					// I or P frame that the current frame depends on was successfully decoded
+        			currentFrameDiscard = false;
 
-					// handle frame number and detect frame loss
-					long displayNumber = displayNumberPFrame(frameNumber, numBFrames);
-					if ( displayNumber != (currentDisplayNumber + 1) % numTraceFrames )
+					if (isFragmentEnd == true)
 					{
-						// detected loss of frame(s) between previously handled frame and the current one.
-						currentNumFramesLost = (displayNumber > currentDisplayNumber) ?
-						(displayNumber - currentDisplayNumber - 1) : (displayNumber + numTraceFrames - currentDisplayNumber - 1);
+						currentFrameFinished = true;	/// no more packet in this frame
+						prevPFrameNumber = frameNumber;
+						numFramesReceived++; ///< count the current frame as well
 					}
-
-					// check whether the previous frame has been processed completely
-					if (currentFrameFinished == false)
+					else
 					{
-						// there must be packet losses before the finish of its processing,
-						// so include the previously handled frame in the loss count.
-						currentNumFramesLost++;
+						currentFrameFinished = false;	///< more frames to come
 					}
+				}
+				else
+				{
+					// the dependency check failed, so the current frame will be discarded
+					currentFrameDiscard = true;
 
+					if (isFragmentEnd == true)
+					{
+						currentFrameFinished = true;	/// no more packet in this frame
+						currentNumFramesLost++; ///< count the current frame as well
+					}
+					else
+					{
+						currentFrameFinished = false;	///< more frames to come
+					}
+				}
+
+				// update frame-related flags and variables
+				currentFrameNumber = frameNumber;
+				currentEncodingNumber = encodingNumber;
+				currentFrameType = frameType;
+        	}	// end of processing of the first packet of P frame
+        	else
+        	{
+//        		// check whether there has been any packet loss in the same frame
+//        		if (currentNumPacketsLost > 0)
+//        		{
+//        			currentFrameDiscard =true;
+//        		}
+        		if (isFragmentEnd == true)
+            	{
+        			if (currentFrameDiscard == false)
+        			{
+        				// the frame has been received and decoded successfully
+            			prevPFrameNumber = currentFrameNumber;
+            			numFramesReceived++;
+        			}
+        			else
+        			{
+        				currentNumFramesLost++;
+        			}
+        			currentFrameFinished = true;
+            	}
+        	}	// end of processing of the non-first packet of P frame
+        	break;
+
+        case B:
+        	if (isFragmentStart == true)
+        	{
+//        		// handle frame number and detect frame loss
+//        		long encodingNumber = encodingNumberBFrame(frameNumber);
+//				if ( encodingNumber != (currentEncodingNumber + 1) % numTraceFrames )
+//				{
+//        			// detected loss of frame(s) between previous and current frames
+//        			currentNumFramesLost =
+//                        (encodingNumber > currentEncodingNumber ? encodingNumber : encodingNumber + numTraceFrames)
+//                        - currentEncodingNumber - 1;
+//				}
+//
+//				// check whether the previous frame has been processed completely
+//				if (currentFrameFinished == false)
+//				{
+//					// there must be packet losses before the finish of its processing,
+//					// so include the previously handled frame in the loss count.
+//					currentNumFramesLost++;
+//				}
+
+        		// check frame dependency
+        		long lastDependonFrameNumber = (frameNumber/(numBFrames + 1))*(numBFrames + 1);
+                    ///< frame number of the last I or P frame it depends on
+        		long nextDependonFrameNumber = lastDependonFrameNumber + numBFrames + 1;
+                    ///< frame number of the next I or P frame it depends on
+        		bool passedDependency = false;
+        		if (nextDependonFrameNumber % gopSize == 0)
+        		{
+        			// next dependent frame is I frame, so we need to check
+                    // both next (I) and last frames.
+        			if (
+                        prevPFrameNumber == lastDependonFrameNumber &&
+                        prevIFrameNumber == nextDependonFrameNumber
+                        )
+        			{
+        				passedDependency = true;
+        			}
+        		}
+        		else
+        		{
+        			// next dependent frame is P frame, so we need to check
+                    // only next (P) frame.
+        			if (prevPFrameNumber == nextDependonFrameNumber)
+        			{
+        				passedDependency = true;
+        			}
+        		}
+
+				if (passedDependency == true)
+				{
 					if (isFragmentEnd == true)
 					{
 						// this frame consists of this packet only
 						currentFrameFinished = true;
-						prevPFrameNumber = currentFrameNumber;
 						numFramesReceived++; ///< count the current frame as well
 					}
 					else
@@ -270,7 +420,7 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 					{
 						// this frame consists of this packet only
 						currentFrameFinished = true;
-						numFramesLost++; ///< count the current frame as well
+						currentNumFramesLost++; ///< count the current frame as well
 					}
 					else
 					{
@@ -281,35 +431,30 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 
 				// update frame-related flags and variables
 				currentFrameNumber = frameNumber;
-				currentDisplayNumber = displayNumberPFrame(currentFrameNumber, numBFrames);
+				currentEncodingNumber = encodingNumber;
 				currentFrameType = frameType;
-        	}	// end of processing of the first packet of P frame
+        	}	// end of processing of the first packet of B frame
         	else
         	{
-        		// check whether there has been any packet loss in the same frame
-        		if (currentNumPacketsLost > 0)
-        		{
-        			currentFrameDiscard =true;
-        		}
+//        		// check whether there has been any packet loss in the same frame
+//        		if (currentNumPacketsLost > 0)
+//        		{
+//        			currentFrameDiscard =true;
+//        		}
         		if (isFragmentEnd == true)
             	{
         			if (currentFrameDiscard == false)
         			{
         				// the frame has been received and decoded successfully
-            			prevPFrameNumber = currentFrameNumber;
             			numFramesReceived++;
         			}
         			else
         			{
-        				numFramesLost++;
+        				currentNumFramesLost++;
         			}
         			currentFrameFinished = true;
             	}
-        	}	// end of processing of the non-first packet of P frame
-        	break;
-
-        case B:
-        	// TODO!!!
+        	}	// end of processing of the non-first packet of B frame
         	break;
 
         default:
@@ -321,7 +466,7 @@ void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 		numPacketsLost += currentNumPacketsLost;
 
 		// update frame statistics
-		numFramesLost += currentNumFramesLost;
+		numFramesDiscarded += currentNumFramesLost;
 
 	}	// end of 'if (warmupFinshed == false)'
 

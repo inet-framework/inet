@@ -13,8 +13,8 @@
 ///
 
 
-#ifndef UDPVIDEOSTREAM_WITHTRACE_H
-#define UDPVIDEOSTREAM_WITHTRACE_H
+#ifndef UDPVIDEOSTREAM_WITH_TRACE_H
+#define UDPVIDEOSTREAM_WITH_TRACE_H
 
 #include <vector>
 
@@ -32,4 +32,4 @@ typedef std::vector<long> LongVector;
 typedef std::vector<std::string> StringVector;
 
 
-#endif	// UDPVIDEOSTREAMSVR_WITHTRACE_H
+#endif	// UDPVIDEOSTREAM_WITH_TRACE_H

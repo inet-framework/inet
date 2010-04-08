@@ -238,7 +238,8 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	d->numPktSent = 0;
 	d->numFrames = numFrames;
 	d->framePeriod = framePeriod;
-	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+//	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+	d->currentFrame = intuniform(0, numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
 	streamVector.push_back(d);
 
 	// initialize self messages
@@ -257,13 +258,14 @@ void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 {
 	VideoStreamData *d = (VideoStreamData *) frameTimer->getContextPointer();
 
+//	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
+	d->currentFrame = (d->currentFrame + 1) % numFrames; ///> wrap around to the first frame if it reaches the last one
 	d->frameNumber = frameNumberVector[d->currentFrame];
 	d->frameTime = frameTimeVector[d->currentFrame];
 	d->frameType = frameTypeVector[d->currentFrame];
 	d->frameSize = frameSizeVector[d->currentFrame];
 	d->bytesLeft = d->frameSize;
 	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over the frame period
-	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
 
 	// schedule next frame start
 	scheduleAt(simTime() + framePeriod, frameTimer);
@@ -291,7 +293,6 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	// update the session VideoStreamData and global statistics
 	d->bytesLeft -= payloadSize;
 	d->numPktSent++;
-//	d->currentSequenceNumber = (d->currentSequenceNumber < 65535) ? d->currentSequenceNumber + 1 : 0;	///> wrap around to zero if it reaches the maximum value (65535)
 	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % 65536;	///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;
 

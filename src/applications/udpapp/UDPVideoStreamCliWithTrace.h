@@ -1,24 +1,28 @@
-//
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
-// Copyright (C) 2005 Andras Varga
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
+///
+/// @file   UDPVideoStreamCliWithTrace.h
+/// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+/// @date   2010-04-02
+///
+/// @brief  Declares UDPVideoStreamCliWithTrace class, modeling a video
+///         streaming client based on trace files from ASU video trace
+///         library [1].
+///
+/// @par References:
+/// <ol>
+///	<li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
+/// </li>
+/// </ol>
+///
+/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+///
+/// @remarks This software is written and distributed under the GNU General
+///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
+///          You must not remove this notice, or any other, from this software.
+///
 
 
-#ifndef __INET_UDPVIDEOSTREAM_WITHTRACE_H
-#define __INET_UDPVIDEOSTREAM_WITHTRACE_H
+#ifndef UDPVIDEOSTREAMCLI_WITH_TRACE_H
+#define UDPVIDEOSTREAMCLI_WITH_TRACE_H
 
 #include <omnetpp.h>
 #include "UDPVideoStreamCli.h"
@@ -40,45 +44,37 @@ class INET_API UDPVideoStreamCliWithTrace : public UDPVideoStreamCli
 	int numBFrames;	///< GOP pattern: I-to-P frame distance (M)
 
     // statistics
-	//    cOutVector eed;
 	bool warmupFinished;	///< if true, start statistics gathering
 	long numPacketsReceived;	///< number of packets received
 	long numPacketsLost;	///< number of packets lost
-    long numFramesReceived; ///< number of frames received (and correctly decoded)
-    long numFramesLost; ///< number of frames lost (or discarded due to unmet dependency)
+    long numFramesReceived;	///< number of frames received and correctly decoded
+    long numFramesDiscarded;	///< number of frames discarded due to packet loss or failed dependency
 
 	// variables for packet and frame loss handling
-//	bool isFirstPacket;	///< indicator of whether the current packet is the first one or not
 	uint16_t prevSequenceNumber;	///< (16-bit RTP) sequence number of the most recently received packet
     long prevIFrameNumber;   ///< frame number of the most recently received I frame
     long prevPFrameNumber;   ///< frame number of the most recently received P frame
-	long currentFrameNumber;    ///< frame number whose packets are currently being received
-	long currentDisplayNumber;	///< display number of the current frame number
-// 	long currentGopNumber;
-	FrameType currentFrameType;
+	long currentFrameNumber;    ///< frame number (display order) of the frame under processing
+	long currentEncodingNumber;	///< encoding number (transmission order) of the frame under processing
+	FrameType currentFrameType;	/// type (I, IDR, P, or B) of the frame under processing
 	bool currentFrameDiscard;	///< if true, all the remaining packets of the current frame are to be discarded
     bool currentFrameFinished;	///< if true, the frame has been successfully received and decoded
 
   protected:
-    ///@name Overridden cSimpleModule functions
-	//@{
 	virtual void initialize();
 	virtual void finish();
 	virtual void handleMessage(cMessage *msg);
-	//@}
 
   protected:
     virtual void receiveStream(UDPVideoStreamPacket *pkt);
 
   protected:
     // utility functions
-    inline long displayNumberIFrame(long frameNumber, int numBFrames) {return (frameNumber == 0 ? 0 : frameNumber - numBFrames);}
-    inline long displayNumberPFrame(long frameNumber, int numBFrames) {return (frameNumber - numBFrames);}
-    inline long displayNumberBFrame(long frameNumber) {return (frameNumber - 1);}
+    long frameEncodingNumber(long frameNumber, int numBFrames, FrameType frameType);
+//    inline long encodingNumberIFrame(long frameNumber, int numBFrames) {return (frameNumber == 0 ? 0 : frameNumber - numBFrames);}
+//    inline long encodingNumberPFrame(long frameNumber, int numBFrames) {return (frameNumber - numBFrames);}
+//    inline long encodingNumberBFrame(long frameNumber) {return (frameNumber + 1);}
 };
 
 
-#endif
-
-
-
+#endif	// UDPVIDEOSTREAMCLI_WITH_TRACE_H

@@ -50,5 +50,6 @@ network TestOfUDPVideoStreaming
                 @display("p=464,119;i=device/server_l");
         }
     connections:
-        host.ethg++ <--> { datarate = 100Mbps; delay = 10ms; ber = 1e-7; } <--> server.ethg++;
+        host.ethg++ <--> { datarate = 100Mbps; delay = 10ms; per = 1e-5; } <--> server.ethg++;
+//        host.ethg++ <--> { datarate = 100Mbps; delay = 10ms; per = 0.0; } <--> server.ethg++;
 }
