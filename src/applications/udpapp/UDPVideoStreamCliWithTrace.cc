@@ -102,7 +102,9 @@ void UDPVideoStreamCliWithTrace::handleMessage(cMessage* msg)
 void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
 {
     EV << "Video stream packet:\n";
+#ifndef NDEBUG
     printPacket(PK(pkt));
+#endif
 
     // record vector statistics; note that warm-up period handling is automatically done.
     eed.record(simTime() - pkt->getCreationTime());
