@@ -92,6 +92,25 @@ inline std::ostream& operator<<(std::ostream& out,
 	return out;
 }
 
+void UDPVideoStreamSvrWithTrace::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
+{
+    // send message to UDP, with the appropriate control info attached
+    msg->setKind(UDP_C_DATA);
+
+    UDPControlInfo *ctrl = new UDPControlInfo();
+    ctrl->setSrcPort(srcPort);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setDestPort(destPort);
+    msg->setControlInfo(ctrl);
+
+    EV << "Sending packet: ";
+#ifndef NDEBUG
+    printPacket(msg);
+#endif
+
+    send(msg, "udpOut");
+}
+
 UDPVideoStreamSvrWithTrace::UDPVideoStreamSvrWithTrace()
 {
 }

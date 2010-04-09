@@ -27,12 +27,7 @@
 
 
 // common type declarations
-//enum TraceFormat {ASU_TERSE, ASU_VERBOSE}; ///< trace file formats
 enum MessageKind {FRAME_START = 100, PACKET_TX = 200}; ///< kind values for self messages
-//typedef std::vector<char> CharVector;
-//typedef std::vector<double> DoubleVector;
-//typedef std::vector<long> LongVector;
-//typedef std::vector<std::string> StringVector;
 
 
 ///
@@ -124,6 +119,10 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     virtual void finish();
     virtual void handleMessage(cMessage* msg);
     //@}
+
+  protected:
+    /// redefine to optimize the performance
+    virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
 };
 
 
