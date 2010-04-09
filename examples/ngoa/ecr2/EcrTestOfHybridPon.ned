@@ -41,7 +41,7 @@ import inet.linklayer.hybridpon.LambdaSplitter;
 network EcrTestOfHybridPon
 {
     parameters:
-        int N;	// number of subscribers (ONUs); we assume that there is only one client per ONU.
+        int N = default(16);	// number of subscribers (ONUs); we assume that there is only one client per ONU.
         double uni_rate @unit(bps) = default(1Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(1Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)

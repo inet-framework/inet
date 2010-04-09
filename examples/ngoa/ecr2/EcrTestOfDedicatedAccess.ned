@@ -37,7 +37,7 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 network EcrTestOfDedicatedAccess
 {
     parameters:
-//        int N;	// number of ONUs (subscribers)
+        int N = default(16);	// number of ONUs (subscribers)
         int n = default(1);	// number of hosts (users) per ONU (subscriber)
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
@@ -60,26 +60,27 @@ network EcrTestOfDedicatedAccess
             parameters:
                 @display("p=52,42");
         }
-        host[n]: StandardHost3WithEthernetInterface2 {
+
+        server: StandardServerWithEthernetInterface2 {
             parameters:
-                @display("i=device/laptop;p=46,119");
-        }
-        onu: EtherSwitch3 {
-            parameters:
-                @display("p=131,119");
+                @display("p=464,119;i=device/server_l");
         }
         olt: EtherSwitch3 {
             parameters:
                 @display("p=300,119");
         }
-        server: StandardServerWithEthernetInterface2 {
+        onu[N]: EtherSwitch3 {
             parameters:
-                @display("p=464,119;i=device/server_l");
+                @display("p=131,119");
+        }
+        host[N*n]: StandardHost3WithEthernetInterface2 {
+            parameters:
+                @display("i=device/laptop;p=46,119");
         }
     connections:
-        for i=0..n-1 {
-            host[i].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu.ethg++;
+        for i=0..N-1, for j=0..n-1 {
+			host[i*n+j].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg++;
+			onu[i].ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg++;
         }
-        onu.ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg++;
         olt.ethg++ <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg++;
 }
