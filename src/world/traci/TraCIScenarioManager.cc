@@ -519,7 +519,7 @@ void TraCIScenarioManager::processUpdateObject(uint8_t domain, int32_t nodeId, T
 	cModule* mod = getManagedModule(nodeId);
 
 	// is it in the ROI?
-	bool inRoi = isInRegionOfInterest(p, edge, speed, angle, allowed_speed);
+	bool inRoi = isInRegionOfInterest(Coord(px, py), edge, speed, angle, allowed_speed);
 	if (!inRoi) {
 		if (mod) {
 			deleteModule(nodeId);
