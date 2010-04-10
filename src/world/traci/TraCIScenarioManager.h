@@ -79,6 +79,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
 		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
+		size_t nextNodeVectorIndex; /**< next OMNeT++ module vector index to use */
 		std::map<int32_t, cModule*> hosts; /**< vector of all hosts managed by us */
 		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
 
