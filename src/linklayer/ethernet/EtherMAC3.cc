@@ -151,7 +151,7 @@ void EtherMAC3::processFrameFromUpperLayer(EtherFrame *frame)
     {
         numFramesFromHL++;
 
-        if (txQueueLimit && txQueue.length()>txQueueLimit)
+        if (txQueueLimit && txQueue.length()>=txQueueLimit)
         {
 //            error("txQueue length exceeds %d -- this is probably due to "
 //                  "a bogus app model generating excessive traffic "
@@ -159,17 +159,18 @@ void EtherMAC3::processFrameFromUpperLayer(EtherFrame *frame)
 //                  txQueueLimit);
             numDroppedTxQueueOverflow++;
 			numDroppedTxQueueOverflowVector.record(numDroppedTxQueueOverflow);
+            delete frame;
         }
+        else
+        {
+            // fill in src address if not set
+            if (frame->getSrc().isUnspecified())
+                frame->setSrc(address);
 
-
-
-        // fill in src address if not set
-        if (frame->getSrc().isUnspecified())
-            frame->setSrc(address);
-
-        // store frame and possibly begin transmitting
-        EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
-        txQueue.insert(frame);
+            // store frame and possibly begin transmitting
+            EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
+            txQueue.insert(frame);
+        }
     }
     else
     {
@@ -183,7 +184,7 @@ void EtherMAC3::processFrameFromUpperLayer(EtherFrame *frame)
     }
 	// end of modified implementation of EtherMACBase::processFrameFromUpperLayer(frame)
 
-    if (transmitState == TX_IDLE_STATE)
+    if (transmitState == TX_IDLE_STATE && !txQueue.empty()) // now we need to check txQueue
         startFrameTransmission();
 }
 

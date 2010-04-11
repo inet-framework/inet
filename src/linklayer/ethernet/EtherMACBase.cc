@@ -365,7 +365,9 @@ void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
     }
     else
     {
-        processReceivedDataFrame((EtherFrame *)frame);
+        // processReceivedDataFrame((EtherFrame *)frame);
+        // modifed by Kyeong Soo (Joseph) Kim
+        processReceivedDataFrame(check_and_cast<EtherFrame *>(frame));
     }
 }
 

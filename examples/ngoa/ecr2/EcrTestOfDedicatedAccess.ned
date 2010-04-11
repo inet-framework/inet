@@ -64,23 +64,33 @@ network EcrTestOfDedicatedAccess
         server: StandardServerWithEthernetInterface2 {
             parameters:
                 @display("p=464,119;i=device/server_l");
+			gates:
+				ethg[1];
         }
         olt: EtherSwitch3 {
             parameters:
                 @display("p=300,119");
+			gates:
+				ethg[N+1];
         }
         onu[N]: EtherSwitch3 {
             parameters:
                 @display("p=131,119");
+			gates:
+				ethg[n+1];				
         }
         host[N*n]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
+			gates:
+				ethg[1];				
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
-			host[i*n+j].ethg++ <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg++;
-			onu[i].ethg++ <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg++;
+			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
+		}
+		for i=0..N-1 {
+			onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
         }
-        olt.ethg++ <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg++;
+        olt.ethg[N] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
 }

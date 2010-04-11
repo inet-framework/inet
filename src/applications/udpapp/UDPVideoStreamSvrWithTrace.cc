@@ -271,6 +271,7 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	readFrameData(d->frameStartMsg);
 
 	numStreams++;
+    delete msg;
 }
 
 void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
