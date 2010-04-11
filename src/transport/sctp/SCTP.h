@@ -222,7 +222,7 @@ class INET_API SCTP : public cSimpleModule
         /**
         * To be called from SCTPAssociation: reserves an ephemeral port for the connection.
         */
-        int16 getEphemeralPort();
+        uint16 getEphemeralPort();
 
         /**
         * Generates a new integer, to be used as assocId. (assocId is part of the key

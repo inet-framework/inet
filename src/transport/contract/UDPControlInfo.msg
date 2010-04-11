@@ -48,7 +48,7 @@ enum UDPCommandCode
 enum UDPStatusInd
 {
 
-    UDP_I_DATA = 0;        // data packet (set on data packet)
+    UDP_I_DATA = 0;  // data packet (set on data packet)
     UDP_I_ERROR = 1; // ICMP error received on a sent datagram
 }
 
