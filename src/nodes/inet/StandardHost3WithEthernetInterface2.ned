@@ -96,11 +96,12 @@ module StandardHost3WithEthernetInterface2
         }
         ftpApp[numFtpApps]: <ftpAppType> like TCPApp2 {
             parameters:
+				port = index+1024;
                 @display("p=169,54");
         }        
         httpApp[numHttpApps]: <httpAppType> like TCPApp2 {
             parameters:
-                port = index+1024;
+                port = index+2048; // TODO: Remove the limit in the max. number of ftpApp's (i.e., 1024)
                 @display("p=169,140");
         }
         tcp: <tcpType> like ITCP {
