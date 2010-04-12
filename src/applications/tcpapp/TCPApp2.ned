@@ -20,8 +20,11 @@
 package inet.applications.tcpapp;
 
 //
-// Template for TCP applications. It shows what gates a TCP app
-// needs, to be able to be used in StandardHost etc.
+// Template for TCP applications. It shows what gates and port number
+// a TCP app needs, to be able to be used in StandardHost2 etc.
+//
+// Note that 'port' is added as a new parameter so that we can assign
+// it in a higher, compound modules as in StandardHost2 and so on.
 //
 moduleinterface TCPApp2
 {
@@ -29,7 +32,7 @@ moduleinterface TCPApp2
         int port;
         @display("i=block/app");
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }
 
