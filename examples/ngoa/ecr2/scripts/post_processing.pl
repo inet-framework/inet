@@ -3,10 +3,10 @@
 # Perl script for post processing simulation data for candidate NGOA
 # architecture in OMNeT++ scala files
 #
-# It prints out results to corresponding output files against number
+# It prints out results to corresponding output files against the number
 # of sessions ($n).
 #
-# (C) 2009 Kyeong Soo (Joseph) Kim
+# (C) 2009-2010 Kyeong Soo (Joseph) Kim
 
 @infiles = <$ARGV[0]>; # a list of files matching a given pattern
 
