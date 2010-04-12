@@ -117,6 +117,11 @@ class INET_API TCPSendQueue : public cPolymorphic
     virtual void enqueueAppData(cPacket *msg) = 0;
 
     /**
+     * Returns the sequence number of the first byte stored in the buffer.
+     */
+    virtual uint32 getBufferStartSeq() = 0;
+
+    /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
