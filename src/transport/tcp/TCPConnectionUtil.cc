@@ -709,7 +709,9 @@ void TCPConnection::retransmitOneSegment()
     // retransmit one segment at snd_una, and set snd_nxt accordingly
     state->snd_nxt = state->snd_una;
 
-    ulong bytes = std::min(state->snd_mss, state->snd_max - state->snd_nxt);
+    // When FIN sent the snd_max-snd_nxt larger than bytes available in queue
+    ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+            sendQueue->getBytesAvailable(state->snd_nxt));
     ASSERT(bytes!=0);
 
     sendSegment(bytes);
