@@ -239,12 +239,14 @@ foreach my $infile (@infiles) {
 			$outfile = "br" . $br;
 		}
 	}
+	# replace bd (backbond delay) with rtt (overall round-trip delay including 0.3ms delay in access)
 	if ($bd >= 0) {
+		my $rtt = ($bd+0.3)*2;
 		if ($outfile) {
-			$outfile = $outfile . "_bd" . $bd;
+			$outfile = $outfile . "_rtt" . $rtt;
 		}
 		else {
-			$outfile = "bd" . $bd;
+			$outfile = "rtt" . $rtt;
 		}
 	}
 	
