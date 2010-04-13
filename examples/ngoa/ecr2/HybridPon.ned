@@ -38,7 +38,7 @@ import inet.linklayer.hybridpon.LambdaSplitter;
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2010-03-23
 //
-network EcrTestOfHybridPon
+network HybridPon
 {
     parameters:
         int N = default(16);	// number of subscribers (ONUs); we assume that there is only one client per ONU.

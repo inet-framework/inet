@@ -34,7 +34,7 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2010-03-26
 //
-network EcrTestOfDedicatedAccess
+network DedicatedAccess
 {
     parameters:
         int N = default(16);	// number of ONUs (subscribers)
