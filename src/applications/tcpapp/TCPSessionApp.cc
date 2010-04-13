@@ -56,10 +56,17 @@ void TCPSessionApp::parseScript(const char *script)
 
 void TCPSessionApp::count(cMessage *msg)
 {
-    if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+    if(msg->isPacket())
     {
-        packetsRcvd++;
-        bytesRcvd+=PK(msg)->getByteLength();
+        if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+        {
+            packetsRcvd++;
+            bytesRcvd+=PK(msg)->getByteLength();
+        }
+        else
+        {
+            EV << "TCPSessionApp received unknown message (kind:" << msg->getKind() << ", name:" << msg->getName() << ")\n";
+        }
     }
     else
     {
@@ -77,7 +84,7 @@ void TCPSessionApp::waitUntil(simtime_t t)
     cMessage *msg=NULL;
     while ((msg=receive())!=timeoutMsg)
     {
-//FIXME ??? PK() or if (isPacket) ?        count(msg);
+        count(msg);
         socket.processMessage(msg);
     }
     delete timeoutMsg;
