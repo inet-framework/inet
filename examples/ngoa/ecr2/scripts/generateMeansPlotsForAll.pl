@@ -31,10 +31,15 @@ my %exts = (
 	"Average Decodable Frame Rate of Streaming Videos (Q)" => "video_dfr",
 );
 
+# set time stamp
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+my $timestamp = sprintf("%4d-%02d-%02d %02d:%02d:%02d", $year+1900, $mon+1, $mday, $hour, $min, $sec);
+
 # generate group means plots into pdf files
+my $title = $infile_base . " \($timestamp\)";
 foreach my $stat (keys %exts) {
 	my $infile = $infile_base . ".$exts{$stat}";
-	my $rc = system("$shellScript $infile '$stat'");
+	my $rc = system("$shellScript $infile '$stat' '$title'");
     die "system() failed with status $rc" unless ($rc == 0);
 }
 

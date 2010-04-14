@@ -22,6 +22,10 @@ my $numInFilesProcessed = 0;	# counter for the number of input files processed
 my %pdfs = ();	# hash of run number and individual pdf file name
 my $pdf = "";	# file name for merged pdfs
 
+# set time stamp
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+my $timestamp = sprintf("%4d-%02d-%02d %02d:%02d:%02d", $year+1900, $mon+1, $mday, $hour, $min, $sec);
+
 foreach my $infile (@infiles) {
 
 	open(INFILE, "<", $infile)
@@ -98,7 +102,7 @@ foreach my $infile (@infiles) {
 	my $rScript = <<EOF;
 data <- read.table("$outfile");
 pdf(file="$outfile.pdf", width=10, height=10);
-plot(data, main="$config-$run", xlab="Time [sec]", ylab="Number of Messages", type="l", panel.first=grid(col="black", lwd=2));
+plot(data, main="$config-$run ($timestamp)", xlab="Time [sec]", ylab="Number of Messages", type="l", panel.first=grid(col="black", lwd=2));
 dev.off();
 EOF
 

@@ -13,25 +13,26 @@
 # (C) 2010 Kyeong Soo (Joseph) Kim
 #
 
-EXPECTED_ARGS=2
+EXPECTED_ARGS=3
 
-# print usage if the number of command-line args is less than 2
+# print usage if the number of command-line args is less than 3
 if [ $# -ne $EXPECTED_ARGS ]
 then
-    echo "Usage: `basename $0` data_file statistic_name"
+    echo "Usage: `basename $0` data_file statistic_name main_title"
     exit 1
 fi
 
 # initialize variables
 INPUT_FILE=$1
 STATISTIC=$2
+TITLE=$3
 
 RSCRIPT="
 library(gplots);
 data <- read.table('${INPUT_FILE}', col.names = c('numHosts', 'repetition', 'value'));
 pdf(file='${INPUT_FILE}.pdf', width=10, height=10);
 attach(data);
-plotmeans(value ~ numHosts, xlab='Number of Hosts per ONU', ylab = '${STATISTIC}', n.label=FALSE);
+plotmeans(value ~ numHosts, main='${TITLE}', xlab='Number of Hosts per ONU', ylab = '${STATISTIC}', n.label=FALSE);
 dev.off();
 "
 echo $RSCRIPT | R --no-save --quiet
