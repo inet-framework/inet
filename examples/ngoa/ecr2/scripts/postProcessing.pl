@@ -18,7 +18,7 @@ use strict;
 # check argument count and print usage if needed
 my $argcnt = $#ARGV + 1;
 if ($argcnt < 1) {
-	die "Usage: postprocessing.pl \"regexp pattern for scala files\"\n";
+	die "Usage: $0 \"regexp_pattern_for_scala_files\"\n";
 }
 
 # initialize variables
@@ -27,6 +27,7 @@ my @infiles = <$ARGV[0]>; # a list of files matching a given pattern
 # print @files;
 #my @outfiles = ();
 my %outfiles;
+my $numInFilesProcessed = 0;	# counter for the number of input files processed
 
 # extract & process statistics from the given scalar files
 # and put them into separate output files
@@ -274,8 +275,14 @@ foreach my $infile (@infiles) {
 	my $ftp_avg_delay = $ftp_sum_delay/$ftp_sum_num_sessions;
 
 	my $outfile_ftp_dly = $outfile . ".ftp_dly";
-	open(OUTFILE, ">>", $outfile_ftp_dly)
-		or die "Can't open $outfile_ftp_dly for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_ftp_dly)
+			or die "Can't open $outfile_ftp_dly for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_ftp_dly)
+			or die "Can't open $outfile_ftp_dly for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $ftp_avg_delay);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_ftp_dly: $!"
@@ -295,8 +302,14 @@ foreach my $infile (@infiles) {
 	my $ftp_avg_throughput = $ftp_sum_throughput/$ftp_sum_num_sessions;
 
 	my $outfile_ftp_thr = $outfile . ".ftp_thr";
-	open(OUTFILE, ">>", $outfile_ftp_thr)
-		or die "Can't open $outfile_ftp_thr for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_ftp_thr)
+			or die "Can't open $outfile_ftp_thr for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_ftp_thr)
+			or die "Can't open $outfile_ftp_thr for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $ftp_avg_throughput);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_ftp_thr: $!"
@@ -316,8 +329,14 @@ foreach my $infile (@infiles) {
 	my $ftp_avg_transfer_rate = $ftp_sum_transfer_rate/$ftp_sum_num_sessions;
 
 	my $outfile_ftp_trf = $outfile . ".ftp_trf";
-	open(OUTFILE, ">>", $outfile_ftp_trf)
-		or die "Can't open $outfile_ftp_trf for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_ftp_trf)
+			or die "Can't open $outfile_ftp_trf for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_ftp_trf)
+			or die "Can't open $outfile_ftp_trf for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $ftp_avg_transfer_rate);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_ftp_trf: $!"
@@ -345,8 +364,14 @@ foreach my $infile (@infiles) {
 	my $http_avg_delay = $http_sum_delay/$http_sum_num_sessions;
 
 	my $outfile_http_dly = $outfile . ".http_dly";
-	open(OUTFILE, ">>", $outfile_http_dly)
-		or die "Can't open $outfile_http_dly for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_http_dly)
+			or die "Can't open $outfile_http_dly for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_http_dly)
+			or die "Can't open $outfile_http_dly for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $http_avg_delay);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_http_dly: $!"
@@ -366,8 +391,14 @@ foreach my $infile (@infiles) {
 	my $http_avg_throughput = $http_sum_throughput/$http_sum_num_sessions;
 
 	my $outfile_http_thr = $outfile . ".http_thr";
-	open(OUTFILE, ">>", $outfile_http_thr)
-		or die "Can't open $outfile_http_thr for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_http_thr)
+			or die "Can't open $outfile_http_thr for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_http_thr)
+			or die "Can't open $outfile_http_thr for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $http_avg_throughput);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_http_thr: $!"
@@ -387,8 +418,14 @@ foreach my $infile (@infiles) {
 	my $http_avg_transfer_rate = $http_sum_transfer_rate/$http_sum_num_sessions;
 
 	my $outfile_http_trf = $outfile . ".http_trf";
-	open(OUTFILE, ">>", $outfile_http_trf)
-		or die "Can't open $outfile_http_trf for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_http_trf)
+			or die "Can't open $outfile_http_trf for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_http_trf)
+			or die "Can't open $outfile_http_trf for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $http_avg_transfer_rate);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_http_trf: $!"
@@ -401,8 +438,14 @@ foreach my $infile (@infiles) {
 
 	# decodable frame rate (Q)
 	my $outfile_video_dfr = $outfile . ".video_dfr";
-	open(OUTFILE, ">>", $outfile_video_dfr)
-		or die "Can't open $outfile_video_dfr for output: $!";
+	if ($numInFilesProcessed == 0) {
+		open(OUTFILE, ">", $outfile_video_dfr)
+			or die "Can't open $outfile_video_dfr for output: $!";
+	}
+	else {
+		open(OUTFILE, ">>", $outfile_video_dfr)
+			or die "Can't open $outfile_video_dfr for output: $!";
+	}
 	printf(OUTFILE "%d\t%d\t%le\n", $n, $repetition, $sum_decodable_frame_rate/$num_decodable_frame_rate);
 	close OUTFILE
 		or warn $! ? "Error closing $outfile_video_dfr: $!"
@@ -410,6 +453,9 @@ foreach my $infile (@infiles) {
 	unless (exists $outfiles{$outfile_video_dfr}) {
 		$outfiles{$outfile_video_dfr} = 1; # store the file name for later processing
 	}
+
+	# update counter
+	$numInFilesProcessed++;
 
 }	# end of the 1st foreach()
 

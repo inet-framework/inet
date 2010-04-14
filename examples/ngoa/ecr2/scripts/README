@@ -1,18 +1,26 @@
 scripts
 =======
 
-This directory includes various scripts to submit array & batch jobs
-to a cluster and do pre- & post-processing of simulation results for
-the ECR study of next-generation optical access networks.
+This directory includes scripts to submit array & batch jobs to a
+cluster and do pre- & post-processing of simulation results for the
+ECR study of next-generation optical access networks.
 
-The following is the explanation of typical workflow.
 
-1. Run simulations
+1. Simulation run (batch processing)
 
-Use 'arrayrun.sh' script to submit a batch job to cluster (Grid
-Engine) as in the following example:
-
+arrayrun.sh:
+Submit a batch job to cluster (Grid Engine) as in the following
+example:
+  
 qsub -t 1:50 -o directoryForStandardOutput -j yes arrayrun.sh iniFile configuration
 
 
-2. Analyze results
+2. Data analysis (pre- and post-processing)
+
+generateMeansPlotsForAll.pl/generateMeansPlot.sh:
+Plot group means with 95% confidence intervals for batch of
+simulations
+
+generateMsgPlotsForAll.pl:
+Plot the number of messages present in the system for batch of
+simulations (to check the warm-up period)
