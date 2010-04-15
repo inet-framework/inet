@@ -29,7 +29,7 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 //
 // Defines a test network for equivalent circuit rate (ECR)-based
-// study of dedicated access network models.
+// study of dedicated access network architectures.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2010-03-26
@@ -41,11 +41,9 @@ network DedicatedAccess
         int n = default(1);	// number of hosts (users) per ONU (subscriber)
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
-        double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and LambdaSplitter)
+        double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
         double distribution_delay @unit(s) = default(300us);	// default delay of 300 us corresponds to 60 km fiber;
         														// note that there is no feeder fiber in dedicated access unlike PONs.
-//        double feeder_rate @unit(bps) = default(10Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
-//        double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(1Tbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
         @display("bgb=519,184");
@@ -60,7 +58,6 @@ network DedicatedAccess
             parameters:
                 @display("p=52,42");
         }
-
         server: StandardServerWithEthernetInterface2 {
             parameters:
                 @display("p=464,119;i=device/server_l");
@@ -83,7 +80,7 @@ network DedicatedAccess
             parameters:
                 @display("i=device/laptop;p=46,119");
 			gates:
-				ethg[1];				
+				ethg[1];
         }
     connections:
         for i=0..N-1, for j=0..n-1 {

@@ -19,7 +19,7 @@ simple OnuMacLayer
 {
     parameters:
         @display("i=block/subqueue;p=92,124");
-        int queueSize @unit(bit) = default(83886080b);	// size of FIFO queue (default is 10 MB)
+        int queueSize @unit(bit) = default(8e7b);	// size of FIFO queue (default is 80 Mb)
     gates:
         inout ethg;	// interface with Ethernet switch
         inout wdmg;	// interface with WDM Layer

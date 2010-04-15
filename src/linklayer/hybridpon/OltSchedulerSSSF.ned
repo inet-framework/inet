@@ -46,12 +46,12 @@ simple OltSchedulerSSSF like IOltScheduler
     parameters:
         @display("i=block/join");
         int cwMax @unit(bit) = default(5e6b);		// maximum grant to ONU [bit] (default is 5 Mb)
-        double maxTxDelay @unit(s) = default(2ms);	// max. limit to TX scheduling delay [sec]
+        double maxTxDelay @unit(s) = default(2ms);	// max. limit to TX scheduling delay [sec] (default is 2 ms)
         double onuTimeout @unit(s) = default(1ms);	// polling cycle from OLT to ONU [sec] (default is 1 ms)
-        double queueSizePoll @unit(bit) = default(8388608b);	// size of FIFO queue for polling frames [bit] (default is 1 MB)
-        double voqSize @unit(bit) = default(83886080b);			// VOQ size [bit] (default is 10 MB)
-//#        // Parameters specific to improved sequential scheduling
-//#        double rsDepth;					// rescheduling depth
+        double queueSizePoll @unit(bit) = default(8e7b);	// size of FIFO queue for polling frames [bit] (default is 80 Mb)
+        double voqSize @unit(bit) = default(8e7b);	// VOQ size [bit] (default is 80 Mb)
+//		// Parameters specific to improved sequential scheduling
+//		double rsDepth;					// rescheduling depth
     gates:
 		inout ethg[];	// interface with Ethernet switch
 		inout wdmg;	// interface with WDM Layer		
