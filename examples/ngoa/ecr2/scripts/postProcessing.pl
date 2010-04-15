@@ -23,9 +23,6 @@ if ($argcnt < 1) {
 
 # initialize variables
 my @infiles = <$ARGV[0]>; # a list of files matching a given pattern
-# # DEBUG
-# print @files;
-#my @outfiles = ();
 my %outfiles;
 my $numInFilesProcessed = 0;	# counter for the number of input files processed
 
@@ -36,10 +33,6 @@ foreach my $infile (@infiles) {
 	my @names = split("-", $infile);
 	my $config = $names[0];		# configuration name without run number
 	
-# 	# DEBUG
-# 	print "$config\n";
-
-
 #########################################################################
 # input file processing
 #########################################################################
@@ -52,6 +45,7 @@ foreach my $infile (@infiles) {
 	my $n = -1;					# number of hosts (users) per ONU (subscriber)
 	my $dr = -1;				# rate of distribution fiber [Gbps]
 	my $fr = -1;				# rate of feeder fiber [Gbps] (for PONs)
+	my $tx = -1;				# number of OLT transmitters
 	my $br = -1;				# rate of backbone link [Gbps]
 	my $bd = -1;				# delay in backbone network [ms]
 	my $repetition = -1;		# repetition (with a different seed for RNGs)
@@ -92,44 +86,34 @@ foreach my $infile (@infiles) {
 				if ($pair =~ /\$N/) {
 					my @arr2 = split(/=/, $pair);
 					$N = $arr2[1];
-# 					# DEBUG
-# 					print "N = $N\n";
 				}
 				elsif ($pair =~ /\$n/) {
 					my @arr2 = split(/=/, $pair);
 					$n = $arr2[1];
-# 					# DEBUG
-# 					print "n = $n\n";
 				}
 				elsif ($pair =~ /\$dr/) {
 					my @arr2 = split(/=/, $pair);
 					$dr = $arr2[1];
-# 					# DEBUG
-# 					print "dr = $dr\n";
 				}
 				elsif ($pair =~ /\$fr/) {
 					my @arr2 = split(/=/, $pair);
 					$fr = $arr2[1];
-# 					# DEBUG
-# 					print "fr = $fr\n";
+				}
+				elsif ($pair =~ /\$tx/) {
+					my @arr2 = split(/=/, $pair);
+					$tx = $arr2[1];
 				}
 				elsif ($pair =~ /\$br/) {
 					my @arr2 = split(/=/, $pair);
 					$br = $arr2[1];
-# 					# DEBUG
-# 					print "br = $br\n";
 				}
 				elsif ($pair =~ /\$bd/) {
 					my @arr2 = split(/=/, $pair);
 					$bd = $arr2[1];
-# 					# DEBUG
-# 					print "bd = $bd\n";
 				}
 				elsif ($pair =~ /\$repetition/) {
 					my @arr2 = split(/=/, $pair);
 					$repetition = $arr2[1];
-# 					# DEBUG
-# 					print "repetition = $repetition\n";
 				}
 			}	# end of foreach()
 		}	# end of attribute processing
@@ -137,8 +121,6 @@ foreach my $infile (@infiles) {
 		# get "number of finished sessions"
 		if ($line =~ /number of finished sessions/) {
 			my @arr = split(/\t/, $line);
-#			# DEBUG
-# 			print "$arr[2]\n";
 			if ($line =~ /ftpApp/) {
 				push(@ftp_num_sessions, $arr[2]);
 			} elsif ($line =~ /httpApp/) {
@@ -149,8 +131,6 @@ foreach my $infile (@infiles) {
 		# get "average session delay"
 		if ($line =~ /average session delay/) {
 			my @arr = split(/\t/, $line);
-#			# DEBUG
-# 			print "$arr[2]\n";
 			if ($line =~ /ftpApp/) {
 				push(@ftp_delay, $arr[2]);
 			} elsif ($line =~ /httpApp/) {
@@ -161,8 +141,6 @@ foreach my $infile (@infiles) {
 		# get "average session throughput"
 		if ($line =~ /average session throughput/) {
 			my @arr = split(/\t/, $line);
-#			# DEBUG
-# 			print "$arr[2]\n";
 			if ($line =~ /ftpApp/) {
 				push(@ftp_throughput, $arr[2]);
 			} elsif ($line =~ /httpApp/) {
@@ -173,8 +151,6 @@ foreach my $infile (@infiles) {
 		# get "mean session transfer rate"
 		if ($line =~ /mean session transfer rate/) {
 			my @arr = split(/\t/, $line);
-#			# DEBUG
-# 			print "$arr[2]\n";
 			if ($line =~ /ftpApp/) {
 				push(@ftp_transfer_rate, $arr[2]);
 			} elsif ($line =~ /httpApp/) {
@@ -185,8 +161,6 @@ foreach my $infile (@infiles) {
 		# get "decodable frame rate (Q)"
 		if ($line =~ /decodable frame rate/) {
 			my @arr = split(/\t/, $line);
-#			# DEBUG
-#			print "$arr[2]\n";
 			$sum_decodable_frame_rate += $arr[2];
 			$num_decodable_frame_rate++;
 		}
@@ -196,7 +170,6 @@ foreach my $infile (@infiles) {
 	close INFILE
 		or warn $! ? "Error closing $infile: $!"
 		: "Exit status $? from $infile";
-
 
 #########################################################################
 # output file processing
@@ -232,6 +205,14 @@ foreach my $infile (@infiles) {
 			$outfile = "fr" . $fr;
 		}
 	}
+	if ($tx >= 0) {
+		if ($outfile) {
+			$outfile = $outfile . "_tx" . $tx;
+		}
+		else {		
+			$outfile = "tx" . $tx;
+		}
+	}
 	if ($br >= 0) {
 		if ($outfile) {
 			$outfile = $outfile . "_br" . $br;
@@ -251,9 +232,6 @@ foreach my $infile (@infiles) {
 		}
 	}
 	
-# 	# DEBUG
-# 	print "outfile = $outfile\n";
-
 	### print results to a corresponding output file against $n$ and $repetition$
 
 	### for FTP
@@ -462,11 +440,6 @@ foreach my $infile (@infiles) {
 
 # sorting output files based on the value of the 1st column
 foreach my $outfile (keys %outfiles) {
-
-#	# DEBUG
-#	print "outfile = $outfile\n";
-
 	my $rc = system("sort -o $outfile -n $outfile");
 	die "system() failed with status $rc" unless ($rc == 0);
-
 }	# end of the 2nd foreach()
