@@ -23,7 +23,7 @@ package inet.examples.ngoa.ecr2;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.world.ChannelInstaller;
 //import inet.nodes.ethernet.EtherSwitch3;
-import inet.nodes.ethernet.EtherSwitch3WithPPPInterface;
+import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
@@ -65,14 +65,14 @@ network DedicatedAccess
 			gates:
 				ethg[1];
         }
-        olt: EtherSwitch3WithPPPInterface {
+        olt: EtherSwitch3WithPPP2Interface {
             parameters:
                 @display("p=300,119");
 			gates:
 				ethg[1];
 				pppg[N];
         }
-        onu[N]: EtherSwitch3WithPPPInterface {
+        onu[N]: EtherSwitch3WithPPP2Interface {
             parameters:
                 @display("p=131,119");
 			gates:

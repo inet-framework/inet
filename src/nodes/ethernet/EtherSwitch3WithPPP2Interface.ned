@@ -19,9 +19,11 @@
 
 package inet.nodes.ethernet;
 
+//import inet.base.NotificationBoard;
+//import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.ethernet.EtherMAC3;
 import inet.linklayer.etherswitch.MACRelayUnit;
-import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.ppp.PPP2Interface;
 
 
 //
@@ -33,21 +35,29 @@ import inet.linklayer.ppp.PPPInterface;
 //
 // This model does not contain the spanning tree algorithm.
 //
-module EtherSwitch3WithPPPInterface
+module EtherSwitch3WithPPP2Interface
 {
     parameters:
         @node();
         @labels(node,ethernet-node);
-        @display("i=device/switch;bgb=300,200");
+        @display("i=device/switch;bgb=412,200");
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
         inout pppg[];	// PPP interface for WAN connections)
     submodules:
+//        notificationBoard: NotificationBoard {
+//            parameters:
+//                @display("p=57,54");
+//        }
+//        interfaceTable: InterfaceTable {
+//            parameters:
+//                @display("p=57,134");
+//        }
         relayUnit: <relayUnitType> like MACRelayUnit {
             parameters:
-                @display("p=150,40");
+                @display("p=253,54");
             gates:
                 lowerLayerIn[sizeof(ethg)+sizeof(pppg)];
                 lowerLayerOut[sizeof(ethg)+sizeof(pppg)];
@@ -56,11 +66,11 @@ module EtherSwitch3WithPPPInterface
             parameters:
                 promiscuous = true;
                 queueModule = "";
-                @display("p=75,135,row;q=queue");
+                @display("p=174,134,row;q=queue");
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: PPP2Interface {
             parameters:
-                @display("p=220,135,row,90;q=txQueue");
+                @display("p=332,134,row,90;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
