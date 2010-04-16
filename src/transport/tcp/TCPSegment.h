@@ -23,6 +23,16 @@
 #include "INETDefs.h"
 #include "TCPSegment_m.h"
 
+
+/** @name Comparing sequence numbers */
+//@{
+inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}
+inline bool seqLE(uint32 a, uint32 b) {return b-a<(1UL<<31);}
+inline bool seqGreater(uint32 a, uint32 b) {return a!=b && a-b<(1UL<<31);}
+inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
+//@}
+
+
 /**
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).

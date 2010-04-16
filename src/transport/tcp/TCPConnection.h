@@ -125,14 +125,6 @@ enum TCPEventCode
 
 #define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
 
-/** @name Comparing sequence numbers */
-//@{
-inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}
-inline bool seqLE(uint32 a, uint32 b) {return b-a<(1UL<<31);}
-inline bool seqGreater(uint32 a, uint32 b) {return a!=b && a-b<(1UL<<31);}
-inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
-//@}
-
 
 /**
  * Contains state variables ("TCB") for TCP.
