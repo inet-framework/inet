@@ -373,28 +373,33 @@ void TCPConnection::selectInitialSeqNum()
 
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
-    // check that segment entirely falls in receive window
     // RFC 793, page 69:
     // There are four cases for the acceptability test for an incoming segment:
     uint32 len = tcpseg->getPayloadLength();
     uint32 seqNo = tcpseg->getSequenceNo();
+    bool ret;
 
     if (len == 0)
     {
         if (state->rcv_wnd == 0)
-            return seqNo == state->rcv_nxt;
+            ret = (seqNo == state->rcv_nxt);
         else // rcv_wnd > 0
-            return seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd);
+            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, state->rcv_nxt + state->rcv_wnd); //ZBojthe: Accept an ACK on end of window
     }
     else // len > 0
     {
         if (state->rcv_wnd == 0)
-            return false;
+            ret = false;
         else // rcv_wnd > 0
-            return (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd))
+            ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd))
             ||
             (seqLE(state->rcv_nxt, seqNo + len - 1) && seqLess(seqNo + len - 1, state->rcv_nxt + state->rcv_wnd));
     }
+    if (!ret)
+    {
+        tcpEV << "Not Acceptable segment. seqNo:" << seqNo << ", len:" << len << ", rcv_nxt:" << state->rcv_nxt  << ", rcv_wnd:" << state->rcv_wnd << endl;
+    }
+    return ret;
 }
 
 void TCPConnection::sendSyn()
