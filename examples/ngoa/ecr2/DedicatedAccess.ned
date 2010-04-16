@@ -22,7 +22,8 @@ package inet.examples.ngoa.ecr2;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.world.ChannelInstaller;
-import inet.nodes.ethernet.EtherSwitch3;
+//import inet.nodes.ethernet.EtherSwitch3;
+import inet.nodes.ethernet.EtherSwitch3WithPPPInterface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
@@ -64,17 +65,19 @@ network DedicatedAccess
 			gates:
 				ethg[1];
         }
-        olt: EtherSwitch3 {
+        olt: EtherSwitch3WithPPPInterface {
             parameters:
                 @display("p=300,119");
 			gates:
-				ethg[N+1];
+				ethg[1];
+				pppg[N];
         }
-        onu[N]: EtherSwitch3 {
+        onu[N]: EtherSwitch3WithPPPInterface {
             parameters:
                 @display("p=131,119");
 			gates:
-				ethg[n+1];				
+				ethg[n];
+				pppg[1];				
         }
         host[N*n]: StandardHost3WithEthernetInterface2 {
             parameters:
@@ -87,7 +90,7 @@ network DedicatedAccess
 			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
 		}
 		for i=0..N-1 {
-			onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
+			onu[i].pppg[0] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.pppg[i];
         }
-        olt.ethg[N] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        olt.ethg[0] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
 }

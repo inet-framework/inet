@@ -35,7 +35,7 @@ module Olt
         int numTransmitters = default(2);	// number of transmitters
         string schType = default("OltSchedulerSSSF");	// type of IOltScheduler
 														// (algorithm and operation mode)
-        string relayUnitType = default("MACRelayUnitPP"); // type of MACRelayUnit; currently possible
+        string relayUnitType = default("MACRelayUnitNP"); // type of MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP														
     gates:
         inout ethg[] @labels(EtherFrame-conn);	// service network interface (i.e., with metro/backbone)
