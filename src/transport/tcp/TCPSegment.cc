@@ -41,6 +41,45 @@ TCPSegment::~TCPSegment()
     }
 }
 
+void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
+{
+    if(seqLess(sequenceNo_var, firstSeqNo))
+    {
+        unsigned int truncleft = firstSeqNo - sequenceNo_var;
+
+        while (!payloadList.empty())
+        {
+            if (seqGE(payloadList.front().endSequenceNo, firstSeqNo))
+                break;
+
+            cPacket *msg = payloadList.front().msg;
+            payloadList.pop_front();
+            dropAndDelete(msg);
+        }
+
+        payloadLength_var -= truncleft;
+        sequenceNo_var = firstSeqNo;
+        //TODO truncate data correctly if need
+    }
+
+    if(seqGreater(sequenceNo_var+payloadLength_var, endSeqNo))
+    {
+        unsigned int truncright = sequenceNo_var + payloadLength_var - endSeqNo;
+
+        while (!payloadList.empty())
+        {
+            if (seqLE(payloadList.back().endSequenceNo, endSeqNo))
+                break;
+
+            cPacket *msg = payloadList.back().msg;
+            payloadList.pop_back();
+            dropAndDelete(msg);
+        }
+        payloadLength_var -= truncright;
+        //TODO truncate data correctly if need
+    }
+}
+
 void TCPSegment::parsimPack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimPack(b);

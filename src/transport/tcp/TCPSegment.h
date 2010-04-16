@@ -77,6 +77,13 @@ class INET_API TCPSegment : public TCPSegment_Base
      * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
      */
     virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+
+    /**
+     * Truncate segment.
+     * @param firstSeqNo: sequence no of new first byte
+     * @param endSeqNo: sequence no of new last byte+1
+     */
+    virtual void truncateSegment(uint32 firstSeqNo, uint32 endSeqNo);
 };
 
 #endif

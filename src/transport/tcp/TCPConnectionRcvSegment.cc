@@ -429,6 +429,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // This acknowledgment should be piggybacked on a segment being
         // transmitted if possible without incurring undue delay.
         //"
+
+        tcpseg->truncateSegment(state->rcv_nxt, state->rcv_nxt + state->rcv_wnd);
+
         if (tcpseg->getPayloadLength()>0)
         {
             // check for full sized segment
