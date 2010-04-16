@@ -13,7 +13,8 @@ use strict;
 # check argument count and print usage if needed
 my $argcnt = $#ARGV + 1;
 if ($argcnt < 1) {
-    die "Usage: $0 \"regexp_patterns_for_simulation_output_files\"";
+    print "Usage: $0 \"regexp_patterns_for_simulation_output_files\"\n";
+	exit 1;
 }
 
 # initialize variables
