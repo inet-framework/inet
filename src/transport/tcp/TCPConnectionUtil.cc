@@ -707,6 +707,8 @@ bool TCPConnection::sendProbe()
 
 void TCPConnection::retransmitOneSegment()
 {
+    uint32 old_snd_nxt = state->snd_nxt;
+
     // retransmit one segment at snd_una, and set snd_nxt accordingly
     state->snd_nxt = state->snd_una;
 
@@ -716,6 +718,9 @@ void TCPConnection::retransmitOneSegment()
     ASSERT(bytes!=0);
 
     sendSegment(bytes);
+
+    if (seqGreater(old_snd_nxt, state->snd_nxt))
+        state->snd_nxt = old_snd_nxt;
 
     // notify
     tcpAlgorithm->ackSent();
