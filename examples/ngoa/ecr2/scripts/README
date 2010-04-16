@@ -17,7 +17,7 @@ qsub -t 1:50 -o directoryForStandardOutput -j yes arrayrun.sh iniFile configurat
 
 2. Data analysis (pre- and post-processing)
 
-generateMeansPlotsForAll.pl/generateMeansPlot.sh:
+generateMeansPlotsForAll.pl:
 Plot group means with 95% confidence intervals for batch of
 simulations
 

@@ -14,7 +14,8 @@ use strict;
 # check argument count and print usage if needed
 my $argcnt = $#ARGV + 1;
 if ($argcnt < 1) {
-    die "Usage: generateMeansPlotsForAll.pl common_base_name_of_data_files";
+    print "Usage: generateMeansPlotsForAll.pl common_base_name_of_data_files\n";
+	exit 1;
 }
 
 # initialize variables
@@ -37,11 +38,28 @@ my $timestamp = sprintf("%4d-%02d-%02d %02d:%02d:%02d", $year+1900, $mon+1, $mda
 
 # generate group means plots into pdf files
 my $title = $infile_base . " \($timestamp\)";
+open(RPIPE, "| R --no-save --quiet")
+	or die "Can't fork: $!";
+print RPIPE "library(gplots);\n";
+
 foreach my $stat (keys %exts) {
 	my $infile = $infile_base . ".$exts{$stat}";
-	my $rc = system("$shellScript $infile '$stat' '$title'");
-    die "system() failed with status $rc" unless ($rc == 0);
+# 	my $rc = system("$shellScript $infile '$stat' '$title'");
+#     die "system() failed with status $rc" unless ($rc == 0);
+	my $rscript=<<EOF;
+data <- read.table("$infile", col.names = c("numHosts", "repetition", "value"));
+pdf(file="$infile.pdf", width=10, height=10);
+attach(data);
+plotmeans(value ~ numHosts, main="$title", xlab="Number of Hosts per ONU", ylab = "$stat", n.label=FALSE);
+dev.off();
+EOF
+
+	print RPIPE $rscript;
 }
+
+close RPIPE
+	or warn $! ? "Error closing pipe with R: $!"
+	: "Exit status $? from pipe with R";
 
 # merge pdf files into one
 my $pdf = $infile_base . ".pdf";
