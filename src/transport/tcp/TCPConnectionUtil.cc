@@ -657,7 +657,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    state->snd_max = std::max (state->snd_nxt, state->snd_max);
+    if (seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_max = state->snd_nxt;
     if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
     // notify (once is enough)
@@ -1724,7 +1725,8 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
                     tcpEV << "Limited Transmit algorithm enabled. Sending one new segment.\n";
                     sendSegment(bytes);
 
-                    state->snd_max = std::max (state->snd_nxt, state->snd_max);
+                    if (seqGreater(state->snd_nxt, state->snd_max))
+                        state->snd_max = state->snd_nxt;
 
                     if (unackedVector)
                         unackedVector->record(state->snd_max - state->snd_una);
