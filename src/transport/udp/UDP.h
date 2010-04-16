@@ -78,11 +78,11 @@ class INET_API UDP : public cSimpleModule
     int numPassedUp;
     int numDroppedWrongPort;
     int numDroppedBadChecksum;
-    simsignal_t rxPkBytesSignal;
-    simsignal_t txPkBytesSignal;
-    simsignal_t passedUpPkBytesSignal;
-    simsignal_t droppedPkBytesWrongPortSignal;
-    simsignal_t droppedPkBytesBadChecksumSignal;
+    simsignal_t rcvdPkSignal;
+    simsignal_t sentPkSignal;
+    simsignal_t passedUpPkSignal;
+    simsignal_t droppedPkWrongPortSignal;
+    simsignal_t droppedPkBadChecksumSignal;
 
   protected:
     // utility: show current statistics above the icon
