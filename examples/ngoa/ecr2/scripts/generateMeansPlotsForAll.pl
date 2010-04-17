@@ -49,8 +49,7 @@ foreach my $stat (keys %exts) {
 	my $rscript=<<EOF;
 data <- read.table("$infile", col.names = c("numHosts", "repetition", "value"));
 pdf(file="$infile.pdf", width=10, height=10);
-attach(data);
-plotmeans(value ~ numHosts, main="$title", xlab="Number of Hosts per ONU", ylab = "$stat", n.label=FALSE);
+plotmeans(data\$value ~ data\$numHosts, main="$title", xlab="Number of Hosts per ONU", ylab = "$stat", n.label=FALSE);
 dev.off();
 EOF
 
