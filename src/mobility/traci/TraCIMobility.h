@@ -119,6 +119,9 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
 			getManager()->commandSetPolygonShape(polyId, points);
 		}
+		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed) {
+			return getManager()->commandAddVehicle(vehicleId, vehicleTypeId, routeId, laneId, emitPosition, emitSpeed);
+		}
 
 	protected:
 		bool debug; /**< whether to emit debug messages */

@@ -416,6 +416,10 @@ void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<
 	if (!obuf.eof()) error("received additional bytes");
 }
 
+bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed) {
+	return queryTraCIOptional(CMD_ADDVEHICLE, TraCIBuffer() << vehicleId << vehicleTypeId << routeId << laneId << emitPosition << emitSpeed);
+}
+
 // name: host;Car;i=vehicle.gif
 void TraCIScenarioManager::addModule(int32_t nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id, double speed, double angle, double allowed_speed) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");
