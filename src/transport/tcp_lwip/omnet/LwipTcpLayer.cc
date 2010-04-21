@@ -119,3 +119,8 @@ void LwipTcpLayer::memp_free(memp_t type, void *ptr)
     }
     ::memp_free(type, ptr);
 }
+
+void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo, void *dataptr, int len)
+{
+    stackIf.notifyAboutIncomingSegmentProcessing(pcb, seqNo, dataptr, len);
+}

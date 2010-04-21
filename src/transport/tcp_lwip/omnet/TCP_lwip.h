@@ -71,6 +71,8 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
     virtual netif* ip_route(IPvXAddress const & ipAddr);
 
+    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, void *dataptr, int len);
+
     // internal event functions:
 
     err_t tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err);
@@ -140,6 +142,7 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;
+    TCPSegment * pCurTcpSegM;
 };
 
 #endif

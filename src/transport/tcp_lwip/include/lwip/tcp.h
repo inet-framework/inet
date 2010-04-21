@@ -103,6 +103,12 @@ class LwipTcpLayer
     /** interface for ip layer */
     struct netif * ip_route(struct ip_addr *addr);
 
+    /** notify the Omnet about received packet processing is begin
+     *  Omnet change the data in buffer, if need
+     */
+    void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqno, void *dataptr, int len);
+
+
   protected:
     /** interface for ip layer */
     u8_t ip_addr_isbroadcast(struct ip_addr * addr, struct netif * interf);

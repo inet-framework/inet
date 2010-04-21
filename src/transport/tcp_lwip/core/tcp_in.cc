@@ -282,6 +282,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
         return;
       }
     }
+
     tcp_input_pcb = pcb;
     err = tcp_process(pcb);
     /* A return value of ERR_ABRT means that tcp_abort() was called
@@ -1035,6 +1036,9 @@ tcp_receive(struct tcp_pcb *pcb)
   /* If the incoming segment contains data, we must process it
      further. */
   if (tcplen > 0) {
+
+	notifyAboutIncomingSegmentProcessing(pcb, seqno, inseg.dataptr, inseg.len);
+
     /* This code basically does three things:
 
     +) If the incoming segment contains data that is the next

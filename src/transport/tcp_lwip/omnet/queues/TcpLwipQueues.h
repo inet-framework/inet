@@ -144,12 +144,6 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      */
     virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP) = 0;
 
-    /**
-     * Tells the queue that bytes up to (but NOT including) seqNum have been
-     * transmitted and ACKed, so they can be removed from the queue.
-     */
-    virtual void discardUpTo(uint32 seqNumP) = 0;
-
   protected:
     TcpLwipConnection *connM;
 };
@@ -183,7 +177,7 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      *
      * called before nsc_stack->if_receive_packet() called
      */
-    virtual uint32 insertBytesFromSegment(const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP) = 0;
+    virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP) = 0;
 
     /**
      * The method called when data received from NSC

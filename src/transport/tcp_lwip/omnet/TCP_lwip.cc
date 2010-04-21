@@ -53,7 +53,8 @@ TCP_lwip::TCP_lwip()
     pLwipFastTimerM(NULL),
     pLwipSlowTimerM(NULL),
     pLwipTcpLayerM(NULL),
-    isAliveM(false)
+    isAliveM(false),
+	pCurTcpSegM(NULL)
 {
     netIf.gw.addr = 0;
     netIf.flags = 0;
@@ -186,8 +187,11 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
         }
     }
 
+    ASSERT(pCurTcpSegM == NULL);
+    pCurTcpSegM = tcpsegP;
     // receive msg from network
     pLwipTcpLayerM->if_receive_packet(interfaceId, data, totalIpLen);
+    pCurTcpSegM = NULL;
 
     // LwipTcpLayer will call the tcp_event_recv() / tcp_event_err() and/or send a packet to sender
 
@@ -195,6 +199,20 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
 
     delete [] data;
     delete tcpsegP;
+}
+
+void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, void *dataptr, int len)
+{
+    TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
+    if(conn)
+    {
+    	// TODO call queue, for save payload data from received packet
+    	conn->receiveQueueM->insertBytesFromSegment(pCurTcpSegM, seqNo, dataptr, len);
+    }
+    else
+    {
+    	tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
+    }
 }
 
 void TCP_lwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb)

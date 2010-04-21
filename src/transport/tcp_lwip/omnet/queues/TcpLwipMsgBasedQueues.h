@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipVIRTUALDATAQUEUES_H
-#define __INET_TcpLwipVIRTUALDATAQUEUES_H
+#ifndef __INET_TcpLwipMSGBASEDQUEUES_H
+#define __INET_TcpLwipMSGBASEDQUEUES_H
 
 #include <omnetpp.h>
 
@@ -29,18 +29,31 @@
  * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
  */
 
-class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
+class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 {
+  protected:
+    struct Payload
+    {
+        unsigned int endSequenceNo;
+        cPacket *msg;
+    };
+    typedef std::list<Payload> PayloadQueue;
+    PayloadQueue payloadQueueM;
+
+    uint32 beginM;  // 1st sequence number stored
+    uint32 endM;    // last sequence number stored +1
+    long int unsentTcpLayerBytesM;
+
   public:
     /**
      * Ctor.
      */
-    TcpLwipVirtualDataSendQueue();
+    TcpLwipMsgBasedSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipVirtualDataSendQueue();
+    virtual ~TcpLwipMsgBasedSendQueue();
 
     /**
      * set connection queue.
@@ -97,24 +110,25 @@ class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
      * Tells the queue that bytes up to (but NOT including) seqNum have been
      * transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardUpTo(uint32 seqNumP);
-
-  protected:
-    long int unsentTcpLayerBytesM;
+    virtual void discardAckedBytes();
 };
 
-class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
+class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 {
+  protected:
+	typedef std::map<uint32, cPacket *> PayloadList;
+    PayloadList payloadListM;
+
   public:
     /**
      * Ctor.
      */
-    TcpLwipVirtualDataReceiveQueue();
+    TcpLwipMsgBasedReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipVirtualDataReceiveQueue();
+    virtual ~TcpLwipMsgBasedReceiveQueue();
 
     /**
      * Set the connection.
@@ -128,16 +142,16 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
      *
      * The method should return the number of bytes to copied to buffer.
      *
-     * The method should fill the bufferP for data sending to NSC stack
+     * The method should fill the bufferP for data sending to LWIP stack
      *
-     * called before nsc_stack->if_receive_packet() called
+     * called back from lwip::tcp_input()
      */
     virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP);
 
     /**
-     * The method called when data received from NSC
+     * The method called when data received from LWIP
      * The method should set status of the data in queue to received
-     * called after socket->read_data() successfull
+     * called after socket->read_data() successful
      */
     virtual void enqueueTcpLayerData(void* dataP, int dataLengthP);
 
@@ -147,7 +161,7 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
      * It should return NULL if there's no more data to be passed up --
      * this method is called several times until it returns NULL.
      *
-     * called after socket->read_data() successfull
+     * called after socket->read_data() successful
      */
     virtual cPacket *extractBytesUpTo();
 

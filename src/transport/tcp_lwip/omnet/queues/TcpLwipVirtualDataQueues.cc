@@ -172,13 +172,13 @@ void TcpLwipVirtualDataReceiveQueue::setConnection(TcpLwipConnection *connP)
  *
  * The method called before nsc_stack->if_receive_packet() called
  */
-uint32 TcpLwipVirtualDataReceiveQueue::insertBytesFromSegment(
-        const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP)
+void TcpLwipVirtualDataReceiveQueue::insertBytesFromSegment(
+        TCPSegment *tcpsegP, uint32 seqno, void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
 
-    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
+//    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
 /**
