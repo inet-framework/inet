@@ -21,7 +21,7 @@ if ($argcnt < 1) {
 # initialize variables
 my $infile_base = $ARGV[0];
 my $home = $ENV{'HOME'};
-my $shellScript = $home . "/inet-hnrl/examples/ngoa/ecr2/scripts/generateMeansPlot.sh";
+#my $shellScript = $home . "/inet-hnrl/examples/ngoa/ecr2/scripts/generateMeansPlot.sh";
 my %exts = (
 	"Average Delay of FTP Sessions [sec]" => "ftp_dly",
 	"Average Throughput of FTP Sessions [Byte/sec]" => "ftp_thr",
