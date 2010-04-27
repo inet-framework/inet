@@ -22,7 +22,7 @@
 #define __TCP_lwip_H
 
 #include <map>
-#include <list>
+
 #include <omnetpp.h>
 
 #include "INETDefs.h"
@@ -30,8 +30,6 @@
 
 #include "lwip/tcp.h"
 #include "LwipTcpStackIf.h"
-
-//#include "TcpLwipConnection.h"
 
 // forward declarations:
 class TCPCommand;
@@ -124,13 +122,14 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
   protected:
     typedef std::map<int,TcpLwipConnection*> TcpAppConnMap; // connId-to-TcpLwipConnection
-    typedef std::map<LwipTcpLayer::tcp_pcb *,TcpLwipConnection*> TcpPcbConnMap; // pcb-to-TcpLwipConnection
 
     // Maps:
     TcpAppConnMap tcpAppConnMapM;
 
+    // fast timer message:
     cMessage *pLwipFastTimerM;
 
+    // network interface:
     struct netif netIf;
 
   public:

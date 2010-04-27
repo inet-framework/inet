@@ -33,9 +33,6 @@
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
 
-#include <assert.h>
-#include <dlfcn.h>
-
 
 Define_Module(TCP_lwip);
 
@@ -79,8 +76,6 @@ void TCP_lwip::initialize()
     testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
-//    pLwipTcpLayerM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
-//    pLwipTcpLayerM->add_default_gateway(localInnerGwS.str().c_str());
     pLwipTcpLayerM = new LwipTcpLayer(*this);
 
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
