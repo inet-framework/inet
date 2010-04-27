@@ -132,6 +132,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else
     {
         // some indication -- ignore
+    	EV << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << endl;
         delete msg;
     }
 
