@@ -297,7 +297,8 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     if(p == NULL)
     {
         // Received FIN:
-        conn.sendIndicationToApp(TCP_I_CLOSED);
+        conn.sendIndicationToApp((conn.pcbM->state == LwipTcpLayer::TIME_WAIT)
+        		? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
         // TODO is it good?
         pLwipTcpLayerM->tcp_recved(conn.pcbM, 0);
     }
