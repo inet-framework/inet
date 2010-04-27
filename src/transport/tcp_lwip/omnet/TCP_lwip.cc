@@ -51,7 +51,6 @@ bool TCP_lwip::logverboseS;
 TCP_lwip::TCP_lwip()
   :
     pLwipFastTimerM(NULL),
-    pLwipSlowTimerM(NULL),
     pLwipTcpLayerM(NULL),
     isAliveM(false),
 	pCurTcpSegM(NULL)
@@ -393,20 +392,34 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
     processAppCommand(*conn, msgP);
 }
 
+simtime_t roundTime(const simtime_t &timeP, int secSlicesP)
+{
+	int64_t scale = timeP.getScale()/secSlicesP;
+	simtime_t ret = timeP;
+	ret /= scale;
+	ret *= scale;
+	return ret;
+}
+
 void TCP_lwip::handleMessage(cMessage *msgP)
 {
     if (msgP->isSelfMessage())
     {
         // timer expired
-        if(msgP == pLwipFastTimerM )
+        if(msgP == pLwipFastTimerM)
         { // lwip fast timer
+        	tcpEV << "Call tcp_fasttmr()\n";
             pLwipTcpLayerM->tcp_fasttmr();
             scheduleAt(msgP->getArrivalTime() + 0.250, msgP);
+            if (simTime() == roundTime(simTime(), 2))
+            {
+            	tcpEV << "Call tcp_slowtmr()\n";
+                pLwipTcpLayerM->tcp_slowtmr();
+            }
         }
-        else if(msgP == pLwipSlowTimerM )
-        { // lwip slow timer
-            pLwipTcpLayerM->tcp_slowtmr();
-            scheduleAt(msgP->getArrivalTime() + 0.500, msgP);
+        else
+        {
+        	error("Unknown self message");
         }
     }
     else if (msgP->arrivedOn("ipIn") || msgP->arrivedOn("ipv6In"))
@@ -468,8 +481,6 @@ void TCP_lwip::loadStack()
 
     fprintf(stderr, "done.\n");
 
-    pLwipSlowTimerM = new cMessage("lwip_slow_timer");
-    scheduleAt(0.500, pLwipSlowTimerM);
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
     scheduleAt(0.250, pLwipFastTimerM);
 }

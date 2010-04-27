@@ -131,7 +131,6 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
     TcpAppConnMap tcpAppConnMapM;
 
     cMessage *pLwipFastTimerM;
-    cMessage *pLwipSlowTimerM;
 
     struct netif netIf;
 
