@@ -45,6 +45,8 @@ class INET_API TcpLwipConnection
 
     TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
+    ~TcpLwipConnection();
+
     void sendEstablishedMsg();
 
     static const char* indicationName(int code);

@@ -78,6 +78,12 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     receiveQueueM->setConnection(this);
 }
 
+TcpLwipConnection::~TcpLwipConnection()
+{
+	delete receiveQueueM;
+	delete sendQueueM;
+}
+
 void TcpLwipConnection::sendEstablishedMsg()
 {
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");

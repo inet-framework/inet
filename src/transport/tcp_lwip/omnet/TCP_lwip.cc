@@ -99,6 +99,10 @@ TCP_lwip::~TCP_lwip()
         TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
         tcpAppConnMapM.erase(i);
     }
+    if(pLwipFastTimerM)
+    	cancelAndDelete(pLwipFastTimerM);
+    if(pLwipTcpLayerM)
+    	delete pLwipTcpLayerM;
 }
 
 // send a TCP_I_ESTABLISHED msg to Application Layer

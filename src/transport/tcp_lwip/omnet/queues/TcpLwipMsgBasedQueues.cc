@@ -195,7 +195,12 @@ TcpLwipMsgBasedReceiveQueue::TcpLwipMsgBasedReceiveQueue()
  */
 TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
 {
-    // nothing to do here
+	PayloadList::iterator i;
+	while ((i = payloadListM.begin()) != payloadListM.end())
+	{
+		delete i->second;
+		payloadListM.erase(i);
+	}
 }
 
 /**
