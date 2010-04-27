@@ -410,7 +410,6 @@ void TCP_lwip::handleMessage(cMessage *msgP)
         { // lwip fast timer
         	tcpEV << "Call tcp_fasttmr()\n";
             pLwipTcpLayerM->tcp_fasttmr();
-            scheduleAt(msgP->getArrivalTime() + 0.250, msgP);
             if (simTime() == roundTime(simTime(), 2))
             {
             	tcpEV << "Call tcp_slowtmr()\n";
@@ -441,6 +440,12 @@ void TCP_lwip::handleMessage(cMessage *msgP)
     {
         tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
         handleAppMessage(msgP);
+    }
+
+    if( ! pLwipFastTimerM->isScheduled())
+    { // lwip fast timer
+    	if(NULL != pLwipTcpLayerM->tcp_active_pcbs)
+    		scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
 
     if (ev.isGUI())
@@ -482,7 +487,6 @@ void TCP_lwip::loadStack()
     fprintf(stderr, "done.\n");
 
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
-    scheduleAt(0.250, pLwipFastTimerM);
 }
 
 void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IPvXAddress const& destP, void *dataP, int lenP)
