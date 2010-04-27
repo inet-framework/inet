@@ -178,7 +178,7 @@ void TCPSocket::send(cMessage *msg)
 void TCPSocket::close()
 {
     if (sockstate!=CONNECTED && sockstate!=PEER_CLOSED && sockstate!=CONNECTING && sockstate!=LISTENING)
-        opp_error("TCPSocket::close(): not connected or close() already called");
+        opp_error("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TCPCommand *cmd = new TCPCommand();
