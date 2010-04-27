@@ -99,7 +99,6 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
     void removeConnection(TcpLwipConnection &conn);
     void printConnBrief(TcpLwipConnection& connP);
-    void loadStack();
 
     void handleAppMessage(cMessage *msgP);
     void handleIpInputMessage(TCPSegment* tcpsegP);

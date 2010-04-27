@@ -79,9 +79,13 @@ void TCP_lwip::initialize()
     testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
-    loadStack();
 //    pLwipTcpLayerM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
 //    pLwipTcpLayerM->add_default_gateway(localInnerGwS.str().c_str());
+    pLwipTcpLayerM = new LwipTcpLayer(*this);
+
+    pLwipFastTimerM = new cMessage("lwip_fast_timer");
+
+    tcpEV << "TCP_lwip " << this << " has stack " << pLwipTcpLayerM << "\n";
 
     isAliveM = true;
 }
@@ -471,22 +475,6 @@ void TCP_lwip::finish()
 void TCP_lwip::printConnBrief(TcpLwipConnection& connP)
 {
     tcpEV << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM;
-}
-
-void TCP_lwip::loadStack()
-{
-    pLwipTcpLayerM = new LwipTcpLayer(*this);
-
-    tcpEV << "TCP_lwip " << this << " has stack " << pLwipTcpLayerM << "\n";
-
-    fprintf(stderr, "Created stack = %p\n", pLwipTcpLayerM);
-
-    fprintf(stderr, "Initialising LWIP stack\n");
-
-
-    fprintf(stderr, "done.\n");
-
-    pLwipFastTimerM = new cMessage("lwip_fast_timer");
 }
 
 void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IPvXAddress const& destP, void *dataP, int lenP)
