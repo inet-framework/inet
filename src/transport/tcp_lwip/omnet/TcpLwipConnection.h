@@ -39,6 +39,8 @@ class TCPStatusInfo;
  */
 class INET_API TcpLwipConnection
 {
+	// prevent copy constructor:
+	TcpLwipConnection(const TcpLwipConnection&);
   public:
 
     TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, const char *sendQueueClassP, const char *recvQueueClassP);

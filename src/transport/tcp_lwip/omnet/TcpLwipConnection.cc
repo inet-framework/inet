@@ -80,6 +80,8 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
 
 TcpLwipConnection::~TcpLwipConnection()
 {
+	if(pcbM)
+		pcbM->callback_arg = NULL;
 	delete receiveQueueM;
 	delete sendQueueM;
 }

@@ -47,9 +47,12 @@ TcpLwipMsgBasedSendQueue::TcpLwipMsgBasedSendQueue()
  */
 TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
-    for (PayloadQueue::iterator it = payloadQueueM.begin(); it != payloadQueueM.end(); ++it)
+    while (! payloadQueueM.empty())
     {
-        delete it->msg;
+    	EV << "SendQueue Destructor: Drop msg from Q: seqno=" << payloadQueueM.front().endSequenceNo <<
+				", length=" << payloadQueueM.front().msg->getByteLength() << endl;
+		delete payloadQueueM.front().msg;
+		payloadQueueM.pop_front();
     }
 }
 
