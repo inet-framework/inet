@@ -42,6 +42,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 
     uint32 beginM;  // 1st sequence number stored
     uint32 endM;    // last sequence number stored +1
+    bool isValidSeqNoM;
     long int unsentTcpLayerBytesM;
 
   public:
