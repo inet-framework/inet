@@ -193,11 +193,10 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     pCurTcpSegM = tcpsegP;
     // receive msg from network
     pLwipTcpLayerM->if_receive_packet(interfaceId, data, totalIpLen);
+    // lwip call back the notifyAboutIncomingSegmentProcessing() for store incoming messages
     pCurTcpSegM = NULL;
 
     // LwipTcpLayer will call the tcp_event_recv() / tcp_event_err() and/or send a packet to sender
-
-    // TODO we must save info from tcpseg to conn->receiveQueue if packet accepted.
 
     delete [] data;
     delete tcpsegP;
@@ -208,7 +207,6 @@ void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
     if(conn)
     {
-    	// TODO call queue, for save payload data from received packet
     	conn->receiveQueueM->insertBytesFromSegment(pCurTcpSegM, seqNo, dataptr, len);
     }
     else
