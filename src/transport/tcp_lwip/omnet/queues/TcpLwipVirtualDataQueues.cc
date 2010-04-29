@@ -117,9 +117,20 @@ TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = new TCPSegment("tcp-segment");
+    TCPSegment *tcpseg = new TCPSegment("");
 
     TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg);
+    uint32 numBytes = tcpseg->getPayloadLength();
+
+    char msgname[80];
+    sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
+            "tcpseg",
+            tcpseg->getSynBit() ? " SYN":"",
+            tcpseg->getFinBit() ? " FIN":"",
+            (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+            (unsigned long)numBytes,
+            tcpseg->getPayloadArraySize());
+    tcpseg->setName(msgname);
 
     return tcpseg;
 }

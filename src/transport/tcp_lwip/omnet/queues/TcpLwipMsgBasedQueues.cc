@@ -154,10 +154,13 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 
     // give segment a name
     char msgname[80];
-    if (!payloadName)
-        sprintf(msgname, "tcpseg(l=%lu,%dmsg)", numBytes, tcpseg->getPayloadArraySize());
-    else
-        sprintf(msgname, "%.10s(l=%lu,%dmsg)", payloadName, numBytes, tcpseg->getPayloadArraySize());
+	sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
+			(payloadName ? payloadName : "tcpseg"),
+			tcpseg->getSynBit() ? " SYN":"",
+			tcpseg->getFinBit() ? " FIN":"",
+			(tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+			(unsigned long)numBytes,
+			tcpseg->getPayloadArraySize());
     tcpseg->setName(msgname);
 
     discardAckedBytes();
