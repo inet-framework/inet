@@ -54,7 +54,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     state->afterRto = true;
 
     // Reno retransmits all data (unlike Tahoe which transmits only the segment)
-    conn->retransmitData();
+    conn->retransmitOneSegment();
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)

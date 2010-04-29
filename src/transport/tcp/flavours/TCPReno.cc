@@ -77,7 +77,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
 
     state->afterRto = true;
 
-    conn->retransmitData();
+    conn->retransmitOneSegment();
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
