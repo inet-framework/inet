@@ -44,7 +44,6 @@
 #define tcpEV ev
 //#define tcpEV std::cout
 
-
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
