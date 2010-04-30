@@ -92,6 +92,7 @@ TCP_lwip::~TCP_lwip()
     while (!tcpAppConnMapM.empty())
     {
         TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
+        delete i->second;
         tcpAppConnMapM.erase(i);
     }
     if(pLwipFastTimerM)
