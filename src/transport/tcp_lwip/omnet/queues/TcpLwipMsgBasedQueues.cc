@@ -331,8 +331,8 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
             lastExtractedSeqNoM += dataLength;
             bytesInQueueM -= dataLength;
 
-            IPvXAddress localAddr(ntohl(connM->pcbM->local_ip.addr));
-            IPvXAddress remoteAddr(ntohl(connM->pcbM->remote_ip.addr));
+            IPvXAddress localAddr((connM->pcbM->local_ip.addr));
+            IPvXAddress remoteAddr((connM->pcbM->remote_ip.addr));
             TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
             tcpConnectInfo->setConnId(connM->connIdM);
             tcpConnectInfo->setLocalAddr(localAddr);

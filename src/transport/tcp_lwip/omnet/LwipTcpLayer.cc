@@ -81,8 +81,8 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
 
     IPvXAddress srcAddr, destAddr;
 
-    srcAddr.set(ntohl(src->addr));
-    destAddr.set(ntohl(dest->addr));
+    srcAddr = src->addr;
+    destAddr = dest->addr;
 
     stackIf.ip_output(pcb, srcAddr, destAddr, p->payload, p->len);
     return 0;
@@ -92,7 +92,7 @@ struct netif * LwipTcpLayer::ip_route(struct ip_addr *addr)
 {
     IPvXAddress ipAddr;
     if(addr)
-        ipAddr.set(ntohl(addr->addr));
+        ipAddr = addr->addr;
     return stackIf.ip_route(ipAddr);
 }
 

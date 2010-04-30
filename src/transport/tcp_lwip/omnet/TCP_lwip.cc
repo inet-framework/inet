@@ -20,7 +20,7 @@
 
 #include "headers/defs.h"   // for endian macros
 #include "headers/in_systm.h"
-#include "headers/ip.h"
+#include "lwip/ip.h"
 
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -52,15 +52,15 @@ TCP_lwip::TCP_lwip()
     isAliveM(false),
     pCurTcpSegM(NULL)
 {
-    netIf.gw.addr = 0;
+    netIf.gw.addr = IPvXAddress();
     netIf.flags = 0;
     netIf.input = NULL;
-    netIf.ip_addr.addr = 0;
+    netIf.ip_addr.addr = IPvXAddress();
     netIf.linkoutput = NULL;
     netIf.mtu = 1500;
     netIf.name[0] = 'T';
     netIf.name[1] = 'C';
-    netIf.netmask.addr = 0;
+    netIf.netmask.addr = IPvXAddress();
     netIf.next = 0;
     netIf.num = 0;
     netIf.output = NULL;
@@ -136,19 +136,20 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     char *data = new char[maxBufferSize];
     memset(data, 0, maxBufferSize);
 
-    ip *ih = (ip *)data;
+    ip_hdr *ih = (ip_hdr *)data;
     tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
     // set IP header:
-    ih->ip_v = 4;
-    ih->ip_hl = ipHdrLen/4;
-    ih->ip_tos = 0;
-    ih->ip_id = htons(tcpsegP->getSequenceNo());
-    ih->ip_off = htons(0x4000);   // don't fragment, offset = 0;
-    ih->ip_ttl = 64;
-    ih->ip_p = 6;       // TCP
-    ih->ip_sum = 0;
-    ih->ip_src.s_addr = htonl(srcAddr.get4().getInt());
-    ih->ip_dst.s_addr = htonl(destAddr.get4().getInt());
+//    ih->_v = 4;
+    ih->_hl = ipHdrLen/4;
+    ASSERT((ih->_hl) * 4 == ipHdrLen);
+//    ih->_tos = 0;
+//    ih->_id = htons(tcpsegP->getSequenceNo());
+//    ih->_offset = htons(0x4000);   // don't fragment, offset = 0;
+//    ih->_ttl = 64;
+//    ih->_proto = 6;       // TCP
+    ih->_chksum = 0;
+    ih->src.addr = srcAddr;
+    ih->dest.addr = destAddr;
 
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
 
@@ -159,14 +160,14 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     tcph->th_sum = TCPSerializer().checksum(tcph, totalTcpLen, srcAddr, destAddr);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
-    ih->ip_len = htons(totalIpLen);
-    ih->ip_sum = 0;
-    ih->ip_sum = TCPIPchecksum::checksum(ih, ipHdrLen);
+//    ih->_len = htons(totalIpLen);
+    ih->_chksum = 0;
+//    ih->_chksum = TCPIPchecksum::checksum(ih, ipHdrLen);
 
     // search unfilled local addr in pcb-s for this connection.
     TcpAppConnMap::iterator i;
-    u32_t laddr = ih->ip_dst.s_addr;
-    u32_t raddr = ih->ip_src.s_addr;
+    IPvXAddress laddr = ih->dest.addr;
+    IPvXAddress raddr = ih->src.addr;
     u16_t lport = tcpsegP->getDestPort();
     u16_t rport = tcpsegP->getSrcPort();
 
@@ -178,7 +179,7 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
             if(pcb)
             {
                 if(  (pcb->state == LwipTcpLayer::SYN_SENT)
-                     && (pcb->local_ip.addr == 0)
+                     && (pcb->local_ip.addr.isUnspecified())
                      && (pcb->local_port == lport)
                      && (pcb->remote_ip.addr == raddr)
                      && (pcb->remote_port == rport)

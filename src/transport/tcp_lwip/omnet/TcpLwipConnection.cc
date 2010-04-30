@@ -93,7 +93,7 @@ void TcpLwipConnection::sendEstablishedMsg()
 
     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
 
-    IPvXAddress localAddr(ntohl(pcbM->local_ip.addr)), remoteAddr(ntohl(pcbM->remote_ip.addr));
+    IPvXAddress localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
     tcpConnectInfo->setConnId(connIdM);
     tcpConnectInfo->setLocalAddr(localAddr);
@@ -142,9 +142,9 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
 //TODO    statusInfo.setState(fsm.getState());
 //TODO    statusInfo.setStateName(stateName(fsm.getState()));
 
-    statusInfo.setLocalAddr(IPvXAddress(ntohl(pcbM->local_ip.addr)));
+    statusInfo.setLocalAddr(IPvXAddress((pcbM->local_ip.addr)));
     statusInfo.setLocalPort(pcbM->local_port);
-    statusInfo.setRemoteAddr(IPvXAddress(ntohl(pcbM->remote_ip.addr)));
+    statusInfo.setRemoteAddr(IPvXAddress((pcbM->remote_ip.addr)));
     statusInfo.setRemotePort(pcbM->remote_port);
 
     statusInfo.setSnd_mss(pcbM->mss);
@@ -179,7 +179,7 @@ void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort
 {
     onCloseM = false;
     struct ip_addr dest_addr;
-    dest_addr.addr = htonl(remoteAddr.get4().getInt());
+    dest_addr.addr = remoteAddr;
     tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, NULL);
 }
 

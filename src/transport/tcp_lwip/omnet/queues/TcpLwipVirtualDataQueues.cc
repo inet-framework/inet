@@ -217,8 +217,8 @@ cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
     cPacket *dataMsg = NULL;
     if(bytesInQueueM)
     {
-        IPvXAddress localAddr(ntohl(connM->pcbM->local_ip.addr));
-        IPvXAddress remoteAddr(ntohl(connM->pcbM->remote_ip.addr));
+        IPvXAddress localAddr((connM->pcbM->local_ip.addr));
+        IPvXAddress remoteAddr((connM->pcbM->remote_ip.addr));
 
         dataMsg = new cPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);

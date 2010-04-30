@@ -36,8 +36,10 @@
 
 #include "lwip/inet.h"
 
+#include "IPvXAddress.h"
+
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
 #ifdef PACK_STRUCT_USE_INCLUDES
@@ -45,7 +47,7 @@ extern "C" {
 #endif
 PACK_STRUCT_BEGIN
 struct ip_addr {
-  PACK_STRUCT_FIELD(u32_t addr);
+  PACK_STRUCT_FIELD(IPvXAddress addr);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
@@ -135,11 +137,13 @@ extern const struct ip_addr ip_addr_broadcast;
                                               (mask)->addr))
 #define ip_addr_cmp(addr1, addr2) ((addr1)->addr == (addr2)->addr)
 
-#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == 0)
+#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr.isUnspecified())
 
 u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 
-#define ip_addr_ismulticast(addr1) (((addr1)->addr & ntohl(0xf0000000UL)) == ntohl(0xe0000000UL))
+//#define ip_addr_ismulticast(addr1) (((addr1)->addr & ntohl(0xf0000000UL)) == ntohl(0xe0000000UL))
+//TODO
+#define ip_addr_ismulticast(addr1) (false)
 
 #define ip_addr_islinklocal(addr1) (((addr1)->addr & ntohl(0xffff0000UL)) == ntohl(0xa9fe0000UL))
 
@@ -167,7 +171,7 @@ u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 #define ip_ntoa(addr)  ((addr != NULL) ? inet_ntoa(*((struct in_addr*)(addr))) : "NULL")
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* __LWIP_IP_ADDR_H__ */
