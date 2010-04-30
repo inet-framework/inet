@@ -5,8 +5,11 @@ struct ip_addr
 struct ip_hdr
 
 IPH_HL(ip_hdr*) [usage: bytes = IPH_HL(x) * 4 ]
+  - 
 
 IP_HLEN
+  - tcp.cc:1330 : parameterfüggő, hogy 20 vagy 40.
+  - pbuf.cc: : ??? PBUF_IP_HLEN
 
 inet_chksum_pseudo(pbuf*, srcipaddr,destipaddr, IP_PROTO_TCP, tot_len)
 
