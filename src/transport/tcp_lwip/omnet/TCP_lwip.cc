@@ -50,7 +50,7 @@ TCP_lwip::TCP_lwip()
     pLwipFastTimerM(NULL),
     pLwipTcpLayerM(NULL),
     isAliveM(false),
-	pCurTcpSegM(NULL)
+    pCurTcpSegM(NULL)
 {
     netIf.gw.addr = 0;
     netIf.flags = 0;
@@ -96,9 +96,9 @@ TCP_lwip::~TCP_lwip()
         tcpAppConnMapM.erase(i);
     }
     if(pLwipFastTimerM)
-    	cancelAndDelete(pLwipFastTimerM);
+        cancelAndDelete(pLwipFastTimerM);
     if(pLwipTcpLayerM)
-    	delete pLwipTcpLayerM;
+        delete pLwipTcpLayerM;
 }
 
 // send a TCP_I_ESTABLISHED msg to Application Layer
@@ -208,11 +208,11 @@ void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
     if(conn)
     {
-    	conn->receiveQueueM->insertBytesFromSegment(pCurTcpSegM, seqNo, dataptr, len);
+        conn->receiveQueueM->insertBytesFromSegment(pCurTcpSegM, seqNo, dataptr, len);
     }
     else
     {
-    	tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
+        tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
     }
 }
 
@@ -299,7 +299,7 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     {
         // Received FIN:
         conn.sendIndicationToApp((conn.pcbM->state == LwipTcpLayer::TIME_WAIT)
-        		? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
+                ? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
         // TODO is it good?
         pLwipTcpLayerM->tcp_recved(conn.pcbM, 0);
     }
@@ -396,11 +396,11 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
 
 simtime_t roundTime(const simtime_t &timeP, int secSlicesP)
 {
-	int64_t scale = timeP.getScale()/secSlicesP;
-	simtime_t ret = timeP;
-	ret /= scale;
-	ret *= scale;
-	return ret;
+    int64_t scale = timeP.getScale()/secSlicesP;
+    simtime_t ret = timeP;
+    ret /= scale;
+    ret *= scale;
+    return ret;
 }
 
 void TCP_lwip::handleMessage(cMessage *msgP)
@@ -410,17 +410,17 @@ void TCP_lwip::handleMessage(cMessage *msgP)
         // timer expired
         if(msgP == pLwipFastTimerM)
         { // lwip fast timer
-        	tcpEV << "Call tcp_fasttmr()\n";
+            tcpEV << "Call tcp_fasttmr()\n";
             pLwipTcpLayerM->tcp_fasttmr();
             if (simTime() == roundTime(simTime(), 2))
             {
-            	tcpEV << "Call tcp_slowtmr()\n";
+                tcpEV << "Call tcp_slowtmr()\n";
                 pLwipTcpLayerM->tcp_slowtmr();
             }
         }
         else
         {
-        	error("Unknown self message");
+            error("Unknown self message");
         }
     }
     else if (msgP->arrivedOn("ipIn") || msgP->arrivedOn("ipv6In"))
@@ -446,8 +446,8 @@ void TCP_lwip::handleMessage(cMessage *msgP)
 
     if( ! pLwipFastTimerM->isScheduled())
     { // lwip fast timer
-    	if(NULL != pLwipTcpLayerM->tcp_active_pcbs || NULL != pLwipTcpLayerM->tcp_tw_pcbs)
-    		scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
+        if(NULL != pLwipTcpLayerM->tcp_active_pcbs || NULL != pLwipTcpLayerM->tcp_tw_pcbs)
+            scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
 
     if (ev.isGUI())

@@ -80,10 +80,10 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
 
 TcpLwipConnection::~TcpLwipConnection()
 {
-	if(pcbM)
-		pcbM->callback_arg = NULL;
-	delete receiveQueueM;
-	delete sendQueueM;
+    if(pcbM)
+        pcbM->callback_arg = NULL;
+    delete receiveQueueM;
+    delete sendQueueM;
 }
 
 void TcpLwipConnection::sendEstablishedMsg()
@@ -165,7 +165,7 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
 
 void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
 {
-	onCloseM = false;
+    onCloseM = false;
     tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, NULL, localPort);
     // The next returns a tcp_pcb: need to do some research on how
     // it works; does it actually accept a connection as well? It
@@ -177,7 +177,7 @@ void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
 
 void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort)
 {
-	onCloseM = false;
+    onCloseM = false;
     struct ip_addr dest_addr;
     dest_addr.addr = htonl(remoteAddr.get4().getInt());
     tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, NULL);
@@ -185,18 +185,18 @@ void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort
 
 void TcpLwipConnection::close()
 {
-	onCloseM = true;
-	if (0 == sendQueueM->getBytesAvailable())
-	{
-		tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
-		onCloseM = false;
-	}
+    onCloseM = true;
+    if (0 == sendQueueM->getBytesAvailable())
+    {
+        tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
+        onCloseM = false;
+    }
 }
 
 void TcpLwipConnection::abort()
 {
     tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
-	onCloseM = false;
+    onCloseM = false;
 }
 
 void TcpLwipConnection::send(cPacket *msgP)
@@ -268,9 +268,9 @@ void TcpLwipConnection::do_SEND()
         }
     }
     tcpEV << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
-	if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
-	{
-		tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
-		onCloseM = false;
-	}
+    if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
+    {
+        tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
+        onCloseM = false;
+    }
 }

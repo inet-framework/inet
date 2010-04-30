@@ -37,8 +37,8 @@ Register_Class(TcpLwipMsgBasedReceiveQueue);
 TcpLwipMsgBasedSendQueue::TcpLwipMsgBasedSendQueue()
     :
     beginM(0),
-	endM(0),
-	unsentTcpLayerBytesM(0)
+    endM(0),
+    unsentTcpLayerBytesM(0)
 {
 }
 
@@ -49,10 +49,10 @@ TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
     while (! payloadQueueM.empty())
     {
-    	EV << "SendQueue Destructor: Drop msg from Q: seqno=" << payloadQueueM.front().endSequenceNo <<
-				", length=" << payloadQueueM.front().msg->getByteLength() << endl;
-		delete payloadQueueM.front().msg;
-		payloadQueueM.pop_front();
+        EV << "SendQueue Destructor: Drop msg from Q: seqno=" << payloadQueueM.front().endSequenceNo <<
+                ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
+        delete payloadQueueM.front().msg;
+        payloadQueueM.pop_front();
     }
 }
 
@@ -62,9 +62,9 @@ TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 void TcpLwipMsgBasedSendQueue::setConnection(TcpLwipConnection *connP)
 {
     TcpLwipSendQueue::setConnection(connP);
-	endM = beginM = 0;
-	isValidSeqNoM = false;
-	unsentTcpLayerBytesM = 0;
+    endM = beginM = 0;
+    isValidSeqNoM = false;
+    unsentTcpLayerBytesM = 0;
 }
 
 /**
@@ -130,9 +130,9 @@ ulong TcpLwipMsgBasedSendQueue::getBytesAvailable()
 TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
         const void* tcpDataP, int tcpLengthP)
 {
-	ASSERT(tcpDataP);
+    ASSERT(tcpDataP);
 
-	PayloadQueue::iterator i;
+    PayloadQueue::iterator i;
 
     TCPSegment *tcpseg = new TCPSegment("tcp-segment");
 
@@ -142,45 +142,45 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     uint32 numBytes = tcpseg->getPayloadLength();
     if( (! isValidSeqNoM) && (numBytes > 0))
     {
-    	for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
-    	{
-    		i->endSequenceNo += fromSeq;
-    	}
-    	beginM += fromSeq;
-    	endM += fromSeq;
-    	isValidSeqNoM = true;
+        for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
+        {
+            i->endSequenceNo += fromSeq;
+        }
+        beginM += fromSeq;
+        endM += fromSeq;
+        isValidSeqNoM = true;
     }
 
     if (numBytes && !seqLE(fromSeq+numBytes, endM))
-    	opp_error("Implementation bug");
+        opp_error("Implementation bug");
 
     const char *payloadName = NULL;
     if (numBytes > 0)
     {
-		// add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
-		i = payloadQueueM.begin();
-		while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
-			++i;
-		uint32 toSeq = fromSeq+numBytes;
-		while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
-		{
-			if (!payloadName)
-				payloadName = i->msg->getName();
-			cPacket* msg = i->msg->dup();
-			tcpseg->addPayloadMessage(msg, i->endSequenceNo);
-			++i;
-		}
+        // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
+        i = payloadQueueM.begin();
+        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
+            ++i;
+        uint32 toSeq = fromSeq+numBytes;
+        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
+        {
+            if (!payloadName)
+                payloadName = i->msg->getName();
+            cPacket* msg = i->msg->dup();
+            tcpseg->addPayloadMessage(msg, i->endSequenceNo);
+            ++i;
+        }
     }
 
     // give segment a name
     char msgname[80];
-	sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
-			(payloadName ? payloadName : "tcpseg"),
-			tcpseg->getSynBit() ? " SYN":"",
-			tcpseg->getFinBit() ? " FIN":"",
-			(tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
-			(unsigned long)numBytes,
-			tcpseg->getPayloadArraySize());
+    sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
+            (payloadName ? payloadName : "tcpseg"),
+            tcpseg->getSynBit() ? " SYN":"",
+            tcpseg->getFinBit() ? " FIN":"",
+            (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+            (unsigned long)numBytes,
+            tcpseg->getPayloadArraySize());
     tcpseg->setName(msgname);
 
     discardAckedBytes();
@@ -194,21 +194,21 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
  */
 void TcpLwipMsgBasedSendQueue::discardAckedBytes()
 {
-	if (isValidSeqNoM)
-	{
-		uint32 seqNum = connM->pcbM->lastack;
-		if(seqLE(beginM, seqNum) && seqLE(seqNum, endM))
-		{
-			beginM = seqNum;
+    if (isValidSeqNoM)
+    {
+        uint32 seqNum = connM->pcbM->lastack;
+        if(seqLE(beginM, seqNum) && seqLE(seqNum, endM))
+        {
+            beginM = seqNum;
 
-			// remove payload messages whose endSequenceNo is below seqNum
-			while (!payloadQueueM.empty() && seqLE(payloadQueueM.front().endSequenceNo, seqNum))
-			{
-				delete payloadQueueM.front().msg;
-				payloadQueueM.pop_front();
-			}
-		}
-	}
+            // remove payload messages whose endSequenceNo is below seqNum
+            while (!payloadQueueM.empty() && seqLE(payloadQueueM.front().endSequenceNo, seqNum))
+            {
+                delete payloadQueueM.front().msg;
+                payloadQueueM.pop_front();
+            }
+        }
+    }
 }
 
 
@@ -226,12 +226,12 @@ TcpLwipMsgBasedReceiveQueue::TcpLwipMsgBasedReceiveQueue()
  */
 TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
 {
-	PayloadList::iterator i;
-	while ((i = payloadListM.begin()) != payloadListM.end())
-	{
-		delete i->second;
-		payloadListM.erase(i);
-	}
+    PayloadList::iterator i;
+    while ((i = payloadListM.begin()) != payloadListM.end())
+    {
+        delete i->second;
+        payloadListM.erase(i);
+    }
 }
 
 /**
@@ -258,21 +258,21 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     uint32 endSeqNo;
     while ((msg=tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
     {
-    	if(seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
-    	{
-			// insert, avoiding duplicates
-			PayloadList::iterator i = payloadListM.find(endSeqNo);
-			if (i != payloadListM.end())
-			{
-				ASSERT(msg->getByteLength() == i->second->getByteLength());
-				delete i->second;
-			}
-			payloadListM[endSeqNo] = msg;
-    	}
-    	else
-    	{
-    		delete msg;
-    	}
+        if(seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
+        {
+            // insert, avoiding duplicates
+            PayloadList::iterator i = payloadListM.find(endSeqNo);
+            if (i != payloadListM.end())
+            {
+                ASSERT(msg->getByteLength() == i->second->getByteLength());
+                delete i->second;
+            }
+            payloadListM[endSeqNo] = msg;
+        }
+        else
+        {
+            delete msg;
+        }
     }
 }
 
@@ -305,33 +305,33 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     // remove old messages
     while( (! payloadListM.empty()) && seqLess(payloadListM.begin()->first, firstSeqNo))
     {
-		delete payloadListM.begin()->second;
-		payloadListM.erase(payloadListM.begin());
+        delete payloadListM.begin()->second;
+        payloadListM.erase(payloadListM.begin());
     }
     // pass up payload messages, in sequence number order
     if (! payloadListM.empty())
     {
-    	uint32 endSeqNo = payloadListM.begin()->first;
-    	if (seqLE(endSeqNo, lastSeqNo))
-    	{
-    		dataMsg = payloadListM.begin()->second;
-			uint32 dataLength = dataMsg->getByteLength();
+        uint32 endSeqNo = payloadListM.begin()->first;
+        if (seqLE(endSeqNo, lastSeqNo))
+        {
+            dataMsg = payloadListM.begin()->second;
+            uint32 dataLength = dataMsg->getByteLength();
 
-			ASSERT(endSeqNo - dataLength == firstSeqNo);
-			payloadListM.erase(payloadListM.begin());
-			bytesInQueueM -= dataLength;
+            ASSERT(endSeqNo - dataLength == firstSeqNo);
+            payloadListM.erase(payloadListM.begin());
+            bytesInQueueM -= dataLength;
 
-			IPvXAddress localAddr(ntohl(connM->pcbM->local_ip.addr));
-			IPvXAddress remoteAddr(ntohl(connM->pcbM->remote_ip.addr));
-			TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-			tcpConnectInfo->setConnId(connM->connIdM);
-			tcpConnectInfo->setLocalAddr(localAddr);
-			tcpConnectInfo->setRemoteAddr(remoteAddr);
-			tcpConnectInfo->setLocalPort(connM->pcbM->local_port);
-			tcpConnectInfo->setRemotePort(connM->pcbM->remote_port);
-			dataMsg->setControlInfo(tcpConnectInfo);
-			dataMsg->setKind(TCP_I_DATA);
-    	}
+            IPvXAddress localAddr(ntohl(connM->pcbM->local_ip.addr));
+            IPvXAddress remoteAddr(ntohl(connM->pcbM->remote_ip.addr));
+            TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+            tcpConnectInfo->setConnId(connM->connIdM);
+            tcpConnectInfo->setLocalAddr(localAddr);
+            tcpConnectInfo->setRemoteAddr(remoteAddr);
+            tcpConnectInfo->setLocalPort(connM->pcbM->local_port);
+            tcpConnectInfo->setRemotePort(connM->pcbM->remote_port);
+            dataMsg->setControlInfo(tcpConnectInfo);
+            dataMsg->setKind(TCP_I_DATA);
+        }
     }
     return dataMsg;
 }
