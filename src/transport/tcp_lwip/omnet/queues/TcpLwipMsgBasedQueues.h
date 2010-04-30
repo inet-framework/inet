@@ -126,6 +126,8 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
   protected:
     typedef std::map<uint32, cPacket *, SeqCmpLess> PayloadList;
     PayloadList payloadListM;
+    bool isValidSeqNoM;
+    uint32 lastExtractedSeqNoM;
 
   public:
     /**

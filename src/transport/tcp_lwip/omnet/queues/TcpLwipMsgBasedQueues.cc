@@ -243,6 +243,8 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
 
     bytesInQueueM = 0;
     TcpLwipReceiveQueue::setConnection(connP);
+    isValidSeqNoM = false;
+    lastExtractedSeqNoM = 0;
 }
 
 void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
@@ -299,8 +301,15 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
-    uint32 lastSeqNo = connM->pcbM->rcv_nxt;
-    uint32 firstSeqNo = lastSeqNo - bytesInQueueM;
+    if(!isValidSeqNoM)
+    {
+        isValidSeqNoM = true;
+        lastExtractedSeqNoM = connM->pcbM->rcv_nxt - bytesInQueueM;
+        if(connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
+            lastExtractedSeqNoM--; // received FIN
+    }
+    uint32 firstSeqNo = lastExtractedSeqNoM;
+    uint32 lastSeqNo = firstSeqNo + bytesInQueueM;
 
     // remove old messages
     while( (! payloadListM.empty()) && seqLess(payloadListM.begin()->first, firstSeqNo))
@@ -319,6 +328,7 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
 
             ASSERT(endSeqNo - dataLength == firstSeqNo);
             payloadListM.erase(payloadListM.begin());
+            lastExtractedSeqNoM += dataLength;
             bytesInQueueM -= dataLength;
 
             IPvXAddress localAddr(ntohl(connM->pcbM->local_ip.addr));
