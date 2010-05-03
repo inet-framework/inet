@@ -123,7 +123,11 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     }
     else if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
-        error("(%s)%s : TCP_lwip doesn't work on IPv6", tcpsegP->getClassName(), tcpsegP->getName());
+        IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
+        srcAddr = controlInfo->getSrcAddr();
+        destAddr = controlInfo->getDestAddr();
+        interfaceId = controlInfo->getInterfaceId();
+        delete controlInfo;
     }
     else
     {
@@ -512,7 +516,14 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
     else
     {
         // send over IPv6
-        opp_error("LWIP doesn't work on IPv6!");
+        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+        controlInfo->setProtocol(IP_PROT_TCP);
+        controlInfo->setSrcAddr(srcP.get6());
+        controlInfo->setDestAddr(destP.get6());
+        tcpseg->setControlInfo(controlInfo);
+
+        output = "ipv6Out";
+        // send over IPv6
     }
     if(conn)
     {
