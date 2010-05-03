@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 #define PBUF_TRANSPORT_HLEN 20
-#define PBUF_IP_HLEN        20
+#define PBUF_IP_HLEN        60
 
 typedef enum {
   PBUF_TRANSPORT,

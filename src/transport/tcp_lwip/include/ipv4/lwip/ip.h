@@ -47,7 +47,8 @@ extern "C" {
 /** Currently, the function ip_output_if_opt() is only used with IGMP */
 #define IP_OPTIONS_SEND   LWIP_IGMP
 
-#define IP_HLEN 20
+//#define IP_HLEN 20
+#define IP_HLEN ((addr->addr.isIPv6()) ? 40 : 20)
 
 #define IP_PROTO_ICMP    1
 #define IP_PROTO_UDP     17
