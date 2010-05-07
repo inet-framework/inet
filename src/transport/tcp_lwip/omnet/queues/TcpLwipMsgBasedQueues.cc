@@ -140,6 +140,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 
     uint32 fromSeq = tcpseg->getSequenceNo();
     uint32 numBytes = tcpseg->getPayloadLength();
+    uint32 toSeq = fromSeq+numBytes;
     if( (! isValidSeqNoM) && (numBytes > 0))
     {
         for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
@@ -151,7 +152,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
         isValidSeqNoM = true;
     }
 
-    if (numBytes && !seqLE(fromSeq+numBytes, endM))
+    if (numBytes && !seqLE(toSeq, endM))
         opp_error("Implementation bug");
 
     const char *payloadName = NULL;
@@ -161,7 +162,6 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
         i = payloadQueueM.begin();
         while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
             ++i;
-        uint32 toSeq = fromSeq+numBytes;
         while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
         {
             if (!payloadName)
