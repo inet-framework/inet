@@ -496,6 +496,7 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
         tcpseg = new TCPSegment("tcp-segment");
 
         TCPSerializer().parse((const unsigned char *)dataP, lenP, tcpseg);
+        ASSERT(tcpseg->getPayloadLength() == 0);
     }
     ASSERT(tcpseg);
 
