@@ -76,6 +76,8 @@ void TCP_lwip::initialize()
     testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
+    recordStatisticsM = par("recordStats");
+
     pLwipTcpLayerM = new LwipTcpLayer(*this);
 
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
@@ -527,9 +529,8 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
     }
     if(conn)
     {
-        conn->receiveQueueM->notifyAboutSending(tcpseg);
+        conn->notifyAboutSending(*tcpseg);
     }
-
     send(tcpseg, output);
 }
 

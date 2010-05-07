@@ -42,6 +42,52 @@
 //#define tcpEV std::cout
 
 
+TcpLwipConnection::Stats::Stats()
+:
+    sndWndVector("send window"),
+    sndSeqVector("sent seq"),
+    sndAckVector("sent ack"),
+    sndSacksVector("sent sacks"),
+
+    rcvWndVector("receive window"),
+    rcvSeqVector("rcvd seq"),
+    rcvAdvVector("advertised window"),
+    rcvAckVector("rcvd ack"),
+    rcvSacksVector("rcvd sacks"),
+
+    unackedVector("unacked bytes"),
+
+    dupAcksVector("rcvd dupAcks"),
+    pipeVector("pipe"),
+    rcvOooSegVector("rcvd oooseg"),
+
+    sackedBytesVector("rcvd sackedBytes"),
+    tcpRcvQueueBytesVector("tcpRcvQueueBytes"),
+    tcpRcvQueueDropsVector("tcpRcvQueueDrops")
+{
+}
+
+TcpLwipConnection::Stats::~Stats()
+{
+}
+
+void TcpLwipConnection::Stats::recordSend(const TCPSegment &tcpsegP)
+{
+    sndWndVector.record(tcpsegP.getWindow());
+    sndSeqVector.record(tcpsegP.getSequenceNo());
+    if (tcpsegP.getAckBit())
+        sndAckVector.record(tcpsegP.getAckNo());
+}
+
+void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
+{
+    rcvWndVector.record(tcpsegP.getWindow());
+    rcvSeqVector.record(tcpsegP.getSequenceNo());
+    if (tcpsegP.getAckBit())
+        rcvAckVector.record(tcpsegP.getAckNo());
+}
+
+
 TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, const char *sendQueueClassP, const char *recvQueueClassP)
     :
     connIdM(connIdP),
@@ -50,7 +96,8 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIn
     isListenerM(false),
     tcpLwipM(tcpLwipP),
     receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(recvQueueClassP))),
-    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(sendQueueClassP)))
+    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(sendQueueClassP))),
+    statsM(NULL)
 {
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_new();
     assert(pcbM);
@@ -59,6 +106,8 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIn
 
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
+    if(tcpLwipM.recordStatisticsM)
+        statsM = new Stats();
 }
 
 TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
@@ -69,13 +118,16 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     isListenerM(false),
     tcpLwipM(connP.tcpLwipM),
     receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(connP.receiveQueueM->getClassName()))),
-    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(connP.sendQueueM->getClassName())))
+    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(connP.sendQueueM->getClassName()))),
+    statsM(NULL)
 {
     pcbM = pcbP;
     pcbM->callback_arg = this;
 
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
+    if(tcpLwipM.recordStatisticsM)
+        statsM = new Stats();
 }
 
 TcpLwipConnection::~TcpLwipConnection()
@@ -84,6 +136,7 @@ TcpLwipConnection::~TcpLwipConnection()
         pcbM->callback_arg = NULL;
     delete receiveQueueM;
     delete sendQueueM;
+    delete statsM;
 }
 
 void TcpLwipConnection::sendEstablishedMsg()
@@ -202,6 +255,13 @@ void TcpLwipConnection::abort()
 void TcpLwipConnection::send(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
+}
+
+void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)
+{
+    receiveQueueM->notifyAboutSending(&tcpsegP);
+    if (statsM)
+        statsM->recordSend(tcpsegP);
 }
 
 int TcpLwipConnection::send_data(void *data, int datalen)

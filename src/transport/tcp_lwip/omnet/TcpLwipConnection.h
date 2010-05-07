@@ -24,6 +24,7 @@
 
 #include "IPvXAddress.h"
 #include "lwip/tcp.h"
+#include "TCPSegment.h"
 
 // forward declarations:
 class TCP_lwip;
@@ -39,10 +40,42 @@ class TCPStatusInfo;
  */
 class INET_API TcpLwipConnection
 {
+  protected:
+    class Stats
+    {
+      public:
+        Stats();
+        ~Stats();
+        void recordSend(const TCPSegment &tcpsegP);
+        void recordReceive(const TCPSegment &tcpsegP);
+
+      protected:
+        // statistics
+        cOutVector sndWndVector;   // snd_wnd
+        cOutVector sndSeqVector;   // sent seqNo
+        cOutVector sndAckVector;   // sent ackNo
+        cOutVector sndSacksVector;  // number of sent Sacks
+
+        cOutVector rcvWndVector;   // rcv_wnd
+        cOutVector rcvSeqVector;   // received seqNo
+        cOutVector rcvAdvVector;   // current advertised window (=rcv_avd)
+        cOutVector rcvAckVector;   // received ackNo (= snd_una)
+        cOutVector rcvSacksVector;  // number of received Sacks
+
+        cOutVector unackedVector;  // number of bytes unacknowledged
+
+        cOutVector dupAcksVector;   // current number of received dupAcks
+        cOutVector pipeVector;      // current sender's estimate of bytes outstanding in the network
+        cOutVector rcvOooSegVector; // number of received out-of-order segments
+
+        cOutVector sackedBytesVector;        // current number of received sacked bytes
+        cOutVector tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
+        cOutVector tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
+    };
     // prevent copy constructor:
     TcpLwipConnection(const TcpLwipConnection&);
-  public:
 
+  public:
     TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, const char *sendQueueClassP, const char *recvQueueClassP);
 
     TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
@@ -67,11 +100,15 @@ class INET_API TcpLwipConnection
 
     void fillStatusInfo(TCPStatusInfo &statusInfo);
 
+    void notifyAboutSending(const TCPSegment& tcpsegP);
+
     int send_data(void *data, int len);
 
     void do_SEND();
 
     INetStreamSocket* getSocket();
+
+    void initStats();
 
   public:
     int connIdM;
@@ -87,6 +124,9 @@ class INET_API TcpLwipConnection
     TcpLwipReceiveQueue * receiveQueueM;
     TcpLwipSendQueue * sendQueueM;
     LwipTcpLayer::tcp_pcb *pcbM;
+
+  protected:
+    Stats * statsM;
 };
 
 #endif

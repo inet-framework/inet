@@ -135,6 +135,7 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
   public:
     static bool testingS;    // switches between tcpEV and testingEV
     static bool logverboseS; // if !testingS, turns on more verbose logging
+    bool recordStatisticsM;  // output vectors on/off
 
   protected:
     LwipTcpLayer *pLwipTcpLayerM;

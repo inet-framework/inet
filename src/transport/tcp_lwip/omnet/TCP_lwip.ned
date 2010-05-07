@@ -86,6 +86,8 @@ simple TCP_lwip like ITCP
         int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack
         string sendQueueClass = default("TcpLwipVirtualDataSendQueue");
         string receiveQueueClass = default("TcpLwipVirtualDataReceiveQueue");
+        bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
+
     gates:
         input appIn[];
         input ipIn;
