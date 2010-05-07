@@ -267,47 +267,50 @@ void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)
 int TcpLwipConnection::send_data(void *data, int datalen)
 {
     int error;
+    int written = 0;
 
     if (datalen > 0xFFFF)
       datalen = 0xFFFF; // tcp_write() length argument is uint16_t
+
+    u32_t ss = pcbM->snd_lbb;
     error = tcpLwipM.getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
-
     if(error == ERR_OK)
-        return datalen;
-
-    if(error == ERR_MEM) {
+    {
+        written = datalen;
+    }
+    else if(error == ERR_MEM)
+    {
         // Chances are that datalen is too large to fit in the send
         // buffer. If it is really large (larger than a typical MSS,
         // say), we should try segmenting the data ourselves.
-        int written = 0;
 
-        if(datalen < pcbM->snd_buf)
-//           return ERR_EAGAIN;
-            return written; //TODO
-        do
+        while(1)
         {
             u16_t snd_buf = pcbM->snd_buf;
             if(0 == snd_buf)
                 break;
+            if(datalen < snd_buf)
+                break;
             error = tcpLwipM.getLwipTcpLayer()->tcp_write(
                     pcbM, ((const char *)data) + written, snd_buf, 1);
-            if(error == ERR_OK)
-            {
-                written += snd_buf;
-                datalen -= snd_buf;
-            }
-        } while(error == ERR_OK && datalen >= pcbM->snd_buf);
+            if(error != ERR_OK)
+                break;
+            written += snd_buf;
+            datalen -= snd_buf;
+        }
 
-        if(written > 0)
-            return written;
     }
-
+    if(written > 0)
+    {
+        ASSERT(pcbM->snd_lbb - ss == written);
+        return written;
+    }
     return error;
 }
 
 void TcpLwipConnection::do_SEND()
 {
-    char buffer[4096];
+    char buffer[8*536];
     int bytes;
     int allsent = 0;
 
