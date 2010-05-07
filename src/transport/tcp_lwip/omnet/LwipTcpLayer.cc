@@ -84,7 +84,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
     srcAddr = src->addr;
     destAddr = dest->addr;
 
-    stackIf.ip_output(pcb, srcAddr, destAddr, p->payload, p->len);
+    stackIf.ip_output(pcb, srcAddr, destAddr, p->payload, p->tot_len);
     return 0;
 }
 
