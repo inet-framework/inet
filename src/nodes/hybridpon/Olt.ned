@@ -10,7 +10,7 @@
 package inet.nodes.hybridpon;
 
 import inet.linklayer.etherswitch.MACRelayUnit;
-import inet.linklayer.ethernet.EtherMAC2;
+import inet.linklayer.ethernet.EtherMAC3;
 import inet.linklayer.hybridpon.IOltScheduler;
 import inet.linklayer.hybridpon.OltWdmLayer;
 
@@ -48,7 +48,7 @@ module Olt
                 lowerLayerIn[sizeof(ethg)+sizeof(phyg)];
                 lowerLayerOut[sizeof(ethg)+sizeof(phyg)];
         }
-        etherMac[sizeof(ethg)]: EtherMAC2 {
+        etherMac[sizeof(ethg)]: EtherMAC3 {
             parameters:
                 promiscuous = true;
                 queueModule = "";

@@ -13,6 +13,9 @@
 # for better catching the bugs
 use strict;
 
+# for checking numeric variables
+use Scalar::Util qw(looks_like_number);
+
 
 # check argument count and print usage if needed
 my $argcnt = $#ARGV + 1;
@@ -151,8 +154,10 @@ foreach my $infile (@infiles) {
 		# get "decodable frame rate (Q)"
 		if ($line =~ /decodable frame rate/) {
 			my @arr = split(/\t/, $line);
-			$sum_decodable_frame_rate += $arr[2];
-			$num_decodable_frame_rate++;
+			if ($arr[2] ne "nan") {
+				$sum_decodable_frame_rate += $arr[2];
+				$num_decodable_frame_rate++;
+			}
 		}
 	}	# end of while ()
 
@@ -166,62 +171,73 @@ foreach my $infile (@infiles) {
 #########################################################################
 
 	### FTP
-	# check the size of arrays
-	unless (
-		($#ftp_delay == $#ftp_num_sessions) &&
-		($#ftp_throughput == $#ftp_num_sessions) &&
-		($#ftp_transfer_rate == $#ftp_num_sessions)
-		) {
-		die "Error in processing FTP statistics";
+	my ($ftp_avg_delay, $ftp_avg_throughput, $ftp_avg_transfer_rate) = ("", "", "");
+	# check whether the number of finished sessions is bigger than zero
+	if ($#ftp_num_sessions >= 0) {
+		# check whether the sizes of arrays are equal
+		unless (
+			($#ftp_delay == $#ftp_num_sessions) &&
+			($#ftp_throughput == $#ftp_num_sessions) &&
+			($#ftp_transfer_rate == $#ftp_num_sessions)
+			) {
+			die "Error in processing FTP statistics";
+		}
+		# calcuate the number of finished sessions
+		my $ftp_sum_num_sessions = 0;
+		for my $i (0 .. $#ftp_num_sessions) {
+			$ftp_sum_num_sessions += $ftp_num_sessions[$i];
+		}
+		# averaging session delay, throughput, and transfer rate
+		my $ftp_sum_delay = 0;
+		my $ftp_sum_throughput = 0;
+		my $ftp_sum_transfer_rate = 0;
+		for my $i (0 .. $#ftp_num_sessions) {
+			$ftp_sum_delay += $ftp_delay[$i]*$ftp_num_sessions[$i];
+			$ftp_sum_throughput += $ftp_throughput[$i]*$ftp_num_sessions[$i];
+			$ftp_sum_transfer_rate += $ftp_transfer_rate[$i]*$ftp_num_sessions[$i];
+		}
+		$ftp_avg_delay = $ftp_sum_delay/$ftp_sum_num_sessions;
+		$ftp_avg_throughput = $ftp_sum_throughput/$ftp_sum_num_sessions;
+		$ftp_avg_transfer_rate = $ftp_sum_transfer_rate/$ftp_sum_num_sessions;
 	}
-	# calcuate the number of finished sessions
-	my $ftp_sum_num_sessions = 0;
-	for my $i (0 .. $#ftp_num_sessions) {
-		$ftp_sum_num_sessions += $ftp_num_sessions[$i];
-	}
-	# averaging session delay, throughput, and transfer rate
-	my $ftp_sum_delay = 0;
-	my $ftp_sum_throughput = 0;
-	my $ftp_sum_transfer_rate = 0;
-	for my $i (0 .. $#ftp_num_sessions) {
-		$ftp_sum_delay += $ftp_delay[$i]*$ftp_num_sessions[$i];
-		$ftp_sum_throughput += $ftp_throughput[$i]*$ftp_num_sessions[$i];
-		$ftp_sum_transfer_rate += $ftp_transfer_rate[$i]*$ftp_num_sessions[$i];
-	}
-	my $ftp_avg_delay = $ftp_sum_delay/$ftp_sum_num_sessions;
-	my $ftp_avg_throughput = $ftp_sum_throughput/$ftp_sum_num_sessions;
-	my $ftp_avg_transfer_rate = $ftp_sum_transfer_rate/$ftp_sum_num_sessions;
 
 	### HTTP
-	# check the size of arrays
-	unless (
-		($#http_delay == $#http_num_sessions) &&
-		($#http_throughput == $#http_num_sessions) &&
-		($#http_transfer_rate == $#http_num_sessions)
-		) {
-		die "Error in processing HTTP statistics";
+	my ($http_avg_delay, $http_avg_throughput, $http_avg_transfer_rate) = ("", "", "");
+	# check whether the number of finished sessions is bigger than zero
+	if ($#http_num_sessions >= 0) {
+		# check whether the sizes of arrays are equal
+		unless (
+			($#http_delay == $#http_num_sessions) &&
+			($#http_throughput == $#http_num_sessions) &&
+			($#http_transfer_rate == $#http_num_sessions)
+			) {
+			die "Error in processing HTTP statistics";
+		}
+		# calcuate the number of finished sessions
+		my $http_sum_num_sessions = 0;
+		for my $i (0 .. $#http_num_sessions) {
+			$http_sum_num_sessions += $http_num_sessions[$i];
+		}
+		# averaging session delay, throughput, and transfer rate
+		my $http_sum_delay = 0;
+		my $http_sum_throughput = 0;
+		my $http_sum_transfer_rate = 0;
+		for my $i (0 .. $#http_num_sessions) {
+			$http_sum_delay += $http_delay[$i]*$http_num_sessions[$i];
+			$http_sum_throughput += $http_throughput[$i]*$http_num_sessions[$i];
+			$http_sum_transfer_rate += $http_transfer_rate[$i]*$http_num_sessions[$i];
+		}
+		$http_avg_delay = $http_sum_delay/$http_sum_num_sessions;
+		$http_avg_throughput = $http_sum_throughput/$http_sum_num_sessions;
+		$http_avg_transfer_rate = $http_sum_transfer_rate/$http_sum_num_sessions;
 	}
-	# calcuate the number of finished sessions
-	my $http_sum_num_sessions = 0;
-	for my $i (0 .. $#http_num_sessions) {
-		$http_sum_num_sessions += $http_num_sessions[$i];
-	}
-	# averaging session delay, throughput, and transfer rate
-	my $http_sum_delay = 0;
-	my $http_sum_throughput = 0;
-	my $http_sum_transfer_rate = 0;
-	for my $i (0 .. $#http_num_sessions) {
-		$http_sum_delay += $http_delay[$i]*$http_num_sessions[$i];
-		$http_sum_throughput += $http_throughput[$i]*$http_num_sessions[$i];
-		$http_sum_transfer_rate += $http_transfer_rate[$i]*$http_num_sessions[$i];
-	}
-	my $http_avg_delay = $http_sum_delay/$http_sum_num_sessions;
-	my $http_avg_throughput = $http_sum_throughput/$http_sum_num_sessions;
-	my $http_avg_transfer_rate = $http_sum_transfer_rate/$http_sum_num_sessions;
 
 	### UDP video streaming
 	# averaging decodable frame rate (Q)
-	my $avg_decodable_frame_rate = $sum_decodable_frame_rate/$num_decodable_frame_rate;
+	my $avg_decodable_frame_rate = "";
+	if ($num_decodable_frame_rate > 0) {
+		$avg_decodable_frame_rate = $sum_decodable_frame_rate/$num_decodable_frame_rate;
+	}
 
 	### store statistics into the results array
 	# get interation variables used and convert them into a comma-separated string
@@ -237,11 +253,17 @@ foreach my $infile (@infiles) {
 		$itervars .= "$rtt,";
 	}
 	$itervars .= ($repetition >= 0) ? "$repetition," : "";
+
 	# store the processed statistics into a string
-	my $stats = sprintf("%le,%le,%le,%le,%le,%le,%le",
-						 $ftp_avg_delay, $ftp_avg_throughput, $ftp_avg_transfer_rate,
-						 $http_avg_delay, $http_avg_throughput, $http_avg_transfer_rate,
-						 $avg_decodable_frame_rate);
+	my $stats = "";
+	$stats .= looks_like_number($ftp_avg_delay) ? sprintf("%le,", $ftp_avg_delay) : "NA,";
+	$stats .= looks_like_number($ftp_avg_throughput) ? sprintf("%le,", $ftp_avg_throughput) : "NA,";
+	$stats .= looks_like_number($ftp_avg_transfer_rate) ? sprintf("%le,", $ftp_avg_transfer_rate) : "NA,";
+	$stats .= looks_like_number($http_avg_delay) ? sprintf("%le,", $http_avg_delay) : "NA,";
+	$stats .= looks_like_number($http_avg_throughput) ? sprintf("%le,", $http_avg_throughput) : "NA,";
+	$stats .= looks_like_number($http_avg_transfer_rate) ? sprintf("%le,", $http_avg_transfer_rate) : "NA,";
+	$stats .= looks_like_number($avg_decodable_frame_rate) ? sprintf("%le", $avg_decodable_frame_rate) : "NA";	# no comma at the end
+
 	# store the string in the array
 	my $result = $itervars . $stats;
 	push(@results, $result);
