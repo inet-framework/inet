@@ -20,11 +20,10 @@
 #ifndef WORLD_TRACI_TRACISCENARIOMANAGER_H
 #define WORLD_TRACI_TRACISCENARIOMANAGER_H
 
-#include <fstream>
-#include <vector>
 #include <map>
 #include <list>
-#include <stdexcept>
+#include <sstream>
+#include <iomanip>
 
 #include <omnetpp.h>
 
@@ -45,17 +44,16 @@
 class INET_API TraCIScenarioManager : public cSimpleModule
 {
 	public:
-
 		~TraCIScenarioManager();
 		virtual void initialize();
 		virtual void finish();
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);
 
-		void commandSetMaximumSpeed(int32_t nodeId, float maxSpeed);
-		void commandChangeRoute(int32_t nodeId, std::string roadId, double travelTime);
+		void commandSetMaximumSpeed(std::string nodeId, float maxSpeed);
+		void commandChangeRoute(std::string nodeId, std::string roadId, double travelTime);
 		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
-		void commandStopNode(int32_t nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
+		void commandStopNode(std::string nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
 		void commandSetTrafficLightProgram(std::string trafficLightId, std::string program);
 		void commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index);
 		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId);
@@ -63,44 +61,6 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 
 	protected:
-
-		bool debug; /**< whether to emit debug messages */
-		simtime_t updateInterval; /**< time interval to update the host's position */
-		std::string moduleType; /**< module type to be used in the simulation for each managed vehicle */
-		std::string moduleName; /**< module name to be used in the simulation for each managed vehicle */
-		std::string moduleDisplayString; /**< module displayString to be used in the simulation for each managed vehicle */
-		std::string host;
-		int port;
-		bool autoShutdown; /**< Shutdown module as soon as no more vehicles are in the simulation */
-		int margin;
-		std::list<std::string> roiRoads; /**< which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty */
-		std::list<std::pair<Coord, Coord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
-
-		void* socketPtr;
-		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
-		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
-
-		size_t nextNodeVectorIndex; /**< next OMNeT++ module vector index to use */
-		std::map<int32_t, cModule*> hosts; /**< vector of all hosts managed by us */
-		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
-
-		ChannelControl* cc;
-
-		void executeOneTimestep(); /**< read and execute all commands for the next timestep */
-
-		void connect();
-		virtual void init_traci();
-
-		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
-		cModule* getManagedModule(int32_t nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
-		void deleteModule(int32_t nodeId);
-
-		/**
-		 * returns whether a given position lies within the simulation's region of interest.
-		 * Modules are destroyed and re-created as managed vehicles leave and re-enter the ROI
-		 */
-		bool isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed);
-
 		/**
 		 * Byte-buffer that stores values in TraCI byte-order
 		 */
@@ -179,6 +139,15 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 					return buf;
 				}
 
+				std::string hexStr() const {
+					std::stringstream ss;
+					for (std::string::const_iterator i = buf.begin() + buf_index; i != buf.end(); ++i) {
+						if (i != buf.begin()) ss << " ";
+						ss << std::hex << std::setw(2) << std::setfill('0') << (int)(uint8_t)*i;
+					}
+					return ss.str();
+				}
+
 			protected:
 				bool isBigEndian() {
 					short a = 0x0102;
@@ -190,11 +159,45 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 				size_t buf_index;
 		};
 
-		void processObjectCreation(uint8_t domain, int32_t nodeId);
+		bool debug; /**< whether to emit debug messages */
+		simtime_t updateInterval; /**< time interval to update the host's position */
+		std::string moduleType; /**< module type to be used in the simulation for each managed vehicle */
+		std::string moduleName; /**< module name to be used in the simulation for each managed vehicle */
+		std::string moduleDisplayString; /**< module displayString to be used in the simulation for each managed vehicle */
+		std::string host;
+		int port;
+		bool autoShutdown; /**< Shutdown module as soon as no more vehicles are in the simulation */
+		int margin;
+		std::list<std::string> roiRoads; /**< which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty */
+		std::list<std::pair<Coord, Coord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
 
-		void processObjectDestruction(uint8_t domain, int32_t nodeId);
+		void* socketPtr;
+		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
+		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
-		void processUpdateObject(uint8_t domain, int32_t nodeId, TraCIBuffer& buf);
+		size_t nextNodeVectorIndex; /**< next OMNeT++ module vector index to use */
+		std::map<std::string, cModule*> hosts; /**< vector of all hosts managed by us */
+		std::set<std::string> subscribedVehicles; /**< all vehicles we have already subscribed to */
+		uint32_t activeVehicleCount; /**< number of vehicles reported as active by TraCI server */
+		bool autoShutdownTriggered;
+		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
+
+		ChannelControl* cc;
+
+		void executeOneTimestep(); /**< read and execute all commands for the next timestep */
+
+		void connect();
+		virtual void init_traci();
+
+		void addModule(std::string nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
+		cModule* getManagedModule(std::string nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
+		void deleteModule(std::string nodeId);
+
+		/**
+		 * returns whether a given position lies within the simulation's region of interest.
+		 * Modules are destroyed and re-created as managed vehicles leave and re-enter the ROI
+		 */
+		bool isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle);
 
 		/**
 		 * sends a single command via TraCI, checks status response, returns additional responses
@@ -241,6 +244,11 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		 */
 		double omnet2traciAngle(double angle) const;
 
+		void subscribeToVehicleVariables(std::string vehicleId);
+		void unsubscribeFromVehicleVariables(std::string vehicleId);
+		void processSimSubscription(std::string objectId, TraCIBuffer& buf);
+		void processVehicleSubscription(std::string objectId, TraCIBuffer& buf);
+		void processSubcriptionResult(TraCIBuffer& buf);
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
