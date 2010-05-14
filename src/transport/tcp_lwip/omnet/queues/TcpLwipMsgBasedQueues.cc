@@ -24,6 +24,7 @@
 #include "TCPCommand_m.h"
 #include "TcpLwipConnection.h"
 #include "TCPSerializer.h"
+#include "TCP_lwip.h"
 
 
 Register_Class(TcpLwipMsgBasedSendQueue);
@@ -49,7 +50,7 @@ TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
     while (! payloadQueueM.empty())
     {
-        EV << "SendQueue Destructor: Drop msg from Q: seqno=" << payloadQueueM.front().endSequenceNo <<
+        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath() << " Queue: seqno=" << payloadQueueM.front().endSequenceNo <<
                 ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
         delete payloadQueueM.front().msg;
         payloadQueueM.pop_front();
@@ -154,6 +155,15 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 
     if (numBytes && !seqLE(toSeq, endM))
         opp_error("Implementation bug");
+
+    EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
+
+#ifdef DEBUG_LWIP
+    for(i=payloadQueueM.begin(); i!=payloadQueueM.end(); ++i)
+    {
+        EV << "  buffered msg: endseq=" << i->endSequenceNo << ", length=" << i->msg->getByteLength() << endl;
+    }
+#endif
 
     const char *payloadName = NULL;
     if (numBytes > 0)
