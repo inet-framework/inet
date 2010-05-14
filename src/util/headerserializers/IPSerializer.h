@@ -31,11 +31,12 @@ class IPSerializer
 
         /**
          * Serializes an IPDatagram for transmission on the wire.
-         * The checksum is NOT filled in. (The kernel does that when sending
+         * The checksum is set to 0 when hasCalcChkSum is false. (The kernel does that when sending
          * the frame over a raw socket.)
+         * When hasCalcChkSum is true, then calculating checksum.
          * Returns the length of data written into buffer.
          */
-        int serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize);
+        int serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum=false);
 
         /**
          * Puts a packet sniffed from the wire into an IPDatagram. Does NOT
