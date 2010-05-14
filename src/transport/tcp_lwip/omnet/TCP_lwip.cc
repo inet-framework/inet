@@ -305,6 +305,7 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     if(p == NULL)
     {
         // Received FIN:
+        tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[NULL], " << (int)err << "):FIN\n";
         conn.sendIndicationToApp((conn.pcbM->state == LwipTcpLayer::TIME_WAIT)
                 ? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
         // TODO is it good?
@@ -312,8 +313,9 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     }
     else
     {
-        conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->len);
-        pLwipTcpLayerM->tcp_recved(conn.pcbM, p->len);
+        tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", " << p->tot_len << "], " << (int)err << ")\n";
+        conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
+        pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
         pbuf_free(p);
     }
 
