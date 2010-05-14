@@ -92,15 +92,17 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIn
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
-    onCloseM(false),
-    isListenerM(false),
-    tcpLwipM(tcpLwipP),
-    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(recvQueueClassP))),
+    pcbM(NULL),
     sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(sendQueueClassP))),
+    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(recvQueueClassP))),
+    tcpLwipM(tcpLwipP),
+    totalSentM(0),
+    isListenerM(false),
+    onCloseM(false),
     statsM(NULL)
 {
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_new();
-    assert(pcbM);
+    ASSERT(pcbM);
 
     pcbM->callback_arg = this;
 
@@ -114,11 +116,13 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     :
     connIdM(connIdP),
     appGateIndexM(connP.appGateIndexM),
-    onCloseM(false),
-    isListenerM(false),
-    tcpLwipM(connP.tcpLwipM),
-    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(connP.receiveQueueM->getClassName()))),
+    pcbM(pcbP),
     sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(connP.sendQueueM->getClassName()))),
+    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(connP.receiveQueueM->getClassName()))),
+    tcpLwipM(connP.tcpLwipM),
+    totalSentM(0),
+    isListenerM(false),
+    onCloseM(false),
     statsM(NULL)
 {
     pcbM = pcbP;
@@ -226,6 +230,7 @@ void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
     pcbM = NULL; // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_listen(pcb);
+    totalSentM = 0;
 }
 
 void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort)
@@ -234,6 +239,7 @@ void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;
     tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, NULL);
+    totalSentM = 0;
 }
 
 void TcpLwipConnection::close()
@@ -330,7 +336,13 @@ void TcpLwipConnection::do_SEND()
 
         }
     }
-    tcpEV << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
+    totalSentM += allsent;
+    tcpEV << "do_SEND(): " << connIdM <<
+            " send:" << allsent <<
+            ", unsent:" << sendQueueM->getBytesAvailable() <<
+            ", total sent:" << totalSentM <<
+            ", all bytes:" << totalSentM+sendQueueM->getBytesAvailable() <<
+            "\n";
     if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
     {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);

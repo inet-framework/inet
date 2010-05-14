@@ -113,19 +113,16 @@ class INET_API TcpLwipConnection
   public:
     int connIdM;
     int appGateIndexM;
-
-    INetStreamSocket *pLwipSocketM;
-
-    bool sentEstablishedM;
-    bool onCloseM;
-    bool isListenerM;
-
-    TCP_lwip &tcpLwipM;
-    TcpLwipReceiveQueue * receiveQueueM;
-    TcpLwipSendQueue * sendQueueM;
     LwipTcpLayer::tcp_pcb *pcbM;
+    TcpLwipSendQueue *sendQueueM;
+    TcpLwipReceiveQueue *receiveQueueM;
+    TCP_lwip &tcpLwipM;
 
   protected:
+    long int totalSentM;
+    bool isListenerM;
+    bool onCloseM;
+
     Stats * statsM;
 };
 
