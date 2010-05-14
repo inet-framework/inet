@@ -78,6 +78,8 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
         u8_t ttl, u8_t tos, u8_t proto)
 {
     assert(proto == IP_PROTO_TCP);
+    assert(p);
+    assert(p->len <= p->tot_len);
 
     IPvXAddress srcAddr, destAddr;
 
