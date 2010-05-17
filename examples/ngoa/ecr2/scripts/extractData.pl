@@ -289,9 +289,9 @@ $colnames .= ($bd >= 0) ? "rtt," : "";
 $colnames .= ($repetition >= 0) ? "repetition," : "";
 
 # append statistic names to column names
-$colnames .= "ftp_delay,ftp_throughput,ftp_transfer_rate,";
-$colnames .= "http_delay,http_throughput,http_transfer_rate,";
-$colnames .= "decodable_frame_rate";
+$colnames .= "ftp.delay,ftp.throughput,ftp.transferrate,";
+$colnames .= "http.delay,http.throughput,http.transferrate,";
+$colnames .= "video.dfr";
 
 open(OUTFILE, ">", $outfile)
 	or die "Can't open $outfile for output: $!";
