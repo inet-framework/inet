@@ -264,8 +264,9 @@ err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         break;
 
     case LwipTcpLayer::LWIP_EVENT_POLL:
-        assert(conn->pcbM == pcb);
-        err = tcp_event_poll(*conn);
+        // it's called also when conn->pcbM point to a LISTEN pcb, and pcb point to a SYN_RCVD
+        if(conn->pcbM == pcb)
+            err = tcp_event_poll(*conn);
         break;
 
     case LwipTcpLayer::LWIP_EVENT_ERR:
