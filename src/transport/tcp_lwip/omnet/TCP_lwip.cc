@@ -240,7 +240,7 @@ err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
          LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)arg;
-    assert(conn != NULL);
+    ASSERT(conn != NULL);
 
     switch(event)
     {
@@ -249,17 +249,17 @@ err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         break;
 
     case LwipTcpLayer::LWIP_EVENT_SENT:
-        assert(conn->pcbM == pcb);
+        ASSERT(conn->pcbM == pcb);
         err = tcp_event_sent(*conn, size);
         break;
 
     case LwipTcpLayer::LWIP_EVENT_RECV:
-        assert(conn->pcbM == pcb);
+        ASSERT(conn->pcbM == pcb);
         err = tcp_event_recv(*conn, p, err);
         break;
 
     case LwipTcpLayer::LWIP_EVENT_CONNECTED:
-        assert(conn->pcbM == pcb);
+        ASSERT(conn->pcbM == pcb);
         err = tcp_event_conn(*conn, err);
         break;
 
