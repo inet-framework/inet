@@ -28,6 +28,7 @@ simple TCPSinkApp like TCPApp
     parameters:
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
+        string TCPdataTransferMode = default("virtualBytes");
         @display("i=block/sink");
     gates:
         input tcpIn @labels(TCPCommand/up);

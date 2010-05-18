@@ -280,18 +280,36 @@ void TCPConnection::sendToApp(cMessage *msg)
     tcpMain->send(msg, "appOut", appGateIndex);
 }
 
+static const char* getSendQueueClassName(int transferMode)
+{
+    switch (transferMode)
+    {
+        case TCP_TRANS_VIRTUALBYTES: return "tcp_old::TCPVirtualDataSendQueue";
+        case TCP_TRANS_MSGBASED:     return "tcp_old::TCPMsgBasedSendQueue";
+        case TCP_TRANS_BYTESTREAM:   return "tcp_old::TCPByteStreamSendQueue";
+        default: opp_error("Invalid TCP data transfer mode: %d", transferMode);
+    }
+}
+
+static const char* getRcvQueueClassName(int transferMode)
+{
+    switch (transferMode)
+    {
+        case TCP_TRANS_VIRTUALBYTES: return "tcp_old::TCPVirtualDataRcvQueue";
+        case TCP_TRANS_MSGBASED:     return "tcp_old::TCPMsgBasedRcvQueue";
+        case TCP_TRANS_BYTESTREAM:   return "tcp_old::TCPByteStreamRcvQueue";
+        default: opp_error("Invalid TCP data transfer mode: %d", transferMode);
+    }
+}
+
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
     // create send/receive queues
-    const char *sendQueueClass = openCmd->getSendQueueClass();
-    if (!sendQueueClass || !sendQueueClass[0])
-        sendQueueClass = tcpMain->par("sendQueueClass");
+    const char *sendQueueClass = getSendQueueClassName(openCmd->getDataTransferMode());
     sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
     sendQueue->setConnection(this);
 
-    const char *receiveQueueClass = openCmd->getReceiveQueueClass();
-    if (!receiveQueueClass || !receiveQueueClass[0])
-        receiveQueueClass = tcpMain->par("receiveQueueClass");
+    const char *receiveQueueClass =  getRcvQueueClassName(openCmd->getDataTransferMode());
     receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
     receiveQueue->setConnection(this);
 

@@ -11,35 +11,30 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_TCPECHOAPP_H
-#define __INET_TCPECHOAPP_H
+#ifndef __INET_TCPGENERICAPP_H
+#define __INET_TCPGENERICAPP_H
 
 #include <omnetpp.h>
-
 #include "INETDefs.h"
-#include "TCPGenericApp.h"
+
 
 
 /**
- * Accepts any number of incoming connections, and sends back whatever
- * arrives on them.
+ * Generic server application. It serves requests coming in GenericAppMsg
+ * request messages. Clients are usually subclassed from TCPGenericCliAppBase.
+ *
+ * @see GenericAppMsg, TCPGenericCliAppBase
  */
-class INET_API TCPEchoApp : public TCPGenericApp
+class INET_API TCPGenericApp : public cSimpleModule
 {
+  public:
+    TCPGenericApp(unsigned stacksize = 0);
+    virtual ~TCPGenericApp() {};
   protected:
-    simtime_t delay;
-    double echoFactor;
-
-    long bytesRcvd;
-    long bytesSent;
-
-  protected:
-    virtual void sendDown(cMessage *msg);
+    int tcpDataTransferMode;
 
   protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
 };
 
 #endif

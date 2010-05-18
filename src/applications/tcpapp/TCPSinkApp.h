@@ -15,7 +15,9 @@
 #define __INET_TCPSINKAPP_H
 
 #include <omnetpp.h>
+
 #include "INETDefs.h"
+#include "TCPGenericApp.h"
 
 
 
@@ -23,7 +25,7 @@
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
  */
-class INET_API TCPSinkApp : public cSimpleModule
+class INET_API TCPSinkApp : public TCPGenericApp
 {
   protected:
     long bytesRcvd;

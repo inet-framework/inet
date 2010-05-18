@@ -46,6 +46,7 @@ simple TCPSrvHostApp like TCPApp
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
         string serverThreadClass; // class name of "thread" objects to launch on incoming connections
+        string TCPdataTransferMode = default("virtualBytes");
         @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);
