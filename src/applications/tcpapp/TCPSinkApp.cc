@@ -21,6 +21,7 @@ Define_Module(TCPSinkApp);
 
 void TCPSinkApp::initialize()
 {
+    TCPGenericApp::initialize();
     const char *address = par("address");
     int port = par("port");
 
@@ -29,6 +30,7 @@ void TCPSinkApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
+    socket.setDataTransferMode(tcpDataTransferMode);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
 }

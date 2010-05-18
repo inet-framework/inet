@@ -15,6 +15,8 @@
 #define __INET_TCPSRVHOSTAPP_H
 
 #include <omnetpp.h>
+
+#include "TCPGenericApp.h"
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 
@@ -27,7 +29,7 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPSrvHostApp : public cSimpleModule
+class INET_API TCPSrvHostApp : public TCPGenericApp
 {
   protected:
     TCPSocket serverSocket;

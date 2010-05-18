@@ -159,8 +159,7 @@ class INET_API TCPSocket
 
     cGate *gateToTcp;
 
-    std::string sendQueueClass;
-    std::string receiveQueueClass;
+    int dataTransferMode;
     std::string tcpAlgorithmClass;
 
 
@@ -237,14 +236,9 @@ class INET_API TCPSocket
     void bind(IPvXAddress localAddr, int localPort);
 
     /**
-     * Returns the current sendQueueClass parameter.
+     * Returns the current dataTransferMode parameter.
      */
-    const char *getSendQueueClass() const {return sendQueueClass.c_str();}
-
-    /**
-     * Returns the current receiveQueueClass parameter.
-     */
-    const char *getReceiveQueueClass() const {return receiveQueueClass.c_str();}
+    int getDataTransferMode() const {return dataTransferMode;}
 
     /**
      * Returns the current tcpAlgorithmClass parameter.
@@ -252,14 +246,9 @@ class INET_API TCPSocket
     const char *getTCPAlgorithmClass() const {return tcpAlgorithmClass.c_str();}
 
     /**
-     * Sets the sendQueueClass parameter of the next connect() or listen() call.
+     * Sets the dataTransferMode parameter of the next connect() or listen() call.
      */
-    void setSendQueueClass(const char *sendQueueClass) { this->sendQueueClass = sendQueueClass; }
-
-    /**
-     * Sets the receiveQueueClass parameter of the next connect() or listen() call.
-     */
-    void setReceiveQueueClass(const char *receiveQueueClass) { this->receiveQueueClass = receiveQueueClass; }
+    void setDataTransferMode(int dataTransferModeP) { this->dataTransferMode = dataTransferModeP; }
 
     /**
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.

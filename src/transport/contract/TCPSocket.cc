@@ -30,6 +30,7 @@ TCPSocket::TCPSocket()
     yourPtr = NULL;
 
     gateToTcp = NULL;
+    dataTransferMode = TCP_TRANS_VIRTUALBYTES;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -60,6 +61,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
+    dataTransferMode = TCP_TRANS_VIRTUALBYTES;  //TODO
 }
 
 const char *TCPSocket::stateName(int state)
@@ -127,8 +129,7 @@ void TCPSocket::listen(bool fork)
     openCmd->setLocalPort(localPrt);
     openCmd->setConnId(connId);
     openCmd->setFork(fork);
-    openCmd->setSendQueueClass(sendQueueClass.c_str());
-    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
@@ -154,8 +155,7 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
-    openCmd->setSendQueueClass(sendQueueClass.c_str());
-    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);

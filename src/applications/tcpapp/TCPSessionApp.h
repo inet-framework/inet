@@ -16,13 +16,15 @@
 
 #include <vector>
 #include <omnetpp.h>
+
+#include "TCPGenericApp.h"
 #include "TCPSocket.h"
 
 
 /**
  * Single-connection TCP application.
  */
-class INET_API TCPSessionApp : public cSimpleModule
+class INET_API TCPSessionApp : public TCPGenericApp
 {
   protected:
     struct Command
@@ -41,7 +43,7 @@ class INET_API TCPSessionApp : public cSimpleModule
     int indicationsRcvd;
 
   public:
-    TCPSessionApp() : cSimpleModule(65536) {}
+    TCPSessionApp() : TCPGenericApp(65536) {}
 
   protected:
     virtual void parseScript(const char *script);

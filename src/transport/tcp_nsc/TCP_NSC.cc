@@ -646,6 +646,28 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
+static const char* getSendQueueClassName(int transferMode)
+{
+    switch (transferMode)
+    {
+        case TCP_TRANS_VIRTUALBYTES: return "TCP_NSC_VirtualDataSendQueue";
+        case TCP_TRANS_MSGBASED:     return "TCP_NSC_MsgBasedSendQueue";
+        case TCP_TRANS_BYTESTREAM:   return "TCP_NSC_ByteStreamSendQueue";
+        default: opp_error("Invalid TCP_NSC data transfer mode: %d", transferMode);
+    }
+}
+
+static const char* getRcvQueueClassName(int transferMode)
+{
+    switch (transferMode)
+    {
+        case TCP_TRANS_VIRTUALBYTES: return "TCP_NSC_VirtualDataRcvQueue";
+        case TCP_TRANS_MSGBASED:     return "TCP_NSC_MsgBasedRcvQueue";
+        case TCP_TRANS_BYTESTREAM:   return "TCP_NSC_ByteStreamRcvQueue";
+        default: opp_error("Invalid TCP_NSC data transfer mode: %d", transferMode);
+    }
+}
+
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
@@ -662,16 +684,12 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
 
         // create send queue
-        const char *sendQueueClass = openCmd->getSendQueueClass();
-        if (!sendQueueClass || !sendQueueClass[0])
-            sendQueueClass = this->par("sendQueueClass");
+        const char *sendQueueClass = getSendQueueClassName(openCmd->getDataTransferMode());
         conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(createOne(sendQueueClass));
         conn->sendQueueM->setConnection(conn);
 
         // create receive queue
-        const char *receiveQueueClass = openCmd->getReceiveQueueClass();
-        if (!receiveQueueClass || !receiveQueueClass[0])
-            receiveQueueClass = this->par("receiveQueueClass");
+        const char *receiveQueueClass = getRcvQueueClassName(openCmd->getDataTransferMode());
         conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(createOne(receiveQueueClass));
         conn->receiveQueueM->setConnection(conn);
 

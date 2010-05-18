@@ -36,6 +36,7 @@ simple TelnetApp like TCPApp
         int port; // port number to listen on FIXME change it to listenPort = default(1000)
         string connectAddress;  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
+        string TCPdataTransferMode = default("virtualBytes");
         double startTime @unit("s") = default(1s); // time first session begins
         volatile int numCommands = default(exponential(10)); // user types this many commands in a session
         volatile int commandLength @unit("B") = default(10B); // commands are this many characters (plus Enter)

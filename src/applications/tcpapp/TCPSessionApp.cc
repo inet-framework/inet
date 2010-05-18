@@ -13,6 +13,8 @@
 
 
 #include "TCPSessionApp.h"
+
+#include "GenericAppMsg_m.h"
 #include "IPAddressResolver.h"
 
 
@@ -112,6 +114,7 @@ void TCPSessionApp::activity()
     // open
     waitUntil(tOpen);
 
+    socket.setDataTransferMode(tcpDataTransferMode);
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
@@ -138,7 +141,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(tSend);
         EV << "sending " << sendBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
+        cPacket *msg = new GenericAppMsg("data1");
         msg->setByteLength(sendBytes);
         socket.send(msg);
     }
@@ -146,7 +149,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(i->tSend);
         EV << "sending " << i->numBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
+        cPacket *msg = new GenericAppMsg("data1");
         msg->setByteLength(i->numBytes);
         socket.send(msg);
     }

@@ -63,6 +63,7 @@ simple TCPSessionApp like TCPApp
         bool active = default(true);
         string connectAddress;
         int connectPort = default(1000);
+        string TCPdataTransferMode = default("virtualBytes");
         double tOpen @unit("s") = default(1s);
         double tSend @unit("s") = default(1s);
         int sendBytes @unit("B") = default(1MB);

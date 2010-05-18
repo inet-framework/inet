@@ -20,6 +20,7 @@
 
 void TCPGenericCliAppBase::initialize()
 {
+    TCPGenericApp::initialize();
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
     WATCH(numSessions);
     WATCH(numBroken);
@@ -31,6 +32,7 @@ void TCPGenericCliAppBase::initialize()
     // parameters
     const char *address = par("address");
     int port = par("port");
+    socket.setDataTransferMode(tcpDataTransferMode);
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     socket.setCallbackObject(this);
