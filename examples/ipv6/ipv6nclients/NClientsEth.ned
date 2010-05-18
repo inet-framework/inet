@@ -31,6 +31,7 @@ network NClientsEth
 {
     parameters:
         int n;
+        @display("bgb=569,296");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -42,13 +43,27 @@ network NClientsEth
             delay = 0.1us;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
-        r1: Router6;
-        r2: Router6;
-        r3: Router6;
-        cli[n]: StandardHost6;
-        srv: StandardHost6;
-        hub: EtherHub;
+        configurator: FlatNetworkConfigurator6 {
+            @display("p=73,70");
+        }
+        r1: Router6 {
+            @display("p=245,173");
+        }
+        r2: Router6 {
+            @display("p=338,121");
+        }
+        r3: Router6 {
+            @display("p=430,75");
+        }
+        cli[n]: StandardHost6 {
+            @display("p=56,236");
+        }
+        srv: StandardHost6 {
+            @display("p=524,33");
+        }
+        hub: EtherHub {
+            @display("p=152,201");
+        }
     connections:
         for i=0..n-1 {
             cli[i].ethg++ <--> ethernetline <--> hub.ethg++;
