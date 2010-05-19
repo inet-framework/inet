@@ -32,7 +32,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
         opp_error("Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
                   "dataTransferMode parameters "
-                  "(try \"msgBased\")",
+                  "(try \"object\")",
                   msg->getClassName(), msg->getName());
     if (appmsg->getReplyDelay()>0)
         opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"

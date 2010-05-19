@@ -35,7 +35,7 @@ void TCPGenericSrvApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    socket.setDataTransferMode(TCP_TRANS_MSGBASED);
+    socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
 }
@@ -88,7 +88,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             error("Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
                   "dataTransferMode parameters "
-                  "(try \"msgBased\")",
+                  "(try \"object\")",
                   msg->getClassName(), msg->getName());
 
         msgsRcvd++;

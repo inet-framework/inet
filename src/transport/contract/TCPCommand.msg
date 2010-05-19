@@ -105,9 +105,10 @@ class TCPErrorInfo extends TCPCommand
 // Transfer mode between Applicationlayer and TCPlayer 
 enum TCPdataTransferMode
 {
-    TCP_TRANS_VIRTUALBYTES = 1;		// Transmit only bytecount values.
-    TCP_TRANS_MSGBASED = 2;			// Transmit the Application messages.
-    TCP_TRANS_BYTESTREAM = 3;		// Transmit real bytes of messages.
+    TCP_TRANSFER_UNDEFINED = 0;         // Invalid value
+    TCP_TRANSFER_BYTECOUNT = 1;         // Transmit only bytecount values.
+    TCP_TRANSFER_OBJECT = 2;            // Transmit the Application messages.
+    TCP_TRANSFER_BYTESTREAM = 3;        // Transmit real bytes of messages.
 }
 
 //

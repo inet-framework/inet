@@ -30,7 +30,7 @@ TCPSocket::TCPSocket()
     yourPtr = NULL;
 
     gateToTcp = NULL;
-    dataTransferMode = TCP_TRANS_VIRTUALBYTES;
+    dataTransferMode = 0;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -61,7 +61,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
-    dataTransferMode = TCP_TRANS_VIRTUALBYTES;  //TODO
+    dataTransferMode = 0;  //TODO
 }
 
 const char *TCPSocket::stateName(int state)
