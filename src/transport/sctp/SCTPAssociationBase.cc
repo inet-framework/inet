@@ -201,6 +201,7 @@ SCTPStateVariables::SCTPStateVariables()
     initChunk                 = NULL;
     cookieChunk               = NULL;
     sctpmsg                   = NULL;
+    sctpMsg                   = NULL;
     bytesToRetransmit         = 0;
     initRexmitTimeout         = SCTP_TIMEOUT_INIT_REXMIT;
     localRwnd                 = SCTP_DEFAULT_ARWND;

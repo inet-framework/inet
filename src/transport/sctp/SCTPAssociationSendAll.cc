@@ -418,7 +418,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                 stopTimer(SackTimer);
                 sctpAlgorithm->sackSent();
                 state->sackAllowed = false;
-                sendToIP(sctpMsg, path->remoteAddress);
+                sendToIP(sctpMsg, state->lastDataSourceAddress);
                 if ((bytesToSend > 0) || (bytes.chunk) || (bytes.packet)) {
                     sctpMsg = new SCTPMessage("send");
                     sctpMsg->setByteLength(SCTP_COMMON_HEADER);
