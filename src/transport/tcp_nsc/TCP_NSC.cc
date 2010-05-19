@@ -650,9 +650,9 @@ static const char* getSendQueueClassName(int transferMode)
 {
     switch (transferMode)
     {
-        case TCP_TRANS_VIRTUALBYTES: return "TCP_NSC_VirtualDataSendQueue";
-        case TCP_TRANS_MSGBASED:     return "TCP_NSC_MsgBasedSendQueue";
-        case TCP_TRANS_BYTESTREAM:   return "TCP_NSC_ByteStreamSendQueue";
+        case TCP_TRANSFER_BYTECOUNT: return "TCP_NSC_VirtualDataSendQueue";
+        case TCP_TRANSFER_OBJECT:     return "TCP_NSC_MsgBasedSendQueue";
+        case TCP_TRANSFER_BYTESTREAM:   return "TCP_NSC_ByteStreamSendQueue";
         default: opp_error("Invalid TCP_NSC data transfer mode: %d", transferMode);
     }
 }
@@ -661,9 +661,9 @@ static const char* getRcvQueueClassName(int transferMode)
 {
     switch (transferMode)
     {
-        case TCP_TRANS_VIRTUALBYTES: return "TCP_NSC_VirtualDataRcvQueue";
-        case TCP_TRANS_MSGBASED:     return "TCP_NSC_MsgBasedRcvQueue";
-        case TCP_TRANS_BYTESTREAM:   return "TCP_NSC_ByteStreamRcvQueue";
+        case TCP_TRANSFER_BYTECOUNT: return "TCP_NSC_VirtualDataRcvQueue";
+        case TCP_TRANSFER_OBJECT:     return "TCP_NSC_MsgBasedRcvQueue";
+        case TCP_TRANSFER_BYTESTREAM:   return "TCP_NSC_ByteStreamRcvQueue";
         default: opp_error("Invalid TCP_NSC data transfer mode: %d", transferMode);
     }
 }

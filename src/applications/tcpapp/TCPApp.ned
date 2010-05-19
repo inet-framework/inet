@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// <b>Configuring TCPApp</b>
+// <b>Configuring App</b>
 //
 // The module parameter TCPdataTransferMode should be set the names of 
-// classes that manage the actual send and receive queues.
+// classes that manage the actual send and receive queues in TCP layer.
 // Currently you have three choices:
 //
-//   -# set them to "virtualBytes".
+//   -# set them to "bytecount".
 //      These classes manage "virtual bytes", that is, only byte counts are
 //      transmitted over the \TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
@@ -35,7 +35,7 @@
 // and receive queue classes may be implemented, e.g. to allow transmission
 // of "raw bytes" (actual byte arrays).
 //
-//   -# use "msgBased", which transmit
+//   -# use "object", which transmit
 //      cMessage objects (and subclasses) over a \TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
@@ -46,7 +46,7 @@
 //      from TCPVirtualDataSendQueue/RcvQueue.
 //      These classes not implemented in TCP_NSC yet.
 //
-//   -# use "byteStream", which transmit real bytes of messages.
+//   -# use "bytestream", which transmit real bytes of messages.
 //      These classes not imnplemented yet.
 
 
@@ -59,7 +59,6 @@ package inet.applications.tcpapp;
 moduleinterface TCPApp
 {
     parameters:
-        string TCPdataTransferMode @enum("virtualBytes", "msgBased", "byteStream");
         @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);

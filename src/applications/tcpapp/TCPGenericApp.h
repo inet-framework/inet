@@ -15,15 +15,13 @@
 #define __INET_TCPGENERICAPP_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
 
+#include "INETDefs.h"
+#include "TCPCommand_m.h"
 
 
 /**
- * Generic server application. It serves requests coming in GenericAppMsg
- * request messages. Clients are usually subclassed from TCPGenericCliAppBase.
- *
- * @see GenericAppMsg, TCPGenericCliAppBase
+ * Generic TCP application.
  */
 class INET_API TCPGenericApp : public cSimpleModule
 {
@@ -31,12 +29,20 @@ class INET_API TCPGenericApp : public cSimpleModule
     TCPGenericApp(unsigned stacksize = 0);
     virtual ~TCPGenericApp() {};
   protected:
-    int tcpDataTransferMode;
+    TCPdataTransferMode tcpDataTransferMode;
 
   protected:
     virtual void initialize();
+
+    /**
+     * Read "TCPdataTransferMode" parameter from ini/ned, and set tcpDataTransferMode member value
+     * Doesn't change the transfer mode, when the parameter value is empty.
+     */
+    void readTransferModePar();
+
+    void setTransferMode(TCPdataTransferMode newmodeP) { tcpDataTransferMode = newmodeP; };
+
+    TCPdataTransferMode getTransferMode() { return tcpDataTransferMode; };
 };
 
 #endif
-
-

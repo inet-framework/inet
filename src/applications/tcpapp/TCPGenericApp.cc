@@ -22,21 +22,26 @@ Define_Module(TCPGenericApp);
 
 TCPGenericApp::TCPGenericApp(unsigned stacksize)
   : cSimpleModule(stacksize),
-    tcpDataTransferMode(TCP_TRANS_VIRTUALBYTES)
+    tcpDataTransferMode(TCP_TRANSFER_UNDEFINED)
 {
 };
 
 void TCPGenericApp::initialize()
 {
-    const char *transferMode = par("TCPdataTransferMode");
-    tcpDataTransferMode = 0;
+}
 
-    if(0 == transferMode || 0 == transferMode[0] || 0==strcmp(transferMode, "virtualBytes"))
-        tcpDataTransferMode = TCP_TRANS_VIRTUALBYTES;
-    else if (0 == strcmp(transferMode, "msgBased"))
-        tcpDataTransferMode = TCP_TRANS_MSGBASED;
-    else if (0 == strcmp(transferMode, "byteStream"))
-        tcpDataTransferMode = TCP_TRANS_BYTESTREAM;
+void TCPGenericApp::readTransferModePar()
+{
+    const char *transferMode = par("TCPdataTransferMode");
+
+    if(0 == transferMode || 0 == transferMode[0])
+        opp_error("Missing/empty TCPdataTransferMode parameter at %s.", getFullPath().c_str());
+    else if (0==strcmp(transferMode, "bytecount"))
+        tcpDataTransferMode = TCP_TRANSFER_BYTECOUNT;
+    else if (0 == strcmp(transferMode, "object"))
+        tcpDataTransferMode = TCP_TRANSFER_OBJECT;
+    else if (0 == strcmp(transferMode, "bytestream"))
+        tcpDataTransferMode = TCP_TRANSFER_BYTESTREAM;
     else
         opp_error("Invalid '%s' TCPdataTransferMode parameter at %s.", transferMode, getFullPath().c_str());
 }
