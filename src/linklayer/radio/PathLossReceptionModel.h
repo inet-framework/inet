@@ -21,13 +21,14 @@
 #include "IReceptionModel.h"
 
 /**
- * Path loss model which calculates the received power using a path loss exponent
- * and the distance.
+ * Path loss model which calculates the received power using a path loss exponent,
+ * the distance and log-normal distribution shadowing.
  */
 class INET_API PathLossReceptionModel : public IReceptionModel
 {
   protected:
     double pathLossAlpha;
+    double shadowingDeviation;
 
   public:
     /**
@@ -39,6 +40,11 @@ class INET_API PathLossReceptionModel : public IReceptionModel
      * Perform the calculation.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
+
+    /**
+     * Convert mW to dBm.
+    */
+    virtual double mW2dBm(double mW);
 };
 
 #endif
