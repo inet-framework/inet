@@ -25,6 +25,7 @@
 #include "IPvXAddress.h"
 #include "lwip/tcp.h"
 #include "TCPSegment.h"
+#include "TCPCommand_m.h"
 
 // forward declarations:
 class TCP_lwip;
@@ -76,7 +77,7 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, const char *sendQueueClassP, const char *recvQueueClassP);
+    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPdataTransferMode dataTransferModeP);
 
     TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 

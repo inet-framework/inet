@@ -386,17 +386,11 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
     {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
 
-        const char *sendQueueClass = openCmd->getSendQueueClass();
-        if (!sendQueueClass || !sendQueueClass[0])
-            sendQueueClass = this->par("sendQueueClass");
-
-        const char *receiveQueueClass = openCmd->getReceiveQueueClass();
-        if (!receiveQueueClass || !receiveQueueClass[0])
-            receiveQueueClass = this->par("receiveQueueClass");
+        TCPdataTransferMode dataTransferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
 
         // add into appConnMap
         conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(),
-                                     sendQueueClass, receiveQueueClass);
+                                     dataTransferMode);
         tcpAppConnMapM[connId] = conn;
 
         tcpEV << this << ": TCP connection created for " << msgP << "\n";
