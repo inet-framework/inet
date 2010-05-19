@@ -20,11 +20,14 @@ use Scalar::Util qw(looks_like_number);
 # check argument count and print usage if needed
 my $argcnt = $#ARGV + 1;
 if ($argcnt < 1) {
-	die "Usage: $0 \"regexp_pattern_for_scala_files\"\n";
+	die "Usage: $0 scalar_file_name (or \"regexp_pattern\") ... \n";
 }
 
 # initialize variables
-my @infiles = <$ARGV[0]>; # a list of files matching a given pattern
+my @infiles = ();	# a list of files matching a given pattern
+foreach my $i (0 .. $#ARGV) {
+	push(@infiles, <$ARGV[$i]>);
+}
 my @results = ();	# array of processed statistics
 my $config = "";	# scalar file basename minus run number
 # - iteration variables
