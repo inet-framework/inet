@@ -25,6 +25,11 @@
 #include "ICMPMessage_m.h"
 #include "ICMPv6Message_m.h"
 
+#include "TCPMsgBasedRcvQueue_old.h"
+#include "TCPMsgBasedSendQueue_old.h"
+#include "TCPVirtualDataRcvQueue_old.h"
+#include "TCPVirtualDataSendQueue_old.h"
+
 using namespace tcp_old;
 
 Define_Module(TCP);
@@ -405,4 +410,26 @@ void TCP::removeConnection(TCPConnection *conn)
 void TCP::finish()
 {
     tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+}
+
+tcp_old::TCPSendQueue* TCP::createSendQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new tcp_old::TCPVirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:      return new tcp_old::TCPMsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCPByteStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+
+tcp_old::TCPReceiveQueue* TCP::createReceiveQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new tcp_old::TCPVirtualDataRcvQueue();
+        case TCP_TRANSFER_OBJECT:      return new tcp_old::TCPMsgBasedRcvQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCPByteStreamRcvQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
 }
