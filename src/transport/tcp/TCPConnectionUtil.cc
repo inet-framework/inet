@@ -307,7 +307,7 @@ static const char* getSendQueueClassName(int transferMode)
         case TCP_TRANSFER_BYTECOUNT: return "TCPVirtualDataSendQueue";
         case TCP_TRANSFER_OBJECT:     return "TCPMsgBasedSendQueue";
         case TCP_TRANSFER_BYTESTREAM:   return "TCPByteStreamSendQueue";
-        default: opp_error("Invalid TCP data transfer mode: %d", transferMode);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferMode);
     }
 }
 
@@ -318,7 +318,7 @@ static const char* getRcvQueueClassName(int transferMode)
         case TCP_TRANSFER_BYTECOUNT: return "TCPVirtualDataRcvQueue";
         case TCP_TRANSFER_OBJECT:     return "TCPMsgBasedRcvQueue";
         case TCP_TRANSFER_BYTESTREAM:   return "TCPByteStreamRcvQueue";
-        default: opp_error("Invalid TCP data transfer mode: %d", transferMode);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferMode);
     }
 }
 
