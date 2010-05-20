@@ -36,7 +36,8 @@ class INET_API TCPGenericApp : public cSimpleModule
 
     /**
      * Read "TCPdataTransferMode" parameter from ini/ned, and set tcpDataTransferMode member value
-     * Doesn't change the transfer mode, when the parameter value is empty.
+     *
+     * Generate runtime error when parameter is missing or value is invalid.
      */
     void readTransferModePar();
 
