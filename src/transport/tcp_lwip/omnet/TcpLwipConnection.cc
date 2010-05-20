@@ -95,7 +95,7 @@ static const char* getSendQueueClassName(TCPdataTransferMode transferModeP)
         case TCP_TRANSFER_BYTECOUNT: return "TcpLwipVirtualDataSendQueue";
         case TCP_TRANSFER_OBJECT:     return "TcpLwipMsgBasedSendQueue";
         case TCP_TRANSFER_BYTESTREAM:   return "TcpLwipByteStreamSendQueue";
-        default: opp_error("Invalid TCP data transfer mode: %d", transferModeP);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
 
@@ -106,7 +106,7 @@ static const char* getRcvQueueClassName(TCPdataTransferMode transferModeP)
         case TCP_TRANSFER_BYTECOUNT: return "TcpLwipVirtualDataReceiveQueue";
         case TCP_TRANSFER_OBJECT:     return "TcpLwipMsgBasedReceiveQueue";
         case TCP_TRANSFER_BYTESTREAM:   return "TcpLwipByteStreamReceiveQueue";
-        default: opp_error("Invalid TCP data transfer mode: %d", transferModeP);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
 
@@ -330,7 +330,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
     }
     if(written > 0)
     {
-        ASSERT(pcbM->snd_lbb - ss == written);
+        ASSERT(pcbM->snd_lbb - ss == (u32_t)written);
         return written;
     }
     return error;
