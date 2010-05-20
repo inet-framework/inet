@@ -29,7 +29,8 @@
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TcpLwipConnection.h"
-#include "TcpLwipQueues.h"
+#include "TcpLwipMsgBasedQueues.h"
+#include "TcpLwipVirtualDataQueues.h"
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
 
@@ -626,3 +627,26 @@ void TCP_lwip::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     msgP->setControlInfo(statusInfo);
     send(msgP, "appOut", connP.appGateIndexM);
 }
+
+TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:    return new TcpLwipVirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:       return new TcpLwipMsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:   //return new TcpLwipByteStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+
+TcpLwipReceiveQueue* TCP_lwip::createReceiveQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:    return new TcpLwipVirtualDataReceiveQueue();
+        case TCP_TRANSFER_OBJECT:       return new TcpLwipMsgBasedReceiveQueue();
+        case TCP_TRANSFER_BYTESTREAM:   //return new TcpLwipByteStreamReceiveQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+

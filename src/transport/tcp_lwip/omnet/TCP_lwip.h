@@ -27,17 +27,18 @@
 
 #include "INETDefs.h"
 #include "IPvXAddress.h"
-
+#include "TCPCommand_m.h"
 #include "lwip/tcp.h"
 #include "LwipTcpStackIf.h"
 
 // forward declarations:
-class TCPCommand;
 class TCPOpenCommand;
 class TCPSendCommand;
 class TCPSegment;
 
 class TcpLwipConnection;
+class TcpLwipReceiveQueue;
+class TcpLwipSendQueue;
 
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
@@ -119,6 +120,16 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
   public:
     LwipTcpLayer * getLwipTcpLayer() { return pLwipTcpLayerM; }
+
+    /**
+     * To be called from TcpLwipConnection: create a new send queue.
+     */
+    virtual TcpLwipSendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+
+    /**
+     * To be called from TcpLwipConnection: create a new receive queue.
+     */
+    virtual TcpLwipReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
 
   protected:
     typedef std::map<int,TcpLwipConnection*> TcpAppConnMap; // connId-to-TcpLwipConnection

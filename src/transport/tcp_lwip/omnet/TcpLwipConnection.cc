@@ -88,35 +88,13 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 }
 
 
-static const char* getSendQueueClassName(TCPdataTransferMode transferModeP)
-{
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT: return "TcpLwipVirtualDataSendQueue";
-        case TCP_TRANSFER_OBJECT:     return "TcpLwipMsgBasedSendQueue";
-        case TCP_TRANSFER_BYTESTREAM:   return "TcpLwipByteStreamSendQueue";
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
-}
-
-static const char* getRcvQueueClassName(TCPdataTransferMode transferModeP)
-{
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT: return "TcpLwipVirtualDataReceiveQueue";
-        case TCP_TRANSFER_OBJECT:     return "TcpLwipMsgBasedReceiveQueue";
-        case TCP_TRANSFER_BYTESTREAM:   return "TcpLwipByteStreamReceiveQueue";
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
-}
-
 TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPdataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
     pcbM(NULL),
-    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(getSendQueueClassName(dataTransferModeP)))),
-    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(getRcvQueueClassName(dataTransferModeP)))),
+    sendQueueM(tcpLwipP.createSendQueue(dataTransferModeP)),
+    receiveQueueM(tcpLwipP.createReceiveQueue(dataTransferModeP)),
     tcpLwipM(tcpLwipP),
     totalSentM(0),
     isListenerM(false),
