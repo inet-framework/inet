@@ -360,7 +360,7 @@ err_t TCP_lwip::tcp_event_err(TcpLwipConnection &conn, err_t err)
         break;
 
     default:
-        opp_error("invalid LWIP error code: %d", err);
+        throw cRuntimeError("invalid LWIP error code: %d", err);
     }
     return err;
 }
@@ -547,7 +547,7 @@ void TCP_lwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
         case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
         case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
         case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
-        default: opp_error("wrong command from app: %d", msgP->getKind());
+        default: throw cRuntimeError("wrong command from app: %d", msgP->getKind());
     }
 }
 
@@ -555,7 +555,7 @@ void TCP_lwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
 {
 
     if (tcpCommandP->getRemoteAddr().isUnspecified() || tcpCommandP->getRemotePort() == -1)
-        opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+        throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
     tcpEV << this << ": OPEN: "
         << tcpCommandP->getLocalAddr() << ":" << tcpCommandP->getLocalPort() << " --> "
@@ -576,7 +576,7 @@ void TCP_lwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tc
     ASSERT(tcpCommandP->getFork()==true);
 
     if (tcpCommandP->getLocalPort() == -1)
-        opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
 
     tcpEV << this << "Starting to listen on: " << tcpCommandP->getLocalAddr() << ":" << tcpCommandP->getLocalPort() << "\n";
 

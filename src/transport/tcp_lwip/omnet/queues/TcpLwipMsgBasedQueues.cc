@@ -154,7 +154,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     }
 
     if (numBytes && !seqLE(toSeq, endM))
-        opp_error("Implementation bug");
+        throw cRuntimeError("Implementation bug");
 
     EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
