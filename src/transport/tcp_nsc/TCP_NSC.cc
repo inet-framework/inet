@@ -36,6 +36,7 @@
 #include <dlfcn.h>
 #include <netinet/in.h>
 
+#include "TCP_NSC_VirtualDataQueues.h"
 
 Define_Module(TCP_NSC);
 
@@ -646,28 +647,27 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
-static const char* getSendQueueClassName(int transferMode)
+TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPdataTransferMode transferModeP)
 {
-    switch (transferMode)
+    switch (transferModeP)
     {
-        case TCP_TRANSFER_BYTECOUNT: return "TCP_NSC_VirtualDataSendQueue";
-        case TCP_TRANSFER_OBJECT:     return "TCP_NSC_MsgBasedSendQueue";
-        case TCP_TRANSFER_BYTESTREAM:   return "TCP_NSC_ByteStreamSendQueue";
-        default: throw cRuntimeError("Invalid TCP_NSC data transfer mode: %d", transferMode);
+        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
 
-static const char* getRcvQueueClassName(int transferMode)
+TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPdataTransferMode transferModeP)
 {
-    switch (transferMode)
+    switch (transferModeP)
     {
-        case TCP_TRANSFER_BYTECOUNT: return "TCP_NSC_VirtualDataRcvQueue";
-        case TCP_TRANSFER_OBJECT:     return "TCP_NSC_MsgBasedRcvQueue";
-        case TCP_TRANSFER_BYTESTREAM:   return "TCP_NSC_ByteStreamRcvQueue";
-        default: throw cRuntimeError("Invalid TCP_NSC data transfer mode: %d", transferMode);
+        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataReceiveQueue();
+        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedReceiveQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamReceiveQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
-
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
@@ -683,14 +683,13 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
         conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
 
+        TCPdataTransferMode transferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
-        const char *sendQueueClass = getSendQueueClassName(openCmd->getDataTransferMode());
-        conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(createOne(sendQueueClass));
+        conn->sendQueueM = createSendQueue(transferMode);
         conn->sendQueueM->setConnection(conn);
 
         // create receive queue
-        const char *receiveQueueClass = getRcvQueueClassName(openCmd->getDataTransferMode());
-        conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(createOne(receiveQueueClass));
+        conn->receiveQueueM = createReceiveQueue(transferMode);
         conn->receiveQueueM->setConnection(conn);
 
         tcpEV << this << ": TCP connection created for " << msgP << "\n";

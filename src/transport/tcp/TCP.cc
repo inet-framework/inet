@@ -25,6 +25,12 @@
 #include "ICMPMessage_m.h"
 #include "ICMPv6Message_m.h"
 
+#include "TCPMsgBasedRcvQueue.h"
+#include "TCPMsgBasedSendQueue.h"
+#include "TCPVirtualDataRcvQueue.h"
+#include "TCPVirtualDataSendQueue.h"
+
+
 Define_Module(TCP);
 
 
@@ -404,4 +410,26 @@ void TCP::removeConnection(TCPConnection *conn)
 void TCP::finish()
 {
     tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+}
+
+TCPSendQueue* TCP::createSendQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCPByteStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+
+TCPReceiveQueue* TCP::createReceiveQueue(TCPdataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataRcvQueue();
+        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedRcvQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCPByteStreamRcvQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
 }

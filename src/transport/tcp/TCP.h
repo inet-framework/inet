@@ -23,9 +23,13 @@
 #include <omnetpp.h>
 #include "IPvXAddress.h"
 
+#include "TCPCommand_m.h"
 
+// Forward declarations:
 class TCPConnection;
 class TCPSegment;
+class TCPSendQueue;
+class TCPReceiveQueue;
 
 // macro for normal ev<< logging (Note: deliberately no parens in macro def)
 #define tcpEV (ev.disable_tracing||TCP::testing)?ev:ev
@@ -189,6 +193,16 @@ class INET_API TCP : public cSimpleModule
      * To be called from TCPConnection: reserves an ephemeral port for the connection.
      */
     virtual ushort getEphemeralPort();
+
+    /**
+     * To be called from TCPConnection: create a new send queue.
+     */
+    virtual TCPSendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+
+    /**
+     * To be called from TCPConnection: create a new receive queue.
+     */
+    virtual TCPReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
 };
 
 #endif

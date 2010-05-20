@@ -29,11 +29,14 @@
 #include "IPvXAddress.h"
 
 #include "sim_interface.h" // NSC. We need this here to derive from classes
+
+#include "TCPCommand_m.h"
 #include "TCP_NSC_Connection.h"
 
 // forward declarations:
-class TCPCommand;
 class TCPSegment;
+class TCP_NSC_SendQueue;
+class TCP_NSC_ReceiveQueue;
 
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
@@ -118,6 +121,16 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     // send a connection established msg to application layer
     void sendEstablishedMsg(TCP_NSC_Connection &connP);
+
+    /**
+     * To be called from TCPConnection: create a new send queue.
+     */
+    virtual TCP_NSC_SendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+
+    /**
+     * To be called from TCPConnection: create a new receive queue.
+     */
+    virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
 
   protected:
     typedef std::map<int,TCP_NSC_Connection> TcpAppConnMap; // connId-to-TCP_NSC_Connection
