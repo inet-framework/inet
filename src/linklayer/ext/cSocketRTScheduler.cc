@@ -325,9 +325,9 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 
-    ssize_t sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);
+    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);  //note: no ssize_t on MSVC
 
-    if (sent == (ssize_t)numBytes)
+    if (sent == numBytes)
         EV << "Sent an IP packet with length of " << sent << " bytes.\n";
     else
         EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
