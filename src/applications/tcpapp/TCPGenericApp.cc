@@ -32,10 +32,10 @@ void TCPGenericApp::initialize()
 
 void TCPGenericApp::readTransferModePar()
 {
-    const char *transferMode = par("TCPdataTransferMode");
+    const char *transferMode = par("dataTransferMode");
 
     if(0 == transferMode || 0 == transferMode[0])
-        throw cRuntimeError("Missing/empty TCPdataTransferMode parameter at %s.", getFullPath().c_str());
+        throw cRuntimeError("Missing/empty dataTransferMode parameter at %s.", getFullPath().c_str());
     else if (0==strcmp(transferMode, "bytecount"))
         tcpDataTransferMode = TCP_TRANSFER_BYTECOUNT;
     else if (0 == strcmp(transferMode, "object"))
@@ -43,5 +43,5 @@ void TCPGenericApp::readTransferModePar()
     else if (0 == strcmp(transferMode, "bytestream"))
         tcpDataTransferMode = TCP_TRANSFER_BYTESTREAM;
     else
-        throw cRuntimeError("Invalid '%s' TCPdataTransferMode parameter at %s.", transferMode, getFullPath().c_str());
+        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, getFullPath().c_str());
 }
