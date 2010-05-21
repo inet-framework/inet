@@ -61,7 +61,7 @@ package inet.applications.tcpapp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter TCPdataTransferMode should be set the names of 
+// The module parameter dataTransferMode should be set the names of 
 // classes that manage the actual send and receive queues in TCP layer.
 // Currently you have three choices:
 //
@@ -103,7 +103,7 @@ simple TCPBasicClientApp like TCPApp
         int port = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
-        string TCPdataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
         double startTime @unit("s") = default(1s); // time first session begins
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
