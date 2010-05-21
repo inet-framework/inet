@@ -41,7 +41,7 @@ int32 SCTPAssociation::calculateBytesToSendOnPath(const SCTPPathVariables* pathV
     const SCTPDataMsg* datMsg = peekOutboundDataMsg();
     if(datMsg != NULL) {
         const uint32 ums = datMsg->getBooksize();        // Get user message size
-            const uint32 num = (uint32)floor((pathVar->pmtu - 32) / (ums + SCTP_DATA_CHUNK_LENGTH));
+            const uint32 num = (uint32)floor((double)(pathVar->pmtu - 32) / (ums + SCTP_DATA_CHUNK_LENGTH));
             if (num * ums > state->peerRwnd) {
                 // Receiver cannot handle data yet
                 bytesToSend = 0;

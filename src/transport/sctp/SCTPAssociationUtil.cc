@@ -17,6 +17,9 @@
 //
 
 
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
@@ -30,10 +33,6 @@
 #include "IPv4InterfaceData.h"
 #include "IPv6InterfaceData.h"
 #include "IPv6Address.h"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <sys/time.h>
 #include "UDPControlInfo_m.h"
 
 
