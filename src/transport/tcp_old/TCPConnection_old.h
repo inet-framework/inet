@@ -397,7 +397,7 @@ class INET_API TCPConnection
      * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
      * sendData(), sendProbe() and retransmitData() internally all rely on this one.
      */
-    virtual void sendSegment(int bytes);
+    virtual void sendSegment(ulong bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(TCPSegment *tcpseg);
