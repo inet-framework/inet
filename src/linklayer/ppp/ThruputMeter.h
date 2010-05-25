@@ -33,8 +33,8 @@ class INET_API ThruputMeter : public cSimpleModule
   protected:
     // config
     simtime_t startTime; // start time
-    int batchSize;   // number of packets in a batch
-    int maxInterval; // max length of measurement interval (measurement ends
+    unsigned int batchSize;   // number of packets in a batch
+    simtime_t maxInterval; // max length of measurement interval (measurement ends
                      // if either batchSize or maxInterval is reached, whichever
                      // is reached first)
 
