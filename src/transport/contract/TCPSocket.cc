@@ -30,7 +30,7 @@ TCPSocket::TCPSocket()
     yourPtr = NULL;
 
     gateToTcp = NULL;
-    dataTransferMode = 0;
+    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -61,7 +61,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
-    dataTransferMode = 0;  //TODO
+    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 const char *TCPSocket::stateName(int state)

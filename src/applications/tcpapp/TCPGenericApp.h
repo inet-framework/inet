@@ -29,7 +29,7 @@ class INET_API TCPGenericApp : public cSimpleModule
     TCPGenericApp(unsigned stacksize = 0);
     virtual ~TCPGenericApp() {};
   protected:
-    TCPdataTransferMode tcpDataTransferMode;
+    TCPDataTransferMode tcpDataTransferMode;
 
   protected:
     virtual void initialize();
@@ -41,9 +41,9 @@ class INET_API TCPGenericApp : public cSimpleModule
      */
     void readTransferModePar();
 
-    void setTransferMode(TCPdataTransferMode newmodeP) { tcpDataTransferMode = newmodeP; };
+    void setTransferMode(TCPDataTransferMode newmodeP) { tcpDataTransferMode = newmodeP; };
 
-    TCPdataTransferMode getTransferMode() { return tcpDataTransferMode; };
+    TCPDataTransferMode getTransferMode() { return tcpDataTransferMode; };
 };
 
 #endif

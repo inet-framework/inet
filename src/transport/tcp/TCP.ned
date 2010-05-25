@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -55,11 +56,6 @@ package inet.transport.tcp;
 // and attaching a TCPSendCommand control info object to the data packet,
 // and sending it to TCP. The server app will receive data as messages
 // with the TCP_I_DATA message kind and TCPSendCommand control info.
-// (Whether you'll receive the same or identical messages, or even whether
-// you'll receive data in the same sized chunks as sent depends on the
-// sendQueueClass and receiveQueueClass used, see below. With
-// TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue set, message objects
-// and even message boundaries are not preserved.)
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and TCPCommand control info.
@@ -132,7 +128,7 @@ package inet.transport.tcp;
 //      but not for DumbTCP).
 //
 // The \TCP flavour supported depends on the value of the tcpAlgorithmClass
-// module parameters, e.g. "TCPTahoe" or "TCPReno". In the future, other
+// module parameter, e.g. "TCPTahoe" or "TCPReno". In the future, other
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
@@ -177,6 +173,7 @@ package inet.transport.tcp;
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
+<<<<<<< HEAD
 //      - TS: Timestamps option, based on RFC 1323.
 //  - flow control: finite receive buffer size (initiated by parameter
 //    advertisedWindow). If receive buffer is exhausted (by out-of-order
@@ -184,6 +181,14 @@ package inet.transport.tcp;
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in tcpRcvQueueDropsVector.
 
+=======
+//    - flow control: finite receive buffer size (initiated by parameter
+//      advertisedWindow). If receive buffer is exhausted (by out-of-order
+//      segments) and the payload length of a new received segment
+//      is higher than free receiver buffer, the new segment will be dropped.
+//      Such drops are recorded in tcpRcvQueueDropsVector.
+//
+>>>>>>> use TCPDataTransferMode enum instead of int; comment refinements; other cosmetic changes
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)

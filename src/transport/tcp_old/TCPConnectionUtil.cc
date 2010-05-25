@@ -282,7 +282,7 @@ void TCPConnection::sendToApp(cMessage *msg)
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
-    TCPdataTransferMode transferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
+    TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
     sendQueue = tcpMain->createSendQueue(transferMode);
     sendQueue->setConnection(this);

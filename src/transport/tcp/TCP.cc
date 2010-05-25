@@ -412,7 +412,7 @@ void TCP::finish()
     tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
-TCPSendQueue* TCP::createSendQueue(TCPdataTransferMode transferModeP)
+TCPSendQueue* TCP::createSendQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {
@@ -423,7 +423,7 @@ TCPSendQueue* TCP::createSendQueue(TCPdataTransferMode transferModeP)
     }
 }
 
-TCPReceiveQueue* TCP::createReceiveQueue(TCPdataTransferMode transferModeP)
+TCPReceiveQueue* TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {

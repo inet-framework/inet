@@ -159,9 +159,8 @@ class INET_API TCPSocket
 
     cGate *gateToTcp;
 
-    int dataTransferMode;
+    TCPDataTransferMode dataTransferMode;
     std::string tcpAlgorithmClass;
-
 
   protected:
     void sendToTCP(cMessage *msg);
@@ -237,8 +236,9 @@ class INET_API TCPSocket
 
     /**
      * Returns the current dataTransferMode parameter.
+     * @see TCPCommand
      */
-    int getDataTransferMode() const {return dataTransferMode;}
+    TCPDataTransferMode getDataTransferMode() const {return dataTransferMode;}
 
     /**
      * Returns the current tcpAlgorithmClass parameter.
@@ -246,9 +246,10 @@ class INET_API TCPSocket
     const char *getTCPAlgorithmClass() const {return tcpAlgorithmClass.c_str();}
 
     /**
-     * Sets the dataTransferMode parameter of the next connect() or listen() call.
+     * Sets the dataTransferMode parameter of the subsequent connect() or listen() calls.
+     * @see TCPCommand
      */
-    void setDataTransferMode(int dataTransferModeP) { this->dataTransferMode = dataTransferModeP; }
+    void setDataTransferMode(TCPDataTransferMode transferMode) { this->dataTransferMode = transferMode; }
 
     /**
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.

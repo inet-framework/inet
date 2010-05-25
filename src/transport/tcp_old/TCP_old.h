@@ -197,12 +197,12 @@ class INET_API TCP : public cSimpleModule
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual tcp_old::TCPSendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+    virtual tcp_old::TCPSendQueue* createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual tcp_old::TCPReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
+    virtual tcp_old::TCPReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
 };
 
 }
