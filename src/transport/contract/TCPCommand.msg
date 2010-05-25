@@ -101,14 +101,15 @@ class TCPErrorInfo extends TCPCommand
     string messageText;
 }
 
-
-// Transfer mode between Applicationlayer and TCPlayer 
-enum TCPdataTransferMode
+//
+// Defines what to transmit as payload in TCP segments
+//
+enum TCPDataTransferMode
 {
     TCP_TRANSFER_UNDEFINED = 0;         // Invalid value
-    TCP_TRANSFER_BYTECOUNT = 1;         // Transmit only bytecount values.
-    TCP_TRANSFER_OBJECT = 2;            // Transmit the Application messages.
-    TCP_TRANSFER_BYTESTREAM = 3;        // Transmit real bytes of messages.
+    TCP_TRANSFER_BYTECOUNT = 1;         // Transmit byte counts only
+    TCP_TRANSFER_OBJECT = 2;            // Transmit the application packet C++ objects
+    TCP_TRANSFER_BYTESTREAM = 3;        // Transmit actual bytes
 }
 
 //
@@ -143,8 +144,8 @@ class TCPOpenCommand extends TCPCommand
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
-    int dataTransferMode enum(TCPdataTransferMode); // transfer mode between App and TCP layers
-    string tcpAlgorithmClass; // may be left empty
+    int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts
+    string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 
 

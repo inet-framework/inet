@@ -125,12 +125,12 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCP_NSC_SendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+    virtual TCP_NSC_SendQueue* createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
+    virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
 
   protected:
     typedef std::map<int,TCP_NSC_Connection> TcpAppConnMap; // connId-to-TCP_NSC_Connection

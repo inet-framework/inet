@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 //               2009 Thomas Reschka
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -54,11 +55,6 @@ package inet.transport.tcp;
 // and attaching a TCPSendCommand control info object to the data packet,
 // and sending it to TCP. The server app will receive data as messages
 // with the TCP_I_DATA message kind and TCPSendCommand control info.
-// (Whether you'll receive the same or identical messages, or even whether
-// you'll receive data in the same sized chunks as sent depends on the
-// sendQueueClass and receiveQueueClass used, see below. With
-// TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue set, message objects
-// and even message boundaries are not preserved.)
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and TCPCommand control info.
@@ -131,7 +127,7 @@ package inet.transport.tcp;
 //      but not for DumbTCP).
 //
 // The \TCP flavour supported depends on the value of the tcpAlgorithmClass
-// module parameters, e.g. "TCPTahoe" or "TCPReno". In the future, other
+// module parameter, e.g. "TCPTahoe" or "TCPReno". In the future, other
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
@@ -180,7 +176,7 @@ package inet.transport.tcp;
 //      segments) and the payload length of a new received segment
 //      is higher than free receiver buffer, the new segment will be dropped.
 //      Such drops are recorded in tcpRcvQueueDropsVector.
-
+//
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - delayed acks, with 200ms timeout (optional)
 //  - RFC 896 - Nagle's algorithm (optional)

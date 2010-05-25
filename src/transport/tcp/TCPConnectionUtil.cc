@@ -302,7 +302,7 @@ void TCPConnection::sendToApp(cMessage *msg)
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
-    TCPdataTransferMode transferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
+    TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
     sendQueue = tcpMain->createSendQueue(transferMode);
     sendQueue->setConnection(this);
@@ -567,7 +567,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     if (!state->afterRto)
-	{
+    {
         // we'll start sending from snd_max
         state->snd_nxt = state->snd_max;
     }

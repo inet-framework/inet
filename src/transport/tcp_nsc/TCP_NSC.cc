@@ -647,7 +647,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
-TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPdataTransferMode transferModeP)
+TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {
@@ -658,7 +658,7 @@ TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPdataTransferMode transferModeP)
     }
 }
 
-TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPdataTransferMode transferModeP)
+TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {
@@ -683,7 +683,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
         conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
 
-        TCPdataTransferMode transferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
+        TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
         conn->sendQueueM = createSendQueue(transferMode);
         conn->sendQueueM->setConnection(conn);
