@@ -16,12 +16,11 @@
 
 #include <omnetpp.h>
 
-#include "TCPGenericApp.h"
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 
 
-
+//forward declaration:
 class TCPServerThreadBase;
 
 /**
@@ -29,7 +28,7 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPSrvHostApp : public TCPGenericApp
+class INET_API TCPSrvHostApp : public cSimpleModule
 {
   protected:
     TCPSocket serverSocket;

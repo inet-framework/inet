@@ -16,7 +16,6 @@
 
 #include <omnetpp.h>
 
-#include "TCPGenericApp.h"
 #include "TCPSocket.h"
 
 
@@ -28,7 +27,7 @@
  *
  * Generally used together with GenericAppMsg and TCPGenericSrvApp.
  */
-class INET_API TCPGenericCliAppBase : public TCPGenericApp, public TCPSocket::CallbackInterface
+class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSocket socket;

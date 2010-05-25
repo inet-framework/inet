@@ -303,3 +303,18 @@ void TCPSocket::processMessage(cMessage *msg)
     }
 }
 
+void TCPSocket::readDataTransferModePar(cComponent &component)
+{
+    const char *transferMode = component.par("dataTransferMode");
+
+    if(0 == transferMode || 0 == transferMode[0])
+        throw cRuntimeError("Missing/empty dataTransferMode parameter at %s.", component.getFullPath().c_str());
+    else if (0==strcmp(transferMode, "bytecount"))
+        dataTransferMode = TCP_TRANSFER_BYTECOUNT;
+    else if (0 == strcmp(transferMode, "object"))
+        dataTransferMode = TCP_TRANSFER_OBJECT;
+    else if (0 == strcmp(transferMode, "bytestream"))
+        dataTransferMode = TCP_TRANSFER_BYTESTREAM;
+    else
+        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
+}

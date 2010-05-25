@@ -100,7 +100,6 @@ void TCPSessionApp::activity()
     WATCH(indicationsRcvd);
 
     // parameters
-    readTransferModePar();
     const char *address = par("address");
     int port = par("port");
     const char *connectAddress = par("connectAddress");
@@ -122,7 +121,7 @@ void TCPSessionApp::activity()
     // open
     waitUntil(tOpen);
 
-    socket.setDataTransferMode(getTransferMode());
+    socket.readDataTransferModePar(*this);
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
