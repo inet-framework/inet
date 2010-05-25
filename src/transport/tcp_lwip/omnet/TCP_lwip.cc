@@ -387,7 +387,7 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
     {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
 
-        TCPdataTransferMode dataTransferMode = (TCPdataTransferMode)(openCmd->getDataTransferMode());
+        TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
 
         // add into appConnMap
         conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(),
@@ -628,7 +628,7 @@ void TCP_lwip::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     send(msgP, "appOut", connP.appGateIndexM);
 }
 
-TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPdataTransferMode transferModeP)
+TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {
@@ -639,7 +639,7 @@ TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPdataTransferMode transferModeP)
     }
 }
 
-TcpLwipReceiveQueue* TCP_lwip::createReceiveQueue(TCPdataTransferMode transferModeP)
+TcpLwipReceiveQueue* TCP_lwip::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {

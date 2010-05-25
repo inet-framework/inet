@@ -124,12 +124,12 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
     /**
      * To be called from TcpLwipConnection: create a new send queue.
      */
-    virtual TcpLwipSendQueue* createSendQueue(TCPdataTransferMode transferModeP);
+    virtual TcpLwipSendQueue* createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TcpLwipConnection: create a new receive queue.
      */
-    virtual TcpLwipReceiveQueue* createReceiveQueue(TCPdataTransferMode transferModeP);
+    virtual TcpLwipReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
 
   protected:
     typedef std::map<int,TcpLwipConnection*> TcpAppConnMap; // connId-to-TcpLwipConnection

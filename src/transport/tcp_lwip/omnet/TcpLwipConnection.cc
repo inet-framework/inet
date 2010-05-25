@@ -88,7 +88,7 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 }
 
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPdataTransferMode dataTransferModeP)
+TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPDataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
