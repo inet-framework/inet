@@ -108,8 +108,8 @@ void SCTPServer::generateAndSend()
 uint32 numBytes;
 
     cPacket* cmsg = new cPacket("CMSG");
-    SCTPSimpleMessage* msg=new SCTPSimpleMessage("Server");
-    numBytes=(long uint32)par("requestLength");
+    SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
+    numBytes = (uint32)par("requestLength");
     msg->setDataArraySize(numBytes);
     for (uint32 i=0; i<numBytes; i++)
     {
@@ -365,7 +365,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 
             if (echoFactor==0)
             {
-                if ((long uint32)par("numPacketsToReceivePerClient")>0)
+                if ((uint32)par("numPacketsToReceivePerClient")>0)
                 {
                     j->second.rcvdPackets--;
                     SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg);
