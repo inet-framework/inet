@@ -17,14 +17,13 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "TCPGenericApp.h"
 
 
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TCPEchoApp : public TCPGenericApp
+class INET_API TCPEchoApp : public cSimpleModule
 {
   protected:
     simtime_t delay;
