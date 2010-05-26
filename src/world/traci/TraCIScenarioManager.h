@@ -60,6 +60,10 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points);
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 
+		const std::map<std::string, cModule*>& getManagedHosts() {
+			return hosts;
+		}
+
 	protected:
 		/**
 		 * Byte-buffer that stores values in TraCI byte-order
