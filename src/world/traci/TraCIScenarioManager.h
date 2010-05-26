@@ -56,7 +56,9 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void commandStopNode(std::string nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
 		void commandSetTrafficLightProgram(std::string trafficLightId, std::string program);
 		void commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index);
-		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId);
+		std::list<std::string> commandGetPolygonIds();
+		std::string commandGetPolygonTypeId(std::string polyId);
+		std::list<Coord> commandGetPolygonShape(std::string polyId);
 		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points);
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 

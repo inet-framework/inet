@@ -109,7 +109,13 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandStopNode(std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
 			return getManager()->commandStopNode(getExternalId(), roadId, pos, laneid, radius, waittime);
 		}
-		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId) {
+		std::list<std::string> commandGetPolygonIds() {
+			return getManager()->commandGetPolygonIds();
+		}
+		std::string commandGetPolygonTypeId(std::string polyId) {
+			return getManager()->commandGetPolygonTypeId(polyId);
+		}
+		std::list<Coord> commandGetPolygonShape(std::string polyId) {
 			return getManager()->commandGetPolygonShape(polyId);
 		}
 		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {

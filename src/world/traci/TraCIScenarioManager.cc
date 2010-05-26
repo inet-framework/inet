@@ -396,8 +396,64 @@ void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficL
 	ASSERT(buf.eof());
 }
 
-std::list<std::pair<float, float> > TraCIScenarioManager::commandGetPolygonShape(std::string polyId) {
-	std::list<std::pair<float, float> > res;
+std::list<std::string> TraCIScenarioManager::commandGetPolygonIds() {
+	std::list<std::string> res;
+
+	std::string objectId = "";
+	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(ID_LIST) << objectId);
+
+	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_POLYGON_VARIABLE);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == ID_LIST);
+	std::string polyId_r; buf >> polyId_r;
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == TYPE_STRINGLIST);
+	uint32_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		std::string id; buf >> id;
+		res.push_back(id);
+	}
+
+	ASSERT(buf.eof());
+
+	return res;
+}
+
+std::string TraCIScenarioManager::commandGetPolygonTypeId(std::string polyId) {
+	std::string res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_TYPE) << polyId);
+
+	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_POLYGON_VARIABLE);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == VAR_TYPE);
+	std::string polyId_r; buf >> polyId_r;
+	ASSERT(polyId_r == polyId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == TYPE_STRING);
+	buf >> res;
+
+	ASSERT(buf.eof());
+
+	return res;
+}
+
+std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId) {
+	std::list<Coord> res;
 
 	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_SHAPE) << polyId);
 
@@ -420,7 +476,7 @@ std::list<std::pair<float, float> > TraCIScenarioManager::commandGetPolygonShape
 		float x; buf >> x;
 		float y; buf >> y;
 		Coord pos = traci2omnet(Coord(x, y));
-		res.push_back(std::make_pair(pos.x, pos.y));
+		res.push_back(pos);
 	}
 
 	ASSERT(buf.eof());
