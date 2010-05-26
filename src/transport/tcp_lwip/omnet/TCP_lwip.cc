@@ -454,7 +454,59 @@ void TCP_lwip::handleMessage(cMessage *msgP)
 
 void TCP_lwip::updateDisplayString()
 {
-    // TODO implementing it...
+    if (ev.isDisabled())
+    {
+        // in express mode, we don't bother to update the display
+        // (std::map's iteration is not very fast if map is large)
+        getDisplayString().setTagArg("t",0,"");
+        return;
+    }
+
+    int numINIT=0, numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
+        numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
+        numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
+
+    for (TcpAppConnMap::iterator i=tcpAppConnMapM.begin(); i!=tcpAppConnMapM.end(); ++i)
+    {
+        LwipTcpLayer::tcp_pcb *pcb = (*i).second->pcbM;
+        if (NULL == pcb)
+        {
+            numINIT++;
+        }
+        else
+        {
+            enum LwipTcpLayer::tcp_state state = pcb->state;
+            switch(state)
+            {
+               case LwipTcpLayer::CLOSED:      numCLOSED++; break;
+               case LwipTcpLayer::LISTEN:      numLISTEN++; break;
+               case LwipTcpLayer::SYN_SENT:    numSYN_SENT++; break;
+               case LwipTcpLayer::SYN_RCVD:    numSYN_RCVD++; break;
+               case LwipTcpLayer::ESTABLISHED: numESTABLISHED++; break;
+               case LwipTcpLayer::CLOSE_WAIT:  numCLOSE_WAIT++; break;
+               case LwipTcpLayer::LAST_ACK:    numLAST_ACK++; break;
+               case LwipTcpLayer::FIN_WAIT_1:  numFIN_WAIT_1++; break;
+               case LwipTcpLayer::FIN_WAIT_2:  numFIN_WAIT_2++; break;
+               case LwipTcpLayer::CLOSING:     numCLOSING++; break;
+               case LwipTcpLayer::TIME_WAIT:   numTIME_WAIT++; break;
+            }
+        }
+    }
+    char buf2[200];
+    buf2[0] = '\0';
+    if (numINIT>0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
+    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2),"estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+    getDisplayString().setTagArg("t",0,buf2);
 }
 
 TcpLwipConnection *TCP_lwip::findAppConn(int connIdP)
