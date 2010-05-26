@@ -145,15 +145,10 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
 
     ip_hdr *ih = (ip_hdr *)data;
     tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
-    // set IP header:
-//    ih->_v = 4;
+
+    // set the modified lwip IP header:
     ih->_hl = ipHdrLen/4;
     ASSERT((ih->_hl) * 4 == ipHdrLen);
-//    ih->_tos = 0;
-//    ih->_id = htons(tcpsegP->getSequenceNo());
-//    ih->_offset = htons(0x4000);   // don't fragment, offset = 0;
-//    ih->_ttl = 64;
-//    ih->_proto = 6;       // TCP
     ih->_chksum = 0;
     ih->src.addr = srcAddr;
     ih->dest.addr = destAddr;
@@ -167,9 +162,7 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     tcph->th_sum = TCPSerializer().checksum(tcph, totalTcpLen, srcAddr, destAddr);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
-//    ih->_len = htons(totalIpLen);
     ih->_chksum = 0;
-//    ih->_chksum = TCPIPchecksum::checksum(ih, ipHdrLen);
 
     // search unfilled local addr in pcb-s for this connection.
     TcpAppConnMap::iterator i;
