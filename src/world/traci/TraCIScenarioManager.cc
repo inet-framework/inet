@@ -44,7 +44,12 @@ TraCIScenarioManager::~TraCIScenarioManager() {
 	cancelAndDelete(executeOneTimestepTrigger);
 }
 
-void TraCIScenarioManager::initialize() {
+void TraCIScenarioManager::initialize(int stage) {
+	cSimpleModule::initialize(stage);
+	if (stage != 1) {
+		return;
+	}
+
 	debug = par("debug");
 	updateInterval = par("updateInterval");
 	moduleType = par("moduleType").stdstringValue();

@@ -32,8 +32,12 @@ TraCIScenarioManagerLaunchd::~TraCIScenarioManagerLaunchd()
 }
 
 
-void TraCIScenarioManagerLaunchd::initialize()
+void TraCIScenarioManagerLaunchd::initialize(int stage)
 {
+	if (stage != 1) {
+		TraCIScenarioManager::initialize(stage);
+		return;
+	}
 	launchConfig = par("launchConfig").xmlValue();
 	seed = par("seed");
 	cXMLElementList basedir_nodes = launchConfig->getElementsByTagName("basedir");
@@ -56,7 +60,7 @@ void TraCIScenarioManagerLaunchd::initialize()
 		seed_node->setAttribute("value", ss.str().c_str());
 		launchConfig->appendChild(seed_node);
 	}
-	TraCIScenarioManager::initialize();
+	TraCIScenarioManager::initialize(stage);
 }
 
 void TraCIScenarioManagerLaunchd::finish()

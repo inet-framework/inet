@@ -45,7 +45,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 {
 	public:
 		~TraCIScenarioManager();
-		virtual void initialize();
+		virtual int numInitStages() const { return std::max(cSimpleModule::numInitStages(), 2); }
+		virtual void initialize(int stage);
 		virtual void finish();
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);

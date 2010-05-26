@@ -35,7 +35,8 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 	public:
 
 		virtual ~TraCIScenarioManagerLaunchd();
-		virtual void initialize();
+		virtual int numInitStages() const { return std::max(TraCIScenarioManager::numInitStages(), 2); }
+		virtual void initialize(int stage);
 		virtual void finish();
 
 	protected:
