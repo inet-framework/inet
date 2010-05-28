@@ -141,7 +141,7 @@ network TwoHosts
                 @display("p=200,140");
         }
     connections:
-        hostA.ethg <--> {  delay = 0.5us; } <--> hostB.ethg;
+        hostA.ethg <--> {  delay = 0.5us; datarate = 100Mbps; } <--> hostB.ethg;
 }
 
 
