@@ -39,9 +39,11 @@ void EtherHub::initialize()
     EV << "Autoconfig: advertising that we only support half-duplex operation\n";
     for (int i=0; i<ports; i++)
     {
+/* TODO
         EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-halfduplex");
         autoconf->setHalfDuplex(true);
         send(autoconf,"ethg$o",i);
+*/
     }
 }
 

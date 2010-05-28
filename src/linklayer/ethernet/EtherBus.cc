@@ -107,10 +107,12 @@ void EtherBus::initialize()
     EV << "Autoconfig: advertising that we only support 10Mb half-duplex operation\n";
     for (i=0; i<taps; i++)
     {
+        /*
         EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-10Mb-halfduplex");
         autoconf->setHalfDuplex(true);
         autoconf->setTxrate(10000000); // 10Mb
         send(autoconf,"ethg$o",i);
+        */
     }
 }
 
