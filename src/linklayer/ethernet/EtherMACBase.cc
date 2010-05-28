@@ -346,7 +346,7 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        simtime_t shortestFrameDuration = (getDataRate(physInGate) > FAST_ETHERNET_TXRATE)
+        simtime_t shortestFrameDuration = (getDataRate(physOutGate) > FAST_ETHERNET_TXRATE) // TODO must physInGate ???
                 ? GIGABIT_MIN_FRAME_WITH_EXT
                 : MIN_ETHERNET_FRAME;
         if (simTime()-frame->getSendingTime() >= shortestFrameDuration)
