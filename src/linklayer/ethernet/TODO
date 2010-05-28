@@ -5,3 +5,5 @@ TODO:
  - The EtherHub, EtherBus must halfduplex communcication!!!
 
  - The EtherBus must 10Mbit speed!!!
+
+ - How abort a transmit, when detected a collision.
