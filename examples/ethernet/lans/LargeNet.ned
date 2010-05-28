@@ -29,7 +29,13 @@ import ned.DatarateChannel;
 channel cable extends DatarateChannel
 {
     parameters:
-        delay = 0.1us;
+        delay = 0.1us; datarate = 100Mbps;
+}
+
+channel cabletobus extends DatarateChannel
+{
+    parameters:
+        delay = 0; datarate = 10Mbps;
 }
 
 
@@ -148,7 +154,7 @@ module LargeLAN
         switch.ethg++ <--> cable <--> hub.ethg++;
 
         for i=0..b-1 {
-            bus.ethg++ <--> bhost[i].ethg;
+            bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
         }
 
         bus.ethg++ <--> hub.ethg++;
