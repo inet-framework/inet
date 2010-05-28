@@ -55,17 +55,12 @@ void EtherMAC::initialize()
     endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
     endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
 
-    // check: datarate is forbidden with EtherMAC -- module's txrate must be used
+/*
     cGate *g = physOutGate;
-    while (g)
-    {
-        cDatarateChannel *chan = dynamic_cast<cDatarateChannel*>(g->getChannel());
-        if (chan && chan->par("datarate").doubleValue()>0)
-            error("connection on gate %s has data rate set: using data rate with EtherMAC "
-                  "is forbidden, module's txrate parameter must be used instead",
-                  g->getFullPath().c_str());
-        g = g->getNextGate();
-    }
+    cChannel *channel = g->getTransmissionChannel();
+    send(msg);
+    channel->getTransmissionFinishTime();
+*/
 
     // launch autoconfig process
     bool performAutoconfig = true;
@@ -102,101 +97,14 @@ void EtherMAC::initialize()
 
 void EtherMAC::initializeTxrate()
 {
-    txrate = par("txrate");
 }
 
 void EtherMAC::startAutoconfig()
 {
-    autoconfigInProgress = true;
-    lowestTxrateSuggested = 0;  // none suggested
-    duplexVetoed = false;
-
-    double initialTxrate = par("txrate");
-    bool duplexEnabled = par("duplexEnabled");
-    txrate = 0;
-    duplexMode = duplexEnabled;
-    if (!duplexEnabled || initialTxrate>0)
-    {
-        EV << "Autoconfig: advertising our settings: " << initialTxrate/1000000 << "Mb, "
-           << (duplexMode ? "duplex" : "half-duplex") << endl;
-
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf");
-        if (!duplexEnabled)
-            autoconf->setHalfDuplex(true);
-        if (initialTxrate>0)
-            autoconf->setTxrate(initialTxrate);
-        send(autoconf, physOutGate);
-    }
-    scheduleAt(simTime()+AUTOCONFIG_PERIOD, new cMessage("EndAutoconfig",ENDAUTOCONFIG));
 }
 
 void EtherMAC::handleAutoconfigMessage(cMessage *msg)
 {
-    if (!msg->isSelfMessage())
-    {
-        if (msg->getArrivalGate() == gate("upperLayerIn"))
-        {
-            // from upper layer
-            EV << "Received frame from upper layer during autoconfig period: " << msg << endl;
-            processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
-        }
-        else
-        {
-            // from network: must be autoconfig message
-            EV << "Message from network during autoconfig period: " << msg << endl;
-            EtherAutoconfig *autoconf = check_and_cast<EtherAutoconfig *>(msg);
-            double acTxrate = autoconf->getTxrate();
-
-            EV << "Autoconfig message: ";
-            if (acTxrate>0)
-                EV << acTxrate/1000000 << "Mb ";
-            if (autoconf->getHalfDuplex())
-                EV << "non-duplex";
-            EV << "\n";
-
-            if (acTxrate>0 && (acTxrate<lowestTxrateSuggested || lowestTxrateSuggested==0))
-                lowestTxrateSuggested = acTxrate;
-            if (!duplexVetoed && autoconf->getHalfDuplex())
-                duplexVetoed = true;
-            delete msg;
-        }
-    }
-    else
-    {
-        // self-message signals end of autoconfig period
-        EV << "Self-message during autoconfig period: " << msg << endl;
-
-        delete msg;
-        autoconfigInProgress = false;
-
-        double initialTxrate = par("txrate");
-        bool duplexEnabled = par("duplexEnabled");
-
-        txrate = (initialTxrate==0 && lowestTxrateSuggested==0) ? 100000000 /* 100 Mb */:
-                 (initialTxrate==0) ? lowestTxrateSuggested :
-                 (lowestTxrateSuggested==0) ? initialTxrate :
-                 (lowestTxrateSuggested<initialTxrate) ? lowestTxrateSuggested : initialTxrate;
-        duplexMode = (duplexEnabled && !duplexVetoed);
-        calculateParameters();
-
-        EV << "Parameters after autoconfig: txrate=" << txrate/1000000 << "Mb, " << (duplexMode ? "duplex" : "half-duplex") << endl;
-
-        if (ev.isGUI())
-        {
-            char modestr[64];
-            sprintf(modestr, "%dMb\n%s", int(txrate/1000000), (duplexMode ? "full duplex" : "half duplex"));
-            getDisplayString().setTagArg("t",0,modestr);
-            //getDisplayString().setTagArg("t",1,"r");
-            sprintf(modestr, "%s: %dMb %s", getFullName(), int(txrate/1000000), (duplexMode ? "duplex" : "half duplex"));
-            getParentModule()->bubble(modestr);
-        }
-
-        if (!txQueue.empty())
-        {
-            EV << "Autoconfig period over, starting to send frames\n";
-            scheduleEndIFGPeriod();
-        }
-    }
 }
 
 void EtherMAC::handleMessage (cMessage *msg)
@@ -205,11 +113,6 @@ void EtherMAC::handleMessage (cMessage *msg)
     {
         EV << "MAC is disabled -- dropping message " << msg << "\n";
         delete msg;
-        return;
-    }
-    if (autoconfigInProgress)
-    {
-        handleAutoconfigMessage(msg);
         return;
     }
 
@@ -283,7 +186,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
 
-    simtime_t endRxTime = simTime() + msg->getBitLength()*bitTime;
+    simtime_t endRxTime = simTime() + msg->getDuration();
 
     if (!duplexMode && transmitState==TRANSMITTING_STATE)
     {
@@ -300,8 +203,12 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
         numConcurrentTransmissions++;
-        simtime_t endJamTime = simTime()+jamDuration;
-        scheduleAt(endRxTime<endJamTime ? endJamTime : endRxTime, endRxMsg);
+
+        cPacket jam;
+        jam.setByteLength(JAM_SIGNAL_BYTES);
+        cChannel *channel = physOutGate->getTransmissionChannel();
+        simtime_t endJamTime = simTime() + channel->calculateDuration(&jam);
+        scheduleAt(endRxTime < endJamTime ? endJamTime : endRxTime, endRxMsg);
         delete msg;
 
         numCollisions++;
@@ -320,7 +227,9 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         scheduleEndRxPeriod(msg);
         channelBusySince = simTime();
     }
-    else if (receiveState==RECEIVING_STATE && dynamic_cast<EtherJam*>(msg)==NULL && endRxMsg->getArrivalTime()-simTime()<bitTime)
+    else if (receiveState==RECEIVING_STATE
+            && dynamic_cast<EtherJam*>(msg)==NULL
+            && endRxMsg->getArrivalTime()-simTime() < 1.0/getDataRate(physInGate))
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -418,7 +327,9 @@ void EtherMAC::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
     if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
+    cChannel *channel = physOutGate->getTransmissionChannel();
     send(frame, physOutGate);
+    channel->getTransmissionFinishTime();
 
     // update burst variables
     if (frameBursting)
@@ -559,16 +470,18 @@ void EtherMAC::sendJamSignal()
 {
     cPacket *jam = new EtherJam("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
-    if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
+    if (ev.isGUI())
+        updateConnectionColor(JAMMING_STATE);
     send(jam, physOutGate);
 
-    scheduleAt(simTime()+jamDuration, endJammingMsg);
+    cChannel *channel = physOutGate->getTransmissionChannel();
+    scheduleAt(channel->getTransmissionFinishTime(), endJammingMsg);
     transmitState = JAMMING_STATE;
 }
 
 void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
 {
-    scheduleAt(simTime()+frame->getBitLength()*bitTime, endRxMsg);
+    scheduleAt(simTime()+frame->getDuration(), endRxMsg);
     receiveState = RECEIVING_STATE;
 }
 
@@ -588,7 +501,8 @@ void EtherMAC::handleRetransmission()
     EV << "Executing backoff procedure\n";
     int backoffrange = (backoffs>=BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0,backoffrange-1);
-    simtime_t backofftime = slotNumber*slotTime;
+    simtime_t slotTime = getDataRate(physOutGate);
+    simtime_t backofftime = slotNumber * slotTime;
 
     scheduleAt(simTime()+backofftime, endBackoffMsg);
     transmitState = BACKOFF_STATE;

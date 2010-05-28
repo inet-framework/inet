@@ -43,19 +43,20 @@ EtherMACBase::~EtherMACBase()
 
 void EtherMACBase::initialize()
 {
+    physInGate = gate("phys$i");
     physOutGate = gate("phys$o");
 
     initializeFlags();
 
-    initializeTxrate();
-    WATCH(txrate);
+//    initializeTxrate();
+//    WATCH(txrate);
 
     initializeMACAddress();
     initializeQueueModule();
     initializeNotificationBoard();
     initializeStatistics();
 
-    registerInterface(txrate); // needs MAC address
+    registerInterface(); // needs MAC address
 
     // initialize queue
     txQueue.setName("txQueue");
@@ -128,6 +129,8 @@ void EtherMACBase::initializeFlags()
         EV << "MAC not connected to a network.\n";
     WATCH(connected);
 
+    physInGate->setDeliverOnReceptionStart(true);
+
     // TODO: this should be settable from the gui
     // initialize disabled flag
     // Note: it is currently not supported to enable a disabled MAC at runtime.
@@ -177,7 +180,7 @@ void EtherMACBase::initializeStatistics()
     numPauseFramesSentVector.setName("pauseFramesSent");
 }
 
-void EtherMACBase::registerInterface(double txrate)
+void EtherMACBase::registerInterface()
 {
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (!ift)
@@ -197,7 +200,7 @@ void EtherMACBase::registerInterface(double txrate)
     delete [] interfaceName;
 
     // data rate
-    interfaceEntry->setDatarate(txrate);
+    interfaceEntry->setDatarate(0); // FIXME
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);
@@ -239,18 +242,14 @@ void EtherMACBase::calculateParameters()
 {
     if (disabled || !connected)
     {
+/*
         bitTime = slotTime = interFrameGap = jamDuration = shortestFrameDuration = 0;
         carrierExtension = frameBursting = false;
+*/
         return;
     }
 
-    if (txrate != ETHERNET_TXRATE && txrate != FAST_ETHERNET_TXRATE &&
-        txrate != GIGABIT_ETHERNET_TXRATE && txrate != FAST_GIGABIT_ETHERNET_TXRATE)
-    {
-        error("nonstandard transmission rate %g, must be %g, %g, %g or %g bit/sec",
-            txrate, ETHERNET_TXRATE, FAST_ETHERNET_TXRATE, GIGABIT_ETHERNET_TXRATE, FAST_GIGABIT_ETHERNET_TXRATE);
-    }
-
+/*
     bitTime = 1/(double)txrate;
 
     // set slot time
@@ -266,13 +265,14 @@ void EtherMACBase::calculateParameters()
     interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
     jamDuration = 8*JAM_SIGNAL_BYTES*bitTime;
     shortestFrameDuration = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
+*/
 }
 
 void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl;
-    EV << "txrate: " << txrate << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
+    EV << "txrate: " << "?" /* FIXME */ << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
 #if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
@@ -326,7 +326,12 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
         else
             txQueue.insert(frame);
     }
+}
 
+double EtherMACBase::getDataRate(cGate *gate)
+{
+    cDatarateChannel* channel = dynamic_cast<cDatarateChannel*>(gate->getTransmissionChannel());
+    return channel ? channel->getDatarate() : 0.0;
 }
 
 void EtherMACBase::processMsgFromNetwork(cPacket *frame)
@@ -339,11 +344,19 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
                 frame->getClassName(), frame->getFullName());
 
     // detect cable length violation in half-duplex mode
-    if (!duplexMode && simTime()-frame->getSendingTime()>=shortestFrameDuration)
-        error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
-              "(%lgs corresponds to an approx. %lgm cable)",
-              SIMTIME_STR(simTime() - frame->getSendingTime()),
-              SIMTIME_STR((simTime() - frame->getSendingTime())*SPEED_OF_LIGHT));
+    if (!duplexMode)
+    {
+        simtime_t shortestFrameDuration = (getDataRate(physInGate) > FAST_ETHERNET_TXRATE)
+                ? GIGABIT_MIN_FRAME_WITH_EXT
+                : MIN_ETHERNET_FRAME;
+        if (simTime()-frame->getSendingTime() >= shortestFrameDuration)
+        {
+            error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
+                  "(%lgs corresponds to an approx. %lgm cable)",
+                  SIMTIME_STR(simTime() - frame->getSendingTime()),
+                  SIMTIME_STR((simTime() - frame->getSendingTime()) * SPEED_OF_LIGHT));
+        }
+    }
 }
 
 void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
@@ -497,20 +510,30 @@ void EtherMACBase::processMessageWhenDisabled(cMessage *msg)
 
 void EtherMACBase::scheduleEndIFGPeriod()
 {
+    cPacket gap;
+    gap.setBitLength(INTERFRAME_GAP_BITS);
+    cChannel *channel = physOutGate->getTransmissionChannel();
+    simtime_t interFrameGap = channel->calculateDuration(&gap);
+    //simtime_t interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
     scheduleAt(simTime()+interFrameGap, endIFGMsg);
     transmitState = WAIT_IFG_STATE;
 }
 
 void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
 {
-    scheduleAt(simTime()+frame->getBitLength()*bitTime, endTxMsg);
+    cChannel *channel = physOutGate->getTransmissionChannel();
+    scheduleAt(channel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
 }
 
 void EtherMACBase::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    simtime_t pausePeriod = pauseUnits*PAUSE_BITTIME*bitTime;
+    cPacket pause;
+    pause.setBitLength(pauseUnits*PAUSE_BITTIME);
+    cChannel *channel = physOutGate->getTransmissionChannel();
+    simtime_t pausePeriod = channel->calculateDuration(&pause);
+    //simtime_t pausePeriod = pauseUnits*PAUSE_BITTIME*bitTime;
     scheduleAt(simTime()+pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }
@@ -569,7 +592,7 @@ void EtherMACBase::finish()
     {
         simtime_t t = simTime();
         recordScalar("simulated time", t);
-        recordScalar("txrate (Mb)", txrate/1000000);
+//        recordScalar("txrate (Mb)", txrate/1000000);
         recordScalar("full duplex", duplexMode);
         recordScalar("frames sent",    numFramesSent);
         recordScalar("frames rcvd",    numFramesReceivedOK);
@@ -669,5 +692,3 @@ void EtherMACBase::receiveChangeNotification(int category, const cPolymorphic *)
     if (category==NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();
 }
-
-

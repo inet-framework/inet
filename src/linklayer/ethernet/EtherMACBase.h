@@ -72,12 +72,12 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
     // MAC transmission characteristics
-    double txrate;                  // transmission rate of MAC, bit/s
-    simtime_t bitTime;              // precalculated as 1/txrate
-    simtime_t slotTime;             // slot time
-    simtime_t interFrameGap;        // IFG
-    simtime_t jamDuration;          // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
-    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+//    double txrate;                  // transmission rate of MAC, bit/s
+//    simtime_t bitTime;              // precalculated as 1/txrate
+//    simtime_t slotTime;             // slot time
+//    simtime_t interFrameGap;        // IFG
+//    simtime_t jamDuration;          // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
+//    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
 
     // states
     int transmitState;              // State of the MAC unit transmitting
@@ -87,6 +87,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     cQueue txQueue;                 // output queue
     IPassiveQueue *queueModule;     // optional module to receive messages from
 
+    cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
 
     // notification stuff
@@ -131,15 +132,17 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     virtual MACAddress getMACAddress() {return address;}
 
   protected:
+    double getDataRate(cGate *gate);
+
     //  initialization
     virtual void initialize();
-    virtual void initializeTxrate() = 0;
+//    virtual void initializeTxrate() = 0;
     virtual void initializeFlags();
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();
     virtual void initializeNotificationBoard();
     virtual void initializeStatistics();
-    virtual void registerInterface(double txrate);
+    virtual void registerInterface();
 
     // helpers
     virtual bool checkDestinationAddress(EtherFrame *frame);

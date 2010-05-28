@@ -41,18 +41,6 @@ void EtherMAC2::initialize()
 
 void EtherMAC2::initializeTxrate()
 {
-    // if we're connected, find the gate with transmission rate
-    txrate = 0;
-
-    if (connected)
-    {
-        // obtain txrate from channel. As a side effect, this also asserts
-        // that the other end is an EtherMAC2, since normal EtherMAC
-        // insists that the connection has *no* datarate set.
-        // if we're connected, get the gate with transmission rate
-        cChannel *datarateChannel = physOutGate->getTransmissionChannel();
-        txrate = datarateChannel->par("datarate").doubleValue();
-    }
 }
 
 void EtherMAC2::handleMessage(cMessage *msg)
