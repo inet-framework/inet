@@ -40,7 +40,7 @@ source("~/inet-hnrl/examples/ngoa/ecr2/scripts/groupMeansAndCIs.R")
 #########################################################################
 ### processing data from DedicatedAccess simulation
 #########################################################################
-setwd(.da.wd)
+#setwd(.da.wd)
 .da.data <- paste(.da.wd, paste(.da.base, "data", sep="."), sep="/")
 .df <- read.csv(.da.data, header=TRUE)
 .df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$rtt, .df$repetition), ] # order data frame
@@ -76,7 +76,7 @@ save(.da.df, .da.plots, file=.da.save)
 #########################################################################
 ### processing data from HybridPon simulation
 #########################################################################
-setwd(.hp.wd)
+#setwd(.hp.wd)
 .hp.data <- paste(.hp.wd, paste(.hp.base, "data", sep="."), sep="/")
 .df <- read.csv(.hp.data, header=TRUE);
 .df <- .df[order(.df$N, .df$n, .df$dr, .df$tx, .df$br, .df$rtt, .df$repetition), ] # order data frame
