@@ -157,8 +157,7 @@ module LargeLAN
             bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
         }
 
-        bus.ethg++ <--> hub.ethg++;
-
+        bus.ethg++ <--> cabletobus <--> hub.ethg++;
 }
 
 //
