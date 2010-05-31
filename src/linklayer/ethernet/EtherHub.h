@@ -26,9 +26,15 @@
  */
 class INET_API EtherHub : public cSimpleModule
 {
+  public:
+    EtherHub();
+    virtual ~EtherHub();
+
   protected:
     int ports;          // number of ports
     long numMessages;   // number of messages handled
+    typedef cChannel* cChannelPtr;
+    cChannelPtr *channelMap;  // Array of cChannel pointers
 
   protected:
     virtual void initialize();

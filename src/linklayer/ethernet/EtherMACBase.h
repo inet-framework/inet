@@ -72,12 +72,10 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
     // MAC transmission characteristics
-//    double txrate;                  // transmission rate of MAC, bit/s
-//    simtime_t bitTime;              // precalculated as 1/txrate
-//    simtime_t slotTime;             // slot time
-//    simtime_t interFrameGap;        // IFG
-//    simtime_t jamDuration;          // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
-//    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    double txrate;                  // transmission rate of MAC, bit/s
+    simtime_t slotTime;             // slot time
+    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    cChannel *transmissionChannel;  // transmission channel
 
     // states
     int transmitState;              // State of the MAC unit transmitting
@@ -132,8 +130,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     virtual MACAddress getMACAddress() {return address;}
 
   protected:
-    double getDataRate(cGate *gate);
-
     //  initialization
     virtual void initialize();
 //    virtual void initializeTxrate() = 0;

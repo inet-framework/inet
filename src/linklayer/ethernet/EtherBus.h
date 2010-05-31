@@ -46,6 +46,8 @@ class INET_API EtherBus : public cSimpleModule
 
     BusTap *tap;  // physical locations of where the hosts is connected to the bus
     int taps;     // number of tap points on the bus
+    typedef cChannel* cChannelPtr;
+    cChannelPtr *channelMap;  // Array of cChannel pointers
 
     long numMessages;             // number of messages handled
 

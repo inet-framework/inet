@@ -242,29 +242,24 @@ void EtherMACBase::calculateParameters()
 {
     if (disabled || !connected)
     {
-/*
-        bitTime = slotTime = interFrameGap = jamDuration = shortestFrameDuration = 0;
+        txrate = 0;
+        slotTime = 0;
+        shortestFrameDuration = 0;
         carrierExtension = frameBursting = false;
-*/
+        transmissionChannel = NULL;
+
         return;
     }
-
+    transmissionChannel = (physOutGate->getTransmissionChannel());
+    cDatarateChannel* channel = dynamic_cast<cDatarateChannel*>(transmissionChannel);
+    txrate = channel ? channel->getDatarate() : 0.0;
+    slotTime = (txrate >= GIGABIT_ETHERNET_TXRATE) ?
+            GIGABIT_SLOT_TIME : SLOT_TIME;
+    shortestFrameDuration = (txrate > FAST_ETHERNET_TXRATE)
+            ? GIGABIT_MIN_FRAME_WITH_EXT
+            : MIN_ETHERNET_FRAME;
 /*
     bitTime = 1/(double)txrate;
-
-    // set slot time
-    if (txrate==ETHERNET_TXRATE || txrate==FAST_ETHERNET_TXRATE)
-        slotTime = SLOT_TIME;
-    else
-        slotTime = GIGABIT_SLOT_TIME;
-
-    // only if Gigabit Ethernet
-    frameBursting = (txrate==GIGABIT_ETHERNET_TXRATE || txrate==FAST_GIGABIT_ETHERNET_TXRATE);
-    carrierExtension = (slotTime == GIGABIT_SLOT_TIME && !duplexMode);
-
-    interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
-    jamDuration = 8*JAM_SIGNAL_BYTES*bitTime;
-    shortestFrameDuration = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
 */
 }
 
@@ -328,12 +323,6 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     }
 }
 
-double EtherMACBase::getDataRate(cGate *gate)
-{
-    cDatarateChannel* channel = dynamic_cast<cDatarateChannel*>(gate->getTransmissionChannel());
-    return channel ? channel->getDatarate() : 0.0;
-}
-
 void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 {
     EV << "Received frame from network: " << frame << endl;
@@ -346,9 +335,6 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        simtime_t shortestFrameDuration = (getDataRate(physOutGate) > FAST_ETHERNET_TXRATE) // TODO must physInGate ???
-                ? GIGABIT_MIN_FRAME_WITH_EXT
-                : MIN_ETHERNET_FRAME;
         if (simTime()-frame->getSendingTime() >= shortestFrameDuration)
         {
             error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
@@ -512,17 +498,14 @@ void EtherMACBase::scheduleEndIFGPeriod()
 {
     cPacket gap;
     gap.setBitLength(INTERFRAME_GAP_BITS);
-    cChannel *channel = physOutGate->getTransmissionChannel();
-    simtime_t interFrameGap = channel->calculateDuration(&gap);
-    //simtime_t interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
+    simtime_t interFrameGap = transmissionChannel->calculateDuration(&gap);
     scheduleAt(simTime()+interFrameGap, endIFGMsg);
     transmitState = WAIT_IFG_STATE;
 }
 
 void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
 {
-    cChannel *channel = physOutGate->getTransmissionChannel();
-    scheduleAt(channel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
 }
 
@@ -531,9 +514,7 @@ void EtherMACBase::scheduleEndPausePeriod(int pauseUnits)
     // length is interpreted as 512-bit-time units
     cPacket pause;
     pause.setBitLength(pauseUnits*PAUSE_BITTIME);
-    cChannel *channel = physOutGate->getTransmissionChannel();
-    simtime_t pausePeriod = channel->calculateDuration(&pause);
-    //simtime_t pausePeriod = pauseUnits*PAUSE_BITTIME*bitTime;
+    simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
     scheduleAt(simTime()+pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }

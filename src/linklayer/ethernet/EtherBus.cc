@@ -29,11 +29,13 @@ static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 EtherBus::EtherBus()
 {
     tap = NULL;
+    channelMap = NULL;
 }
 
 EtherBus::~EtherBus()
 {
     delete [] tap;
+    delete [] channelMap;
 }
 
 void EtherBus::initialize()
@@ -105,8 +107,11 @@ void EtherBus::initialize()
 
     // autoconfig: tell everyone that bus supports only 10Mb half-duplex
     EV << "Autoconfig: advertising that we only support 10Mb half-duplex operation\n";
+    channelMap = new cChannelPtr[taps];
     for (i=0; i<taps; i++)
     {
+        gate("ethg$i", i)->setDeliverOnReceptionStart(true);
+        channelMap[i] = gate("ethg$o",i)->getTransmissionChannel();
         /*
         EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-10Mb-halfduplex");
         autoconf->setHalfDuplex(true);
@@ -159,6 +164,10 @@ void EtherBus::handleMessage (cMessage *msg)
         // send out on gate
         bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
         cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
+        {
+            // stop current transmission
+            channelMap[tapPoint]->forceTransmissionFinishTime(SIMTIME_ZERO);
+        }
         send(msg2, "ethg$o", tapPoint);
 
         // if not end of the bus, schedule for next tap

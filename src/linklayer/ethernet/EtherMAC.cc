@@ -55,15 +55,8 @@ void EtherMAC::initialize()
     endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
     endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
 
-/*
-    cGate *g = physOutGate;
-    cChannel *channel = g->getTransmissionChannel();
-    send(msg);
-    channel->getTransmissionFinishTime();
-*/
-
     // launch autoconfig process
-    bool performAutoconfig = true;
+    bool performAutoconfig = false;
     if (!disabled && connected && performAutoconfig)
     {
         startAutoconfig();
@@ -206,8 +199,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 
         cPacket jam;
         jam.setByteLength(JAM_SIGNAL_BYTES);
-        cChannel *channel = physOutGate->getTransmissionChannel();
-        simtime_t endJamTime = simTime() + channel->calculateDuration(&jam);
+        simtime_t endJamTime = simTime() + transmissionChannel->calculateDuration(&jam);
         scheduleAt(endRxTime < endJamTime ? endJamTime : endRxTime, endRxMsg);
         delete msg;
 
@@ -229,7 +221,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
     else if (receiveState==RECEIVING_STATE
             && dynamic_cast<EtherJam*>(msg)==NULL
-            && endRxMsg->getArrivalTime()-simTime() < 1.0/getDataRate(physInGate))
+            && endRxMsg->getArrivalTime()-simTime() < 1.0/txrate)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -327,9 +319,8 @@ void EtherMAC::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
     if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
-    cChannel *channel = physOutGate->getTransmissionChannel();
     send(frame, physOutGate);
-    channel->getTransmissionFinishTime();
+    transmissionChannel->getTransmissionFinishTime();
 
     // update burst variables
     if (frameBursting)
@@ -472,10 +463,10 @@ void EtherMAC::sendJamSignal()
     jam->setByteLength(JAM_SIGNAL_BYTES);
     if (ev.isGUI())
         updateConnectionColor(JAMMING_STATE);
+    transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
     send(jam, physOutGate);
 
-    cChannel *channel = physOutGate->getTransmissionChannel();
-    scheduleAt(channel->getTransmissionFinishTime(), endJammingMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
     transmitState = JAMMING_STATE;
 }
 
@@ -501,7 +492,6 @@ void EtherMAC::handleRetransmission()
     EV << "Executing backoff procedure\n";
     int backoffrange = (backoffs>=BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0,backoffrange-1);
-    simtime_t slotTime = getDataRate(physOutGate);
     simtime_t backofftime = slotNumber * slotTime;
 
     scheduleAt(simTime()+backofftime, endBackoffMsg);
