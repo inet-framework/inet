@@ -55,19 +55,8 @@ void EtherMAC::initialize()
     endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
     endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
 
-    // launch autoconfig process
-    bool performAutoconfig = false;
-    if (!disabled && connected && performAutoconfig)
-    {
-        startAutoconfig();
-    }
-    else
-    {
-        autoconfigInProgress = false;
-        duplexMode = par("duplexEnabled");
-        calculateParameters();
-    }
-    WATCH(autoconfigInProgress);
+    duplexMode = par("duplexEnabled");
+    calculateParameters();
 
     // initialize state info
     backoffs = 0;
@@ -89,14 +78,6 @@ void EtherMAC::initialize()
 }
 
 void EtherMAC::initializeTxrate()
-{
-}
-
-void EtherMAC::startAutoconfig()
-{
-}
-
-void EtherMAC::handleAutoconfigMessage(cMessage *msg)
 {
 }
 
@@ -167,7 +148,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EtherMACBase::processFrameFromUpperLayer(frame);
 
-    if (!autoconfigInProgress && (duplexMode || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
+    if ((duplexMode || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
     {
         EV << "No incoming carrier signals detected, frame clear to send, wait IFG first\n";
         scheduleEndIFGPeriod();

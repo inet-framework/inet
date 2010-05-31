@@ -26,8 +26,6 @@
 #include "EtherFrame_m.h"
 #include "EtherMACBase.h"
 
-// Length of autoconfig period: should be larger than delays
-#define AUTOCONFIG_PERIOD  0.001  /* well more than 4096 bit times at 10Mb */
 
 class IPassiveQueue;
 
@@ -47,11 +45,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void finish();
 
   protected:
-    // parameters for autoconfig
-    bool autoconfigInProgress; // true if autoconfig is currently ongoing
-    double lowestTxrateSuggested;
-    bool duplexVetoed;
-
     // states
     int  backoffs;          // Value of backoff for exponential back-off algorithm
     int  numConcurrentTransmissions; // number of colliding frames -- we must receive this many jams
@@ -78,9 +71,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void handleEndBackoffPeriod();
     virtual void handleEndJammingPeriod();
 
-    // setup, autoconfig
-    virtual void startAutoconfig();
-    virtual void handleAutoconfigMessage(cMessage *msg);
     virtual void printState();
 
     // helpers

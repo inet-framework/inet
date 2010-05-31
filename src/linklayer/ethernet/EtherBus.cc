@@ -16,7 +16,6 @@
 */
 
 #include "EtherBus.h"
-#include "EtherFrame_m.h"  // for EtherAutoconfig only
 
 Define_Module(EtherBus);
 
@@ -29,13 +28,11 @@ static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 EtherBus::EtherBus()
 {
     tap = NULL;
-    channelMap = NULL;
 }
 
 EtherBus::~EtherBus()
 {
     delete [] tap;
-    delete [] channelMap;
 }
 
 void EtherBus::initialize()
@@ -105,20 +102,8 @@ void EtherBus::initialize()
     }
     EV << "\n";
 
-    // autoconfig: tell everyone that bus supports only 10Mb half-duplex
-    EV << "Autoconfig: advertising that we only support 10Mb half-duplex operation\n";
-    channelMap = new cChannelPtr[taps];
     for (i=0; i<taps; i++)
-    {
         gate("ethg$i", i)->setDeliverOnReceptionStart(true);
-        channelMap[i] = gate("ethg$o",i)->getTransmissionChannel();
-        /*
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-10Mb-halfduplex");
-        autoconf->setHalfDuplex(true);
-        autoconf->setTxrate(10000000); // 10Mb
-        send(autoconf,"ethg$o",i);
-        */
-    }
 }
 
 void EtherBus::handleMessage (cMessage *msg)
@@ -166,7 +151,7 @@ void EtherBus::handleMessage (cMessage *msg)
         cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
         {
             // stop current transmission
-            channelMap[tapPoint]->forceTransmissionFinishTime(SIMTIME_ZERO);
+            gate("ethg$o",tapPoint)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
         send(msg2, "ethg$o", tapPoint);
 

@@ -16,7 +16,6 @@
 */
 
 #include "EtherHub.h"
-#include "EtherFrame_m.h"  // for EtherAutoconfig only
 
 
 Define_Module(EtherHub);
@@ -28,16 +27,6 @@ static cEnvir& operator<< (cEnvir& out, cMessage *msg)
     return out;
 }
 
-EtherHub::EtherHub()
-{
-    channelMap = NULL;
-}
-
-EtherHub::~EtherHub()
-{
-    delete [] channelMap;
-}
-
 void EtherHub::initialize()
 {
     numMessages = 0;
@@ -45,19 +34,8 @@ void EtherHub::initialize()
 
     ports = gateSize("ethg");
 
-    // autoconfig: tell everyone that full duplex is not possible over shared media
-    EV << "Autoconfig: advertising that we only support half-duplex operation\n";
-    channelMap = new cChannelPtr[ports];
     for (int i=0; i<ports; i++)
-    {
         gate("ethg$i", i)->setDeliverOnReceptionStart(true);
-        channelMap[i] = gate("ethg$o",i)->getTransmissionChannel();
-/* TODO
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-halfduplex");
-        autoconf->setHalfDuplex(true);
-        send(autoconf,"ethg$o",i);
-*/
-    }
 }
 
 void EtherHub::handleMessage(cMessage *msg)
@@ -80,7 +58,7 @@ void EtherHub::handleMessage(cMessage *msg)
             bool isLast = (arrivalPort==ports-1) ? (i==ports-2) : (i==ports-1);
             cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
             // stop current transmission
-            channelMap[i]->forceTransmissionFinishTime(SIMTIME_ZERO);
+            gate("ethg$o",i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
             send(msg2,"ethg$o",i);
         }
     }

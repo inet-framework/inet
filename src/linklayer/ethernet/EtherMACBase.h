@@ -37,7 +37,6 @@
 #define ENDTRANSMISSION    103
 #define ENDJAMMING         104
 #define ENDPAUSE           105
-#define ENDAUTOCONFIG      106
 
 // MAC transmit state
 #define TX_IDLE_STATE      1
