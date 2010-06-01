@@ -102,8 +102,23 @@ void EtherBus::initialize()
     }
     EV << "\n";
 
+    double datarate = 0.0;
     for (i=0; i<taps; i++)
-        gate("ethg$i", i)->setDeliverOnReceptionStart(true);
+    {
+    	cGate* igate = gate("ethg$i", i);
+    	double drate = igate->getReceptionChannel()->getNominalDatarate();
+
+    	if (i == 0)
+    		datarate = drate;
+    	else if (datarate != drate)
+    		throw cRuntimeError(this, "The input datarate at tap %i differs from datarates of previous taps", i);
+
+    	drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+    	if (datarate != drate)
+    		throw cRuntimeError(this, "The output datarate at tap %i differs from datarates of previous taps", i);
+
+    	igate->setDeliverOnReceptionStart(true);
+    }
 }
 
 void EtherBus::handleMessage (cMessage *msg)
