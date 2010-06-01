@@ -29,13 +29,15 @@ import ned.DatarateChannel;
 channel cable extends DatarateChannel
 {
     parameters:
-        delay = 0.1us; datarate = 100Mbps;
+        delay = 0.1us;
+        datarate = 100Mbps;
 }
 
 channel cabletobus extends DatarateChannel
 {
     parameters:
-        delay = 0; datarate = 10Mbps;
+        delay = 0;
+        datarate = 10Mbps;
 }
 
 
@@ -138,7 +140,7 @@ module LargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
-                @display("is=s;p=,,r");
+                @display("is=s; p=,,r");
         }
     connections:
         for i=0..n-1 {
@@ -148,10 +150,10 @@ module LargeLAN
         switch.ethg++ <--> ethg;
 
         for i=0..h-1 {
-            hub.ethg++ <--> cable <--> hhost[i].ethg;
+            hub.ethg++ <--> cabletobus <--> hhost[i].ethg;
         }
 
-        switch.ethg++ <--> cable <--> hub.ethg++;
+        switch.ethg++ <--> cabletobus <--> hub.ethg++;
 
         for i=0..b-1 {
             bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
