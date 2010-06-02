@@ -216,6 +216,8 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         EtherFrame *frame = frameBeingReceived;
         frameBeingReceived = NULL;
         frameReceptionComplete(frame);
+        totalSuccessfulRxTxTime += simTime()-channelBusySince;
+        channelBusySince = simTime();
 
         // start receiving next frame
         frameBeingReceived = (EtherFrame *)msg;
