@@ -202,7 +202,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
     else if (receiveState==RECEIVING_STATE
             && dynamic_cast<EtherJam*>(msg)==NULL
-            && endRxMsg->getArrivalTime()-simTime() < 1.0/txrate)
+            && endRxMsg->getArrivalTime()-simTime() < halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -216,6 +216,8 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         EtherFrame *frame = frameBeingReceived;
         frameBeingReceived = NULL;
         frameReceptionComplete(frame);
+
+        // calculate usability
         totalSuccessfulRxTxTime += simTime()-channelBusySince;
         channelBusySince = simTime();
 

@@ -38,19 +38,6 @@
 #define ENDJAMMING         104
 #define ENDPAUSE           105
 
-// MAC transmit state
-#define TX_IDLE_STATE      1
-#define WAIT_IFG_STATE     2
-#define TRANSMITTING_STATE 3
-#define JAMMING_STATE      4
-#define BACKOFF_STATE      5
-#define PAUSE_STATE        6
-
-// MAC receive states
-#define RX_IDLE_STATE      1
-#define RECEIVING_STATE    2
-#define RX_COLLISION_STATE 3
-
 class IPassiveQueue;
 
 /**
@@ -59,26 +46,46 @@ class IPassiveQueue;
 class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 {
   protected:
+    enum MACTransmitState
+    {
+        TX_IDLE_STATE = 1,
+        WAIT_IFG_STATE,
+        TRANSMITTING_STATE,
+        JAMMING_STATE,
+        BACKOFF_STATE,
+        PAUSE_STATE
+    };
+    enum MACReceiveState
+    {
+        RX_IDLE_STATE = 1,
+        RECEIVING_STATE,
+        RX_COLLISION_STATE
+    };
+    MACAddress address;             // own MAC address
+    int txQueueLimit;               // max queue length
+
     bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
     bool disabled;                  // true if the MAC is disabled, defined by the user
     bool promiscuous;               // if true, passes up all received frames
-    MACAddress address;             // own MAC address
-    int txQueueLimit;               // max queue length
 
     // MAC operation modes and parameters
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
+    bool hasSubscribers;            // only notify if somebody is listening
+
+    // states
+    MACTransmitState transmitState; // State of the MAC unit transmitting
+    MACReceiveState receiveState;   // State of the MAC unit receiving
+
     // MAC transmission characteristics
     double txrate;                  // transmission rate of MAC, bit/s
+    simtime_t halfBitTime;          // transmission time of a half bit
     simtime_t slotTime;             // slot time
     simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
     cChannel *transmissionChannel;  // transmission channel
 
-    // states
-    int transmitState;              // State of the MAC unit transmitting
-    int receiveState;               // State of the MAC unit receiving
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
 
     cQueue txQueue;                 // output queue
@@ -91,7 +98,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
-    bool hasSubscribers; // only notify if somebody is listening
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;

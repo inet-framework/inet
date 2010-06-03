@@ -20,14 +20,8 @@
 
 package inet.examples.ethernet.test;
 
-import inet.linklayer.ethernet.EtherBus;
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHost2;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherSwitch2;
-import inet.world.ChannelInstaller;
 import ned.DatarateChannel;
+import inet.nodes.ethernet.EtherHost;
 
 
 //
@@ -61,28 +55,34 @@ module TwoHosts
 network SpeedTest
 {
     submodules:
+        Hosts1000F: TwoHosts {
+            parameters:
+                speed = 1000Mbps;
+                isduplex = true;
+                @display("p=70,70");
+        }
         Hosts100F: TwoHosts {
             parameters:
                 speed = 100Mbps;
                 isduplex = true;
-                @display("p=70,70");
+                @display("p=70,140");
         }
         Hosts100H: TwoHosts {
             parameters:
                 speed = 100Mbps;
                 isduplex = false;
-                @display("p=190,70");
+                @display("p=190,140");
         }
         Hosts10F: TwoHosts {
             parameters:
                 speed = 10Mbps;
                 isduplex = true;
-                @display("p=70,190");
+                @display("p=70,210");
         }
         Hosts10H: TwoHosts {
             parameters:
                 speed = 10Mbps;
                 isduplex = false;
-                @display("p=190,190");
+                @display("p=190,210");
         }
 }

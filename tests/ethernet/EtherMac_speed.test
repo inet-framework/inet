@@ -1,0 +1,163 @@
+%description:
+Testing EtherMac communications at 10Mbps,100Mbps,1000Mbps
+
+%testprog: opp_run
+
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.nodes.ethernet.EtherHost;
+
+//
+// Sample Ethernet LAN: two hosts directly connected to each other
+// via twisted pair.
+//
+module TwoHosts
+{
+    parameters:
+        double speed @unit(bps) = default(100Mbps);
+        bool isduplex = default(true);
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 0s;
+            datarate = speed;
+        }
+    submodules:
+        hostA: EtherHost {
+            parameters:
+                @display("p=70,70");
+        }
+        hostB: EtherHost {
+            parameters:
+                @display("p=190,70");
+        }
+    connections:
+        hostA.ethg <--> C <--> hostB.ethg;
+}
+
+network SpeedTest
+{
+    submodules:
+        Hosts1000F: TwoHosts {
+            parameters:
+                speed = 1000Mbps;
+                isduplex = true;
+                @display("p=70,70");
+        }
+        Hosts100F: TwoHosts {
+            parameters:
+                speed = 100Mbps;
+                isduplex = true;
+                @display("p=70,140");
+        }
+        Hosts100H: TwoHosts {
+            parameters:
+                speed = 100Mbps;
+                isduplex = false;
+                @display("p=190,140");
+        }
+        Hosts10F: TwoHosts {
+            parameters:
+                speed = 10Mbps;
+                isduplex = true;
+                @display("p=70,210");
+        }
+        Hosts10H: TwoHosts {
+            parameters:
+                speed = 10Mbps;
+                isduplex = false;
+                @display("p=190,210");
+        }
+}
+
+%inifile: omnetpp.ini
+#
+# To try: ./LANs -f TwoHosts.ini
+#
+
+[General]
+sim-time-limit = 10s
+
+tkenv-plugin-path = ../../../etc/plugins
+**.vector-recording = true
+#record-eventlog = true
+
+network = SpeedTest
+
+*.Hosts1000F.hostA.cli.destAddress = "Hosts1000F.hostB"
+*.Hosts1000F.hostB.cli.destAddress = "Hosts1000F.hostA"
+
+*.Hosts100F.hostA.cli.destAddress = "Hosts100F.hostB"
+*.Hosts100F.hostB.cli.destAddress = "Hosts100F.hostA"
+
+*.Hosts100H.hostA.cli.destAddress = "Hosts100H.hostB"
+*.Hosts100H.hostB.cli.destAddress = "Hosts100H.hostA"
+
+*.Hosts10F.hostA.cli.destAddress = "Hosts10F.hostB"
+*.Hosts10F.hostB.cli.destAddress = "Hosts10F.hostA"
+
+*.Hosts10H.hostA.cli.destAddress = "Hosts10H.hostB"
+*.Hosts10H.hostB.cli.destAddress = "Hosts10H.hostA"
+
+
+**.cli.reqLength = 1250B       # 10.000 bit
+**.cli.respLength = 1250B      # 10.000 bit
+**.hostB.cli.waitTime = 10000s
+**.hostB.cli.startTime = 10000s
+
+*.Hosts*F.*.mac.duplexEnabled = true
+*.Hosts*H.*.mac.duplexEnabled = false
+
+*.Hosts1000F.hostA.cli.waitTime = 0.0105ms        # 10.000 / speed [ / 2 when halfduplex]
+*.Hosts100F.hostA.cli.waitTime = 0.103ms        # 10.000 / speed [ / 2 when halfduplex]
+*.Hosts100H.hostA.cli.waitTime = 0.208ms        # 10.000 / speed [ / 2 when halfduplex]
+*.Hosts10F.hostA.cli.waitTime = 1ms        # 10.000 / speed [ / 2 when halfduplex]
+*.Hosts10H.hostA.cli.waitTime = 2ms        # 10.000 / speed [ / 2 when halfduplex]
+
+**.hostA.cli.startTime = 0.1s
+
+**.mac.address = "auto"
+
+# Check: "rx channel idle (%)" <= 5.0
+# Check: "rx channel utilization (%)" >= 95.0
+
+%file:check.r
+#!/usr/bin/R
+#R file:
+
+options(width=120)
+library("omnetpp")
+
+idlelimit <- 5.0
+usedlimit <- 97.0
+
+
+idle <- loadDataset(add(type='scalar', files='results/General-0.sca', select='name("rx channel idle *")'))
+used <- loadDataset(add(type='scalar', files='results/General-0.sca', select='name("rx channel utilization *")'))
+
+cat("\nOMNETPP TEST RESULT: ")
+
+if(length(idle$scalars$value) == 10 && max(idle$scalars$value) <= idlelimit)
+{
+    cat("IDLE OK\n")
+} else {
+    cat("IDLE BAD:\n")
+    print(idle$scalars[idle$scalars$value > idlelimit,])
+}
+
+cat("\nOMNETPP TEST RESULT: ")
+
+if(min(used$scalars$value) >= usedlimit)
+{
+    cat("USED OK\n")
+} else {
+    cat("USED BAD:\n")
+    print(used$scalars[used$scalars$value < usedlimit,])
+}
+
+cat("\n")
+
+%contains: stdout
+OMNETPP TEST RESULT: IDLE OK
+OMNETPP TEST RESULT: USED OK

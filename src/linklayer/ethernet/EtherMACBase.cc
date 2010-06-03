@@ -79,6 +79,7 @@ void EtherMACBase::initialize()
     // initialize queue limit
     txQueueLimit = par("txQueueLimit");
     WATCH(txQueueLimit);
+    EV << "EtherMACBase class size = " << sizeof(EtherMACBase) << "(cOutVector size = " << sizeof(cOutVector) << ")\n";
 }
 
 void EtherMACBase::initializeQueueModule()
@@ -200,7 +201,7 @@ void EtherMACBase::registerInterface()
     delete [] interfaceName;
 
     // data rate
-    interfaceEntry->setDatarate(0); // FIXME
+    interfaceEntry->setDatarate(txrate); // FIXME
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);
@@ -250,10 +251,11 @@ void EtherMACBase::calculateParameters()
 
         return;
     }
+    carrierExtension = frameBursting = false; // FIXME
     transmissionChannel = (physOutGate->getTransmissionChannel());
-    cDatarateChannel* channel = dynamic_cast<cDatarateChannel*>(transmissionChannel);
-    txrate = channel ? channel->getDatarate() : 0.0;
-    slotTime = (txrate >= GIGABIT_ETHERNET_TXRATE) ?
+    txrate = transmissionChannel->getNominalDatarate();
+    halfBitTime = txrate ? 0.5/txrate : 0.0;
+    slotTime = (txrate > FAST_ETHERNET_TXRATE) ?
             GIGABIT_SLOT_TIME : SLOT_TIME;
     shortestFrameDuration = (txrate > FAST_ETHERNET_TXRATE)
             ? GIGABIT_MIN_FRAME_WITH_EXT
@@ -267,7 +269,7 @@ void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl;
-    EV << "txrate: " << "?" /* FIXME */ << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
+    EV << "txrate: " << txrate << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
 #if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
