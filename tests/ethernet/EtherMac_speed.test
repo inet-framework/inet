@@ -1,8 +1,13 @@
 %description:
-Testing EtherMac communications at 10Mbps,100Mbps,1000Mbps
-
+Testing EtherMac communications 
+    10Mbps half duplex
+    10Mbps full duplex
+   100Mbps half duplex
+   100Mbps full duplex
+  1000Mbps full duplex
+%#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
-
+%#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
 import ned.DatarateChannel;
@@ -70,7 +75,7 @@ network SpeedTest
                 @display("p=190,210");
         }
 }
-
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 #
 # To try: ./LANs -f TwoHosts.ini
@@ -103,8 +108,9 @@ network = SpeedTest
 
 **.cli.reqLength = 1250B       # 10.000 bit
 **.cli.respLength = 1250B      # 10.000 bit
-**.hostB.cli.waitTime = 10000s
-**.hostB.cli.startTime = 10000s
+**.hostA.cli.startTime = 0s
+**.hostB.cli.startTime = 99999s    # out of sim-time-limit
+**.hostB.cli.waitTime  = 99999s    # out of sim-time-limit
 
 *.Hosts*F.*.mac.duplexEnabled = true
 *.Hosts*H.*.mac.duplexEnabled = false
@@ -115,30 +121,33 @@ network = SpeedTest
 *.Hosts10F.hostA.cli.waitTime = 1ms        # 10.000 / speed [ / 2 when halfduplex]
 *.Hosts10H.hostA.cli.waitTime = 2ms        # 10.000 / speed [ / 2 when halfduplex]
 
-**.hostA.cli.startTime = 0.1s
 
 **.mac.address = "auto"
 
 # Check: "rx channel idle (%)" <= 5.0
 # Check: "rx channel utilization (%)" >= 95.0
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
 
-%file:check.r
-#!/usr/bin/R
-#R file:
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
 
-options(width=120)
-library("omnetpp")
-
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 10
 idlelimit <- 5.0
-usedlimit <- 97.0
+usedlimit <- 95.0
 
+# begin TEST:
 
-idle <- loadDataset(add(type='scalar', files='results/General-0.sca', select='name("rx channel idle *")'))
-used <- loadDataset(add(type='scalar', files='results/General-0.sca', select='name("rx channel utilization *")'))
+idle <- loadDataset(add(type='scalar', files=scafile, select='name("rx channel idle *")'))
+used <- loadDataset(add(type='scalar', files=scafile, select='name("rx channel utilization *")'))
 
 cat("\nOMNETPP TEST RESULT: ")
 
-if(length(idle$scalars$value) == 10 && max(idle$scalars$value) <= idlelimit)
+if(length(idle$scalars$value) == linecount && max(idle$scalars$value) <= idlelimit)
 {
     cat("IDLE OK\n")
 } else {
@@ -148,7 +157,7 @@ if(length(idle$scalars$value) == 10 && max(idle$scalars$value) <= idlelimit)
 
 cat("\nOMNETPP TEST RESULT: ")
 
-if(min(used$scalars$value) >= usedlimit)
+if(length(used$scalars$value) == linecount && min(used$scalars$value) >= usedlimit)
 {
     cat("USED OK\n")
 } else {
@@ -157,7 +166,13 @@ if(min(used$scalars$value) >= usedlimit)
 }
 
 cat("\n")
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+Loaded results/General-0.sca
+Loaded results/General-0.sca
 
-%contains: stdout
 OMNETPP TEST RESULT: IDLE OK
+
 OMNETPP TEST RESULT: USED OK
+
+%#--------------------------------------------------------------------------------------------------------------

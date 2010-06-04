@@ -14,10 +14,10 @@ if [ ! -d work ];  then mkdir work; fi
 #export NEDPATH=.:../lib
 #EXTRA_INCLUDES="-I../../../src/sim/parsim -I../../../src/envir -I../../../src/common -I../../../include/platdep"
 
-opp_test -g $OPT -v $TESTFILES || exit 1
+./opp_test -g $OPT -v $TESTFILES || exit 1
 echo
 #(cd work; opp_makemake -f --deep --no-deep-includes -i ../makefrag $EXTRA_INCLUDES; $MAKE) || exit 1
 #echo
-opp_test -a "-l ../../../../src/inet -n ../../../../src/:. -u Cmdenv" -d -r $OPT -v $TESTFILES || exit 1
+./opp_test -a "-l ../../../../src/inet -n ../../../../src/:. -u Cmdenv" -d -r $OPT -v $TESTFILES || exit 1
 echo
 echo Results can be found in ./work
