@@ -324,6 +324,9 @@ void EtherMAC::startFrameTransmission()
         // But we don't know of any ongoing transmission so we blindly
         // start transmitting, immediately collide and send a jam signal.
         //
+        EV << "startFrameTransmission() send JAM signal.\n";
+        printState();
+
         sendJamSignal();
         // numConcurrentTransmissions stays the same: +1 transmission, -1 jam
 
