@@ -78,6 +78,9 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Redefined from PassiveQueueBase. */
     virtual cMessage *dequeue();
 
+    /** Redefined from IPassiveQueue. */
+    virtual bool isEmpty();
+
     /** Redefined from PassiveQueueBase: send message to MAC */
     virtual void sendOut(cMessage *msg);
 
@@ -110,5 +113,3 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
 };
 
 #endif
-
-

@@ -68,6 +68,10 @@ class INET_API REDQueue : public PassiveQueueBase
      */
     virtual void sendOut(cMessage *msg);
 
+    /**
+     * Redefined from IPassiveQueue.
+     */
+    virtual bool isEmpty();
 };
 
 #endif

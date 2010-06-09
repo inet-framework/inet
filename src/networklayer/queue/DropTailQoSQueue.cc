@@ -89,4 +89,14 @@ void DropTailQoSQueue::sendOut(cMessage *msg)
     send(msg, outGate);
 }
 
-
+/**
+ * Return true when queue is empty, otherwise return false.
+ */
+bool DropTailQoSQueue::isEmpty()
+{
+    // queue 0 is highest priority
+    for (int i=0; i<numQueues; i++)
+        if (!queues[i]->empty())
+            return false;
+    return true;
+}

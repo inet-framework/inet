@@ -56,6 +56,11 @@ class INET_API DropTailQueue : public PassiveQueueBase
      * Redefined from PassiveQueueBase.
      */
     virtual void sendOut(cMessage *msg);
+
+    /**
+     * Redefined from IPassiveQueue.
+     */
+    virtual bool isEmpty();
 };
 
 #endif

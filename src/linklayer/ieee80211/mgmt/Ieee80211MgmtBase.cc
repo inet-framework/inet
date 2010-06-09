@@ -129,6 +129,14 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     }
 }
 
+bool Ieee80211MgmtBase::isEmpty()
+{
+    if (!mgmtQueue.empty())
+        return false;
+
+    return dataQueue.empty();
+}
+
 cMessage *Ieee80211MgmtBase::dequeue()
 {
     // management frames have priority
