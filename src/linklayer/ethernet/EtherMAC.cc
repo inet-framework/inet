@@ -282,14 +282,6 @@ void EtherMAC::handleEndIFGPeriod()
     EtherMACBase::handleEndIFGPeriod();
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
-    cPacket *frame = (cPacket *)txQueue.front();
-
-    // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
-    {
-        EV << "Performing carrier extension of small frame\n";
-        frame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
-    }
 
     // send frame to network
     startFrameTransmission();
@@ -297,9 +289,8 @@ void EtherMAC::handleEndIFGPeriod()
 
 void EtherMAC::startFrameTransmission()
 {
-    cPacket *origFrame = (cPacket *)txQueue.front();
-    EV << "Transmitting a copy of frame " << origFrame << endl;
-    cPacket *frame = origFrame->dup();
+    EV << "Transmitting a copy of frame " << curTxFrame << endl;
+    EtherFrame *frame = curTxFrame->dup();
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
@@ -372,7 +363,7 @@ void EtherMAC::handleEndTxPeriod()
     // Gigabit Ethernet: now decide if we transmit next frame right away (burst) or wait IFG
     // FIXME! this is not entirely correct, there must be IFG between burst frames too
     bool burstFrame=false;
-    if (frameBursting && !txQueue.empty())
+    if (frameBursting && !txQueue.isEmpty())
     {
         // check if max bytes for burst not exceeded
         if (bytesSentInBurst<GIGABIT_MAX_BURST_BYTES)
@@ -411,10 +402,9 @@ void EtherMAC::handleEndRxPeriod()
     receiveState = RX_IDLE_STATE;
     numConcurrentTransmissions = 0;
 
-    if (transmitState==TX_IDLE_STATE && !txQueue.empty())
+    if (transmitState==TX_IDLE_STATE)
     {
-        EV << "Receiver now idle, can transmit frames in output buffer after IFG period\n";
-        scheduleEndIFGPeriod();
+        beginSendFrames();
     }
 }
 
@@ -422,8 +412,8 @@ void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
         error("At end of BACKOFF not in BACKOFF_STATE!");
-    if (txQueue.empty())
-        error("At end of BACKOFF and buffer empty!");
+    if (NULL == curTxFrame)
+        error("At end of BACKOFF and not have current tx frame!");
 
     if (receiveState==RX_IDLE_STATE)
     {
@@ -469,10 +459,11 @@ void EtherMAC::handleRetransmission()
     if (++backoffs > MAX_ATTEMPTS)
     {
         EV << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
-        delete txQueue.pop();
-
+        delete curTxFrame;
+        curTxFrame = NULL;
         transmitState = TX_IDLE_STATE;
         backoffs = 0;
+        getNextFrameFromQueue();
         // no beginSendFrames(), because end of jam signal sending will trigger it automatically
         return;
     }
@@ -509,7 +500,8 @@ void EtherMAC::printState()
     }
     EV << ",  backoffs: " << backoffs;
     EV << ",  numConcurrentTransmissions: " << numConcurrentTransmissions;
-    EV << ",  queueLength: " << txQueue.length() << endl;
+    if (txQueue.innerQueue)
+        EV << ",  queueLength: " << txQueue.innerQueue->queue.length() << endl;
 #undef CASE
 }
 

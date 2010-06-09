@@ -61,8 +61,29 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
         RECEIVING_STATE,
         RX_COLLISION_STATE
     };
+
+    class InnerQueue
+    {
+      public:
+        cQueue queue;
+        int queueLimit;               // max queue length
+
+        InnerQueue(const char* name=NULL, int limit=0) : queue(name), queueLimit(limit) {}
+    };
+
+    class MacQueue
+    {
+      public:
+        InnerQueue * innerQueue;
+        IPassiveQueue *extQueue;
+        MacQueue() : innerQueue(NULL),extQueue(NULL) {};
+        ~MacQueue() { delete innerQueue; };
+        bool isEmpty();
+        void setExternalQueue(IPassiveQueue *_extQueue) { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
+        void setInternalQueue(const char* name=NULL, int limit=0) { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
+    };
+
     MACAddress address;             // own MAC address
-    int txQueueLimit;               // max queue length
 
     bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
     bool disabled;                  // true if the MAC is disabled, defined by the user
@@ -88,8 +109,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
 
-    cQueue txQueue;                 // output queue
-    IPassiveQueue *queueModule;     // optional module to receive messages from
+    MacQueue txQueue;            // output queue
 
     cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
@@ -98,6 +118,8 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
+
+    EtherFrame *curTxFrame;
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -131,7 +153,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     EtherMACBase();
     virtual ~EtherMACBase();
 
-    virtual long getQueueLength() {return txQueue.length();}
+//    virtual long getQueueLength() {return txQueue.length();}
     virtual MACAddress getMACAddress() {return address;}
 
   protected:
@@ -172,6 +194,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     virtual void frameReceptionComplete(EtherFrame *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processPauseCommand(int pauseUnits);
+    virtual void getNextFrameFromQueue();
 
     // display
     virtual void updateDisplayString();

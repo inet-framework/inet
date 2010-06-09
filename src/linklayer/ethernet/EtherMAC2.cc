@@ -77,10 +77,9 @@ void EtherMAC2::handleMessage(cMessage *msg)
 
 void EtherMAC2::startFrameTransmission()
 {
-    EtherFrame *origFrame = (EtherFrame *)txQueue.front();
-    EV << "Transmitting a copy of frame " << origFrame << endl;
+    EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
-    EtherFrame *frame = (EtherFrame *) origFrame->dup();
+    EtherFrame *frame = (EtherFrame *) curTxFrame->dup();
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 
     if (hasSubscribers)
@@ -143,7 +142,7 @@ void EtherMAC2::handleEndTxPeriod()
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setPacket((cPacket *)txQueue.front());
+        notifDetails.setPacket(curTxFrame);
         nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
     }
 
@@ -161,4 +160,3 @@ void EtherMAC2::updateHasSubcribers()
                      nb->hasSubscribers(NF_PP_TX_END) ||
                      nb->hasSubscribers(NF_PP_RX_END);
 }
-

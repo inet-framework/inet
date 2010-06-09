@@ -26,16 +26,23 @@
 
 static const double SPEED_OF_LIGHT = 200000000.0;
 
+bool EtherMACBase::MacQueue::isEmpty()
+{
+    return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
+}
+
 EtherMACBase::EtherMACBase()
 {
     nb = NULL;
-    queueModule = NULL;
     interfaceEntry = NULL;
+    curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
 }
 
 EtherMACBase::~EtherMACBase()
 {
+    delete curTxFrame;
+
     cancelAndDelete(endTxMsg);
     cancelAndDelete(endIFGMsg);
     cancelAndDelete(endPauseMsg);
@@ -58,9 +65,6 @@ void EtherMACBase::initialize()
 
     registerInterface(); // needs MAC address
 
-    // initialize queue
-    txQueue.setName("txQueue");
-
     // initialize self messages
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
     endIFGMsg = new cMessage("EndIFG", ENDIFG);
@@ -76,9 +80,6 @@ void EtherMACBase::initialize()
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
 
-    // initialize queue limit
-    txQueueLimit = par("txQueueLimit");
-    WATCH(txQueueLimit);
     EV << "EtherMACBase class size = " << sizeof(EtherMACBase) << "(cOutVector size = " << sizeof(cOutVector) << ")\n";
 }
 
@@ -87,9 +88,14 @@ void EtherMACBase::initializeQueueModule()
     if (par("queueModule").stringValue()[0])
     {
         cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
-        queueModule = check_and_cast<IPassiveQueue *>(module);
+        IPassiveQueue *queueModule = check_and_cast<IPassiveQueue *>(module);
         EV << "Requesting first frame from queue module\n";
-        queueModule->requestPacket();
+        txQueue.setExternalQueue(queueModule);
+        txQueue.extQueue->requestPacket();
+    }
+    else
+    {
+        txQueue.setInternalQueue("txQueue", par("txQueueLimit"));
     }
 }
 
@@ -286,42 +292,55 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(address))
     {
-        error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
-              frame->getFullName(), frame->getDest().str().c_str());
+        throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
+                frame->getFullName(), frame->getDest().str().c_str());
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
+    {
+        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
+                (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
+    }
 
-    // must be EtherFrame (or EtherPauseFrame) from upper layer
+    // fill in src address if not set
+    if (frame->getSrc().isUnspecified())
+        frame->setSrc(address);
+
     bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame)!=NULL);
     if (!isPauseFrame)
-    {
         numFramesFromHL++;
 
-        if (txQueueLimit && txQueue.length()>txQueueLimit)
-            error("txQueue length exceeds %d -- this is probably due to "
-                  "a bogus app model generating excessive traffic "
-                  "(or if this is normal, increase txQueueLimit!)",
-                  txQueueLimit);
-
-        // fill in src address if not set
-        if (frame->getSrc().isUnspecified())
-            frame->setSrc(address);
-
-        // store frame and possibly begin transmitting
-        EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
-        txQueue.insert(frame);
+    if(txQueue.extQueue)
+    {
+        ASSERT(curTxFrame == NULL);
+        curTxFrame = frame;
     }
     else
     {
-        EV << "PAUSE received from higher layer\n";
+        if (!isPauseFrame)
+        {
+            if (txQueue.innerQueue->queueLimit && txQueue.innerQueue->queue.length() > txQueue.innerQueue->queueLimit)
+                error("txQueue length exceeds %d -- this is probably due to "
+                      "a bogus app model generating excessive traffic "
+                      "(or if this is normal, increase txQueueLimit!)",
+                      txQueue.innerQueue->queueLimit);
 
-        // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
-        if (!txQueue.empty())
-            txQueue.insertBefore(txQueue.front(), frame);  // front() frame is probably being transmitted
+            // store frame and possibly begin transmitting
+            EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
+            txQueue.innerQueue->queue.insert(frame);
+        }
         else
-            txQueue.insert(frame);
+        {
+            EV << "PAUSE received from higher layer\n";
+
+            // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
+            if (!txQueue.innerQueue->queue.empty())
+                txQueue.innerQueue->queue.insertBefore(txQueue.innerQueue->queue.front(), frame);  // front() frame is probably being transmitted
+            else
+                txQueue.innerQueue->queue.insert(frame);
+        }
+        if(NULL == curTxFrame && !txQueue.innerQueue->queue.empty())
+            curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
     }
 }
 
@@ -422,21 +441,20 @@ void EtherMACBase::processPauseCommand(int pauseUnits)
 
 void EtherMACBase::handleEndIFGPeriod()
 {
-    if (transmitState!=WAIT_IFG_STATE)
+    if (transmitState != WAIT_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
-    if (txQueue.empty())
+    if (NULL == curTxFrame)
         error("End of IFG and no frame to transmit");
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
-    cPacket *frame = (cPacket *)txQueue.front();
-    EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
+    EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
+    if (carrierExtension && curTxFrame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
     {
         EV << "Performing carrier extension of small frame\n";
-        frame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
+        curTxFrame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
     }
 
     // start frame burst, if enabled
@@ -454,25 +472,37 @@ void EtherMACBase::handleEndTxPeriod()
     if (transmitState!=TRANSMITTING_STATE || (!duplexMode && receiveState!=RX_IDLE_STATE))
         error("End of transmission, and incorrect state detected");
 
-    if (txQueue.empty())
+    if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
 
-    // get frame from buffer
-    cPacket *frame = (cPacket *)txQueue.pop();
-
     numFramesSent++;
-    numBytesSent += frame->getByteLength();
+    numBytesSent += curTxFrame->getByteLength();
     numFramesSentVector.record(numFramesSent);
     numBytesSentVector.record(numBytesSent);
 
-    if (dynamic_cast<EtherPauseFrame*>(frame)!=NULL)
+    if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {
         numPauseFramesSent++;
         numPauseFramesSentVector.record(numPauseFramesSent);
     }
 
-    EV << "Transmission of " << frame << " successfully completed\n";
-    delete frame;
+    EV << "Transmission of " << curTxFrame << " successfully completed\n";
+    delete curTxFrame;
+    curTxFrame = NULL;
+    getNextFrameFromQueue();
+}
+
+void EtherMACBase::getNextFrameFromQueue()
+{
+    if(txQueue.extQueue)
+    {
+        txQueue.extQueue->requestPacket();
+    }
+    else
+    {
+        if (!txQueue.innerQueue->queue.empty())
+            curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
+    }
 }
 
 void EtherMACBase::handleEndPausePeriod()
@@ -538,7 +568,7 @@ bool EtherMACBase::checkAndScheduleEndPausePeriod()
 
 void EtherMACBase::beginSendFrames()
 {
-    if (!txQueue.empty())
+    if (curTxFrame)
     {
         // Other frames are queued, therefore wait IFG period and transmit next frame
         EV << "Transmit next frame in output queue, after IFG period\n";
@@ -547,23 +577,15 @@ void EtherMACBase::beginSendFrames()
     else
     {
         transmitState = TX_IDLE_STATE;
-        if (queueModule)
-        {
-            // tell queue module that we've become idle
-            EV << "Requesting another frame from queue module\n";
-            queueModule->requestPacket();
-        }
-        else
-        {
-            // No more frames set transmitter to idle
-            EV << "No more frames to send, transmitter set to idle\n";
-        }
+        // No more frames set transmitter to idle
+        EV << "No more frames to send, transmitter set to idle\n";
     }
 }
 
 void EtherMACBase::fireChangeNotification(int type, cPacket *msg)
 {
-    if (nb) {
+    if (nb)
+    {
         notifDetails.setPacket(msg);
         nb->fireChangeNotification(type, &notifDetails);
     }
