@@ -1,0 +1,83 @@
+//
+// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
+
+
+package inet.nodes.ethernet;
+
+import inet.networklayer.queue.OutputQueue;
+import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherEncap;
+import inet.applications.ethernet.EtherAppSrv;
+import inet.applications.ethernet.EtherAppCli;
+
+
+//
+// An example host with one Ethernet port and traffic generators that
+// generate Ethernet traffic directly. This host model does not contain
+// higher layer protocols (\IP, \TCP).
+//
+module EtherHostQ
+{
+    parameters:
+        string queueType = default("DropTailQueue");
+        @node();
+        @labels(node,ethernet-node);
+        @display("i=device/pc2");
+    gates:
+        inout ethg @labels(EtherFrame-conn);
+    submodules:
+        queue: <queueType> like OutputQueue {
+            parameters:
+                @display("p=99,201;q=l2queue");
+        }
+        cli: EtherAppCli {
+            parameters:
+                registerSAP = true;
+                @display("p=60,60,col");
+        }
+        srv: EtherAppSrv {
+            parameters:
+                registerSAP = true;
+                @display("p=250,60,col");
+        }
+        llc: EtherLLC {
+            parameters:
+                @display("p=155,120");
+            gates:
+                upperLayerIn[2];
+                upperLayerOut[2];
+        }
+        mac: EtherMAC {
+            parameters:
+                queueModule = "queue";
+                txQueueLimit = 1; // queue sends one packet at a time
+                @display("p=155,272;q=queue");
+        }
+    connections:
+        mac.phys <--> ethg;
+
+        cli.out --> llc.upperLayerIn[0];
+        cli.in <-- llc.upperLayerOut[0];
+
+        srv.out --> llc.upperLayerIn[1];
+        srv.in <-- llc.upperLayerOut[1];
+        llc.lowerLayerOut --> queue.in;
+        queue.out --> mac.upperLayerIn;
+        mac.upperLayerOut --> llc.lowerLayerIn;
+}
