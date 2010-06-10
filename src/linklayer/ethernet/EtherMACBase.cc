@@ -55,9 +55,6 @@ void EtherMACBase::initialize()
 
     initializeFlags();
 
-//    initializeTxrate();
-//    WATCH(txrate);
-
     initializeMACAddress();
     initializeQueueModule();
     initializeNotificationBoard();
@@ -80,7 +77,7 @@ void EtherMACBase::initialize()
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
 
-    EV << "EtherMACBase class size = " << sizeof(EtherMACBase) << "(cOutVector size = " << sizeof(cOutVector) << ")\n";
+    EV << "EtherMACBase class size = " << sizeof(EtherMACBase) << "(long size:" << sizeof(long) << ", cOutVector size = " << sizeof(cOutVector) << ")\n";
 }
 
 void EtherMACBase::initializeQueueModule()
@@ -135,8 +132,6 @@ void EtherMACBase::initializeFlags()
     if (!connected)
         EV << "MAC not connected to a network.\n";
     WATCH(connected);
-
-    physInGate->setDeliverOnReceptionStart(true);
 
     // TODO: this should be settable from the gui
     // initialize disabled flag
@@ -275,7 +270,7 @@ void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl;
-    EV << "txrate: " << txrate << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
+    EV << "txrate: " << txrate << ", " << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
@@ -615,8 +610,8 @@ void EtherMACBase::finish()
         {
             recordScalar("frames/sec sent", numFramesSent/t);
             recordScalar("frames/sec rcvd", numFramesReceivedOK/t);
-            recordScalar("bits/sec sent",   8*numBytesSent/t);
-            recordScalar("bits/sec rcvd",   8*numBytesReceivedOK/t);
+            recordScalar("bits/sec sent",   (8.0*numBytesSent)/t);
+            recordScalar("bits/sec rcvd",   (8.0*numBytesReceivedOK)/t);
         }
     }
 }

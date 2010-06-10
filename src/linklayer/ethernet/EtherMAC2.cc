@@ -39,9 +39,20 @@ void EtherMAC2::initialize()
     beginSendFrames();
 }
 
-void EtherMAC2::initializeTxrate()
+void EtherMAC2::initializeStatistics()
 {
+    EtherMACBase::initializeStatistics();
+
+    // initialize statistics
+    totalSuccessfulRxTime = 0.0;
 }
+
+void EtherMAC2::initializeFlags()
+{
+    EtherMACBase::initializeFlags();
+    physInGate->setDeliverOnReceptionStart(false);
+}
+
 
 void EtherMAC2::handleMessage(cMessage *msg)
 {
@@ -119,6 +130,8 @@ void EtherMAC2::processMsgFromNetwork(cPacket *msg)
     EtherMACBase::processMsgFromNetwork(msg);
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
+    totalSuccessfulRxTime += frame->getDuration();
+
     if (hasSubscribers)
     {
         // fire notification
@@ -152,6 +165,16 @@ void EtherMAC2::handleEndTxPeriod()
     EtherMACBase::handleEndTxPeriod();
 
     beginSendFrames();
+}
+
+void EtherMAC2::finish()
+{
+    EtherMACBase::finish();
+
+    simtime_t t = simTime();
+    simtime_t totalChannelIdleTime = t - totalSuccessfulRxTime;
+    recordScalar("rx channel idle (%)", 100*(totalChannelIdleTime/t));
+    recordScalar("rx channel utilization (%)", 100*(totalSuccessfulRxTime/t));
 }
 
 void EtherMAC2::updateHasSubcribers()

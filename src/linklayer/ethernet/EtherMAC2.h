@@ -36,8 +36,12 @@ class INET_API EtherMAC2 : public EtherMACBase
 
   protected:
     virtual void initialize();
-    virtual void initializeTxrate();
+    virtual void initializeStatistics();
+    virtual void initializeFlags();
     virtual void handleMessage(cMessage *msg);
+
+    // finish
+    virtual void finish();
 
     // event handlers
     virtual void startFrameTransmission();
@@ -48,6 +52,10 @@ class INET_API EtherMAC2 : public EtherMACBase
 
     // notifications
     virtual void updateHasSubcribers();
+
+    // statistics:
+    simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
+    simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
 };
 
 #endif

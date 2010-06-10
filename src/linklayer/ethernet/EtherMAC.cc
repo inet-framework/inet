@@ -64,6 +64,11 @@ void EtherMAC::initialize()
 
     WATCH(backoffs);
     WATCH(numConcurrentTransmissions);
+}
+
+void EtherMAC::initializeStatistics()
+{
+    EtherMACBase::initializeStatistics();
 
     // initialize statistics
     totalCollisionTime = 0.0;
@@ -77,8 +82,11 @@ void EtherMAC::initialize()
     numBackoffsVector.setName("backoffs");
 }
 
-void EtherMAC::initializeTxrate()
+void EtherMAC::initializeFlags()
 {
+    EtherMACBase::initializeFlags();
+
+    physInGate->setDeliverOnReceptionStart(true);
 }
 
 void EtherMAC::handleMessage (cMessage *msg)
