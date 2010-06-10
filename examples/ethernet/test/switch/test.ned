@@ -2,12 +2,11 @@
 package inet.examples.ethernet.test.switch;
 
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHost;
+import inet.nodes.ethernet.EtherHostQ;
 import inet.nodes.ethernet.EtherSwitch;
 
 //
-// Sample Ethernet LAN: two hosts directly connected to each other
-// via twisted pair.
+// Sample Ethernet LAN: hosts connected via switch.
 //
 network SpeedTest
 {
@@ -28,27 +27,27 @@ network SpeedTest
             datarate = 1000Mbps;
         }
     submodules:
-        host_10_F_A: EtherHost {
+        host_10_F_A: EtherHostQ {
             parameters:
                 @display("p=70,70");
         }
-        host_10_F_B: EtherHost {
+        host_10_F_B: EtherHostQ {
             parameters:
                 @display("p=210,70");
         }
-        host_100_F_A: EtherHost {
+        host_100_F_A: EtherHostQ {
             parameters:
                 @display("p=70,140");
         }
-        host_100_F_B: EtherHost {
+        host_100_F_B: EtherHostQ {
             parameters:
                 @display("p=210,140");
         }
-        host_1000_F_A: EtherHost {
+        host_1000_F_A: EtherHostQ {
             parameters:
                 @display("p=70,210");
         }
-        host_1000_F_B: EtherHost {
+        host_1000_F_B: EtherHostQ {
             parameters:
                 @display("p=210,210");
         }
@@ -66,4 +65,3 @@ network SpeedTest
         switch.ethg[4] <--> C1000 <--> host_1000_F_A.ethg;
         switch.ethg[5] <--> C1000 <--> host_1000_F_B.ethg;
 }
-
