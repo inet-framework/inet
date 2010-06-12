@@ -2,7 +2,7 @@
 /// @file    TraCIConstants.h
 /// @author  Axel Wegener <wegener@itm.uni-luebeck.de>
 /// @date    2007/10/24
-/// @version $Id$
+/// @version $Id: TraCIConstants.h 8776 2010-05-25 07:33:26Z dkrajzew $
 ///
 /// holds codes used for TraCI
 /****************************************************************************/
@@ -31,9 +31,6 @@
 
 // command: set maximum speed
 #define CMD_SETMAXSPEED 0x11
-
-// command: set vehicle color
-#define CMD_SETCOLOR 0x99 // not in TraCI standard
 
 // command: stop node
 #define CMD_STOP 0x12
@@ -278,8 +275,6 @@
 #define TYPE_STRINGLIST 0x0E
 // compound object
 #define TYPE_COMPOUND 0x0F
-// 2D-position (two floats)
-#define TYPE_POSITION2D 0x10
 // color (four ubytes)
 #define TYPE_COLOR 0x11
 

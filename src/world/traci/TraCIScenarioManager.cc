@@ -731,7 +731,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			}
 		} else if (variable1_resp == VAR_POSITION) {
 			uint8_t varType; buf >> varType;
-			ASSERT(varType == TYPE_POSITION2D);
+			ASSERT(varType == POSITION_2D);
 			buf >> px;
 			buf >> py;
 			numRead++;
