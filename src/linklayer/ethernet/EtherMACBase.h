@@ -28,16 +28,6 @@
 #include "NotificationBoard.h"
 
 
-//FIXME change into inner enums!!!
-
-// Self-message kind values
-#define ENDIFG             100
-#define ENDRECEPTION       101
-#define ENDBACKOFF         102
-#define ENDTRANSMISSION    103
-#define ENDJAMMING         104
-#define ENDPAUSE           105
-
 class IPassiveQueue;
 
 /**
@@ -62,6 +52,17 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
         RX_COLLISION_STATE
     };
 
+    // Self-message kind values
+    enum SelfMsgKindValues
+    {
+        ENDIFG = 100,
+        ENDRECEPTION,
+        ENDBACKOFF,
+        ENDTRANSMISSION,
+        ENDJAMMING,
+        ENDPAUSE
+    };
+
     class InnerQueue
     {
       public:
@@ -76,7 +77,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
       public:
         InnerQueue * innerQueue;
         IPassiveQueue *extQueue;
-        MacQueue() : innerQueue(NULL),extQueue(NULL) {};
+        MacQueue() : innerQueue(NULL), extQueue(NULL) {};
         ~MacQueue() { delete innerQueue; };
         bool isEmpty();
         void setExternalQueue(IPassiveQueue *_extQueue) { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
