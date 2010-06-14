@@ -53,9 +53,8 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     // notifications
     virtual void updateHasSubcribers();
 
-    // statistics:
+    // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
-    simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
 };
 
 #endif
