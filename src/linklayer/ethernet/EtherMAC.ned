@@ -124,10 +124,10 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EtherMAC2, EthernetInterface, EthernetInterface2, OutputQueue, EtherEncap, EtherLLC
+// @see EtherMACFullDuplex, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
-simple EtherMAC
+simple EtherMAC like IEtherMAC
 {
     parameters:
         bool promiscuous = default(false); // if true, all packets are received, otherwise only the

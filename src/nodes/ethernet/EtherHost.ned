@@ -22,7 +22,7 @@ package inet.nodes.ethernet;
 import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.linklayer.ethernet.EtherLLC;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.IEtherMAC;
 
 
 //
@@ -33,6 +33,7 @@ import inet.linklayer.ethernet.EtherMAC;
 module EtherHost
 {
     parameters:
+        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
         @node();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
@@ -56,7 +57,7 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        mac: EtherMAC {
+        mac: <macType> like IEtherMAC {
             parameters:
                 queueModule = "";
                 @display("p=155,200;q=queue");

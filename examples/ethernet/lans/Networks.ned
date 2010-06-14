@@ -23,9 +23,7 @@ package inet.examples.ethernet.lans;
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHostFullDuplex;
 import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherSwitch2;
 import inet.world.ChannelInstaller;
 import ned.DatarateChannel;
 
@@ -271,26 +269,38 @@ channel ethernetline extends DatarateChannel
         datarate = 10Mbps;
 }
 
+module EtherHostFullDuplex extends EtherHost
+{
+	parameters:
+	    macType = "EtherMACFullDuplex";
+}
+
+module EtherSwitchFullDuplex extends EtherSwitch
+{
+	parameters:
+	    macType = "EtherMACFullDuplex";
+}
+
 network SwitchedDuplexLAN
 {
     submodules:
-        hostA: EtherHost2 {
+        hostA: EtherHostFullDuplex {
             parameters:
                 @display("p=161,55");
         }
-        hostB: EtherHost2 {
+        hostB: EtherHostFullDuplex {
             parameters:
                 @display("p=253,125");
         }
-        hostC: EtherHost2 {
+        hostC: EtherHostFullDuplex {
             parameters:
                 @display("p=158,199");
         }
-        hostD: EtherHost2 {
+        hostD: EtherHostFullDuplex {
             parameters:
                 @display("p=59,127");
         }
-        switch: EtherSwitch2 {
+        switch: EtherSwitchFullDuplex {
             parameters:
                 @display("p=162,124");
             gates:
@@ -302,4 +312,3 @@ network SwitchedDuplexLAN
         switch.ethg[2] <--> ethernetline <--> hostC.ethg;
         switch.ethg[3] <--> ethernetline <--> hostD.ethg;
 }
-

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Levente Meszaros
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -141,7 +142,7 @@ package inet.linklayer.ethernet;
 // @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
-simple EtherMACFullDuplex
+simple EtherMACFullDuplex like IEtherMAC
 {
     parameters:
         bool promiscuous = default(false);     // if true, all packets are received, otherwise only the
@@ -153,10 +154,9 @@ simple EtherMACFullDuplex
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
         int mtu = default(1500);
-        @display("i=block/queue");
+        @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
         inout phys @labels(EtherFrame);            // to physical layer or the network
 }
-

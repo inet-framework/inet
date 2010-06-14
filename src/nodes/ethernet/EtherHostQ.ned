@@ -20,7 +20,7 @@
 package inet.nodes.ethernet;
 
 import inet.networklayer.queue.OutputQueue;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.ethernet.EtherLLC;
 import inet.linklayer.ethernet.EtherEncap;
 import inet.applications.ethernet.EtherAppSrv;
@@ -35,6 +35,7 @@ import inet.applications.ethernet.EtherAppCli;
 module EtherHostQ
 {
     parameters:
+        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
         string queueType = default("DropTailQueue");
         @node();
         @labels(node,ethernet-node);
@@ -63,7 +64,7 @@ module EtherHostQ
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        mac: EtherMAC {
+        mac: <macType> like IEtherMAC {
             parameters:
                 queueModule = "queue";
                 txQueueLimit = 1; // queue sends one packet at a time

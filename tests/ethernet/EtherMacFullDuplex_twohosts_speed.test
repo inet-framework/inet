@@ -11,8 +11,14 @@ Testing EtherMac communications
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostFullDuplexQ;
+import inet.nodes.ethernet.EtherHostQ;
 
+
+module EtherHostFullDuplexQ extends EtherHostQ
+{
+    parameters:
+        macType = "EtherMACFullDuplex";
+}
 
 network SpeedTest
 {
