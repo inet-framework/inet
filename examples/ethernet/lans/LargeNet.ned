@@ -40,6 +40,13 @@ channel cabletobus extends DatarateChannel
         datarate = 10Mbps;
 }
 
+channel cabletoserver extends DatarateChannel
+{
+    parameters:
+        delay = 0;
+        datarate = 1Gbps;
+}
+
 
 //
 // Several hosts on an Ethernet hub
@@ -237,7 +244,7 @@ network LargeNet
         for i=0..al-1 {
             switchA.ethg++ <--> cable <--> llanA[i].ethg;
         }
-        switchA.ethg++ <--> cable <--> serverA.ethg;
+        switchA.ethg++ <--> cabletoserver <--> serverA.ethg;
 
         // switch B
         for i=0..bs-1 {
@@ -249,7 +256,7 @@ network LargeNet
         for i=0..bl-1 {
             switchB.ethg++ <--> cable <--> llanB[i].ethg;
         }
-        switchB.ethg++ <--> cable <--> serverB.ethg;
+        switchB.ethg++ <--> cabletoserver <--> serverB.ethg;
 
         // switch C
         for i=0..cs-1 {
@@ -261,7 +268,7 @@ network LargeNet
         for i=0..cl-1 {
             switchC.ethg++ <--> cable <--> llanC[i].ethg;
         }
-        switchC.ethg++ <--> cable <--> serverC.ethg;
+        switchC.ethg++ <--> cabletoserver <--> serverC.ethg;
 
         // switch D
         for i=0..ds-1 {
@@ -273,7 +280,7 @@ network LargeNet
         for i=0..dl-1 {
             switchD.ethg++ <--> cable <--> llanD[i].ethg;
         }
-        switchD.ethg++ <--> cable <--> serverD.ethg;
+        switchD.ethg++ <--> cabletoserver <--> serverD.ethg;
 
         // connect switches
         switchA.ethg++ <--> cable <--> switchB.ethg++;
