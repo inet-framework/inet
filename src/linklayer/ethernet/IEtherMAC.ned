@@ -19,8 +19,8 @@
 package inet.linklayer.ethernet;
 
 //                                                                                                                                                                                                                                                                        
-// Interface for TCP protocol implementations. All TCP implementations should                                                                                                                                                                                             
-// implement this (i.e. TCP like ITCP)                                                                                                                                                                                                                                    
+// Interface for Ethernet MAC implementations. All EtherMAC implementations should                                                                                                                                                                                             
+// implement this (i.e. EtherMAC like IEtherMAC)                                                                                                                                                                                                                                    
 //                                                                                                                                                                                                                                                                        
 moduleinterface IEtherMAC
 {
@@ -30,7 +30,7 @@ moduleinterface IEtherMAC
         string address;  // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-//        bool duplexEnabled;   // whether duplex mode can be enabled or not; whether
+        bool duplexEnabled;   // whether duplex mode can be enabled or not; whether
                                 // MAC will actually use duplex mode depends on the result
                                 // of the auto-configuration process (duplex is only
                                 // possible with DTE-to-DTE connection).
@@ -44,4 +44,3 @@ moduleinterface IEtherMAC
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
-
