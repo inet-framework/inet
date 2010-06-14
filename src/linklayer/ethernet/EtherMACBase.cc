@@ -255,15 +255,21 @@ void EtherMACBase::calculateParameters()
     carrierExtension = frameBursting = false; // FIXME
     transmissionChannel = (physOutGate->getTransmissionChannel());
     txrate = transmissionChannel->getNominalDatarate();
-    halfBitTime = txrate ? 0.5/txrate : 0.0;
+
+    // Check valid speeds
+    if(     (txrate != ETHERNET_TXRATE)
+         && (txrate != FAST_ETHERNET_TXRATE)
+         && (txrate != GIGABIT_ETHERNET_TXRATE)
+         && (txrate != FAST_GIGABIT_ETHERNET_TXRATE)
+         )
+        error("Invalid transmission rate on channel %s at %s modul", transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+
+    halfBitTime = 0.5/txrate;
     slotTime = (txrate > FAST_ETHERNET_TXRATE) ?
             GIGABIT_SLOT_TIME : SLOT_TIME;
     shortestFrameDuration = (txrate > FAST_ETHERNET_TXRATE)
             ? GIGABIT_MIN_FRAME_WITH_EXT
             : MIN_ETHERNET_FRAME;
-/*
-    bitTime = 1/(double)txrate;
-*/
 }
 
 void EtherMACBase::printParameters()
