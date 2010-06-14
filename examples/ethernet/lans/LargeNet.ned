@@ -140,7 +140,7 @@ module LargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
-                @display("is=s; p=,,r");
+                @display("is=s;p=,r");
         }
     connections:
         for i=0..n-1 {

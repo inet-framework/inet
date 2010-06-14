@@ -23,7 +23,7 @@ package inet.examples.ethernet.lans;
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHost2;
+import inet.nodes.ethernet.EtherHostFullDuplex;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.ethernet.EtherSwitch2;
 import inet.world.ChannelInstaller;

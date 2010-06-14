@@ -19,33 +19,26 @@
 
 package inet.nodes.ethernet;
 
-import inet.networklayer.queue.OutputQueue;
-import inet.linklayer.ethernet.EtherMAC2;
-import inet.linklayer.ethernet.EtherLLC;
-import inet.linklayer.ethernet.EtherEncap;
-import inet.applications.ethernet.EtherAppSrv;
 import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppSrv;
+import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherMACFullDuplex;
 
 
 //
-// An example host with one Ethernet port and traffic generators that
-// generate Ethernet traffic directly. This host model does not contain
-// higher layer protocols (\IP, \TCP).
+// Example host model with one Ethernet port and several traffic generators
+// to create traffic in the test network.
 //
-module EtherHost2Q
+module EtherHostFullDuplex
 {
     parameters:
-        string queueType = default("DropTailQueue");
         @node();
         @labels(node,ethernet-node);
-        @display("i=device/pc2");
+        @display("b=271,262;i=device/pc2");
     gates:
         inout ethg @labels(EtherFrame-conn);
+
     submodules:
-        queue: <queueType> like OutputQueue {
-            parameters:
-                @display("p=99,201;q=l2queue");
-        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = true;
@@ -63,13 +56,15 @@ module EtherHost2Q
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        mac: EtherMAC2 {
+        mac: EtherMACFullDuplex {
             parameters:
-                queueModule = "queue";
-                txQueueLimit = 1; // queue sends one packet at a time
-                @display("p=155,272;q=queue");
+                queueModule = "";
+                @display("p=155,200;q=queue");
         }
     connections:
+        llc.lowerLayerIn <-- mac.upperLayerOut;
+        llc.lowerLayerOut --> mac.upperLayerIn;
+
         mac.phys <--> ethg;
 
         cli.out --> llc.upperLayerIn[0];
@@ -77,7 +72,5 @@ module EtherHost2Q
 
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
-        llc.lowerLayerOut --> queue.in;
-        queue.out --> mac.upperLayerIn;
-        mac.upperLayerOut --> llc.lowerLayerIn;
 }
+

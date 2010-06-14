@@ -18,18 +18,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "EtherMAC2.h"
+#include "EtherMACFullDuplex.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
-Define_Module(EtherMAC2);
+Define_Module(EtherMACFullDuplex);
 
-EtherMAC2::EtherMAC2()
+EtherMACFullDuplex::EtherMACFullDuplex()
 {
 }
 
-void EtherMAC2::initialize()
+void EtherMACFullDuplex::initialize()
 {
     EtherMACBase::initialize();
 
@@ -39,7 +39,7 @@ void EtherMAC2::initialize()
     beginSendFrames();
 }
 
-void EtherMAC2::initializeStatistics()
+void EtherMACFullDuplex::initializeStatistics()
 {
     EtherMACBase::initializeStatistics();
 
@@ -47,14 +47,14 @@ void EtherMAC2::initializeStatistics()
     totalSuccessfulRxTime = 0.0;
 }
 
-void EtherMAC2::initializeFlags()
+void EtherMACFullDuplex::initializeFlags()
 {
     EtherMACBase::initializeFlags();
     physInGate->setDeliverOnReceptionStart(false);
 }
 
 
-void EtherMAC2::handleMessage(cMessage *msg)
+void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
     if (!connected)
         processMessageWhenNotConnected(msg);
@@ -86,7 +86,7 @@ void EtherMAC2::handleMessage(cMessage *msg)
     if (ev.isGUI())  updateDisplayString();
 }
 
-void EtherMAC2::startFrameTransmission()
+void EtherMACFullDuplex::startFrameTransmission()
 {
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
@@ -117,7 +117,7 @@ void EtherMAC2::startFrameTransmission()
     }
 }
 
-void EtherMAC2::processFrameFromUpperLayer(EtherFrame *frame)
+void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EtherMACBase::processFrameFromUpperLayer(frame);
 
@@ -125,7 +125,7 @@ void EtherMAC2::processFrameFromUpperLayer(EtherFrame *frame)
         startFrameTransmission();
 }
 
-void EtherMAC2::processMsgFromNetwork(cPacket *msg)
+void EtherMACFullDuplex::processMsgFromNetwork(cPacket *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
@@ -143,14 +143,14 @@ void EtherMAC2::processMsgFromNetwork(cPacket *msg)
         frameReceptionComplete(frame);
 }
 
-void EtherMAC2::handleEndIFGPeriod()
+void EtherMACFullDuplex::handleEndIFGPeriod()
 {
     EtherMACBase::handleEndIFGPeriod();
 
     startFrameTransmission();
 }
 
-void EtherMAC2::handleEndTxPeriod()
+void EtherMACFullDuplex::handleEndTxPeriod()
 {
     if (hasSubscribers)
     {
@@ -167,7 +167,7 @@ void EtherMAC2::handleEndTxPeriod()
     beginSendFrames();
 }
 
-void EtherMAC2::finish()
+void EtherMACFullDuplex::finish()
 {
     EtherMACBase::finish();
 
@@ -177,7 +177,7 @@ void EtherMAC2::finish()
     recordScalar("rx channel utilization (%)", 100*(totalSuccessfulRxTime/t));
 }
 
-void EtherMAC2::updateHasSubcribers()
+void EtherMACFullDuplex::updateHasSubcribers()
 {
     hasSubscribers = nb->hasSubscribers(NF_PP_TX_BEGIN) ||
                      nb->hasSubscribers(NF_PP_TX_END) ||
