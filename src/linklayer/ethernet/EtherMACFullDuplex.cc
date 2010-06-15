@@ -122,7 +122,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     EtherMACBase::processFrameFromUpperLayer(frame);
 
     if (transmitState == TX_IDLE_STATE)
-        startFrameTransmission();
+        scheduleEndIFGPeriod();
 }
 
 void EtherMACFullDuplex::processMsgFromNetwork(cPacket *msg)
