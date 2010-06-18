@@ -26,6 +26,73 @@
 
 static const double SPEED_OF_LIGHT = 200000000.0;
 
+/*
+double      txrate;
+int         maxFramesInBurst;
+int64       maxBytesInBurst;
+int64       frameMinBytes;
+int64       otherFrameMinBytes;     // minimal frame length in burst mode, after first frame
+simtime_t   halfBitTime;          // transmission time of a half bit
+simtime_t   slotTime;             // slot time
+simtime_t   shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+*/
+
+const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
+{
+    0,
+    0,
+    0,
+    0,
+    0,
+    0.0,
+    0.0,
+    0.0
+};
+
+const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
+{
+    {
+        ETHERNET_TXRATE,
+        0,
+        0,
+        MIN_ETHERNET_FRAME,
+        0,
+        0.5/ETHERNET_TXRATE,
+        512.0/ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+    },
+    {
+        FAST_ETHERNET_TXRATE,
+        0,
+        0,
+        MIN_ETHERNET_FRAME,
+        0,
+        0.5/FAST_ETHERNET_TXRATE,
+        512.0/ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME/FAST_ETHERNET_TXRATE
+    },
+    {
+        GIGABIT_ETHERNET_TXRATE,
+        MAX_PACKETBURST,
+        GIGABIT_MAX_BURST_BYTES,
+        GIGABIT_MIN_FRAME_WITH_EXT,
+        MIN_ETHERNET_FRAME,
+        0.5/GIGABIT_ETHERNET_TXRATE,
+        512.0/GIGABIT_ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+    },
+    {
+        FAST_GIGABIT_ETHERNET_TXRATE,
+        MAX_PACKETBURST,
+        GIGABIT_MAX_BURST_BYTES,
+        GIGABIT_MIN_FRAME_WITH_EXT,
+        MIN_ETHERNET_FRAME,
+        0.5/FAST_GIGABIT_ETHERNET_TXRATE,
+        512.0/GIGABIT_ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+    }
+};
+
 bool EtherMACBase::MacQueue::isEmpty()
 {
     return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
@@ -37,6 +104,7 @@ EtherMACBase::EtherMACBase()
     interfaceEntry = NULL;
     curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
+    lastTxFinishTime = -1.0; // never equals with current simtime.
 }
 
 EtherMACBase::~EtherMACBase()
@@ -61,6 +129,8 @@ void EtherMACBase::initialize()
     initializeStatistics();
 
     registerInterface(); // needs MAC address
+
+    lastTxFinishTime = -1.0; // never equals with current simtime.
 
     // initialize self messages
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
@@ -202,7 +272,7 @@ void EtherMACBase::registerInterface()
     delete [] interfaceName;
 
     // data rate
-    interfaceEntry->setDatarate(txrate); // FIXME
+    interfaceEntry->setDatarate(curEtherDescr->txrate); // FIXME
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);
@@ -244,39 +314,33 @@ void EtherMACBase::calculateParameters()
 {
     if (disabled || !connected)
     {
-        txrate = 0;
-        slotTime = 0;
-        shortestFrameDuration = 0;
+        curEtherDescr = &nullEtherDescr;
         carrierExtension = frameBursting = false;
         transmissionChannel = NULL;
 
         return;
     }
     carrierExtension = frameBursting = false; // FIXME
-    transmissionChannel = (physOutGate->getTransmissionChannel());
-    txrate = transmissionChannel->getNominalDatarate();
+    transmissionChannel = physOutGate->getTransmissionChannel();
+    double txrate = transmissionChannel->getNominalDatarate();
 
     // Check valid speeds
-    if(     (txrate != ETHERNET_TXRATE)
-         && (txrate != FAST_ETHERNET_TXRATE)
-         && (txrate != GIGABIT_ETHERNET_TXRATE)
-         && (txrate != FAST_GIGABIT_ETHERNET_TXRATE)
-         )
-        error("Invalid transmission rate on channel %s at %s modul", transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
-
-    halfBitTime = 0.5/txrate;
-    slotTime = (txrate > FAST_ETHERNET_TXRATE) ?
-            GIGABIT_SLOT_TIME : SLOT_TIME;
-    shortestFrameDuration = (txrate > FAST_ETHERNET_TXRATE)
-            ? GIGABIT_MIN_FRAME_WITH_EXT
-            : MIN_ETHERNET_FRAME;
+    for(int i=0; i<NUM_OF_ETHERDESCRS; i++)
+    {
+        if (txrate == etherDescrs[i].txrate)
+        {
+            curEtherDescr = &etherDescrs[i];
+            return;
+        }
+    }
+    error("Invalid transmission rate on channel %s at %s modul", transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
 }
 
 void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl;
-    EV << "txrate: " << txrate << ", " << (duplexMode ? "full-duplex" : "half-duplex") << endl;
+    EV << "txrate: " << curEtherDescr->txrate << ", " << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
@@ -349,15 +413,15 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 {
     EV << "Received frame from network: " << frame << endl;
 
-    // frame must be EtherFrame or EtherJam
-    if (dynamic_cast<EtherFrame*>(frame)==NULL && dynamic_cast<EtherJam*>(frame)==NULL)
+    // frame must be EtherTraffic
+    if (dynamic_cast<EtherTraffic*>(frame)==NULL)
         error("message with unexpected message class '%s' arrived from network (name='%s')",
                 frame->getClassName(), frame->getFullName());
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime()-frame->getSendingTime() >= shortestFrameDuration)
+        if (simTime()-frame->getSendingTime() >= curEtherDescr->shortestFrameDuration)
         {
             error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
                   "(%lgs corresponds to an approx. %lgm cable)",
@@ -442,7 +506,7 @@ void EtherMACBase::processPauseCommand(int pauseUnits)
 
 void EtherMACBase::handleEndIFGPeriod()
 {
-    if (transmitState != WAIT_IFG_STATE)
+    if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
     if (NULL == curTxFrame)
@@ -490,6 +554,7 @@ void EtherMACBase::handleEndTxPeriod()
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
     delete curTxFrame;
     curTxFrame = NULL;
+    lastTxFinishTime = simTime();
     getNextFrameFromQueue();
 }
 
@@ -529,15 +594,39 @@ void EtherMACBase::processMessageWhenDisabled(cMessage *msg)
 
 void EtherMACBase::scheduleEndIFGPeriod()
 {
-    cPacket gap;
-    gap.setBitLength(INTERFRAME_GAP_BITS);
-    simtime_t interFrameGap = transmissionChannel->calculateDuration(&gap);
-    scheduleAt(simTime()+interFrameGap, endIFGMsg);
-    transmitState = WAIT_IFG_STATE;
+    ASSERT(curTxFrame);
+
+    if (frameBursting
+            && (simTime() == lastTxFinishTime)
+            && (bytesSentInBurst + curTxFrame->getByteLength() <= GIGABIT_MAX_BURST_BYTES) )
+    {
+        EtherPadding *gap = new EtherPadding("IFG");
+        gap->setBitLength(INTERFRAME_GAP_BITS);
+        send(gap, physOutGate);
+        transmitState = SEND_IFG_STATE;
+        scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
+        // FIXME Check collision?
+    }
+    else
+    {
+        EtherPadding gap;
+        gap.setBitLength(INTERFRAME_GAP_BITS);
+        bytesSentInBurst = 0;
+        framesSentInBurst = 0;
+        transmitState = WAIT_IFG_STATE;
+        scheduleAt(simTime()+transmissionChannel->calculateDuration(&gap), endIFGMsg);
+    }
 }
 
 void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
 {
+    // update burst variables
+    if (frameBursting)
+    {
+        bytesSentInBurst += frame->getByteLength();
+        framesSentInBurst++;
+    }
+
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
 }
@@ -653,6 +742,7 @@ void EtherMACBase::updateDisplayString()
     switch (transmitState) {
         case TX_IDLE_STATE:      txStateName="IDLE"; break;
         case WAIT_IFG_STATE:     txStateName="WAIT_IFG"; break;
+        case SEND_IFG_STATE:     txStateName="SEND_IFG"; break;
         case TRANSMITTING_STATE: txStateName="TX"; break;
         case JAMMING_STATE:      txStateName="JAM"; break;
         case BACKOFF_STATE:      txStateName="BACKOFF"; break;

@@ -168,16 +168,18 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
 
+//TODO handling received EtherIFG
+
     simtime_t endRxTime = simTime() + msg->getDuration();
 
-    if (!duplexMode && transmitState==TRANSMITTING_STATE)
+    if (!duplexMode && (transmitState==TRANSMITTING_STATE || transmitState==SEND_IFG_STATE))
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
         if (dynamic_cast<EtherJam*>(msg) != NULL)
             error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
-        cancelEvent(endTxMsg);
+        cancelEvent((transmitState==TRANSMITTING_STATE) ? endTxMsg : endIFGMsg);
 
         EV << "Transmitting jam signal\n";
         sendJamSignal(); // backoff will be executed when jamming finished
@@ -210,7 +212,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
     else if (receiveState==RECEIVING_STATE
             && dynamic_cast<EtherJam*>(msg)==NULL
-            && endRxMsg->getArrivalTime()-simTime() < halfBitTime)
+            && endRxMsg->getArrivalTime()-simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -300,18 +302,22 @@ void EtherMAC::startFrameTransmission()
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
     EtherFrame *frame = curTxFrame->dup();
 
+    if (curTxFrame->getSrc().isUnspecified())
+        error("curTxFrame Source MAC address is unspecified");
+    if (frame->getSrc().isUnspecified())
+        error("dup() Source MAC address is unspecified");
+
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
+    bool inBurst = frameBursting && framesSentInBurst;
+    int64 minFrameLength = inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+    if (frame->getByteLength() < minFrameLength)
+    {
+        frame->setByteLength(minFrameLength);
+    }
     if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
     send(frame, physOutGate);
     transmissionChannel->getTransmissionFinishTime();
-
-    // update burst variables
-    if (frameBursting)
-    {
-        bytesSentInBurst = frame->getByteLength();
-        framesSentInBurst++;
-    }
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
     if (!duplexMode && receiveState!=RX_IDLE_STATE)
@@ -368,27 +374,7 @@ void EtherMAC::handleEndTxPeriod()
     if (checkAndScheduleEndPausePeriod())
         return;
 
-    // Gigabit Ethernet: now decide if we transmit next frame right away (burst) or wait IFG
-    // FIXME! this is not entirely correct, there must be IFG between burst frames too
-    bool burstFrame=false;
-    if (frameBursting && !txQueue.isEmpty())
-    {
-        // check if max bytes for burst not exceeded
-        if (bytesSentInBurst<GIGABIT_MAX_BURST_BYTES)
-        {
-             burstFrame=true;
-             EV << "Transmitting next frame in current burst\n";
-        }
-        else
-        {
-             EV << "Next frame does not fit in current burst\n";
-        }
-    }
-
-    if (burstFrame)
-        startFrameTransmission();
-    else
-        beginSendFrames();
+    beginSendFrames();
 }
 
 void EtherMAC::handleEndRxPeriod()
@@ -479,7 +465,7 @@ void EtherMAC::handleRetransmission()
     EV << "Executing backoff procedure\n";
     int backoffrange = (backoffs>=BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0,backoffrange-1);
-    simtime_t backofftime = slotNumber * slotTime;
+    simtime_t backofftime = slotNumber * curEtherDescr->slotTime;
 
     scheduleAt(simTime()+backofftime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
@@ -495,6 +481,7 @@ void EtherMAC::printState()
     switch (transmitState) {
         CASE(TX_IDLE_STATE);
         CASE(WAIT_IFG_STATE);
+        CASE(SEND_IFG_STATE);
         CASE(TRANSMITTING_STATE);
         CASE(JAMMING_STATE);
         CASE(BACKOFF_STATE);

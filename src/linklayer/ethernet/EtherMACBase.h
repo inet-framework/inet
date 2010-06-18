@@ -40,6 +40,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     {
         TX_IDLE_STATE = 1,
         WAIT_IFG_STATE,
+        SEND_IFG_STATE,
         TRANSMITTING_STATE,
         JAMMING_STATE,
         BACKOFF_STATE,
@@ -61,6 +62,23 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
         ENDTRANSMISSION,
         ENDJAMMING,
         ENDPAUSE
+    };
+
+    enum
+    {
+        NUM_OF_ETHERDESCRS = 4
+    };
+
+    struct EtherDescr
+    {
+        double      txrate;
+        int         maxFramesInBurst;
+        int64       maxBytesInBurst;      // with IFG and external datas
+        int64       frameMinBytes;        // minimal frame length
+        int64       frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
+        const_simtime_t   halfBitTime;          // transmission time of a half bit
+        const_simtime_t   slotTime;             // slot time
+        const_simtime_t   shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
     };
 
     class InnerQueue
@@ -93,19 +111,22 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     // MAC operation modes and parameters
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
-    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
     bool hasSubscribers;            // only notify if somebody is listening
+
+    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
+    simtime_t lastTxFinishTime;     // time of finish last transmission
 
     // states
     MACTransmitState transmitState; // State of the MAC unit transmitting
     MACReceiveState receiveState;   // State of the MAC unit receiving
 
     // MAC transmission characteristics
-    double txrate;                  // transmission rate of MAC, bit/s
-    simtime_t halfBitTime;          // transmission time of a half bit
-    simtime_t slotTime;             // slot time
-    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
+    static const EtherDescr nullEtherDescr;
+
+    const EtherDescr *curEtherDescr;    // Current Ethernet Constants (eg txrate, ...)
+
     cChannel *transmissionChannel;  // transmission channel
 
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx

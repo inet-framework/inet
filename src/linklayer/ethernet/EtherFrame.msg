@@ -31,10 +31,25 @@ enum EtherType;
 
 enum SAPCode;
 
+// containing their common header fields.
+//
+// This class should never be instantiated by the models, only specific
+// subclasses: EthernetJam, EtherIFG and submodules of EtherFrame.
+packet EtherTraffic
+{
+}
+
 //
 // Represents jam on the Ethernet.
 //
-packet EtherJam
+packet EtherJam extends EtherTraffic
+{
+}
+
+//
+// Represents padding when packet too short, and filled IFG on burst mode.
+//
+packet EtherPadding extends EtherTraffic
 {
 }
 
@@ -52,7 +67,7 @@ packet EtherJam
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
 //  - crc: represented by cMessage::hasBitError()
 //
-packet EtherFrame
+packet EtherFrame extends EtherTraffic
 {
     MACAddress dest;
     MACAddress src;
