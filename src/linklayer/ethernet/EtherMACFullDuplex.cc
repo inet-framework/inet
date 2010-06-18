@@ -78,7 +78,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
         if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else if (msg->getArrivalGate() == gate("phys$i"))
-            processMsgFromNetwork(check_and_cast<EtherFrame *>(msg));
+            processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
         else
             error("Message received from unknown gate!");
     }
@@ -90,8 +90,9 @@ void EtherMACFullDuplex::startFrameTransmission()
 {
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
-    EtherFrame *frame = (EtherFrame *) curTxFrame->dup();
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
+    EtherFrame *frame = curTxFrame->dup();
+
+    prepareTxFrame(frame);
 
     if (hasSubscribers)
     {
@@ -100,21 +101,12 @@ void EtherMACFullDuplex::startFrameTransmission()
         nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
     }
 
-    // fill in src address if not set
-    if (frame->getSrc().isUnspecified())
-        frame->setSrc(address);
-
     // send
     EV << "Starting transmission of " << frame << endl;
-    send(frame, physOutGate);
-    scheduleEndTxPeriod(frame);
 
-    // update burst variables
-    if (frameBursting)
-    {
-        bytesSentInBurst = frame->getByteLength();
-        framesSentInBurst++;
-    }
+    send(frame, physOutGate);
+
+    scheduleEndTxPeriod(frame);
 }
 
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
@@ -125,9 +117,15 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
         scheduleEndIFGPeriod();
 }
 
-void EtherMACFullDuplex::processMsgFromNetwork(cPacket *msg)
+void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
+
+    if(dynamic_cast<EtherPadding *>(msg))
+    {
+        frameReceptionComplete(msg);
+        return;
+    }
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
     totalSuccessfulRxTime += frame->getDuration();

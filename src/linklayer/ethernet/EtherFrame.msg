@@ -71,7 +71,8 @@ packet EtherFrame extends EtherTraffic
 {
     MACAddress dest;
     MACAddress src;
-        //MessageId id; -- uncomment for tracing frames
+    int origByteLength;
+    //MessageId id; -- uncomment for tracing frames
 }
 
 

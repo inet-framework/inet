@@ -51,7 +51,7 @@ class INET_API EtherMAC : public EtherMACBase
     int  numConcurrentTransmissions; // number of colliding frames -- we must receive this many jams
 
     // other variables
-    EtherFrame *frameBeingReceived;
+    EtherTraffic *frameBeingReceived;
     cMessage *endRxMsg, *endBackoffMsg, *endJammingMsg;
 
     // statistics
@@ -65,7 +65,7 @@ class INET_API EtherMAC : public EtherMACBase
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndRxPeriod();

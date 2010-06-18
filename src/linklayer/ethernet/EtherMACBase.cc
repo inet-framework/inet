@@ -79,7 +79,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME,
         0.5/GIGABIT_ETHERNET_TXRATE,
         512.0/GIGABIT_ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+        GIGABIT_MIN_FRAME_WITH_EXT/GIGABIT_ETHERNET_TXRATE
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
@@ -89,7 +89,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME,
         0.5/FAST_GIGABIT_ETHERNET_TXRATE,
         512.0/GIGABIT_ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+        GIGABIT_MIN_FRAME_WITH_EXT/FAST_GIGABIT_ETHERNET_TXRATE
     }
 };
 
@@ -213,6 +213,9 @@ void EtherMACBase::initializeFlags()
     // initialize promiscuous flag
     promiscuous = par("promiscuous");
     WATCH(promiscuous);
+
+    frameBursting = par("frameBursting");
+    WATCH(frameBursting);
 }
 
 void EtherMACBase::initializeStatistics()
@@ -315,12 +318,12 @@ void EtherMACBase::calculateParameters()
     if (disabled || !connected)
     {
         curEtherDescr = &nullEtherDescr;
-        carrierExtension = frameBursting = false;
+        carrierExtension = false;
         transmissionChannel = NULL;
 
         return;
     }
-    carrierExtension = frameBursting = false; // FIXME
+    carrierExtension = false; // FIXME
     transmissionChannel = physOutGate->getTransmissionChannel();
     double txrate = transmissionChannel->getNominalDatarate();
 
@@ -409,14 +412,9 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     }
 }
 
-void EtherMACBase::processMsgFromNetwork(cPacket *frame)
+void EtherMACBase::processMsgFromNetwork(EtherTraffic *frame)
 {
     EV << "Received frame from network: " << frame << endl;
-
-    // frame must be EtherTraffic
-    if (dynamic_cast<EtherTraffic*>(frame)==NULL)
-        error("message with unexpected message class '%s' arrived from network (name='%s')",
-                frame->getClassName(), frame->getFullName());
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
@@ -431,7 +429,7 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
     }
 }
 
-void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
+void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
 {
     int pauseUnits;
     EtherPauseFrame *pauseFrame;
@@ -443,6 +441,10 @@ void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
         numPauseFramesRcvd++;
         numPauseFramesRcvdVector.record(numPauseFramesRcvd);
         processPauseCommand(pauseUnits);
+    }
+    else if ((dynamic_cast<EtherPadding*>(frame))!=NULL)
+    {
+        delete frame;
     }
     else
     {
@@ -461,8 +463,8 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
         return;
     }
 
-    // strip preamble and SFD
-    frame->addByteLength(-PREAMBLE_BYTES-SFD_BYTES);
+    // restore original byte length (strip preamble and SFD and external bytes)
+    frame->setByteLength(frame->getOrigByteLength());
 
     // statistics
     numFramesReceivedOK++;
@@ -521,14 +523,6 @@ void EtherMACBase::handleEndIFGPeriod()
         EV << "Performing carrier extension of small frame\n";
         curTxFrame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
     }
-
-    // start frame burst, if enabled
-    if (frameBursting)
-    {
-        EV << "Starting frame burst\n";
-        framesSentInBurst = 0;
-        bytesSentInBurst = 0;
-    }
 }
 
 void EtherMACBase::handleEndTxPeriod()
@@ -571,6 +565,22 @@ void EtherMACBase::getNextFrameFromQueue()
     }
 }
 
+void EtherMACBase::prepareTxFrame(EtherFrame *frame)
+{
+    if (frame->getSrc().isUnspecified())
+        frame->setSrc(address);
+
+    // add preamble and SFD (Starting Frame Delimiter), then send out
+    frame->setOrigByteLength(frame->getByteLength());
+    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
+    bool inBurst = frameBursting && framesSentInBurst;
+    int64 minFrameLength = inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+    if (frame->getByteLength() < minFrameLength)
+    {
+        frame->setByteLength(minFrameLength);
+    }
+}
+
 void EtherMACBase::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
@@ -598,10 +608,13 @@ void EtherMACBase::scheduleEndIFGPeriod()
 
     if (frameBursting
             && (simTime() == lastTxFinishTime)
-            && (bytesSentInBurst + curTxFrame->getByteLength() <= GIGABIT_MAX_BURST_BYTES) )
+            && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
+            && (bytesSentInBurst + INTERFRAME_GAP_BITS/8 + curTxFrame->getByteLength() <= curEtherDescr->maxBytesInBurst)
+       )
     {
         EtherPadding *gap = new EtherPadding("IFG");
         gap->setBitLength(INTERFRAME_GAP_BITS);
+        bytesSentInBurst += gap->getByteLength();
         send(gap, physOutGate);
         transmitState = SEND_IFG_STATE;
         scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);

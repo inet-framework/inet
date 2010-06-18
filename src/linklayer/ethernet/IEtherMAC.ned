@@ -25,18 +25,15 @@ package inet.linklayer.ethernet;
 moduleinterface IEtherMAC
 {
     parameters:
-        bool promiscuous; // if true, all packets are received, otherwise only the
+        bool promiscuous;       // if true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
-        string address;  // MAC address as hex string (12 hex digits), or
+        string address;         // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        bool duplexEnabled;   // whether duplex mode can be enabled or not; whether
-                                // MAC will actually use duplex mode depends on the result
-                                // of the auto-configuration process (duplex is only
-                                // possible with DTE-to-DTE connection).
-        int txQueueLimit; // maximum number of frames queued up for transmission;
+        int txQueueLimit;       // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
-        string queueModule;    // name of optional external queue module
+        string queueModule;     // name of optional external queue module
+        bool frameBursting;     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu;
         @display("i=block/rxtx");
     gates:

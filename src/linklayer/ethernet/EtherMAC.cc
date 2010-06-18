@@ -109,7 +109,7 @@ void EtherMAC::handleMessage (cMessage *msg)
         if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else
-            processMsgFromNetwork(PK(msg));
+            processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
     }
     else
     {
@@ -164,7 +164,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 }
 
 
-void EtherMAC::processMsgFromNetwork(cPacket *msg)
+void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
 
@@ -223,7 +223,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 
         // complete reception of previous frame
         cancelEvent(endRxMsg);
-        EtherFrame *frame = frameBeingReceived;
+        EtherTraffic *frame = frameBeingReceived;
         frameBeingReceived = NULL;
         frameReceptionComplete(frame);
 
@@ -232,7 +232,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         channelBusySince = simTime();
 
         // start receiving next frame
-        frameBeingReceived = (EtherFrame *)msg;
+        frameBeingReceived = (EtherTraffic *)msg;
         scheduleEndRxPeriod(msg);
     }
     else // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
@@ -300,24 +300,15 @@ void EtherMAC::handleEndIFGPeriod()
 void EtherMAC::startFrameTransmission()
 {
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
+
     EtherFrame *frame = curTxFrame->dup();
 
-    if (curTxFrame->getSrc().isUnspecified())
-        error("curTxFrame Source MAC address is unspecified");
-    if (frame->getSrc().isUnspecified())
-        error("dup() Source MAC address is unspecified");
+    prepareTxFrame(frame);
 
-    // add preamble and SFD (Starting Frame Delimiter), then send out
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
-    bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength = inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
-    if (frame->getByteLength() < minFrameLength)
-    {
-        frame->setByteLength(minFrameLength);
-    }
-    if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
+    if (ev.isGUI())
+        updateConnectionColor(TRANSMITTING_STATE);
+
     send(frame, physOutGate);
-    transmissionChannel->getTransmissionFinishTime();
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
     if (!duplexMode && receiveState!=RX_IDLE_STATE)
@@ -383,7 +374,7 @@ void EtherMAC::handleEndRxPeriod()
     simtime_t dt = simTime()-channelBusySince;
     if (receiveState==RECEIVING_STATE) // i.e. not RX_COLLISION_STATE
     {
-        EtherFrame *frame = frameBeingReceived;
+        EtherTraffic *frame = frameBeingReceived;
         frameBeingReceived = NULL;
         frameReceptionComplete(frame);
         totalSuccessfulRxTxTime += dt;

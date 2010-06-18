@@ -46,7 +46,7 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     // event handlers
     virtual void startFrameTransmission();
     virtual void processFrameFromUpperLayer(EtherFrame *frame);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
 
