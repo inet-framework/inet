@@ -122,7 +122,7 @@ void DumbTCP::dataSent(uint32)
 
 void DumbTCP::restartRexmitTimer()
 {
-	// NO retransmit timer in dumb TCP
+    // NO retransmit timer in dumb TCP
 }
 
 
