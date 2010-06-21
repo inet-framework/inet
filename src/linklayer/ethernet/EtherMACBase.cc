@@ -326,6 +326,9 @@ void EtherMACBase::calculateParameters()
     carrierExtension = false; // FIXME
     transmissionChannel = physOutGate->getTransmissionChannel();
     double txrate = transmissionChannel->getNominalDatarate();
+    double drate = physInGate->getIncomingTransmissionChannel()->getNominalDatarate();
+    if (txrate != drate)
+        throw cRuntimeError(this, "The input/output datarates are differs (%f / %f)", drate, txrate);
 
     // Check valid speeds
     for(int i=0; i<NUM_OF_ETHERDESCRS; i++)
