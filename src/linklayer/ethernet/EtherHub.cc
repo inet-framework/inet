@@ -38,7 +38,7 @@ void EtherHub::initialize()
     for (int i=0; i<ports; i++)
     {
     	cGate* igate = gate("ethg$i", i);
-    	double drate = igate->getReceptionChannel()->getNominalDatarate();
+    	double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
 
     	if (i == 0)
     		datarate = drate;
