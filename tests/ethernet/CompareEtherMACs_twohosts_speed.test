@@ -140,7 +140,9 @@ if(length(xx$value) != linecount)
     print(xx)
 } else {
     cat("LINECOUNT CORRECT\n")
-    if(min(xx$value) == max(xx$value))
+
+#   one packet different is acceptable, because the first event of endtime is processed.
+    if( 1 >= (max(xx$value) - min(xx$value)))
     {
         cat("NUMBER OF SENT PACKETS ARE EQUALS\n")
     } else {
