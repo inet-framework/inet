@@ -113,8 +113,10 @@ const char *TCPConnection::optionName(int option)
         case TCPOPTION_END_OF_OPTION_LIST:   return "EOL";
         case TCPOPTION_NO_OPERATION:         return "NOP";
         case TCPOPTION_MAXIMUM_SEGMENT_SIZE: return "MSS";
+        case TCPOPTION_WINDOW_SCALE:         return "WS";
         case TCPOPTION_SACK_PERMITTED:       return "SACK_PERMITTED";
         case TCPOPTION_SACK:                 return "SACK";
+        case TCPOPTION_TIMESTAMP:            return "TS";
         default:                             return "unknown";
     }
 }
