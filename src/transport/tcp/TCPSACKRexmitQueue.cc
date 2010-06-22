@@ -113,7 +113,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         begin = fromSeqNum;
         end = toSeqNum;
         rexmitQueue.push_back(region);
-        tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+//        tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
         return;
     }
 
@@ -137,7 +137,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         end = toSeqNum;
         rexmitQueue.push_back(region);
     }
-    tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+//    tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
 }
 
 void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
@@ -179,7 +179,6 @@ bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum)
             i++;
         }
     }
-
     return found;
 }
 
