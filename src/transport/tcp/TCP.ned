@@ -182,7 +182,7 @@ package inet.transport.tcp;
 //    Such drops are recorded in tcpRcvQueueDropsVector.
 
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
-//  - delayed acks, with 200ms timeout (optional)
+//  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
