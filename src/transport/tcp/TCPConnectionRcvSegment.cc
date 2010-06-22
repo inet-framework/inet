@@ -116,7 +116,23 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: first check sequence number
     //
-    bool acceptable = isSegmentAcceptable(tcpseg);
+
+    bool acceptable = true;
+    if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
+    {
+        // PAWS
+        if (state->ts_enabled && getTSval(tcpseg) != 0 && seqLess(getTSval(tcpseg), state->ts_recent) &&
+            (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
+        {
+            tcpEV << "PAWS: Segment is not acceptable, TSval=" << getTSval(tcpseg) << " in " <<  stateName(fsm.getState()) << " state received: dropping segment\n";
+            acceptable = false; 
+        }
+
+        readHeaderOptions(tcpseg);
+    }
+
+    if (!state->ts_enabled || (state->ts_enabled && acceptable))
+        acceptable = isSegmentAcceptable(tcpseg);
     if (!acceptable)
     {
         //"
@@ -244,6 +260,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         tcpEV << "ACK not set, dropping segment\n";
         return TCP_E_IGNORE;
     }
+
+    uint32 old_snd_una = state->snd_una;
 
     TCPEventCode event = TCP_E_IGNORE;
 
@@ -435,7 +453,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         if (tcpseg->getPayloadLength()>0)
         {
             // check for full sized segment
-            if (tcpseg->getPayloadLength() == state->snd_mss)
+            if (tcpseg->getPayloadLength() == state->snd_mss || tcpseg->getPayloadLength() + tcpseg->getHeaderLength() - TCP_HEADER_OCTETS == state->snd_mss)
                 state->full_sized_segment_counter++;
             // check for persist probe
             if (tcpseg->getPayloadLength() == 1)
@@ -547,6 +565,17 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                                 break;
                         }
                         sendIndicationToApp(TCP_I_PEER_CLOSED);
+                    }
+
+                    if (seqGreater(state->snd_una, old_snd_una))
+                    {
+                        // notify
+                        tcpAlgorithm->receivedDataAck(old_snd_una);
+
+                        // in the receivedDataAck we need the old value
+                        state->dupacks = 0;
+                        if (dupAcksVector)
+                            dupAcksVector->record(state->dupacks);
                     }
                 }
             }
@@ -1109,9 +1138,6 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
             // we need to update send window even if the ACK is a dupACK, because rcv win could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
             updateWndInfo(tcpseg);
 
-            if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
-                readHeaderOptions(tcpseg);
-
             tcpAlgorithm->receivedDuplicateAck();
         }
         else
@@ -1142,6 +1168,17 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         if (seqLess(state->snd_nxt, state->snd_una))
             state->snd_nxt = state->snd_una;
 
+        // RFC 1323, page 36:
+        // "If SND.UNA < SEG.ACK =< SND.NXT then, set SND.UNA <- SEG.ACK.
+        // Also compute a new estimate of round-trip time.  If Snd.TS.OK
+        // bit is on, use my.TSclock - SEG.TSecr; otherwise use the
+        // elapsed time since the first segment in the retransmission
+        // queue was sent.  Any segments on the retransmission queue
+        // which are thereby entirely acknowledged."
+        if (state->ts_enabled)
+            tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpseg));
+        // Note: If TS is disabled the RTT measurement is complete in TCPBaseAlg::receivedDataAck()
+
         uint32 discardUpToSeq = state->snd_una;
 
         // our FIN acked?
@@ -1161,16 +1198,16 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 
         updateWndInfo(tcpseg);
 
-        if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
-            readHeaderOptions(tcpseg);
+        if (tcpseg->getPayloadLength() == 0 && fsm.getState()!=TCP_S_SYN_RCVD) // if segment contains data, wait until data has been forwarded to app before sending ACK, otherwise we would use an old ACKNo
+        {   
+            // notify
+            tcpAlgorithm->receivedDataAck(old_snd_una);
 
-        // notify
-        tcpAlgorithm->receivedDataAck(old_snd_una);
-
-        // in the receivedDataAck we need the old value
-        state->dupacks = 0;
-        if (dupAcksVector)
-            dupAcksVector->record(state->dupacks);
+            // in the receivedDataAck we need the old value
+            state->dupacks = 0;
+            if (dupAcksVector)
+                dupAcksVector->record(state->dupacks);
+        }
     }
     else
     {

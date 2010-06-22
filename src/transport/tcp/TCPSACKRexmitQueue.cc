@@ -144,17 +144,24 @@ void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
 {
     bool found = false;
 
-    if (seqLE(begin,fromSeqNum) && seqLE(toSeqNum,end))
+    if (seqLE(toSeqNum,end))
     {
         RexmitQueue::iterator i = rexmitQueue.begin();
         while (i!=rexmitQueue.end())
         {
-            if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum) // Search for region in queue!
+            if (i->beginSeqNum == fromSeqNum && seqGE(toSeqNum, i->endSeqNum)) // Search for LE of region in queue!
             {
                 i->sacked = true; // set sacked bit
                 found = true;
+                i++;
+                while (seqGE(toSeqNum, i->endSeqNum) && i!=rexmitQueue.end()) // Search for RE of region in queue!
+                {
+                    i->sacked = true; // set sacked bit
+                    i++;
+                }
             }
-            i++;
+            else
+                i++;
         }
     }
 
