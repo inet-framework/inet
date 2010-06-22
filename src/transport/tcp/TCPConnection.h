@@ -125,6 +125,7 @@ enum TCPEventCode
 
 #define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
 
+#define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
 
 
 /**
@@ -187,6 +188,8 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool fin_rcvd;       // whether FIN received or not
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
 
+    uint32 sentBytes;    // amount of user data (in bytes) sent in last segment
+
     bool nagle_enabled;         // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;  // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled; // set if Limited Transmit algorithm (RFC 3042) is enabled
@@ -203,6 +206,23 @@ class INET_API TCPStateVariables : public cPolymorphic
                                 //   - FIN is received
 
     bool afterRto;              // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
+
+    // WINDOW_SCALE related variables
+    bool ws_support;         // set if the host supports Window Scale (header option) (RFC 1322)
+    bool ws_enabled;         // set if the connection uses Window Scale (header option)
+    bool snd_ws;             // set if initial WINDOW_SCALE has been sent
+    bool rcv_ws;             // set if initial WINDOW_SCALE has been received
+    uint rcv_wnd_scale;      // RFC 1323, page 31: "Receive window scale power"
+    uint snd_wnd_scale;      // RFC 1323, page 31: "Send window scale power"
+
+    // TIMESTAMP related variables
+    bool ts_support;         // set if the host supports Timestamps (header option) (RFC 1322)
+    bool ts_enabled;         // set if the connection uses Window Scale (header option)
+    bool snd_initial_ts;     // set if initial TIMESTAMP has been sent
+    bool rcv_initial_ts;     // set if initial TIMESTAMP has been received
+    uint32 ts_recent;        // RFC 1323, page 31: "Latest received Timestamp"
+    uint32 last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
+    simtime_t time_last_data_sent; // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
     bool sack_support;       // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
@@ -310,6 +330,7 @@ class INET_API TCPConnection
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
  public:
+
     TCPSACKRexmitQueue *rexmitQueue;
 
  protected:
@@ -385,8 +406,10 @@ class INET_API TCPConnection
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
     virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processWSOption(TCPSegment *tcpseg, const TCPOption& option);
     virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option);
     virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processTSOption(TCPSegment *tcpseg, const TCPOption& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -418,10 +441,10 @@ class INET_API TCPConnection
     /** Utility: send SYN+ACK */
     virtual void sendSynAck();
 
-    /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, SACK_PERMITTED and SACK are implemented) */
+    /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual void readHeaderOptions(TCPSegment *tcpseg);
 
-    /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, SACK_PERMITTED and SACK are implemented) */
+    /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual TCPSegment writeHeaderOptions(TCPSegment *tcpseg);
 
     /** Utility: adds SACKs to segments header options field */
@@ -520,6 +543,8 @@ class INET_API TCPConnection
     virtual void updateRcvQueueVars();
     /** Utility: update receive window (rcv_wnd) */
     virtual void updateRcvWnd();
+    /** Utility: scale receive window (rcv_wnd) */
+    virtual uint scaleRcvWnd();
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 
@@ -632,6 +657,11 @@ class INET_API TCPConnection
      * Utility: converts a given timestamp (TS) to a simtime.
      */
     virtual simtime_t convertTSToSimtime(uint32 timestamp);
+
+    /**
+     * Utility: checks if there are data to send.
+     */
+    virtual bool dataToSend();
 
 };
 
