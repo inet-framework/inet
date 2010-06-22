@@ -76,6 +76,11 @@ class INET_API TCPSACKRexmitQueue
     virtual std::string str() const;
 
     /**
+     * Prints the current rexmitQueue status for debug purposes.
+     */
+    virtual void info();
+
+    /**
      * Returns the sequence number of the first byte stored in the buffer.
      */
     virtual uint32 getBufferStartSeq();

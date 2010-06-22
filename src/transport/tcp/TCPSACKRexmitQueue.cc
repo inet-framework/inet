@@ -44,6 +44,19 @@ std::string TCPSACKRexmitQueue::str() const
     return out.str();
 }
 
+void TCPSACKRexmitQueue::info()
+{
+    str();
+    RexmitQueue::iterator i = rexmitQueue.begin();
+    uint j = 1;
+    while (i!=rexmitQueue.end())
+    {
+        tcpEV << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted << "\n";
+        i++;
+        j++;
+    }
+}
+
 uint32 TCPSACKRexmitQueue::getBufferStartSeq()
 {
     return begin;
