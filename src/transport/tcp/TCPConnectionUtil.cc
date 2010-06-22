@@ -1436,13 +1436,14 @@ void TCPConnection::setPipe()
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
 
+    uint32 shift = state->snd_mss;
     // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
     // octets that are currently in transit between the TCP sender and
     // the TCP receiver.  After initializing pipe to zero the following
     // steps are taken for each octet 'S1' in the sequence space between
     // HighACK and HighData that has not been SACKed:"
-    for (uint32 s1=state->snd_una; s1<state->snd_max; s1=s1+state->snd_mss) // Note: Would be better use byte ranges
+    for (uint32 s1=state->snd_una; s1<state->snd_max; s1=s1+shift)
     {
         if (rexmitQueue->getSackedBit(s1)==false)
         {
@@ -1471,7 +1472,7 @@ void TCPConnection::setPipe()
         }
     }
 
-    state->pipe = state->pipe * state->snd_mss; // TODO - remove this line if using byte ranges
+    state->pipe = state->pipe * shift;
     if (pipeVector)
         pipeVector->record(state->pipe);
 }
@@ -1489,6 +1490,7 @@ uint32 TCPConnection::nextSeg()
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     uint32 seqNum = 0;
     bool found = false;
+    uint32 shift = state->snd_mss;
 
     // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
@@ -1501,7 +1503,7 @@ uint32 TCPConnection::nextSeg()
     //       received SACK.
     //
     // (1.c) IsLost (S2) returns true."
-    for (uint32 s2=state->snd_una; s2<state->snd_max; s2=s2+state->snd_mss) // Note: Would be better use byte ranges
+    for (uint32 s2=state->snd_una; s2<state->snd_max; s2=s2+shift)
     {
         if (rexmitQueue->getSackedBit(s2)==false)
         {
@@ -1564,7 +1566,7 @@ uint32 TCPConnection::nextSeg()
     // implementors."
     if (!found)
     {
-        for (uint32 s3=state->snd_una; s3<state->snd_max; s3=s3+state->snd_mss) // Note: Would be better use byte ranges
+        for (uint32 s3=state->snd_una; s3<state->snd_max; s3=s3+shift)
         {
             if (rexmitQueue->getSackedBit(s3)==false)
             {
