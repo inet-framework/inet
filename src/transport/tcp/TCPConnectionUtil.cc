@@ -648,9 +648,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     {
         sendSegment(bytesToSend);
     }
-    else
+    else // send whole segments only (nagle_enabled)
     {
-        // send whole segments only (nagle_enabled)
         while (bytesToSend>=state->snd_mss)
         {
             sendSegment(state->snd_mss);
