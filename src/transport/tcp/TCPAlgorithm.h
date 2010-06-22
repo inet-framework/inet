@@ -166,6 +166,12 @@ class INET_API TCPAlgorithm : public cPolymorphic
      */
     virtual void restartRexmitTimer() = 0;
 
+    /**
+     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * to update state vars with new measured RTT value.
+     */
+    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
+
 };
 
 #endif

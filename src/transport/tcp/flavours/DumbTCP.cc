@@ -123,3 +123,7 @@ void DumbTCP::dataSent(uint32 fromseq)
 void DumbTCP::restartRexmitTimer()
 {
 }
+
+void DumbTCP::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+{
+}

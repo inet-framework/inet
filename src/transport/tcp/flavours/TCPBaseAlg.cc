@@ -397,6 +397,17 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     if (rtoVector) rtoVector->record(rto);
 }
 
+void TCPBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+{
+    ASSERT (state->ts_enabled);
+    // Note: The TS option is using uint32 values (ms precision) therefore we convert the current simTime also to a uint32 value (ms precision)
+    // and then convert back to simtime_t to use rttMeasurementComplete() to update srtt and rttvar
+    uint32 now = conn->convertSimtimeToTS(simTime());
+    simtime_t tSent = conn->convertTSToSimtime(echoedTS);
+    simtime_t tAcked = conn->convertTSToSimtime(now);
+    rttMeasurementComplete(tSent, tAcked);
+}
+
 bool TCPBaseAlg::sendData()
 {
     //
