@@ -175,13 +175,13 @@ module StandardHostWithDLDuplicatesGenerator
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> tcpdump.ifIn[sizeof(pppg)];  //I.R.
-            tcpdump.out2[sizeof(pppg)] --> networkLayer.ifIn[sizeof(pppg)];
-            eth[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)];
-            tcpdump.in2[sizeof(pppg)] <-- networkLayer.ifOut[sizeof(pppg)];
+            eth[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+i];
+            tcpdump.out2[sizeof(pppg)+i] --> networkLayer.ifIn[sizeof(pppg)+i];
+            eth[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)+i];
+            tcpdump.in2[sizeof(pppg)+i] <-- networkLayer.ifOut[sizeof(pppg)+i];
         }
 
-        for i=0..sizeof(extOut)-1 {
+        for i=0..numExtInterfaces-1 {
             ext[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             tcpdump.out2[sizeof(pppg)+sizeof(ethg)+i] --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
             ext[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)+sizeof(ethg)+i];
