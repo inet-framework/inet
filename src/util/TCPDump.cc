@@ -1,8 +1,8 @@
 //
-// Copyright (C)    2005 Michael Tuexen
-//                  2008 Irene Ruengeler
-//                  2009 Thomas Dreibholz
-//                  2009 Thomas Reschka
+// Copyright (C) 2005 Michael Tuexen
+// Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License

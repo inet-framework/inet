@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -187,11 +187,11 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
 
     bool nagle_enabled;         // set if Nagle's algorithm (RFC 896) is enabled
-    bool delayed_acks_enabled;  // set if delayed ACKs are enabled
+    bool delayed_acks_enabled;  // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled; // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled;  // set if Increased Initial Window (RFC 3390) is enabled
 
-    uint32 full_sized_segment_counter;// this counter is needed for delayed ACKs
+    uint32 full_sized_segment_counter; // this counter is needed for delayed ACK
     bool ack_now;               // send ACK immediately, needed if delayed_acks_enabled is set
                                 // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
                                 // ack_now should be set when:
@@ -221,16 +221,16 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool lossRecovery;       // indicates if algorithm is in loss recovery phase
 
     // those counters would logically belong to TCPAlgorithm, but it's a lot easier to manage them here
-    uint32 dupacks;             // current number of received consecutive duplicate ACKs
-    uint32 snd_sacks;           // number of sent sacks
-    uint32 rcv_sacks;           // number of received sacks
-    uint32 rcv_oooseg;          // number of received out-of-order segments
+    uint32 dupacks;          // current number of received consecutive duplicate ACKs
+    uint32 snd_sacks;        // number of sent sacks
+    uint32 rcv_sacks;        // number of received sacks
+    uint32 rcv_oooseg;       // number of received out-of-order segments
 
     // receiver buffer / receiver queue related variables
-    uint32 maxRcvBuffer;        // maximal amount of bytes in tcp receive queue
-    uint32 usedRcvBuffer;       // current amount of used bytes in tcp receive queue
-    uint32 freeRcvBuffer;       // current amount of free bytes in tcp receive queue
-    uint32 tcpRcvQueueDrops;    // number of drops in tcp receive queue
+    uint32 maxRcvBuffer;     // maximal amount of bytes in tcp receive queue
+    uint32 usedRcvBuffer;    // current amount of used bytes in tcp receive queue
+    uint32 freeRcvBuffer;    // current amount of free bytes in tcp receive queue
+    uint32 tcpRcvQueueDrops; // number of drops in tcp receive queue
 };
 
 

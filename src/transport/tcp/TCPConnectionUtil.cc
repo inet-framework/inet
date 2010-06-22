@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -374,7 +374,7 @@ void TCPConnection::selectInitialSeqNum()
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
     // RFC 793, page 69:
-    // There are four cases for the acceptability test for an incoming segment:
+    // "There are four cases for the acceptability test for an incoming segment:"
     uint32 len = tcpseg->getPayloadLength();
     uint32 seqNo = tcpseg->getSequenceNo();
     bool ret;
@@ -577,7 +577,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     if (!state->afterRto)
-	{
+    {
         // we'll start sending from snd_max
         state->snd_nxt = state->snd_max;
     }

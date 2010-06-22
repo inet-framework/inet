@@ -1,58 +1,58 @@
 2010-03-26  Andras Varga
 
-	* fix: represent port numbers with ushort. Previously it was short 
-	at places, which caused problems for large port numbers due to sign 
-	extension [reported by Thomas Gamer]
+    * fix: represent port numbers with ushort. Previously it was short 
+    at places, which caused problems for large port numbers due to sign 
+    extension [reported by Thomas Gamer]
 
-2010-02-27 Andras Varga
+2010-02-27  Andras Varga
 
-    * Added optionName() method
+    * added optionName() method
 
-2010-02-26 Andras Varga
+2010-02-26  Andras Varga
 
     * Broke up long function TCPConnection::readHeaderOptions()
 
     * minor refactoring to increase readability
 
-2010-02-26 Andras Varga
+2010-02-26  Andras Varga
 
     * Fixed following issues with patch submitted by Thomas Reschka:
         - assertion in TCPConnectionUtil.cc line 1056 after reception of SYN duplicate. See bug #121
-		- too early transition from ESTABLISHED to CLOSE_WAIT state
-		  when FIN has been received but segments have been lost before. See bug #139
+        - too early transition from ESTABLISHED to CLOSE_WAIT state
+          when FIN has been received but segments have been lost before. See bug #139
         - unnecessary delay before sending the last data segment if nagle is enabled
 
-2010-02-16 Rudolf Hornig
+2010-02-16  Rudolf Hornig
 
     * Fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
 
-2010-02-11 Rudolf Hornig
+2010-02-11  Rudolf Hornig
 
-	* Fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
+    * Fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
 
-2010-02-10 Zoltan Bojthe
+2010-02-10  Zoltan Bojthe
 
     * Fixed 'advertised window' issue
 
-2010-02-02 Zoltan Bojthe
+2010-02-02  Zoltan Bojthe
 
-    * Added checking value of advertisedWindow parameter
+    * added checking value of advertisedWindow parameter
 
-2009-11-27 Thomas Reschka
+2009-11-27  Thomas Reschka
 
     * implemented TCPNewReno algorithm (RFC 3782):
         - the implementation is based on the 'default' algorithm specified in section 3 of RFC 3782.
         - algorithm variants (RFC 3782, sections 4-6) are NOT IMPLEMENTED.
 
-2009-10-27 Rudolf Hornig
+2009-10-27  Rudolf Hornig
 
-    * Added ITCP module interface that is implemented by TCP and TCP_old
+    * added ITCP module interface that is implemented by TCP and TCP_old
 
     * The old TCP (SACK-less) implementation is available as TCP_old
 
     * TCP (default) and TCP_old can be selected in StandardHost with the new tcpType parameter
 
-2009-10-27 Thomas Reschka
+2009-10-27  Thomas Reschka
 
     * implemented SACK TCP:
       - the basic SACK implementation (RFC 2018 and RFC 2883)
@@ -70,9 +70,9 @@
         buffer, the new segment will be dropped. Such drops are recorded in
         tcpRcvQueueDropsVector.
       - update receive window.
-		The data receiver updates all receiver queue related variables before
-		sending (ACK/SACK or DATA) and updates the receiver window,
-		thus data receiver is able to advertise a zero window.
+        The data receiver updates all receiver queue related variables before
+        sending (ACK/SACK or DATA) and updates the receiver window,
+        thus data receiver is able to advertise a zero window.
         Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879].
 
     * implemented some TCP header options:
@@ -175,49 +175,49 @@
       - slightly changed the update of window information (snd_wnd, snd_wl1, snd_wl2).
         Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982].
 
-2009-10-17 Rudolf Hornig
+2009-10-17  Rudolf Hornig
 
-	* Fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
+    * Fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
 
-2009-03-01 Andras Varga
+2009-03-01  Andras Varga
 
-	* fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
+    * fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
 
-2008-06-29 Andras Varga
+2008-06-29  Andras Varga
 
-	* some refactoring: created factory methods for TCPSegment and
-	TCPConnection, to allow customizing them via subclassing
+    * some refactoring: created factory methods for TCPSegment and
+    TCPConnection, to allow customizing them via subclassing
 
-2006-03-22 Andras Varga
+2006-03-22  Andras Varga
 
-	* TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user
-	issues CLOSE, defer transition to FIN_WAIT_1 until all data are sent.
-	(Before this fix the transiton was made immediately, but that was
-	harmless, i.e. it didn't affect TCP's external behaviour.)
+    * TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user
+    issues CLOSE, defer transition to FIN_WAIT_1 until all data are sent.
+    (Before this fix the transiton was made immediately, but that was
+    harmless, i.e. it didn't affect TCP's external behaviour.)
 
-2006-03-21 Andras Varga
+2006-03-21  Andras Varga
 
-	* TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
-	carries data [reported by Joachim Meichle]
+    * TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
+    carries data [reported by Joachim Meichle]
 
-2005-07-20 Andras Varga
+2005-07-20  Andras Varga
 
-	* some sources moved into subdirs queues/ and flavours/
+    * some sources moved into subdirs queues/ and flavours/
 
-2005-07-14 Andras Varga
+2005-07-14  Andras Varga
 
-	* TCPMain renamed to TCP
+    * TCPMain renamed to TCP
 
-2005-07-12 Andras Varga
+2005-07-12  Andras Varga
 
-	* TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received
-	several active/passive opens with same local port number. Now it raises
-	an error (this is like EADDRINUSE on *nix)
+    * TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received
+    several active/passive opens with same local port number. Now it raises
+    an error (this is like EADDRINUSE on *nix)
 
-2005-07-06 Andras Varga
+2005-07-06  Andras Varga
 
-	* TCPConnectionRcvSegment.cc: fixed bug which caused closing of a
-	connection to be reported 2MSL (240s) later to the user. Basically,
-	the user has to be notified already when the connection enters the
-	TIME_WAIT state. (TCP stays in TIME_WAIT for 240s or longer, and
-	nothing can happen during that time that's of interest to the user.)
+    * TCPConnectionRcvSegment.cc: fixed bug which caused closing of a
+    connection to be reported 2MSL (240s) later to the user. Basically,
+    the user has to be notified already when the connection enters the
+    TIME_WAIT state. (TCP stays in TIME_WAIT for 240s or longer, and
+    nothing can happen during that time that's of interest to the user.)

@@ -1,5 +1,5 @@
 //
-// Author: Thomas Reschka
+// author: Thomas Reschka
 //
 
 package inet.examples.inet.tcpsack;
@@ -40,7 +40,7 @@ network tcpSack {
 channel NormalPath extends DatarateChannel {
     parameters:
         datarate = 100Mbps;
-		delay = 0.0565us; // 10m
+        delay = 0.0565us; // 10m
         per = 0;
         ber = 0;
 }

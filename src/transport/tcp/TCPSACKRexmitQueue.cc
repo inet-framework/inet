@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,7 +28,7 @@ TCPSACKRexmitQueue::TCPSACKRexmitQueue()
 TCPSACKRexmitQueue::~TCPSACKRexmitQueue()
 {
     while (!rexmitQueue.empty())
-        rexmitQueue.pop_front(); // TODO rexmit warnings (delete operator) are still present
+        rexmitQueue.pop_front();
 }
 
 void TCPSACKRexmitQueue::init(uint32 seqNum)
@@ -107,7 +107,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         {
             if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum)
             {
-                i->rexmitted=true; // set rexmitted bit
+                i->rexmitted = true; // set rexmitted bit
                 found = true;
             }
             i++;
@@ -239,7 +239,7 @@ void TCPSACKRexmitQueue::resetSackedBit()
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end())
     {
-        i->sacked=false; // reset sacked bit
+        i->sacked = false; // reset sacked bit
         i++;
     }
 }
@@ -249,7 +249,7 @@ void TCPSACKRexmitQueue::resetRexmittedBit()
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end())
     {
-        i->rexmitted=false; // reset rexmitted bit
+        i->rexmitted = false; // reset rexmitted bit
         i++;
     }
 }

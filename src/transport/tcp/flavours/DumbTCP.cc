@@ -113,7 +113,7 @@ void DumbTCP::ackSent()
 {
 }
 
-void DumbTCP::dataSent(uint32)
+void DumbTCP::dataSent(uint32 fromseq)
 {
     if (rexmitTimer->isScheduled())
         conn->getTcpMain()->cancelEvent(rexmitTimer);

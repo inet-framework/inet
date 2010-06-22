@@ -123,7 +123,7 @@ import inet.transport.tcp.ITCP;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    rfc 763 but may not be what you'd expect.
+//    rfc 793 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
@@ -156,7 +156,7 @@ import inet.transport.tcp.ITCP;
 //    between TCP and the app.
 //  - no \TCP header options (e.g. MSS is currently module parameter; no SACK;
 //    no timestamp option for more frequent round-trip time measurement per
-//    rfc 2988 section 3
+//    rfc 2988 section 3)
 //  - all timeouts are precisely calculated: timer granularity (which is caused
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
@@ -195,4 +195,3 @@ simple TCP_old like ITCP
         output ipOut;
         output ipv6Out;
 }
-

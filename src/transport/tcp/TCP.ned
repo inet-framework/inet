@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -142,7 +142,7 @@ package inet.transport.tcp;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    RFC 763 but may not be what you'd expect.
+//    RFC 793 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
@@ -166,7 +166,7 @@ package inet.transport.tcp;
 //  - changes from RFC 2001 to RFC 2581:
 //      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
-//    - TCP header options:
+//  - TCP header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
@@ -175,11 +175,11 @@ package inet.transport.tcp;
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
-//    - flow control: finite receive buffer size (initiated by parameter
-//      advertisedWindow). If receive buffer is exhausted (by out-of-order
-//      segments) and the payload length of a new received segment
-//      is higher than free receiver buffer, the new segment will be dropped.
-//      Such drops are recorded in tcpRcvQueueDropsVector.
+//  - flow control: finite receive buffer size (initiated by parameter
+//    advertisedWindow). If receive buffer is exhausted (by out-of-order
+//    segments) and the payload length of a new received segment
+//    is higher than free receiver buffer, the new segment will be dropped.
+//    Such drops are recorded in tcpRcvQueueDropsVector.
 
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - delayed acks, with 200ms timeout (optional)
@@ -234,12 +234,12 @@ simple TCP like ITCP
 {
     parameters:
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
-        bool delayedAcksEnabled = default(false); // delayed ACKs enabled/disabled
+        bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // maximum segment size (header option)
+        int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
         string receiveQueueClass = default("TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue

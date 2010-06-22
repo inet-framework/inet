@@ -40,6 +40,6 @@ channel NormalPath extends DatarateChannel {
     parameters:
         datarate = 100Mbps;
         delay = 0.0565us; // 10m
-		per = 0;
+        per = 0;
         ber = 0;
 }
