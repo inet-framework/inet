@@ -71,6 +71,11 @@ class INET_API TCPSACKRexmitQueue
     virtual void init(uint32 seqNum);
 
     /**
+     * Returns the sequence number of the first byte stored in the buffer.
+     */
+    virtual uint32 getBufferStartSeq();
+
+    /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */

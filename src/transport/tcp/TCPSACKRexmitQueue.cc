@@ -44,6 +44,11 @@ std::string TCPSACKRexmitQueue::str() const
     return out.str();
 }
 
+uint32 TCPSACKRexmitQueue::getBufferStartSeq()
+{
+    return begin;
+}
+
 uint32 TCPSACKRexmitQueue::getBufferEndSeq()
 {
     return end;
