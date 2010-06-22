@@ -121,6 +121,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
     {
         // PAWS
+        // FIXME: call only once the getTSval() ! this is an expensive function!
         if (state->ts_enabled && getTSval(tcpseg) != 0 && seqLess(getTSval(tcpseg), state->ts_recent) &&
             (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
         {
