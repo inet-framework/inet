@@ -173,9 +173,9 @@ import inet.transport.tcp.ITCP;
 //  - RFC 2018 - TCP Selective Acknowledgment Options
 //  - RFC 2581 - TCP Congestion Control
 //  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
-//  - RFC 3042 Â– Limited Transmit (Loss Recovery algorithm)
-//  - RFC 3390 Â– Increasing TCP's Initial Window
-//  - RFC 3782 Â– NewReno (Loss Recovery algorithm)
+//  - RFC 3042 – Limited Transmit (Loss Recovery algorithm)
+//  - RFC 3390 – Increasing TCP's Initial Window
+//  - RFC 3782 – NewReno (Loss Recovery algorithm)
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.
@@ -189,9 +189,8 @@ simple TCP_old like ITCP
 {
     parameters:
         @class(tcp_old::TCP);
-        int mss = default(1024); // maximum segment size
+        int mss = default(536); // maximum segment size (Note: no MSS negotiation)
         int advertisedWindow = default(14*this.mss); // in bytes (Note: normally, NIC queues should be at least this size)
-
         string tcpAlgorithmClass = default("tcp_old::TCPReno"); // TCPTahoe/TCPReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("tcp_old::TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
         string receiveQueueClass = default("tcp_old::TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue

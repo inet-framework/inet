@@ -208,20 +208,10 @@ package inet.transport.tcp;
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
-//  - Re-starting Idle Connections (RFC 2581)
-//    RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//    more than one retransmission timeout, cwnd is reduced to the value
-//    of the restart window (RW) before transmission begins.
-//    For the purposes of this standard, we define RW = IW."
 //
 // TCPNewReno/TCPReno/TCPTahoe issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm (RFC 896) possibly not precisely implemented
-//  - Re-starting Idle Connections (RFC 2581)
-//      RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//      more than one retransmission timeout, cwnd is reduced to the value
-//      of the restart window (RW) before transmission begins.
-//      For the purposes of this standard, we define RW = IW."
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.
@@ -242,6 +232,8 @@ simple TCP like ITCP
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool wsSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        bool tsSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
