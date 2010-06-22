@@ -71,6 +71,11 @@ class INET_API TCPSACKRexmitQueue
     virtual void init(uint32 seqNum);
 
     /**
+     * Returns a string for debug purposes.
+     */
+    virtual std::string str() const;
+
+    /**
      * Returns the sequence number of the first byte stored in the buffer.
      */
     virtual uint32 getBufferStartSeq();
@@ -138,11 +143,6 @@ class INET_API TCPSACKRexmitQueue
      * Resets rexmitted bit of all segments in rexmit queue.
      */
     virtual void resetRexmittedBit();
-
-    /**
-     * Returns a string for debug purposes.
-     */
-    virtual std::string str() const;
 
     /**
      * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
