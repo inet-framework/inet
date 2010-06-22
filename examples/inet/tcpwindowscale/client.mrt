@@ -1,0 +1,22 @@
+# filename: client.mrt
+# author: Thomas Reschka
+# routing table for client of tcp example "tcpwindowscale"
+
+ifconfig:
+
+# interface 0 to client
+name: ppp0
+    inet_addr: 172.0.0.1
+    Mask: 255.255.255.0
+    MTU: 1500
+    POINTTOPOINT MULTICAST
+
+ifconfigend.
+
+
+route:
+
+#Destination     Gateway          Genmask          Flags  Metric  Iface
+172.0.0.2        172.0.0.1        255.255.255.0    H      0       ppp0
+
+routeend.
