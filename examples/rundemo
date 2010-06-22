@@ -9,7 +9,7 @@ exec wish "$0" "$@"
 
 #--------------------------------------------------------------
 #  Copyright (C) 1992-2003 Andras Varga
-#					  2009 Thomas Reschka
+#
 #  This file is distributed WITHOUT ANY WARRANTY. See the file
 #  `license' for details on this and other legal matters.
 #--------------------------------------------------------------
@@ -57,20 +57,24 @@ foreach line {
    {"Multicast"              "inet/multicast"       "./run"               "run"}
    {"RouterPerf"             "inet/routerperf"      "./run"               "run"}
    {"BulkTransfer"           "inet/bulktransfer"    "./run"               "run"}
+   {"RedTest"                "inet/redtest"         "./run"               "run"}
    {"TcpSack"                "inet/tcpsack"         "./run"               "run"}
-   {"Ber"                    "inet/ber"             "./run"               "run"}
+   {"TcpTimestamps"          "inet/tcptimestamps"   "./run"               "run"}
+   {"TcpWindowScale"         "inet/tcpwindowscale"  "./run"               "run"}
+   {"TcpClientServer"        "inet/tcpclientserver" "./run"               "run"}
+   {"BER"                    "inet/ber"             "./run"               "run"}
 
    {"IPv6 (work in progress)"}
    {"NClients"               "ipv6/nclients"        "./run"               "run"}
    {"DemoNetworkEth"         "ipv6/demonetworketh"  "./run"               "run"}
 
    {"SCTP"}
-   {"NClients"               "sctp/nclients" 	    "./run"               "run"}
+   {"NClients"               "sctp/nclients"        "./run"               "run"}
    {"Multi-homing"           "sctp/multihomed"      "./run"               "run"}
 
    {"Emulation"}
    {"Traceroute"             "emulation/traceroute" "./run"               "run"}
-   {"ExtClient"	             "emulation/extclient"  "./run"               "run"}
+   {"ExtClient"              "emulation/extclient"  "./run"               "run"}
    {"ExtServer"              "emulation/extserver"  "./run"               "run"}
 
    {"Ad-hoc"}
