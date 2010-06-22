@@ -339,14 +339,14 @@ void TCPConnection::configureStateVariables()
     if (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0)
         throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
 
-    state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACKs enabled/disabled
-    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
-    state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
-    state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->rcv_wnd = advertisedWindowPar;
     state->rcv_adv = advertisedWindowPar;
     state->maxRcvBuffer = advertisedWindowPar;
-    state->snd_mss = tcpMain->par("mss").longValue(); // maximum segment size
+    state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
+    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
+    state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
+    state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
+    state->snd_mss = tcpMain->par("mss").longValue(); // Maximum Segment Size (RFC 793)
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     if (state->sack_support)
     {
@@ -1004,7 +1004,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             option.setLength(2);
             option.setValuesArraySize(0);
 
-            // Update SACK variable
+            // Update SACK variables
             state->snd_sack_perm = true;
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
             tcpEV << "TCP Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to: " << state->sack_enabled << "\n";
@@ -1324,7 +1324,7 @@ void TCPConnection::updateRcvQueueVars()
     if (tcpRcvQueueBytesVector)
         tcpRcvQueueBytesVector->record(state->usedRcvBuffer);
 
-    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
+//    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
 
 void TCPConnection::updateRcvWnd()
@@ -1366,9 +1366,8 @@ void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982]:
     if (doAlways || (tcpseg->getAckBit()
         && (seqLess(state->snd_wl1, tcpseg->getSequenceNo()) ||
-        (state->snd_wl1 == tcpseg->getSequenceNo()&& seqLE(state->snd_wl2, tcpseg->getAckNo())) ||
-        (state->snd_wl2 == tcpseg->getAckNo()&& tcpseg->getWindow() > state->snd_wnd)))
-        )
+        (state->snd_wl1 == tcpseg->getSequenceNo() && seqLE(state->snd_wl2, tcpseg->getAckNo())) ||
+        (state->snd_wl2 == tcpseg->getAckNo() && true_window > state->snd_wnd))))
     {
         // send window should be updated
         tcpEV << "Updating send window from segment: new wnd=" << tcpseg->getWindow() << "\n";

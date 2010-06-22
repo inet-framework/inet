@@ -151,7 +151,7 @@ void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
         {
             if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum) // Search for region in queue!
             {
-                i->sacked=true; // set sacked bit
+                i->sacked = true; // set sacked bit
                 found = true;
             }
             i++;

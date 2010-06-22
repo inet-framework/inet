@@ -334,8 +334,8 @@ void TCPBaseAlg::processDelayedAckTimer(TCPEventCode& event)
 
 void TCPBaseAlg::processKeepAliveTimer(TCPEventCode& event)
 {
-    // FIXME TBD
-	// RFC 1122, page 102:
+    // TBD
+    // RFC 1122, page 102:
     // "A "keep-alive" mechanism periodically probes the other
     // end of a connection when the connection is otherwise
     // idle, even when there is no data to be sent.  The TCP
