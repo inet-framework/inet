@@ -427,6 +427,11 @@ class INET_API TCPConnection
     /** Utility: adds SACKs to segments header options field */
     virtual TCPSegment addSacks(TCPSegment *tcpseg);
 
+    /** Utility: get TSval from segments TS header option */
+    virtual uint32 getTSval(TCPSegment *tcpseg);
+
+    /** Utility: get TSecr from segments TS header option */
+    virtual uint32 getTSecr(TCPSegment *tcpseg);
   public:
     /** Utility: send ACK */
     virtual void sendAck();

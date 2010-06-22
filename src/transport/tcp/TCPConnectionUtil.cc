@@ -1326,6 +1326,30 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     return *tcpseg;
 }
 
+uint32 TCPConnection::getTSval(TCPSegment *tcpseg)
+{
+    for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
+    {
+        const TCPOption& option = tcpseg->getOptions(i);
+        short kind = option.getKind();
+        if (kind == TCPOPTION_TIMESTAMP)
+            return option.getValues(0);
+    }
+    return 0;
+}
+
+uint32 TCPConnection::getTSecr(TCPSegment *tcpseg)
+{
+    for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
+    {
+        const TCPOption& option = tcpseg->getOptions(i);
+        short kind = option.getKind();
+        if (kind == TCPOPTION_TIMESTAMP)
+            return option.getValues(1);
+    }
+    return 0;
+}
+
 void TCPConnection::updateRcvQueueVars()
 {
     // update receive queue related state variables
