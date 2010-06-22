@@ -1,3 +1,44 @@
+2010-06-19  Thomas Reschka
+
+    * implemented RFC 1323 (TCP Extensions for High Performance):
+        - Window Scale option
+        - Timestamps option (Round-Trip Time Measurement - RTTM)
+        - Protect Against Wrapped Sequence Numbers (PAWS)
+        - added a PAWS modification according to the latest proposal
+          of the tcplw@cray.com list (Braden 1993/04/26)
+
+    * implemented missing part of RFC 2581: Re-starting Idle Connections
+
+    * added some improvements:
+        - added check for TS and SACK in writeHeaderOptions() to avoide of unnecessary NOPs
+        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd
+        - changed parts of SACK implementation to respect potential use of TS option
+        - changed parts of updateWndInfo() to respect potential use of WS option
+        - changed parts of the delayedAck algorithm
+
+    * Fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
+
+    * Fixed some issues (not yet reported):
+        - the node doing the passive open should use mss as cwnd! Calling receivedDataAck()
+          after receiving ACK von SYN,ACK changes cwnd to 2*mss!
+        - a SACK supporting node should not include a SACK_PERMITTED option in his SYN,ACK
+          when the received SYN was without SACK_PERMITTED 
+        - calling readHeaderOptions() was missing in certain situations (receivedOutOfOrderSegment(),
+          receiveSeqChanged(), receivedAckForDataNotYetSent()) now readHeaderOptions() is called in:
+          1. processSegmentInListen()
+          2. processSegmentInSynSent()
+          3. processSegment1stThru8th() [NEW]
+        - calling ackSent() was missing in sendSynAck() and sendRstAck()
+        - added condition: (bytes + options_len <= snd_mss) in sendSegment()
+        - added condition in processSACKOption() to check sack_enabled and current TCP state
+
+    * added some TCP patches submitted by Zoltan Bojthe (see tcpfixes branch):
+        - add a getBufferStartSeq() function to TCP queues
+        - bugfix for DumbTCP
+        - Eliminate ASSERT when resend last packet after sent a FIN
+        - Move sequence number compare functions to TCPSegment.h
+        - TCP fix: replace std::max() with seqGreater(), when comparing sequence numbers
+
 2010-03-26  Andras Varga
 
     * fix: represent port numbers with ushort. Previously it was short 

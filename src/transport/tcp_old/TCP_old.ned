@@ -149,7 +149,7 @@ import inet.transport.tcp.ITCP;
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
 //    on all segments: always forwards data to the app as soon as possible.
 //  - finite receive buffer size is not modelled (always the maximum
-//    window size, currently 16K is advertised)
+//    window size, is advertised and data receiver was not able to send a Zero Window)
 //  - no RECEIVE command. Received data are always forwarded to the app as
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control
@@ -165,7 +165,17 @@ import inet.transport.tcp.ITCP;
 //  - PERSIST timer not implemented (currently no problem, because receiver
 //    never advertises 0 window size)
 //  - KEEPALIVE not implemented (idle connections never time out)
+//  - delayed ACKs algorithm not precisely implemented
 //  - Nagle's algorithm possibly not precisely implemented
+//
+// Further missing features:
+//  - RFC 1323 - TCP Extensions for High Performance
+//  - RFC 2018 - TCP Selective Acknowledgment Options
+//  - RFC 2581 - TCP Congestion Control
+//  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+//  - RFC 3042  Limited Transmit (Loss Recovery algorithm)
+//  - RFC 3390  Increasing TCP's Initial Window
+//  - RFC 3782  NewReno (Loss Recovery algorithm)
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.

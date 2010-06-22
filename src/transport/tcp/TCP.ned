@@ -24,6 +24,7 @@ package inet.transport.tcp;
 //   - RFC  793 - Transmission Control Protocol
 //   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+//   - RFC 1323 - TCP Extensions for High Performance
 //   - RFC 2018 - TCP Selective Acknowledgment Options
 //   - RFC 2581 - TCP Congestion Control
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
@@ -172,9 +173,11 @@ package inet.transport.tcp;
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
 //        (local parameter) and the value specified in the MSS option
 //        received during connection startup. Based on [RFC 2581, page 1].
+//      - WS: Window Scale option, based on RFC 1323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
+//      - TS: Timestamps option, based on RFC 1323.
 //  - flow control: finite receive buffer size (initiated by parameter
 //    advertisedWindow). If receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a new received segment
