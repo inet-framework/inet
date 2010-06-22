@@ -883,12 +883,12 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
         return false;
     }
 
-    int n = option.getValuesArraySize()/2;
+    uint n = option.getValuesArraySize()/2;
     if (n > 0) // sacks present?
     {
         tcpEV << n << " SACK(s) received:\n";
         uint count=0;
-        for (int i=0; i<n; i++)
+        for (uint i=0; i<n; i++)
         {
             Sack tmp;
             tmp.setStart(option.getValues(count));
@@ -979,7 +979,7 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
 TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
 {
     TCPOption option;
-    int t = 0;
+    uint t = 0;
 
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN || ((fsm.getState()==TCP_S_SYN_SENT || fsm.getState()==TCP_S_SYN_RCVD) && state->syn_rexmit_count>0))) // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     {
@@ -1097,7 +1097,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 
     // delete old sacks (below rcv_nxt), delete duplicates and print previous status of sacks_array:
     tcpEV << "Previous status of sacks_array: \n";
-    for (int a=0; a<MAX_SACK_BLOCKS; a++) // MAX_SACK_BLOCKS is set to 60
+    for (uint a=0; a<MAX_SACK_BLOCKS; a++) // MAX_SACK_BLOCKS is set to 60
     {
         if (state->sacks_array[a].getStart()!=0 && seqLE(state->sacks_array[a].getEnd(), state->rcv_nxt))
         {
