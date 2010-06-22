@@ -127,7 +127,7 @@ enum TCPEventCode
 
 #define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
 
-
+#define TCP_OPTION_TS_SIZE  12
 /**
  * Contains state variables ("TCB") for TCP.
  *

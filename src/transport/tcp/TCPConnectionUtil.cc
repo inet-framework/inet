@@ -652,8 +652,13 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
-    // last segment could be less then state->snd_mss (or less then snd_mss-12 is using TS option)
-    if (fullSegmentsOnly && buffered > (ulong) effectiveWin && ((bytesToSend < state->snd_mss && !state->ts_enabled) || (bytesToSend < (state->snd_mss-12) && state->ts_enabled)))
+    uint32 effectiveMaxBytesSend = state->snd_mss;
+    if(state->ts_enabled)
+        effectiveMaxBytesSend = TCP_OPTION_TS_SIZE;
+
+    // last segment could be less than state->snd_mss (or less than snd_mss-TCP_OPTION_TS_SIZE is using TS option)
+    if (fullSegmentsOnly && buffered > (ulong)effectiveWin &&
+            (bytesToSend < (effectiveMaxBytesSend)))
     {
         tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
             << ", in buffer " << buffered << ")\n";
@@ -685,13 +690,13 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     }
     else // send whole segments only (nagle_enabled)
     {
-        while (bytesToSend >= state->snd_mss || (bytesToSend >= (state->snd_mss-12) && state->ts_enabled))
+        while (bytesToSend >= effectiveMaxBytesSend)
         {
             sendSegment(state->snd_mss);
             bytesToSend -= state->sentBytes;
         }
     }
-    // check how many bytes we have - last segment could be less then state->snd_mss
+    // check how many bytes we have - last segment could be less than state->snd_mss
     buffered = sendQueue->getBytesAvailable(state->snd_nxt);
     if (bytesToSend==buffered && buffered!=0) // last segment?
         sendSegment(bytesToSend);
@@ -1717,7 +1722,7 @@ void TCPConnection::setPipe()
 
     uint32 shift = state->snd_mss;
     if (state->ts_enabled)
-        shift = (state->snd_mss - 12);
+        shift -= TCP_OPTION_TS_SIZE;
 
     // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
@@ -1774,7 +1779,7 @@ uint32 TCPConnection::nextSeg()
     bool found = false;
     uint32 shift = state->snd_mss;
     if (state->ts_enabled)
-        shift = (state->snd_mss - 12);
+        shift -= TCP_OPTION_TS_SIZE;
 
     // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
