@@ -1759,3 +1759,17 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
         }
     }
 }
+
+uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
+{
+    ASSERT (SimTime::getScaleExp() == -12); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    uint32 timestamp = (uint32) (simtime.dbl() * 1000);
+    return timestamp;
+}
+
+simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
+{
+    ASSERT (SimTime::getScaleExp() == -12); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    simtime_t simtime = (simtime_t) ((double) timestamp / 1000);
+    return simtime;
+}

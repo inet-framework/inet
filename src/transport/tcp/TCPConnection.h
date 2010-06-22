@@ -618,6 +618,16 @@ class INET_API TCPConnection
      */
     virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow);
 
+    /**
+     * Utility: converts a given simtime to a timestamp (TS).
+     */
+    virtual uint32 convertSimtimeToTS(simtime_t simtime);
+
+    /**
+     * Utility: converts a given timestamp (TS) to a simtime.
+     */
+    virtual simtime_t convertTSToSimtime(uint32 timestamp);
+
 };
 
 #endif
