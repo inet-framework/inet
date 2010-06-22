@@ -118,22 +118,28 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
 
     bool acceptable = true;
+
     if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
     {
         // PAWS
-        // FIXME: call only once the getTSval() ! this is an expensive function!
-        if (state->ts_enabled && getTSval(tcpseg) != 0 && seqLess(getTSval(tcpseg), state->ts_recent) &&
-            (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
+        if (state->ts_enabled)
         {
-            tcpEV << "PAWS: Segment is not acceptable, TSval=" << getTSval(tcpseg) << " in " <<  stateName(fsm.getState()) << " state received: dropping segment\n";
-            acceptable = false; 
+            uint32 tsval = getTSval(tcpseg);
+            // FIXME check TS rounding on all other code
+            if(tsval != 0 && seqLess(tsval, state->ts_recent) &&
+                    (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
+            {
+                tcpEV << "PAWS: Segment is not acceptable, TSval=" << tsval << " in " <<
+                        stateName(fsm.getState()) << " state received: dropping segment\n";
+                acceptable = false;
+            }
         }
-
         readHeaderOptions(tcpseg);
     }
 
-    if (!state->ts_enabled || (state->ts_enabled && acceptable))
+    if (acceptable)
         acceptable = isSegmentAcceptable(tcpseg);
+
     if (!acceptable)
     {
         //"
