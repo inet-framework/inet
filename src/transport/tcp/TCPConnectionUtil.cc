@@ -144,8 +144,19 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
         tcpEV << "(l=" << tcpseg->getPayloadLength() << ") ";
     }
     if (tcpseg->getAckBit())  tcpEV << "ack " << tcpseg->getAckNo() << " ";
-    tcpEV << "win " << tcpseg->getWindow() << "\n";
+    tcpEV << "win " << tcpseg->getWindow() << " ";
     if (tcpseg->getUrgBit())  tcpEV << "urg " << tcpseg->getUrgentPointer() << " ";
+    if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
+    {
+        tcpEV << "options ";
+        for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
+        {
+            const TCPOption& option = tcpseg->getOptions(i);
+            short kind = option.getKind();
+            tcpEV << optionName(kind) << " ";
+        }
+    }
+    tcpEV << "\n";
 }
 
 TCPConnection *TCPConnection::cloneListeningConnection()
