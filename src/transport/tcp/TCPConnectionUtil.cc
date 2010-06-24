@@ -641,8 +641,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         bytesToSend = buffered;
 
     uint32 effectiveMaxBytesSend = state->snd_mss;
-    if(state->ts_enabled)
-        effectiveMaxBytesSend = TCP_OPTION_TS_SIZE;
+    if (state->ts_enabled)
+        effectiveMaxBytesSend -= TCP_OPTION_TS_SIZE;
 
     // last segment could be less than state->snd_mss (or less than snd_mss-TCP_OPTION_TS_SIZE is using TS option)
     if (fullSegmentsOnly && buffered > (ulong)effectiveWin &&
