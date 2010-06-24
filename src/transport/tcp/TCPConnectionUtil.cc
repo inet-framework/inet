@@ -2066,8 +2066,5 @@ simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
 
 bool TCPConnection::dataToSend()
 {
-    if (sendQueue->getBytesAvailable(state->snd_nxt) > 0)
-        return true;
-    else
-        return false;
+    return (sendQueue->getBytesAvailable(state->snd_nxt) > 0);
 }
