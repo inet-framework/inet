@@ -544,7 +544,7 @@ class INET_API TCPConnection
     /** Utility: update receive window (rcv_wnd) */
     virtual void updateRcvWnd();
     /** Utility: scale receive window (rcv_wnd) */
-    virtual uint scaleRcvWnd();
+    virtual unsigned short scaleRcvWnd();
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 

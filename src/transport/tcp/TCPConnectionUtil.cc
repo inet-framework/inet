@@ -1633,10 +1633,10 @@ void TCPConnection::updateRcvWnd()
         rcvWndVector->record(state->rcv_wnd);
 }
 
-uint TCPConnection::scaleRcvWnd()
+unsigned short TCPConnection::scaleRcvWnd()
 {
     ASSERT(state->ws_enabled);
-    ulong scaled_rcv_wnd = state->rcv_wnd;
+    uint32 scaled_rcv_wnd = state->rcv_wnd;
     state->rcv_wnd_scale = 0;
     while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
     {
@@ -1644,7 +1644,8 @@ uint TCPConnection::scaleRcvWnd()
         state->rcv_wnd_scale++;
     }
     scaled_rcv_wnd = state->rcv_wnd >> state->rcv_wnd_scale;
-    return (uint) scaled_rcv_wnd;
+    ASSERT(scaled_rcv_wnd == (unsigned short)scaled_rcv_wnd);
+    return (unsigned short) scaled_rcv_wnd;
 }
 
 void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
