@@ -512,11 +512,7 @@ void TCPConnection::sendAck()
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(state->snd_nxt);
     tcpseg->setAckNo(state->rcv_nxt);
-    updateRcvWnd();
-    if (state->ws_enabled)
-        tcpseg->setWindow(scaleRcvWnd());
-    else
-        tcpseg->setWindow(state->rcv_wnd);
+    tcpseg->setWindow(updateRcvWnd());
 
     // write header options
     writeHeaderOptions(tcpseg);
@@ -538,11 +534,7 @@ void TCPConnection::sendFin()
     tcpseg->setAckBit(true);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSequenceNo(state->snd_nxt);
-    updateRcvWnd();
-    if (state->ws_enabled)
-        tcpseg->setWindow(scaleRcvWnd());
-    else
-        tcpseg->setWindow(state->rcv_wnd);
+    tcpseg->setWindow(updateRcvWnd());
 
     // send it
     sendToIP(tcpseg);
@@ -584,11 +576,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
-    updateRcvWnd();
-    if (state->ws_enabled)
-        tcpseg->setWindow(scaleRcvWnd());
-    else
-        tcpseg->setWindow(state->rcv_wnd);
+    tcpseg->setWindow(updateRcvWnd());
 
     // TBD when to set PSH bit?
     // TBD set URG bit if needed
@@ -1596,7 +1584,7 @@ void TCPConnection::updateRcvQueueVars()
 //    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
 
-void TCPConnection::updateRcvWnd()
+unsigned short TCPConnection::updateRcvWnd()
 {
     uint32 win = 0;
 
@@ -1631,19 +1619,18 @@ void TCPConnection::updateRcvWnd()
     state->rcv_wnd = win;
     if (rcvWndVector)
         rcvWndVector->record(state->rcv_wnd);
-}
 
-unsigned short TCPConnection::scaleRcvWnd()
-{
-    ASSERT(state->ws_enabled);
+    // scale rcv_wnd:
     uint32 scaled_rcv_wnd = state->rcv_wnd;
     state->rcv_wnd_scale = 0;
-    while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
+    if(state->ws_enabled)
     {
-        scaled_rcv_wnd = scaled_rcv_wnd >> 1;
-        state->rcv_wnd_scale++;
+        while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
+        {
+            scaled_rcv_wnd = scaled_rcv_wnd >> 1;
+            state->rcv_wnd_scale++;
+        }
     }
-    scaled_rcv_wnd = state->rcv_wnd >> state->rcv_wnd_scale;
     ASSERT(scaled_rcv_wnd == (unsigned short)scaled_rcv_wnd);
     return (unsigned short) scaled_rcv_wnd;
 }

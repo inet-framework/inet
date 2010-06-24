@@ -541,10 +541,12 @@ class INET_API TCPConnection
     static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
-    /** Utility: update receive window (rcv_wnd) */
-    virtual void updateRcvWnd();
-    /** Utility: scale receive window (rcv_wnd) */
-    virtual unsigned short scaleRcvWnd();
+
+    /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
+     *  Returns the (scaled) receive window size.
+     */
+    virtual unsigned short updateRcvWnd();
+
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 
