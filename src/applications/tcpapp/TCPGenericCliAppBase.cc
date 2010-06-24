@@ -21,6 +21,11 @@
 void TCPGenericCliAppBase::initialize()
 {
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
+
+    //statistics
+    receivedBytesSignal = registerSignal("receivedBytes");
+    sentBytesSignal = registerSignal("sentBytes");
+
     WATCH(numSessions);
     WATCH(numBroken);
     WATCH(packetsSent);
@@ -84,6 +89,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
 
     packetsSent++;
     bytesSent+=numBytes;
+    emit(sentBytesSignal, (long int)numBytes);
 }
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
@@ -103,6 +109,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
     bytesRcvd+=msg->getByteLength();
+    emit(receivedBytesSignal, (long int)(msg->getByteLength()));
 
     delete msg;
 }
@@ -140,10 +147,6 @@ void TCPGenericCliAppBase::finish()
     EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 
     recordScalar("number of sessions", numSessions);
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsRcvd);
-    recordScalar("bytes sent", bytesSent);
-    recordScalar("bytes rcvd", bytesRcvd);
 }
 
 

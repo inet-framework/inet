@@ -70,6 +70,11 @@ class INET_API ARP : public cSimpleModule
     long numRequestsSent;
     long numRepliesSent;
 
+    simsignal_t sendRequestSignal;
+    simsignal_t sendRepliesSignal;
+    simsignal_t failedResolutionSignal;
+    simsignal_t resolutionSignal;
+
     ARPCache arpCache;
 
     cQueue pendingQueue; // outbound packets waiting for ARP resolution

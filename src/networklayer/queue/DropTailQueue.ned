@@ -27,7 +27,9 @@ simple DropTailQueue like OutputQueue
     parameters:
         int frameCapacity = default(100);
         @display("i=block/queue");
-    gates:
+        @signal[queueLength](title="Queue length";modeHint=hints);
+        @signal[droppedPacket](title="Drops";modeHint=hints);
+        gates:
         input in;
         output out;
 }

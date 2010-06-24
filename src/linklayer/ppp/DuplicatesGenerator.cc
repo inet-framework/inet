@@ -29,7 +29,11 @@ void DuplicatesGenerator::initialize()
     WATCH(numDuplicated);
     WATCH(generateFurtherDuplicates);
 
-    const char *vector = par("duplicatesVector");
+    //statistics
+    receivedPacketSignal = registerSignal("receivedPacket");
+    duplicatedPacketSignal = registerSignal("duplicatedPacket");
+
+	const char *vector = par("duplicatesVector");
     parseVector(vector);
 
     if (duplicatesVector.size()==0)
@@ -43,25 +47,27 @@ void DuplicatesGenerator::initialize()
 
 void DuplicatesGenerator::handleMessage(cMessage *msg)
 {
-    numPackets++;
+	numPackets++;
+	emit(receivedPacketSignal, 1L);
 
-    if (generateFurtherDuplicates)
-    {
-        if (numPackets==duplicatesVector[0])
-        {
-            EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
-            cMessage *dupmsg = (cMessage*) msg->dup();
-            send(dupmsg, "out");
-            numDuplicated++;
-            duplicatesVector.erase(duplicatesVector.begin());
-            if (duplicatesVector.size()==0)
-            {
-                EV << "DuplicatesGenerator: End of duplicatesVector reached." << endl;
-                generateFurtherDuplicates = false;
-            }
-        }
-    }
-    send(msg, "out");
+	if (generateFurtherDuplicates)
+	{
+		if (numPackets==duplicatesVector[0])
+		{
+			EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
+			cMessage *dupmsg = (cMessage*) msg->dup();
+			send(dupmsg, "out");
+			numDuplicated++;
+			emit(duplicatedPacketSignal, 1L);
+			duplicatesVector.erase(duplicatesVector.begin());
+			if (duplicatesVector.size()==0)
+			{
+				EV << "DuplicatesGenerator: End of duplicatesVector reached." << endl;
+				generateFurtherDuplicates = false;
+			}
+		}
+	}
+	send(msg, "out");
 }
 
 void DuplicatesGenerator::parseVector(const char *vector)
@@ -92,6 +98,4 @@ void DuplicatesGenerator::parseVector(const char *vector)
 
 void DuplicatesGenerator::finish()
 {
-    recordScalar("total packets", numPackets);
-    recordScalar("total duplicated", numDuplicated);
 }

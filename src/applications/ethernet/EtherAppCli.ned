@@ -33,6 +33,9 @@ simple EtherAppCli
         volatile int respLength @unit(B) = default(1KB);  // length of response packets
         bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         @display("i=block/app");
+        @signal[endToEndDelay](title="end-to-end delay";modeHint=hints,stats);
+        @signal[receivedPacket](title="Received packet";modeHint=count);
+        @signal[sentPacket](title="Sent packet";modeHint=count);
     gates:
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);

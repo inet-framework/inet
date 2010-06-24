@@ -34,8 +34,8 @@ void Ieee80211MgmtBase::initialize(int stage)
 
         dataQueue.setName("wlanDataQueue");
         mgmtQueue.setName("wlanMgmtQueue");
-        dataQueueLenVec.setName("queue length");
-        dataQueueDropVec.setName("queue drop count");
+        dataQueueLenSignal = registerSignal("dataQueueLen");
+        droppedPacketSignal = registerSignal("droppedPacket");
 
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
@@ -118,13 +118,13 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
-        dataQueueDropVec.record(1);
+        emit(droppedPacketSignal, 1L);
         return true;
     }
     else
     {
         dataQueue.insert(msg);
-        dataQueueLenVec.record(dataQueue.length());
+        emit(dataQueueLenSignal, (long)(dataQueue.length()));
         return false;
     }
 }
@@ -142,7 +142,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
     cMessage *pk = (cMessage *)dataQueue.pop();
 
     // statistics
-    dataQueueLenVec.record(dataQueue.length());
+    emit(dataQueueLenSignal, (long)(dataQueue.length()));
     return pk;
 }
 

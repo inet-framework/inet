@@ -51,11 +51,13 @@ simple PingApp
         double stopTime @unit("s") = default(0s); // send no pings after stopTime, 0 means forever
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
+        @signal[endToEndDelay](title="delay";modeHint=histogram,stats);
+        @signal[droppedPacket](title="dropped packets";modeHint=histogram,stats);
+        @signal[sentPacket](title="sent packets";modeHint=histogram,count);
+        @signal[outOfOrderArrival](title="Out of order arrival";modeHint=hints,count);
     gates:
         input pingIn;
         output pingOut;
         input pingv6In;
         output pingv6Out;
 }
-
-

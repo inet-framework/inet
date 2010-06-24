@@ -29,6 +29,10 @@ void DropsGenerator::initialize()
     WATCH(numDropped);
     WATCH(generateFurtherDrops);
 
+    //statistics
+    receivedPacketSignal = registerSignal("receivedPacket");
+    droppedPacketSignal = registerSignal("droppedPacket");
+
     const char *vector = par("dropsVector");
     parseVector(vector);
 
@@ -44,6 +48,7 @@ void DropsGenerator::initialize()
 void DropsGenerator::handleMessage(cMessage *msg)
 {
     numPackets++;
+    emit(receivedPacketSignal, 1L);
 
     if (generateFurtherDrops)
     {
@@ -52,18 +57,18 @@ void DropsGenerator::handleMessage(cMessage *msg)
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
             delete msg;
             numDropped++;
+            emit(droppedPacketSignal, 1L);
             dropsVector.erase(dropsVector.begin());
             if (dropsVector.size()==0)
             {
                 EV << "DropsGenerator: End of dropsVector reached." << endl;
                 generateFurtherDrops = false;
             }
+            return; // drop message
+
         }
-        else
-            {send(msg, "out");}
     }
-    else
-        {send(msg, "out");}
+    send(msg, "out");
 }
 
 void DropsGenerator::parseVector(const char *vector)
@@ -94,6 +99,4 @@ void DropsGenerator::parseVector(const char *vector)
 
 void DropsGenerator::finish()
 {
-    recordScalar("total packets", numPackets);
-    recordScalar("total dropped", numDropped);
 }

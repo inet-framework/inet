@@ -112,16 +112,26 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     unsigned long numFramesPassedToHL; // frames passed to higher layer
     unsigned long numPauseFramesRcvd;  // PAUSE frames received from network
     unsigned long numPauseFramesSent;  // PAUSE frames sent
-    cOutVector numFramesSentVector;
-    cOutVector numFramesReceivedOKVector;
-    cOutVector numBytesSentVector;
-    cOutVector numBytesReceivedOKVector;
-    cOutVector numDroppedIfaceDownVector;
-    cOutVector numDroppedBitErrorVector;
-    cOutVector numDroppedNotForUsVector;
-    cOutVector numFramesPassedToHLVector;
-    cOutVector numPauseFramesRcvdVector;
-    cOutVector numPauseFramesSentVector;
+//    cOutVector numFramesSentVector;
+//    cOutVector numFramesReceivedOKVector;
+//    cOutVector numBytesSentVector;
+//    cOutVector numBytesReceivedOKVector;
+//    cOutVector numDroppedIfaceDownVector;
+//    cOutVector numDroppedBitErrorVector;
+//    cOutVector numDroppedNotForUsVector;
+//    cOutVector numFramesPassedToHLVector;
+//    cOutVector numPauseFramesRcvdVector;
+//    cOutVector numPauseFramesSentVector;
+
+    simsignal_t sentBytesSignal;
+    simsignal_t receivedBytesOkSignal;
+    simsignal_t passedBytesToHigherLayerSignal;
+    simsignal_t sentPauseSignal;
+    simsignal_t receivedPauseSignal;
+    simsignal_t receivedBytesFromHigherLayerSignal;
+    simsignal_t droppedBytesNotForUsSignal;
+    simsignal_t droppedBytesBitErrorSignal;
+    simsignal_t droppedMsgIfaceDownSignal;
 
   public:
     EtherMACBase();

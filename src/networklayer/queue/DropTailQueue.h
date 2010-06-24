@@ -36,8 +36,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
     cGate *outGate;
 
     // statistics
-    cOutVector qlenVec;
-    cOutVector dropVec;
+    simsignal_t queueLengthSignal;
 
   protected:
     virtual void initialize();
@@ -59,5 +58,3 @@ class INET_API DropTailQueue : public PassiveQueueBase
 };
 
 #endif
-
-

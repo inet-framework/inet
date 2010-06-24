@@ -27,9 +27,10 @@ void REDQueue::initialize()
     PassiveQueueBase::initialize();
     queue.setName("l2queue");
 
-    avgQlenVec.setName("avg queue length");
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
+    //statistics
+    queueLengthSignal = registerSignal("queueLength");
+    avgQueueLengthSignal = registerSignal("avgQueueLength");
+    earlyDropPacketSignal = registerSignal("earlyDropPacket");
 
     // configuration
     wq = par("wq");
@@ -77,7 +78,7 @@ bool REDQueue::enqueue(cMessage *msg)
     }
 
     // statistics
-    avgQlenVec.record(avg);
+    emit(avgQueueLengthSignal, avg);
 
     //"
     //    if minth <= avg < maxth
@@ -106,6 +107,7 @@ bool REDQueue::enqueue(cMessage *msg)
             mark = true;
             count = 0;
             numEarlyDrops++;
+            emit(earlyDropPacketSignal, 1L);
         }
     }
     else if (maxth <= avg)
@@ -123,13 +125,14 @@ bool REDQueue::enqueue(cMessage *msg)
     if (mark || queue.length()>=maxth) // maxth is also the "hard" limit
     {
         delete msg;
-        dropVec.record(1);
         return true;
     }
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
+
+        emit(queueLengthSignal, (long)(queue.length()));
+
         return false;
     }
 }
@@ -147,8 +150,7 @@ cMessage *REDQueue::dequeue()
     if (queue.length()==0)
         q_time = simTime();
 
-    // statistics
-    qlenVec.record(queue.length());
+    emit(queueLengthSignal, (long)(queue.length()));
 
     return pk;
 }
@@ -161,5 +163,4 @@ void REDQueue::sendOut(cMessage *msg)
 void REDQueue::finish()
 {
     PassiveQueueBase::finish();
-    recordScalar("packets dropped early by RED", numEarlyDrops);
 }

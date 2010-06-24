@@ -27,8 +27,9 @@ void DropTailQueue::initialize()
     PassiveQueueBase::initialize();
     queue.setName("l2queue");
 
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
+    //statistics
+    queueLengthSignal = registerSignal("queueLength");
+    emit(queueLengthSignal, 0L);
 
     outGate = gate("out");
 
@@ -42,13 +43,12 @@ bool DropTailQueue::enqueue(cMessage *msg)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
-        dropVec.record(1);
         return true;
     }
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
+        emit(queueLengthSignal, (long)(queue.length()));
         return false;
     }
 }
@@ -61,7 +61,7 @@ cMessage *DropTailQueue::dequeue()
    cMessage *pk = (cMessage *)queue.pop();
 
     // statistics
-    qlenVec.record(queue.length());
+    emit(queueLengthSignal, (long)(queue.length()));
 
     return pk;
 }

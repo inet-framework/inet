@@ -29,6 +29,9 @@ void PassiveQueueBase::initialize()
     // statistics
     numQueueReceived = 0;
     numQueueDropped = 0;
+    receivedPacketSignal = registerSignal("receivedPacket");
+    droppedPacketSignal = registerSignal("droppedPacket");
+
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
 }
@@ -36,6 +39,7 @@ void PassiveQueueBase::initialize()
 void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
+    emit(BytesSignal, packet->getByteLength());
     if (packetRequested>0)
     {
         packetRequested--;
@@ -45,7 +49,10 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     {
         bool dropped = enqueue(msg);
         if (dropped)
+        {
             numQueueDropped++;
+            emit(droppedPacketSignal, 1L);
+        }
     }
 
     if (ev.isGUI())
@@ -73,7 +80,5 @@ void PassiveQueueBase::requestPacket()
 
 void PassiveQueueBase::finish()
 {
-    recordScalar("packets received by queue", numQueueReceived);
-    recordScalar("packets dropped by queue", numQueueDropped);
 }
 

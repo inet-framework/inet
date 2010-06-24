@@ -26,7 +26,8 @@ simple Sink
 {
     parameters:
         @display("i=block/sink");
+        @signal[receivedBits](title="Received bits";modeHint=count,sum);
+        //TODO sum/time,count/time ???
     gates:
         input in[];
 }
-

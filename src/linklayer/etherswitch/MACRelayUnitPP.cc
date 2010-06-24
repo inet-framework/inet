@@ -46,8 +46,6 @@ void MACRelayUnitPP::initialize()
 {
     MACRelayUnitBase::initialize();
 
-    bufferLevel.setName("buffer level");
-
     numProcessedFrames = numDroppedFrames = 0;
     WATCH(numProcessedFrames);
     WATCH(numDroppedFrames);
@@ -60,6 +58,10 @@ void MACRelayUnitPP::initialize()
     // 1 pause unit is 512 bit times; we assume 100Mb MACs here.
     // We send a pause again when previous one is about to expire.
     pauseInterval = pauseUnits*512.0/100000.0;
+
+    processedBytesSignal = registerSignal("processed");
+    droppedBytesSignal = registerSignal("dropped");
+    usedBufferBytesSignal = registerSignal("usedByfferBytes");
 
     pauseLastSent = 0;
     WATCH(pauseLastSent);
@@ -143,10 +145,11 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
         EV << "Buffer full, dropping frame " << frame << endl;
         delete frame;
         ++numDroppedFrames;
+        emit(droppedBytesSignal, length);
     }
 
     // Record statistics of buffer usage levels
-    bufferLevel.record(bufferUsed);
+    emit(usedBufferBytesSignal, (long)bufferUsed);
 }
 
 void MACRelayUnitPP::processFrame(cMessage *msg)
@@ -163,7 +166,8 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     printAddressTable();
 
     bufferUsed -= length;
-    bufferLevel.record(bufferUsed);
+    emit(usedBufferBytesSignal, (long)bufferUsed);
+    emit(processedBytesSignal, length);
 
     numProcessedFrames++;
 
@@ -183,7 +187,5 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
 
 void MACRelayUnitPP::finish()
 {
-    recordScalar("processed frames", numProcessedFrames);
-    recordScalar("dropped frames", numDroppedFrames);
 }
 

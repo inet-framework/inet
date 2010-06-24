@@ -66,8 +66,10 @@ class INET_API EtherMAC : public EtherMACBase
     simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
     unsigned long numCollisions;       // collisions (NOT number of collided frames!) sensed
     unsigned long numBackoffs;         // number of retransmissions
-    cOutVector numCollisionsVector;
-    cOutVector numBackoffsVector;
+//    cOutVector numCollisionsVector;
+//    cOutVector numBackoffsVector;
+    simsignal_t collisionSignal;
+    simsignal_t backoffSignal;
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);

@@ -179,7 +179,7 @@ class INET_API RTCP : public cSimpleModule
          * behaviour of rtcp. Every participant's rtcp module
          * writes its calculated rtcp interval (without variation
          */
-        cOutVector *_rtcpIntervalOutVector;
+//        cOutVector *_rtcpIntervalOutVector;
 
         /**
          * Request a server socket from the socket layer.

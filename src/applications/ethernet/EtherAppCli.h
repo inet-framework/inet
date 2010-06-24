@@ -41,8 +41,9 @@ class INET_API EtherAppCli : public cSimpleModule
     // receive statistics
     long packetsSent;
     long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
+    simsignal_t endToEndDelaySignal;
+    simsignal_t sentPacketSignal;
+    simsignal_t receivedPacketSignal;
 
   protected:
     virtual void initialize(int stage);

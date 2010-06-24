@@ -50,8 +50,10 @@ void PingApp::initialize()
 
     // statistics
     delayStat.setName("pingRTT");
-    delayVector.setName("pingRTT");
-    dropVector.setName("pingDrop");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
+    droppedPacketSignal = registerSignal("droppedPacket");
+    sentPacketSignal = registerSignal("sentPacket");
+    outOfOrderArrivalSignal = registerSignal("outOfOrderArrival");
 
     dropCount = outOfOrderArrivalCount = 0;
     WATCH(dropCount);
@@ -104,12 +106,13 @@ void PingApp::sendPing()
     msg->setByteLength(packetSize);
 
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
+    sendSeqNo++;
+    emit(sentPacketSignal, 1L);
 }
 
 void PingApp::scheduleNextPing(cMessage *timer)
 {
     simtime_t nextPing = simTime() + intervalp->doubleValue();
-    sendSeqNo++;
     if ((count==0 || sendSeqNo<count) && (stopTime==0 || nextPing<stopTime))
         scheduleAt(nextPing, timer);
     else
@@ -181,7 +184,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
 
     delayStat.collect(rtt);
-    delayVector.record(rtt);
+    emit(endToEndDelaySignal, rtt);
 
     if (seqNo == expectedReplySeqNo)
     {
@@ -195,7 +198,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         // jump in the sequence: count pings in gap as lost
         long jump = seqNo - expectedReplySeqNo;
         dropCount += jump;
-        dropVector.record(dropCount);
+        emit(droppedPacketSignal, jump);
 
         // expect sequence numbers to continue from here
         expectedReplySeqNo = seqNo+1;
@@ -205,6 +208,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         // ping arrived too late: count as out of order arrival
         EV << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
+        emit(outOfOrderArrivalSignal, 1L);
     }
 }
 
@@ -213,20 +217,15 @@ void PingApp::finish()
     if (sendSeqNo==0)
     {
         EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
-        recordScalar("Pings sent", sendSeqNo);
         return;
     }
 
     // record statistics
-    recordScalar("Pings sent", sendSeqNo);
-    recordScalar("Pings dropped", dropCount);
     recordScalar("Out-of-order ping arrivals", outOfOrderArrivalCount);
     recordScalar("Pings outstanding at end", sendSeqNo-expectedReplySeqNo);
 
     recordScalar("Ping drop rate (%)", 100 * dropCount / (double)sendSeqNo);
     recordScalar("Ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
-
-    delayStat.recordAs("Ping roundtrip delays");
 
     // print it to stdout as well
     cout << "--------------------------------------------------------" << endl;

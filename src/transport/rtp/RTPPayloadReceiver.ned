@@ -20,6 +20,7 @@ simple RTPPayloadReceiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
+        @signal[packetArrival](title="Packet arrival";modeHint=hints);
 
     gates:
         input profileIn @labels(RTPInnerPacket);

@@ -44,6 +44,8 @@ simple TCPGenericSrvApp like TCPApp
         int port = default(1000);     // port number to listen on
         double replyDelay @unit("s") = default(0s);
         @display("i=block/app");
+        @signal[receivedBytes](title="Received bytes";modeHint=count,sum);
+        @signal[sentBytes](title="Sent bytes";modeHint=count,sum);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

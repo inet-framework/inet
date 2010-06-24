@@ -29,6 +29,8 @@ simple DuplicatesGenerator
         string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/busy");
+        @signal[receivedPacket](title="total packets";modeHint=count);
+        @signal[duplicatedPacket](title="total duplicated";modeHint=count);
     gates:
         input in;
         output out;

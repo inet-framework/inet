@@ -36,6 +36,10 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
 
+    //statistics:
+    simsignal_t receivedBytesSignal;
+    simsignal_t sentBytesSignal;
+
   protected:
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);

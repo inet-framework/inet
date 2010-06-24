@@ -28,6 +28,9 @@ class INET_API TCPSinkApp : public cSimpleModule
   protected:
     long bytesRcvd;
 
+    //statistics:
+    simsignal_t receivedBytesSignal;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

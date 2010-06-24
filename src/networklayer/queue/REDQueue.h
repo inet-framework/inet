@@ -44,10 +44,12 @@ class INET_API REDQueue : public PassiveQueueBase
     cGate *outGate;
 
     // statistics
-    cOutVector avgQlenVec;
-    cOutVector qlenVec;
-    cOutVector dropVec;
     long numEarlyDrops;
+
+    // statistics
+    simsignal_t queueLengthSignal;
+    simsignal_t avgQueueLengthSignal;
+    simsignal_t earlyDropPacketSignal;
 
   protected:
     virtual void initialize();

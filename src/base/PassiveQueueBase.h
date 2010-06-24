@@ -38,6 +38,8 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     // statistics
     int numQueueReceived;
     int numQueueDropped;
+    simsignal_t receivedPacketSignal;
+    simsignal_t droppedPacketSignal;
 
   protected:
     virtual void initialize();

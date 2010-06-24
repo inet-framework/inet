@@ -147,9 +147,19 @@ simple EtherMAC
         string queueModule = default("");    // name of optional external queue module
         int mtu = default(1500);
         @display("i=block/rxtx");
+        @signal[collision](title="Collision";modeHint=count);
+        @signal[backoff](title="Backoff";modeHint=count);
+        @signal[sentBytes](title="Sent bytes";modeHint=hints,sum,count);
+        @signal[receivedBytesOk](title="title";modeHint=hints,sum,count);
+        @signal[droppedMsgIfaceDown](title="Dropped msg Iface down";modeHint=hints,count);
+        @signal[droppedBytesBitError](title="Dropped bytes bit error";modeHint=hints,sum,count);
+        @signal[droppedBytesNotForUs](title="Dropped bytes not for us";modeHint=hints,sum,count);
+        @signal[passedBytesToHigherLayer](title="Passed bytes to higher layer";modeHint=hints);
+        @signal[receivedPause](title="Received pause";modeHint=hints,count);
+        @signal[sentPause](title="Sent pause";modeHint=hints,count);
+        @signal[receivedBytesFromHigherLayer](title="Received bytes from higher layer";modeHint=hints,count);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
-

@@ -30,8 +30,10 @@ void EtherAppSrv::initialize()
 
     // statistics
     packetsSent = packetsReceived = 0;
-    eedVector.setName("end-to-end delay");
-    eedStats.setName("end-to-end delay");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
+    sentPacketSignal = registerSignal("sentPacket");
+    receivedPacketSignal = registerSignal("receivedPacket");
+
     WATCH(packetsSent);
     WATCH(packetsReceived);
 
@@ -43,13 +45,12 @@ void EtherAppSrv::initialize()
 void EtherAppSrv::handleMessage(cMessage *msg)
 {
     EV << "Received packet `" << msg->getName() << "'\n";
-
+    EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     packetsReceived++;
     simtime_t lastEED = simTime() - msg->getCreationTime();
-    eedVector.record(lastEED);
-    eedStats.collect(lastEED);
+    emit(receivedPacketSignal, (long)(req->getByteLength()));
+    emit(endToEndDelaySignal, lastEED);
 
-    EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
     MACAddress srcAddr = ctrl->getSrc();
     long requestId = req->getRequestId();
@@ -77,7 +78,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         datapacket->setRequestId(requestId);
         datapacket->setByteLength(l);
         sendPacket(datapacket, srcAddr);
-        packetsSent++;
 
         k++;
     }
@@ -92,6 +92,8 @@ void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
     etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
     send(datapacket, "out");
+    packetsSent++;
+    emit(sentPacketSignal,1L);
 }
 
 void EtherAppSrv::registerDSAP(int dsap)
@@ -108,12 +110,6 @@ void EtherAppSrv::registerDSAP(int dsap)
 
 void EtherAppSrv::finish()
 {
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.getMean());
-    recordScalar("end-to-end delay stddev", eedStats.getStddev());
-    recordScalar("end-to-end delay min", eedStats.getMin());
-    recordScalar("end-to-end delay max", eedStats.getMax());
 }
 
 

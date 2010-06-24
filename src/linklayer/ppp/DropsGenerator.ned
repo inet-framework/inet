@@ -29,7 +29,9 @@ simple DropsGenerator
         string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
                                           // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/lightning");
-    gates:
+        @signal[receivedPacket](title="total packets";modeHint=count);
+        @signal[droppedPacket](title="total dropped";modeHint=count);
+        gates:
         input in;
         output out;
 }
