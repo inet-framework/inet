@@ -20,6 +20,7 @@
 #ifndef WORLD_TRACI_TRACISCENARIOMANAGER_H
 #define WORLD_TRACI_TRACISCENARIOMANAGER_H
 
+#include <utility>
 #include <map>
 #include <list>
 #include <sstream>
@@ -51,6 +52,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		virtual void handleMessage(cMessage *msg);
 		virtual void handleSelfMsg(cMessage *msg);
 
+		std::pair<uint32_t, std::string> commandGetVersion();
 		void commandSetMaximumSpeed(std::string nodeId, float maxSpeed);
 		void commandChangeRoute(std::string nodeId, std::string roadId, double travelTime);
 		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
@@ -214,7 +216,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		/**
 		 * sends a single command via TraCI, expects no reply, returns true if successful
 		 */
-		bool queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, std::string* errorMsg = 0);
+		TraCIScenarioManager::TraCIBuffer queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, bool& success, std::string* errorMsg = 0);
 
 		/**
 		 * returns byte-buffer containing a TraCI command with optional parameters

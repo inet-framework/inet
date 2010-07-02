@@ -185,7 +185,7 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCI(uint8_t comma
 	return obuf;
 }
 
-bool TraCIScenarioManager::queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, std::string* errorMsg) {
+TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCIOptional(uint8_t commandId, const TraCIBuffer& buf, bool& success, std::string* errorMsg) {
 	sendTraCIMessage(makeTraCICommand(commandId, buf));
 
 	TraCIBuffer obuf(receiveTraCIMessage());
@@ -194,8 +194,9 @@ bool TraCIScenarioManager::queryTraCIOptional(uint8_t commandId, const TraCIBuff
 	ASSERT(commandResp == commandId);
 	uint8_t result; obuf >> result;
 	std::string description; obuf >> description;
-	ASSERT(obuf.eof());
-	return (result == RTYPE_OK);
+	success = (result == RTYPE_OK);
+	if (errorMsg) *errorMsg = description;
+	return obuf;
 }
 
 void TraCIScenarioManager::connect() {
@@ -234,6 +235,16 @@ void TraCIScenarioManager::connect() {
 }
 
 void TraCIScenarioManager::init_traci() {
+	{
+		std::pair<uint32_t, std::string> version = TraCIScenarioManager::commandGetVersion();
+		uint32_t apiVersion = version.first;
+		std::string serverVersion = version.second;
+
+		ASSERT(apiVersion == 1);
+
+		MYDEBUG << "TraCI server reports version \"" << serverVersion << "\"" << endl;
+	}
+
 	{
 		// query road network boundaries
 		uint8_t do_write = 0x00;
@@ -317,6 +328,27 @@ void TraCIScenarioManager::handleSelfMsg(cMessage *msg) {
 		return;
 	}
 	error("TraCIScenarioManager received unknown self-message");
+}
+
+std::pair<uint32_t, std::string> TraCIScenarioManager::commandGetVersion() {
+	bool success = false;
+	TraCIBuffer buf = queryTraCIOptional(CMD_GETVERSION, TraCIBuffer(), success);
+
+/*
+	ASSERT(buf.eof());
+
+	if (!success) return std::pair<uint32_t, std::string>(0, "(unknown)");
+
+	TraCIBuffer obuf(receiveTraCIMessage());
+*/
+	uint8_t cmdLength; buf >> cmdLength;
+	uint8_t commandResp; buf >> commandResp;
+	ASSERT(commandResp == CMD_GETVERSION);
+	uint32_t apiVersion; buf >> apiVersion;
+	std::string serverVersion; buf >> serverVersion;
+	ASSERT(buf.eof());
+
+	return std::pair<uint32_t, std::string>(apiVersion, serverVersion);
 }
 
 void TraCIScenarioManager::commandSetMaximumSpeed(std::string nodeId, float maxSpeed) {
@@ -504,7 +536,10 @@ void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<
 }
 
 bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed) {
-	return queryTraCIOptional(CMD_ADDVEHICLE, TraCIBuffer() << vehicleId << vehicleTypeId << routeId << laneId << emitPosition << emitSpeed);
+	bool success = false;
+	TraCIBuffer buf = queryTraCIOptional(CMD_ADDVEHICLE, TraCIBuffer() << vehicleId << vehicleTypeId << routeId << laneId << emitPosition << emitSpeed, success);
+	ASSERT(buf.eof());
+	return success;
 }
 
 // name: host;Car;i=vehicle.gif

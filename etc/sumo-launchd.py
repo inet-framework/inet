@@ -55,7 +55,9 @@ import logging
 import atexit
 from optparse import OptionParser
 
-
+_API_VERSION = 1
+_LAUNCHD_VERSION = 'sumo-launchd.py 1.00'
+_CMD_GET_VERSION = 0x00
 _CMD_FILE_SEND = 0x75
 
 class UnusedPortLock:
@@ -425,6 +427,17 @@ def handle_launch_configuration(sumo_command, shlex, launch_xml_string, client_s
 
     return result_xml
 
+def handle_get_version(conn):
+    """
+    process a "get version" command received on the connection
+    """
+
+    logging.debug('Got CMD_GETVERSION')
+
+    # Send OK response and version info
+    response = struct.pack("!iBBBiBBii", 4+1+1+1+4 + 1+1+4+4+len(_LAUNCHD_VERSION), 1+1+1+4, _CMD_GET_VERSION, 0x00, 0x00, 1+4+4+len(_LAUNCHD_VERSION), _CMD_GET_VERSION, _API_VERSION, len(_LAUNCHD_VERSION)) + _LAUNCHD_VERSION
+    conn.send(response)
+
 
 def read_launch_config(conn):
     """
@@ -455,10 +468,16 @@ def read_launch_config(conn):
     cmd_id_buf = ""
     cmd_id_buf += conn.recv(1)
     cmd_id = struct.unpack("!B", cmd_id_buf)[0]
-    if cmd_id != _CMD_FILE_SEND:
-        raise RuntimeError("Expected CMD_FILE_SEND (0x%x), but got 0x%x" % (_CMD_FILE_SEND, cmd_id))
 
     logging.debug("Got TraCI command 0x%x" % cmd_id)
+
+    if cmd_id == _CMD_GET_VERSION:
+        # handle get version command
+        handle_get_version(conn)
+        # ...and try reading the launch config again
+        return read_launch_config(conn)
+    elif cmd_id != _CMD_FILE_SEND:
+        raise RuntimeError("Expected CMD_FILE_SEND (0x%x), but got 0x%x" % (_CMD_FILE_SEND, cmd_id))
 
     # Get File name
     fname_len_buf = ""
