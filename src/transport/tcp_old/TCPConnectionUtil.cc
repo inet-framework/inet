@@ -622,14 +622,14 @@ void TCPConnection::retransmitData()
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
 
-    ulong bytesToSend = state->snd_max - state->snd_nxt;
+    uint32 bytesToSend = state->snd_max - state->snd_nxt;
     ASSERT(bytesToSend!=0);
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend>0)
     {
-        ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);
-        bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
+        uint32 bytes = std::min(bytesToSend, state->snd_mss);
+        bytes = std::min(bytes, (uint32)(sendQueue->getBytesAvailable(state->snd_nxt)));
         sendSegment(bytes);
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
