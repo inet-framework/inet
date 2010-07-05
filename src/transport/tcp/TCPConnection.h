@@ -663,7 +663,7 @@ class INET_API TCPConnection
     /**
      * Utility: checks if send queue is empty (no data to send).
      */
-    virtual bool isEmptySendQueue();
+    virtual bool isSendQueueEmpty();
 
 };
 

@@ -2053,7 +2053,7 @@ simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
     return simtime;
 }
 
-bool TCPConnection::isEmptySendQueue()
+bool TCPConnection::isSendQueueEmpty()
 {
     return (sendQueue->getBytesAvailable(state->snd_nxt) == 0);
 }

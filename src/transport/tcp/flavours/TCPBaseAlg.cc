@@ -438,7 +438,7 @@ bool TCPBaseAlg::sendData()
     // Therefore, a TCP SHOULD set cwnd to no more than RW before beginning
     // transmission if the TCP has not sent data in an interval exceeding
     // the retransmission timeout."
-    if (!conn->isEmptySendQueue())  // do we have any data to send?
+    if (!conn->isSendQueueEmpty())  // do we have any data to send?
     {
         if ((simTime() - state->time_last_data_sent) > state->rexmit_timeout)
         {
