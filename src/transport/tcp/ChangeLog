@@ -1,3 +1,9 @@
+2010-07-04  Thomas Reschka
+
+    * changed computation of Restart Window (RW) from RW = IW to RW = min(IW,cwnd). Based on [RFC 5681, page 11].
+
+    * updated TCP Option Numbers in TCPSegment.msg. Based on [http://www.iana.org/assignments/tcp-parameters/].
+
 2010-06-23  Zoltan Bojthe
 
     * added some optimizations and improvements:
@@ -6,7 +12,7 @@
         - integrated scaleRcvWnd() into updateRcvWnd()
         - simplified setting window size
         - replaced use of '12' by constant TCP_OPTION_TS_SIZE in sendData(), setPipe() and nextSeg()
-        - added logging in isSegmentAcceptable()
+        - added event logging in isSegmentAcceptable()
         - renamed dataToSend() to isSendQueueEmpty(), optimized function body and adjusted its use in sendData()
 
 2010-06-19  Thomas Reschka
@@ -21,8 +27,8 @@
     * implemented missing part of RFC 2581: Re-starting Idle Connections
 
     * added some improvements:
-        - added check for TS and SACK in writeHeaderOptions() to avoide of unnecessary NOPs
-        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd
+        - added check for TS and SACK support in writeHeaderOptions() to avoide unnecessary NOPs
+        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd()
         - changed parts of SACK implementation to respect potential use of TS option
         - changed parts of updateWndInfo() to respect potential use of WS option
         - changed parts of the delayedAck algorithm
