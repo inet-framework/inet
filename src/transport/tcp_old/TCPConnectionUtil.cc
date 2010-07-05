@@ -368,6 +368,9 @@ void TCPConnection::sendSynAck()
 
     // send it
     sendToIP(tcpseg);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendRst(uint32 seqNo)
@@ -403,6 +406,9 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddr
 
     // send it
     sendToIP(tcpseg, src, dest);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendAck()
