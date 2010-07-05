@@ -1624,7 +1624,7 @@ unsigned short TCPConnection::updateRcvWnd()
     // scale rcv_wnd:
     uint32 scaled_rcv_wnd = state->rcv_wnd;
     state->rcv_wnd_scale = 0;
-    if(state->ws_enabled)
+    if (state->ws_enabled)
     {
         while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
         {

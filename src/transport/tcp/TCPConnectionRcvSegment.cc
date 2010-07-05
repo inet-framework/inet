@@ -126,7 +126,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         {
             uint32 tsval = getTSval(tcpseg);
             // FIXME check TS rounding on all other code
-            if(tsval != 0 && seqLess(tsval, state->ts_recent) &&
+            if (tsval != 0 && seqLess(tsval, state->ts_recent) &&
                     (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
             {
                 tcpEV << "PAWS: Segment is not acceptable, TSval=" << tsval << " in " <<

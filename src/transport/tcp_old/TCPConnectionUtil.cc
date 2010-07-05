@@ -509,7 +509,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
-    if (fullSegmentsOnly && bytesToSend < state->snd_mss && buffered > (ulong) effectiveWin) // last segment could be less then state->snd_mss
+    if (fullSegmentsOnly && bytesToSend < state->snd_mss && buffered > (ulong) effectiveWin) // last segment could be less than state->snd_mss
     {
         tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
             << ", in buffer " << buffered << ")\n";
@@ -546,7 +546,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
             sendSegment(state->snd_mss);
             bytesToSend -= state->snd_mss;
         }
-        // check how many bytes we have - last segment could be less then state->snd_mss
+        // check how many bytes we have - last segment could be less than state->snd_mss
         buffered = sendQueue->getBytesAvailable(state->snd_nxt);
         if (bytesToSend==buffered && buffered!=0) // last segment?
             sendSegment(bytesToSend);
