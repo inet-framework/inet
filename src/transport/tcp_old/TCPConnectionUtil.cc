@@ -446,7 +446,7 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendSegment(ulong bytes)
+void TCPConnection::sendSegment(uint32 bytes)
 {
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
     if (bytes > buffered) // last segment?
