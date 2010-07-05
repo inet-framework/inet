@@ -195,6 +195,8 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     bool afterRto;       // set when the retransmission timer expires, reset when snd_nxt == snd_max or snd_una == snd_max
 
+    uint32 last_ack_sent;// RFC 1323, page 31: "Last ACK field sent"
+
     //bool rcv_up_valid;
     //uint32 rcv_buf_seq;
     //unsigned long rcv_buff;

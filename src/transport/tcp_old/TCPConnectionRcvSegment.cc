@@ -227,6 +227,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         return TCP_E_IGNORE;
     }
 
+    uint32 old_snd_una = state->snd_una;
+
     TCPEventCode event = TCP_E_IGNORE;
 
     if (fsm.getState()==TCP_S_SYN_RCVD)
@@ -492,6 +494,15 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     }
                     sendIndicationToApp(TCP_I_PEER_CLOSED);
                 }
+
+				if (seqGreater(state->snd_una, old_snd_una))
+				{
+					// notify
+					tcpAlgorithm->receivedDataAck(old_snd_una);
+
+					// in the receivedDataAck we need the old value
+					state->dupacks = 0;
+				}
             }
         }
     }
@@ -1016,11 +1027,14 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
             if (sndWndVector) sndWndVector->record(state->snd_wnd);
         }
 
-        // notify
-        tcpAlgorithm->receivedDataAck(old_snd_una);
+        if (tcpseg->getPayloadLength() == 0 && fsm.getState()!=TCP_S_SYN_RCVD) // if segment contains data, wait until data has been forwarded to app before sending ACK, otherwise we would use an old ACKNo
+        {   
+            // notify
+            tcpAlgorithm->receivedDataAck(old_snd_una);
 
-        // in the receivedDataAck we need the old value
-        state->dupacks = 0;
+            // in the receivedDataAck we need the old value
+            state->dupacks = 0;
+        }
     }
     else
     {

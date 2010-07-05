@@ -328,18 +328,27 @@ void TCPBaseAlg::receivedOutOfOrderSegment()
 
 void TCPBaseAlg::receiveSeqChanged()
 {
-    if (!state->delayed_acks_enabled)
+    // If we send a data segment already (with the updated seqNo) there is no need to send an additional ACK
+    if (state->last_ack_sent == state->rcv_nxt && !delayedAckTimer->isScheduled()) // ackSent?
     {
-        tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", sending ACK now (delayed ACKs are disabled)\n";
-        conn->sendAck();
+        // tcpEV << "ACK has already been sent (possibly piggybacked on data)\n";
     }
     else
     {
-        // FIXME ACK should be generated for at least every second SMSS-sized segment!
-        // schedule delayed ACK timer if not already running
-        tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", scheduling ACK\n";
-        if (!delayedAckTimer->isScheduled())
-            conn->scheduleTimeout(delayedAckTimer, DELAYED_ACK_TIMEOUT);
+
+        if (!state->delayed_acks_enabled)
+        {
+            tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", sending ACK now (delayed ACKs are disabled)\n";
+            conn->sendAck();
+        }
+        else
+        {
+            // FIXME ACK should be generated for at least every second SMSS-sized segment!
+            // schedule delayed ACK timer if not already running
+            tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", scheduling ACK\n";
+            if (!delayedAckTimer->isScheduled())
+                conn->scheduleTimeout(delayedAckTimer, DELAYED_ACK_TIMEOUT);
+        }
     }
 }
 
@@ -415,6 +424,7 @@ void TCPBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
 
 void TCPBaseAlg::ackSent()
 {
+    state->last_ack_sent = state->rcv_nxt;
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
         cancelEvent(delayedAckTimer);
