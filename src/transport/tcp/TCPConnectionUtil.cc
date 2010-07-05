@@ -392,6 +392,7 @@ void TCPConnection::selectInitialSeqNum()
 
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
+    // check that segment entirely falls in receive window
     // RFC 793, page 69:
     // "There are four cases for the acceptability test for an incoming segment:"
     uint32 len = tcpseg->getPayloadLength();

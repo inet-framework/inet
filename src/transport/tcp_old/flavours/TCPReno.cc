@@ -54,6 +54,10 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     state->afterRto = true;
 
     // Reno retransmits all data (unlike Tahoe which transmits only the segment)
+    // conn->retransmitData();
+    // After REXMIT timeout TCP Reno should start slow start with snd_cwnd = snd_mss.
+    // If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
+    // therefore "sendData();" has been modified and is called to rexmit outstanding data.
     conn->retransmitOneSegment();
 }
 

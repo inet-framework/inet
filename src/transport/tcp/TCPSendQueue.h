@@ -140,7 +140,7 @@ class INET_API TCPSendQueue : public cPolymorphic
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
      * a TCP segment which contains the data from the requested sequence
-     * number range. The actually returned segment may contain less then
+     * number range. The actually returned segment may contain less than
      * maxNumBytes bytes if the subclass wants to reproduce the original
      * segment boundaries when retransmitting.
      */

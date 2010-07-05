@@ -661,7 +661,7 @@ class INET_API TCPConnection
     virtual simtime_t convertTSToSimtime(uint32 timestamp);
 
     /**
-     * Utility: checks if there are not data to send.
+     * Utility: checks if send queue is empty (no data to send).
      */
     virtual bool isEmptySendQueue();
 

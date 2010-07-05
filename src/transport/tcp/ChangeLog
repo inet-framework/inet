@@ -1,3 +1,14 @@
+2010-06-23  Zoltan Bojthe
+
+    * added some optimizations and improvements:
+        - optimized PAWS check
+        - optimized ASSERT condition in convertSimtimeToTS() and convertTSToSimtime()
+        - integrated scaleRcvWnd() into updateRcvWnd()
+        - simplified setting window size
+        - replaced use of '12' by constant TCP_OPTION_TS_SIZE in sendData(), setPipe() and nextSeg()
+        - added logging in isSegmentAcceptable()
+        - renamed dataToSend() to isSendQueueEmpty(), optimized function body and adjusted its use in sendData()
+
 2010-06-19  Thomas Reschka
 
     * implemented RFC 1323 (TCP Extensions for High Performance):
@@ -20,7 +31,7 @@
 
     * Fixed some issues (not yet reported):
         - the node doing the passive open should use mss as cwnd! Calling receivedDataAck()
-          after receiving ACK von SYN,ACK changes cwnd to 2*mss!
+          after receiving ACK for SYN,ACK changes cwnd to 2*mss!
         - a SACK supporting node should not include a SACK_PERMITTED option in his SYN,ACK
           when the received SYN was without SACK_PERMITTED 
         - calling readHeaderOptions() was missing in certain situations (receivedOutOfOrderSegment(),

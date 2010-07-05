@@ -139,7 +139,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
 
     /**
-     * Converting uint32 echoedTS to simetime_t and calling rttMeasurementComplete()
+     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
