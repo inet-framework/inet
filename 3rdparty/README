@@ -19,6 +19,7 @@ Supported software:
   Then rebuild INET.
 
   $ make cleanall
+  $ make makefiles
   $ make
 
   To test if your build was correct, try the examples/inet/tcpclientserver
