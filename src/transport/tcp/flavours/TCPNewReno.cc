@@ -163,7 +163,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 
             tcpEV << "Fast Recovery - Partial ACK received: retransmitting the first unacknowledged segment\n";
             // retransmit first unacknowledged segment
-            conn->retransmitOneSegment();
+            conn->retransmitOneSegment(false);
 
             // deflate cwnd by amount of new data acknowledged by cumulative acknowledgement field
             state->snd_cwnd -= state->snd_una - firstSeqAcked;
@@ -301,7 +301,7 @@ void TCPNewReno::receivedDuplicateAck()
                 state->snd_cwnd = state->ssthresh + 3*state->snd_mss;
                 if (cwndVector) cwndVector->record(state->snd_cwnd);
                 tcpEV << " , cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
-                conn->retransmitOneSegment();
+                conn->retransmitOneSegment(false);
 
                 // RFC 3782, page 5:
                 // "4) Fast Recovery, continued:
