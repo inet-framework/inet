@@ -2,6 +2,16 @@
 
     * fixed bug in retransmitData() - snd_nxt must stay at snd_una after RTO.
 
+    * eliminated ASSERT in TCPConnection::retransmitData(); - by moving up receivedDataAck() in processSegment1stThru8th().
+
+    * extended condition in processSegment1stThru8th() to allow calling processAckInEstabEtc() in LAST-ACK state.
+      If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
+      TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
+	  "LAST-ACK STATE
+         The only thing that can arrive in this state is an
+         acknowledgment of our FIN.  If our FIN is now acknowledged,
+         delete the TCB, enter the CLOSED state, and return."
+
 2010-07-04  Thomas Reschka
 
     * changed computation of Restart Window (RW) from RW = IW to RW = min(IW,cwnd). Based on [RFC 5681, page 11].
