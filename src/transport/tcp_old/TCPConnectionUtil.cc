@@ -599,9 +599,9 @@ bool TCPConnection::sendProbe()
     return true;
 }
 
-void TCPConnection::retransmitOneSegment()
+void TCPConnection::retransmitOneSegment(bool called_at_rto)
 {
-    // retransmit one segment at snd_una, and set snd_nxt accordingly
+    // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     uint32 old_snd_nxt = state->snd_nxt;
 
     state->snd_nxt = state->snd_una;
@@ -611,8 +611,11 @@ void TCPConnection::retransmitOneSegment()
 
     sendSegment(bytes);
 
-    if (seqGreater(old_snd_nxt, state->snd_nxt))
-        state->snd_nxt = old_snd_nxt;
+    if (!called_at_rto)
+    {
+        if (seqGreater(old_snd_nxt, state->snd_nxt))
+            state->snd_nxt = old_snd_nxt;
+    }
     // notify
     tcpAlgorithm->ackSent();
 }

@@ -1,3 +1,7 @@
+2010-07-12  Thomas Reschka
+
+    * fixed bug in retransmitData() - snd_nxt must stay at snd_una after RTO.
+
 2010-07-04  Thomas Reschka
 
     * changed computation of Restart Window (RW) from RW = IW to RW = min(IW,cwnd). Based on [RFC 5681, page 11].

@@ -54,7 +54,7 @@ void TCPTahoe::processRexmitTimer(TCPEventCode& event)
     state->afterRto = true;
 
     // Tahoe retransmits only one segment at the front of the queue
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)

@@ -744,22 +744,25 @@ bool TCPConnection::sendProbe()
     return true;
 }
 
-void TCPConnection::retransmitOneSegment()
+void TCPConnection::retransmitOneSegment(bool called_at_rto)
 {
     uint32 old_snd_nxt = state->snd_nxt;
 
-    // retransmit one segment at snd_una, and set snd_nxt accordingly
+    // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max-snd_nxt larger than bytes available in queue
     ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
             sendQueue->getBytesAvailable(state->snd_nxt));
+
     ASSERT(bytes!=0);
 
     sendSegment(bytes);
-
-    if (seqGreater(old_snd_nxt, state->snd_nxt))
-        state->snd_nxt = old_snd_nxt;
+    if (!called_at_rto)
+    {
+        if (seqGreater(old_snd_nxt, state->snd_nxt))
+            state->snd_nxt = old_snd_nxt;
+    }
 
     // notify
     tcpAlgorithm->ackSent();

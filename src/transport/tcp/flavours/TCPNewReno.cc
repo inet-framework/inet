@@ -87,7 +87,7 @@ void TCPNewReno::processRexmitTimer(TCPEventCode& event)
 
     state->afterRto = true;
 
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)

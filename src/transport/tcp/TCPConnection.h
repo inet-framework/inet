@@ -470,7 +470,7 @@ class INET_API TCPConnection
     virtual bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
-    virtual void retransmitOneSegment();
+    virtual void retransmitOneSegment(bool called_at_rto=false);
 
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
