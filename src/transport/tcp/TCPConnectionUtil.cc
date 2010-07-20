@@ -404,7 +404,7 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
         if (state->rcv_wnd == 0)
             ret = (seqNo == state->rcv_nxt);
         else // rcv_wnd > 0
-            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, state->rcv_nxt + state->rcv_wnd); //ZBojthe: Accept an ACK on end of window
+            ret = seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd);
     }
     else // len > 0
     {
