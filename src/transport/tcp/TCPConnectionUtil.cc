@@ -382,7 +382,7 @@ void TCPConnection::configureStateVariables()
 void TCPConnection::selectInitialSeqNum()
 {
     // set the initial send sequence number
-    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime())*250000.0 + (connId * 1000000), 1.0+(double)(unsigned)0xffffffffUL) & 0xffffffffUL;
+    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime())*250000.0, 1.0+(double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
 
@@ -392,6 +392,7 @@ void TCPConnection::selectInitialSeqNum()
 
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
+    // check that segment entirely falls in receive window
     // RFC 793, page 69:
     // "There are four cases for the acceptability test for an incoming segment:"
     uint32 len = tcpseg->getPayloadLength();
@@ -403,7 +404,7 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
         if (state->rcv_wnd == 0)
             ret = (seqNo == state->rcv_nxt);
         else // rcv_wnd > 0
-            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, state->rcv_nxt + state->rcv_wnd); //ZBojthe: Accept an ACK on end of window
+            ret = seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, state->rcv_nxt + state->rcv_wnd);
     }
     else // len > 0
     {
@@ -743,22 +744,25 @@ bool TCPConnection::sendProbe()
     return true;
 }
 
-void TCPConnection::retransmitOneSegment()
+void TCPConnection::retransmitOneSegment(bool called_at_rto)
 {
     uint32 old_snd_nxt = state->snd_nxt;
 
-    // retransmit one segment at snd_una, and set snd_nxt accordingly
+    // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max-snd_nxt larger than bytes available in queue
     ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
             sendQueue->getBytesAvailable(state->snd_nxt));
+
     ASSERT(bytes!=0);
 
     sendSegment(bytes);
-
-    if (seqGreater(old_snd_nxt, state->snd_nxt))
-        state->snd_nxt = old_snd_nxt;
+    if (!called_at_rto)
+    {
+        if (seqGreater(old_snd_nxt, state->snd_nxt))
+            state->snd_nxt = old_snd_nxt;
+    }
 
     // notify
     tcpAlgorithm->ackSent();
@@ -778,14 +782,14 @@ void TCPConnection::retransmitData()
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
 
-    ulong bytesToSend = state->snd_max - state->snd_nxt;
+    uint32 bytesToSend = state->snd_max - state->snd_nxt;
     ASSERT(bytesToSend!=0);
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend>0)
     {
-        ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);
-        bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
+        uint32 bytes = std::min(bytesToSend, state->snd_mss);
+        bytes = std::min(bytes, (uint32)(sendQueue->getBytesAvailable(state->snd_nxt)));
         sendSegment(bytes);
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
@@ -1623,7 +1627,7 @@ unsigned short TCPConnection::updateRcvWnd()
     // scale rcv_wnd:
     uint32 scaled_rcv_wnd = state->rcv_wnd;
     state->rcv_wnd_scale = 0;
-    if(state->ws_enabled)
+    if (state->ws_enabled)
     {
         while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
         {
@@ -2052,7 +2056,7 @@ simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
     return simtime;
 }
 
-bool TCPConnection::isEmptySendQueue()
+bool TCPConnection::isSendQueueEmpty()
 {
     return (sendQueue->getBytesAvailable(state->snd_nxt) == 0);
 }

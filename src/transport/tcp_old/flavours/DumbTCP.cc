@@ -44,6 +44,7 @@ void DumbTCP::initialize()
     TCPAlgorithm::initialize();
 
     rexmitTimer = new cMessage("REXMIT");
+    rexmitTimer->setContextPointer(conn);
 }
 
 void DumbTCP::established(bool active)

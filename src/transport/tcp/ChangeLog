@@ -1,3 +1,34 @@
+2010-07-12  Thomas Reschka
+
+    * fixed bug in retransmitData() - snd_nxt must stay at snd_una after RTO.
+
+    * eliminated ASSERT in TCPConnection::retransmitData(); - by moving up receivedDataAck() in processSegment1stThru8th().
+
+    * extended condition in processSegment1stThru8th() to allow calling processAckInEstabEtc() in LAST-ACK state.
+      If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
+      TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
+	  "LAST-ACK STATE
+         The only thing that can arrive in this state is an
+         acknowledgment of our FIN.  If our FIN is now acknowledged,
+         delete the TCB, enter the CLOSED state, and return."
+
+2010-07-04  Thomas Reschka
+
+    * changed computation of Restart Window (RW) from RW = IW to RW = min(IW,cwnd). Based on [RFC 5681, page 11].
+
+    * updated TCP Option Numbers in TCPSegment.msg. Based on [http://www.iana.org/assignments/tcp-parameters/].
+
+2010-06-23  Zoltan Bojthe
+
+    * added some optimizations and improvements:
+        - optimized PAWS check
+        - optimized ASSERT condition in convertSimtimeToTS() and convertTSToSimtime()
+        - integrated scaleRcvWnd() into updateRcvWnd()
+        - simplified setting window size
+        - replaced use of '12' by constant TCP_OPTION_TS_SIZE in sendData(), setPipe() and nextSeg()
+        - added event logging in isSegmentAcceptable()
+        - renamed dataToSend() to isSendQueueEmpty(), optimized function body and adjusted its use in sendData()
+
 2010-06-19  Thomas Reschka
 
     * implemented RFC 1323 (TCP Extensions for High Performance):
@@ -10,17 +41,17 @@
     * implemented missing part of RFC 2581: Re-starting Idle Connections
 
     * added some improvements:
-        - added check for TS and SACK in writeHeaderOptions() to avoide of unnecessary NOPs
-        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd
+        - added check for TS and SACK support in writeHeaderOptions() to avoide unnecessary NOPs
+        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd()
         - changed parts of SACK implementation to respect potential use of TS option
         - changed parts of updateWndInfo() to respect potential use of WS option
         - changed parts of the delayedAck algorithm
 
-    * Fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
+    * fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
 
-    * Fixed some issues (not yet reported):
+    * fixed some issues (not yet reported):
         - the node doing the passive open should use mss as cwnd! Calling receivedDataAck()
-          after receiving ACK von SYN,ACK changes cwnd to 2*mss!
+          after receiving ACK for SYN,ACK changes cwnd to 2*mss!
         - a SACK supporting node should not include a SACK_PERMITTED option in his SYN,ACK
           when the received SYN was without SACK_PERMITTED 
         - calling readHeaderOptions() was missing in certain situations (receivedOutOfOrderSegment(),
@@ -57,7 +88,7 @@
 
 2010-02-26  Andras Varga
 
-    * Fixed following issues with patch submitted by Thomas Reschka:
+    * fixed following issues with patch submitted by Thomas Reschka:
         - assertion in TCPConnectionUtil.cc line 1056 after reception of SYN duplicate. See bug #121
         - too early transition from ESTABLISHED to CLOSE_WAIT state
           when FIN has been received but segments have been lost before. See bug #139
@@ -65,15 +96,15 @@
 
 2010-02-16  Rudolf Hornig
 
-    * Fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
+    * fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
 
 2010-02-11  Rudolf Hornig
 
-    * Fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
+    * fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
 
 2010-02-10  Zoltan Bojthe
 
-    * Fixed 'advertised window' issue
+    * fixed 'advertised window' issue
 
 2010-02-02  Zoltan Bojthe
 
@@ -218,7 +249,7 @@
 
 2009-10-17  Rudolf Hornig
 
-    * Fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
+    * fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
 
 2009-03-01  Andras Varga
 

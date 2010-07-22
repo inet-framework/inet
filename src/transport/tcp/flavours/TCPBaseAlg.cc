@@ -184,7 +184,7 @@ void TCPBaseAlg::established(bool active)
     // transmitted SYN MUST be one segment consisting of MSS bytes."
     if (state->increased_IW_enabled && state->syn_rexmit_count==0)
     {
-        state->snd_cwnd = std::min (4*(int)state->snd_mss, std::max(2*(int)state->snd_mss, 4380));
+        state->snd_cwnd = std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380));
         tcpEV << "Enabled Increased Initial Window, CWND is set to: " << state->snd_cwnd << "\n";
     }
     // RFC 2001, page 3:
@@ -438,11 +438,15 @@ bool TCPBaseAlg::sendData()
     // Therefore, a TCP SHOULD set cwnd to no more than RW before beginning
     // transmission if the TCP has not sent data in an interval exceeding
     // the retransmission timeout."
-    if (!conn->isEmptySendQueue())  // do we have any data to send?
+    if (!conn->isSendQueueEmpty())  // do we have any data to send?
     {
         if ((simTime() - state->time_last_data_sent) > state->rexmit_timeout)
         {
-            state->snd_cwnd = state->snd_mss;
+            // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
+            if (state->increased_IW_enabled)
+                state->snd_cwnd = std::min (std::min (4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
+            else
+                state->snd_cwnd = state->snd_mss;
             tcpEV << "Restarting idle connection, CWND is set to: " << state->snd_cwnd << "\n";
         }
     }
