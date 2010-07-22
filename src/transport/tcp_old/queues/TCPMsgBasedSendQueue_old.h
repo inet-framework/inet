@@ -71,6 +71,11 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     /**
      *
      */
+    virtual uint32 getBufferStartSeq();
+
+    /**
+     *
+     */
     virtual uint32 getBufferEndSeq();
 
     /**

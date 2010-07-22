@@ -149,7 +149,7 @@ import inet.transport.tcp.ITCP;
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
 //    on all segments: always forwards data to the app as soon as possible.
 //  - finite receive buffer size is not modelled (always the maximum
-//    window size, is advertised and data receiver was not able to send a Zero Window)
+//    window size, is advertised and data receiver is not able to send a Zero Window)
 //  - no RECEIVE command. Received data are always forwarded to the app as
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control

@@ -27,6 +27,7 @@
 
 #include "INETDefs.h"
 #include "IPvXAddress.h"
+#include "TCPCommand_m.h"
 
 #include <sim_interface.h> // NSC. We need this here to derive from classes
 

@@ -173,22 +173,13 @@ package inet.transport.tcp;
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
-<<<<<<< HEAD
+
 //      - TS: Timestamps option, based on RFC 1323.
 //  - flow control: finite receive buffer size (initiated by parameter
 //    advertisedWindow). If receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a new received segment
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in tcpRcvQueueDropsVector.
-
-=======
-//    - flow control: finite receive buffer size (initiated by parameter
-//      advertisedWindow). If receive buffer is exhausted (by out-of-order
-//      segments) and the payload length of a new received segment
-//      is higher than free receiver buffer, the new segment will be dropped.
-//      Such drops are recorded in tcpRcvQueueDropsVector.
-//
->>>>>>> use TCPDataTransferMode enum instead of int; comment refinements; other cosmetic changes
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)

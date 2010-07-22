@@ -470,7 +470,7 @@ class INET_API TCPConnection
     virtual bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
-    virtual void retransmitOneSegment();
+    virtual void retransmitOneSegment(bool called_at_rto);
 
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
@@ -661,9 +661,9 @@ class INET_API TCPConnection
     virtual simtime_t convertTSToSimtime(uint32 timestamp);
 
     /**
-     * Utility: checks if there are not data to send.
+     * Utility: checks if send queue is empty (no data to send).
      */
-    virtual bool isEmptySendQueue();
+    virtual bool isSendQueueEmpty();
 
 };
 

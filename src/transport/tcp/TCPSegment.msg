@@ -54,7 +54,7 @@ struct TCPPayloadMessage
 //
 // TCP Option Numbers
 // Reference: http://www.iana.org/assignments/tcp-parameters/
-// Date: 2009-08-05
+// Date: 2010-07-04
 //
 // Note: Options not yet implemented should stay commented out
 //
@@ -66,8 +66,8 @@ enum TCPOptionNumbers
     TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes
     TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes
     TCPOPTION_SACK = 5;                                 // RFC 2018, LENGTH: N (max. N = 4) 8 * n + 2 Bytes  => 32 + 2 + 2 * NOP = 36 Bytes; If TIMESTAMP option is used with SACK: max. n = 3 => 12 Bytes (for Timestamp) + 28 Bytes (for SACK) = 40 Bytes
-//    TCPOPTION_ECHO = 6;                               // obsoleted by option 8 RFC 1072, LENGTH: 6 Bytes
-//    TCPOPTION_ECHO_REPLY = 7;                         // obsoleted by option 8 RFC 1072, LENGTH: 6 Bytes
+//    TCPOPTION_ECHO = 6;                              // (obsoleted by option 8) RFC 1072, LENGTH: 6 Bytes
+//    TCPOPTION_ECHO_REPLY = 7;                        // (obsoleted by option 8) RFC 1072, LENGTH: 6 Bytes
     TCPOPTION_TIMESTAMP = 8;                            // RFC 1323, LENGTH: 10 Bytes
 //  TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9;   // RFC 1693, LENGTH: 2 Bytes
 //  TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;       // RFC 1693, LENGTH: 3 Bytes
@@ -79,7 +79,7 @@ enum TCPOptionNumbers
 //  TCPOPTION_SKEETER = 16;                             // [Knowles], LENGTH: -
 //  TCPOPTION_BUBBA = 17;                               // [Knowles], LENGTH: -
 //  TCPOPTION_TRAILER_CHECKSUM_OPTION = 18;             // [Subbu & Monroe], LENGTH: 3Bytes
-//  TCPOPTION_MD5_SIGNATURE_OPTION = 19;                // RFC 2385, LENGTH: 18 Bytes
+//     TCPOPTION_MD5_SIGNATURE_OPTION = 19;             // (obsoleted by option 29) RFC 2385, LENGTH: 18 Bytes
 //  TCPOPTION_SCPS_CAPABILITIES = 20;                   // [Scott], LENGTH: -
 //  TCPOPTION_SELECTIVE_NEGATIVE_ACKNOWLEDGEMENTS = 21; // [Scott], LENGTH: -
 //  TCPOPTION_RECORD_BOUNDARIES = 22;                   // [Scott], LENGTH: -
@@ -89,7 +89,8 @@ enum TCPOptionNumbers
 //  TCPOPTION_TCP_COMPESSION_FILTER = 26;               // [Bellovin], LENGTH: -
 //  TCPOPTION_QUICK_START_RESPONSE = 27;                // RFC 4782, LENGTH: 8 Bytes
 //  TCPOPTION_USER_TIMEOUT_OPTION = 28;                 // RFC 5482, LENGTH: 4 Bytes
-//    TCPOPTION kinds 29-252 Unassigned
+//  TCPOPTION_AUTHENTICATION_OPTION = 29;               // RFC 5925, LENGTH: -
+//    TCPOPTION kinds 30-252 Unassigned
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_1 = 253;         // RFC 4727, LENGTH: N
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_2 = 254;         // RFC 4727, LENGTH: N
 };
