@@ -117,6 +117,11 @@ class INET_API TCPSendQueue : public cPolymorphic
     virtual void enqueueAppData(cPacket *msg) = 0;
 
     /**
+     * Returns the sequence number of the first byte stored in the buffer.
+     */
+    virtual uint32 getBufferStartSeq() = 0;
+
+    /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
@@ -135,7 +140,7 @@ class INET_API TCPSendQueue : public cPolymorphic
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
      * a TCP segment which contains the data from the requested sequence
-     * number range. The actually returned segment may contain less then
+     * number range. The actually returned segment may contain less than
      * maxNumBytes bytes if the subclass wants to reproduce the original
      * segment boundaries when retransmitting.
      */

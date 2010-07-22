@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar
-//               2009 Thomas Reschka
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,13 +21,13 @@
 
 #include "headers/defs.h"   // for endian macros
 
-#  define TH_FIN	0x01
-#  define TH_SYN	0x02
-#  define TH_RST	0x04
-#  define TH_PUSH	0x08
-#  define TH_ACK	0x10
-#  define TH_URG	0x20
-#define TH_FLAGS	0x3F
+#  define TH_FIN    0x01
+#  define TH_SYN    0x02
+#  define TH_RST    0x04
+#  define TH_PUSH   0x08
+#  define TH_ACK    0x10
+#  define TH_URG    0x20
+#define TH_FLAGS    0x3F
 
 struct tcphdr
   {

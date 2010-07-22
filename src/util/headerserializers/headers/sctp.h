@@ -102,122 +102,122 @@ static unsigned int crc_c[256] =
 
 
 struct common_header {
-	unsigned short source_port;
-	unsigned short destination_port;
-	unsigned int  verification_tag;
-	unsigned int  checksum;
+    unsigned short source_port;
+    unsigned short destination_port;
+    unsigned int  verification_tag;
+    unsigned int  checksum;
 };
 
 struct chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
 };
 
 struct data_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned int  tsn;
-	unsigned short sid;
-	unsigned short ssn;
-	unsigned int  ppi;
-	unsigned char  user_data[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned int  tsn;
+    unsigned short sid;
+    unsigned short ssn;
+    unsigned int  ppi;
+    unsigned char  user_data[0];
 };
 
 struct init_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned int  initiate_tag;
-	unsigned int  a_rwnd;
-	unsigned short mos;
-	unsigned short mis;
-	unsigned int  initial_tsn;
-	unsigned char  parameter[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned int  initiate_tag;
+    unsigned int  a_rwnd;
+    unsigned short mos;
+    unsigned short mis;
+    unsigned int  initial_tsn;
+    unsigned char  parameter[0];
 };
 
 struct init_ack_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned int  initiate_tag;
-	unsigned int  a_rwnd;
-	unsigned short mos;
-	unsigned short mis;
-	unsigned int  initial_tsn;
-	unsigned char  parameter[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned int  initiate_tag;
+    unsigned int  a_rwnd;
+    unsigned short mos;
+    unsigned short mis;
+    unsigned int  initial_tsn;
+    unsigned char  parameter[0];
 };
 
 struct sack_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned int  cum_tsn_ack;
-	unsigned int  a_rwnd;
-	unsigned short nr_of_gaps;
-	unsigned short nr_of_dups;
-	unsigned char  tsns[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned int  cum_tsn_ack;
+    unsigned int  a_rwnd;
+    unsigned short nr_of_gaps;
+    unsigned short nr_of_dups;
+    unsigned char  tsns[0];
 };
 
 struct heartbeat_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned char heartbeat_info[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned char heartbeat_info[0];
 };
 
 struct heartbeat_ack_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned char heartbeat_info[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned char heartbeat_info[0];
 };
 
 struct abort_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned char  error_causes[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned char  error_causes[0];
 };
 
 struct shutdown_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned int  cumulative_tsn_ack;
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned int  cumulative_tsn_ack;
 };
 
 struct shutdown_ack_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
 };
 
 struct shutdown_complete_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
 };
 
 struct cookie_echo_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned char  state_cookie[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned char  state_cookie[0];
 };
 
 struct cookie_ack_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
 };
 
 struct error_chunk {
-	unsigned char  type;
-	unsigned char  flags;
-	unsigned short length;
-	unsigned char  error_causes[0];
+    unsigned char  type;
+    unsigned char  flags;
+    unsigned short length;
+    unsigned char  error_causes[0];
 };
 
 
@@ -228,62 +228,62 @@ struct error_chunk {
 #define INIT_SUPPORTED_ADDRESS 12
 
 struct init_ipv4_address_parameter {
-	unsigned short type;
-	unsigned short length;
-	unsigned int address;
+    unsigned short type;
+    unsigned short length;
+    unsigned int address;
 };
 
 struct init_ipv6_address_parameter {
-	unsigned short type;
-	unsigned short length;
-	unsigned int address[4];
+    unsigned short type;
+    unsigned short length;
+    unsigned int address[4];
 };
 
 struct init_cookie_parameter {
-	unsigned short type;
-	unsigned short length;
-	unsigned int creationTime;
-	unsigned int localTag;
-	unsigned int peerTag;
-	unsigned char localTieTag[32];
-	unsigned char peerTieTag[32];
-	//unsigned char cookie[0];
+    unsigned short type;
+    unsigned short length;
+    unsigned int creationTime;
+    unsigned int localTag;
+    unsigned int peerTag;
+    unsigned char localTieTag[32];
+    unsigned char peerTieTag[32];
+    //unsigned char cookie[0];
 };
 
 struct cookie_parameter {
-	unsigned int creationTime;
-	unsigned int localTag;
-	unsigned int peerTag;
-	unsigned char localTieTag[32];
-	unsigned char peerTieTag[32];
-	//unsigned char cookie[0];
+    unsigned int creationTime;
+    unsigned int localTag;
+    unsigned int peerTag;
+    unsigned char localTieTag[32];
+    unsigned char peerTieTag[32];
+    //unsigned char cookie[0];
 };
 
 struct tlv {
-	unsigned short type;
-	unsigned short length;
-	unsigned char value[0];
+    unsigned short type;
+    unsigned short length;
+    unsigned char value[0];
 };
 
 
 struct supported_address_types_parameter {
-	unsigned short type;
-	unsigned short length;
-	unsigned short address_type;
+    unsigned short type;
+    unsigned short length;
+    unsigned short address_type;
 };
 
 
 // Heartbeat info TLV:
 struct heartbeat_info {
-	unsigned short type;
-	unsigned short length;
-	union {
-	  unsigned char info[];
-	  struct {
-	    unsigned int addr;
-	    unsigned int time;
-	  } addr_and_time;
-	} heartbeat_info_union;
+    unsigned short type;
+    unsigned short length;
+    union {
+      unsigned char info[];
+      struct {
+        unsigned int addr;
+        unsigned int time;
+      } addr_and_time;
+    } heartbeat_info_union;
 };
 
 #define HBI_INFO(hbi) ((hbi)->heartbeat_info_union.info)
@@ -291,20 +291,20 @@ struct heartbeat_info {
 #define HBI_TIME(hbi) ((hbi)->heartbeat_info_union.addr_and_time.time)
 
 struct error_cause {
-	unsigned short cause_code;
-	unsigned short length;
-	unsigned char info[0];
+    unsigned short cause_code;
+    unsigned short length;
+    unsigned char info[0];
 };
 
 // SACK GAP:
 struct sack_gap {
-	unsigned short start;
-	unsigned short stop;
+    unsigned short start;
+    unsigned short stop;
 };
 
 // SACK DUP TSN:
 struct sack_duptsn {
-	unsigned int tsn;
+    unsigned int tsn;
 };
 
 

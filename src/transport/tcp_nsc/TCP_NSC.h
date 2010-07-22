@@ -27,13 +27,13 @@
 
 #include "INETDefs.h"
 #include "IPvXAddress.h"
-
-#include "sim_interface.h" // NSC. We need this here to derive from classes
-
 #include "TCPCommand_m.h"
+
+#include <sim_interface.h> // NSC. We need this here to derive from classes
 #include "TCP_NSC_Connection.h"
 
 // forward declarations:
+class TCPCommand;
 class TCPSegment;
 class TCP_NSC_SendQueue;
 class TCP_NSC_ReceiveQueue;

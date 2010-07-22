@@ -105,5 +105,6 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 
 void TCPEchoApp::finish()
 {
+    recordScalar("bytesRcvd", bytesRcvd);
+    recordScalar("bytesSent", bytesSent);
 }
-

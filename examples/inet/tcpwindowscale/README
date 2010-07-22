@@ -1,0 +1,9 @@
+In this example the network consists of one client and one server.
+IP addresses and routing tables are set up by using mrt files.
+
+The client sends 1000 MB of data to the server using TCP.
+
+The channel between client and server has a high bandwidth-delay product (LFN).
+
+Different configurations illustrate the performance gain achievable by using
+the Window Scale header option (RFC 1323).

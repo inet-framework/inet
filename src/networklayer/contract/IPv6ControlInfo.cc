@@ -22,8 +22,8 @@ IPv6ControlInfo::~IPv6ControlInfo()
 {
     if (dgram)
     {
-    	drop(dgram);
-    	delete dgram;
+        drop(dgram);
+        delete dgram;
     }
 }
 
@@ -42,7 +42,7 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
                   "(already removed, or maybe this IPv6ControlInfo does not come "
                   "from the IPv6 module?)");
     IPv6Datagram *ret = dgram;
-	drop(dgram);
+    drop(dgram);
     dgram = NULL;
     return ret;
 }

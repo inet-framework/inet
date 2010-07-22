@@ -46,9 +46,9 @@ class ExtInterface : public cSimpleModule
     InterfaceEntry *interfaceEntry;  // points into RoutingTable
 
     // statistics
-    uint64 numSent;
-    uint64 numRcvd;
-    uint64 numDropped;
+    int numSent;
+    int numRcvd;
+    int numDropped;
 
     // access to real network interface via Scheduler class:
     cSocketRTScheduler *rtScheduler;

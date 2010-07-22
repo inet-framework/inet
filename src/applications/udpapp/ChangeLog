@@ -1,7 +1,7 @@
 2008-09-09  Tamas Borbely
 
-	* UDPEchoApp: check for UDP error responses
+    * UDPEchoApp: check for UDP error responses
 
 2008-07-07  Andras Varga
 
-	* UDPEchoApp: messageLength parameter now understood in bytes not bits
+    * UDPEchoApp: messageLength parameter now understood in bytes not bits

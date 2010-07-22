@@ -195,6 +195,8 @@ class INET_API TCPStateVariables : public cPolymorphic
 
     bool afterRto;       // set when the retransmission timer expires, reset when snd_nxt == snd_max or snd_una == snd_max
 
+    uint32 last_ack_sent;// RFC 1323, page 31: "Last ACK field sent"
+
     //bool rcv_up_valid;
     //uint32 rcv_buf_seq;
     //unsigned long rcv_buff;
@@ -378,7 +380,7 @@ class INET_API TCPConnection
     virtual bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
-    virtual void retransmitOneSegment();
+    virtual void retransmitOneSegment(bool called_at_rto);
 
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
@@ -397,7 +399,7 @@ class INET_API TCPConnection
      * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
      * sendData(), sendProbe() and retransmitData() internally all rely on this one.
      */
-    virtual void sendSegment(int bytes);
+    virtual void sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(TCPSegment *tcpseg);
