@@ -183,7 +183,7 @@ package inet.transport.tcp;
 //    segments) and the payload length of a new received segment
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in tcpRcvQueueDropsVector.
-
+//
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
