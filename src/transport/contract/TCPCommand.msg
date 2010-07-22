@@ -35,6 +35,7 @@ enum TcpCommandCode
     TCP_C_OPEN_ACTIVE = 1;   // active open (must carry TCPOpenCommand)
     TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry TCPOpenCommand)
     TCP_C_SEND = 3;          // send data (set on data packet)
+    TCP_C_READ = 4;	         // read data
     TCP_C_CLOSE = 5;         // "I have no more data to send"
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
@@ -59,6 +60,7 @@ enum TcpStatusInd
     TCP_I_CONNECTION_RESET = 7;  // connection reset
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry TCPStatusInfo)
+    TCP_I_QUEUESTATUS = 10;		 // status info of send and receive queues
 }
 
 
@@ -156,6 +158,18 @@ class TCPOpenCommand extends TCPCommand
 //
 class TCPSendCommand extends TCPCommand
 {
+    long availableBytesInSendQueueLimit; // The TCP layout must send up a TCP_I_QUEUESTATUS msg, when the available bytes in send queue will smaller than this value
+}
+
+
+//
+// Control info to be used with the READ command.
+//
+// @see TcpCommandCode, TCP
+//
+class TCPReadCommand extends TCPCommand
+{
+    long bytes;
 }
 
 
@@ -210,3 +224,13 @@ class TCPStatusInfo extends TCPCommand
     bool fin_ack_rcvd;
 }
 
+//
+// TODO leiras!!!
+//
+// @see TcpStatusInd, TcpCommandCode, TCP
+//
+class TCPQueueStatusInfo extends TCPCommand
+{
+    long availableBytesInSendQueue;
+    long availableBytesInReceiveQueue;
+}
