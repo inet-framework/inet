@@ -33,9 +33,9 @@
         - changed parts of updateWndInfo() to respect potential use of WS option
         - changed parts of the delayedAck algorithm
 
-    * Fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
+    * fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
 
-    * Fixed some issues (not yet reported):
+    * fixed some issues (not yet reported):
         - the node doing the passive open should use mss as cwnd! Calling receivedDataAck()
           after receiving ACK for SYN,ACK changes cwnd to 2*mss!
         - a SACK supporting node should not include a SACK_PERMITTED option in his SYN,ACK
@@ -74,7 +74,7 @@
 
 2010-02-26  Andras Varga
 
-    * Fixed following issues with patch submitted by Thomas Reschka:
+    * fixed following issues with patch submitted by Thomas Reschka:
         - assertion in TCPConnectionUtil.cc line 1056 after reception of SYN duplicate. See bug #121
         - too early transition from ESTABLISHED to CLOSE_WAIT state
           when FIN has been received but segments have been lost before. See bug #139
@@ -82,15 +82,15 @@
 
 2010-02-16  Rudolf Hornig
 
-    * Fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
+    * fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
 
 2010-02-11  Rudolf Hornig
 
-    * Fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
+    * fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
 
 2010-02-10  Zoltan Bojthe
 
-    * Fixed 'advertised window' issue
+    * fixed 'advertised window' issue
 
 2010-02-02  Zoltan Bojthe
 
@@ -235,7 +235,7 @@
 
 2009-10-17  Rudolf Hornig
 
-    * Fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
+    * fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
 
 2009-03-01  Andras Varga
 

@@ -1143,7 +1143,8 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
             if (dupAcksVector)
                 dupAcksVector->record(state->dupacks);
 
-            // we need to update send window even if the ACK is a dupACK, because rcv win could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
+            // we need to update send window even if the ACK is a dupACK, because rcv win
+            // could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
             updateWndInfo(tcpseg);
 
             tcpAlgorithm->receivedDuplicateAck();
@@ -1206,8 +1207,10 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 
         updateWndInfo(tcpseg);
 
-        if (tcpseg->getPayloadLength() == 0 && fsm.getState()!=TCP_S_SYN_RCVD) // if segment contains data, wait until data has been forwarded to app before sending ACK, otherwise we would use an old ACKNo
-        {   
+        // if segment contains data, wait until data has been forwarded to app before sending ACK,
+        // otherwise we would use an old ACKNo
+        if (tcpseg->getPayloadLength() == 0 && fsm.getState()!=TCP_S_SYN_RCVD)
+        {
             // notify
             tcpAlgorithm->receivedDataAck(old_snd_una);
 

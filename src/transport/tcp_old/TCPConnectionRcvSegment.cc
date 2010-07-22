@@ -1028,7 +1028,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         }
 
         if (tcpseg->getPayloadLength() == 0 && fsm.getState()!=TCP_S_SYN_RCVD) // if segment contains data, wait until data has been forwarded to app before sending ACK, otherwise we would use an old ACKNo
-        {   
+        {
             // notify
             tcpAlgorithm->receivedDataAck(old_snd_una);
 
