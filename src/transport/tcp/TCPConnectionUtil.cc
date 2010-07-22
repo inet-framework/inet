@@ -349,7 +349,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 void TCPConnection::configureStateVariables()
 {
     long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
-    state->ws_support = tcpMain->par("wsSupport"); // if set, this means that current host supports WS (RFC 1323)
+    state->ws_support = tcpMain->par("windowScalingSupport"); // if set, this means that current host supports WS (RFC 1323)
     if (!state->ws_support && (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0))
         throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
     state->rcv_wnd = advertisedWindowPar;
@@ -365,7 +365,7 @@ void TCPConnection::configureStateVariables()
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss").longValue(); // Maximum Segment Size (RFC 793)
-    state->ts_support = tcpMain->par("tsSupport"); // if set, this means that current host supports TS (RFC 1323)
+    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     if (state->sack_support)
     {
@@ -965,7 +965,7 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
             {
                 tcpEV << "PAWS: Segment is not acceptable, TSval=" << option.getValues(0) << " in " <<  stateName(fsm.getState()) << " state received: dropping segment\n";
-                return false; 
+                return false;
             }
         }
         else if (seqLE(tcpseg->getSequenceNo(), state->last_ack_sent)) // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
