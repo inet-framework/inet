@@ -333,6 +333,14 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
         throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
 }
 
+void TCPSocket::setDataTransferMode(TCPDataTransferMode transferMode)
+{
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+        opp_error( "TCPSocket::setExplicitReads(): connect() or listen() already called (need renewSocket()?)");
+
+    dataTransferMode = transferMode;
+}
+
 void TCPSocket::setExplicitReads(bool enabled)
 {
     if (sockstate!=NOT_BOUND && sockstate!=BOUND)

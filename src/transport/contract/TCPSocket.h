@@ -255,8 +255,9 @@ class INET_API TCPSocket
     /**
      * Sets the dataTransferMode parameter of the subsequent connect() or listen() calls.
      * @see TCPCommand
+     * May only be invoked before connect() or listen().
      */
-    void setDataTransferMode(TCPDataTransferMode transferMode) { dataTransferMode = transferMode; }
+    void setDataTransferMode(TCPDataTransferMode transferMode);
 
     /**
      * Read "dataTransferMode" parameter from ini/ned, and set dataTransferMode member value
