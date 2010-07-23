@@ -404,6 +404,12 @@ class INET_API TCPSocket
     void processMessage(cMessage *msg);
 
     /**
+     * Aszinkron read. Request received data from TCP layer (max "bytes" bytes).
+     * Only needed when explicit reads are enabled.
+     */
+    void read(long bytes);
+
+    /**
      *   when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
      *   May only be invoked before connect() or listen().
      *   The default setting is false.

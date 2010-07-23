@@ -341,6 +341,17 @@ void TCPSocket::setDataTransferMode(TCPDataTransferMode transferMode)
     dataTransferMode = transferMode;
 }
 
+void TCPSocket::read(long bytes)
+{
+    if (sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED) //FIXME check this conditions
+        opp_error("TCPSocket::read(): not connected or connecting");
+
+    if (!explicitReadsEnabled)
+        opp_error("Before use TCPSocket::read() you must call setExplicitReads(true) once.");
+
+    // FIXME implementing it.
+}
+
 void TCPSocket::setExplicitReads(bool enabled)
 {
     if (sockstate!=NOT_BOUND && sockstate!=BOUND)
