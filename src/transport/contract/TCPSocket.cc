@@ -137,6 +137,11 @@ void TCPSocket::listen(bool fork)
     openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
+    openCmd->setExplicitReadsEnabled(explicitReadsEnabled);
+    openCmd->setSendNotificationsEnabled(sendNotificationsEnabled);
+    openCmd->setReceiveBufferSize(receiveBufferSize);
+    openCmd->setSendingObjectUpAtFirstByteEnabled(sendingObjectUpAtFirstByteEnabled);
+
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
     sockstate = LISTENING;
@@ -162,6 +167,11 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
     openCmd->setRemotePort(remotePrt);
     openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+
+    openCmd->setExplicitReadsEnabled(explicitReadsEnabled);
+    openCmd->setSendNotificationsEnabled(sendNotificationsEnabled);
+    openCmd->setReceiveBufferSize(receiveBufferSize);
+    openCmd->setSendingObjectUpAtFirstByteEnabled(sendingObjectUpAtFirstByteEnabled);
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
