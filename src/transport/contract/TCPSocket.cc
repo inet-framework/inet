@@ -31,6 +31,11 @@ TCPSocket::TCPSocket()
 
     gateToTcp = NULL;
     dataTransferMode = TCP_TRANSFER_UNDEFINED;
+
+    explicitReadsEnabled = false;
+    sendNotificationsEnabled = false;
+    receiveBufferSize = -1; //TODO mi a kezdoerteke?
+    sendingObjectUpAtFirstByteEnabled = false;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -326,4 +331,36 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
         dataTransferMode = TCP_TRANSFER_BYTESTREAM;
     else
         throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
+}
+
+void TCPSocket::setExplicitReads(bool enabled)
+{
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+        opp_error( "TCPSocket::setExplicitReads(): connect() or listen() already called (need renewSocket()?)");
+
+    explicitReadsEnabled = enabled;
+}
+
+void TCPSocket::setSendNotifications(bool enabled)
+{
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+        opp_error( "TCPSocket::setSendNotifications(): connect() or listen() already called (need renewSocket()?)");
+
+    sendNotificationsEnabled = enabled;
+}
+
+void TCPSocket::setReceiveBufferSize(long bytes)
+{
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+        opp_error( "TCPSocket::setReceiveBufferSize(): connect() or listen() already called (need renewSocket()?)");
+
+    receiveBufferSize = bytes;
+}
+
+void TCPSocket::setSendingObjectUpAtFirstByte(bool enabled)
+{
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+        opp_error( "TCPSocket::setSendingObjectUpAtFirstByte(): connect() or listen() already called (need renewSocket()?)");
+
+    sendingObjectUpAtFirstByteEnabled = enabled;
 }

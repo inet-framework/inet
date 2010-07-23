@@ -164,6 +164,11 @@ class INET_API TCPSocket
     TCPDataTransferMode dataTransferMode;
     std::string tcpAlgorithmClass;
 
+    bool explicitReadsEnabled;
+    bool sendNotificationsEnabled;
+    long receiveBufferSize;
+    bool sendingObjectUpAtFirstByteEnabled;
+
   protected:
     void sendToTCP(cMessage *msg);
 
@@ -396,6 +401,38 @@ class INET_API TCPSocket
      * return true!
      */
     void processMessage(cMessage *msg);
+
+    /**
+     *   when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
+     *   May only be invoked before connect() or listen().
+     *   The default setting is false.
+     */
+    void setExplicitReads(bool enabled);
+
+    /**
+     *   when enabled: when TCP sent some data to partner, it's send up a TCPDataSentInfo notification.
+     *   May only be invoked before connect() or listen().
+     *   The default setting is false.
+     */
+    void setSendNotifications(bool enabled);
+
+    /**
+     *   set max size of used receive queue in TCP layer (SO_RCVBUF).
+     *   Only valid when explicit reads are enabled.
+     *   May only be invoked before connect() or listen().
+     *   The default setting is ???.  TODO
+     */
+    void setReceiveBufferSize(long bytes);
+
+    /**
+     *   when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
+     *   otherwise send at last byte.
+     *   Only supported when explicit reads are enabled.
+     *   Only valid when TCPTransferMode is TCP_TRANSFER_OBJECT.
+     *   May only be invoked before connect() or listen().
+     *   The default setting is false.
+     */
+    void setSendingObjectUpAtFirstByte(bool enabled);
     //@}
 };
 
