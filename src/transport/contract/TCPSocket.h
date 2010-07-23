@@ -136,6 +136,8 @@ class INET_API TCPSocket
       public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;
+        virtual void socketDataArrived(int connId, void *yourPtr, TCPDataArrivedInfo *info) { delete info; }
+        virtual void socketDataSent(int connId, void *yourPtr, TCPDataSentInfo *info) { delete info; }
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
         virtual void socketClosed(int connId, void *yourPtr) {}
