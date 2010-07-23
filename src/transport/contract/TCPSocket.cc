@@ -303,6 +303,8 @@ void TCPSocket::processMessage(cMessage *msg)
             delete msg;
             if (cb)
                 cb->socketStatusArrived(connId, yourPtr, status);
+            else
+                delete status;
             break;
 
         default:
