@@ -273,6 +273,28 @@ void TCPSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
 
+        case TCP_I_DATA_ARRIVED:
+            {
+                TCPDataArrivedInfo* info = check_and_cast<TCPDataArrivedInfo*>(msg->removeControlInfo());
+                delete msg;
+                if (cb)
+                    cb->socketDataArrived(connId, yourPtr, info);
+                else
+                    delete info;
+            }
+            break;
+
+        case TCP_I_DATA_SENT:
+            {
+                TCPDataSentInfo* info = check_and_cast<TCPDataSentInfo*>(msg->removeControlInfo());
+                delete msg;
+                if (cb)
+                    cb->socketDataSent(connId, yourPtr, info);
+                else
+                    delete info;
+            }
+            break;
+
         case TCP_I_ESTABLISHED:
             // Note: this code is only for sockets doing active open, and nonforking
             // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
