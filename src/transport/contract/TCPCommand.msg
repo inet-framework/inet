@@ -16,6 +16,33 @@
 //
 
 
+// TCPCommmand kommunikáció:
+// 
+// SEND:
+//    Sikeres küldés esetén (ACKed) felküldi a TCP az elküldött byte számot és a send queue méretét.
+//
+// Receive: OPEN-nél paraméter, hogy régi módon dolgozzon, vagy csak értesítsen az adatról...
+//   Értesítés módban:
+//     ha volt READ(n), akkor a TCP felküldi az adatból ami belefér (<=n).
+//     ha nem volt READ vagy maradt még adat, akkor küld egy TCP_I_DATA_ARRIVED msg-t.
+//     A receive queue-ra meg lehet adni az OPEN-nél egy limitet, aminél több nem lehet a bufferben, ilyenkor a tcp úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
+//   Eredeti módban:
+//     nincs értelme a limitnek, mert úgyis felküldi, amint megérkezett.
+//
+// Problémák:
+//   MsgBased kommunikáció esetén:
+//     Kell valami msg slice-t küldeni értesítési módban, hogy ürüljön a buffer. (Jelenleg csak akkor küldi fel az msg-t, ha megjött az egész msg.)
+//       Ilyenkor a hossz-ellenőrzéseknél figyelni a felküldött sliceok méretére is...
+//     Elején, vagy végén menjen-e az msg, vagy választható legyen:
+//       Az msg-t a hálón az első bájttal küldeni. A fogadó oldalon értesítési mód esetén az OPEN-ben állítható, hogy első vagy utolsó bájttal adja fel az msg-t.
+//
+// új OPEN paraméterek:
+//   - bool Értesítési mód(ÉM=readNotificationsEnabled) / kompatibilis mód
+//   - long ÉM esetén: receive queue size limit
+//   - bool ÉM & MsgBased esetén: MsgInFirstPacket/MsgInLastPacket
+//   - bool TCP_I_DATA_SENT enabled: Y/N
+
+
 cplusplus {{
 #include "IPvXAddress.h"
 }}
