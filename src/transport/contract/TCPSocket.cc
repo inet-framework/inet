@@ -38,11 +38,14 @@ TCPSocket::TCPSocket()
     sendingObjectUpAtFirstByteEnabled = false;
 }
 
-TCPSocket::TCPSocket(cMessage *msg)
+TCPSocket::TCPSocket(const TCPSocket* listenerSocket, cMessage *msg)
 {
+    if (!listenerSocket)
+        opp_error("TCPSocket::TCPSocket(const TCPSocket* listenerSocket, cMessage *): listenerSocket parameter is NULL!");
+
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
     if (!ind)
-        opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
+        opp_error("TCPSocket::TCPSocket(const TCPSocket* listenerSocket, cMessage *): no TCPCommand control info in message (not from TCP?)");
 
     connId = ind->getConnId();
     sockstate = CONNECTED;
@@ -66,7 +69,12 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
-    dataTransferMode = TCP_TRANSFER_UNDEFINED;
+    dataTransferMode = listenerSocket->dataTransferMode;
+
+    explicitReadsEnabled = listenerSocket->explicitReadsEnabled;
+    sendNotificationsEnabled = listenerSocket->sendNotificationsEnabled;
+    receiveBufferSize = listenerSocket->receiveBufferSize;
+    sendingObjectUpAtFirstByteEnabled = listenerSocket->sendingObjectUpAtFirstByteEnabled;
 }
 
 const char *TCPSocket::stateName(int state)

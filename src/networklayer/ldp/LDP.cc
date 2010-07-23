@@ -560,7 +560,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
     {
         // not yet in socketMap, must be new incoming connection.
         // find which peer it is and register connection
-        socket = new TCPSocket(msg);
+        socket = new TCPSocket(&serverSocket, msg);
         socket->setOutputGate(gate("tcpOut"));
 
         // FIXME there seems to be some confusion here. Is it sure that

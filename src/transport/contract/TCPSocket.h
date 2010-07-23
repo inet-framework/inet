@@ -187,7 +187,7 @@ class INET_API TCPSocket
      * The new connId will be picked up from the message: it should have
      * arrived from TCP and contain TCPCommmand control info.
      */
-    TCPSocket(cMessage *msg);
+    TCPSocket(const TCPSocket* listenerSocket, cMessage *msg);
 
     /**
      * Destructor

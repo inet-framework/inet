@@ -53,7 +53,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
         if (!socket)
         {
             // new connection -- create new socket object and server process
-            socket = new TCPSocket(msg);
+            socket = new TCPSocket(&serverSocket, msg);
             socket->setOutputGate(gate("tcpOut"));
 
             const char *serverThreadClass = par("serverThreadClass");
