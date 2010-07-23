@@ -245,61 +245,68 @@ void TCPSocket::processMessage(cMessage *msg)
     switch (msg->getKind())
     {
         case TCP_I_DATA:
-             if (cb)
-                 cb->socketDataArrived(connId, yourPtr, PK(msg), false);
-             else
-                 delete msg;
-             break;
+            if (cb)
+                cb->socketDataArrived(connId, yourPtr, PK(msg), false);
+            else
+                delete msg;
+            break;
+
         case TCP_I_URGENT_DATA:
-             if (cb)
-                 cb->socketDataArrived(connId, yourPtr, PK(msg), true);
-             else
-                 delete msg;
-             break;
+            if (cb)
+                cb->socketDataArrived(connId, yourPtr, PK(msg), true);
+            else
+                delete msg;
+            break;
+
         case TCP_I_ESTABLISHED:
-             // Note: this code is only for sockets doing active open, and nonforking
-             // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
-             // carries a new connId which won't match the connId of this TCPSocket,
-             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
-             // want to create a new TCPSocket object via new TCPSocket(msg).
-             sockstate = CONNECTED;
-             connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
-             localAddr = connectInfo->getLocalAddr();
-             remoteAddr = connectInfo->getRemoteAddr();
-             localPrt = connectInfo->getLocalPort();
-             remotePrt = connectInfo->getRemotePort();
-             delete msg;
-             if (cb)
-                 cb->socketEstablished(connId, yourPtr);
-             break;
+            // Note: this code is only for sockets doing active open, and nonforking
+            // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
+            // carries a new connId which won't match the connId of this TCPSocket,
+            // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
+            // want to create a new TCPSocket object via new TCPSocket(msg).
+            sockstate = CONNECTED;
+            connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
+            localAddr = connectInfo->getLocalAddr();
+            remoteAddr = connectInfo->getRemoteAddr();
+            localPrt = connectInfo->getLocalPort();
+            remotePrt = connectInfo->getRemotePort();
+            delete msg;
+            if (cb)
+                cb->socketEstablished(connId, yourPtr);
+            break;
+
         case TCP_I_PEER_CLOSED:
-             sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
-             delete msg;
-             if (cb)
-                 cb->socketPeerClosed(connId, yourPtr);
-             break;
+            sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
+            delete msg;
+            if (cb)
+                cb->socketPeerClosed(connId, yourPtr);
+            break;
+
         case TCP_I_CLOSED:
-             sockstate = CLOSED;
-             delete msg;
-             if (cb)
-                 cb->socketClosed(connId, yourPtr);
-             break;
+            sockstate = CLOSED;
+            delete msg;
+            if (cb)
+                cb->socketClosed(connId, yourPtr);
+            break;
+
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
-             sockstate = SOCKERROR;
-             if (cb)
-                 cb->socketFailure(connId, yourPtr, msg->getKind());
-             delete msg;
-             break;
+            sockstate = SOCKERROR;
+            if (cb)
+                cb->socketFailure(connId, yourPtr, msg->getKind());
+            delete msg;
+            break;
+
         case TCP_I_STATUS:
-             status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
-             delete msg;
-             if (cb)
-                 cb->socketStatusArrived(connId, yourPtr, status);
-             break;
+            status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
+            delete msg;
+            if (cb)
+                cb->socketStatusArrived(connId, yourPtr, status);
+            break;
+
         default:
-             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
+            opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
     }
 }
 
