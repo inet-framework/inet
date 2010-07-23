@@ -359,6 +359,8 @@ void TCPSocket::processMessage(cMessage *msg)
 
 void TCPSocket::readDataTransferModePar(cComponent &component)
 {
+    //FIXME inkabb legyen egy kulon string to enum konverter fveny, ez pedig nem kell.
+
     const char *transferMode = component.par("dataTransferMode");
 
     if(0 == transferMode || 0 == transferMode[0])
