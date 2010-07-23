@@ -175,6 +175,10 @@ class TCPOpenCommand extends TCPCommand
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
     int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts
+    bool explicitReadsEnabled;
+    bool sendNotificationsEnabled;
+    long receiveBufferSize;
+    bool sendingObjectUpAtFirstByteEnabled;
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 
