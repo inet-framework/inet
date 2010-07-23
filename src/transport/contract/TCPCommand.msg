@@ -87,7 +87,8 @@ enum TcpStatusInd
     TCP_I_CONNECTION_RESET = 7;  // connection reset
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry TCPStatusInfo)
-    TCP_I_QUEUESTATUS = 10;		 // status info of send and receive queues
+    TCP_I_DATA_ARRIVED = 10;     // number of bytes in receive queue
+    TCP_I_DATA_SENT = 11;        // number of sent bytes and number of bytes in send queue
 }
 
 
@@ -256,8 +257,18 @@ class TCPStatusInfo extends TCPCommand
 //
 // @see TcpStatusInd, TcpCommandCode, TCP
 //
-class TCPQueueStatusInfo extends TCPCommand
+class TCPDataArrivedInfo extends TCPCommand
+{
+    long availableBytesInReceiveQueue;
+}
+
+//
+// TODO leiras!!!
+//
+// @see TcpStatusInd, TcpCommandCode, TCP
+//
+class TCPDataSentInfo extends TCPCommand
 {
     long availableBytesInSendQueue;
-    long availableBytesInReceiveQueue;
+    unsigned int sentBytes;
 }
