@@ -184,7 +184,7 @@ package inet.transport.tcp;
 //    segments) and the payload length of a new received segment
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in tcpRcvQueueDropsVector.
-
+//
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
@@ -233,8 +233,8 @@ simple TCP like ITCP
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        bool wsSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
-        bool tsSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
