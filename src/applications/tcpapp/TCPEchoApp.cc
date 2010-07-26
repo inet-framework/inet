@@ -26,6 +26,12 @@ void TCPEchoApp::initialize()
     int port = par("port");
     delay = par("echoDelay");
     echoFactor = par("echoFactor");
+    useExplicitRead = par("useExplicitRead");
+    SendNotificationsEnabled = par("SendNotificationsEnabled");
+    readBufferSize = par("receiveBufferSize");
+    sendBufferLimit = par("sendBufferLimit");
+    waitingData = false;
+    bytesInSendQueue = 0;
 
     bytesRcvd = bytesSent = 0;
     WATCH(bytesRcvd);
@@ -34,6 +40,9 @@ void TCPEchoApp::initialize()
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
     socket.readDataTransferModePar(*this);
+    socket.setExplicitReads(useExplicitRead);
+    socket.setSendNotifications(SendNotificationsEnabled);
+    socket.setReceiveBufferSize(readBufferSize);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
 }
@@ -45,54 +54,106 @@ void TCPEchoApp::sendDown(cMessage *msg)
     send(msg, "tcpOut");
 }
 
+void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId, ulong bytes)
+{
+    if (!msg)
+        msg = new cMessage();
+
+    msg->setKind(TCP_C_READ);
+    msg->setName("READ");
+    TCPReadCommand *cmd = new TCPReadCommand();
+    cmd->setConnId(connId);
+    cmd->setBytes(bytes);
+    msg->setControlInfo(cmd);
+    waitingData = true;
+    sendDown(msg);
+}
+
 void TCPEchoApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
         sendDown(msg);
     }
-    else if (msg->getKind()==TCP_I_PEER_CLOSED)
-    {
-        // we'll close too
-        msg->setKind(TCP_C_CLOSE);
-        if (delay==0)
-            sendDown(msg);
-        else
-            scheduleAt(simTime()+delay, msg); // send after a delay
-    }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
-    {
-        cPacket *pkt = check_and_cast<cPacket *>(msg);
-        bytesRcvd += pkt->getByteLength();
-
-        if (echoFactor==0)
-        {
-            delete pkt;
-        }
-        else
-        {
-            // reverse direction, modify length, and send it back
-            pkt->setKind(TCP_C_SEND);
-            TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
-            TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setConnId(ind->getConnId());
-            pkt->setControlInfo(cmd);
-            delete ind;
-
-            long byteLen = pkt->getByteLength()*echoFactor;
-            if (byteLen<1) byteLen=1;
-            pkt->setByteLength(byteLen);
-
-            if (delay==0)
-                sendDown(pkt);
-            else
-                scheduleAt(simTime()+delay, pkt); // send after a delay
-        }
-    }
     else
     {
-        // some indication -- ignore
-        delete msg;
+        switch (msg->getKind())
+        {
+            case TCP_I_PEER_CLOSED:
+                msg->setKind(TCP_C_CLOSE);
+                if (delay==0)
+                    sendDown(msg);
+                else
+                    scheduleAt(simTime()+delay, msg); // send after a delay
+                break;
+
+            case TCP_I_DATA:
+            case TCP_I_URGENT_DATA:
+            {
+                waitingData = false;
+                cPacket *pkt = check_and_cast<cPacket *>(msg);
+                bytesRcvd += pkt->getByteLength();
+                TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
+                int connId = ind->getConnId();
+                delete ind;
+
+                if (echoFactor==0)
+                {
+                    delete pkt;
+                }
+                else
+                {
+                    // reverse direction, modify length, and send it back
+                    pkt->setKind(TCP_C_SEND);
+                    TCPSendCommand *cmd = new TCPSendCommand();
+                    cmd->setConnId(connId);
+                    pkt->setControlInfo(cmd);
+
+                    long byteLen = pkt->getByteLength()*echoFactor;
+                    if (byteLen<1) byteLen=1;
+                    pkt->setByteLength(byteLen);
+
+                    if (delay==0)
+                        sendDown(pkt);
+                    else
+                        scheduleAt(simTime()+delay, pkt); // send after a delay
+                }
+                if (useExplicitRead)
+                    if (!waitingData && checkForRead())
+                        sendDownReadCmd(NULL, connId, 65536);
+                break;
+            }
+            ASSERT(0);
+
+            case TCP_I_DATA_ARRIVED:
+            {
+                ASSERT(useExplicitRead);
+                ASSERT(!waitingData);
+                TCPDataArrivedInfo *ind = check_and_cast<TCPDataArrivedInfo *>(msg->removeControlInfo());
+                if (checkForRead())
+                    sendDownReadCmd(msg, ind->getConnId(), 65536);
+                else
+                    delete msg;
+                break;
+            }
+            ASSERT(0);
+
+            case TCP_I_DATA_SENT:
+            {
+                TCPDataSentInfo *ind = check_and_cast<TCPDataSentInfo *>(msg->removeControlInfo());
+                bytesInSendQueue = ind->getAvailableBytesInSendQueue();
+                if (useExplicitRead && !waitingData && checkForRead())
+                    sendDownReadCmd(msg, ind->getConnId(), 65536);
+                else
+                    delete msg;
+                break;
+            }
+            ASSERT(0);
+
+            default:
+                delete msg;
+                break;
+        }
     }
 
     if (ev.isGUI())

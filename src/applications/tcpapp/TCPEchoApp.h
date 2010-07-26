@@ -28,12 +28,20 @@ class INET_API TCPEchoApp : public cSimpleModule
   protected:
     simtime_t delay;
     double echoFactor;
+    bool useExplicitRead;
+    bool SendNotificationsEnabled;
+    ulong readBufferSize;
 
     long bytesRcvd;
     long bytesSent;
+    bool waitingData;
+    long bytesInSendQueue;
+    long sendBufferLimit;
 
   protected:
     virtual void sendDown(cMessage *msg);
+    virtual void sendDownReadCmd(cMessage *msg, int connId, ulong bytes);
+    virtual bool checkForRead() { return bytesInSendQueue < sendBufferLimit; }
 
   protected:
     virtual void initialize();

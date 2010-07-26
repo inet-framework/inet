@@ -126,9 +126,9 @@ void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
     }
 }
 
-cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
+cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
 {
-    ulong numBytes = extractTo(seq);
+    ulong numBytes = extractTo(seq, maxBytes);
     if (numBytes==0)
         return NULL;
 
@@ -137,7 +137,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     return msg;
 }
 
-ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
+ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq, ulong maxBytes)
 {
     ASSERT(seqLE(seq,rcv_nxt));
 
@@ -151,20 +151,48 @@ ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     if (seqLE(seq,i->begin))
         return 0;
 
+    if (seqGreater(seq,i->end))
+        seq = i->end;
+
+    ulong octets = seq - i->begin;
+    if (maxBytes < octets)
+    {
+        octets = maxBytes;
+        seq = i->begin + octets;
+    }
+
     if (seqLess(seq,i->end))
     {
         // part of 1st region
-        ulong octets = seq - i->begin;
         i->begin = seq;
-        return octets;
     }
     else
     {
         // full 1st region
-        ulong octets = i->end - i->begin;
         regionList.erase(i);
-        return octets;
     }
+    return octets;
+}
+
+ulong TCPVirtualDataRcvQueue::getExtractableBytesUpTo(uint32 seq)
+{
+    ASSERT(seqLE(seq,rcv_nxt));
+
+    RegionList::iterator i = regionList.begin();
+    if (i==regionList.end())
+        return 0;
+
+    ASSERT(seqLess(i->begin,i->end)); // empty regions cannot exist
+
+    // seq below 1st region
+    if (seqLE(seq,i->begin))
+        return 0;
+
+    if (seqLess(seq,i->end)) // part of 1st region
+        return (ulong)(seq - i->begin);
+
+    // full 1st region
+    return (ulong)(i->end - i->begin);
 }
 
 uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()

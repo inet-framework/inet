@@ -170,6 +170,11 @@ TCPConnection::TCPConnection()
     receiveQueue = NULL;
     tcpAlgorithm = NULL;
     state = NULL;
+    explicitReadsEnabled = false;
+    sendNotificationsEnabled = false;
+    sendingObjectUpAtFirstByteEnabled = false;
+    receiveBufferSize = 0;
+    readBytes = 0;
     the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = NULL;
     sndWndVector = rcvWndVector = rcvAdvVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector =
     dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector =
@@ -200,6 +205,11 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     receiveQueue = NULL;
     tcpAlgorithm = NULL;
     state = NULL;
+    explicitReadsEnabled = false;
+    sendNotificationsEnabled = false;
+    sendingObjectUpAtFirstByteEnabled = false;
+    receiveBufferSize = 0;
+    readBytes = 0;
 
     the2MSLTimer = new cMessage("2MSL");
     connEstabTimer = new cMessage("CONN-ESTAB");
@@ -357,6 +367,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
         case TCP_E_OPEN_ACTIVE: process_OPEN_ACTIVE(event, tcpCommand, msg); break;
         case TCP_E_OPEN_PASSIVE: process_OPEN_PASSIVE(event, tcpCommand, msg); break;
         case TCP_E_SEND: process_SEND(event, tcpCommand, msg); break;
+        case TCP_E_READ: process_READ(event, tcpCommand, msg); break;
         case TCP_E_CLOSE: process_CLOSE(event, tcpCommand, msg); break;
         case TCP_E_ABORT: process_ABORT(event, tcpCommand, msg); break;
         case TCP_E_STATUS: process_STATUS(event, tcpCommand, msg); break;
@@ -375,6 +386,7 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
         case TCP_C_OPEN_ACTIVE:  return TCP_E_OPEN_ACTIVE;
         case TCP_C_OPEN_PASSIVE: return TCP_E_OPEN_PASSIVE;
         case TCP_C_SEND:         return TCP_E_SEND;
+        case TCP_C_READ:         return TCP_E_READ;
         case TCP_C_CLOSE:        return TCP_E_CLOSE;
         case TCP_C_ABORT:        return TCP_E_ABORT;
         case TCP_C_STATUS:       return TCP_E_STATUS;

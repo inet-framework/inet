@@ -46,7 +46,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     void merge(uint32 segmentBegin, uint32 segmentEnd);
 
     // returns number of bytes extracted
-    ulong extractTo(uint32 toSeq);
+    ulong extractTo(uint32 toSeq, ulong maxBytes);
 
   public:
     /**
@@ -77,7 +77,12 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     /**
      *
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq);
+    virtual ulong getExtractableBytesUpTo(uint32 seq);
+
+    /**
+     *
+     */
+    virtual cPacket *extractBytesUpTo(uint32 seq, ulong maxBytes);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

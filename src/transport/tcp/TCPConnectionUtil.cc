@@ -324,6 +324,11 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     receiveQueue = tcpMain->createReceiveQueue(transferMode);
     receiveQueue->setConnection(this);
 
+    explicitReadsEnabled = openCmd->getExplicitReadsEnabled();
+    sendNotificationsEnabled = openCmd->getSendNotificationsEnabled();
+    sendingObjectUpAtFirstByteEnabled = openCmd->getSendingObjectUpAtFirstByteEnabled();
+    receiveBufferSize = openCmd->getReceiveBufferSize();
+
     // create SACK retransmit queue
     rexmitQueue = new TCPSACKRexmitQueue();
     rexmitQueue->setConnection(this);

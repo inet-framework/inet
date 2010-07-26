@@ -84,6 +84,7 @@ enum TCPEventCode
     TCP_E_OPEN_ACTIVE,
     TCP_E_OPEN_PASSIVE,
     TCP_E_SEND,
+    TCP_E_READ,
     TCP_E_CLOSE,
     TCP_E_ABORT,
     TCP_E_STATUS,
@@ -329,8 +330,14 @@ class INET_API TCPConnection
     // TCP queues
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
- public:
 
+    bool explicitReadsEnabled;      // when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
+    bool sendNotificationsEnabled;  // when enabled: when TCP sent some data to partner, it's send up a TCPDataSentInfo notification.
+    bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
+    long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true
+    ulong readBytes;                // bytecount of last READ
+
+ public:
     TCPSACKRexmitQueue *rexmitQueue;
 
  protected:
@@ -379,6 +386,7 @@ class INET_API TCPConnection
     virtual void process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
@@ -525,6 +533,12 @@ class INET_API TCPConnection
 
     /** Utility: sends TCP_I_ESTABLISHED indication with TCPConnectInfo to application */
     virtual void sendEstabIndicationToApp();
+
+    /** Utility: discard up send queues to seqNum and send notification when need */
+    virtual void discardUpTo(uint32 seqNum);
+
+    /** Utility: send available received data to App */
+    void SendDataToApp();
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */

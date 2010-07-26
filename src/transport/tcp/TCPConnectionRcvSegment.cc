@@ -111,6 +111,41 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
     return event;
 }
 
+void TCPConnection::SendDataToApp()
+{
+    if (!explicitReadsEnabled)
+    {
+        readBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
+    }
+    cPacket *msg;
+    while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes)) != NULL)
+    {
+        if (explicitReadsEnabled)
+            readBytes = 0;
+        else
+            readBytes -= msg->getByteLength();
+        msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
+        TCPCommand *cmd = new TCPCommand();
+        cmd->setConnId(connId);
+        msg->setControlInfo(cmd);
+        sendToApp(msg);
+    }
+    if (explicitReadsEnabled)
+    {
+        ulong readableBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
+        if (readableBytes > 0)
+        {
+            cMessage* info = new cMessage("DataArrived");
+            info->setKind(TCP_I_DATA_ARRIVED);
+            TCPDataArrivedInfo *cmd = new TCPDataArrivedInfo();
+            cmd->setConnId(connId);
+            cmd->setAvailableBytesInReceiveQueue(readableBytes);
+            info->setControlInfo(cmd);
+            sendToApp(info);
+        }
+    }
+}
+
 TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 {
     //
@@ -538,15 +573,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     // as many bytes as requested. rcv_wnd should be decreased
                     // accordingly!
                     //
-                    cPacket *msg;
-                    while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt))!=NULL)
-                    {
-                        msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
-                        TCPCommand *cmd = new TCPCommand();
-                        cmd->setConnId(connId);
-                        msg->setControlInfo(cmd);
-                        sendToApp(msg);
-                    }
+                    SendDataToApp();
 
                     // if this segment "filled the gap" until the previously arrived segment
                     // that carried a FIN (i.e.rcv_nxt==rcv_fin_seq), we have to advance
@@ -866,6 +893,34 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
     return TCP_E_IGNORE;
 }
 
+void TCPConnection::discardUpTo(uint32 seqNum)
+{
+    ulong oldbytes = 0;
+    if (sendNotificationsEnabled)
+        oldbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+
+    sendQueue->discardUpTo(seqNum);
+    if (state->sack_enabled)
+        rexmitQueue->discardUpTo(seqNum);
+
+    if (sendNotificationsEnabled)
+    {
+        ulong curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+        if (oldbytes > curbytes)
+        {
+            cMessage *msg = new cMessage("DataSent");
+            // Send up a DATA sent notification
+            msg->setKind(TCP_I_DATA_SENT);
+            TCPDataSentInfo *cmd = new TCPDataSentInfo();
+            cmd->setConnId(connId);
+            cmd->setAvailableBytesInSendQueue(curbytes);
+            cmd->setSentBytes(oldbytes-curbytes);
+            msg->setControlInfo(cmd);
+            sendToApp(msg);
+        }
+    }
+}
+
 TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
 {
     tcpEV2 << "Processing segment in SYN_SENT\n";
@@ -948,9 +1003,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
         if (tcpseg->getAckBit())
         {
             state->snd_una = tcpseg->getAckNo();
-            sendQueue->discardUpTo(state->snd_una);
-            if (state->sack_enabled)
-                rexmitQueue->discardUpTo(state->snd_una);
+            discardUpTo(state->snd_una);
 
             // although not mentioned in RFC 793, seems like we have to pick up
             // initial snd_wnd from the segment here.
@@ -1206,10 +1259,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         }
 
         // acked data no longer needed in send queue
-        sendQueue->discardUpTo(discardUpToSeq);
-        // acked data no longer needed in rexmit queue
-        if (state->sack_enabled)
-            rexmitQueue->discardUpTo(discardUpToSeq);
+        discardUpTo(discardUpToSeq);
 
         updateWndInfo(tcpseg);
 

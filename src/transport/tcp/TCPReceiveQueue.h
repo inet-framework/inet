@@ -80,12 +80,18 @@ class INET_API TCPReceiveQueue : public cPolymorphic
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) = 0;
 
     /**
+     * Returns the number of received bytes, up to (but NOT
+     * including) the given sequence no (usually rcv_nxt).
+     */
+    virtual ulong getExtractableBytesUpTo(uint32 seq) = 0;
+
+    /**
      * Should create a packet to be passed up to the app, up to (but NOT
      * including) the given sequence no (usually rcv_nxt).
      * It should return NULL if there's no more data to be passed up --
      * this method is called several times until it returns NULL.
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq) = 0;
+    virtual cPacket *extractBytesUpTo(uint32 seq, ulong maxBytes) = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

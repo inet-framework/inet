@@ -47,6 +47,11 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             remoteAddr = openCmd->getRemoteAddr();
             localPort = openCmd->getLocalPort();
             remotePort = openCmd->getRemotePort();
+            explicitReadsEnabled = openCmd->getExplicitReadsEnabled();
+            receiveBufferSize = openCmd->getReceiveBufferSize();
+            sendNotificationsEnabled = openCmd->getSendNotificationsEnabled();
+            sendingObjectUpAtFirstByteEnabled = openCmd->getSendingObjectUpAtFirstByteEnabled();
+            readBytes = 0;
 
             if (remoteAddr.isUnspecified() || remotePort==-1)
                 opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
@@ -92,6 +97,12 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             state->fork = openCmd->getFork();
             localAddr = openCmd->getLocalAddr();
             localPort = openCmd->getLocalPort();
+            explicitReadsEnabled = openCmd->getExplicitReadsEnabled();
+            receiveBufferSize = openCmd->getReceiveBufferSize();
+            sendNotificationsEnabled = openCmd->getSendNotificationsEnabled();
+            sendingObjectUpAtFirstByteEnabled = openCmd->getSendingObjectUpAtFirstByteEnabled();
+            readBytes = 0;
+
 
             if (localPort==-1)
                 opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
@@ -215,6 +226,45 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // RFC 793 is not entirely clear on how to handle a duplicate close request.
             // Here we treat it as an error.
             opp_error("Duplicate CLOSE command: connection already closing");
+    }
+}
+
+void TCPConnection::process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+{
+    TCPReadCommand *readCommand = check_and_cast<TCPReadCommand *>(tcpCommand);
+    if (!explicitReadsEnabled)
+        opp_error("Invalid READ command: explicit read not enabled");
+
+    if (readBytes)
+        opp_error("Duplicate READ command: connection already reading");
+
+    switch(fsm.getState())
+    {
+        case TCP_S_INIT:
+            opp_error("Error processing command READ: connection not open");
+
+        case TCP_S_LISTEN:
+            // Nothing to do here
+            break;
+
+        case TCP_S_SYN_SENT:
+        case TCP_S_SYN_RCVD:
+        case TCP_S_ESTABLISHED:
+            readBytes = readCommand->getBytes();
+            if (0 == readBytes)
+                opp_error("Invalid READ command: byte count is 0");
+            SendDataToApp();
+            break;
+
+        case TCP_S_CLOSE_WAIT:
+        case TCP_S_FIN_WAIT_1:
+        case TCP_S_FIN_WAIT_2:
+        case TCP_S_CLOSING:
+        case TCP_S_LAST_ACK:
+        case TCP_S_TIME_WAIT:
+            // RFC 793 is not entirely clear on how to handle a duplicate close request.
+            // Here we treat it as an error.
+            opp_error("Error processing command READ: connection closing");
     }
 }
 

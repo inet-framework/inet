@@ -169,17 +169,17 @@ enum TCPDataTransferMode
 //
 class TCPOpenCommand extends TCPCommand
 {
-    IPvXAddress localAddr; // may be left empty
-    IPvXAddress remoteAddr;// required for active open
+    IPvXAddress localAddr;    // may be left empty
+    IPvXAddress remoteAddr;   // required for active open
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
-    bool fork = false;        // used only for passive open
     int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts
-    bool explicitReadsEnabled;
-    bool sendNotificationsEnabled;
-    long receiveBufferSize;
-    bool sendingObjectUpAtFirstByteEnabled;
-    string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
+    bool fork = false;        // used only for passive open
+    bool explicitReadsEnabled;		// when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
+    bool sendNotificationsEnabled;  // when enabled: when TCP sent some data to partner, it's send up a TCPDataSentInfo notification.
+    bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
+    long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true 
+    string tcpAlgorithmClass;       // TCP congestion control algorithm; leave empty for default
 }
 
 
