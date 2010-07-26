@@ -25,6 +25,8 @@
 #include <iostream>
 #include <fstream>
 
+#define MYDEBUG EV
+
 Define_Module(TraCIScenarioManagerLaunchd);
 
 TraCIScenarioManagerLaunchd::~TraCIScenarioManagerLaunchd()
@@ -32,8 +34,12 @@ TraCIScenarioManagerLaunchd::~TraCIScenarioManagerLaunchd()
 }
 
 
-void TraCIScenarioManagerLaunchd::initialize()
+void TraCIScenarioManagerLaunchd::initialize(int stage)
 {
+	if (stage != 1) {
+		TraCIScenarioManager::initialize(stage);
+		return;
+	}
 	launchConfig = par("launchConfig").xmlValue();
 	seed = par("seed");
 	cXMLElementList basedir_nodes = launchConfig->getElementsByTagName("basedir");
@@ -56,7 +62,7 @@ void TraCIScenarioManagerLaunchd::initialize()
 		seed_node->setAttribute("value", ss.str().c_str());
 		launchConfig->appendChild(seed_node);
 	}
-	TraCIScenarioManager::initialize();
+	TraCIScenarioManager::initialize(stage);
 }
 
 void TraCIScenarioManagerLaunchd::finish()
@@ -65,6 +71,15 @@ void TraCIScenarioManagerLaunchd::finish()
 }
 
 void TraCIScenarioManagerLaunchd::init_traci() {
+	{
+		std::pair<uint32_t, std::string> version = TraCIScenarioManager::commandGetVersion();
+		uint32_t apiVersion = version.first;
+		std::string serverVersion = version.second;
+
+		ASSERT(apiVersion == 1);
+
+		MYDEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
+	}
 
 	std::string contents = launchConfig->tostr(0);
 

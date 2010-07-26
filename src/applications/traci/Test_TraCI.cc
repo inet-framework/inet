@@ -169,7 +169,8 @@ void Test_TraCI::receiveChangeNotification(int category, const cPolymorphic *det
 	try {
 		double speed = mobility->getSpeed();
 
-		visitedEdges.insert(mobility->getRoadId());
+		std::string roadId = mobility->getRoadId();
+		if ((roadId.length() > 0) && (roadId[0] != ':')) visitedEdges.insert(roadId);
 		if (speed < 0.001) hasStopped = true;
 	}
 	catch (std::runtime_error e) {

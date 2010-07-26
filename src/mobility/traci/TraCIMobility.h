@@ -65,14 +65,14 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual void finish();
 
 		virtual void handleSelfMsg(cMessage *msg);
-		virtual void preInitialize(int32_t external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
-		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, double allowed_speed = -1);
+		virtual void preInitialize(std::string external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
+		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
 		virtual void changePosition();
-		virtual void setExternalId(int32_t external_id) {
+		virtual void setExternalId(std::string external_id) {
 			this->external_id = external_id;
 		}
-		virtual int32_t getExternalId() {
-			if (external_id == -1) throw std::runtime_error("TraCIMobility::getExternalId called with no external_id set yet");
+		virtual std::string getExternalId() {
+			if (external_id == "") throw std::runtime_error("TraCIMobility::getExternalId called with no external_id set yet");
 			return external_id;
 		}
 		virtual Coord getPosition() {
@@ -93,10 +93,6 @@ class INET_API TraCIMobility : public BasicMobility
 			if (angle == M_PI) throw std::runtime_error("TraCIMobility::getAngleRad called with no angle set yet");
 			return angle;
 		}
-		virtual double getAllowedSpeed() {
-			if (allowed_speed == -1) throw std::runtime_error("TraCIMobility::getAllowedSpeed called with no allowed speed set yet");
-			return allowed_speed;
-		}
 		virtual TraCIScenarioManager* getManager() {
 			if (!manager) manager = TraCIScenarioManagerAccess().get();
 			return manager;
@@ -113,7 +109,13 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandStopNode(std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
 			return getManager()->commandStopNode(getExternalId(), roadId, pos, laneid, radius, waittime);
 		}
-		std::list<std::pair<float, float> > commandGetPolygonShape(std::string polyId) {
+		std::list<std::string> commandGetPolygonIds() {
+			return getManager()->commandGetPolygonIds();
+		}
+		std::string commandGetPolygonTypeId(std::string polyId) {
+			return getManager()->commandGetPolygonTypeId(polyId);
+		}
+		std::list<Coord> commandGetPolygonShape(std::string polyId) {
 			return getManager()->commandGetPolygonShape(polyId);
 		}
 		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
@@ -137,14 +139,13 @@ class INET_API TraCIMobility : public BasicMobility
 
 		bool isPreInitialized; /**< true if preInitialize() has been called immediately before initialize() */
 
-		int32_t external_id; /**< updated by setExternalId() */
+		std::string external_id; /**< updated by setExternalId() */
 
 		simtime_t lastUpdate; /**< updated by nextPosition() */
 		Coord nextPos; /**< updated by nextPosition() */
 		std::string road_id; /**< updated by nextPosition() */
 		double speed; /**< updated by nextPosition() */
 		double angle; /**< updated by nextPosition() */
-		double allowed_speed; /**< updated by nextPosition() */
 
 		cMessage* startAccidentMsg;
 		cMessage* stopAccidentMsg;

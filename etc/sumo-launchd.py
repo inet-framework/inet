@@ -55,7 +55,9 @@ import logging
 import atexit
 from optparse import OptionParser
 
-
+_API_VERSION = 1
+_LAUNCHD_VERSION = 'sumo-launchd.py 1.00'
+_CMD_GET_VERSION = 0x00
 _CMD_FILE_SEND = 0x75
 
 class UnusedPortLock:
@@ -177,7 +179,7 @@ def parse_launch_configuration(launch_xml_string):
     return (basedir, copy_nodes, seed)
 
 
-def run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp):
+def run_sumo(runpath, sumo_command, shlex, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp):
     """
     Actually run SUMO.
     """
@@ -192,7 +194,12 @@ def run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_
     sumo_returncode = -1
     sumo_status = None
     try:
-        cmd = [sumo_command, "-c", config_file_name] 
+        cmd = []
+        if shlex:
+            import shlex
+            cmd = shlex.split(sumo_command.replace('{}', '-c ' + unicode(config_file_name).encode()))
+        else:
+            cmd = [sumo_command, "-c", config_file_name] 
         logging.info("Starting SUMO (%s) on port %d, seed %d" % (" ".join(cmd), remote_port, seed))
         sumo = subprocess.Popen(cmd, cwd=runpath, stdin=None, stdout=sumoLogOut, stderr=sumoLogErr)
 
@@ -374,7 +381,7 @@ def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed):
     return config_file_name
 
 
-def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, keep_temp):
+def handle_launch_configuration(sumo_command, shlex, launch_xml_string, client_socket, keep_temp):
     """
     Process launch configuration in launch_xml_string.
     """
@@ -404,7 +411,7 @@ def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, 
         config_file_name = copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed)
         
         # run SUMO
-        result_xml = run_sumo(runpath, sumo_command, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp)
+        result_xml = run_sumo(runpath, sumo_command, shlex, config_file_name, remote_port, seed, client_socket, unused_port_lock, keep_temp)
 
     finally:
         unused_port_lock.__exit__()
@@ -419,6 +426,17 @@ def handle_launch_configuration(sumo_command, launch_xml_string, client_socket, 
         logging.debug('Result: "%s"' % result_xml)
 
     return result_xml
+
+def handle_get_version(conn):
+    """
+    process a "get version" command received on the connection
+    """
+
+    logging.debug('Got CMD_GETVERSION')
+
+    # Send OK response and version info
+    response = struct.pack("!iBBBiBBii", 4+1+1+1+4 + 1+1+4+4+len(_LAUNCHD_VERSION), 1+1+1+4, _CMD_GET_VERSION, 0x00, 0x00, 1+4+4+len(_LAUNCHD_VERSION), _CMD_GET_VERSION, _API_VERSION, len(_LAUNCHD_VERSION)) + _LAUNCHD_VERSION
+    conn.send(response)
 
 
 def read_launch_config(conn):
@@ -450,10 +468,16 @@ def read_launch_config(conn):
     cmd_id_buf = ""
     cmd_id_buf += conn.recv(1)
     cmd_id = struct.unpack("!B", cmd_id_buf)[0]
-    if cmd_id != _CMD_FILE_SEND:
-        raise RuntimeError("Expected CMD_FILE_SEND (0x%x), but got 0x%x" % (_CMD_FILE_SEND, cmd_id))
 
     logging.debug("Got TraCI command 0x%x" % cmd_id)
+
+    if cmd_id == _CMD_GET_VERSION:
+        # handle get version command
+        handle_get_version(conn)
+        # ...and try reading the launch config again
+        return read_launch_config(conn)
+    elif cmd_id != _CMD_FILE_SEND:
+        raise RuntimeError("Expected CMD_FILE_SEND (0x%x), but got 0x%x" % (_CMD_FILE_SEND, cmd_id))
 
     # Get File name
     fname_len_buf = ""
@@ -482,7 +506,7 @@ def read_launch_config(conn):
     return data
         
         
-def handle_connection(sumo_command, conn, addr, keep_temp):
+def handle_connection(sumo_command, shlex, conn, addr, keep_temp):
     """
     Handle incoming connection.
     """
@@ -491,7 +515,7 @@ def handle_connection(sumo_command, conn, addr, keep_temp):
 
     try:
         data = read_launch_config(conn)
-        handle_launch_configuration(sumo_command, data, conn, keep_temp)
+        handle_launch_configuration(sumo_command, shlex, data, conn, keep_temp)
 
     except Exception, e:
         logging.error("Aborting on error: %s" % e)
@@ -501,7 +525,7 @@ def handle_connection(sumo_command, conn, addr, keep_temp):
         conn.close()
 
 
-def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do_kill, pidfile, keep_temp):
+def wait_for_connections(sumo_command, shlex, sumo_port, bind_address, do_daemonize, do_kill, pidfile, keep_temp):
     """
     Open TCP socket, wait for connections, call handle_connection for each
     """
@@ -523,7 +547,7 @@ def wait_for_connections(sumo_command, sumo_port, bind_address, do_daemonize, do
         while True:
             conn, addr = listener.accept()
             logging.debug("Connection from %s on port %d" % addr)
-            thread.start_new_thread(handle_connection, (sumo_command, conn, addr, keep_temp))
+            thread.start_new_thread(handle_connection, (sumo_command, shlex, conn, addr, keep_temp))
     
     except exceptions.SystemExit:
         logging.warning("Killed.")
@@ -613,6 +637,7 @@ def main():
     # Option handling
     parser = OptionParser()
     parser.add_option("-c", "--command", dest="command", default="sumo", help="run SUMO as COMMAND [default: %default]", metavar="COMMAND")
+    parser.add_option("-s", "--shlex", dest="shlex", default=False, action="store_true", help="treat command as shell string to execute, replace {} with command line parameters [default: no]")
     parser.add_option("-p", "--port", dest="port", type="int", default=9999, action="store", help="listen for connections on PORT [default: %default]", metavar="PORT")
     parser.add_option("-b", "--bind", dest="bind", default="127.0.0.1", help="bind to ADDRESS [default: %default]", metavar="ADDRESS")
     parser.add_option("-L", "--logfile", dest="logfile", default=os.path.join(tempfile.gettempdir(), "sumo-launchd.log"), help="log messages to LOGFILE [default: %default]", metavar="LOGFILE")
@@ -635,8 +660,11 @@ def main():
         logging.getLogger().addHandler(logging.StreamHandler())
     logging.debug("Logging to %s" % options.logfile)
 
+    if args:
+        logging.warning("Superfluous command line arguments: \"%s\"" % " ".join(args))
+
     # this is where we'll spend our time
-    wait_for_connections(options.command, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
+    wait_for_connections(options.command, options.shlex, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
 
 
 # Start main() when run interactively

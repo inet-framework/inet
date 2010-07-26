@@ -95,7 +95,6 @@ void TraCIMobility::initialize(int stage)
 			road_id = -1; 
 			speed = -1; 
 			angle = M_PI; 
-			allowed_speed = -1; 
 			pos.x = -1; 
 			pos.y = -1; 
 		}
@@ -104,7 +103,6 @@ void TraCIMobility::initialize(int stage)
 		WATCH(road_id);
 		WATCH(speed);
 		WATCH(angle);
-		WATCH(allowed_speed);
 		WATCH(pos.x);
 		WATCH(pos.y);
 
@@ -154,9 +152,9 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 }
 
-void TraCIMobility::preInitialize(int32_t external_id, const Coord& position, std::string road_id, double speed, double angle, double allowed_speed)
+void TraCIMobility::preInitialize(std::string external_id, const Coord& position, std::string road_id, double speed, double angle)
 {
-	if (debug) EV << "pre-initializing to " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
+	if (debug) EV << "pre-initializing to " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << std::endl;
 
 	this->external_id = external_id;
 	nextPos = position;
@@ -164,20 +162,18 @@ void TraCIMobility::preInitialize(int32_t external_id, const Coord& position, st
 	this->road_id = road_id;
 	this->speed = speed;
 	this->angle = angle;
-	this->allowed_speed = allowed_speed;
 
 	isPreInitialized = true;
 }
 
-void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle, double allowed_speed)
+void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle)
 {
-	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << " " << allowed_speed << std::endl;
+	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << std::endl;
 	isPreInitialized = false;
 	nextPos = position;
 	this->road_id = road_id;
 	this->speed = speed;
 	this->angle = angle;
-	this->allowed_speed = allowed_speed;
 	changePosition();
 }
 
