@@ -660,6 +660,9 @@ def main():
         logging.getLogger().addHandler(logging.StreamHandler())
     logging.debug("Logging to %s" % options.logfile)
 
+    if args:
+        logging.warning("Superfluous command line arguments: \"%s\"" % " ".join(args))
+
     # this is where we'll spend our time
     wait_for_connections(options.command, options.shlex, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
 
