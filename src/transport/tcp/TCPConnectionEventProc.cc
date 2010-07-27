@@ -120,6 +120,22 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     delete msg;
 }
 
+void TCPConnection::enqueueAppData(cMessage* msg)
+{
+    ulong oldbytes, curbytes;
+
+    if (sendNotificationsEnabled)
+        oldbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+
+    sendQueue->enqueueAppData(check_and_cast<cPacket *>(msg));  // queue up for later
+
+    if (sendNotificationsEnabled)
+    {
+        curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+        SendDataSentMsgToApp(oldbytes, curbytes);
+    }
+}
+
 void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommand);
@@ -138,20 +154,20 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             sendSyn();
             startSynRexmitTimer();
             scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
-            sendQueue->enqueueAppData(PK(msg));  // queue up for later
+            enqueueAppData(msg);  // queue up for later
             tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
             tcpEV << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(PK(msg)); // queue up for later
+            enqueueAppData(msg); // queue up for later
             tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_ESTABLISHED:
         case TCP_S_CLOSE_WAIT:
-            sendQueue->enqueueAppData(PK(msg));
+            enqueueAppData(msg);
             tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
                   << (state->snd_max-state->snd_una) << " bytes unacknowledged\n";
             tcpAlgorithm->sendCommandInvoked();
@@ -231,6 +247,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
 
 void TCPConnection::process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
+    delete msg;
     TCPReadCommand *readCommand = check_and_cast<TCPReadCommand *>(tcpCommand);
     if (!explicitReadsEnabled)
         opp_error("Invalid READ command: explicit read not enabled");
@@ -250,6 +267,7 @@ void TCPConnection::process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cM
         case TCP_S_SYN_SENT:
         case TCP_S_SYN_RCVD:
         case TCP_S_ESTABLISHED:
+            // FIXME which other status accepted?
             readBytes = readCommand->getBytes();
             if (0 == readBytes)
                 opp_error("Invalid READ command: byte count is 0");
@@ -266,6 +284,7 @@ void TCPConnection::process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cM
             // Here we treat it as an error.
             opp_error("Error processing command READ: connection closing");
     }
+    delete readCommand;
 }
 
 void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)

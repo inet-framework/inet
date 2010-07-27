@@ -114,12 +114,13 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
 void TCPConnection::SendDataToApp()
 {
     if (!explicitReadsEnabled)
-    {
         readBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
-    }
-    cPacket *msg;
-    while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes)) != NULL)
+
+    while (1)
     {
+        cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
+        if(msg == NULL)
+            break;
         if (explicitReadsEnabled)
             readBytes = 0;
         else
@@ -129,6 +130,8 @@ void TCPConnection::SendDataToApp()
         cmd->setConnId(connId);
         msg->setControlInfo(cmd);
         sendToApp(msg);
+        if (explicitReadsEnabled)
+            break;
     }
     if (explicitReadsEnabled)
     {
@@ -895,7 +898,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
 
 void TCPConnection::discardUpTo(uint32 seqNum)
 {
-    ulong oldbytes = 0;
+    ulong oldbytes, curbytes;
     if (sendNotificationsEnabled)
         oldbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
 
@@ -905,19 +908,8 @@ void TCPConnection::discardUpTo(uint32 seqNum)
 
     if (sendNotificationsEnabled)
     {
-        ulong curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
-        if (oldbytes > curbytes)
-        {
-            cMessage *msg = new cMessage("DataSent");
-            // Send up a DATA sent notification
-            msg->setKind(TCP_I_DATA_SENT);
-            TCPDataSentInfo *cmd = new TCPDataSentInfo();
-            cmd->setConnId(connId);
-            cmd->setAvailableBytesInSendQueue(curbytes);
-            cmd->setSentBytes(oldbytes-curbytes);
-            msg->setControlInfo(cmd);
-            sendToApp(msg);
-        }
+        curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+        SendDataSentMsgToApp(oldbytes, curbytes);
     }
 }
 

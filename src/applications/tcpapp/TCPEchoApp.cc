@@ -27,21 +27,29 @@ void TCPEchoApp::initialize()
     delay = par("echoDelay");
     echoFactor = par("echoFactor");
     useExplicitRead = par("useExplicitRead");
-    SendNotificationsEnabled = par("SendNotificationsEnabled");
+    sendNotificationsEnabled = par("sendNotificationsEnabled");
     readBufferSize = par("receiveBufferSize");
     sendBufferLimit = par("sendBufferLimit");
     waitingData = false;
     bytesInSendQueue = 0;
 
-    bytesRcvd = bytesSent = 0;
+    while(!msgQueue.empty())
+    {
+        delete msgQueue.front();
+        msgQueue.pop();
+    }
+
+    bytesRcvd = bytesSent = bytesSentAndAcked = 0;
     WATCH(bytesRcvd);
     WATCH(bytesSent);
+    WATCH(bytesSentAndAcked);
+    WATCH(bytesInSendQueue);
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
     socket.readDataTransferModePar(*this);
     socket.setExplicitReads(useExplicitRead);
-    socket.setSendNotifications(SendNotificationsEnabled);
+    socket.setSendNotifications(sendNotificationsEnabled);
     socket.setReceiveBufferSize(readBufferSize);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
@@ -49,24 +57,44 @@ void TCPEchoApp::initialize()
 
 void TCPEchoApp::sendDown(cMessage *msg)
 {
-    if (msg->isPacket())
-        bytesSent += ((cPacket *)msg)->getByteLength();
-    send(msg, "tcpOut");
+    if (msg)
+        msgQueue.push(msg);
+    while(!msgQueue.empty())
+    {
+        msg = msgQueue.front();
+        if (msg->getKind() ==TCP_C_SEND && msg->isPacket())
+        {
+            int64 len = ((cPacket *)msg)->getByteLength();
+            if (sendNotificationsEnabled)
+            {
+                if (bytesInSendQueue + len > sendBufferLimit)
+                    break;
+            }
+            bytesSent += len;
+        }
+        msgQueue.pop();
+        send(msg, "tcpOut");
+    }
 }
 
-void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId, ulong bytes)
+void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId)
 {
-    if (!msg)
-        msg = new cMessage();
+    long bytes = (sendBufferLimit - bytesInSendQueue) / 4;
 
-    msg->setKind(TCP_C_READ);
-    msg->setName("READ");
-    TCPReadCommand *cmd = new TCPReadCommand();
-    cmd->setConnId(connId);
-    cmd->setBytes(bytes);
-    msg->setControlInfo(cmd);
-    waitingData = true;
-    sendDown(msg);
+    if (bytes > 0)
+    {
+        if (!msg)
+            msg = new cMessage();
+
+        msg->setKind(TCP_C_READ);
+        msg->setName("READ");
+        TCPReadCommand *cmd = new TCPReadCommand();
+        cmd->setConnId(connId);
+        cmd->setBytes(bytes);
+        msg->setControlInfo(cmd);
+        waitingData = true;
+        send(msg, "tcpOut");
+    }
 }
 
 void TCPEchoApp::handleMessage(cMessage *msg)
@@ -120,7 +148,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 }
                 if (useExplicitRead)
                     if (!waitingData && checkForRead())
-                        sendDownReadCmd(NULL, connId, 65536);
+                        sendDownReadCmd(NULL, connId);
                 break;
             }
             ASSERT(0);
@@ -128,10 +156,9 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             case TCP_I_DATA_ARRIVED:
             {
                 ASSERT(useExplicitRead);
-                ASSERT(!waitingData);
                 TCPDataArrivedInfo *ind = check_and_cast<TCPDataArrivedInfo *>(msg->removeControlInfo());
-                if (checkForRead())
-                    sendDownReadCmd(msg, ind->getConnId(), 65536);
+                if (!waitingData && checkForRead())
+                    sendDownReadCmd(msg, ind->getConnId());
                 else
                     delete msg;
                 break;
@@ -140,10 +167,12 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 
             case TCP_I_DATA_SENT:
             {
+                ASSERT(sendNotificationsEnabled);
                 TCPDataSentInfo *ind = check_and_cast<TCPDataSentInfo *>(msg->removeControlInfo());
+                bytesSentAndAcked += ind->getSentBytes();
                 bytesInSendQueue = ind->getAvailableBytesInSendQueue();
                 if (useExplicitRead && !waitingData && checkForRead())
-                    sendDownReadCmd(msg, ind->getConnId(), 65536);
+                    sendDownReadCmd(msg, ind->getConnId());
                 else
                     delete msg;
                 break;
@@ -154,12 +183,13 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 delete msg;
                 break;
         }
+        sendDown(NULL);
     }
 
     if (ev.isGUI())
     {
         char buf[80];
-        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
+        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes \nsent&ack: %ld", bytesRcvd, bytesSent, bytesSentAndAcked);
         getDisplayString().setTagArg("t",0,buf);
     }
 }

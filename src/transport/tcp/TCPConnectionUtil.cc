@@ -2060,3 +2060,19 @@ bool TCPConnection::isSendQueueEmpty()
 {
     return (sendQueue->getBytesAvailable(state->snd_nxt) == 0);
 }
+
+void TCPConnection::SendDataSentMsgToApp(long oldQueueLength, long newQueueLength)
+{
+    if (oldQueueLength != newQueueLength)
+    {
+        cMessage *msg = new cMessage("DataSent");
+        // Send up a DATA sent notification
+        msg->setKind(TCP_I_DATA_SENT);
+        TCPDataSentInfo *cmd = new TCPDataSentInfo();
+        cmd->setConnId(connId);
+        cmd->setAvailableBytesInSendQueue(newQueueLength);
+        cmd->setSentBytes((oldQueueLength > newQueueLength) ? oldQueueLength - newQueueLength : 0);
+        msg->setControlInfo(cmd);
+        sendToApp(msg);
+    }
+}

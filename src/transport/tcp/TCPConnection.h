@@ -540,6 +540,12 @@ class INET_API TCPConnection
     /** Utility: send available received data to App */
     void SendDataToApp();
 
+    /** Utility: send sent byte count and length of send queue to App */
+    void SendDataSentMsgToApp(long oldQueueLength, long newQueueLength);
+
+    /** Utility: enqueue App data to sendqueue and call SendDataSentMsgToApp() if need */
+    void enqueueAppData(cMessage* msg);
+
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */
     virtual void printConnBrief();

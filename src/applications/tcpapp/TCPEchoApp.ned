@@ -44,8 +44,8 @@ simple TCPEchoApp like TCPApp
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
         string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
-        bool useExplicitRead = default(false);
-        bool SendNotificationsEnabled = default(false);
+        bool useExplicitRead = default(true);
+        bool sendNotificationsEnabled = default(true);
         int receiveBufferSize @unit("B") = default(65536B);
         int sendBufferLimit @unit("B") = default(65536B);
         @display("i=block/app");
