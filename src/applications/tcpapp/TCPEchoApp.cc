@@ -33,12 +33,6 @@ void TCPEchoApp::initialize()
     waitingData = false;
     bytesInSendQueue = 0;
 
-    while(!msgQueue.empty())
-    {
-        delete msgQueue.front();
-        msgQueue.pop();
-    }
-
     bytesRcvd = bytesSent = bytesSentAndAcked = 0;
     WATCH(bytesRcvd);
     WATCH(bytesSent);
@@ -57,24 +51,14 @@ void TCPEchoApp::initialize()
 
 void TCPEchoApp::sendDown(cMessage *msg)
 {
-    if (msg)
-        msgQueue.push(msg);
-    while(!msgQueue.empty())
+    ASSERT(msg);
+    if (msg->getKind() ==TCP_C_SEND && msg->isPacket())
     {
-        msg = msgQueue.front();
-        if (msg->getKind() ==TCP_C_SEND && msg->isPacket())
-        {
-            int64 len = ((cPacket *)msg)->getByteLength();
-            if (sendNotificationsEnabled)
-            {
-                if (bytesInSendQueue + len > sendBufferLimit)
-                    break;
-            }
-            bytesSent += len;
-        }
-        msgQueue.pop();
-        send(msg, "tcpOut");
+        int64 len = ((cPacket *)msg)->getByteLength();
+        bytesInSendQueue += len;
+        bytesSent += len;
     }
+    send(msg, "tcpOut");
 }
 
 void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId)
@@ -146,9 +130,8 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                     else
                         scheduleAt(simTime()+delay, pkt); // send after a delay
                 }
-                if (useExplicitRead)
-                    if (!waitingData && checkForRead())
-                        sendDownReadCmd(NULL, connId);
+                if (checkForRead())
+                    sendDownReadCmd(NULL, connId);
                 break;
             }
             ASSERT(0);
@@ -157,8 +140,10 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             {
                 ASSERT(useExplicitRead);
                 TCPDataArrivedInfo *ind = check_and_cast<TCPDataArrivedInfo *>(msg->removeControlInfo());
-                if (!waitingData && checkForRead())
-                    sendDownReadCmd(msg, ind->getConnId());
+                int connId = ind->getConnId();
+                delete ind;
+                if (checkForRead())
+                    sendDownReadCmd(msg, connId);
                 else
                     delete msg;
                 break;
@@ -171,8 +156,10 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 TCPDataSentInfo *ind = check_and_cast<TCPDataSentInfo *>(msg->removeControlInfo());
                 bytesSentAndAcked += ind->getSentBytes();
                 bytesInSendQueue = ind->getAvailableBytesInSendQueue();
-                if (useExplicitRead && !waitingData && checkForRead())
-                    sendDownReadCmd(msg, ind->getConnId());
+                int connId = ind->getConnId();
+                delete ind;
+                if (checkForRead())
+                    sendDownReadCmd(msg, connId);
                 else
                     delete msg;
                 break;
@@ -183,7 +170,6 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 delete msg;
                 break;
         }
-        sendDown(NULL);
     }
 
     if (ev.isGUI())

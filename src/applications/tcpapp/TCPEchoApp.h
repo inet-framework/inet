@@ -14,8 +14,6 @@
 #ifndef __INET_TCPECHOAPP_H
 #define __INET_TCPECHOAPP_H
 
-#include <queue>
-
 #include <omnetpp.h>
 
 #include "INETDefs.h"
@@ -33,8 +31,6 @@ class INET_API TCPEchoApp : public cSimpleModule
     bool useExplicitRead;
     bool sendNotificationsEnabled;
     ulong readBufferSize;
-    typedef std::queue<cMessage*> MsgQueue;
-    MsgQueue msgQueue;
 
     long bytesRcvd;
     long bytesSent;
@@ -46,7 +42,7 @@ class INET_API TCPEchoApp : public cSimpleModule
   protected:
     virtual void sendDown(cMessage *msg);
     virtual void sendDownReadCmd(cMessage *msg, int connId);
-    virtual bool checkForRead() { return msgQueue.empty() && (bytesInSendQueue < sendBufferLimit); }
+    virtual bool checkForRead() { return useExplicitRead && !waitingData && (bytesInSendQueue < sendBufferLimit); }
 
   protected:
     virtual void initialize();
