@@ -19,6 +19,18 @@
 
 Define_Module(TCPEchoApp);
 
+TCPEchoApp::TCPEchoApp()
+{
+    bytesRcvdVector = bytesSentVector = bytesSentAndAckedVector = NULL;
+}
+
+TCPEchoApp::~TCPEchoApp()
+{
+    delete bytesRcvdVector;
+    delete bytesSentVector;
+    delete bytesSentAndAckedVector;
+}
+
 void TCPEchoApp::initialize()
 {
     cSimpleModule::initialize();
@@ -34,6 +46,11 @@ void TCPEchoApp::initialize()
     bytesInSendQueue = 0;
 
     bytesRcvd = bytesSent = bytesSentAndAcked = 0;
+
+    bytesRcvdVector = new cOutVector("bytesRcvd");
+    bytesSentVector = new cOutVector("bytesSent");
+    bytesSentAndAckedVector = new cOutVector("bytesSentAndAcked");
+
     WATCH(bytesRcvd);
     WATCH(bytesSent);
     WATCH(bytesSentAndAcked);
@@ -57,6 +74,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
         int64 len = ((cPacket *)msg)->getByteLength();
         bytesInSendQueue += len;
         bytesSent += len;
+        bytesSentVector->record(bytesSent);
     }
     send(msg, "tcpOut");
 }
@@ -105,6 +123,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 waitingData = false;
                 cPacket *pkt = check_and_cast<cPacket *>(msg);
                 bytesRcvd += pkt->getByteLength();
+                bytesRcvdVector->record(bytesRcvd);
                 TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
                 int connId = ind->getConnId();
                 delete ind;
@@ -155,6 +174,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 ASSERT(sendNotificationsEnabled);
                 TCPDataSentInfo *ind = check_and_cast<TCPDataSentInfo *>(msg->removeControlInfo());
                 bytesSentAndAcked += ind->getSentBytes();
+                bytesSentAndAckedVector->record(bytesSentAndAcked);
                 bytesInSendQueue = ind->getAvailableBytesInSendQueue();
                 int connId = ind->getConnId();
                 delete ind;

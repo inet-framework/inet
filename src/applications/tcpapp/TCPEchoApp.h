@@ -25,6 +25,10 @@
  */
 class INET_API TCPEchoApp : public cSimpleModule
 {
+  public:
+    TCPEchoApp();
+    ~TCPEchoApp();
+
   protected:
     simtime_t delay;
     double echoFactor;
@@ -32,12 +36,17 @@ class INET_API TCPEchoApp : public cSimpleModule
     bool sendNotificationsEnabled;
     ulong readBufferSize;
 
-    long bytesRcvd;
-    long bytesSent;
-    long bytesSentAndAcked;
     bool waitingData;
     long bytesInSendQueue;
     long sendBufferLimit;
+
+    // statistics:
+    long bytesRcvd;
+    long bytesSent;
+    long bytesSentAndAcked;
+    cOutVector *bytesRcvdVector;
+    cOutVector *bytesSentVector;
+    cOutVector *bytesSentAndAckedVector;
 
   protected:
     virtual void sendDown(cMessage *msg);
