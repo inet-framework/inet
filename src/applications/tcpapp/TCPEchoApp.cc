@@ -81,6 +81,11 @@ void TCPEchoApp::sendDown(cMessage *msg)
 
 void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId)
 {
+    if (!checkForRead())
+    {
+        delete msg;
+        return;
+    }
     long bytes = (sendBufferLimit - bytesInSendQueue) / 4;
 
     if (bytes > 0)
@@ -149,8 +154,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                     else
                         scheduleAt(simTime()+delay, pkt); // send after a delay
                 }
-                if (checkForRead())
-                    sendDownReadCmd(NULL, connId);
+                sendDownReadCmd(NULL, connId);
                 break;
             }
             ASSERT(0);
@@ -161,10 +165,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 TCPDataArrivedInfo *ind = check_and_cast<TCPDataArrivedInfo *>(msg->removeControlInfo());
                 int connId = ind->getConnId();
                 delete ind;
-                if (checkForRead())
-                    sendDownReadCmd(msg, connId);
-                else
-                    delete msg;
+                sendDownReadCmd(msg, connId);
                 break;
             }
             ASSERT(0);
@@ -178,10 +179,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 bytesInSendQueue = ind->getAvailableBytesInSendQueue();
                 int connId = ind->getConnId();
                 delete ind;
-                if (checkForRead())
-                    sendDownReadCmd(msg, connId);
-                else
-                    delete msg;
+                sendDownReadCmd(msg, connId);
                 break;
             }
             ASSERT(0);
