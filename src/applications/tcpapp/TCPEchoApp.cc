@@ -81,27 +81,27 @@ void TCPEchoApp::sendDown(cMessage *msg)
 
 void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId)
 {
-    if (!checkForRead())
+    if (checkForRead())
     {
-        delete msg;
-        return;
-    }
-    long bytes = (sendBufferLimit - bytesInSendQueue) / 4;
+        long bytes = (sendBufferLimit - bytesInSendQueue) / 4;
 
-    if (bytes > 0)
-    {
-        if (!msg)
-            msg = new cMessage();
+        if (bytes > 0)
+        {
+            if (!msg)
+                msg = new cMessage();
 
-        msg->setKind(TCP_C_READ);
-        msg->setName("READ");
-        TCPReadCommand *cmd = new TCPReadCommand();
-        cmd->setConnId(connId);
-        cmd->setBytes(bytes);
-        msg->setControlInfo(cmd);
-        waitingData = true;
-        send(msg, "tcpOut");
+            msg->setKind(TCP_C_READ);
+            msg->setName("READ");
+            TCPReadCommand *cmd = new TCPReadCommand();
+            cmd->setConnId(connId);
+            cmd->setBytes(bytes);
+            msg->setControlInfo(cmd);
+            waitingData = true;
+            send(msg, "tcpOut");
+            return;
+        }
     }
+    delete msg;
 }
 
 void TCPEchoApp::handleMessage(cMessage *msg)
