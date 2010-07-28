@@ -212,7 +212,12 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             // SACK option."
             //
             // The received segment is not "valid" therefore the ACK will not bear a SACK option, if snd_dsack (D-SACK) is not set.
+
+            // HACK: send ACK with snd_max
+            uint32 old_snd_nxt = state->snd_nxt;
+            state->snd_nxt = state->snd_max;
             sendAck();
+            state->snd_nxt = old_snd_nxt;
         }
         return TCP_E_IGNORE;
     }
