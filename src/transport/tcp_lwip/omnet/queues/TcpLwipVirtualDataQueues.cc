@@ -204,13 +204,21 @@ void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void* dataP, int dataLe
 }
 
 /**
+ * Returns the number of received bytes.
+ */
+long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo()
+{
+    return bytesInQueueM;
+}
+
+/**
  * Should create a packet to be passed up to the app.
  * It should return NULL if there's no more data to be passed up --
  * this method is called several times until it returns NULL.
  *
  * the method called after socket->read_data() successful
  */
-cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
+cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(long maxBytesP)
 {
     ASSERT(connM);
 
@@ -222,7 +230,7 @@ cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
 
         dataMsg = new cPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->setByteLength(bytesInQueueM);
+        dataMsg->setByteLength(std::min(bytesInQueueM, maxBytesP));
         TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
         tcpConnectInfo->setConnId(connM->connIdM);
         tcpConnectInfo->setLocalAddr(localAddr);

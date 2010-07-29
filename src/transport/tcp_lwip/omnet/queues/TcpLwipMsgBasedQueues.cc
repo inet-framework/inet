@@ -300,16 +300,25 @@ void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, int dataLengt
 }
 
 /**
+ * Returns the number of received bytes.
+ */
+long TcpLwipMsgBasedReceiveQueue::getExtractableBytesUpTo()
+{
+    return bytesInQueueM;
+}
+
+/**
  * Should create a packet to be passed up to the app.
  * It should return NULL if there's no more data to be passed up --
  * this method is called several times until it returns NULL.
  *
  * the method called after socket->read_data() successful
  */
-cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
+cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(long maxBytesP)
 {
     ASSERT(connM);
 
+    // FIXME use maxBytesP parameter
     cPacket *dataMsg = NULL;
     if(!isValidSeqNoM)
     {

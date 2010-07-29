@@ -187,6 +187,11 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
     virtual void enqueueTcpLayerData(void* dataP, int dataLengthP) = 0;
 
     /**
+     * Returns the number of received bytes.
+     */
+    virtual long getExtractableBytesUpTo() = 0;
+
+    /**
      * Should create a packet to be passed up to the app, up to (but NOT
      * including) the given sequence no (usually rcv_nxt).
      * It should return NULL if there's no more data to be passed up --
@@ -194,7 +199,7 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo() = 0;
+    virtual cPacket *extractBytesUpTo(long maxBytesP) = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
