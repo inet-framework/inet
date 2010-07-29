@@ -44,10 +44,10 @@ simple TCPEchoApp like TCPApp
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
         string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
-        bool useExplicitRead = default(true);
-        bool sendNotificationsEnabled = default(true);
-        int receiveBufferSize @unit("B") = default(65536B);
-        int sendBufferLimit @unit("B") = default(65536B);
+        bool useExplicitRead = default(false);
+        bool sendNotificationsEnabled = default(false);
+        int receiveBufferSize @unit("B") = default(65535B);
+        int sendBufferLimit @unit("B") = default(65535B);
         @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);
