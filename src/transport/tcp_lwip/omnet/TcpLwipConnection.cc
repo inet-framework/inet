@@ -170,6 +170,8 @@ const char *TcpLwipConnection::indicationName(int code)
     switch (code)
     {
         CASE(TCP_I_DATA);
+        CASE(TCP_I_DATA_ARRIVED);
+        CASE(TCP_I_DATA_SENT);
         CASE(TCP_I_URGENT_DATA);
         CASE(TCP_I_ESTABLISHED);
         CASE(TCP_I_PEER_CLOSED);
@@ -225,6 +227,14 @@ void TcpLwipConnection::listen(TCPOpenCommand &tcpCommand)
     unsigned short localPort = tcpCommand.getLocalPort();
     onCloseM = false;
     tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, NULL, localPort);
+
+    // Get other TCPOpenCommand parameters
+    explicitReadsEnabled = tcpCommand.getExplicitReadsEnabled();
+    sendNotificationsEnabled = tcpCommand.getSendNotificationsEnabled();
+    sendingObjectUpAtFirstByteEnabled = tcpCommand.getSendingObjectUpAtFirstByteEnabled();
+    receiveBufferSize = tcpCommand.getReceiveBufferSize();
+    readBytes = 0;
+
     // The next returns a tcp_pcb: need to do some research on how
     // it works; does it actually accept a connection as well? It
     // shouldn't, as there is a tcp_accept
@@ -240,6 +250,14 @@ void TcpLwipConnection::connect(TCPOpenCommand &tcpCommand)
     unsigned short localPort = tcpCommand.getLocalPort();
     IPvXAddress& remoteAddr = tcpCommand.getRemoteAddr();
     unsigned short remotePort = tcpCommand.getRemotePort();
+
+    // Get other TCPOpenCommand parameters
+    explicitReadsEnabled = tcpCommand.getExplicitReadsEnabled();
+    sendNotificationsEnabled = tcpCommand.getSendNotificationsEnabled();
+    sendingObjectUpAtFirstByteEnabled = tcpCommand.getSendingObjectUpAtFirstByteEnabled();
+    receiveBufferSize = tcpCommand.getReceiveBufferSize();
+    readBytes = 0;
+
     onCloseM = false;
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;
@@ -266,6 +284,19 @@ void TcpLwipConnection::abort()
 void TcpLwipConnection::send(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
+}
+
+void TcpLwipConnection::read(TCPReadCommand &tcpCommandP)
+{
+    if (!explicitReadsEnabled)
+        opp_error("Invalid READ command: explicit read not enabled");
+
+    if (readBytes)
+        opp_error("Duplicate READ command: connection already reading");
+
+    readBytes = tcpCommandP.getBytes();
+    //FIXME send data to APP if available
+    //FIXME read data from pcb (for lwip can receive more data)
 }
 
 void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)

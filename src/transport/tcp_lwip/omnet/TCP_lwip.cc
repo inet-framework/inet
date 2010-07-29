@@ -309,9 +309,17 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     else
     {
         tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", " << p->tot_len << "], " << (int)err << ")\n";
-        conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
-        pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
-        pbuf_free(p);
+        if (1) // FIXME if buffers has enough free bytes for this data
+        {
+            conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
+            pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
+            pbuf_free(p);
+        }
+        else
+        {
+            err = ERR_BUF;
+            // the lwip will push back data to pcb->refused_data and stop receiving while not read this data from lwip.
+        }
     }
 
     while(cPacket *dataMsg = conn.receiveQueueM->extractBytesUpTo(conn.receiveQueueM->getExtractableBytesUpTo())) //FIXME call with valid maxBytes
@@ -590,6 +598,7 @@ void TCP_lwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
         case TCP_C_OPEN_ACTIVE: process_OPEN_ACTIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP); break;
         case TCP_C_OPEN_PASSIVE: process_OPEN_PASSIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP); break;
         case TCP_C_SEND: process_SEND(connP, check_and_cast<TCPSendCommand *>(tcpCommand), check_and_cast<cPacket*>(msgP)); break;
+        case TCP_C_READ: process_READ(connP, check_and_cast<TCPReadCommand *>(tcpCommand), msgP); break;
         case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
         case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
         case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
@@ -641,6 +650,14 @@ void TCP_lwip::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommand
     delete tcpCommandP;
 
     connP.send(msgP);
+}
+
+void TCP_lwip::process_READ(TcpLwipConnection& connP, TCPReadCommand *tcpCommandP, cMessage *msgP)
+{
+    delete msgP;
+
+    connP.read(*tcpCommandP);
+    delete tcpCommandP;
 }
 
 void TCP_lwip::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
