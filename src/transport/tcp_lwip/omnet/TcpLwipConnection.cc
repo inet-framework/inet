@@ -220,8 +220,9 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
 //TODO    statusInfo.setFin_ack_rcvd(pcbM->fin_ack_rcvd);
 }
 
-void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
+void TcpLwipConnection::listen(TCPOpenCommand &tcpCommand)
 {
+    unsigned short localPort = tcpCommand.getLocalPort();
     onCloseM = false;
     tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, NULL, localPort);
     // The next returns a tcp_pcb: need to do some research on how
@@ -233,8 +234,12 @@ void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
     totalSentM = 0;
 }
 
-void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort)
+void TcpLwipConnection::connect(TCPOpenCommand &tcpCommand)
 {
+    IPvXAddress& localAddr = tcpCommand.getLocalAddr();
+    unsigned short localPort = tcpCommand.getLocalPort();
+    IPvXAddress& remoteAddr = tcpCommand.getRemoteAddr();
+    unsigned short remotePort = tcpCommand.getRemotePort();
     onCloseM = false;
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;

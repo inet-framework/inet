@@ -609,7 +609,7 @@ void TCP_lwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
 
     ASSERT(pLwipTcpLayerM);
 
-    connP.connect(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort(), tcpCommandP->getRemoteAddr(), tcpCommandP->getRemotePort());
+    connP.connect(*tcpCommandP);
 
     delete tcpCommandP;
     delete msgP;
@@ -630,7 +630,7 @@ void TCP_lwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tc
     process passive open request
     */
 
-    connP.listen(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort());
+    connP.listen(*tcpCommandP);
 
     delete tcpCommandP;
     delete msgP;

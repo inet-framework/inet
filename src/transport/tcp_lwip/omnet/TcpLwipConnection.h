@@ -89,9 +89,9 @@ class INET_API TcpLwipConnection
 
     void sendIndicationToApp(int code);
 
-    void listen(IPvXAddress& localAddr, unsigned short localPort);
+    void listen(TCPOpenCommand &tcpCommand);
 
-    void connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort);
+    void connect(TCPOpenCommand &tcpCommand);
 
     void close();
 
