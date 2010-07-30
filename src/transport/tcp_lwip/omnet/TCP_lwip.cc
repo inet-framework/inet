@@ -649,14 +649,14 @@ void TCP_lwip::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommand
 {
     delete tcpCommandP;
 
-    connP.send(msgP);
+    connP.process_SEND(msgP);
 }
 
 void TCP_lwip::process_READ(TcpLwipConnection& connP, TCPReadCommand *tcpCommandP, cMessage *msgP)
 {
     delete msgP;
 
-    connP.read(*tcpCommandP);
+    connP.process_READ(*tcpCommandP);
     delete tcpCommandP;
 }
 
@@ -667,7 +667,7 @@ void TCP_lwip::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     delete tcpCommandP;
     delete msgP;
 
-    connP.close();
+    connP.process_CLOSE();
 }
 
 void TCP_lwip::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
@@ -677,7 +677,7 @@ void TCP_lwip::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     delete tcpCommandP;
     delete msgP;
 
-    connP.abort();
+    connP.process_ABORT();
 }
 
 void TCP_lwip::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)

@@ -93,13 +93,13 @@ class INET_API TcpLwipConnection
 
     void connect(TCPOpenCommand &tcpCommand);
 
-    void close();
+    void process_CLOSE();
 
-    void abort();
+    void process_ABORT();
 
-    void send(cPacket *msgP);
+    void process_SEND(cPacket *msgP);
 
-    void read(TCPReadCommand &tcpCommandP);
+    void process_READ(TCPReadCommand &tcpCommandP);
 
     void fillStatusInfo(TCPStatusInfo &statusInfo);
 

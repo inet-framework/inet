@@ -265,7 +265,7 @@ void TcpLwipConnection::connect(TCPOpenCommand &tcpCommand)
     totalSentM = 0;
 }
 
-void TcpLwipConnection::close()
+void TcpLwipConnection::process_CLOSE()
 {
     onCloseM = true;
     if (0 == sendQueueM->getBytesAvailable())
@@ -275,18 +275,18 @@ void TcpLwipConnection::close()
     }
 }
 
-void TcpLwipConnection::abort()
+void TcpLwipConnection::process_ABORT()
 {
     tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
     onCloseM = false;
 }
 
-void TcpLwipConnection::send(cPacket *msgP)
+void TcpLwipConnection::process_SEND(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
 }
 
-void TcpLwipConnection::read(TCPReadCommand &tcpCommandP)
+void TcpLwipConnection::process_READ(TCPReadCommand &tcpCommandP)
 {
     if (!explicitReadsEnabled)
         opp_error("Invalid READ command: explicit read not enabled");
