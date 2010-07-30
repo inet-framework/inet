@@ -132,7 +132,7 @@ void TCPConnection::enqueueAppData(cMessage* msg)
     if (sendNotificationsEnabled)
     {
         curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
-        SendDataSentMsgToApp(oldbytes, curbytes);
+        sendDataSentMsgToApp(oldbytes, curbytes);
     }
 }
 
@@ -271,7 +271,7 @@ void TCPConnection::process_READ(TCPEventCode& event, TCPCommand *tcpCommand, cM
             readBytes = readCommand->getBytes();
             if (0 == readBytes)
                 opp_error("Invalid READ command: byte count is 0");
-            SendDataToApp();
+            sendDataToApp();
             break;
 
         case TCP_S_CLOSE_WAIT:

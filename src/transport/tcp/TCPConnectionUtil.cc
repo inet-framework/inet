@@ -2061,7 +2061,7 @@ bool TCPConnection::isSendQueueEmpty()
     return (sendQueue->getBytesAvailable(state->snd_nxt) == 0);
 }
 
-void TCPConnection::SendDataSentMsgToApp(long oldQueueLength, long newQueueLength)
+void TCPConnection::sendDataSentMsgToApp(ulong oldQueueLength, ulong newQueueLength)
 {
     if (oldQueueLength != newQueueLength)
     {

@@ -111,7 +111,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
     return event;
 }
 
-void TCPConnection::SendDataToApp()
+void TCPConnection::sendDataToApp()
 {
     if (!explicitReadsEnabled)
         readBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
@@ -581,7 +581,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     // as many bytes as requested. rcv_wnd should be decreased
                     // accordingly!
                     //
-                    SendDataToApp();
+                    sendDataToApp();
 
                     // if this segment "filled the gap" until the previously arrived segment
                     // that carried a FIN (i.e.rcv_nxt==rcv_fin_seq), we have to advance
@@ -914,7 +914,7 @@ void TCPConnection::discardUpTo(uint32 seqNum)
     if (sendNotificationsEnabled)
     {
         curbytes = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
-        SendDataSentMsgToApp(oldbytes, curbytes);
+        sendDataSentMsgToApp(oldbytes, curbytes);
     }
 }
 

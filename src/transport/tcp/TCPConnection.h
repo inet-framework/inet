@@ -538,10 +538,10 @@ class INET_API TCPConnection
     virtual void discardUpTo(uint32 seqNum);
 
     /** Utility: send available received data to App */
-    void SendDataToApp();
+    void sendDataToApp();
 
     /** Utility: send sent byte count and length of send queue to App */
-    void SendDataSentMsgToApp(long oldQueueLength, long newQueueLength);
+    void sendDataSentMsgToApp(ulong oldQueueLength, ulong newQueueLength);
 
     /** Utility: enqueue App data to sendqueue and call SendDataSentMsgToApp() if need */
     void enqueueAppData(cMessage* msg);
