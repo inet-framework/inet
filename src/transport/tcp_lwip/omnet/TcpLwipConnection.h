@@ -109,7 +109,19 @@ class INET_API TcpLwipConnection
 
     void do_SEND();
 
+    long getReceiveBufferSize() { return receiveBufferSizeM; }
+    bool isExplicitReadsEnabled() { return explicitReadsEnabledM; }
+
     INetStreamSocket* getSocket();
+
+    /** Utility: send available received data to App */
+    void sendToApp(cMessage* msgP);
+
+    /** Utility: send available received data to App */
+    void sendDataToApp();
+
+    /** Utility: send sent byte count and length of send queue to App */
+    void sendDataSentMsgToApp(long oldQueueLengthP, long newQueueLengthP);
 
     void initStats();
 

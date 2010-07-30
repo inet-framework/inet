@@ -160,7 +160,7 @@ void TcpLwipConnection::sendEstablishedMsg()
 
     msg->setControlInfo(tcpConnectInfo);
 
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    sendToApp(msg);
 }
 
 const char *TcpLwipConnection::indicationName(int code)
@@ -193,7 +193,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     TCPCommand *ind = new TCPCommand();
     ind->setConnId(connIdM);
     msg->setControlInfo(ind);
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    sendToApp(msg);
 }
 
 void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
@@ -295,7 +295,7 @@ void TcpLwipConnection::process_READ(TCPReadCommand &tcpCommandP)
         opp_error("Duplicate READ command: connection already reading");
 
     readBytesM = tcpCommandP.getBytes();
-    //FIXME send data to APP if available
+    sendDataToApp(); //send data to APP if available
     //FIXME read data from pcb (for lwip can receive more data)
 }
 
@@ -372,6 +372,8 @@ void TcpLwipConnection::do_SEND()
 
         }
     }
+
+    //FIXME call sendDataSentMsgToApp();
     totalSentM += allsent;
     tcpEV << "do_SEND(): " << connIdM <<
             " send:" << allsent <<
@@ -383,5 +385,62 @@ void TcpLwipConnection::do_SEND()
     {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
+    }
+}
+
+void TcpLwipConnection::sendToApp(cMessage *msg)
+{
+    tcpLwipM.send(msg, "appOut", appGateIndexM);
+}
+
+void TcpLwipConnection::sendDataToApp()
+{
+    if (!explicitReadsEnabledM)
+        readBytesM = receiveQueueM->getExtractableBytesUpTo();
+
+    while (1)
+    {
+        cPacket *msg = receiveQueueM->extractBytesUpTo(readBytesM);
+        if(msg == NULL)
+            break;
+            readBytesM -= msg->getByteLength();
+        msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
+        TCPCommand *cmd = new TCPCommand();
+        cmd->setConnId(connIdM);
+        msg->setControlInfo(cmd);
+        sendToApp(msg);
+        if (explicitReadsEnabledM)
+            break;
+    }
+    readBytesM = 0;
+    if (explicitReadsEnabledM)
+    {
+        ulong readableBytes = receiveQueueM->getExtractableBytesUpTo();
+        if (readableBytes > 0)
+        {
+            cMessage* info = new cMessage("DataArrived");
+            info->setKind(TCP_I_DATA_ARRIVED);
+            TCPDataArrivedInfo *cmd = new TCPDataArrivedInfo();
+            cmd->setConnId(connIdM);
+            cmd->setAvailableBytesInReceiveQueue(readableBytes);
+            info->setControlInfo(cmd);
+            sendToApp(info);
+        }
+    }
+}
+
+void TcpLwipConnection::sendDataSentMsgToApp(long oldQueueLengthP, long newQueueLengthP)
+{
+    if (oldQueueLengthP != newQueueLengthP)
+    {
+        cMessage *msg = new cMessage("DataSent");
+        // Send up a DATA sent notification
+        msg->setKind(TCP_I_DATA_SENT);
+        TCPDataSentInfo *cmd = new TCPDataSentInfo();
+        cmd->setConnId(connIdM);
+        cmd->setAvailableBytesInSendQueue(newQueueLengthP);
+        cmd->setSentBytes((oldQueueLengthP > newQueueLengthP) ? oldQueueLengthP - newQueueLengthP : 0);
+        msg->setControlInfo(cmd);
+        sendToApp(msg);
     }
 }

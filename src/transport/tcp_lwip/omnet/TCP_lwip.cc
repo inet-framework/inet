@@ -335,11 +335,7 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
         }
     }
 
-    while(cPacket *dataMsg = conn.receiveQueueM->extractBytesUpTo(conn.receiveQueueM->getExtractableBytesUpTo())) //FIXME call with valid maxBytes
-    {
-        // send Msg to Application layer:
-        send(dataMsg, "appOut", conn.appGateIndexM);
-    }
+    conn.sendDataToApp();
     conn.do_SEND();
     return err;
 }
