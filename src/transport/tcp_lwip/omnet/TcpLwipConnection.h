@@ -126,11 +126,11 @@ class INET_API TcpLwipConnection
     bool isListenerM;
     bool onCloseM;
 
-    bool explicitReadsEnabled;      // when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
-    bool sendNotificationsEnabled;  // when enabled: when TCP sent some data to partner, it's send up a TCPDataSentInfo notification.
-    bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
-    long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true
-    ulong readBytes;                // bytecount of last READ
+    bool explicitReadsEnabledM;      // when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
+    bool sendNotificationsEnabledM;  // when enabled: when TCP sent some data to partner, it's send up a TCPDataSentInfo notification.
+    bool sendingObjectUpAtFirstByteEnabledM; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
+    long receiveBufferSizeM;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true
+    ulong readBytesM;                // bytecount of last READ
 
     Stats * statsM;
 };
