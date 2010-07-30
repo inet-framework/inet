@@ -109,6 +109,11 @@ class LwipTcpLayer
      */
     void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqno, void *dataptr, int len);
 
+    /**
+     * notify the Omnet about received ACK is accepted
+     */
+    void notifyAboutIncomingAckAccepted(LwipTcpLayer::tcp_pcb *pcb);
+
 
   protected:
     /** interface for ip layer */

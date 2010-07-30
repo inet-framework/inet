@@ -126,3 +126,8 @@ void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *p
 {
     stackIf.notifyAboutIncomingSegmentProcessing(pcb, seqNo, dataptr, len);
 }
+
+void LwipTcpLayer::notifyAboutIncomingAckAccepted(LwipTcpLayer::tcp_pcb *pcb)
+{
+    stackIf.notifyAboutIncomingAckAccepted(pcb);
+}
