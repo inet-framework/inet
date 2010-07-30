@@ -322,7 +322,7 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     else
     {
         tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", " << p->tot_len << "], " << (int)err << ")\n";
-        if (1) // FIXME if buffers has enough free bytes for this data
+        if (!conn.isExplicitReadsEnabled() || (conn.receiveQueueM->getAmountOfBufferedBytes() + p->tot_len <= conn.getReceiveBufferSize())) // if buffers has enough free bytes for this data
         {
             conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
             pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
