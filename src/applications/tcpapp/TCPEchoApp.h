@@ -51,7 +51,6 @@ class INET_API TCPEchoApp : public cSimpleModule
   protected:
     virtual void sendDown(cMessage *msg);
     virtual void sendDownReadCmd(cMessage *msg, int connId);
-    virtual bool checkForRead() { return useExplicitRead && !waitingData && (bytesInSendQueue < sendBufferLimit); }
 
   protected:
     virtual void initialize();

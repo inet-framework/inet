@@ -72,7 +72,8 @@ void TCPEchoApp::sendDown(cMessage *msg)
     if (msg->getKind() ==TCP_C_SEND && msg->isPacket())
     {
         int64 len = ((cPacket *)msg)->getByteLength();
-        bytesInSendQueue += len;
+        if (sendNotificationsEnabled)
+            bytesInSendQueue += len;
         bytesSent += len;
         bytesSentVector->record(bytesSent);
     }
@@ -81,9 +82,10 @@ void TCPEchoApp::sendDown(cMessage *msg)
 
 void TCPEchoApp::sendDownReadCmd(cMessage *msg, int connId)
 {
-    if (checkForRead())
+    if (useExplicitRead && !waitingData)
     {
-        long bytes = (sendBufferLimit - bytesInSendQueue) / 4;
+        long bytes = (sendNotificationsEnabled) ?
+                (sendBufferLimit - bytesInSendQueue) / 2 : readBufferSize;
 
         if (bytes > 0)
         {
