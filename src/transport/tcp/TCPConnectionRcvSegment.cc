@@ -121,10 +121,7 @@ void TCPConnection::sendDataToApp()
         cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
         if(msg == NULL)
             break;
-        if (explicitReadsEnabled)
-            readBytes = 0;
-        else
-            readBytes -= msg->getByteLength();
+        readBytes -= msg->getByteLength();
         msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
         TCPCommand *cmd = new TCPCommand();
         cmd->setConnId(connId);
@@ -133,6 +130,7 @@ void TCPConnection::sendDataToApp()
         if (explicitReadsEnabled)
             break;
     }
+    readBytes = 0;
     if (explicitReadsEnabled)
     {
         ulong readableBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
