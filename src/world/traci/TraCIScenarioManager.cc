@@ -240,9 +240,16 @@ void TraCIScenarioManager::init_traci() {
 		uint32_t apiVersion = version.first;
 		std::string serverVersion = version.second;
 
-		ASSERT(apiVersion == 1);
+		if (apiVersion == 0) {
+			MYDEBUG << "WARNING: TraCI server didn't report API version. Expect trouble down the road." << endl;
+		}
+		else if (apiVersion == 1) {
+			MYDEBUG << "TraCI server reports version \"" << serverVersion << "\"" << endl;
+		}
+		else {
+			error("TraCI server reports API version %d, but only version 1 is supported.", apiVersion);
+		}
 
-		MYDEBUG << "TraCI server reports version \"" << serverVersion << "\"" << endl;
 	}
 
 	{
@@ -334,13 +341,12 @@ std::pair<uint32_t, std::string> TraCIScenarioManager::commandGetVersion() {
 	bool success = false;
 	TraCIBuffer buf = queryTraCIOptional(CMD_GETVERSION, TraCIBuffer(), success);
 
-/*
-	ASSERT(buf.eof());
+	if (!success) {
+		ASSERT(buf.eof());
+		return std::pair<uint32_t, std::string>(0, "(unknown)");
+	}
 
-	if (!success) return std::pair<uint32_t, std::string>(0, "(unknown)");
 
-	TraCIBuffer obuf(receiveTraCIMessage());
-*/
 	uint8_t cmdLength; buf >> cmdLength;
 	uint8_t commandResp; buf >> commandResp;
 	ASSERT(commandResp == CMD_GETVERSION);
