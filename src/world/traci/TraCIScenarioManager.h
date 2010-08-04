@@ -89,12 +89,12 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 					if (isBigEndian()) {
 						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
-							if (eof()) throw std::runtime_error("Attempted to read past end of byte buffer");
+							if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");
 							p_buf_to_return[i] = buf[buf_index++];
 						}
 					} else {
 						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
-							if (eof()) throw std::runtime_error("Attempted to read past end of byte buffer");
+							if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");
 							p_buf_to_return[sizeof(buf_to_return)-1-i] = buf[buf_index++];
 						}
 					}

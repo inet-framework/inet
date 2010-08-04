@@ -72,25 +72,25 @@ class INET_API TraCIMobility : public BasicMobility
 			this->external_id = external_id;
 		}
 		virtual std::string getExternalId() {
-			if (external_id == "") throw std::runtime_error("TraCIMobility::getExternalId called with no external_id set yet");
+			if (external_id == "") throw cRuntimeError("TraCIMobility::getExternalId called with no external_id set yet");
 			return external_id;
 		}
 		virtual Coord getPosition() {
 			return pos;
 		}
 		virtual std::string getRoadId() {
-			if (road_id == "") throw std::runtime_error("TraCIMobility::getRoadId called with no road_id set yet");
+			if (road_id == "") throw cRuntimeError("TraCIMobility::getRoadId called with no road_id set yet");
 			return road_id;
 		}
 		virtual double getSpeed() {
-			if (speed == -1) throw std::runtime_error("TraCIMobility::getSpeed called with no speed set yet");
+			if (speed == -1) throw cRuntimeError("TraCIMobility::getSpeed called with no speed set yet");
 			return speed;
 		}
 		/**
 		 * returns angle in rads, 0 being east, with -M_PI <= angle < M_PI. 
 		 */
 		virtual double getAngleRad() {
-			if (angle == M_PI) throw std::runtime_error("TraCIMobility::getAngleRad called with no angle set yet");
+			if (angle == M_PI) throw cRuntimeError("TraCIMobility::getAngleRad called with no angle set yet");
 			return angle;
 		}
 		virtual TraCIScenarioManager* getManager() {
