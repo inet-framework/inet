@@ -20,14 +20,5 @@
 
 #include "BGPOpen_m.h"
 
-class BGPOpenMessage : public BGPOpenMessage_Base
-{
-public:
-    BGPOpenMessage(const char *name="BGPOpen", int kind=0) : BGPOpenMessage_Base(name,kind) {}
-    BGPOpenMessage(const BGPOpenMessage& other) : BGPOpenMessage_Base(other.getName()) {operator=(other);}
-    BGPOpenMessage& operator=(const BGPOpenMessage& other) {BGPOpenMessage_Base::operator=(other); return *this;}
-    virtual BGPOpenMessage_Base *dup() const {return new BGPOpenMessage(*this);}
-};
-
 #endif
 

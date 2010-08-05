@@ -443,7 +443,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
             NLRI.prefix = entry->getHost().doAnd(netMask);
             NLRI.length = (unsigned char) netMask.getNetmaskLength();
             {
-                BGPUpdate*  updateMsg = new BGPUpdate();
+                BGPUpdate* updateMsg = new BGPUpdate("BGPUpdate");
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);

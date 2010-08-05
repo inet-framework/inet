@@ -121,7 +121,7 @@ void BGPSession::restartsConnectRetryTimer(bool start)
 
 void BGPSession::sendOpenMessage()
 {
-    BGPOpenMessage* openMsg = new BGPOpenMessage();
+    BGPOpenMessage* openMsg = new BGPOpenMessage("BGPOpen");
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().get4());
@@ -131,7 +131,7 @@ void BGPSession::sendOpenMessage()
 
 void BGPSession::sendKeepAliveMessage()
 {
-    BGPKeepAliveMessage* keepAliveMsg = new BGPKeepAliveMessage();
+    BGPKeepAliveMessage* keepAliveMsg = new BGPKeepAliveMessage("BGPKeepAlive");
     _info.socket->send(keepAliveMsg);
     _keepAliveMsgSent ++;
 }

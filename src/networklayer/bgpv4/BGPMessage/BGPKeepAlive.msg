@@ -29,7 +29,6 @@ class BGPHeader;
 //
 packet BGPKeepAliveMessage extends BGPHeader
 {
-    @customize(true);
     type = BGP_KEEPALIVE;
 }
 

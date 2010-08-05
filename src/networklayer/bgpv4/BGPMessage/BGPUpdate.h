@@ -25,7 +25,7 @@ class BGPUpdate : public BGPUpdate_Base
 protected:
     unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);
 public:
-    BGPUpdate(const char *name="BGPUpdate", int kind=0) : BGPUpdate_Base(name,kind) {}
+    BGPUpdate(const char *name=NULL, int kind=0) : BGPUpdate_Base(name,kind) {}
     void setWithdrawnRoutesArraySize(unsigned int size);
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
     void setNLRI(const BGPUpdateNLRI& NLRI_var);

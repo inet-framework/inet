@@ -17,7 +17,7 @@
 
 cplusplus {{
 #include "IPAddress.h"
-#include "BGPASPathSegment.h"
+#include "BGPASPathSegment_m.h"
 }}
 
 class noncobject IPAddress;

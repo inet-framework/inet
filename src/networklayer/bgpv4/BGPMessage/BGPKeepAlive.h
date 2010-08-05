@@ -20,14 +20,5 @@
 
 #include "BGPKeepAlive_m.h"
 
-class BGPKeepAliveMessage : public BGPKeepAliveMessage_Base
-{
-public:
-    BGPKeepAliveMessage(const char *name="BGPKeepAlive", int kind=0) : BGPKeepAliveMessage_Base(name,kind) {}
-    BGPKeepAliveMessage(const BGPKeepAliveMessage& other) : BGPKeepAliveMessage_Base(other.getName()) {operator=(other);}
-    BGPKeepAliveMessage& operator=(const BGPKeepAliveMessage& other) {BGPKeepAliveMessage_Base::operator=(other); return *this;}
-    virtual BGPKeepAliveMessage_Base *dup() const {return new BGPKeepAliveMessage(*this);}
-};
-
 #endif
 

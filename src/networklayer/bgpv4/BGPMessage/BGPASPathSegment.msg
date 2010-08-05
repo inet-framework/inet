@@ -26,7 +26,6 @@ enum BGPPathSegmentType
 //
 class BGPASPathSegment
 {
-    @customize(true);
     unsigned char type @enum(BGPPathSegmentType);
     unsigned char length;
     unsigned short asValue[];
