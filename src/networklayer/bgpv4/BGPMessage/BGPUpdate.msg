@@ -73,7 +73,7 @@ class BGPUpdatePathAttributeList
 //    - Length : 1 octet
 //    - prefix : variable size (contains the IP prefix; IPv4: 4 octets)
 //
-packet BGPUpdate extends BGPHeader
+packet BGPUpdateMessage extends BGPHeader
 {
     @customize(true);
     type = BGP_UPDATE;

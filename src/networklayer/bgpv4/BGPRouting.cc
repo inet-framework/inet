@@ -227,7 +227,7 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
                 processMessage(*(static_cast<BGPKeepAliveMessage*>(msg)));
                 break;
             case BGP_UPDATE:
-                processMessage(*(static_cast<BGPUpdate*>(msg)));
+                processMessage(*check_and_cast<BGPUpdateMessage*>(msg));
                 break;
             default:
                 error("the BGP type %s does'nt exist",ptrHdr->getType());
@@ -257,7 +257,7 @@ void BGPRouting::processMessage(const BGPKeepAliveMessage& msg)
     _BGPSessions[_currSessionId]->getFSM()->KeepAliveMsgEvent();
 }
 
-void BGPRouting::processMessage(const BGPUpdate& msg)
+void BGPRouting::processMessage(const BGPUpdateMessage& msg)
 {
     EV << "Processing BGP Update message" << std::endl;
     _BGPSessions[_currSessionId]->getFSM()->UpdateMsgEvent();
@@ -290,7 +290,7 @@ void BGPRouting::processMessage(const BGPUpdate& msg)
     }
 }
 
-unsigned char BGPRouting::decisionProcess(const BGPUpdate& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex)
+unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex)
 {
     //Don't add the route if it exists in PrefixListINTable or in ASListINTable
     if (isInTable(_prefixListIN, entry) != -1 || isInASList(_ASListIN, entry))
@@ -443,7 +443,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
             NLRI.prefix = entry->getHost().doAnd(netMask);
             NLRI.length = (unsigned char) netMask.getNetmaskLength();
             {
-                BGPUpdate* updateMsg = new BGPUpdate("BGPUpdate");
+                BGPUpdateMessage* updateMsg = new BGPUpdateMessage("BGPUpdate");
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);

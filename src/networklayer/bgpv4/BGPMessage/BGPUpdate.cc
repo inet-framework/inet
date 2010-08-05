@@ -17,16 +17,16 @@
 
 #include "BGPUpdate.h"
 
-Register_Class(BGPUpdate)
+Register_Class(BGPUpdateMessage)
 
-void BGPUpdate::setWithdrawnRoutesArraySize(unsigned int size)
+void BGPUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
 {
     unsigned short delta_size = size - getWithdrawnRoutesArraySize();
     unsigned short delta_bytes = delta_size * 5; // 5 = Withdrawn Route length
     setByteLength(getByteLength() + delta_bytes);
 }
 
-unsigned short BGPUpdate::computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs)
+unsigned short BGPUpdateMessage::computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs)
 {
     unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
         + pathAttrs.getLocalPrefArraySize()
@@ -46,20 +46,20 @@ unsigned short BGPUpdate::computePathAttributesBytes(const BGPUpdatePathAttribut
     return contentBytes;
 }
 
-void BGPUpdate::setPathAttributeList(const BGPUpdatePathAttributeList& pathAttrs)
+void BGPUpdateMessage::setPathAttributeList(const BGPUpdatePathAttributeList& pathAttrs)
 {
     unsigned int old_bytes = getPathAttributeListArraySize()==0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
     unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
 
     setPathAttributeListArraySize(1);
-    BGPUpdate_Base::setPathAttributeList(0, pathAttrs);
+    BGPUpdateMessage_Base::setPathAttributeList(0, pathAttrs);
 
     setByteLength(getByteLength() + delta_bytes);
 }
 
-void BGPUpdate::setNLRI(const BGPUpdateNLRI& NLRI_var)
+void BGPUpdateMessage::setNLRI(const BGPUpdateNLRI& NLRI_var)
 {
     setByteLength(getByteLength() + 5); //5 = NLRI (length (1) + IPAddress (4))
-    BGPUpdate_Base::NLRI_var = NLRI_var;
+    BGPUpdateMessage_Base::NLRI_var = NLRI_var;
 }
 

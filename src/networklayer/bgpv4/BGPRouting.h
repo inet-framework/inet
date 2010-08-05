@@ -90,7 +90,7 @@ private:
     void processMessageFromTCP(cMessage *msg);
     void processMessage(const BGPOpenMessage& msg);
     void processMessage(const BGPKeepAliveMessage& msg);
-    void processMessage(const BGPUpdate& msg);
+    void processMessage(const BGPUpdateMessage& msg);
 
     bool deleteBGPRoutingEntry(BGP::RoutingTableEntry* entry);
     /**
@@ -98,7 +98,7 @@ private:
      *  As matches, routes are sent or not to UpdateSentProcess
      *  The result can be ROUTE_DESTINATION_CHANGED, NEW_ROUTE_ADDED or 0 if no routingTable modification
      */
-    unsigned char decisionProcess(const BGPUpdate& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex);
+    unsigned char decisionProcess(const BGPUpdateMessage& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex);
     /**
      * \brief RFC 4271: 9.1.2.2 Breaking Ties used when BGP speaker may have several routes
      *  to the same destination that have the same degree of preference.
