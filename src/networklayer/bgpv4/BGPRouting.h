@@ -32,6 +32,9 @@
 #include "BGPKeepAlive.h"
 #include "BGPUpdate.h"
 
+class BGPSession;
+
+
 class INET_API BGPRouting : public cSimpleModule, public TCPSocket::CallbackInterface
 {
 public:
@@ -53,7 +56,7 @@ protected:
     virtual void socketClosed(int connId, void *yourPtr) {}
 
     friend class BGPSession;
-    //fonctions use by BGPSession class
+    //functions used by the BGPSession class
     int             getScheduleAt(simtime_t t, cMessage* msg)   { return scheduleAt(t, msg);}
     simtime_t       getSimTime()                                { return simTime();}
     void            getCancelAndDelete(cMessage* msg)           { return cancelAndDelete(msg);}

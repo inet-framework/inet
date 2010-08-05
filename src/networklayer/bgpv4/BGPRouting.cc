@@ -643,13 +643,10 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
     delayTab[3] = saveStartDelay;
 
     // load AS information
-    std::string ASXPath("AS[@id='");
-    char ASString[16];
-    itoa(_myAS,ASString,10);
-    ASXPath += ASString;
-    ASXPath += "']";
+    char ASXPath[32];
+    sprintf(ASXPath, "AS[@id='%d']", _myAS);
 
-    cXMLElement* ASNode = bgpConfig->getElementByPath(ASXPath.c_str());
+    cXMLElement* ASNode = bgpConfig->getElementByPath(ASXPath);
     std::vector<const char *> routerInSameASList;
     if (ASNode != 0)
     {
@@ -658,7 +655,7 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
     }
     else
     {
-        error ("In BGPRouting.xml : No configuration for AS ID: %s", ASString);
+        error ("In BGPRouting.xml : No configuration for AS ID: %d", _myAS);
     }
 
     //create IGP Session(s)
