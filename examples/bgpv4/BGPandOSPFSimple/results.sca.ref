@@ -1,0 +1,4 @@
+scalar BGPNet.HA11.udpApp[0] 	"packets sent" 	40
+scalar BGPNet.HB11.udpApp[0] 	"packets received" 	24
+
+

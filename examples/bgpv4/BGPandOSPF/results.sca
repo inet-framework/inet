@@ -1,0 +1,29 @@
+version 2
+run config1-0-20100729-18:38:11-792
+attr configname config1
+attr datetime 20100729-18:38:11
+attr experiment config1
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network BGPTest
+attr processid 792
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar BGPTest.HA11.udpApp[0] 	"packets sent" 	60
+scalar BGPTest.HA11.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HA12.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HA21.udpApp[0] 	"packets sent" 	59
+scalar BGPTest.HA21.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HA22.udpApp[0] 	"packets received" 	44
+scalar BGPTest.HB11.udpApp[0] 	"packets sent" 	59
+scalar BGPTest.HB11.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HB12.udpApp[0] 	"packets received" 	44
+scalar BGPTest.HB21.udpApp[0] 	"packets sent" 	59
+scalar BGPTest.HB21.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HB22.udpApp[0] 	"packets received" 	0

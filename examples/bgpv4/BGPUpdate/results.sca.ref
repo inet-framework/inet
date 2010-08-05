@@ -1,0 +1,16 @@
+
+scalar Net.A.bgp 	OPENMsgSent 	1
+scalar Net.A.bgp 	OPENMsgRecv 	1
+scalar Net.A.bgp 	KeepAliveMsgSent 	1
+scalar Net.A.bgp 	KeepAliveMsgRcv 	1
+scalar Net.A.bgp 	UpdateMsgSent 	1
+scalar Net.A.bgp 	UpdateMsgRcv 	1
+scalar Net.B.bgp 	OPENMsgSent 	1
+scalar Net.B.bgp 	OPENMsgRecv 	1
+scalar Net.B.bgp 	KeepAliveMsgSent 	1
+scalar Net.B.bgp 	KeepAliveMsgRcv 	1
+scalar Net.B.bgp 	UpdateMsgSent 	1
+scalar Net.B.bgp 	UpdateMsgRcv 	1
+
+scalar Net.H1.udpApp[0] 	"packets sent" 	15
+scalar Net.H2.udpApp[0] 	"packets received" 	14

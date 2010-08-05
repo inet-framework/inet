@@ -1,0 +1,9 @@
+scalar BGPTest.HA11.udpApp[0] 	"packets sent" 	60
+scalar BGPTest.HA21.udpApp[0] 	"packets sent" 	59
+scalar BGPTest.HB11.udpApp[0] 	"packets sent" 	59
+scalar BGPTest.HB21.udpApp[0] 	"packets sent" 	59
+
+scalar BGPTest.HA12.udpApp[0] 	"packets received" 	0
+scalar BGPTest.HA22.udpApp[0] 	"packets received" 	44
+scalar BGPTest.HB12.udpApp[0] 	"packets received" 	44
+scalar BGPTest.HB22.udpApp[0] 	"packets received" 	0

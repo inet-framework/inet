@@ -179,6 +179,18 @@ void OSPF::LinkStateUpdateHandler::ProcessPacket(OSPFPacket* packet, OSPF::Inter
                     }
                     rebuildRoutingTable |= router->InstallLSA(currentLSA, areaID);
 
+					// Add externalIPRoute in IPRoutingTable if this route is learned by BGP
+					if(currentType == ASExternalLSAType)
+					{
+						OSPFASExternalLSA*  externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
+						if(externalLSA->getContents().getExternalRouteTag() == OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP)
+						{
+							OSPF::IPv4Address	externalAddr = IPv4AddressFromULong(currentLSA->getHeader().getLinkStateID());							
+							int ifName = intf->GetIfIndex();
+							router->AddExternalRouteInIPTable(externalAddr, externalLSA->getContents(), ifName);
+						}						
+					}
+
                     EV << "    (update installed)\n";
 
                     AcknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID().getInt());

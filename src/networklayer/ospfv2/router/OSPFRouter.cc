@@ -67,6 +67,7 @@ void OSPF::Router::AddWatches(void)
     WATCH(routerID);
     WATCH_PTRVECTOR(areas);
     WATCH_PTRVECTOR(asExternalLSAs);
+	WATCH_PTRVECTOR(routingTable);
 }
 
 
@@ -1585,6 +1586,40 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
     }
 }
 
+/**
+ * Add an AS External Route in IPRoutingTable 
+ * @param networkAddress        [in] The external route's network address.
+ * @param externalRouteContents [in] Route configuration data for the external route.
+ * @param ifIndex               [in]
+ */
+void OSPF::Router::AddExternalRouteInIPTable(OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex){
+
+    IRoutingTable*			simRoutingTable		= RoutingTableAccess().get();
+	IInterfaceTable*		simInterfaceTable	= InterfaceTableAccess().get();
+    int						routingEntryNumber	= simRoutingTable->getNumRoutes();
+    bool					inRoutingTable		= false;
+
+	// add the external route to the IP routing table if it was not added by another module
+	for(int i = 1; i < routingEntryNumber; i++) {
+        if(simRoutingTable->getRoute(i)->getHost().getInt() == ULongFromIPv4Address(networkAddress))
+        {
+            inRoutingTable = true;
+			break;
+        }
+    }
+
+	if(!inRoutingTable)
+	{
+        IPRoute* entry = new IPRoute();
+        entry->setHost(ULongFromIPv4Address(networkAddress));
+		entry->setNetmask(externalRouteContents.getNetworkMask());
+		entry->setInterface(simInterfaceTable->getInterfaceById(ifIndex));
+		entry->setType(IPRoute::DIRECT);
+		entry->setSource(IPRoute::OSPF);
+		entry->setMetric(OSPF_BGP_DEFAULT_COST);
+        simRoutingTable->addRoute(entry);
+	}
+}
 
 /**
  * Removes an AS External Route from the database.

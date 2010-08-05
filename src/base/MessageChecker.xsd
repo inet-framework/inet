@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:complexType name="FieldValue">
+		<xs:annotation><xs:documentation>A field that contains a value</xs:documentation></xs:annotation>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="value" type="xs:string" use="required" />
+		<xs:attribute name="type" type="xs:string" use="optional" />
+	</xs:complexType>
+	<!-- array contains values  -->
+	<xs:complexType name="FieldValueInArray">
+		<xs:annotation><xs:documentation>A field that is a value in an array</xs:documentation></xs:annotation>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="index" type="xs:unsignedByte" use="required" />
+		<xs:attribute name="value" type="xs:string" use="required" />
+		<xs:attribute name="size" type="xs:unsignedByte" use="optional" />		
+		<xs:attribute name="type" type="xs:string" use="optional" />
+	</xs:complexType>
+	<!-- array -->
+	<xs:complexType name="FieldArray">
+		<xs:annotation><xs:documentation>A field that contains an array</xs:documentation></xs:annotation>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="size" type="xs:unsignedByte" use="required" />		
+		<xs:attribute name="type" type="xs:string" use="optional" />
+	</xs:complexType>
+	<!-- field contains an object  -->
+	<xs:complexType name="FieldObject">
+		<xs:annotation><xs:documentation>A field that contains an object</xs:documentation></xs:annotation>
+		<xs:sequence minOccurs="1" maxOccurs="unbounded">
+			<xs:choice>
+				<xs:element name="fieldArray" type="FieldArray"/>
+				<xs:element name="fieldValue" type="FieldValue"/>
+				<xs:element name="fieldValueInArray" type="FieldValueInArray"/>
+				<xs:element name="fieldObject" type="FieldObject"/>	
+				<xs:element name="fieldObjectInArray" type="FieldObjectInArray"/>	
+			</xs:choice>
+		</xs:sequence>		
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="type" type="xs:string" use="optional" />
+	</xs:complexType>
+	<!-- array that contains an object  -->
+	<xs:complexType name="FieldObjectInArray">
+		<xs:annotation><xs:documentation>A field that is an object in an array</xs:documentation></xs:annotation>
+		<xs:sequence minOccurs="1" maxOccurs="unbounded">
+			<xs:choice>
+				<xs:element name="fieldArray" type="FieldArray"/>
+				<xs:element name="fieldValue" type="FieldValue"/>
+				<xs:element name="fieldValueInArray" type="FieldValueInArray"/>
+				<xs:element name="fieldObject" type="FieldObject"/>	
+				<xs:element name="fieldObjectInArray" type="FieldObjectInArray"/>	
+			</xs:choice>
+		</xs:sequence>		
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="index" type="xs:unsignedByte" use="required" />
+		<xs:attribute name="size" type="xs:unsignedByte" use="optional" />		
+		<xs:attribute name="type" type="xs:string" use="optional" />
+	</xs:complexType>
+	<!-- message -->
+	<xs:complexType name="Message">
+		<xs:annotation><xs:documentation>A message that contains fields to check</xs:documentation></xs:annotation>
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:choice>
+				<xs:element name="fieldArray" type="FieldArray"/>
+				<xs:element name="fieldValue" type="FieldValue"/>
+				<xs:element name="fieldValueInArray" type="FieldValueInArray"/>
+				<xs:element name="fieldObject" type="FieldObject"/>	
+				<xs:element name="fieldObjectInArray" type="FieldObjectInArray"/>	
+			</xs:choice>
+		</xs:sequence>		
+		<xs:attribute name="occurence" type="xs:unsignedByte" use="required" />
+	</xs:complexType>
+	<!-- Root element -->
+	<xs:complexType name="Checker">
+		<xs:annotation><xs:documentation>The root element that contains messages to check</xs:documentation></xs:annotation>
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="message" type="Message"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="checker" type="Checker"/>
+</xs:schema>
