@@ -120,8 +120,8 @@ private:
     BGP::SessionID                          _currSessionId;
 
     IInterfaceTable*                        _inft;
-    IRoutingTable*                          _rt;                //< The IP routing table >
-    std::vector<BGP::RoutingTableEntry*>    _BGPRoutingTable;   //< The BGP routing table >
+    IRoutingTable*                          _rt;                // The IP routing table
+    std::vector<BGP::RoutingTableEntry*>    _BGPRoutingTable;   // The BGP routing table
     std::vector<BGP::RoutingTableEntry*>    _prefixListIN;
     std::vector<BGP::RoutingTableEntry*>    _prefixListOUT;
     std::vector<BGP::ASID>                  _ASListIN;

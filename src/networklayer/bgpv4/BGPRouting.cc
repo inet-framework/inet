@@ -102,7 +102,7 @@ void BGPRouting::handleTimer(cMessage *timer)
                 pSession->getFSM()->KeepaliveTimer_Expires();
                 break;
             default :
-                error("the timer kind %s does'nt exist",timer->getKind());
+                error("Invalid timer kind %d",timer->getKind());
         }
     }
 }
@@ -188,7 +188,7 @@ void BGPRouting::socketEstablished(int connId, void *yourPtr)
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == -1)
     {
-        error("error : socket %d is not established",connId);
+        error("socket id=%d is not established",connId);
     }
 
     //if it's an IGP Session, TCPConnectionConfirmed only if all EGP Sessions established
@@ -216,21 +216,21 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != -1)
     {
-        BGPHeader* ptrHdr = static_cast<BGPHeader*>(msg);
+        BGPHeader* ptrHdr = check_and_cast<BGPHeader*>(msg);
         switch(ptrHdr->getType())
         {
             case BGP_OPEN:
-                //BGPOpenMessage* ptrMsg = static_cast<BGPOpenMessage*>(msg);
-                processMessage(*(static_cast<BGPOpenMessage*>(msg)));
+                //BGPOpenMessage* ptrMsg = check_and_cast<BGPOpenMessage*>(msg);
+                processMessage(*check_and_cast<BGPOpenMessage*>(msg));
                 break;
             case BGP_KEEPALIVE:
-                processMessage(*(static_cast<BGPKeepAliveMessage*>(msg)));
+                processMessage(*check_and_cast<BGPKeepAliveMessage*>(msg));
                 break;
             case BGP_UPDATE:
                 processMessage(*check_and_cast<BGPUpdateMessage*>(msg));
                 break;
             default:
-                error("the BGP type %s does'nt exist",ptrHdr->getType());
+                error("Invalid BGP message type %d",ptrHdr->getType());
         }
     }
     delete msg;
