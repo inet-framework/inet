@@ -14,7 +14,7 @@
 package inet.networklayer.ospfv2;
 
 //
-// Implements \OSPFRouting.
+// Implements the OSPFv4 routing protocol.
 //
 simple OSPFRouting
 {
