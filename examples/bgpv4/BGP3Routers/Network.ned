@@ -7,14 +7,16 @@ import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 import inet.nodes.ethernet.EtherSwitch;
 
-channel LINK_100 extends ned.DatarateChannel // 100 Gbps
-{
-    parameters:
-        delay = 0;
-}
 
-module Test
+network BGPTest
 {
+    types:
+        channel LINK_100 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 100 Gbps;
+        }
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -203,7 +205,7 @@ module Test
         HA21.ethg[0] <--> LINK_100 <--> PA2.ethg[0];
         HA22.ethg[0] <--> LINK_100 <--> PA2.ethg[1];
         PA1.ethg[2] <--> LINK_100 <--> RA1.ethg[0];
-        PA2.ethg[2] <--> LINK_100 <--> RA2.ethg[0];  
+        PA2.ethg[2] <--> LINK_100 <--> RA2.ethg[0];
 
         //LAN B1 et B2
         HB11.ethg[0] <--> LINK_100 <--> PB1.ethg[0];
@@ -211,7 +213,7 @@ module Test
         HB21.ethg[0] <--> LINK_100 <--> PB2.ethg[0];
         HB22.ethg[0] <--> LINK_100 <--> PB2.ethg[1];
         PB1.ethg[2] <--> LINK_100 <--> RB1.ethg[0];
-        PB2.ethg[2] <--> LINK_100 <--> RB2.ethg[0]; 
+        PB2.ethg[2] <--> LINK_100 <--> RB2.ethg[0];
 
         //LAN C1 et C2
         HC11.ethg[0] <--> LINK_100 <--> PC1.ethg[0];
@@ -219,18 +221,18 @@ module Test
         HC21.ethg[0] <--> LINK_100 <--> PC2.ethg[0];
         HC22.ethg[0] <--> LINK_100 <--> PC2.ethg[1];
         PC1.ethg[2] <--> LINK_100 <--> RC1.ethg[0];
-        PC2.ethg[2] <--> LINK_100 <--> RC2.ethg[0]; 
+        PC2.ethg[2] <--> LINK_100 <--> RC2.ethg[0];
 
         //OSPF A
         RA1.pppg[1] <--> LINK_100 <--> RA2.pppg[1];
         RA1.pppg[0] <--> LINK_100 <--> A.pppg[2];
         RA2.pppg[0] <--> LINK_100 <--> A.pppg[3];
-        
+
         //OSPF B
         RB1.pppg[1] <--> LINK_100 <--> RB2.pppg[1];
         RB1.pppg[0] <--> LINK_100 <--> B.pppg[2];
         RB2.pppg[0] <--> LINK_100 <--> B.pppg[3];
-        
+
         //OSPF C
         RC1.pppg[1] <--> LINK_100 <--> RC2.pppg[1];
         RC1.pppg[0] <--> LINK_100 <--> C.pppg[2];
@@ -243,8 +245,4 @@ module Test
 
 }
 
-network BGPTest extends Test
-{
-    parameters:
-}
 

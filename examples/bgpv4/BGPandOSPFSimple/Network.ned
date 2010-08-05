@@ -6,15 +6,16 @@ import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 
-channel LINK_100 extends ned.DatarateChannel // 100 Gbps
+network BGPTest
 {
-    parameters:
-        delay = 0;
-        //datarate = 100e6;
-}
+    types:
+        channel LINK_100 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 100Gbps;
+        }
 
-module Test
-{
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -77,8 +78,4 @@ module Test
         RB1.pppg[0] <--> LINK_100 <--> B.pppg[1];
 }
 
-network BGPNet extends Test
-{
-    parameters:
-}
 

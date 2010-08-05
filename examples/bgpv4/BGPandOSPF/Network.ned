@@ -7,15 +7,17 @@ import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 import inet.nodes.ethernet.EtherSwitch;
 
-channel LINK_100 extends ned.DatarateChannel // 100 Gbps
-{
-    parameters:
-        delay = 0;
-        //datarate = 100e6;
-}
 
-module Test
+network BGPTest
 {
+    types:
+        channel LINK_100 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 100Gbps;
+        }
+
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -170,8 +172,4 @@ module Test
         RB2.pppg[0] <--> LINK_100 <--> B.pppg[2];
 }
 
-network BGPTest extends Test
-{
-    parameters:
-}
 

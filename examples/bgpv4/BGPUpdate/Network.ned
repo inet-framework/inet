@@ -4,22 +4,23 @@ import BGPRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 
-channel LINK_100 extends ned.DatarateChannel // 100 Gbps
-{
-    parameters:
-        delay = 0;
-        //datarate = 100e9bps;
-}
 
-module Test
+network BGPTest
 {
-    submodules:        
+    types:
+        channel LINK_100 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 100Gbps;
+        }
+    submodules:
         channelInstaller: ChannelInstaller {
             parameters:
                 @display("p=130,40;i=block/cogwheel_s");
                 channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";            
-        }        
+                channelAttrs = "format=#N";
+        }
         A: BGPRouter {
             parameters:
                 @display("p=160,92;i=cisco/router");
@@ -50,10 +51,5 @@ module Test
         H1.ethg[0] <--> LINK_100 <--> A.ethg[0];
         A.pppg[0] <--> LINK_100 <--> B.pppg[0];
         B.ethg[0] <--> LINK_100 <--> H2.ethg[0];
-}
-
-network Net extends Test
-{
-    parameters:
 }
 

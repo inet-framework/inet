@@ -2,16 +2,17 @@ package inet.examples.bgpv4.BGPOpen;
 
 import BGPRouterSimple;
 
-channel LINK_100 extends ned.DatarateChannel // 100 Gbps
-{
-    parameters:
-        delay = 0;
-        datarate = 100e9bps;
-    //error 1
-}
 
-module Test
+network Net
 {
+    types:
+        channel LINK_100 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 100Gbps;
+        }
+
     submodules:
         A: BGPRouterSimple {
             parameters:
@@ -30,10 +31,5 @@ module Test
     connections:
         A.pppOut[0] --> LINK_100 --> B.pppIn[0];
         B.pppOut[0] --> LINK_100 --> A.pppIn[0];
-}
-
-network Net extends Test
-{
-    parameters:
 }
 
