@@ -6,7 +6,7 @@ import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 
-network BGPTest
+network BGPNet
 {
     types:
         channel LINK_100 extends ned.DatarateChannel
