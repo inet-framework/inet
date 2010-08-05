@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BGPKeepAlive.h"
+#include "BGPUpdatePathAttributes.h"
 
-Register_Class(BGPKeepAliveMessage);
-
+Register_Class(BGPUpdatePathAttributes);
 
