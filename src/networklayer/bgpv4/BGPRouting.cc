@@ -266,14 +266,14 @@ void BGPRouting::processMessage(const BGPUpdate& msg)
     IPAddress                   netMask(IPAddress::ALLONES_ADDRESS);
     BGP::RoutingTableEntry*     entry           = new BGP::RoutingTableEntry();
     const unsigned char         length          = msg.getNLRI().length;
-    unsigned int                ASValueCount    = msg.getPathAttributesContent(0).getAsPath(0).getValue(0).getAsValueArraySize();
+    unsigned int                ASValueCount    = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
 
     entry->setDestinationID(msg.getNLRI().prefix);
     netMask.keepFirstBits(32-length);
     entry->setAddressMask(netMask);
     for (unsigned int j=0; j< ASValueCount; j++)
     {
-        entry->addAS(msg.getPathAttributesContent(0).getAsPath(0).getValue(0).getAsValue(j));
+        entry->addAS(msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValue(j));
     }
 
     decisionProcessResult = ASLoopDetection(entry, _myAS);
@@ -300,8 +300,8 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdate& msg, BGP::RoutingTabl
 
     /*If the AS_PATH attribute of a BGP route contains an AS loop, the BGP
     route should be excluded from the decision process. */
-    entry->setPathType(msg.getPathAttributesContent(0).getOrigin().getValue());
-    entry->setNextHop(msg.getPathAttributesContent(0).getNextHop().getValue());
+    entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
+    entry->setNextHop(msg.getPathAttributeList(0).getNextHop().getValue());
 
     //if the route already exist in BGP routing table, tieBreakingProcess();
     //(RFC 4271: 9.1.2.2 Breaking Ties)
@@ -409,7 +409,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
             type == BGP::NEW_SESSION_ESTABLISHED )
         {
             BGPUpdateNLRI                   NLRI;
-            BGPUpdatePathAttributesContent  content;
+            BGPUpdatePathAttributeList  content;
 
             unsigned int nbAS = entry->getASCount();
             content.setAsPathArraySize(1);
@@ -444,8 +444,8 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
             NLRI.length = (unsigned char) netMask.getNetmaskLength();
             {
                 BGPUpdate*  updateMsg = new BGPUpdate();
-                updateMsg->setPathAttributesContentArraySize(1);
-                updateMsg->setPathAttributesContent(content);
+                updateMsg->setPathAttributeListArraySize(1);
+                updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
                 (*sessionIt).second->getSocket()->send(updateMsg);
                 (*sessionIt).second->addUpdateMsgSent();

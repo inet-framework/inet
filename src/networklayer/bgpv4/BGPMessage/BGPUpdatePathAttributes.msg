@@ -56,7 +56,6 @@ class BGPUpdatePathAttributes
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
 enum BGPUpdateOriginValues
 {
-
     IGP = 0;
     EGP = 1;
     INCOMPLETE = 2;

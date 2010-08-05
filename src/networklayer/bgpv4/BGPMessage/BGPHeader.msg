@@ -40,7 +40,7 @@ enum BGPType
 //
 packet BGPHeader
 {
-    unsigned short length = BGP_HEADER_OCTETS;
+    byteLength = BGP_HEADER_OCTETS;
     char type @enum(BGPType);
 }
 

@@ -18,6 +18,8 @@
 cplusplus {{
 #include "BGPHeader_m.h"
 #include "IPAddress.h"
+
+const int BGP_OPEN_OCTETS = 10;
 }}
 
 
@@ -52,18 +54,20 @@ struct BGPOptionalParameters
 //    - Parameter Type
 //    - Parameter Length
 //    - Parameter Values (variable size)
-//    -Auth code
-//    -Authentication Data
+//    - Auth code
+//    - Authentication Data
 //
 packet BGPOpenMessage extends BGPHeader
 {
     @customize(true);
     @omitGetVerb(true);
+    type = BGP_OPEN;
+    byteLength = BGP_HEADER_OCTETS + BGP_OPEN_OCTETS;
+
     char version = 4;
     unsigned short myAS;
     simtime_t holdTime;
     IPAddress BGPIdentifier;
-    char optionalParamLength = 0;
     BGPOptionalParameters optionalParameters[];
 }
 

@@ -19,54 +19,47 @@
 
 Register_Class(BGPUpdate)
 
-void BGPUpdate::setUnfeasibleRoutesLength(unsigned short unfeasibleRoutesLength_var)
-{
-    unsigned short delta_bytes = unfeasibleRoutesLength_var - getUnfeasibleRoutesLength();
-    setBitLength(getLength() + delta_bytes);
-}
-
 void BGPUpdate::setWithdrawnRoutesArraySize(unsigned int size)
 {
     unsigned short delta_size = size - getWithdrawnRoutesArraySize();
     unsigned short delta_bytes = delta_size * 5; // 5 = Withdrawn Route length
-    setUnfeasibleRoutesLength(getUnfeasibleRoutesLength() + delta_bytes);
+    setByteLength(getByteLength() + delta_bytes);
 }
 
-void BGPUpdate::setTotalPathAttributeLength(unsigned short totalPathAttributeLength_var)
+unsigned short BGPUpdate::computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs)
 {
-    unsigned short delta_bytes = totalPathAttributeLength_var - getTotalPathAttributeLength();
-    setBitLength(getLength() + delta_bytes);
-    BGPUpdate_Base::totalPathAttributeLength_var = totalPathAttributeLength_var;
-}
-
-void BGPUpdate::setPathAttributesContent(const BGPUpdatePathAttributesContent& pathAttributesContent_var)
-{
-    setPathAttributesContentArraySize(1);
-
-    unsigned short nb_path_attr = 2 + pathAttributesContent_var.getAsPathArraySize()
-        + pathAttributesContent_var.getLocalPrefArraySize()
-        + pathAttributesContent_var.getAtomicAggregateArraySize();
+    unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
+        + pathAttrs.getLocalPrefArraySize()
+        + pathAttrs.getAtomicAggregateArraySize();
 
     // BGPUpdatePathAttributes (4)
     unsigned short contentBytes = nb_path_attr * 4;
     // BGPUpdatePathAttributesOrigin (1)
     contentBytes += 1;
     // BGPUpdatePathAttributesASPath
-    for (unsigned int i=0; i<pathAttributesContent_var.getAsPathArraySize(); i++)
-        contentBytes += 2 + pathAttributesContent_var.getAsPath(i).getLength(); // type (1) + length (1) + value
+    for (unsigned int i=0; i<pathAttrs.getAsPathArraySize(); i++)
+        contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
     // BGPUpdatePathAttributesNextHop (4)
     contentBytes += 4;
     // BGPUpdatePathAttributesLocalPref (4)
-    contentBytes = 4 * pathAttributesContent_var.getLocalPrefArraySize();
+    contentBytes = 4 * pathAttrs.getLocalPrefArraySize();
+    return contentBytes;
+}
 
-    setTotalPathAttributeLength(contentBytes);
+void BGPUpdate::setPathAttributeList(const BGPUpdatePathAttributeList& pathAttrs)
+{
+    unsigned int old_bytes = getPathAttributeListArraySize()==0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
+    unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
 
-    BGPUpdate_Base::pathAttributesContent_var[0]=pathAttributesContent_var;
+    setPathAttributeListArraySize(1);
+    BGPUpdate_Base::setPathAttributeList(0, pathAttrs);
+
+    setByteLength(getByteLength() + delta_bytes);
 }
 
 void BGPUpdate::setNLRI(const BGPUpdateNLRI& NLRI_var)
 {
-    setBitLength(getLength() + 5); //5 = NLRI (lenght (1) + IPAddress (4))
+    setByteLength(getByteLength() + 5); //5 = NLRI (length (1) + IPAddress (4))
     BGPUpdate_Base::NLRI_var = NLRI_var;
 }
 

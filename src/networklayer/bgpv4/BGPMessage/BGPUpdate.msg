@@ -19,6 +19,8 @@ cplusplus {{
 #include "BGPHeader_m.h"
 #include "BGPUpdatePathAttributes_m.h"
 #include "IPAddress.h"
+
+const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
 }}
 
 
@@ -43,13 +45,17 @@ struct BGPUpdateNLRI
     IPAddress prefix; // 4 octets
 }
 
-class BGPUpdatePathAttributesContent
+//
+// Represents the list of path attributes in a BGPv4 UPDATE message.
+// See RFC 4271, section 4.3
+//
+class BGPUpdatePathAttributeList
 {
-    BGPUpdatePathAttributesOrigin origin;
-    BGPUpdatePathAttributesASPath asPath[];
-    BGPUpdatePathAttributesNextHop nextHop;
-    BGPUpdatePathAttributesLocalPref localPref[]; // optional
-    BGPUpdatePathAttributesAtomicAggregate atomicAggregate[]; // optional
+    BGPUpdatePathAttributesOrigin origin; // mandatory attribute
+    BGPUpdatePathAttributesASPath asPath[]; // mandatory attribute
+    BGPUpdatePathAttributesNextHop nextHop; // mandatory attribute
+    BGPUpdatePathAttributesLocalPref localPref[]; // optional attribute
+    BGPUpdatePathAttributesAtomicAggregate atomicAggregate[]; // optional attribute
 }
 
 //
@@ -70,12 +76,11 @@ class BGPUpdatePathAttributesContent
 packet BGPUpdate extends BGPHeader
 {
     @customize(true);
-    unsigned short unfeasibleRoutesLength = 0;
-    BGPUpdateWithdrawnRoutes withdrawnRoutes[]; // if unfeasibleRoutesLength != 0
+    type = BGP_UPDATE;
+    byteLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
 
-    unsigned short totalPathAttributeLength = 0;
-    BGPUpdatePathAttributesContent pathAttributesContent[]; // if totalPathAttributesLengh != 0
-
+    BGPUpdateWithdrawnRoutes withdrawnRoutes[];
+    BGPUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)
     BGPUpdateNLRI NLRI;
 }
 
