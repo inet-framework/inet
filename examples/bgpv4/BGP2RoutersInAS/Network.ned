@@ -14,7 +14,7 @@ network BGPTest
         {
             parameters:
                 delay = 0;
-                datarate = 100Gbps;
+                //TODO restore after merging topic/ethernet: datarate = 100Gbps;
         }
     submodules:
         channelInstaller: ChannelInstaller {
