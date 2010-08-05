@@ -32,10 +32,12 @@ import inet.base.MessageChecker;
 module BGPRouterSimple
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
+        @display("i=abstract/router");
         string routingFile;
     gates:
-        input pppIn[];
-        output pppOut[];
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -92,8 +94,7 @@ module BGPRouterSimple
 
         // connections to network outside
         for i=0..sizeof(pppOut)-1 {
-            pppIn[i] --> { @display("m=s"); } --> ppp[i].phys$i;
-            pppOut[i] <-- { @display("m=s"); } <-- ppp[i].phys$o;
+            pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
             ppp[i].netwOut --> networkLayer.ifIn[i];
             ppp[i].netwIn <-- networkLayer.ifOut[i];
         }

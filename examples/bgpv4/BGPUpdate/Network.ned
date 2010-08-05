@@ -1,6 +1,5 @@
 package inet.examples.bgpv4.BGPUpdate;
 
-import BGPRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 
@@ -23,14 +22,14 @@ network BGPTest
         }
         A: BGPRouter {
             parameters:
-                @display("p=160,92;i=cisco/router");
+                @display("p=160,92");
             gates:
                 pppg[1];
                 ethg[1];
         }
         B: BGPRouter {
             parameters:
-                @display("p=256,92;i=cisco/router");
+                @display("p=256,92");
             gates:
                 pppg[1];
                 ethg[1];

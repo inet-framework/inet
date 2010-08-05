@@ -25,25 +25,25 @@ network BGPTest
         }
         A1: BGPRouter {
             parameters:
-                @display("p=274,93;i=cisco/router");
+                @display("p=274,93");
             gates:
                 pppg[2];
         }
         A2: BGPRouter {
             parameters:
-                @display("p=184,221;i=cisco/router");
+                @display("p=184,221");
             gates:
                 pppg[2];
         }
         B: BGPRouter {
             parameters:
-                @display("p=386,93;i=cisco/router");
+                @display("p=386,93");
             gates:
                 pppg[2];
         }
         C: BGPRouter {
             parameters:
-                @display("p=298,221;i=cisco/router");
+                @display("p=298,221");
             gates:
                 pppg[3];
         }

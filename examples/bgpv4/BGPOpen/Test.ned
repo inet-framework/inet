@@ -1,7 +1,5 @@
 package inet.examples.bgpv4.BGPOpen;
 
-import BGPRouterSimple;
-
 
 network Net
 {
@@ -16,20 +14,13 @@ network Net
     submodules:
         A: BGPRouterSimple {
             parameters:
-                @display("p=80,60;i=cisco/router");
-            gates:
-                pppIn[1];
-                pppOut[1];
+                @display("p=80,60");
         }
         B: BGPRouterSimple {
             parameters:
-                @display("p=200,60;i=cisco/router");
-            gates:
-                pppIn[1];
-                pppOut[1];
+                @display("p=200,60");
         }
     connections:
-        A.pppOut[0] --> LINK_100 --> B.pppIn[0];
-        B.pppOut[0] --> LINK_100 --> A.pppIn[0];
+        A.pppg++ <--> LINK_100 <--> B.pppg++;
 }
 
