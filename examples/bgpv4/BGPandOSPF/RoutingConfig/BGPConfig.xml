@@ -10,7 +10,7 @@
     </TimerParams>
 
     <AS id="65324">
-        <Router interAddr="100.10.10.1"> </Router> <!--router A-->
+        <Router interAddr="100.10.10.1"/> <!--router A-->
         <!-- DenyRoute: deny route in IN  and OUT traffic -->
         <!-- DenyRouteIN : deny route in IN traffic -->
         <!-- DenyRouteOUT: deny route in OUT traffic -->
@@ -22,12 +22,12 @@
     </AS>
 
     <AS id="65248">
-        <Router interAddr="100.10.10.2"> </Router> <!--router B-->
+        <Router interAddr="100.10.10.2"/> <!--router B-->
     </AS>
 
    <Session id="1">
-        <Router exterAddr="100.10.10.1"> </Router>
-        <Router exterAddr="100.10.10.2"> </Router>
+        <Router exterAddr="100.10.10.1"/>
+        <Router exterAddr="100.10.10.2"/>
     </Session>
 
 </BGPConfig>

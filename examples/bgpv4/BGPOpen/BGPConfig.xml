@@ -10,16 +10,16 @@
     </TimerParams>
 
     <AS id="65324">
-        <Router interAddr="10.10.10.1"> </Router> <!--router A-->
+        <Router interAddr="10.10.10.1"/> <!--router A-->
     </AS>
 
     <AS id="65248">
-        <Router interAddr="10.10.10.2"> </Router> <!--router B-->
+        <Router interAddr="10.10.10.2"/> <!--router B-->
     </AS>
 
    <Session id="1">
-        <Router exterAddr="10.10.10.1"> </Router> <!--router A-->
-        <Router exterAddr="10.10.10.2"> </Router> <!--router B-->
+        <Router exterAddr="10.10.10.1"/> <!--router A-->
+        <Router exterAddr="10.10.10.2"/> <!--router B-->
     </Session>
 
 </BGPConfig>
