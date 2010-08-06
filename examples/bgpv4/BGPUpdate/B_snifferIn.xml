@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<!DOCTYPE checker SYSTEM "../../../Etc/MessageChecker.dtd">
+<!DOCTYPE checker SYSTEM "../../../etc/MessageChecker.dtd">
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="sniffer.xsd" -->
+    xsi:noNamespaceSchemaLocation="sniffer.xsd" -->
 <checker>
     <message occurence="3"/> <!-- msg tcp connect ok , open, keepAlive-->
     <message occurence="1">
-		<fieldValue name="className" value="BGPUpdate"/>
-	</message>
+        <fieldValue name="className" value="BGPUpdate"/>
+    </message>
 </checker>
