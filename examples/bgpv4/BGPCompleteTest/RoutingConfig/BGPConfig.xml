@@ -67,9 +67,5 @@
         <Router exterAddr="10.10.50.2" > </Router> <!--Router E-->
     </Session>
 
-
-
-
-
 </BGPConfig>
 

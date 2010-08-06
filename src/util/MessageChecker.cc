@@ -110,22 +110,20 @@ void MessageChecker::checkFields(void* object, cClassDescriptor* descriptor, con
 
 void MessageChecker::checkFieldValue(void* object, cClassDescriptor* descriptor, int field, cXMLAttributeMap& attr, int i) const
 {
-    char buf[BUFSIZE];
     // get the field string value from the client object
-    descriptor->getFieldAsString(object, field, i, buf, BUFSIZE);
-    std::string value(buf);
+    std::string value = descriptor->getFieldAsString(object, field, i);
 
     // convert the field value into its name of enum value
     if (descriptor->getFieldProperty(object, field, "enum"))
     {
         cEnum* enm = cEnum::find(descriptor->getFieldProperty(object, field, "enum"));
-        if (enm) value = enm->getStringFor(atol(buf));
+        if (enm) value = enm->getStringFor(atol(value.c_str()));
     }
 
     // check field value into the client object
     if (value.find(attr["value"])!=0) //allow to keep reference values even if
                                      //simtime precision changed...
-        opp_error("mismatch field \"%s\" into the message %d (\"%s\" != \"%s\")",
+        opp_error("mismatch: field \"%s\" in the message %d (\"%s\" != \"%s\")",
             attr["name"].data(), forwardedMsg, value.data(), attr["value"].data());
 }
 
@@ -145,13 +143,13 @@ void MessageChecker::checkFieldObject(void* object, cClassDescriptor* descriptor
 int MessageChecker::checkFieldArray(void* object, cClassDescriptor* descriptor, int field, cXMLAttributeMap& attr) const
 {
     if (!descriptor->getFieldIsArray(object, field))
-        opp_error("the field \"%s\" into the message %d isn't an array", attr["name"].data(), forwardedMsg);
+        opp_error("the field \"%s\" in message %d isn't an array", attr["name"].data(), forwardedMsg);
 
     // check the size of the field array into the client object
     int size = atol(attr["size"].data());
     int fieldSize = descriptor->getArraySize(object, field);
     if (size != fieldSize)
-        opp_error("field array \"%s\" contains %d element(s) (and not %d) into message %d",
+        opp_error("field array \"%s\" contains %d element(s) (and not %d) in message %d",
             attr["name"].data(), fieldSize, size, forwardedMsg);
 
     return fieldSize;
@@ -165,7 +163,7 @@ void MessageChecker::checkFieldValueInArray(void* object, cClassDescriptor* desc
     int i = atol(attr["index"].data());
 
     if (i >= fieldSize)
-        opp_error("the field \"%s\" into the message %d has no entry for index %d", attr["name"].data(), forwardedMsg, i);
+        opp_error("field \"%s\" in message %d has no entry for index %d", attr["name"].data(), forwardedMsg, i);
 
     // check field value into the client object
     checkFieldValue(object, descriptor, field, attr, i);
@@ -179,7 +177,7 @@ void MessageChecker::checkFieldObjectInArray(void* object, cClassDescriptor* des
     int i = atol(attr["index"].data());
 
     if (i >= fieldSize)
-        opp_error("the field \"%s\" into the message %d has no entry for index %d", attr["name"].data(), forwardedMsg, i);
+        opp_error("field \"%s\" in message %d has no entry for index %d", attr["name"].data(), forwardedMsg, i);
 
     // check field object into the client object
     checkFieldObject(object, descriptor, field, attr, pattern, i);
@@ -195,7 +193,7 @@ void MessageChecker::checkFieldType(void* object, cClassDescriptor* descriptor, 
         type = descriptor->getFieldTypeString(object, field);
 
     if (type != attr["type"])
-        opp_error("mismatch type for the field \"%s\" into message %d (\"%s\" != \"%s\")",
+        opp_error("type mismatch for field \"%s\" in message %d (\"%s\" != \"%s\")",
             attr["name"].data(), forwardedMsg, type.data(), attr["type"].data());
 }
 
@@ -209,7 +207,7 @@ int MessageChecker::findFieldIndex(void* object, cClassDescriptor* descriptor, c
             return i;
     }
 
-    opp_error("unknown field \"%s\" into message %d\nAvailable fields in \"%s\" are : %s"
+    opp_error("unknown field \"%s\" in message %d\nAvailable fields in \"%s\" are : %s"
         , fieldName.data(), forwardedMsg, descriptor->getClassName(), availableFields.str().data());
     return 0;
 }

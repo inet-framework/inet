@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.base;
+package inet.util;
 
 //
 // Module that allows checking fields of messages

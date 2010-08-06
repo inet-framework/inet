@@ -17,14 +17,15 @@
 
 package inet.examples.bgpv4.BGPOpen;
 
-import inet.base.NotificationBoard;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
+import inet.util.MessageChecker;
 import inet.transport.tcp.TCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.bgpv4.BGPRouting;
 import inet.linklayer.ppp.PPPInterfaceNoQueue;
-import inet.base.MessageChecker;
+import inet.base.NotificationBoard;
+
 
 //
 // Example \IP router with BGPv4 support.

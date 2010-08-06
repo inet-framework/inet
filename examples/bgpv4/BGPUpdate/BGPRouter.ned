@@ -17,16 +17,17 @@
 
 package inet.examples.bgpv4.BGPUpdate;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
+import inet.util.MessageChecker;
 import inet.transport.tcp.TCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ospfv2.OSPFRouting;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.bgpv4.BGPRouting;
 import inet.linklayer.ppp.PPPInterfaceNoQueue;
-import inet.base.MessageChecker;
-import inet.networklayer.ospfv2.OSPFRouting;
+import inet.linklayer.ethernet.EthernetInterface;
+import inet.base.NotificationBoard;
+
 
 //
 // Example \IP router with BGPv4 and OSPFv4 support.
