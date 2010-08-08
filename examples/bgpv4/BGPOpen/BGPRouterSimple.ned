@@ -76,10 +76,10 @@ module BGPRouterSimple
                 proxyARP = true;
                 @display("p=120,284;i=block/layer;q=queue");
             gates:
-                ifIn[sizeof(pppOut)];
-                ifOut[sizeof(pppOut)];
+                ifIn[sizeof(pppg)];
+                ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppOut)]: PPPInterfaceNoQueue {
+        ppp[sizeof(pppg)]: PPPInterfaceNoQueue {
             parameters:
                 @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
         }
@@ -94,7 +94,7 @@ module BGPRouterSimple
         tcp.ipIn <-- { @display("m=s"); } <-- networkLayer.tcpOut;
 
         // connections to network outside
-        for i=0..sizeof(pppOut)-1 {
+        for i=0..sizeof(pppg)-1 {
             pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
             ppp[i].netwOut --> networkLayer.ifIn[i];
             ppp[i].netwIn <-- networkLayer.ifOut[i];
