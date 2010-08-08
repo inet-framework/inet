@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!DOCTYPE movements SYSTEM "../../../src/mobility/TurtleMobility.dtd">
+<!DOCTYPE movements SYSTEM "../../../etc/TurtleMobility.dtd">
 <movements>
     <movement id="1">
         <!-- draw a square -->
