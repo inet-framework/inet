@@ -30,12 +30,12 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
     if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
         OSPFLinkStateAcknowledgementPacket* lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket*> (packet);
 
-        int  lsaCount = lsAckPacket->getLsaHeadersArraySize();
+        int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
         EV << "  Processing packet contents:\n";
 
-        for (int i  = 0; i < lsaCount; i++) {
-            OSPFLSAHeader&   lsaHeader = lsAckPacket->getLsaHeaders(i);
+        for (int i = 0; i < lsaCount; i++) {
+            OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
             OSPFLSA*         lsaOnRetransmissionList;
             OSPF::LSAKeyType lsaKey;
 

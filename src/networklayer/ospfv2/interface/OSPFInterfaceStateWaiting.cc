@@ -42,7 +42,7 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
             intf->sendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
-            int           ttl           = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
                 OSPF::Neighbor* neighbor = intf->getNeighbor(i);
                 if (neighbor->getPriority() > 0) {

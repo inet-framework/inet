@@ -189,7 +189,7 @@ bool OSPF::DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPa
 
     for (unsigned int i = 0; i < headerCount; i++) {
         OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LSAType        lsaType       = static_cast<LSAType> (currentHeader.getLsType());
+        LSAType lsaType = static_cast<LSAType> (currentHeader.getLsType());
 
         EV << "    ";
         printLSAHeader(currentHeader, ev.getOStream());

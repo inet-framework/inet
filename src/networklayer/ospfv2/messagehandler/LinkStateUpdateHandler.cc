@@ -44,13 +44,13 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
 {
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
-    OSPFLinkStateUpdatePacket* lsUpdatePacket      = check_and_cast<OSPFLinkStateUpdatePacket*> (packet);
-    bool                       shouldRebuildRoutingTable = false;
+    OSPFLinkStateUpdatePacket* lsUpdatePacket = check_and_cast<OSPFLinkStateUpdatePacket*> (packet);
+    bool shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
-        OSPF::AreaID areaID          = lsUpdatePacket->getAreaID().getInt();
-        OSPF::Area*  area            = router->getArea(areaID);
-        LSAType      currentType     = ROUTERLSA_TYPE;
+        OSPF::AreaID areaID = lsUpdatePacket->getAreaID().getInt();
+        OSPF::Area* area = router->getArea(areaID);
+        LSAType currentType = ROUTERLSA_TYPE;
         unsigned int currentLSAIndex = 0;
 
         EV << "  Processing packet contents:\n";
@@ -122,8 +122,8 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                 lsaKey.linkStateID = currentLSA->getHeader().getLinkStateID();
                 lsaKey.advertisingRouter = currentLSA->getHeader().getAdvertisingRouter().getInt();
 
-                OSPFLSA*                lsaInDatabase = router->findLSA(lsaType, lsaKey, areaID);
-                unsigned short          lsAge         = currentLSA->getHeader().getLsAge();
+                OSPFLSA* lsaInDatabase = router->findLSA(lsaType, lsaKey, areaID);
+                unsigned short lsAge = currentLSA->getHeader().getLsAge();
                 AcknowledgementFlags    ackFlags;
 
                 ackFlags.floodedBackOut = false;

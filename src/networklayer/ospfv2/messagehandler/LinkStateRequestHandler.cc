@@ -37,14 +37,14 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
     {
         OSPFLinkStateRequestPacket* lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket*> (packet);
 
-        unsigned long         requestCount = lsRequestPacket->getRequestsArraySize();
-        bool                  error        = false;
+        unsigned long requestCount = lsRequestPacket->getRequestsArraySize();
+        bool error = false;
         std::vector<OSPFLSA*> lsas;
 
         EV << "  Processing packet contents:\n";
 
         for (unsigned long i = 0; i < requestCount; i++) {
-            LSARequest&      request = lsRequestPacket->getRequests(i);
+            LSARequest& request = lsRequestPacket->getRequests(i);
             OSPF::LSAKeyType lsaKey;
             char             addressString[16];
 
@@ -71,8 +71,8 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
         }
 
         if (!error) {
-            int                   updatesCount   = lsas.size();
-            int                   ttl            = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            int updatesCount = lsas.size();
+            int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             OSPF::MessageHandler* messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {

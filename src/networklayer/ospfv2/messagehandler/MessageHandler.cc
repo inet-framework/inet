@@ -166,10 +166,10 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
 {
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
-        IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
-        int             interfaceId = controlInfo->getInterfaceId();
-        OSPF::AreaID    areaID      = packet->getAreaID().getInt();
-        OSPF::Area*     area        = router->getArea(areaID);
+        IPControlInfo* controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
+        int interfaceId = controlInfo->getInterfaceId();
+        OSPF::AreaID areaID = packet->getAreaID().getInt();
+        OSPF::Area* area = router->getArea(areaID);
 
         if (area != NULL) {
             // packet Area ID must either match the Area ID of the receiving interface or...
@@ -200,9 +200,9 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                 }
             }
             if (intf != NULL) {
-                unsigned long                       destinationAddress = controlInfo->getDestAddr().getInt();
-                unsigned long                       allDRouters        = ulongFromIPv4Address(OSPF::AllDRouters);
-                OSPF::Interface::InterfaceStateType interfaceState     = intf->getState();
+                unsigned long destinationAddress = controlInfo->getDestAddr().getInt();
+                unsigned long allDRouters = ulongFromIPv4Address(OSPF::AllDRouters);
+                OSPF::Interface::InterfaceStateType interfaceState = intf->getState();
 
                 // if destination address is AllDRouters the receiving interface must be in DesignatedRouter or Backup state
                 if (
@@ -217,8 +217,8 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                 {
                     // packet authentication
                     if (authenticatePacket(packet)) {
-                        OSPFPacketType  packetType = static_cast<OSPFPacketType> (packet->getType());
-                        OSPF::Neighbor* neighbor   = NULL;
+                        OSPFPacketType packetType = static_cast<OSPFPacketType> (packet->getType());
+                        OSPF::Neighbor* neighbor = NULL;
 
                         // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
                         if (packetType != HELLO_PACKET) {
@@ -464,7 +464,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
        << outputIfIndex
        << "] with updates:\n";
 
-    unsigned int i           = 0;
+    unsigned int i = 0;
     unsigned int updateCount = updatePacket->getRouterLSAsArraySize();
 
     for (i = 0; i < updateCount; i++) {

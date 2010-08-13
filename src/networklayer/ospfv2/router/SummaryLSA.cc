@@ -37,7 +37,7 @@ bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA* summaryLSA) const
                             ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
                             (header_var.getLsaLength() != lsaHeader.getLsaLength()));
-    bool differentBody   = false;
+    bool differentBody = false;
 
     if (!differentHeader) {
         differentBody = ((networkMask_var != summaryLSA->getNetworkMask()) ||

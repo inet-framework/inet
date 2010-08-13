@@ -297,9 +297,9 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         )
        )
     {
-        long              neighborCount                = neighboringRouters.size();
-        bool              lsaAddedToRetransmissionList = false;
-        OSPF::LinkStateID linkStateID                  = lsa->getHeader().getLinkStateID();
+        long neighborCount = neighboringRouters.size();
+        bool lsaAddedToRetransmissionList = false;
+        OSPF::LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
         OSPF::LSAKeyType  lsaKey;
 
         lsaKey.linkStateID = linkStateID;
@@ -339,7 +339,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                     OSPFLinkStateUpdatePacket* updatePacket = createUpdatePacket(lsa);    // (5)
 
                     if (updatePacket != NULL) {
-                        int                   ttl            = (interfaceType == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+                        int ttl = (interfaceType == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
                         OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
 
                         if (interfaceType == OSPF::Interface::BROADCAST) {
@@ -407,10 +407,10 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
 
 OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
 {
-    LSAType lsaType                  = static_cast<LSAType> (lsa->getHeader().getLsType());
-    OSPFRouterLSA* routerLSA         = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA*> (lsa) : NULL;
-    OSPFNetworkLSA* networkLSA       = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA*> (lsa) : NULL;
-    OSPFSummaryLSA* summaryLSA       = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
+    LSAType lsaType = static_cast<LSAType> (lsa->getHeader().getLsType());
+    OSPFRouterLSA* routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA*> (lsa) : NULL;
+    OSPFNetworkLSA* networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA*> (lsa) : NULL;
+    OSPFSummaryLSA* summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
                                         (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OSPFSummaryLSA*> (lsa) : NULL;
     OSPFASExternalLSA* asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA*> (lsa) : NULL;
 
@@ -516,7 +516,7 @@ void OSPF::Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
 void OSPF::Interface::sendDelayedAcknowledgements()
 {
     OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
-    long                  maxPacketSize  = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
+    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
     for (std::map<IPv4Address, std::list<OSPFLSAHeader>, OSPF::IPv4Address_Less>::iterator delayIt = delayedAcknowledgements.begin();
          delayIt != delayedAcknowledgements.end();
@@ -525,8 +525,8 @@ void OSPF::Interface::sendDelayedAcknowledgements()
         int ackCount = delayIt->second.size();
         if (ackCount > 0) {
             while (!(delayIt->second.empty())) {
-                OSPFLinkStateAcknowledgementPacket* ackPacket  = new OSPFLinkStateAcknowledgementPacket;
-                long                                packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
+                OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket;
+                long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
                 ackPacket->setRouterID(parentArea->getRouter()->getRouterID());
@@ -537,7 +537,7 @@ void OSPF::Interface::sendDelayedAcknowledgements()
                 }
 
                 while ((!(delayIt->second.empty())) && (packetSize <= (maxPacketSize - OSPF_LSA_HEADER_LENGTH))) {
-                    unsigned long   headerCount = ackPacket->getLsaHeadersArraySize();
+                    unsigned long headerCount = ackPacket->getLsaHeadersArraySize();
                     ackPacket->setLsaHeadersArraySize(headerCount + 1);
                     ackPacket->setLsaHeaders(headerCount, *(delayIt->second.begin()));
                     delayIt->second.pop_front();

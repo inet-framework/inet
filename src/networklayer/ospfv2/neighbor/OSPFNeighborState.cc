@@ -23,14 +23,14 @@
 void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
 {
 
-    OSPF::Neighbor::NeighborStateType   oldState            = currentState->getState();
-    OSPF::Neighbor::NeighborStateType   nextState           = newState->getState();
-    bool                                shouldRebuildRoutingTable = false;
+    OSPF::Neighbor::NeighborStateType oldState = currentState->getState();
+    OSPF::Neighbor::NeighborStateType nextState = newState->getState();
+    bool shouldRebuildRoutingTable = false;
 
     neighbor->changeState(newState, currentState);
 
     if ((oldState == OSPF::Neighbor::FULL_STATE) || (nextState == OSPF::Neighbor::FULL_STATE)) {
-        OSPF::RouterID   routerID  = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
+        OSPF::RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
         OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
         if (routerLSA != NULL) {

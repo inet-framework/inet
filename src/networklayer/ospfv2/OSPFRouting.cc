@@ -177,10 +177,10 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
  */
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
-    OSPF::Interface* intf          = new OSPF::Interface;
-    std::string      ifName        = ifConfig.getAttribute("ifName");
-    int              ifIndex       = resolveInterfaceName(ifName);
-    std::string      interfaceType = ifConfig.getTagName();
+    OSPF::Interface* intf = new OSPF::Interface;
+    std::string ifName = ifConfig.getAttribute("ifName");
+    int ifIndex = resolveInterfaceName(ifName);
+    std::string interfaceType = ifConfig.getTagName();
 
     EV << "        loading " << interfaceType << " " << ifName << " ifIndex[" << ifIndex << "]\n";
 
@@ -198,7 +198,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
     }
 
-    OSPF::AreaID    areaID    = 0;
+    OSPF::AreaID areaID = 0;
     cXMLElementList ifDetails = ifConfig.getChildren();
 
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
@@ -293,8 +293,8 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
  */
 void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
-    std::string               ifName  = externalRouteConfig.getAttribute("ifName");
-    int                       ifIndex = resolveInterfaceName(ifName);
+    std::string ifName = externalRouteConfig.getAttribute("ifName");
+    int ifIndex = resolveInterfaceName(ifName);
     OSPFASExternalLSAContents asExternalRoute;
     OSPF::RoutingTableEntry   externalRoutingEntry; // only used here to keep the path cost calculation in one place
     OSPF::IPv4AddressRange    networkAddress;
@@ -311,7 +311,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
         }
         if (nodeName == "ExternalInterfaceOutputParameters") {
             std::string metricType = (*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputType")[0]->getNodeValue();
-            int         routeCost  = atoi((*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputCost")[0]->getNodeValue());
+            int routeCost = atoi((*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputCost")[0]->getNodeValue());
 
             asExternalRoute.setRouteCost(routeCost);
             if (metricType == "Type2") {
@@ -390,9 +390,9 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
  */
 void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
-    OSPF::Interface* intf     = new OSPF::Interface;
-    std::string      endPoint = virtualLinkConfig.getAttribute("endPointRouterID");
-    OSPF::Neighbor*  neighbor = new OSPF::Neighbor;
+    OSPF::Interface* intf = new OSPF::Interface;
+    std::string endPoint = virtualLinkConfig.getAttribute("endPointRouterID");
+    OSPF::Neighbor* neighbor = new OSPF::Neighbor;
 
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
@@ -444,7 +444,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     // add the virtual link to the OSPF datastructure.
     OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());
-    OSPF::Area* backbone    = ospfRouter->getArea(OSPF::BackboneAreaID);
+    OSPF::Area* backbone = ospfRouter->getArea(OSPF::BackboneAreaID);
 
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);
