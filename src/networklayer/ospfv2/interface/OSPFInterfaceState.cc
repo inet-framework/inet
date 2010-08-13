@@ -24,14 +24,14 @@
 #include "OSPFInterfaceStateBackup.h"
 #include <map>
 
-void OSPF::InterfaceState::ChangeState(OSPF::Interface* intf, OSPF::InterfaceState* newState, OSPF::InterfaceState* currentState)
+void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceState* newState, OSPF::InterfaceState* currentState)
 {
     OSPF::Interface::InterfaceStateType oldState            = currentState->getState();
     OSPF::Interface::InterfaceStateType nextState           = newState->getState();
     OSPF::Interface::OSPFInterfaceType  intfType            = intf->getType();
     bool                                rebuildRoutingTable = false;
 
-    intf->ChangeState(newState, currentState);
+    intf->changeState(newState, currentState);
 
     if ((oldState == OSPF::Interface::DownState) ||
         (nextState == OSPF::Interface::DownState) ||
@@ -47,33 +47,33 @@ void OSPF::InterfaceState::ChangeState(OSPF::Interface* intf, OSPF::InterfaceSta
          ((oldState == OSPF::Interface::WaitingState) ||
           (nextState == OSPF::Interface::WaitingState))))
     {
-        OSPF::RouterLSA* routerLSA = intf->getArea()->FindRouterLSA(intf->getArea()->getRouter()->getRouterID());
+        OSPF::RouterLSA* routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
         if (routerLSA != NULL) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                 routerLSA->getHeader().setLsAge(MAX_AGE);
-                intf->getArea()->FloodLSA(routerLSA);
-                routerLSA->IncrementInstallTime();
+                intf->getArea()->floodLSA(routerLSA);
+                routerLSA->incrementInstallTime();
             } else {
                 OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                rebuildRoutingTable |= routerLSA->Update(newLSA);
+                rebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
-                intf->getArea()->FloodLSA(routerLSA);
+                intf->getArea()->floodLSA(routerLSA);
             }
         } else {  // (lsa == NULL) -> This must be the first time any interface is up...
             OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
 
-            rebuildRoutingTable |= intf->getArea()->InstallRouterLSA(newLSA);
+            rebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
 
-            routerLSA = intf->getArea()->FindRouterLSA(intf->getArea()->getRouter()->getRouterID());
+            routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
             intf->getArea()->setSPFTreeRoot(routerLSA);
-            intf->getArea()->FloodLSA(newLSA);
+            intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         }
     }
@@ -81,28 +81,28 @@ void OSPF::InterfaceState::ChangeState(OSPF::Interface* intf, OSPF::InterfaceSta
     if (nextState == OSPF::Interface::DesignatedRouterState) {
         OSPF::NetworkLSA* newLSA = intf->getArea()->OriginateNetworkLSA(intf);
         if (newLSA != NULL) {
-            rebuildRoutingTable |= intf->getArea()->InstallNetworkLSA(newLSA);
+            rebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
-            intf->getArea()->FloodLSA(newLSA);
+            intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         } else {    // no neighbors on the network -> old NetworkLSA must be flushed
-            OSPF::NetworkLSA* oldLSA = intf->getArea()->FindNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
+            OSPF::NetworkLSA* oldLSA = intf->getArea()->findNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
 
             if (oldLSA != NULL) {
                 oldLSA->getHeader().setLsAge(MAX_AGE);
-                intf->getArea()->FloodLSA(oldLSA);
-                oldLSA->IncrementInstallTime();
+                intf->getArea()->floodLSA(oldLSA);
+                oldLSA->incrementInstallTime();
             }
         }
     }
 
     if (oldState == OSPF::Interface::DesignatedRouterState) {
-        OSPF::NetworkLSA* networkLSA = intf->getArea()->FindNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
+        OSPF::NetworkLSA* networkLSA = intf->getArea()->findNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
 
         if (networkLSA != NULL) {
             networkLSA->getHeader().setLsAge(MAX_AGE);
-            intf->getArea()->FloodLSA(networkLSA);
-            networkLSA->IncrementInstallTime();
+            intf->getArea()->floodLSA(networkLSA);
+            networkLSA->incrementInstallTime();
         }
     }
 
@@ -111,7 +111,7 @@ void OSPF::InterfaceState::ChangeState(OSPF::Interface* intf, OSPF::InterfaceSta
     }
 }
 
-void OSPF::InterfaceState::CalculateDesignatedRouter(OSPF::Interface* intf)
+void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
 {
     OSPF::RouterID           routerID                = intf->parentArea->getRouter()->getRouterID();
     OSPF::DesignatedRouterID currentDesignatedRouter = intf->designatedRouter;
@@ -326,37 +326,37 @@ void OSPF::InterfaceState::CalculateDesignatedRouter(OSPF::Interface* intf)
 
     if (wasBackupDesignatedRouter) {
         if (isDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
         }
         if (isOther) {
-            ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
         }
     }
     if (wasDesignatedRouter) {
         if (isBackupDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new OSPF::InterfaceStateBackup, this);
         }
         if (isOther) {
-            ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
         }
     }
     if (wasOther) {
         if (isDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
         }
         if (isBackupDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new OSPF::InterfaceStateBackup, this);
         }
     }
     if (wasWaiting) {
         if (isDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
         }
         if (isBackupDesignatedRouter) {
-            ChangeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new OSPF::InterfaceStateBackup, this);
         }
         if (isOther) {
-            ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
         }
     }
 
@@ -366,14 +366,14 @@ void OSPF::InterfaceState::CalculateDesignatedRouter(OSPF::Interface* intf)
              (!wasDesignatedRouter && isDesignatedRouter)))
         {
             if (intf->neighboringRouters[i]->getPriority() == 0) {
-                intf->neighboringRouters[i]->ProcessEvent(OSPF::Neighbor::Start);
+                intf->neighboringRouters[i]->processEvent(OSPF::Neighbor::Start);
             }
         }
         if ((declaredDesignatedRouter.routerID != routersOldDesignatedRouterID) ||
             (declaredBackup.routerID != routersOldBackupID))
         {
             if (intf->neighboringRouters[i]->getState() >= OSPF::Neighbor::TwoWayState) {
-                intf->neighboringRouters[i]->ProcessEvent(OSPF::Neighbor::IsAdjacencyOK);
+                intf->neighboringRouters[i]->processEvent(OSPF::Neighbor::IsAdjacencyOK);
             }
         }
     }

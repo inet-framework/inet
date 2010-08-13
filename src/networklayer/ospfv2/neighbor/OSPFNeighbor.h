@@ -116,38 +116,38 @@ private:
     static unsigned long                ddSequenceNumberInitSeed;
 
 private:
-    void ChangeState(NeighborState* newState, NeighborState* currentState);
+    void changeState(NeighborState* newState, NeighborState* currentState);
 
 public:
             Neighbor(RouterID neighbor = NullRouterID);
     virtual ~Neighbor(void);
 
-    void                ProcessEvent                        (NeighborEventType event);
+    void                processEvent                        (NeighborEventType event);
     void                Reset                               (void);
     void                InitFirstAdjacency                  (void);
     NeighborStateType   getState                            (void) const;
     static const char*  getStateString                      (NeighborStateType stateType);
-    void                SendDatabaseDescriptionPacket       (bool init = false);
-    bool                RetransmitDatabaseDescriptionPacket(void);
-    void                CreateDatabaseSummary               (void);
-    void                SendLinkStateRequestPacket          (void);
-    void                RetransmitUpdatePacket              (void);
+    void                sendDatabaseDescriptionPacket       (bool init = false);
+    bool                retransmitDatabaseDescriptionPacket(void);
+    void                createDatabaseSummary               (void);
+    void                sendLinkStateRequestPacket          (void);
+    void                retransmitUpdatePacket              (void);
     bool                NeedAdjacency                       (void);
-    void                AddToRetransmissionList             (OSPFLSA* lsa);
-    void                RemoveFromRetransmissionList        (LSAKeyType lsaKey);
-    bool                IsLSAOnRetransmissionList           (LSAKeyType lsaKey) const;
-    OSPFLSA*            FindOnRetransmissionList            (LSAKeyType lsaKey);
+    void                addToRetransmissionList             (OSPFLSA* lsa);
+    void                removeFromRetransmissionList        (LSAKeyType lsaKey);
+    bool                isLinkStateRequestListEmpty           (LSAKeyType lsaKey) const;
+    OSPFLSA*            findOnRetransmissionList            (LSAKeyType lsaKey);
     void                StartUpdateRetransmissionTimer      (void);
-    void                ClearUpdateRetransmissionTimer      (void);
-    void                AddToRequestList                    (OSPFLSAHeader* lsaHeader);
-    void                RemoveFromRequestList               (LSAKeyType lsaKey);
-    bool                IsLSAOnRequestList                  (LSAKeyType lsaKey) const;
-    OSPFLSAHeader*      FindOnRequestList                   (LSAKeyType lsaKey);
+    void                clearUpdateRetransmissionTimer      (void);
+    void                addToRequestList                    (OSPFLSAHeader* lsaHeader);
+    void                removeFromRequestList               (LSAKeyType lsaKey);
+    bool                isLSAOnRequestList                  (LSAKeyType lsaKey) const;
+    OSPFLSAHeader*      findOnRequestList                   (LSAKeyType lsaKey);
     void                StartRequestRetransmissionTimer     (void);
-    void                ClearRequestRetransmissionTimer     (void);
-    void                AddToTransmittedLSAList             (LSAKeyType lsaKey);
-    bool                IsOnTransmittedLSAList              (LSAKeyType lsaKey) const;
-    void                AgeTransmittedLSAList               (void);
+    void                clearRequestRetransmissionTimer     (void);
+    void                addToTransmittedLSAList             (LSAKeyType lsaKey);
+    bool                isOnTransmittedLSAList              (LSAKeyType lsaKey) const;
+    void                ageTransmittedLSAList               (void);
     unsigned long       getUniqueULong                      (void);
     void                DeleteLastSentDDPacket              (void);
 
@@ -181,16 +181,16 @@ public:
     OSPFTimer*          getPollTimer                        (void)                  { return pollTimer; }
     OSPFTimer*          getDDRetransmissionTimer            (void)                  { return ddRetransmissionTimer; }
     OSPFTimer*          getUpdateRetransmissionTimer        (void)                  { return updateRetransmissionTimer; }
-    bool                IsUpdateRetransmissionTimerActive   (void) const            { return updateRetransmissionTimerActive; }
-    bool                IsRequestRetransmissionTimerActive  (void) const            { return requestRetransmissionTimerActive; }
-    bool                IsFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
+    bool                isUpdateRetransmissionTimerActive   (void) const            { return updateRetransmissionTimerActive; }
+    bool                isRequestRetransmissionTimerActive  (void) const            { return requestRetransmissionTimerActive; }
+    bool                isFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
     bool                DesignatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
-    void                SetUpDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
+    void                setupDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
     unsigned long       getDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
 
-    void IncrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
+    void incrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
     bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
-    bool IsLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
+    bool isLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
     void PopFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
 };
 

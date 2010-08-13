@@ -17,20 +17,20 @@
 
 #include "LSA.h"
 
-bool OSPF::SummaryLSA::Update(const OSPFSummaryLSA* lsa)
+bool OSPF::SummaryLSA::update(const OSPFSummaryLSA* lsa)
 {
-    bool different = DiffersFrom(lsa);
+    bool different = differsFrom(lsa);
     (*this) = (*lsa);
     ResetInstallTime();
     if (different) {
-        ClearNextHops();
+        clearNextHops();
         return true;
     } else {
         return false;
     }
 }
 
-bool OSPF::SummaryLSA::DiffersFrom(const OSPFSummaryLSA* summaryLSA) const
+bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA* summaryLSA) const
 {
     const OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||

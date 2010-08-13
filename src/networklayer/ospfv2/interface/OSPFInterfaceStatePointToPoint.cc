@@ -22,28 +22,28 @@
 #include "OSPFRouter.h"
 #include "MessageHandler.h"
 
-void OSPF::InterfaceStatePointToPoint::ProcessEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::InterfaceDown) {
         intf->Reset();
-        ChangeState(intf, new OSPF::InterfaceStateDown, this);
+        changeState(intf, new OSPF::InterfaceStateDown, this);
     }
     if (event == OSPF::Interface::LoopIndication) {
         intf->Reset();
-        ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
+        changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HelloTimer) {
         if (intf->getType() == OSPF::Interface::Virtual) {
             if (intf->getNeighborCount() > 0) {
-                intf->SendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
+                intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
         } else {
-            intf->SendHelloPacket(OSPF::AllSPFRouters);
+            intf->sendHelloPacket(OSPF::AllSPFRouters);
         }
         intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::AcknowledgementTimer) {
-        intf->SendDelayedAcknowledgements();
+        intf->sendDelayedAcknowledgements();
     }
 }
 

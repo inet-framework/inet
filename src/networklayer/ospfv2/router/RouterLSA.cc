@@ -17,20 +17,20 @@
 
 #include "LSA.h"
 
-bool OSPF::RouterLSA::Update(const OSPFRouterLSA* lsa)
+bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
 {
-    bool different = DiffersFrom(lsa);
+    bool different = differsFrom(lsa);
     (*this) = (*lsa);
     ResetInstallTime();
     if (different) {
-        ClearNextHops();
+        clearNextHops();
         return true;
     } else {
         return false;
     }
 }
 
-bool OSPF::RouterLSA::DiffersFrom(const OSPFRouterLSA* routerLSA) const
+bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA* routerLSA) const
 {
     const OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||

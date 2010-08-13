@@ -70,10 +70,10 @@ void OSPFRouting::initialize(int stage)
 
         // read the OSPF AS configuration
         const char *fileName = par("ospfConfigFile");
-        if (fileName == NULL || (!strcmp(fileName, "")) || !LoadConfigFromXML(fileName))
+        if (fileName == NULL || (!strcmp(fileName, "")) || !loadConfigFromXML(fileName))
             error("Error reading AS configuration from file %s", fileName);
 
-        ospfRouter->AddWatches();
+        ospfRouter->addWatches();
     }
 }
 
@@ -93,7 +93,7 @@ void OSPFRouting::handleMessage(cMessage *msg)
 /**
  * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
  */
-int OSPFRouting::ResolveInterfaceName(const std::string& name) const
+int OSPFRouting::resolveInterfaceName(const std::string& name) const
 {
     InterfaceEntry* ie = ift->getInterfaceByName(name.c_str());
     if (!ie)
@@ -131,7 +131,7 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
  * @param asConfig [in] XML node describing the configuration of the whole Autonomous System.
  * @param areaID   [in] The Area to be added to the OSPF datastructure.
  */
-void OSPFRouting::LoadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID)
+void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID)
 {
     std::string areaXPath("Area[@id='");
     areaXPath += areaID;
@@ -155,9 +155,9 @@ void OSPFRouting::LoadAreaFromXML(const cXMLElement& asConfig, const std::string
             addressRange.mask = IPv4AddressFromAddressString((*arIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
             std::string status = (*arIt)->getChildrenByTagName("Status")[0]->getNodeValue();
             if (status == "Advertise") {
-                area->AddAddressRange(addressRange, true);
+                area->addAddressRange(addressRange, true);
             } else {
-                area->AddAddressRange(addressRange, false);
+                area->addAddressRange(addressRange, false);
             }
         }
         if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
@@ -166,7 +166,7 @@ void OSPFRouting::LoadAreaFromXML(const cXMLElement& asConfig, const std::string
         }
     }
     // Add the Area to the router
-    ospfRouter->AddArea(area);
+    ospfRouter->addArea(area);
 }
 
 
@@ -175,11 +175,11 @@ void OSPFRouting::LoadAreaFromXML(const cXMLElement& asConfig, const std::string
  * Handles PointToPoint, Broadcast, NBMA and PointToMultiPoint interfaces.
  * @param ifConfig [in] XML node describing the configuration of an OSPF interface.
  */
-void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
+void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     OSPF::Interface* intf          = new OSPF::Interface;
     std::string      ifName        = ifConfig.getAttribute("ifName");
-    int              ifIndex       = ResolveInterfaceName(ifName);
+    int              ifIndex       = resolveInterfaceName(ifName);
     std::string      interfaceType = ifConfig.getTagName();
 
     EV << "        loading " << interfaceType << " " << ifName << " ifIndex[" << ifIndex << "]\n";
@@ -258,7 +258,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
                     neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
                     neighbor->setPriority(atoi((*neighborIt)->getChildrenByTagName("NeighborPriority")[0]->getNodeValue()));
-                    intf->AddNeighbor(neighbor);
+                    intf->addNeighbor(neighbor);
                 }
             }
         }
@@ -269,7 +269,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
                 if (neighborNodeName == "PointToMultiPointNeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
                     neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getNodeValue()));
-                    intf->AddNeighbor(neighbor);
+                    intf->addNeighbor(neighbor);
                 }
             }
         }
@@ -278,8 +278,8 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
     // add the interface to it's Area
     OSPF::Area* area = ospfRouter->getArea(areaID);
     if (area != NULL) {
-        area->AddInterface(intf);
-        intf->ProcessEvent(OSPF::Interface::InterfaceUp); // notification should come from the blackboard...
+        area->addInterface(intf);
+        intf->processEvent(OSPF::Interface::InterfaceUp); // notification should come from the blackboard...
     } else {
         delete intf;
         error("Loading %s ifIndex[%d] in Area %d aborted", interfaceType.c_str(), ifIndex, areaID);
@@ -291,10 +291,10 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
  * Loads the configuration information of a route outside of the Autonomous System(external route).
  * @param externalRouteConfig [in] XML node describing the parameters of an external route.
  */
-void OSPFRouting::LoadExternalRoute(const cXMLElement& externalRouteConfig)
+void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
     std::string               ifName  = externalRouteConfig.getAttribute("ifName");
-    int                       ifIndex = ResolveInterfaceName(ifName);
+    int                       ifIndex = resolveInterfaceName(ifName);
     OSPFASExternalLSAContents asExternalRoute;
     OSPF::RoutingTableEntry   externalRoutingEntry; // only used here to keep the path cost calculation in one place
     OSPF::IPv4AddressRange    networkAddress;
@@ -342,7 +342,7 @@ void OSPFRouting::LoadExternalRoute(const cXMLElement& externalRouteConfig)
         }
     }
     // add the external route to the OSPF datastructure
-    ospfRouter->UpdateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
+    ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
 }
 
 
@@ -350,13 +350,13 @@ void OSPFRouting::LoadExternalRoute(const cXMLElement& externalRouteConfig)
  * Loads the configuration of a host getRoute(a host directly connected to the router).
  * @param hostRouteConfig [in] XML node describing the parameters of a host route.
  */
-void OSPFRouting::LoadHostRoute(const cXMLElement& hostRouteConfig)
+void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 {
     OSPF::HostRouteParameters hostParameters;
     OSPF::AreaID              hostArea;
 
     std::string ifName = hostRouteConfig.getAttribute("ifName");
-    hostParameters.ifIndex = ResolveInterfaceName(ifName);
+    hostParameters.ifIndex = resolveInterfaceName(ifName);
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
@@ -376,7 +376,7 @@ void OSPFRouting::LoadHostRoute(const cXMLElement& hostRouteConfig)
     // add the host route to the OSPF datastructure.
     OSPF::Area* area = ospfRouter->getArea(hostArea);
     if (area != NULL) {
-        area->AddHostRoute(hostParameters);
+        area->addHostRoute(hostParameters);
 
     } else {
         error("Loading HostInterface ifIndex[%d] in Area %d aborted", hostParameters.ifIndex, hostArea);
@@ -388,7 +388,7 @@ void OSPFRouting::LoadHostRoute(const cXMLElement& hostRouteConfig)
  * Loads the configuration of an OSPf virtual link(virtual connection between two backbone routers).
  * @param virtualLinkConfig [in] XML node describing the parameters of a virtual link.
  */
-void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
+void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     OSPF::Interface* intf     = new OSPF::Interface;
     std::string      endPoint = virtualLinkConfig.getAttribute("endPointRouterID");
@@ -398,7 +398,7 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     intf->setType(OSPF::Interface::Virtual);
     neighbor->setNeighborID(ULongFromAddressString(endPoint.c_str()));
-    intf->AddNeighbor(neighbor);
+    intf->addNeighbor(neighbor);
 
     cXMLElementList ifDetails = virtualLinkConfig.getChildren();
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
@@ -447,7 +447,7 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
     OSPF::Area* backbone    = ospfRouter->getArea(OSPF::BackboneAreaID);
 
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
-        backbone->AddInterface(intf);
+        backbone->addInterface(intf);
     } else {
         delete intf;
         error("Loading VirtualLink to %s through Area %d aborted", endPoint.c_str(), intf->getAreaID());
@@ -461,7 +461,7 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
  * @return True if the configuration was succesfully loaded.
  * @throws an getError() otherwise.
  */
-bool OSPFRouting::LoadConfigFromXML(const char * filename)
+bool OSPFRouting::loadConfigFromXML(const char * filename)
 {
     cXMLElement* asConfig = ev.getXMLDocument(filename);
     if (asConfig == NULL) {
@@ -491,11 +491,11 @@ bool OSPFRouting::LoadConfigFromXML(const char * filename)
 
     // load area information
     for (std::map<std::string, int>::iterator areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {
-        LoadAreaFromXML(*asConfig, areaIt->first);
+        loadAreaFromXML(*asConfig, areaIt->first);
     }
     // if the router is an area border router then it MUST be part of the backbone(area 0)
     if ((areaList.size() > 1) && (areaList.find("0.0.0.0") == areaList.end())) {
-        LoadAreaFromXML(*asConfig, "0.0.0.0");
+        loadAreaFromXML(*asConfig, "0.0.0.0");
     }
 
     // load interface information
@@ -507,16 +507,16 @@ bool OSPFRouting::LoadConfigFromXML(const char * filename)
             (nodeName == "NBMAInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
-            LoadInterfaceParameters(*(*routerConfigIt));
+            loadInterfaceParameters(*(*routerConfigIt));
         }
         if (nodeName == "ExternalInterface") {
-            LoadExternalRoute(*(*routerConfigIt));
+            loadExternalRoute(*(*routerConfigIt));
         }
         if (nodeName == "HostInterface") {
-            LoadHostRoute(*(*routerConfigIt));
+            loadHostRoute(*(*routerConfigIt));
         }
         if (nodeName == "VirtualLink") {
-            LoadVirtualLink(*(*routerConfigIt));
+            loadVirtualLink(*(*routerConfigIt));
         }
     }
     return true;

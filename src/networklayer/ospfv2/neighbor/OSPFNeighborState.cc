@@ -20,60 +20,60 @@
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
 
-void OSPF::NeighborState::ChangeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
+void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
 {
 
     OSPF::Neighbor::NeighborStateType   oldState            = currentState->getState();
     OSPF::Neighbor::NeighborStateType   nextState           = newState->getState();
     bool                                rebuildRoutingTable = false;
 
-    neighbor->ChangeState(newState, currentState);
+    neighbor->changeState(newState, currentState);
 
     if ((oldState == OSPF::Neighbor::FullState) || (nextState == OSPF::Neighbor::FullState)) {
         OSPF::RouterID   routerID  = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
-        OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->FindRouterLSA(routerID);
+        OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
         if (routerLSA != NULL) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                 routerLSA->getHeader().setLsAge(MAX_AGE);
-                neighbor->getInterface()->getArea()->FloodLSA(routerLSA);
-                routerLSA->IncrementInstallTime();
+                neighbor->getInterface()->getArea()->floodLSA(routerLSA);
+                routerLSA->incrementInstallTime();
             } else {
                 OSPF::RouterLSA* newLSA = neighbor->getInterface()->getArea()->OriginateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                rebuildRoutingTable |= routerLSA->Update(newLSA);
+                rebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
-                neighbor->getInterface()->getArea()->FloodLSA(routerLSA);
+                neighbor->getInterface()->getArea()->floodLSA(routerLSA);
             }
         }
 
         if (neighbor->getInterface()->getState() == OSPF::Interface::DesignatedRouterState) {
-            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->FindNetworkLSA(ULongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
+            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(ULongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
 
             if (networkLSA != NULL) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                     networkLSA->getHeader().setLsAge(MAX_AGE);
-                    neighbor->getInterface()->getArea()->FloodLSA(networkLSA);
-                    networkLSA->IncrementInstallTime();
+                    neighbor->getInterface()->getArea()->floodLSA(networkLSA);
+                    networkLSA->incrementInstallTime();
                 } else {
                     OSPF::NetworkLSA* newLSA = neighbor->getInterface()->getArea()->OriginateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= networkLSA->Update(newLSA);
+                        rebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;
                     } else {    // no neighbors on the network -> old NetworkLSA must be flushed
                         networkLSA->getHeader().setLsAge(MAX_AGE);
-                        networkLSA->IncrementInstallTime();
+                        networkLSA->incrementInstallTime();
                     }
 
-                    neighbor->getInterface()->getArea()->FloodLSA(networkLSA);
+                    neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                 }
             }
         }

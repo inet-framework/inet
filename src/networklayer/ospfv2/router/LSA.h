@@ -45,8 +45,8 @@ public:
 
     virtual ~RoutingInfo(void) {}
 
-    void            AddNextHop          (NextHop nextHop)           { nextHops.push_back(nextHop); }
-    void            ClearNextHops       (void)                      { nextHops.clear(); }
+    void            addNextHop          (NextHop nextHop)           { nextHops.push_back(nextHop); }
+    void            clearNextHops       (void)                      { nextHops.clear(); }
     unsigned int    getNextHopCount     (void) const                { return nextHops.size(); }
     NextHop         getNextHop          (unsigned int index) const  { return nextHops[index]; }
     void            setDistance         (unsigned long d)           { distance = d; }
@@ -73,7 +73,7 @@ public:
 
     void            setSource               (InstallSource installSource)   { source = installSource; }
     InstallSource   getSource               (void) const                    { return source; }
-    void            IncrementInstallTime    (void)                          { installTime++; }
+    void            incrementInstallTime    (void)                          { installTime++; }
     void            ResetInstallTime        (void)                          { installTime = 0; }
     unsigned long   getInstallTime          (void) const                    { return installTime; }
 };
@@ -88,10 +88,10 @@ public:
             RouterLSA  (const RouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
     virtual ~RouterLSA(void) {}
 
-    bool    ValidateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const   { return true; } // not implemented
 
-    bool    Update      (const OSPFRouterLSA* lsa);
-    bool    DiffersFrom(const OSPFRouterLSA* routerLSA) const;
+    bool    update      (const OSPFRouterLSA* lsa);
+    bool    differsFrom(const OSPFRouterLSA* routerLSA) const;
 };
 
 class NetworkLSA : public OSPFNetworkLSA,
@@ -104,10 +104,10 @@ public:
             NetworkLSA  (const NetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
     virtual ~NetworkLSA(void) {}
 
-    bool    ValidateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const   { return true; } // not implemented
 
-    bool    Update      (const OSPFNetworkLSA* lsa);
-    bool    DiffersFrom(const OSPFNetworkLSA* networkLSA) const;
+    bool    update      (const OSPFNetworkLSA* lsa);
+    bool    differsFrom(const OSPFNetworkLSA* networkLSA) const;
 };
 
 class SummaryLSA : public OSPFSummaryLSA,
@@ -125,10 +125,10 @@ public:
     bool    getPurgeable(void) const           { return purgeable; }
     void    setPurgeable(bool purge = true)    { purgeable = purge; }
 
-    bool    ValidateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const   { return true; } // not implemented
 
-    bool    Update      (const OSPFSummaryLSA* lsa);
-    bool    DiffersFrom(const OSPFSummaryLSA* summaryLSA) const;
+    bool    update      (const OSPFSummaryLSA* lsa);
+    bool    differsFrom(const OSPFSummaryLSA* summaryLSA) const;
 };
 
 class ASExternalLSA : public OSPFASExternalLSA,
@@ -146,10 +146,10 @@ public:
     bool    getPurgeable(void) const           { return purgeable; }
     void    setPurgeable(bool purge = true)    { purgeable = purge; }
 
-    bool    ValidateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const   { return true; } // not implemented
 
-    bool    Update      (const OSPFASExternalLSA* lsa);
-    bool    DiffersFrom(const OSPFASExternalLSA* asExternalLSA) const;
+    bool    update      (const OSPFASExternalLSA* lsa);
+    bool    differsFrom(const OSPFASExternalLSA* asExternalLSA) const;
 };
 
 } // namespace OSPF
@@ -238,7 +238,7 @@ inline bool operator!= (const OSPF::NextHop& leftHop, const OSPF::NextHop& right
     return (!(leftHop == rightHop));
 }
 
-inline unsigned int CalculateLSASize(const OSPFRouterLSA* routerLSA)
+inline unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA)
 {
     unsigned int   lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
     unsigned short linkCount = routerLSA->getLinksArraySize();
@@ -251,25 +251,25 @@ inline unsigned int CalculateLSASize(const OSPFRouterLSA* routerLSA)
     return lsaLength;
 }
 
-inline unsigned int CalculateLSASize(const OSPFNetworkLSA* networkLSA)
+inline unsigned int calculateLSASize(const OSPFNetworkLSA* networkLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
             (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH));
 }
 
-inline unsigned int CalculateLSASize(const OSPFSummaryLSA* summaryLSA)
+inline unsigned int calculateLSASize(const OSPFSummaryLSA* summaryLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH +
             (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH));
 }
 
-inline unsigned int CalculateLSASize(const OSPFASExternalLSA* asExternalLSA)
+inline unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH +
             (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
 }
 
-inline void PrintLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
+inline void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
     char addressString[16];
     output << "LSAHeader: age="
            << lsaHeader.getLsAge()
@@ -293,7 +293,7 @@ inline void PrintLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output)
 
 inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
 {
-    PrintLSAHeader(lsa.getHeader(), ostr);
+    printLSAHeader(lsa.getHeader(), ostr);
     return ostr;
 }
 

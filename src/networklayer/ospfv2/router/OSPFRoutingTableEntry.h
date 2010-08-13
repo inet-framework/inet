@@ -82,8 +82,8 @@ public:
     Metric                  getType2Cost            (void) const                    { return type2Cost; }
     void                    setLinkStateOrigin      (const OSPFLSA* lsa)            { linkStateOrigin = lsa; }
     const OSPFLSA*          getLinkStateOrigin      (void) const                    { return linkStateOrigin; }
-    void                    AddNextHop              (NextHop hop);
-    void                    ClearNextHops           (void)                          { nextHops.clear(); }
+    void                    addNextHop              (NextHop hop);
+    void                    clearNextHops           (void)                          { nextHops.clear(); }
     unsigned int            getNextHopCount         (void) const                    { return nextHops.size(); }
     NextHop                 getNextHop              (unsigned int index) const      { return nextHops[index]; }
 };
@@ -155,7 +155,7 @@ inline void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
     }
 }
 
-inline void OSPF::RoutingTableEntry::AddNextHop(OSPF::NextHop hop)
+inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
 {
     if (nextHops.size() == 0) {
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterfaceById(hop.ifIndex);
@@ -227,7 +227,7 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
         << ", Type2Cost: "
         << entry.getType2Cost()
         << ", Origin: [";
-    PrintLSAHeader(entry.getLinkStateOrigin()->getHeader(), out);
+    printLSAHeader(entry.getLinkStateOrigin()->getHeader(), out);
     out << "], NextHops: ";
 
     unsigned int hopCount = entry.getNextHopCount();

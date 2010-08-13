@@ -23,9 +23,9 @@ OSPF::LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(OSPF::Rou
 {
 }
 
-void OSPF::LinkStateAcknowledgementHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
 {
-    router->getMessageHandler()->PrintEvent("Link State Acknowledgement packet received", intf, neighbor);
+    router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= OSPF::Neighbor::ExchangeState) {
         OSPFLinkStateAcknowledgementPacket* lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket*> (packet);
@@ -40,22 +40,22 @@ void OSPF::LinkStateAcknowledgementHandler::ProcessPacket(OSPFPacket* packet, OS
             OSPF::LSAKeyType lsaKey;
 
             EV << "    ";
-            PrintLSAHeader(lsaHeader, ev.getOStream());
+            printLSAHeader(lsaHeader, ev.getOStream());
             EV << "\n";
 
             lsaKey.linkStateID = lsaHeader.getLinkStateID();
             lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter().getInt();
 
-            if ((lsaOnRetransmissionList = neighbor->FindOnRetransmissionList(lsaKey)) != NULL) {
+            if ((lsaOnRetransmissionList = neighbor->findOnRetransmissionList(lsaKey)) != NULL) {
                 if (operator== (lsaHeader, lsaOnRetransmissionList->getHeader())) {
-                    neighbor->RemoveFromRetransmissionList(lsaKey);
+                    neighbor->removeFromRetransmissionList(lsaKey);
                 } else {
                     EV << "Got an Acknowledgement packet for an unsent Update packet.\n";
                 }
             }
         }
-        if (neighbor->IsLinkStateRetransmissionListEmpty()) {
-            neighbor->ClearUpdateRetransmissionTimer();
+        if (neighbor->isLinkStateRetransmissionListEmpty()) {
+            neighbor->clearUpdateRetransmissionTimer();
         }
     }
 }

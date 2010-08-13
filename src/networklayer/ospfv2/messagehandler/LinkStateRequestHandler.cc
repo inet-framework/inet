@@ -25,9 +25,9 @@ OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router* containingR
 {
 }
 
-void OSPF::LinkStateRequestHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
 {
-    router->getMessageHandler()->PrintEvent("Link State Request packet received", intf, neighbor);
+    router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
     OSPF::Neighbor::NeighborStateType neighborState = neighbor->getState();
 
@@ -59,13 +59,13 @@ void OSPF::LinkStateRequestHandler::ProcessPacket(OSPFPacket* packet, OSPF::Inte
             lsaKey.linkStateID = request.linkStateID;
             lsaKey.advertisingRouter = request.advertisingRouter.getInt();
 
-            OSPFLSA* lsaInDatabase = router->FindLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->getArea()->getAreaID());
+            OSPFLSA* lsaInDatabase = router->findLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->getArea()->getAreaID());
 
             if (lsaInDatabase != NULL) {
                 lsas.push_back(lsaInDatabase);
             } else {
                 error = true;
-                neighbor->ProcessEvent(OSPF::Neighbor::BadLinkStateRequest);
+                neighbor->processEvent(OSPF::Neighbor::BadLinkStateRequest);
                 break;
             }
         }
@@ -76,22 +76,22 @@ void OSPF::LinkStateRequestHandler::ProcessPacket(OSPFPacket* packet, OSPF::Inte
             OSPF::MessageHandler* messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
-                OSPFLinkStateUpdatePacket* updatePacket = intf->CreateUpdatePacket(lsas[j]);
+                OSPFLinkStateUpdatePacket* updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != NULL) {
                     if (intf->getType() == OSPF::Interface::Broadcast) {
                         if ((intf->getState() == OSPF::Interface::DesignatedRouterState) ||
                             (intf->getState() == OSPF::Interface::BackupState) ||
                             (intf->getDesignatedRouter() == OSPF::NullDesignatedRouterID))
                         {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllDRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::AllDRouters, intf->getIfIndex(), ttl);
                         }
                     } else {
                         if (intf->getType() == OSPF::Interface::PointToPoint) {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->SendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                         }
                     }
 

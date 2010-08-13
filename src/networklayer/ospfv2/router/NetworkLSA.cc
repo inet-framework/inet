@@ -17,20 +17,20 @@
 
 #include "LSA.h"
 
-bool OSPF::NetworkLSA::Update(const OSPFNetworkLSA* lsa)
+bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
 {
-    bool different = DiffersFrom(lsa);
+    bool different = differsFrom(lsa);
     (*this) = (*lsa);
     ResetInstallTime();
     if (different) {
-        ClearNextHops();
+        clearNextHops();
         return true;
     } else {
         return false;
     }
 }
 
-bool OSPF::NetworkLSA::DiffersFrom(const OSPFNetworkLSA* networkLSA) const
+bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA* networkLSA) const
 {
     const OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||

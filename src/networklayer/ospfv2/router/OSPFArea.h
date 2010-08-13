@@ -54,10 +54,10 @@ public:
 
     void                setAreaID                       (AreaID areaId)                                 { areaID = areaId; }
     AreaID              getAreaID                       (void) const                                    { return areaID; }
-    void                AddAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
+    void                addAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
     unsigned int        getAddressRangeCount            (void) const                                    { return areaAddressRanges.size(); }
     IPv4AddressRange    getAddressRange                 (unsigned int index) const                      { return areaAddressRanges[index]; }
-    void                AddHostRoute                    (HostRouteParameters& hostRouteParameters)      { hostRoutes.push_back(hostRouteParameters); }
+    void                addHostRoute                    (HostRouteParameters& hostRouteParameters)      { hostRoutes.push_back(hostRouteParameters); }
     void                setTransitCapability            (bool transit)                                  { transitCapability = transit; }
     bool                getTransitCapability            (void) const                                    { return transitCapability; }
     void                setExternalRoutingCapability    (bool flooded)                                  { externalRoutingCapability = flooded; }
@@ -82,37 +82,37 @@ public:
     SummaryLSA*         getSummaryLSA                   (unsigned long i)                               { return summaryLSAs[i]; }
     const SummaryLSA*   getSummaryLSA                   (unsigned long i) const                         { return summaryLSAs[i]; }
 
-    bool                ContainsAddress                     (IPv4Address address) const;
-    bool                HasAddressRange                     (IPv4AddressRange addressRange) const;
+    bool                containsAddress                     (IPv4Address address) const;
+    bool                hasAddressRange                     (IPv4AddressRange addressRange) const;
     IPv4AddressRange    getContainingAddressRange           (IPv4AddressRange addressRange, bool* advertise = NULL) const;
-    void                AddInterface                        (Interface* intf);
+    void                addInterface                        (Interface* intf);
     Interface*          getInterface                        (unsigned char ifIndex);
     Interface*          getInterface                        (IPv4Address address);
-    bool                HasVirtualLink                      (AreaID withTransitArea) const;
-    Interface*          FindVirtualLink                     (RouterID routerID);
+    bool                hasVirtualLink                      (AreaID withTransitArea) const;
+    Interface*          findVirtualLink                     (RouterID routerID);
 
-    bool                InstallRouterLSA                    (OSPFRouterLSA* lsa);
-    bool                InstallNetworkLSA                   (OSPFNetworkLSA* lsa);
-    bool                InstallSummaryLSA                   (OSPFSummaryLSA* lsa);
-    RouterLSA*          FindRouterLSA                       (LinkStateID linkStateID);
-    const RouterLSA*    FindRouterLSA                       (LinkStateID linkStateID) const;
-    NetworkLSA*         FindNetworkLSA                      (LinkStateID linkStateID);
-    const NetworkLSA*   FindNetworkLSA                      (LinkStateID linkStateID) const;
-    SummaryLSA*         FindSummaryLSA                      (LSAKeyType lsaKey);
-    const SummaryLSA*   FindSummaryLSA                      (LSAKeyType lsaKey) const;
-    void                AgeDatabase                         (void);
-    bool                HasAnyNeighborInStates              (int states) const;
-    void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
-    bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
-    bool                FloodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
-    bool                IsLocalAddress                      (IPv4Address address) const;
+    bool                installRouterLSA                    (OSPFRouterLSA* lsa);
+    bool                installNetworkLSA                   (OSPFNetworkLSA* lsa);
+    bool                installSummaryLSA                   (OSPFSummaryLSA* lsa);
+    RouterLSA*          findRouterLSA                       (LinkStateID linkStateID);
+    const RouterLSA*    findRouterLSA                       (LinkStateID linkStateID) const;
+    NetworkLSA*         findNetworkLSA                      (LinkStateID linkStateID);
+    const NetworkLSA*   findNetworkLSA                      (LinkStateID linkStateID) const;
+    SummaryLSA*         findSummaryLSA                      (LSAKeyType lsaKey);
+    const SummaryLSA*   findSummaryLSA                      (LSAKeyType lsaKey) const;
+    void                ageDatabase                         (void);
+    bool                hasAnyNeighborInStates              (int states) const;
+    void                removeFromAllRetransmissionLists    (LSAKeyType lsaKey);
+    bool                isOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
+    bool                floodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    bool                isLocalAddress                      (IPv4Address address) const;
     RouterLSA*          OriginateRouterLSA                  (void);
     NetworkLSA*         OriginateNetworkLSA                 (const Interface* intf);
     SummaryLSA*         OriginateSummaryLSA                 (const RoutingTableEntry* entry,
                                                              const std::map<LSAKeyType, bool, LSAKeyType_Less>& originatedLSAs,
                                                              SummaryLSA*& lsaToReoriginate);
-    void                CalculateShortestPathTree           (std::vector<RoutingTableEntry*>& newRoutingTable);
-    void                CalculateInterAreaRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
+    void                calculateShortestPathTree           (std::vector<RoutingTableEntry*>& newRoutingTable);
+    void                calculateInterAreaRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
     void                ReCheckSummaryLSAs                  (std::vector<RoutingTableEntry*>& newRoutingTable);
 
     void        info(char* buffer);
@@ -120,21 +120,21 @@ public:
 
 private:
     SummaryLSA*             OriginateSummaryLSA                     (const OSPF::SummaryLSA* summaryLSA);
-    bool                    HasLink                                 (OSPFLSA* fromLSA, OSPFLSA* toLSA) const;
-    std::vector<NextHop>*   CalculateNextHops                       (OSPFLSA* destination, OSPFLSA* parent) const;
-    std::vector<NextHop>*   CalculateNextHops                       (Link& destination, OSPFLSA* parent) const;
+    bool                    hasLink                                 (OSPFLSA* fromLSA, OSPFLSA* toLSA) const;
+    std::vector<NextHop>*   calculateNextHops                       (OSPFLSA* destination, OSPFLSA* parent) const;
+    std::vector<NextHop>*   calculateNextHops                       (Link& destination, OSPFLSA* parent) const;
 
     LinkStateID             getUniqueLinkStateID                    (IPv4AddressRange destination,
                                                                      Metric destinationCost,
                                                                      SummaryLSA*& lsaToReoriginate) const;
 
-    bool                    FindSameOrWorseCostRoute                (const std::vector<OSPF::RoutingTableEntry*>& newRoutingTable,
+    bool                    findSameOrWorseCostRoute                (const std::vector<OSPF::RoutingTableEntry*>& newRoutingTable,
                                                                      const OSPF::SummaryLSA&                      currentLSA,
                                                                      unsigned short                               currentCost,
                                                                      bool&                                        destinationInRoutingTable,
                                                                      std::list<OSPF::RoutingTableEntry*>&         sameOrWorseCost) const;
 
-    RoutingTableEntry*      CreateRoutingTableEntryFromSummaryLSA   (const OSPF::SummaryLSA&        summaryLSA,
+    RoutingTableEntry*      createRoutingTableEntryFromSummaryLSA   (const OSPF::SummaryLSA&        summaryLSA,
                                                                      unsigned short                 entryCost,
                                                                      const OSPF::RoutingTableEntry& borderRouterEntry) const;
 };

@@ -40,7 +40,7 @@ void OSPF::MessageHandler::MessageReceived(cMessage* message)
             EV << "This packet is from ourselves, discarding.\n";
             delete message;
         } else {
-            ProcessPacket(packet);
+            processPacket(packet);
         }
     }
 }
@@ -56,8 +56,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid InterfaceHelloTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Hello Timer expired", intf);
-                    intf->ProcessEvent(OSPF::Interface::HelloTimer);
+                    printEvent("Hello Timer expired", intf);
+                    intf->processEvent(OSPF::Interface::HelloTimer);
                 }
             }
             break;
@@ -69,8 +69,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid InterfaceWaitTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Wait Timer expired", intf);
-                    intf->ProcessEvent(OSPF::Interface::WaitTimer);
+                    printEvent("Wait Timer expired", intf);
+                    intf->processEvent(OSPF::Interface::WaitTimer);
                 }
             }
             break;
@@ -82,8 +82,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid InterfaceAcknowledgementTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Acknowledgement Timer expired", intf);
-                    intf->ProcessEvent(OSPF::Interface::AcknowledgementTimer);
+                    printEvent("Acknowledgement Timer expired", intf);
+                    intf->processEvent(OSPF::Interface::AcknowledgementTimer);
                 }
             }
             break;
@@ -95,8 +95,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Inactivity Timer expired", neighbor->getInterface(), neighbor);
-                    neighbor->ProcessEvent(OSPF::Neighbor::InactivityTimer);
+                    printEvent("Inactivity Timer expired", neighbor->getInterface(), neighbor);
+                    neighbor->processEvent(OSPF::Neighbor::InactivityTimer);
                 }
             }
             break;
@@ -108,8 +108,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Poll Timer expired", neighbor->getInterface(), neighbor);
-                    neighbor->ProcessEvent(OSPF::Neighbor::PollTimer);
+                    printEvent("Poll Timer expired", neighbor->getInterface(), neighbor);
+                    neighbor->processEvent(OSPF::Neighbor::PollTimer);
                 }
             }
             break;
@@ -121,8 +121,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborDDRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Database Description Retransmission Timer expired", neighbor->getInterface(), neighbor);
-                    neighbor->ProcessEvent(OSPF::Neighbor::DDRetransmissionTimer);
+                    printEvent("Database Description Retransmission Timer expired", neighbor->getInterface(), neighbor);
+                    neighbor->processEvent(OSPF::Neighbor::DDRetransmissionTimer);
                 }
             }
             break;
@@ -134,8 +134,8 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborUpdateRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Update Retransmission Timer expired", neighbor->getInterface(), neighbor);
-                    neighbor->ProcessEvent(OSPF::Neighbor::UpdateRetransmissionTimer);
+                    printEvent("Update Retransmission Timer expired", neighbor->getInterface(), neighbor);
+                    neighbor->processEvent(OSPF::Neighbor::UpdateRetransmissionTimer);
                 }
             }
             break;
@@ -147,22 +147,22 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborRequestRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Request Retransmission Timer expired", neighbor->getInterface(), neighbor);
-                    neighbor->ProcessEvent(OSPF::Neighbor::RequestRetransmissionTimer);
+                    printEvent("Request Retransmission Timer expired", neighbor->getInterface(), neighbor);
+                    neighbor->processEvent(OSPF::Neighbor::RequestRetransmissionTimer);
                 }
             }
             break;
         case DatabaseAgeTimer:
             {
-                PrintEvent("Ageing the database");
-                router->AgeDatabase();
+                printEvent("Ageing the database");
+                router->ageDatabase();
             }
             break;
         default: break;
     }
 }
 
-void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* unused1, OSPF::Neighbor* unused2)
+void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* unused1, OSPF::Neighbor* unused2)
 {
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
@@ -180,7 +180,7 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
                 if (areaID == BackboneAreaID) {
                     if (router->getAreaCount() > 1) {
                         // it must be a virtual link and the source router's router ID must be the endpoint of this virtual link and...
-                        intf = area->FindVirtualLink(packet->getRouterID().getInt());
+                        intf = area->findVirtualLink(packet->getRouterID().getInt());
 
                         if (intf != NULL) {
                             OSPF::Area* virtualLinkTransitArea = router->getArea(intf->getTransitAreaID());
@@ -237,26 +237,26 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
                         }
                         switch (packetType) {
                             case HelloPacket:
-                                helloHandler.ProcessPacket(packet, intf);
+                                helloHandler.processPacket(packet, intf);
                                 break;
                             case DatabaseDescriptionPacket:
                                 if (neighbor != NULL) {
-                                    ddHandler.ProcessPacket(packet, intf, neighbor);
+                                    ddHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
                             case LinkStateRequestPacket:
                                 if (neighbor != NULL) {
-                                    lsRequestHandler.ProcessPacket(packet, intf, neighbor);
+                                    lsRequestHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
                             case LinkStateUpdatePacket:
                                 if (neighbor != NULL) {
-                                    lsUpdateHandler.ProcessPacket(packet, intf, neighbor);
+                                    lsUpdateHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
                             case LinkStateAcknowledgementPacket:
                                 if (neighbor != NULL) {
-                                    lsAckHandler.ProcessPacket(packet, intf, neighbor);
+                                    lsAckHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
                             default: break;
@@ -269,7 +269,7 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
     delete packet;
 }
 
-void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destination, int outputIfIndex, short ttl)
+void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
     IPControlInfo *ipControlInfo = new IPControlInfo();
     ipControlInfo->setProtocol(IP_PROT_OSPF);
@@ -285,7 +285,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
                 packet->setName("OSPF_HelloPacket");
 
                 OSPFHelloPacket* helloPacket = check_and_cast<OSPFHelloPacket*> (packet);
-                PrintHelloPacket(helloPacket, destination, outputIfIndex);
+                printHelloPacket(helloPacket, destination, outputIfIndex);
             }
             break;
         case DatabaseDescriptionPacket:
@@ -294,7 +294,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
                 packet->setName("OSPF_DDPacket");
 
                 OSPFDatabaseDescriptionPacket* ddPacket = check_and_cast<OSPFDatabaseDescriptionPacket*> (packet);
-                PrintDatabaseDescriptionPacket(ddPacket, destination, outputIfIndex);
+                printDatabaseDescriptionPacket(ddPacket, destination, outputIfIndex);
             }
             break;
         case LinkStateRequestPacket:
@@ -303,7 +303,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
                 packet->setName("OSPF_LSReqPacket");
 
                 OSPFLinkStateRequestPacket* requestPacket = check_and_cast<OSPFLinkStateRequestPacket*> (packet);
-                PrintLinkStateRequestPacket(requestPacket, destination, outputIfIndex);
+                printLinkStateRequestPacket(requestPacket, destination, outputIfIndex);
             }
             break;
         case LinkStateUpdatePacket:
@@ -312,7 +312,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
                 packet->setName("OSPF_LSUpdPacket");
 
                 OSPFLinkStateUpdatePacket* updatePacket = check_and_cast<OSPFLinkStateUpdatePacket*> (packet);
-                PrintLinkStateUpdatePacket(updatePacket, destination, outputIfIndex);
+                printLinkStateUpdatePacket(updatePacket, destination, outputIfIndex);
             }
             break;
         case LinkStateAcknowledgementPacket:
@@ -321,7 +321,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
                 packet->setName("OSPF_LSAckPacket");
 
                 OSPFLinkStateAcknowledgementPacket* ackPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket*> (packet);
-                PrintLinkStateAcknowledgementPacket(ackPacket, destination, outputIfIndex);
+                printLinkStateAcknowledgementPacket(ackPacket, destination, outputIfIndex);
             }
             break;
         default: break;
@@ -330,7 +330,7 @@ void OSPF::MessageHandler::SendPacket(OSPFPacket* packet, IPv4Address destinatio
     ospfModule->send(packet,"ipOut");
 }
 
-void OSPF::MessageHandler::ClearTimer(OSPFTimer* timer)
+void OSPF::MessageHandler::clearTimer(OSPFTimer* timer)
 {
     ospfModule->cancelEvent(timer);
 }
@@ -340,7 +340,7 @@ void OSPF::MessageHandler::StartTimer(OSPFTimer* timer, simtime_t delay)
     ospfModule->scheduleAt(simTime() + delay, timer);
 }
 
-void OSPF::MessageHandler::PrintEvent(const char* eventString, const OSPF::Interface* onInterface, const OSPF::Neighbor* forNeighbor /*= NULL*/) const
+void OSPF::MessageHandler::printEvent(const char* eventString, const OSPF::Interface* onInterface, const OSPF::Neighbor* forNeighbor /*= NULL*/) const
 {
     EV << eventString;
     if ((onInterface != NULL) || (forNeighbor != NULL)) {
@@ -378,7 +378,7 @@ void OSPF::MessageHandler::PrintEvent(const char* eventString, const OSPF::Inter
     EV << ".\n";
 }
 
-void OSPF::MessageHandler::PrintHelloPacket(const OSPFHelloPacket* helloPacket, IPv4Address destination, int outputIfIndex) const
+void OSPF::MessageHandler::printHelloPacket(const OSPFHelloPacket* helloPacket, IPv4Address destination, int outputIfIndex) const
 {
     char addressString[16];
     EV << "Sending Hello packet to "
@@ -405,7 +405,7 @@ void OSPF::MessageHandler::PrintHelloPacket(const OSPFHelloPacket* helloPacket, 
     }
 }
 
-void OSPF::MessageHandler::PrintDatabaseDescriptionPacket(const OSPFDatabaseDescriptionPacket* ddPacket, IPv4Address destination, int outputIfIndex) const
+void OSPF::MessageHandler::printDatabaseDescriptionPacket(const OSPFDatabaseDescriptionPacket* ddPacket, IPv4Address destination, int outputIfIndex) const
 {
     char addressString[16];
     EV << "Sending Database Description packet to "
@@ -428,12 +428,12 @@ void OSPF::MessageHandler::PrintDatabaseDescriptionPacket(const OSPFDatabaseDesc
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader(ddPacket->getLsaHeaders(i), ev.getOStream());
+        printLSAHeader(ddPacket->getLsaHeaders(i), ev.getOStream());
         EV << "\n";
     }
 }
 
-void OSPF::MessageHandler::PrintLinkStateRequestPacket(const OSPFLinkStateRequestPacket* requestPacket, IPv4Address destination, int outputIfIndex) const
+void OSPF::MessageHandler::printLinkStateRequestPacket(const OSPFLinkStateRequestPacket* requestPacket, IPv4Address destination, int outputIfIndex) const
 {
     char addressString[16];
     EV << "Sending Link State Request packet to "
@@ -455,7 +455,7 @@ void OSPF::MessageHandler::PrintLinkStateRequestPacket(const OSPFLinkStateReques
     }
 }
 
-void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdatePacket* updatePacket, IPv4Address destination, int outputIfIndex) const
+void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdatePacket* updatePacket, IPv4Address destination, int outputIfIndex) const
 {
     char addressString[16];
     EV << "Sending Link State Update packet to "
@@ -470,7 +470,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFRouterLSA& lsa = updatePacket->getRouterLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), ev.getOStream());
         EV << "\n";
 
         EV << "  bits="
@@ -506,7 +506,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFNetworkLSA& lsa = updatePacket->getNetworkLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), ev.getOStream());
         EV << "\n";
 
         EV << "  netMask="
@@ -526,7 +526,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFSummaryLSA& lsa = updatePacket->getSummaryLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), ev.getOStream());
         EV << "\n";
 
         EV << "  netMask="
@@ -541,7 +541,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFASExternalLSA& lsa = updatePacket->getAsExternalLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), ev.getOStream());
         EV << "\n";
 
         const OSPFASExternalLSAContents& contents = lsa.getContents();
@@ -559,7 +559,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     }
 }
 
-void OSPF::MessageHandler::PrintLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket* ackPacket, IPv4Address destination, int outputIfIndex) const
+void OSPF::MessageHandler::printLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket* ackPacket, IPv4Address destination, int outputIfIndex) const
 {
     char addressString[16];
     EV << "Sending Link State Acknowledgement packet to "
@@ -571,7 +571,7 @@ void OSPF::MessageHandler::PrintLinkStateAcknowledgementPacket(const OSPFLinkSta
     unsigned int lsaCount = ackPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader(ackPacket->getLsaHeaders(i), ev.getOStream());
+        printLSAHeader(ackPacket->getLsaHeaders(i), ev.getOStream());
         EV << "\n";
     }
 }

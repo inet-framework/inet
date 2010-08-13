@@ -67,44 +67,44 @@ public:
     unsigned long            getRoutingTableEntryCount(void) const               { return routingTable.size(); }
     RoutingTableEntry*       getRoutingTableEntry      (unsigned long i)          { return routingTable[i]; }
     const RoutingTableEntry* getRoutingTableEntry      (unsigned long i) const    { return routingTable[i]; }
-    void                     AddRoutingTableEntry      (RoutingTableEntry* entry) { routingTable.push_back(entry); }
+    void                     addRoutingTableEntry      (RoutingTableEntry* entry) { routingTable.push_back(entry); }
 
-    void                 AddWatches                           (void);
+    void                 addWatches                           (void);
 
-    void                 AddArea                              (Area* area);
+    void                 addArea                              (Area* area);
     Area*                getArea                              (AreaID areaID);
     Area*                getArea                              (IPv4Address address);
     Interface*           getNonVirtualInterface               (unsigned char ifIndex);
 
-    bool                 InstallLSA                           (OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
-    OSPFLSA*             FindLSA                              (LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
-    void                 AgeDatabase                          (void);
-    bool                 HasAnyNeighborInStates               (int states) const;
-    void                 RemoveFromAllRetransmissionLists     (LSAKeyType lsaKey);
-    bool                 IsOnAnyRetransmissionList            (LSAKeyType lsaKey) const;
-    bool                 FloodLSA                             (OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
-    bool                 IsLocalAddress                       (IPv4Address address) const;
-    bool                 HasAddressRange                      (IPv4AddressRange addressRange) const;
-    bool                 IsDestinationUnreachable             (OSPFLSA* lsa) const;
+    bool                 installLSA                           (OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
+    OSPFLSA*             findLSA                              (LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
+    void                 ageDatabase                          (void);
+    bool                 hasAnyNeighborInStates               (int states) const;
+    void                 removeFromAllRetransmissionLists     (LSAKeyType lsaKey);
+    bool                 isOnAnyRetransmissionList            (LSAKeyType lsaKey) const;
+    bool                 floodLSA                             (OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    bool                 isLocalAddress                       (IPv4Address address) const;
+    bool                 hasAddressRange                      (IPv4AddressRange addressRange) const;
+    bool                 isDestinationUnreachable             (OSPFLSA* lsa) const;
     RoutingTableEntry*   Lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
     void                 RebuildRoutingTable                  (void);
     IPv4AddressRange     getContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
-    void                 UpdateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
-    void                 RemoveExternalRoute                  (IPv4Address networkAddress);
+    void                 updateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void                 removeExternalRoute                  (IPv4Address networkAddress);
     RoutingTableEntry*   getPreferredEntry                    (const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
 
 private:
     bool                 InstallASExternalLSA                 (OSPFASExternalLSA* lsa);
-    ASExternalLSA*       FindASExternalLSA                    (LSAKeyType lsaKey);
-    const ASExternalLSA* FindASExternalLSA                    (LSAKeyType lsaKey) const;
+    ASExternalLSA*       findASExternalLSA                    (LSAKeyType lsaKey);
+    const ASExternalLSA* findASExternalLSA                    (LSAKeyType lsaKey) const;
     ASExternalLSA*       OriginateASExternalLSA               (ASExternalLSA* lsa);
     LinkStateID          getUniqueLinkStateID                 (IPv4AddressRange destination,
                                                                Metric destinationCost,
                                                                OSPF::ASExternalLSA*& lsaToReoriginate,
                                                                bool externalMetricIsType2 = false) const;
-    void                 CalculateASExternalRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
-    void                 NotifyAboutRoutingTableChanges       (std::vector<RoutingTableEntry*>& oldRoutingTable);
-    bool                 HasRouteToASBoundaryRouter           (const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
+    void                 calculateASExternalRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
+    void                 notifyAboutRoutingTableChanges       (std::vector<RoutingTableEntry*>& oldRoutingTable);
+    bool                 hasRouteToASBoundaryRouter           (const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
     std::vector<RoutingTableEntry*>
                          getRoutesToASBoundaryRouter          (const std::vector<RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const;
     void                 PruneASBoundaryRouterEntries         (std::vector<RoutingTableEntry*>& asbrEntries) const;

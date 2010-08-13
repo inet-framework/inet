@@ -27,7 +27,7 @@ OSPF::HelloHandler::HelloHandler(OSPF::Router* containingRouter) :
 {
 }
 
-void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* unused)
+void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* unused)
 {
     OSPFHelloPacket* helloPacket         = check_and_cast<OSPFHelloPacket*> (packet);
     bool             rebuildRoutingTable = false;
@@ -81,7 +81,7 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                 }
 
                 if (neighbor != NULL) {
-                    router->getMessageHandler()->PrintEvent("Hello packet received", intf, neighbor);
+                    router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
                     IPv4Address                 designatedAddress   = neighbor->getDesignatedRouter().ipInterfaceAddress;
                     IPv4Address                 backupAddress       = neighbor->getBackupDesignatedRouter().ipInterfaceAddress;
@@ -179,7 +179,7 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                     }
                     neighbor->setBackupDesignatedRouter(dRouterID);
                     if (drChanged) {
-                        neighbor->SetUpDesignatedRouters(false);
+                        neighbor->setupDesignatedRouters(false);
                     }
 
                     /* If the neighbor router's Designated or Backup Designated Router
@@ -201,7 +201,7 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                             neighbor->setBackupDesignatedRouter(dRouterID);
                         }
                         if ((designated != NULL) && (backup != NULL)) {
-                            neighbor->SetUpDesignatedRouters(true);
+                            neighbor->setupDesignatedRouters(true);
                         }
                     }
                 } else {
@@ -214,7 +214,7 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                     neighbor->setAddress(srcAddress);
                     neighbor->setRouterDeadInterval(helloPacket->getRouterDeadInterval());
 
-                    router->getMessageHandler()->PrintEvent("Hello packet received", intf, neighbor);
+                    router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
                     dRouterID.routerID = helloPacket->getDesignatedRouter().getInt();
                     dRouterID.ipInterfaceAddress = IPv4AddressFromULong(dRouterID.routerID);
@@ -244,17 +244,17 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                     }
                     neighbor->setBackupDesignatedRouter(dRouterID);
                     if (designatedSetUp && backupSetUp) {
-                        neighbor->SetUpDesignatedRouters(true);
+                        neighbor->setupDesignatedRouters(true);
                     }
-                    intf->AddNeighbor(neighbor);
+                    intf->addNeighbor(neighbor);
                 }
 
-                neighbor->ProcessEvent(OSPF::Neighbor::HelloReceived);
+                neighbor->processEvent(OSPF::Neighbor::HelloReceived);
                 if ((interfaceType == OSPF::Interface::NBMA) &&
                     (intf->getRouterPriority() == 0) &&
                     (neighbor->getState() >= OSPF::Neighbor::InitState))
                 {
-                    intf->SendHelloPacket(neighbor->getAddress());
+                    intf->sendHelloPacket(neighbor->getAddress());
                 }
 
                 unsigned long   interfaceAddress       = ULongFromIPv4Address(intf->getAddressRange().address);
@@ -266,7 +266,7 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                  */
                 for (i = 0; i < neighborsNeighborCount; i++) {
                     if (helloPacket->getNeighbor(i).getInt() == interfaceAddress) {
-                        neighbor->ProcessEvent(OSPF::Neighbor::TwoWayReceived);
+                        neighbor->processEvent(OSPF::Neighbor::TwoWayReceived);
                         break;
                     }
                 }
@@ -275,13 +275,13 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                    of the packet stops.
                  */
                 if (i == neighborsNeighborCount) {
-                    neighbor->ProcessEvent(OSPF::Neighbor::OneWayReceived);
+                    neighbor->processEvent(OSPF::Neighbor::OneWayReceived);
                 }
 
                 if (neighborChanged) {
-                    intf->ProcessEvent(OSPF::Interface::NeighborChange);
+                    intf->processEvent(OSPF::Interface::NeighborChange);
                     /* In some cases neighbors get stuck in TwoWay state after a DR
-                       or Backup change. (CalculateDesignatedRouter runs before the
+                       or Backup change. (calculateDesignatedRouter runs before the
                        neighbors' signal of DR change + this router does not become
                        neither DR nor backup -> IsAdjacencyOK does not get called.)
                        So to make it work(workaround) we'll call IsAdjacencyOK for
@@ -294,35 +294,35 @@ void OSPF::HelloHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf
                     for (i = 0; i < neighborCount; i++) {
                         OSPF::Neighbor* stuckNeighbor = intf->getNeighbor(i);
                         if (stuckNeighbor->getState() == OSPF::Neighbor::TwoWayState) {
-                            stuckNeighbor->ProcessEvent(OSPF::Neighbor::IsAdjacencyOK);
+                            stuckNeighbor->processEvent(OSPF::Neighbor::IsAdjacencyOK);
                         }
                     }
 
                     if (neighborsDRStateChanged) {
-                        OSPF::RouterLSA* routerLSA = intf->getArea()->FindRouterLSA(router->getRouterID());
+                        OSPF::RouterLSA* routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
 
                         if (routerLSA != NULL) {
                             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
                             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                                 routerLSA->getHeader().setLsAge(MAX_AGE);
-                                intf->getArea()->FloodLSA(routerLSA);
-                                routerLSA->IncrementInstallTime();
+                                intf->getArea()->floodLSA(routerLSA);
+                                routerLSA->incrementInstallTime();
                             } else {
                                 OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
 
                                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                                rebuildRoutingTable |= routerLSA->Update(newLSA);
+                                rebuildRoutingTable |= routerLSA->update(newLSA);
                                 delete newLSA;
 
-                                intf->getArea()->FloodLSA(routerLSA);
+                                intf->getArea()->floodLSA(routerLSA);
                             }
                         }
                     }
                 }
 
                 if (backupSeen) {
-                    intf->ProcessEvent(OSPF::Interface::BackupSeen);
+                    intf->processEvent(OSPF::Interface::BackupSeen);
                 }
             }
         }

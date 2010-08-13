@@ -23,26 +23,26 @@
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
 
-void OSPF::NeighborStateDown::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if (event == OSPF::Neighbor::Start) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         int             ttl            = (neighbor->getInterface()->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
 
-        messageHandler->ClearTimer(neighbor->getPollTimer());
-        neighbor->getInterface()->SendHelloPacket(neighbor->getAddress(), ttl);
+        messageHandler->clearTimer(neighbor->getPollTimer());
+        neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        ChangeState(neighbor, new OSPF::NeighborStateAttempt, this);
+        changeState(neighbor, new OSPF::NeighborStateAttempt, this);
     }
     if (event == OSPF::Neighbor::HelloReceived) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-        messageHandler->ClearTimer(neighbor->getPollTimer());
+        messageHandler->clearTimer(neighbor->getPollTimer());
         messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        ChangeState(neighbor, new OSPF::NeighborStateInit, this);
+        changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
     if (event == OSPF::Neighbor::PollTimer) {
         int ttl = (neighbor->getInterface()->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-        neighbor->getInterface()->SendHelloPacket(neighbor->getAddress(), ttl);
+        neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->StartTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
     }

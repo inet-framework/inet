@@ -96,30 +96,30 @@ private:
     Area*                                                               parentArea;
 private:
     friend class InterfaceState;
-    void ChangeState(InterfaceState* newState, InterfaceState* currentState);
+    void changeState(InterfaceState* newState, InterfaceState* currentState);
 
 public:
             Interface(OSPFInterfaceType ifType = UnknownType);
     virtual ~Interface(void);
 
-    void                ProcessEvent                        (InterfaceEventType event);
+    void                processEvent                        (InterfaceEventType event);
     void                Reset                               (void);
-    void                SendHelloPacket                     (IPv4Address destination, short ttl = 1);
-    void                SendLSAcknowledgement               (OSPFLSAHeader* lsaHeader, IPv4Address destination);
+    void                sendHelloPacket                     (IPv4Address destination, short ttl = 1);
+    void                sendLSAcknowledgement               (OSPFLSAHeader* lsaHeader, IPv4Address destination);
     Neighbor*           getNeighborByID                     (RouterID neighborID);
     Neighbor*           getNeighborByAddress                (IPv4Address address);
-    void                AddNeighbor                         (Neighbor* neighbor);
+    void                addNeighbor                         (Neighbor* neighbor);
     InterfaceStateType  getState                            (void) const;
     static const char*  getStateString                      (InterfaceStateType stateType);
-    bool                HasAnyNeighborInStates              (int states) const;
-    void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
-    bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
-    bool                FloodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
-    void                AddDelayedAcknowledgement           (OSPFLSAHeader& lsaHeader);
-    void                SendDelayedAcknowledgements         (void);
-    void                AgeTransmittedLSALists              (void);
+    bool                hasAnyNeighborInStates              (int states) const;
+    void                removeFromAllRetransmissionLists    (LSAKeyType lsaKey);
+    bool                isOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
+    bool                floodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    void                addDelayedAcknowledgement           (OSPFLSAHeader& lsaHeader);
+    void                sendDelayedAcknowledgements         (void);
+    void                ageTransmittedLSALists              (void);
 
-    OSPFLinkStateUpdatePacket*  CreateUpdatePacket          (OSPFLSA* lsa);
+    OSPFLinkStateUpdatePacket*  createUpdatePacket          (OSPFLSA* lsa);
 
     void                    setType                         (OSPFInterfaceType ifType)  { interfaceType = ifType; }
     OSPFInterfaceType       getType                         (void) const                { return interfaceType; }

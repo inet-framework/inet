@@ -23,13 +23,13 @@
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
 
-void OSPF::NeighborStateAttempt::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateAttempt::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KillNeighbor) || (event == OSPF::Neighbor::LinkDown)) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->Reset();
-        messageHandler->ClearTimer(neighbor->getInactivityTimer());
-        ChangeState(neighbor, new OSPF::NeighborStateDown, this);
+        messageHandler->clearTimer(neighbor->getInactivityTimer());
+        changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
     if (event == OSPF::Neighbor::InactivityTimer) {
         neighbor->Reset();
@@ -37,12 +37,12 @@ void OSPF::NeighborStateAttempt::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Ne
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->StartTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        ChangeState(neighbor, new OSPF::NeighborStateDown, this);
+        changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
     if (event == OSPF::Neighbor::HelloReceived) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-        messageHandler->ClearTimer(neighbor->getInactivityTimer());
+        messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        ChangeState(neighbor, new OSPF::NeighborStateInit, this);
+        changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
 }

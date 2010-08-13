@@ -53,7 +53,7 @@ OSPF::Router::~Router(void)
     for (long k = 0; k < routeCount; k++) {
         delete routingTable[k];
     }
-    messageHandler->ClearTimer(ageTimer);
+    messageHandler->clearTimer(ageTimer);
     delete ageTimer;
     delete messageHandler;
 }
@@ -62,7 +62,7 @@ OSPF::Router::~Router(void)
 /**
  * Adds OMNeT++ watches for the routerID, the list of Areas and the list of AS External LSAs.
  */
-void OSPF::Router::AddWatches(void)
+void OSPF::Router::addWatches(void)
 {
     WATCH(routerID);
     WATCH_PTRVECTOR(areas);
@@ -74,7 +74,7 @@ void OSPF::Router::AddWatches(void)
  * Adds a new Area to the Area list.
  * @param area [in] The Area to add.
  */
-void OSPF::Router::AddArea(OSPF::Area* area)
+void OSPF::Router::addArea(OSPF::Area* area)
 {
 
     area->setRouter(this);
@@ -109,7 +109,7 @@ OSPF::Area* OSPF::Router::getArea(OSPF::IPv4Address address)
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->ContainsAddress(address)) {
+        if (areas[i]->containsAddress(address)) {
             return areas[i];
         }
     }
@@ -143,7 +143,7 @@ OSPF::Interface* OSPF::Router::getNonVirtualInterface(unsigned char ifIndex)
  * @param areaID [in] Identifies the input Router, Network and Summary LSA's Area.
  * @return True if the routing table needs to be updated, false otherwise.
  */
-bool OSPF::Router::InstallLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/)
+bool OSPF::Router::installLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/)
 {
     switch (lsa->getHeader().getLsType()) {
         case RouterLSAType:
@@ -151,7 +151,7 @@ bool OSPF::Router::InstallLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneArea
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
                     OSPFRouterLSA* ospfRouterLSA = check_and_cast<OSPFRouterLSA*> (lsa);
-                    return areaIt->second->InstallRouterLSA(ospfRouterLSA);
+                    return areaIt->second->installRouterLSA(ospfRouterLSA);
                 }
             }
             break;
@@ -160,7 +160,7 @@ bool OSPF::Router::InstallLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneArea
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
                     OSPFNetworkLSA* ospfNetworkLSA = check_and_cast<OSPFNetworkLSA*> (lsa);
-                    return areaIt->second->InstallNetworkLSA(ospfNetworkLSA);
+                    return areaIt->second->installNetworkLSA(ospfNetworkLSA);
                 }
             }
             break;
@@ -170,7 +170,7 @@ bool OSPF::Router::InstallLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneArea
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
                     OSPFSummaryLSA* ospfSummaryLSA = check_and_cast<OSPFSummaryLSA*> (lsa);
-                    return areaIt->second->InstallSummaryLSA(ospfSummaryLSA);
+                    return areaIt->second->installSummaryLSA(ospfSummaryLSA);
                 }
             }
             break;
@@ -248,8 +248,8 @@ bool OSPF::Router::InstallASExternalLSA(OSPFASExternalLSA* lsa)
             return false;
         } else {
             lsaIt->second->getHeader().setLsAge(MAX_AGE);
-            FloodLSA(lsaIt->second, OSPF::BackboneAreaID);
-            lsaIt->second->IncrementInstallTime();
+            floodLSA(lsaIt->second, OSPF::BackboneAreaID);
+            lsaIt->second->incrementInstallTime();
             ownLSAFloodedOut = true;
         }
     }
@@ -260,9 +260,9 @@ bool OSPF::Router::InstallASExternalLSA(OSPFASExternalLSA* lsa)
     if (lsaIt != asExternalLSAsByID.end()) {
         unsigned long areaCount = areas.size();
         for (unsigned long i = 0; i < areaCount; i++) {
-            areas[i]->RemoveFromAllRetransmissionLists(lsaKey);
+            areas[i]->removeFromAllRetransmissionLists(lsaKey);
         }
-        return ((lsaIt->second->Update(lsa)) | ownLSAFloodedOut);
+        return ((lsaIt->second->update(lsa)) | ownLSAFloodedOut);
     } else {
         OSPF::ASExternalLSA* lsaCopy = new OSPF::ASExternalLSA(*lsa);
         asExternalLSAsByID[lsaKey] = lsaCopy;
@@ -280,14 +280,14 @@ bool OSPF::Router::InstallASExternalLSA(OSPFASExternalLSA* lsa)
  *                     identified by this parameter.
  * @return The pointer to the LSA if it was found, NULL otherwise.
  */
-OSPFLSA* OSPF::Router::FindLSA(LSAType lsaType, OSPF::LSAKeyType lsaKey, OSPF::AreaID areaID)
+OSPFLSA* OSPF::Router::findLSA(LSAType lsaType, OSPF::LSAKeyType lsaKey, OSPF::AreaID areaID)
 {
     switch (lsaType) {
         case RouterLSAType:
             {
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
-                    return areaIt->second->FindRouterLSA(lsaKey.linkStateID);
+                    return areaIt->second->findRouterLSA(lsaKey.linkStateID);
                 }
             }
             break;
@@ -295,7 +295,7 @@ OSPFLSA* OSPF::Router::FindLSA(LSAType lsaType, OSPF::LSAKeyType lsaKey, OSPF::A
             {
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
-                    return areaIt->second->FindNetworkLSA(lsaKey.linkStateID);
+                    return areaIt->second->findNetworkLSA(lsaKey.linkStateID);
                 }
             }
             break;
@@ -304,13 +304,13 @@ OSPFLSA* OSPF::Router::FindLSA(LSAType lsaType, OSPF::LSAKeyType lsaKey, OSPF::A
             {
                 std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
                 if (areaIt != areasByID.end()) {
-                    return areaIt->second->FindSummaryLSA(lsaKey);
+                    return areaIt->second->findSummaryLSA(lsaKey);
                 }
             }
             break;
         case ASExternalLSAType:
             {
-                return FindASExternalLSA(lsaKey);
+                return findASExternalLSA(lsaKey);
             }
             break;
         default:
@@ -326,7 +326,7 @@ OSPFLSA* OSPF::Router::FindLSA(LSAType lsaType, OSPF::LSAKeyType lsaKey, OSPF::A
  * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
  * @return The pointer to the AS External LSA if it was found, NULL otherwise.
  */
-OSPF::ASExternalLSA* OSPF::Router::FindASExternalLSA(OSPF::LSAKeyType lsaKey)
+OSPF::ASExternalLSA* OSPF::Router::findASExternalLSA(OSPF::LSAKeyType lsaKey)
 {
     std::map<OSPF::LSAKeyType, OSPF::ASExternalLSA*, OSPF::LSAKeyType_Less>::iterator lsaIt = asExternalLSAsByID.find(lsaKey);
     if (lsaIt != asExternalLSAsByID.end()) {
@@ -342,7 +342,7 @@ OSPF::ASExternalLSA* OSPF::Router::FindASExternalLSA(OSPF::LSAKeyType lsaKey)
  * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
  * @return The const pointer to the AS External LSA if it was found, NULL otherwise.
  */
-const OSPF::ASExternalLSA* OSPF::Router::FindASExternalLSA(OSPF::LSAKeyType lsaKey) const
+const OSPF::ASExternalLSA* OSPF::Router::findASExternalLSA(OSPF::LSAKeyType lsaKey) const
 {
     std::map<OSPF::LSAKeyType, OSPF::ASExternalLSA*, OSPF::LSAKeyType_Less>::const_iterator lsaIt = asExternalLSAsByID.find(lsaKey);
     if (lsaIt != asExternalLSAsByID.end()) {
@@ -358,7 +358,7 @@ const OSPF::ASExternalLSA* OSPF::Router::FindASExternalLSA(OSPF::LSAKeyType lsaK
  * This method is called on every firing of the DatabaseAgeTimer(every second).
  * @sa RFC2328 Section 14.
  */
-void OSPF::Router::AgeDatabase(void)
+void OSPF::Router::ageDatabase(void)
 {
     long lsaCount            = asExternalLSAs.size();
     bool rebuildRoutingTable = false;
@@ -366,45 +366,45 @@ void OSPF::Router::AgeDatabase(void)
     for (long i = 0; i < lsaCount; i++) {
         unsigned short       lsAge          = asExternalLSAs[i]->getHeader().getLsAge();
         bool                 selfOriginated = (asExternalLSAs[i]->getHeader().getAdvertisingRouter().getInt() == routerID);
-        bool                 unreachable    = IsDestinationUnreachable(asExternalLSAs[i]);
+        bool                 unreachable    = isDestinationUnreachable(asExternalLSAs[i]);
         OSPF::ASExternalLSA* lsa            = asExternalLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
             lsa->getHeader().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
-                if (!lsa->ValidateLSChecksum()) {
+                if (!lsa->validateLSChecksum()) {
                     EV << "Invalid LS checksum. Memory error detected!\n";
                 }
             }
-            lsa->IncrementInstallTime();
+            lsa->incrementInstallTime();
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
                 lsa->getHeader().setLsAge(MAX_AGE);
-                FloodLSA(lsa, OSPF::BackboneAreaID);
-                lsa->IncrementInstallTime();
+                floodLSA(lsa, OSPF::BackboneAreaID);
+                lsa->incrementInstallTime();
             } else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                     lsa->getHeader().setLsAge(MAX_AGE);
-                    FloodLSA(lsa, OSPF::BackboneAreaID);
-                    lsa->IncrementInstallTime();
+                    floodLSA(lsa, OSPF::BackboneAreaID);
+                    lsa->incrementInstallTime();
                 } else {
                     OSPF::ASExternalLSA* newLSA = OriginateASExternalLSA(lsa);
 
                     newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                     newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                    rebuildRoutingTable |= lsa->Update(newLSA);
+                    rebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
-                    FloodLSA(lsa, OSPF::BackboneAreaID);
+                    floodLSA(lsa, OSPF::BackboneAreaID);
                 }
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
             lsa->getHeader().setLsAge(MAX_AGE);
-            FloodLSA(lsa, OSPF::BackboneAreaID);
-            lsa->IncrementInstallTime();
+            floodLSA(lsa, OSPF::BackboneAreaID);
+            lsa->incrementInstallTime();
         }
         if (lsAge == MAX_AGE) {
             OSPF::LSAKeyType lsaKey;
@@ -412,8 +412,8 @@ void OSPF::Router::AgeDatabase(void)
             lsaKey.linkStateID       = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
-            if (!IsOnAnyRetransmissionList(lsaKey) &&
-                !HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
+            if (!isOnAnyRetransmissionList(lsaKey) &&
+                !hasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
             {
                 if (!selfOriginated || unreachable) {
                     asExternalLSAsByID.erase(lsaKey);
@@ -432,10 +432,10 @@ void OSPF::Router::AgeDatabase(void)
 
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->Update(newLSA);
+                        rebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
-                        FloodLSA(lsa, OSPF::BackboneAreaID);
+                        floodLSA(lsa, OSPF::BackboneAreaID);
                     }
                 }
             }
@@ -453,7 +453,7 @@ void OSPF::Router::AgeDatabase(void)
 
     long areaCount = areas.size();
     for (long j = 0; j < areaCount; j++) {
-        areas[j]->AgeDatabase();
+        areas[j]->ageDatabase();
     }
     messageHandler->StartTimer(ageTimer, 1.0);
 
@@ -468,11 +468,11 @@ void OSPF::Router::AgeDatabase(void)
  * in any of the input states, false otherwise.
  * @param states [in] A bitfield combination of NeighborStateType values.
  */
-bool OSPF::Router::HasAnyNeighborInStates(int states) const
+bool OSPF::Router::hasAnyNeighborInStates(int states) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->HasAnyNeighborInStates(states)) {
+        if (areas[i]->hasAnyNeighborInStates(states)) {
             return true;
         }
     }
@@ -485,11 +485,11 @@ bool OSPF::Router::HasAnyNeighborInStates(int states) const
  * the input lsaKey.
  * @param lsaKey [in] Identifies the LSAs to remove from the retransmission lists.
  */
-void OSPF::Router::RemoveFromAllRetransmissionLists(OSPF::LSAKeyType lsaKey)
+void OSPF::Router::removeFromAllRetransmissionLists(OSPF::LSAKeyType lsaKey)
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        areas[i]->RemoveFromAllRetransmissionLists(lsaKey);
+        areas[i]->removeFromAllRetransmissionLists(lsaKey);
     }
 }
 
@@ -499,11 +499,11 @@ void OSPF::Router::RemoveFromAllRetransmissionLists(OSPF::LSAKeyType lsaKey)
  * identified by the input lsaKey, false otherwise.
  * @param lsaKey [in] Identifies the LSAs to look for on the retransmission lists.
  */
-bool OSPF::Router::IsOnAnyRetransmissionList(OSPF::LSAKeyType lsaKey) const
+bool OSPF::Router::isOnAnyRetransmissionList(OSPF::LSAKeyType lsaKey) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->IsOnAnyRetransmissionList(lsaKey)) {
+        if (areas[i]->isOnAnyRetransmissionList(lsaKey)) {
             return true;
         }
     }
@@ -520,7 +520,7 @@ bool OSPF::Router::IsOnAnyRetransmissionList(OSPF::LSAKeyType lsaKey) const
  * @param neighbor [in] The Nieghbor this LSA arrived from.
  * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
  */
-bool OSPF::Router::FloodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/, OSPF::Interface* intf /*= NULL*/, OSPF::Neighbor* neighbor /*= NULL*/)
+bool OSPF::Router::floodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/, OSPF::Interface* intf /*= NULL*/, OSPF::Neighbor* neighbor /*= NULL*/)
 {
     bool floodedBackOut = false;
 
@@ -529,7 +529,7 @@ bool OSPF::Router::FloodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID
             long areaCount = areas.size();
             for (long i = 0; i < areaCount; i++) {
                 if (areas[i]->getExternalRoutingCapability()) {
-                    if (areas[i]->FloodLSA(lsa, intf, neighbor)) {
+                    if (areas[i]->floodLSA(lsa, intf, neighbor)) {
                         floodedBackOut = true;
                     }
                 }
@@ -537,7 +537,7 @@ bool OSPF::Router::FloodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID
         } else {
             std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
-                floodedBackOut = areaIt->second->FloodLSA(lsa, intf, neighbor);
+                floodedBackOut = areaIt->second->floodLSA(lsa, intf, neighbor);
             }
         }
     }
@@ -551,11 +551,11 @@ bool OSPF::Router::FloodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID
  * IP address ranges, false otherwise.
  * @param address [in] The IP address to look for.
  */
-bool OSPF::Router::IsLocalAddress(OSPF::IPv4Address address) const
+bool OSPF::Router::isLocalAddress(OSPF::IPv4Address address) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->IsLocalAddress(address)) {
+        if (areas[i]->isLocalAddress(address)) {
             return true;
         }
     }
@@ -568,11 +568,11 @@ bool OSPF::Router::IsLocalAddress(OSPF::IPv4Address address) const
  * input IP address range, false otherwise.
  * @param addressRange [in] The IP address range to look for.
  */
-bool OSPF::Router::HasAddressRange(OSPF::IPv4AddressRange addressRange) const
+bool OSPF::Router::hasAddressRange(OSPF::IPv4AddressRange addressRange) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->HasAddressRange(addressRange)) {
+        if (areas[i]->hasAddressRange(addressRange)) {
             return true;
         }
     }
@@ -606,7 +606,7 @@ OSPF::ASExternalLSA* OSPF::Router::OriginateASExternalLSA(OSPF::ASExternalLSA* l
  * Returns true if the destination described by the input lsa is in the routing table, false otherwise.
  * @param lsa [in] The LSA which describes the destination to look for.
  */
-bool OSPF::Router::IsDestinationUnreachable(OSPFLSA* lsa) const
+bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
 {
     IPAddress destination = lsa->getHeader().getLinkStateID();
 
@@ -827,7 +827,7 @@ void OSPF::Router::RebuildRoutingTable(void)
     EV << "Rebuilding routing table:\n";
 
     for (i = 0; i < areaCount; i++) {
-        areas[i]->CalculateShortestPathTree(newTable);
+        areas[i]->calculateShortestPathTree(newTable);
         if (areas[i]->getTransitCapability()) {
             hasTransitAreas = true;
         }
@@ -835,11 +835,11 @@ void OSPF::Router::RebuildRoutingTable(void)
     if (areaCount > 1) {
         OSPF::Area* backbone = getArea(OSPF::BackboneAreaID);
         if (backbone != NULL) {
-            backbone->CalculateInterAreaRoutes(newTable);
+            backbone->calculateInterAreaRoutes(newTable);
         }
     } else {
         if (areaCount == 1) {
-            areas[0]->CalculateInterAreaRoutes(newTable);
+            areas[0]->calculateInterAreaRoutes(newTable);
         }
     }
     if (hasTransitAreas) {
@@ -849,7 +849,7 @@ void OSPF::Router::RebuildRoutingTable(void)
             }
         }
     }
-    CalculateASExternalRoutes(newTable);
+    calculateASExternalRoutes(newTable);
 
     // backup the routing table
     unsigned long                         routeCount = routingTable.size();
@@ -885,7 +885,7 @@ void OSPF::Router::RebuildRoutingTable(void)
         }
     }
 
-    NotifyAboutRoutingTableChanges(oldTable);
+    notifyAboutRoutingTableChanges(oldTable);
 
     routeCount = oldTable.size();
     for (i = 0; i < routeCount; i++) {
@@ -909,7 +909,7 @@ void OSPF::Router::RebuildRoutingTable(void)
  * @param inRoutingTable [in] The routing table to look in.
  * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
  */
-bool OSPF::Router::HasRouteToASBoundaryRouter(const std::vector<OSPF::RoutingTableEntry*>& inRoutingTable, OSPF::RouterID asbrRouterID) const
+bool OSPF::Router::hasRouteToASBoundaryRouter(const std::vector<OSPF::RoutingTableEntry*>& inRoutingTable, OSPF::RouterID asbrRouterID) const
 {
     long routeCount = inRoutingTable.size();
     for (long i = 0; i < routeCount; i++) {
@@ -1052,7 +1052,7 @@ OSPF::RoutingTableEntry* OSPF::Router::getPreferredEntry(const OSPFLSA& lsa, boo
         return NULL;
     }
 
-    if (!HasRouteToASBoundaryRouter(*fromRoutingTable, originatingRouter)) { // (3)
+    if (!hasRouteToASBoundaryRouter(*fromRoutingTable, originatingRouter)) { // (3)
         return NULL;
     }
 
@@ -1089,7 +1089,7 @@ OSPF::RoutingTableEntry* OSPF::Router::getPreferredEntry(const OSPFLSA& lsa, boo
  *                                 calculations.
  * @sa RFC2328 Section 16.4.
  */
-void OSPF::Router::CalculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry*>& newRoutingTable)
+void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry*>& newRoutingTable)
 {
     unsigned long lsaCount = asExternalLSAs.size();
     unsigned long i;
@@ -1132,7 +1132,7 @@ void OSPF::Router::CalculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
                 NextHop nextHop = preferredEntry->getNextHop(j);
 
                 nextHop.advertisingRouter = originatingRouter;
-                newEntry->AddNextHop(nextHop);
+                newEntry->addNextHop(nextHop);
             }
 
             newRoutingTable.push_back(newEntry);
@@ -1190,7 +1190,7 @@ void OSPF::Router::CalculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
                     NextHop nextHop = preferredEntry->getNextHop(j);
 
                     nextHop.advertisingRouter = originatingRouter;
-                    destinationEntry->AddNextHop(nextHop);
+                    destinationEntry->addNextHop(nextHop);
                 }
                 continue;
             }
@@ -1206,13 +1206,13 @@ void OSPF::Router::CalculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             }
             destinationEntry->setDestinationType(OSPF::RoutingTableEntry::NetworkDestination);
             destinationEntry->setOptionalCapabilities(currentHeader.getLsOptions());
-            destinationEntry->ClearNextHops();
+            destinationEntry->clearNextHops();
 
             for (unsigned int j = 0; j < nextHopCount; j++) {
                 NextHop nextHop = preferredEntry->getNextHop(j);
 
                 nextHop.advertisingRouter = originatingRouter;
-                destinationEntry->AddNextHop(nextHop);
+                destinationEntry->addNextHop(nextHop);
             }
         }
     }
@@ -1274,7 +1274,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
     lsaKey.linkStateID = ULongFromIPv4Address(destination.address);
     lsaKey.advertisingRouter = routerID;
 
-    const OSPF::ASExternalLSA* foundLSA = FindASExternalLSA(lsaKey);
+    const OSPF::ASExternalLSA* foundLSA = findASExternalLSA(lsaKey);
 
     if (foundLSA == NULL) {
         return lsaKey.linkStateID;
@@ -1312,7 +1312,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
  * @sa RFC2328 Section 12.4. points(5) through(6).
  */
 // TODO: review this algorithm + add virtual link changes(RFC2328 Section 16.7.).
-void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTableEntry*>& oldRoutingTable)
+void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTableEntry*>& oldRoutingTable)
 {
     if (areas.size() <= 1) {
         return;
@@ -1350,9 +1350,9 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
                 if (newLSA != NULL) {
                     if (lsaToReoriginate != NULL) {
-                        areas[i]->InstallSummaryLSA(lsaToReoriginate);
-//                        FloodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
-                        FloodLSA(lsaToReoriginate, areas[i]->getAreaID());
+                        areas[i]->installSummaryLSA(lsaToReoriginate);
+//                        floodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
+                        floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                         lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = routerID;
@@ -1361,9 +1361,9 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                         delete lsaToReoriginate;
                     }
 
-                    areas[i]->InstallSummaryLSA(newLSA);
-//                    FloodLSA(newLSA, OSPF::BackboneAreaID);
-                    FloodLSA(newLSA, areas[i]->getAreaID());
+                    areas[i]->installSummaryLSA(newLSA);
+//                    floodLSA(newLSA, OSPF::BackboneAreaID);
+                    floodLSA(newLSA, areas[i]->getAreaID());
 
                     lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
                     lsaKey.advertisingRouter = routerID;
@@ -1378,9 +1378,9 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
                     if (newLSA != NULL) {
                         if (lsaToReoriginate != NULL) {
-                            areas[i]->InstallSummaryLSA(lsaToReoriginate);
-//                            FloodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
-                            FloodLSA(lsaToReoriginate, areas[i]->getAreaID());
+                            areas[i]->installSummaryLSA(lsaToReoriginate);
+//                            floodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
+                            floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                             lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
                             lsaKey.advertisingRouter = routerID;
@@ -1389,9 +1389,9 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                             delete lsaToReoriginate;
                         }
 
-                        areas[i]->InstallSummaryLSA(newLSA);
-//                        FloodLSA(newLSA, OSPF::BackboneAreaID);
-                        FloodLSA(newLSA, areas[i]->getAreaID());
+                        areas[i]->installSummaryLSA(newLSA);
+//                        floodLSA(newLSA, OSPF::BackboneAreaID);
+                        floodLSA(newLSA, areas[i]->getAreaID());
 
                         lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = routerID;
@@ -1433,21 +1433,21 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                             lsaKey.linkStateID       = ULongFromIPv4Address(destinationAddressRange.address);
                             lsaKey.advertisingRouter = routerID;
 
-                            OSPF::SummaryLSA* summaryLSA = areas[i]->FindSummaryLSA(lsaKey);
+                            OSPF::SummaryLSA* summaryLSA = areas[i]->findSummaryLSA(lsaKey);
 
                             if (summaryLSA != NULL) {
                                 if (oneLessCost != 0) { // there's an other entry in this range
                                     summaryLSA->setRouteCost(oneLessCost);
-//                                    FloodLSA(summaryLSA, OSPF::BackboneAreaID);
-                                    FloodLSA(summaryLSA, areas[i]->getAreaID());
+//                                    floodLSA(summaryLSA, OSPF::BackboneAreaID);
+                                    floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                     originatedLSAMap[lsaKey] = true;
                                 } else {    // no more entries in this range -> delete it
                                     std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                                     if (deletedIt == deletedLSAMap.end()) {
                                         summaryLSA->getHeader().setLsAge(MAX_AGE);
-//                                        FloodLSA(summaryLSA, OSPF::BackboneAreaID);
-                                        FloodLSA(summaryLSA, areas[i]->getAreaID());
+//                                        floodLSA(summaryLSA, OSPF::BackboneAreaID);
+                                        floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                         deletedLSAMap[lsaKey]    = true;
                                     }
@@ -1497,19 +1497,19 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     lsaKey.linkStateID       = ULongFromIPv4Address(destinationAddressRange.address);
                     lsaKey.advertisingRouter = routerID;
 
-                    OSPF::SummaryLSA* summaryLSA = areas[i]->FindSummaryLSA(lsaKey);
+                    OSPF::SummaryLSA* summaryLSA = areas[i]->findSummaryLSA(lsaKey);
 
                     if (summaryLSA != NULL) {
                         if (maxRangeCost > 0) { // there's an other entry in this range
                             summaryLSA->setRouteCost(maxRangeCost);
-                            FloodLSA(summaryLSA, OSPF::BackboneAreaID);
+                            floodLSA(summaryLSA, OSPF::BackboneAreaID);
 
                             originatedLSAMap[lsaKey] = true;
                         } else {    // no more entries in this range -> delete it
                             std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                             if (deletedIt == deletedLSAMap.end()) {
                                 summaryLSA->getHeader().setLsAge(MAX_AGE);
-                                FloodLSA(summaryLSA, OSPF::BackboneAreaID);
+                                floodLSA(summaryLSA, OSPF::BackboneAreaID);
 
                                 deletedLSAMap[lsaKey]    = true;
                             }
@@ -1529,7 +1529,7 @@ void OSPF::Router::NotifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
  * @param externalRouteContents [in] Route configuration data for the external route.
  * @param ifIndex               [in]
  */
-void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex)
+void OSPF::Router::updateExternalRoute(OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex)
 {
     OSPF::ASExternalLSA* asExternalLSA = new OSPF::ASExternalLSA;
     OSPFLSAHeader&       lsaHeader     = asExternalLSA->getHeader();
@@ -1577,7 +1577,7 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
     externalRoutes[networkAddress] = externalRouteContents;
 
     bool rebuild = InstallASExternalLSA(asExternalLSA);
-    FloodLSA(asExternalLSA, OSPF::BackboneAreaID);
+    floodLSA(asExternalLSA, OSPF::BackboneAreaID);
     delete asExternalLSA;
 
     if (rebuild) {
@@ -1591,7 +1591,7 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
  * @param networkAddress [in] The network address of the external route which
  *                            needs to be removed.
  */
-void OSPF::Router::RemoveExternalRoute(OSPF::IPv4Address networkAddress)
+void OSPF::Router::removeExternalRoute(OSPF::IPv4Address networkAddress)
 {
     OSPF::LSAKeyType     lsaKey;
 
@@ -1602,7 +1602,7 @@ void OSPF::Router::RemoveExternalRoute(OSPF::IPv4Address networkAddress)
     if (lsaIt != asExternalLSAsByID.end()) {
         lsaIt->second->getHeader().setLsAge(MAX_AGE);
         lsaIt->second->setPurgeable();
-        FloodLSA(lsaIt->second, OSPF::BackboneAreaID);
+        floodLSA(lsaIt->second, OSPF::BackboneAreaID);
     }
 
     std::map<OSPF::IPv4Address, OSPFASExternalLSAContents, OSPF::IPv4Address_Less>::iterator externalIt = externalRoutes.find(networkAddress);
