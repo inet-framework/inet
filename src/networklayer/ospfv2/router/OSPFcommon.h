@@ -116,14 +116,14 @@ struct DesignatedRouterID {
     IPv4Address ipInterfaceAddress;
 };
 
-const RouterID              NullRouterID = 0;
-const AreaID                BackboneAreaID = 0;
-const LinkStateID           NullLinkStateID = 0;
-const IPv4Address           NullIPv4Address = { {0, 0, 0, 0} };
-const IPv4Address           AllSPFRouters = { {224, 0, 0, 5} };
-const IPv4Address           AllDRouters = { {224, 0, 0, 6} };
-const IPv4AddressRange      NullIPv4AddressRange = { { {0, 0, 0, 0} }, { {0, 0, 0, 0} } };
-const DesignatedRouterID    NullDesignatedRouterID = { 0, { {0, 0, 0, 0} } };
+const RouterID              NULL_ROUTERID = 0;
+const AreaID                BACKBONE_AREAID = 0;
+const LinkStateID           NULL_LINKSTATEID = 0;
+const IPv4Address           NULL_IPV4ADDRESS = { {0, 0, 0, 0} };
+const IPv4Address           ALL_SPF_ROUTERS = { {224, 0, 0, 5} };
+const IPv4Address           ALL_D_ROUTERS = { {224, 0, 0, 6} };
+const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { { {0, 0, 0, 0} }, { {0, 0, 0, 0} } };
+const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, { {0, 0, 0, 0} } };
 
 } // namespace OSPF
 
@@ -223,7 +223,7 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
 
 inline OSPF::IPv4Address ipv4AddressFromAddressString(const char* charForm)
 {
-    OSPF::IPv4Address byteForm = OSPF::NullIPv4Address;
+    OSPF::IPv4Address byteForm = OSPF::NULL_IPV4ADDRESS;
 
     int  lastDot = -1;
     int  byteCount = 0;

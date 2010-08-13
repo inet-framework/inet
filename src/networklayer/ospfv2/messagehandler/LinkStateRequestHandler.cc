@@ -81,15 +81,15 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
                     if (intf->getType() == OSPF::Interface::BROADCAST) {
                         if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
                             (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
-                            (intf->getDesignatedRouter() == OSPF::NullDesignatedRouterID))
+                            (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                         {
-                            messageHandler->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->sendPacket(updatePacket, OSPF::AllDRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_D_ROUTERS, intf->getIfIndex(), ttl);
                         }
                     } else {
                         if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
-                            messageHandler->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                         } else {
                             messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                         }

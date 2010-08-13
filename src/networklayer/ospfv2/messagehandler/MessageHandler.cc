@@ -177,7 +177,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
 
             if (intf == NULL) {
                 // it must be the backbone area and...
-                if (areaID == BackboneAreaID) {
+                if (areaID == BACKBONE_AREAID) {
                     if (router->getAreaCount() > 1) {
                         // it must be a virtual link and the source router's router ID must be the endpoint of this virtual link and...
                         intf = area->findVirtualLink(packet->getRouterID().getInt());
@@ -201,10 +201,10 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
             }
             if (intf != NULL) {
                 unsigned long destinationAddress = controlInfo->getDestAddr().getInt();
-                unsigned long allDRouters = ulongFromIPv4Address(OSPF::AllDRouters);
+                unsigned long allDRouters = ulongFromIPv4Address(OSPF::ALL_D_ROUTERS);
                 OSPF::Interface::InterfaceStateType interfaceState = intf->getState();
 
-                // if destination address is AllDRouters the receiving interface must be in DesignatedRouter or Backup state
+                // if destination address is ALL_D_ROUTERS the receiving interface must be in DesignatedRouter or Backup state
                 if (
                     ((destinationAddress == allDRouters) &&
                      (

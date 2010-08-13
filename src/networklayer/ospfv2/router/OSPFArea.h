@@ -49,7 +49,7 @@ private:
 
     Router*                                                 parentRouter;
 public:
-            Area(AreaID id = BackboneAreaID);
+            Area(AreaID id = BACKBONE_AREAID);
     virtual ~Area();
 
     void              setAreaID(AreaID areaId)  { areaID = areaId; }

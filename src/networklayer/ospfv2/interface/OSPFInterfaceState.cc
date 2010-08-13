@@ -133,14 +133,14 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
 
     do {
         // calculating backup designated router
-        declaredBackup = OSPF::NullDesignatedRouterID;
+        declaredBackup = OSPF::NULL_DESIGNATEDROUTERID;
         declaredBackupPriority = 0;
-        declaredBackupID = OSPF::NullRouterID;
+        declaredBackupID = OSPF::NULL_ROUTERID;
         backupDeclared = false;
 
-        OSPF::DesignatedRouterID highestRouter = OSPF::NullDesignatedRouterID;
+        OSPF::DesignatedRouterID highestRouter = OSPF::NULL_DESIGNATEDROUTERID;
         unsigned char highestPriority = 0;
-        OSPF::RouterID highestID = OSPF::NullRouterID;
+        OSPF::RouterID highestID = OSPF::NULL_ROUTERID;
 
         for (i = 0; i < neighborCount; i++) {
             OSPF::Neighbor* neighbor = intf->neighboringRouters[i];
@@ -219,9 +219,9 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
         }
 
         // calculating backup designated router
-        declaredDesignatedRouter = OSPF::NullDesignatedRouterID;
+        declaredDesignatedRouter = OSPF::NULL_DESIGNATEDROUTERID;
         declaredDesignatedRouterPriority = 0;
-        declaredDesignatedRouterID = OSPF::NullRouterID;
+        declaredDesignatedRouterID = OSPF::NULL_ROUTERID;
         designatedRouterDeclared = false;
 
         for (i = 0; i < neighborCount; i++) {
@@ -278,7 +278,7 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
         //FIXME  suggest parentheses around && within ||
         if (
             (
-                (declaredDesignatedRouter.routerID != OSPF::NullRouterID) &&
+                (declaredDesignatedRouter.routerID != OSPF::NULL_ROUTERID) &&
                 (
                     (currentDesignatedRouter.routerID == routerID) &&
                     (declaredDesignatedRouter.routerID != routerID)
@@ -289,7 +289,7 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
                 )
             ) ||
             (
-                (declaredBackup.routerID != OSPF::NullRouterID) &&
+                (declaredBackup.routerID != OSPF::NULL_ROUTERID) &&
                 (
                     (currentBackupRouter.routerID == routerID) &&
                     (declaredBackup.routerID != routerID)

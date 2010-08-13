@@ -444,7 +444,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     // add the virtual link to the OSPF datastructure.
     OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());
-    OSPF::Area* backbone = ospfRouter->getArea(OSPF::BackboneAreaID);
+    OSPF::Area* backbone = ospfRouter->getArea(OSPF::BACKBONE_AREAID);
 
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);

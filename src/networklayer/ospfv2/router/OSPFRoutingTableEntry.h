@@ -38,9 +38,9 @@ public:
     typedef unsigned char RoutingDestinationType;
 
     // destinationType bitfield values
-    static const unsigned char NetworkDestination = 0;
-    static const unsigned char AreaBorderRouterDestination = 1;
-    static const unsigned char ASBoundaryRouterDestination = 2;
+    static const unsigned char NETWORK_DESTINATION = 0;
+    static const unsigned char AREA_BORDER_ROUTER_DESTINATION = 1;
+    static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
 
 private:
     RoutingDestinationType  destinationType;
@@ -92,8 +92,8 @@ public:
 
 inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     IPRoute(),
-    destinationType(OSPF::RoutingTableEntry::NetworkDestination),
-    area(OSPF::BackboneAreaID),
+    destinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION),
+    area(OSPF::BACKBONE_AREAID),
     pathType(OSPF::RoutingTableEntry::INTRAAREA),
     type2Cost(0),
     linkStateOrigin(NULL)
@@ -199,16 +199,16 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
         << "/"
         << entry.getAddressMask().str()
         << " (";
-    if (entry.getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) {
+    if (entry.getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";
     } else {
-        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AreaBorderRouterDestination) != 0) {
+        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
             out << "AreaBorderRouter";
         }
-        if ((entry.getDestinationType() & (OSPF::RoutingTableEntry::ASBoundaryRouterDestination | OSPF::RoutingTableEntry::AreaBorderRouterDestination)) != 0) {
+        if ((entry.getDestinationType() & (OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION | OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION)) != 0) {
             out << "+";
         }
-        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) {
+        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
             out << "ASBoundaryRouter";
         }
     }

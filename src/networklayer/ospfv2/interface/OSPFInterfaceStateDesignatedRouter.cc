@@ -37,7 +37,7 @@ void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, O
     }
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
-            intf->sendHelloPacket(OSPF::AllSPFRouters);
+            intf->sendHelloPacket(OSPF::ALL_SPF_ROUTERS);
         } else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
             int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;

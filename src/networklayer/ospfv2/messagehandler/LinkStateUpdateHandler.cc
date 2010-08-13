@@ -138,15 +138,15 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                     if (intf->getType() == OSPF::Interface::BROADCAST) {
                         if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
                             (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
-                            (intf->getDesignatedRouter() == OSPF::NullDesignatedRouterID))
+                            (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                         {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::AllSPFRouters);
+                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::ALL_SPF_ROUTERS);
                         } else {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::AllDRouters);
+                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::ALL_D_ROUTERS);
                         }
                     } else {
                         if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::AllSPFRouters);
+                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), OSPF::ALL_SPF_ROUTERS);
                         } else {
                             intf->sendLSAcknowledgement(&(currentLSA->getHeader()), neighbor->getAddress());
                         }
@@ -229,15 +229,15 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                         if (intf->getType() == OSPF::Interface::BROADCAST) {
                             if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
                                 (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
-                                (intf->getDesignatedRouter() == OSPF::NullDesignatedRouterID))
+                                (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                             {
-                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                             } else {
-                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::AllDRouters, intf->getIfIndex(), ttl);
+                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::ALL_D_ROUTERS, intf->getIfIndex(), ttl);
                             }
                         } else {
                             if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
-                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                                router->getMessageHandler()->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                             } else {
                                 router->getMessageHandler()->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                             }
@@ -317,15 +317,15 @@ void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
         if (intf->getType() == OSPF::Interface::BROADCAST) {
             if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
                 (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
-                (intf->getDesignatedRouter() == OSPF::NullDesignatedRouterID))
+                (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
             {
-                router->getMessageHandler()->sendPacket(ackPacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(ackPacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
             } else {
-                router->getMessageHandler()->sendPacket(ackPacket, OSPF::AllDRouters, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(ackPacket, OSPF::ALL_D_ROUTERS, intf->getIfIndex(), ttl);
             }
         } else {
             if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
-                router->getMessageHandler()->sendPacket(ackPacket, OSPF::AllSPFRouters, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(ackPacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
             } else {
                 router->getMessageHandler()->sendPacket(ackPacket, intf->getNeighborByID(lsaSource)->getAddress(), intf->getIfIndex(), ttl);
             }

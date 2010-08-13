@@ -143,7 +143,7 @@ OSPF::Interface* OSPF::Router::getNonVirtualInterface(unsigned char ifIndex)
  * @param areaID [in] Identifies the input Router, Network and Summary LSA's Area.
  * @return True if the routing table needs to be updated, false otherwise.
  */
-bool OSPF::Router::installLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/)
+bool OSPF::Router::installLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BACKBONE_AREAID*/)
 {
     switch (lsa->getHeader().getLsType()) {
         case ROUTERLSA_TYPE:
@@ -221,8 +221,8 @@ bool OSPF::Router::installASExternalLSA(OSPFASExternalLSA* lsa)
     unsigned int routeCount = routingTable.size();
 
     for (unsigned int i = 0; i < routeCount; i++) {
-        if ((((routingTable[i]->getDestinationType() & OSPF::RoutingTableEntry::AreaBorderRouterDestination) != 0) ||
-             ((routingTable[i]->getDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0)) &&
+        if ((((routingTable[i]->getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
+             ((routingTable[i]->getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
             (routingTable[i]->getDestinationID().getInt() == advertisingRouter))
         {
             reachable = true;
@@ -248,7 +248,7 @@ bool OSPF::Router::installASExternalLSA(OSPFASExternalLSA* lsa)
             return false;
         } else {
             lsaIt->second->getHeader().setLsAge(MAX_AGE);
-            floodLSA(lsaIt->second, OSPF::BackboneAreaID);
+            floodLSA(lsaIt->second, OSPF::BACKBONE_AREAID);
             lsaIt->second->incrementInstallTime();
             ownLSAFloodedOut = true;
         }
@@ -381,13 +381,13 @@ void OSPF::Router::ageDatabase()
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
                 lsa->getHeader().setLsAge(MAX_AGE);
-                floodLSA(lsa, OSPF::BackboneAreaID);
+                floodLSA(lsa, OSPF::BACKBONE_AREAID);
                 lsa->incrementInstallTime();
             } else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                     lsa->getHeader().setLsAge(MAX_AGE);
-                    floodLSA(lsa, OSPF::BackboneAreaID);
+                    floodLSA(lsa, OSPF::BACKBONE_AREAID);
                     lsa->incrementInstallTime();
                 } else {
                     OSPF::ASExternalLSA* newLSA = originateASExternalLSA(lsa);
@@ -397,13 +397,13 @@ void OSPF::Router::ageDatabase()
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
-                    floodLSA(lsa, OSPF::BackboneAreaID);
+                    floodLSA(lsa, OSPF::BACKBONE_AREAID);
                 }
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
             lsa->getHeader().setLsAge(MAX_AGE);
-            floodLSA(lsa, OSPF::BackboneAreaID);
+            floodLSA(lsa, OSPF::BACKBONE_AREAID);
             lsa->incrementInstallTime();
         }
         if (lsAge == MAX_AGE) {
@@ -435,7 +435,7 @@ void OSPF::Router::ageDatabase()
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
-                        floodLSA(lsa, OSPF::BackboneAreaID);
+                        floodLSA(lsa, OSPF::BACKBONE_AREAID);
                     }
                 }
             }
@@ -520,7 +520,7 @@ bool OSPF::Router::isOnAnyRetransmissionList(OSPF::LSAKeyType lsaKey) const
  * @param neighbor [in] The Nieghbor this LSA arrived from.
  * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
  */
-bool OSPF::Router::floodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BackboneAreaID*/, OSPF::Interface* intf /*= NULL*/, OSPF::Neighbor* neighbor /*= NULL*/)
+bool OSPF::Router::floodLSA(OSPFLSA* lsa, OSPF::AreaID areaID /*= BACKBONE_AREAID*/, OSPF::Interface* intf /*= NULL*/, OSPF::Neighbor* neighbor /*= NULL*/)
 {
     bool floodedBackOut = false;
 
@@ -745,7 +745,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPAddress destination, std::vector
             for (unsigned int k = 0; k < routingTableSize; k++) {
                 OSPF::RoutingTableEntry* entry = rTable[k];
 
-                if (entry->getDestinationType() != OSPF::RoutingTableEntry::NetworkDestination) {
+                if (entry->getDestinationType() != OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
                     continue;
                 }
                 if (((entry->getDestinationID().getInt() & entry->getAddressMask().getInt() & ulongFromIPv4Address(range.mask)) == ulongFromIPv4Address(range.address & range.mask)) &&
@@ -755,7 +755,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPAddress destination, std::vector
                     OSPF::RoutingTableEntry* discardEntry = new OSPF::RoutingTableEntry;
                     discardEntry->setDestinationID(ulongFromIPv4Address(range.address));
                     discardEntry->setAddressMask(ulongFromIPv4Address(range.mask));
-                    discardEntry->setDestinationType(OSPF::RoutingTableEntry::NetworkDestination);
+                    discardEntry->setDestinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION);
                     discardEntry->setPathType(OSPF::RoutingTableEntry::INTERAREA);
                     discardEntry->setArea(areas[i]->getAreaID());
                     discard.push_back(discardEntry);
@@ -769,7 +769,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPAddress destination, std::vector
     unsigned long longestMatch = 0;
 
     for (i = 0; i < routingTableSize; i++) {
-        if (rTable[i]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) {
+        if (rTable[i]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
             OSPF::RoutingTableEntry* entry = rTable[i];
             unsigned long entryAddress = entry->getDestinationID().getInt();
             unsigned long entryMask = entry->getAddressMask().getInt();
@@ -833,7 +833,7 @@ void OSPF::Router::rebuildRoutingTable()
         }
     }
     if (areaCount > 1) {
-        OSPF::Area* backbone = getArea(OSPF::BackboneAreaID);
+        OSPF::Area* backbone = getArea(OSPF::BACKBONE_AREAID);
         if (backbone != NULL) {
             backbone->calculateInterAreaRoutes(newTable);
         }
@@ -880,7 +880,7 @@ void OSPF::Router::rebuildRoutingTable()
     // add the new routing entries
     routeCount = routingTable.size();
     for (i = 0; i < routeCount; i++) {
-        if (routingTable[i]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) {
+        if (routingTable[i]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
             simRoutingTable->addRoute(new OSPF::RoutingTableEntry(*(routingTable[i])));
         }
     }
@@ -914,7 +914,7 @@ bool OSPF::Router::hasRouteToASBoundaryRouter(const std::vector<OSPF::RoutingTab
     long routeCount = inRoutingTable.size();
     for (long i = 0; i < routeCount; i++) {
         OSPF::RoutingTableEntry* routingEntry = inRoutingTable[i];
-        if (((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) &&
+        if (((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) &&
             (routingEntry->getDestinationID().getInt() == asbrRouterID))
         {
             return true;
@@ -938,7 +938,7 @@ std::vector<OSPF::RoutingTableEntry*> OSPF::Router::getRoutesToASBoundaryRouter(
 
     for (long i = 0; i < routeCount; i++) {
         OSPF::RoutingTableEntry* routingEntry = fromRoutingTable[i];
-        if (((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) &&
+        if (((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) &&
             (routingEntry->getDestinationID().getInt() == asbrRouterID))
         {
             results.push_back(routingEntry);
@@ -960,7 +960,7 @@ void OSPF::Router::pruneASBoundaryRouterEntries(std::vector<OSPF::RoutingTableEn
     for (std::vector<OSPF::RoutingTableEntry*>::iterator it = asbrEntries.begin(); it != asbrEntries.end(); it++) {
         OSPF::RoutingTableEntry* routingEntry = *it;
         if ((routingEntry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-            (routingEntry->getArea() != OSPF::BackboneAreaID))
+            (routingEntry->getArea() != OSPF::BACKBONE_AREAID))
         {
             hasNonBackboneIntraAreaPath = true;
             break;
@@ -971,7 +971,7 @@ void OSPF::Router::pruneASBoundaryRouterEntries(std::vector<OSPF::RoutingTableEn
         std::vector<OSPF::RoutingTableEntry*>::iterator it = asbrEntries.begin();
         while (it != asbrEntries.end()) {
             if (((*it)->getPathType() != OSPF::RoutingTableEntry::INTRAAREA) ||
-                ((*it)->getArea() == OSPF::BackboneAreaID))
+                ((*it)->getArea() == OSPF::BACKBONE_AREAID))
             {
                 it = asbrEntries.erase(it);
             } else {
@@ -1124,7 +1124,7 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             } else {
                 newEntry->setCost(preferredCost + externalCost);
             }
-            newEntry->setDestinationType(OSPF::RoutingTableEntry::NetworkDestination);
+            newEntry->setDestinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION);
             newEntry->setOptionalCapabilities(currentHeader.getLsOptions());
             newEntry->setLinkStateOrigin(currentLSA);
 
@@ -1159,9 +1159,9 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             OSPF::RoutingTableEntry* destinationPreferredEntry = getPreferredEntry(*(destinationEntry->getLinkStateOrigin()), false, &newRoutingTable);
             if ((!rfc1583Compatibility) &&
                 (destinationPreferredEntry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-                (destinationPreferredEntry->getArea() != OSPF::BackboneAreaID) &&
+                (destinationPreferredEntry->getArea() != OSPF::BACKBONE_AREAID) &&
                 ((preferredEntry->getPathType() != OSPF::RoutingTableEntry::INTRAAREA) ||
-                 (preferredEntry->getArea() == OSPF::BackboneAreaID)))
+                 (preferredEntry->getArea() == OSPF::BACKBONE_AREAID)))
             {
                 continue;
             }
@@ -1204,7 +1204,7 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             } else {
                 destinationEntry->setCost(preferredCost + externalCost);
             }
-            destinationEntry->setDestinationType(OSPF::RoutingTableEntry::NetworkDestination);
+            destinationEntry->setDestinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION);
             destinationEntry->setOptionalCapabilities(currentHeader.getLsOptions());
             destinationEntry->clearNextHops();
 
@@ -1226,21 +1226,21 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
  * @param advertise    [out] Whether the advertise flag is set in the returned
  *                           preconfigured address range.
  * @return The containing preconfigured address range if found,
- *         OSPF::NullIPv4AddressRange otherwise.
+ *         OSPF::NULL_IPV4ADDRESSRANGE otherwise.
  */
 OSPF::IPv4AddressRange OSPF::Router::getContainingAddressRange(OSPF::IPv4AddressRange addressRange, bool* advertise /*= NULL*/) const
 {
     unsigned long areaCount = areas.size();
     for (unsigned long i = 0; i < areaCount; i++) {
         OSPF::IPv4AddressRange containingAddressRange = areas[i]->getContainingAddressRange(addressRange, advertise);
-        if (containingAddressRange != OSPF::NullIPv4AddressRange) {
+        if (containingAddressRange != OSPF::NULL_IPV4ADDRESSRANGE) {
             return containingAddressRange;
         }
     }
     if (advertise != NULL) {
         *advertise = false;
     }
-    return OSPF::NullIPv4AddressRange;
+    return OSPF::NULL_IPV4ADDRESSRANGE;
 }
 
 
@@ -1351,7 +1351,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                 if (newLSA != NULL) {
                     if (lsaToReoriginate != NULL) {
                         areas[i]->installSummaryLSA(lsaToReoriginate);
-//                        floodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
+//                        floodLSA(lsaToReoriginate, OSPF::BACKBONE_AREAID);
                         floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                         lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
@@ -1362,7 +1362,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     }
 
                     areas[i]->installSummaryLSA(newLSA);
-//                    floodLSA(newLSA, OSPF::BackboneAreaID);
+//                    floodLSA(newLSA, OSPF::BACKBONE_AREAID);
                     floodLSA(newLSA, areas[i]->getAreaID());
 
                     lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
@@ -1379,7 +1379,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     if (newLSA != NULL) {
                         if (lsaToReoriginate != NULL) {
                             areas[i]->installSummaryLSA(lsaToReoriginate);
-//                            floodLSA(lsaToReoriginate, OSPF::BackboneAreaID);
+//                            floodLSA(lsaToReoriginate, OSPF::BACKBONE_AREAID);
                             floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                             lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
@@ -1390,7 +1390,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                         }
 
                         areas[i]->installSummaryLSA(newLSA);
-//                        floodLSA(newLSA, OSPF::BackboneAreaID);
+//                        floodLSA(newLSA, OSPF::BACKBONE_AREAID);
                         floodLSA(newLSA, areas[i]->getAreaID());
 
                         lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
@@ -1404,12 +1404,12 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                         destinationAddressRange.address = ipv4AddressFromULong(routingTable[j]->getDestinationID().getInt());
                         destinationAddressRange.mask = ipv4AddressFromULong(routingTable[j]->getAddressMask().getInt());
 
-                        if ((routingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) &&
+                        if ((routingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                             ((routingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||
                              (routingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTERAREA)))
                         {
                             OSPF::IPv4AddressRange containingAddressRange = getContainingAddressRange(destinationAddressRange);
-                            if (containingAddressRange != OSPF::NullIPv4AddressRange) {
+                            if (containingAddressRange != OSPF::NULL_IPV4ADDRESSRANGE) {
                                 destinationAddressRange = containingAddressRange;
                             }
                         }
@@ -1418,7 +1418,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                         Metric oneLessCost = 0;
 
                         for (k = 0; k < routeCount; k++) {
-                            if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) &&
+                            if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                                 (routingTable[k]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
                                 ((routingTable[k]->getDestinationID().getInt() & routingTable[k]->getAddressMask().getInt() & ulongFromIPv4Address(destinationAddressRange.mask)) ==
                                  ulongFromIPv4Address(destinationAddressRange.address & destinationAddressRange.mask)) &&
@@ -1438,7 +1438,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                             if (summaryLSA != NULL) {
                                 if (oneLessCost != 0) { // there's an other entry in this range
                                     summaryLSA->setRouteCost(oneLessCost);
-//                                    floodLSA(summaryLSA, OSPF::BackboneAreaID);
+//                                    floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
                                     floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                     originatedLSAMap[lsaKey] = true;
@@ -1446,7 +1446,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                                     std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                                     if (deletedIt == deletedLSAMap.end()) {
                                         summaryLSA->getHeader().setLsAge(MAX_AGE);
-//                                        floodLSA(summaryLSA, OSPF::BackboneAreaID);
+//                                        floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
                                         floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                         deletedLSAMap[lsaKey]    = true;
@@ -1469,12 +1469,12 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                 destinationAddressRange.address = ipv4AddressFromULong(oldRoutingTable[j]->getDestinationID().getInt());
                 destinationAddressRange.mask = ipv4AddressFromULong(oldRoutingTable[j]->getAddressMask().getInt());
 
-                if ((oldRoutingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) &&
+                if ((oldRoutingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                     ((oldRoutingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||
                      (oldRoutingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTERAREA)))
                 {
                     OSPF::IPv4AddressRange containingAddressRange = getContainingAddressRange(destinationAddressRange);
-                    if (containingAddressRange != OSPF::NullIPv4AddressRange) {
+                    if (containingAddressRange != OSPF::NULL_IPV4ADDRESSRANGE) {
                         destinationAddressRange = containingAddressRange;
                     }
                 }
@@ -1483,7 +1483,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
                 unsigned long newRouteCount = routingTable.size();
                 for (k = 0; k < newRouteCount; k++) {
-                    if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) &&
+                    if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                         (routingTable[k]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
                         ((routingTable[k]->getDestinationID().getInt() & routingTable[k]->getAddressMask().getInt() & ulongFromIPv4Address(destinationAddressRange.mask)) ==
                          ulongFromIPv4Address(destinationAddressRange.address & destinationAddressRange.mask)) &&
@@ -1502,14 +1502,14 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     if (summaryLSA != NULL) {
                         if (maxRangeCost > 0) { // there's an other entry in this range
                             summaryLSA->setRouteCost(maxRangeCost);
-                            floodLSA(summaryLSA, OSPF::BackboneAreaID);
+                            floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
 
                             originatedLSAMap[lsaKey] = true;
                         } else {    // no more entries in this range -> delete it
                             std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                             if (deletedIt == deletedLSAMap.end()) {
                                 summaryLSA->getHeader().setLsAge(MAX_AGE);
-                                floodLSA(summaryLSA, OSPF::BackboneAreaID);
+                                floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
 
                                 deletedLSAMap[lsaKey]    = true;
                             }
@@ -1577,7 +1577,7 @@ void OSPF::Router::updateExternalRoute(OSPF::IPv4Address networkAddress, const O
     externalRoutes[networkAddress] = externalRouteContents;
 
     bool rebuild = installASExternalLSA(asExternalLSA);
-    floodLSA(asExternalLSA, OSPF::BackboneAreaID);
+    floodLSA(asExternalLSA, OSPF::BACKBONE_AREAID);
     delete asExternalLSA;
 
     if (rebuild) {
@@ -1602,7 +1602,7 @@ void OSPF::Router::removeExternalRoute(OSPF::IPv4Address networkAddress)
     if (lsaIt != asExternalLSAsByID.end()) {
         lsaIt->second->getHeader().setLsAge(MAX_AGE);
         lsaIt->second->setPurgeable();
-        floodLSA(lsaIt->second, OSPF::BackboneAreaID);
+        floodLSA(lsaIt->second, OSPF::BACKBONE_AREAID);
     }
 
     std::map<OSPF::IPv4Address, OSPFASExternalLSAContents, OSPF::IPv4Address_Less>::iterator externalIt = externalRoutes.find(networkAddress);

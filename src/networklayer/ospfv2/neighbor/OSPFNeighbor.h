@@ -119,7 +119,7 @@ private:
     void changeState(NeighborState* newState, NeighborState* currentState);
 
 public:
-    Neighbor(RouterID neighbor = NullRouterID);
+    Neighbor(RouterID neighbor = NULL_ROUTERID);
     virtual ~Neighbor();
 
     void                processEvent(NeighborEventType event);

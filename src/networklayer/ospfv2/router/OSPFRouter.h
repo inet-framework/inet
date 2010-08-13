@@ -76,13 +76,13 @@ public:
     Area*                getArea(IPv4Address address);
     Interface*           getNonVirtualInterface(unsigned char ifIndex);
 
-    bool                 installLSA(OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
+    bool                 installLSA(OSPFLSA* lsa, AreaID areaID = BACKBONE_AREAID);
     OSPFLSA*             findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
     void                 ageDatabase();
     bool                 hasAnyNeighborInStates(int states) const;
     void                 removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool                 isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool                 floodLSA(OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    bool                 floodLSA(OSPFLSA* lsa, AreaID areaID = BACKBONE_AREAID, Interface* intf = NULL, Neighbor* neighbor = NULL);
     bool                 isLocalAddress(IPv4Address address) const;
     bool                 hasAddressRange(IPv4AddressRange addressRange) const;
     bool                 isDestinationUnreachable(OSPFLSA* lsa) const;
