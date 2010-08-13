@@ -46,8 +46,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
            networks and on virtual links, the Network Mask in the received
            Hello Packet should be ignored.
          */
-        if (!((interfaceType != OSPF::Interface::PointToPoint) &&
-              (interfaceType != OSPF::Interface::Virtual) &&
+        if (!((interfaceType != OSPF::Interface::POINTTOPOINT) &&
+              (interfaceType != OSPF::Interface::VIRTUAL) &&
               (intf->getAddressRange().mask != IPv4AddressFromULong(helloPacket->getNetworkMask().getInt()))
              )
            )
@@ -68,8 +68,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                    MultiPoint or NBMA network the source is identified by the IP
                    source address found in the Hello's IP header.
                  */
-                if ((interfaceType == OSPF::Interface::Broadcast) ||
-                    (interfaceType == OSPF::Interface::PointToMultiPoint) ||
+                if ((interfaceType == OSPF::Interface::BROADCAST) ||
+                    (interfaceType == OSPF::Interface::POINTTOMULTIPOINT) ||
                     (interfaceType == OSPF::Interface::NBMA))
                 {
                     neighbor = intf->getNeighborByAddress(srcAddress);
@@ -91,8 +91,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     unsigned long               newBackupRouter     = helloPacket->getBackupDesignatedRouter().getInt();
                     OSPF::DesignatedRouterID    dRouterID;
 
-                    if ((interfaceType == OSPF::Interface::Virtual) &&
-                        (neighbor->getState() == OSPF::Neighbor::DownState))
+                    if ((interfaceType == OSPF::Interface::VIRTUAL) &&
+                        (neighbor->getState() == OSPF::Neighbor::DOWN_STATE))
                     {
                         neighbor->setPriority(helloPacket->getRouterPriority());
                         neighbor->setRouterDeadInterval(helloPacket->getRouterDeadInterval());
@@ -100,7 +100,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
 
                     /* If a change in the neighbor's Router Priority field
                        was noted, the receiving interface's state machine is
-                       scheduled with the event NeighborChange.
+                       scheduled with the event NEIGHBOR_CHANGE.
                      */
                     if (neighbor->getPriority() != newPriority) {
                         neighborChanged = true;
@@ -111,11 +111,11 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        address) and the Backup Designated Router field in the
                        packet is equal to 0.0.0.0 and the receiving interface is in
                        state Waiting, the receiving interface's state machine is
-                       scheduled with the event BackupSeen.
+                       scheduled with the event BACKUP_SEEN.
                      */
                     if ((newDesignatedRouter == source) &&
                         (newBackupRouter == 0) &&
-                        (intf->getState() == OSPF::Interface::WaitingState))
+                        (intf->getState() == OSPF::Interface::WAITING_STATE))
                     {
                         backupSeen = true;
                     } else {
@@ -123,7 +123,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            had not previously, or the neighbor is not declaring itself
                            Designated Router where it had previously, the receiving
                            interface's state machine is scheduled with the event
-                           NeighborChange.
+                           NEIGHBOR_CHANGE.
                          */
                         if (((newDesignatedRouter == source) &&
                              (newDesignatedRouter != ULongFromIPv4Address(designatedAddress))) ||
@@ -139,10 +139,10 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        Router(Hello Packet's Backup Designated Router field =
                        Neighbor IP address) and the receiving interface is in state
                        Waiting, the receiving interface's state machine is
-                       scheduled with the event BackupSeen.
+                       scheduled with the event BACKUP_SEEN.
                      */
                     if ((newBackupRouter == source) &&
-                        (intf->getState() == OSPF::Interface::WaitingState))
+                        (intf->getState() == OSPF::Interface::WAITING_STATE))
                     {
                         backupSeen = true;
                     } else {
@@ -150,7 +150,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            and it had not previously, or the neighbor is not declaring
                            itself Backup Designated Router where it had previously, the
                            receiving interface's state machine is scheduled with the
-                           event NeighborChange.
+                           event NEIGHBOR_CHANGE.
                          */
                         if (((newBackupRouter == source) &&
                              (newBackupRouter != ULongFromIPv4Address(backupAddress))) ||
@@ -249,10 +249,10 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     intf->addNeighbor(neighbor);
                 }
 
-                neighbor->processEvent(OSPF::Neighbor::HelloReceived);
+                neighbor->processEvent(OSPF::Neighbor::HELLO_RECEIVED);
                 if ((interfaceType == OSPF::Interface::NBMA) &&
                     (intf->getRouterPriority() == 0) &&
-                    (neighbor->getState() >= OSPF::Neighbor::InitState))
+                    (neighbor->getState() >= OSPF::Neighbor::INIT_STATE))
                 {
                     intf->sendHelloPacket(neighbor->getAddress());
                 }
@@ -262,39 +262,39 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                 unsigned int    i;
                 /* The list of neighbors contained in the Hello Packet is
                    examined.  If the router itself appears in this list, the
-                   neighbor state machine should be executed with the event TwoWayReceived.
+                   neighbor state machine should be executed with the event TWOWAY_RECEIVED.
                  */
                 for (i = 0; i < neighborsNeighborCount; i++) {
                     if (helloPacket->getNeighbor(i).getInt() == interfaceAddress) {
-                        neighbor->processEvent(OSPF::Neighbor::TwoWayReceived);
+                        neighbor->processEvent(OSPF::Neighbor::TWOWAY_RECEIVED);
                         break;
                     }
                 }
                 /* Otherwise, the neighbor state machine should
-                   be executed with the event OneWayReceived, and the processing
+                   be executed with the event ONEWAY_RECEIVED, and the processing
                    of the packet stops.
                  */
                 if (i == neighborsNeighborCount) {
-                    neighbor->processEvent(OSPF::Neighbor::OneWayReceived);
+                    neighbor->processEvent(OSPF::Neighbor::ONEWAY_RECEIVED);
                 }
 
                 if (neighborChanged) {
-                    intf->processEvent(OSPF::Interface::NeighborChange);
+                    intf->processEvent(OSPF::Interface::NEIGHBOR_CHANGE);
                     /* In some cases neighbors get stuck in TwoWay state after a DR
                        or Backup change. (calculateDesignatedRouter runs before the
                        neighbors' signal of DR change + this router does not become
-                       neither DR nor backup -> IsAdjacencyOK does not get called.)
-                       So to make it work(workaround) we'll call IsAdjacencyOK for
+                       neither DR nor backup -> IS_ADJACENCY_OK does not get called.)
+                       So to make it work(workaround) we'll call IS_ADJACENCY_OK for
                        all neighbors in TwoWay state from here. This shouldn't break
                        anything because if the neighbor state doesn't have to change
                        then NeedAdjacency returns false and nothing happnes in
-                       IsAdjacencyOK.
+                       IS_ADJACENCY_OK.
                      */
                     unsigned int neighborCount = intf->getNeighborCount();
                     for (i = 0; i < neighborCount; i++) {
                         OSPF::Neighbor* stuckNeighbor = intf->getNeighbor(i);
-                        if (stuckNeighbor->getState() == OSPF::Neighbor::TwoWayState) {
-                            stuckNeighbor->processEvent(OSPF::Neighbor::IsAdjacencyOK);
+                        if (stuckNeighbor->getState() == OSPF::Neighbor::TWOWAY_STATE) {
+                            stuckNeighbor->processEvent(OSPF::Neighbor::IS_ADJACENCY_OK);
                         }
                     }
 
@@ -322,7 +322,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                 }
 
                 if (backupSeen) {
-                    intf->processEvent(OSPF::Interface::BackupSeen);
+                    intf->processEvent(OSPF::Interface::BACKUP_SEEN);
                 }
             }
         }

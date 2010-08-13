@@ -26,14 +26,14 @@
 
 void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::InterfaceUp) {
+    if (event == OSPF::Interface::INTERFACE_UP) {
         OSPF::MessageHandler* messageHandler = intf->getArea()->getRouter()->getMessageHandler();
         messageHandler->StartTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
         messageHandler->StartTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
-            case OSPF::Interface::PointToPoint:
-            case OSPF::Interface::PointToMultiPoint:
-            case OSPF::Interface::Virtual:
+            case OSPF::Interface::POINTTOPOINT:
+            case OSPF::Interface::POINTTOMULTIPOINT:
+            case OSPF::Interface::VIRTUAL:
                 changeState(intf, new OSPF::InterfaceStatePointToPoint, this);
                 break;
 
@@ -48,13 +48,13 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
                     for (long i = 0; i < neighborCount; i++) {
                         OSPF::Neighbor* neighbor = intf->getNeighbor(i);
                         if (neighbor->getPriority() > 0) {
-                            neighbor->processEvent(OSPF::Neighbor::Start);
+                            neighbor->processEvent(OSPF::Neighbor::START);
                         }
                     }
                 }
                 break;
 
-            case OSPF::Interface::Broadcast:
+            case OSPF::Interface::BROADCAST:
                 if (intf->getRouterPriority() == 0) {
                     changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
@@ -67,7 +67,7 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
                 break;
         }
     }
-    if (event == OSPF::Interface::LoopIndication) {
+    if (event == OSPF::Interface::LOOP_INDICATION) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }

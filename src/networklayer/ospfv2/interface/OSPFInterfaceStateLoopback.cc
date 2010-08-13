@@ -20,11 +20,11 @@
 
 void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::InterfaceDown) {
+    if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::UnloopIndication) {
+    if (event == OSPF::Interface::UNLOOP_INDICATION) {
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
 }

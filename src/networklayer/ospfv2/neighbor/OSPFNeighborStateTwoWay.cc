@@ -26,13 +26,13 @@
 
 void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
-    if ((event == OSPF::Neighbor::KillNeighbor) || (event == OSPF::Neighbor::LinkDown)) {
+    if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->Reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::InactivityTimer) {
+    if (event == OSPF::Neighbor::INACTIVITY_TIMER) {
         neighbor->Reset();
         if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -40,16 +40,16 @@ void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor* neighbor, OSPF::Nei
         }
         changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::OneWayReceived) {
+    if (event == OSPF::Neighbor::ONEWAY_RECEIVED) {
         neighbor->Reset();
         changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
-    if (event == OSPF::Neighbor::HelloReceived) {
+    if (event == OSPF::Neighbor::HELLO_RECEIVED) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == OSPF::Neighbor::IsAdjacencyOK) {
+    if (event == OSPF::Neighbor::IS_ADJACENCY_OK) {
         if (neighbor->NeedAdjacency()) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             if (!(neighbor->isFirstAdjacencyInited())) {

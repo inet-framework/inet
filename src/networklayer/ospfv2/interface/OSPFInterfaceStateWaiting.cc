@@ -24,25 +24,25 @@
 
 void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if ((event == OSPF::Interface::BackupSeen) ||
-        (event == OSPF::Interface::WaitTimer))
+    if ((event == OSPF::Interface::BACKUP_SEEN) ||
+        (event == OSPF::Interface::WAIT_TIMER))
     {
         calculateDesignatedRouter(intf);
     }
-    if (event == OSPF::Interface::InterfaceDown) {
+    if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LoopIndication) {
+    if (event == OSPF::Interface::LOOP_INDICATION) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HelloTimer) {
-        if (intf->getType() == OSPF::Interface::Broadcast) {
+    if (event == OSPF::Interface::HELLO_TIMER) {
+        if (intf->getType() == OSPF::Interface::BROADCAST) {
             intf->sendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
-            int           ttl           = (intf->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+            int           ttl           = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
                 OSPF::Neighbor* neighbor = intf->getNeighbor(i);
                 if (neighbor->getPriority() > 0) {
@@ -52,7 +52,7 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
         }
         intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::AcknowledgementTimer) {
+    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

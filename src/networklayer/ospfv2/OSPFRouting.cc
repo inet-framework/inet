@@ -172,7 +172,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
 
 /**
  * Loads OSPF configuration information for a router interface.
- * Handles PointToPoint, Broadcast, NBMA and PointToMultiPoint interfaces.
+ * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
  * @param ifConfig [in] XML node describing the configuration of an OSPF interface.
  */
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
@@ -186,13 +186,13 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 
     intf->setIfIndex(ifIndex);
     if (interfaceType == "PointToPointInterface") {
-        intf->setType(OSPF::Interface::PointToPoint);
+        intf->setType(OSPF::Interface::POINTTOPOINT);
     } else if (interfaceType == "BroadcastInterface") {
-        intf->setType(OSPF::Interface::Broadcast);
+        intf->setType(OSPF::Interface::BROADCAST);
     } else if (interfaceType == "NBMAInterface") {
         intf->setType(OSPF::Interface::NBMA);
     } else if (interfaceType == "PointToMultiPointInterface") {
-        intf->setType(OSPF::Interface::PointToMultiPoint);
+        intf->setType(OSPF::Interface::POINTTOMULTIPOINT);
     } else {
         delete intf;
         error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
@@ -228,11 +228,11 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         if (nodeName == "AuthenticationType") {
             std::string authenticationType = (*ifElemIt)->getNodeValue();
             if (authenticationType == "SimplePasswordType") {
-                intf->setAuthenticationType(OSPF::SimplePasswordType);
+                intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
             } else if (authenticationType == "CrytographicType") {
-                intf->setAuthenticationType(OSPF::CrytographicType);
+                intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
             } else {
-                intf->setAuthenticationType(OSPF::NullType);
+                intf->setAuthenticationType(OSPF::NULL_TYPE);
             }
         }
         if (nodeName == "AuthenticationKey") {
@@ -279,7 +279,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
     OSPF::Area* area = ospfRouter->getArea(areaID);
     if (area != NULL) {
         area->addInterface(intf);
-        intf->processEvent(OSPF::Interface::InterfaceUp); // notification should come from the blackboard...
+        intf->processEvent(OSPF::Interface::INTERFACE_UP); // notification should come from the blackboard...
     } else {
         delete intf;
         error("Loading %s ifIndex[%d] in Area %d aborted", interfaceType.c_str(), ifIndex, areaID);
@@ -317,11 +317,11 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
             if (metricType == "Type2") {
                 asExternalRoute.setE_ExternalMetricType(true);
                 externalRoutingEntry.setType2Cost(routeCost);
-                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::Type2External);
+                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE2_EXTERNAL);
             } else {
                 asExternalRoute.setE_ExternalMetricType(false);
                 externalRoutingEntry.setCost(routeCost);
-                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::Type1External);
+                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
             }
         }
         if (nodeName == "ForwardingAddress") {
@@ -396,7 +396,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
-    intf->setType(OSPF::Interface::Virtual);
+    intf->setType(OSPF::Interface::VIRTUAL);
     neighbor->setNeighborID(ULongFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
@@ -421,11 +421,11 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         if (nodeName == "AuthenticationType") {
             std::string authenticationType = (*ifElemIt)->getNodeValue();
             if (authenticationType == "SimplePasswordType") {
-                intf->setAuthenticationType(OSPF::SimplePasswordType);
+                intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
             } else if (authenticationType == "CrytographicType") {
-                intf->setAuthenticationType(OSPF::CrytographicType);
+                intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
             } else {
-                intf->setAuthenticationType(OSPF::NullType);
+                intf->setAuthenticationType(OSPF::NULL_TYPE);
             }
         }
         if (nodeName == "AuthenticationKey") {

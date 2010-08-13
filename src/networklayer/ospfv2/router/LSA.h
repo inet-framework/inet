@@ -59,8 +59,8 @@ class LSATrackingInfo
 {
 public:
     enum InstallSource {
-        Originated = 0,
-        Flooded = 1
+        ORIGINATED = 0,
+        FLOODED = 1
     };
 
 private:
@@ -68,7 +68,7 @@ private:
     unsigned long   installTime;
 
 public:
-        LSATrackingInfo(void) : source(Flooded), installTime(0) {}
+        LSATrackingInfo(void) : source(FLOODED), installTime(0) {}
         LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
     void            setSource               (InstallSource installSource)   { source = installSource; }
@@ -275,11 +275,11 @@ inline void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output)
            << lsaHeader.getLsAge()
            << ", type=";
     switch (lsaHeader.getLsType()) {
-        case RouterLSAType:                     output << "RouterLSA";                     break;
-        case NetworkLSAType:                    output << "NetworkLSA";                    break;
-        case SummaryLSA_NetworksType:           output << "SummaryLSA_Networks";           break;
-        case SummaryLSA_ASBoundaryRoutersType:  output << "SummaryLSA_ASBoundaryRouters";  break;
-        case ASExternalLSAType:                 output << "ASExternalLSA";                 break;
+        case ROUTERLSA_TYPE:                     output << "RouterLSA";                     break;
+        case NETWORKLSA_TYPE:                    output << "NetworkLSA";                    break;
+        case SUMMARYLSA_NETWORKS_TYPE:           output << "SummaryLSA_Networks";           break;
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  output << "SummaryLSA_ASBoundaryRouters";  break;
+        case AS_EXTERNAL_LSA_TYPE:                 output << "ASExternalLSA";                 break;
         default:                                output << "Unknown";                       break;
     }
     output << ", LSID="

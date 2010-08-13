@@ -24,16 +24,16 @@
 
 void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::InterfaceDown) {
+    if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LoopIndication) {
+    if (event == OSPF::Interface::LOOP_INDICATION) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HelloTimer) {
-        if (intf->getType() == OSPF::Interface::Virtual) {
+    if (event == OSPF::Interface::HELLO_TIMER) {
+        if (intf->getType() == OSPF::Interface::VIRTUAL) {
             if (intf->getNeighborCount() > 0) {
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
@@ -42,7 +42,7 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
         }
         intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::AcknowledgementTimer) {
+    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

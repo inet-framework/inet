@@ -26,7 +26,7 @@ class InterfaceStateBackup : public InterfaceState
 {
 public:
     virtual void processEvent(Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState(void) const { return Interface::BackupState; }
+    virtual Interface::InterfaceStateType getState(void) const { return Interface::BACKUP_STATE; }
 };
 
 } // namespace OSPF

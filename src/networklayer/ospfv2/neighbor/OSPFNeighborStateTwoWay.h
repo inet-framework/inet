@@ -26,7 +26,7 @@ class NeighborStateTwoWay : public NeighborState
 {
 public:
     virtual void processEvent(Neighbor* neighbor, Neighbor::NeighborEventType event);
-    virtual Neighbor::NeighborStateType getState(void) const { return Neighbor::TwoWayState; }
+    virtual Neighbor::NeighborStateType getState(void) const { return Neighbor::TWOWAY_STATE; }
 };
 
 } // namespace OSPF

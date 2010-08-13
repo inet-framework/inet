@@ -29,7 +29,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 
     neighbor->changeState(newState, currentState);
 
-    if ((oldState == OSPF::Neighbor::FullState) || (nextState == OSPF::Neighbor::FullState)) {
+    if ((oldState == OSPF::Neighbor::FULL_STATE) || (nextState == OSPF::Neighbor::FULL_STATE)) {
         OSPF::RouterID   routerID  = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
         OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
@@ -51,7 +51,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
             }
         }
 
-        if (neighbor->getInterface()->getState() == OSPF::Interface::DesignatedRouterState) {
+        if (neighbor->getInterface()->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
             OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(ULongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
 
             if (networkLSA != NULL) {

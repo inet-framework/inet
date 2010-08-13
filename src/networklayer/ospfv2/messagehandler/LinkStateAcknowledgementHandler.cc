@@ -27,7 +27,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
-    if (neighbor->getState() >= OSPF::Neighbor::ExchangeState) {
+    if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
         OSPFLinkStateAcknowledgementPacket* lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket*> (packet);
 
         int  lsaCount = lsAckPacket->getLsaHeadersArraySize();

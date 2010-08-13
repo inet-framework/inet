@@ -29,10 +29,10 @@ class RoutingTableEntry : public IPRoute
 {
 public:
     enum RoutingPathType {
-        IntraArea     = 0,
-        InterArea     = 1,
-        Type1External = 2,
-        Type2External = 3
+        INTRAAREA     = 0,
+        INTERAREA     = 1,
+        TYPE1_EXTERNAL = 2,
+        TYPE2_EXTERNAL = 3
     };
 
     typedef unsigned char RoutingDestinationType;
@@ -94,7 +94,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(void) :
     IPRoute(),
     destinationType(OSPF::RoutingTableEntry::NetworkDestination),
     area(OSPF::BackboneAreaID),
-    pathType(OSPF::RoutingTableEntry::IntraArea),
+    pathType(OSPF::RoutingTableEntry::INTRAAREA),
     type2Cost(0),
     linkStateOrigin(NULL)
 {
@@ -126,7 +126,7 @@ inline void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
 {
     pathType = type;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
-    if (pathType == OSPF::RoutingTableEntry::Type2External) {
+    if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         metric = cost + type2Cost * 1000;
     } else {
         metric = cost;
@@ -137,7 +137,7 @@ inline void OSPF::RoutingTableEntry::setCost(Metric pathCost)
 {
     cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
-    if (pathType == OSPF::RoutingTableEntry::Type2External) {
+    if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         metric = cost + type2Cost * 1000;
     } else {
         metric = cost;
@@ -148,7 +148,7 @@ inline void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
-    if (pathType == OSPF::RoutingTableEntry::Type2External) {
+    if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         metric = cost + type2Cost * 1000;
     } else {
         metric = cost;
@@ -216,10 +216,10 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
         << entry.getArea()
         << ", PathType: ";
     switch (entry.getPathType()) {
-        case OSPF::RoutingTableEntry::IntraArea:     out << "IntraArea";     break;
-        case OSPF::RoutingTableEntry::InterArea:     out << "InterArea";     break;
-        case OSPF::RoutingTableEntry::Type1External: out << "Type1External"; break;
-        case OSPF::RoutingTableEntry::Type2External: out << "Type2External"; break;
+        case OSPF::RoutingTableEntry::INTRAAREA:     out << "IntraArea";     break;
+        case OSPF::RoutingTableEntry::INTERAREA:     out << "InterArea";     break;
+        case OSPF::RoutingTableEntry::TYPE1_EXTERNAL: out << "Type1External"; break;
+        case OSPF::RoutingTableEntry::TYPE2_EXTERNAL: out << "Type2External"; break;
         default:            out << "Unknown";       break;
     }
     out << ", Cost: "

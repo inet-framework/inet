@@ -56,9 +56,9 @@ namespace OSPF {
 typedef unsigned long Metric;
 
 enum AuthenticationType {
-    NullType           = 0,
-    SimplePasswordType = 1,
-    CrytographicType   = 2
+    NULL_TYPE           = 0,
+    SIMPLE_PASSWORD_TYPE = 1,
+    CRYTOGRAPHIC_TYPE   = 2
 };
 
 struct AuthenticationKeyType {

@@ -21,16 +21,15 @@ cplusplus {{
 
 enum OSPFTimerType
 {
-
-    InterfaceHelloTimer = 0;
-    InterfaceWaitTimer = 1;
-    InterfaceAcknowledgementTimer = 3;
-    NeighborInactivityTimer = 4;
-    NeighborPollTimer = 5;
-    NeighborDDRetransmissionTimer = 6;
-    NeighborUpdateRetransmissionTimer = 7;
-    NeighborRequestRetransmissionTimer = 8;
-    DatabaseAgeTimer = 9;
+    INTERFACE_HELLO_TIMER = 0;
+    INTERFACE_WAIT_TIMER = 1;
+    INTERFACE_ACKNOWLEDGEMENT_TIMER = 3;
+    NEIGHBOR_INACTIVITY_TIMER = 4;
+    NEIGHBOR_POLL_TIMER = 5;
+    NEIGHBOR_DD_RETRANSMISSION_TIMER = 6;
+    NEIGHBOR_UPDATE_RETRANSMISSION_TIMER = 7;
+    NEIGHBOR_REQUEST_RETRANSMISSION_TIMER = 8;
+    DATABASE_AGE_TIMER = 9;
 }
 
 //
@@ -38,6 +37,6 @@ enum OSPFTimerType
 //
 packet OSPFTimer extends cMessage
 {
-    char timerKind enum(OSPFTimerType) = InterfaceHelloTimer;
+    char timerKind enum(OSPFTimerType) = INTERFACE_HELLO_TIMER;
 }
 

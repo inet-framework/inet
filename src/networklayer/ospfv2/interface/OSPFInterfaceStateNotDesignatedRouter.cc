@@ -24,19 +24,19 @@
 
 void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::NeighborChange) {
+    if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
     }
-    if (event == OSPF::Interface::InterfaceDown) {
+    if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LoopIndication) {
+    if (event == OSPF::Interface::LOOP_INDICATION) {
         intf->Reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HelloTimer) {
-        if (intf->getType() == OSPF::Interface::Broadcast) {
+    if (event == OSPF::Interface::HELLO_TIMER) {
+        if (intf->getType() == OSPF::Interface::BROADCAST) {
             intf->sendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
             if (intf->getRouterPriority() > 0) {
@@ -54,7 +54,7 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
         }
         intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::AcknowledgementTimer) {
+    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

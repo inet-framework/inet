@@ -34,34 +34,34 @@ class Area;
 class Interface {
 public:
     enum InterfaceEventType {
-        InterfaceUp          = 0,
-        HelloTimer           = 1,
-        WaitTimer            = 2,
-        AcknowledgementTimer = 3,
-        BackupSeen           = 4,
-        NeighborChange       = 5,
-        LoopIndication       = 6,
-        UnloopIndication     = 7,
-        InterfaceDown        = 8
+        INTERFACE_UP          = 0,
+        HELLO_TIMER           = 1,
+        WAIT_TIMER            = 2,
+        ACKNOWLEDGEMENT_TIMER = 3,
+        BACKUP_SEEN           = 4,
+        NEIGHBOR_CHANGE       = 5,
+        LOOP_INDICATION       = 6,
+        UNLOOP_INDICATION     = 7,
+        INTERFACE_DOWN        = 8
     };
 
     enum OSPFInterfaceType {
-        UnknownType       = 0,
-        PointToPoint      = 1,
-        Broadcast         = 2,
+        UNKNOWN_TYPE       = 0,
+        POINTTOPOINT      = 1,
+        BROADCAST         = 2,
         NBMA              = 3,
-        PointToMultiPoint = 4,
-        Virtual           = 5
+        POINTTOMULTIPOINT = 4,
+        VIRTUAL           = 5
     };
 
     enum InterfaceStateType {
-        DownState                = 0,
-        LoopbackState            = 1,
-        WaitingState             = 2,
-        PointToPointState        = 3,
-        NotDesignatedRouterState = 4,
-        BackupState              = 5,
-        DesignatedRouterState    = 6
+        DOWN_STATE                = 0,
+        LOOPBACK_STATE            = 1,
+        WAITING_STATE             = 2,
+        POINTTOPOINT_STATE        = 3,
+        NOT_DESIGNATED_ROUTER_STATE = 4,
+        BACKUP_STATE              = 5,
+        DESIGNATED_ROUTER_STATE    = 6
     };
 
 private:
@@ -99,7 +99,7 @@ private:
     void changeState(InterfaceState* newState, InterfaceState* currentState);
 
 public:
-            Interface(OSPFInterfaceType ifType = UnknownType);
+            Interface(OSPFInterfaceType ifType = UNKNOWN_TYPE);
     virtual ~Interface(void);
 
     void                processEvent                        (InterfaceEventType event);

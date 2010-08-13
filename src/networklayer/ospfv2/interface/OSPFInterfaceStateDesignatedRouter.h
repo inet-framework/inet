@@ -26,7 +26,7 @@ class InterfaceStateDesignatedRouter : public InterfaceState
 {
 public:
     virtual void processEvent(Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState(void) const { return Interface::DesignatedRouterState; }
+    virtual Interface::InterfaceStateType getState(void) const { return Interface::DESIGNATED_ROUTER_STATE; }
 };
 
 } // namespace OSPF

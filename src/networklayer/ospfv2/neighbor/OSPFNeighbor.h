@@ -35,39 +35,39 @@ friend class NeighborState;
 
 public:
     enum NeighborEventType {
-        HelloReceived               = 0,
-        Start                       = 1,
-        TwoWayReceived              = 2,
-        NegotiationDone             = 3,
-        ExchangeDone                = 4,
-        BadLinkStateRequest         = 5,
-        LoadingDone                 = 6,
-        IsAdjacencyOK               = 7,
-        SequenceNumberMismatch      = 8,
-        OneWayReceived              = 9,
-        KillNeighbor                = 10,
-        InactivityTimer             = 11,
-        PollTimer                   = 12,
-        LinkDown                    = 13,
-        DDRetransmissionTimer       = 14,
-        UpdateRetransmissionTimer   = 15,
-        RequestRetransmissionTimer  = 16
+        HELLO_RECEIVED               = 0,
+        START                       = 1,
+        TWOWAY_RECEIVED              = 2,
+        NEGOTIATION_DONE             = 3,
+        EXCHANGE_DONE                = 4,
+        BAD_LINK_STATE_REQUEST         = 5,
+        LOADING_DONE                 = 6,
+        IS_ADJACENCY_OK               = 7,
+        SEQUENCE_NUMBER_MISMATCH      = 8,
+        ONEWAY_RECEIVED              = 9,
+        KILL_NEIGHBOR                = 10,
+        INACTIVITY_TIMER             = 11,
+        POLL_TIMER                   = 12,
+        LINK_DOWN                    = 13,
+        DD_RETRANSMISSION_TIMER       = 14,
+        UPDATE_RETRANSMISSION_TIMER   = 15,
+        REQUEST_RETRANSMISSION_TIMER  = 16
     };
 
     enum NeighborStateType {
-        DownState          = 0,
-        AttemptState       = 1,
-        InitState          = 2,
-        TwoWayState        = 4,
-        ExchangeStartState = 8,
-        ExchangeState      = 16,
-        LoadingState       = 32,
-        FullState          = 64
+        DOWN_STATE          = 0,
+        ATTEMPT_STATE       = 1,
+        INIT_STATE          = 2,
+        TWOWAY_STATE        = 4,
+        EXCHANGE_START_STATE = 8,
+        EXCHANGE_STATE      = 16,
+        LOADING_STATE       = 32,
+        FULL_STATE          = 64
     };
 
     enum DatabaseExchangeRelationshipType {
-        Master = 0,
-        Slave = 1
+        MASTER = 0,
+        SLAVE = 1
     };
 
     struct DDPacketID {
