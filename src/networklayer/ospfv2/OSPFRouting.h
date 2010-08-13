@@ -32,19 +32,19 @@
 class OSPFRouting :  public cSimpleModule
 {
   private:
-    IInterfaceTable*     ift;        ///< Provides access to the interface table.
-    IRoutingTable*       rt;         ///< Provides access to the IP routing table.
-    OSPF::Router*       ospfRouter; ///< Root object of the OSPF datastructure.
+    IInterfaceTable* ift;        ///< Provides access to the interface table.
+    IRoutingTable*   rt;         ///< Provides access to the IP routing table.
+    OSPF::Router*    ospfRouter; ///< Root object of the OSPF datastructure.
 
-    int     resolveInterfaceName(const std::string& name) const;
-    void    getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
-    void    loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);
-    void    loadInterfaceParameters(const cXMLElement& ifConfig);
-    void    loadExternalRoute(const cXMLElement& externalRouteConfig);
-    void    loadHostRoute(const cXMLElement& hostRouteConfig);
-    void    loadVirtualLink(const cXMLElement& virtualLinkConfig);
+    int   resolveInterfaceName(const std::string& name) const;
+    void  getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
+    void  loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);
+    void  loadInterfaceParameters(const cXMLElement& ifConfig);
+    void  loadExternalRoute(const cXMLElement& externalRouteConfig);
+    void  loadHostRoute(const cXMLElement& hostRouteConfig);
+    void  loadVirtualLink(const cXMLElement& virtualLinkConfig);
 
-    bool    loadConfigFromXML(const char * filename);
+    bool  loadConfigFromXML(const char * filename);
 
   public:
     OSPFRouting();

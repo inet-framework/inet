@@ -48,7 +48,7 @@ private:
     bool                                                               rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
 
 public:
-            Router(RouterID id, cSimpleModule* containingModule);
+    Router(RouterID id, cSimpleModule* containingModule);
     virtual ~Router();
 
     void                     setRouterID(RouterID id)  { routerID = id; }

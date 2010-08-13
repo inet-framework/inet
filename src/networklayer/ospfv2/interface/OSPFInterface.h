@@ -99,7 +99,7 @@ private:
     void changeState(InterfaceState* newState, InterfaceState* currentState);
 
 public:
-            Interface(OSPFInterfaceType ifType = UNKNOWN_TYPE);
+    Interface(OSPFInterfaceType ifType = UNKNOWN_TYPE);
     virtual ~Interface();
 
     void                processEvent(InterfaceEventType event);
@@ -119,7 +119,7 @@ public:
     void                sendDelayedAcknowledgements();
     void                ageTransmittedLSALists();
 
-    OSPFLinkStateUpdatePacket*  createUpdatePacket(OSPFLSA* lsa);
+    OSPFLinkStateUpdatePacket* createUpdatePacket(OSPFLSA* lsa);
 
     void                    setType(OSPFInterfaceType ifType)  { interfaceType = ifType; }
     OSPFInterfaceType       getType() const  { return interfaceType; }

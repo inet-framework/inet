@@ -112,14 +112,14 @@ private:
 
     Interface*                          parentInterface;
 
-    // FIXME!!! Should come from a global unique number generator module.
+    // TODO: Should come from a global unique number generator module.
     static unsigned long                ddSequenceNumberInitSeed;
 
 private:
     void changeState(NeighborState* newState, NeighborState* currentState);
 
 public:
-            Neighbor(RouterID neighbor = NullRouterID);
+    Neighbor(RouterID neighbor = NullRouterID);
     virtual ~Neighbor();
 
     void                processEvent(NeighborEventType event);
