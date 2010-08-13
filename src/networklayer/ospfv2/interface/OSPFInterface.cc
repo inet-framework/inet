@@ -47,15 +47,15 @@ OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
 {
     state = new OSPF::InterfaceStateDown;
     previousState = NULL;
-    helloTimer = new OSPFTimer;
+    helloTimer = new OSPFTimer();
     helloTimer->setTimerKind(INTERFACE_HELLO_TIMER);
     helloTimer->setContextPointer(this);
     helloTimer->setName("OSPF::Interface::InterfaceHelloTimer");
-    waitTimer = new OSPFTimer;
+    waitTimer = new OSPFTimer();
     waitTimer->setTimerKind(INTERFACE_WAIT_TIMER);
     waitTimer->setContextPointer(this);
     waitTimer->setName("OSPF::Interface::InterfaceWaitTimer");
-    acknowledgementTimer = new OSPFTimer;
+    acknowledgementTimer = new OSPFTimer();
     acknowledgementTimer->setTimerKind(INTERFACE_ACKNOWLEDGEMENT_TIMER);
     acknowledgementTimer->setContextPointer(this);
     acknowledgementTimer->setName("OSPF::Interface::InterfaceAcknowledgementTimer");
@@ -123,7 +123,7 @@ void OSPF::Interface::reset()
 void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
 {
     OSPFOptions options;
-    OSPFHelloPacket* helloPacket = new OSPFHelloPacket;
+    OSPFHelloPacket* helloPacket = new OSPFHelloPacket();
     std::vector<OSPF::IPv4Address> neighbors;
 
     helloPacket->setRouterID(parentArea->getRouter()->getRouterID());
@@ -170,7 +170,7 @@ void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
 void OSPF::Interface::sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Address destination)
 {
     OSPFOptions options;
-    OSPFLinkStateAcknowledgementPacket* lsAckPacket = new OSPFLinkStateAcknowledgementPacket;
+    OSPFLinkStateAcknowledgementPacket* lsAckPacket = new OSPFLinkStateAcknowledgementPacket();
 
     lsAckPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
     lsAckPacket->setRouterID(parentArea->getRouter()->getRouterID());
@@ -419,7 +419,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
         (((lsaType == SUMMARYLSA_NETWORKS_TYPE) || (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) && (summaryLSA != NULL)) ||
         ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != NULL)))
     {
-        OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket;
+        OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket();
 
         updatePacket->setType(LINKSTATE_UPDATE_PACKET);
         updatePacket->setRouterID(parentArea->getRouter()->getRouterID());
@@ -525,7 +525,7 @@ void OSPF::Interface::sendDelayedAcknowledgements()
         int ackCount = delayIt->second.size();
         if (ackCount > 0) {
             while (!(delayIt->second.empty())) {
-                OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket;
+                OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket();
                 long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);

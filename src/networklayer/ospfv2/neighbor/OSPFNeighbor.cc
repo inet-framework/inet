@@ -44,23 +44,23 @@ OSPF::Neighbor::Neighbor(RouterID neighbor) :
     // setting only I and M bits is invalid -> good initializer
     lastReceivedDDPacket.ddOptions.I_Init = true;
     lastReceivedDDPacket.ddOptions.M_More = true;
-    inactivityTimer = new OSPFTimer;
+    inactivityTimer = new OSPFTimer();
     inactivityTimer->setTimerKind(NEIGHBOR_INACTIVITY_TIMER);
     inactivityTimer->setContextPointer(this);
     inactivityTimer->setName("OSPF::Neighbor::NeighborInactivityTimer");
-    pollTimer = new OSPFTimer;
+    pollTimer = new OSPFTimer();
     pollTimer->setTimerKind(NEIGHBOR_POLL_TIMER);
     pollTimer->setContextPointer(this);
     pollTimer->setName("OSPF::Neighbor::NeighborPollTimer");
-    ddRetransmissionTimer = new OSPFTimer;
+    ddRetransmissionTimer = new OSPFTimer();
     ddRetransmissionTimer->setTimerKind(NEIGHBOR_DD_RETRANSMISSION_TIMER);
     ddRetransmissionTimer->setContextPointer(this);
     ddRetransmissionTimer->setName("OSPF::Neighbor::NeighborDDRetransmissionTimer");
-    updateRetransmissionTimer = new OSPFTimer;
+    updateRetransmissionTimer = new OSPFTimer();
     updateRetransmissionTimer->setTimerKind(NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
     updateRetransmissionTimer->setContextPointer(this);
     updateRetransmissionTimer->setName("OSPF::Neighbor::Neighbor::NeighborUpdateRetransmissionTimer");
-    requestRetransmissionTimer = new OSPFTimer;
+    requestRetransmissionTimer = new OSPFTimer();
     requestRetransmissionTimer->setTimerKind(NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
     requestRetransmissionTimer->setContextPointer(this);
     requestRetransmissionTimer->setName("OSPF::Neighbor::NeighborRequestRetransmissionTimer");
@@ -165,7 +165,7 @@ const char* OSPF::Neighbor::getStateString(OSPF::Neighbor::NeighborStateType sta
 
 void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
 {
-    OSPFDatabaseDescriptionPacket* ddPacket = new OSPFDatabaseDescriptionPacket;
+    OSPFDatabaseDescriptionPacket* ddPacket = new OSPFDatabaseDescriptionPacket();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
@@ -310,7 +310,7 @@ void OSPF::Neighbor::createDatabaseSummary()
 
 void OSPF::Neighbor::sendLinkStateRequestPacket()
 {
-    OSPFLinkStateRequestPacket* requestPacket = new OSPFLinkStateRequestPacket;
+    OSPFLinkStateRequestPacket* requestPacket = new OSPFLinkStateRequestPacket();
 
     requestPacket->setType(LINKSTATE_REQUEST_PACKET);
     requestPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
@@ -583,7 +583,7 @@ void OSPF::Neighbor::ageTransmittedLSAList()
 
 void OSPF::Neighbor::retransmitUpdatePacket()
 {
-    OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket;
+    OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket();
 
     updatePacket->setType(LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());

@@ -295,7 +295,7 @@ void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
     }
 
     if (sendDirectAcknowledgment) {
-        OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket;
+        OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket();
 
         ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
         ackPacket->setRouterID(router->getRouterID());
