@@ -36,7 +36,7 @@ void OSPF::NeighborStateLoading::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Ne
     }
     if (event == OSPF::Neighbor::InactivityTimer) {
         neighbor->Reset();
-        if (neighbor->getInterface()->GetType() == OSPF::Interface::NBMA) {
+        if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->StartTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
@@ -49,7 +49,7 @@ void OSPF::NeighborStateLoading::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Ne
     if (event == OSPF::Neighbor::HelloReceived) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->ClearTimer(neighbor->getInactivityTimer());
-        messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->GetRouterDeadInterval());
+        messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
     if (event == OSPF::Neighbor::LoadingDone) {
         neighbor->ClearRequestRetransmissionTimer();

@@ -36,7 +36,7 @@ void OSPF::MessageHandler::MessageReceived(cMessage* message)
     } else {
         OSPFPacket* packet = check_and_cast<OSPFPacket*> (message);
         EV << "Received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
-        if (packet->getRouterID() == router->GetRouterID()) {
+        if (packet->getRouterID() == router->getRouterID()) {
             EV << "This packet is from ourselves, discarding.\n";
             delete message;
         } else {
@@ -222,7 +222,7 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
 
                         // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
                         if (packetType != HelloPacket) {
-                            switch (intf->GetType()) {
+                            switch (intf->getType()) {
                                 case OSPF::Interface::Broadcast:
                                 case OSPF::Interface::NBMA:
                                 case OSPF::Interface::PointToMultiPoint:
@@ -358,7 +358,7 @@ void OSPF::MessageHandler::PrintEvent(const char* eventString, const OSPF::Inter
         EV << "interface["
            << static_cast <short> (onInterface->getIfIndex())
            << "] ";
-        switch (onInterface->GetType()) {
+        switch (onInterface->getType()) {
             case OSPF::Interface::PointToPoint:      EV << "(PointToPoint)";
                                                      break;
             case OSPF::Interface::Broadcast:         EV << "(Broadcast)";

@@ -37,7 +37,7 @@ void OSPF::NeighborStateExchange::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::N
     }
     if (event == OSPF::Neighbor::InactivityTimer) {
         neighbor->Reset();
-        if (neighbor->getInterface()->GetType() == OSPF::Interface::NBMA) {
+        if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->StartTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
@@ -50,7 +50,7 @@ void OSPF::NeighborStateExchange::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::N
     if (event == OSPF::Neighbor::HelloReceived) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->ClearTimer(neighbor->getInactivityTimer());
-        messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->GetRouterDeadInterval());
+        messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
     if (event == OSPF::Neighbor::IsAdjacencyOK) {
         if (!neighbor->NeedAdjacency()) {
@@ -69,12 +69,12 @@ void OSPF::NeighborStateExchange::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::N
     if (event == OSPF::Neighbor::ExchangeDone) {
         if (neighbor->IsLinkStateRequestListEmpty()) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-            messageHandler->StartTimer(neighbor->getDDRetransmissionTimer(), neighbor->GetRouterDeadInterval());
+            messageHandler->StartTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             neighbor->ClearRequestRetransmissionTimer();
             ChangeState(neighbor, new OSPF::NeighborStateFull, this);
         } else {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-            messageHandler->StartTimer(neighbor->getDDRetransmissionTimer(), neighbor->GetRouterDeadInterval());
+            messageHandler->StartTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             ChangeState(neighbor, new OSPF::NeighborStateLoading, this);
         }
     }

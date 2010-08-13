@@ -157,23 +157,23 @@ public:
     unsigned char       getPriority                 (void) const                    { return neighborPriority; }
     void                setAddress                  (IPv4Address address)           { neighborIPAddress = address; }
     IPv4Address         getAddress                  (void) const                    { return neighborIPAddress; }
-    void                SetDesignatedRouter         (DesignatedRouterID routerID)   { neighborsDesignatedRouter = routerID; }
-    DesignatedRouterID  GetDesignatedRouter         (void) const                    { return neighborsDesignatedRouter; }
-    void                SetBackupDesignatedRouter   (DesignatedRouterID routerID)   { neighborsBackupDesignatedRouter = routerID; }
-    DesignatedRouterID  GetBackupDesignatedRouter   (void) const                    { return neighborsBackupDesignatedRouter; }
-    void                SetRouterDeadInterval       (short interval)                { neighborsRouterDeadInterval = interval; }
-    short               GetRouterDeadInterval       (void) const                    { return neighborsRouterDeadInterval; }
+    void                setDesignatedRouter         (DesignatedRouterID routerID)   { neighborsDesignatedRouter = routerID; }
+    DesignatedRouterID  getDesignatedRouter         (void) const                    { return neighborsDesignatedRouter; }
+    void                setBackupDesignatedRouter   (DesignatedRouterID routerID)   { neighborsBackupDesignatedRouter = routerID; }
+    DesignatedRouterID  getBackupDesignatedRouter   (void) const                    { return neighborsBackupDesignatedRouter; }
+    void                setRouterDeadInterval       (short interval)                { neighborsRouterDeadInterval = interval; }
+    short               getRouterDeadInterval       (void) const                    { return neighborsRouterDeadInterval; }
     void                setDDSequenceNumber         (unsigned long sequenceNumber)  { ddSequenceNumber = sequenceNumber; }
     unsigned long       getDDSequenceNumber         (void) const                    { return ddSequenceNumber; }
-    void                SetOptions                  (OSPFOptions options)           { neighborOptions = options; }
-    OSPFOptions         GetOptions                  (void) const                    { return neighborOptions; }
+    void                setOptions                  (OSPFOptions options)           { neighborOptions = options; }
+    OSPFOptions         getOptions                  (void) const                    { return neighborOptions; }
     void                setLastReceivedDDPacket     (DDPacketID packetID)           { lastReceivedDDPacket = packetID; }
     DDPacketID          getLastReceivedDDPacket     (void) const                    { return lastReceivedDDPacket; }
 
     void                                setDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
     DatabaseExchangeRelationshipType    getDatabaseExchangeRelationship(void) const                                { return databaseExchangeRelationship; }
 
-    void                SetInterface                (Interface* intf)               { parentInterface = intf; }
+    void                setInterface                (Interface* intf)               { parentInterface = intf; }
     Interface*          getInterface                (void)                          { return parentInterface; }
     const Interface*    getInterface                (void) const                    { return parentInterface; }
 

@@ -52,8 +52,8 @@ public:
             Area(AreaID id = BackboneAreaID);
     virtual ~Area(void);
 
-    void                SetAreaID                       (AreaID areaId)                                 { areaID = areaId; }
-    AreaID              GetAreaID                       (void) const                                    { return areaID; }
+    void                setAreaID                       (AreaID areaId)                                 { areaID = areaId; }
+    AreaID              getAreaID                       (void) const                                    { return areaID; }
     void                AddAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
     unsigned int        getAddressRangeCount            (void) const                                    { return areaAddressRanges.size(); }
     IPv4AddressRange    getAddressRange                 (unsigned int index) const                      { return areaAddressRanges[index]; }

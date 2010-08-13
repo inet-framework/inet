@@ -186,13 +186,13 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
 
     intf->setIfIndex(ifIndex);
     if (interfaceType == "PointToPointInterface") {
-        intf->SetType(OSPF::Interface::PointToPoint);
+        intf->setType(OSPF::Interface::PointToPoint);
     } else if (interfaceType == "BroadcastInterface") {
-        intf->SetType(OSPF::Interface::Broadcast);
+        intf->setType(OSPF::Interface::Broadcast);
     } else if (interfaceType == "NBMAInterface") {
-        intf->SetType(OSPF::Interface::NBMA);
+        intf->setType(OSPF::Interface::NBMA);
     } else if (interfaceType == "PointToMultiPointInterface") {
-        intf->SetType(OSPF::Interface::PointToMultiPoint);
+        intf->setType(OSPF::Interface::PointToMultiPoint);
     } else {
         delete intf;
         error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
@@ -205,7 +205,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
         std::string nodeName = (*ifElemIt)->getTagName();
         if (nodeName == "AreaID") {
             areaID = ULongFromAddressString((*ifElemIt)->getNodeValue());
-            intf->SetAreaID(areaID);
+            intf->setAreaID(areaID);
         }
         if (nodeName == "InterfaceOutputCost") {
             intf->setOutputCost(atoi((*ifElemIt)->getNodeValue()));
@@ -217,22 +217,22 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
             intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RouterPriority") {
-            intf->SetRouterPriority(atoi((*ifElemIt)->getNodeValue()));
+            intf->setRouterPriority(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "HelloInterval") {
-            intf->SetHelloInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setHelloInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RouterDeadInterval") {
-            intf->SetRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "AuthenticationType") {
             std::string authenticationType = (*ifElemIt)->getNodeValue();
             if (authenticationType == "SimplePasswordType") {
-                intf->SetAuthenticationType(OSPF::SimplePasswordType);
+                intf->setAuthenticationType(OSPF::SimplePasswordType);
             } else if (authenticationType == "CrytographicType") {
-                intf->SetAuthenticationType(OSPF::CrytographicType);
+                intf->setAuthenticationType(OSPF::CrytographicType);
             } else {
-                intf->SetAuthenticationType(OSPF::NullType);
+                intf->setAuthenticationType(OSPF::NullType);
             }
         }
         if (nodeName == "AuthenticationKey") {
@@ -396,7 +396,7 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
-    intf->SetType(OSPF::Interface::Virtual);
+    intf->setType(OSPF::Interface::Virtual);
     neighbor->setNeighborID(ULongFromAddressString(endPoint.c_str()));
     intf->AddNeighbor(neighbor);
 
@@ -413,19 +413,19 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
             intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "HelloInterval") {
-            intf->SetHelloInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setHelloInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RouterDeadInterval") {
-            intf->SetRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "AuthenticationType") {
             std::string authenticationType = (*ifElemIt)->getNodeValue();
             if (authenticationType == "SimplePasswordType") {
-                intf->SetAuthenticationType(OSPF::SimplePasswordType);
+                intf->setAuthenticationType(OSPF::SimplePasswordType);
             } else if (authenticationType == "CrytographicType") {
-                intf->SetAuthenticationType(OSPF::CrytographicType);
+                intf->setAuthenticationType(OSPF::CrytographicType);
             } else {
-                intf->SetAuthenticationType(OSPF::NullType);
+                intf->setAuthenticationType(OSPF::NullType);
             }
         }
         if (nodeName == "AuthenticationKey") {
@@ -443,14 +443,14 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
     }
 
     // add the virtual link to the OSPF datastructure.
-    OSPF::Area* transitArea = ospfRouter->getArea(intf->GetAreaID());
+    OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());
     OSPF::Area* backbone    = ospfRouter->getArea(OSPF::BackboneAreaID);
 
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->AddInterface(intf);
     } else {
         delete intf;
-        error("Loading VirtualLink to %s through Area %d aborted", endPoint.c_str(), intf->GetAreaID());
+        error("Loading VirtualLink to %s through Area %d aborted", endPoint.c_str(), intf->getAreaID());
     }
 }
 
@@ -470,7 +470,7 @@ bool OSPFRouting::LoadConfigFromXML(const char * filename)
 
     // load information on this router
     std::string routerXPath("Router[@id='");
-    IPAddress routerId(ospfRouter->GetRouterID());
+    IPAddress routerId(ospfRouter->getRouterID());
     routerXPath += routerId.str();
     routerXPath += "']";
 

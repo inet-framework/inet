@@ -30,7 +30,7 @@ void OSPF::InterfaceStateDown::ProcessEvent(OSPF::Interface* intf, OSPF::Interfa
         OSPF::MessageHandler* messageHandler = intf->getArea()->getRouter()->getMessageHandler();
         messageHandler->StartTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
         messageHandler->StartTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
-        switch (intf->GetType()) {
+        switch (intf->getType()) {
             case OSPF::Interface::PointToPoint:
             case OSPF::Interface::PointToMultiPoint:
             case OSPF::Interface::Virtual:
@@ -38,15 +38,15 @@ void OSPF::InterfaceStateDown::ProcessEvent(OSPF::Interface* intf, OSPF::Interfa
                 break;
 
             case OSPF::Interface::NBMA:
-                if (intf->GetRouterPriority() == 0) {
+                if (intf->getRouterPriority() == 0) {
                     ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
                     ChangeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->getWaitTimer(), intf->GetRouterDeadInterval());
+                    messageHandler->StartTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
 
                     long neighborCount = intf->getNeighborCount();
                     for (long i = 0; i < neighborCount; i++) {
-                        OSPF::Neighbor* neighbor = intf->GetNeighbor(i);
+                        OSPF::Neighbor* neighbor = intf->getNeighbor(i);
                         if (neighbor->getPriority() > 0) {
                             neighbor->ProcessEvent(OSPF::Neighbor::Start);
                         }
@@ -55,11 +55,11 @@ void OSPF::InterfaceStateDown::ProcessEvent(OSPF::Interface* intf, OSPF::Interfa
                 break;
 
             case OSPF::Interface::Broadcast:
-                if (intf->GetRouterPriority() == 0) {
+                if (intf->getRouterPriority() == 0) {
                     ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
                     ChangeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->getWaitTimer(), intf->GetRouterDeadInterval());
+                    messageHandler->StartTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
                 }
                 break;
 

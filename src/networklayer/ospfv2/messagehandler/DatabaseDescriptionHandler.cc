@@ -34,7 +34,7 @@ void OSPF::DatabaseDescriptionHandler::ProcessPacket(OSPFPacket* packet, OSPF::I
 
     OSPF::Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((ddPacket->getInterfaceMTU() <= intf->GetMTU()) &&
+    if ((ddPacket->getInterfaceMTU() <= intf->getMTU()) &&
         (neighborState > OSPF::Neighbor::AttemptState))
     {
         switch (neighborState) {
@@ -50,13 +50,13 @@ void OSPF::DatabaseDescriptionHandler::ProcessPacket(OSPFPacket* packet, OSPF::I
                     if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                         (ddPacket->getLsaHeadersArraySize() == 0))
                     {
-                        if (neighbor->getNeighborID() > router->GetRouterID()) {
+                        if (neighbor->getNeighborID() > router->getRouterID()) {
                             OSPF::Neighbor::DDPacketID packetID;
                             packetID.ddOptions      = ddOptions;
                             packetID.options        = ddPacket->getOptions();
                             packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                            neighbor->SetOptions(packetID.options);
+                            neighbor->setOptions(packetID.options);
                             neighbor->setDatabaseExchangeRelationship(OSPF::Neighbor::Slave);
                             neighbor->setDDSequenceNumber(packetID.sequenceNumber);
                             neighbor->setLastReceivedDDPacket(packetID);
@@ -79,14 +79,14 @@ void OSPF::DatabaseDescriptionHandler::ProcessPacket(OSPFPacket* packet, OSPF::I
                     }
                     if (!ddOptions.I_Init && !ddOptions.MS_MasterSlave &&
                         (ddPacket->getDdSequenceNumber() == neighbor->getDDSequenceNumber()) &&
-                        (neighbor->getNeighborID() < router->GetRouterID()))
+                        (neighbor->getNeighborID() < router->getRouterID()))
                     {
                         OSPF::Neighbor::DDPacketID packetID;
                         packetID.ddOptions      = ddOptions;
                         packetID.options        = ddPacket->getOptions();
                         packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                        neighbor->SetOptions(packetID.options);
+                        neighbor->setOptions(packetID.options);
                         neighbor->setDatabaseExchangeRelationship(OSPF::Neighbor::Master);
                         neighbor->setLastReceivedDDPacket(packetID);
 
@@ -206,7 +206,7 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket(OSPFDatabaseDescriptionPa
             lsaKey.linkStateID = currentHeader.getLinkStateID();
             lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter().getInt();
 
-            OSPFLSA* lsaInDatabase = router->FindLSA(lsaType, lsaKey, intf->getArea()->GetAreaID());
+            OSPFLSA* lsaInDatabase = router->FindLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
             if ((lsaInDatabase == NULL) || (lsaInDatabase->getHeader() < currentHeader)) {

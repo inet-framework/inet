@@ -36,23 +36,23 @@ void OSPF::InterfaceStateNotDesignatedRouter::ProcessEvent(OSPF::Interface* intf
         ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HelloTimer) {
-        if (intf->GetType() == OSPF::Interface::Broadcast) {
+        if (intf->getType() == OSPF::Interface::Broadcast) {
             intf->SendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
-            if (intf->GetRouterPriority() > 0) {
+            if (intf->getRouterPriority() > 0) {
                 unsigned long neighborCount = intf->getNeighborCount();
                 for (unsigned long i = 0; i < neighborCount; i++) {
-                    const OSPF::Neighbor* neighbor = intf->GetNeighbor(i);
+                    const OSPF::Neighbor* neighbor = intf->getNeighbor(i);
                     if (neighbor->getPriority() > 0) {
                         intf->SendHelloPacket(neighbor->getAddress());
                     }
                 }
             } else {
-                intf->SendHelloPacket(intf->GetDesignatedRouter().ipInterfaceAddress);
-                intf->SendHelloPacket(intf->GetBackupDesignatedRouter().ipInterfaceAddress);
+                intf->SendHelloPacket(intf->getDesignatedRouter().ipInterfaceAddress);
+                intf->SendHelloPacket(intf->getBackupDesignatedRouter().ipInterfaceAddress);
             }
         }
-        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->GetHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::AcknowledgementTimer) {
         intf->SendDelayedAcknowledgements();

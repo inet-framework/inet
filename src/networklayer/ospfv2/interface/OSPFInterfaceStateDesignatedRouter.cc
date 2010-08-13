@@ -36,16 +36,16 @@ void OSPF::InterfaceStateDesignatedRouter::ProcessEvent(OSPF::Interface* intf, O
         ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HelloTimer) {
-        if (intf->GetType() == OSPF::Interface::Broadcast) {
+        if (intf->getType() == OSPF::Interface::Broadcast) {
             intf->SendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
-            int           ttl           = (intf->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+            int           ttl           = (intf->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
-                intf->SendHelloPacket(intf->GetNeighbor(i)->getAddress(), ttl);
+                intf->SendHelloPacket(intf->getNeighbor(i)->getAddress(), ttl);
             }
         }
-        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->GetHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::AcknowledgementTimer) {
         intf->SendDelayedAcknowledgements();

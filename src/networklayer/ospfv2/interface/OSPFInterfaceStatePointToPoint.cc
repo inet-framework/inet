@@ -33,14 +33,14 @@ void OSPF::InterfaceStatePointToPoint::ProcessEvent(OSPF::Interface* intf, OSPF:
         ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HelloTimer) {
-        if (intf->GetType() == OSPF::Interface::Virtual) {
+        if (intf->getType() == OSPF::Interface::Virtual) {
             if (intf->getNeighborCount() > 0) {
-                intf->SendHelloPacket(intf->GetNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
+                intf->SendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
         } else {
             intf->SendHelloPacket(OSPF::AllSPFRouters);
         }
-        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->GetHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::AcknowledgementTimer) {
         intf->SendDelayedAcknowledgements();

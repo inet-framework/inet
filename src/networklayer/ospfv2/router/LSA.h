@@ -71,7 +71,7 @@ public:
         LSATrackingInfo(void) : source(Flooded), installTime(0) {}
         LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
-    void            SetSource               (InstallSource installSource)   { source = installSource; }
+    void            setSource               (InstallSource installSource)   { source = installSource; }
     InstallSource   getSource               (void) const                    { return source; }
     void            IncrementInstallTime    (void)                          { installTime++; }
     void            ResetInstallTime        (void)                          { installTime = 0; }

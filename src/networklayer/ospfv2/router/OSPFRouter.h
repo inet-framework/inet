@@ -51,8 +51,8 @@ public:
             Router(RouterID id, cSimpleModule* containingModule);
     virtual ~Router(void);
 
-    void                     SetRouterID               (RouterID id)              { routerID = id; }
-    RouterID                 GetRouterID               (void) const               { return routerID; }
+    void                     setRouterID               (RouterID id)              { routerID = id; }
+    RouterID                 getRouterID               (void) const               { return routerID; }
     void                     setRFC1583Compatibility   (bool compatibility)       { rfc1583Compatibility = compatibility; }
     bool                     getRFC1583Compatibility   (void) const               { return rfc1583Compatibility; }
     unsigned long            getAreaCount              (void) const               { return areas.size(); }

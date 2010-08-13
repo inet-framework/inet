@@ -121,14 +121,14 @@ public:
 
     OSPFLinkStateUpdatePacket*  CreateUpdatePacket          (OSPFLSA* lsa);
 
-    void                    SetType                         (OSPFInterfaceType ifType)  { interfaceType = ifType; }
-    OSPFInterfaceType       GetType                         (void) const                { return interfaceType; }
+    void                    setType                         (OSPFInterfaceType ifType)  { interfaceType = ifType; }
+    OSPFInterfaceType       getType                         (void) const                { return interfaceType; }
     void                    setIfIndex                      (unsigned char index);
     unsigned char           getIfIndex                      (void) const                { return ifIndex; }
     void                    setMTU                          (unsigned short ifMTU)      { mtu = ifMTU; }
-    unsigned short          GetMTU                          (void) const                { return mtu; }
-    void                    SetAreaID                       (AreaID areaId)             { areaID = areaId; }
-    AreaID                  GetAreaID                       (void) const                { return areaID; }
+    unsigned short          getMTU                          (void) const                { return mtu; }
+    void                    setAreaID                       (AreaID areaId)             { areaID = areaId; }
+    AreaID                  getAreaID                       (void) const                { return areaID; }
     void                    setTransitAreaID                (AreaID areaId)             { transitAreaID = areaId; }
     AreaID                  getTransitAreaID                (void) const                { return transitAreaID; }
     void                    setOutputCost                   (Metric cost)               { interfaceOutputCost = cost; }
@@ -139,15 +139,15 @@ public:
     short                   getTransmissionDelay            (void) const                { return interfaceTransmissionDelay; }
     void                    setAcknowledgementDelay         (short delay)               { acknowledgementDelay = delay; }
     short                   getAcknowledgementDelay         (void) const                { return acknowledgementDelay; }
-    void                    SetRouterPriority               (unsigned char priority)    { routerPriority = priority; }
-    unsigned char           GetRouterPriority               (void) const                { return routerPriority; }
-    void                    SetHelloInterval                (short interval)            { helloInterval = interval; }
-    short                   GetHelloInterval                (void) const                { return helloInterval; }
+    void                    setRouterPriority               (unsigned char priority)    { routerPriority = priority; }
+    unsigned char           getRouterPriority               (void) const                { return routerPriority; }
+    void                    setHelloInterval                (short interval)            { helloInterval = interval; }
+    short                   getHelloInterval                (void) const                { return helloInterval; }
     void                    setPollInterval                 (short interval)            { pollInterval = interval; }
     short                   getPollInterval                 (void) const                { return pollInterval; }
-    void                    SetRouterDeadInterval           (short interval)            { routerDeadInterval = interval; }
-    short                   GetRouterDeadInterval           (void) const                { return routerDeadInterval; }
-    void                    SetAuthenticationType           (AuthenticationType type)   { authenticationType = type; }
+    void                    setRouterDeadInterval           (short interval)            { routerDeadInterval = interval; }
+    short                   getRouterDeadInterval           (void) const                { return routerDeadInterval; }
+    void                    setAuthenticationType           (AuthenticationType type)   { authenticationType = type; }
     AuthenticationType      getAuthenticationType           (void) const                { return authenticationType; }
     void                    setAuthenticationKey            (AuthenticationKeyType key) { authenticationKey = key; }
     AuthenticationKeyType   getAuthenticationKey            (void) const                { return authenticationKey; }
@@ -157,11 +157,11 @@ public:
     OSPFTimer*              getHelloTimer                   (void)                      { return helloTimer; }
     OSPFTimer*              getWaitTimer                    (void)                      { return waitTimer; }
     OSPFTimer*              getAcknowledgementTimer         (void)                      { return acknowledgementTimer; }
-    DesignatedRouterID      GetDesignatedRouter             (void) const                { return designatedRouter; }
-    DesignatedRouterID      GetBackupDesignatedRouter       (void) const                { return backupDesignatedRouter; }
+    DesignatedRouterID      getDesignatedRouter             (void) const                { return designatedRouter; }
+    DesignatedRouterID      getBackupDesignatedRouter       (void) const                { return backupDesignatedRouter; }
     unsigned long           getNeighborCount                (void) const                { return neighboringRouters.size(); }
-    Neighbor*               GetNeighbor                     (unsigned long i)           { return neighboringRouters[i]; }
-    const Neighbor*         GetNeighbor                     (unsigned long i) const     { return neighboringRouters[i]; }
+    Neighbor*               getNeighbor                     (unsigned long i)           { return neighboringRouters[i]; }
+    const Neighbor*         getNeighbor                     (unsigned long i) const     { return neighboringRouters[i]; }
 
     void                    setArea                         (Area* area)                { parentArea = area; }
     Area*                   getArea                         (void)                      { return parentArea; }

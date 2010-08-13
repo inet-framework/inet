@@ -30,7 +30,7 @@ void OSPF::NeighborState::ChangeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
     neighbor->ChangeState(newState, currentState);
 
     if ((oldState == OSPF::Neighbor::FullState) || (nextState == OSPF::Neighbor::FullState)) {
-        OSPF::RouterID   routerID  = neighbor->getInterface()->getArea()->getRouter()->GetRouterID();
+        OSPF::RouterID   routerID  = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
         OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->FindRouterLSA(routerID);
 
         if (routerLSA != NULL) {

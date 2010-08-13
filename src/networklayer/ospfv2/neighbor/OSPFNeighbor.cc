@@ -168,16 +168,16 @@ void OSPF::Neighbor::SendDatabaseDescriptionPacket(bool init)
     OSPFDatabaseDescriptionPacket* ddPacket = new OSPFDatabaseDescriptionPacket;
 
     ddPacket->setType(DatabaseDescriptionPacket);
-    ddPacket->setRouterID(parentInterface->getArea()->getRouter()->GetRouterID());
-    ddPacket->setAreaID(parentInterface->getArea()->GetAreaID());
+    ddPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
+    ddPacket->setAreaID(parentInterface->getArea()->getAreaID());
     ddPacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {
         ddPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    if (parentInterface->GetType() != OSPF::Interface::Virtual) {
-        ddPacket->setInterfaceMTU(parentInterface->GetMTU());
+    if (parentInterface->getType() != OSPF::Interface::Virtual) {
+        ddPacket->setInterfaceMTU(parentInterface->getMTU());
     } else {
         ddPacket->setInterfaceMTU(0);
     }
@@ -189,9 +189,9 @@ void OSPF::Neighbor::SendDatabaseDescriptionPacket(bool init)
 
     ddPacket->setDdSequenceNumber(ddSequenceNumber);
 
-    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > parentInterface->GetMTU()) ?
+    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > parentInterface->getMTU()) ?
                           IPV4_DATAGRAM_LENGTH :
-                          parentInterface->GetMTU();
+                          parentInterface->getMTU();
 
     if (init || databaseSummaryList.empty()) {
         ddPacket->setLsaHeadersArraySize(0);
@@ -227,8 +227,8 @@ void OSPF::Neighbor::SendDatabaseDescriptionPacket(bool init)
     ddPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-    if (parentInterface->GetType() == OSPF::Interface::PointToPoint) {
+    int ttl = (parentInterface->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+    if (parentInterface->getType() == OSPF::Interface::PointToPoint) {
         messageHandler->SendPacket(ddPacket, OSPF::AllSPFRouters, parentInterface->getIfIndex(), ttl);
     } else {
         messageHandler->SendPacket(ddPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
@@ -245,9 +245,9 @@ bool OSPF::Neighbor::RetransmitDatabaseDescriptionPacket(void)
     if (lastTransmittedDDPacket != NULL) {
         OSPFDatabaseDescriptionPacket* ddPacket       = new OSPFDatabaseDescriptionPacket(*lastTransmittedDDPacket);
         OSPF::MessageHandler*          messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-        int                            ttl            = (parentInterface->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+        int                            ttl            = (parentInterface->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
 
-        if (parentInterface->GetType() == OSPF::Interface::PointToPoint) {
+        if (parentInterface->getType() == OSPF::Interface::PointToPoint) {
             messageHandler->SendPacket(ddPacket, OSPF::AllSPFRouters, parentInterface->getIfIndex(), ttl);
         } else {
             messageHandler->SendPacket(ddPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
@@ -293,7 +293,7 @@ void OSPF::Neighbor::CreateDatabaseSummary(void)
         }
     }
 
-    if ((parentInterface->GetType() != OSPF::Interface::Virtual) &&
+    if ((parentInterface->getType() != OSPF::Interface::Virtual) &&
         (area->getExternalRoutingCapability()))
     {
         OSPF::Router* router             = area->getRouter();
@@ -313,17 +313,17 @@ void OSPF::Neighbor::SendLinkStateRequestPacket(void)
     OSPFLinkStateRequestPacket* requestPacket = new OSPFLinkStateRequestPacket;
 
     requestPacket->setType(LinkStateRequestPacket);
-    requestPacket->setRouterID(parentInterface->getArea()->getRouter()->GetRouterID());
-    requestPacket->setAreaID(parentInterface->getArea()->GetAreaID());
+    requestPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
+    requestPacket->setAreaID(parentInterface->getArea()->getAreaID());
     requestPacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {
         requestPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->GetMTU()) ?
+    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->getMTU()) ?
                           IPV4_DATAGRAM_LENGTH :
-                          parentInterface->GetMTU();
+                          parentInterface->getMTU();
 
     if (linkStateRequestList.empty()) {
         requestPacket->setRequestsArraySize(0);
@@ -352,8 +352,8 @@ void OSPF::Neighbor::SendLinkStateRequestPacket(void)
     requestPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-    if (parentInterface->GetType() == OSPF::Interface::PointToPoint) {
+    int ttl = (parentInterface->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+    if (parentInterface->getType() == OSPF::Interface::PointToPoint) {
         messageHandler->SendPacket(requestPacket, OSPF::AllSPFRouters, parentInterface->getIfIndex(), ttl);
     } else {
         messageHandler->SendPacket(requestPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
@@ -362,10 +362,10 @@ void OSPF::Neighbor::SendLinkStateRequestPacket(void)
 
 bool OSPF::Neighbor::NeedAdjacency(void)
 {
-    OSPF::Interface::OSPFInterfaceType interfaceType = parentInterface->GetType();
-    OSPF::RouterID                     routerID      = parentInterface->getArea()->getRouter()->GetRouterID();
-    OSPF::DesignatedRouterID           dRouter       = parentInterface->GetDesignatedRouter();
-    OSPF::DesignatedRouterID           backupDRouter = parentInterface->GetBackupDesignatedRouter();
+    OSPF::Interface::OSPFInterfaceType interfaceType = parentInterface->getType();
+    OSPF::RouterID                     routerID      = parentInterface->getArea()->getRouter()->getRouterID();
+    OSPF::DesignatedRouterID           dRouter       = parentInterface->getDesignatedRouter();
+    OSPF::DesignatedRouterID           backupDRouter = parentInterface->getBackupDesignatedRouter();
 
     if ((interfaceType == OSPF::Interface::PointToPoint) ||
         (interfaceType == OSPF::Interface::PointToMultiPoint) ||
@@ -586,8 +586,8 @@ void OSPF::Neighbor::RetransmitUpdatePacket(void)
     OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket;
 
     updatePacket->setType(LinkStateUpdatePacket);
-    updatePacket->setRouterID(parentInterface->getArea()->getRouter()->GetRouterID());
-    updatePacket->setAreaID(parentInterface->getArea()->GetAreaID());
+    updatePacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
+    updatePacket->setAreaID(parentInterface->getArea()->getAreaID());
     updatePacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {
@@ -634,7 +634,7 @@ void OSPF::Neighbor::RetransmitUpdatePacket(void)
             default: break;
         }
 
-        if (packetLength + lsaSize < parentInterface->GetMTU()) {
+        if (packetLength + lsaSize < parentInterface->getMTU()) {
             includeLSA = true;
             lsaCount++;
         } else {
@@ -719,7 +719,7 @@ void OSPF::Neighbor::RetransmitUpdatePacket(void)
     updatePacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+    int ttl = (parentInterface->getType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
     messageHandler->SendPacket(updatePacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
 }
 
