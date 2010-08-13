@@ -67,7 +67,7 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
         changeState(neighbor, new OSPF::NeighborStateExchangeStart, this);
     }
     if (event == OSPF::Neighbor::EXCHANGE_DONE) {
-        if (neighbor->IsLinkStateRequestListEmpty()) {
+        if (neighbor->isLinkStateRequestListEmpty()) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             neighbor->clearRequestRetransmissionTimer();

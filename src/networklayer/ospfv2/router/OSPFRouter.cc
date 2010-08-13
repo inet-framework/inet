@@ -458,7 +458,7 @@ void OSPF::Router::ageDatabase(void)
     messageHandler->startTimer(ageTimer, 1.0);
 
     if (rebuildRoutingTable) {
-        RebuildRoutingTable();
+        rebuildRoutingTable();
     }
 }
 
@@ -817,7 +817,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPAddress destination, std::vector
  * Rebuilds the routing table from scratch(based on the LSA database).
  * @sa RFC2328 Section 16.
  */
-void OSPF::Router::RebuildRoutingTable(void)
+void OSPF::Router::rebuildRoutingTable(void)
 {
     unsigned long                         areaCount       = areas.size();
     bool                                  hasTransitAreas = false;
@@ -1581,7 +1581,7 @@ void OSPF::Router::updateExternalRoute(OSPF::IPv4Address networkAddress, const O
     delete asExternalLSA;
 
     if (rebuild) {
-        RebuildRoutingTable();
+        rebuildRoutingTable();
     }
 }
 

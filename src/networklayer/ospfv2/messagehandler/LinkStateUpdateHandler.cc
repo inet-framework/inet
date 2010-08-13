@@ -45,7 +45,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
     OSPFLinkStateUpdatePacket* lsUpdatePacket      = check_and_cast<OSPFLinkStateUpdatePacket*> (packet);
-    bool                       rebuildRoutingTable = false;
+    bool                       shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
         OSPF::AreaID areaID          = lsUpdatePacket->getAreaID().getInt();
@@ -177,7 +177,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
 
                         router->removeFromAllRetransmissionLists(lsaKey);
                     }
-                    rebuildRoutingTable |= router->installLSA(currentLSA, areaID);
+                    shouldRebuildRoutingTable |= router->installLSA(currentLSA, areaID);
 
                     EV << "    (update installed)\n";
 
@@ -252,8 +252,8 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
         }
     }
 
-    if (rebuildRoutingTable) {
-        router->RebuildRoutingTable();
+    if (shouldRebuildRoutingTable) {
+        router->rebuildRoutingTable();
     }
 }
 

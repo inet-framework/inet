@@ -184,12 +184,12 @@ public:
     bool                isUpdateRetransmissionTimerActive   (void) const            { return updateRetransmissionTimerActive; }
     bool                isRequestRetransmissionTimerActive  (void) const            { return requestRetransmissionTimerActive; }
     bool                isFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
-    bool                DesignatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
+    bool                designatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
     void                setupDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
     unsigned long       getDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
 
     void incrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
-    bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
+    bool isLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
     bool isLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
     void popFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
 };

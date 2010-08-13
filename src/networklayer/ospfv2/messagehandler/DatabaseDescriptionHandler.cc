@@ -66,7 +66,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                             }
 
                             neighbor->processEvent(OSPF::Neighbor::NEGOTIATION_DONE);
-                            if (!neighbor->IsLinkStateRequestListEmpty() &&
+                            if (!neighbor->isLinkStateRequestListEmpty() &&
                                 !neighbor->isRequestRetransmissionTimerActive())
                             {
                                 neighbor->sendLinkStateRequestPacket();
@@ -95,7 +95,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                         }
 
                         neighbor->processEvent(OSPF::Neighbor::NEGOTIATION_DONE);
-                        if (!neighbor->IsLinkStateRequestListEmpty() &&
+                        if (!neighbor->isLinkStateRequestListEmpty() &&
                             !neighbor->isRequestRetransmissionTimerActive())
                         {
                             neighbor->sendLinkStateRequestPacket();
@@ -131,7 +131,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                                 if (!processDDPacket(ddPacket, intf, neighbor, false)) {
                                     break;
                                 }
-                                if (!neighbor->IsLinkStateRequestListEmpty() &&
+                                if (!neighbor->isLinkStateRequestListEmpty() &&
                                     !neighbor->isRequestRetransmissionTimerActive())
                                 {
                                     neighbor->sendLinkStateRequestPacket();

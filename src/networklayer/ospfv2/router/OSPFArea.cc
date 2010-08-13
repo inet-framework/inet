@@ -341,7 +341,7 @@ const OSPF::SummaryLSA* OSPF::Area::findSummaryLSA(OSPF::LSAKeyType lsaKey) cons
 void OSPF::Area::ageDatabase(void)
 {
     long            lsaCount            = routerLSAs.size();
-    bool            rebuildRoutingTable = false;
+    bool            shouldRebuildRoutingTable = false;
     long            i;
 
     for (i = 0; i < lsaCount; i++) {
@@ -375,7 +375,7 @@ void OSPF::Area::ageDatabase(void)
 
                     newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                     newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                    rebuildRoutingTable |= lsa->update(newLSA);
+                    shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
                     floodLSA(lsa);
@@ -400,14 +400,14 @@ void OSPF::Area::ageDatabase(void)
                     routerLSAsByID.erase(lsa->getHeader().getLinkStateID());
                     delete lsa;
                     routerLSAs[i] = NULL;
-                    rebuildRoutingTable = true;
+                    shouldRebuildRoutingTable = true;
                 } else {
                     OSPF::RouterLSA* newLSA              = originateRouterLSA();
                     long             sequenceNumber      = lsa->getHeader().getLsSequenceNumber();
 
                     newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                     newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                    rebuildRoutingTable |= lsa->update(newLSA);
+                    shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
                     floodLSA(lsa);
@@ -467,7 +467,7 @@ void OSPF::Area::ageDatabase(void)
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->update(newLSA);
+                        shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
                     } else {    // no neighbors on the network -> old NetworkLSA must be flushed
                         lsa->getHeader().setLsAge(MAX_AGE);
@@ -496,7 +496,7 @@ void OSPF::Area::ageDatabase(void)
                     networkLSAsByID.erase(lsa->getHeader().getLinkStateID());
                     delete lsa;
                     networkLSAs[i] = NULL;
-                    rebuildRoutingTable = true;
+                    shouldRebuildRoutingTable = true;
                 } else {
                     OSPF::NetworkLSA* newLSA              = originateNetworkLSA(localIntf);
                     long              sequenceNumber      = lsa->getHeader().getLsSequenceNumber();
@@ -504,7 +504,7 @@ void OSPF::Area::ageDatabase(void)
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->update(newLSA);
+                        shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
                         floodLSA(lsa);
@@ -558,7 +558,7 @@ void OSPF::Area::ageDatabase(void)
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->update(newLSA);
+                        shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
                         floodLSA(lsa);
@@ -588,7 +588,7 @@ void OSPF::Area::ageDatabase(void)
                     summaryLSAsByID.erase(lsaKey);
                     delete lsa;
                     summaryLSAs[i] = NULL;
-                    rebuildRoutingTable = true;
+                    shouldRebuildRoutingTable = true;
                 } else {
                     OSPF::SummaryLSA* newLSA = originateSummaryLSA(lsa);
                     if (newLSA != NULL) {
@@ -596,7 +596,7 @@ void OSPF::Area::ageDatabase(void)
 
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->update(newLSA);
+                        shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
                         floodLSA(lsa);
@@ -604,7 +604,7 @@ void OSPF::Area::ageDatabase(void)
                         summaryLSAsByID.erase(lsaKey);
                         delete lsa;
                         summaryLSAs[i] = NULL;
-                        rebuildRoutingTable = true;
+                        shouldRebuildRoutingTable = true;
                     }
                 }
             }
@@ -625,8 +625,8 @@ void OSPF::Area::ageDatabase(void)
         associatedInterfaces[m]->ageTransmittedLSALists();
     }
 
-    if (rebuildRoutingTable) {
-        parentRouter->RebuildRoutingTable();
+    if (shouldRebuildRoutingTable) {
+        parentRouter->rebuildRoutingTable();
     }
 }
 

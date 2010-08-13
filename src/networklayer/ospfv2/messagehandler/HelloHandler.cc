@@ -30,7 +30,7 @@ OSPF::HelloHandler::HelloHandler(OSPF::Router* containingRouter) :
 void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* unused)
 {
     OSPFHelloPacket* helloPacket         = check_and_cast<OSPFHelloPacket*> (packet);
-    bool             rebuildRoutingTable = false;
+    bool             shouldRebuildRoutingTable = false;
 
     /* The values of the Network Mask, HelloInterval,
        and RouterDeadInterval fields in the received Hello packet must
@@ -186,7 +186,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        has changed it's necessary to look up the Router IDs belonging to the
                        new addresses.
                      */
-                    if (!neighbor->DesignatedRoutersAreSetUp()) {
+                    if (!neighbor->designatedRoutersAreSetUp()) {
                         OSPF::Neighbor* designated = intf->getNeighborByAddress(designatedAddress);
                         OSPF::Neighbor* backup     = intf->getNeighborByAddress(backupAddress);
 
@@ -312,7 +312,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
 
                                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                                rebuildRoutingTable |= routerLSA->update(newLSA);
+                                shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                                 delete newLSA;
 
                                 intf->getArea()->floodLSA(routerLSA);
@@ -328,7 +328,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
         }
     }
 
-    if (rebuildRoutingTable) {
-        router->RebuildRoutingTable();
+    if (shouldRebuildRoutingTable) {
+        router->rebuildRoutingTable();
     }
 }

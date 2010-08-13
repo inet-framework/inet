@@ -29,7 +29,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
     OSPF::Interface::InterfaceStateType oldState            = currentState->getState();
     OSPF::Interface::InterfaceStateType nextState           = newState->getState();
     OSPF::Interface::OSPFInterfaceType  intfType            = intf->getType();
-    bool                                rebuildRoutingTable = false;
+    bool                                shouldRebuildRoutingTable = false;
 
     intf->changeState(newState, currentState);
 
@@ -60,7 +60,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                rebuildRoutingTable |= routerLSA->update(newLSA);
+                shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
                 intf->getArea()->floodLSA(routerLSA);
@@ -68,7 +68,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
         } else {  // (lsa == NULL) -> This must be the first time any interface is up...
             OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
 
-            rebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
+            shouldRebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
 
             routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
@@ -81,7 +81,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
     if (nextState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
         OSPF::NetworkLSA* newLSA = intf->getArea()->originateNetworkLSA(intf);
         if (newLSA != NULL) {
-            rebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
+            shouldRebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
             intf->getArea()->floodLSA(newLSA);
             delete newLSA;
@@ -106,8 +106,8 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
         }
     }
 
-    if (rebuildRoutingTable) {
-        intf->getArea()->getRouter()->RebuildRoutingTable();
+    if (shouldRebuildRoutingTable) {
+        intf->getArea()->getRouter()->rebuildRoutingTable();
     }
 }
 

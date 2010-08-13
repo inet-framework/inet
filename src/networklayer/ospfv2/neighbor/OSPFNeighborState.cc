@@ -25,7 +25,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 
     OSPF::Neighbor::NeighborStateType   oldState            = currentState->getState();
     OSPF::Neighbor::NeighborStateType   nextState           = newState->getState();
-    bool                                rebuildRoutingTable = false;
+    bool                                shouldRebuildRoutingTable = false;
 
     neighbor->changeState(newState, currentState);
 
@@ -44,7 +44,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                rebuildRoutingTable |= routerLSA->update(newLSA);
+                shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
                 neighbor->getInterface()->getArea()->floodLSA(routerLSA);
@@ -66,7 +66,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= networkLSA->update(newLSA);
+                        shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;
                     } else {    // no neighbors on the network -> old NetworkLSA must be flushed
                         networkLSA->getHeader().setLsAge(MAX_AGE);
@@ -79,7 +79,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         }
     }
 
-    if (rebuildRoutingTable) {
-        neighbor->getInterface()->getArea()->getRouter()->RebuildRoutingTable();
+    if (shouldRebuildRoutingTable) {
+        neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
     }
 }

@@ -87,7 +87,7 @@ public:
     bool                 hasAddressRange                      (IPv4AddressRange addressRange) const;
     bool                 isDestinationUnreachable             (OSPFLSA* lsa) const;
     RoutingTableEntry*   lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
-    void                 RebuildRoutingTable                  (void);
+    void                 rebuildRoutingTable                  (void);
     IPv4AddressRange     getContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
     void                 updateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
     void                 removeExternalRoute                  (IPv4Address networkAddress);
