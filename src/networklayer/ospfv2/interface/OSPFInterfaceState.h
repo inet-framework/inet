@@ -31,7 +31,7 @@ public:
     virtual ~InterfaceState() {}
 
     virtual void processEvent(Interface* intf, Interface::InterfaceEventType event) = 0;
-    virtual Interface::InterfaceStateType getState(void) const = 0;
+    virtual Interface::InterfaceStateType getState() const = 0;
 };
 
 } // namespace OSPF

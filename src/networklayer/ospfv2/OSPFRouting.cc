@@ -43,7 +43,7 @@ OSPFRouting::OSPFRouting()
  * Destructor.
  * Deletes the whole OSPF datastructure.
  */
-OSPFRouting::~OSPFRouting(void)
+OSPFRouting::~OSPFRouting()
 {
     delete ospfRouter;
 }

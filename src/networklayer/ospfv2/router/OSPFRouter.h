@@ -49,27 +49,27 @@ private:
 
 public:
             Router(RouterID id, cSimpleModule* containingModule);
-    virtual ~Router(void);
+    virtual ~Router();
 
     void                     setRouterID(RouterID id)  { routerID = id; }
-    RouterID                 getRouterID(void) const  { return routerID; }
+    RouterID                 getRouterID() const  { return routerID; }
     void                     setRFC1583Compatibility(bool compatibility)  { rfc1583Compatibility = compatibility; }
-    bool                     getRFC1583Compatibility(void) const  { return rfc1583Compatibility; }
-    unsigned long            getAreaCount(void) const  { return areas.size(); }
+    bool                     getRFC1583Compatibility() const  { return rfc1583Compatibility; }
+    unsigned long            getAreaCount() const  { return areas.size(); }
 
-    MessageHandler*          getMessageHandler(void)  { return messageHandler; }
+    MessageHandler*          getMessageHandler()  { return messageHandler; }
 
-    unsigned long            getASExternalLSACount(void) const  { return asExternalLSAs.size(); }
+    unsigned long            getASExternalLSACount() const  { return asExternalLSAs.size(); }
     ASExternalLSA*           getASExternalLSA(unsigned long i)  { return asExternalLSAs[i]; }
     const ASExternalLSA*     getASExternalLSA(unsigned long i) const  { return asExternalLSAs[i]; }
-    bool                     getASBoundaryRouter(void) const  { return (externalRoutes.size() > 0); }
+    bool                     getASBoundaryRouter() const  { return (externalRoutes.size() > 0); }
 
-    unsigned long            getRoutingTableEntryCount(void) const  { return routingTable.size(); }
+    unsigned long            getRoutingTableEntryCount() const  { return routingTable.size(); }
     RoutingTableEntry*       getRoutingTableEntry(unsigned long i)  { return routingTable[i]; }
     const RoutingTableEntry* getRoutingTableEntry(unsigned long i) const  { return routingTable[i]; }
     void                     addRoutingTableEntry(RoutingTableEntry* entry) { routingTable.push_back(entry); }
 
-    void                 addWatches(void);
+    void                 addWatches();
 
     void                 addArea(Area* area);
     Area*                getArea(AreaID areaID);
@@ -78,7 +78,7 @@ public:
 
     bool                 installLSA(OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
     OSPFLSA*             findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
-    void                 ageDatabase(void);
+    void                 ageDatabase();
     bool                 hasAnyNeighborInStates(int states) const;
     void                 removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool                 isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
@@ -87,7 +87,7 @@ public:
     bool                 hasAddressRange(IPv4AddressRange addressRange) const;
     bool                 isDestinationUnreachable(OSPFLSA* lsa) const;
     RoutingTableEntry*   lookup(IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
-    void                 rebuildRoutingTable(void);
+    void                 rebuildRoutingTable();
     IPv4AddressRange     getContainingAddressRange(IPv4AddressRange addressRange, bool* advertise = NULL) const;
     void                 updateExternalRoute(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
     void                 removeExternalRoute(IPv4Address networkAddress);

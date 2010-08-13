@@ -48,7 +48,7 @@ class OSPFRouting :  public cSimpleModule
 
   public:
     OSPFRouting();
-    virtual ~OSPFRouting(void);
+    virtual ~OSPFRouting();
 
   protected:
     virtual int numInitStages() const  {return 5;}

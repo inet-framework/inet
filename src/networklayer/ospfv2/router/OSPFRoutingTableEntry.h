@@ -57,40 +57,40 @@ private:
     // IPRoute::gateway is nextHops[0].hopAddress
 
 public:
-            RoutingTableEntry(void);
+            RoutingTableEntry();
             RoutingTableEntry(const RoutingTableEntry& entry);
-    virtual ~RoutingTableEntry(void) {}
+    virtual ~RoutingTableEntry() {}
 
     bool    operator== (const RoutingTableEntry& entry) const;
     bool    operator!= (const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
 
     void                    setDestinationType(RoutingDestinationType type)  { destinationType = type; }
-    RoutingDestinationType  getDestinationType(void) const  { return destinationType; }
+    RoutingDestinationType  getDestinationType() const  { return destinationType; }
     void                    setDestinationID(IPAddress destID)  { host = destID; }
-    IPAddress               getDestinationID(void) const  { return host; }
+    IPAddress               getDestinationID() const  { return host; }
     void                    setAddressMask(IPAddress destMask)  { netmask = destMask; }
-    IPAddress               getAddressMask(void) const  { return netmask; }
+    IPAddress               getAddressMask() const  { return netmask; }
     void                    setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
-    OSPFOptions             getOptionalCapabilities(void) const  { return optionalCapabilities; }
+    OSPFOptions             getOptionalCapabilities() const  { return optionalCapabilities; }
     void                    setArea(AreaID source)  { area = source; }
-    AreaID                  getArea(void) const  { return area; }
+    AreaID                  getArea() const  { return area; }
     void                    setPathType(RoutingPathType type);
-    RoutingPathType         getPathType(void) const  { return pathType; }
+    RoutingPathType         getPathType() const  { return pathType; }
     void                    setCost(Metric pathCost);
-    Metric                  getCost(void) const  { return cost; }
+    Metric                  getCost() const  { return cost; }
     void                    setType2Cost(Metric pathCost);
-    Metric                  getType2Cost(void) const  { return type2Cost; }
+    Metric                  getType2Cost() const  { return type2Cost; }
     void                    setLinkStateOrigin(const OSPFLSA* lsa)  { linkStateOrigin = lsa; }
-    const OSPFLSA*          getLinkStateOrigin(void) const  { return linkStateOrigin; }
+    const OSPFLSA*          getLinkStateOrigin() const  { return linkStateOrigin; }
     void                    addNextHop(NextHop hop);
-    void                    clearNextHops(void)  { nextHops.clear(); }
-    unsigned int            getNextHopCount(void) const  { return nextHops.size(); }
+    void                    clearNextHops()  { nextHops.clear(); }
+    unsigned int            getNextHopCount() const  { return nextHops.size(); }
     NextHop                 getNextHop(unsigned int index) const  { return nextHops[index]; }
 };
 
 } // namespace OSPF
 
-inline OSPF::RoutingTableEntry::RoutingTableEntry(void) :
+inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     IPRoute(),
     destinationType(OSPF::RoutingTableEntry::NetworkDestination),
     area(OSPF::BackboneAreaID),

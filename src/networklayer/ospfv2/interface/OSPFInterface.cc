@@ -62,7 +62,7 @@ OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
     memset(authenticationKey.bytes, 0, 8 * sizeof(char));
 }
 
-OSPF::Interface::~Interface(void)
+OSPF::Interface::~Interface()
 {
     MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     messageHandler->clearTimer(helloTimer);
@@ -106,7 +106,7 @@ void OSPF::Interface::processEvent(OSPF::Interface::InterfaceEventType event)
     state->processEvent(this, event);
 }
 
-void OSPF::Interface::reset(void)
+void OSPF::Interface::reset()
 {
     MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     messageHandler->clearTimer(helloTimer);
@@ -221,7 +221,7 @@ void OSPF::Interface::addNeighbor(OSPF::Neighbor* neighbor)
     neighboringRouters.push_back(neighbor);
 }
 
-OSPF::Interface::InterfaceStateType OSPF::Interface::getState(void) const
+OSPF::Interface::InterfaceStateType OSPF::Interface::getState() const
 {
     return state->getState();
 }
@@ -513,7 +513,7 @@ void OSPF::Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
     }
 }
 
-void OSPF::Interface::sendDelayedAcknowledgements(void)
+void OSPF::Interface::sendDelayedAcknowledgements()
 {
     OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     long                  maxPacketSize  = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
@@ -571,7 +571,7 @@ void OSPF::Interface::sendDelayedAcknowledgements(void)
     messageHandler->startTimer(acknowledgementTimer, acknowledgementDelay);
 }
 
-void OSPF::Interface::ageTransmittedLSALists(void)
+void OSPF::Interface::ageTransmittedLSALists()
 {
     long neighborCount = neighboringRouters.size();
     for (long i = 0; i < neighborCount; i++) {

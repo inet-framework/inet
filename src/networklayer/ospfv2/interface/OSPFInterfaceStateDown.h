@@ -26,7 +26,7 @@ class InterfaceStateDown : public InterfaceState
 {
 public:
     virtual void processEvent(Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState(void) const { return Interface::DOWN_STATE; }
+    virtual Interface::InterfaceStateType getState() const { return Interface::DOWN_STATE; }
 };
 
 } // namespace OSPF

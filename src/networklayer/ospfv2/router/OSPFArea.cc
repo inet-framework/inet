@@ -29,7 +29,7 @@ OSPF::Area::Area(OSPF::AreaID id) :
 {
 }
 
-OSPF::Area::~Area(void)
+OSPF::Area::~Area()
 {
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
@@ -66,7 +66,7 @@ void OSPF::Area::info(char *buffer)
     strcpy(buffer, out.str().c_str());
 }
 
-std::string OSPF::Area::detailedInfo(void) const
+std::string OSPF::Area::detailedInfo() const
 {
     std::stringstream out;
     char addressString[16];
@@ -338,7 +338,7 @@ const OSPF::SummaryLSA* OSPF::Area::findSummaryLSA(OSPF::LSAKeyType lsaKey) cons
     }
 }
 
-void OSPF::Area::ageDatabase(void)
+void OSPF::Area::ageDatabase()
 {
     long            lsaCount            = routerLSAs.size();
     bool            shouldRebuildRoutingTable = false;
@@ -685,7 +685,7 @@ bool OSPF::Area::isLocalAddress(OSPF::IPv4Address address) const
     return false;
 }
 
-OSPF::RouterLSA* OSPF::Area::originateRouterLSA(void)
+OSPF::RouterLSA* OSPF::Area::originateRouterLSA()
 {
     OSPF::RouterLSA* routerLSA      = new OSPF::RouterLSA;
     OSPFLSAHeader&   lsaHeader      = routerLSA->getHeader();

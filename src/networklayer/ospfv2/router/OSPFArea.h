@@ -50,35 +50,35 @@ private:
     Router*                                                 parentRouter;
 public:
             Area(AreaID id = BackboneAreaID);
-    virtual ~Area(void);
+    virtual ~Area();
 
     void                setAreaID(AreaID areaId)  { areaID = areaId; }
-    AreaID              getAreaID(void) const  { return areaID; }
+    AreaID              getAreaID() const  { return areaID; }
     void                addAddressRange(IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
-    unsigned int        getAddressRangeCount(void) const  { return areaAddressRanges.size(); }
+    unsigned int        getAddressRangeCount() const  { return areaAddressRanges.size(); }
     IPv4AddressRange    getAddressRange(unsigned int index) const  { return areaAddressRanges[index]; }
     void                addHostRoute(HostRouteParameters& hostRouteParameters)  { hostRoutes.push_back(hostRouteParameters); }
     void                setTransitCapability(bool transit)  { transitCapability = transit; }
-    bool                getTransitCapability(void) const  { return transitCapability; }
+    bool                getTransitCapability() const  { return transitCapability; }
     void                setExternalRoutingCapability(bool flooded)  { externalRoutingCapability = flooded; }
-    bool                getExternalRoutingCapability(void) const  { return externalRoutingCapability; }
+    bool                getExternalRoutingCapability() const  { return externalRoutingCapability; }
     void                setStubDefaultCost(Metric cost)  { stubDefaultCost = cost; }
-    Metric              getStubDefaultCost(void) const  { return stubDefaultCost; }
+    Metric              getStubDefaultCost() const  { return stubDefaultCost; }
     void                setSPFTreeRoot(RouterLSA* root)  { spfTreeRoot = root; }
-    RouterLSA*          getSPFTreeRoot(void)  { return spfTreeRoot; }
-    const RouterLSA*    getSPFTreeRoot(void) const  { return spfTreeRoot; }
+    RouterLSA*          getSPFTreeRoot()  { return spfTreeRoot; }
+    const RouterLSA*    getSPFTreeRoot() const  { return spfTreeRoot; }
 
     void                setRouter(Router* router)  { parentRouter = router; }
-    Router*             getRouter(void)  { return parentRouter; }
-    const Router*       getRouter(void) const  { return parentRouter; }
+    Router*             getRouter()  { return parentRouter; }
+    const Router*       getRouter() const  { return parentRouter; }
 
-    unsigned long       getRouterLSACount(void) const  { return routerLSAs.size(); }
+    unsigned long       getRouterLSACount() const  { return routerLSAs.size(); }
     RouterLSA*          getRouterLSA(unsigned long i)  { return routerLSAs[i]; }
     const RouterLSA*    getRouterLSA(unsigned long i) const  { return routerLSAs[i]; }
-    unsigned long       getNetworkLSACount(void) const  { return networkLSAs.size(); }
+    unsigned long       getNetworkLSACount() const  { return networkLSAs.size(); }
     NetworkLSA*         getNetworkLSA(unsigned long i)  { return networkLSAs[i]; }
     const NetworkLSA*   getNetworkLSA(unsigned long i) const  { return networkLSAs[i]; }
-    unsigned long       getSummaryLSACount(void) const  { return summaryLSAs.size(); }
+    unsigned long       getSummaryLSACount() const  { return summaryLSAs.size(); }
     SummaryLSA*         getSummaryLSA(unsigned long i)  { return summaryLSAs[i]; }
     const SummaryLSA*   getSummaryLSA(unsigned long i) const  { return summaryLSAs[i]; }
 
@@ -100,13 +100,13 @@ public:
     const NetworkLSA*   findNetworkLSA(LinkStateID linkStateID) const;
     SummaryLSA*         findSummaryLSA(LSAKeyType lsaKey);
     const SummaryLSA*   findSummaryLSA(LSAKeyType lsaKey) const;
-    void                ageDatabase(void);
+    void                ageDatabase();
     bool                hasAnyNeighborInStates(int states) const;
     void                removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool                isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
     bool                floodLSA(OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
     bool                isLocalAddress(IPv4Address address) const;
-    RouterLSA*          originateRouterLSA(void);
+    RouterLSA*          originateRouterLSA();
     NetworkLSA*         originateNetworkLSA(const Interface* intf);
     SummaryLSA*         originateSummaryLSA(const RoutingTableEntry* entry,
                                             const std::map<LSAKeyType, bool, LSAKeyType_Less>& originatedLSAs,
@@ -116,7 +116,7 @@ public:
     void                recheckSummaryLSAs(std::vector<RoutingTableEntry*>& newRoutingTable);
 
     void                info(char* buffer);
-    std::string         detailedInfo(void) const;
+    std::string         detailedInfo() const;
 
 private:
     SummaryLSA*             originateSummaryLSA(const OSPF::SummaryLSA* summaryLSA);

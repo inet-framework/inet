@@ -39,7 +39,7 @@ OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule) :
  * Destructor.
  * Clears all LSA lists and kills the Database Age timer.
  */
-OSPF::Router::~Router(void)
+OSPF::Router::~Router()
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
@@ -62,7 +62,7 @@ OSPF::Router::~Router(void)
 /**
  * Adds OMNeT++ watches for the routerID, the list of Areas and the list of AS External LSAs.
  */
-void OSPF::Router::addWatches(void)
+void OSPF::Router::addWatches()
 {
     WATCH(routerID);
     WATCH_PTRVECTOR(areas);
@@ -358,7 +358,7 @@ const OSPF::ASExternalLSA* OSPF::Router::findASExternalLSA(OSPF::LSAKeyType lsaK
  * This method is called on every firing of the DATABASE_AGE_TIMER(every second).
  * @sa RFC2328 Section 14.
  */
-void OSPF::Router::ageDatabase(void)
+void OSPF::Router::ageDatabase()
 {
     long lsaCount            = asExternalLSAs.size();
     bool shouldRebuildRoutingTable = false;
@@ -817,7 +817,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPAddress destination, std::vector
  * Rebuilds the routing table from scratch(based on the LSA database).
  * @sa RFC2328 Section 16.
  */
-void OSPF::Router::rebuildRoutingTable(void)
+void OSPF::Router::rebuildRoutingTable()
 {
     unsigned long                         areaCount       = areas.size();
     bool                                  hasTransitAreas = false;
