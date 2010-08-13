@@ -43,7 +43,7 @@ private:
 public:
     LinkStateUpdateHandler(Router* containingRouter);
 
-    void    processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
 } // namespace OSPF

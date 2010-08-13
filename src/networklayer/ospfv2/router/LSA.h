@@ -39,20 +39,20 @@ private:
     OSPFLSA*              parent;
 
 public:
-            RoutingInfo  (void) : distance(0), parent(NULL) {}
+            RoutingInfo(void) : distance(0), parent(NULL) {}
 
-            RoutingInfo  (const RoutingInfo& routingInfo) : nextHops(routingInfo.nextHops), distance(routingInfo.distance), parent(routingInfo.parent) {}
+            RoutingInfo(const RoutingInfo& routingInfo) : nextHops(routingInfo.nextHops), distance(routingInfo.distance), parent(routingInfo.parent) {}
 
     virtual ~RoutingInfo(void) {}
 
-    void            addNextHop          (NextHop nextHop)           { nextHops.push_back(nextHop); }
-    void            clearNextHops       (void)                      { nextHops.clear(); }
-    unsigned int    getNextHopCount     (void) const                { return nextHops.size(); }
-    NextHop         getNextHop          (unsigned int index) const  { return nextHops[index]; }
-    void            setDistance         (unsigned long d)           { distance = d; }
-    unsigned long   getDistance         (void) const                { return distance; }
-    void            setParent           (OSPFLSA* p)                { parent = p; }
-    OSPFLSA*        getParent           (void) const                { return parent; }
+    void            addNextHop(NextHop nextHop)  { nextHops.push_back(nextHop); }
+    void            clearNextHops(void)  { nextHops.clear(); }
+    unsigned int    getNextHopCount(void) const  { return nextHops.size(); }
+    NextHop         getNextHop(unsigned int index) const  { return nextHops[index]; }
+    void            setDistance(unsigned long d)  { distance = d; }
+    unsigned long   getDistance(void) const  { return distance; }
+    void            setParent(OSPFLSA* p)  { parent = p; }
+    OSPFLSA*        getParent(void) const  { return parent; }
 };
 
 class LSATrackingInfo
@@ -71,11 +71,11 @@ public:
         LSATrackingInfo(void) : source(FLOODED), installTime(0) {}
         LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
-    void            setSource               (InstallSource installSource)   { source = installSource; }
-    InstallSource   getSource               (void) const                    { return source; }
-    void            incrementInstallTime    (void)                          { installTime++; }
-    void            resetInstallTime        (void)                          { installTime = 0; }
-    unsigned long   getInstallTime          (void) const                    { return installTime; }
+    void            setSource(InstallSource installSource)  { source = installSource; }
+    InstallSource   getSource(void) const  { return source; }
+    void            incrementInstallTime(void)  { installTime++; }
+    void            resetInstallTime(void)  { installTime = 0; }
+    unsigned long   getInstallTime(void) const  { return installTime; }
 };
 
 class RouterLSA : public OSPFRouterLSA,
@@ -83,14 +83,14 @@ class RouterLSA : public OSPFRouterLSA,
                   public LSATrackingInfo
 {
 public:
-            RouterLSA  (void) : OSPFRouterLSA(), RoutingInfo(), LSATrackingInfo() {}
-            RouterLSA  (const OSPFRouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
-            RouterLSA  (const RouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
+            RouterLSA(void) : OSPFRouterLSA(), RoutingInfo(), LSATrackingInfo() {}
+            RouterLSA(const OSPFRouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
+            RouterLSA(const RouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
     virtual ~RouterLSA(void) {}
 
-    bool    validateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const  { return true; } // not implemented
 
-    bool    update      (const OSPFRouterLSA* lsa);
+    bool    update(const OSPFRouterLSA* lsa);
     bool    differsFrom(const OSPFRouterLSA* routerLSA) const;
 };
 
@@ -99,14 +99,14 @@ class NetworkLSA : public OSPFNetworkLSA,
                    public LSATrackingInfo
 {
 public:
-            NetworkLSA  (void) : OSPFNetworkLSA(), RoutingInfo(), LSATrackingInfo() {}
-            NetworkLSA  (const OSPFNetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
-            NetworkLSA  (const NetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
+            NetworkLSA(void) : OSPFNetworkLSA(), RoutingInfo(), LSATrackingInfo() {}
+            NetworkLSA(const OSPFNetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
+            NetworkLSA(const NetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
     virtual ~NetworkLSA(void) {}
 
-    bool    validateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const  { return true; } // not implemented
 
-    bool    update      (const OSPFNetworkLSA* lsa);
+    bool    update(const OSPFNetworkLSA* lsa);
     bool    differsFrom(const OSPFNetworkLSA* networkLSA) const;
 };
 
@@ -117,17 +117,17 @@ class SummaryLSA : public OSPFSummaryLSA,
 protected:
     bool    purgeable;
 public:
-            SummaryLSA  (void) : OSPFSummaryLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-            SummaryLSA  (const OSPFSummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-            SummaryLSA  (const SummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
+            SummaryLSA(void) : OSPFSummaryLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            SummaryLSA(const OSPFSummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            SummaryLSA(const SummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
     virtual ~SummaryLSA(void) {}
 
-    bool    getPurgeable(void) const           { return purgeable; }
-    void    setPurgeable(bool purge = true)    { purgeable = purge; }
+    bool    getPurgeable(void) const  { return purgeable; }
+    void    setPurgeable(bool purge = true)  { purgeable = purge; }
 
-    bool    validateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const  { return true; } // not implemented
 
-    bool    update      (const OSPFSummaryLSA* lsa);
+    bool    update(const OSPFSummaryLSA* lsa);
     bool    differsFrom(const OSPFSummaryLSA* summaryLSA) const;
 };
 
@@ -138,17 +138,17 @@ class ASExternalLSA : public OSPFASExternalLSA,
 protected:
     bool    purgeable;
 public:
-            ASExternalLSA  (void) : OSPFASExternalLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-            ASExternalLSA  (const OSPFASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-            ASExternalLSA  (const ASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
+            ASExternalLSA(void) : OSPFASExternalLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            ASExternalLSA(const OSPFASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            ASExternalLSA(const ASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
     virtual ~ASExternalLSA(void) {}
 
-    bool    getPurgeable(void) const           { return purgeable; }
-    void    setPurgeable(bool purge = true)    { purgeable = purge; }
+    bool    getPurgeable(void) const  { return purgeable; }
+    void    setPurgeable(bool purge = true)  { purgeable = purge; }
 
-    bool    validateLSChecksum() const   { return true; } // not implemented
+    bool    validateLSChecksum() const  { return true; } // not implemented
 
-    bool    update      (const OSPFASExternalLSA* lsa);
+    bool    update(const OSPFASExternalLSA* lsa);
     bool    differsFrom(const OSPFASExternalLSA* asExternalLSA) const;
 };
 

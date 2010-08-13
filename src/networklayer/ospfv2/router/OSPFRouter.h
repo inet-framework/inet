@@ -51,64 +51,64 @@ public:
             Router(RouterID id, cSimpleModule* containingModule);
     virtual ~Router(void);
 
-    void                     setRouterID               (RouterID id)              { routerID = id; }
-    RouterID                 getRouterID               (void) const               { return routerID; }
-    void                     setRFC1583Compatibility   (bool compatibility)       { rfc1583Compatibility = compatibility; }
-    bool                     getRFC1583Compatibility   (void) const               { return rfc1583Compatibility; }
-    unsigned long            getAreaCount              (void) const               { return areas.size(); }
+    void                     setRouterID(RouterID id)  { routerID = id; }
+    RouterID                 getRouterID(void) const  { return routerID; }
+    void                     setRFC1583Compatibility(bool compatibility)  { rfc1583Compatibility = compatibility; }
+    bool                     getRFC1583Compatibility(void) const  { return rfc1583Compatibility; }
+    unsigned long            getAreaCount(void) const  { return areas.size(); }
 
-    MessageHandler*          getMessageHandler         (void)                     { return messageHandler; }
+    MessageHandler*          getMessageHandler(void)  { return messageHandler; }
 
-    unsigned long            getASExternalLSACount     (void) const               { return asExternalLSAs.size(); }
-    ASExternalLSA*           getASExternalLSA          (unsigned long i)          { return asExternalLSAs[i]; }
-    const ASExternalLSA*     getASExternalLSA          (unsigned long i) const    { return asExternalLSAs[i]; }
-    bool                     getASBoundaryRouter       (void) const               { return (externalRoutes.size() > 0); }
+    unsigned long            getASExternalLSACount(void) const  { return asExternalLSAs.size(); }
+    ASExternalLSA*           getASExternalLSA(unsigned long i)  { return asExternalLSAs[i]; }
+    const ASExternalLSA*     getASExternalLSA(unsigned long i) const  { return asExternalLSAs[i]; }
+    bool                     getASBoundaryRouter(void) const  { return (externalRoutes.size() > 0); }
 
-    unsigned long            getRoutingTableEntryCount(void) const               { return routingTable.size(); }
-    RoutingTableEntry*       getRoutingTableEntry      (unsigned long i)          { return routingTable[i]; }
-    const RoutingTableEntry* getRoutingTableEntry      (unsigned long i) const    { return routingTable[i]; }
-    void                     addRoutingTableEntry      (RoutingTableEntry* entry) { routingTable.push_back(entry); }
+    unsigned long            getRoutingTableEntryCount(void) const  { return routingTable.size(); }
+    RoutingTableEntry*       getRoutingTableEntry(unsigned long i)  { return routingTable[i]; }
+    const RoutingTableEntry* getRoutingTableEntry(unsigned long i) const  { return routingTable[i]; }
+    void                     addRoutingTableEntry(RoutingTableEntry* entry) { routingTable.push_back(entry); }
 
-    void                 addWatches                           (void);
+    void                 addWatches(void);
 
-    void                 addArea                              (Area* area);
-    Area*                getArea                              (AreaID areaID);
-    Area*                getArea                              (IPv4Address address);
-    Interface*           getNonVirtualInterface               (unsigned char ifIndex);
+    void                 addArea(Area* area);
+    Area*                getArea(AreaID areaID);
+    Area*                getArea(IPv4Address address);
+    Interface*           getNonVirtualInterface(unsigned char ifIndex);
 
-    bool                 installLSA                           (OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
-    OSPFLSA*             findLSA                              (LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
-    void                 ageDatabase                          (void);
-    bool                 hasAnyNeighborInStates               (int states) const;
-    void                 removeFromAllRetransmissionLists     (LSAKeyType lsaKey);
-    bool                 isOnAnyRetransmissionList            (LSAKeyType lsaKey) const;
-    bool                 floodLSA                             (OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
-    bool                 isLocalAddress                       (IPv4Address address) const;
-    bool                 hasAddressRange                      (IPv4AddressRange addressRange) const;
-    bool                 isDestinationUnreachable             (OSPFLSA* lsa) const;
-    RoutingTableEntry*   lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
-    void                 rebuildRoutingTable                  (void);
-    IPv4AddressRange     getContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
-    void                 updateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
-    void                 removeExternalRoute                  (IPv4Address networkAddress);
-    RoutingTableEntry*   getPreferredEntry                    (const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
+    bool                 installLSA(OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
+    OSPFLSA*             findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
+    void                 ageDatabase(void);
+    bool                 hasAnyNeighborInStates(int states) const;
+    void                 removeFromAllRetransmissionLists(LSAKeyType lsaKey);
+    bool                 isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
+    bool                 floodLSA(OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    bool                 isLocalAddress(IPv4Address address) const;
+    bool                 hasAddressRange(IPv4AddressRange addressRange) const;
+    bool                 isDestinationUnreachable(OSPFLSA* lsa) const;
+    RoutingTableEntry*   lookup(IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
+    void                 rebuildRoutingTable(void);
+    IPv4AddressRange     getContainingAddressRange(IPv4AddressRange addressRange, bool* advertise = NULL) const;
+    void                 updateExternalRoute(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void                 removeExternalRoute(IPv4Address networkAddress);
+    RoutingTableEntry*   getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
 
 private:
-    bool                 installASExternalLSA                 (OSPFASExternalLSA* lsa);
-    ASExternalLSA*       findASExternalLSA                    (LSAKeyType lsaKey);
-    const ASExternalLSA* findASExternalLSA                    (LSAKeyType lsaKey) const;
-    ASExternalLSA*       originateASExternalLSA               (ASExternalLSA* lsa);
-    LinkStateID          getUniqueLinkStateID                 (IPv4AddressRange destination,
-                                                               Metric destinationCost,
-                                                               OSPF::ASExternalLSA*& lsaToReoriginate,
-                                                               bool externalMetricIsType2 = false) const;
-    void                 calculateASExternalRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
-    void                 notifyAboutRoutingTableChanges       (std::vector<RoutingTableEntry*>& oldRoutingTable);
-    bool                 hasRouteToASBoundaryRouter           (const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
+    bool                 installASExternalLSA(OSPFASExternalLSA* lsa);
+    ASExternalLSA*       findASExternalLSA(LSAKeyType lsaKey);
+    const ASExternalLSA* findASExternalLSA(LSAKeyType lsaKey) const;
+    ASExternalLSA*       originateASExternalLSA(ASExternalLSA* lsa);
+    LinkStateID          getUniqueLinkStateID(IPv4AddressRange destination,
+                                              Metric destinationCost,
+                                              OSPF::ASExternalLSA*& lsaToReoriginate,
+                                              bool externalMetricIsType2 = false) const;
+    void                 calculateASExternalRoutes(std::vector<RoutingTableEntry*>& newRoutingTable);
+    void                 notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry*>& oldRoutingTable);
+    bool                 hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
     std::vector<RoutingTableEntry*>
-                         getRoutesToASBoundaryRouter          (const std::vector<RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const;
-    void                 pruneASBoundaryRouterEntries         (std::vector<RoutingTableEntry*>& asbrEntries) const;
-    RoutingTableEntry*   selectLeastCostRoutingEntry          (std::vector<RoutingTableEntry*>& entries) const;
+                         getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const;
+    void                 pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry*>& asbrEntries) const;
+    RoutingTableEntry*   selectLeastCostRoutingEntry(std::vector<RoutingTableEntry*>& entries) const;
 };
 
 } // namespace OSPF

@@ -57,35 +57,35 @@ private:
     // IPRoute::gateway is nextHops[0].hopAddress
 
 public:
-            RoutingTableEntry  (void);
-            RoutingTableEntry  (const RoutingTableEntry& entry);
+            RoutingTableEntry(void);
+            RoutingTableEntry(const RoutingTableEntry& entry);
     virtual ~RoutingTableEntry(void) {}
 
     bool    operator== (const RoutingTableEntry& entry) const;
     bool    operator!= (const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
 
-    void                    setDestinationType      (RoutingDestinationType type)   { destinationType = type; }
-    RoutingDestinationType  getDestinationType      (void) const                    { return destinationType; }
-    void                    setDestinationID        (IPAddress destID)              { host = destID; }
-    IPAddress               getDestinationID        (void) const                    { return host; }
-    void                    setAddressMask          (IPAddress destMask)            { netmask = destMask; }
-    IPAddress               getAddressMask          (void) const                    { return netmask; }
-    void                    setOptionalCapabilities(OSPFOptions options)           { optionalCapabilities = options; }
-    OSPFOptions             getOptionalCapabilities(void) const                    { return optionalCapabilities; }
-    void                    setArea                 (AreaID source)                 { area = source; }
-    AreaID                  getArea                 (void) const                    { return area; }
-    void                    setPathType             (RoutingPathType type);
-    RoutingPathType         getPathType             (void) const                    { return pathType; }
-    void                    setCost                 (Metric pathCost);
-    Metric                  getCost                 (void) const                    { return cost; }
-    void                    setType2Cost            (Metric pathCost);
-    Metric                  getType2Cost            (void) const                    { return type2Cost; }
-    void                    setLinkStateOrigin      (const OSPFLSA* lsa)            { linkStateOrigin = lsa; }
-    const OSPFLSA*          getLinkStateOrigin      (void) const                    { return linkStateOrigin; }
-    void                    addNextHop              (NextHop hop);
-    void                    clearNextHops           (void)                          { nextHops.clear(); }
-    unsigned int            getNextHopCount         (void) const                    { return nextHops.size(); }
-    NextHop                 getNextHop              (unsigned int index) const      { return nextHops[index]; }
+    void                    setDestinationType(RoutingDestinationType type)  { destinationType = type; }
+    RoutingDestinationType  getDestinationType(void) const  { return destinationType; }
+    void                    setDestinationID(IPAddress destID)  { host = destID; }
+    IPAddress               getDestinationID(void) const  { return host; }
+    void                    setAddressMask(IPAddress destMask)  { netmask = destMask; }
+    IPAddress               getAddressMask(void) const  { return netmask; }
+    void                    setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
+    OSPFOptions             getOptionalCapabilities(void) const  { return optionalCapabilities; }
+    void                    setArea(AreaID source)  { area = source; }
+    AreaID                  getArea(void) const  { return area; }
+    void                    setPathType(RoutingPathType type);
+    RoutingPathType         getPathType(void) const  { return pathType; }
+    void                    setCost(Metric pathCost);
+    Metric                  getCost(void) const  { return cost; }
+    void                    setType2Cost(Metric pathCost);
+    Metric                  getType2Cost(void) const  { return type2Cost; }
+    void                    setLinkStateOrigin(const OSPFLSA* lsa)  { linkStateOrigin = lsa; }
+    const OSPFLSA*          getLinkStateOrigin(void) const  { return linkStateOrigin; }
+    void                    addNextHop(NextHop hop);
+    void                    clearNextHops(void)  { nextHops.clear(); }
+    unsigned int            getNextHopCount(void) const  { return nextHops.size(); }
+    NextHop                 getNextHop(unsigned int index) const  { return nextHops[index]; }
 };
 
 } // namespace OSPF

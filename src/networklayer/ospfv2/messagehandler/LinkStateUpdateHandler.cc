@@ -28,7 +28,7 @@ private:
 
 public:
     LSAProcessingMarker(unsigned int counter) : index(counter) { EV << "    --> Processing LSA(" << index << ")\n"; }
-    ~LSAProcessingMarker()                                      { EV << "    <-- LSA(" << index << ") processed.\n"; }
+    ~LSAProcessingMarker()  { EV << "    <-- LSA(" << index << ") processed.\n"; }
 };
 
 
