@@ -55,39 +55,39 @@ public:
     void                SetAreaID                       (AreaID areaId)                                 { areaID = areaId; }
     AreaID              GetAreaID                       (void) const                                    { return areaID; }
     void                AddAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
-    unsigned int        GetAddressRangeCount            (void) const                                    { return areaAddressRanges.size(); }
-    IPv4AddressRange    GetAddressRange                 (unsigned int index) const                      { return areaAddressRanges[index]; }
+    unsigned int        getAddressRangeCount            (void) const                                    { return areaAddressRanges.size(); }
+    IPv4AddressRange    getAddressRange                 (unsigned int index) const                      { return areaAddressRanges[index]; }
     void                AddHostRoute                    (HostRouteParameters& hostRouteParameters)      { hostRoutes.push_back(hostRouteParameters); }
-    void                SetTransitCapability            (bool transit)                                  { transitCapability = transit; }
-    bool                GetTransitCapability            (void) const                                    { return transitCapability; }
-    void                SetExternalRoutingCapability    (bool flooded)                                  { externalRoutingCapability = flooded; }
-    bool                GetExternalRoutingCapability    (void) const                                    { return externalRoutingCapability; }
-    void                SetStubDefaultCost              (Metric cost)                                   { stubDefaultCost = cost; }
-    Metric              GetStubDefaultCost              (void) const                                    { return stubDefaultCost; }
-    void                SetSPFTreeRoot                  (RouterLSA* root)                               { spfTreeRoot = root; }
-    RouterLSA*          GetSPFTreeRoot                  (void)                                          { return spfTreeRoot; }
-    const RouterLSA*    GetSPFTreeRoot                  (void) const                                    { return spfTreeRoot; }
+    void                setTransitCapability            (bool transit)                                  { transitCapability = transit; }
+    bool                getTransitCapability            (void) const                                    { return transitCapability; }
+    void                setExternalRoutingCapability    (bool flooded)                                  { externalRoutingCapability = flooded; }
+    bool                getExternalRoutingCapability    (void) const                                    { return externalRoutingCapability; }
+    void                setStubDefaultCost              (Metric cost)                                   { stubDefaultCost = cost; }
+    Metric              getStubDefaultCost              (void) const                                    { return stubDefaultCost; }
+    void                setSPFTreeRoot                  (RouterLSA* root)                               { spfTreeRoot = root; }
+    RouterLSA*          getSPFTreeRoot                  (void)                                          { return spfTreeRoot; }
+    const RouterLSA*    getSPFTreeRoot                  (void) const                                    { return spfTreeRoot; }
 
-    void                SetRouter                       (Router* router)                                { parentRouter = router; }
-    Router*             GetRouter                       (void)                                          { return parentRouter; }
-    const Router*       GetRouter                       (void) const                                    { return parentRouter; }
+    void                setRouter                       (Router* router)                                { parentRouter = router; }
+    Router*             getRouter                       (void)                                          { return parentRouter; }
+    const Router*       getRouter                       (void) const                                    { return parentRouter; }
 
-    unsigned long       GetRouterLSACount               (void) const                                    { return routerLSAs.size(); }
-    RouterLSA*          GetRouterLSA                    (unsigned long i)                               { return routerLSAs[i]; }
-    const RouterLSA*    GetRouterLSA                    (unsigned long i) const                         { return routerLSAs[i]; }
-    unsigned long       GetNetworkLSACount              (void) const                                    { return networkLSAs.size(); }
-    NetworkLSA*         GetNetworkLSA                   (unsigned long i)                               { return networkLSAs[i]; }
-    const NetworkLSA*   GetNetworkLSA                   (unsigned long i) const                         { return networkLSAs[i]; }
-    unsigned long       GetSummaryLSACount              (void) const                                    { return summaryLSAs.size(); }
-    SummaryLSA*         GetSummaryLSA                   (unsigned long i)                               { return summaryLSAs[i]; }
-    const SummaryLSA*   GetSummaryLSA                   (unsigned long i) const                         { return summaryLSAs[i]; }
+    unsigned long       getRouterLSACount               (void) const                                    { return routerLSAs.size(); }
+    RouterLSA*          getRouterLSA                    (unsigned long i)                               { return routerLSAs[i]; }
+    const RouterLSA*    getRouterLSA                    (unsigned long i) const                         { return routerLSAs[i]; }
+    unsigned long       getNetworkLSACount              (void) const                                    { return networkLSAs.size(); }
+    NetworkLSA*         getNetworkLSA                   (unsigned long i)                               { return networkLSAs[i]; }
+    const NetworkLSA*   getNetworkLSA                   (unsigned long i) const                         { return networkLSAs[i]; }
+    unsigned long       getSummaryLSACount              (void) const                                    { return summaryLSAs.size(); }
+    SummaryLSA*         getSummaryLSA                   (unsigned long i)                               { return summaryLSAs[i]; }
+    const SummaryLSA*   getSummaryLSA                   (unsigned long i) const                         { return summaryLSAs[i]; }
 
     bool                ContainsAddress                     (IPv4Address address) const;
     bool                HasAddressRange                     (IPv4AddressRange addressRange) const;
-    IPv4AddressRange    GetContainingAddressRange           (IPv4AddressRange addressRange, bool* advertise = NULL) const;
+    IPv4AddressRange    getContainingAddressRange           (IPv4AddressRange addressRange, bool* advertise = NULL) const;
     void                AddInterface                        (Interface* intf);
-    Interface*          GetInterface                        (unsigned char ifIndex);
-    Interface*          GetInterface                        (IPv4Address address);
+    Interface*          getInterface                        (unsigned char ifIndex);
+    Interface*          getInterface                        (IPv4Address address);
     bool                HasVirtualLink                      (AreaID withTransitArea) const;
     Interface*          FindVirtualLink                     (RouterID routerID);
 
@@ -124,7 +124,7 @@ private:
     std::vector<NextHop>*   CalculateNextHops                       (OSPFLSA* destination, OSPFLSA* parent) const;
     std::vector<NextHop>*   CalculateNextHops                       (Link& destination, OSPFLSA* parent) const;
 
-    LinkStateID             GetUniqueLinkStateID                    (IPv4AddressRange destination,
+    LinkStateID             getUniqueLinkStateID                    (IPv4AddressRange destination,
                                                                      Metric destinationCost,
                                                                      SummaryLSA*& lsaToReoriginate) const;
 

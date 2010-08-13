@@ -87,7 +87,7 @@ void OSPFRouting::handleMessage(cMessage *msg)
 //    if (simulation.getEventNumber() == 90591) {
 //        __asm int 3;
 //    }
-    ospfRouter->GetMessageHandler()->MessageReceived(msg);
+    ospfRouter->getMessageHandler()->MessageReceived(msg);
 }
 
 /**
@@ -106,7 +106,7 @@ int OSPFRouting::ResolveInterfaceName(const std::string& name) const
  * @param routerNode [in]  XML node describing this router.
  * @param areaList   [out] A hash of OSPF Areas connected to this router. The hash key is the Area ID.
  */
-void OSPFRouting::GetAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const
+void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const
 {
     cXMLElementList routerConfig = routerNode.getChildren();
     for (cXMLElementList::iterator routerConfigIt = routerConfig.begin(); routerConfigIt != routerConfig.end(); routerConfigIt++) {
@@ -161,8 +161,8 @@ void OSPFRouting::LoadAreaFromXML(const cXMLElement& asConfig, const std::string
             }
         }
         if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
-            area->SetExternalRoutingCapability(false);
-            area->SetStubDefaultCost(atoi((*arIt)->getChildrenByTagName("DefaultCost")[0]->getNodeValue()));
+            area->setExternalRoutingCapability(false);
+            area->setStubDefaultCost(atoi((*arIt)->getChildrenByTagName("DefaultCost")[0]->getNodeValue()));
         }
     }
     // Add the Area to the router
@@ -184,7 +184,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
 
     EV << "        loading " << interfaceType << " " << ifName << " ifIndex[" << ifIndex << "]\n";
 
-    intf->SetIfIndex(ifIndex);
+    intf->setIfIndex(ifIndex);
     if (interfaceType == "PointToPointInterface") {
         intf->SetType(OSPF::Interface::PointToPoint);
     } else if (interfaceType == "BroadcastInterface") {
@@ -208,13 +208,13 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
             intf->SetAreaID(areaID);
         }
         if (nodeName == "InterfaceOutputCost") {
-            intf->SetOutputCost(atoi((*ifElemIt)->getNodeValue()));
+            intf->setOutputCost(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RetransmissionInterval") {
-            intf->SetRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "InterfaceTransmissionDelay") {
-            intf->SetTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
+            intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RouterPriority") {
             intf->SetRouterPriority(atoi((*ifElemIt)->getNodeValue()));
@@ -245,10 +245,10 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
                     keyValue.bytes[(i - 2) / 2] = HexPairToByte(key[i - 1], key[i]);
                 }
             }
-            intf->SetAuthenticationKey(keyValue);
+            intf->setAuthenticationKey(keyValue);
         }
         if (nodeName == "PollInterval") {
-            intf->SetPollInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setPollInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if ((interfaceType == "NBMAInterface") && (nodeName == "NBMANeighborList")) {
             cXMLElementList neighborList = (*ifElemIt)->getChildren();
@@ -256,8 +256,8 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->SetAddress(IPv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
-                    neighbor->SetPriority(atoi((*neighborIt)->getChildrenByTagName("NeighborPriority")[0]->getNodeValue()));
+                    neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
+                    neighbor->setPriority(atoi((*neighborIt)->getChildrenByTagName("NeighborPriority")[0]->getNodeValue()));
                     intf->AddNeighbor(neighbor);
                 }
             }
@@ -268,7 +268,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "PointToMultiPointNeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->SetAddress(IPv4AddressFromAddressString((*neighborIt)->getNodeValue()));
+                    neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getNodeValue()));
                     intf->AddNeighbor(neighbor);
                 }
             }
@@ -276,7 +276,7 @@ void OSPFRouting::LoadInterfaceParameters(const cXMLElement& ifConfig)
 
     }
     // add the interface to it's Area
-    OSPF::Area* area = ospfRouter->GetArea(areaID);
+    OSPF::Area* area = ospfRouter->getArea(areaID);
     if (area != NULL) {
         area->AddInterface(intf);
         intf->ProcessEvent(OSPF::Interface::InterfaceUp); // notification should come from the blackboard...
@@ -316,12 +316,12 @@ void OSPFRouting::LoadExternalRoute(const cXMLElement& externalRouteConfig)
             asExternalRoute.setRouteCost(routeCost);
             if (metricType == "Type2") {
                 asExternalRoute.setE_ExternalMetricType(true);
-                externalRoutingEntry.SetType2Cost(routeCost);
-                externalRoutingEntry.SetPathType(OSPF::RoutingTableEntry::Type2External);
+                externalRoutingEntry.setType2Cost(routeCost);
+                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::Type2External);
             } else {
                 asExternalRoute.setE_ExternalMetricType(false);
-                externalRoutingEntry.SetCost(routeCost);
-                externalRoutingEntry.SetPathType(OSPF::RoutingTableEntry::Type1External);
+                externalRoutingEntry.setCost(routeCost);
+                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::Type1External);
             }
         }
         if (nodeName == "ForwardingAddress") {
@@ -374,7 +374,7 @@ void OSPFRouting::LoadHostRoute(const cXMLElement& hostRouteConfig)
         }
     }
     // add the host route to the OSPF datastructure.
-    OSPF::Area* area = ospfRouter->GetArea(hostArea);
+    OSPF::Area* area = ospfRouter->getArea(hostArea);
     if (area != NULL) {
         area->AddHostRoute(hostParameters);
 
@@ -397,20 +397,20 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->SetType(OSPF::Interface::Virtual);
-    neighbor->SetNeighborID(ULongFromAddressString(endPoint.c_str()));
+    neighbor->setNeighborID(ULongFromAddressString(endPoint.c_str()));
     intf->AddNeighbor(neighbor);
 
     cXMLElementList ifDetails = virtualLinkConfig.getChildren();
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
         std::string nodeName = (*ifElemIt)->getTagName();
         if (nodeName == "TransitAreaID") {
-            intf->SetTransitAreaID(ULongFromAddressString((*ifElemIt)->getNodeValue()));
+            intf->setTransitAreaID(ULongFromAddressString((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RetransmissionInterval") {
-            intf->SetRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
+            intf->setRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "InterfaceTransmissionDelay") {
-            intf->SetTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
+            intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "HelloInterval") {
             intf->SetHelloInterval(atoi((*ifElemIt)->getNodeValue()));
@@ -438,15 +438,15 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
                     keyValue.bytes[(i - 2) / 2] = HexPairToByte(key[i - 1], key[i]);
                 }
             }
-            intf->SetAuthenticationKey(keyValue);
+            intf->setAuthenticationKey(keyValue);
         }
     }
 
     // add the virtual link to the OSPF datastructure.
-    OSPF::Area* transitArea = ospfRouter->GetArea(intf->GetAreaID());
-    OSPF::Area* backbone    = ospfRouter->GetArea(OSPF::BackboneAreaID);
+    OSPF::Area* transitArea = ospfRouter->getArea(intf->GetAreaID());
+    OSPF::Area* backbone    = ospfRouter->getArea(OSPF::BackboneAreaID);
 
-    if ((backbone != NULL) && (transitArea != NULL) && (transitArea->GetExternalRoutingCapability())) {
+    if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->AddInterface(intf);
     } else {
         delete intf;
@@ -483,11 +483,11 @@ bool OSPFRouting::LoadConfigFromXML(const char * filename)
     }
 
     if (routerNode->getChildrenByTagName("RFC1583Compatible").size() > 0) {
-        ospfRouter->SetRFC1583Compatibility(true);
+        ospfRouter->setRFC1583Compatibility(true);
     }
 
     std::map<std::string, int> areaList;
-    GetAreaListFromXML(*routerNode, areaList);
+    getAreaListFromXML(*routerNode, areaList);
 
     // load area information
     for (std::map<std::string, int>::iterator areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {

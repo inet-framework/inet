@@ -106,11 +106,11 @@ public:
     void                Reset                               (void);
     void                SendHelloPacket                     (IPv4Address destination, short ttl = 1);
     void                SendLSAcknowledgement               (OSPFLSAHeader* lsaHeader, IPv4Address destination);
-    Neighbor*           GetNeighborByID                     (RouterID neighborID);
-    Neighbor*           GetNeighborByAddress                (IPv4Address address);
+    Neighbor*           getNeighborByID                     (RouterID neighborID);
+    Neighbor*           getNeighborByAddress                (IPv4Address address);
     void                AddNeighbor                         (Neighbor* neighbor);
-    InterfaceStateType  GetState                            (void) const;
-    static const char*  GetStateString                      (InterfaceStateType stateType);
+    InterfaceStateType  getState                            (void) const;
+    static const char*  getStateString                      (InterfaceStateType stateType);
     bool                HasAnyNeighborInStates              (int states) const;
     void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
     bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
@@ -123,49 +123,49 @@ public:
 
     void                    SetType                         (OSPFInterfaceType ifType)  { interfaceType = ifType; }
     OSPFInterfaceType       GetType                         (void) const                { return interfaceType; }
-    void                    SetIfIndex                      (unsigned char index);
-    unsigned char           GetIfIndex                      (void) const                { return ifIndex; }
-    void                    SetMTU                          (unsigned short ifMTU)      { mtu = ifMTU; }
+    void                    setIfIndex                      (unsigned char index);
+    unsigned char           getIfIndex                      (void) const                { return ifIndex; }
+    void                    setMTU                          (unsigned short ifMTU)      { mtu = ifMTU; }
     unsigned short          GetMTU                          (void) const                { return mtu; }
     void                    SetAreaID                       (AreaID areaId)             { areaID = areaId; }
     AreaID                  GetAreaID                       (void) const                { return areaID; }
-    void                    SetTransitAreaID                (AreaID areaId)             { transitAreaID = areaId; }
-    AreaID                  GetTransitAreaID                (void) const                { return transitAreaID; }
-    void                    SetOutputCost                   (Metric cost)               { interfaceOutputCost = cost; }
-    Metric                  GetOutputCost                   (void) const                { return interfaceOutputCost; }
-    void                    SetRetransmissionInterval       (short interval)            { retransmissionInterval = interval; }
-    short                   GetRetransmissionInterval       (void) const                { return retransmissionInterval; }
-    void                    SetTransmissionDelay            (short delay)               { interfaceTransmissionDelay = delay; }
-    short                   GetTransmissionDelay            (void) const                { return interfaceTransmissionDelay; }
-    void                    SetAcknowledgementDelay         (short delay)               { acknowledgementDelay = delay; }
-    short                   GetAcknowledgementDelay         (void) const                { return acknowledgementDelay; }
+    void                    setTransitAreaID                (AreaID areaId)             { transitAreaID = areaId; }
+    AreaID                  getTransitAreaID                (void) const                { return transitAreaID; }
+    void                    setOutputCost                   (Metric cost)               { interfaceOutputCost = cost; }
+    Metric                  getOutputCost                   (void) const                { return interfaceOutputCost; }
+    void                    setRetransmissionInterval       (short interval)            { retransmissionInterval = interval; }
+    short                   getRetransmissionInterval       (void) const                { return retransmissionInterval; }
+    void                    setTransmissionDelay            (short delay)               { interfaceTransmissionDelay = delay; }
+    short                   getTransmissionDelay            (void) const                { return interfaceTransmissionDelay; }
+    void                    setAcknowledgementDelay         (short delay)               { acknowledgementDelay = delay; }
+    short                   getAcknowledgementDelay         (void) const                { return acknowledgementDelay; }
     void                    SetRouterPriority               (unsigned char priority)    { routerPriority = priority; }
     unsigned char           GetRouterPriority               (void) const                { return routerPriority; }
     void                    SetHelloInterval                (short interval)            { helloInterval = interval; }
     short                   GetHelloInterval                (void) const                { return helloInterval; }
-    void                    SetPollInterval                 (short interval)            { pollInterval = interval; }
-    short                   GetPollInterval                 (void) const                { return pollInterval; }
+    void                    setPollInterval                 (short interval)            { pollInterval = interval; }
+    short                   getPollInterval                 (void) const                { return pollInterval; }
     void                    SetRouterDeadInterval           (short interval)            { routerDeadInterval = interval; }
     short                   GetRouterDeadInterval           (void) const                { return routerDeadInterval; }
     void                    SetAuthenticationType           (AuthenticationType type)   { authenticationType = type; }
-    AuthenticationType      GetAuthenticationType           (void) const                { return authenticationType; }
-    void                    SetAuthenticationKey            (AuthenticationKeyType key) { authenticationKey = key; }
-    AuthenticationKeyType   GetAuthenticationKey            (void) const                { return authenticationKey; }
-    void                    SetAddressRange                 (IPv4AddressRange range)    { interfaceAddressRange = range; }
-    IPv4AddressRange        GetAddressRange                 (void) const                { return interfaceAddressRange; }
+    AuthenticationType      getAuthenticationType           (void) const                { return authenticationType; }
+    void                    setAuthenticationKey            (AuthenticationKeyType key) { authenticationKey = key; }
+    AuthenticationKeyType   getAuthenticationKey            (void) const                { return authenticationKey; }
+    void                    setAddressRange                 (IPv4AddressRange range)    { interfaceAddressRange = range; }
+    IPv4AddressRange        getAddressRange                 (void) const                { return interfaceAddressRange; }
 
-    OSPFTimer*              GetHelloTimer                   (void)                      { return helloTimer; }
-    OSPFTimer*              GetWaitTimer                    (void)                      { return waitTimer; }
-    OSPFTimer*              GetAcknowledgementTimer         (void)                      { return acknowledgementTimer; }
+    OSPFTimer*              getHelloTimer                   (void)                      { return helloTimer; }
+    OSPFTimer*              getWaitTimer                    (void)                      { return waitTimer; }
+    OSPFTimer*              getAcknowledgementTimer         (void)                      { return acknowledgementTimer; }
     DesignatedRouterID      GetDesignatedRouter             (void) const                { return designatedRouter; }
     DesignatedRouterID      GetBackupDesignatedRouter       (void) const                { return backupDesignatedRouter; }
-    unsigned long           GetNeighborCount                (void) const                { return neighboringRouters.size(); }
+    unsigned long           getNeighborCount                (void) const                { return neighboringRouters.size(); }
     Neighbor*               GetNeighbor                     (unsigned long i)           { return neighboringRouters[i]; }
     const Neighbor*         GetNeighbor                     (unsigned long i) const     { return neighboringRouters[i]; }
 
-    void                    SetArea                         (Area* area)                { parentArea = area; }
-    Area*                   GetArea                         (void)                      { return parentArea; }
-    const Area*             GetArea                         (void) const                { return parentArea; }
+    void                    setArea                         (Area* area)                { parentArea = area; }
+    Area*                   getArea                         (void)                      { return parentArea; }
+    const Area*             getArea                         (void) const                { return parentArea; }
 };
 
 } // namespace OSPF

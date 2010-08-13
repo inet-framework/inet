@@ -37,7 +37,7 @@ class OSPFRouting :  public cSimpleModule
     OSPF::Router*       ospfRouter; ///< Root object of the OSPF datastructure.
 
     int     ResolveInterfaceName(const std::string& name) const;
-    void    GetAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
+    void    getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
     void    LoadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);
     void    LoadInterfaceParameters(const cXMLElement& ifConfig);
     void    LoadExternalRoute(const cXMLElement& externalRouteConfig);

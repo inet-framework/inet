@@ -125,8 +125,8 @@ public:
     void                ProcessEvent                        (NeighborEventType event);
     void                Reset                               (void);
     void                InitFirstAdjacency                  (void);
-    NeighborStateType   GetState                            (void) const;
-    static const char*  GetStateString                      (NeighborStateType stateType);
+    NeighborStateType   getState                            (void) const;
+    static const char*  getStateString                      (NeighborStateType stateType);
     void                SendDatabaseDescriptionPacket       (bool init = false);
     bool                RetransmitDatabaseDescriptionPacket(void);
     void                CreateDatabaseSummary               (void);
@@ -148,45 +148,45 @@ public:
     void                AddToTransmittedLSAList             (LSAKeyType lsaKey);
     bool                IsOnTransmittedLSAList              (LSAKeyType lsaKey) const;
     void                AgeTransmittedLSAList               (void);
-    unsigned long       GetUniqueULong                      (void);
+    unsigned long       getUniqueULong                      (void);
     void                DeleteLastSentDDPacket              (void);
 
-    void                SetNeighborID               (RouterID id)                   { neighborID = id; }
-    RouterID            GetNeighborID               (void) const                    { return neighborID; }
-    void                SetPriority                 (unsigned char priority)        { neighborPriority = priority; }
-    unsigned char       GetPriority                 (void) const                    { return neighborPriority; }
-    void                SetAddress                  (IPv4Address address)           { neighborIPAddress = address; }
-    IPv4Address         GetAddress                  (void) const                    { return neighborIPAddress; }
+    void                setNeighborID               (RouterID id)                   { neighborID = id; }
+    RouterID            getNeighborID               (void) const                    { return neighborID; }
+    void                setPriority                 (unsigned char priority)        { neighborPriority = priority; }
+    unsigned char       getPriority                 (void) const                    { return neighborPriority; }
+    void                setAddress                  (IPv4Address address)           { neighborIPAddress = address; }
+    IPv4Address         getAddress                  (void) const                    { return neighborIPAddress; }
     void                SetDesignatedRouter         (DesignatedRouterID routerID)   { neighborsDesignatedRouter = routerID; }
     DesignatedRouterID  GetDesignatedRouter         (void) const                    { return neighborsDesignatedRouter; }
     void                SetBackupDesignatedRouter   (DesignatedRouterID routerID)   { neighborsBackupDesignatedRouter = routerID; }
     DesignatedRouterID  GetBackupDesignatedRouter   (void) const                    { return neighborsBackupDesignatedRouter; }
     void                SetRouterDeadInterval       (short interval)                { neighborsRouterDeadInterval = interval; }
     short               GetRouterDeadInterval       (void) const                    { return neighborsRouterDeadInterval; }
-    void                SetDDSequenceNumber         (unsigned long sequenceNumber)  { ddSequenceNumber = sequenceNumber; }
-    unsigned long       GetDDSequenceNumber         (void) const                    { return ddSequenceNumber; }
+    void                setDDSequenceNumber         (unsigned long sequenceNumber)  { ddSequenceNumber = sequenceNumber; }
+    unsigned long       getDDSequenceNumber         (void) const                    { return ddSequenceNumber; }
     void                SetOptions                  (OSPFOptions options)           { neighborOptions = options; }
     OSPFOptions         GetOptions                  (void) const                    { return neighborOptions; }
-    void                SetLastReceivedDDPacket     (DDPacketID packetID)           { lastReceivedDDPacket = packetID; }
-    DDPacketID          GetLastReceivedDDPacket     (void) const                    { return lastReceivedDDPacket; }
+    void                setLastReceivedDDPacket     (DDPacketID packetID)           { lastReceivedDDPacket = packetID; }
+    DDPacketID          getLastReceivedDDPacket     (void) const                    { return lastReceivedDDPacket; }
 
-    void                                SetDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
-    DatabaseExchangeRelationshipType    GetDatabaseExchangeRelationship(void) const                                { return databaseExchangeRelationship; }
+    void                                setDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
+    DatabaseExchangeRelationshipType    getDatabaseExchangeRelationship(void) const                                { return databaseExchangeRelationship; }
 
     void                SetInterface                (Interface* intf)               { parentInterface = intf; }
-    Interface*          GetInterface                (void)                          { return parentInterface; }
-    const Interface*    GetInterface                (void) const                    { return parentInterface; }
+    Interface*          getInterface                (void)                          { return parentInterface; }
+    const Interface*    getInterface                (void) const                    { return parentInterface; }
 
-    OSPFTimer*          GetInactivityTimer                  (void)                  { return inactivityTimer; }
-    OSPFTimer*          GetPollTimer                        (void)                  { return pollTimer; }
-    OSPFTimer*          GetDDRetransmissionTimer            (void)                  { return ddRetransmissionTimer; }
-    OSPFTimer*          GetUpdateRetransmissionTimer        (void)                  { return updateRetransmissionTimer; }
+    OSPFTimer*          getInactivityTimer                  (void)                  { return inactivityTimer; }
+    OSPFTimer*          getPollTimer                        (void)                  { return pollTimer; }
+    OSPFTimer*          getDDRetransmissionTimer            (void)                  { return ddRetransmissionTimer; }
+    OSPFTimer*          getUpdateRetransmissionTimer        (void)                  { return updateRetransmissionTimer; }
     bool                IsUpdateRetransmissionTimerActive   (void) const            { return updateRetransmissionTimerActive; }
     bool                IsRequestRetransmissionTimerActive  (void) const            { return requestRetransmissionTimerActive; }
     bool                IsFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
     bool                DesignatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
     void                SetUpDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
-    unsigned long       GetDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
+    unsigned long       getDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
 
     void IncrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
     bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }

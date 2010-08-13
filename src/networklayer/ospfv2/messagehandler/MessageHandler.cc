@@ -95,7 +95,7 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Inactivity Timer expired", neighbor->GetInterface(), neighbor);
+                    PrintEvent("Inactivity Timer expired", neighbor->getInterface(), neighbor);
                     neighbor->ProcessEvent(OSPF::Neighbor::InactivityTimer);
                 }
             }
@@ -108,7 +108,7 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Poll Timer expired", neighbor->GetInterface(), neighbor);
+                    PrintEvent("Poll Timer expired", neighbor->getInterface(), neighbor);
                     neighbor->ProcessEvent(OSPF::Neighbor::PollTimer);
                 }
             }
@@ -121,7 +121,7 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborDDRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Database Description Retransmission Timer expired", neighbor->GetInterface(), neighbor);
+                    PrintEvent("Database Description Retransmission Timer expired", neighbor->getInterface(), neighbor);
                     neighbor->ProcessEvent(OSPF::Neighbor::DDRetransmissionTimer);
                 }
             }
@@ -134,7 +134,7 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborUpdateRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Update Retransmission Timer expired", neighbor->GetInterface(), neighbor);
+                    PrintEvent("Update Retransmission Timer expired", neighbor->getInterface(), neighbor);
                     neighbor->ProcessEvent(OSPF::Neighbor::UpdateRetransmissionTimer);
                 }
             }
@@ -147,7 +147,7 @@ void OSPF::MessageHandler::HandleTimer(OSPFTimer* timer)
                     EV << "Discarding invalid NeighborRequestRetransmissionTimer.\n";
                     delete timer;
                 } else {
-                    PrintEvent("Request Retransmission Timer expired", neighbor->GetInterface(), neighbor);
+                    PrintEvent("Request Retransmission Timer expired", neighbor->getInterface(), neighbor);
                     neighbor->ProcessEvent(OSPF::Neighbor::RequestRetransmissionTimer);
                 }
             }
@@ -169,25 +169,25 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
         IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
         int             interfaceId = controlInfo->getInterfaceId();
         OSPF::AreaID    areaID      = packet->getAreaID().getInt();
-        OSPF::Area*     area        = router->GetArea(areaID);
+        OSPF::Area*     area        = router->getArea(areaID);
 
         if (area != NULL) {
             // packet Area ID must either match the Area ID of the receiving interface or...
-            OSPF::Interface* intf = area->GetInterface(interfaceId);
+            OSPF::Interface* intf = area->getInterface(interfaceId);
 
             if (intf == NULL) {
                 // it must be the backbone area and...
                 if (areaID == BackboneAreaID) {
-                    if (router->GetAreaCount() > 1) {
+                    if (router->getAreaCount() > 1) {
                         // it must be a virtual link and the source router's router ID must be the endpoint of this virtual link and...
                         intf = area->FindVirtualLink(packet->getRouterID().getInt());
 
                         if (intf != NULL) {
-                            OSPF::Area* virtualLinkTransitArea = router->GetArea(intf->GetTransitAreaID());
+                            OSPF::Area* virtualLinkTransitArea = router->getArea(intf->getTransitAreaID());
 
                             if (virtualLinkTransitArea != NULL) {
                                 // the receiving interface must attach to the virtual link's configured transit area
-                                OSPF::Interface* virtualLinkInterface = virtualLinkTransitArea->GetInterface(interfaceId);
+                                OSPF::Interface* virtualLinkInterface = virtualLinkTransitArea->getInterface(interfaceId);
 
                                 if (virtualLinkInterface == NULL) {
                                     intf = NULL;
@@ -202,7 +202,7 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
             if (intf != NULL) {
                 unsigned long                       destinationAddress = controlInfo->getDestAddr().getInt();
                 unsigned long                       allDRouters        = ULongFromIPv4Address(OSPF::AllDRouters);
-                OSPF::Interface::InterfaceStateType interfaceState     = intf->GetState();
+                OSPF::Interface::InterfaceStateType interfaceState     = intf->getState();
 
                 // if destination address is AllDRouters the receiving interface must be in DesignatedRouter or Backup state
                 if (
@@ -226,11 +226,11 @@ void OSPF::MessageHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* un
                                 case OSPF::Interface::Broadcast:
                                 case OSPF::Interface::NBMA:
                                 case OSPF::Interface::PointToMultiPoint:
-                                    neighbor = intf->GetNeighborByAddress(IPv4AddressFromULong(controlInfo->getSrcAddr().getInt()));
+                                    neighbor = intf->getNeighborByAddress(IPv4AddressFromULong(controlInfo->getSrcAddr().getInt()));
                                     break;
                                 case OSPF::Interface::PointToPoint:
                                 case OSPF::Interface::Virtual:
-                                    neighbor = intf->GetNeighborByID(packet->getRouterID().getInt());
+                                    neighbor = intf->getNeighborByID(packet->getRouterID().getInt());
                                     break;
                                 default: break;
                             }
@@ -349,14 +349,14 @@ void OSPF::MessageHandler::PrintEvent(const char* eventString, const OSPF::Inter
     if (forNeighbor != NULL) {
         char addressString[16];
         EV << "neighbor["
-           << AddressStringFromULong(addressString, sizeof(addressString), forNeighbor->GetNeighborID())
+           << AddressStringFromULong(addressString, sizeof(addressString), forNeighbor->getNeighborID())
            << "] (state: "
-           << forNeighbor->GetStateString(forNeighbor->GetState())
+           << forNeighbor->getStateString(forNeighbor->getState())
            << "); ";
     }
     if (onInterface != NULL) {
         EV << "interface["
-           << static_cast <short> (onInterface->GetIfIndex())
+           << static_cast <short> (onInterface->getIfIndex())
            << "] ";
         switch (onInterface->GetType()) {
             case OSPF::Interface::PointToPoint:      EV << "(PointToPoint)";
@@ -372,7 +372,7 @@ void OSPF::MessageHandler::PrintEvent(const char* eventString, const OSPF::Inter
             default:                                 EV << "(Unknown)";
         }
         EV << " (state: "
-           << onInterface->GetStateString(onInterface->GetState())
+           << onInterface->getStateString(onInterface->getState())
            << ")";
     }
     EV << ".\n";

@@ -26,7 +26,7 @@ class NeighborStateExchange : public NeighborState
 {
 public:
     virtual void ProcessEvent(Neighbor* neighbor, Neighbor::NeighborEventType event);
-    virtual Neighbor::NeighborStateType GetState(void) const { return Neighbor::ExchangeState; }
+    virtual Neighbor::NeighborStateType getState(void) const { return Neighbor::ExchangeState; }
 };
 
 } // namespace OSPF

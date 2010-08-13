@@ -64,7 +64,7 @@ OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
 
 OSPF::Interface::~Interface(void)
 {
-    MessageHandler* messageHandler = parentArea->GetRouter()->GetMessageHandler();
+    MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     messageHandler->ClearTimer(helloTimer);
     delete helloTimer;
     messageHandler->ClearTimer(waitTimer);
@@ -81,7 +81,7 @@ OSPF::Interface::~Interface(void)
     }
 }
 
-void OSPF::Interface::SetIfIndex(unsigned char index)
+void OSPF::Interface::setIfIndex(unsigned char index)
 {
     ifIndex = index;
     if (interfaceType == OSPF::Interface::UnknownType) {
@@ -108,7 +108,7 @@ void OSPF::Interface::ProcessEvent(OSPF::Interface::InterfaceEventType event)
 
 void OSPF::Interface::Reset(void)
 {
-    MessageHandler* messageHandler = parentArea->GetRouter()->GetMessageHandler();
+    MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     messageHandler->ClearTimer(helloTimer);
     messageHandler->ClearTimer(waitTimer);
     messageHandler->ClearTimer(acknowledgementTimer);
@@ -126,7 +126,7 @@ void OSPF::Interface::SendHelloPacket(OSPF::IPv4Address destination, short ttl)
     OSPFHelloPacket* helloPacket = new OSPFHelloPacket;
     std::vector<OSPF::IPv4Address> neighbors;
 
-    helloPacket->setRouterID(parentArea->GetRouter()->GetRouterID());
+    helloPacket->setRouterID(parentArea->getRouter()->GetRouterID());
     helloPacket->setAreaID(parentArea->GetAreaID());
     helloPacket->setAuthenticationType(authenticationType);
     for (int i = 0; i < 8; i++) {
@@ -142,7 +142,7 @@ void OSPF::Interface::SendHelloPacket(OSPF::IPv4Address destination, short ttl)
         helloPacket->setNetworkMask(ULongFromIPv4Address(interfaceAddressRange.mask));
     }
     memset(&options, 0, sizeof(OSPFOptions));
-    options.E_ExternalRoutingCapability = parentArea->GetExternalRoutingCapability();
+    options.E_ExternalRoutingCapability = parentArea->getExternalRoutingCapability();
     helloPacket->setOptions(options);
     helloPacket->setHelloInterval(helloInterval);
     helloPacket->setRouterPriority(routerPriority);
@@ -151,8 +151,8 @@ void OSPF::Interface::SendHelloPacket(OSPF::IPv4Address destination, short ttl)
     helloPacket->setBackupDesignatedRouter(ULongFromIPv4Address(backupDesignatedRouter.ipInterfaceAddress));
     long neighborCount = neighboringRouters.size();
     for (long j = 0; j < neighborCount; j++) {
-        if (neighboringRouters[j]->GetState() >= OSPF::Neighbor::InitState) {
-            neighbors.push_back(neighboringRouters[j]->GetAddress());
+        if (neighboringRouters[j]->getState() >= OSPF::Neighbor::InitState) {
+            neighbors.push_back(neighboringRouters[j]->getAddress());
         }
     }
     unsigned int initedNeighborCount = neighbors.size();
@@ -164,7 +164,7 @@ void OSPF::Interface::SendHelloPacket(OSPF::IPv4Address destination, short ttl)
     helloPacket->setPacketLength(0); // TODO: Calculate correct length
     helloPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
-    parentArea->GetRouter()->GetMessageHandler()->SendPacket(helloPacket, destination, ifIndex, ttl);
+    parentArea->getRouter()->getMessageHandler()->SendPacket(helloPacket, destination, ifIndex, ttl);
 }
 
 void OSPF::Interface::SendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Address destination)
@@ -173,7 +173,7 @@ void OSPF::Interface::SendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Addres
     OSPFLinkStateAcknowledgementPacket* lsAckPacket = new OSPFLinkStateAcknowledgementPacket;
 
     lsAckPacket->setType(LinkStateAcknowledgementPacket);
-    lsAckPacket->setRouterID(parentArea->GetRouter()->GetRouterID());
+    lsAckPacket->setRouterID(parentArea->getRouter()->GetRouterID());
     lsAckPacket->setAreaID(parentArea->GetAreaID());
     lsAckPacket->setAuthenticationType(authenticationType);
     for (int i = 0; i < 8; i++) {
@@ -187,11 +187,11 @@ void OSPF::Interface::SendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Addres
     lsAckPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     int ttl = (interfaceType == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-    parentArea->GetRouter()->GetMessageHandler()->SendPacket(lsAckPacket, destination, ifIndex, ttl);
+    parentArea->getRouter()->getMessageHandler()->SendPacket(lsAckPacket, destination, ifIndex, ttl);
 }
 
 
-OSPF::Neighbor* OSPF::Interface::GetNeighborByID(OSPF::RouterID neighborID)
+OSPF::Neighbor* OSPF::Interface::getNeighborByID(OSPF::RouterID neighborID)
 {
     std::map<OSPF::RouterID, OSPF::Neighbor*>::iterator neighborIt = neighboringRoutersByID.find(neighborID);
     if (neighborIt != neighboringRoutersByID.end()) {
@@ -202,7 +202,7 @@ OSPF::Neighbor* OSPF::Interface::GetNeighborByID(OSPF::RouterID neighborID)
     }
 }
 
-OSPF::Neighbor* OSPF::Interface::GetNeighborByAddress(OSPF::IPv4Address address)
+OSPF::Neighbor* OSPF::Interface::getNeighborByAddress(OSPF::IPv4Address address)
 {
     std::map<OSPF::IPv4Address, OSPF::Neighbor*, OSPF::IPv4Address_Less>::iterator neighborIt = neighboringRoutersByAddress.find(address);
     if (neighborIt != neighboringRoutersByAddress.end()) {
@@ -215,18 +215,18 @@ OSPF::Neighbor* OSPF::Interface::GetNeighborByAddress(OSPF::IPv4Address address)
 
 void OSPF::Interface::AddNeighbor(OSPF::Neighbor* neighbor)
 {
-    neighboringRoutersByID[neighbor->GetNeighborID()] = neighbor;
-    neighboringRoutersByAddress[neighbor->GetAddress()] = neighbor;
+    neighboringRoutersByID[neighbor->getNeighborID()] = neighbor;
+    neighboringRoutersByAddress[neighbor->getAddress()] = neighbor;
     neighbor->SetInterface(this);
     neighboringRouters.push_back(neighbor);
 }
 
-OSPF::Interface::InterfaceStateType OSPF::Interface::GetState(void) const
+OSPF::Interface::InterfaceStateType OSPF::Interface::getState(void) const
 {
-    return state->GetState();
+    return state->getState();
 }
 
-const char* OSPF::Interface::GetStateString(OSPF::Interface::InterfaceStateType stateType)
+const char* OSPF::Interface::getStateString(OSPF::Interface::InterfaceStateType stateType)
 {
     switch (stateType) {
         case DownState:                 return "Down";
@@ -245,7 +245,7 @@ bool OSPF::Interface::HasAnyNeighborInStates(int states) const
 {
     long neighborCount = neighboringRouters.size();
     for (long i = 0; i < neighborCount; i++) {
-        OSPF::Neighbor::NeighborStateType neighborState = neighboringRouters[i]->GetState();
+        OSPF::Neighbor::NeighborStateType neighborState = neighboringRouters[i]->getState();
         if (neighborState & states) {
             return true;
         }
@@ -283,7 +283,7 @@ bool OSPF::Interface::FloodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         (
          (lsa->getHeader().getLsType() == ASExternalLSAType) &&
          (interfaceType != OSPF::Interface::Virtual) &&
-         (parentArea->GetExternalRoutingCapability())
+         (parentArea->getExternalRoutingCapability())
         ) ||
         (
          (lsa->getHeader().getLsType() != ASExternalLSAType) &&
@@ -306,10 +306,10 @@ bool OSPF::Interface::FloodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
         for (long i = 0; i < neighborCount; i++) {  // (1)
-            if (neighboringRouters[i]->GetState() < OSPF::Neighbor::ExchangeState) {   // (1) (a)
+            if (neighboringRouters[i]->getState() < OSPF::Neighbor::ExchangeState) {   // (1) (a)
                 continue;
             }
-            if (neighboringRouters[i]->GetState() < OSPF::Neighbor::FullState) {   // (1) (b)
+            if (neighboringRouters[i]->getState() < OSPF::Neighbor::FullState) {   // (1) (b)
                 OSPFLSAHeader* requestLSAHeader = neighboringRouters[i]->FindOnRequestList(lsaKey);
                 if (requestLSAHeader != NULL) {
                     // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
@@ -332,19 +332,19 @@ bool OSPF::Interface::FloodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         if (lsaAddedToRetransmissionList) {     // (2)
             if ((intf != this) ||
                 ((neighbor != NULL) &&
-                 (neighbor->GetNeighborID() != designatedRouter.routerID) &&
-                 (neighbor->GetNeighborID() != backupDesignatedRouter.routerID)))  // (3)
+                 (neighbor->getNeighborID() != designatedRouter.routerID) &&
+                 (neighbor->getNeighborID() != backupDesignatedRouter.routerID)))  // (3)
             {
-                if ((intf != this) || (GetState() != OSPF::Interface::BackupState)) {  // (4)
+                if ((intf != this) || (getState() != OSPF::Interface::BackupState)) {  // (4)
                     OSPFLinkStateUpdatePacket* updatePacket = CreateUpdatePacket(lsa);    // (5)
 
                     if (updatePacket != NULL) {
                         int                   ttl            = (interfaceType == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-                        OSPF::MessageHandler* messageHandler = parentArea->GetRouter()->GetMessageHandler();
+                        OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
 
                         if (interfaceType == OSPF::Interface::Broadcast) {
-                            if ((GetState() == OSPF::Interface::DesignatedRouterState) ||
-                                (GetState() == OSPF::Interface::BackupState) ||
+                            if ((getState() == OSPF::Interface::DesignatedRouterState) ||
+                                (getState() == OSPF::Interface::BackupState) ||
                                 (designatedRouter == OSPF::NullDesignatedRouterID))
                             {
                                 messageHandler->SendPacket(updatePacket, OSPF::AllSPFRouters, ifIndex, ttl);
@@ -356,8 +356,8 @@ bool OSPF::Interface::FloodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 }
                             } else {
                                 messageHandler->SendPacket(updatePacket, OSPF::AllDRouters, ifIndex, ttl);
-                                OSPF::Neighbor* dRouter = GetNeighborByID(designatedRouter.routerID);
-                                OSPF::Neighbor* backupDRouter = GetNeighborByID(backupDesignatedRouter.routerID);
+                                OSPF::Neighbor* dRouter = getNeighborByID(designatedRouter.routerID);
+                                OSPF::Neighbor* backupDRouter = getNeighborByID(backupDesignatedRouter.routerID);
                                 if (dRouter != NULL) {
                                     dRouter->AddToTransmittedLSAList(lsaKey);
                                     if (!dRouter->IsUpdateRetransmissionTimerActive()) {
@@ -382,8 +382,8 @@ bool OSPF::Interface::FloodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 }
                             } else {
                                 for (long m = 0; m < neighborCount; m++) {
-                                    if (neighboringRouters[m]->GetState() >= OSPF::Neighbor::ExchangeState) {
-                                        messageHandler->SendPacket(updatePacket, neighboringRouters[m]->GetAddress(), ifIndex, ttl);
+                                    if (neighboringRouters[m]->getState() >= OSPF::Neighbor::ExchangeState) {
+                                        messageHandler->SendPacket(updatePacket, neighboringRouters[m]->getAddress(), ifIndex, ttl);
                                         neighboringRouters[m]->AddToTransmittedLSAList(lsaKey);
                                         if (!neighboringRouters[m]->IsUpdateRetransmissionTimerActive()) {
                                             neighboringRouters[m]->StartUpdateRetransmissionTimer();
@@ -422,7 +422,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::CreateUpdatePacket(OSPFLSA* lsa)
         OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket;
 
         updatePacket->setType(LinkStateUpdatePacket);
-        updatePacket->setRouterID(parentArea->GetRouter()->GetRouterID());
+        updatePacket->setRouterID(parentArea->getRouter()->GetRouterID());
         updatePacket->setAreaID(areaID);
         updatePacket->setAuthenticationType(authenticationType);
         for (int j = 0; j < 8; j++) {
@@ -495,8 +495,8 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::CreateUpdatePacket(OSPFLSA* lsa)
 void OSPF::Interface::AddDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
 {
     if (interfaceType == OSPF::Interface::Broadcast) {
-        if ((GetState() == OSPF::Interface::DesignatedRouterState) ||
-            (GetState() == OSPF::Interface::BackupState) ||
+        if ((getState() == OSPF::Interface::DesignatedRouterState) ||
+            (getState() == OSPF::Interface::BackupState) ||
             (designatedRouter == OSPF::NullDesignatedRouterID))
         {
             delayedAcknowledgements[OSPF::AllSPFRouters].push_back(lsaHeader);
@@ -506,8 +506,8 @@ void OSPF::Interface::AddDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
     } else {
         long neighborCount = neighboringRouters.size();
         for (long i = 0; i < neighborCount; i++) {
-            if (neighboringRouters[i]->GetState() >= OSPF::Neighbor::ExchangeState) {
-                delayedAcknowledgements[neighboringRouters[i]->GetAddress()].push_back(lsaHeader);
+            if (neighboringRouters[i]->getState() >= OSPF::Neighbor::ExchangeState) {
+                delayedAcknowledgements[neighboringRouters[i]->getAddress()].push_back(lsaHeader);
             }
         }
     }
@@ -515,7 +515,7 @@ void OSPF::Interface::AddDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
 
 void OSPF::Interface::SendDelayedAcknowledgements(void)
 {
-    OSPF::MessageHandler* messageHandler = parentArea->GetRouter()->GetMessageHandler();
+    OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     long                  maxPacketSize  = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
     for (std::map<IPv4Address, std::list<OSPFLSAHeader>, OSPF::IPv4Address_Less>::iterator delayIt = delayedAcknowledgements.begin();
@@ -529,7 +529,7 @@ void OSPF::Interface::SendDelayedAcknowledgements(void)
                 long                                packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LinkStateAcknowledgementPacket);
-                ackPacket->setRouterID(parentArea->GetRouter()->GetRouterID());
+                ackPacket->setRouterID(parentArea->getRouter()->GetRouterID());
                 ackPacket->setAreaID(areaID);
                 ackPacket->setAuthenticationType(authenticationType);
                 for (int i = 0; i < 8; i++) {
@@ -550,8 +550,8 @@ void OSPF::Interface::SendDelayedAcknowledgements(void)
                 int ttl = (interfaceType == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
 
                 if (interfaceType == OSPF::Interface::Broadcast) {
-                    if ((GetState() == OSPF::Interface::DesignatedRouterState) ||
-                        (GetState() == OSPF::Interface::BackupState) ||
+                    if ((getState() == OSPF::Interface::DesignatedRouterState) ||
+                        (getState() == OSPF::Interface::BackupState) ||
                         (designatedRouter == OSPF::NullDesignatedRouterID))
                     {
                         messageHandler->SendPacket(ackPacket, OSPF::AllSPFRouters, ifIndex, ttl);

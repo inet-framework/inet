@@ -47,12 +47,12 @@ public:
 
     void            AddNextHop          (NextHop nextHop)           { nextHops.push_back(nextHop); }
     void            ClearNextHops       (void)                      { nextHops.clear(); }
-    unsigned int    GetNextHopCount     (void) const                { return nextHops.size(); }
-    NextHop         GetNextHop          (unsigned int index) const  { return nextHops[index]; }
-    void            SetDistance         (unsigned long d)           { distance = d; }
-    unsigned long   GetDistance         (void) const                { return distance; }
-    void            SetParent           (OSPFLSA* p)                { parent = p; }
-    OSPFLSA*        GetParent           (void) const                { return parent; }
+    unsigned int    getNextHopCount     (void) const                { return nextHops.size(); }
+    NextHop         getNextHop          (unsigned int index) const  { return nextHops[index]; }
+    void            setDistance         (unsigned long d)           { distance = d; }
+    unsigned long   getDistance         (void) const                { return distance; }
+    void            setParent           (OSPFLSA* p)                { parent = p; }
+    OSPFLSA*        getParent           (void) const                { return parent; }
 };
 
 class LSATrackingInfo
@@ -72,10 +72,10 @@ public:
         LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
     void            SetSource               (InstallSource installSource)   { source = installSource; }
-    InstallSource   GetSource               (void) const                    { return source; }
+    InstallSource   getSource               (void) const                    { return source; }
     void            IncrementInstallTime    (void)                          { installTime++; }
     void            ResetInstallTime        (void)                          { installTime = 0; }
-    unsigned long   GetInstallTime          (void) const                    { return installTime; }
+    unsigned long   getInstallTime          (void) const                    { return installTime; }
 };
 
 class RouterLSA : public OSPFRouterLSA,
@@ -122,8 +122,8 @@ public:
             SummaryLSA  (const SummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
     virtual ~SummaryLSA(void) {}
 
-    bool    GetPurgeable(void) const           { return purgeable; }
-    void    SetPurgeable(bool purge = true)    { purgeable = purge; }
+    bool    getPurgeable(void) const           { return purgeable; }
+    void    setPurgeable(bool purge = true)    { purgeable = purge; }
 
     bool    ValidateLSChecksum() const   { return true; } // not implemented
 
@@ -143,8 +143,8 @@ public:
             ASExternalLSA  (const ASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
     virtual ~ASExternalLSA(void) {}
 
-    bool    GetPurgeable(void) const           { return purgeable; }
-    void    SetPurgeable(bool purge = true)    { purgeable = purge; }
+    bool    getPurgeable(void) const           { return purgeable; }
+    void    setPurgeable(bool purge = true)    { purgeable = purge; }
 
     bool    ValidateLSChecksum() const   { return true; } // not implemented
 

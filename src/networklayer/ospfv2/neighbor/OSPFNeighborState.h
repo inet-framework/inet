@@ -30,7 +30,7 @@ public:
     virtual ~NeighborState() {}
 
     virtual void ProcessEvent(Neighbor* neighbor, Neighbor::NeighborEventType event) = 0;
-    virtual Neighbor::NeighborStateType GetState(void) const = 0;
+    virtual Neighbor::NeighborStateType getState(void) const = 0;
 };
 
 } // namespace OSPF

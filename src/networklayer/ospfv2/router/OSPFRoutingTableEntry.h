@@ -64,28 +64,28 @@ public:
     bool    operator== (const RoutingTableEntry& entry) const;
     bool    operator!= (const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
 
-    void                    SetDestinationType      (RoutingDestinationType type)   { destinationType = type; }
-    RoutingDestinationType  GetDestinationType      (void) const                    { return destinationType; }
-    void                    SetDestinationID        (IPAddress destID)              { host = destID; }
-    IPAddress               GetDestinationID        (void) const                    { return host; }
-    void                    SetAddressMask          (IPAddress destMask)            { netmask = destMask; }
-    IPAddress               GetAddressMask          (void) const                    { return netmask; }
-    void                    SetOptionalCapabilities(OSPFOptions options)           { optionalCapabilities = options; }
-    OSPFOptions             GetOptionalCapabilities(void) const                    { return optionalCapabilities; }
-    void                    SetArea                 (AreaID source)                 { area = source; }
-    AreaID                  GetArea                 (void) const                    { return area; }
-    void                    SetPathType             (RoutingPathType type);
-    RoutingPathType         GetPathType             (void) const                    { return pathType; }
-    void                    SetCost                 (Metric pathCost);
-    Metric                  GetCost                 (void) const                    { return cost; }
-    void                    SetType2Cost            (Metric pathCost);
-    Metric                  GetType2Cost            (void) const                    { return type2Cost; }
-    void                    SetLinkStateOrigin      (const OSPFLSA* lsa)            { linkStateOrigin = lsa; }
-    const OSPFLSA*          GetLinkStateOrigin      (void) const                    { return linkStateOrigin; }
+    void                    setDestinationType      (RoutingDestinationType type)   { destinationType = type; }
+    RoutingDestinationType  getDestinationType      (void) const                    { return destinationType; }
+    void                    setDestinationID        (IPAddress destID)              { host = destID; }
+    IPAddress               getDestinationID        (void) const                    { return host; }
+    void                    setAddressMask          (IPAddress destMask)            { netmask = destMask; }
+    IPAddress               getAddressMask          (void) const                    { return netmask; }
+    void                    setOptionalCapabilities(OSPFOptions options)           { optionalCapabilities = options; }
+    OSPFOptions             getOptionalCapabilities(void) const                    { return optionalCapabilities; }
+    void                    setArea                 (AreaID source)                 { area = source; }
+    AreaID                  getArea                 (void) const                    { return area; }
+    void                    setPathType             (RoutingPathType type);
+    RoutingPathType         getPathType             (void) const                    { return pathType; }
+    void                    setCost                 (Metric pathCost);
+    Metric                  getCost                 (void) const                    { return cost; }
+    void                    setType2Cost            (Metric pathCost);
+    Metric                  getType2Cost            (void) const                    { return type2Cost; }
+    void                    setLinkStateOrigin      (const OSPFLSA* lsa)            { linkStateOrigin = lsa; }
+    const OSPFLSA*          getLinkStateOrigin      (void) const                    { return linkStateOrigin; }
     void                    AddNextHop              (NextHop hop);
     void                    ClearNextHops           (void)                          { nextHops.clear(); }
-    unsigned int            GetNextHopCount         (void) const                    { return nextHops.size(); }
-    NextHop                 GetNextHop              (unsigned int index) const      { return nextHops[index]; }
+    unsigned int            getNextHopCount         (void) const                    { return nextHops.size(); }
+    NextHop                 getNextHop              (unsigned int index) const      { return nextHops[index]; }
 };
 
 } // namespace OSPF
@@ -122,7 +122,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     metric        = entry.metric;
 }
 
-inline void OSPF::RoutingTableEntry::SetPathType(RoutingPathType type)
+inline void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
 {
     pathType = type;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
@@ -133,7 +133,7 @@ inline void OSPF::RoutingTableEntry::SetPathType(RoutingPathType type)
     }
 }
 
-inline void OSPF::RoutingTableEntry::SetCost(Metric pathCost)
+inline void OSPF::RoutingTableEntry::setCost(Metric pathCost)
 {
     cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
@@ -144,7 +144,7 @@ inline void OSPF::RoutingTableEntry::SetCost(Metric pathCost)
     }
 }
 
-inline void OSPF::RoutingTableEntry::SetType2Cost(Metric pathCost)
+inline void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
@@ -195,27 +195,27 @@ inline bool OSPF::RoutingTableEntry::operator== (const RoutingTableEntry& entry)
 inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntry& entry)
 {
     out << "Destination: "
-        << entry.GetDestinationID().str()
+        << entry.getDestinationID().str()
         << "/"
-        << entry.GetAddressMask().str()
+        << entry.getAddressMask().str()
         << " (";
-    if (entry.GetDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) {
+    if (entry.getDestinationType() == OSPF::RoutingTableEntry::NetworkDestination) {
         out << "Network";
     } else {
-        if ((entry.GetDestinationType() & OSPF::RoutingTableEntry::AreaBorderRouterDestination) != 0) {
+        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AreaBorderRouterDestination) != 0) {
             out << "AreaBorderRouter";
         }
-        if ((entry.GetDestinationType() & (OSPF::RoutingTableEntry::ASBoundaryRouterDestination | OSPF::RoutingTableEntry::AreaBorderRouterDestination)) != 0) {
+        if ((entry.getDestinationType() & (OSPF::RoutingTableEntry::ASBoundaryRouterDestination | OSPF::RoutingTableEntry::AreaBorderRouterDestination)) != 0) {
             out << "+";
         }
-        if ((entry.GetDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) {
+        if ((entry.getDestinationType() & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) {
             out << "ASBoundaryRouter";
         }
     }
     out << "), Area: "
-        << entry.GetArea()
+        << entry.getArea()
         << ", PathType: ";
-    switch (entry.GetPathType()) {
+    switch (entry.getPathType()) {
         case OSPF::RoutingTableEntry::IntraArea:     out << "IntraArea";     break;
         case OSPF::RoutingTableEntry::InterArea:     out << "InterArea";     break;
         case OSPF::RoutingTableEntry::Type1External: out << "Type1External"; break;
@@ -223,17 +223,17 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
         default:            out << "Unknown";       break;
     }
     out << ", Cost: "
-        << entry.GetCost()
+        << entry.getCost()
         << ", Type2Cost: "
-        << entry.GetType2Cost()
+        << entry.getType2Cost()
         << ", Origin: [";
-    PrintLSAHeader(entry.GetLinkStateOrigin()->getHeader(), out);
+    PrintLSAHeader(entry.getLinkStateOrigin()->getHeader(), out);
     out << "], NextHops: ";
 
-    unsigned int hopCount = entry.GetNextHopCount();
+    unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
         char addressString[16];
-        out << AddressStringFromIPv4Address(addressString, sizeof(addressString), entry.GetNextHop(i).hopAddress)
+        out << AddressStringFromIPv4Address(addressString, sizeof(addressString), entry.getNextHop(i).hopAddress)
             << " ";
     }
 

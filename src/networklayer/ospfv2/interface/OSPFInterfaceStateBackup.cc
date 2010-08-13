@@ -39,13 +39,13 @@ void OSPF::InterfaceStateBackup::ProcessEvent(OSPF::Interface* intf, OSPF::Inter
         if (intf->GetType() == OSPF::Interface::Broadcast) {
             intf->SendHelloPacket(OSPF::AllSPFRouters);
         } else {    // OSPF::Interface::NBMA
-            unsigned long neighborCount = intf->GetNeighborCount();
+            unsigned long neighborCount = intf->getNeighborCount();
             int           ttl           = (intf->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
-                intf->SendHelloPacket(intf->GetNeighbor(i)->GetAddress(), ttl);
+                intf->SendHelloPacket(intf->GetNeighbor(i)->getAddress(), ttl);
             }
         }
-        intf->GetArea()->GetRouter()->GetMessageHandler()->StartTimer(intf->GetHelloTimer(), intf->GetHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->GetHelloInterval());
     }
     if (event == OSPF::Interface::AcknowledgementTimer) {
         intf->SendDelayedAcknowledgements();
