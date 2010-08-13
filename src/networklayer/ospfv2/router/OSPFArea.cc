@@ -342,7 +342,7 @@ void OSPF::Area::ageDatabase()
 {
     long lsaCount = routerLSAs.size();
     bool shouldRebuildRoutingTable = false;
-    long            i;
+    long i;
 
     for (i = 0; i < lsaCount; i++) {
         unsigned short lsAge = routerLSAs[i]->getHeader().getLsAge();
@@ -690,8 +690,8 @@ OSPF::RouterLSA* OSPF::Area::originateRouterLSA()
     OSPF::RouterLSA* routerLSA = new OSPF::RouterLSA;
     OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
     long interfaceCount = associatedInterfaces.size();
-    OSPFOptions      lsOptions;
-    long             i;
+    OSPFOptions lsOptions;
+    long i;
 
     lsaHeader.setLsAge(0);
     memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -932,7 +932,7 @@ OSPF::NetworkLSA* OSPF::Area::originateNetworkLSA(const OSPF::Interface* intf)
         OSPF::NetworkLSA* networkLSA = new OSPF::NetworkLSA;
         OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
         long neighborCount = intf->getNeighborCount();
-        OSPFOptions      lsOptions;
+        OSPFOptions lsOptions;
 
         lsaHeader.setLsAge(0);
         memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -1062,7 +1062,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
         if ((preferredEntry != NULL) && (*preferredEntry == *entry) && (externalRoutingCapability)) {
             OSPF::SummaryLSA* summaryLSA = new OSPF::SummaryLSA;
             OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
-            OSPFOptions       lsOptions;
+            OSPFOptions lsOptions;
 
             lsaHeader.setLsAge(0);
             memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -1117,7 +1117,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
             } else {
                 OSPF::SummaryLSA* summaryLSA = new OSPF::SummaryLSA;
                 OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
-                OSPFOptions       lsOptions;
+                OSPFOptions lsOptions;
 
                 lsaHeader.setLsAge(0);
                 memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -1177,7 +1177,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                 } else {
                     OSPF::SummaryLSA* summaryLSA = new OSPF::SummaryLSA;
                     OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
-                    OSPFOptions       lsOptions;
+                    OSPFOptions lsOptions;
 
                     lsaHeader.setLsAge(0);
                     memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -1217,7 +1217,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                     }
 
                     OSPF::LinkStateID newLinkStateID = getUniqueLinkStateID(containingAddressRange, maxRangeCost, lsaToReoriginate);
-                    OSPF::LSAKeyType  lsaKey;
+                    OSPF::LSAKeyType lsaKey;
 
                     if (lsaToReoriginate != NULL) {
                         lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
@@ -1260,7 +1260,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
 
                         OSPF::SummaryLSA* summaryLSA = new OSPF::SummaryLSA;
                         OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
-                        OSPFOptions       lsOptions;
+                        OSPFOptions lsOptions;
 
                         lsaHeader.setLsAge(0);
                         memset(&lsOptions, 0, sizeof(OSPFOptions));
@@ -1335,11 +1335,11 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
 {
     OSPF::RouterID routerID = parentRouter->getRouterID();
     bool finished = false;
-    std::vector<OSPFLSA*>   treeVertices;
-    OSPFLSA*                justAddedVertex;
-    std::vector<OSPFLSA*>   candidateVertices;
+    std::vector<OSPFLSA*> treeVertices;
+    OSPFLSA* justAddedVertex;
+    std::vector<OSPFLSA*> candidateVertices;
     unsigned long            i, j, k;
-    unsigned long            lsaCount;
+    unsigned long lsaCount;
 
     if (spfTreeRoot == NULL) {
         OSPF::RouterLSA* newLSA = originateRouterLSA();
@@ -1382,7 +1382,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
                 Link& link = routerVertex->getLinks(i);
                 LinkType linkType = static_cast<LinkType> (link.getType());
                 OSPFLSA* joiningVertex;
-                LSAType  joiningVertexType;
+                LSAType joiningVertexType;
 
                 if (linkType == STUB_LINK) {     // (2) (a)
                     continue;
@@ -1874,7 +1874,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(OSPFLSA* destination, 
                             (associatedInterfaces[i]->getDesignatedRouter().ipInterfaceAddress == networkDesignatedRouter))
                         {
                             OSPF::IPv4AddressRange range = associatedInterfaces[i]->getAddressRange();
-                            NextHop                nextHop;
+                            NextHop nextHop;
 
                             nextHop.ifIndex           = associatedInterfaces[i]->getIfIndex();
                             nextHop.hopAddress        = (range.address & range.mask);
@@ -1939,7 +1939,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(OSPFLSA* destination, 
 std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSPFLSA* parent) const
 {
     std::vector<OSPF::NextHop>* hops = new std::vector<OSPF::NextHop>;
-    unsigned long                i;
+    unsigned long i;
 
     OSPF::RouterLSA* routerLSA = check_and_cast<OSPF::RouterLSA*> (parent);
     if (routerLSA != spfTreeRoot) {
@@ -2354,7 +2354,7 @@ void OSPF::Area::recheckSummaryLSAs(std::vector<OSPF::RoutingTableEntry*>& newRo
         unsigned long routeCount = newRoutingTable.size();
         char lsType = currentHeader.getLsType();
         OSPF::RoutingTableEntry* destinationEntry = NULL;
-        OSPF::IPv4AddressRange   destination;
+        OSPF::IPv4AddressRange destination;
 
         destination.address = ipv4AddressFromULong(currentHeader.getLinkStateID());
         destination.mask    = ipv4AddressFromULong(currentLSA->getNetworkMask().getInt());

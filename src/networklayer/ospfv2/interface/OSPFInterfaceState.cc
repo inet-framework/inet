@@ -119,17 +119,17 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
 
     unsigned int neighborCount = intf->neighboringRouters.size();
     unsigned char repeatCount = 0;
-    unsigned int             i;
+    unsigned int i;
 
     OSPF::DesignatedRouterID declaredBackup;
-    unsigned char            declaredBackupPriority;
-    OSPF::RouterID           declaredBackupID;
-    bool                     backupDeclared;
+    unsigned char declaredBackupPriority;
+    OSPF::RouterID declaredBackupID;
+    bool backupDeclared;
 
     OSPF::DesignatedRouterID declaredDesignatedRouter;
-    unsigned char            declaredDesignatedRouterPriority;
-    OSPF::RouterID           declaredDesignatedRouterID;
-    bool                     designatedRouterDeclared;
+    unsigned char declaredDesignatedRouterPriority;
+    OSPF::RouterID declaredDesignatedRouterID;
+    bool designatedRouterDeclared;
 
     do {
         // calculating backup designated router

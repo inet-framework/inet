@@ -150,15 +150,15 @@ OSPF::Neighbor::NeighborStateType OSPF::Neighbor::getState() const
 const char* OSPF::Neighbor::getStateString(OSPF::Neighbor::NeighborStateType stateType)
 {
     switch (stateType) {
-        case DOWN_STATE:             return "Down";
-        case ATTEMPT_STATE:          return "Attempt";
-        case INIT_STATE:             return "Init";
-        case TWOWAY_STATE:           return "TwoWay";
-        case EXCHANGE_START_STATE:    return "ExchangeStart";
-        case EXCHANGE_STATE:         return "Exchange";
-        case LOADING_STATE:          return "Loading";
-        case FULL_STATE:             return "Full";
-        default:                    ASSERT(false);
+        case DOWN_STATE:           return "Down";
+        case ATTEMPT_STATE:        return "Attempt";
+        case INIT_STATE:           return "Init";
+        case TWOWAY_STATE:         return "TwoWay";
+        case EXCHANGE_START_STATE: return "ExchangeStart";
+        case EXCHANGE_STATE:       return "Exchange";
+        case LOADING_STATE:        return "Loading";
+        case FULL_STATE:           return "Full";
+        default:                   ASSERT(false);
     }
     return "";
 }
@@ -334,7 +334,7 @@ void OSPF::Neighbor::sendLinkStateRequestPacket()
         while ((it != linkStateRequestList.end()) && (packetSize <= (maxPacketSize - OSPF_REQUEST_LENGTH))) {
             unsigned long requestCount = requestPacket->getRequestsArraySize();
             OSPFLSAHeader* requestHeader = (*it);
-            LSARequest     request;
+            LSARequest request;
 
             request.lsType = requestHeader->getLsType();
             request.linkStateID = requestHeader->getLinkStateID();

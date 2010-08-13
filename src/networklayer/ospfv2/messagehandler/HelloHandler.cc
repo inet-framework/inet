@@ -62,7 +62,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;
                 bool backupSeen = false;
-                OSPF::Neighbor*     neighbor;
+                OSPF::Neighbor* neighbor;
 
                 /* If the receiving interface connects to a broadcast, Point-to-
                    MultiPoint or NBMA network the source is identified by the IP
@@ -89,7 +89,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     unsigned long source = controlInfo->getSrcAddr().getInt();
                     unsigned long newDesignatedRouter = helloPacket->getDesignatedRouter().getInt();
                     unsigned long newBackupRouter = helloPacket->getBackupDesignatedRouter().getInt();
-                    OSPF::DesignatedRouterID    dRouterID;
+                    OSPF::DesignatedRouterID dRouterID;
 
                     if ((interfaceType == OSPF::Interface::VIRTUAL) &&
                         (neighbor->getState() == OSPF::Neighbor::DOWN_STATE))
@@ -205,7 +205,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                         }
                     }
                 } else {
-                    OSPF::DesignatedRouterID    dRouterID;
+                    OSPF::DesignatedRouterID dRouterID;
                     bool designatedSetUp = false;
                     bool backupSetUp = false;
 
@@ -259,7 +259,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
 
                 unsigned long interfaceAddress = ulongFromIPv4Address(intf->getAddressRange().address);
                 unsigned int neighborsNeighborCount = helloPacket->getNeighborArraySize();
-                unsigned int    i;
+                unsigned int i;
                 /* The list of neighbors contained in the Hello Packet is
                    examined.  If the router itself appears in this list, the
                    neighbor state machine should be executed with the event TWOWAY_RECEIVED.

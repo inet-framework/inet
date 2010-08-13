@@ -124,7 +124,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
 
                 OSPFLSA* lsaInDatabase = router->findLSA(lsaType, lsaKey, areaID);
                 unsigned short lsAge = currentLSA->getHeader().getLsAge();
-                AcknowledgementFlags    ackFlags;
+                AcknowledgementFlags ackFlags;
 
                 ackFlags.floodedBackOut = false;
                 ackFlags.lsaIsNewer = false;

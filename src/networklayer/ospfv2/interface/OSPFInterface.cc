@@ -169,7 +169,7 @@ void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
 
 void OSPF::Interface::sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Address destination)
 {
-    OSPFOptions                         options;
+    OSPFOptions options;
     OSPFLinkStateAcknowledgementPacket* lsAckPacket = new OSPFLinkStateAcknowledgementPacket;
 
     lsAckPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
@@ -300,7 +300,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         long neighborCount = neighboringRouters.size();
         bool lsaAddedToRetransmissionList = false;
         OSPF::LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
-        OSPF::LSAKeyType  lsaKey;
+        OSPF::LSAKeyType lsaKey;
 
         lsaKey.linkStateID = linkStateID;
         lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();

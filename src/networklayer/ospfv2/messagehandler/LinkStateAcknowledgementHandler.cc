@@ -36,7 +36,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
 
         for (int i = 0; i < lsaCount; i++) {
             OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
-            OSPFLSA*         lsaOnRetransmissionList;
+            OSPFLSA* lsaOnRetransmissionList;
             OSPF::LSAKeyType lsaKey;
 
             EV << "    ";

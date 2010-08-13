@@ -296,8 +296,8 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
     std::string ifName = externalRouteConfig.getAttribute("ifName");
     int ifIndex = resolveInterfaceName(ifName);
     OSPFASExternalLSAContents asExternalRoute;
-    OSPF::RoutingTableEntry   externalRoutingEntry; // only used here to keep the path cost calculation in one place
-    OSPF::IPv4AddressRange    networkAddress;
+    OSPF::RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
+    OSPF::IPv4AddressRange networkAddress;
 
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
@@ -353,7 +353,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 {
     OSPF::HostRouteParameters hostParameters;
-    OSPF::AreaID              hostArea;
+    OSPF::AreaID hostArea;
 
     std::string ifName = hostRouteConfig.getAttribute("ifName");
     hostParameters.ifIndex = resolveInterfaceName(ifName);
