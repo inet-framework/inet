@@ -361,7 +361,7 @@ const OSPF::ASExternalLSA* OSPF::Router::findASExternalLSA(OSPF::LSAKeyType lsaK
 void OSPF::Router::ageDatabase(void)
 {
     long lsaCount            = asExternalLSAs.size();
-    bool rebuildRoutingTable = false;
+    bool shouldRebuildRoutingTable = false;
 
     for (long i = 0; i < lsaCount; i++) {
         unsigned short       lsAge          = asExternalLSAs[i]->getHeader().getLsAge();
@@ -394,7 +394,7 @@ void OSPF::Router::ageDatabase(void)
 
                     newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                     newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                    rebuildRoutingTable |= lsa->update(newLSA);
+                    shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
                     floodLSA(lsa, OSPF::BackboneAreaID);
@@ -419,20 +419,20 @@ void OSPF::Router::ageDatabase(void)
                     asExternalLSAsByID.erase(lsaKey);
                     delete lsa;
                     asExternalLSAs[i] = NULL;
-                    rebuildRoutingTable = true;
+                    shouldRebuildRoutingTable = true;
                 } else {
                     if (lsa->getPurgeable()) {
                         asExternalLSAsByID.erase(lsaKey);
                         delete lsa;
                         asExternalLSAs[i] = NULL;
-                        rebuildRoutingTable = true;
+                        shouldRebuildRoutingTable = true;
                     } else {
                         OSPF::ASExternalLSA* newLSA              = originateASExternalLSA(lsa);
                         long                 sequenceNumber      = lsa->getHeader().getLsSequenceNumber();
 
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
-                        rebuildRoutingTable |= lsa->update(newLSA);
+                        shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
                         floodLSA(lsa, OSPF::BackboneAreaID);
@@ -457,7 +457,7 @@ void OSPF::Router::ageDatabase(void)
     }
     messageHandler->startTimer(ageTimer, 1.0);
 
-    if (rebuildRoutingTable) {
+    if (shouldRebuildRoutingTable) {
         rebuildRoutingTable();
     }
 }
