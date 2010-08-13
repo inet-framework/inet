@@ -27,22 +27,22 @@ void OSPF::NeighborStateAttempt::processEvent(OSPF::Neighbor* neighbor, OSPF::Ne
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-        neighbor->Reset();
+        neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
     if (event == OSPF::Neighbor::INACTIVITY_TIMER) {
-        neighbor->Reset();
+        neighbor->reset();
         if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
             MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-            messageHandler->StartTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
+            messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
         changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
     if (event == OSPF::Neighbor::HELLO_RECEIVED) {
         MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
-        messageHandler->StartTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
+        messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
         changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
 }

@@ -86,7 +86,7 @@ public:
     bool                 isLocalAddress                       (IPv4Address address) const;
     bool                 hasAddressRange                      (IPv4AddressRange addressRange) const;
     bool                 isDestinationUnreachable             (OSPFLSA* lsa) const;
-    RoutingTableEntry*   Lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
+    RoutingTableEntry*   lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
     void                 RebuildRoutingTable                  (void);
     IPv4AddressRange     getContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
     void                 updateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
@@ -94,10 +94,10 @@ public:
     RoutingTableEntry*   getPreferredEntry                    (const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
 
 private:
-    bool                 InstallASExternalLSA                 (OSPFASExternalLSA* lsa);
+    bool                 installASExternalLSA                 (OSPFASExternalLSA* lsa);
     ASExternalLSA*       findASExternalLSA                    (LSAKeyType lsaKey);
     const ASExternalLSA* findASExternalLSA                    (LSAKeyType lsaKey) const;
-    ASExternalLSA*       OriginateASExternalLSA               (ASExternalLSA* lsa);
+    ASExternalLSA*       originateASExternalLSA               (ASExternalLSA* lsa);
     LinkStateID          getUniqueLinkStateID                 (IPv4AddressRange destination,
                                                                Metric destinationCost,
                                                                OSPF::ASExternalLSA*& lsaToReoriginate,
@@ -107,8 +107,8 @@ private:
     bool                 hasRouteToASBoundaryRouter           (const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
     std::vector<RoutingTableEntry*>
                          getRoutesToASBoundaryRouter          (const std::vector<RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const;
-    void                 PruneASBoundaryRouterEntries         (std::vector<RoutingTableEntry*>& asbrEntries) const;
-    RoutingTableEntry*   SelectLeastCostRoutingEntry          (std::vector<RoutingTableEntry*>& entries) const;
+    void                 pruneASBoundaryRouterEntries         (std::vector<RoutingTableEntry*>& asbrEntries) const;
+    RoutingTableEntry*   selectLeastCostRoutingEntry          (std::vector<RoutingTableEntry*>& entries) const;
 };
 
 } // namespace OSPF

@@ -21,7 +21,7 @@ bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime();
+    resetInstallTime();
     if (different) {
         clearNextHops();
         return true;

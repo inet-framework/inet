@@ -74,7 +74,7 @@ public:
     void            setSource               (InstallSource installSource)   { source = installSource; }
     InstallSource   getSource               (void) const                    { return source; }
     void            incrementInstallTime    (void)                          { installTime++; }
-    void            ResetInstallTime        (void)                          { installTime = 0; }
+    void            resetInstallTime        (void)                          { installTime = 0; }
     unsigned long   getInstallTime          (void) const                    { return installTime; }
 };
 
@@ -283,9 +283,9 @@ inline void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output)
         default:                                output << "Unknown";                       break;
     }
     output << ", LSID="
-           << AddressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
+           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
     output << ", advertisingRouter="
-           << AddressStringFromULong(addressString, sizeof(addressString), lsaHeader.getAdvertisingRouter().getInt())
+           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getAdvertisingRouter().getInt())
            << ", seqNumber="
            << lsaHeader.getLsSequenceNumber();
     output << endl;

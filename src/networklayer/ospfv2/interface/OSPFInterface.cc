@@ -86,8 +86,8 @@ void OSPF::Interface::setIfIndex(unsigned char index)
     ifIndex = index;
     if (interfaceType == OSPF::Interface::UNKNOWN_TYPE) {
         InterfaceEntry* routingInterface = InterfaceTableAccess().get()->getInterfaceById(ifIndex);
-        interfaceAddressRange.address = IPv4AddressFromAddressString(routingInterface->ipv4Data()->getIPAddress().str().c_str());
-        interfaceAddressRange.mask = IPv4AddressFromAddressString(routingInterface->ipv4Data()->getNetmask().str().c_str());
+        interfaceAddressRange.address = ipv4AddressFromAddressString(routingInterface->ipv4Data()->getIPAddress().str().c_str());
+        interfaceAddressRange.mask = ipv4AddressFromAddressString(routingInterface->ipv4Data()->getNetmask().str().c_str());
         mtu = routingInterface->getMTU();
     }
 }
@@ -106,7 +106,7 @@ void OSPF::Interface::processEvent(OSPF::Interface::InterfaceEventType event)
     state->processEvent(this, event);
 }
 
-void OSPF::Interface::Reset(void)
+void OSPF::Interface::reset(void)
 {
     MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     messageHandler->clearTimer(helloTimer);
@@ -137,9 +137,9 @@ void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
          (interfaceAddressRange.address == OSPF::NullIPv4Address)) ||
         (interfaceType == VIRTUAL))
     {
-        helloPacket->setNetworkMask(ULongFromIPv4Address(OSPF::NullIPv4Address));
+        helloPacket->setNetworkMask(ulongFromIPv4Address(OSPF::NullIPv4Address));
     } else {
-        helloPacket->setNetworkMask(ULongFromIPv4Address(interfaceAddressRange.mask));
+        helloPacket->setNetworkMask(ulongFromIPv4Address(interfaceAddressRange.mask));
     }
     memset(&options, 0, sizeof(OSPFOptions));
     options.E_ExternalRoutingCapability = parentArea->getExternalRoutingCapability();
@@ -147,8 +147,8 @@ void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
     helloPacket->setHelloInterval(helloInterval);
     helloPacket->setRouterPriority(routerPriority);
     helloPacket->setRouterDeadInterval(routerDeadInterval);
-    helloPacket->setDesignatedRouter(ULongFromIPv4Address(designatedRouter.ipInterfaceAddress));
-    helloPacket->setBackupDesignatedRouter(ULongFromIPv4Address(backupDesignatedRouter.ipInterfaceAddress));
+    helloPacket->setDesignatedRouter(ulongFromIPv4Address(designatedRouter.ipInterfaceAddress));
+    helloPacket->setBackupDesignatedRouter(ulongFromIPv4Address(backupDesignatedRouter.ipInterfaceAddress));
     long neighborCount = neighboringRouters.size();
     for (long j = 0; j < neighborCount; j++) {
         if (neighboringRouters[j]->getState() >= OSPF::Neighbor::INIT_STATE) {
@@ -158,7 +158,7 @@ void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
     unsigned int initedNeighborCount = neighbors.size();
     helloPacket->setNeighborArraySize(initedNeighborCount);
     for (unsigned int k = 0; k < initedNeighborCount; k++) {
-        helloPacket->setNeighbor(k, ULongFromIPv4Address(neighbors[k]));
+        helloPacket->setNeighbor(k, ulongFromIPv4Address(neighbors[k]));
     }
 
     helloPacket->setPacketLength(0); // TODO: Calculate correct length
@@ -351,7 +351,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 for (long k = 0; k < neighborCount; k++) {
                                     neighboringRouters[k]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[k]->isUpdateRetransmissionTimerActive()) {
-                                        neighboringRouters[k]->StartUpdateRetransmissionTimer();
+                                        neighboringRouters[k]->startUpdateRetransmissionTimer();
                                     }
                                 }
                             } else {
@@ -361,13 +361,13 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 if (dRouter != NULL) {
                                     dRouter->addToTransmittedLSAList(lsaKey);
                                     if (!dRouter->isUpdateRetransmissionTimerActive()) {
-                                        dRouter->StartUpdateRetransmissionTimer();
+                                        dRouter->startUpdateRetransmissionTimer();
                                     }
                                 }
                                 if (backupDRouter != NULL) {
                                     backupDRouter->addToTransmittedLSAList(lsaKey);
                                     if (!backupDRouter->isUpdateRetransmissionTimerActive()) {
-                                        backupDRouter->StartUpdateRetransmissionTimer();
+                                        backupDRouter->startUpdateRetransmissionTimer();
                                     }
                                 }
                             }
@@ -377,7 +377,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 if (neighborCount > 0) {
                                     neighboringRouters[0]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[0]->isUpdateRetransmissionTimerActive()) {
-                                        neighboringRouters[0]->StartUpdateRetransmissionTimer();
+                                        neighboringRouters[0]->startUpdateRetransmissionTimer();
                                     }
                                 }
                             } else {
@@ -386,7 +386,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                         messageHandler->sendPacket(updatePacket, neighboringRouters[m]->getAddress(), ifIndex, ttl);
                                         neighboringRouters[m]->addToTransmittedLSAList(lsaKey);
                                         if (!neighboringRouters[m]->isUpdateRetransmissionTimerActive()) {
-                                            neighboringRouters[m]->StartUpdateRetransmissionTimer();
+                                            neighboringRouters[m]->startUpdateRetransmissionTimer();
                                         }
                                     }
                                 }
@@ -568,7 +568,7 @@ void OSPF::Interface::sendDelayedAcknowledgements(void)
             }
         }
     }
-    messageHandler->StartTimer(acknowledgementTimer, acknowledgementDelay);
+    messageHandler->startTimer(acknowledgementTimer, acknowledgementDelay);
 }
 
 void OSPF::Interface::ageTransmittedLSALists(void)

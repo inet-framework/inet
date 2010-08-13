@@ -103,7 +103,7 @@ public:
     virtual ~Interface(void);
 
     void                processEvent                        (InterfaceEventType event);
-    void                Reset                               (void);
+    void                reset                               (void);
     void                sendHelloPacket                     (IPv4Address destination, short ttl = 1);
     void                sendLSAcknowledgement               (OSPFLSAHeader* lsaHeader, IPv4Address destination);
     Neighbor*           getNeighborByID                     (RouterID neighborID);

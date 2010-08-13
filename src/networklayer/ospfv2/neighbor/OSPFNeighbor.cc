@@ -70,7 +70,7 @@ OSPF::Neighbor::Neighbor(RouterID neighbor) :
 
 OSPF::Neighbor::~Neighbor(void)
 {
-    Reset();
+    reset();
     MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     messageHandler->clearTimer(inactivityTimer);
     messageHandler->clearTimer(pollTimer);
@@ -99,7 +99,7 @@ void OSPF::Neighbor::processEvent(OSPF::Neighbor::NeighborEventType event)
     state->processEvent(this, event);
 }
 
-void OSPF::Neighbor::Reset(void)
+void OSPF::Neighbor::reset(void)
 {
     for (std::list<OSPFLSA*>::iterator retIt = linkStateRetransmissionList.begin();
          retIt != linkStateRetransmissionList.end();
@@ -130,7 +130,7 @@ void OSPF::Neighbor::Reset(void)
     }
 }
 
-void OSPF::Neighbor::InitFirstAdjacency(void)
+void OSPF::Neighbor::initFirstAdjacency(void)
 {
     ddSequenceNumber = getUniqueULong();
     firstAdjacencyInited = true;
@@ -360,7 +360,7 @@ void OSPF::Neighbor::sendLinkStateRequestPacket(void)
     }
 }
 
-bool OSPF::Neighbor::NeedAdjacency(void)
+bool OSPF::Neighbor::needAdjacency(void)
 {
     OSPF::Interface::OSPFInterfaceType interfaceType = parentInterface->getType();
     OSPF::RouterID                     routerID      = parentInterface->getArea()->getRouter()->getRouterID();
@@ -469,10 +469,10 @@ OSPFLSA* OSPF::Neighbor::findOnRetransmissionList(OSPF::LSAKeyType lsaKey)
     return NULL;
 }
 
-void OSPF::Neighbor::StartUpdateRetransmissionTimer(void)
+void OSPF::Neighbor::startUpdateRetransmissionTimer(void)
 {
     MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    messageHandler->StartTimer(updateRetransmissionTimer, parentInterface->getRetransmissionInterval());
+    messageHandler->startTimer(updateRetransmissionTimer, parentInterface->getRetransmissionInterval());
     updateRetransmissionTimerActive = true;
 }
 
@@ -533,10 +533,10 @@ OSPFLSAHeader* OSPF::Neighbor::findOnRequestList(OSPF::LSAKeyType lsaKey)
     return NULL;
 }
 
-void OSPF::Neighbor::StartRequestRetransmissionTimer(void)
+void OSPF::Neighbor::startRequestRetransmissionTimer(void)
 {
     MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    messageHandler->StartTimer(requestRetransmissionTimer, parentInterface->getRetransmissionInterval());
+    messageHandler->startTimer(requestRetransmissionTimer, parentInterface->getRetransmissionInterval());
     requestRetransmissionTimerActive = true;
 }
 
@@ -723,7 +723,7 @@ void OSPF::Neighbor::retransmitUpdatePacket(void)
     messageHandler->sendPacket(updatePacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
 }
 
-void OSPF::Neighbor::DeleteLastSentDDPacket(void)
+void OSPF::Neighbor::deleteLastSentDDPacket(void)
 {
     if (lastTransmittedDDPacket != NULL) {
         delete lastTransmittedDDPacket;

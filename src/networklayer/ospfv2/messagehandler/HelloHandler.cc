@@ -48,7 +48,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
          */
         if (!((interfaceType != OSPF::Interface::POINTTOPOINT) &&
               (interfaceType != OSPF::Interface::VIRTUAL) &&
-              (intf->getAddressRange().mask != IPv4AddressFromULong(helloPacket->getNetworkMask().getInt()))
+              (intf->getAddressRange().mask != ipv4AddressFromULong(helloPacket->getNetworkMask().getInt()))
              )
            )
         {
@@ -57,7 +57,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
                 IPControlInfo*      controlInfo             = check_and_cast<IPControlInfo *> (helloPacket->getControlInfo());
-                OSPF::IPv4Address   srcAddress              = IPv4AddressFromULong(controlInfo->getSrcAddr().getInt());
+                OSPF::IPv4Address   srcAddress              = ipv4AddressFromULong(controlInfo->getSrcAddr().getInt());
                 bool                neighborChanged         = false;
                 bool                neighborsDRStateChanged = false;
                 bool                drChanged               = false;
@@ -126,9 +126,9 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            NEIGHBOR_CHANGE.
                          */
                         if (((newDesignatedRouter == source) &&
-                             (newDesignatedRouter != ULongFromIPv4Address(designatedAddress))) ||
+                             (newDesignatedRouter != ulongFromIPv4Address(designatedAddress))) ||
                             ((newDesignatedRouter != source) &&
-                             (source == ULongFromIPv4Address(designatedAddress))))
+                             (source == ulongFromIPv4Address(designatedAddress))))
                         {
                             neighborChanged = true;
                             neighborsDRStateChanged = true;
@@ -153,9 +153,9 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            event NEIGHBOR_CHANGE.
                          */
                         if (((newBackupRouter == source) &&
-                             (newBackupRouter != ULongFromIPv4Address(backupAddress))) ||
+                             (newBackupRouter != ulongFromIPv4Address(backupAddress))) ||
                             ((newBackupRouter != source) &&
-                             (source == ULongFromIPv4Address(backupAddress))))
+                             (source == ulongFromIPv4Address(backupAddress))))
                         {
                             neighborChanged = true;
                         }
@@ -165,15 +165,15 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     neighbor->setPriority(newPriority);
                     neighbor->setAddress(srcAddress);
                     dRouterID.routerID = newDesignatedRouter;
-                    dRouterID.ipInterfaceAddress = IPv4AddressFromULong(newDesignatedRouter);
-                    if (newDesignatedRouter != ULongFromIPv4Address(designatedAddress)) {
+                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(newDesignatedRouter);
+                    if (newDesignatedRouter != ulongFromIPv4Address(designatedAddress)) {
                         designatedAddress = dRouterID.ipInterfaceAddress;
                         drChanged = true;
                     }
                     neighbor->setDesignatedRouter(dRouterID);
                     dRouterID.routerID = newBackupRouter;
-                    dRouterID.ipInterfaceAddress = IPv4AddressFromULong(newBackupRouter);
-                    if (newBackupRouter != ULongFromIPv4Address(backupAddress)) {
+                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(newBackupRouter);
+                    if (newBackupRouter != ulongFromIPv4Address(backupAddress)) {
                         backupAddress = dRouterID.ipInterfaceAddress;
                         drChanged = true;
                     }
@@ -217,7 +217,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
                     dRouterID.routerID = helloPacket->getDesignatedRouter().getInt();
-                    dRouterID.ipInterfaceAddress = IPv4AddressFromULong(dRouterID.routerID);
+                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(dRouterID.routerID);
 
                     OSPF::Neighbor* designated = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
@@ -231,7 +231,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     neighbor->setDesignatedRouter(dRouterID);
 
                     dRouterID.routerID = helloPacket->getBackupDesignatedRouter().getInt();
-                    dRouterID.ipInterfaceAddress = IPv4AddressFromULong(dRouterID.routerID);
+                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(dRouterID.routerID);
 
                     OSPF::Neighbor* backup = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
@@ -257,7 +257,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     intf->sendHelloPacket(neighbor->getAddress());
                 }
 
-                unsigned long   interfaceAddress       = ULongFromIPv4Address(intf->getAddressRange().address);
+                unsigned long   interfaceAddress       = ulongFromIPv4Address(intf->getAddressRange().address);
                 unsigned int    neighborsNeighborCount = helloPacket->getNeighborArraySize();
                 unsigned int    i;
                 /* The list of neighbors contained in the Hello Packet is
@@ -287,7 +287,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        So to make it work(workaround) we'll call IS_ADJACENCY_OK for
                        all neighbors in TwoWay state from here. This shouldn't break
                        anything because if the neighbor state doesn't have to change
-                       then NeedAdjacency returns false and nothing happnes in
+                       then needAdjacency returns false and nothing happnes in
                        IS_ADJACENCY_OK.
                      */
                     unsigned int neighborCount = intf->getNeighborCount();
@@ -308,7 +308,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                                 intf->getArea()->floodLSA(routerLSA);
                                 routerLSA->incrementInstallTime();
                             } else {
-                                OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
+                                OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
 
                                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum

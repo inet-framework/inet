@@ -21,7 +21,7 @@ bool OSPF::SummaryLSA::update(const OSPFSummaryLSA* lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime();
+    resetInstallTime();
     if (different) {
         clearNextHops();
         return true;

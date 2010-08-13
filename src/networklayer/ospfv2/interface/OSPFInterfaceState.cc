@@ -56,7 +56,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
                 intf->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
             } else {
-                OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
+                OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
@@ -66,7 +66,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
                 intf->getArea()->floodLSA(routerLSA);
             }
         } else {  // (lsa == NULL) -> This must be the first time any interface is up...
-            OSPF::RouterLSA* newLSA = intf->getArea()->OriginateRouterLSA();
+            OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
 
             rebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
 
@@ -79,14 +79,14 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
     }
 
     if (nextState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-        OSPF::NetworkLSA* newLSA = intf->getArea()->OriginateNetworkLSA(intf);
+        OSPF::NetworkLSA* newLSA = intf->getArea()->originateNetworkLSA(intf);
         if (newLSA != NULL) {
             rebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
             intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         } else {    // no neighbors on the network -> old NetworkLSA must be flushed
-            OSPF::NetworkLSA* oldLSA = intf->getArea()->findNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
+            OSPF::NetworkLSA* oldLSA = intf->getArea()->findNetworkLSA(ulongFromIPv4Address(intf->getAddressRange().address));
 
             if (oldLSA != NULL) {
                 oldLSA->getHeader().setLsAge(MAX_AGE);
@@ -97,7 +97,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
     }
 
     if (oldState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-        OSPF::NetworkLSA* networkLSA = intf->getArea()->findNetworkLSA(ULongFromIPv4Address(intf->getAddressRange().address));
+        OSPF::NetworkLSA* networkLSA = intf->getArea()->findNetworkLSA(ulongFromIPv4Address(intf->getAddressRange().address));
 
         if (networkLSA != NULL) {
             networkLSA->getHeader().setLsAge(MAX_AGE);

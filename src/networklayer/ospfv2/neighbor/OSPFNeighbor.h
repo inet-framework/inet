@@ -123,8 +123,8 @@ public:
     virtual ~Neighbor(void);
 
     void                processEvent                        (NeighborEventType event);
-    void                Reset                               (void);
-    void                InitFirstAdjacency                  (void);
+    void                reset                               (void);
+    void                initFirstAdjacency                  (void);
     NeighborStateType   getState                            (void) const;
     static const char*  getStateString                      (NeighborStateType stateType);
     void                sendDatabaseDescriptionPacket       (bool init = false);
@@ -132,24 +132,24 @@ public:
     void                createDatabaseSummary               (void);
     void                sendLinkStateRequestPacket          (void);
     void                retransmitUpdatePacket              (void);
-    bool                NeedAdjacency                       (void);
+    bool                needAdjacency                       (void);
     void                addToRetransmissionList             (OSPFLSA* lsa);
     void                removeFromRetransmissionList        (LSAKeyType lsaKey);
     bool                isLinkStateRequestListEmpty           (LSAKeyType lsaKey) const;
     OSPFLSA*            findOnRetransmissionList            (LSAKeyType lsaKey);
-    void                StartUpdateRetransmissionTimer      (void);
+    void                startUpdateRetransmissionTimer      (void);
     void                clearUpdateRetransmissionTimer      (void);
     void                addToRequestList                    (OSPFLSAHeader* lsaHeader);
     void                removeFromRequestList               (LSAKeyType lsaKey);
     bool                isLSAOnRequestList                  (LSAKeyType lsaKey) const;
     OSPFLSAHeader*      findOnRequestList                   (LSAKeyType lsaKey);
-    void                StartRequestRetransmissionTimer     (void);
+    void                startRequestRetransmissionTimer     (void);
     void                clearRequestRetransmissionTimer     (void);
     void                addToTransmittedLSAList             (LSAKeyType lsaKey);
     bool                isOnTransmittedLSAList              (LSAKeyType lsaKey) const;
     void                ageTransmittedLSAList               (void);
     unsigned long       getUniqueULong                      (void);
-    void                DeleteLastSentDDPacket              (void);
+    void                deleteLastSentDDPacket              (void);
 
     void                setNeighborID               (RouterID id)                   { neighborID = id; }
     RouterID            getNeighborID               (void) const                    { return neighborID; }
@@ -191,7 +191,7 @@ public:
     void incrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
     bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
     bool isLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
-    void PopFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
+    void popFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
 };
 
 } // namespace OSPF

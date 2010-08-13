@@ -161,7 +161,7 @@ inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterfaceById(hop.ifIndex);
 
         interfacePtr = routingInterface;
-        //gateway = ULongFromIPv4Address(hop.hopAddress); // TODO: verify this isn't necessary
+        //gateway = ulongFromIPv4Address(hop.hopAddress); // TODO: verify this isn't necessary
     }
     nextHops.push_back(hop);
 }
@@ -233,7 +233,7 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
         char addressString[16];
-        out << AddressStringFromIPv4Address(addressString, sizeof(addressString), entry.getNextHop(i).hopAddress)
+        out << addressStringFromIPv4Address(addressString, sizeof(addressString), entry.getNextHop(i).hopAddress)
             << " ";
     }
 

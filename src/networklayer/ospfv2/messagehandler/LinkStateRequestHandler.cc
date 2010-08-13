@@ -51,9 +51,9 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
             EV << "    LSARequest: type="
                << request.lsType
                << ", LSID="
-               << AddressStringFromULong(addressString, sizeof(addressString), request.linkStateID)
+               << addressStringFromULong(addressString, sizeof(addressString), request.linkStateID)
                << ", advertisingRouter="
-               << AddressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
+               << addressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
                << "\n";
 
             lsaKey.linkStateID = request.linkStateID;

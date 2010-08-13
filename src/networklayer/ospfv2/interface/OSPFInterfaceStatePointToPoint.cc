@@ -25,11 +25,11 @@
 void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::INTERFACE_DOWN) {
-        intf->Reset();
+        intf->reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
     if (event == OSPF::Interface::LOOP_INDICATION) {
-        intf->Reset();
+        intf->reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HELLO_TIMER) {
@@ -40,7 +40,7 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
         } else {
             intf->sendHelloPacket(OSPF::AllSPFRouters);
         }
-        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();

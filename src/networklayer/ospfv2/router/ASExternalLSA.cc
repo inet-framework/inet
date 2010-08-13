@@ -21,7 +21,7 @@ bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA* lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime();
+    resetInstallTime();
     if (different) {
         clearNextHops();
         return true;

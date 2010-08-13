@@ -38,7 +38,7 @@ private:
 
 private:
     bool validateLSChecksum(OSPFLSA* lsa) { return true; }   // not implemented
-    void AcknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface* intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
+    void acknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface* intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
 
 public:
     LinkStateUpdateHandler(Router* containingRouter);

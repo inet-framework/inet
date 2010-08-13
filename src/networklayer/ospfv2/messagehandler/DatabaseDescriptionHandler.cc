@@ -71,7 +71,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                             {
                                 neighbor->sendLinkStateRequestPacket();
                                 neighbor->clearRequestRetransmissionTimer();
-                                neighbor->StartRequestRetransmissionTimer();
+                                neighbor->startRequestRetransmissionTimer();
                             }
                         } else {
                             neighbor->sendDatabaseDescriptionPacket(true);
@@ -100,7 +100,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                         {
                             neighbor->sendLinkStateRequestPacket();
                             neighbor->clearRequestRetransmissionTimer();
-                            neighbor->StartRequestRetransmissionTimer();
+                            neighbor->startRequestRetransmissionTimer();
                         }
                     }
                 }
@@ -136,7 +136,7 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                                 {
                                     neighbor->sendLinkStateRequestPacket();
                                     neighbor->clearRequestRetransmissionTimer();
-                                    neighbor->StartRequestRetransmissionTimer();
+                                    neighbor->startRequestRetransmissionTimer();
                                 }
                             } else {
                                 neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);

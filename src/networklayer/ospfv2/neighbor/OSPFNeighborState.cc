@@ -40,7 +40,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                 neighbor->getInterface()->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
             } else {
-                OSPF::RouterLSA* newLSA = neighbor->getInterface()->getArea()->OriginateRouterLSA();
+                OSPF::RouterLSA* newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
@@ -52,7 +52,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         }
 
         if (neighbor->getInterface()->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(ULongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
+            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(ulongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
 
             if (networkLSA != NULL) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
@@ -61,7 +61,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                     neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                     networkLSA->incrementInstallTime();
                 } else {
-                    OSPF::NetworkLSA* newLSA = neighbor->getInterface()->getArea()->OriginateNetworkLSA(neighbor->getInterface());
+                    OSPF::NetworkLSA* newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);

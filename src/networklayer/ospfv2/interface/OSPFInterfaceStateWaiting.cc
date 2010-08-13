@@ -30,11 +30,11 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
         calculateDesignatedRouter(intf);
     }
     if (event == OSPF::Interface::INTERFACE_DOWN) {
-        intf->Reset();
+        intf->reset();
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
     if (event == OSPF::Interface::LOOP_INDICATION) {
-        intf->Reset();
+        intf->reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
     if (event == OSPF::Interface::HELLO_TIMER) {
@@ -50,7 +50,7 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
                 }
             }
         }
-        intf->getArea()->getRouter()->getMessageHandler()->StartTimer(intf->getHelloTimer(), intf->getHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
     if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();

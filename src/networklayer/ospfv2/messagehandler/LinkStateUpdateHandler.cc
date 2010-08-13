@@ -181,10 +181,10 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
 
                     EV << "    (update installed)\n";
 
-                    AcknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID().getInt());
+                    acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID().getInt());
                     if ((currentLSA->getHeader().getAdvertisingRouter().getInt() == router->getRouterID()) ||
                         ((lsaType == NETWORKLSA_TYPE) &&
-                         (router->isLocalAddress(IPv4AddressFromULong(currentLSA->getHeader().getLinkStateID())))))
+                         (router->isLocalAddress(ipv4AddressFromULong(currentLSA->getHeader().getLinkStateID())))))
                     {
                         if (ackFlags.noLSAInstanceInDatabase) {
                             currentLSA->getHeader().setLsAge(MAX_AGE);
@@ -213,7 +213,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                         neighbor->removeFromRetransmissionList(lsaKey);
                         ackFlags.impliedAcknowledgement = true;
                     }
-                    AcknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID().getInt());
+                    acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID().getInt());
                     continue;
                 }
                 if ((lsaInDatabase->getHeader().getLsAge() == MAX_AGE) &&
@@ -257,7 +257,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
     }
 }
 
-void OSPF::LinkStateUpdateHandler::AcknowledgeLSA(OSPFLSAHeader& lsaHeader,
+void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
                                                    OSPF::Interface* intf,
                                                    OSPF::LinkStateUpdateHandler::AcknowledgementFlags acknowledgementFlags,
                                                    OSPF::RouterID lsaSource)

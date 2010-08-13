@@ -28,8 +28,8 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
 {
     if (event == OSPF::Interface::INTERFACE_UP) {
         OSPF::MessageHandler* messageHandler = intf->getArea()->getRouter()->getMessageHandler();
-        messageHandler->StartTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
-        messageHandler->StartTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
+        messageHandler->startTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
+        messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
             case OSPF::Interface::POINTTOPOINT:
             case OSPF::Interface::POINTTOMULTIPOINT:
@@ -42,7 +42,7 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
                     changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
                     changeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
+                    messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
 
                     long neighborCount = intf->getNeighborCount();
                     for (long i = 0; i < neighborCount; i++) {
@@ -59,7 +59,7 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
                     changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
                     changeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
+                    messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
                 }
                 break;
 
@@ -68,7 +68,7 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
         }
     }
     if (event == OSPF::Interface::LOOP_INDICATION) {
-        intf->Reset();
+        intf->reset();
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
 }

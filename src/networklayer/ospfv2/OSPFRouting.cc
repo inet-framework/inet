@@ -87,7 +87,7 @@ void OSPFRouting::handleMessage(cMessage *msg)
 //    if (simulation.getEventNumber() == 90591) {
 //        __asm int 3;
 //    }
-    ospfRouter->getMessageHandler()->MessageReceived(msg);
+    ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
 /**
@@ -145,14 +145,14 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         EV << "    loading info for Area id = " << areaID << "\n";
     }
 
-    OSPF::Area* area = new OSPF::Area(ULongFromAddressString(areaID.c_str()));
+    OSPF::Area* area = new OSPF::Area(ulongFromAddressString(areaID.c_str()));
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (cXMLElementList::iterator arIt = areaDetails.begin(); arIt != areaDetails.end(); arIt++) {
         std::string nodeName = (*arIt)->getTagName();
         if (nodeName == "AddressRange") {
             OSPF::IPv4AddressRange addressRange;
-            addressRange.address = IPv4AddressFromAddressString((*arIt)->getChildrenByTagName("Address")[0]->getNodeValue());
-            addressRange.mask = IPv4AddressFromAddressString((*arIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
+            addressRange.address = ipv4AddressFromAddressString((*arIt)->getChildrenByTagName("Address")[0]->getNodeValue());
+            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
             std::string status = (*arIt)->getChildrenByTagName("Status")[0]->getNodeValue();
             if (status == "Advertise") {
                 area->addAddressRange(addressRange, true);
@@ -204,7 +204,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
         std::string nodeName = (*ifElemIt)->getTagName();
         if (nodeName == "AreaID") {
-            areaID = ULongFromAddressString((*ifElemIt)->getNodeValue());
+            areaID = ulongFromAddressString((*ifElemIt)->getNodeValue());
             intf->setAreaID(areaID);
         }
         if (nodeName == "InterfaceOutputCost") {
@@ -242,7 +242,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
             int keyLength = key.length();
             if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
                 for (int i = keyLength; (i > 2); i -= 2) {
-                    keyValue.bytes[(i - 2) / 2] = HexPairToByte(key[i - 1], key[i]);
+                    keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
                 }
             }
             intf->setAuthenticationKey(keyValue);
@@ -256,7 +256,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
+                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
                     neighbor->setPriority(atoi((*neighborIt)->getChildrenByTagName("NeighborPriority")[0]->getNodeValue()));
                     intf->addNeighbor(neighbor);
                 }
@@ -268,7 +268,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "PointToMultiPointNeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->setAddress(IPv4AddressFromAddressString((*neighborIt)->getNodeValue()));
+                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getNodeValue()));
                     intf->addNeighbor(neighbor);
                 }
             }
@@ -305,9 +305,9 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
     for (cXMLElementList::iterator exElemIt = ifDetails.begin(); exElemIt != ifDetails.end(); exElemIt++) {
         std::string nodeName = (*exElemIt)->getTagName();
         if (nodeName == "AdvertisedExternalNetwork") {
-            networkAddress.address = IPv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Address")[0]->getNodeValue());
-            networkAddress.mask    = IPv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
-            asExternalRoute.setNetworkMask(ULongFromIPv4Address(networkAddress.mask));
+            networkAddress.address = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Address")[0]->getNodeValue());
+            networkAddress.mask    = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
+            asExternalRoute.setNetworkMask(ulongFromIPv4Address(networkAddress.mask));
         }
         if (nodeName == "ExternalInterfaceOutputParameters") {
             std::string metricType = (*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputType")[0]->getNodeValue();
@@ -325,7 +325,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
             }
         }
         if (nodeName == "ForwardingAddress") {
-            asExternalRoute.setForwardingAddress(ULongFromAddressString((*exElemIt)->getNodeValue()));
+            asExternalRoute.setForwardingAddress(ulongFromAddressString((*exElemIt)->getNodeValue()));
         }
         if (nodeName == "ExternalRouteTag") {
             std::string externalRouteTag = (*exElemIt)->getNodeValue();
@@ -335,7 +335,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
             int externalRouteTagLength = externalRouteTag.length();
             if ((externalRouteTagLength > 4) && (externalRouteTagLength <= 10) && (externalRouteTagLength % 2 == 0) && (externalRouteTag[0] == '0') && (externalRouteTag[1] == 'x')) {
                 for (int i = externalRouteTagLength; (i > 2); i -= 2) {
-                    externalRouteTagValue[(i - 2) / 2] = HexPairToByte(externalRouteTag[i - 1], externalRouteTag[i]);
+                    externalRouteTagValue[(i - 2) / 2] = hexPairToByte(externalRouteTag[i - 1], externalRouteTag[i]);
                 }
             }
             asExternalRoute.setExternalRouteTag((externalRouteTagValue[0] << 24) + (externalRouteTagValue[1] << 16) + (externalRouteTagValue[2] << 8) + externalRouteTagValue[3]);
@@ -364,10 +364,10 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     for (cXMLElementList::iterator hostElemIt = ifDetails.begin(); hostElemIt != ifDetails.end(); hostElemIt++) {
         std::string nodeName = (*hostElemIt)->getTagName();
         if (nodeName == "AreaID") {
-            hostArea = ULongFromAddressString((*hostElemIt)->getNodeValue());
+            hostArea = ulongFromAddressString((*hostElemIt)->getNodeValue());
         }
         if (nodeName == "AttachedHost") {
-            hostParameters.address = IPv4AddressFromAddressString((*hostElemIt)->getNodeValue());
+            hostParameters.address = ipv4AddressFromAddressString((*hostElemIt)->getNodeValue());
         }
         if (nodeName == "LinkCost") {
             hostParameters.linkCost = atoi((*hostElemIt)->getNodeValue());
@@ -397,14 +397,14 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->setType(OSPF::Interface::VIRTUAL);
-    neighbor->setNeighborID(ULongFromAddressString(endPoint.c_str()));
+    neighbor->setNeighborID(ulongFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
     cXMLElementList ifDetails = virtualLinkConfig.getChildren();
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
         std::string nodeName = (*ifElemIt)->getTagName();
         if (nodeName == "TransitAreaID") {
-            intf->setTransitAreaID(ULongFromAddressString((*ifElemIt)->getNodeValue()));
+            intf->setTransitAreaID(ulongFromAddressString((*ifElemIt)->getNodeValue()));
         }
         if (nodeName == "RetransmissionInterval") {
             intf->setRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
@@ -435,7 +435,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
             int keyLength = key.length();
             if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
                 for (int i = keyLength; (i > 2); i -= 2) {
-                    keyValue.bytes[(i - 2) / 2] = HexPairToByte(key[i - 1], key[i]);
+                    keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
                 }
             }
             intf->setAuthenticationKey(keyValue);

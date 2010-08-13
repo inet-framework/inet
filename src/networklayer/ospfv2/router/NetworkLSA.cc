@@ -21,7 +21,7 @@ bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime();
+    resetInstallTime();
     if (different) {
         clearNextHops();
         return true;

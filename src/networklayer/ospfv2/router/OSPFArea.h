@@ -106,20 +106,20 @@ public:
     bool                isOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
     bool                floodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
     bool                isLocalAddress                      (IPv4Address address) const;
-    RouterLSA*          OriginateRouterLSA                  (void);
-    NetworkLSA*         OriginateNetworkLSA                 (const Interface* intf);
-    SummaryLSA*         OriginateSummaryLSA                 (const RoutingTableEntry* entry,
+    RouterLSA*          originateRouterLSA                  (void);
+    NetworkLSA*         originateNetworkLSA                 (const Interface* intf);
+    SummaryLSA*         originateSummaryLSA                 (const RoutingTableEntry* entry,
                                                              const std::map<LSAKeyType, bool, LSAKeyType_Less>& originatedLSAs,
                                                              SummaryLSA*& lsaToReoriginate);
     void                calculateShortestPathTree           (std::vector<RoutingTableEntry*>& newRoutingTable);
     void                calculateInterAreaRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
-    void                ReCheckSummaryLSAs                  (std::vector<RoutingTableEntry*>& newRoutingTable);
+    void                recheckSummaryLSAs                  (std::vector<RoutingTableEntry*>& newRoutingTable);
 
     void        info(char* buffer);
     std::string detailedInfo(void) const;
 
 private:
-    SummaryLSA*             OriginateSummaryLSA                     (const OSPF::SummaryLSA* summaryLSA);
+    SummaryLSA*             originateSummaryLSA                     (const OSPF::SummaryLSA* summaryLSA);
     bool                    hasLink                                 (OSPFLSA* fromLSA, OSPFLSA* toLSA) const;
     std::vector<NextHop>*   calculateNextHops                       (OSPFLSA* destination, OSPFLSA* parent) const;
     std::vector<NextHop>*   calculateNextHops                       (Link& destination, OSPFLSA* parent) const;

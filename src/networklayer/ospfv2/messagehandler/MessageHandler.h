@@ -44,14 +44,14 @@ private:
 public:
     MessageHandler  (Router* containingRouter, cSimpleModule* containingModule);
 
-    void    MessageReceived(cMessage* message);
-    void    HandleTimer     (OSPFTimer* timer);
+    void    messageReceived(cMessage* message);
+    void    handleTimer     (OSPFTimer* timer);
 
     void    processPacket   (OSPFPacket* packet, Interface* unused1 = NULL, Neighbor* unused2 = NULL);
 
     void    sendPacket      (OSPFPacket* packet, IPv4Address destination, int outputIfIndex, short ttl = 1);
     void    clearTimer      (OSPFTimer* timer);
-    void    StartTimer      (OSPFTimer* timer, simtime_t delay);
+    void    startTimer      (OSPFTimer* timer, simtime_t delay);
 
     void    printEvent                          (const char* eventString, const Interface* onInterface = NULL, const Neighbor* forNeighbor = NULL) const;
     void    printHelloPacket                    (const OSPFHelloPacket* helloPacket, IPv4Address destination, int outputIfIndex) const;
@@ -61,7 +61,7 @@ public:
     void    printLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket* ackPacket, IPv4Address destination, int outputIfIndex) const;
 
     // Authentication not implemented
-    bool    AuthenticatePacket  (OSPFPacket* packet)    { return true; }
+    bool    authenticatePacket  (OSPFPacket* packet)    { return true; }
 };
 
 } // namespace OSPF
