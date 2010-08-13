@@ -1,12 +1,20 @@
+2010-08-13  Andras Varga
+
+	* coding style made more consistent with the rest of the INET:
+	- changed method names to start with lower-case letter
+	- changed enum constants to all-capitals with underscores
+	- removed excessive in-line spaces
+	- removed superfluous "void" keywords from arg-less methods
+
 2008-12-11  Andras Varga
 
-    * added LGPL headers to files
+	* added LGPL headers to files
 
 2007..2008  Andras Varga
 
-    * ported to OMNeT++ 4.0
+	* ported to OMNeT++ 4.0
 
 2006-05-01  Andras Varga
 
-    * checked in more patches from author of this model, Andras Babos
+	* checked in more patches from author of this model, Andras Babos
 
