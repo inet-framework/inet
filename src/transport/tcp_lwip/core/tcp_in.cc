@@ -905,10 +905,6 @@ tcp_receive(struct tcp_pcb *pcb)
       pcb->dupacks = 0;
       pcb->lastack = ackno;
 
-
-      notifyAboutIncomingAckAccepted(pcb);
-
-
       /* Update the congestion control variables (cwnd and
          ssthresh). */
       if (pcb->state >= ESTABLISHED) {

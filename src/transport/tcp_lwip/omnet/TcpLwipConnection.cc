@@ -429,17 +429,21 @@ void TcpLwipConnection::sendDataToApp()
     }
 }
 
-void TcpLwipConnection::sendDataSentMsgToApp(long oldQueueLengthP, long newQueueLengthP)
+
+void TcpLwipConnection::dataSent(unsigned int sentBytesP)
 {
-    if (oldQueueLengthP != newQueueLengthP)
+    if (sentBytesP)
+        sendQueueM->discardAckedBytes(sentBytesP);
+
+    if (sendNotificationsEnabledM)
     {
         cMessage *msg = new cMessage("DataSent");
         // Send up a DATA sent notification
         msg->setKind(TCP_I_DATA_SENT);
         TCPDataSentInfo *cmd = new TCPDataSentInfo();
         cmd->setConnId(connIdM);
-        cmd->setAvailableBytesInSendQueue(newQueueLengthP);
-        cmd->setSentBytes((oldQueueLengthP > newQueueLengthP) ? oldQueueLengthP - newQueueLengthP : 0);
+        cmd->setAvailableBytesInSendQueue(this->sendQueueM->getBytesAvailable()); //FIXME
+        cmd->setSentBytes(sentBytesP);
         msg->setControlInfo(cmd);
         sendToApp(msg);
     }

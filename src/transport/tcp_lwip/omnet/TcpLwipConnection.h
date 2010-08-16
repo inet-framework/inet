@@ -121,7 +121,7 @@ class INET_API TcpLwipConnection
     void sendDataToApp();
 
     /** Utility: send sent byte count and length of send queue to App */
-    void sendDataSentMsgToApp(long oldQueueLengthP, long newQueueLengthP);
+    void dataSent(unsigned int sentBytesP);
 
     void initStats();
 

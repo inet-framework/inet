@@ -217,19 +217,6 @@ void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     }
 }
 
-void TCP_lwip::notifyAboutIncomingAckAccepted(LwipTcpLayer::tcp_pcb *pcb)
-{
-    TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
-    if(conn)
-    {
-        // FIXME Implement it!!!
-    }
-    else
-    {
-        tcpEV << "notifyAboutIncomingAckAccepted: conn is null\n";
-    }
-}
-
 void TCP_lwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)(pcb->callback_arg);
@@ -304,6 +291,7 @@ err_t TCP_lwip::tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb 
 
 err_t TCP_lwip::tcp_event_sent(TcpLwipConnection &conn, u16_t size)
 {
+    conn.dataSent(size);
     conn.do_SEND();
     return ERR_OK;
 }

@@ -72,8 +72,6 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, void *dataptr, int len);
 
-    virtual void notifyAboutIncomingAckAccepted(LwipTcpLayer::tcp_pcb *pcb);
-
     // internal event functions:
 
     err_t tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err);
