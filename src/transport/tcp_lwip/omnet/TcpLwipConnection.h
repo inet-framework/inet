@@ -123,6 +123,8 @@ class INET_API TcpLwipConnection
     /** Utility: send sent byte count and length of send queue to App */
     void dataSent(unsigned int sentBytesP);
 
+    err_t eventRecv(struct pbuf *p, err_t err);
+
     void initStats();
 
   public:

@@ -78,8 +78,6 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
     err_t tcp_event_sent(TcpLwipConnection &conn, u16_t size);
 
-    err_t tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t err);
-
     err_t tcp_event_conn(TcpLwipConnection &conn, err_t err);
 
     err_t tcp_event_poll(TcpLwipConnection &conn);

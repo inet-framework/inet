@@ -455,3 +455,38 @@ void TcpLwipConnection::dataSent(unsigned int sentBytesP)
         sendToApp(msg);
     }
 }
+
+err_t TcpLwipConnection::eventRecv(struct pbuf *p, err_t err)
+{
+    if(p == NULL)
+    {
+        // Received FIN:
+        tcpEV << ": eventRecv(" << connIdM << ", pbuf[NULL], " << (int)err << "):FIN\n";
+        sendIndicationToApp((pcbM->state == LwipTcpLayer::TIME_WAIT)
+                ? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
+        // TODO is it good?
+        tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, 0);
+    }
+    else
+    {
+        tcpEV << ": eventRecv(" << connIdM << ", pbuf[" << p->len << ", " << p->tot_len << "], " << (int)err << ")\n";
+
+        u16_t len = p->tot_len;
+        receiveQueueM->enqueueTcpLayerData(p->payload, len);
+        if (isExplicitReadsEnabled())
+        {
+            uint32 bytesInBuffer = receiveQueueM->getAmountOfBufferedBytes();
+            uint32 bufferSize = getReceiveBufferSize();
+            uint32 freeBuffer = (bytesInBuffer < bufferSize) ? bufferSize - bytesInBuffer : 0;
+            if (len > freeBuffer) // if buffers has enough free bytes for this data
+                len = freeBuffer;
+        }
+        tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, len);
+        unRecvedM += p->tot_len - len;
+        pbuf_free(p);
+    }
+
+    sendDataToApp();
+    do_SEND();
+    return err;
+}

@@ -249,7 +249,7 @@ err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 
     case LwipTcpLayer::LWIP_EVENT_RECV:
         ASSERT(conn->pcbM == pcb);
-        err = tcp_event_recv(*conn, p, err);
+        err = conn->eventRecv(p, err);
         break;
 
     case LwipTcpLayer::LWIP_EVENT_CONNECTED:
@@ -294,38 +294,6 @@ err_t TCP_lwip::tcp_event_sent(TcpLwipConnection &conn, u16_t size)
     conn.dataSent(size);
     conn.do_SEND();
     return ERR_OK;
-}
-
-err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t err)
-{
-    if(p == NULL)
-    {
-        // Received FIN:
-        tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[NULL], " << (int)err << "):FIN\n";
-        conn.sendIndicationToApp((conn.pcbM->state == LwipTcpLayer::TIME_WAIT)
-                ? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
-        // TODO is it good?
-        pLwipTcpLayerM->tcp_recved(conn.pcbM, 0);
-    }
-    else
-    {
-        tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", " << p->tot_len << "], " << (int)err << ")\n";
-        if (!conn.isExplicitReadsEnabled() || (conn.receiveQueueM->getAmountOfBufferedBytes() + p->tot_len <= conn.getReceiveBufferSize())) // if buffers has enough free bytes for this data
-        {
-            conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
-            pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
-            pbuf_free(p);
-        }
-        else
-        {
-            err = ERR_BUF;
-            // the lwip will push back data to pcb->refused_data and stop receiving while not read this data from lwip.
-        }
-    }
-
-    conn.sendDataToApp();
-    conn.do_SEND();
-    return err;
 }
 
 err_t TCP_lwip::tcp_event_conn(TcpLwipConnection &conn, err_t err)
