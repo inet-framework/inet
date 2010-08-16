@@ -54,6 +54,7 @@ void TCPEchoApp::initialize()
     WATCH(bytesRcvd);
     WATCH(bytesSent);
     WATCH(bytesSentAndAcked);
+    WATCH(waitingData);
     WATCH(bytesInSendQueue);
 
     TCPSocket socket;
