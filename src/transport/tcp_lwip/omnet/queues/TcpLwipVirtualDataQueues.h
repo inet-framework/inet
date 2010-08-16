@@ -94,10 +94,9 @@ class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
     virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP);
 
     /**
-     * Tells the queue that bytes up to (but NOT including) seqNum have been
-     * transmitted and ACKed, so they can be removed from the queue.
+     * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardUpTo(uint32 seqNumP);
+    virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
     long int unsentTcpLayerBytesM;

@@ -35,11 +35,7 @@
 #include <dlfcn.h>
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing)||(TCP_lwip::testingS)) ? (std::cout) : (ev))
-
-#define tcpEV ev
-//#define tcpEV std::cout
+#define tcpEV (ev.disable_tracing||TCP_lwip::testingS) ? ev : ev
 
 
 TcpLwipConnection::Stats::Stats()
@@ -128,6 +124,14 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     pcbM = pcbP;
     pcbM->callback_arg = this;
 
+    // Get other TCPOpenCommand parameters
+    explicitReadsEnabledM = connP.explicitReadsEnabledM;
+    sendNotificationsEnabledM = connP.sendNotificationsEnabledM;
+    sendingObjectUpAtFirstByteEnabledM = connP.sendingObjectUpAtFirstByteEnabledM;
+    receiveBufferSizeM = connP.receiveBufferSizeM;
+    readBytesM = 0;
+    unRecvedM = 0;
+
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
     if(tcpLwipM.recordStatisticsM)
@@ -138,6 +142,12 @@ TcpLwipConnection::~TcpLwipConnection()
 {
     if(pcbM)
         pcbM->callback_arg = NULL;
+
+    tcpEV << "~TcpLwipConnection()[connId:" << connIdM << "]: receiveQueue:" << receiveQueueM->getExtractableBytesUpTo()
+            << ", sendQueue:" << sendQueueM->getBytesAvailable()
+            << ", unRecved:" << unRecvedM
+            << endl;
+
     delete receiveQueueM;
     delete sendQueueM;
     delete statsM;
@@ -234,20 +244,21 @@ void TcpLwipConnection::listen(TCPOpenCommand &tcpCommand)
     sendingObjectUpAtFirstByteEnabledM = tcpCommand.getSendingObjectUpAtFirstByteEnabled();
     receiveBufferSizeM = tcpCommand.getReceiveBufferSize();
     readBytesM = 0;
+    unRecvedM = 0;
 
-    // The next returns a tcp_pcb: need to do some research on how
-    // it works; does it actually accept a connection as well? It
-    // shouldn't, as there is a tcp_accept
+    // IMPORTANT!!! unlink old pcb from this object, otherwise lwip_free_pcb_event destroy this conn.
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
-    pcbM = NULL; // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
+    pcbM = NULL;
+    // IMPORTANT!!! unlink old pcb from this object, otherwise lwip_free_pcb_event destroy this conn.
+
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_listen(pcb);
     totalSentM = 0;
 }
 
 void TcpLwipConnection::connect(TCPOpenCommand &tcpCommand)
 {
-    IPvXAddress& localAddr = tcpCommand.getLocalAddr();
-    unsigned short localPort = tcpCommand.getLocalPort();
+    // IPvXAddress& localAddr = tcpCommand.getLocalAddr();
+    // unsigned short localPort = tcpCommand.getLocalPort();
     IPvXAddress& remoteAddr = tcpCommand.getRemoteAddr();
     unsigned short remotePort = tcpCommand.getRemotePort();
 
@@ -257,6 +268,7 @@ void TcpLwipConnection::connect(TCPOpenCommand &tcpCommand)
     sendingObjectUpAtFirstByteEnabledM = tcpCommand.getSendingObjectUpAtFirstByteEnabled();
     receiveBufferSizeM = tcpCommand.getReceiveBufferSize();
     readBytesM = 0;
+    unRecvedM = 0;
 
     onCloseM = false;
     struct ip_addr dest_addr;
@@ -284,6 +296,10 @@ void TcpLwipConnection::process_ABORT()
 void TcpLwipConnection::process_SEND(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
+    if (sendNotificationsEnabledM)
+    {
+        dataSent(0);
+    }
 }
 
 void TcpLwipConnection::process_READ(TCPReadCommand &tcpCommandP)
@@ -296,7 +312,6 @@ void TcpLwipConnection::process_READ(TCPReadCommand &tcpCommandP)
 
     readBytesM = tcpCommandP.getBytes();
     sendDataToApp(); //send data to APP if available
-    //FIXME read data from pcb (for lwip can receive more data)
 }
 
 void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)
@@ -373,7 +388,6 @@ void TcpLwipConnection::do_SEND()
         }
     }
 
-    //FIXME call sendDataSentMsgToApp();
     totalSentM += allsent;
     tcpEV << "do_SEND(): " << connIdM <<
             " send:" << allsent <<
@@ -436,7 +450,6 @@ void TcpLwipConnection::sendDataToApp()
     }
 }
 
-
 void TcpLwipConnection::dataSent(unsigned int sentBytesP)
 {
     if (sentBytesP)
@@ -449,7 +462,7 @@ void TcpLwipConnection::dataSent(unsigned int sentBytesP)
         msg->setKind(TCP_I_DATA_SENT);
         TCPDataSentInfo *cmd = new TCPDataSentInfo();
         cmd->setConnId(connIdM);
-        cmd->setAvailableBytesInSendQueue(this->sendQueueM->getBytesAvailable()); //FIXME
+        cmd->setAvailableBytesInSendQueue(this->sendQueueM->getBytesAvailable() + (TCP_SND_BUF - pcbM->snd_buf)); //the sendQueueM length + lwip sendqueue length
         cmd->setSentBytes(sentBytesP);
         msg->setControlInfo(cmd);
         sendToApp(msg);

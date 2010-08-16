@@ -50,7 +50,7 @@ TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
     while (! payloadQueueM.empty())
     {
-        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath() << " Queue: seqno=" << payloadQueueM.front().endSequenceNo <<
+        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath() << " Queue: seqno=" << payloadQueueM.front().beginSequenceNo <<
                 ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
         delete payloadQueueM.front().msg;
         payloadQueueM.pop_front();
@@ -81,13 +81,14 @@ void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
     ASSERT(msgP);
 
     uint32 bytes = msgP->getByteLength();
-    endM += bytes;
-    unsentTcpLayerBytesM += bytes;
 
     Payload payload;
-    payload.endSequenceNo = endM;
+    payload.beginSequenceNo = endM;
     payload.msg = msgP;
     payloadQueueM.push_back(payload);
+
+    endM += bytes;
+    unsentTcpLayerBytesM += bytes;
 }
 
 int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP)
@@ -146,7 +147,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     {
         for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
         {
-            i->endSequenceNo += fromSeq;
+            i->beginSequenceNo += fromSeq;
         }
         beginM += fromSeq;
         endM += fromSeq;
@@ -161,23 +162,23 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 #ifdef DEBUG_LWIP
     for(i=payloadQueueM.begin(); i!=payloadQueueM.end(); ++i)
     {
-        EV << "  buffered msg: endseq=" << i->endSequenceNo << ", length=" << i->msg->getByteLength() << endl;
+        EV << "  buffered msg: beginseq=" << i->beginSequenceNo << ", length=" << i->msg->getByteLength() << endl;
     }
 #endif
 
     const char *payloadName = NULL;
     if (numBytes > 0)
     {
-        // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
+        // add payload messages whose beginSequenceNo is between fromSeq and fromSeq+numBytes
         i = payloadQueueM.begin();
-        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
+        while (i!=payloadQueueM.end() && seqLess(i->beginSequenceNo, fromSeq))
             ++i;
-        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
+        while (i!=payloadQueueM.end() && seqLess(i->beginSequenceNo, toSeq))
         {
             if (!payloadName)
                 payloadName = i->msg->getName();
             cPacket* msg = i->msg->dup();
-            tcpseg->addPayloadMessage(msg, i->endSequenceNo);
+            tcpseg->addPayloadMessage(msg, i->beginSequenceNo);
             ++i;
         }
     }
@@ -193,8 +194,6 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
             tcpseg->getPayloadArraySize());
     tcpseg->setName(msgname);
 
-    discardAckedBytes();
-
     return tcpseg;
 }
 
@@ -202,17 +201,18 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
  * Tells the queue that bytes up to seqNum have been
  * transmitted and ACKed, so they can be removed from the queue.
  */
-void TcpLwipMsgBasedSendQueue::discardAckedBytes()
+void TcpLwipMsgBasedSendQueue::discardAckedBytes(unsigned long bytesP)
 {
     if (isValidSeqNoM)
     {
         uint32 seqNum = connM->pcbM->lastack;
+        ASSERT(seqNum == beginM + bytesP);
         if(seqLE(beginM, seqNum) && seqLE(seqNum, endM))
         {
             beginM = seqNum;
 
-            // remove payload messages whose endSequenceNo is below seqNum
-            while (!payloadQueueM.empty() && seqLE(payloadQueueM.front().endSequenceNo, seqNum))
+            // remove payload messages whose beginSequenceNo is below seqNum
+            while (!payloadQueueM.empty() && seqLess(payloadQueueM.front().beginSequenceNo, seqNum))
             {
                 delete payloadQueueM.front().msg;
                 payloadQueueM.pop_front();
@@ -220,7 +220,6 @@ void TcpLwipMsgBasedSendQueue::discardAckedBytes()
         }
     }
 }
-
 
 /**
  * Ctor.

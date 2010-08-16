@@ -144,6 +144,11 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      */
     virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP) = 0;
 
+    /**
+     * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
+     */
+    virtual void discardAckedBytes(unsigned long bytesP) = 0;
+
   protected:
     TcpLwipConnection *connM;
 };

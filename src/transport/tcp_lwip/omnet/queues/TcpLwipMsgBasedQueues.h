@@ -34,7 +34,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
   protected:
     struct Payload
     {
-        unsigned int endSequenceNo;
+        uint32 beginSequenceNo;
         cPacket *msg;
     };
     typedef std::list<Payload> PayloadQueue;
@@ -111,7 +111,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * Tells the queue that bytes up to (but NOT including) seqNum have been
      * transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardAckedBytes();
+    virtual void discardAckedBytes(unsigned long bytesP);
 };
 
 class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue

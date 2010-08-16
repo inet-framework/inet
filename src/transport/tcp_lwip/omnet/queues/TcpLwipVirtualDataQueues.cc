@@ -136,10 +136,9 @@ TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
 }
 
 /**
- * Tells the queue that bytes up to (but NOT including) seqNum have been
- * transmitted and ACKed, so they can be removed from the queue.
+ * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
  */
-void TcpLwipVirtualDataSendQueue::discardUpTo(uint32 seqNumP)
+void TcpLwipVirtualDataSendQueue::discardAckedBytes(unsigned long bytesP)
 {
     // nothing to do here
 }
@@ -223,7 +222,7 @@ cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(long maxBytesP)
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
-    if(bytesInQueueM)
+    if(bytesInQueueM && maxBytesP)
     {
         IPvXAddress localAddr((connM->pcbM->local_ip.addr));
         IPvXAddress remoteAddr((connM->pcbM->remote_ip.addr));
