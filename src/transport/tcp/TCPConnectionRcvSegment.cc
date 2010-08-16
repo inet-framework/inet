@@ -113,27 +113,22 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
 
 void TCPConnection::sendDataToApp()
 {
-    if (!explicitReadsEnabled)
-        readBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
-
-    while (1)
-    {
-        cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
-        if(msg == NULL)
-            break;
-        readBytes -= msg->getByteLength();
-        msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
-        TCPCommand *cmd = new TCPCommand();
-        cmd->setConnId(connId);
-        msg->setControlInfo(cmd);
-        sendToApp(msg);
-        if (explicitReadsEnabled)
-            break;
-    }
-    readBytes = 0;
     if (explicitReadsEnabled)
     {
-        ulong readableBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
+        if (readBytes)
+        {
+            cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
+            if (msg)
+            {
+                msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
+                TCPCommand *cmd = new TCPCommand();
+                cmd->setConnId(connId);
+                msg->setControlInfo(cmd);
+                readBytes = 0;
+                sendToApp(msg);
+            }
+        }
+        long readableBytes = receiveQueue->getExtractableBytesUpTo(state->rcv_nxt);
         if (readableBytes > 0)
         {
             cMessage* info = new cMessage("DataArrived");
@@ -143,6 +138,20 @@ void TCPConnection::sendDataToApp()
             cmd->setAvailableBytesInReceiveQueue(readableBytes);
             info->setControlInfo(cmd);
             sendToApp(info);
+        }
+    }
+    else
+    {
+        while (1)
+        {
+            cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, receiveQueue->getExtractableBytesUpTo(state->rcv_nxt));
+            if(msg == NULL)
+                break;
+            msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
+            TCPCommand *cmd = new TCPCommand();
+            cmd->setConnId(connId);
+            msg->setControlInfo(cmd);
+            sendToApp(msg);
         }
     }
 }

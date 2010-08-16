@@ -395,27 +395,24 @@ void TcpLwipConnection::sendToApp(cMessage *msg)
 
 void TcpLwipConnection::sendDataToApp()
 {
-    if (!explicitReadsEnabledM)
-        readBytesM = receiveQueueM->getExtractableBytesUpTo();
-
-    while (1)
-    {
-        cPacket *msg = receiveQueueM->extractBytesUpTo(readBytesM);
-        if(msg == NULL)
-            break;
-            readBytesM -= msg->getByteLength();
-        msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
-        TCPCommand *cmd = new TCPCommand();
-        cmd->setConnId(connIdM);
-        msg->setControlInfo(cmd);
-        sendToApp(msg);
-        if (explicitReadsEnabledM)
-            break;
-    }
-    readBytesM = 0;
     if (explicitReadsEnabledM)
     {
-        ulong readableBytes = receiveQueueM->getExtractableBytesUpTo();
+        if (readBytesM)
+        {
+            cPacket *msg = receiveQueueM->extractBytesUpTo(readBytesM);
+            if (msg)
+            {
+                readBytesM = 0;
+                if (unRecvedM)
+                {
+                    u16_t len = std::min(0x7FFFUL,std::min(unRecvedM, (ulong)msg->getByteLength()));
+                    tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, len);
+                    unRecvedM -= len;
+                }
+                sendToApp(msg);
+            }
+        }
+        long readableBytes = receiveQueueM->getExtractableBytesUpTo();
         if (readableBytes > 0)
         {
             cMessage* info = new cMessage("DataArrived");
@@ -425,6 +422,16 @@ void TcpLwipConnection::sendDataToApp()
             cmd->setAvailableBytesInReceiveQueue(readableBytes);
             info->setControlInfo(cmd);
             sendToApp(info);
+        }
+    }
+    else
+    {
+        while (1)
+        {
+            cPacket *msg = receiveQueueM->extractBytesUpTo(receiveQueueM->getExtractableBytesUpTo());
+            if(msg == NULL)
+                break;
+            sendToApp(msg);
         }
     }
 }
