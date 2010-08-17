@@ -14,7 +14,7 @@
 
 #include "TCPGenericSrvApp.h"
 #include "TCPSocket.h"
-#include "TCPCommand_m.h"
+#include "TCPCommand.h"
 #include "GenericAppMsg_m.h"
 
 
@@ -83,52 +83,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     }
     else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
-        if (!appmsg)
-            error("Message (%s)%s is not a GenericAppMsg -- "
-                  "probably wrong client app, or wrong setting of TCP's "
-                  "dataTransferMode parameters "
-                  "(try \"object\")",
-                  msg->getClassName(), msg->getName());
-
-        msgsRcvd++;
-        bytesRcvd += appmsg->getByteLength();
-
-        long requestedBytes = appmsg->getExpectedReplyLength();
-
-        simtime_t msgDelay = appmsg->getReplyDelay();
-        if (msgDelay>maxMsgDelay)
-            maxMsgDelay = msgDelay;
-
-        bool doClose = appmsg->getServerClose();
-        int connId = check_and_cast<TCPCommand *>(appmsg->getControlInfo())->getConnId();
-
-        if (requestedBytes==0)
-        {
-            delete msg;
-        }
-        else
-        {
-            delete appmsg->removeControlInfo();
-            TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setConnId(connId);
-            appmsg->setControlInfo(cmd);
-
-            // set length and send it back
-            appmsg->setKind(TCP_C_SEND);
-            appmsg->setByteLength(requestedBytes);
-            sendOrSchedule(appmsg, delay+msgDelay);
-        }
-
-        if (doClose)
-        {
-            cMessage *msg = new cMessage("close");
-            msg->setKind(TCP_C_CLOSE);
-            TCPCommand *cmd = new TCPCommand();
-            cmd->setConnId(connId);
-            msg->setControlInfo(cmd);
-            sendOrSchedule(msg, delay+maxMsgDelay);
-        }
+        handleTCPDataMessage(msg);
     }
     else
     {
@@ -142,6 +97,73 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         char buf[64];
         sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
         getDisplayString().setTagArg("t",0,buf);
+    }
+}
+
+void TCPGenericSrvApp::handleTCPDataMessage(cMessage *msg)
+{
+    TCPDataMsg *tcpMsg = check_and_cast<TCPDataMsg*>(msg);
+    bytesRcvd += tcpMsg->getByteLength();
+
+    if (tcpMsg->getIsBegin())
+    {
+        error("TCPGenericSrvApp doesn't work when object transmitted on first byte");
+    }
+
+    cPacket *appPacket = tcpMsg->removeDataObject();
+    if (!appPacket)
+    {
+        delete msg;
+        return;
+    }
+
+    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(appPacket);
+    if (!appmsg)
+    {
+        error("Message (%s)%s is not a GenericAppMsg -- "
+              "probably wrong client app, or wrong setting of TCP's "
+              "dataTransferMode parameters "
+              "(try \"object\")",
+              appPacket->getClassName(), appPacket->getName());
+    }
+
+    msgsRcvd++;
+
+    int connId = check_and_cast<TCPCommand *>(tcpMsg->getControlInfo())->getConnId();
+    delete msg;
+
+    long requestedBytes = appmsg->getExpectedReplyLength();
+    simtime_t msgDelay = appmsg->getReplyDelay();
+    bool doClose = appmsg->getServerClose();
+
+    if (requestedBytes > 0)
+    {
+        if (msgDelay > maxMsgDelay)
+            maxMsgDelay = msgDelay;
+
+        delete appmsg->removeControlInfo();
+        TCPSendCommand *cmd = new TCPSendCommand();
+        cmd->setConnId(connId);
+        appmsg->setControlInfo(cmd);
+
+        // set length and send it back
+        appmsg->setKind(TCP_C_SEND);
+        appmsg->setByteLength(requestedBytes);
+        sendOrSchedule(appmsg, delay+msgDelay);
+    }
+    else
+    {
+        delete appmsg;
+    }
+
+    if (doClose)
+    {
+        cMessage *closemsg = new cMessage("close");
+        closemsg->setKind(TCP_C_CLOSE);
+        TCPCommand *cmd = new TCPCommand();
+        cmd->setConnId(connId);
+        closemsg->setControlInfo(cmd);
+        sendOrSchedule(closemsg, delay+maxMsgDelay);
     }
 }
 

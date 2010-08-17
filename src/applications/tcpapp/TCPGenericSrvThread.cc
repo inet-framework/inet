@@ -14,7 +14,7 @@
 
 #include "TCPGenericSrvThread.h"
 #include "GenericAppMsg_m.h"
-
+#include "TCPCommand.h"
 
 
 Register_Class(TCPGenericSrvThread);
@@ -27,18 +27,30 @@ void TCPGenericSrvThread::established()
 
 void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 {
-    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
+    TCPDataMsg *datamsg = check_and_cast<TCPDataMsg *>(msg);
+    cPacket *dataobj = datamsg->removeDataObject();
+    if (! dataobj)
+    {
+        delete msg;
+        return;
+    }
+    if (datamsg->getIsBegin())
+        opp_error("Cannot work when enabled the object sending up at first byte");
+
+    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(dataobj);
     if (!appmsg)
         opp_error("Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
                   "dataTransferMode parameters "
                   "(try \"object\")",
                   msg->getClassName(), msg->getName());
+
     if (appmsg->getReplyDelay()>0)
         opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"
                   " of GenericAppMsg, try to use TCPGenericSrvApp instead",
                   msg->getClassName(), msg->getName(), getClassName());
 
+    delete msg;
     // process message: send back requested number of bytes, then close
     // connection if that was requested too
     long requestedBytes = appmsg->getExpectedReplyLength();
@@ -65,5 +77,3 @@ void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }
-
-

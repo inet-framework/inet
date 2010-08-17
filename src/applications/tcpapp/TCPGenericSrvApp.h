@@ -43,6 +43,7 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void handleTCPDataMessage(cMessage *msg);
     virtual void finish();
 };
 
