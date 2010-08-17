@@ -115,22 +115,10 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
      */
     virtual ~TcpLwipVirtualDataReceiveQueue();
 
-    /**
-     * Set the connection.
-     */
+    // see TcpLwipReceiveQueue
     virtual void setConnection(TcpLwipConnection *connP);
 
-    /**
-     * Called when a TCP segment arrives, it should extract the payload
-     * from the segment and store it in the receive queue. The segment
-     * object should be deleted by queue.
-     *
-     * The method should return the number of bytes to copied to buffer.
-     *
-     * The method should fill the bufferP for data sending to NSC stack
-     *
-     * called before nsc_stack->if_receive_packet() called
-     */
+    // see TcpLwipReceiveQueue
     virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP);
 
     /**
@@ -140,19 +128,10 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
      */
     virtual void enqueueTcpLayerData(void* dataP, int dataLengthP);
 
-    /**
-     * Returns the number of received bytes.
-     */
+    // see TcpLwipReceiveQueue
     virtual long getExtractableBytesUpTo();
 
-    /**
-     * Should create a packet to be passed up to the app, up to (but NOT
-     * including) the given sequence no (usually rcv_nxt).
-     * It should return NULL if there's no more data to be passed up --
-     * this method is called several times until it returns NULL.
-     *
-     * called after socket->read_data() successfull
-     */
+    // see TcpLwipReceiveQueue
     virtual TCPDataMsg* extractBytesUpTo(long maxBytesP);
 
     /**

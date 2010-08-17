@@ -262,7 +262,7 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(long maxBytesP)
         if(connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
             initialSeqNoM--; // received FIN
     }
-*/
+    */
 
     if (bytesInQueueM < maxBytesP)
         maxBytesP = bytesInQueueM;
