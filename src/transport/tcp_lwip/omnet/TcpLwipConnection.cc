@@ -26,7 +26,7 @@
 #include "lwip/tcp.h"
 #include "TCP_lwip.h"
 #include "TcpLwipQueues.h"
-#include "TCPCommand_m.h"
+#include "TCPCommand.h"
 #include "TCPIPchecksum.h"
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
@@ -413,7 +413,7 @@ void TcpLwipConnection::sendDataToApp()
     {
         if (readBytesM)
         {
-            cPacket *msg = receiveQueueM->extractBytesUpTo(readBytesM);
+            TCPDataMsg *msg = receiveQueueM->extractBytesUpTo(readBytesM);
             if (msg)
             {
                 readBytesM = 0;
@@ -423,6 +423,9 @@ void TcpLwipConnection::sendDataToApp()
                     tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, len);
                     unRecvedM -= len;
                 }
+                TCPCommand *controlInfo = new TCPCommand();
+                controlInfo->setConnId(connIdM);
+                msg->setControlInfo(controlInfo);
                 sendToApp(msg);
             }
         }
@@ -442,9 +445,12 @@ void TcpLwipConnection::sendDataToApp()
     {
         while (1)
         {
-            cPacket *msg = receiveQueueM->extractBytesUpTo(receiveQueueM->getExtractableBytesUpTo());
+            TCPDataMsg *msg = receiveQueueM->extractBytesUpTo(receiveQueueM->getExtractableBytesUpTo());
             if(msg == NULL)
                 break;
+            TCPCommand *controlInfo = new TCPCommand();
+            controlInfo->setConnId(connIdM);
+            msg->setControlInfo(controlInfo);
             sendToApp(msg);
         }
     }

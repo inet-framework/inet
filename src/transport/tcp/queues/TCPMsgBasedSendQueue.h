@@ -31,7 +31,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
   protected:
     struct Payload
     {
-        unsigned int endSequenceNo;
+        uint64 beginStreamOffset;   // the offset of 1st byte in stream
         cPacket *msg;
     };
     typedef std::list<Payload> PayloadQueue;
@@ -39,6 +39,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
 
     uint32 begin;  // 1st sequence number stored
     uint32 end;    // last sequence number stored +1
+    uint64 endOffs; // last stored bytes offset+1
 
   public:
     /**

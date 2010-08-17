@@ -111,6 +111,7 @@ class INET_API TcpLwipConnection
 
     long getReceiveBufferSize() { return receiveBufferSizeM; }
     bool isExplicitReadsEnabled() { return explicitReadsEnabledM; }
+    bool isSendingObjectUpAtFirstByteEnabled() { return sendingObjectUpAtFirstByteEnabledM; }
 
     INetStreamSocket* getSocket();
 

@@ -32,8 +32,11 @@
 class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
 {
   protected:
-    typedef std::map<uint32, cPacket *> PayloadList;
+    typedef std::map<uint64, cPacket *> PayloadList;
     PayloadList payloadList;
+    uint64 extractedBytes;
+    uint64 extractedPayloadBytes;
+    bool isPayloadExtractAtFirst;
 
   public:
     /**
@@ -45,6 +48,8 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
      * Virtual dtor.
      */
     virtual ~TCPMsgBasedRcvQueue();
+
+    virtual void setConnection(TCPConnection *_conn);
 
     /**
      * Set initial receive sequence number.
@@ -64,7 +69,7 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
     /**
      *
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq, ulong maxBytes);
+    virtual TCPDataMsg* extractBytesUpTo(uint32 seq, ulong maxBytes);
 
 };
 

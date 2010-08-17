@@ -23,6 +23,7 @@ Register_Class(TCPMsgBasedSendQueue);
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
 {
     begin = end = 0;
+    endOffs = 0;
 }
 
 TCPMsgBasedSendQueue::~TCPMsgBasedSendQueue()
@@ -35,6 +36,7 @@ void TCPMsgBasedSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
+    endOffs = 0;
 }
 
 std::string TCPMsgBasedSendQueue::info() const
@@ -50,9 +52,10 @@ void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
     end += msg->getByteLength();
 
     Payload payload;
-    payload.endSequenceNo = end;
+    payload.beginStreamOffset = endOffs;
     payload.msg = msg;
     payloadQueue.push_back(payload);
+    endOffs += msg->getByteLength();
 }
 
 uint32 TCPMsgBasedSendQueue::getBufferStartSeq()
@@ -75,15 +78,16 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     tcpseg->setPayloadLength(numBytes);
 
     // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
+    uint64 fromOffs = endOffs - (uint32)(end - fromSeq);
     PayloadQueue::iterator i = payloadQueue.begin();
-    while (i!=payloadQueue.end() && seqLE(i->endSequenceNo, fromSeq))
+    while (i!=payloadQueue.end() && (i->beginStreamOffset < fromOffs))
         ++i;
-    uint32 toSeq = fromSeq+numBytes;
+    uint64 toOffs = fromOffs + numBytes;
     const char *payloadName = NULL;
-    while (i!=payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
+    while (i!=payloadQueue.end() && (i->beginStreamOffset < toOffs))
     {
         if (!payloadName) payloadName = i->msg->getName();
-        tcpseg->addPayloadMessage(i->msg->dup(), i->endSequenceNo);
+        tcpseg->addPayloadMessage(i->msg->dup(), i->beginStreamOffset);
         ++i;
     }
 
@@ -104,11 +108,11 @@ void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
     ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
     begin = seqNum;
 
+    uint64 fromOffs = endOffs - (uint32)(end - seqNum);
     // remove payload messages whose endSequenceNo is below seqNum
-    while (!payloadQueue.empty() && seqLE(payloadQueue.front().endSequenceNo, seqNum))
+    while (!payloadQueue.empty() && (payloadQueue.front().beginStreamOffset < fromOffs))
     {
         delete payloadQueue.front().msg;
         payloadQueue.pop_front();
     }
 }
-

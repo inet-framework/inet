@@ -19,6 +19,8 @@
 
 #include "TCPVirtualDataRcvQueue.h"
 
+#include "TCPCommand.h"
+
 
 Register_Class(TCPVirtualDataRcvQueue);
 
@@ -126,13 +128,13 @@ void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
     }
 }
 
-cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
+TCPDataMsg *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
 {
     ulong numBytes = extractTo(seq, maxBytes);
     if (numBytes==0)
         return NULL;
 
-    cPacket *msg = new cPacket("data");
+    TCPDataMsg *msg = new TCPDataMsg("data");
     msg->setByteLength(numBytes);
     return msg;
 }

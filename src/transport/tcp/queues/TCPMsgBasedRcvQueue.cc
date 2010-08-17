@@ -18,20 +18,44 @@
 
 #include "TCPMsgBasedRcvQueue.h"
 
+#include "TCPCommand.h"
+
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 
 TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 {
+    extractedBytes = extractedPayloadBytes = 0;
+    isPayloadExtractAtFirst = false;
 }
 
 TCPMsgBasedRcvQueue::~TCPMsgBasedRcvQueue()
 {
+    while (! payloadList.empty())
+    {
+        EV << "SendQueue Destructor: Drop msg from " << this->getFullPath() <<
+                " Queue: offset=" << payloadList.begin()->first <<
+                ", length=" << payloadList.begin()->second->getByteLength() << endl;
+        delete payloadList.begin()->second;
+        payloadList.erase(payloadList.begin());
+    }
 }
+
+void TCPMsgBasedRcvQueue::setConnection(TCPConnection *_conn)
+{
+    ASSERT(_conn);
+
+    TCPReceiveQueue::setConnection(_conn);
+    isPayloadExtractAtFirst = conn->isSendingObjectUpAtFirstByteEnabled();
+}
+
 
 void TCPMsgBasedRcvQueue::init(uint32 startSeq)
 {
     TCPVirtualDataRcvQueue::init(startSeq);
+    extractedBytes = extractedPayloadBytes = 0;
+    isPayloadExtractAtFirst = false;
 }
 
 std::string TCPMsgBasedRcvQueue::info() const
@@ -57,28 +81,79 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 
     cPacket *msg;
-    uint32 endSeqNo;
-    while ((msg=tcpseg->removeFirstPayloadMessage(endSeqNo))!=NULL)
+    uint64 offs;
+    while ((msg=tcpseg->removeFirstPayloadMessage(offs))!=NULL)
     {
         // insert, avoiding duplicates
-        PayloadList::iterator i = payloadList.find(endSeqNo);
+        PayloadList::iterator i = payloadList.find(offs);
         if (i!=payloadList.end()) {delete msg; continue;}
-        payloadList[endSeqNo] = msg;
+        payloadList[offs] = msg;
     }
 
     return rcv_nxt;
 }
 
-cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
+TCPDataMsg* TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
 {
-    extractTo(seq, maxBytes);
+    TCPDataMsg *msg = NULL;
+    cPacket *objMsg = NULL;
+    uint64 nextPayloadBegin = extractedPayloadBytes;
+    uint64 nextPayloadLength = 0;
+    uint64 nextPayloadOffs = 0;
 
-    // pass up payload messages, in sequence number order
-    if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
-        return NULL;
+    if (!payloadList.empty())
+    {
+        nextPayloadBegin = payloadList.begin()->first;
+        nextPayloadLength = payloadList.begin()->second->getByteLength();
+    }
+    uint64 nextPayloadEnd = nextPayloadBegin + nextPayloadLength;
 
-    cPacket *msg = payloadList.begin()->second;
-    payloadList.erase(payloadList.begin());
+    ASSERT(nextPayloadBegin == extractedPayloadBytes);
+
+    if (isPayloadExtractAtFirst)
+    {
+        nextPayloadOffs = nextPayloadBegin;
+        ASSERT(extractedBytes <= extractedPayloadBytes);
+        ASSERT(nextPayloadBegin >= extractedBytes);
+        if (nextPayloadBegin == extractedBytes)
+        {
+            if (maxBytes > nextPayloadLength)
+                maxBytes = nextPayloadLength;
+        }
+        else // nextPayloadBegin > extractedBytes
+        {
+            ulong extractableBytes = nextPayloadBegin - extractedBytes;
+            if (maxBytes > extractableBytes)
+                maxBytes = extractableBytes;
+        }
+    }
+    else
+    {
+        nextPayloadOffs = nextPayloadEnd -1;
+        ulong extractableBytes = nextPayloadEnd - extractedBytes;
+        ASSERT(extractedBytes >= extractedPayloadBytes);
+        if (maxBytes > extractableBytes)
+            maxBytes = extractableBytes;
+    }
+
+    ulong bytes = extractTo(seq, maxBytes);
+
+    if (bytes)
+    {
+        msg = new TCPDataMsg("DATA");
+        msg->setByteLength(bytes);
+        if (!payloadList.empty() && extractedBytes <= nextPayloadOffs && nextPayloadOffs < extractedBytes + bytes)
+        {
+            objMsg = payloadList.begin()->second;
+            payloadList.erase(payloadList.begin());
+            msg->setDataObject(objMsg);
+            msg->setIsBegin(isPayloadExtractAtFirst);
+            extractedPayloadBytes = nextPayloadEnd;
+        }
+        msg->setDataObject(objMsg);
+        msg->setIsBegin(isPayloadExtractAtFirst);
+        extractedBytes += bytes;
+    }
     return msg;
 }
 

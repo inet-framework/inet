@@ -685,6 +685,10 @@ class INET_API TCPConnection
      */
     virtual bool isSendQueueEmpty();
 
+    /**
+     * Utility: returns true when original msg transfered at first byte when using msg based transfer.
+     */
+    bool isSendingObjectUpAtFirstByteEnabled() { return sendingObjectUpAtFirstByteEnabled; }
 };
 
 #endif

@@ -70,13 +70,19 @@ class INET_API TCPSegment : public TCPSegment_Base
      * Adds a message object to the TCP segment. The sequence number+1 of the
      * last byte of the message should be passed as 2nd argument
      */
-    virtual void addPayloadMessage(cPacket *msg, uint32 endSequenceNo);
+    virtual void addPayloadMessage(cPacket *msg, uint64 streamOffs);
 
     /**
      * Removes and returns the first message object in this TCP segment.
      * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
      */
-    virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+    _OPPDEPRECATED virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+
+    /**
+     * Removes and returns the first message object in this TCP segment.
+     * It also returns the stream offset number of its first octet in streamOffs.
+     */
+    virtual cPacket *removeFirstPayloadMessage(uint64& streamOffs);
 
     /**
      * Truncate segment.

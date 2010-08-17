@@ -45,8 +45,12 @@
 
 cplusplus {{
 #include "IPvXAddress.h"
+
+typedef cPacket* cPacketPtr;
 }}
 
+class noncobject cPacketPtr;
+//struct cPacketPtr;
 
 class noncobject IPvXAddress;
 
@@ -190,7 +194,6 @@ class TCPOpenCommand extends TCPCommand
 //
 class TCPSendCommand extends TCPCommand
 {
-    long availableBytesInSendQueueLimit; // The TCP layout must send up a TCP_I_QUEUESTATUS msg, when the available bytes in send queue will smaller than this value
 }
 
 
@@ -217,6 +220,17 @@ class TCPConnectInfo extends TCPCommand
     IPvXAddress remoteAddr;
     int localPort;
     int remotePort;
+}
+
+
+//
+// Sent with message kind TCP_I_DATA or TCP_I_URGENT_DATA
+//
+class TCPDataMsg extends cPacket
+{
+    @customize(true);
+    cPacketPtr dataObject;
+    bool isBegin;	// true when first byte of dataObject is first byte of the packet, false when last byte of dataObject is last byte of the packet   
 }
 
 

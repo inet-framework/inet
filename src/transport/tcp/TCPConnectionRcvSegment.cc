@@ -21,7 +21,7 @@
 #include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
-#include "TCPCommand_m.h"
+#include "TCPCommand.h"
 #include "TCPSendQueue.h"
 #include "TCPSACKRexmitQueue.h"
 #include "TCPReceiveQueue.h"
@@ -117,7 +117,7 @@ void TCPConnection::sendDataToApp()
     {
         if (readBytes)
         {
-            cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
+            TCPDataMsg *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, readBytes);
             if (msg)
             {
                 msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
@@ -144,7 +144,7 @@ void TCPConnection::sendDataToApp()
     {
         while (1)
         {
-            cPacket *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, receiveQueue->getExtractableBytesUpTo(state->rcv_nxt));
+            TCPDataMsg *msg = receiveQueue->extractBytesUpTo(state->rcv_nxt, receiveQueue->getExtractableBytesUpTo(state->rcv_nxt));
             if(msg == NULL)
                 break;
             msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA

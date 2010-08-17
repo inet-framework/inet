@@ -24,10 +24,12 @@
 #include "TCPSegment.h"
 
 // forward declarations:
+class TCPDataMsg;
 class TcpLwipConnection;
 
+
 /**
- * Abstract base class for TCP_NSC send queues. In fact a single object
+ * Abstract base class for TCP_LWIP send queues. In fact a single object
  * represents both the send queue and the retransmission queue
  * (no need to separate them). The TCPConnection object knows
  * which data in the queue have already been transmitted ("retransmission
@@ -71,12 +73,12 @@ class TcpLwipConnection;
  *   receiving side when its last byte has arrived on the simulated
  *   connection.
  *
- * Different TCP_NSCSendQueue subclasses can be written to accomodate
+ * Different TcpLwipSendQueue subclasses can be written to accomodate
  * different needs.
  *
- * This class goes hand-in-hand with TCP_NSCReceiveQueue.
+ * This class goes hand-in-hand with TcpLwipReceiveQueue.
  *
- * @see TCP_NSCReceiveQueue
+ * @see TcpLwipReceiveQueue
  */
 
 class INET_API TcpLwipSendQueue : public cPolymorphic
@@ -176,16 +178,11 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      * from the segment and store it in the receive queue. The segment
      * object should *not* be deleted.
      *
-     * The method should return the number of bytes to copied to buffer.
-     *
-     * The method should fill the bufferP for data sending to NSC stack
-     *
-     * called before nsc_stack->if_receive_packet() called
      */
     virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP) = 0;
 
     /**
-     * The method called when data received from NSC
+     * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
@@ -197,14 +194,13 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
     virtual long getExtractableBytesUpTo() = 0;
 
     /**
-     * Should create a packet to be passed up to the app, up to (but NOT
-     * including) the given sequence no (usually rcv_nxt).
+     * Should create a packet to be passed up to the app, limited to maxBytesP length.
      * It should return NULL if there's no more data to be passed up --
      * this method is called several times until it returns NULL.
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo(long maxBytesP) = 0;
+    virtual TCPDataMsg* extractBytesUpTo(long maxBytesP) = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

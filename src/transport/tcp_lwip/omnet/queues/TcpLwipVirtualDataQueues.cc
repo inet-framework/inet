@@ -21,7 +21,7 @@
 
 #include "TcpLwipVirtualDataQueues.h"
 
-#include "TCPCommand_m.h"
+#include "TCPCommand.h"
 #include "TcpLwipConnection.h"
 #include "TCPSerializer.h"
 
@@ -217,26 +217,18 @@ long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo()
  *
  * the method called after socket->read_data() successful
  */
-cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(long maxBytesP)
+TCPDataMsg* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(long maxBytesP)
 {
     ASSERT(connM);
 
-    cPacket *dataMsg = NULL;
+    TCPDataMsg *dataMsg = NULL;
     if(bytesInQueueM && maxBytesP)
     {
-        IPvXAddress localAddr((connM->pcbM->local_ip.addr));
-        IPvXAddress remoteAddr((connM->pcbM->remote_ip.addr));
-
-        dataMsg = new cPacket("DATA");
+        dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(std::min(bytesInQueueM, maxBytesP));
-        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setConnId(connM->connIdM);
-        tcpConnectInfo->setLocalAddr(localAddr);
-        tcpConnectInfo->setRemoteAddr(remoteAddr);
-        tcpConnectInfo->setLocalPort(connM->pcbM->local_port);
-        tcpConnectInfo->setRemotePort(connM->pcbM->remote_port);
-        dataMsg->setControlInfo(tcpConnectInfo);
+        dataMsg->setDataObject(NULL);
+        dataMsg->setIsBegin(false);
         bytesInQueueM -= dataMsg->getByteLength();
     }
     return dataMsg;

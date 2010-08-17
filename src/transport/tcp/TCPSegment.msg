@@ -47,7 +47,7 @@ struct cPacketPtr;
 
 struct TCPPayloadMessage
 {
-    unsigned int endSequenceNo;
+    uint64 streamOffs;	// offset of first  byte of msg in tcp stream
     cPacketPtr msg;
 }
 

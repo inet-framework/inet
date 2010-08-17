@@ -34,14 +34,15 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
   protected:
     struct Payload
     {
-        uint32 beginSequenceNo;
+        uint64 beginStreamOffset;   // the offset of first byte of packet in the datastream
         cPacket *msg;
     };
     typedef std::list<Payload> PayloadQueue;
     PayloadQueue payloadQueueM;
 
-    uint32 beginM;  // 1st sequence number stored
-    uint32 endM;    // last sequence number stored +1
+    uint32 initialSeqNoM;  // the initial sequence number ( sequence no of first byte)
+    uint64 enquedBytesM;
+    uint64 ackedBytesM;
     bool isValidSeqNoM;
     long int unsentTcpLayerBytesM;
 
@@ -116,18 +117,13 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 
 class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 {
-  public:
-    class SeqCmpLess
-    {
-      public:
-        bool operator()(uint32 a, uint32 b) const { return seqLess(a, b); }
-    };
-
   protected:
-    typedef std::map<uint32, cPacket *, SeqCmpLess> PayloadList;
+    typedef std::map<uint64, cPacket*> PayloadList;
     PayloadList payloadListM;
-    bool isValidSeqNoM;
-    uint32 lastExtractedSeqNoM;
+//    bool isValidSeqNoM;
+    bool isPayloadExtractAtFirstM;
+    uint64 lastExtractedBytesM;
+    uint64 lastExtractedPayloadBytesM;
 
   public:
     /**
@@ -178,7 +174,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
      *
      * called after socket->read_data() successful
      */
-    virtual cPacket *extractBytesUpTo(long maxBytesP);
+    virtual TCPDataMsg* extractBytesUpTo(long maxBytesP);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

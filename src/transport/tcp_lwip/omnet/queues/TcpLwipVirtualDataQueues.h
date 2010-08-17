@@ -153,7 +153,7 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo(long maxBytesP);
+    virtual TCPDataMsg* extractBytesUpTo(long maxBytesP);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

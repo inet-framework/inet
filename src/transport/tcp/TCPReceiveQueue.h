@@ -22,9 +22,10 @@
 #include <omnetpp.h>
 #include "TCPConnection.h"
 
-
+//Forward declarations:
 class TCPSegment;
 class TCPCommand;
+class TCPDataMsg;
 
 
 /**
@@ -91,7 +92,7 @@ class INET_API TCPReceiveQueue : public cPolymorphic
      * It should return NULL if there's no more data to be passed up --
      * this method is called several times until it returns NULL.
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq, ulong maxBytes) = 0;
+    virtual TCPDataMsg* extractBytesUpTo(uint32 seq, ulong maxBytes) = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

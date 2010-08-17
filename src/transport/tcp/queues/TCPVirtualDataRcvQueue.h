@@ -82,7 +82,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     /**
      *
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq, ulong maxBytes);
+    virtual TCPDataMsg* extractBytesUpTo(uint32 seq, ulong maxBytes);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
