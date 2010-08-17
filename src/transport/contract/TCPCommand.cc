@@ -1,16 +1,23 @@
 //
+// Copyright (C) 2010 Zoltan Bojthe
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "TCPCommand.h"
-/*
-* class TCPDataMsg : public TCPDataMsg_Base
- * {
- *   public:
- *     TCPDataMsg& operator=(const TCPDataMsg& other) {TCPDataMsg_Base::operator=(other); return *this;}
- *     virtual TCPDataMsg *dup() const {return new TCPDataMsg(*this);}
- *     // ADD CODE HERE to redefine and implement pure virtual functions from TCPDataMsg_Base
- * };
- */
+
 
 TCPDataMsg::TCPDataMsg(const char *name)
     : TCPDataMsg_Base(name)
@@ -31,8 +38,7 @@ TCPDataMsg::~TCPDataMsg()
 
 TCPDataMsg& TCPDataMsg::operator=(const TCPDataMsg& other)
 {
-    if (this==&other)
-        return *this;
+    if (this==&other) return *this;
     TCPDataMsg_Base::operator=(other);
     this->dataObject_var = other.dataObject_var->dup();
     return *this;
