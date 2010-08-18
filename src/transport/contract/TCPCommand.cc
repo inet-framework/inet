@@ -33,7 +33,11 @@ TCPDataMsg::TCPDataMsg(const TCPDataMsg& other) : TCPDataMsg_Base(other.getName(
 
 TCPDataMsg::~TCPDataMsg()
 {
-    delete dataObject_var;
+    if (dataObject_var)
+    {
+        drop(dataObject_var);
+        delete dataObject_var;
+    }
 }
 
 TCPDataMsg& TCPDataMsg::operator=(const TCPDataMsg& other)
@@ -44,9 +48,21 @@ TCPDataMsg& TCPDataMsg::operator=(const TCPDataMsg& other)
     return *this;
 }
 
+void TCPDataMsg::setDataObject(const cPacketPtr& dataObject)
+{
+    if (dataObject_var)
+        throw cRuntimeError(this,"setDataObject: already contains a data object");
+    dataObject_var = dataObject;
+    if (dataObject_var)
+        take(dataObject_var);
+}
+
 cPacket* TCPDataMsg::removeDataObject()
 {
+    if (! dataObject_var)
+        return NULL;
     cPacket* ret = dataObject_var;
     dataObject_var = NULL;
+    drop(ret);
     return ret;
 }

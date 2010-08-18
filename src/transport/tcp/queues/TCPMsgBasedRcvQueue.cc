@@ -151,7 +151,6 @@ TCPDataMsg* TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
             msg->setIsBegin(isPayloadExtractAtFirst);
             extractedPayloadBytes = nextPayloadEnd;
         }
-        msg->setDataObject(objMsg);
         msg->setIsBegin(isPayloadExtractAtFirst);
         extractedBytes += bytes;
     }

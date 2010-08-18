@@ -35,6 +35,7 @@ class TCPDataMsg : public TCPDataMsg_Base
     TCPDataMsg& operator=(const TCPDataMsg& other);
     virtual TCPDataMsg *dup() const {return new TCPDataMsg(*this);}
 
+    virtual void setDataObject(const cPacketPtr& dataObject);
     virtual cPacket* removeDataObject();
 };
 
