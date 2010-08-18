@@ -44,7 +44,7 @@
 #include "lwip/opt.h"
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
 /* Create the list of all memory pools managed by memp. MEMP_MAX represents a NULL pool at the end */
@@ -123,7 +123,7 @@ void  memp_free(memp_t type, void *mem);
 #endif /* MEMP_MEM_MALLOC */
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* __LWIP_MEMP_H__ */

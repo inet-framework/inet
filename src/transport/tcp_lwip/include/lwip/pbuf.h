@@ -37,7 +37,7 @@
 #include "lwip/err.h"
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
 #define PBUF_TRANSPORT_HLEN 20
@@ -114,7 +114,7 @@ err_t pbuf_take(struct pbuf *buf, const void *dataptr, u16_t len);
 struct pbuf *pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* __LWIP_PBUF_H__ */
