@@ -48,17 +48,11 @@ const IPvXAddress TCP_NSC::localInnerGwS("1.0.0.254");
 const IPvXAddress TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 
 const char * TCP_NSC::stackNameParamNameS = "stackName";
-
 const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 
 bool TCP_NSC::testingS;
 bool TCP_NSC::logverboseS;
 
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing) || (TCP_NSC::testingS)) ? ev : std::cout)
-#define tcpEV ev
-//#define tcpEV std::cout
 
 struct nsc_iphdr
 {
@@ -110,7 +104,7 @@ struct nsc_ipv6hdr
 
 static char *flags2str(unsigned char flags)
 {
-    static char buf[512];
+    static char buf[128];
     buf[0]='\0';
     if(flags & TH_FIN) strcat(buf, " FIN");
     if(flags & TH_SYN) strcat(buf, " SYN");
@@ -677,6 +671,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
     if (!conn)
     {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
+
         // add into appConnMap
         conn = &tcpAppConnMapM[connId];
         conn->connIdM = connId;
@@ -990,9 +985,9 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
 
     switch (msgP->getKind())
     {
-        case TCP_C_OPEN_ACTIVE: process_OPEN_ACTIVE(connP, tcpCommand, msgP); break;
-        case TCP_C_OPEN_PASSIVE: process_OPEN_PASSIVE(connP, tcpCommand, msgP); break;
-        case TCP_C_SEND: process_SEND(connP, tcpCommand, check_and_cast<cPacket*>(msgP)); break;
+        case TCP_C_OPEN_ACTIVE: process_OPEN_ACTIVE(connP, check_and_cast<TCPOpenCommand*>(tcpCommand), msgP); break;
+        case TCP_C_OPEN_PASSIVE: process_OPEN_PASSIVE(connP, check_and_cast<TCPOpenCommand*>(tcpCommand), msgP); break;
+        case TCP_C_SEND: process_SEND(connP, check_and_cast<TCPSendCommand*>(tcpCommand), check_and_cast<cPacket*>(msgP)); break;
         case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
         case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
         case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
@@ -1006,15 +1001,19 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
     */
 }
 
-void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPOpenCommand *tcpOpenCommandP, cMessage *msgP)
 {
-    TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommandP);
+    if (tcpOpenCommandP->getExplicitReadsEnabled())
+        opp_error("TCP_NSC not supported ExplicitReadsEnabled mode");
+
+    if (tcpOpenCommandP->getSendNotificationsEnabled())
+        opp_error("TCP_NSC not supported SendNotificationsEnabled mode");
 
     TCP_NSC_Connection::SockPair inetSockPair,nscSockPair;
-    inetSockPair.localM.ipAddrM = openCmd->getLocalAddr();
-    inetSockPair.remoteM.ipAddrM = openCmd->getRemoteAddr();
-    inetSockPair.localM.portM = openCmd->getLocalPort();
-    inetSockPair.remoteM.portM = openCmd->getRemotePort();
+    inetSockPair.localM.ipAddrM = tcpOpenCommandP->getLocalAddr();
+    inetSockPair.remoteM.ipAddrM = tcpOpenCommandP->getRemoteAddr();
+    inetSockPair.localM.portM = tcpOpenCommandP->getLocalPort();
+    inetSockPair.remoteM.portM = tcpOpenCommandP->getRemotePort();
 
     if (inetSockPair.remoteM.ipAddrM.isUnspecified() || inetSockPair.remoteM.portM == -1)
         opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
@@ -1045,23 +1044,28 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     // TODO sendToIp already set the addresses.
     //changeAddresses(connP, inetSockPair, nscSockPair);
 
-    delete tcpCommandP;
+    delete tcpOpenCommandP;
     delete msgP;
 }
 
-void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPOpenCommand *tcpOpenCommandP, cMessage *msgP)
 {
     ASSERT(pStackM);
 
-    TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommandP);
+    if (!tcpOpenCommandP->getFork())
+        opp_error("TCP_NSC not supported only Forking mode");
 
-    ASSERT(openCmd->getFork()==true);
+    if (tcpOpenCommandP->getExplicitReadsEnabled())
+        opp_error("TCP_NSC not supported ExplicitReadsEnabled mode");
+
+    if (tcpOpenCommandP->getSendNotificationsEnabled())
+        opp_error("TCP_NSC not supported SendNotificationsEnabled mode");
 
     TCP_NSC_Connection::SockPair inetSockPair, nscSockPair;
-    inetSockPair.localM.ipAddrM = openCmd->getLocalAddr();
-    inetSockPair.remoteM.ipAddrM = openCmd->getRemoteAddr();
-    inetSockPair.localM.portM = openCmd->getLocalPort();
-    inetSockPair.remoteM.portM = openCmd->getRemotePort();
+    inetSockPair.localM.ipAddrM = tcpOpenCommandP->getLocalAddr();
+    inetSockPair.remoteM.ipAddrM = tcpOpenCommandP->getRemoteAddr();
+    inetSockPair.localM.portM = tcpOpenCommandP->getLocalPort();
+    inetSockPair.remoteM.portM = tcpOpenCommandP->getRemotePort();
 
     uint32_t nscRemoteAddr = inetSockPair.remoteM.ipAddrM.isUnspecified()
         ? ntohl(INADDR_ANY)
@@ -1089,14 +1093,13 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
 
     changeAddresses(connP, inetSockPair, nscSockPair);
 
-    delete openCmd;
+    delete tcpOpenCommandP;
     delete msgP;
 }
 
-void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cPacket *msgP)
+void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPSendCommand *tcpCommandP, cPacket *msgP)
 {
-    TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommandP);
-    delete sendCommand;
+    delete tcpCommandP;
 
     connP.send(msgP);
 
