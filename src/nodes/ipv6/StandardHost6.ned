@@ -43,7 +43,7 @@ module StandardHost6
         int numUdpApps = default(0);
         string tcpAppType = default("");
         string udpAppType = default("");
-        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_lwip, TCP_NSC)
         @display("i=device/laptop");
     gates:
         inout pppg[] @labels(PPPFrame-conn);

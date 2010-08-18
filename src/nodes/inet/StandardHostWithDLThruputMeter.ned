@@ -52,7 +52,7 @@ module StandardHostWithDLThruputMeter
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");
-        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
+        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_lwip, TCP_NSC)
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");

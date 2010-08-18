@@ -1,3 +1,7 @@
+2010-08-18  Zoltan Bojthe
+
+    * Removed this deprecated TCP implementation from INET
+
 2010-03-26  Andras Varga
 
     * fix: represent port numbers with ushort
