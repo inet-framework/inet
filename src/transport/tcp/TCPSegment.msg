@@ -44,6 +44,10 @@ cplusplus {{
 
 struct cPacketPtr;
 
+class TCPPayloadBytes
+{
+    uint8 bytes[];
+}	// FIXME make a better implementation!!!
 
 struct TCPPayloadMessage
 {
@@ -189,4 +193,8 @@ packet TCPSegment
     // that the receiving TCP passes up the message object to its client
     // when the last byte of the message has arrived.
     abstract TCPPayloadMessage payload[];
+
+    // Message bytes that travel in this segment as data.
+    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_BYTECOUNT)
+	TCPPayloadBytes payloadBytes;
 }
