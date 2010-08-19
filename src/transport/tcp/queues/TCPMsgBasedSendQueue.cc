@@ -87,7 +87,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     while (i!=payloadQueue.end() && (i->beginStreamOffset < toOffs))
     {
         if (!payloadName) payloadName = i->msg->getName();
-        tcpseg->addPayloadMessage(i->msg->dup(), i->beginStreamOffset);
+        tcpseg->addPayloadMessage(i->msg->dup(), i->beginStreamOffset, i->beginStreamOffset - fromOffs);
         ++i;
     }
 

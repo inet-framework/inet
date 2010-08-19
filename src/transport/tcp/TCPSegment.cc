@@ -25,8 +25,8 @@ TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 {
     TCPSegment_Base::operator=(other);
 
-    for (std::list<TCPPayloadMessage>::const_iterator i=other.payloadList.begin(); i!=other.payloadList.end(); ++i)
-        addPayloadMessage(i->msg->dup(), i->streamOffs);
+    for (PayloadList::const_iterator i=other.payloadList.begin(); i!=other.payloadList.end(); ++i)
+        addPayloadMessage(i->msg->dup(), i->streamOffs, i->segmentOffs);
 
     return *this;
 }
@@ -48,14 +48,30 @@ void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
         unsigned int truncleft = firstSeqNo - sequenceNo_var;
         payloadLength_var -= truncleft;
         sequenceNo_var = firstSeqNo;
-        //TODO truncate data correctly if need
+
+        // truncate payload data correctly
+        while (!payloadList.empty() && payloadList.front().segmentOffs < truncleft)
+        {
+            cPacket *msg = payloadList.front().msg;
+            payloadList.pop_front();
+            dropAndDelete(msg);
+        }
+        for (PayloadList::iterator i = payloadList.begin(); i != payloadList.end(); ++i)
+            i->segmentOffs -= truncleft;
     }
 
     if(seqGreater(sequenceNo_var+payloadLength_var, endSeqNo))
     {
         unsigned int truncright = sequenceNo_var + payloadLength_var - endSeqNo;
         payloadLength_var -= truncright;
-        //TODO truncate data correctly if need
+
+        // truncate payload data correctly
+        while (!payloadList.empty() && payloadList.back().segmentOffs >= payloadLength_var)
+        {
+            cPacket *msg = payloadList.back().msg;
+            payloadList.pop_back();
+            dropAndDelete(msg);
+        }
     }
 }
 
@@ -83,7 +99,7 @@ unsigned int TCPSegment::getPayloadArraySize() const
 
 TCPPayloadMessage& TCPSegment::getPayload(unsigned int k)
 {
-    std::list<TCPPayloadMessage>::iterator i = payloadList.begin();
+    PayloadList::iterator i = payloadList.begin();
     while (k>0 && i!=payloadList.end())
         (++i, --k);
     return *i;
@@ -94,33 +110,26 @@ void TCPSegment::setPayload(unsigned int k, const TCPPayloadMessage& payload_var
     throw cRuntimeError(this, "setPayload() not supported, use addPayloadMessage()");
 }
 
-void TCPSegment::addPayloadMessage(cPacket *msg, uint64 streamOffs)
+void TCPSegment::addPayloadMessage(cPacket *msg, uint64 streamOffs, uint64 segmentOffs)
 {
     take(msg);
 
     TCPPayloadMessage payload;
     payload.streamOffs = streamOffs;
+    payload.segmentOffs = segmentOffs;
     payload.msg = msg;
     payloadList.push_back(payload);
 }
 
-cPacket *TCPSegment::removeFirstPayloadMessage(uint64& streamOffs)
+cPacket *TCPSegment::removeFirstPayloadMessage(uint64& streamOffs, uint64& segmentOffs)
 {
     if (payloadList.empty())
         return NULL;
 
     cPacket *msg = payloadList.front().msg;
     streamOffs = payloadList.front().streamOffs;
+    segmentOffs = payloadList.front().segmentOffs;
     payloadList.pop_front();
     drop(msg);
     return msg;
 }
-
-cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
-{
-    uint64 streamOffs = endSequenceNo;
-    cPacket* msg = removeFirstPayloadMessage(streamOffs);
-    endSequenceNo = streamOffs;
-    return msg;
-}
-

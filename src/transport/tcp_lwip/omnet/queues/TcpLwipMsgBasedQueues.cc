@@ -140,7 +140,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
             if (!payloadName)
                 payloadName = i->msg->getName();
             cPacket* msg = i->msg->dup();
-            tcpseg->addPayloadMessage(msg, i->beginStreamOffset);
+            tcpseg->addPayloadMessage(msg, i->beginStreamOffset, i->beginStreamOffset - fromOffs);
             ++i;
         }
     }
@@ -216,19 +216,19 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     ASSERT(seqGE(tcpsegP->getSequenceNo()+tcpsegP->getPayloadLength(), lastSeqNo));
 
     cPacket *msg;
-    uint64 beginOffsNo;
-    while ((msg=tcpsegP->removeFirstPayloadMessage(beginOffsNo)) != NULL)
+    uint64 streamOffsNo, segmentOffsNo;
+    while ((msg=tcpsegP->removeFirstPayloadMessage(streamOffsNo, segmentOffsNo)) != NULL)
     {
-        if (beginOffsNo >= lastExtractedPayloadBytesM) // if (seqLess(seqNoP, beginSeqNo) && seqLE(beginSeqNo, lastSeqNo))  //FIXME
+        if (streamOffsNo >= lastExtractedPayloadBytesM && segmentOffsNo < tcpsegP->getPayloadLength())
         {
             // insert, avoiding duplicates
-            PayloadList::iterator i = payloadListM.find(beginOffsNo);
+            PayloadList::iterator i = payloadListM.find(streamOffsNo);
             if (i != payloadListM.end())
             {
                 ASSERT(msg->getByteLength() == i->second->getByteLength());
                 delete i->second;
             }
-            payloadListM[beginOffsNo] = msg;
+            payloadListM[streamOffsNo] = msg;
         }
         else
         {

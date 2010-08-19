@@ -40,7 +40,8 @@ inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
 class INET_API TCPSegment : public TCPSegment_Base
 {
   protected:
-    std::list<TCPPayloadMessage> payloadList;
+    typedef std::list<TCPPayloadMessage> PayloadList;
+    PayloadList payloadList;
 
   public:
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
@@ -67,22 +68,18 @@ class INET_API TCPSegment : public TCPSegment_Base
     virtual TCPPayloadMessage& getPayload(unsigned int k);
 
     /**
-     * Adds a message object to the TCP segment. The sequence number+1 of the
-     * last byte of the message should be passed as 2nd argument
+     * Adds a message object to the TCP segment.
+     * The stream offset number of the first byte of the message should be passed as 2nd argument.
+     * The segment offset number of the first byte of the message should be passed as 3th argument.
      */
-    virtual void addPayloadMessage(cPacket *msg, uint64 streamOffs);
-
-    /**
-     * Removes and returns the first message object in this TCP segment.
-     * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
-     */
-    _OPPDEPRECATED virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+    virtual void addPayloadMessage(cPacket *msg, uint64 streamOffs, uint64 segmentOffs);
 
     /**
      * Removes and returns the first message object in this TCP segment.
      * It also returns the stream offset number of its first octet in streamOffs.
+     * It also returns the segment offset number of its first octet in segmentOffs.
      */
-    virtual cPacket *removeFirstPayloadMessage(uint64& streamOffs);
+    virtual cPacket *removeFirstPayloadMessage(uint64& streamOffs, uint64& segmentOffs);
 
     /**
      * Truncate segment.

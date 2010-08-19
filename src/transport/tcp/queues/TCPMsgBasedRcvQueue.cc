@@ -82,13 +82,15 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 
     cPacket *msg;
-    uint64 offs;
-    while ((msg=tcpseg->removeFirstPayloadMessage(offs))!=NULL)
+    uint64 streamOffs, segmentOffs;
+    while (NULL != (msg = tcpseg->removeFirstPayloadMessage(streamOffs, segmentOffs)))
     {
         // insert, avoiding duplicates
-        PayloadList::iterator i = payloadList.find(offs);
-        if (i!=payloadList.end()) {delete msg; continue;}
-        payloadList[offs] = msg;
+        PayloadList::iterator i = payloadList.find(streamOffs);
+        if (i != payloadList.end())
+            delete msg;
+        else
+            payloadList[streamOffs] = msg;
     }
 
     return rcv_nxt;
