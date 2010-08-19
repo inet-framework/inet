@@ -81,6 +81,7 @@ void TCPSessionApp::waitUntil(simtime_t t)
     if (simTime()>=t)
         return;
 
+    if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
     cMessage *timeoutMsg = new cMessage("timeout");
     scheduleAt(t, timeoutMsg);
     cMessage *msg=NULL;
@@ -88,6 +89,7 @@ void TCPSessionApp::waitUntil(simtime_t t)
     {
         count(msg);
         socket.processMessage(msg);
+        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
     }
     delete timeoutMsg;
 }
@@ -132,17 +134,19 @@ void TCPSessionApp::activity()
         socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
     else
         socket.listenOnce();
+    if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
 
     // wait until connection gets established
     while (socket.getState()!=TCPSocket::CONNECTED)
     {
         socket.processMessage(receive());
+        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
         if (socket.getState()==TCPSocket::SOCKERROR)
             return;
     }
 
     EV << "connection established, starting sending\n";
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
+//    if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
 
     // send
     if (sendBytes>0)
@@ -171,6 +175,7 @@ void TCPSessionApp::activity()
         EV << "issuing CLOSE command\n";
         if (ev.isGUI()) getDisplayString().setTagArg("t",0,"closing");
         socket.close();
+        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
     }
 
     // wait until peer closes too and all data arrive
@@ -179,6 +184,7 @@ void TCPSessionApp::activity()
         cMessage *msg = receive();
         count(msg);
         socket.processMessage(msg);
+        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
     }
 }
 
