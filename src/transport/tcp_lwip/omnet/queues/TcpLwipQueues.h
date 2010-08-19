@@ -116,8 +116,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      *
      * called before called socket->send_data()
      */
-//    virtual int getNscMsg(void* bufferP, int bufferLengthP) = 0;
-    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) = 0;
+    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) = 0;
 
     /**
      * The function should remove msgLengthP bytes from NSCqueue
@@ -127,7 +126,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      *
      * called with return value of socket->send_data() if larger than 0
      */
-    virtual void dequeueTcpLayerMsg(int msgLengthP) = 0;
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP) = 0;
 
     /**
      * Utility function: returns how many bytes are available in the queue.
@@ -144,7 +143,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP) = 0;
+    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP) = 0;
 
     /**
      * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
@@ -186,12 +185,12 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueTcpLayerData(void* dataP, int dataLengthP) = 0;
+    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP) = 0;
 
     /**
      * Returns the number of received bytes.
      */
-    virtual long getExtractableBytesUpTo() = 0;
+    virtual unsigned long getExtractableBytesUpTo() = 0;
 
     /**
      * Should create a packet to be passed up to the app, limited to maxBytesP length.
@@ -200,7 +199,7 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      *
      * called after socket->read_data() successfull
      */
-    virtual TCPDataMsg* extractBytesUpTo(long maxBytesP) = 0;
+    virtual TCPDataMsg* extractBytesUpTo(unsigned long maxBytesP) = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

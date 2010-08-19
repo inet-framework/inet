@@ -44,7 +44,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
     uint64 enquedBytesM;
     uint64 ackedBytesM;
     bool isValidSeqNoM;
-    long int unsentTcpLayerBytesM;
+    unsigned long unsentTcpLayerBytesM;
 
   public:
     /**
@@ -61,13 +61,13 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP);
+    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP);
 
-    virtual void dequeueTcpLayerMsg(int msgLengthP);
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
     ulong getBytesAvailable();
 
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP);
+    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP);
 
     virtual void discardAckedBytes(unsigned long bytesP);
 };
@@ -97,11 +97,11 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 
     virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP);
 
-    virtual void enqueueTcpLayerData(void* dataP, int dataLengthP);
+    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
 
-    virtual long getExtractableBytesUpTo();
+    virtual unsigned long getExtractableBytesUpTo();
 
-    virtual TCPDataMsg* extractBytesUpTo(long maxBytesP);
+    virtual TCPDataMsg* extractBytesUpTo(unsigned long maxBytesP);
 
     virtual uint32 getAmountOfBufferedBytes();
 
@@ -112,7 +112,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
-    long int bytesInQueueM;
+    unsigned long bytesInQueueM;
 };
 
 #endif

@@ -57,14 +57,14 @@ void TcpLwipVirtualDataSendQueue::enqueueAppData(cPacket *msgP)
     unsentTcpLayerBytesM += bytes;
 }
 
-int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP)
+unsigned int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
 {
     ASSERT(bufferP);
 
     return (unsentTcpLayerBytesM > bufferLengthP) ? bufferLengthP : unsentTcpLayerBytesM;
 }
 
-void TcpLwipVirtualDataSendQueue::dequeueTcpLayerMsg(int msgLengthP)
+void TcpLwipVirtualDataSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
     ASSERT(msgLengthP <= unsentTcpLayerBytesM);
 
@@ -77,7 +77,7 @@ ulong TcpLwipVirtualDataSendQueue::getBytesAvailable()
 }
 
 TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, int tcpLengthP)
+        const void* tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -132,17 +132,17 @@ void TcpLwipVirtualDataReceiveQueue::insertBytesFromSegment(
 //    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
-void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void* dataP, int dataLengthP)
+void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
 {
     bytesInQueueM += dataLengthP;
 }
 
-long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo()
+unsigned long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo()
 {
     return bytesInQueueM;
 }
 
-TCPDataMsg* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(long maxBytesP)
+TCPDataMsg* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(unsigned long maxBytesP)
 {
     ASSERT(connM);
 

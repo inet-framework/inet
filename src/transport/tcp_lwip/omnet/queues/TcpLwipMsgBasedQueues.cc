@@ -70,7 +70,7 @@ void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
     uint32 bytes = msgP->getByteLength();
 
     Payload payload;
-    payload.beginStreamOffset = this->enquedBytesM;
+    payload.beginStreamOffset = enquedBytesM;
     payload.msg = msgP;
     payloadQueueM.push_back(payload);
 
@@ -78,14 +78,14 @@ void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
     unsentTcpLayerBytesM += bytes;
 }
 
-int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP)
+unsigned int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
 {
     ASSERT(bufferP);
 
     return (unsentTcpLayerBytesM > bufferLengthP) ? bufferLengthP : unsentTcpLayerBytesM;
 }
 
-void TcpLwipMsgBasedSendQueue::dequeueTcpLayerMsg(int msgLengthP)
+void TcpLwipMsgBasedSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
     ASSERT(msgLengthP <= unsentTcpLayerBytesM);
 
@@ -98,7 +98,7 @@ ulong TcpLwipMsgBasedSendQueue::getBytesAvailable()
 }
 
 TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, int tcpLengthP)
+        const void* tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -237,17 +237,17 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     }
 }
 
-void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, int dataLengthP)
+void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
 {
     bytesInQueueM += dataLengthP;
 }
 
-long TcpLwipMsgBasedReceiveQueue::getExtractableBytesUpTo()
+unsigned long TcpLwipMsgBasedReceiveQueue::getExtractableBytesUpTo()
 {
     return bytesInQueueM;
 }
 
-TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(long maxBytesP)
+TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytesP)
 {
     ASSERT(connM);
 
