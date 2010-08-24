@@ -47,6 +47,8 @@
 cplusplus {{
 #include "IPvXAddress.h"
 
+#include "ByteArrayMessage.h"
+
 typedef cPacket* cPacketPtr;
 }}
 
@@ -54,6 +56,8 @@ class noncobject cPacketPtr;
 //struct cPacketPtr;
 
 class noncobject IPvXAddress;
+
+class ByteArrayMessage;
 
 //
 // \TCP command codes, sent by the application to TCP. These constants
@@ -227,7 +231,7 @@ class TCPConnectInfo extends TCPCommand
 //
 // Sent with message kind TCP_I_DATA or TCP_I_URGENT_DATA
 //
-class TCPDataMsg extends cPacket
+class TCPDataMsg extends ByteArrayMessage
 {
     @customize(true);
     cPacketPtr dataObject;
