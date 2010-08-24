@@ -20,7 +20,7 @@
 #include "TCPMsgBasedRcvQueue.h"
 
 #include "TCPCommand.h"
-
+#include "TCPSegmentWithData.h"
 
 Register_Class(TCPMsgBasedRcvQueue);
 
@@ -77,8 +77,10 @@ std::string TCPMsgBasedRcvQueue::info() const
     return res;
 }
 
-uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg_)
 {
+    TCPSegmentWithMessages *tcpseg = check_and_cast<TCPSegmentWithMessages *>(tcpseg_);
+
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 
     cPacket *msg;

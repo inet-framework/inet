@@ -23,6 +23,7 @@
 
 #include "TcpLwipQueues.h"
 
+#include "ByteArrayList.h"
 #include "TCPConnection.h"
 
 /**
@@ -60,15 +61,7 @@ class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
     virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
-    struct Payload
-    {
-        uint64 endStreamOffset;   // the offset of first byte of packet in the datastream
-        cPacket *msg;
-    };
-    typedef std::list<Payload> PayloadQueue;
-    PayloadQueue payloadQueueM;
-    uint64 enquedBytesM;
-    uint64 dequedBytesM;
+    ByteArrayList byteArrayListM;
 };
 
 class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
@@ -127,7 +120,7 @@ class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
-    unsigned long bytesInQueueM;
+    ByteArrayList byteArrayListM;
 };
 
 #endif

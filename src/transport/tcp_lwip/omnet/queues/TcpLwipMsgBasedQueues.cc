@@ -23,6 +23,7 @@
 
 #include "TCPCommand.h"
 #include "TcpLwipConnection.h"
+#include "TCPSegmentWithData.h"
 #include "TCPSerializer.h"
 #include "TCP_lwip.h"
 
@@ -104,7 +105,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 
     PayloadQueue::iterator i;
 
-    TCPSegment *tcpseg = new TCPSegment("tcp-segment");
+    TCPSegmentWithMessages *tcpseg = new TCPSegmentWithMessages("tcp-segment");
 
     TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg);
 
@@ -215,11 +216,12 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     uint32 lastSeqNo = seqNoP + bufferLengthP;
     ASSERT(seqGE(tcpsegP->getSequenceNo()+tcpsegP->getPayloadLength(), lastSeqNo));
 
+    TCPSegmentWithMessages *tcpseg = check_and_cast<TCPSegmentWithMessages *>(tcpsegP);
     cPacket *msg;
     uint64 streamOffsNo, segmentOffsNo;
-    while ((msg=tcpsegP->removeFirstPayloadMessage(streamOffsNo, segmentOffsNo)) != NULL)
+    while ((msg=tcpseg->removeFirstPayloadMessage(streamOffsNo, segmentOffsNo)) != NULL)
     {
-        if (streamOffsNo >= lastExtractedPayloadBytesM && segmentOffsNo < tcpsegP->getPayloadLength())
+        if (streamOffsNo >= lastExtractedPayloadBytesM && segmentOffsNo < tcpseg->getPayloadLength())
         {
             // insert, avoiding duplicates
             PayloadList::iterator i = payloadListM.find(streamOffsNo);

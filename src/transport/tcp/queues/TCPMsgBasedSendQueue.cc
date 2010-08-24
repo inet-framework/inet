@@ -18,6 +18,8 @@
 
 #include "TCPMsgBasedSendQueue.h"
 
+#include "TCPSegmentWithData.h"
+
 Register_Class(TCPMsgBasedSendQueue);
 
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
@@ -73,7 +75,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
 
-    TCPSegment *tcpseg = conn->createTCPSegment(NULL);
+    TCPSegmentWithMessages *tcpseg = new TCPSegmentWithMessages();
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
 

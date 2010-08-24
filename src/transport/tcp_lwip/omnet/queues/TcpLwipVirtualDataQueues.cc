@@ -87,13 +87,12 @@ TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
-    sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
+    sprintf(msgname, "%.10s%s%s%s(l=%lu)",
             "tcpseg",
             tcpseg->getSynBit() ? " SYN":"",
             tcpseg->getFinBit() ? " FIN":"",
             (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
-            (unsigned long)numBytes,
-            tcpseg->getPayloadArraySize());
+            (unsigned long)numBytes);
     tcpseg->setName(msgname);
 
     return tcpseg;

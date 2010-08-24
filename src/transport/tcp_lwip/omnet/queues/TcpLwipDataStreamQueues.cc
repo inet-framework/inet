@@ -23,6 +23,7 @@
 
 #include "TCPCommand.h"
 #include "TcpLwipConnection.h"
+#include "TCPSegmentWithData.h"
 #include "TCPSerializer.h"
 
 
@@ -32,8 +33,6 @@ Register_Class(TcpLwipDataStreamReceiveQueue);
 
 
 TcpLwipDataStreamSendQueue::TcpLwipDataStreamSendQueue()
-    :
-    enquedBytesM(0), dequedBytesM(0)
 {
 }
 
@@ -43,7 +42,7 @@ TcpLwipDataStreamSendQueue::~TcpLwipDataStreamSendQueue()
 
 void TcpLwipDataStreamSendQueue::setConnection(TcpLwipConnection *connP)
 {
-    enquedBytesM = dequedBytesM = 0;
+    byteArrayListM.clear();
     TcpLwipSendQueue::setConnection(connP);
 }
 
@@ -51,34 +50,27 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
 
-    int bytes = msgP->getByteLength();
-    enquedBytesM += bytes;
-    Payload payload;
-    payload.endStreamOffset = enquedBytesM;
-    payload.msg = msgP;
-    payloadQueueM.push_back(payload);
+    ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msgP);
+    int64 bytes = msg->getByteLength();
+    ASSERT (bytes == msg->getByteArray().getDataArraySize());
+    byteArrayListM.push(msg->getByteArray());
 }
 
 unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
 {
     ASSERT(bufferP);
 
-    uint64 unsentTcpLayerBytes = enquedBytesM - dequedBytesM;
-    int bytes = (unsentTcpLayerBytes > bufferLengthP) ? bufferLengthP : unsentTcpLayerBytes;
-    //FIXME copy data to bufferP from payloadQueueM at streamPos [dequedBytesM..dequedBytesM+bytes-1]
-    return bytes;
+    return byteArrayListM.getBytesToBuffer(bufferP, bufferLengthP);
 }
 
 void TcpLwipDataStreamSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
-    ASSERT(dequedBytesM + msgLengthP <= enquedBytesM);
-
-    dequedBytesM += msgLengthP;
+    byteArrayListM.drop(msgLengthP);
 }
 
 ulong TcpLwipDataStreamSendQueue::getBytesAvailable()
 {
-    return enquedBytesM - dequedBytesM; // TODO
+    return byteArrayListM.getLength();
 }
 
 TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
@@ -86,19 +78,19 @@ TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = new TCPSegment("");
+    TCPSegmentWithBytes *tcpseg = new TCPSegmentWithBytes("");
 
     TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg);
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
-    sprintf(msgname, "%.10s%s%s%s(l=%lu,%dmsg)",
+    sprintf(msgname, "%.10s%s%s%s(l=%lu,%u bytes)",
             "tcpseg",
             tcpseg->getSynBit() ? " SYN":"",
             tcpseg->getFinBit() ? " FIN":"",
             (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
             (unsigned long)numBytes,
-            tcpseg->getPayloadArraySize());
+            tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);
 
     return tcpseg;
@@ -110,8 +102,6 @@ void TcpLwipDataStreamSendQueue::discardAckedBytes(unsigned long bytesP)
 }
 
 TcpLwipDataStreamReceiveQueue::TcpLwipDataStreamReceiveQueue()
-    :
-    bytesInQueueM(0)
 {
 }
 
@@ -124,7 +114,7 @@ void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
 {
     ASSERT(connP);
 
-    bytesInQueueM = 0;
+    byteArrayListM.clear();
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
@@ -139,12 +129,15 @@ void TcpLwipDataStreamReceiveQueue::insertBytesFromSegment(
 
 void TcpLwipDataStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
 {
-    bytesInQueueM += dataLengthP;
+    ByteArray byteArray;
+
+    byteArray.setDataFromBuffer(dataP, dataLengthP);
+    byteArrayListM.push(byteArray);
 }
 
 unsigned long TcpLwipDataStreamReceiveQueue::getExtractableBytesUpTo()
 {
-    return bytesInQueueM;
+    return byteArrayListM.getLength();
 }
 
 TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxBytesP)
@@ -152,26 +145,29 @@ TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxByt
     ASSERT(connM);
 
     TCPDataMsg *dataMsg = NULL;
-    if(bytesInQueueM && maxBytesP)
+    uint64 bytesInQueue = byteArrayListM.getLength();
+    if(bytesInQueue && maxBytesP)
     {
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->setByteLength(std::min(bytesInQueueM, maxBytesP));
-        dataMsg->setDataObject(NULL);
-        dataMsg->setIsBegin(false);
-        bytesInQueueM -= dataMsg->getByteLength();
+        unsigned int extractBytes = bytesInQueue > maxBytesP ? maxBytesP : bytesInQueue;
+        char *data = new char[extractBytes];
+        unsigned int extractedBytes = byteArrayListM.moveBytesToBuffer(data, extractBytes);
+        dataMsg->setByteLength(extractedBytes);
+        dataMsg->setDataFromBuffer(data, extractedBytes);
+        delete data;
     }
     return dataMsg;
 }
 
 uint32 TcpLwipDataStreamReceiveQueue::getAmountOfBufferedBytes()
 {
-    return bytesInQueueM;
+    return byteArrayListM.getLength();
 }
 
 uint32 TcpLwipDataStreamReceiveQueue::getQueueLength()
 {
-    return bytesInQueueM ? 1 : 0;
+    return byteArrayListM.getLength();
 }
 
 void TcpLwipDataStreamReceiveQueue::getQueueStatus()
