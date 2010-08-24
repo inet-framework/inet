@@ -14,8 +14,11 @@
 
 cplusplus {{
 #include "INETDefs.h"
+
+#include "ByteArray.h"
 }}
 
+class noncobject ByteArray;
 
 //
 // Message that carries raw bytes. Used with emulation-related features.
@@ -23,5 +26,5 @@ cplusplus {{
 packet ByteArrayMessage
 {
     @customize(true);
-    char data[];
+    ByteArray byteArray;
 }

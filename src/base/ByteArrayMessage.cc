@@ -17,31 +17,22 @@
 void ByteArrayMessage::setDataFromBuffer(const void *ptr, int length)
 {
     ASSERT(length > 0);
+    byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);
+}
 
-    delete[] data_var;
-    data_var = new char[length];
-    data_arraysize = length;
-    memcpy(data_var, ptr, length);
+void ByteArrayMessage::addDataFromBuffer(const void *ptr, unsigned int length)
+{
+    byteArray_var.addDataFromBuffer(ptr, length);
 }
 
 void ByteArrayMessage::copyDataToBuffer(void *ptr, int length)
 {
-    ASSERT((uint)length <= data_arraysize);
-
-    memcpy(ptr, data_var, length);
+    ASSERT(length > 0);
+    byteArray_var.copyDataToBuffer(ptr, (unsigned int)length);
 }
 
 void ByteArrayMessage::removePrefix(int length)
 {
-    ASSERT(data_arraysize > (uint)length);
     ASSERT(length > 0);
-
-    int nlength = data_arraysize - length;
-    char *data_var2 = new char[nlength];
-    memcpy(data_var2, data_var+length, nlength);
-    delete[] data_var;
-    data_var = data_var2;
-    data_arraysize = nlength;
+    byteArray_var.truncateData((unsigned int)length);
 }
-
-

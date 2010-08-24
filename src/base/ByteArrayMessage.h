@@ -29,6 +29,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     virtual ByteArrayMessage *dup() const {return new ByteArrayMessage(*this);}
 
     virtual void setDataFromBuffer(const void *ptr, int length);
+    virtual void addDataFromBuffer(const void *ptr, unsigned int length);
     virtual void copyDataToBuffer(void *ptr, int length);
     virtual void removePrefix(int length);
 };
