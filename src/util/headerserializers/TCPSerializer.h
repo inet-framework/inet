@@ -20,13 +20,14 @@
 #define __TCPSERIALIZER_H
 
 
-#include "TCPSegment.h"
-#include "TCPSegment_m.h"
 #include "IPvXAddress.h"
 
 #include "headers/defs.h"
 
 #include "headers/tcp.h"
+
+//forward declarations:
+class TCPSegment;
 
 /**
  * Converts between TCPSegment and binary (network byte order) TCP header.
