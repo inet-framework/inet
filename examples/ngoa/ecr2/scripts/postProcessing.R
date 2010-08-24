@@ -114,7 +114,7 @@ for (.i in 4:4) {
         .df <- rbind.fill(list(.df, data.frame(n=rep(.n, .l), dr=.x, interpolated=.y)))
     }
     .df <- merge(remove_missing(.df[c('n', 'dr', 'mean', 'ci.width')]),
-                 remove_missing(.df[c('n', 'dr', 'interpolated')]), all=T)  # merge to remove duplcated rows with NAs
+                 remove_missing(.df[c('n', 'dr', 'interpolated')]), all=T)  # merge to remove duplicated rows with NAs
     .da.dfs[[.i]] <- .df
 
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
