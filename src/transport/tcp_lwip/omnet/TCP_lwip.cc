@@ -41,7 +41,6 @@ bool TCP_lwip::testingS;
 bool TCP_lwip::logverboseS;
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
 #define tcpEV ((ev.disable_tracing) || (TCP_lwip::testingS)) ? ev : ev
 
 TCP_lwip::TCP_lwip()
