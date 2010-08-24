@@ -29,32 +29,8 @@ cplusplus {{
 
     // maximum allowed sack entry number, if no other options are used
     const unsigned int MAX_SACK_ENTRIES = 4;
-
-    typedef cPacket *cPacketPtr;
-
-    inline std::ostream& operator<<(std::ostream& os, cPacketPtr msg)
-    {
-        return os << "(" << msg->getClassName() << ") " << msg->getName() << ": " << msg->info();
-    }
-
-    inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
-    inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
 }}
 
-
-struct cPacketPtr;
-
-class TCPPayloadBytes
-{
-    uint8 bytes[];
-}	// FIXME make a better implementation!!!
-
-struct TCPPayloadMessage
-{
-    uint64 streamOffs;	// offset of first  byte of msg in the full tcp stream
-    uint64 segmentOffs;	// offset of first  byte of msg in the current tcp segment
-    cPacketPtr msg;     // pointer to payload msg
-}
 
 //
 // TCP Option Numbers
@@ -183,18 +159,4 @@ packet TCPSegment
     // e.g. when simulating a virtual data stream there's no encapsulated
     // packet at all.
     unsigned long payloadLength;
-
-    // Message objects (cMessages) that travel in this segment as data.
-    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_OBJECT)
-    // Every message object is put into the TCPSegment that would (in real life)
-    // carry its first octet. That is, if message object 'msg' with length=100 bytes
-    // occupies stream offset number range 10000..10099, it will travel in the
-    // TCPSegment which carries the octet 10000. This way it is easily achieved
-    // that the receiving TCP passes up the message object to its client
-    // when the last byte of the message has arrived.
-    abstract TCPPayloadMessage payload[];
-
-    // Message bytes that travel in this segment as data.
-    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_BYTECOUNT)
-	TCPPayloadBytes payloadBytes;
 }

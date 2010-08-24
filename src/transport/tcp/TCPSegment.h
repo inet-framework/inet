@@ -39,47 +39,11 @@ inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
  */
 class INET_API TCPSegment : public TCPSegment_Base
 {
-  protected:
-    typedef std::list<TCPPayloadMessage> PayloadList;
-    PayloadList payloadList;
-
   public:
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
-    virtual ~TCPSegment();
-    TCPSegment& operator=(const TCPSegment& other);
+    TCPSegment& operator=(const TCPSegment& other) {TCPSegment_Base::operator=(other); return *this;}
     virtual TCPSegment *dup() const {return new TCPSegment(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    /** Generated but unused method, should not be called. */
-    virtual void setPayloadArraySize(unsigned int size);
-    /** Generated but unused method, should not be called. */
-    virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var);
-
-    /**
-     * Returns the number of payload messages in this TCP segment
-     */
-    virtual unsigned int getPayloadArraySize() const;
-
-    /**
-     * Returns the kth payload message in this TCP segment
-     */
-    virtual TCPPayloadMessage& getPayload(unsigned int k);
-
-    /**
-     * Adds a message object to the TCP segment.
-     * The stream offset number of the first byte of the message should be passed as 2nd argument.
-     * The segment offset number of the first byte of the message should be passed as 3th argument.
-     */
-    virtual void addPayloadMessage(cPacket *msg, uint64 streamOffs, uint64 segmentOffs);
-
-    /**
-     * Removes and returns the first message object in this TCP segment.
-     * It also returns the stream offset number of its first octet in streamOffs.
-     * It also returns the segment offset number of its first octet in segmentOffs.
-     */
-    virtual cPacket *removeFirstPayloadMessage(uint64& streamOffs, uint64& segmentOffs);
 
     /**
      * Truncate segment.
@@ -87,8 +51,14 @@ class INET_API TCPSegment : public TCPSegment_Base
      * @param endSeqNo: sequence no of new last byte+1
      */
     virtual void truncateSegment(uint32 firstSeqNo, uint32 endSeqNo);
+
+  protected:
+    /**
+     * Truncate segment data. Called from truncateSegment().
+     * @param truncleft: number of bytes for truncate from begin of data
+     * @param truncright: number of bytes for truncate from end of data
+     */
+    virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
 
 #endif
-
-
