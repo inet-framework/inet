@@ -18,7 +18,7 @@
 #include "ByteArray.h"
 
 /**
- * Message that carries raw bytes. Used with emulation-related features.
+ * Queue that carries raw bytes.
  */
 class ByteArrayList
 {
@@ -35,9 +35,10 @@ class ByteArrayList
 
     void clear();
     virtual void push(const ByteArray& byteArrayP);
-    virtual uint64 getLength() { return dataLengthM; }
-    virtual unsigned int getBytesToBuffer(void* bufferP, unsigned int bufferLengthP);
-    virtual unsigned int moveBytesToBuffer(void* bufferP, unsigned int bufferLengthP);
+    virtual void push(const void* bufferP, unsigned int bufferLengthP);
+    virtual uint64 getLength() const { return dataLengthM; }
+    virtual unsigned int getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int popBytesToBuffer(void* bufferP, unsigned int bufferLengthP);
     virtual unsigned int drop(unsigned int lengthP);
 };
 

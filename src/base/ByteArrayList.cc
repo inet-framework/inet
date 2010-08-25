@@ -37,30 +37,36 @@ ByteArrayList& ByteArrayList::operator=(const ByteArrayList& other)
 
 void ByteArrayList::push(const ByteArray& byteArrayP)
 {
-    dataLengthM += byteArrayP.getDataArraySize();
     dataListM.push_back(byteArrayP);
+    dataLengthM += byteArrayP.getDataArraySize();
 }
 
-unsigned int ByteArrayList::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
+void ByteArrayList::push(const void* bufferP, unsigned int bufferLengthP)
 {
-    // FIXME
+    ByteArray byteArray;
+    dataListM.push_back(byteArray);
+    dataListM.back().setDataFromBuffer(bufferP, bufferLengthP);
+    dataLengthM += bufferLengthP;
+}
+
+unsigned int ByteArrayList::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const
+{
     unsigned int copiedBytes = 0;
     unsigned int bytes = bufferLengthP;
 
-    DataList::iterator i;
+    DataList::const_iterator i;
     for(i=this->dataListM.begin(); (0 < bytes) && (i != dataListM.end()); ++i)
     {
-        unsigned int cbytes = std::min(bytes, i->getDataArraySize());
-        i->copyDataToBuffer((char *)bufferP + copiedBytes, cbytes);
+        unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes, bytes);
         copiedBytes += cbytes;
         bytes -= cbytes;
     }
     return copiedBytes;
 }
 
-unsigned int ByteArrayList::moveBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
+unsigned int ByteArrayList::popBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
 {
-    return drop(getBytesToBuffer(bufferP,bufferLengthP));
+    return drop(getBytesToBuffer(bufferP, bufferLengthP));
 }
 
 unsigned int ByteArrayList::drop(unsigned int lengthP)
@@ -70,17 +76,16 @@ unsigned int ByteArrayList::drop(unsigned int lengthP)
     unsigned int length = lengthP;
     while (length > 0)
     {
-        DataList::iterator i = dataListM.begin();
-        unsigned int cbytes = i->getDataArraySize();
-        if (cbytes <= length)
+        unsigned int sliceLength = dataListM.front().getDataArraySize();
+        if (sliceLength <= length)
         {
             dataListM.pop_front();
-            dataLengthM -= cbytes;
-            length -= cbytes;
+            dataLengthM -= sliceLength;
+            length -= sliceLength;
         }
         else
         {
-            i->truncateData(length);
+            dataListM.front().truncateData(length);
             dataLengthM -= length;
             length = 0;
         }

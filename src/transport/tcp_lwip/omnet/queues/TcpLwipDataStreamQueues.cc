@@ -152,7 +152,7 @@ TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxByt
         dataMsg->setKind(TCP_I_DATA);
         unsigned int extractBytes = bytesInQueue > maxBytesP ? maxBytesP : bytesInQueue;
         char *data = new char[extractBytes];
-        unsigned int extractedBytes = byteArrayListM.moveBytesToBuffer(data, extractBytes);
+        unsigned int extractedBytes = byteArrayListM.popBytesToBuffer(data, extractBytes);
         dataMsg->setByteLength(extractedBytes);
         dataMsg->setDataFromBuffer(data, extractedBytes);
         delete data;

@@ -19,19 +19,59 @@
 #include "ByteArray_m.h"
 
 /**
- * Message that carries raw bytes. Used with emulation-related features.
+ * Class that carries raw bytes.
  */
 class ByteArray : public ByteArray_Base
 {
   public:
+    /**
+     * Constructor
+     */
     ByteArray() : ByteArray_Base() {}
+
+    /**
+     * Copy constructor
+     */
     ByteArray(const ByteArray& other) : ByteArray_Base() {operator=(other);}
+
+    /**
+     * operator =
+     */
     ByteArray& operator=(const ByteArray& other) {ByteArray_Base::operator=(other); return *this;}
+
+    /**
+     * Creates and returns an exact copy of this object.
+     */
     virtual ByteArray *dup() const {return new ByteArray(*this);}
 
+    /**
+     * Set data from buffer
+     * @param ptr: pointer to buffer
+     * @param length: length of data
+     */
     virtual void setDataFromBuffer(const void *ptr, unsigned int length);
+
+    /**
+     * Add data from buffer to the end of existing content
+     * @param ptr: pointer to input buffer
+     * @param length: length of data
+     */
     virtual void addDataFromBuffer(const void *ptr, unsigned int length);
-    virtual void copyDataToBuffer(void *ptr, unsigned int length) const;
+
+    /**
+     * Copy data content to buffer
+     * @param ptr: pointer to output buffer
+     * @param length: length of buffer, maximum of copied bytes
+     * @return: length of copied data
+     */
+    virtual unsigned int copyDataToBuffer(void *ptr, unsigned int length) const;
+
+    /**
+     * Truncate data content
+     * @param truncleft: The number of bytes from the beginning of the content be removed
+     * @param truncright: The number of bytes from the end of the content be removed
+     * Generate assert when not have enough bytes for truncation
+     */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
 };
 

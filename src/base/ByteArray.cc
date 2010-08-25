@@ -41,11 +41,12 @@ void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
     data_var = ndata_var;
 }
 
-void ByteArray::copyDataToBuffer(void *ptr, unsigned int length) const
+unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length) const
 {
-    ASSERT(length <= data_arraysize);
-
+    if (length > data_arraysize)
+        length = data_arraysize;
     memcpy(ptr, data_var, length);
+    return length;
 }
 
 void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)

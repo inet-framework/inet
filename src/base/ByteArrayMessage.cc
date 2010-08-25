@@ -14,9 +14,8 @@
 
 #include "ByteArrayMessage.h"
 
-void ByteArrayMessage::setDataFromBuffer(const void *ptr, int length)
+void ByteArrayMessage::setDataFromBuffer(const void *ptr, unsigned int length)
 {
-    ASSERT(length > 0);
     byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);
 }
 
@@ -25,14 +24,12 @@ void ByteArrayMessage::addDataFromBuffer(const void *ptr, unsigned int length)
     byteArray_var.addDataFromBuffer(ptr, length);
 }
 
-void ByteArrayMessage::copyDataToBuffer(void *ptr, int length)
+unsigned int ByteArrayMessage::copyDataToBuffer(void *ptr, unsigned int length) const
 {
-    ASSERT(length > 0);
-    byteArray_var.copyDataToBuffer(ptr, (unsigned int)length);
+    return byteArray_var.copyDataToBuffer(ptr, length);
 }
 
-void ByteArrayMessage::removePrefix(int length)
+void ByteArrayMessage::removePrefix(unsigned int length)
 {
-    ASSERT(length > 0);
-    byteArray_var.truncateData((unsigned int)length);
+    byteArray_var.truncateData(length);
 }
