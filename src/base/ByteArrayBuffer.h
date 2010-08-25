@@ -20,7 +20,7 @@
 /**
  * Queue that carries raw bytes.
  */
-class ByteArrayList
+class ByteArrayBuffer
 {
   protected:
     typedef std::list<ByteArray> DataList;
@@ -28,10 +28,10 @@ class ByteArrayList
     DataList dataListM;
 
   public:
-    ByteArrayList();
-    ByteArrayList(const ByteArrayList& other);
-    ByteArrayList& operator=(const ByteArrayList& other);
-    virtual ByteArrayList *dup() const {return new ByteArrayList(*this);}
+    ByteArrayBuffer();
+    ByteArrayBuffer(const ByteArrayBuffer& other);
+    ByteArrayBuffer& operator=(const ByteArrayBuffer& other);
+    virtual ByteArrayBuffer *dup() const {return new ByteArrayBuffer(*this);}
 
     void clear();
     virtual void push(const ByteArray& byteArrayP);

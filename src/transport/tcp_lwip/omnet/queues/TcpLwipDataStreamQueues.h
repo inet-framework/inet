@@ -23,7 +23,7 @@
 
 #include "TcpLwipQueues.h"
 
-#include "ByteArrayList.h"
+#include "ByteArrayBuffer.h"
 #include "TCPConnection.h"
 
 /**
@@ -61,7 +61,7 @@ class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
     virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
-    ByteArrayList byteArrayListM;
+    ByteArrayBuffer byteArrayBufferM;
 };
 
 class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
@@ -120,7 +120,7 @@ class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
-    ByteArrayList byteArrayListM;
+    ByteArrayBuffer byteArrayBufferM;
 };
 
 #endif

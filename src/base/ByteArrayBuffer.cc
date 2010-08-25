@@ -12,36 +12,36 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "ByteArrayList.h"
+#include "ByteArrayBuffer.h"
 
-ByteArrayList::ByteArrayList()
+ByteArrayBuffer::ByteArrayBuffer()
  :
     dataLengthM(0)
 {
     // FIXME
 }
 
-ByteArrayList::ByteArrayList(const ByteArrayList& other)
+ByteArrayBuffer::ByteArrayBuffer(const ByteArrayBuffer& other)
  :
     dataLengthM(other.dataLengthM),
     dataListM(other.dataListM)
 {
 }
 
-ByteArrayList& ByteArrayList::operator=(const ByteArrayList& other)
+ByteArrayBuffer& ByteArrayBuffer::operator=(const ByteArrayBuffer& other)
 {
     dataLengthM = other.dataLengthM;
     dataListM = other.dataListM;
     return *this;
 }
 
-void ByteArrayList::push(const ByteArray& byteArrayP)
+void ByteArrayBuffer::push(const ByteArray& byteArrayP)
 {
     dataListM.push_back(byteArrayP);
     dataLengthM += byteArrayP.getDataArraySize();
 }
 
-void ByteArrayList::push(const void* bufferP, unsigned int bufferLengthP)
+void ByteArrayBuffer::push(const void* bufferP, unsigned int bufferLengthP)
 {
     ByteArray byteArray;
     dataListM.push_back(byteArray);
@@ -49,7 +49,7 @@ void ByteArrayList::push(const void* bufferP, unsigned int bufferLengthP)
     dataLengthM += bufferLengthP;
 }
 
-unsigned int ByteArrayList::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const
+unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const
 {
     unsigned int copiedBytes = 0;
     unsigned int bytes = bufferLengthP;
@@ -64,12 +64,12 @@ unsigned int ByteArrayList::getBytesToBuffer(void* bufferP, unsigned int bufferL
     return copiedBytes;
 }
 
-unsigned int ByteArrayList::popBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
+unsigned int ByteArrayBuffer::popBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
 {
     return drop(getBytesToBuffer(bufferP, bufferLengthP));
 }
 
-unsigned int ByteArrayList::drop(unsigned int lengthP)
+unsigned int ByteArrayBuffer::drop(unsigned int lengthP)
 {
     ASSERT(lengthP <= dataLengthM);
 
@@ -94,7 +94,7 @@ unsigned int ByteArrayList::drop(unsigned int lengthP)
     return lengthP;
 }
 
-void ByteArrayList::clear()
+void ByteArrayBuffer::clear()
 {
     dataLengthM = 0;
     while (dataListM.begin() != dataListM.end())

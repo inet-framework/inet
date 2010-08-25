@@ -42,7 +42,7 @@ TcpLwipDataStreamSendQueue::~TcpLwipDataStreamSendQueue()
 
 void TcpLwipDataStreamSendQueue::setConnection(TcpLwipConnection *connP)
 {
-    byteArrayListM.clear();
+    byteArrayBufferM.clear();
     TcpLwipSendQueue::setConnection(connP);
 }
 
@@ -53,24 +53,24 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msgP);
     int64 bytes = msg->getByteLength();
     ASSERT (bytes == msg->getByteArray().getDataArraySize());
-    byteArrayListM.push(msg->getByteArray());
+    byteArrayBufferM.push(msg->getByteArray());
 }
 
 unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
 {
     ASSERT(bufferP);
 
-    return byteArrayListM.getBytesToBuffer(bufferP, bufferLengthP);
+    return byteArrayBufferM.getBytesToBuffer(bufferP, bufferLengthP);
 }
 
 void TcpLwipDataStreamSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
-    byteArrayListM.drop(msgLengthP);
+    byteArrayBufferM.drop(msgLengthP);
 }
 
 ulong TcpLwipDataStreamSendQueue::getBytesAvailable()
 {
-    return byteArrayListM.getLength();
+    return byteArrayBufferM.getLength();
 }
 
 TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
@@ -114,7 +114,7 @@ void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
 {
     ASSERT(connP);
 
-    byteArrayListM.clear();
+    byteArrayBufferM.clear();
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
@@ -132,12 +132,12 @@ void TcpLwipDataStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned in
     ByteArray byteArray;
 
     byteArray.setDataFromBuffer(dataP, dataLengthP);
-    byteArrayListM.push(byteArray);
+    byteArrayBufferM.push(byteArray);
 }
 
 unsigned long TcpLwipDataStreamReceiveQueue::getExtractableBytesUpTo()
 {
-    return byteArrayListM.getLength();
+    return byteArrayBufferM.getLength();
 }
 
 TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxBytesP)
@@ -145,14 +145,14 @@ TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxByt
     ASSERT(connM);
 
     TCPDataMsg *dataMsg = NULL;
-    uint64 bytesInQueue = byteArrayListM.getLength();
+    uint64 bytesInQueue = byteArrayBufferM.getLength();
     if(bytesInQueue && maxBytesP)
     {
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         unsigned int extractBytes = bytesInQueue > maxBytesP ? maxBytesP : bytesInQueue;
         char *data = new char[extractBytes];
-        unsigned int extractedBytes = byteArrayListM.popBytesToBuffer(data, extractBytes);
+        unsigned int extractedBytes = byteArrayBufferM.popBytesToBuffer(data, extractBytes);
         dataMsg->setByteLength(extractedBytes);
         dataMsg->setDataFromBuffer(data, extractedBytes);
         delete data;
@@ -162,12 +162,12 @@ TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxByt
 
 uint32 TcpLwipDataStreamReceiveQueue::getAmountOfBufferedBytes()
 {
-    return byteArrayListM.getLength();
+    return byteArrayBufferM.getLength();
 }
 
 uint32 TcpLwipDataStreamReceiveQueue::getQueueLength()
 {
-    return byteArrayListM.getLength();
+    return byteArrayBufferM.getLength();
 }
 
 void TcpLwipDataStreamReceiveQueue::getQueueStatus()
