@@ -68,7 +68,7 @@ std::string TCPMsgBasedRcvQueue::info() const
 
     for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
     {
-        sprintf(buf, "[%u..%u) ", i->begin, i->end);
+        sprintf(buf, "[%u..%u) ", (*i)->getBegin(), (*i)->getEnd());
         res+=buf;
     }
     sprintf(buf, "%u msgs", payloadList.size());
@@ -141,7 +141,9 @@ TCPDataMsg* TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
             maxBytes = extractableBytes;
     }
 
-    ulong bytes = extractTo(seq, maxBytes);
+    Region *reg = extractTo(seq, maxBytes);
+    ulong bytes = reg->getLength();
+    delete reg;
 
     if (bytes)
     {

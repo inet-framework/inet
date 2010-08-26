@@ -34,19 +34,42 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
   protected:
     uint32 rcv_nxt;
 
-    struct Region
+    class Region
     {
+      protected:
         uint32 begin;
         uint32 end;
+      public:
+        enum CompareStatus {BEFORE=1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
+        Region(uint32 _begin, uint32 _end) : begin(_begin),end(_end) {};
+        virtual ~Region() {};
+        uint32 getBegin() const {return begin;}
+        uint32 getEnd() const {return end;}
+        unsigned long getLength() const {return (ulong)(end - begin);}
+        unsigned long getLengthTo(uint32 seq) const;
+
+        /// Compare self and other
+        CompareStatus compare(const Region& other) const;
+
+        /// Merge other to self
+        virtual bool merge(const Region& other);
+
+        /// Copy self to msg
+        virtual void copyTo(TCPDataMsg* msg) const;
+
+        /**
+         * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
+         */
+        virtual Region* split(uint32 seq);
     };
-    typedef std::list<Region> RegionList;
+    typedef std::list<Region*> RegionList;
     RegionList regionList;
 
-    // merges segment byte range into regionList
-    void merge(uint32 segmentBegin, uint32 segmentEnd);
+    /// Merge segment byte range into regionList, the parameter region must created by 'new' operator.
+    void merge(Region *region);
 
-    // returns number of bytes extracted
-    ulong extractTo(uint32 toSeq, ulong maxBytes);
+    /// returns the number of bytes extracted
+    Region* extractTo(uint32 toSeq, ulong maxBytes);
 
   public:
     /**
@@ -64,6 +87,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      */
     virtual void init(uint32 startSeq);
 
+    void setConnection(TCPConnection *_conn);
+
     /**
      * Returns a string with region stored.
      */
@@ -73,6 +98,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      * Called when a TCP segment arrives. Returns sequence number for ACK.
      */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
+
+    virtual uint32 insertBytesFromRegion(Region *region);
 
     /**
      *
