@@ -27,6 +27,12 @@ void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
     data_arraysize = length;
 }
 
+void ByteArray::setDataFromByteArray(const ByteArray& other, unsigned int offset, unsigned int length)
+{
+    ASSERT(offset+length <= other.data_arraysize);
+    setDataFromBuffer(other.data_var+offset, length);
+}
+
 void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
 {
     if (0 == length)
@@ -41,10 +47,13 @@ void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
     data_var = ndata_var;
 }
 
-unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length) const
+unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length, unsigned int srcOffs) const
 {
-    if (length > data_arraysize)
-        length = data_arraysize;
+    //FIXME
+    if (srcOffs > data_arraysize)
+        return 0;
+    if (srcOffs + length > data_arraysize)
+        length = data_arraysize - srcOffs;
     memcpy(ptr, data_var, length);
     return length;
 }

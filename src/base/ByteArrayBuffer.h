@@ -37,7 +37,7 @@ class ByteArrayBuffer
     virtual void push(const ByteArray& byteArrayP);
     virtual void push(const void* bufferP, unsigned int bufferLengthP);
     virtual uint64 getLength() const { return dataLengthM; }
-    virtual unsigned int getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesToBuffer(void* bufferP, unsigned int bufferLengthP, unsigned int srcOffsP=0) const;
     virtual unsigned int popBytesToBuffer(void* bufferP, unsigned int bufferLengthP);
     virtual unsigned int drop(unsigned int lengthP);
 };

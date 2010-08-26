@@ -49,7 +49,7 @@ void ByteArrayBuffer::push(const void* bufferP, unsigned int bufferLengthP)
     dataLengthM += bufferLengthP;
 }
 
-unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP) const
+unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP, unsigned int srcOffsP) const
 {
     unsigned int copiedBytes = 0;
     unsigned int bytes = bufferLengthP;
@@ -57,9 +57,17 @@ unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int buffe
     DataList::const_iterator i;
     for(i=this->dataListM.begin(); (0 < bytes) && (i != dataListM.end()); ++i)
     {
-        unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes, bytes);
-        copiedBytes += cbytes;
-        bytes -= cbytes;
+        unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes, bytes, srcOffsP);
+        if (cbytes)
+        {
+            copiedBytes += cbytes;
+            bytes -= cbytes;
+            srcOffsP = 0;
+        }
+        else
+        {
+            srcOffsP -= i->getDataArraySize();
+        }
     }
     return copiedBytes;
 }
