@@ -260,6 +260,13 @@ class INET_API TCPSocket
     void setDataTransferMode(TCPDataTransferMode transferMode);
 
     /**
+     * convert transferMode string to TCPDataTransferMode enum
+     *
+     * Generate runtime error when parameter is missing or value is invalid.
+     */
+    TCPDataTransferMode strToTransfermode(const char* transferMode);
+
+    /**
      * Read "dataTransferMode" parameter from ini/ned, and set dataTransferMode member value
      *
      * Generate runtime error when parameter is missing or value is invalid.
