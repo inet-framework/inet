@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009 Thomas Reschka
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -49,11 +50,11 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         unsigned long getLengthTo(uint32 seq) const;
 
         /// Compare self and other
-        CompareStatus compare(const Region& other) const;
+        CompareStatus compare(const TCPVirtualDataRcvQueue::Region& other) const;
 
         // Virtual functions:
 
-        /// Merge other to self
+        /// Merge other region to self
         virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
 
         /// Copy self to msg
@@ -68,7 +69,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     RegionList regionList;
 
     /// Merge segment byte range into regionList, the parameter region must created by 'new' operator.
-    void merge(Region *region);
+    void merge(TCPVirtualDataRcvQueue::Region *region);
 
     /// returns the number of bytes extracted
     Region* extractTo(uint32 toSeq, ulong maxBytes);
@@ -101,7 +102,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
 
-    virtual uint32 insertBytesFromRegion(Region *region);
+    virtual uint32 insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region);
 
     /**
      *

@@ -24,7 +24,7 @@
 
 Register_Class(TCPVirtualDataRcvQueue);
 
-bool TCPVirtualDataRcvQueue::Region::merge(const Region* other)
+bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* other)
 {
     if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
@@ -44,7 +44,7 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::Region::split(uint32 seq
     return reg;
 }
 
-TCPVirtualDataRcvQueue::Region::CompareStatus TCPVirtualDataRcvQueue::Region::compare(const Region& other) const
+TCPVirtualDataRcvQueue::Region::CompareStatus TCPVirtualDataRcvQueue::Region::compare(const TCPVirtualDataRcvQueue::Region& other) const
 {
     if (seqLess(end, other.begin))
         return BEFORE;
@@ -127,7 +127,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     return insertBytesFromRegion(region);
 }
 
-uint32 TCPVirtualDataRcvQueue::insertBytesFromRegion(Region *region)
+uint32 TCPVirtualDataRcvQueue::insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region)
 {
     merge(region);
     if (seqGE(rcv_nxt, regionList.front()->getBegin()))
@@ -136,7 +136,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromRegion(Region *region)
 }
 
 //void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
-void TCPVirtualDataRcvQueue::merge(Region *seg)
+void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
 {
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
