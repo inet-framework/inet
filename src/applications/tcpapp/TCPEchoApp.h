@@ -17,7 +17,7 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-
+#include "TCPCommand.h"
 
 /**
  * Accepts any number of incoming connections, and sends back whatever
@@ -39,6 +39,7 @@ class INET_API TCPEchoApp : public cSimpleModule
     bool waitingData;
     long bytesInSendQueue;
     long sendBufferLimit;
+    TCPDataTransferMode dataTransferMode;
 
     // statistics:
     long bytesRcvd;

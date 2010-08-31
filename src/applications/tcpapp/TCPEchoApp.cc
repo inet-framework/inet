@@ -59,7 +59,9 @@ void TCPEchoApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    socket.readDataTransferModePar(*this);
+    const char *transferMode = par("dataTransferMode");
+    dataTransferMode = socket.strToTransfermode(transferMode);
+    socket.setDataTransferMode(dataTransferMode);
     socket.setExplicitReads(useExplicitRead);
     socket.setSendNotifications(sendNotificationsEnabled);
     socket.setReceiveBufferSize(readBufferSize);
@@ -129,7 +131,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             case TCP_I_URGENT_DATA:
             {
                 waitingData = false;
-                cPacket *pkt = check_and_cast<cPacket *>(msg);
+                TCPDataMsg *pkt = check_and_cast<TCPDataMsg *>(msg);
                 bytesRcvd += pkt->getByteLength();
                 bytesRcvdVector->record(bytesRcvd);
                 TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
@@ -151,6 +153,14 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                     long byteLen = pkt->getByteLength()*echoFactor;
                     if (byteLen<1) byteLen=1;
                     pkt->setByteLength(byteLen);
+                    if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
+                    {
+                        ByteArray& outdata = pkt->getByteArray();
+                        ByteArray indata = outdata;
+                        outdata.setDataArraySize(byteLen);
+                        for (long i=0; i<byteLen; i++)
+                            outdata.setData(i, indata.getData(i/echoFactor));
+                    }
 
                     if (delay==0)
                         sendDown(pkt);
