@@ -1,5 +1,6 @@
 //
 // Copyright 2004 Andras Varga
+// Copyright 2010 Zoltan Bojthe
 //
 // This library is free software, you can redistribute it and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -29,30 +30,41 @@ void TCPSessionApp::parseScript(const char *script)
         Command cmd;
 
         // parse time
-        while (isspace(*s)) s++;
-        if (!*s || *s==';') break;
+        while (isspace(*s))
+            s++;
+        if (!*s || *s==';')
+            break;
+
         const char *s0 = s;
-        cmd.tSend = strtod(s,&const_cast<char *&>(s));
+        cmd.tSend = strtod(s, &const_cast<char *&>(s));
         if (s==s0)
             throw cRuntimeError("syntax error in script: simulation time expected");
 
         // parse number of bytes
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
         if (!isdigit(*s))
             throw cRuntimeError("syntax error in script: number of bytes expected");
+
         cmd.numBytes = atoi(s);
-        while (isdigit(*s)) s++;
+        while (isdigit(*s))
+            s++;
 
         // add command
         commands.push_back(cmd);
 
         // skip delimiter
-        while (isspace(*s)) s++;
-        if (!*s) break;
+        while (isspace(*s))
+            s++;
+        if (!*s)
+            break;
+
         if (*s!=';')
             throw cRuntimeError("syntax error in script: separator ';' missing");
+
         s++;
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
     }
 }
 
@@ -63,7 +75,7 @@ void TCPSessionApp::count(cMessage *msg)
         if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
         {
             packetsRcvd++;
-            bytesRcvd+=PK(msg)->getByteLength();
+            bytesRcvd += PK(msg)->getByteLength();
         }
         else
         {
@@ -78,18 +90,18 @@ void TCPSessionApp::count(cMessage *msg)
 
 void TCPSessionApp::waitUntil(simtime_t t)
 {
-    if (simTime()>=t)
+    if (simTime() >= t)
         return;
 
     if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
     cMessage *timeoutMsg = new cMessage("timeout");
     scheduleAt(t, timeoutMsg);
     cMessage *msg=NULL;
-    while ((msg=receive())!=timeoutMsg)
+    while ((msg=receive()) != timeoutMsg)
     {
         count(msg);
         socket.processMessage(msg);
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
+        if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
     }
     delete timeoutMsg;
 }
@@ -134,13 +146,13 @@ void TCPSessionApp::activity()
         socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
     else
         socket.listenOnce();
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
+    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
 
     // wait until connection gets established
     while (socket.getState()!=TCPSocket::CONNECTED)
     {
         socket.processMessage(receive());
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
+        if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
         if (socket.getState()==TCPSocket::SOCKERROR)
             return;
     }
@@ -173,9 +185,9 @@ void TCPSessionApp::activity()
     {
         waitUntil(tClose);
         EV << "issuing CLOSE command\n";
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,"closing");
+        if (ev.isGUI()) getDisplayString().setTagArg("t", 0, "closing");
         socket.close();
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
+        if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
     }
 
     // wait until peer closes too and all data arrive
@@ -184,7 +196,7 @@ void TCPSessionApp::activity()
         cMessage *msg = receive();
         count(msg);
         socket.processMessage(msg);
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,socket.stateName(socket.getState()));
+        if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
     }
 }
 
