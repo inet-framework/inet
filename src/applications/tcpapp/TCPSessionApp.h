@@ -41,6 +41,7 @@ class INET_API TCPSessionApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
     int indicationsRcvd;
+    unsigned char lastByte;
 
   public:
     TCPSessionApp() : cSimpleModule(65536) {}
@@ -52,6 +53,8 @@ class INET_API TCPSessionApp : public cSimpleModule
 
     virtual void activity();
     virtual void finish();
+
+    virtual void sendOneMsg(long bytes);
 };
 
 #endif

@@ -17,6 +17,7 @@
 
 #include "GenericAppMsg_m.h"
 #include "IPAddressResolver.h"
+#include "TCPCommand.h"
 
 
 Define_Module(TCPSessionApp);
@@ -110,6 +111,7 @@ void TCPSessionApp::activity()
 {
     packetsRcvd = indicationsRcvd = 0;
     bytesRcvd = bytesSent = 0;
+    lastByte = 0;
     WATCH(packetsRcvd);
     WATCH(bytesRcvd);
     WATCH(indicationsRcvd);
@@ -136,7 +138,9 @@ void TCPSessionApp::activity()
     // open
     waitUntil(tOpen);
 
-    socket.readDataTransferModePar(*this);
+    const char *transferMode = par("dataTransferMode");
+    TCPDataTransferMode dataTransferMode = socket.strToTransfermode(transferMode);
+    socket.setDataTransferMode(dataTransferMode);
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
@@ -164,20 +168,12 @@ void TCPSessionApp::activity()
     if (sendBytes>0)
     {
         waitUntil(tSend);
-        EV << "sending " << sendBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
-        msg->setByteLength(sendBytes);
-        bytesSent += sendBytes;
-        socket.send(msg);
+        sendOneMsg(sendBytes);
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
     {
         waitUntil(i->tSend);
-        EV << "sending " << i->numBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
-        msg->setByteLength(i->numBytes);
-        bytesSent += i->numBytes;
-        socket.send(msg);
+        sendOneMsg(i->numBytes);
     }
 
     // close
@@ -198,6 +194,29 @@ void TCPSessionApp::activity()
         socket.processMessage(msg);
         if (ev.isGUI()) getDisplayString().setTagArg("t", 0, socket.stateName(socket.getState()));
     }
+}
+
+void TCPSessionApp::sendOneMsg(long numBytes)
+{
+    EV << "sending " << numBytes << " bytes\n";
+
+    cPacket *msg = NULL;
+    if (socket.getDataTransferMode() == TCP_TRANSFER_BYTESTREAM)
+    {
+        ByteArrayMessage* dmsg = new ByteArrayMessage("data1");
+        ByteArray& byteArray = dmsg->getByteArray();
+        byteArray.setDataArraySize(numBytes);
+        for (long i=0; i<numBytes; i++)
+            byteArray.setData(i, lastByte++);
+        msg = dmsg;
+    }
+    else
+    {
+        msg = new cPacket("data1");
+    }
+    msg->setByteLength(numBytes);
+    bytesSent += numBytes;
+    socket.send(msg);
 }
 
 void TCPSessionApp::finish()
