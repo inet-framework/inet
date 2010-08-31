@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipVIRTUALDATAQUEUES_H
-#define __INET_TcpLwipVIRTUALDATAQUEUES_H
+#ifndef __INET_TCPLWIP_DATASTREAMQUEUES_H
+#define __INET_TCPLWIP_DATASTREAMQUEUES_H
 
 #include <omnetpp.h>
 
@@ -123,4 +123,4 @@ class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
     ByteArrayBuffer byteArrayBufferM;
 };
 
-#endif
+#endif // __INET_TCPLWIP_DATASTREAMQUEUES_H

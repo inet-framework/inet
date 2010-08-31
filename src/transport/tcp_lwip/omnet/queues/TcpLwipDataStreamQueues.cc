@@ -54,6 +54,7 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     int64 bytes = msg->getByteLength();
     ASSERT (bytes == msg->getByteArray().getDataArraySize());
     byteArrayBufferM.push(msg->getByteArray());
+    delete msgP;
 }
 
 unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
