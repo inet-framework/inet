@@ -51,8 +51,10 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         /// Compare self and other
         CompareStatus compare(const Region& other) const;
 
+        // Virtual functions:
+
         /// Merge other to self
-        virtual bool merge(const Region& other);
+        virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
 
         /// Copy self to msg
         virtual void copyTo(TCPDataMsg* msg) const;
@@ -60,7 +62,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         /**
          * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
          */
-        virtual Region* split(uint32 seq);
+        virtual TCPVirtualDataRcvQueue::Region* split(uint32 seq);
     };
     typedef std::list<Region*> RegionList;
     RegionList regionList;

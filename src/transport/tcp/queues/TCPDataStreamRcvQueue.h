@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPMESSAGERCVQUEUE_H
-#define __INET_TCPMESSAGERCVQUEUE_H
+#ifndef __INET_TCPDATASTREAMRCVQUEUE_H
+#define __INET_TCPDATASTREAMRCVQUEUE_H
 
 #include <map>
 #include <string>
@@ -43,7 +43,7 @@ class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
         virtual ~Region() {};
 
         /// Merge other to self
-        virtual bool merge(const Region& other);
+        virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
 
         /// Copy self to msg
         virtual void copyTo(TCPDataMsg* msg) const;
@@ -51,7 +51,7 @@ class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
         /**
          * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
          */
-        virtual Region* split(uint32 seq);
+        virtual TCPDataStreamRcvQueue::Region* split(uint32 seq);
     };
 
   public:
@@ -76,5 +76,4 @@ class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
 };
 
-#endif
-
+#endif // __INET_TCPDATASTREAMRCVQUEUE_H

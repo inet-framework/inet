@@ -24,14 +24,14 @@
 
 Register_Class(TCPVirtualDataRcvQueue);
 
-bool TCPVirtualDataRcvQueue::Region::merge(const Region& other)
+bool TCPVirtualDataRcvQueue::Region::merge(const Region* other)
 {
-    if (seqLess(end, other.begin) || seqLess(other.end, begin))
+    if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
-    if (seqLess(other.begin, begin))
-        begin = other.begin;
-    if (seqLess(end, other.end))
-        end = other.end;
+    if (seqLess(other->begin, begin))
+        begin = other->begin;
+    if (seqLess(end, other->end))
+        end = other->end;
     return true;
 }
 
@@ -151,7 +151,7 @@ void TCPVirtualDataRcvQueue::merge(Region *seg)
         RegionList::iterator old = i++;
         if (cmp != Region::BEFORE)
         {
-            seg->merge(*(*old));
+            seg->merge(*old);
             delete *old;
             regionList.erase(old);
         }

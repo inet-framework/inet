@@ -25,7 +25,6 @@ Register_Class(TCPDataStreamSendQueue);
 TCPDataStreamSendQueue::TCPDataStreamSendQueue() : TCPSendQueue()
 {
     begin = end = 0;
-    endOffs = 0;
 }
 
 TCPDataStreamSendQueue::~TCPDataStreamSendQueue()
@@ -36,7 +35,6 @@ void TCPDataStreamSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
-    endOffs = 0;
     dataBuffer.clear();
 }
 
@@ -55,7 +53,7 @@ void TCPDataStreamSendQueue::enqueueAppData(cPacket *msg)
     ASSERT (bytes == bamsg->getByteArray().getDataArraySize());
     dataBuffer.push(bamsg->getByteArray());
     end += bytes;
-    endOffs += bytes;
+    delete msg;
 }
 
 uint32 TCPDataStreamSendQueue::getBufferStartSeq()

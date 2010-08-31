@@ -17,6 +17,8 @@
 //
 
 
+#include <omnetpp.h>
+
 #include "TCPDataStreamRcvQueue.h"
 
 #include "TCPCommand.h"
@@ -25,20 +27,25 @@
 Register_Class(TCPDataStreamRcvQueue);
 
 
-bool TCPDataStreamRcvQueue::Region::merge(const Region& other)
+bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* _other)
 {
-    if (seqLess(end, other.begin) || seqLess(other.end, begin))
+    const Region *other = dynamic_cast<const Region *>(_other);
+    if (!other)
+        throw cRuntimeError("check_and_cast(): cannot cast (TCPVirtualDataRcvQueue::Region *) to type 'TCPDataStreamRcvQueue::Region'");
+
+    if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
-    uint32 nbegin = (seqLess(other.begin, begin)) ? other.begin : begin;
-    uint32 nend = (seqLess(end, other.end)) ? other.end : end;
+
+    uint32 nbegin = (seqLess(other->begin, begin)) ? other->begin : begin;
+    uint32 nend = (seqLess(end, other->end)) ? other->end : end;
     if (nbegin != begin || nend != end)
     {
         char * buff = new char[nend-nbegin];
         if (nbegin != begin)
-            other.data.copyDataToBuffer(buff, begin - nbegin);
+            other->data.copyDataToBuffer(buff, begin - nbegin);
         data.copyDataToBuffer(buff + begin - nbegin, end - begin);
         if (nend != end)
-            other.data.copyDataToBuffer(buff + end - nbegin, nend - end);
+            other->data.copyDataToBuffer(buff + end - nbegin, nend - end);
         begin = nbegin;
         end = nend;
         data.setDataFromBuffer(buff, end - begin);

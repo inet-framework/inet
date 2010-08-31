@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPMESSAGESENDQUEUE_H
-#define __INET_TCPMESSAGESENDQUEUE_H
+#ifndef __INET_TCPDATASTREAMSENDQUEUE_H
+#define __INET_TCPDATASTREAMSENDQUEUE_H
 
 #include <list>
 
@@ -35,7 +35,6 @@ class INET_API TCPDataStreamSendQueue : public TCPSendQueue
     ByteArrayBuffer dataBuffer;
     uint32 begin;  // 1st sequence number stored
     uint32 end;    // last sequence number stored +1
-    uint64 endOffs; // last stored bytes offset+1
 
   public:
     /**
@@ -63,4 +62,4 @@ class INET_API TCPDataStreamSendQueue : public TCPSendQueue
     virtual void discardUpTo(uint32 seqNum);
 };
 
-#endif
+#endif // __INET_TCPDATASTREAMSENDQUEUE_H
