@@ -84,17 +84,23 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 }
 
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPDataTransferMode dataTransferModeP)
+TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPOpenCommand *openCmdP)
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
     pcbM(NULL),
-    sendQueueM(tcpLwipP.createSendQueue(dataTransferModeP)),
-    receiveQueueM(tcpLwipP.createReceiveQueue(dataTransferModeP)),
+    sendQueueM(tcpLwipP.createSendQueue((TCPDataTransferMode)(openCmdP->getDataTransferMode()))),
+    receiveQueueM(tcpLwipP.createReceiveQueue((TCPDataTransferMode)(openCmdP->getDataTransferMode()))),
     tcpLwipM(tcpLwipP),
     totalSentM(0),
     isListenerM(false),
     onCloseM(false),
+    explicitReadsEnabledM(openCmdP->getExplicitReadsEnabled()),
+    sendNotificationsEnabledM(openCmdP->getSendNotificationsEnabled()),
+    sendingObjectUpAtFirstByteEnabledM(openCmdP->getSendingObjectUpAtFirstByteEnabled()),
+    receiveBufferSizeM(openCmdP->getReceiveBufferSize()),
+    readBytesM(0),
+    unRecvedM(0),
     statsM(NULL)
 {
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_new();
@@ -119,18 +125,15 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     totalSentM(0),
     isListenerM(false),
     onCloseM(false),
+    explicitReadsEnabledM(connP.explicitReadsEnabledM),
+    sendNotificationsEnabledM(connP.sendNotificationsEnabledM),
+    sendingObjectUpAtFirstByteEnabledM(connP.sendingObjectUpAtFirstByteEnabledM),
+    receiveBufferSizeM(connP.receiveBufferSizeM),
+    readBytesM(0),
+    unRecvedM(0),
     statsM(NULL)
 {
-    pcbM = pcbP;
     pcbM->callback_arg = this;
-
-    // Get other TCPOpenCommand parameters
-    explicitReadsEnabledM = connP.explicitReadsEnabledM;
-    sendNotificationsEnabledM = connP.sendNotificationsEnabledM;
-    sendingObjectUpAtFirstByteEnabledM = connP.sendingObjectUpAtFirstByteEnabledM;
-    receiveBufferSizeM = connP.receiveBufferSizeM;
-    readBytesM = 0;
-    unRecvedM = 0;
 
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
@@ -300,6 +303,7 @@ void TcpLwipConnection::process_SEND(cPacket *msgP)
     {
         dataSent(0);
     }
+    do_SEND();
 }
 
 void TcpLwipConnection::process_READ(TCPReadCommand &tcpCommandP)

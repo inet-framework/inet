@@ -211,6 +211,8 @@ void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     }
     else
     {
+        if (pCurTcpSegM->getPayloadLength())
+            error("conn is null, and received packet has data");
         tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
     }
 }
@@ -351,11 +353,8 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
     {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
 
-        TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
-
         // add into appConnMap
-        conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(),
-                                     dataTransferMode);
+        conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(), openCmd);
         tcpAppConnMapM[connId] = conn;
 
         tcpEV << this << ": TCP connection created for " << msgP << "\n";

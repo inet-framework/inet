@@ -180,10 +180,11 @@ void TcpLwipMsgBasedSendQueue::discardAckedBytes(unsigned long bytesP)
 
 TcpLwipMsgBasedReceiveQueue::TcpLwipMsgBasedReceiveQueue()
     :
+    isPayloadExtractAtFirstM(333),
+    lastExtractedBytesM(0),
+    lastExtractedPayloadBytesM(0),
     bytesInQueueM(0)
 {
-//    isValidSeqNoM = false;
-    lastExtractedBytesM = lastExtractedPayloadBytesM = 0;
 }
 
 TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
@@ -202,7 +203,6 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
 
     bytesInQueueM = 0;
     TcpLwipReceiveQueue::setConnection(connP);
-//    isValidSeqNoM = false;
     lastExtractedBytesM = lastExtractedPayloadBytesM = 0;
     isPayloadExtractAtFirstM = connP->isSendingObjectUpAtFirstByteEnabled();
 }
@@ -216,7 +216,11 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     uint32 lastSeqNo = seqNoP + bufferLengthP;
     ASSERT(seqGE(tcpsegP->getSequenceNo()+tcpsegP->getPayloadLength(), lastSeqNo));
 
+    if (0==bufferLengthP && 0==tcpsegP->getPayloadLength())
+        return;
+
     TCPSegmentWithMessages *tcpseg = check_and_cast<TCPSegmentWithMessages *>(tcpsegP);
+
     cPacket *msg;
     uint64 streamOffsNo, segmentOffsNo;
     while ((msg=tcpseg->removeFirstPayloadMessage(streamOffsNo, segmentOffsNo)) != NULL)
@@ -253,18 +257,69 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytes
 {
     ASSERT(connM);
 
+    TCPDataMsg *msg = NULL;
+    cPacket *objMsg = NULL;
+    uint64 nextPayloadBegin = lastExtractedPayloadBytesM;
+    uint64 nextPayloadLength = 0;
+    uint64 nextPayloadOffs = 0;
+
+    if (!payloadListM.empty())
+    {
+        nextPayloadBegin = payloadListM.begin()->first;
+        nextPayloadLength = payloadListM.begin()->second->getByteLength();
+    }
+    uint64 nextPayloadEnd = nextPayloadBegin + nextPayloadLength;
+
+    ASSERT(nextPayloadBegin == lastExtractedPayloadBytesM);
+
+    if (isPayloadExtractAtFirstM)
+    {
+        nextPayloadOffs = nextPayloadBegin;
+        ASSERT(lastExtractedBytesM <= lastExtractedPayloadBytesM);
+        ASSERT(nextPayloadBegin >= lastExtractedBytesM);
+        if (nextPayloadBegin == lastExtractedBytesM)
+        {
+            if (maxBytesP > nextPayloadLength)
+                maxBytesP = nextPayloadLength;
+        }
+        else // nextPayloadBegin > lastExtractedBytesM
+        {
+            ulong extractableBytes = nextPayloadBegin - lastExtractedBytesM;
+            if (maxBytesP > extractableBytes)
+                maxBytesP = extractableBytes;
+        }
+    }
+    else
+    {
+        nextPayloadOffs = nextPayloadEnd -1;
+        ulong extractableBytes = nextPayloadEnd - lastExtractedBytesM;
+        ASSERT(lastExtractedBytesM >= lastExtractedPayloadBytesM);
+        if (maxBytesP > extractableBytes)
+            maxBytesP = extractableBytes;
+    }
+
+    if (maxBytesP)
+    {
+        msg = new TCPDataMsg("DATA");
+        msg->setKind(TCP_I_DATA);
+        msg->setByteLength(maxBytesP);
+        if (!payloadListM.empty() && lastExtractedBytesM <= nextPayloadOffs && nextPayloadOffs < lastExtractedBytesM + maxBytesP)
+        {
+            objMsg = payloadListM.begin()->second;
+            payloadListM.erase(payloadListM.begin());
+            msg->setDataObject(objMsg);
+            msg->setIsBegin(isPayloadExtractAtFirstM);
+            lastExtractedPayloadBytesM = nextPayloadEnd;
+        }
+        msg->setIsBegin(isPayloadExtractAtFirstM);
+        lastExtractedBytesM += maxBytesP;
+    }
+    return msg;
+
+///////////////////////////////////6
+#if 0
     TCPDataMsg *dataMsg = NULL;
     cPacket *objMsg = NULL;
-
-    /*
-    if(!isValidSeqNoM)
-    {
-        isValidSeqNoM = true;
-        initialSeqNoM = connM->pcbM->rcv_nxt - bytesInQueueM;
-        if(connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
-            initialSeqNoM--; // received FIN
-    }
-    */
 
     if (bytesInQueueM < maxBytesP)
         maxBytesP = bytesInQueueM;
@@ -346,6 +401,7 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytes
         dataMsg->setKind(TCP_I_DATA);
     }
     return dataMsg;
+#endif
 }
 
 uint32 TcpLwipMsgBasedReceiveQueue::getAmountOfBufferedBytes()

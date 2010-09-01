@@ -77,7 +77,7 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPDataTransferMode dataTransferModeP);
+    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPOpenCommand *openCmdP);
 
     TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
