@@ -20,10 +20,9 @@
 #define __INET_TCPSOCKET_H
 
 #include <omnetpp.h>
-#include "TCPCommand_m.h"
-#include "IPvXAddress.h"
 
-class TCPStatusInfo;
+#include "IPvXAddress.h"
+#include "TCPCommand.h"
 
 
 /**
@@ -135,7 +134,10 @@ class INET_API TCPSocket
     {
       public:
         virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;
+        virtual void socketDataMsgArrived(int connId, TCPDataTransferMode transferMode, void *yourPtr, TCPDataMsg *msg, bool urgent);
+        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;    //FIXME why not { delete msg; } ???
+        virtual void socketDataBytesArrived(int connId, void *yourPtr, uint64 bytes, bool urgent) {}
+        virtual void socketDataArriveBegins(int connId, void *yourPtr, cPacket *msg, bool urgent) { delete msg; }
         virtual void socketDataArrived(int connId, void *yourPtr, TCPDataArrivedInfo *info) { delete info; }
         virtual void socketDataSent(int connId, void *yourPtr, TCPDataSentInfo *info) { delete info; }
         virtual void socketEstablished(int connId, void *yourPtr) {}

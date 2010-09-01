@@ -18,6 +18,28 @@
 #include "TCPSocket.h"
 
 
+void TCPSocket::CallbackInterface::socketDataMsgArrived(int connId, TCPDataTransferMode transferMode, void *yourPtr, TCPDataMsg *msg, bool urgent)
+{
+    cPacket *pk = msg;
+    if (transferMode == TCP_TRANSFER_OBJECT)
+    {
+        cPacket *pk = msg->removeDataObject();
+        if (pk && msg->getIsBegin())
+        {
+            socketDataArriveBegins(connId, yourPtr, pk, urgent);
+            pk = NULL;
+        }
+        socketDataBytesArrived(connId, yourPtr, msg->getByteLength(), urgent);
+        if (pk)
+            socketDataArrived(connId, yourPtr, pk, urgent);
+        delete msg;
+    }
+    else
+    {
+        socketDataArrived(connId, yourPtr, msg, urgent);
+    }
+}
+
 TCPSocket::TCPSocket()
 {
     // don't allow user-specified connIds because they may conflict with
@@ -269,14 +291,14 @@ void TCPSocket::processMessage(cMessage *msg)
     {
         case TCP_I_DATA:
             if (cb)
-                cb->socketDataArrived(connId, yourPtr, PK(msg), false);
+                cb->socketDataMsgArrived(connId, dataTransferMode, yourPtr, check_and_cast<TCPDataMsg *>(msg), false);
             else
                 delete msg;
             break;
 
         case TCP_I_URGENT_DATA:
             if (cb)
-                cb->socketDataArrived(connId, yourPtr, PK(msg), true);
+                cb->socketDataMsgArrived(connId, dataTransferMode, yourPtr, check_and_cast<TCPDataMsg *>(msg), true);
             else
                 delete msg;
             break;
@@ -390,7 +412,7 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
 void TCPSocket::setDataTransferMode(TCPDataTransferMode transferMode)
 {
     if (sockstate!=NOT_BOUND && sockstate!=BOUND)
-        opp_error( "TCPSocket::setExplicitReads(): connect() or listen() already called (need renewSocket()?)");
+        opp_error( "TCPSocket::setDataTransferMode(): connect() or listen() already called (need renewSocket()?)");
 
     dataTransferMode = transferMode;
 }
