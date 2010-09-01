@@ -337,7 +337,7 @@ class INET_API TCPConnection
     bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
     long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true
     ulong readBytes;                // bytecount of last READ
-
+    TCPDataTransferMode transferMode;   // TCP transfer mode: bytecount, object, bytestream
  public:
     TCPSACKRexmitQueue *rexmitQueue;
 

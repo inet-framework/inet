@@ -22,6 +22,7 @@
 #include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
+#include "TCPSegmentWithData.h"
 #include "TCPCommand_m.h"
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -165,6 +166,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 {
     TCPConnection *conn = new TCPConnection(tcpMain,appGateIndex,connId);
 
+    conn->transferMode = transferMode;
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
@@ -272,7 +274,16 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)
 {
-    return new TCPSegment(name);
+    switch(transferMode)
+    {
+    case TCP_TRANSFER_BYTECOUNT:
+        return new TCPSegment(name);
+    case TCP_TRANSFER_OBJECT:
+        return new TCPSegmentWithMessages(name);
+    case TCP_TRANSFER_BYTESTREAM:
+        return new TCPSegmentWithBytes(name);
+    }
+    throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferMode, tcpMain->getFullPath().c_str());
 }
 
 void TCPConnection::signalConnectionTimeout()
@@ -315,7 +326,7 @@ void TCPConnection::sendToApp(cMessage *msg)
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
-    TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
+    transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
     sendQueue = tcpMain->createSendQueue(transferMode);
     sendQueue->setConnection(this);
