@@ -16,7 +16,7 @@
 //
 
 #ifndef __INET_TCPCOMMAND_H
-#define __INET_TCPCOMMAND_H_
+#define __INET_TCPCOMMAND_H
 
 #include <omnetpp.h>
 #include "TCPCommand_m.h"
@@ -43,4 +43,4 @@ inline void doPacking(cCommBuffer *b, TCPDataMsg& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, TCPDataMsg& obj) {obj.parsimUnpack(b);}
 
 
-#endif // __INET_TCPCOMMAND_H_
+#endif // __INET_TCPCOMMAND_H
