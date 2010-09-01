@@ -142,23 +142,26 @@ TCPDataMsg* TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
     }
 
     Region *reg = extractTo(seq, maxBytes);
-    ulong bytes = reg->getLength();
-    delete reg;
-
-    if (bytes)
+    if (reg)
     {
-        msg = new TCPDataMsg("DATA");
-        msg->setByteLength(bytes);
-        if (!payloadList.empty() && extractedBytes <= nextPayloadOffs && nextPayloadOffs < extractedBytes + bytes)
+        ulong bytes = reg->getLength();
+        delete reg;
+
+        if (bytes)
         {
-            objMsg = payloadList.begin()->second;
-            payloadList.erase(payloadList.begin());
-            msg->setDataObject(objMsg);
+            msg = new TCPDataMsg("DATA");
+            msg->setByteLength(bytes);
+            if (!payloadList.empty() && extractedBytes <= nextPayloadOffs && nextPayloadOffs < extractedBytes + bytes)
+            {
+                objMsg = payloadList.begin()->second;
+                payloadList.erase(payloadList.begin());
+                msg->setDataObject(objMsg);
+                msg->setIsBegin(isPayloadExtractAtFirst);
+                extractedPayloadBytes = nextPayloadEnd;
+            }
             msg->setIsBegin(isPayloadExtractAtFirst);
-            extractedPayloadBytes = nextPayloadEnd;
+            extractedBytes += bytes;
         }
-        msg->setIsBegin(isPayloadExtractAtFirst);
-        extractedBytes += bytes;
     }
     return msg;
 }
