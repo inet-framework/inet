@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -47,17 +47,14 @@ class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP);
+    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const;
 
     virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
-    unsigned  long getBytesAvailable();
+    unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
-    /**
-     * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
-     */
     virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
@@ -83,43 +80,29 @@ class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
     // see TcpLwipReceiveQueue
     virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP);
 
-    /**
-     * The method called when data received from NSC
-     * The method should set status of the data in queue to received
-     * called after socket->read_data() successfull
-     */
+    // see TcpLwipReceiveQueue
     virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
 
     // see TcpLwipReceiveQueue
-    virtual unsigned long getExtractableBytesUpTo();
+    virtual unsigned long getExtractableBytesUpTo() const;
 
     // see TcpLwipReceiveQueue
     virtual TCPDataMsg* extractBytesUpTo(unsigned long maxBytesP);
 
-    /**
-     * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
-     */
-    virtual uint32 getAmountOfBufferedBytes();
+    // see TcpLwipReceiveQueue
+    virtual uint32 getAmountOfBufferedBytes() const;
 
-    /**
-     * Returns the number of blocks currently buffered in queue.
-     */
-    virtual uint32 getQueueLength();
+    // see TcpLwipReceiveQueue
+    virtual uint32 getQueueLength() const;
 
-    /**
-     * Shows current queue status.
-     */
-    virtual void getQueueStatus();
+    // see TcpLwipReceiveQueue
+    virtual void getQueueStatus() const;
 
-    /**
-     * notify the queue about output messages
-     *
-     * called when connM send out a packet.
-     * for read AckNo, if have
-     */
+    // see TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
+    /// store bytes
     ByteArrayBuffer byteArrayBufferM;
 };
 

@@ -189,7 +189,7 @@ void TCP_NSC_Connection::do_SEND()
         int allsent = 0;
         while(1)
         {
-            int bytes = sendQueueM->getNscMsg(buffer, sizeof(buffer));
+            int bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer));
             if(0 == bytes)
                 break;
 
@@ -197,7 +197,7 @@ void TCP_NSC_Connection::do_SEND()
 
             if(sent > 0)
             {
-                sendQueueM->dequeueNscMsg(sent);
+                sendQueueM->dequeueTcpLayerMsg(sent);
                 allsent += sent;
             }
             else

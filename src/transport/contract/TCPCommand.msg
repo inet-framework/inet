@@ -17,43 +17,47 @@
 //
 
 
-// TCPCommmand kommunikáció:
+// TCP kommunikáció:
+// Paraméterek (TCPOpenCommand-ban állítható be):
+//     enum dataTransferMode: whether to transmit C++ objects, real bytes or just byte counts (bytecount, bytestream, object)
+//     bool fork = false;        // used only for passive open
+//     bool explicitReadsEnabled;		// when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
+//     bool sendNotificationsEnabled;  // when enabled: when TCP sent some data to partner or used send buffer size changed, it's send up a TCPDataSentInfo notification.
+//     bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
+//     long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true 
+// 
 // 
 // SEND:
-//    Sikeres küldés esetén (ACKed) felküldi a TCP az elküldött byte számot és a send queue méretét.
+//    sendNotificationsEnabled:
+//      - Sikeres küldés esetén (ACKed) felküldi a TCP az elküldött byte számot és a send queue méretét egy TCPDataSentInfo csomagban.
+//      - Ha adatot küld le az App a TCP számára, akkor felküldi a TCP a send queue méretét egy TCPDataSentInfo csomagban (sent byte = 0).
+//       
 //
-// Receive: OPEN-nél paraméter, hogy régi módon dolgozzon, vagy csak értesítsen az adatról...
-//   Értesítés módban:
-//     ha volt READ(n), akkor a TCP felküldi az adatból ami belefér (<=n).
-//     ha nem volt READ vagy maradt még adat, akkor küld egy TCP_I_DATA_ARRIVED msg-t.
-//     A receive queue-ra meg lehet adni az OPEN-nél egy limitet, aminél több nem lehet a bufferben, ilyenkor a tcp úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
+// RECEIVE:
+//   Adatot mindíg TCPDataMsg üzenetben küld fel.
+//   explicitReadsEnabled:
+//     1) ha volt READ(n), akkor a TCP felküldi az adatból ami belefér (<=n).
+//     2) ha nem volt READ vagy maradt még adat, akkor küld egy TCP_I_DATA_ARRIVED msg-t.
+//     A receive queue-ra meg lehet adni az OPEN-nél egy limitet, aminél több nem lehet a bufferben, ilyenkor a TCP úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
 //   Eredeti módban:
 //     nincs értelme a limitnek, mert úgyis felküldi, amint megérkezett.
 //
-// Problémák:
-//   MsgBased kommunikáció esetén:
-//     Kell valami msg slice-t küldeni értesítési módban, hogy ürüljön a buffer. (Jelenleg csak akkor küldi fel az msg-t, ha megjött az egész msg.)
-//       Ilyenkor a hossz-ellenőrzéseknél figyelni a felküldött sliceok méretére is...
-//     Elején, vagy végén menjen-e az msg, vagy választható legyen:
-//       Az msg-t a hálón az első bájttal küldeni. A fogadó oldalon értesítési mód esetén az OPEN-ben állítható, hogy első vagy utolsó bájttal adja fel az msg-t.
+//   object (MsgBased) kommunikáció esetén:
+//     A megérkezett byteokat felküldi az app-nak az általános szabályok szerint, plusz:
+//       - A felküldésnél az object határoknál mindíg eltöri a felküldendő adatot.
+//       - Az object-et - ha tartozik az adott szelethez - a TCPDataMsg.payloadPacket memberben küldi fel.
+//         Ha a sendingObjectUpAtFirstByteEnabled, akkor az első bájtjával együtt küldi fel; ha ~Disabled, akkor pedig az utolsó bájtjával együtt küldi fel. 
 //
-// új OPEN paraméterek:
-//   - bool Értesítési mód(ÉM=readNotificationsEnabled) / kompatibilis mód
-//   - long ÉM esetén: receive queue size limit
-//   - bool ÉM & MsgBased esetén: MsgInFirstPacket/MsgInLastPacket
-//   - bool TCP_I_DATA_SENT enabled: Y/N
-
+// Változott még a TCPSocket::CallbackInterface is
 
 cplusplus {{
-#include "IPvXAddress.h"
 
 #include "ByteArrayMessage.h"
+#include "IPvXAddress.h"
+#include "TCPDataMsg.h"
 
-typedef cPacket* cPacketPtr;
 }}
 
-class noncobject cPacketPtr;
-//struct cPacketPtr;
 
 class noncobject IPvXAddress;
 
@@ -233,9 +237,11 @@ class TCPConnectInfo extends TCPCommand
 //
 class TCPDataMsg extends ByteArrayMessage
 {
-    @customize(true);
-    cPacketPtr dataObject;
-    bool isBegin;	// true when first byte of dataObject is first byte of the packet, false when last byte of dataObject is last byte of the packet   
+//    @customize(true);
+    @existingClass(true);
+    cPacket * payloadPacket = NULL;
+    bool isPayloadStart = false;	// true when first byte of payloadPacket is first byte of the packet 
+    						// false when last byte of payloadPacket is last byte of the packet
 }
 
 

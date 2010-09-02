@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipVIRTUALDATAQUEUES_H
-#define __INET_TcpLwipVIRTUALDATAQUEUES_H
+#ifndef __INET_TCPLWIP_VIRTUALDATAQUEUES_H
+#define __INET_TCPLWIP_VIRTUALDATAQUEUES_H
 
 #include <omnetpp.h>
 
@@ -46,13 +46,13 @@ class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP);
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
 
     virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
-    ulong getBytesAvailable();
+    unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
     virtual void discardAckedBytes(unsigned long bytesP);
 
@@ -83,19 +83,19 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
     virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
 
     // see TcpLwipReceiveQueue
-    virtual unsigned long getExtractableBytesUpTo();
+    virtual unsigned long getExtractableBytesUpTo() const;
 
     // see TcpLwipReceiveQueue
     virtual TCPDataMsg* extractBytesUpTo(unsigned long maxBytesP);
 
     // see TcpLwipReceiveQueue
-    virtual uint32 getAmountOfBufferedBytes();
+    virtual uint32 getAmountOfBufferedBytes() const;
 
     // see TcpLwipReceiveQueue
-    virtual uint32 getQueueLength();
+    virtual uint32 getQueueLength() const;
 
     // see TcpLwipReceiveQueue
-    virtual void getQueueStatus();
+    virtual void getQueueStatus() const;
 
     // see TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);

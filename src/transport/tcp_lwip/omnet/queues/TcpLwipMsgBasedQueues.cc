@@ -79,7 +79,7 @@ void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
     unsentTcpLayerBytesM += bytes;
 }
 
-unsigned int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
+unsigned int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -93,7 +93,7 @@ void TcpLwipMsgBasedSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
     unsentTcpLayerBytesM -= msgLengthP;
 }
 
-ulong TcpLwipMsgBasedSendQueue::getBytesAvailable()
+ulong TcpLwipMsgBasedSendQueue::getBytesAvailable() const
 {
     return unsentTcpLayerBytesM;
 }
@@ -248,7 +248,7 @@ void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int 
     bytesInQueueM += dataLengthP;
 }
 
-unsigned long TcpLwipMsgBasedReceiveQueue::getExtractableBytesUpTo()
+unsigned long TcpLwipMsgBasedReceiveQueue::getExtractableBytesUpTo() const
 {
     return bytesInQueueM;
 }
@@ -307,114 +307,26 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytes
         {
             objMsg = payloadListM.begin()->second;
             payloadListM.erase(payloadListM.begin());
-            msg->setDataObject(objMsg);
-            msg->setIsBegin(isPayloadExtractAtFirstM);
             lastExtractedPayloadBytesM = nextPayloadEnd;
         }
-        msg->setIsBegin(isPayloadExtractAtFirstM);
+        msg->setPayloadPacket(objMsg);
+        msg->setIsPayloadStart(isPayloadExtractAtFirstM);
         lastExtractedBytesM += maxBytesP;
     }
     return msg;
-
-///////////////////////////////////6
-#if 0
-    TCPDataMsg *dataMsg = NULL;
-    cPacket *objMsg = NULL;
-
-    if (bytesInQueueM < maxBytesP)
-        maxBytesP = bytesInQueueM;
-    uint64 firstOffs = lastExtractedBytesM;
-    uint64 lastOffs = firstOffs + maxBytesP;
-
-    // remove old messages
-    while( (! payloadListM.empty()) && (payloadListM.begin()->first < lastExtractedPayloadBytesM))
-    {
-        delete payloadListM.begin()->second;
-        payloadListM.erase(payloadListM.begin());
-    }
-
-    if(maxBytesP)
-    {
-        dataMsg = new TCPDataMsg("DATA");
-        dataMsg->setKind(TCP_I_DATA);
-
-        // pass up payload messages, in sequence number order
-        if (! payloadListM.empty())
-        {
-            uint64 objOffsNo = payloadListM.begin()->first;
-            ASSERT(objOffsNo == lastExtractedPayloadBytesM);
-            objMsg = payloadListM.begin()->second;
-            int64 objDataLength = objMsg->getByteLength();
-            if (isPayloadExtractAtFirstM)
-            {
-                ASSERT(lastExtractedBytesM <= lastExtractedPayloadBytesM);
-                if (objOffsNo == firstOffs)
-                {
-                    objMsg = payloadListM.begin()->second;
-                    int64 objDataLength = objMsg->getByteLength();
-                    if (objDataLength < maxBytesP)
-                        maxBytesP = objDataLength;
-
-                    payloadListM.erase(payloadListM.begin());
-                    lastExtractedPayloadBytesM += objDataLength;
-                }
-                else if (objOffsNo < lastOffs)
-                {
-                    // do not add payload object to Msg, truncate segment before first byte of payload data
-                    maxBytesP = objOffsNo - firstOffs;
-                    objMsg = NULL;
-                }
-                else
-                {
-                    // do not add payload object to Msg
-                    objMsg = NULL;
-                }
-            }
-            else
-            {
-                ASSERT(lastExtractedBytesM >= lastExtractedPayloadBytesM);
-                ASSERT(objOffsNo <= firstOffs);
-                uint64 endOffsNo = objOffsNo + objDataLength;
-                if (endOffsNo > lastOffs)
-                {
-                    // do not add payload object to Msg
-                    objMsg = NULL;
-                }
-                else
-                {
-                    if (endOffsNo < lastOffs)
-                    {
-                        // truncate segment after last byte of payload data
-                        maxBytesP = endOffsNo - firstOffs;
-                    }
-                    payloadListM.erase(payloadListM.begin());
-                    lastExtractedPayloadBytesM += objDataLength;
-                }
-            }
-        }
-        dataMsg->setByteLength(maxBytesP);
-        lastExtractedBytesM += maxBytesP;
-        bytesInQueueM -= maxBytesP;
-
-        dataMsg->setDataObject(objMsg);
-        dataMsg->setIsBegin(isPayloadExtractAtFirstM);
-        dataMsg->setKind(TCP_I_DATA);
-    }
-    return dataMsg;
-#endif
 }
 
-uint32 TcpLwipMsgBasedReceiveQueue::getAmountOfBufferedBytes()
+uint32 TcpLwipMsgBasedReceiveQueue::getAmountOfBufferedBytes() const
 {
     return bytesInQueueM;
 }
 
-uint32 TcpLwipMsgBasedReceiveQueue::getQueueLength()
+uint32 TcpLwipMsgBasedReceiveQueue::getQueueLength() const
 {
     return payloadListM.size();
 }
 
-void TcpLwipMsgBasedReceiveQueue::getQueueStatus()
+void TcpLwipMsgBasedReceiveQueue::getQueueStatus() const
 {
     // TODO
 }

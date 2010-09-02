@@ -28,13 +28,13 @@ void TCPGenericSrvThread::established()
 void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 {
     TCPDataMsg *datamsg = check_and_cast<TCPDataMsg *>(msg);
-    cPacket *dataobj = datamsg->removeDataObject();
+    cPacket *dataobj = datamsg->removePayloadPacket();
     if (! dataobj)
     {
         delete msg;
         return;
     }
-    if (datamsg->getIsBegin())
+    if (datamsg->getIsPayloadStart())
         opp_error("Cannot work when enabled the object sending up at first byte");
 
     GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(dataobj);

@@ -57,7 +57,7 @@ void TcpLwipVirtualDataSendQueue::enqueueAppData(cPacket *msgP)
     unsentTcpLayerBytesM += bytes;
 }
 
-unsigned int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP)
+unsigned int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -71,9 +71,9 @@ void TcpLwipVirtualDataSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
     unsentTcpLayerBytesM -= msgLengthP;
 }
 
-ulong TcpLwipVirtualDataSendQueue::getBytesAvailable()
+ulong TcpLwipVirtualDataSendQueue::getBytesAvailable() const
 {
-    return unsentTcpLayerBytesM; // TODO
+    return unsentTcpLayerBytesM;
 }
 
 TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
@@ -136,7 +136,7 @@ void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned i
     bytesInQueueM += dataLengthP;
 }
 
-unsigned long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo()
+unsigned long TcpLwipVirtualDataReceiveQueue::getExtractableBytesUpTo() const
 {
     return bytesInQueueM;
 }
@@ -151,24 +151,24 @@ TCPDataMsg* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(unsigned long maxBy
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(std::min(bytesInQueueM, maxBytesP));
-        dataMsg->setDataObject(NULL);
-        dataMsg->setIsBegin(false);
+        dataMsg->setPayloadPacket(NULL);
+        dataMsg->setIsPayloadStart(false);
         bytesInQueueM -= dataMsg->getByteLength();
     }
     return dataMsg;
 }
 
-uint32 TcpLwipVirtualDataReceiveQueue::getAmountOfBufferedBytes()
+uint32 TcpLwipVirtualDataReceiveQueue::getAmountOfBufferedBytes() const
 {
     return bytesInQueueM;
 }
 
-uint32 TcpLwipVirtualDataReceiveQueue::getQueueLength()
+uint32 TcpLwipVirtualDataReceiveQueue::getQueueLength() const
 {
     return bytesInQueueM ? 1 : 0;
 }
 
-void TcpLwipVirtualDataReceiveQueue::getQueueStatus()
+void TcpLwipVirtualDataReceiveQueue::getQueueStatus() const
 {
     // TODO
 }

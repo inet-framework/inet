@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,37 +16,38 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifdef WITH_TCP_NSC
 
 #include <omnetpp.h>
 
-#include "TcpLwipDataStreamQueues.h"
+#include "TCP_NSC_DataStreamQueues.h"
 
-#include "TCPCommand.h"
-#include "TcpLwipConnection.h"
-#include "TCPSegmentWithData.h"
+#include "TCPCommand_m.h"
+#include "TCP_NSC_Connection.h"
 #include "TCPSerializer.h"
+#include "TCPSegmentWithData.h"
 
 
-Register_Class(TcpLwipDataStreamSendQueue);
+Register_Class(TCP_NSC_DataStreamSendQueue);
 
-Register_Class(TcpLwipDataStreamReceiveQueue);
+Register_Class(TCP_NSC_DataStreamReceiveQueue);
 
 
-TcpLwipDataStreamSendQueue::TcpLwipDataStreamSendQueue()
+TCP_NSC_DataStreamSendQueue::TCP_NSC_DataStreamSendQueue()
 {
 }
 
-TcpLwipDataStreamSendQueue::~TcpLwipDataStreamSendQueue()
+TCP_NSC_DataStreamSendQueue::~TCP_NSC_DataStreamSendQueue()
 {
 }
 
-void TcpLwipDataStreamSendQueue::setConnection(TcpLwipConnection *connP)
+void TCP_NSC_DataStreamSendQueue::setConnection(TCP_NSC_Connection *connP)
 {
     byteArrayBufferM.clear();
-    TcpLwipSendQueue::setConnection(connP);
+    TCP_NSC_SendQueue::setConnection(connP);
 }
 
-void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
+void TCP_NSC_DataStreamSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
 
@@ -57,25 +58,24 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const
+int TCP_NSC_DataStreamSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
-
     return byteArrayBufferM.getBytesToBuffer(bufferP, bufferLengthP);
 }
 
-void TcpLwipDataStreamSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
+void TCP_NSC_DataStreamSendQueue::dequeueTcpLayerMsg(int msgLengthP)
 {
     byteArrayBufferM.drop(msgLengthP);
 }
 
-ulong TcpLwipDataStreamSendQueue::getBytesAvailable() const
+ulong TCP_NSC_DataStreamSendQueue::getBytesAvailable() const
 {
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, unsigned int tcpLengthP)
+TCPSegment* TCP_NSC_DataStreamSendQueue::createSegmentWithBytes(
+        const void* tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -97,83 +97,89 @@ TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
     return tcpseg;
 }
 
-void TcpLwipDataStreamSendQueue::discardAckedBytes(unsigned long bytesP)
+void TCP_NSC_DataStreamSendQueue::discardUpTo(uint32 seqNumP)
 {
     // nothing to do here
 }
 
-TcpLwipDataStreamReceiveQueue::TcpLwipDataStreamReceiveQueue()
+////////////////////////////////////////////////////////////////////////////////////////
+
+TCP_NSC_DataStreamReceiveQueue::TCP_NSC_DataStreamReceiveQueue()
 {
 }
 
-TcpLwipDataStreamReceiveQueue::~TcpLwipDataStreamReceiveQueue()
+TCP_NSC_DataStreamReceiveQueue::~TCP_NSC_DataStreamReceiveQueue()
 {
     // nothing to do here
 }
 
-void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
+void TCP_NSC_DataStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
 {
     ASSERT(connP);
 
     byteArrayBufferM.clear();
-    TcpLwipReceiveQueue::setConnection(connP);
+    TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipDataStreamReceiveQueue::insertBytesFromSegment(
-        TCPSegment *tcpsegP, uint32 seqno, void* bufferP, size_t bufferLengthP)
+uint32 TCP_NSC_DataStreamReceiveQueue::insertBytesFromSegment(
+        const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
 
-//    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
+    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
-void TcpLwipDataStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
+void TCP_NSC_DataStreamReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)
 {
     byteArrayBufferM.push(dataP, dataLengthP);
 }
 
-unsigned long TcpLwipDataStreamReceiveQueue::getExtractableBytesUpTo() const
-{
-    return byteArrayBufferM.getLength();
-}
-
-TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxBytesP)
+TCPDataMsg* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     TCPDataMsg *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
-    if(bytesInQueue && maxBytesP)
+    if(bytesInQueue)
     {
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
-        unsigned int extractBytes = bytesInQueue > maxBytesP ? maxBytesP : bytesInQueue;
+        unsigned int extractBytes = bytesInQueue;
         char *data = new char[extractBytes];
         unsigned int extractedBytes = byteArrayBufferM.popBytesToBuffer(data, extractBytes);
         dataMsg->setByteLength(extractedBytes);
         dataMsg->setDataFromBuffer(data, extractedBytes);
         delete data;
+        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+        tcpConnectInfo->setConnId(connM->connIdM);
+        tcpConnectInfo->setLocalAddr(connM->inetSockPairM.localM.ipAddrM);
+        tcpConnectInfo->setRemoteAddr(connM->inetSockPairM.remoteM.ipAddrM);
+        tcpConnectInfo->setLocalPort(connM->inetSockPairM.localM.portM);
+        tcpConnectInfo->setRemotePort(connM->inetSockPairM.remoteM.portM);
+        dataMsg->setControlInfo(tcpConnectInfo);
     }
     return dataMsg;
 }
 
-uint32 TcpLwipDataStreamReceiveQueue::getAmountOfBufferedBytes() const
+uint32 TCP_NSC_DataStreamReceiveQueue::getAmountOfBufferedBytes() const
 {
     return byteArrayBufferM.getLength();
 }
 
-uint32 TcpLwipDataStreamReceiveQueue::getQueueLength() const
+uint32 TCP_NSC_DataStreamReceiveQueue::getQueueLength() const
 {
     return byteArrayBufferM.getLength();
 }
 
-void TcpLwipDataStreamReceiveQueue::getQueueStatus() const
+void TCP_NSC_DataStreamReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
 
-void TcpLwipDataStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TCP_NSC_DataStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 {
     // nothing to do
 }
+
+#endif // WITH_TCP_NSC

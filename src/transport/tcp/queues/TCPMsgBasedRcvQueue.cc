@@ -155,11 +155,11 @@ TCPDataMsg* TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq, ulong maxBytes)
             {
                 objMsg = payloadList.begin()->second;
                 payloadList.erase(payloadList.begin());
-                msg->setDataObject(objMsg);
-                msg->setIsBegin(isPayloadExtractAtFirst);
+                msg->setPayloadPacket(objMsg);
+                msg->setIsPayloadStart(isPayloadExtractAtFirst);
                 extractedPayloadBytes = nextPayloadEnd;
             }
-            msg->setIsBegin(isPayloadExtractAtFirst);
+            msg->setIsPayloadStart(isPayloadExtractAtFirst);
             extractedBytes += bytes;
         }
     }

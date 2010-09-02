@@ -20,10 +20,11 @@
 #define __INET_TCP_NSC_QUEUES_H
 
 #include <omnetpp.h>
-//#include "TCPConnection.h"
+
 #include "TCPSegment.h"
 
 // forward declarations:
+class TCPDataMsg;
 class TCP_NSC_Connection;
 
 /**
@@ -114,7 +115,7 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
      *
      * called before called socket->send_data()
      */
-    virtual int getNscMsg(void* bufferP, int bufferLengthP) = 0;
+    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) const = 0;
 
     /**
      * The function should remove msgLengthP bytes from NSCqueue
@@ -124,12 +125,12 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
      *
      * called with return value of socket->send_data() if larger than 0
      */
-    virtual void dequeueNscMsg(int msgLengthP) = 0;
+    virtual void dequeueTcpLayerMsg(int msgLengthP) = 0;
 
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual ulong getBytesAvailable() = 0;
+    virtual ulong getBytesAvailable() const = 0;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -199,22 +200,22 @@ class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo() = 0;
+    virtual TCPDataMsg* extractBytesUpTo() = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() = 0;
+    virtual uint32 getAmountOfBufferedBytes() const = 0;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() = 0;
+    virtual uint32 getQueueLength() const = 0;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() = 0;
+    virtual void getQueueStatus() const = 0;
 
     /**
      * notify the queue about output messages

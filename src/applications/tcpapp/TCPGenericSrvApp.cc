@@ -105,12 +105,12 @@ void TCPGenericSrvApp::handleTCPDataMessage(cMessage *msg)
     TCPDataMsg *tcpMsg = check_and_cast<TCPDataMsg*>(msg);
     bytesRcvd += tcpMsg->getByteLength();
 
-    if (tcpMsg->getIsBegin())
+    if (tcpMsg->getIsPayloadStart())
     {
         error("TCPGenericSrvApp doesn't work when object transmitted on first byte");
     }
 
-    cPacket *appPacket = tcpMsg->removeDataObject();
+    cPacket *appPacket = tcpMsg->removePayloadPacket();
     if (!appPacket)
     {
         delete msg;

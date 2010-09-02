@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipQUEUES_H
-#define __INET_TcpLwipQUEUES_H
+#ifndef __INET_TCPLWIP_QUEUES_H
+#define __INET_TCPLWIP_QUEUES_H
 
 #include <omnetpp.h>
 //#include "TCPConnection.h"
@@ -116,7 +116,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      *
      * called before called socket->send_data()
      */
-    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) = 0;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const = 0;
 
     /**
      * The function should remove msgLengthP bytes from NSCqueue
@@ -131,7 +131,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual ulong getBytesAvailable() = 0;
+    virtual unsigned long getBytesAvailable() const = 0;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -143,7 +143,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP) = 0;
+    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
 
     /**
      * Tells the queue that bytes transmitted and ACKed, so they can be removed from the queue.
@@ -185,12 +185,12 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP) = 0;
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP) = 0;
 
     /**
      * Returns the number of received bytes.
      */
-    virtual unsigned long getExtractableBytesUpTo() = 0;
+    virtual unsigned long getExtractableBytesUpTo() const = 0;
 
     /**
      * Should create a packet to be passed up to the app, limited to maxBytesP length.
@@ -204,17 +204,17 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() = 0;
+    virtual uint32 getAmountOfBufferedBytes() const = 0;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() = 0;
+    virtual uint32 getQueueLength() const = 0;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() = 0;
+    virtual void getQueueStatus() const = 0;
 
     /**
      * notify the queue about output messages

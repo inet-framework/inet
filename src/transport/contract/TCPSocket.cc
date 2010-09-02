@@ -20,11 +20,10 @@
 
 void TCPSocket::CallbackInterface::socketDataMsgArrived(int connId, TCPDataTransferMode transferMode, void *yourPtr, TCPDataMsg *msg, bool urgent)
 {
-    cPacket *pk = msg;
     if (transferMode == TCP_TRANSFER_OBJECT)
     {
-        cPacket *pk = msg->removeDataObject();
-        if (pk && msg->getIsBegin())
+        cPacket *pk = msg->removePayloadPacket();
+        if (pk && msg->getIsPayloadStart())
         {
             socketDataArriveBegins(connId, yourPtr, pk, urgent);
             pk = NULL;

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Zoltan Bojthe
+// Copyright (C) 2009 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -58,21 +58,21 @@ void TCP_NSC_VirtualDataSendQueue::enqueueAppData(cPacket *msgP)
     unsentNscBytesM += bytes;
 }
 
-int TCP_NSC_VirtualDataSendQueue::getNscMsg(void* bufferP, int bufferLengthP)
+int TCP_NSC_VirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
 
     return (unsentNscBytesM > bufferLengthP) ? bufferLengthP : unsentNscBytesM;
 }
 
-void TCP_NSC_VirtualDataSendQueue::dequeueNscMsg(int msgLengthP)
+void TCP_NSC_VirtualDataSendQueue::dequeueTcpLayerMsg(int msgLengthP)
 {
     ASSERT(msgLengthP <= unsentNscBytesM);
 
     unsentNscBytesM -= msgLengthP;
 }
 
-ulong TCP_NSC_VirtualDataSendQueue::getBytesAvailable()
+ulong TCP_NSC_VirtualDataSendQueue::getBytesAvailable() const
 {
     return unsentNscBytesM; // TODO
 }
@@ -129,14 +129,14 @@ void TCP_NSC_VirtualDataReceiveQueue::enqueueNscData(void* dataP, int dataLength
     bytesInQueueM += dataLengthP;
 }
 
-cPacket* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
+TCPDataMsg* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
-    cPacket *dataMsg = NULL;
+    TCPDataMsg *dataMsg = NULL;
     if(bytesInQueueM)
     {
-        dataMsg = new cPacket("DATA");
+        dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(bytesInQueueM);
         TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
@@ -151,17 +151,17 @@ cPacket* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TCP_NSC_VirtualDataReceiveQueue::getAmountOfBufferedBytes()
+uint32 TCP_NSC_VirtualDataReceiveQueue::getAmountOfBufferedBytes() const
 {
     return bytesInQueueM;
 }
 
-uint32 TCP_NSC_VirtualDataReceiveQueue::getQueueLength()
+uint32 TCP_NSC_VirtualDataReceiveQueue::getQueueLength() const
 {
     return bytesInQueueM ? 1 : 0;
 }
 
-void TCP_NSC_VirtualDataReceiveQueue::getQueueStatus()
+void TCP_NSC_VirtualDataReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
