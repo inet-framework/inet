@@ -219,6 +219,7 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
 {
     uint32 usedRcvBuffer = getAmountOfBufferedBytes();
     uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
+    ASSERT(maxRcvBuffer >= usedRcvBuffer);
     return freeRcvBuffer;
 }
 
