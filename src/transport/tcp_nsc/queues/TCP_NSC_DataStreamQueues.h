@@ -51,7 +51,7 @@ class INET_API TCP_NSC_DataStreamSendQueue : public TCP_NSC_SendQueue
 
     virtual void dequeueTcpLayerMsg(int msgLengthP);
 
-    unsigned long getBytesAvailable() const;
+    virtual unsigned long getBytesAvailable() const;
 
     virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, int tcpLengthP);
 

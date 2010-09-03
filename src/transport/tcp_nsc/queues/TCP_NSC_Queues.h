@@ -130,7 +130,7 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual ulong getBytesAvailable() const = 0;
+    virtual unsigned long getBytesAvailable() const = 0;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
