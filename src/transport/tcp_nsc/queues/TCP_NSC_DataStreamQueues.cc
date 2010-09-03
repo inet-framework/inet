@@ -121,13 +121,9 @@ void TCP_NSC_DataStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-uint32 TCP_NSC_DataStreamReceiveQueue::insertBytesFromSegment(
-        const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP)
+void TCP_NSC_DataStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
 {
     ASSERT(tcpsegP);
-    ASSERT(bufferP);
-
-    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
 void TCP_NSC_DataStreamReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)

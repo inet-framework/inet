@@ -115,13 +115,9 @@ void TCP_NSC_VirtualDataReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-uint32 TCP_NSC_VirtualDataReceiveQueue::insertBytesFromSegment(
-        const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP)
+void TCP_NSC_VirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
 {
     ASSERT(tcpsegP);
-    ASSERT(bufferP);
-
-    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
 void TCP_NSC_VirtualDataReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)

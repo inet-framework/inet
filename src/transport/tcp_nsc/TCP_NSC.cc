@@ -501,14 +501,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     conn = findConnByInetSockPair(inetSockPair);
     if (!conn)
         conn = findConnByInetSockPair(inetSockPairAny);
+
+    totalTcpLen = TCPSerializer().serialize(tcpsegP, (unsigned char *)tcph, totalTcpLen);
     if(conn)
     {
-        totalTcpLen = conn->receiveQueueM->insertBytesFromSegment(tcpsegP, (void *)tcph, totalTcpLen);
-    }
-    else
-    {
-        totalTcpLen = TCPSerializer().serialize(tcpsegP, (unsigned char *)tcph, totalTcpLen);
-        //TODO the PayLoad data are destroyed...
+        conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(tcpsegP);
     }
 
     // calculate TCP checksum

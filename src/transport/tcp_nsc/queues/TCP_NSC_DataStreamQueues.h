@@ -76,7 +76,7 @@ class INET_API TCP_NSC_DataStreamReceiveQueue : public TCP_NSC_ReceiveQueue
 
     virtual void setConnection(TCP_NSC_Connection *connP);
 
-    virtual uint32 insertBytesFromSegment(const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP);
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP);
 
     virtual void enqueueNscData(void* dataP, int dataLengthP);
 

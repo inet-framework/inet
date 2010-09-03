@@ -173,17 +173,14 @@ class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
     virtual void setConnection(TCP_NSC_Connection *connP) { connM = connP; }
 
     /**
-     * Called when a TCP segment arrives, it should extract the payload
-     * from the segment and store it in the receive queue. The segment
+     * Called when a TCP segment arrives. The segment
      * object should *not* be deleted.
      *
-     * The method should return the number of bytes to copied to buffer.
-     *
-     * The method should fill the bufferP for data sending to NSC stack
+     * For remove and store payload messages if need.
      *
      * called before nsc_stack->if_receive_packet() called
      */
-    virtual uint32 insertBytesFromSegment(const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP) = 0;
 
     /**
      * The method called when data received from NSC
