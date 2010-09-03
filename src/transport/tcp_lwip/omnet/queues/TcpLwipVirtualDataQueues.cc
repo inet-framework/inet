@@ -149,8 +149,6 @@ TCPDataMsg* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo(unsigned long maxBy
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(std::min(bytesInQueueM, maxBytesP));
-        dataMsg->setPayloadPacket(NULL);
-        dataMsg->setIsPayloadStart(false);
         bytesInQueueM -= dataMsg->getByteLength();
     }
     return dataMsg;

@@ -258,7 +258,6 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytes
     ASSERT(connM);
 
     TCPDataMsg *msg = NULL;
-    cPacket *objMsg = NULL;
     uint64 nextPayloadBegin = lastExtractedPayloadBytesM;
     uint64 nextPayloadLength = 0;
     uint64 nextPayloadOffs = 0;
@@ -305,11 +304,11 @@ TCPDataMsg* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo(unsigned long maxBytes
         msg->setByteLength(maxBytesP);
         if (!payloadListM.empty() && lastExtractedBytesM <= nextPayloadOffs && nextPayloadOffs < lastExtractedBytesM + maxBytesP)
         {
-            objMsg = payloadListM.begin()->second;
+            cPacket *objMsg = payloadListM.begin()->second;
             payloadListM.erase(payloadListM.begin());
             lastExtractedPayloadBytesM = nextPayloadEnd;
+            msg->setPayloadPacket(objMsg);
         }
-        msg->setPayloadPacket(objMsg);
         msg->setIsPayloadStart(isPayloadExtractAtFirstM);
         lastExtractedBytesM += maxBytesP;
     }
