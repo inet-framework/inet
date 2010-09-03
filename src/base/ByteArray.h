@@ -45,14 +45,14 @@ class ByteArray : public ByteArray_Base
     virtual ByteArray *dup() const {return new ByteArray(*this);}
 
     /**
-     * Set data from buffer
+     * Copy data from buffer
      * @param ptr: pointer to buffer
      * @param length: length of data
      */
     virtual void setDataFromBuffer(const void *ptr, unsigned int length);
 
     /**
-     * Set data from other ByteArray
+     * Copy data from other ByteArray
      * @param other: reference to other ByteArray
      * @param offset: skipped first bytes from other
      * @param length: length of data
@@ -76,14 +76,19 @@ class ByteArray : public ByteArray_Base
     virtual unsigned int copyDataToBuffer(void *ptr, unsigned int length, unsigned int srcOffs=0) const;
 
     /**
+     * Set buffer pointer and buffer length
+     * @param ptr: pointer to new buffer, must created by `buffer = new char[length1];` where length1>=length
+     * @param length: length of buffer
+     */
+    virtual void assignBuffer(void *ptr, unsigned int length);
+
+    /**
      * Truncate data content
-     * @param truncleft: The number of bytes from the beginning of the content be removed
-     * @param truncright: The number of bytes from the end of the content be removed
+     * @param truncleft: The number of bytes from the beginning of the content be remove
+     * @param truncright: The number of bytes from the end of the content be remove
      * Generate assert when not have enough bytes for truncation
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
-
-    const void* getDataArrayPtr() { return data_var; }
 };
 
 #endif //  __INET_BYTEARRAY_H

@@ -12,13 +12,13 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_BYTEARRAYLIST_H
-#define __INET_BYTEARRAYLIST_H
+#ifndef __INET_BYTEARRAYBUFFER_H
+#define __INET_BYTEARRAYBUFFER_H
 
 #include "ByteArray.h"
 
 /**
- * Queue that carries raw bytes.
+ * Buffer that carries BytesArray.
  */
 class ByteArrayBuffer
 {
@@ -42,4 +42,4 @@ class ByteArrayBuffer
     virtual unsigned int drop(unsigned int lengthP);
 };
 
-#endif //  __INET_BYTEARRAYLIST_H
+#endif //  __INET_BYTEARRAYBUFFER_H

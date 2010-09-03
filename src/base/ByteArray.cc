@@ -17,14 +17,14 @@
 
 void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 {
-    delete[] data_var;
-    data_var = NULL;
-    if (length)
+    if (length != data_arraysize)
     {
-        data_var = new char[length];
-        memcpy(data_var, ptr, length);
+        delete[] data_var;
+        data_var = length ? new char[length] : NULL;
+        data_arraysize = length;
     }
-    data_arraysize = length;
+    if (length)
+        memcpy(data_var, ptr, length);
 }
 
 void ByteArray::setDataFromByteArray(const ByteArray& other, unsigned int srcOffs, unsigned int length)
@@ -49,13 +49,20 @@ void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
 
 unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length, unsigned int srcOffs) const
 {
-    //FIXME
     if (srcOffs >= data_arraysize)
         return 0;
+
     if (srcOffs + length > data_arraysize)
         length = data_arraysize - srcOffs;
     memcpy(ptr, data_var+srcOffs, length);
     return length;
+}
+
+void ByteArray::assignBuffer(void *ptr, unsigned int length)
+{
+    delete[] data_var;
+    data_var = (char *)ptr;
+    data_arraysize = length;
 }
 
 void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
