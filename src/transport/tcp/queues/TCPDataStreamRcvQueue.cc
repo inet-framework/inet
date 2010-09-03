@@ -31,7 +31,7 @@ bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
 {
     const Region *other = dynamic_cast<const Region *>(_other);
     if (!other)
-        throw cRuntimeError("check_and_cast(): cannot cast (TCPVirtualDataRcvQueue::Region *) to type 'TCPDataStreamRcvQueue::Region'");
+        throw cRuntimeError("merge(): cannot cast (TCPVirtualDataRcvQueue::Region *) to type 'TCPDataStreamRcvQueue::Region *'");
 
     if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
@@ -40,7 +40,7 @@ bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
     uint32 nend = (seqLess(end, other->end)) ? other->end : end;
     if (nbegin != begin || nend != end)
     {
-        char * buff = new char[nend-nbegin];
+        char *buff = new char[nend-nbegin];
         if (nbegin != begin)
             other->data.copyDataToBuffer(buff, begin - nbegin);
         data.copyDataToBuffer(buff + begin - nbegin, end - begin);
@@ -48,8 +48,7 @@ bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
             other->data.copyDataToBuffer(buff + end - nbegin, nend - end);
         begin = nbegin;
         end = nend;
-        data.setDataFromBuffer(buff, end - begin);
-        delete buff;
+        data.assignBuffer(buff, end - begin);
     }
     return true;
 }
@@ -58,7 +57,7 @@ TCPDataStreamRcvQueue::Region* TCPDataStreamRcvQueue::Region::split(uint32 seq)
 {
     ASSERT(seqGreater(seq, begin) && seqLess(seq, end));
 
-    Region * reg = new Region(begin, seq);
+    Region *reg = new Region(begin, seq);
     reg->data.setDataFromByteArray(data, 0, seq - begin);
     data.truncateData(seq - begin);
     begin = seq;

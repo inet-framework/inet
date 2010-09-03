@@ -150,8 +150,7 @@ TCPDataMsg* TcpLwipDataStreamReceiveQueue::extractBytesUpTo(unsigned long maxByt
         char *data = new char[extractBytes];
         unsigned int extractedBytes = byteArrayBufferM.popBytesToBuffer(data, extractBytes);
         dataMsg->setByteLength(extractedBytes);
-        dataMsg->setDataFromBuffer(data, extractedBytes);
-        delete data;
+        dataMsg->getByteArray().assignBuffer(data, extractedBytes);
     }
     return dataMsg;
 }
