@@ -119,13 +119,11 @@ void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipDataStreamReceiveQueue::insertBytesFromSegment(
-        TCPSegment *tcpsegP, uint32 seqno, void* bufferP, size_t bufferLengthP)
+void TcpLwipDataStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(
+        TCPSegment *tcpsegP, uint32 seqno, const void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
-
-//    return TCPSerializer().serialize(tcpsegP, (unsigned char *)bufferP, bufferLengthP);
 }
 
 void TcpLwipDataStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)

@@ -173,12 +173,11 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
     virtual void setConnection(TcpLwipConnection *connP) { connM = connP; }
 
     /**
-     * Called when a TCP segment arrives, it should extract the payload
+     * Called when a TCP segment arrives, it should extract the payload messages
      * from the segment and store it in the receive queue. The segment
      * object should *not* be deleted.
-     *
      */
-    virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo, const void* bufferP, size_t bufferLengthP) = 0;
 
     /**
      * The method called when data received from LWIP

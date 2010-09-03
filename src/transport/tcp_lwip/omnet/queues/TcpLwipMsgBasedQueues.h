@@ -94,7 +94,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 
     virtual void setConnection(TcpLwipConnection *connP);
 
-    virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void *bufferP, size_t bufferLengthP);
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo, const void *bufferP, size_t bufferLengthP);
 
     virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
 

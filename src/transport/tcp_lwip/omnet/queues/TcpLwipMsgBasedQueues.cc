@@ -207,8 +207,8 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
     isPayloadExtractAtFirstM = connP->isSendingObjectUpAtFirstByteEnabled();
 }
 
-void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
-        TCPSegment *tcpsegP, uint32 seqNoP, void* bufferP, size_t bufferLengthP)
+void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
+        TCPSegment *tcpsegP, uint32 seqNoP, const void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
