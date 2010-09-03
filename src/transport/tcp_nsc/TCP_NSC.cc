@@ -37,6 +37,7 @@
 #include <netinet/in.h>
 
 #include "TCP_NSC_VirtualDataQueues.h"
+#include "TCP_NSC_DataStreamQueues.h"
 
 Define_Module(TCP_NSC);
 
@@ -646,9 +647,9 @@ TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
     switch (transferModeP)
     {
         case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  return new TCP_NSC_DataStreamSendQueue();
         case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedSendQueue();
-        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamSendQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
     }
 }
 
@@ -657,9 +658,9 @@ TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPDataTransferMode transferMo
     switch (transferModeP)
     {
         case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataReceiveQueue();
+        case TCP_TRANSFER_BYTESTREAM:  return new TCP_NSC_DataStreamReceiveQueue();
         case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedReceiveQueue();
-        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamReceiveQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
     }
 }
 void TCP_NSC::handleAppMessage(cMessage *msgP)
