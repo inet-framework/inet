@@ -618,8 +618,16 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
             }
             if(hasData)
             {
-                while(cPacket *dataMsg = c.receiveQueueM->extractBytesUpTo())
+                cPacket *dataMsg;
+                while(NULL != (dataMsg = c.receiveQueueM->extractBytesUpTo()))
                 {
+                    TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+                    tcpConnectInfo->setConnId(c.connIdM);
+                    tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
+                    tcpConnectInfo->setRemoteAddr(c.inetSockPairM.remoteM.ipAddrM);
+                    tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
+                    tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
+                    dataMsg->setControlInfo(tcpConnectInfo);
                     // send Msg to Application layer:
                     send(dataMsg, "appOut", c.appGateIndexM);
                 }

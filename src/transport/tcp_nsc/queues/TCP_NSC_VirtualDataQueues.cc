@@ -139,13 +139,6 @@ TCPDataMsg* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
         dataMsg = new TCPDataMsg("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(bytesInQueueM);
-        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setConnId(connM->connIdM);
-        tcpConnectInfo->setLocalAddr(connM->inetSockPairM.localM.ipAddrM);
-        tcpConnectInfo->setRemoteAddr(connM->inetSockPairM.remoteM.ipAddrM);
-        tcpConnectInfo->setLocalPort(connM->inetSockPairM.localM.portM);
-        tcpConnectInfo->setRemotePort(connM->inetSockPairM.remoteM.portM);
-        dataMsg->setControlInfo(tcpConnectInfo);
         bytesInQueueM -= dataMsg->getByteLength();
     }
     return dataMsg;

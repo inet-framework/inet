@@ -151,13 +151,6 @@ TCPDataMsg* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
         dataMsg->setByteLength(extractedBytes);
         dataMsg->setDataFromBuffer(data, extractedBytes);
         delete data;
-        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setConnId(connM->connIdM);
-        tcpConnectInfo->setLocalAddr(connM->inetSockPairM.localM.ipAddrM);
-        tcpConnectInfo->setRemoteAddr(connM->inetSockPairM.remoteM.ipAddrM);
-        tcpConnectInfo->setLocalPort(connM->inetSockPairM.localM.portM);
-        tcpConnectInfo->setRemotePort(connM->inetSockPairM.remoteM.portM);
-        dataMsg->setControlInfo(tcpConnectInfo);
     }
     return dataMsg;
 }
