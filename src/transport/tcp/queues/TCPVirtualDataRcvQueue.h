@@ -20,10 +20,13 @@
 #ifndef __INET_TCPVIRTUALDATARCVQUEUE_H
 #define __INET_TCPVIRTUALDATARCVQUEUE_H
 
+
 #include <list>
 #include <string>
+
 #include "TCPSegment.h"
 #include "TCPReceiveQueue.h"
+
 
 /**
  * Receive queue that manages "virtual bytes", that is, byte counts only.
@@ -49,30 +52,38 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         unsigned long getLength() const {return (ulong)(end - begin);}
         unsigned long getLengthTo(uint32 seq) const;
 
-        /// Compare self and other
+        /** Compare self and other */
         CompareStatus compare(const TCPVirtualDataRcvQueue::Region& other) const;
 
         // Virtual functions:
 
-        /// Merge other region to self
+        /** Merge other region to self */
         virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
 
-        /// Copy self to msg
+        /** Copy self to msg */
         virtual void copyTo(TCPDataMsg* msg) const;
 
         /**
-         * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
+         * Returns an allocated new Region object with filled with [begin..seq) and set self to [seq..end)
          */
         virtual TCPVirtualDataRcvQueue::Region* split(uint32 seq);
     };
+
     typedef std::list<Region*> RegionList;
+
     RegionList regionList;
 
-    /// Merge segment byte range into regionList, the parameter region must created by 'new' operator.
+    /** Merge segment byte range into regionList, the parameter region must created by 'new' operator. */
     void merge(TCPVirtualDataRcvQueue::Region *region);
 
-    /// returns the number of bytes extracted
+    /** Returns the number of bytes extracted */
     Region* extractTo(uint32 toSeq, ulong maxBytes);
+
+    /**
+     * Insert Region to queue.
+     * Called from insertBytesFromSegment()
+     */
+    uint32 insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region);
 
   public:
     /**
@@ -85,63 +96,40 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
      */
     virtual ~TCPVirtualDataRcvQueue();
 
-    /**
-     * Set initial receive sequence number.
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual void init(uint32 startSeq);
 
+    /** Method inherited from TCPReceiveQueue */
     void setConnection(TCPConnection *_conn);
 
-    /**
-     * Returns a string with region stored.
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual std::string info() const;
 
-    /**
-     * Called when a TCP segment arrives. Returns sequence number for ACK.
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
 
-    virtual uint32 insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region);
-
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual ulong getExtractableBytesUpTo(uint32 seq);
 
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual TCPDataMsg* extractBytesUpTo(uint32 seq, ulong maxBytes);
 
-    /**
-     * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 getAmountOfBufferedBytes();
 
-    /**
-     * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer);
 
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 getQueueLength();
 
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual void getQueueStatus();
 
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 getLE(uint32 fromSeqNum);
 
-    /**
-     *
-     */
+    /** Method inherited from TCPReceiveQueue */
     virtual uint32 getRE(uint32 toSeqNum);
 };
 

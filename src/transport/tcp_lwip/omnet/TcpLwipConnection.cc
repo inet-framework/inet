@@ -501,7 +501,7 @@ err_t TcpLwipConnection::eventRecv(struct pbuf *p, err_t err)
             uint32 bytesInBuffer = receiveQueueM->getAmountOfBufferedBytes();
             uint32 bufferSize = getReceiveBufferSize();
             uint32 freeBuffer = (bytesInBuffer < bufferSize) ? bufferSize - bytesInBuffer : 0;
-            if (len > freeBuffer) // if buffers has enough free bytes for this data
+            if (len > freeBuffer) // if buffers hasn't enough free bytes for this data
                 len = freeBuffer;
         }
         tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, len);
