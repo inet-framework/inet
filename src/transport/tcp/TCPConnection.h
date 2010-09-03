@@ -354,7 +354,7 @@ class INET_API TCPConnection
     // statistics
     cOutVector *sndWndVector;   // snd_wnd
     cOutVector *rcvWndVector;   // rcv_wnd
-    cOutVector *rcvAdvVector;   // current advertised window (=rcv_avd)
+    cOutVector *rcvAdvVector;   // current advertised window (=rcv_adv)
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo
