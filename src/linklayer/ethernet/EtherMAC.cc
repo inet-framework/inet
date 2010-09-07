@@ -55,9 +55,6 @@ void EtherMAC::initialize()
     endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
     endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
 
-    duplexMode = par("duplexEnabled");
-    calculateParameters();
-
     // initialize state info
     backoffs = 0;
     numConcurrentTransmissions = 0;
@@ -86,6 +83,7 @@ void EtherMAC::initializeFlags()
 {
     EtherMACBase::initializeFlags();
 
+    duplexMode = par("duplexEnabled");
     physInGate->setDeliverOnReceptionStart(true);
 }
 

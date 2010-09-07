@@ -33,9 +33,6 @@ void EtherMACFullDuplex::initialize()
 {
     EtherMACBase::initialize();
 
-    duplexMode = true;
-    calculateParameters();
-
     beginSendFrames();
 }
 
@@ -50,6 +47,8 @@ void EtherMACFullDuplex::initializeStatistics()
 void EtherMACFullDuplex::initializeFlags()
 {
     EtherMACBase::initializeFlags();
+
+    duplexMode = true;
     physInGate->setDeliverOnReceptionStart(false);
 }
 

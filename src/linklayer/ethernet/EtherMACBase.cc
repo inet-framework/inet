@@ -128,6 +128,8 @@ void EtherMACBase::initialize()
     initializeNotificationBoard();
     initializeStatistics();
 
+    calculateParameters();
+
     registerInterface(); // needs MAC address
 
     lastTxFinishTime = -1.0; // never equals with current simtime.
@@ -197,6 +199,8 @@ void EtherMACBase::initializeNotificationBoard()
 
 void EtherMACBase::initializeFlags()
 {
+    duplexMode = true;
+
     // initialize connected flag
     connected = physOutGate->getPathEndGate()->isConnected();
     if (!connected)
@@ -274,6 +278,7 @@ void EtherMACBase::registerInterface()
     interfaceEntry->setName(interfaceName);
     delete [] interfaceName;
 
+    ASSERT(curEtherDescr);
     // data rate
     interfaceEntry->setDatarate(curEtherDescr->txrate); // FIXME
 
@@ -339,7 +344,7 @@ void EtherMACBase::calculateParameters()
             return;
         }
     }
-    error("Invalid transmission rate on channel %s at %s modul", transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+    error("Invalid transmission rate %e on channel %s at %s modul", txrate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
 }
 
 void EtherMACBase::printParameters()
