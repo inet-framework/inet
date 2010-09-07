@@ -24,7 +24,7 @@
 //     bool explicitReadsEnabled;		// when enabled: TCP send up only TCPDataArrivedInfo notification when received some data, and send the packet only after a READ msg.
 //     bool sendNotificationsEnabled;  // when enabled: when TCP sent some data to partner or used send buffer size changed, it's send up a TCPDataSentInfo notification.
 //     bool sendingObjectUpAtFirstByteEnabled; // when enabled: when TCPDataTransferMode is "object", then TCP send up object at first byte of msg
-//     long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true 
+//     long receiveBufferSize;         // max size of used receive queue in TCP layer (SO_RCVBUF). only valid when explicitReadsEnabled is true.
 // 
 // 
 // SEND:
