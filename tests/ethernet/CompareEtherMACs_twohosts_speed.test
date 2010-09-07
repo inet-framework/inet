@@ -125,7 +125,7 @@ usedlimit <- 98.0
 
 # begin TEST:
 
-dataset <- loadDataset(add(type='scalar', files=scafile, select='name("*")'))
+dataset <- loadDataset(scafile)
 
 cat("\nOMNETPP TEST RESULT:\n")
 
@@ -194,7 +194,6 @@ if(length(xx$value) != linecount)
 cat("\n")
 %#--------------------------------------------------------------------------------------------------------------
 %contains: check.r.out
-Loaded results/General-0.sca
 
 OMNETPP TEST RESULT:
 
