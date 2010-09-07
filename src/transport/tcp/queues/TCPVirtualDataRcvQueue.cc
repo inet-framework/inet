@@ -180,16 +180,20 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq, ul
     if(regionList.empty())
         return NULL;
 
-    Region * reg = regionList.front();
-    if (seqLE(seq, reg->getBegin()))
+    Region *reg = regionList.front();
+    uint32 beg = reg->getBegin();
+    if (seqLE(seq, beg))
         return NULL;
 
-    if (seqGE(seq, reg->getEnd()))
+    uint32 maxend = beg + maxBytes;
+    if (seqLess(seq, maxend))
+        maxend = seq;
+    if (seqGE(maxend, reg->getEnd()))
     {
         regionList.pop_front();
         return reg;
     }
-    return reg->split(seq);
+    return reg->split(maxend);
 }
 
 ulong TCPVirtualDataRcvQueue::getExtractableBytesUpTo(uint32 seq)
