@@ -34,21 +34,52 @@
 //       
 //
 // RECEIVE:
-//   Adatot mindíg TCPDataMsg üzenetben küld fel.
+//   Adatot mindig TCPDataMsg üzenetben küld fel.
+//
 //   explicitReadsEnabled:
 //     1) ha volt READ(n), akkor a TCP felküldi az adatból ami belefér (<=n).
 //     2) ha nem volt READ vagy maradt még adat, akkor küld egy TCP_I_DATA_ARRIVED msg-t.
-//     A receive queue-ra meg lehet adni az OPEN-nél egy limitet, aminél több nem lehet a bufferben, ilyenkor a TCP úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
-//   Eredeti módban:
-//     nincs értelme a limitnek, mert úgyis felküldi, amint megérkezett.
+//
+//     A receive queue-ra meg lehet adni az OPEN-nél egy méretlimitet, aminél több nem lehet a bufferben, ilyenkor a TCP úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
+//       Az inet-TCP ehelyett jelenleg az advertizedwindow paraméterét használja.
+//
+//   explicitReads Disabled esetén nincs értelme a limitnek, mert úgyis mindent felküld, amint megérkezett.
+//
+//   bytecount kommunikáció:
+//     A hálózaton TCPSegment csomagok mennek.
+//     Az App-tól cPacket csomagot vár.
 //
 //   object (MsgBased) kommunikáció esetén:
 //     A megérkezett byteokat felküldi az app-nak az általános szabályok szerint, plusz:
 //       - A felküldésnél az object határoknál mindíg eltöri a felküldendő adatot.
 //       - Az object-et - ha tartozik az adott szelethez - a TCPDataMsg.payloadPacket memberben küldi fel.
-//         Ha a sendingObjectUpAtFirstByteEnabled, akkor az első bájtjával együtt küldi fel; ha ~Disabled, akkor pedig az utolsó bájtjával együtt küldi fel. 
+//         Ha a sendingObjectUpAtFirstByteEnabled, akkor az első bájtjával együtt küldi fel; ha ~Disabled, akkor pedig az utolsó bájtjával együtt küldi fel.
+//         Ezt mindig jelöli is a felküldött csomagban, akkor is ha nincs is benne payloadPacket.
+//     A hálózaton TCPSegmentWithMessages csomagok mennek. 
+//     Az App-tól cPacket csomagot vár.
 //
-// Változott még a TCPSocket::CallbackInterface is
+//   bytestream kommunikáció:
+//     Ugyanúgy működik, mint a bytecount komunikáció, csak a bájtok számán kívül magukat a bájtokat is átküldi.
+//     A hálózaton TCPSegmentWithBytes csomagok mennek.
+//     Az App-tól ByteArrayMessage csomagot vár.
+// 
+//
+// Változott még a TCPSocket::CallbackInterface is:
+//   három új függvény:
+//     virtual void socketDataMsgArrived()
+//       A TCPSocket ezt hívja meg a socketDataArrived() helyett adatcsomag érkezése esetén.
+//         - object (MsgBased) kommunikáció esetén:
+//           - ha nincs az üzenetben payloadPacket, akkor csak a socketDataBytesArrived(... bytecount ...) függvényt hívja.
+//           - ha van az üzenetben payloadPacket, akkor az IsPayloadStart-tól függően 
+//             - vagy socketDataArriveBegins(... payloadPacket ...); socketDataBytesArrived(... bytecount ...)
+//             - vagy socketDataBytesArrived(... bytecount ...); socketDataArrived(... payloadPacket ...)
+//             függvényhívások lesznek
+//         - egyéb kommunikációs mód (bytecount, bytestream) esetén meghívja a socketDataArrived() függvényt.
+//     virtual void socketDataBytesArrived()
+//       - object (MsgBased) kommunikáció esetén az érkezett byteok számával hívódik.
+//     virtual void socketDataArriveBegins()
+//       - object (MsgBased) kommunikáció esetén isPayloadStart esetén az érkezett payloadPackettel hívódik.
+//   új socketDataMsgArrived() függvény, ami object (MsgBased) kommunikáció esetén
 
 cplusplus {{
 
