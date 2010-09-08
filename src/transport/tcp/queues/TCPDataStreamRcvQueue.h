@@ -71,9 +71,10 @@ class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
     virtual std::string info() const;
 
     /**
-     * Called when a TCP segment arrives. Returns sequence number for ACK.
+     * Create a new Region from tcpseg.
+     * Called from insertBytesFromSegment()
      */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
+    virtual Region* createRegionFromSegment(TCPSegment *tcpseg);
 };
 
 #endif // __INET_TCPDATASTREAMRCVQUEUE_H

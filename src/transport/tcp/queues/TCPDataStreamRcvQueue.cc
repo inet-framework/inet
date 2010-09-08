@@ -95,11 +95,11 @@ std::string TCPDataStreamRcvQueue::info() const
     return res;
 }
 
-uint32 TCPDataStreamRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg_)
+TCPDataStreamRcvQueue::Region* TCPDataStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg_)
 {
     TCPSegmentWithBytes *tcpseg = check_and_cast<TCPSegmentWithBytes *>(tcpseg_);
     Region *region = new Region(tcpseg->getSequenceNo(),
             tcpseg->getSequenceNo()+tcpseg->getPayloadLength(), tcpseg->getByteArray());
-    return insertBytesFromRegion(region);
+    return region;
 }
 

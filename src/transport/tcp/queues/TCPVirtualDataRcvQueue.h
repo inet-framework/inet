@@ -80,10 +80,10 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     Region* extractTo(uint32 toSeq, ulong maxBytes);
 
     /**
-     * Insert Region to queue.
+     * Create a new Region from tcpseg.
      * Called from insertBytesFromSegment()
      */
-    uint32 insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region);
+    virtual Region* createRegionFromSegment(TCPSegment *tcpseg);
 
   public:
     /**

@@ -122,21 +122,20 @@ std::string TCPVirtualDataRcvQueue::info() const
     return res;
 }
 
-uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
 {
     Region *region = new Region(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
-    return insertBytesFromRegion(region);
+    return region;
 }
-
-uint32 TCPVirtualDataRcvQueue::insertBytesFromRegion(TCPVirtualDataRcvQueue::Region *region)
+uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
+    Region *region = createRegionFromSegment(tcpseg);
     merge(region);
     if (seqGE(rcv_nxt, regionList.front()->getBegin()))
         rcv_nxt = regionList.front()->getEnd();
     return rcv_nxt;
 }
 
-//void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
 void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
 {
     // Here we have to update our existing regions with the octet range
