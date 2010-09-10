@@ -41,7 +41,7 @@
 //     2) ha nem volt READ vagy maradt még adat, akkor küld egy TCP_I_DATA_ARRIVED msg-t.
 //
 //     A receive queue-ra meg lehet adni az OPEN-nél egy méretlimitet, aminél több nem lehet a bufferben, ilyenkor a TCP úgy állítja az ablakméretet, hogy csak ennyi adatot fogadhasson.
-//       Az inet-TCP ehelyett jelenleg az advertizedwindow paraméterét használja.
+//       Az inet-TCP ehelyett jelenleg az advertisedwindow paraméterét használja.
 //
 //   explicitReads Disabled esetén nincs értelme a limitnek, mert úgyis mindent felküld, amint megérkezett.
 //
