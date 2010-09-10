@@ -1131,7 +1131,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             option.setValuesArraySize(1);
 
             // Update WS variables
-            ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
+            ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer); //FIXME why not used state->rcv_wnd?
             state->rcv_wnd_scale = 0;
             while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
             {
@@ -1607,7 +1607,7 @@ unsigned short TCPConnection::updateRcvWnd()
     updateRcvQueueVars();
     win = state->freeRcvBuffer;
 
-    // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879]:
+    // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
     if (win < (state->maxRcvBuffer / 4) && win < state->snd_mss)
         win = 0;

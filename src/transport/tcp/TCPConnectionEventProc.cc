@@ -49,6 +49,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             remotePort = openCmd->getRemotePort();
             explicitReadsEnabled = openCmd->getExplicitReadsEnabled();
             receiveBufferSize = openCmd->getReceiveBufferSize();
+            state->maxRcvBuffer = receiveBufferSize;
             sendNotificationsEnabled = openCmd->getSendNotificationsEnabled();
             sendingObjectUpAtFirstByteEnabled = openCmd->getSendingObjectUpAtFirstByteEnabled();
             readBytes = 0;
@@ -99,6 +100,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             localPort = openCmd->getLocalPort();
             explicitReadsEnabled = openCmd->getExplicitReadsEnabled();
             receiveBufferSize = openCmd->getReceiveBufferSize();
+            state->maxRcvBuffer = receiveBufferSize;
             sendNotificationsEnabled = openCmd->getSendNotificationsEnabled();
             sendingObjectUpAtFirstByteEnabled = openCmd->getSendingObjectUpAtFirstByteEnabled();
             readBytes = 0;
