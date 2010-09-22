@@ -35,39 +35,39 @@ friend class NeighborState;
 
 public:
     enum NeighborEventType {
-        HelloReceived               = 0,
-        Start                       = 1,
-        TwoWayReceived              = 2,
-        NegotiationDone             = 3,
-        ExchangeDone                = 4,
-        BadLinkStateRequest         = 5,
-        LoadingDone                 = 6,
-        IsAdjacencyOK               = 7,
-        SequenceNumberMismatch      = 8,
-        OneWayReceived              = 9,
-        KillNeighbor                = 10,
-        InactivityTimer             = 11,
-        PollTimer                   = 12,
-        LinkDown                    = 13,
-        DDRetransmissionTimer       = 14,
-        UpdateRetransmissionTimer   = 15,
-        RequestRetransmissionTimer  = 16
+        HELLO_RECEIVED               = 0,
+        START                       = 1,
+        TWOWAY_RECEIVED              = 2,
+        NEGOTIATION_DONE             = 3,
+        EXCHANGE_DONE                = 4,
+        BAD_LINK_STATE_REQUEST         = 5,
+        LOADING_DONE                 = 6,
+        IS_ADJACENCY_OK               = 7,
+        SEQUENCE_NUMBER_MISMATCH      = 8,
+        ONEWAY_RECEIVED              = 9,
+        KILL_NEIGHBOR                = 10,
+        INACTIVITY_TIMER             = 11,
+        POLL_TIMER                   = 12,
+        LINK_DOWN                    = 13,
+        DD_RETRANSMISSION_TIMER       = 14,
+        UPDATE_RETRANSMISSION_TIMER   = 15,
+        REQUEST_RETRANSMISSION_TIMER  = 16
     };
 
     enum NeighborStateType {
-        DownState          = 0,
-        AttemptState       = 1,
-        InitState          = 2,
-        TwoWayState        = 4,
-        ExchangeStartState = 8,
-        ExchangeState      = 16,
-        LoadingState       = 32,
-        FullState          = 64
+        DOWN_STATE          = 0,
+        ATTEMPT_STATE       = 1,
+        INIT_STATE          = 2,
+        TWOWAY_STATE        = 4,
+        EXCHANGE_START_STATE = 8,
+        EXCHANGE_STATE      = 16,
+        LOADING_STATE       = 32,
+        FULL_STATE          = 64
     };
 
     enum DatabaseExchangeRelationshipType {
-        Master = 0,
-        Slave = 1
+        MASTER = 0,
+        SLAVE = 1
     };
 
     struct DDPacketID {
@@ -112,86 +112,86 @@ private:
 
     Interface*                          parentInterface;
 
-    // FIXME!!! Should come from a global unique number generator module.
+    // TODO: Should come from a global unique number generator module.
     static unsigned long                ddSequenceNumberInitSeed;
 
 private:
-    void ChangeState(NeighborState* newState, NeighborState* currentState);
+    void changeState(NeighborState* newState, NeighborState* currentState);
 
 public:
-            Neighbor(RouterID neighbor = NullRouterID);
-    virtual ~Neighbor(void);
+    Neighbor(RouterID neighbor = NULL_ROUTERID);
+    virtual ~Neighbor();
 
-    void                ProcessEvent                        (NeighborEventType event);
-    void                Reset                               (void);
-    void                InitFirstAdjacency                  (void);
-    NeighborStateType   GetState                            (void) const;
-    static const char*  GetStateString                      (NeighborStateType stateType);
-    void                SendDatabaseDescriptionPacket       (bool init = false);
-    bool                RetransmitDatabaseDescriptionPacket(void);
-    void                CreateDatabaseSummary               (void);
-    void                SendLinkStateRequestPacket          (void);
-    void                RetransmitUpdatePacket              (void);
-    bool                NeedAdjacency                       (void);
-    void                AddToRetransmissionList             (OSPFLSA* lsa);
-    void                RemoveFromRetransmissionList        (LSAKeyType lsaKey);
-    bool                IsLSAOnRetransmissionList           (LSAKeyType lsaKey) const;
-    OSPFLSA*            FindOnRetransmissionList            (LSAKeyType lsaKey);
-    void                StartUpdateRetransmissionTimer      (void);
-    void                ClearUpdateRetransmissionTimer      (void);
-    void                AddToRequestList                    (OSPFLSAHeader* lsaHeader);
-    void                RemoveFromRequestList               (LSAKeyType lsaKey);
-    bool                IsLSAOnRequestList                  (LSAKeyType lsaKey) const;
-    OSPFLSAHeader*      FindOnRequestList                   (LSAKeyType lsaKey);
-    void                StartRequestRetransmissionTimer     (void);
-    void                ClearRequestRetransmissionTimer     (void);
-    void                AddToTransmittedLSAList             (LSAKeyType lsaKey);
-    bool                IsOnTransmittedLSAList              (LSAKeyType lsaKey) const;
-    void                AgeTransmittedLSAList               (void);
-    unsigned long       GetUniqueULong                      (void);
-    void                DeleteLastSentDDPacket              (void);
+    void                processEvent(NeighborEventType event);
+    void                reset();
+    void                initFirstAdjacency();
+    NeighborStateType   getState() const;
+    static const char*  getStateString(NeighborStateType stateType);
+    void                sendDatabaseDescriptionPacket(bool init = false);
+    bool                retransmitDatabaseDescriptionPacket();
+    void                createDatabaseSummary();
+    void                sendLinkStateRequestPacket();
+    void                retransmitUpdatePacket();
+    bool                needAdjacency();
+    void                addToRetransmissionList(OSPFLSA* lsa);
+    void                removeFromRetransmissionList(LSAKeyType lsaKey);
+    bool                isLinkStateRequestListEmpty(LSAKeyType lsaKey) const;
+    OSPFLSA*            findOnRetransmissionList(LSAKeyType lsaKey);
+    void                startUpdateRetransmissionTimer();
+    void                clearUpdateRetransmissionTimer();
+    void                addToRequestList(OSPFLSAHeader* lsaHeader);
+    void                removeFromRequestList(LSAKeyType lsaKey);
+    bool                isLSAOnRequestList(LSAKeyType lsaKey) const;
+    OSPFLSAHeader*      findOnRequestList(LSAKeyType lsaKey);
+    void                startRequestRetransmissionTimer();
+    void                clearRequestRetransmissionTimer();
+    void                addToTransmittedLSAList(LSAKeyType lsaKey);
+    bool                isOnTransmittedLSAList(LSAKeyType lsaKey) const;
+    void                ageTransmittedLSAList();
+    unsigned long       getUniqueULong();
+    void                deleteLastSentDDPacket();
 
-    void                SetNeighborID               (RouterID id)                   { neighborID = id; }
-    RouterID            GetNeighborID               (void) const                    { return neighborID; }
-    void                SetPriority                 (unsigned char priority)        { neighborPriority = priority; }
-    unsigned char       GetPriority                 (void) const                    { return neighborPriority; }
-    void                SetAddress                  (IPv4Address address)           { neighborIPAddress = address; }
-    IPv4Address         GetAddress                  (void) const                    { return neighborIPAddress; }
-    void                SetDesignatedRouter         (DesignatedRouterID routerID)   { neighborsDesignatedRouter = routerID; }
-    DesignatedRouterID  GetDesignatedRouter         (void) const                    { return neighborsDesignatedRouter; }
-    void                SetBackupDesignatedRouter   (DesignatedRouterID routerID)   { neighborsBackupDesignatedRouter = routerID; }
-    DesignatedRouterID  GetBackupDesignatedRouter   (void) const                    { return neighborsBackupDesignatedRouter; }
-    void                SetRouterDeadInterval       (short interval)                { neighborsRouterDeadInterval = interval; }
-    short               GetRouterDeadInterval       (void) const                    { return neighborsRouterDeadInterval; }
-    void                SetDDSequenceNumber         (unsigned long sequenceNumber)  { ddSequenceNumber = sequenceNumber; }
-    unsigned long       GetDDSequenceNumber         (void) const                    { return ddSequenceNumber; }
-    void                SetOptions                  (OSPFOptions options)           { neighborOptions = options; }
-    OSPFOptions         GetOptions                  (void) const                    { return neighborOptions; }
-    void                SetLastReceivedDDPacket     (DDPacketID packetID)           { lastReceivedDDPacket = packetID; }
-    DDPacketID          GetLastReceivedDDPacket     (void) const                    { return lastReceivedDDPacket; }
+    void                setNeighborID(RouterID id)  { neighborID = id; }
+    RouterID            getNeighborID() const  { return neighborID; }
+    void                setPriority(unsigned char priority)  { neighborPriority = priority; }
+    unsigned char       getPriority() const  { return neighborPriority; }
+    void                setAddress(IPv4Address address)  { neighborIPAddress = address; }
+    IPv4Address         getAddress() const  { return neighborIPAddress; }
+    void                setDesignatedRouter(DesignatedRouterID routerID)  { neighborsDesignatedRouter = routerID; }
+    DesignatedRouterID  getDesignatedRouter() const  { return neighborsDesignatedRouter; }
+    void                setBackupDesignatedRouter(DesignatedRouterID routerID)  { neighborsBackupDesignatedRouter = routerID; }
+    DesignatedRouterID  getBackupDesignatedRouter() const  { return neighborsBackupDesignatedRouter; }
+    void                setRouterDeadInterval(short interval)  { neighborsRouterDeadInterval = interval; }
+    short               getRouterDeadInterval() const  { return neighborsRouterDeadInterval; }
+    void                setDDSequenceNumber(unsigned long sequenceNumber)  { ddSequenceNumber = sequenceNumber; }
+    unsigned long       getDDSequenceNumber() const  { return ddSequenceNumber; }
+    void                setOptions(OSPFOptions options)  { neighborOptions = options; }
+    OSPFOptions         getOptions() const  { return neighborOptions; }
+    void                setLastReceivedDDPacket(DDPacketID packetID)  { lastReceivedDDPacket = packetID; }
+    DDPacketID          getLastReceivedDDPacket() const  { return lastReceivedDDPacket; }
 
-    void                                SetDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
-    DatabaseExchangeRelationshipType    GetDatabaseExchangeRelationship(void) const                                { return databaseExchangeRelationship; }
+    void                                setDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
+    DatabaseExchangeRelationshipType    getDatabaseExchangeRelationship() const  { return databaseExchangeRelationship; }
 
-    void                SetInterface                (Interface* intf)               { parentInterface = intf; }
-    Interface*          GetInterface                (void)                          { return parentInterface; }
-    const Interface*    GetInterface                (void) const                    { return parentInterface; }
+    void                setInterface(Interface* intf)  { parentInterface = intf; }
+    Interface*          getInterface()  { return parentInterface; }
+    const Interface*    getInterface() const  { return parentInterface; }
 
-    OSPFTimer*          GetInactivityTimer                  (void)                  { return inactivityTimer; }
-    OSPFTimer*          GetPollTimer                        (void)                  { return pollTimer; }
-    OSPFTimer*          GetDDRetransmissionTimer            (void)                  { return ddRetransmissionTimer; }
-    OSPFTimer*          GetUpdateRetransmissionTimer        (void)                  { return updateRetransmissionTimer; }
-    bool                IsUpdateRetransmissionTimerActive   (void) const            { return updateRetransmissionTimerActive; }
-    bool                IsRequestRetransmissionTimerActive  (void) const            { return requestRetransmissionTimerActive; }
-    bool                IsFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
-    bool                DesignatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
-    void                SetUpDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
-    unsigned long       GetDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
+    OSPFTimer*          getInactivityTimer()  { return inactivityTimer; }
+    OSPFTimer*          getPollTimer()  { return pollTimer; }
+    OSPFTimer*          getDDRetransmissionTimer()  { return ddRetransmissionTimer; }
+    OSPFTimer*          getUpdateRetransmissionTimer()  { return updateRetransmissionTimer; }
+    bool                isUpdateRetransmissionTimerActive() const  { return updateRetransmissionTimerActive; }
+    bool                isRequestRetransmissionTimerActive() const  { return requestRetransmissionTimerActive; }
+    bool                isFirstAdjacencyInited() const  { return firstAdjacencyInited; }
+    bool                designatedRoutersAreSetUp() const  { return designatedRoutersSetUp; }
+    void                setupDesignatedRouters(bool setUp)  { designatedRoutersSetUp = setUp; }
+    unsigned long       getDatabaseSummaryListCount() const  { return databaseSummaryList.size(); }
 
-    void IncrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
-    bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
-    bool IsLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
-    void PopFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
+    void incrementDDSequenceNumber()  { ddSequenceNumber++; }
+    bool isLinkStateRequestListEmpty() const { return linkStateRequestList.empty(); }
+    bool isLinkStateRetransmissionListEmpty() const { return linkStateRetransmissionList.empty(); }
+    void popFirstLinkStateRequest()  { linkStateRequestList.pop_front(); }
 };
 
 } // namespace OSPF

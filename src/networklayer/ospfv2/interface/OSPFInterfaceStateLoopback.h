@@ -25,8 +25,8 @@ namespace OSPF {
 class InterfaceStateLoopback : public InterfaceState
 {
 public:
-    virtual void ProcessEvent(Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType GetState(void) const { return Interface::LoopbackState; }
+    virtual void processEvent(Interface* intf, Interface::InterfaceEventType event);
+    virtual Interface::InterfaceStateType getState() const { return Interface::LOOPBACK_STATE; }
 };
 
 } // namespace OSPF

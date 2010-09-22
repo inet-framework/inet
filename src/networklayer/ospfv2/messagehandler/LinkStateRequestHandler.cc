@@ -25,73 +25,73 @@ OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router* containingR
 {
 }
 
-void OSPF::LinkStateRequestHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
 {
-    router->GetMessageHandler()->PrintEvent("Link State Request packet received", intf, neighbor);
+    router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
-    OSPF::Neighbor::NeighborStateType neighborState = neighbor->GetState();
+    OSPF::Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((neighborState == OSPF::Neighbor::ExchangeState) ||
-        (neighborState == OSPF::Neighbor::LoadingState) ||
-        (neighborState == OSPF::Neighbor::FullState))
+    if ((neighborState == OSPF::Neighbor::EXCHANGE_STATE) ||
+        (neighborState == OSPF::Neighbor::LOADING_STATE) ||
+        (neighborState == OSPF::Neighbor::FULL_STATE))
     {
         OSPFLinkStateRequestPacket* lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket*> (packet);
 
-        unsigned long         requestCount = lsRequestPacket->getRequestsArraySize();
-        bool                  error        = false;
+        unsigned long requestCount = lsRequestPacket->getRequestsArraySize();
+        bool error = false;
         std::vector<OSPFLSA*> lsas;
 
         EV << "  Processing packet contents:\n";
 
         for (unsigned long i = 0; i < requestCount; i++) {
-            LSARequest&      request = lsRequestPacket->getRequests(i);
+            LSARequest& request = lsRequestPacket->getRequests(i);
             OSPF::LSAKeyType lsaKey;
-            char             addressString[16];
+            char addressString[16];
 
             EV << "    LSARequest: type="
                << request.lsType
                << ", LSID="
-               << AddressStringFromULong(addressString, sizeof(addressString), request.linkStateID)
+               << addressStringFromULong(addressString, sizeof(addressString), request.linkStateID)
                << ", advertisingRouter="
-               << AddressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
+               << addressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
                << "\n";
 
             lsaKey.linkStateID = request.linkStateID;
             lsaKey.advertisingRouter = request.advertisingRouter.getInt();
 
-            OSPFLSA* lsaInDatabase = router->FindLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->GetArea()->GetAreaID());
+            OSPFLSA* lsaInDatabase = router->findLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->getArea()->getAreaID());
 
             if (lsaInDatabase != NULL) {
                 lsas.push_back(lsaInDatabase);
             } else {
                 error = true;
-                neighbor->ProcessEvent(OSPF::Neighbor::BadLinkStateRequest);
+                neighbor->processEvent(OSPF::Neighbor::BAD_LINK_STATE_REQUEST);
                 break;
             }
         }
 
         if (!error) {
-            int                   updatesCount   = lsas.size();
-            int                   ttl            = (intf->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-            OSPF::MessageHandler* messageHandler = router->GetMessageHandler();
+            int updatesCount = lsas.size();
+            int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            OSPF::MessageHandler* messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
-                OSPFLinkStateUpdatePacket* updatePacket = intf->CreateUpdatePacket(lsas[j]);
+                OSPFLinkStateUpdatePacket* updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != NULL) {
-                    if (intf->GetType() == OSPF::Interface::Broadcast) {
-                        if ((intf->GetState() == OSPF::Interface::DesignatedRouterState) ||
-                            (intf->GetState() == OSPF::Interface::BackupState) ||
-                            (intf->GetDesignatedRouter() == OSPF::NullDesignatedRouterID))
+                    if (intf->getType() == OSPF::Interface::BROADCAST) {
+                        if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
+                            (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
+                            (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                         {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllSPFRouters, intf->GetIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllDRouters, intf->GetIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_D_ROUTERS, intf->getIfIndex(), ttl);
                         }
                     } else {
-                        if (intf->GetType() == OSPF::Interface::PointToPoint) {
-                            messageHandler->SendPacket(updatePacket, OSPF::AllSPFRouters, intf->GetIfIndex(), ttl);
+                        if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
+                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->SendPacket(updatePacket, neighbor->GetAddress(), intf->GetIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                         }
                     }
 

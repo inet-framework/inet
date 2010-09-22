@@ -23,27 +23,27 @@
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
 
-void OSPF::NeighborStateDown::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
-    if (event == OSPF::Neighbor::Start) {
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        int             ttl            = (neighbor->GetInterface()->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
+    if (event == OSPF::Neighbor::START) {
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        int ttl = (neighbor->getInterface()->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
-        messageHandler->ClearTimer(neighbor->GetPollTimer());
-        neighbor->GetInterface()->SendHelloPacket(neighbor->GetAddress(), ttl);
-        messageHandler->StartTimer(neighbor->GetInactivityTimer(), neighbor->GetRouterDeadInterval());
-        ChangeState(neighbor, new OSPF::NeighborStateAttempt, this);
+        messageHandler->clearTimer(neighbor->getPollTimer());
+        neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
+        messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
+        changeState(neighbor, new OSPF::NeighborStateAttempt, this);
     }
-    if (event == OSPF::Neighbor::HelloReceived) {
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        messageHandler->ClearTimer(neighbor->GetPollTimer());
-        messageHandler->StartTimer(neighbor->GetInactivityTimer(), neighbor->GetRouterDeadInterval());
-        ChangeState(neighbor, new OSPF::NeighborStateInit, this);
+    if (event == OSPF::Neighbor::HELLO_RECEIVED) {
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(neighbor->getPollTimer());
+        messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
+        changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
-    if (event == OSPF::Neighbor::PollTimer) {
-        int ttl = (neighbor->GetInterface()->GetType() == OSPF::Interface::Virtual) ? VIRTUAL_LINK_TTL : 1;
-        neighbor->GetInterface()->SendHelloPacket(neighbor->GetAddress(), ttl);
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        messageHandler->StartTimer(neighbor->GetPollTimer(), neighbor->GetInterface()->GetPollInterval());
+    if (event == OSPF::Neighbor::POLL_TIMER) {
+        int ttl = (neighbor->getInterface()->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+        neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
     }
 }

@@ -22,28 +22,28 @@
 #include "OSPFRouter.h"
 #include "MessageHandler.h"
 
-void OSPF::InterfaceStatePointToPoint::ProcessEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::InterfaceDown) {
-        intf->Reset();
-        ChangeState(intf, new OSPF::InterfaceStateDown, this);
+    if (event == OSPF::Interface::INTERFACE_DOWN) {
+        intf->reset();
+        changeState(intf, new OSPF::InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LoopIndication) {
-        intf->Reset();
-        ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
+    if (event == OSPF::Interface::LOOP_INDICATION) {
+        intf->reset();
+        changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HelloTimer) {
-        if (intf->GetType() == OSPF::Interface::Virtual) {
-            if (intf->GetNeighborCount() > 0) {
-                intf->SendHelloPacket(intf->GetNeighbor(0)->GetAddress(), VIRTUAL_LINK_TTL);
+    if (event == OSPF::Interface::HELLO_TIMER) {
+        if (intf->getType() == OSPF::Interface::VIRTUAL) {
+            if (intf->getNeighborCount() > 0) {
+                intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
         } else {
-            intf->SendHelloPacket(OSPF::AllSPFRouters);
+            intf->sendHelloPacket(OSPF::ALL_SPF_ROUTERS);
         }
-        intf->GetArea()->GetRouter()->GetMessageHandler()->StartTimer(intf->GetHelloTimer(), intf->GetHelloInterval());
+        intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::AcknowledgementTimer) {
-        intf->SendDelayedAcknowledgements();
+    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
+        intf->sendDelayedAcknowledgements();
     }
 }
 

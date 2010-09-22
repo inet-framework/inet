@@ -24,12 +24,12 @@ namespace OSPF {
 
 class DatabaseDescriptionHandler : public IMessageHandler {
 private:
-    bool ProcessDDPacket(OSPFDatabaseDescriptionPacket* ddPacket, Interface* intf, Neighbor* neighbor, bool inExchangeStart);
+    bool processDDPacket(OSPFDatabaseDescriptionPacket* ddPacket, Interface* intf, Neighbor* neighbor, bool inExchangeStart);
 
 public:
     DatabaseDescriptionHandler(Router* containingRouter);
 
-    void ProcessPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
 } // namespace OSPF

@@ -24,14 +24,14 @@ namespace OSPF {
 
 class InterfaceState {
 protected:
-    void ChangeState(Interface* intf, InterfaceState* newState, InterfaceState* currentState);
-    void CalculateDesignatedRouter(Interface* intf);
+    void changeState(Interface* intf, InterfaceState* newState, InterfaceState* currentState);
+    void calculateDesignatedRouter(Interface* intf);
 
 public:
     virtual ~InterfaceState() {}
 
-    virtual void ProcessEvent(Interface* intf, Interface::InterfaceEventType event) = 0;
-    virtual Interface::InterfaceStateType GetState(void) const = 0;
+    virtual void processEvent(Interface* intf, Interface::InterfaceEventType event) = 0;
+    virtual Interface::InterfaceStateType getState() const = 0;
 };
 
 } // namespace OSPF

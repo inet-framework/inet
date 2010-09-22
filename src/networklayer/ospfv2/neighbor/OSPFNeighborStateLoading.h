@@ -25,8 +25,8 @@ namespace OSPF {
 class NeighborStateLoading : public NeighborState
 {
 public:
-    virtual void ProcessEvent(Neighbor* neighbor, Neighbor::NeighborEventType event);
-    virtual Neighbor::NeighborStateType GetState(void) const { return Neighbor::LoadingState; }
+    virtual void processEvent(Neighbor* neighbor, Neighbor::NeighborEventType event);
+    virtual Neighbor::NeighborStateType getState() const { return Neighbor::LOADING_STATE; }
 };
 
 } // namespace OSPF

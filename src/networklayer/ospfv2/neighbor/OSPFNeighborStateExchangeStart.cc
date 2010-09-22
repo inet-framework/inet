@@ -25,47 +25,47 @@
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
 
-void OSPF::NeighborStateExchangeStart::ProcessEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateExchangeStart::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
-    if ((event == OSPF::Neighbor::KillNeighbor) || (event == OSPF::Neighbor::LinkDown)) {
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        neighbor->Reset();
-        messageHandler->ClearTimer(neighbor->GetInactivityTimer());
-        ChangeState(neighbor, new OSPF::NeighborStateDown, this);
+    if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        neighbor->reset();
+        messageHandler->clearTimer(neighbor->getInactivityTimer());
+        changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::InactivityTimer) {
-        neighbor->Reset();
-        if (neighbor->GetInterface()->GetType() == OSPF::Interface::NBMA) {
-            MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-            messageHandler->StartTimer(neighbor->GetPollTimer(), neighbor->GetInterface()->GetPollInterval());
+    if (event == OSPF::Neighbor::INACTIVITY_TIMER) {
+        neighbor->reset();
+        if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
+            MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+            messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        ChangeState(neighbor, new OSPF::NeighborStateDown, this);
+        changeState(neighbor, new OSPF::NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::OneWayReceived) {
-        neighbor->Reset();
-        ChangeState(neighbor, new OSPF::NeighborStateInit, this);
+    if (event == OSPF::Neighbor::ONEWAY_RECEIVED) {
+        neighbor->reset();
+        changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
-    if (event == OSPF::Neighbor::HelloReceived) {
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        messageHandler->ClearTimer(neighbor->GetInactivityTimer());
-        messageHandler->StartTimer(neighbor->GetInactivityTimer(), neighbor->GetRouterDeadInterval());
+    if (event == OSPF::Neighbor::HELLO_RECEIVED) {
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(neighbor->getInactivityTimer());
+        messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == OSPF::Neighbor::IsAdjacencyOK) {
-        if (!neighbor->NeedAdjacency()) {
-            neighbor->Reset();
-            ChangeState(neighbor, new OSPF::NeighborStateTwoWay, this);
+    if (event == OSPF::Neighbor::IS_ADJACENCY_OK) {
+        if (!neighbor->needAdjacency()) {
+            neighbor->reset();
+            changeState(neighbor, new OSPF::NeighborStateTwoWay, this);
         }
     }
-    if (event == OSPF::Neighbor::DDRetransmissionTimer) {
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        neighbor->RetransmitDatabaseDescriptionPacket();
-        messageHandler->StartTimer(neighbor->GetDDRetransmissionTimer(), neighbor->GetInterface()->GetRetransmissionInterval());
+    if (event == OSPF::Neighbor::DD_RETRANSMISSION_TIMER) {
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        neighbor->retransmitDatabaseDescriptionPacket();
+        messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
     }
-    if (event == OSPF::Neighbor::NegotiationDone) {
-        neighbor->CreateDatabaseSummary();
-        neighbor->SendDatabaseDescriptionPacket();
-        MessageHandler* messageHandler = neighbor->GetInterface()->GetArea()->GetRouter()->GetMessageHandler();
-        messageHandler->ClearTimer(neighbor->GetDDRetransmissionTimer());
-        ChangeState(neighbor, new OSPF::NeighborStateExchange, this);
+    if (event == OSPF::Neighbor::NEGOTIATION_DONE) {
+        neighbor->createDatabaseSummary();
+        neighbor->sendDatabaseDescriptionPacket();
+        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(neighbor->getDDRetransmissionTimer());
+        changeState(neighbor, new OSPF::NeighborStateExchange, this);
     }
 }

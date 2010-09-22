@@ -26,145 +26,145 @@ OSPF::DatabaseDescriptionHandler::DatabaseDescriptionHandler(OSPF::Router* conta
 {
 }
 
-void OSPF::DatabaseDescriptionHandler::ProcessPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
 {
-    router->GetMessageHandler()->PrintEvent("Database Description packet received", intf, neighbor);
+    router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
     OSPFDatabaseDescriptionPacket* ddPacket = check_and_cast<OSPFDatabaseDescriptionPacket*> (packet);
 
-    OSPF::Neighbor::NeighborStateType neighborState = neighbor->GetState();
+    OSPF::Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((ddPacket->getInterfaceMTU() <= intf->GetMTU()) &&
-        (neighborState > OSPF::Neighbor::AttemptState))
+    if ((ddPacket->getInterfaceMTU() <= intf->getMTU()) &&
+        (neighborState > OSPF::Neighbor::ATTEMPT_STATE))
     {
         switch (neighborState) {
-            case OSPF::Neighbor::TwoWayState:
+            case OSPF::Neighbor::TWOWAY_STATE:
                 break;
-            case OSPF::Neighbor::InitState:
-                neighbor->ProcessEvent(OSPF::Neighbor::TwoWayReceived);
+            case OSPF::Neighbor::INIT_STATE:
+                neighbor->processEvent(OSPF::Neighbor::TWOWAY_RECEIVED);
                 break;
-            case OSPF::Neighbor::ExchangeStartState:
+            case OSPF::Neighbor::EXCHANGE_START_STATE:
                 {
                     OSPFDDOptions& ddOptions = ddPacket->getDdOptions();
 
                     if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                         (ddPacket->getLsaHeadersArraySize() == 0))
                     {
-                        if (neighbor->GetNeighborID() > router->GetRouterID()) {
+                        if (neighbor->getNeighborID() > router->getRouterID()) {
                             OSPF::Neighbor::DDPacketID packetID;
                             packetID.ddOptions      = ddOptions;
                             packetID.options        = ddPacket->getOptions();
                             packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                            neighbor->SetOptions(packetID.options);
-                            neighbor->SetDatabaseExchangeRelationship(OSPF::Neighbor::Slave);
-                            neighbor->SetDDSequenceNumber(packetID.sequenceNumber);
-                            neighbor->SetLastReceivedDDPacket(packetID);
+                            neighbor->setOptions(packetID.options);
+                            neighbor->setDatabaseExchangeRelationship(OSPF::Neighbor::SLAVE);
+                            neighbor->setDDSequenceNumber(packetID.sequenceNumber);
+                            neighbor->setLastReceivedDDPacket(packetID);
 
-                            if (!ProcessDDPacket(ddPacket, intf, neighbor, true)) {
+                            if (!processDDPacket(ddPacket, intf, neighbor, true)) {
                                 break;
                             }
 
-                            neighbor->ProcessEvent(OSPF::Neighbor::NegotiationDone);
-                            if (!neighbor->IsLinkStateRequestListEmpty() &&
-                                !neighbor->IsRequestRetransmissionTimerActive())
+                            neighbor->processEvent(OSPF::Neighbor::NEGOTIATION_DONE);
+                            if (!neighbor->isLinkStateRequestListEmpty() &&
+                                !neighbor->isRequestRetransmissionTimerActive())
                             {
-                                neighbor->SendLinkStateRequestPacket();
-                                neighbor->ClearRequestRetransmissionTimer();
-                                neighbor->StartRequestRetransmissionTimer();
+                                neighbor->sendLinkStateRequestPacket();
+                                neighbor->clearRequestRetransmissionTimer();
+                                neighbor->startRequestRetransmissionTimer();
                             }
                         } else {
-                            neighbor->SendDatabaseDescriptionPacket(true);
+                            neighbor->sendDatabaseDescriptionPacket(true);
                         }
                     }
                     if (!ddOptions.I_Init && !ddOptions.MS_MasterSlave &&
-                        (ddPacket->getDdSequenceNumber() == neighbor->GetDDSequenceNumber()) &&
-                        (neighbor->GetNeighborID() < router->GetRouterID()))
+                        (ddPacket->getDdSequenceNumber() == neighbor->getDDSequenceNumber()) &&
+                        (neighbor->getNeighborID() < router->getRouterID()))
                     {
                         OSPF::Neighbor::DDPacketID packetID;
                         packetID.ddOptions      = ddOptions;
                         packetID.options        = ddPacket->getOptions();
                         packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                        neighbor->SetOptions(packetID.options);
-                        neighbor->SetDatabaseExchangeRelationship(OSPF::Neighbor::Master);
-                        neighbor->SetLastReceivedDDPacket(packetID);
+                        neighbor->setOptions(packetID.options);
+                        neighbor->setDatabaseExchangeRelationship(OSPF::Neighbor::MASTER);
+                        neighbor->setLastReceivedDDPacket(packetID);
 
-                        if (!ProcessDDPacket(ddPacket, intf, neighbor, true)) {
+                        if (!processDDPacket(ddPacket, intf, neighbor, true)) {
                             break;
                         }
 
-                        neighbor->ProcessEvent(OSPF::Neighbor::NegotiationDone);
-                        if (!neighbor->IsLinkStateRequestListEmpty() &&
-                            !neighbor->IsRequestRetransmissionTimerActive())
+                        neighbor->processEvent(OSPF::Neighbor::NEGOTIATION_DONE);
+                        if (!neighbor->isLinkStateRequestListEmpty() &&
+                            !neighbor->isRequestRetransmissionTimerActive())
                         {
-                            neighbor->SendLinkStateRequestPacket();
-                            neighbor->ClearRequestRetransmissionTimer();
-                            neighbor->StartRequestRetransmissionTimer();
+                            neighbor->sendLinkStateRequestPacket();
+                            neighbor->clearRequestRetransmissionTimer();
+                            neighbor->startRequestRetransmissionTimer();
                         }
                     }
                 }
                 break;
-            case OSPF::Neighbor::ExchangeState:
+            case OSPF::Neighbor::EXCHANGE_STATE:
                 {
                     OSPF::Neighbor::DDPacketID packetID;
                     packetID.ddOptions      = ddPacket->getDdOptions();
                     packetID.options        = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                    if (packetID != neighbor->GetLastReceivedDDPacket()) {
+                    if (packetID != neighbor->getLastReceivedDDPacket()) {
                         if ((packetID.ddOptions.MS_MasterSlave &&
-                             (neighbor->GetDatabaseExchangeRelationship() != OSPF::Neighbor::Slave)) ||
+                             (neighbor->getDatabaseExchangeRelationship() != OSPF::Neighbor::SLAVE)) ||
                             (!packetID.ddOptions.MS_MasterSlave &&
-                             (neighbor->GetDatabaseExchangeRelationship() != OSPF::Neighbor::Master)) ||
+                             (neighbor->getDatabaseExchangeRelationship() != OSPF::Neighbor::MASTER)) ||
                             packetID.ddOptions.I_Init ||
-                            (packetID.options != neighbor->GetLastReceivedDDPacket().options))
+                            (packetID.options != neighbor->getLastReceivedDDPacket().options))
                         {
-                            neighbor->ProcessEvent(OSPF::Neighbor::SequenceNumberMismatch);
+                            neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);
                         } else {
-                            if (((neighbor->GetDatabaseExchangeRelationship() == OSPF::Neighbor::Master) &&
-                                 (packetID.sequenceNumber == neighbor->GetDDSequenceNumber())) ||
-                                ((neighbor->GetDatabaseExchangeRelationship() == OSPF::Neighbor::Slave) &&
-                                 (packetID.sequenceNumber == (neighbor->GetDDSequenceNumber() + 1))))
+                            if (((neighbor->getDatabaseExchangeRelationship() == OSPF::Neighbor::MASTER) &&
+                                 (packetID.sequenceNumber == neighbor->getDDSequenceNumber())) ||
+                                ((neighbor->getDatabaseExchangeRelationship() == OSPF::Neighbor::SLAVE) &&
+                                 (packetID.sequenceNumber == (neighbor->getDDSequenceNumber() + 1))))
                             {
-                                neighbor->SetLastReceivedDDPacket(packetID);
-                                if (!ProcessDDPacket(ddPacket, intf, neighbor, false)) {
+                                neighbor->setLastReceivedDDPacket(packetID);
+                                if (!processDDPacket(ddPacket, intf, neighbor, false)) {
                                     break;
                                 }
-                                if (!neighbor->IsLinkStateRequestListEmpty() &&
-                                    !neighbor->IsRequestRetransmissionTimerActive())
+                                if (!neighbor->isLinkStateRequestListEmpty() &&
+                                    !neighbor->isRequestRetransmissionTimerActive())
                                 {
-                                    neighbor->SendLinkStateRequestPacket();
-                                    neighbor->ClearRequestRetransmissionTimer();
-                                    neighbor->StartRequestRetransmissionTimer();
+                                    neighbor->sendLinkStateRequestPacket();
+                                    neighbor->clearRequestRetransmissionTimer();
+                                    neighbor->startRequestRetransmissionTimer();
                                 }
                             } else {
-                                neighbor->ProcessEvent(OSPF::Neighbor::SequenceNumberMismatch);
+                                neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);
                             }
                         }
                     } else {
-                        if (neighbor->GetDatabaseExchangeRelationship() == OSPF::Neighbor::Slave) {
-                            neighbor->RetransmitDatabaseDescriptionPacket();
+                        if (neighbor->getDatabaseExchangeRelationship() == OSPF::Neighbor::SLAVE) {
+                            neighbor->retransmitDatabaseDescriptionPacket();
                         }
                     }
                 }
                 break;
-            case OSPF::Neighbor::LoadingState:
-            case OSPF::Neighbor::FullState:
+            case OSPF::Neighbor::LOADING_STATE:
+            case OSPF::Neighbor::FULL_STATE:
                 {
                     OSPF::Neighbor::DDPacketID packetID;
                     packetID.ddOptions      = ddPacket->getDdOptions();
                     packetID.options        = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
-                    if ((packetID != neighbor->GetLastReceivedDDPacket()) ||
+                    if ((packetID != neighbor->getLastReceivedDDPacket()) ||
                         (packetID.ddOptions.I_Init))
                     {
-                        neighbor->ProcessEvent(OSPF::Neighbor::SequenceNumberMismatch);
+                        neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);
                     } else {
-                        if (neighbor->GetDatabaseExchangeRelationship() == OSPF::Neighbor::Slave) {
-                            if (!neighbor->RetransmitDatabaseDescriptionPacket()) {
-                                neighbor->ProcessEvent(OSPF::Neighbor::SequenceNumberMismatch);
+                        if (neighbor->getDatabaseExchangeRelationship() == OSPF::Neighbor::SLAVE) {
+                            if (!neighbor->retransmitDatabaseDescriptionPacket()) {
+                                neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);
                             }
                         }
                     }
@@ -175,7 +175,7 @@ void OSPF::DatabaseDescriptionHandler::ProcessPacket(OSPFPacket* packet, OSPF::I
     }
 }
 
-bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket(OSPFDatabaseDescriptionPacket* ddPacket, OSPF::Interface* intf, OSPF::Neighbor* neighbor, bool inExchangeStart)
+bool OSPF::DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket* ddPacket, OSPF::Interface* intf, OSPF::Neighbor* neighbor, bool inExchangeStart)
 {
     EV << "  Processing packet contents(ddOptions="
        << ((ddPacket->getDdOptions().I_Init) ? "I " : "_ ")
@@ -189,16 +189,16 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket(OSPFDatabaseDescriptionPa
 
     for (unsigned int i = 0; i < headerCount; i++) {
         OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LSAType        lsaType       = static_cast<LSAType> (currentHeader.getLsType());
+        LSAType lsaType = static_cast<LSAType> (currentHeader.getLsType());
 
         EV << "    ";
-        PrintLSAHeader(currentHeader, ev.getOStream());
+        printLSAHeader(currentHeader, ev.getOStream());
 
-        if ((lsaType < RouterLSAType) || (lsaType > ASExternalLSAType) ||
-            ((lsaType == ASExternalLSAType) && (!intf->GetArea()->GetExternalRoutingCapability())))
+        if ((lsaType < ROUTERLSA_TYPE) || (lsaType > AS_EXTERNAL_LSA_TYPE) ||
+            ((lsaType == AS_EXTERNAL_LSA_TYPE) && (!intf->getArea()->getExternalRoutingCapability())))
         {
             EV << " Error!\n";
-            neighbor->ProcessEvent(OSPF::Neighbor::SequenceNumberMismatch);
+            neighbor->processEvent(OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH);
             return false;
         } else {
             OSPF::LSAKeyType lsaKey;
@@ -206,35 +206,35 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket(OSPFDatabaseDescriptionPa
             lsaKey.linkStateID = currentHeader.getLinkStateID();
             lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter().getInt();
 
-            OSPFLSA* lsaInDatabase = router->FindLSA(lsaType, lsaKey, intf->GetArea()->GetAreaID());
+            OSPFLSA* lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
             if ((lsaInDatabase == NULL) || (lsaInDatabase->getHeader() < currentHeader)) {
                 EV << " (newer)";
-                neighbor->AddToRequestList(&currentHeader);
+                neighbor->addToRequestList(&currentHeader);
             }
         }
         EV << "\n";
     }
 
-    if (neighbor->GetDatabaseExchangeRelationship() == OSPF::Neighbor::Master) {
-        neighbor->IncrementDDSequenceNumber();
-        if ((neighbor->GetDatabaseSummaryListCount() == 0) && !ddPacket->getDdOptions().M_More) {
-            neighbor->ProcessEvent(OSPF::Neighbor::ExchangeDone);  // does nothing in ExchangeStart
+    if (neighbor->getDatabaseExchangeRelationship() == OSPF::Neighbor::MASTER) {
+        neighbor->incrementDDSequenceNumber();
+        if ((neighbor->getDatabaseSummaryListCount() == 0) && !ddPacket->getDdOptions().M_More) {
+            neighbor->processEvent(OSPF::Neighbor::EXCHANGE_DONE);  // does nothing in ExchangeStart
         } else {
             if (!inExchangeStart) {
-                neighbor->SendDatabaseDescriptionPacket();
+                neighbor->sendDatabaseDescriptionPacket();
             }
         }
     } else {
-        neighbor->SetDDSequenceNumber(ddPacket->getDdSequenceNumber());
+        neighbor->setDDSequenceNumber(ddPacket->getDdSequenceNumber());
         if (!inExchangeStart) {
-            neighbor->SendDatabaseDescriptionPacket();
+            neighbor->sendDatabaseDescriptionPacket();
         }
         if (!ddPacket->getDdOptions().M_More &&
-            (neighbor->GetDatabaseSummaryListCount() == 0))
+            (neighbor->getDatabaseSummaryListCount() == 0))
         {
-            neighbor->ProcessEvent(OSPF::Neighbor::ExchangeDone);  // does nothing in ExchangeStart
+            neighbor->processEvent(OSPF::Neighbor::EXCHANGE_DONE);  // does nothing in ExchangeStart
         }
     }
     return true;

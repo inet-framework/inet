@@ -37,13 +37,13 @@ private:
     };
 
 private:
-    bool ValidateLSChecksum(OSPFLSA* lsa) { return true; }   // not implemented
-    void AcknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface* intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
+    bool validateLSChecksum(OSPFLSA* lsa) { return true; }   // not implemented
+    void acknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface* intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
 
 public:
     LinkStateUpdateHandler(Router* containingRouter);
 
-    void    ProcessPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
 } // namespace OSPF

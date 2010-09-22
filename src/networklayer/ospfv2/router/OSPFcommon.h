@@ -56,9 +56,9 @@ namespace OSPF {
 typedef unsigned long Metric;
 
 enum AuthenticationType {
-    NullType           = 0,
-    SimplePasswordType = 1,
-    CrytographicType   = 2
+    NULL_TYPE           = 0,
+    SIMPLE_PASSWORD_TYPE = 1,
+    CRYTOGRAPHIC_TYPE   = 2
 };
 
 struct AuthenticationKeyType {
@@ -116,14 +116,14 @@ struct DesignatedRouterID {
     IPv4Address ipInterfaceAddress;
 };
 
-const RouterID              NullRouterID = 0;
-const AreaID                BackboneAreaID = 0;
-const LinkStateID           NullLinkStateID = 0;
-const IPv4Address           NullIPv4Address = { {0, 0, 0, 0} };
-const IPv4Address           AllSPFRouters = { {224, 0, 0, 5} };
-const IPv4Address           AllDRouters = { {224, 0, 0, 6} };
-const IPv4AddressRange      NullIPv4AddressRange = { { {0, 0, 0, 0} }, { {0, 0, 0, 0} } };
-const DesignatedRouterID    NullDesignatedRouterID = { 0, { {0, 0, 0, 0} } };
+const RouterID              NULL_ROUTERID = 0;
+const AreaID                BACKBONE_AREAID = 0;
+const LinkStateID           NULL_LINKSTATEID = 0;
+const IPv4Address           NULL_IPV4ADDRESS = { {0, 0, 0, 0} };
+const IPv4Address           ALL_SPF_ROUTERS = { {224, 0, 0, 5} };
+const IPv4Address           ALL_D_ROUTERS = { {224, 0, 0, 6} };
+const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { { {0, 0, 0, 0} }, { {0, 0, 0, 0} } };
+const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, { {0, 0, 0, 0} } };
 
 } // namespace OSPF
 
@@ -221,9 +221,9 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
              (leftKey.advertisingRouter < rightKey.advertisingRouter)));
 }
 
-inline OSPF::IPv4Address IPv4AddressFromAddressString(const char* charForm)
+inline OSPF::IPv4Address ipv4AddressFromAddressString(const char* charForm)
 {
-    OSPF::IPv4Address byteForm = OSPF::NullIPv4Address;
+    OSPF::IPv4Address byteForm = OSPF::NULL_IPV4ADDRESS;
 
     int  lastDot = -1;
     int  byteCount = 0;
@@ -266,7 +266,7 @@ inline OSPF::IPv4Address IPv4AddressFromAddressString(const char* charForm)
     return byteForm;
 }
 
-inline OSPF::IPv4Address IPv4AddressFromULong(unsigned long longForm)
+inline OSPF::IPv4Address ipv4AddressFromULong(unsigned long longForm)
 {
 
     OSPF::IPv4Address byteForm;
@@ -278,17 +278,17 @@ inline OSPF::IPv4Address IPv4AddressFromULong(unsigned long longForm)
     return byteForm;
 }
 
-inline unsigned long ULongFromIPv4Address(OSPF::IPv4Address byteForm)
+inline unsigned long ulongFromIPv4Address(OSPF::IPv4Address byteForm)
 {
     return ((byteForm.bytes[0] << 24) + (byteForm.bytes[1] << 16) + (byteForm.bytes[2] << 8) + byteForm.bytes[3]);
 }
 
-inline unsigned long ULongFromAddressString(const char* charForm)
+inline unsigned long ulongFromAddressString(const char* charForm)
 {
-    return ULongFromIPv4Address(IPv4AddressFromAddressString(charForm));
+    return ulongFromIPv4Address(ipv4AddressFromAddressString(charForm));
 }
 
-inline char* AddressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
+inline char* addressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
 {
     if (bufferLength < 16) {
         buffer = '\0';
@@ -299,7 +299,7 @@ inline char* AddressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::
     return buffer;
 }
 
-inline char* AddressStringFromULong(char* buffer, int bufferLength, unsigned long longForm)
+inline char* addressStringFromULong(char* buffer, int bufferLength, unsigned long longForm)
 {
     if (bufferLength < 16) {
         buffer = '\0';
@@ -313,7 +313,7 @@ inline char* AddressStringFromULong(char* buffer, int bufferLength, unsigned lon
     return buffer;
 }
 
-inline char HexCharToByte(char hex)
+inline char hexCharToByte(char hex)
 {
     switch (hex) {
         case '0':   return 0;
@@ -342,9 +342,9 @@ inline char HexCharToByte(char hex)
     };
 }
 
-inline char HexPairToByte(char upperHex, char lowerHex)
+inline char hexPairToByte(char upperHex, char lowerHex)
 {
-    return ((HexCharToByte(upperHex) << 4) & (HexCharToByte(lowerHex)));
+    return ((hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex)));
 }
 
 #endif // __COMMON_HPP__
