@@ -1,0 +1,169 @@
+%description:
+Testing EtherMac communications 
+    10Mbps half duplex
+    10Mbps full duplex
+   100Mbps half duplex
+   100Mbps full duplex
+  1000Mbps full duplex
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.nodes.ethernet.EtherHostQ;
+
+
+module EtherHostFullDuplexQ extends EtherHostQ
+{
+    parameters:
+        macType = "EtherMAC";
+        mac.duplexEnabled = true;
+}
+
+network SpeedTest
+{
+    types:
+        channel C10 extends DatarateChannel
+        {
+            delay = 0s;
+            datarate = 10Mbps;
+        }
+        channel C100 extends DatarateChannel
+        {
+            delay = 0s;
+            datarate = 100Mbps;
+        }
+        channel C1000 extends DatarateChannel
+        {
+            delay = 0s;
+            datarate = 1000Mbps;
+        }
+    submodules:
+        host_10_F_A: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=70,140");
+        }
+        host_10_F_B: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=210,140");
+        }
+        host_100_F_A: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=70,280");
+        }
+        host_100_F_B: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=210,280");
+        }
+        host_1000_F_A: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=70,350");
+        }
+        host_1000_F_B: EtherHostFullDuplexQ {
+            parameters:
+                @display("p=210,350");
+        }
+    connections:
+        host_10_F_A.ethg <--> C10 <--> host_10_F_B.ethg;
+        host_100_F_A.ethg <--> C100 <--> host_100_F_B.ethg;
+        host_1000_F_A.ethg <--> C1000 <--> host_1000_F_B.ethg;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+sim-time-limit = 10s
+
+tkenv-plugin-path = ../../../etc/plugins
+**.vector-recording = true
+#record-eventlog = true
+
+network = SpeedTest
+
+*.host_10_H_A.cli.destAddress = "host_10_H_B"
+*.host_10_H_B.cli.destAddress = "host_10_H_A"
+
+*.host_10_F_A.cli.destAddress = "host_10_F_B"
+*.host_10_F_B.cli.destAddress = "host_10_F_A"
+
+*.host_100_H_A.cli.destAddress = "host_100_H_B"
+*.host_100_H_B.cli.destAddress = "host_100_H_A"
+
+*.host_100_F_A.cli.destAddress = "host_100_F_B"
+*.host_100_F_B.cli.destAddress = "host_100_F_A"
+
+*.host_1000_F_A.cli.destAddress = "host_1000_F_B"
+*.host_1000_F_B.cli.destAddress = "host_1000_F_A"
+
+**.cli.reqLength = 1250B       # 10.000 bit
+**.cli.respLength = 0B      # no response
+
+#*.host_1000_F_*.cli.startTime = 99999s
+
+*.host_*.cli.startTime = 0s
+
+*.host_*_F_*.mac.duplexEnabled = true
+
+*.host_1000_F_*.cli.waitTime = 0.005ms       # 10.000 / speed [ / 2 when halfduplex]
+*.host_100_F_*.cli.waitTime  = 0.05ms        # 10.000 / speed [ / 2 when halfduplex]
+*.host_100_H_*.cli.waitTime  = 0.10ms        # 10.000 / speed [ / 2 when halfduplex]
+#*.host_100_H_*.cli.waitTime  = 0.05ms        # 10.000 / speed [ / 2 when halfduplex]
+*.host_10_F_*.cli.waitTime   = 0.5ms            # 10.000 / speed [ / 2 when halfduplex]
+*.host_10_H_*.cli.waitTime   = 1.0ms            # 10.000 / speed [ / 2 when halfduplex]
+
+**.mac.address = "auto"
+**.queue.frameCapacity = 1000
+
+# Check: "rx channel idle (%)" <= 2.0
+# Check: "rx channel utilization (%)" >= 98.0
+
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 6
+idlelimit <- 2.0
+usedlimit <- 98.0
+
+# begin TEST:
+
+idle <- loadDataset(scafile, add(type='scalar', select='name("rx channel idle *")'))
+used <- loadDataset(scafile, add(type='scalar', select='name("rx channel utilization *")'))
+
+cat("\nOMNETPP TEST RESULT: ")
+
+if(length(idle$scalars$value) == linecount && max(idle$scalars$value) <= idlelimit)
+{
+    cat("IDLE OK\n")
+} else {
+    cat("IDLE BAD:\n")
+    print(idle$scalars[idle$scalars$value > idlelimit,])
+}
+
+cat("\nOMNETPP TEST RESULT: ")
+
+if(length(used$scalars$value) == linecount && min(used$scalars$value) >= usedlimit)
+{
+    cat("USED OK\n")
+} else {
+    cat("USED BAD:\n")
+    print(used$scalars[used$scalars$value < usedlimit,])
+}
+
+cat("\n")
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT: IDLE OK
+
+OMNETPP TEST RESULT: USED OK
+
+%#--------------------------------------------------------------------------------------------------------------

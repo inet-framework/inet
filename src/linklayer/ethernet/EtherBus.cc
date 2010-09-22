@@ -16,7 +16,6 @@
 */
 
 #include "EtherBus.h"
-#include "EtherFrame_m.h"  // for EtherAutoconfig only
 
 Define_Module(EtherBus);
 
@@ -103,14 +102,22 @@ void EtherBus::initialize()
     }
     EV << "\n";
 
-    // autoconfig: tell everyone that bus supports only 10Mb half-duplex
-    EV << "Autoconfig: advertising that we only support 10Mb half-duplex operation\n";
+    double datarate = 0.0;
     for (i=0; i<taps; i++)
     {
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-10Mb-halfduplex");
-        autoconf->setHalfDuplex(true);
-        autoconf->setTxrate(10000000); // 10Mb
-        send(autoconf,"ethg$o",i);
+    	cGate* igate = gate("ethg$i", i);
+    	double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
+
+    	if (i == 0)
+    		datarate = drate;
+    	else if (datarate != drate)
+    		throw cRuntimeError(this, "The input datarate at tap %i differs from datarates of previous taps", i);
+
+    	drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+    	if (datarate != drate)
+    		throw cRuntimeError(this, "The output datarate at tap %i differs from datarates of previous taps", i);
+
+    	igate->setDeliverOnReceptionStart(true);
     }
 }
 
@@ -157,6 +164,10 @@ void EtherBus::handleMessage (cMessage *msg)
         // send out on gate
         bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
         cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
+        {
+            // stop current transmission
+            gate("ethg$o",tapPoint)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
+        }
         send(msg2, "ethg$o", tapPoint);
 
         // if not end of the bus, schedule for next tap

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Levente Meszaros
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -30,11 +31,11 @@ package inet.linklayer.ethernet;
 // being used. This allows for a much simpler simulation model
 // for MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
-// EtherMAC2 implements Ethernet without shared medium and CSMA/CD.
+// EtherMACFullDuplex implements Ethernet without shared medium and CSMA/CD.
 // (If you need half-duplex operation, see EtherMAC which is for a full-blown
 // and therefore more complicated Ethernet MAC model.)
 //
-// EtherMAC2 performs transmission and reception of frames.
+// EtherMACFullDuplex performs transmission and reception of frames.
 // It does not do encapsulation/decapsulation; see EtherLLC and EtherEncap
 // for that.
 //
@@ -86,7 +87,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Autoconfiguration</b>
 //
-// EtherMAC2 does NOT include autoconfiguration. \Link speed is taken from
+// EtherMACFullDuplex does NOT include autoconfiguration. \Link speed is taken from
 // the <tt>datarate</tt> attribute of the connection instead of module parameters
 // or autoconfiguration.
 //
@@ -141,7 +142,7 @@ package inet.linklayer.ethernet;
 // @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
-simple EtherMAC2
+simple EtherMACFullDuplex like IEtherMAC
 {
     parameters:
         bool promiscuous = default(false);     // if true, all packets are received, otherwise only the
@@ -152,11 +153,11 @@ simple EtherMAC2
         int txQueueLimit = default(1000); // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
+        bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
-        @display("i=block/queue");
+        @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
         inout phys @labels(EtherFrame);            // to physical layer or the network
 }
-

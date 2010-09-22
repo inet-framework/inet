@@ -18,44 +18,42 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "EtherMAC2.h"
+#include "EtherMACFullDuplex.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
-Define_Module(EtherMAC2);
+Define_Module(EtherMACFullDuplex);
 
-EtherMAC2::EtherMAC2()
+EtherMACFullDuplex::EtherMACFullDuplex()
 {
 }
 
-void EtherMAC2::initialize()
+void EtherMACFullDuplex::initialize()
 {
     EtherMACBase::initialize();
-
-    duplexMode = true;
-    calculateParameters();
 
     beginSendFrames();
 }
 
-void EtherMAC2::initializeTxrate()
+void EtherMACFullDuplex::initializeStatistics()
 {
-    // if we're connected, find the gate with transmission rate
-    txrate = 0;
+    EtherMACBase::initializeStatistics();
 
-    if (connected)
-    {
-        // obtain txrate from channel. As a side effect, this also asserts
-        // that the other end is an EtherMAC2, since normal EtherMAC
-        // insists that the connection has *no* datarate set.
-        // if we're connected, get the gate with transmission rate
-        cChannel *datarateChannel = physOutGate->getTransmissionChannel();
-        txrate = datarateChannel->par("datarate").doubleValue();
-    }
+    // initialize statistics
+    totalSuccessfulRxTime = 0.0;
 }
 
-void EtherMAC2::handleMessage(cMessage *msg)
+void EtherMACFullDuplex::initializeFlags()
+{
+    EtherMACBase::initializeFlags();
+
+    duplexMode = true;
+    physInGate->setDeliverOnReceptionStart(false);
+}
+
+
+void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
     if (!connected)
         processMessageWhenNotConnected(msg);
@@ -79,7 +77,7 @@ void EtherMAC2::handleMessage(cMessage *msg)
         if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else if (msg->getArrivalGate() == gate("phys$i"))
-            processMsgFromNetwork(check_and_cast<EtherFrame *>(msg));
+            processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
         else
             error("Message received from unknown gate!");
     }
@@ -87,13 +85,13 @@ void EtherMAC2::handleMessage(cMessage *msg)
     if (ev.isGUI())  updateDisplayString();
 }
 
-void EtherMAC2::startFrameTransmission()
+void EtherMACFullDuplex::startFrameTransmission()
 {
-    EtherFrame *origFrame = (EtherFrame *)txQueue.front();
-    EV << "Transmitting a copy of frame " << origFrame << endl;
+    EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
-    EtherFrame *frame = (EtherFrame *) origFrame->dup();
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
+    EtherFrame *frame = curTxFrame->dup();
+
+    prepareTxFrame(frame);
 
     if (hasSubscribers)
     {
@@ -102,35 +100,34 @@ void EtherMAC2::startFrameTransmission()
         nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
     }
 
-    // fill in src address if not set
-    if (frame->getSrc().isUnspecified())
-        frame->setSrc(address);
-
     // send
     EV << "Starting transmission of " << frame << endl;
-    send(frame, physOutGate);
-    scheduleEndTxPeriod(frame);
 
-    // update burst variables
-    if (frameBursting)
-    {
-        bytesSentInBurst = frame->getByteLength();
-        framesSentInBurst++;
-    }
+    send(frame, physOutGate);
+
+    scheduleEndTxPeriod(frame);
 }
 
-void EtherMAC2::processFrameFromUpperLayer(EtherFrame *frame)
+void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EtherMACBase::processFrameFromUpperLayer(frame);
 
     if (transmitState == TX_IDLE_STATE)
-        startFrameTransmission();
+        scheduleEndIFGPeriod();
 }
 
-void EtherMAC2::processMsgFromNetwork(cPacket *msg)
+void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
+
+    if(dynamic_cast<EtherPadding *>(msg))
+    {
+        frameReceptionComplete(msg);
+        return;
+    }
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+
+    totalSuccessfulRxTime += frame->getDuration();
 
     if (hasSubscribers)
     {
@@ -143,19 +140,19 @@ void EtherMAC2::processMsgFromNetwork(cPacket *msg)
         frameReceptionComplete(frame);
 }
 
-void EtherMAC2::handleEndIFGPeriod()
+void EtherMACFullDuplex::handleEndIFGPeriod()
 {
     EtherMACBase::handleEndIFGPeriod();
 
     startFrameTransmission();
 }
 
-void EtherMAC2::handleEndTxPeriod()
+void EtherMACFullDuplex::handleEndTxPeriod()
 {
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setPacket((cPacket *)txQueue.front());
+        notifDetails.setPacket(curTxFrame);
         nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
     }
 
@@ -167,10 +164,19 @@ void EtherMAC2::handleEndTxPeriod()
     beginSendFrames();
 }
 
-void EtherMAC2::updateHasSubcribers()
+void EtherMACFullDuplex::finish()
+{
+    EtherMACBase::finish();
+
+    simtime_t t = simTime();
+    simtime_t totalChannelIdleTime = t - totalSuccessfulRxTime;
+    recordScalar("rx channel idle (%)", 100*(totalChannelIdleTime/t));
+    recordScalar("rx channel utilization (%)", 100*(totalSuccessfulRxTime/t));
+}
+
+void EtherMACFullDuplex::updateHasSubcribers()
 {
     hasSubscribers = nb->hasSubscribers(NF_PP_TX_BEGIN) ||
                      nb->hasSubscribers(NF_PP_TX_END) ||
                      nb->hasSubscribers(NF_PP_RX_END);
 }
-

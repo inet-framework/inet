@@ -71,4 +71,7 @@ void DropTailQueue::sendOut(cMessage *msg)
     send(msg, outGate);
 }
 
-
+bool DropTailQueue::isEmpty()
+{
+    return queue.empty();
+}

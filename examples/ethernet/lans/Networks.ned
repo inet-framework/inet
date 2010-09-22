@@ -23,9 +23,7 @@ package inet.examples.ethernet.lans;
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHost2;
 import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherSwitch2;
 import inet.world.ChannelInstaller;
 import ned.DatarateChannel;
 
@@ -114,14 +112,14 @@ network MixedLAN
         bus.ethg[4] <--> hub.ethg[3];
         bus.ethg[5] <--> busHostD.ethg;
 
-        switch.ethg[0] <--> {  delay = 0.1us; } <--> switchHostA.ethg;
-        switch.ethg[1] <--> {  delay = 0.1us; } <--> switchHostB.ethg;
-        switch.ethg[2] <--> {  delay = 0.1us; } <--> switchHostC.ethg;
-        switch.ethg[3] <--> {  delay = 0.1us; } <--> switchHostD.ethg;
+        switch.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostA.ethg;
+        switch.ethg[1] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostB.ethg;
+        switch.ethg[2] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostC.ethg;
+        switch.ethg[3] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostD.ethg;
 
-        hub.ethg[0] <--> {  delay = 0.1us; } <--> hubHostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; } <--> hubHostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.2us; } <--> hubHostC.ethg;
+        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
+        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
+        hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
 }
 
 
@@ -141,7 +139,7 @@ network TwoHosts
                 @display("p=200,140");
         }
     connections:
-        hostA.ethg <--> {  delay = 0.5us; } <--> hostB.ethg;
+        hostA.ethg <--> {  delay = 0.5us; datarate = 100Mbps; } <--> hostB.ethg;
 }
 
 
@@ -153,7 +151,7 @@ network SwitchedLAN
     types:
         channel C extends DatarateChannel
         {
-            delay = 0.1us;
+            delay = 0.1us;  datarate = 100Mbps;
         }
     submodules:
         hostA: EtherHost {
@@ -215,10 +213,10 @@ network HubLAN
                 ethg[4];
         }
     connections:
-        hub.ethg[0] <--> {  delay = 0.1us; } <--> hostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; } <--> hostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.4us; } <--> hostC.ethg;
-        hub.ethg[3] <--> {  delay = 0.2us; } <--> hostD.ethg;
+        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hostA.ethg;
+        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hostB.ethg;
+        hub.ethg[2] <--> {  delay = 0.4us; datarate = 100Mbps;} <--> hostC.ethg;
+        hub.ethg[3] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hostD.ethg;
 }
 
 
@@ -227,6 +225,11 @@ network HubLAN
 //
 network BusLAN
 {
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 0;  datarate = 10Mbps;
+        }
     submodules:
         hostA: EtherHost {
             parameters:
@@ -253,10 +256,10 @@ network BusLAN
                 ethg[4];
         }
     connections:
-        bus.ethg[0] <--> hostA.ethg;
-        bus.ethg[1] <--> hostB.ethg;
-        bus.ethg[2] <--> hostC.ethg;
-        bus.ethg[3] <--> hostD.ethg;
+        bus.ethg[0] <--> C <--> hostA.ethg;
+        bus.ethg[1] <--> C <--> hostB.ethg;
+        bus.ethg[2] <--> C <--> hostC.ethg;
+        bus.ethg[3] <--> C <--> hostD.ethg;
 }
 
 channel ethernetline extends DatarateChannel
@@ -266,26 +269,38 @@ channel ethernetline extends DatarateChannel
         datarate = 10Mbps;
 }
 
+module EtherHostFullDuplex extends EtherHost
+{
+	parameters:
+	    macType = "EtherMACFullDuplex";
+}
+
+module EtherSwitchFullDuplex extends EtherSwitch
+{
+	parameters:
+	    macType = "EtherMACFullDuplex";
+}
+
 network SwitchedDuplexLAN
 {
     submodules:
-        hostA: EtherHost2 {
+        hostA: EtherHostFullDuplex {
             parameters:
                 @display("p=161,55");
         }
-        hostB: EtherHost2 {
+        hostB: EtherHostFullDuplex {
             parameters:
                 @display("p=253,125");
         }
-        hostC: EtherHost2 {
+        hostC: EtherHostFullDuplex {
             parameters:
                 @display("p=158,199");
         }
-        hostD: EtherHost2 {
+        hostD: EtherHostFullDuplex {
             parameters:
                 @display("p=59,127");
         }
-        switch: EtherSwitch2 {
+        switch: EtherSwitchFullDuplex {
             parameters:
                 @display("p=162,124");
             gates:
@@ -297,4 +312,3 @@ network SwitchedDuplexLAN
         switch.ethg[2] <--> ethernetline <--> hostC.ethg;
         switch.ethg[3] <--> ethernetline <--> hostD.ethg;
 }
-

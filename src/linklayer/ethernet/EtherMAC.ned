@@ -124,10 +124,10 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EtherMAC2, EthernetInterface, EthernetInterface2, OutputQueue, EtherEncap, EtherLLC
+// @see EtherMACFullDuplex, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
-simple EtherMAC
+simple EtherMAC like IEtherMAC
 {
     parameters:
         bool promiscuous = default(false); // if true, all packets are received, otherwise only the
@@ -135,9 +135,6 @@ simple EtherMAC
         string address = default("auto");  // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        double txrate @unit("bps") = default(100Mbps); // maximum data rate supported by this station (bit/s);
-                                // actually chosen speed may be lower due to auto-
-                                // configuration. 0 means fully auto-configured.
         bool duplexEnabled = default(true);   // whether duplex mode can be enabled or not; whether
                                 // MAC will actually use duplex mode depends on the result
                                 // of the auto-configuration process (duplex is only
@@ -145,6 +142,7 @@ simple EtherMAC
         int txQueueLimit = default(1000); // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
+        bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
     gates:

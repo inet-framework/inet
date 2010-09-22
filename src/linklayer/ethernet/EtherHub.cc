@@ -16,7 +16,6 @@
 */
 
 #include "EtherHub.h"
-#include "EtherFrame_m.h"  // for EtherAutoconfig only
 
 
 Define_Module(EtherHub);
@@ -35,13 +34,22 @@ void EtherHub::initialize()
 
     ports = gateSize("ethg");
 
-    // autoconfig: tell everyone that full duplex is not possible over shared media
-    EV << "Autoconfig: advertising that we only support half-duplex operation\n";
+    double datarate = 0.0;
     for (int i=0; i<ports; i++)
     {
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-halfduplex");
-        autoconf->setHalfDuplex(true);
-        send(autoconf,"ethg$o",i);
+    	cGate* igate = gate("ethg$i", i);
+    	double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
+
+    	if (i == 0)
+    		datarate = drate;
+    	else if (datarate != drate)
+    		throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
+
+    	drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+    	if (datarate != drate)
+    		throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
+
+    	igate->setDeliverOnReceptionStart(true);
     }
 }
 
@@ -64,6 +72,8 @@ void EtherHub::handleMessage(cMessage *msg)
         {
             bool isLast = (arrivalPort==ports-1) ? (i==ports-2) : (i==ports-1);
             cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
+            // stop current transmission
+            gate("ethg$o",i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
             send(msg2,"ethg$o",i);
         }
     }

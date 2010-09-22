@@ -30,6 +30,21 @@ channel cable extends DatarateChannel
 {
     parameters:
         delay = 0.1us;
+        datarate = 100Mbps;
+}
+
+channel cabletobus extends DatarateChannel
+{
+    parameters:
+        delay = 0;
+        datarate = 10Mbps;
+}
+
+channel cabletoserver extends DatarateChannel
+{
+    parameters:
+        delay = 0;
+        datarate = 1Gbps;
 }
 
 
@@ -132,7 +147,7 @@ module LargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
-                @display("is=s;p=,,r");
+                @display("is=s;p=,r");
         }
     connections:
         for i=0..n-1 {
@@ -142,17 +157,16 @@ module LargeLAN
         switch.ethg++ <--> ethg;
 
         for i=0..h-1 {
-            hub.ethg++ <--> cable <--> hhost[i].ethg;
+            hub.ethg++ <--> cabletobus <--> hhost[i].ethg;
         }
 
-        switch.ethg++ <--> cable <--> hub.ethg++;
+        switch.ethg++ <--> cabletobus <--> hub.ethg++;
 
         for i=0..b-1 {
-            bus.ethg++ <--> bhost[i].ethg;
+            bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
         }
 
-        bus.ethg++ <--> hub.ethg++;
-
+        bus.ethg++ <--> cabletobus <--> hub.ethg++;
 }
 
 //
@@ -230,7 +244,7 @@ network LargeNet
         for i=0..al-1 {
             switchA.ethg++ <--> cable <--> llanA[i].ethg;
         }
-        switchA.ethg++ <--> cable <--> serverA.ethg;
+        switchA.ethg++ <--> cabletoserver <--> serverA.ethg;
 
         // switch B
         for i=0..bs-1 {
@@ -242,7 +256,7 @@ network LargeNet
         for i=0..bl-1 {
             switchB.ethg++ <--> cable <--> llanB[i].ethg;
         }
-        switchB.ethg++ <--> cable <--> serverB.ethg;
+        switchB.ethg++ <--> cabletoserver <--> serverB.ethg;
 
         // switch C
         for i=0..cs-1 {
@@ -254,7 +268,7 @@ network LargeNet
         for i=0..cl-1 {
             switchC.ethg++ <--> cable <--> llanC[i].ethg;
         }
-        switchC.ethg++ <--> cable <--> serverC.ethg;
+        switchC.ethg++ <--> cabletoserver <--> serverC.ethg;
 
         // switch D
         for i=0..ds-1 {
@@ -266,7 +280,7 @@ network LargeNet
         for i=0..dl-1 {
             switchD.ethg++ <--> cable <--> llanD[i].ethg;
         }
-        switchD.ethg++ <--> cable <--> serverD.ethg;
+        switchD.ethg++ <--> cabletoserver <--> serverD.ethg;
 
         // connect switches
         switchA.ethg++ <--> cable <--> switchB.ethg++;

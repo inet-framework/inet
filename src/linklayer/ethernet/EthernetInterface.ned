@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -32,6 +33,7 @@ import inet.networklayer.queue.OutputQueue;
 module EthernetInterface like INetworkInterface
 {
     parameters:
+        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
         string queueType = default("DropTailQueue");
         @display("i=block/ifcard");
     gates:
@@ -43,7 +45,7 @@ module EthernetInterface like INetworkInterface
             parameters:
                 @display("p=92,71;q=l2queue");
         }
-        mac: EtherMAC {
+        mac: <macType> like IEtherMAC {
             parameters:
                 queueModule = "queue";
                 txQueueLimit = 1; // queue sends one packet at a time
@@ -61,4 +63,3 @@ module EthernetInterface like INetworkInterface
         encap.lowerLayerIn <-- mac.upperLayerOut;
         mac.phys <--> phys;
 }
-

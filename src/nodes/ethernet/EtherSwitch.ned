@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,7 +21,7 @@
 
 package inet.nodes.ethernet;
 
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.etherswitch.MACRelayUnit;
 
 
@@ -36,6 +37,7 @@ import inet.linklayer.etherswitch.MACRelayUnit;
 module EtherSwitch
 {
     parameters:
+        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
@@ -51,7 +53,7 @@ module EtherSwitch
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        mac[sizeof(ethg)]: EtherMAC {
+        mac[sizeof(ethg)]: <macType> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 queueModule = "";
@@ -64,4 +66,3 @@ module EtherSwitch
             mac[i].phys <--> ethg[i];
         }
 }
-

@@ -29,25 +29,32 @@
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued and sent out one by one.
  */
-class INET_API EtherMAC2 : public EtherMACBase
+class INET_API EtherMACFullDuplex : public EtherMACBase
 {
   public:
-    EtherMAC2();
+    EtherMACFullDuplex();
 
   protected:
     virtual void initialize();
-    virtual void initializeTxrate();
+    virtual void initializeStatistics();
+    virtual void initializeFlags();
     virtual void handleMessage(cMessage *msg);
+
+    // finish
+    virtual void finish();
 
     // event handlers
     virtual void startFrameTransmission();
     virtual void processFrameFromUpperLayer(EtherFrame *frame);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
 
     // notifications
     virtual void updateHasSubcribers();
+
+    // statistics
+    simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
 };
 
 #endif

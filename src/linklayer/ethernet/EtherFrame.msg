@@ -31,10 +31,25 @@ enum EtherType;
 
 enum SAPCode;
 
+// containing their common header fields.
+//
+// This class should never be instantiated by the models, only specific
+// subclasses: EthernetJam, EtherIFG and submodules of EtherFrame.
+packet EtherTraffic
+{
+}
+
 //
 // Represents jam on the Ethernet.
 //
-packet EtherJam
+packet EtherJam extends EtherTraffic
+{
+}
+
+//
+// Represents padding when packet too short, and filled IFG on burst mode.
+//
+packet EtherPadding extends EtherTraffic
 {
 }
 
@@ -52,11 +67,12 @@ packet EtherJam
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
 //  - crc: represented by cMessage::hasBitError()
 //
-packet EtherFrame
+packet EtherFrame extends EtherTraffic
 {
     MACAddress dest;
     MACAddress src;
-        //MessageId id; -- uncomment for tracing frames
+    int origByteLength;
+    //MessageId id; -- uncomment for tracing frames
 }
 
 
@@ -108,28 +124,3 @@ packet EtherPauseFrame extends EtherFrame
 {
     int pauseTime; // in 512 bit-time units
 }
-
-
-//
-// Ethernet model components (EtherMAC, EtherHub and EtherBus) send this
-// message at the beginning of the simulation, so that "auto"-valued "txrate"
-// and "duplex" parameters of EtherMAC can be initialized. The purpose is
-// similar to Ethernet Auto-Negotiation; however this is NOT meant to be
-// the model of that Ethernet feature. (For example, EtherBus also sends
-// an EtherAutoconfig message in the model, which obviously does not happen in
-// a real Ethernet.)
-//
-// - txrate: EtherMAC with non-auto txrate send configured txrate value;
-//   EtherBus sends 10Mbps (0 means not set). Lowest value will be chosen by
-//   all EtherMACs, or if no txrate was advertised (all were 0), 100Mbps is chosen.
-// - halfDuplex: EtherHub, EtherBus, plus EtherMAC with duplexEnabled=false setting
-//   send true. Duplex operation only chosen by a MAC if nobody vetoed it by sending
-//   halfDuplex=true.
-//
-packet EtherAutoconfig
-{
-    double txrate = 0;
-    bool halfDuplex = false;
-}
-
-

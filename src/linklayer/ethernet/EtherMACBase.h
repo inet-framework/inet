@@ -28,30 +28,6 @@
 #include "NotificationBoard.h"
 
 
-//FIXME change into inner enums!!!
-
-// Self-message kind values
-#define ENDIFG             100
-#define ENDRECEPTION       101
-#define ENDBACKOFF         102
-#define ENDTRANSMISSION    103
-#define ENDJAMMING         104
-#define ENDPAUSE           105
-#define ENDAUTOCONFIG      106
-
-// MAC transmit state
-#define TX_IDLE_STATE      1
-#define WAIT_IFG_STATE     2
-#define TRANSMITTING_STATE 3
-#define JAMMING_STATE      4
-#define BACKOFF_STATE      5
-#define PAUSE_STATE        6
-
-// MAC receive states
-#define RX_IDLE_STATE      1
-#define RECEIVING_STATE    2
-#define RX_COLLISION_STATE 3
-
 class IPassiveQueue;
 
 /**
@@ -60,40 +36,112 @@ class IPassiveQueue;
 class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 {
   protected:
+    enum MACTransmitState
+    {
+        TX_IDLE_STATE = 1,
+        WAIT_IFG_STATE,
+        SEND_IFG_STATE,
+        TRANSMITTING_STATE,
+        JAMMING_STATE,
+        BACKOFF_STATE,
+        PAUSE_STATE
+    };
+    enum MACReceiveState
+    {
+        RX_IDLE_STATE = 1,
+        RECEIVING_STATE,
+        RX_COLLISION_STATE
+    };
+
+    // Self-message kind values
+    enum SelfMsgKindValues
+    {
+        ENDIFG = 100,
+        ENDRECEPTION,
+        ENDBACKOFF,
+        ENDTRANSMISSION,
+        ENDJAMMING,
+        ENDPAUSE
+    };
+
+    enum
+    {
+        NUM_OF_ETHERDESCRS = 4
+    };
+
+    struct EtherDescr
+    {
+        double      txrate;
+        int         maxFramesInBurst;
+        int64       maxBytesInBurst;      // with IFG and external datas
+        int64       frameMinBytes;        // minimal frame length
+        int64       frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
+        const_simtime_t   halfBitTime;          // transmission time of a half bit
+        const_simtime_t   slotTime;             // slot time
+        const_simtime_t   shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    };
+
+    class InnerQueue
+    {
+      public:
+        cQueue queue;
+        int queueLimit;               // max queue length
+
+        InnerQueue(const char* name=NULL, int limit=0) : queue(name), queueLimit(limit) {}
+    };
+
+    class MacQueue
+    {
+      public:
+        InnerQueue * innerQueue;
+        IPassiveQueue *extQueue;
+        MacQueue() : innerQueue(NULL), extQueue(NULL) {};
+        ~MacQueue() { delete innerQueue; };
+        bool isEmpty();
+        void setExternalQueue(IPassiveQueue *_extQueue) { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
+        void setInternalQueue(const char* name=NULL, int limit=0) { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
+    };
+
+    MACAddress address;             // own MAC address
+
     bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
     bool disabled;                  // true if the MAC is disabled, defined by the user
     bool promiscuous;               // if true, passes up all received frames
-    MACAddress address;             // own MAC address
-    int txQueueLimit;               // max queue length
 
     // MAC operation modes and parameters
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
-    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
-    // MAC transmission characteristics
-    double txrate;                  // transmission rate of MAC, bit/s
-    simtime_t bitTime;              // precalculated as 1/txrate
-    simtime_t slotTime;             // slot time
-    simtime_t interFrameGap;        // IFG
-    simtime_t jamDuration;          // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
-    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    bool hasSubscribers;            // only notify if somebody is listening
+
+    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
+    simtime_t lastTxFinishTime;     // time of finish last transmission
 
     // states
-    int transmitState;              // State of the MAC unit transmitting
-    int receiveState;               // State of the MAC unit receiving
+    MACTransmitState transmitState; // State of the MAC unit transmitting
+    MACReceiveState receiveState;   // State of the MAC unit receiving
+
+    // MAC transmission characteristics
+    static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
+    static const EtherDescr nullEtherDescr;
+
+    const EtherDescr *curEtherDescr;    // Current Ethernet Constants (eg txrate, ...)
+
+    cChannel *transmissionChannel;  // transmission channel
+
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
 
-    cQueue txQueue;                 // output queue
-    IPassiveQueue *queueModule;     // optional module to receive messages from
+    MacQueue txQueue;            // output queue
 
+    cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
 
     // notification stuff
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
-    bool hasSubscribers; // only notify if somebody is listening
+
+    EtherFrame *curTxFrame;
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -101,17 +149,17 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     // statistics
     int  framesSentInBurst;            // Number of frames send out in current frame burst
     int  bytesSentInBurst;             // Number of bytes transmitted in current frame burst
-    unsigned long numFramesSent;
-    unsigned long numFramesReceivedOK;
-    unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
-    unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
-    unsigned long numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
-    unsigned long numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
-    unsigned long numDroppedBitError;  // frames dropped because of bit errors
-    unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
-    unsigned long numFramesPassedToHL; // frames passed to higher layer
-    unsigned long numPauseFramesRcvd;  // PAUSE frames received from network
-    unsigned long numPauseFramesSent;  // PAUSE frames sent
+    uint64_t numFramesSent;
+    uint64_t numFramesReceivedOK;
+    uint64_t numBytesSent;        // includes Ethernet frame bytes with preamble
+    uint64_t numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
+    uint64_t numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
+    uint64_t numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
+    uint64_t numDroppedBitError;  // frames dropped because of bit errors
+    uint64_t numDroppedNotForUs;  // frames dropped because destination address didn't match
+    uint64_t numFramesPassedToHL; // frames passed to higher layer
+    uint64_t numPauseFramesRcvd;  // PAUSE frames received from network
+    uint64_t numPauseFramesSent;  // PAUSE frames sent
     cOutVector numFramesSentVector;
     cOutVector numFramesReceivedOKVector;
     cOutVector numBytesSentVector;
@@ -127,31 +175,30 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     EtherMACBase();
     virtual ~EtherMACBase();
 
-    virtual long getQueueLength() {return txQueue.length();}
     virtual MACAddress getMACAddress() {return address;}
 
   protected:
     //  initialization
     virtual void initialize();
-    virtual void initializeTxrate() = 0;
     virtual void initializeFlags();
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();
     virtual void initializeNotificationBoard();
     virtual void initializeStatistics();
-    virtual void registerInterface(double txrate);
+    virtual void registerInterface();
 
     // helpers
     virtual bool checkDestinationAddress(EtherFrame *frame);
     virtual void calculateParameters();
     virtual void printParameters();
+    virtual void prepareTxFrame(EtherFrame *frame);
 
     // finish
     virtual void finish();
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void processMessageWhenNotConnected(cMessage *msg);
     virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void handleEndIFGPeriod();
@@ -165,9 +212,10 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     virtual bool checkAndScheduleEndPausePeriod();
     virtual void fireChangeNotification(int type, cPacket *msg);
     virtual void beginSendFrames();
-    virtual void frameReceptionComplete(EtherFrame *frame);
+    virtual void frameReceptionComplete(EtherTraffic *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processPauseCommand(int pauseUnits);
+    virtual void getNextFrameFromQueue();
 
     // display
     virtual void updateDisplayString();

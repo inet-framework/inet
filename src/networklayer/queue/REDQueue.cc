@@ -134,6 +134,11 @@ bool REDQueue::enqueue(cMessage *msg)
     }
 }
 
+bool REDQueue::isEmpty()
+{
+    return queue.empty();
+}
+
 cMessage *REDQueue::dequeue()
 {
     if (queue.empty())
