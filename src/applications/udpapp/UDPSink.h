@@ -38,6 +38,7 @@ class INET_API UDPSink : public UDPAppBase
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+	virtual void finish();
 };
 
 

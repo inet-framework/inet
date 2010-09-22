@@ -48,6 +48,11 @@ void UDPSink::handleMessage(cMessage *msg)
 
 }
 
+void UDPSink::finish()
+{
+	recordScalar("packets received", numReceived);
+}
+
 void UDPSink::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";

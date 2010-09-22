@@ -58,6 +58,12 @@ void UDPBasicApp::initialize(int stage)
     scheduleAt((double)par("messageFreq"), timer);
 }
 
+void UDPBasicApp::finish()
+{
+	recordScalar("packets sent", numSent);
+	recordScalar("packets received", numReceived);
+}
+
 IPvXAddress UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());

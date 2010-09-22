@@ -48,11 +48,6 @@ class INET_API IPAddress
     uint32 addr;
 
   protected:
-    // Only keeps the n first bits of the address, completing it with zeros.
-    // Typical usage is when the length of an IP prefix is done and to check
-    // the address ends with the right number of 0.
-    void keepFirstBits (unsigned int n);
-
     // Parses IP address into the given bytes, and returns true if syntax was OK.
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
 
@@ -248,6 +243,13 @@ class INET_API IPAddress
      * error if the string has invalid format.)
      */
     static bool isWellFormed(const char *text);
+
+    /** 
+     * Only keeps the n first bits of the address, completing it with zeros.
+     * Typical usage is when the length of an IP prefix is done and to check
+     * the address ends with the right number of 0.
+     */
+    void keepFirstBits (unsigned int n);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)

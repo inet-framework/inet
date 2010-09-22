@@ -91,6 +91,38 @@ void OSPFRouting::handleMessage(cMessage *msg)
 }
 
 /**
+ * Insert a route learn by BGP in OSPF routingTable as an external route.
+ * Used by the BGPRouting module.
+ */
+void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IPv4AddressRange &netAddr)
+{
+    int ifIndex = resolveInterfaceName(ifName);
+    simulation.setContext(this);
+    OSPFASExternalLSAContents newExternalContents;
+    newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
+    newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
+    const IPAddress netmask(ulongFromIPv4Address(netAddr.mask));
+    newExternalContents.setNetworkMask(netmask);
+    ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
+}
+
+/**
+ * Return true if the route is in OSPF external LSA Table, false else.
+ * Used by the BGPRouting module.
+ */
+bool OSPFRouting::checkExternalRoute(const OSPF::IPv4Address &route)
+{
+    for (unsigned long i=1; i < ospfRouter->getASExternalLSACount(); i++)
+    {
+        OSPF::ASExternalLSA* externalLSA = ospfRouter->getASExternalLSA(i);
+        OSPF::IPv4Address externalAddr = ipv4AddressFromULong(externalLSA->getHeader().getLinkStateID());
+        if (externalAddr == route) //FIXME was this meant???
+            return true;
+    }
+    return false;
+}
+
+/**
  * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
  */
 int OSPFRouting::resolveInterfaceName(const std::string& name) const

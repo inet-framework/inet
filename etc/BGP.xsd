@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+<xsd:simpleType name="IPv4AddressType">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      A string containing an IPv4 address in dotted decimal notation.
+    </xsd:documentation>
+  </xsd:annotation>
+  
+  <xsd:restriction base="xsd:string">
+    <xsd:pattern value="(([0-1]?[0-9]?[0-9]|2([0-4][0-9]|5[0-5]))\.){3}([0-1]?[0-9]?[0-9]|2([0-4][0-9]|5[0-5]))" />
+  </xsd:restriction>
+</xsd:simpleType>
+
+<xsd:element name="Router">
+  <xsd:complexType>
+    <xsd:sequence>
+        <xsd:attribute name="interAddr" type="IPv4AddressType" maxOccurs="1" />
+        <xsd:attribute name="exterAddr" type="IPv4AddressType" maxOccurs="1" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:element>
+
+<xsd:simpleType name="RouteType">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      A value type which decides which routes are deny for in/out/all traffic
+    </xsd:documentation>
+  </xsd:annotation>
+  
+  <xsd:restriction base="xsd:string">
+    <xsd:enumeration value="DenyRouteIN" />
+    <xsd:enumeration value="DenyRouteOUT" />
+    <xsd:enumeration value="DenyRoute" />
+  </xsd:restriction>
+  
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:attribute name="Address" type="IPv4AddressType" use="required" />
+      <xsd:attribute name="Netmask" type="IPv4AddressType" use="required" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:simpleType>
+
+<xsd:simpleType name="ASType">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      A value type which decides which AS are deny for in/out/all traffic
+    </xsd:documentation>
+  </xsd:annotation>
+  
+  <xsd:restriction base="xsd:string">
+    <xsd:enumeration value="DenyASIN" />
+    <xsd:enumeration value="DenyASOUT" />
+    <xsd:enumeration value="DenyAS" />
+  </xsd:restriction>
+  
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:attribute name="id" type="xsd:positiveInteger" use="required" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:simpleType>
+
+<xsd:element name="TimerParams">
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element name="connectRetryTime" type="xsd:positiveInteger" default="120"/>
+      <xsd:element name="holdTime" type="xsd:positiveInteger" default="180"/>
+      <xsd:element name="keepAliveTime" type="xsd:positiveInteger" default= "60"/>
+      <xsd:element name="startDelay" type="xsd:positiveInteger" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AS">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      The definition of an AS. It has to have an AS ID given in a positive integer.
+      AS IDs between 1 and 64511 are reserved for public use (Internet), 
+      and AS IDs between 64512 and 65535 are for private use.
+      In this AS, you have BGP router(s), the deny routes (IN/OUT) and
+      the deny AS (IN/OUT).
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element ref="Router" minOccurs="1" maxOccurs="unbounded" />
+      <xsd:element ref="RouteType" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element ref="ASType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:positiveInteger" use="required" />
+  </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Session">
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element ref="Router" minOccurs="2" maxOccurs="2" use="required"/>
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:positiveInteger" use="required" />
+  </xsd:complexType>
+</xsd:element>
+
+</xsd:schema>

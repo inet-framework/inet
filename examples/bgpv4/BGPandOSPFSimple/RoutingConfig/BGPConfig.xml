@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="BGP.xsd">
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime> 180 </holdTime>
+        <keepAliveTime> 60 </keepAliveTime>
+        <startDelay> 15 </startDelay>
+    </TimerParams>
+
+    <AS id="65324">
+        <Router interAddr="10.10.10.1"/> <!--router A-->
+    </AS>
+
+    <AS id="65248">
+        <Router interAddr="10.20.1.2"/> <!--router B-->
+    </AS>
+
+   <Session id="1">
+        <Router exterAddr="10.10.10.2"/>
+        <Router exterAddr="10.10.10.1"/>
+    </Session>
+
+</BGPConfig>
+

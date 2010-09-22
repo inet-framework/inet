@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="BGP.xsd">
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime> 120 </holdTime>
+        <keepAliveTime> 60 </keepAliveTime>
+        <startDelay> 15 </startDelay>
+    </TimerParams>
+
+    <AS id="65324">
+        <Router interAddr="100.10.10.1"/> <!--router A-->
+        <!-- DenyRoute: deny route in IN  and OUT traffic -->
+        <!-- DenyRouteIN : deny route in IN traffic -->
+        <!-- DenyRouteOUT: deny route in OUT traffic -->
+        <!-- DenyAS: deny routes learned by AS in IN  and OUT traffic -->
+        <!-- DenyASIN : deny routes learned by AS in IN traffic -->
+        <!-- DenyASOUT: deny routes learned by AS in OUT traffic -->
+        <DenyRouteIN Address="192.171.0.0" Netmask="255.255.0.0"/>
+        <DenyRouteOUT Address="192.168.0.0" Netmask="255.255.0.0"/>
+    </AS>
+
+    <AS id="65248">
+        <Router interAddr="100.10.10.2"/> <!--router B-->
+    </AS>
+
+   <Session id="1">
+        <Router exterAddr="100.10.10.1"/>
+        <Router exterAddr="100.10.10.2"/>
+    </Session>
+
+</BGPConfig>
+

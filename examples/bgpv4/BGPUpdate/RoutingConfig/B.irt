@@ -1,0 +1,14 @@
+ifconfig:
+name: ppp0
+  inet_addr: 10.10.10.2
+  Mask: 255.255.255.0
+  POINTTOPOINT
+  
+name: eth0
+  inet_addr: 192.168.2.254
+  Mask: 255.255.255.0
+  MTU: 1500
+  Metric: 1
+  BROADCAST MULTICAST
+ifconfigend.
+

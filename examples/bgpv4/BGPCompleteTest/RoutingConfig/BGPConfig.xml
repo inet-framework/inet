@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="BGP.xsd">
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime> 180 </holdTime>
+        <keepAliveTime> 60 </keepAliveTime>
+        <startDelay> 15 </startDelay>
+    </TimerParams>
+
+    <AS id="60111">
+        <Router interAddr="172.1.10.255"/> <!--Router A1-->
+        <Router interAddr="172.1.20.255"/> <!--Router A2-->
+        <!-- DenyRoute: deny route in IN  and OUT traffic -->
+        <!-- DenyRouteIN : deny route in IN traffic -->
+        <!-- DenyRouteOUT: deny route in OUT traffic -->
+        <!-- DenyAS: deny routes learned by AS in IN  and OUT traffic -->
+        <!-- DenyASIN : deny routes learned by AS in IN traffic -->
+        <!-- DenyASOUT: deny routes learned by AS in OUT traffic -->
+    </AS>
+
+    <AS id="60222">
+        <Router interAddr="172.10.4.255"/> <!--Router B-->
+    </AS>
+
+    <AS id="60333">
+        <Router interAddr="172.13.1.255"/> <!--Router C1-->
+        <Router interAddr="172.13.2.255"/> <!--Router C2-->
+        <Router interAddr="172.13.3.255"/> <!--Router C3-->
+        <Router interAddr="172.13.4.255"/> <!--Router C4-->
+        <DenyRouteOUT Address="172.10.8.0" Netmask="255.255.255.0"/>
+        <!--DenyASOUT> 60444 </DenyASOUT-->
+    </AS>
+
+    <AS id="60444">
+        <Router interAddr="172.10.8.255"/> <!--Router D-->
+    </AS>
+
+    <AS id="60555">
+        <Router interAddr="172.15.0.255"/> <!--Router E-->
+        <DenyASIN> 60222 </DenyASIN>
+    </AS>
+
+    <Session id="1">
+        <Router exterAddr="10.10.10.1" > </Router> <!--Router A1-->
+        <Router exterAddr="10.10.10.2" > </Router> <!--Router C1-->
+    </Session>
+
+    <Session id="2">
+        <Router exterAddr="10.10.20.1" > </Router> <!--Router A2-->
+        <Router exterAddr="10.10.20.2" > </Router> <!--Router B-->
+    </Session>
+
+    <Session id="3">
+        <Router exterAddr="10.10.30.1" > </Router> <!--Router B-->
+        <Router exterAddr="10.10.30.2" > </Router> <!--Router C2-->
+    </Session>
+
+    <Session id="4">
+        <Router exterAddr="10.10.40.1" > </Router> <!--Router C3-->
+        <Router exterAddr="10.10.40.2" > </Router> <!--Router D-->
+    </Session>
+
+    <Session id="5">
+        <Router exterAddr="10.10.50.1" > </Router> <!--Router C4-->
+        <Router exterAddr="10.10.50.2" > </Router> <!--Router E-->
+    </Session>
+
+</BGPConfig>
+

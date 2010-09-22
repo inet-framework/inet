@@ -1,0 +1,13 @@
+ifconfig:
+# eth0ernet card 0 of host
+name: eth0
+	inet_addr: 192.171.1.1
+	Mask: 255.255.255.0
+	MTU: 1500
+	Metric: 1
+	POINTTOPOINT
+ifconfigend.
+
+route:
+default:		*	0.0.0.0		H	0	eth0
+routeend.
