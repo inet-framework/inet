@@ -30,6 +30,7 @@ TCPSocket::TCPSocket()
     yourPtr = NULL;
 
     gateToTcp = NULL;
+    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -60,6 +61,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
+    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 const char *TCPSocket::stateName(int state)
@@ -127,8 +129,7 @@ void TCPSocket::listen(bool fork)
     openCmd->setLocalPort(localPrt);
     openCmd->setConnId(connId);
     openCmd->setFork(fork);
-    openCmd->setSendQueueClass(sendQueueClass.c_str());
-    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
@@ -154,8 +155,7 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
-    openCmd->setSendQueueClass(sendQueueClass.c_str());
-    openCmd->setReceiveQueueClass(receiveQueueClass.c_str());
+    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
@@ -178,7 +178,7 @@ void TCPSocket::send(cMessage *msg)
 void TCPSocket::close()
 {
     if (sockstate!=CONNECTED && sockstate!=PEER_CLOSED && sockstate!=CONNECTING && sockstate!=LISTENING)
-        opp_error("TCPSocket::close(): not connected or close() already called");
+        opp_error("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TCPCommand *cmd = new TCPCommand();
@@ -303,3 +303,20 @@ void TCPSocket::processMessage(cMessage *msg)
     }
 }
 
+void TCPSocket::readDataTransferModePar(cComponent &component)
+{
+    //FIXME inkabb legyen egy kulon string to enum konverter fveny, ez pedig nem kell.
+
+    const char *transferMode = component.par("dataTransferMode");
+
+    if(0 == transferMode || 0 == transferMode[0])
+        throw cRuntimeError("Missing/empty dataTransferMode parameter at %s.", component.getFullPath().c_str());
+    else if (0==strcmp(transferMode, "bytecount"))
+        dataTransferMode = TCP_TRANSFER_BYTECOUNT;
+    else if (0 == strcmp(transferMode, "object"))
+        dataTransferMode = TCP_TRANSFER_OBJECT;
+    else if (0 == strcmp(transferMode, "bytestream"))
+        dataTransferMode = TCP_TRANSFER_BYTESTREAM;
+    else
+        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
+}

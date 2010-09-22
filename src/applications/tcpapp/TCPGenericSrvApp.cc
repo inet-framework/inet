@@ -35,6 +35,7 @@ void TCPGenericSrvApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
+    socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
 }
@@ -86,8 +87,8 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         if (!appmsg)
             error("Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
-                  "sendQueueClass/receiveQueueClass parameters "
-                  "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
+                  "dataTransferMode parameters "
+                  "(try \"object\")",
                   msg->getClassName(), msg->getName());
 
         msgsRcvd++;
@@ -132,6 +133,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else
     {
         // some indication -- ignore
+    	EV << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << endl;
         delete msg;
     }
 

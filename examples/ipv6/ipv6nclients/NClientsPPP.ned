@@ -31,6 +31,7 @@ network NClientsPPP
 {
     parameters:
         int n;
+        @display("bgb=628,413");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -38,12 +39,24 @@ network NClientsPPP
             datarate = 512Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
-        r1: Router6;
-        r2: Router6;
-        r3: Router6;
-        cli[n]: StandardHost6;
-        srv: StandardHost6;
+        configurator: FlatNetworkConfigurator6 {
+            @display("p=63,72");
+        }
+        r1: Router6 {
+            @display("p=219,245");
+        }
+        r2: Router6 {
+            @display("p=336,178");
+        }
+        r3: Router6 {
+            @display("p=458,107");
+        }
+        cli[n]: StandardHost6 {
+            @display("p=63,334");
+        }
+        srv: StandardHost6 {
+            @display("p=576,46");
+        }
     connections:
         for i=0..n-1 {
             cli[i].pppg++ <--> fiberline <--> r1.pppg++;

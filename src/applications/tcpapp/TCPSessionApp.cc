@@ -13,6 +13,8 @@
 
 
 #include "TCPSessionApp.h"
+
+#include "GenericAppMsg_m.h"
 #include "IPAddressResolver.h"
 
 
@@ -120,6 +122,7 @@ void TCPSessionApp::activity()
     // open
     waitUntil(tOpen);
 
+    socket.readDataTransferModePar(*this);
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";

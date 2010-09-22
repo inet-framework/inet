@@ -36,6 +36,7 @@
 #include <dlfcn.h>
 #include <netinet/in.h>
 
+#include "TCP_NSC_VirtualDataQueues.h"
 
 Define_Module(TCP_NSC);
 
@@ -646,6 +647,27 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
+TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+
+TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataReceiveQueue();
+        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedReceiveQueue();
+        case TCP_TRANSFER_BYTESTREAM:  // return new TCP_NSC_ByteStreamReceiveQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
@@ -661,18 +683,13 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
         conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
 
+        TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
-        const char *sendQueueClass = openCmd->getSendQueueClass();
-        if (!sendQueueClass || !sendQueueClass[0])
-            sendQueueClass = this->par("sendQueueClass");
-        conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(createOne(sendQueueClass));
+        conn->sendQueueM = createSendQueue(transferMode);
         conn->sendQueueM->setConnection(conn);
 
         // create receive queue
-        const char *receiveQueueClass = openCmd->getReceiveQueueClass();
-        if (!receiveQueueClass || !receiveQueueClass[0])
-            receiveQueueClass = this->par("receiveQueueClass");
-        conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(createOne(receiveQueueClass));
+        conn->receiveQueueM = createReceiveQueue(transferMode);
         conn->receiveQueueM->setConnection(conn);
 
         tcpEV << this << ": TCP connection created for " << msgP << "\n";

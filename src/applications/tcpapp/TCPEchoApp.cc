@@ -21,6 +21,7 @@ Define_Module(TCPEchoApp);
 
 void TCPEchoApp::initialize()
 {
+    cSimpleModule::initialize();
     const char *address = par("address");
     int port = par("port");
     delay = par("echoDelay");
@@ -32,6 +33,7 @@ void TCPEchoApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
+    socket.readDataTransferModePar(*this);
     socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     socket.listen();
 }

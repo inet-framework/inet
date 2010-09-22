@@ -1,0 +1,16 @@
+TCP_lwip
+=======
+
+This directory contains an LWIP version of TCP called TCP_lwip.
+This TCP stack based on lwip 1.3.2 version.
+This TCP stack work on IPV4 and IPV6, too.
+This base algorithm can be extended and customized via "queue"
+classes that implement the TcpLwipSendQueue and TcpLwipReceiveQueue
+classes in bytecount and object mode, and are selected via TCP application's NED parameters.
+
+The main class is TCP_lwip.
+
+Note that it is possible to use different TCP implementations at the same time
+in a simulation, for example you can have some hosts in your simulation
+with TCP_lwip and others witch with TCP modules. Use the tcpType parameter
+in StandardHost to change the TCP implementation.

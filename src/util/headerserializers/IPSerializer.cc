@@ -31,6 +31,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "ICMPSerializer.h"
 #include "UDPSerializer.h"
 #include "SCTPSerializer.h"    //I.R.
+#include "TCPIPchecksum.h"
 #include "TCPSerializer.h"    //I.R.
 
 #if defined(_MSC_VER)
@@ -53,7 +54,7 @@ using namespace INETFw;
 
 
 
-int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize)
+int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
 {
     int packetLength;
     struct ip *ip = (struct ip *) buf;
@@ -99,6 +100,10 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
     }
 
     ip->ip_len = htons(packetLength);
+    if(hasCalcChkSum)
+    {
+        ip->ip_sum = TCPIPchecksum::checksum(buf, IP_HEADER_BYTES);
+    }
 
     return packetLength;
 }

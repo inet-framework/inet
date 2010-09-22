@@ -315,18 +315,13 @@ void TCPConnection::sendToApp(cMessage *msg)
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
+    TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
-    const char *sendQueueClass = openCmd->getSendQueueClass();
-    if (!sendQueueClass || !sendQueueClass[0])
-        sendQueueClass = tcpMain->par("sendQueueClass");
-    sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
+    sendQueue = tcpMain->createSendQueue(transferMode);
     sendQueue->setConnection(this);
 
     // create receive queue
-    const char *receiveQueueClass = openCmd->getReceiveQueueClass();
-    if (!receiveQueueClass || !receiveQueueClass[0])
-        receiveQueueClass = tcpMain->par("receiveQueueClass");
-    receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
+    receiveQueue = tcpMain->createReceiveQueue(transferMode);
     receiveQueue->setConnection(this);
 
     // create SACK retransmit queue

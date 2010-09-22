@@ -15,8 +15,8 @@
 #define __INET_TCPSINKAPP_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
 
+#include "INETDefs.h"
 
 
 /**

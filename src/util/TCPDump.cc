@@ -644,7 +644,7 @@ void TCPDump::handleMessage(cMessage *msg)
         // IP header:
         //struct sockaddr_in *to = (struct sockaddr_in*) malloc(sizeof(struct sockaddr_in));
         //int32 tosize = sizeof(struct sockaddr_in);
-        int32 serialized_ip = IPSerializer().serialize(ipPacket, buf, sizeof(buf));
+        int32 serialized_ip = IPSerializer().serialize(ipPacket, buf, sizeof(buf), true);
         ph.incl_len = serialized_ip + sizeof(uint32);
 
         ph.orig_len = ph.incl_len;

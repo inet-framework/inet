@@ -20,10 +20,13 @@ Define_Module(TCPSrvHostApp);
 
 void TCPSrvHostApp::initialize()
 {
+    cSimpleModule::initialize();
+
     const char *address = par("address");
     int port = par("port");
 
     serverSocket.setOutputGate(gate("tcpOut"));
+    serverSocket.readDataTransferModePar(*this);
     serverSocket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
     serverSocket.listen();
 }

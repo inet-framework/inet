@@ -37,6 +37,7 @@ package inet.applications.tcpapp;
 //
 // @see GenericAppMsg, TCPBasicClientApp, TelnetApp
 //
+
 simple TCPGenericSrvApp like TCPApp
 {
     parameters:
@@ -48,4 +49,3 @@ simple TCPGenericSrvApp like TCPApp
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
-

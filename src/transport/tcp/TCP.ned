@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -55,11 +56,6 @@ package inet.transport.tcp;
 // and attaching a TCPSendCommand control info object to the data packet,
 // and sending it to TCP. The server app will receive data as messages
 // with the TCP_I_DATA message kind and TCPSendCommand control info.
-// (Whether you'll receive the same or identical messages, or even whether
-// you'll receive data in the same sized chunks as sent depends on the
-// sendQueueClass and receiveQueueClass used, see below. With
-// TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue set, message objects
-// and even message boundaries are not preserved.)
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and TCPCommand control info.
@@ -132,7 +128,7 @@ package inet.transport.tcp;
 //      but not for DumbTCP).
 //
 // The \TCP flavour supported depends on the value of the tcpAlgorithmClass
-// module parameters, e.g. "TCPTahoe" or "TCPReno". In the future, other
+// module parameter, e.g. "TCPTahoe" or "TCPReno". In the future, other
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
@@ -236,8 +232,6 @@ simple TCP like ITCP
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
-        string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
-        string receiveQueueClass = default("TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         @display("i=block/wheelbarrow");
     gates:

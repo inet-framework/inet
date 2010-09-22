@@ -15,11 +15,12 @@
 #define __INET_TCPSRVHOSTAPP_H
 
 #include <omnetpp.h>
+
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 
 
-
+//forward declaration:
 class TCPServerThreadBase;
 
 /**
