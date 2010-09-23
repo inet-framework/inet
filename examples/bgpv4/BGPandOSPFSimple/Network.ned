@@ -13,7 +13,7 @@ network BGPNet
         {
             parameters:
                 delay = 0;
-                //TODO restore after merging topic/ethernet: datarate = 100Gbps;
+                datarate = 100Mbps;
         }
 
     submodules:

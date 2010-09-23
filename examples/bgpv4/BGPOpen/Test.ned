@@ -8,7 +8,7 @@ network Net
         {
             parameters:
                 delay = 0;
-                datarate = 100Gbps;
+                datarate = 100Mbps;
         }
 
     submodules:
