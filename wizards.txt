@@ -1,0 +1,48 @@
+Ethernet Networks
+----------------
+hub switch bus
+small large fullduplex halfduplex bus directconnect
+
+Inet
+----
+new inet4/6 simulation:
+    - (with/out explicit routing table)
+    - inet4/inet6
+    - server tcptype: tcp/tcp_old/tcp_nsc
+    - client tcptype: tcp/tcp_old/tcp_nsc
+    - tcp Y/N
+    - udp Y/N
+    - stcp Y/N
+    network configurator
+    client (standardhost/6)
+    router
+    server (standardhost/6)
+
+new infrastructure wireless simulation:
+    channelcontrol,
+    - mobility, Y/N
+    configurator,
+
+new adhoc wireless simulation:
+    channelcontrol,
+    mobility,
+    configurator,
+
+mpls:
+    scenariomanager
+    - ldp/rsvp
+
+dumbbell: 
+    - n*client
+    - m*server
+    - srv.application
+    - client.application
+    - k*router
+    - optionally internet cloud
+
+inet-host-generator: (standardhost helyett csinálna valamit)
+    - protocols,
+    - applications,
+    - ipv4/ipv6,
+    - interfaces(ethernet,ppp,wlan)
+

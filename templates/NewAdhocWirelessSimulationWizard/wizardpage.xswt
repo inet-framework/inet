@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <label x:text="Ad hoc mobility wireless wizard." x:style="WRAP">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
+    <!-- Network Parameters { -->
+    <group text="Network parameters">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- numOfHosts% -->
+        <label text="Number of hosts:"/>
+        <spinner x:id="numOfHosts" minimum="2" maximum="100" x:style="BORDER"/>
+        <!--  -->
+        <!-- } -->
+      </x:children>
+    </group>
+
+    <group text="NED Topology Type">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+    <!-- Static/Dynamic -->
+    <composite>
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+      <layout x:class="GridLayout"/>
+      <x:children>
+        <button x:id="static" text="Static" x:style="RADIO"/>
+        <button x:id="parametric" text="Parametric" x:style="RADIO"/>
+      </x:children>
+    </composite>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+
+  </x:children>
+</xswt>

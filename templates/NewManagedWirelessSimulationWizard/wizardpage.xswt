@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <label x:text="Managed mobility wireless wizard." x:style="WRAP">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
+    <!-- Network Parameters { -->
+    <group text="Network parameters">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <!-- numOfHosts% -->
+        <label text="Number of hosts:"/>
+        <spinner x:id="numOfHosts" minimum="2" maximum="20" x:style="BORDER"/>
+
+        <!--  -->
+
+        <!-- } -->
+      </x:children>
+    </group>
+
+    <group text="NED Topology Type">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+        <!-- Static/Dynamic -->
+        <composite>
+          <layoutData x:class="GridData" horizontalSpan="2"/>
+          <layout x:class="GridLayout"/>
+          <x:children>
+            <button x:id="static" text="Static" x:style="RADIO"/>
+            <button x:id="parametric" text="Parametric" x:style="RADIO"/>
+          </x:children>
+        </composite>
+        <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Traffic Parameters { -->
+    <group text="Traffic parameters">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <group text="TCP traffic">
+          <layoutData x:class="GridData" horizontalSpan="2"/>
+          <layout x:class="GridLayout"/>
+          <x:children>
+            <!-- tcpTraffic? -->
+            <button x:id="hasTcpApp" text="Data traffic (on TCP)" x:style="CHECK">
+              <layoutData x:class="GridData" horizontalSpan="2"/>
+            </button>
+          </x:children>
+        </group>
+
+        <!-- serverTcpLayer:TCP/TCP_old/TCP_NSC -->
+        <label text="Server TCP layer:"/>
+        <combo x:id="serverTcpLayer" x:style="BORDER|READ_ONLY">
+          <add x:p0="TCP"/>
+          <add x:p0="TCP_old"/>
+          <add x:p0="TCP_NSC"/>
+        </combo>
+
+        <!-- clientTcpLayer:TCP/TCP_old/TCP_NSC -->
+        <label text="Client TCP layer:"/>
+        <combo x:id="clientTcpLayer" x:style="BORDER|READ_ONLY">
+          <add x:p0="TCP"/>
+          <add x:p0="TCP_old"/>
+          <add x:p0="TCP_NSC"/>
+        </combo>
+
+        <!-- -- -->
+        <label x:style="SEPARATOR|HORIZONTAL">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </label>
+
+        <!-- pingTraffic? -->
+        <button x:id="hasPingApp" text="Ping traffic" x:style="CHECK">
+          <layoutData x:class="GridData" horizontalSpan="2"/>
+        </button>
+
+        <!-- videoStreamUdpTraffic? -->
+        <button x:id="hasUdpApp" text="Video Stream traffic" x:style="CHECK">
+          <layoutData x:class="GridData" horizontalSpan="2"/>
+        </button>
+        <!--  -->
+      </x:children>
+    </group>
+  </x:children>
+
+</xswt>
