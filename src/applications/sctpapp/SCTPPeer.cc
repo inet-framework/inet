@@ -44,6 +44,11 @@ void SCTPPeer::initialize()
     WATCH(packetsRcvd);
     WATCH(bytesSent);
     WATCH(numRequestsToSend);
+
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    sentEchoedPkBytesSignal = registerSignal("sentEchoedPkBytes");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+
     // parameters
     const char* address = par("address");
 
@@ -128,7 +133,8 @@ uint32 numBytes;
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
     packetsSent++;
-    bytesSent+=msg->getBitLength()/8;
+    bytesSent += msg->getByteLength();
+    emit(sentPkBytesSignal, (long)(msg->getByteLength()));
     sendOrSchedule(cmsg);
 }
 
@@ -336,6 +342,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     k->second->collect(simulation.getSimTime()-smsg->getCreationTime());
                     cPacket* cmsg = new cPacket("SVData");
                     bytesSent+=smsg->getByteLength();
+                    emit(sentPkBytesSignal, (long)(smsg->getByteLength()));
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream=(lastStream+1)%outboundStreams;
                     cmd->setSid(lastStream);
@@ -526,6 +533,7 @@ void SCTPPeer::sendRequest(bool last)
     // send SCTPMessage with SCTPSimpleMessage enclosed
     clientSocket.send(cmsg, last);
     bytesSent+=numBytes;
+    emit(sentPkBytesSignal, numBytes);
 }
 
 
@@ -643,7 +651,8 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     {
         SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
-        echoedBytesSent+=smsg->getBitLength()/8;
+        echoedBytesSent += smsg->getByteLength();
+        emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
         cmsg->encapsulate(smsg);
         if (ind->getSendUnordered())
             cmsg->setKind(SCTP_C_SEND_UNORDERED);

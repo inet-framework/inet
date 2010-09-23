@@ -32,6 +32,8 @@ void EtherHub::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
+    pkBytesSignal = registerSignal("pkBytes");
+
     ports = gateSize("ethg");
 
     double datarate = 0.0;
@@ -60,6 +62,7 @@ void EtherHub::handleMessage(cMessage *msg)
     EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;
+    emit(pkBytesSignal, (long)(PK(msg)->getByteLength()));
 
     if (ports<=1)
     {
@@ -83,8 +86,6 @@ void EtherHub::finish ()
 {
     simtime_t t = simTime();
     recordScalar("simulated time", t);
-    recordScalar("messages handled", numMessages);
     if (t>0)
         recordScalar("messages/sec", numMessages/t);
 }
-

@@ -32,6 +32,8 @@ void UDPEchoApp::initialize(int stage)
     // address auto-assignment takes place etc.
     if (stage!=3)
         return;
+
+    roundTripTimeSignal = registerSignal("roundTripTime");
 }
 
 void UDPEchoApp::finish()
@@ -58,6 +60,7 @@ void UDPEchoApp::processPacket(cPacket *msg)
     }
 
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
 
     if (packet->getIsRequest())
     {
@@ -72,16 +75,15 @@ void UDPEchoApp::processPacket(cPacket *msg)
         controlInfo->setDestPort(srcPort);
 
         packet->setIsRequest(false);
+        emit(sentPkBytesSignal, (long)(packet->getByteLength()));
         send(packet, "udpOut");
     }
     else
     {
         simtime_t rtt = simTime() - packet->getCreationTime();
         EV << "RTT: " << rtt << "\n";
+        emit(roundTripTimeSignal, rtt);
         delete msg;
     }
     numReceived++;
 }
-
-
-

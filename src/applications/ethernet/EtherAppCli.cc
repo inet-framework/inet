@@ -43,8 +43,9 @@ void EtherAppCli::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        eedVector.setName("end-to-end delay");
-        eedStats.setName("end-to-end delay");
+        endToEndDelaySignal = registerSignal("endToEndDelay");
+        sentPkBytesSignal = registerSignal("sentPkBytes");
+        rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
@@ -95,7 +96,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
     }
     else
     {
-        receivePacket(msg);
+        receivePacket(check_and_cast<cPacket*>(msg));
     }
 }
 
@@ -137,27 +138,21 @@ void EtherAppCli::sendPacket()
 
     send(datapacket, "out");
     packetsSent++;
+    emit(sentPkBytesSignal, len);
 }
 
-void EtherAppCli::receivePacket(cMessage *msg)
+void EtherAppCli::receivePacket(cPacket *msg)
 {
     EV << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
     simtime_t lastEED = simTime() - msg->getCreationTime();
-    eedVector.record(lastEED);
-    eedStats.collect(lastEED);
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(endToEndDelaySignal, lastEED);
 
     delete msg;
 }
 
 void EtherAppCli::finish()
 {
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.getMean());
-    recordScalar("end-to-end delay stddev", eedStats.getStddev());
-    recordScalar("end-to-end delay min", eedStats.getMin());
-    recordScalar("end-to-end delay max", eedStats.getMax());
 }
-

@@ -36,7 +36,8 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
 {
   protected:
     // statistics
-    cOutVector eed;
+    simsignal_t endToEndDelaySignal;
+    simsignal_t rcvdPkBytesSignal;
 
   protected:
     ///@name Overridden cSimpleModule functions
@@ -51,8 +52,4 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
     virtual void receiveStream(cPacket *msg);
 };
 
-
 #endif
-
-
-

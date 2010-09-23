@@ -30,6 +30,9 @@ class INET_API EtherHub : public cSimpleModule
     int ports;          // number of ports
     long numMessages;   // number of messages handled
 
+    //statistics
+    simsignal_t pkBytesSignal;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);

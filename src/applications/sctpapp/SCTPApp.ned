@@ -31,4 +31,3 @@ moduleinterface SCTPApp
         input sctpIn @labels(SCTPCommand/up);
         output sctpOut @labels(SCTPCommand/down);
 }
-

@@ -27,6 +27,7 @@ void TCPSinkApp::initialize()
 
     bytesRcvd = 0;
     WATCH(bytesRcvd);
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
@@ -45,7 +46,9 @@ void TCPSinkApp::handleMessage(cMessage *msg)
     }
     else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        bytesRcvd += PK(msg)->getByteLength();
+        long packetLength = PK(msg)->getByteLength();
+        bytesRcvd += packetLength;
+        emit(rcvdPkBytesSignal, packetLength);
         delete msg;
 
         if (ev.isGUI())
@@ -64,6 +67,5 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 
 void TCPSinkApp::finish()
 {
-    recordScalar("bytesRcvd", bytesRcvd);
 }
 

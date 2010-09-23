@@ -33,6 +33,11 @@ moduleinterface OutputQueue
 {
     parameters:
         @display("i=block/queue");
+        // From PassiveQueueBase:
+        @statistic[rcvdPkBytes](title="Received packet Bytes";record=count,sum,vector);
+        @statistic[sentPkBytes](title="Received packet Bytes";record=count,sum,vector);
+        @statistic[droppedPkBytes](title="Dropped packet Bytes";record=count,sum,vector);
+        @statistic[queueingTime](title="Delaying time of packets";unit=s;record=histogram,stats,vector);
     gates:
         input in;
         output out;

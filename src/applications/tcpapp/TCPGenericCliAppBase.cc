@@ -22,6 +22,14 @@ void TCPGenericCliAppBase::initialize()
 {
     cSimpleModule::initialize();
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
+
+    //statistics
+    connectSignal = registerSignal("connect");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+
+    emit(connectSignal, 0L);
+
     WATCH(numSessions);
     WATCH(numBroken);
     WATCH(packetsSent);
@@ -64,6 +72,7 @@ void TCPGenericCliAppBase::connect()
     socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
 
     numSessions++;
+    emit(connectSignal, 1L);
 }
 
 void TCPGenericCliAppBase::close()
@@ -71,6 +80,7 @@ void TCPGenericCliAppBase::close()
     setStatusString("closing");
     EV << "issuing CLOSE command\n";
     socket.close();
+    emit(connectSignal, 0L);
 }
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
@@ -85,7 +95,8 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     socket.send(msg);
 
     packetsSent++;
-    bytesSent+=numBytes;
+    bytesSent += numBytes;
+    emit(sentPkBytesSignal, numBytes);
 }
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
@@ -104,7 +115,8 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
-    bytesRcvd+=msg->getByteLength();
+    bytesRcvd += msg->getByteLength();
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
 
     delete msg;
 }
@@ -142,10 +154,4 @@ void TCPGenericCliAppBase::finish()
     EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 
     recordScalar("number of sessions", numSessions);
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsRcvd);
-    recordScalar("bytes sent", bytesSent);
-    recordScalar("bytes rcvd", bytesRcvd);
 }
-
-

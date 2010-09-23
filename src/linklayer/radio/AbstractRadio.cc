@@ -83,6 +83,11 @@ void AbstractRadio::initialize(int stage)
 
         radioModel = createRadioModel();
         radioModel->initializeFrom(this);
+
+        // statistics
+        bitrateSignal = registerSignal("bitrate");
+        radioStateSignal = registerSignal("radioState");
+        channelNumberSignal = registerSignal("channel");
     }
     else if (stage == 1)
     {
@@ -96,6 +101,11 @@ void AbstractRadio::initialize(int stage)
         // tell initial channel number to ChannelControl; should be done in
         // stage==2 or later, because base class initializes myHostRef in that stage
         cc->updateHostChannel(myHostRef, rs.getChannelNumber());
+
+        // statistics
+        emit(bitrateSignal, rs.getBitrate());
+        emit(radioStateSignal, rs.getState());
+        emit(channelNumberSignal, rs.getChannelNumber());
     }
 }
 
@@ -296,7 +306,10 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newChannel = newChannel;
             } else
+            {
+                emit(channelNumberSignal, rs.getChannelNumber());
                 changeChannel(newChannel); // change channel right now
+            }
         }
         if (newBitrate!=-1)
         {
@@ -565,6 +578,7 @@ void AbstractRadio::changeChannel(int channel)
     // do channel switch
     EV << "Changing to channel #" << channel << "\n";
 
+    emit(channelNumberSignal, channel);
     rs.setChannelNumber(channel);
     cc->updateHostChannel(myHostRef, channel);
     ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
@@ -627,6 +641,7 @@ void AbstractRadio::setBitrate(double bitrate)
         error("changing the bitrate while transmitting is not allowed");
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
+    emit(bitrateSignal, bitrate);
     rs.setBitrate(bitrate);
 
     //XXX fire some notification?
@@ -634,6 +649,10 @@ void AbstractRadio::setBitrate(double bitrate)
 
 void AbstractRadio::setRadioState(RadioState::State newState)
 {
+    if(rs.getState() != newState)
+    {
+        emit(radioStateSignal, newState);
+    }
     rs.setState(newState);
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }

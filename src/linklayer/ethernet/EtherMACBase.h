@@ -149,27 +149,27 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     // statistics
     int  framesSentInBurst;            // Number of frames send out in current frame burst
     int  bytesSentInBurst;             // Number of bytes transmitted in current frame burst
-    uint64_t numFramesSent;
-    uint64_t numFramesReceivedOK;
-    uint64_t numBytesSent;        // includes Ethernet frame bytes with preamble
-    uint64_t numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
-    uint64_t numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
-    uint64_t numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
-    uint64_t numDroppedBitError;  // frames dropped because of bit errors
-    uint64_t numDroppedNotForUs;  // frames dropped because destination address didn't match
-    uint64_t numFramesPassedToHL; // frames passed to higher layer
-    uint64_t numPauseFramesRcvd;  // PAUSE frames received from network
-    uint64_t numPauseFramesSent;  // PAUSE frames sent
-    cOutVector numFramesSentVector;
-    cOutVector numFramesReceivedOKVector;
-    cOutVector numBytesSentVector;
-    cOutVector numBytesReceivedOKVector;
-    cOutVector numDroppedIfaceDownVector;
-    cOutVector numDroppedBitErrorVector;
-    cOutVector numDroppedNotForUsVector;
-    cOutVector numFramesPassedToHLVector;
-    cOutVector numPauseFramesRcvdVector;
-    cOutVector numPauseFramesSentVector;
+    unsigned long numFramesSent;
+    unsigned long numFramesReceivedOK;
+    unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
+    unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
+    unsigned long numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
+    unsigned long numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
+    unsigned long numDroppedBitError;  // frames dropped because of bit errors
+    unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
+    unsigned long numFramesPassedToHL; // frames passed to higher layer
+    unsigned long numPauseFramesRcvd;  // PAUSE frames received from network
+    unsigned long numPauseFramesSent;  // PAUSE frames sent
+
+    simsignal_t txPkBytesSignal;
+    simsignal_t rxPkBytesOkSignal;
+    simsignal_t passedUpPkBytesSignal;
+    simsignal_t txPausePkUnitsSignal;
+    simsignal_t rxPausePkUnitsSignal;
+    simsignal_t rxPkBytesFromHLSignal;
+    simsignal_t droppedPkBytesNotForUsSignal;
+    simsignal_t droppedPkBytesBitErrorSignal;
+    simsignal_t droppedPkBytesIfaceDownSignal;
 
   public:
     EtherMACBase();

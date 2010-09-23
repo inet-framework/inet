@@ -63,7 +63,9 @@ void TCPSessionApp::count(cMessage *msg)
         if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
         {
             packetsRcvd++;
-            bytesRcvd+=PK(msg)->getByteLength();
+            cPacket *packet = PK(msg);
+            bytesRcvd += packet->getByteLength();
+            emit(rcvdPkBytesSignal, (long)(packet->getByteLength()));
         }
         else
         {
@@ -73,6 +75,7 @@ void TCPSessionApp::count(cMessage *msg)
     else
     {
         indicationsRcvd++;
+        emit(rcvdIndicationsSignal, msg->getKind());
     }
 }
 
@@ -99,6 +102,10 @@ void TCPSessionApp::activity()
     WATCH(packetsRcvd);
     WATCH(bytesRcvd);
     WATCH(indicationsRcvd);
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    rcvdIndicationsSignal = registerSignal("rcvdIndications");
 
     // parameters
     const char *address = par("address");
@@ -151,7 +158,8 @@ void TCPSessionApp::activity()
         EV << "sending " << sendBytes << " bytes\n";
         cPacket *msg = new cPacket("data1");
         msg->setByteLength(sendBytes);
-        bytesSent += sendBytes;
+        bytesSent += sendBytes;  //FIXME ez valszeg kikerult
+        emit(sentPkBytesSignal, sendBytes);
         socket.send(msg);
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
@@ -160,7 +168,8 @@ void TCPSessionApp::activity()
         EV << "sending " << i->numBytes << " bytes\n";
         cPacket *msg = new cPacket("data1");
         msg->setByteLength(i->numBytes);
-        bytesSent += i->numBytes;
+        bytesSent += i->numBytes;  //FIXME ez valszeg kikerult
+        emit(sentPkBytesSignal, i->numBytes);
         socket.send(msg);
     }
 

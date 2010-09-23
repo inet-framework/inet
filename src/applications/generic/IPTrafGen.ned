@@ -25,7 +25,11 @@ package inet.applications.generic;
 //
 simple IPTrafSink like IPTrafficGenerator
 {
-    @display("i=block/sink");
+    parameters:
+        @display("i=block/sink");
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
+
     gates:
         input ipIn @labels(IPControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);
@@ -56,12 +60,13 @@ simple IPTrafGen like IPTrafficGenerator
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
         @display("i=block/source");
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
+
     gates:
         input ipIn @labels(IPControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);
         output ipOut @labels(IPControlInfo/down);
         output ipv6Out @labels(IPv6ControlInfo/down);
 }
-
-
-

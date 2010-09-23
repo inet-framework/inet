@@ -40,6 +40,11 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     int bytesSent;
     int bytesRcvd;
 
+    //statistics:
+    simsignal_t connectSignal;
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t sentPkBytesSignal;
+
   protected:
     /**
      * Initialization. Should be redefined to perform or schedule a connect().

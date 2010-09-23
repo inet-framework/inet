@@ -40,6 +40,9 @@ simple EtherEncap
 {
     parameters:
         @display("i=block/square");
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer ";record=count,sum,vector);
+        @statistic[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";record=count,sum,vector);
+        @statistic[sentPause](title="sent Pause";record=count,sum,vector);
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down);   // higher layer
         output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer

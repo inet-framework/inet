@@ -206,6 +206,13 @@ class INET_API RTP : public cSimpleModule
         sizes for ip and udp.
         */
         virtual int resolveMTU();
+
+    protected:
+        int appInGate, profileInGate, rtcpInGate, udpInGate;
+
+        //statistics:
+        simsignal_t rcvdPkBytesSignal;
+        simsignal_t endToEndDelaySignal;
 };
 
 #endif

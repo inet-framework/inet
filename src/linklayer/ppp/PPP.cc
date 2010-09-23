@@ -61,6 +61,16 @@ void PPP::initialize(int stage)
         WATCH(numBitErr);
         WATCH(numDroppedIfaceDown);
 
+        txPkBytesSignal = registerSignal("txPkBytes");
+        rxPkBytesOkSignal = registerSignal("rxPkBytesOk");
+        droppedPkBytesIfaceDownSignal = registerSignal("droppedPkBytesIfaceDown");
+        txStateSignal = registerSignal("txState");
+        droppedPkBytesBitErrorSignal = registerSignal("droppedPkBytesBitError");
+        passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+        rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
+
+        emit(txStateSignal, 0L);
+
         // find queueModule
         queueModule = NULL;
         if (par("queueModule").stringValue()[0])
@@ -175,6 +185,9 @@ void PPP::startTransmitting(cPacket *msg)
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
     scheduleAt(endTransmissionTime, endTransmissionEvent);
+    emit(txStateSignal, 1L);
+    emit(txPkBytesSignal, (long)(msg->getByteLength()));
+    numSent++;
 }
 
 void PPP::handleMessage(cMessage *msg)
@@ -184,11 +197,13 @@ void PPP::handleMessage(cMessage *msg)
         EV << "Interface is not connected, dropping packet " << msg << endl;
         delete msg;
         numDroppedIfaceDown++;
+        emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
     }
     else if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
         EV << "Transmission finished.\n";
+        emit(txStateSignal, 0L);
         if (ev.isGUI()) displayIdle();
 
         if (hasSubscribers)
@@ -202,7 +217,6 @@ void PPP::handleMessage(cMessage *msg)
         {
             cPacket *pk = (cPacket *) txQueue.pop();
             startTransmitting(pk);
-            numSent++;
         }
         else if (queueModule)
         {
@@ -223,19 +237,24 @@ void PPP::handleMessage(cMessage *msg)
         if (PK(msg)->hasBitError())
         {
             EV << "Bit error in " << msg << endl;
+            emit(droppedPkBytesBitErrorSignal, (long)(((cPacket*)msg)->getByteLength()));
             numBitErr++;
             delete msg;
         }
         else
         {
             // pass up payload
-            cPacket *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
+            PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
+            cPacket *payload = decapsulate(pppFrame);
+            emit(rxPkBytesOkSignal, (long)(pppFrame->getByteLength()));
             numRcvdOK++;
+            emit(passedUpPkBytesSignal, (long)(pppFrame->getByteLength()));
             send(payload,"netwOut");
         }
     }
     else // arrived on gate "netwIn"
     {
+        emit(rcvdPkBytesFromHLSignal, (long)(PK(msg)->getByteLength()));
         if (endTransmissionEvent->isScheduled())
         {
             // We are currently busy, so just queue up the packet.
@@ -255,7 +274,6 @@ void PPP::handleMessage(cMessage *msg)
             // We are idle, so we can start transmitting right away.
             EV << "Received " << msg << " for transmission\n";
             startTransmitting(PK(msg));
-            numSent++;
         }
     }
 

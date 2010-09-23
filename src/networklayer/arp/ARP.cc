@@ -62,6 +62,11 @@ void ARP::initialize()
     WATCH(numFailedResolutions);
 
     WATCH_PTRMAP(arpCache);
+
+    sentReqSignal = registerSignal("sentReq");
+    sentReplySignal = registerSignal("sentReply");
+    initiatedResolutionSignal = registerSignal("initiatedResolution");
+    failedResolutionSignal = registerSignal("failedResolution");
 }
 
 void ARP::finish()
@@ -233,6 +238,7 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     scheduleAt(simTime()+retryTimeout, msg);
 
     numResolutions++;
+    emit(initiatedResolutionSignal, 1L);
 }
 
 void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress)
@@ -267,6 +273,7 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
     static MACAddress broadcastAddress("ff:ff:ff:ff:ff:ff");
     sendPacketToNIC(arp, ie, broadcastAddress);
     numRequestsSent++;
+    emit(sentReqSignal, 1L);
 }
 
 void ARP::requestTimedOut(cMessage *selfmsg)
@@ -301,6 +308,7 @@ void ARP::requestTimedOut(cMessage *selfmsg)
     arpCache.erase(entry->myIter);
     delete entry;
     numFailedResolutions++;
+    emit(failedResolutionSignal, 1L);
 }
 
 
@@ -431,6 +439,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 delete arp->removeControlInfo();
                 sendPacketToNIC(arp, ie, srcMACAddress);
                 numRepliesSent++;
+                emit(sentReplySignal, 1L);
                 break;
             }
             case ARP_REPLY:

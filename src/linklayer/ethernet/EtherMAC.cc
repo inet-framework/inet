@@ -75,8 +75,8 @@ void EtherMAC::initializeStatistics()
     WATCH(numCollisions);
     WATCH(numBackoffs);
 
-    numCollisionsVector.setName("collisions");
-    numBackoffsVector.setName("backoffs");
+    collisionSignal = registerSignal("collision");
+    backoffSignal = registerSignal("backoff");
 }
 
 void EtherMAC::initializeFlags()
@@ -193,7 +193,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         delete msg;
 
         numCollisions++;
-        numCollisionsVector.record(numCollisions);
+        emit(collisionSignal, 1L);
     }
     else if (receiveState==RX_IDLE_STATE)
     {
@@ -276,7 +276,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
             frameBeingReceived = NULL;
 
             numCollisions++;
-            numCollisionsVector.record(numCollisions);
+            emit(collisionSignal, 1L);
         }
 
         // go to collision state
@@ -330,7 +330,7 @@ void EtherMAC::startFrameTransmission()
             frameBeingReceived = NULL;
 
             numCollisions++;
-            numCollisionsVector.record(numCollisions);
+            emit(collisionSignal, 1L);
         }
         // go to collision state
         receiveState = RX_COLLISION_STATE;
@@ -460,7 +460,7 @@ void EtherMAC::handleRetransmission()
     transmitState = BACKOFF_STATE;
 
     numBackoffs++;
-    numBackoffsVector.record(numBackoffs);
+    emit(backoffSignal, 1L);
 }
 
 void EtherMAC::printState()

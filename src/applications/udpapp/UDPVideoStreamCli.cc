@@ -29,7 +29,10 @@ Define_Module(UDPVideoStreamCli);
 
 void UDPVideoStreamCli::initialize()
 {
-    eed.setName("video stream eed");
+    //statistics
+    endToEndDelaySignal = registerSignal("endToEndDelay");
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+
     simtime_t startTime = par("startTime");
 
     if (startTime>=0)
@@ -77,7 +80,7 @@ void UDPVideoStreamCli::receiveStream(cPacket *msg)
 {
     EV << "Video stream packet:\n";
     printPacket(msg);
-    eed.record(simTime() - msg->getCreationTime());
+    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(endToEndDelaySignal, (simTime() - msg->getCreationTime()));
     delete msg;
 }
-

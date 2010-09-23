@@ -32,7 +32,6 @@ Define_Module(RTPPayloadReceiver);
 RTPPayloadReceiver::~RTPPayloadReceiver()
 {
     closeOutputFile();
-    delete _packetArrival;
 }
 
 
@@ -43,7 +42,7 @@ void RTPPayloadReceiver::initialize()
     char logName[100];
     sprintf (logName, "outputLogLoss%d.log", getId());
     _outputLogLoss.open(logName);
-    _packetArrival = new cOutVector("packet arrival");
+    _packetArrivalSignal = registerSignal("packetArrival");
 }
 
 
@@ -64,7 +63,7 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg)
 
 void RTPPayloadReceiver::processPacket(RTPPacket *packet)
 {
-    _packetArrival->record((double)(packet->getTimeStamp()));
+    emit(_packetArrivalSignal, (double)(packet->getTimeStamp()));
 }
 
 

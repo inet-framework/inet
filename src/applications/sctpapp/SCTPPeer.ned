@@ -39,6 +39,10 @@ simple SCTPPeer like SCTPApp
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
         @display("i=block/app");
+        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
+        @statistic[sentEchoedPkBytes](title="Sent echoed packet bytes";record=count,sum,vector);
+
     gates:
         input sctpIn @labels(SCTPCommand/up);
         output sctpOut @labels(SCTPCommand/down);

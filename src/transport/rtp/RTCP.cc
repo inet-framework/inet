@@ -50,6 +50,9 @@ void RTCP::initialize()
     _averagePacketSize = 0.0;
 
     _participantInfos = new cArray("ParticipantInfos");
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
 RTCP::~RTCP()
@@ -85,22 +88,29 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
     // distinguish by type
-    if (rinp->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_RTCP) {
+    switch(rinp->getType())
+    {
+    case RTPInnerPacket::RTP_INP_INITIALIZE_RTCP:
         initializeRTCP(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED:
         senderModuleInitialized(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_DATA_OUT:
         dataOut(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_DATA_IN:
         dataIn(rinp);
-    }
-    else if (rinp->getType() == RTPInnerPacket::RTP_INP_LEAVE_SESSION) {
+        break;
+
+    case RTPInnerPacket::RTP_INP_LEAVE_SESSION:
         leaveSession(rinp);
-    }
-    else {
+        break;
+
+    default:
         error("unknown RTPInnerPacket type");
     }
 }
@@ -194,7 +204,9 @@ void RTCP::connectRet()
 
 void RTCP::readRet(cPacket *sifpIn)
 {
-    RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
+    RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(sifpIn->decapsulate());
+    emit(rcvdPkBytesSignal, (long)(sifpIn->getByteLength()));
+    emit(endToEndDelaySignal, simTime() - sifpIn->getCreationTime());
     processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
 }
 
@@ -532,5 +544,10 @@ RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 void RTCP::calculateAveragePacketSize(int size)
 {
     // add size of ip and udp header to given size before calculating
-    _averagePacketSize = ((double)(_packetsCalculated) * _averagePacketSize + (double)(size + 20 + 8)) / (double)(++_packetsCalculated);
+#if 1
+    double sumPacketSize = (double)(_packetsCalculated) * _averagePacketSize  + (double)(size + 20 + 8);
+    _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
+#else
+    _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
+#endif
 }

@@ -41,8 +41,9 @@ class INET_API EtherAppCli : public cSimpleModule
     // receive statistics
     long packetsSent;
     long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
+    simsignal_t endToEndDelaySignal;
+    simsignal_t sentPkBytesSignal;
+    simsignal_t rcvdPkBytesSignal;
 
   protected:
     virtual void initialize(int stage);
@@ -53,10 +54,8 @@ class INET_API EtherAppCli : public cSimpleModule
     virtual MACAddress resolveDestMACAddress();
 
     virtual void sendPacket();
-    virtual void receivePacket(cMessage *msg);
+    virtual void receivePacket(cPacket *msg);
     virtual void registerDSAP(int dsap);
 };
 
 #endif
-
-

@@ -247,16 +247,15 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
 
-    numFramesSentVector.setName("framesSent");
-    numFramesReceivedOKVector.setName("framesReceivedOK");
-    numBytesSentVector.setName("bytesSent");
-    numBytesReceivedOKVector.setName("bytesReceivedOK");
-    numDroppedIfaceDownVector.setName("framesDroppedIfaceDown");
-    numDroppedBitErrorVector.setName("framesDroppedBitError");
-    numDroppedNotForUsVector.setName("framesDroppedNotForUs");
-    numFramesPassedToHLVector.setName("framesPassedToHL");
-    numPauseFramesRcvdVector.setName("pauseFramesRcvd");
-    numPauseFramesSentVector.setName("pauseFramesSent");
+    txPkBytesSignal = registerSignal("txPkBytes");
+    rxPkBytesOkSignal = registerSignal("rxPkBytesOk");
+    txPausePkUnitsSignal = registerSignal("txPausePkUnits");
+    rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
+    rxPkBytesFromHLSignal = registerSignal("rxPkBytesFromHL");
+    droppedPkBytesBitErrorSignal = registerSignal("droppedPkBytesBitError");
+    droppedPkBytesIfaceDownSignal = registerSignal("droppedPkBytesIfaceDown");
+    droppedPkBytesNotForUsSignal = registerSignal("droppedPkBytesNotForUs");
+    passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
 }
 
 void EtherMACBase::registerInterface()
@@ -309,7 +308,7 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
     {
         EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
         numDroppedNotForUs++;
-        numDroppedNotForUsVector.record(numDroppedNotForUs);
+        emit(droppedPkBytesNotForUsSignal, (long)(frame->getByteLength()));
         delete frame;
 
         return false;
@@ -385,6 +384,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame)!=NULL);
     if (!isPauseFrame)
         numFramesFromHL++;
+        emit(rxPkBytesFromHLSignal, (long)(frame->getByteLength()));
 
     if(txQueue.extQueue)
     {
@@ -447,7 +447,7 @@ void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
         pauseUnits = pauseFrame->getPauseTime();
         delete frame;
         numPauseFramesRcvd++;
-        numPauseFramesRcvdVector.record(numPauseFramesRcvd);
+        emit(rxPausePkUnitsSignal, pauseUnits);
         processPauseCommand(pauseUnits);
     }
     else if ((dynamic_cast<EtherPadding*>(frame))!=NULL)
@@ -466,7 +466,7 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
     if (frame->hasBitError())
     {
         numDroppedBitError++;
-        numDroppedBitErrorVector.record(numDroppedBitError);
+        emit(droppedPkBytesBitErrorSignal, (long)(frame->getByteLength()));
         delete frame;
         return;
     }
@@ -475,16 +475,16 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
     frame->setByteLength(frame->getOrigByteLength());
 
     // statistics
+    unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
-    numBytesReceivedOK += frame->getByteLength();
-    numFramesReceivedOKVector.record(numFramesReceivedOK);
-    numBytesReceivedOKVector.record(numBytesReceivedOK);
+    numBytesReceivedOK += curBytes;
+    emit(rxPkBytesOkSignal, curBytes);
 
     if (!checkDestinationAddress(frame))
         return;
 
     numFramesPassedToHL++;
-    numFramesPassedToHLVector.record(numFramesPassedToHL);
+    emit(passedUpPkBytesSignal, curBytes);
 
     // pass up to upper layer
     send(frame, "upperLayerOut");
@@ -542,15 +542,15 @@ void EtherMACBase::handleEndTxPeriod()
     if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
 
+    unsigned long curBytes = curTxFrame->getByteLength();
     numFramesSent++;
-    numBytesSent += curTxFrame->getByteLength();
-    numFramesSentVector.record(numFramesSent);
-    numBytesSentVector.record(numBytesSent);
+    numBytesSent += curBytes;
+    emit(txPkBytesSignal, curBytes);
 
     if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {
         numPauseFramesSent++;
-        numPauseFramesSentVector.record(numPauseFramesSent);
+        emit(txPausePkUnitsSignal, ((EtherPauseFrame*)curTxFrame)->getPauseTime());
     }
 
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
@@ -600,8 +600,9 @@ void EtherMACBase::handleEndPausePeriod()
 void EtherMACBase::processMessageWhenNotConnected(cMessage *msg)
 {
     EV << "Interface is not connected -- dropping packet " << msg << endl;
-    delete msg;
+    emit(droppedPkBytesIfaceDownSignal, (long)(PK(msg)->getByteLength()));
     numDroppedIfaceDown++;
+    delete msg;
 }
 
 void EtherMACBase::processMessageWhenDisabled(cMessage *msg)
@@ -710,17 +711,6 @@ void EtherMACBase::finish()
         recordScalar("simulated time", t);
 //        recordScalar("txrate (Mb)", txrate/1000000);
         recordScalar("full duplex", duplexMode);
-        recordScalar("frames sent",    numFramesSent);
-        recordScalar("frames rcvd",    numFramesReceivedOK);
-        recordScalar("bytes sent",     numBytesSent);
-        recordScalar("bytes rcvd",     numBytesReceivedOK);
-        recordScalar("frames from higher layer", numFramesFromHL);
-        recordScalar("frames from higher layer dropped (iface down)", numDroppedIfaceDown);
-        recordScalar("frames dropped (bit error)",  numDroppedBitError);
-        recordScalar("frames dropped (not for us)", numDroppedNotForUs);
-        recordScalar("frames passed up to HL", numFramesPassedToHL);
-        recordScalar("PAUSE frames sent",  numPauseFramesSent);
-        recordScalar("PAUSE frames rcvd",  numPauseFramesRcvd);
 
         if (t>0)
         {

@@ -19,6 +19,12 @@
 #include <omnetpp.h>
 #include "PassiveQueueBase.h"
 
+static long getMsgByteLength(cMessage* msg)
+{
+    if (msg->isPacket())
+        return (long)(((cPacket*)msg)->getByteLength());
+    return 0; // Unknown value
+}
 
 void PassiveQueueBase::initialize()
 {
@@ -31,21 +37,40 @@ void PassiveQueueBase::initialize()
     numQueueDropped = 0;
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
+
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+    droppedPkBytesSignal = registerSignal("droppedPkBytes");
+    queueingTimeSignal = registerSignal("queueingTime");
+
+    msgId2TimeMap.clear();
 }
 
 void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
+
+    long msgBytes = getMsgByteLength(msg);
+
+    emit(rcvdPkBytesSignal, msgBytes);
     if (packetRequested>0)
     {
         packetRequested--;
+        emit(sentPkBytesSignal, msgBytes);
+        emit(queueingTimeSignal, 0L);
         sendOut(msg);
     }
     else
     {
-        bool dropped = enqueue(msg);
-        if (dropped)
+        msgId2TimeMap[msg->getId()] = simTime();
+        cMessage *droppedMsg = enqueue(msg);
+        if (droppedMsg)
+        {
             numQueueDropped++;
+            emit(droppedPkBytesSignal, getMsgByteLength(droppedMsg));
+            msgId2TimeMap.erase(droppedMsg->getId());
+            delete droppedMsg;
+        }
     }
 
     if (ev.isGUI())
@@ -67,13 +92,14 @@ void PassiveQueueBase::requestPacket()
     }
     else
     {
+        emit(sentPkBytesSignal, getMsgByteLength(msg));
+        emit(queueingTimeSignal, simTime() - msgId2TimeMap[msg->getId()]);
+        msgId2TimeMap.erase(msg->getId());
         sendOut(msg);
     }
 }
 
 void PassiveQueueBase::finish()
 {
-    recordScalar("packets received by queue", numQueueReceived);
-    recordScalar("packets dropped by queue", numQueueDropped);
+    msgId2TimeMap.clear();
 }
-

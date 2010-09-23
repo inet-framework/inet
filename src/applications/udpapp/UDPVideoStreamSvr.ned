@@ -42,8 +42,9 @@ simple UDPVideoStreamSvr like UDPApp
         volatile int packetLen @unit("B");
         volatile int videoSize @unit("B");
         @display("i=block/app");
+        @statistic[reqStreamBytes](title="Requested stream bytes";record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
-

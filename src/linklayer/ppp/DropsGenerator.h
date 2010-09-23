@@ -32,6 +32,10 @@ class INET_API DropsGenerator : public cSimpleModule
   protected:
     unsigned int numPackets;
     unsigned int numDropped;
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t sentPkBytesSignal;
+    simsignal_t droppedPkBytesSignal;
+
     bool generateFurtherDrops;
     std::vector<unsigned int> dropsVector;
 

@@ -58,7 +58,9 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
     // Parameters for statistics collection
     long numProcessedFrames;
     long numDroppedFrames;
-    cOutVector bufferLevel;
+    simsignal_t processedBytesSignal;
+    simsignal_t droppedBytesSignal;
+    simsignal_t usedBufferBytesSignal;
 
   protected:
     /** @name Redefined cSimpleModule member functions. */

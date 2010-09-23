@@ -27,7 +27,12 @@ void TCPGenericSrvApp::initialize()
     delay = par("replyDelay");
     maxMsgDelay = 0;
 
+    //statistics
     msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
+    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkBytesSignal = registerSignal("sentPkBytes");
+
+
     WATCH(msgsRcvd);
     WATCH(msgsSent);
     WATCH(bytesRcvd);
@@ -50,19 +55,20 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
-    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg*>(msg);
+	GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg*>(msg);
 
-    if (appmsg)
-    {
-        msgsSent++;
-        bytesSent += appmsg->getByteLength();
+	if (appmsg)
+	{
+		msgsSent++;
+		bytesSent += appmsg->getByteLength();
+		emit(sentPkBytesSignal, (long)(appmsg->getByteLength()));
 
-        EV << "sending \"" << appmsg->getName() << "\" to TCP, " << appmsg->getByteLength() << " bytes\n";
-    }
-    else
-    {
-        EV << "sending \"" << msg->getName() << "\" to TCP\n";
-    }
+		EV << "sending \"" << appmsg->getName() << "\" to TCP, " << appmsg->getByteLength() << " bytes\n";
+	}
+	else
+	{
+		EV << "sending \"" << msg->getName() << "\" to TCP\n";
+	}
 
     send(msg, "tcpOut");
 }
@@ -93,6 +99,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
         msgsRcvd++;
         bytesRcvd += appmsg->getByteLength();
+        emit(rcvdPkBytesSignal, (long)(appmsg->getByteLength()));
 
         long requestedBytes = appmsg->getExpectedReplyLength();
 
@@ -149,9 +156,4 @@ void TCPGenericSrvApp::finish()
 {
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
-
-    recordScalar("packets sent", msgsSent);
-    recordScalar("packets rcvd", msgsRcvd);
-    recordScalar("bytes sent", bytesSent);
-    recordScalar("bytes rcvd", bytesRcvd);
 }

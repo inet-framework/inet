@@ -27,9 +27,12 @@ void REDQueue::initialize()
     PassiveQueueBase::initialize();
     queue.setName("l2queue");
 
-    avgQlenVec.setName("avg queue length");
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
+    //statistics
+    queueLengthSignal = registerSignal("queueLength");
+    avgQueueLengthSignal = registerSignal("avgQueueLength");
+    earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
+
+    emit(queueLengthSignal, queue.length());
 
     // configuration
     wq = par("wq");
@@ -52,7 +55,7 @@ void REDQueue::initialize()
     WATCH(numEarlyDrops);
 }
 
-bool REDQueue::enqueue(cMessage *msg)
+cMessage *REDQueue::enqueue(cMessage *msg)
 {
     //"
     // for each packet arrival
@@ -77,7 +80,7 @@ bool REDQueue::enqueue(cMessage *msg)
     }
 
     // statistics
-    avgQlenVec.record(avg);
+    emit(avgQueueLengthSignal, avg);
 
     //"
     //    if minth <= avg < maxth
@@ -106,6 +109,7 @@ bool REDQueue::enqueue(cMessage *msg)
             mark = true;
             count = 0;
             numEarlyDrops++;
+            emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
         }
     }
     else if (maxth <= avg)
@@ -122,15 +126,15 @@ bool REDQueue::enqueue(cMessage *msg)
     // carry out decision
     if (mark || queue.length()>=maxth) // maxth is also the "hard" limit
     {
-        delete msg;
-        dropVec.record(1);
-        return true;
+        return msg;
     }
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
-        return false;
+
+        emit(queueLengthSignal, queue.length());
+
+        return NULL;
     }
 }
 
@@ -152,8 +156,7 @@ cMessage *REDQueue::dequeue()
     if (queue.length()==0)
         q_time = simTime();
 
-    // statistics
-    qlenVec.record(queue.length());
+    emit(queueLengthSignal, queue.length());
 
     return pk;
 }
@@ -166,5 +169,4 @@ void REDQueue::sendOut(cMessage *msg)
 void REDQueue::finish()
 {
     PassiveQueueBase::finish();
-    recordScalar("packets dropped early by RED", numEarlyDrops);
 }

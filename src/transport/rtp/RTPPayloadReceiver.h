@@ -74,9 +74,9 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
         int _payloadType;
 
         /**
-         * An output vector used to store arrival of rtp data packets.
+         * An output signal used to store arrival of rtp data packets.
          */
-        cOutVector *_packetArrival;
+        simsignal_t _packetArrivalSignal;
 
         /**
          * Writes contents of this RTPPacket into the output file. Must be overwritten

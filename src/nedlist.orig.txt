@@ -1,0 +1,201 @@
+simple UDP
+simple TCP_NSC like ITCP
+simple TCP like ITCP
+simple RTP
+simple RTCP
+simple RTPPayloadSender like IRTPPayloadSender
+simple RTPAVProfilePayload10Sender like IRTPPayloadSender
+simple RTPAVProfilePayload32Sender like IRTPPayloadSender
+simple RTPAVProfileSampleBasedAudioSender like IRTPPayloadSender
+simple RTPPayloadReceiver like IRTPPayloadReceiver
+        @signal[packetArrival](title="Packet arrival";modeHint=hints);
+simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
+simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
+simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
+simple RTPProfile
+simple RTPAVProfile
+simple TCP_old like ITCP
+simple SCTP
+simple Blackboard
+simple NotificationBoard
+simple Sink
+        @signal[rcvdPkBytes](title="Received bytes";modeHint=count,sum);
+simple Join
+simple ThruputMeter
+simple DropsGenerator
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+        @signal[droppedPkBytes](title="Dropped packet bytes";modeHint=count,sum);
+simple DuplicatesGenerator
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+        @signal[duplPkBytes](title="Duplicated packet bytes";modeHint=count,sum);
+simple PPP
+simple ExtInterface
+simple Ieee80211Mac
+        @signal[state](title="State";modeHint=auto;interpolationmode=sample-hold;); // ENUM!!
+        @signal[radioState](title="Radio state";modeHint=auto;interpolationmode=sample-hold;); // ENUM!!
+simple Ieee80211AgentSTA
+        @signal[dataQueueLen](title="Data queue len";modeHint=histogram);
+        @signal[droppedPacket](title="Dropped packet";modeHint=histogram);
+simple Ieee80211MgmtSTASimplified like Ieee80211Mgmt
+simple Ieee80211MgmtSTA like Ieee80211Mgmt
+simple Ieee80211MgmtAP like Ieee80211Mgmt
+simple Ieee80211MgmtAdhoc like Ieee80211Mgmt
+simple Ieee80211MgmtAPSimplified like Ieee80211Mgmt
+simple Decider80211
+simple SnrDecider
+simple ErrAndCollDecider
+simple GilbertElliotSnr
+simple SnrEval80211
+simple SnrEval
+simple CSMAMacLayer
+simple Mac80211
+simple EtherBus
+simple EtherEncap
+        @signal[rcvdPkBytesFromHL](title="Received packet bytes from higher layer ";modeHint=count,sum);
+        @signal[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";modeHint=count,sum);
+        @signal[sentPause](title="sent Pause";modeHint=count,sum);
+simple EtherMAC
+        @signal[collision](title="Collision";modeHint=count);
+        @signal[backoff](title="Backoff";modeHint=count);
+        @signal[txPkBytes](title="Sent bytes";modeHint=sum,count);
+        @signal[rxPkBytesOk](title="title";modeHint=sum,count);
+        @signal[passedUpPkBytes](title="Passed bytes to higher layer";modeHint=sum,count);
+        @signal[txPausePkUnits](title="Sent pause";modeHint=count,stats);
+        @signal[rxPausePkUnits](title="Received pause";modeHint=count,stats);
+        @signal[rxPkBytesFromHL](title="Received bytes from higher layer";modeHint=sum,count);
+        @signal[droppedPkBytesNotForUs](title="Dropped bytes not for us";modeHint=sum,count);
+        @signal[droppedPkBytesBitError](title="Dropped bytes bit error";modeHint=sum,count);
+        @signal[droppedPkBytesIfaceDown](title="Dropped msg Iface down";modeHint=sum,count);
+simple EtherLLC
+        @signal[dsap](title="dsap registering";modeHint=sum);
+        @signal[rcvdPkBytesFromHL](title="Received packet bytes from higher layer";modeHint=sum,count);
+        @signal[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";modeHint=sum,count);
+        @signal[passedUpPkBytes](title="passed up bytes";modeHint=sum,count);
+        @signal[droppedPkBytesUnknownDSAP](title="Dropped bytes unknown DSAP";modeHint=sum,count);
+        @signal[sendPauseSignal](title="send Pause";modeHint=count);
+simple EtherMAC2
+        @signal[txPkBytes](title="Sent bytes";modeHint=sum,count);
+        @signal[rxPkBytesOk](title="title";modeHint=sum,count);
+        @signal[droppedPkBytesIfaceDown](title="Dropped msg Iface down";modeHint=sum,count);
+        @signal[droppedPkBytesBitError](title="Dropped bytes bit error";modeHint=sum,count);
+        @signal[droppedPkBytesNotForUs](title="Dropped bytes not for us";modeHint=sum,count);
+        @signal[passedUpPkBytes](title="Passed bytes to higher layer";modeHint=sum,count);
+        @signal[rxPausePkUnits](title="Received pause";modeHint=count,stats);
+        @signal[txPausePkUnits](title="Sent pause";modeHint=count,stats);
+        @signal[rxPkBytesFromHL](title="Received bytes from higher layer";modeHint=sum,count);
+simple EtherHub
+        @signal[pkBytes](title="Handled packet bytes";modeHint=count,sum);
+simple GenericRadio like Radio
+simple Ieee80211Radio like Radio
+simple MACRelayUnitPP like MACRelayUnit
+        @signal[processedBytes](title="Processed bytes";modeHint=sum,count);
+        @signal[droppedBytes](title="Processed bytes";modeHint=sum,count);
+        @signal[usedBufferBytes](title="Used buffer bytes";modeHint=histogram);
+simple MACRelayUnitNP like MACRelayUnit
+        @signal[usedBufferBytes](title="Used buffer bytes";modeHint=histogram);
+        @signal[processedBytes](title="title";modeHint=count,sum);
+        @signal[droppedBytes](title="title";modeHint=count,sum);
+simple BasicDecider
+simple WirelessMac
+simple BasicSnrEval
+simple ICMPv6
+simple IPv6NeighbourDiscovery
+simple RSVP
+simple SimpleClassifier
+simple FlatNetworkConfigurator6
+simple FlatNetworkConfigurator
+simple NetworkConfigurator
+simple LDP
+simple IPv6
+simple RoutingTable6
+simple IPv6ErrorHandling
+simple LIBTable
+simple MPLS
+simple OSPFRouting
+simple NetworkInfo
+simple FailureManager
+simple Dummy
+simple TED
+simple LinkStateRouting
+simple RoutingTable
+simple ErrorHandling
+simple ICMP
+simple IP
+        @signal[rcvdPacket](title="Received packets";modeHint=count);
+        @signal[droppedPacket](title="Dropped packets";modeHint=count);
+        @signal[queueingTime](title="Delaying time of packets";unit=s;modeHint=histogram,stats);
+simple DropTailQoSQueue like OutputQueue
+simple REDQueue like OutputQueue
+        @signal[earlyDropPacket](title="Early dropped packet";modeHint=count);
+        @signal[avgQueueLength](title="Avg queue length";modeHint=hints);
+        @signal[queueLength](title="Queue length";modeHint=hints);
+        @signal[droppedPacket](title="Dropped packets";modeHint=hints);
+simple DropTailQueue like OutputQueue
+        @signal[queueLength](title="Used queue length";modeHint=histogram,stats;interpolationmode=sample-hold;);
+        @signal[droppedPkBytes](title="Dropped packet bytes";modeHint=count,sum);
+simple InterfaceTable
+simple ARP
+        @signal[sentReq](title="ARP request sent";modeHint=count);
+        @signal[sentReplies](title="ARP replies sent";modeHint=count);
+        @signal[initiatedResolution](title="ARP initiated resolutions";modeHint=count);
+        @signal[failedResolution](title="failed ARP resolutions sent";modeHint=count);
+simple TurtleMobility like BasicMobility
+simple NullMobility like BasicMobility
+simple MassMobility like BasicMobility
+simple RectangleMobility like BasicMobility
+simple RandomWPMobility like BasicMobility
+simple ConstSpeedMobility like BasicMobility
+simple LinearMobility like BasicMobility
+simple CircleMobility like BasicMobility
+simple ANSimMobility like BasicMobility
+simple BonnMotionMobility like BasicMobility
+simple SCTPClient like SCTPApp
+simple SCTPPeer like SCTPApp
+simple SCTPServer like SCTPApp
+simple IPTrafSink like IPTrafficGenerator
+simple IPTrafGen like IPTrafficGenerator
+simple UDPSink like UDPApp
+simple UDPBasicApp like UDPApp
+simple UDPEchoApp like UDPApp
+simple UDPVideoStreamSvr like UDPApp
+        @signal[reqStreamBytes](title="Requested stream bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+simple UDPVideoStreamCli like UDPApp
+        @signal[endToEndDelay](title="End-to-end delay";modeHint=histogram,stats);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+simple PingApp
+        @signal[endToEndDelay](title="delay";modeHint=histogram,stats);
+        @signal[drop](title="dropped packets";modeHint=stats);
+        @signal[sentPacket](title="sent packets";modeHint=count);
+        @signal[outOfOrderArrival](title="Out of order arrival packets";modeHint=count);
+simple RTPApplication
+simple TCPSpoof
+simple TelnetApp like TCPApp
+simple TCPSessionApp like TCPApp
+simple TCPSrvHostApp like TCPApp
+simple TCPEchoApp like TCPApp
+simple TCPGenericSrvApp like TCPApp
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+simple TCPSinkApp like TCPApp
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=sum,count);
+simple TCPBasicClientApp like TCPApp
+        @signal[connect](title="Connections";modeHint=sum,timeavg);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+simple EtherAppSrv
+        @signal[endToEndDelay](title="end-to-end delay";modeHint=histogram,stats);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+simple EtherAppCli
+        @signal[endToEndDelay](title="end-to-end delay";modeHint=histogram,stats);
+        @signal[rcvdPkBytes](title="Received packet bytes";modeHint=count,sum);
+        @signal[sentPkBytes](title="Sent packet bytes";modeHint=count,sum);
+simple ScenarioManager
+simple NAMTrace
+simple ChannelControl
+simple ChannelInstaller
+simple TCPDump {
+simple NAMTraceWriter

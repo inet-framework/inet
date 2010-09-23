@@ -32,6 +32,11 @@ void EtherEncap::initialize()
     WATCH(seqNum);
 
     totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
+
+    rcvdPkBytesFromHLSignal =  registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
+    sentPauseSignal = registerSignal("sentPause");
+
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
     WATCH(totalPauseSent);
@@ -80,6 +85,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)msg->getByteLength(), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
+    emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
@@ -106,6 +112,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 {
     totalFromMAC++;
+    emit(rcvdPkBytesFromMACSignal, (long)(frame->getByteLength()));
 
     // decapsulate and attach control info
     cPacket *higherlayermsg = frame->decapsulate();
@@ -147,13 +154,10 @@ void EtherEncap::handleSendPause(cMessage *msg)
     send(frame, "lowerLayerOut");
     delete msg;
 
+    emit(sentPauseSignal, pauseUnits);
     totalPauseSent++;
 }
 
 void EtherEncap::finish()
 {
-    recordScalar("packets from higher layer", totalFromHigherLayer);
-    recordScalar("frames from MAC", totalFromMAC);
 }
-
-

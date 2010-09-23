@@ -45,8 +45,10 @@ simple TCPEchoApp like TCPApp
         double echoDelay @unit("s") = default(0s);
         string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
         @display("i=block/app");
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
-
