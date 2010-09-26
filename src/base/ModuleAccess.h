@@ -48,7 +48,7 @@ INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
  * Finds and returns the pointer to a module of type T and name N.
- * Uses findModuleWherever(). See usage e.g. at RoutingTableAccess.
+ * Uses findModuleWhereverInNode(). See usage e.g. at RoutingTableAccess.
  */
 template<typename T>
 class ModuleAccess
