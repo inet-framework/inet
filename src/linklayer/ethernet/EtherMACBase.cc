@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
+#include "opp_utils.h"
 #include "EtherMACBase.h"
 #include "IPassiveQueue.h"
 #include "IInterfaceTable.h"
@@ -266,19 +267,11 @@ void EtherMACBase::registerInterface()
 
     interfaceEntry = new InterfaceEntry();
 
-    // interface name: our module name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName())+1];
-    char *d=interfaceName;
-    for (const char *s=getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
+    // interface name: NIC module's name without special characters ([])
+    interfaceEntry->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
-    interfaceEntry->setName(interfaceName);
-    delete [] interfaceName;
-
-    ASSERT(curEtherDescr);
     // data rate
+    ASSERT(curEtherDescr);
     interfaceEntry->setDatarate(curEtherDescr->txrate); // FIXME
 
     // generate a link-layer address to be used as interface token for IPv6
