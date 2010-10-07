@@ -718,6 +718,7 @@ class INET_API SCTPAssociation : public cObject
         inline void sendToIP(SCTPMessage* sctpmsg, const bool qs = false) {
             sendToIP(sctpmsg, remoteAddr, qs);
         }
+        void recordInPathTsnVector(SCTPMessage* p_msg, const IPvXAddress& dest);
         void scheduleSack();
         /** Utility: signal to user that connection timed out */
         void signalConnectionTimeout();

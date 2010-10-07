@@ -187,6 +187,23 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
     return assoc;
 }
 
+void SCTPAssociation::recordInPathTsnVector(SCTPMessage* pMsg,
+                                         const IPvXAddress& rDest)
+{
+    uint32 n_chunks = pMsg->getChunksArraySize();
+    if (n_chunks == 0)
+       return;
+
+    SCTPPathVariables* p_path = getPath(rDest);
+
+    for (uint32 i = 0 ; i < n_chunks ; i++) {
+        const SCTPChunk* p_chunk = (const SCTPChunk*)(pMsg->getChunks(i));
+        if (p_chunk->getChunkType() == DATA) {
+            const SCTPDataChunk* p_data_chunk = (const SCTPDataChunk*) p_chunk;
+            p_path->pathTSN->record(p_data_chunk->getTsn());
+        }
+    }
+}
 
 void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
                                          const IPvXAddress& dest,
@@ -235,6 +252,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");
         }
+        recordInPathTsnVector(sctpmsg, dest);
     }
     sctpEV3 << "Sent to " << dest << endl;
 }
