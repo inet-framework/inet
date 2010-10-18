@@ -223,6 +223,10 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             }
             trans = true;
             delete heartbeatChunk;
+            if (path) {
+                path->numberOfHeartbeatsRcvd++;
+                path->pathRcvdHb->record(path->numberOfHeartbeatsRcvd);
+            }
             break;
         case HEARTBEAT_ACK:
             sctpEV3 << "SCTPAssociationRcvMessage: HEARTBEAT_ACK received" << endl;
@@ -1348,6 +1352,8 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 SCTPEventCode SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk* hback,
                                                                              SCTPPathVariables*     path)
 {
+    path->numberOfHeartbeatAcksRcvd++;
+    path->pathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
     /* hb-ack goes to pathmanagement, reset error counters, stop timeout timer */
     const IPvXAddress addr          = hback->getRemoteAddr();
     const simtime_t hbTimeField = hback->getTimeField();
