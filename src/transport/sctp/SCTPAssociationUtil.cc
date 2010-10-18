@@ -197,9 +197,9 @@ void SCTPAssociation::recordInPathTsnVector(SCTPMessage* pMsg,
     SCTPPathVariables* p_path = getPath(rDest);
 
     for (uint32 i = 0 ; i < n_chunks ; i++) {
-        const SCTPChunk* p_chunk = (const SCTPChunk*)(pMsg->getChunks(i));
+        const SCTPChunk* p_chunk = check_and_cast<const SCTPChunk *>(pMsg->getChunks(i));
         if (p_chunk->getChunkType() == DATA) {
-            const SCTPDataChunk* p_data_chunk = (const SCTPDataChunk*) p_chunk;
+            const SCTPDataChunk* p_data_chunk = check_and_cast<const SCTPDataChunk *>(p_chunk);
             p_path->pathTSN->record(p_data_chunk->getTsn());
         }
     }
