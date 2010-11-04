@@ -7,91 +7,72 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import ned.DatarateChannel;
 
 
-channel C extends DatarateChannel
+network UdpClientServer
 {
-    delay = 0.01us; // ~ 2m
-    datarate = 10Mbps;
-}
-
-module SubTest
-{
-    parameters:
-        string cliTcpType = default("n/a");
-        string srvTcpType = default("n/a");
-    submodules:
-        server: StandardHost {
-            parameters:
-                numTcpApps = 1;
-                tcpAppType = "TCPEchoApp";
-                tcpType = srvTcpType;
+    @display("bgb=232,193");
+    types:
+        channel C extends DatarateChannel
+        {
+//            datarate = 10Mbps;
+            delay = 1us;
         }
-        client: StandardHost {
-            parameters:
-                numTcpApps = 1;
-                tcpAppType = "TCPSessionApp";
-                tcpType = cliTcpType;
-                tcpApp[0].connectAddress = replace(fullPath(),".client.tcpApp[0]",".server");
-        }
-    connections:
-        client.pppg++ <--> C <--> server.pppg++;
-}
-
-network TcpSpeedTest
-{
-    parameters:
-        int n = 2; // number of available tcpType-s: TCP,TCP_NSC
     submodules:
-        subTests[n*n]: SubTest {
+        host1: StandardHost {
             parameters:
-                srvTcpType = choose((index % n),    "TCP TCP_NSC");
-                cliTcpType = choose(int(index / n), "TCP TCP_NSC");
+                @display("p=53,67;i=device/pc3");
+        }
+        host2: StandardHost {
+            parameters:
+                @display("p=181,67;i=device/pc2");
         }
         configurator: FlatNetworkConfigurator {
-            @display("p=70,40");
+            parameters:
+                @display("p=109,142");
         }
+    connections:
+        host1.ethg++ <--> C <--> host2.ethg++;
 }
+
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
-network = TcpSpeedTest
+network = UdpClientServer
 total-stack = 7MB
 tkenv-plugin-path = ../../../etc/plugins
 #debug-on-errors = true
 #record-eventlog = true
 
-sim-time-limit = 2s+20s
-#sim-time-limit = 2s+20s+4.2s
+sim-time-limit = 10s
 
-#client app:
-**.client*.tcpApp[0].active = true
-**.client*.tcpApp[0].port = -1
-**.client*.tcpApp[0].connectPort = 1000
-**.client*.tcpApp[0].tOpen = 1s
-**.client*.tcpApp[0].tSend = 2s
-**.client*.tcpApp[0].sendBytes = 10000000B
-**.client*.tcpApp[0].sendScript = ""
-**.client*.tcpApp[0].tClose = 100s
+## UDP apps
+**.numUdpApps = 1
+**.udpAppType = "UDPEchoApp"
+**.udpApp[0].localPort = 1234
+**.udpApp[0].destPort = 1234
+**.udpApp[0].messageFreq = 0.5ms
+**.host1.udpApp[0].destAddresses = "host2"
+**.host2.udpApp[0].destAddresses = "host1"
+#**.udpApp[0].messageLength = 32 bytes
+#**.udpApp[0].messageLength = 320 bytes
+**.udpApp[0].messageLength = 5000 bytes
+#**.udpApp[0].messageLength = 6400 bytes
+#**.udpApp[0].messageLength = 7000 bytes
 
-#server app:
-**.server*.tcpApp[0].port = 1000
-**.server*.tcpApp[0].echoFactor = 2.0
-**.server*.tcpApp[0].echoDelay = 0
-
-## tcp apps
+**.arp.cacheTimeout = 1s
 
 # NIC configuration
 **.ppp[*].queueType = "DropTailQueue" # in routers
-**.ppp[*].queue.frameCapacity = 10
-#**.ppp[*].queue.frameCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
+**.ppp[*].queue.frameCapacity = 10  # in routers
 
 *.configurator.networkAddress = "192.168.1.0"
+**.eth.mac.txrate = 10Mbps;
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

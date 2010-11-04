@@ -12,44 +12,49 @@ import inet.nodes.inet.StandardHost;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 
 
+channel C extends DatarateChannel
+{
+    delay = 0.01us; // ~ 2m
+    datarate = 10Mbps;
+}
+
+module SubTest
+{
+    parameters:
+        string cliTcpType = default("n/a");
+        string srvTcpType = default("n/a");
+    submodules:
+        server: StandardHost {
+            parameters:
+                numTcpApps = 1;
+                tcpAppType = "TCPEchoApp";
+                tcpType = srvTcpType;
+        }
+        client: StandardHost {
+            parameters:
+                numTcpApps = 1;
+                tcpAppType = "TCPSessionApp";
+                tcpType = cliTcpType;
+                tcpApp[0].connectAddress = replace(fullPath(),".client.tcpApp[0]",".server");
+        }
+    connections:
+        client.pppg++ <--> C <--> server.pppg++;
+}
+
 network TcpSpeedTest
 {
     parameters:
         int n = 2; // number of available tcpType-s: TCP,TCP_NSC
-    types:
-        channel C extends DatarateChannel
-        {
-            delay = 0.01us; // ~ 2m
-            datarate = 10Mbps;
-        }
     submodules:
-        server[n*n]: StandardHost {
+        subTests[n*n]: SubTest {
             parameters:
-                numTcpApps = 1;
-                tcpAppType = "TCPEchoApp";
-                tcpType = ((index % n) == 0) ? "TCP" : 
-                          ((index % n) == 1) ? "TCP_NSC" :
-                          "UNKNOWN";
-        }
-        client[n*n]: StandardHost {
-            parameters:
-                numTcpApps = 1;
-                tcpAppType = "TCPSessionApp";
-                tcpType = (int(index / n) == 0) ? "TCP" : 
-                          (int(index / n) == 1) ? "TCP_NSC" :
-                          "UNKNOWN";
-                tcpApp[0].connectAddress = "server[" + string( parentIndex() ) + "]";
+                srvTcpType = choose((index % n),    "TCP TCP_NSC");
+                cliTcpType = choose(int(index / n), "TCP TCP_NSC");
         }
         configurator: FlatNetworkConfigurator {
             @display("p=70,40");
         }
-    connections:
-        for i=0..n*n-1
-        {
-            client[i].pppg++ <--> C <--> server[i].pppg++;
-        }
 }
-
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
@@ -98,19 +103,19 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 scafile <- 'results/General-0.sca'
 linecount <- 4
-cliBytes = 10000000
-srvBytes = 2 * cliBytes
+cliBytes <- 10000000
+srvBytes <- 2 * cliBytes
 
 # begin TEST:
 
 dataset <- loadDataset(scafile)
 
 cat("\nOMNETPP TEST RESULT:\n")
-cli <- dataset$scalars[grep("\\.client\\[\\d\\]\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
+cli <- dataset$scalars[grep("\\.client\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
 cliSent <- cli[cli$name == "bytesSent",]
 cliRcvd <- cli[cli$name == "bytesRcvd",]
 
-srv <- dataset$scalars[grep("\\.server\\[\\d\\]\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
+srv <- dataset$scalars[grep("\\.server\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
 srvSent <- srv[srv$name == "bytesSent",]
 srvRcvd <- srv[srv$name == "bytesRcvd",]
 
