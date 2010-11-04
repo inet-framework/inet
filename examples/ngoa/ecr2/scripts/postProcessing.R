@@ -101,7 +101,8 @@ setwd(.da.wd)
 .n.range <- unique(da.df$n)
 ## for (.i in 1:7) {
 for (.i in 4:4) {    
-    .df <- subset(hp.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+    ## .df <- subset(hp.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+    .df <- subset(.da.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
 
     ## get monotone spline curves
