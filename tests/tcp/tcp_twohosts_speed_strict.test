@@ -44,12 +44,12 @@ module SubTest
 network TcpSpeedTest
 {
     parameters:
-        int n = 2; // number of available tcpType-s: TCP,TCP_NSC
+        int n = 3; // number of available tcpType-s: TCP,TCP_NSC,TCP_lwip
     submodules:
         subTests[n*n]: SubTest {
             parameters:
-                srvTcpType = choose((index % n),    "TCP TCP_NSC");
-                cliTcpType = choose(int(index / n), "TCP TCP_NSC");
+                srvTcpType = choose((index % n),    "TCP TCP_NSC TCP_lwip");
+                cliTcpType = choose(int(index / n), "TCP TCP_NSC TCP_lwip");
         }
         configurator: FlatNetworkConfigurator {
             @display("p=70,40");
@@ -103,7 +103,7 @@ library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
 scafile <- 'results/General-0.sca'
-linecount <- 4
+linecount <- 3 * 3
 cliBytes <- 10000000
 srvBytes <- 2 * cliBytes
 
