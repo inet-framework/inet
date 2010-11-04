@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004-2005 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -77,7 +77,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
 
     state->afterRto = true;
 
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
@@ -246,7 +246,7 @@ void TCPReno::receivedDuplicateAck()
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
-        conn->retransmitOneSegment();
+        conn->retransmitOneSegment(false);
 
         // Do not restart REXMIT timer.
         // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.

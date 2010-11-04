@@ -28,7 +28,7 @@
 #include "INETDefs.h"
 #include "IPvXAddress.h"
 
-#include "sim_interface.h" // NSC. We need this here to derive from classes
+#include <sim_interface.h> // NSC. We need this here to derive from classes
 #include "TCP_NSC_Connection.h"
 
 // forward declarations:

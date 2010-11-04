@@ -1,27 +1,27 @@
 2008-07-07  Andras Varga
 
-	* introduced IInterfaceTable, to allow users implement their own
-	InterfaceTables and plug them into INET simulations, without any
-	change to the base INET.
+    * introduced IInterfaceTable, to allow users implement their own
+    InterfaceTables and plug them into INET simulations, without any
+    change to the base INET.
 
 2008-07-01  Andras Varga
 
-	* created this package, by moving files from contract/
+    * created this package, by moving files from contract/
 
-	* InterfaceEntry: setter methods made virtual. This has near zero
-	performance cost (calls to setters are rare, and the class already
-	has a vptr due to cObject). Also added backpointer to containing
-	InterfaceTable.
+    * InterfaceEntry: setter methods made virtual. This has near zero
+    performance cost (calls to setters are rare, and the class already
+    has a vptr due to cObject). Also added backpointer to containing
+    InterfaceTable.
 
-	* InterfaceTable: implemented NotificationBoard-based notifications
-	about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED,
-	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
-	The detail object for all four are the InterfaceEntry.
+    * InterfaceTable: implemented NotificationBoard-based notifications
+    about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED,
+    NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
+    The detail object for all four are the InterfaceEntry.
 
-	* InterfaceTable: created a getInterfaceById() method, NOT to be
-	confused with getInterface(pos)! Ids are stable after deletions,
-	unlike 0..getNumInterfaces()-1 indices
+    * InterfaceTable: created a getInterfaceById() method, NOT to be
+    confused with getInterface(pos)! Ids are stable after deletions,
+    unlike 0..getNumInterfaces()-1 indices
 
 
-	TODO: changes to protocol-specific interface data (IPv4, IPv6)
-	don't trigger a notification yet
+    TODO: changes to protocol-specific interface data (IPv4, IPv6)
+    don't trigger a notification yet

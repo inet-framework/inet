@@ -1,5 +1,5 @@
 //
-// Author: Thomas Reschka
+// author: Thomas Reschka
 //
 
 package inet.examples.inet.ber;
@@ -11,9 +11,9 @@ import ned.DatarateChannel;
 network ber {
     parameters:
         double n;
-		@display("bgb=400,200");
+        @display("bgb=400,200");
     submodules:
-	client: StandardHost {
+    client: StandardHost {
             parameters:
                 @display("p=50,100");
             gates:

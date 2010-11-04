@@ -368,6 +368,9 @@ void TCPConnection::sendSynAck()
 
     // send it
     sendToIP(tcpseg);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendRst(uint32 seqNo)
@@ -403,6 +406,9 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddr
 
     // send it
     sendToIP(tcpseg, src, dest);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendAck()
@@ -440,7 +446,7 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendSegment(int bytes)
+void TCPConnection::sendSegment(uint32 bytes)
 {
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
     if (bytes > buffered) // last segment?
@@ -503,7 +509,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
-    if (fullSegmentsOnly && bytesToSend < state->snd_mss && buffered > (ulong) effectiveWin) // last segment could be less then state->snd_mss
+    if (fullSegmentsOnly && bytesToSend < state->snd_mss && buffered > (ulong) effectiveWin) // last segment could be less than state->snd_mss
     {
         tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
             << ", in buffer " << buffered << ")\n";
@@ -540,7 +546,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
             sendSegment(state->snd_mss);
             bytesToSend -= state->snd_mss;
         }
-        // check how many bytes we have - last segment could be less then state->snd_mss
+        // check how many bytes we have - last segment could be less than state->snd_mss
         buffered = sendQueue->getBytesAvailable(state->snd_nxt);
         if (bytesToSend==buffered && buffered!=0) // last segment?
             sendSegment(bytesToSend);
@@ -552,7 +558,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    state->snd_max = std::max (state->snd_nxt, state->snd_max);
+    if (seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_max = state->snd_nxt;
     if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
     // notify (once is enough)
@@ -592,9 +599,11 @@ bool TCPConnection::sendProbe()
     return true;
 }
 
-void TCPConnection::retransmitOneSegment()
+void TCPConnection::retransmitOneSegment(bool called_at_rto)
 {
-    // retransmit one segment at snd_una, and set snd_nxt accordingly
+    // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
+    uint32 old_snd_nxt = state->snd_nxt;
+
     state->snd_nxt = state->snd_una;
 
     ulong bytes = std::min(state->snd_mss, state->snd_max - state->snd_nxt);
@@ -602,6 +611,11 @@ void TCPConnection::retransmitOneSegment()
 
     sendSegment(bytes);
 
+    if (!called_at_rto)
+    {
+        if (seqGreater(old_snd_nxt, state->snd_nxt))
+            state->snd_nxt = old_snd_nxt;
+    }
     // notify
     tcpAlgorithm->ackSent();
 }
@@ -611,14 +625,14 @@ void TCPConnection::retransmitData()
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
 
-    ulong bytesToSend = state->snd_max - state->snd_nxt;
+    uint32 bytesToSend = state->snd_max - state->snd_nxt;
     ASSERT(bytesToSend!=0);
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend>0)
     {
-        ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);
-        bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
+        uint32 bytes = std::min(bytesToSend, state->snd_mss);
+        bytes = std::min(bytes, (uint32)(sendQueue->getBytesAvailable(state->snd_nxt)));
         sendSegment(bytes);
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -164,6 +165,12 @@ class INET_API TCPAlgorithm : public cPolymorphic
      * Restart REXMIT timer.
      */
     virtual void restartRexmitTimer() = 0;
+
+    /**
+     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * to update state vars with new measured RTT value.
+     */
+    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
 
 };
 

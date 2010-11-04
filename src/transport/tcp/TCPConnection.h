@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -125,15 +125,9 @@ enum TCPEventCode
 
 #define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
 
-/** @name Comparing sequence numbers */
-//@{
-inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}
-inline bool seqLE(uint32 a, uint32 b) {return b-a<(1UL<<31);}
-inline bool seqGreater(uint32 a, uint32 b) {return a!=b && a-b<(1UL<<31);}
-inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
-//@}
+#define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
 
-
+#define TCP_OPTION_TS_SIZE  12
 /**
  * Contains state variables ("TCB") for TCP.
  *
@@ -194,12 +188,14 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool fin_rcvd;       // whether FIN received or not
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
 
+    uint32 sentBytes;    // amount of user data (in bytes) sent in last segment
+
     bool nagle_enabled;         // set if Nagle's algorithm (RFC 896) is enabled
-    bool delayed_acks_enabled;  // set if delayed ACKs are enabled
+    bool delayed_acks_enabled;  // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled; // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled;  // set if Increased Initial Window (RFC 3390) is enabled
 
-    uint32 full_sized_segment_counter;// this counter is needed for delayed ACKs
+    uint32 full_sized_segment_counter; // this counter is needed for delayed ACK
     bool ack_now;               // send ACK immediately, needed if delayed_acks_enabled is set
                                 // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
                                 // ack_now should be set when:
@@ -210,6 +206,23 @@ class INET_API TCPStateVariables : public cPolymorphic
                                 //   - FIN is received
 
     bool afterRto;              // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
+
+    // WINDOW_SCALE related variables
+    bool ws_support;         // set if the host supports Window Scale (header option) (RFC 1322)
+    bool ws_enabled;         // set if the connection uses Window Scale (header option)
+    bool snd_ws;             // set if initial WINDOW_SCALE has been sent
+    bool rcv_ws;             // set if initial WINDOW_SCALE has been received
+    uint rcv_wnd_scale;      // RFC 1323, page 31: "Receive window scale power"
+    uint snd_wnd_scale;      // RFC 1323, page 31: "Send window scale power"
+
+    // TIMESTAMP related variables
+    bool ts_support;         // set if the host supports Timestamps (header option) (RFC 1322)
+    bool ts_enabled;         // set if the connection uses Window Scale (header option)
+    bool snd_initial_ts;     // set if initial TIMESTAMP has been sent
+    bool rcv_initial_ts;     // set if initial TIMESTAMP has been received
+    uint32 ts_recent;        // RFC 1323, page 31: "Latest received Timestamp"
+    uint32 last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
+    simtime_t time_last_data_sent; // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
     bool sack_support;       // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
@@ -229,16 +242,16 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool lossRecovery;       // indicates if algorithm is in loss recovery phase
 
     // those counters would logically belong to TCPAlgorithm, but it's a lot easier to manage them here
-    uint32 dupacks;             // current number of received consecutive duplicate ACKs
-    uint32 snd_sacks;           // number of sent sacks
-    uint32 rcv_sacks;           // number of received sacks
-    uint32 rcv_oooseg;          // number of received out-of-order segments
+    uint32 dupacks;          // current number of received consecutive duplicate ACKs
+    uint32 snd_sacks;        // number of sent sacks
+    uint32 rcv_sacks;        // number of received sacks
+    uint32 rcv_oooseg;       // number of received out-of-order segments
 
     // receiver buffer / receiver queue related variables
-    uint32 maxRcvBuffer;        // maximal amount of bytes in tcp receive queue
-    uint32 usedRcvBuffer;       // current amount of used bytes in tcp receive queue
-    uint32 freeRcvBuffer;       // current amount of free bytes in tcp receive queue
-    uint32 tcpRcvQueueDrops;    // number of drops in tcp receive queue
+    uint32 maxRcvBuffer;     // maximal amount of bytes in tcp receive queue
+    uint32 usedRcvBuffer;    // current amount of used bytes in tcp receive queue
+    uint32 freeRcvBuffer;    // current amount of free bytes in tcp receive queue
+    uint32 tcpRcvQueueDrops; // number of drops in tcp receive queue
 };
 
 
@@ -317,6 +330,7 @@ class INET_API TCPConnection
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
  public:
+
     TCPSACKRexmitQueue *rexmitQueue;
 
  protected:
@@ -392,8 +406,10 @@ class INET_API TCPConnection
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
     virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processWSOption(TCPSegment *tcpseg, const TCPOption& option);
     virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option);
     virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processTSOption(TCPSegment *tcpseg, const TCPOption& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -425,15 +441,20 @@ class INET_API TCPConnection
     /** Utility: send SYN+ACK */
     virtual void sendSynAck();
 
-    /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, SACK_PERMITTED and SACK are implemented) */
+    /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual void readHeaderOptions(TCPSegment *tcpseg);
 
-    /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, SACK_PERMITTED and SACK are implemented) */
+    /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual TCPSegment writeHeaderOptions(TCPSegment *tcpseg);
 
     /** Utility: adds SACKs to segments header options field */
     virtual TCPSegment addSacks(TCPSegment *tcpseg);
 
+    /** Utility: get TSval from segments TS header option */
+    virtual uint32 getTSval(TCPSegment *tcpseg);
+
+    /** Utility: get TSecr from segments TS header option */
+    virtual uint32 getTSecr(TCPSegment *tcpseg);
   public:
     /** Utility: send ACK */
     virtual void sendAck();
@@ -449,7 +470,7 @@ class INET_API TCPConnection
     virtual bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
-    virtual void retransmitOneSegment();
+    virtual void retransmitOneSegment(bool called_at_rto);
 
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
@@ -520,8 +541,12 @@ class INET_API TCPConnection
     static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
-    /** Utility: update receive window (rcv_wnd) */
-    virtual void updateRcvWnd();
+
+    /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
+     *  Returns the (scaled) receive window size.
+     */
+    virtual unsigned short updateRcvWnd();
+
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
 
@@ -624,6 +649,21 @@ class INET_API TCPConnection
      * Utility: send one new segment from snd_max if allowed (RFC 3042).
      */
     virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow);
+
+    /**
+     * Utility: converts a given simtime to a timestamp (TS).
+     */
+    virtual uint32 convertSimtimeToTS(simtime_t simtime);
+
+    /**
+     * Utility: converts a given timestamp (TS) to a simtime.
+     */
+    virtual simtime_t convertTSToSimtime(uint32 timestamp);
+
+    /**
+     * Utility: checks if send queue is empty (no data to send).
+     */
+    virtual bool isSendQueueEmpty();
 
 };
 

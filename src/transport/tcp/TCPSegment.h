@@ -23,6 +23,16 @@
 #include "INETDefs.h"
 #include "TCPSegment_m.h"
 
+
+/** @name Comparing sequence numbers */
+//@{
+inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}
+inline bool seqLE(uint32 a, uint32 b) {return b-a<(1UL<<31);}
+inline bool seqGreater(uint32 a, uint32 b) {return a!=b && a-b<(1UL<<31);}
+inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
+//@}
+
+
 /**
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
@@ -67,6 +77,13 @@ class INET_API TCPSegment : public TCPSegment_Base
      * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
      */
     virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+
+    /**
+     * Truncate segment.
+     * @param firstSeqNo: sequence no of new first byte
+     * @param endSeqNo: sequence no of new last byte+1
+     */
+    virtual void truncateSegment(uint32 firstSeqNo, uint32 endSeqNo);
 };
 
 #endif

@@ -1,33 +1,33 @@
 2008-09-12  Tamas Borbely
 
-	* DLL export IPControlInfo and IPv6ControlInfo.
+    * DLL export IPControlInfo and IPv6ControlInfo.
 
 2008-09-09  Tamas Borbely
 
-	* IPAddress: isLinkLocalMulticast() fixed. It accepted
+    * IPAddress: isLinkLocalMulticast() fixed. It accepted
           244.0.0.x instead of 224.0.0.x.
 
 2008-07-01  Andras Varga
 
-	* InterfaceTable and associated files moved to new directory common/
+    * InterfaceTable and associated files moved to new directory common/
 
 2008-06-30  Andras Varga
 
-	* IPAddress: internal representation changed to use a single int32
-	instead of unsigned char[4], for more efficient code; several methods
-	made inline [code from Ingmar Baumgart, OverSim]
+    * IPAddress: internal representation changed to use a single int32
+    instead of unsigned char[4], for more efficient code; several methods
+    made inline [code from Ingmar Baumgart, OverSim]
 
-	* parsim: added pack/unpack functions for IPAddress, IPv6Address,
-	IPvXAddress
+    * parsim: added pack/unpack functions for IPAddress, IPv6Address,
+    IPvXAddress
 
-	* InterfaceTable: added deleteInterface()
+    * InterfaceTable: added deleteInterface()
 
 2005-10-28  Andras Varga
 
-	* IPControlInfo.msg: added outputPort field
+    * IPControlInfo.msg: added outputPort field
 
 2005-07-12  Andras Varga
 
-	* IPAddress, IPv6Address, IPvXAddress: renamed isNull() to
-	isUnspecified()
+    * IPAddress, IPv6Address, IPvXAddress: renamed isNull() to
+    isUnspecified()
 

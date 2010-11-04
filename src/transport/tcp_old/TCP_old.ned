@@ -123,7 +123,7 @@ import inet.transport.tcp.ITCP;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    rfc 763 but may not be what you'd expect.
+//    rfc 793 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
@@ -149,14 +149,14 @@ import inet.transport.tcp.ITCP;
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
 //    on all segments: always forwards data to the app as soon as possible.
 //  - finite receive buffer size is not modelled (always the maximum
-//    window size, currently 16K is advertised)
+//    window size, is advertised and data receiver is not able to send a Zero Window)
 //  - no RECEIVE command. Received data are always forwarded to the app as
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control
 //    between TCP and the app.
 //  - no \TCP header options (e.g. MSS is currently module parameter; no SACK;
 //    no timestamp option for more frequent round-trip time measurement per
-//    rfc 2988 section 3
+//    rfc 2988 section 3)
 //  - all timeouts are precisely calculated: timer granularity (which is caused
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
@@ -165,7 +165,17 @@ import inet.transport.tcp.ITCP;
 //  - PERSIST timer not implemented (currently no problem, because receiver
 //    never advertises 0 window size)
 //  - KEEPALIVE not implemented (idle connections never time out)
+//  - delayed ACKs algorithm not precisely implemented
 //  - Nagle's algorithm possibly not precisely implemented
+//
+// Further missing features:
+//  - RFC 1323 - TCP Extensions for High Performance
+//  - RFC 2018 - TCP Selective Acknowledgment Options
+//  - RFC 2581 - TCP Congestion Control
+//  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+//  - RFC 3042 – Limited Transmit (Loss Recovery algorithm)
+//  - RFC 3390 – Increasing TCP's Initial Window
+//  - RFC 3782 – NewReno (Loss Recovery algorithm)
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.
@@ -179,9 +189,8 @@ simple TCP_old like ITCP
 {
     parameters:
         @class(tcp_old::TCP);
-        int mss = default(1024); // maximum segment size
+        int mss = default(536); // maximum segment size (Note: no MSS negotiation)
         int advertisedWindow = default(14*this.mss); // in bytes (Note: normally, NIC queues should be at least this size)
-
         string tcpAlgorithmClass = default("tcp_old::TCPReno"); // TCPTahoe/TCPReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("tcp_old::TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
         string receiveQueueClass = default("tcp_old::TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue
@@ -195,4 +204,3 @@ simple TCP_old like ITCP
         output ipOut;
         output ipv6Out;
 }
-

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,7 +28,7 @@ TCPSACKRexmitQueue::TCPSACKRexmitQueue()
 TCPSACKRexmitQueue::~TCPSACKRexmitQueue()
 {
     while (!rexmitQueue.empty())
-        rexmitQueue.pop_front(); // TODO rexmit warnings (delete operator) are still present
+        rexmitQueue.pop_front();
 }
 
 void TCPSACKRexmitQueue::init(uint32 seqNum)
@@ -42,6 +42,24 @@ std::string TCPSACKRexmitQueue::str() const
     std::stringstream out;
     out << "[" << begin << ".." << end << ")";
     return out.str();
+}
+
+void TCPSACKRexmitQueue::info()
+{
+    str();
+    RexmitQueue::iterator i = rexmitQueue.begin();
+    uint j = 1;
+    while (i!=rexmitQueue.end())
+    {
+        tcpEV << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted << "\n";
+        i++;
+        j++;
+    }
+}
+
+uint32 TCPSACKRexmitQueue::getBufferStartSeq()
+{
+    return begin;
 }
 
 uint32 TCPSACKRexmitQueue::getBufferEndSeq()
@@ -95,7 +113,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         begin = fromSeqNum;
         end = toSeqNum;
         rexmitQueue.push_back(region);
-        tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+//        tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
         return;
     }
 
@@ -107,7 +125,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         {
             if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum)
             {
-                i->rexmitted=true; // set rexmitted bit
+                i->rexmitted = true; // set rexmitted bit
                 found = true;
             }
             i++;
@@ -119,24 +137,31 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         end = toSeqNum;
         rexmitQueue.push_back(region);
     }
-    tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+//    tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
 }
 
 void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
 {
     bool found = false;
 
-    if (seqLE(begin,fromSeqNum) && seqLE(toSeqNum,end))
+    if (seqLE(toSeqNum,end))
     {
         RexmitQueue::iterator i = rexmitQueue.begin();
         while (i!=rexmitQueue.end())
         {
-            if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum) // Search for region in queue!
+            if (i->beginSeqNum == fromSeqNum && seqGE(toSeqNum, i->endSeqNum)) // Search for LE of region in queue!
             {
-                i->sacked=true; // set sacked bit
+                i->sacked = true; // set sacked bit
                 found = true;
+                i++;
+                while (seqGE(toSeqNum, i->endSeqNum) && i!=rexmitQueue.end()) // Search for RE of region in queue!
+                {
+                    i->sacked = true; // set sacked bit
+                    i++;
+                }
             }
-            i++;
+            else
+                i++;
         }
     }
 
@@ -161,7 +186,6 @@ bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum)
             i++;
         }
     }
-
     return found;
 }
 
@@ -239,7 +263,7 @@ void TCPSACKRexmitQueue::resetSackedBit()
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end())
     {
-        i->sacked=false; // reset sacked bit
+        i->sacked = false; // reset sacked bit
         i++;
     }
 }
@@ -249,7 +273,7 @@ void TCPSACKRexmitQueue::resetRexmittedBit()
     RexmitQueue::iterator i = rexmitQueue.begin();
     while (i!=rexmitQueue.end())
     {
-        i->rexmitted=false; // reset rexmitted bit
+        i->rexmitted = false; // reset rexmitted bit
         i++;
     }
 }

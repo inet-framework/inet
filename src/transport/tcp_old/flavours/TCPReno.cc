@@ -58,7 +58,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     // After REXMIT timeout TCP Reno should start slow start with snd_cwnd = snd_mss.
     // If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
     // therefore "sendData();" has been modified and is called to rexmit outstanding data.
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
@@ -145,7 +145,7 @@ void TCPReno::receivedDuplicateAck()
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
-        conn->retransmitOneSegment();
+        conn->retransmitOneSegment(false);
 
         // Do not restart REXMIT timer.
         // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.

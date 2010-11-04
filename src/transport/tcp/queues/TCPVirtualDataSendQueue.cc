@@ -49,6 +49,11 @@ void TCPVirtualDataSendQueue::enqueueAppData(cPacket *msg)
     delete msg;
 }
 
+uint32 TCPVirtualDataSendQueue::getBufferStartSeq()
+{
+    return begin;
+}
+
 uint32 TCPVirtualDataSendQueue::getBufferEndSeq()
 {
     return end;
