@@ -18,8 +18,8 @@ network UdpClientServer
     types:
         channel C extends DatarateChannel
         {
-//            datarate = 10Mbps;
-            delay = 1us;
+            datarate = 10Mbps;
+            delay = 0.1us;
         }
     submodules:
         host1: StandardHost {
@@ -56,12 +56,12 @@ sim-time-limit = 10s
 **.udpAppType = "UDPEchoApp"
 **.udpApp[0].localPort = 1234
 **.udpApp[0].destPort = 1234
-**.udpApp[0].messageFreq = 0.5ms
+**.udpApp[0].messageFreq = 0.1ms
 **.host1.udpApp[0].destAddresses = "host2"
 **.host2.udpApp[0].destAddresses = "host1"
 #**.udpApp[0].messageLength = 32 bytes
 #**.udpApp[0].messageLength = 320 bytes
-**.udpApp[0].messageLength = 5000 bytes
+**.udpApp[0].messageLength = 1000 bytes
 #**.udpApp[0].messageLength = 6400 bytes
 #**.udpApp[0].messageLength = 7000 bytes
 
@@ -72,7 +72,7 @@ sim-time-limit = 10s
 **.ppp[*].queue.frameCapacity = 10  # in routers
 
 *.configurator.networkAddress = "192.168.1.0"
-**.eth.mac.txrate = 10Mbps;
+#**.eth.mac.txrate = 10Mbps;
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
