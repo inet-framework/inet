@@ -64,6 +64,7 @@ total-stack = 7MB
 tkenv-plugin-path = ../../../etc/plugins
 #debug-on-errors = true
 #record-eventlog = true
+**.vector-recording = false
 
 #sim-time-limit = 2s+20s
 sim-time-limit = 2s+20s+4.2s
