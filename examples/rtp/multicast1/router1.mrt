@@ -5,19 +5,19 @@
 ifconfig:
 
 # ethernet card (modelled by point-to-point link) 0 to host 1
-name: ppp0  inet_addr: 171.0.0.11  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+name: ppp0  inet_addr: 171.0.0.11  MTU: 1500   Metric: 1  MULTICAST
 #Groups:    225.0.0.1
 
 # ethernet card (modelled by point-to-point link) 1 to host 2
-name: ppp1  inet_addr: 172.0.0.12  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+name: ppp1  inet_addr: 172.0.0.12  MTU: 1500   Metric: 1  MULTICAST
 #Groups:    225.0.0.1
 
 # ethernet card (modelled by point-to-point link) 2 to host 3
-name: ppp2  inet_addr: 173.0.0.13  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+name: ppp2  inet_addr: 173.0.0.13  MTU: 1500   Metric: 1  MULTICAST
 #Groups:    225.0.0.1
 
 # ethernet card (modelled by point-to-point link) 3 to host 4
-name: ppp3  inet_addr: 174.0.0.14  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+name: ppp3  inet_addr: 174.0.0.14  MTU: 1500   Metric: 1  MULTICAST
 #Groups:    225.0.0.1
 
 ifconfigend.

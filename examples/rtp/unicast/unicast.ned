@@ -21,7 +21,7 @@ network RTPNetwork
                 destinationAddress = "10.0.0.2";
                 portNumber = 5004;
                 bandwidth = 8000;
-                fileName = "../Data/moving.mpg.gdf";
+                fileName = "../data/moving.mpg.gdf";
                 payloadType = 32;
                 routingFile = "server.irt";
         }
