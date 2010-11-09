@@ -30,7 +30,7 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * Constructor, with activity() stack size.
          */
-        RTPApplication() : cSimpleModule(32768) {}
+        RTPApplication() : cSimpleModule() {}
 
         /**
          * Reads the OMNeT++ parameters.
@@ -42,10 +42,17 @@ class INET_API RTPApplication : public cSimpleModule
          * RTPApplication uses activity for message handling.
          * The behaviour is controlled by omnet parameters.
          */
-        virtual void activity();
+        virtual void handleMessage(cMessage* msg);
 
     protected:
 
+        enum SelfMsgKind
+        {
+            ENTER_SESSION,
+            START_TRANSMISSION,
+            STOP_TRANSMISSION,
+            LEAVE_SESSION
+        };
         /**
          * The CNAME of this participant.
          */
@@ -101,6 +108,11 @@ class INET_API RTPApplication : public cSimpleModule
          */
         simtime_t _sessionLeaveDelay;
 
+        uint32 ssrc;
+        bool sessionEntered;
+        bool transmissionStarted;
+        bool transmissionFinished;
+        bool sessionLeft;
 };
 
 #endif
