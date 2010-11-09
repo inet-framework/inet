@@ -16,14 +16,19 @@
 
 
 #include "IPAddress.h"
+#include "IPAddressResolver.h"
 #include "RTPApplication.h"
 #include "RTPInterfacePacket.h"
 
 Define_Module(RTPApplication)
 
 
-void RTPApplication::initialize()
+void RTPApplication::initialize(int stage)
 {
+    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // address auto-assignment takes place etc.
+    if (stage!=3)
+        return;
 
     // read all omnet parameters
 
@@ -37,7 +42,7 @@ void RTPApplication::initialize()
     _bandwidth = par("bandwidth");
 
     // the ip address to connect to (unicast or multicast)
-    _destinationAddress = IPAddress(par("destinationAddress").stringValue());
+    _destinationAddress = IPAddressResolver().resolve(par("destinationAddress").stringValue()).get4();
 
     // port number which is to be used; to ports are actually used: one
     // for rtp and one for rtcp

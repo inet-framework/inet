@@ -15,6 +15,8 @@ import ned.IdealChannel;
 module RTPHost
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
         string profileName;
         string destinationAddress;
         int portNumber;
