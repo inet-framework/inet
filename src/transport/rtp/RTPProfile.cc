@@ -233,7 +233,9 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
             this->gate(ssrcGate->getGateId())->connectTo(receiverModule->gate("profileIn"));
             receiverModule->gate("profileOut")->connectTo(this->gate(ssrcGate->getGateId() - findGate("payloadReceiverOut",0) + findGate("payloadReceiverIn",0)));
 
-            receiverModule->callInitialize(0);
+            for(int i=0; receiverModule->callInitialize(i); i++)
+                ;
+            ;
             receiverModule->scheduleStart(simTime());
         }
     }
