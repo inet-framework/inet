@@ -20,9 +20,11 @@
 cplusplus {{
 #include "INETDefs.h"
 #include "IPAddress.h"
-#include "RTPSenderControlMessage.h"
-#include "RTPSenderStatusMessage.h"
+#include "RTPSenderControlMessage_m.h"
+#include "RTPSenderStatusMessage_m.h"
 }}
+
+class noncobject IPAddress;
 
 //
 // An enumeration to distinguish the different functions of the
@@ -49,31 +51,17 @@ enum RTP_IFP_TYPE
 // rtp session, transmission of files and feedback about the success of the
 // operations.
 //
-message RTPInterfacePacket
+packet RTPInterfacePacket
 {
-    int type @enum(RTP_IFP_TYPE);
+    @customize(true);  // see the generated C++ header for more info
+
+    short type @enum(RTP_IFP_TYPE);
     string commonName;
     string profileName;
     int bandwidth;
     IPAddress destinationAddress;
     int port;
-    uint32 SSRC;
+    uint32 ssrc;
     int payloadType;
     string fileName;
-
-//FIXME the handcoded class had the following methods that set the type (and some other fields):
-//   virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port);
-//   virtual void sessionEntered(uint32 ssrc);
-//   virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
-//   virtual void senderModuleCreated(uint32 ssrc);
-//   virtual void deleteSenderModule(uint32 ssrc);
-//   virtual void senderModuleDeleted(uint32 ssrc);
-//   virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
-//   virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
-//   virtual void leaveSession();
-//   virtual void sessionLeft();
-
 };
-
-#endif
-

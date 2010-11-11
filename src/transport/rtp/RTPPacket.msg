@@ -29,44 +29,33 @@ cplusplus {{
 // padding, extension, csrcCount. The csrcList can't be used
 // because csrcCount is always 0.
 //
-message RTPPacket
+enum RTPPacketEnums
 {
-    byteLength = 12;  // 12-byte fixed header
+    RTPPACKET_FIX_HEADERLENGTH = 12;
+}
 
+packet RTPPacket
+{
+    @customize(true);  // see the generated C++ header for more info
 
-//FIXME TODO:
-//int RTPPacket::getHeaderLength() {
-//    // fixed header is 12 bytes long,
-//    // add 4 bytes for every csrc identifier
-//    return(fixedHeaderLength() + 4 * _csrcCount);
-//};
-//
-//
-//int RTPPacket::getPayloadLength() {
-//    return(getByteLength() - getHeaderLength());
-//};
+    byteLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
 
     // The rtp version of this RTPPacket.
-    int version = 2;
+    uint8 version = 2;
 
     // Set to 1 if padding is used in this RTPPacket, 0 otherwise.
     // This implementation doesn't use padding bytes, so it is always 0.
-    int padding;
+    bool padding = false;
 
     // Set to 1, if this RTPPacket contains an rtp header extension, 0 otherwise.
     // This implementation doesn't support rtp header extensions, so it is always 0.
-    int extension;
-
-    // Stores the number (0..31) of contributing sources for this RTPPacket.
-    // It is always 0 because contributing sources are added by rtp mixers
-    // which aren't implemented.
-    int csrcCount;
+    bool extension = false;
 
     // The marker of this RTPPacket.
-    int marker;
+    bool marker = false;
 
     // The type of payload carried in this RTPPacket.
-    int payloadType;
+    int8 payloadType;
 
     // The sequence number of this RTPPacket.
     uint16 sequenceNumber;
@@ -75,9 +64,12 @@ message RTPPacket
     uint32 timeStamp;
 
     // The ssrc identifier of the creator of this RTPPacket.
-    uint32 SSRC;
+    uint32 ssrc;
 
     // no mixers, no contributing sources
-    //int CSRC[];
-};
+    uint32 csrc[];
 
+    abstract int headerLength;
+
+    abstract int payloadLength;
+};

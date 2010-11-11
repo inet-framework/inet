@@ -84,12 +84,12 @@ class INET_API RTPParticipantInfo : public cObject
          * This method extracts information about an rtp endsystem
          * as provided by the given SenderReport.
          */
-        virtual void processSenderReport(SenderReport *report, simtime_t arrivalTime);
+        virtual void processSenderReport(SenderReport &report, simtime_t arrivalTime);
 
         /**
          * This method extracts information of the given ReceptionReport.
          */
-        virtual void processReceptionReport(ReceptionReport *report, simtime_t arrivalTime);
+        virtual void processReceptionReport(ReceptionReport &report, simtime_t arrivalTime);
 
         /**
          * This method extracts sdes information of the given sdes chunk.and stores it.
@@ -153,12 +153,12 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ssrc identifier of the rtp endsystem.
          */
-        virtual uint32 getSSRC();
+        virtual uint32 getSsrc();
 
         /**
          * Sets the ssrc identifier.
          */
-        virtual void setSSRC(uint32 ssrc);
+        virtual void setSsrc(uint32 ssrc);
 
         /**
          * Returns the ip address of the rtp endsystem.

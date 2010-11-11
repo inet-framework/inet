@@ -185,7 +185,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport();
-        receptionReport->setSSRC(getSSRC());
+        receptionReport->setSsrc(getSsrc());
 
         uint64 packetsExpected = _sequenceNumberCycles + (uint64)_highestSequenceNumber - (uint64)_sequenceNumberBase + (uint64)1;
         uint64 packetsLost = packetsExpected - _packetsReceived;

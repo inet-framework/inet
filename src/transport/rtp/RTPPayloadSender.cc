@@ -26,9 +26,16 @@
 Define_Module(RTPPayloadSender);
 
 
+RTPPayloadSender::RTPPayloadSender()
+{
+    _reminderMessage = NULL;
+}
+
+
 RTPPayloadSender::~RTPPayloadSender()
 {
     closeSourceFile();
+    cancelAndDelete(_reminderMessage);
 }
 
 
@@ -43,65 +50,74 @@ void RTPPayloadSender::initialize()
     _timeStamp = _timeStampBase;
     _sequenceNumberBase = intrand(0x7fffffff);
     _sequenceNumber = _sequenceNumberBase;
+    _reminderMessage = NULL;
 }
 
-
-void RTPPayloadSender::activity()
+void RTPPayloadSender::handleMessage(cMessage *msg)
 {
-    const char *command;
-    while (true) {
-        cMessage *msg = receive();
-        if (msg->getArrivalGateId() == findGate("profileIn")) {
-            RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
-            if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
-                initializeSenderModule(rinpIn);
-            }
-            else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
-                RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
-                delete rinpIn;
-                command = rscm->getCommand();
-                if (!opp_strcmp(command, "PLAY")) {
-                    play();
-                }
-                else if (!opp_strcmp(command, "PLAY_UNTIL_TIME")) {
-                    playUntilTime(rscm->getCommandParameter1());
-                }
-                else if (!opp_strcmp(command, "PLAY_UNTIL_BYTE")) {
-                    playUntilByte(rscm->getCommandParameter1());
-                }
-                else if (!opp_strcmp(command, "PAUSE")) {
-                    pause();
-                }
-                else if (!opp_strcmp(command, "STOP")) {
-                    stop();
-                }
-                else if (!opp_strcmp(command, "SEEK_TIME")) {
-                    seekTime(rscm->getCommandParameter1());
-                }
-                else if (!opp_strcmp(command, "SEEK_BYTE")) {
-                    seekByte(rscm->getCommandParameter1());
-                }
-                else {
-                    error("unknown sender control message");
-                }
-                delete rscm;
-            }
+    if (msg->getArrivalGateId() == findGate("profileIn"))
+    {
+        RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
+        if (rinpIn->getType() == RTP_INP_INITIALIZE_SENDER_MODULE)
+        {
+            initializeSenderModule(rinpIn);
         }
-        else {
-            if (!sendPacket()) {
-                endOfFile();
+        else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_CONTROL)
+        {
+            RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
+            delete rinpIn;
+            const char *command;
+            command = rscm->getCommand();
+            if (!opp_strcmp(command, "PLAY"))
+            {
+                play();
             }
-            delete msg;
+            else if (!opp_strcmp(command, "PLAY_UNTIL_TIME"))
+            {
+                playUntilTime(rscm->getCommandParameter1());
+            }
+            else if (!opp_strcmp(command, "PLAY_UNTIL_BYTE"))
+            {
+                playUntilByte(rscm->getCommandParameter1());
+            }
+            else if (!opp_strcmp(command, "PAUSE"))
+            {
+                pause();
+            }
+            else if (!opp_strcmp(command, "STOP"))
+            {
+                stop();
+            }
+            else if (!opp_strcmp(command, "SEEK_TIME"))
+            {
+                seekTime(rscm->getCommandParameter1());
+            }
+            else if (!opp_strcmp(command, "SEEK_BYTE"))
+            {
+                seekByte(rscm->getCommandParameter1());
+            }
+            else
+            {
+                error("unknown sender control message");
+            }
+            delete rscm;
         }
     }
+    else
+    {
+        if (!sendPacket())
+        {
+            endOfFile();
+        }
+        delete msg;
+    }
 }
-
 
 void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
 {
     ev << "initializeSenderModule Enter" << endl;
     _mtu = rinpIn->getMTU();
-    _ssrc = rinpIn->getSSRC();
+    _ssrc = rinpIn->getSsrc();
     const char *fileName = rinpIn->getFileName();
     openSourceFile(fileName);
     delete rinpIn;
@@ -112,49 +128,45 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
     ev << "initializeSenderModule Exit" << endl;
 }
 
-
 void RTPPayloadSender::openSourceFile(const char *fileName)
 {
     _inputFileStream.open(fileName);
-    if (!_inputFileStream) {
+    if (!_inputFileStream)
+    {
         opp_error("sender module: error open data file");
     }
 }
-
 
 void RTPPayloadSender::closeSourceFile()
 {
     _inputFileStream.close();
 }
 
-
 void RTPPayloadSender::play()
 {
     _status = PLAYING;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("PLAYING");
-    rssm->setStatus("PLAYING");
+    rssm->setStatus(RTP_STATUS_PLAYING);
     rssm->setTimeStamp(_timeStamp);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PLAYING)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
     send(rinpOut, "profileOut");
 
-    if (!sendPacket()) {
+    if (!sendPacket())
+    {
         endOfFile();
     }
 }
-
 
 void RTPPayloadSender::playUntilTime(simtime_t moment)
 {
     error("playUntilTime() not implemented");
 }
 
-
 void RTPPayloadSender::playUntilByte(int position)
 {
     error("playUntilByte() not implemented");
 }
-
 
 void RTPPayloadSender::pause()
 {
@@ -162,46 +174,41 @@ void RTPPayloadSender::pause()
     _status = STOPPED;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PAUSED)");
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
-    rsim->setStatus("PAUSED");
+    rsim->setStatus(RTP_STATUS_PAUSED);
     rinpOut->senderModuleStatus(_ssrc, rsim);
     send(rinpOut, "profileOut");
 }
-
 
 void RTPPayloadSender::seekTime(simtime_t moment)
 {
     error("seekTime() not implemented");
 }
 
-
 void RTPPayloadSender::seekByte(int position)
 {
     error("seekByte() not implemented");
 }
-
 
 void RTPPayloadSender::stop()
 {
     cancelEvent(_reminderMessage);
     _status = STOPPED;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("STOPPED");
-    rssm->setStatus("STOPPED");
+    rssm->setStatus(RTP_STATUS_STOPPED);
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleStatus(STOPPED)");
     rinp->senderModuleStatus(_ssrc, rssm);
     send(rinp, "profileOut");
 }
 
-
 void RTPPayloadSender::endOfFile()
 {
     _status = STOPPED;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage();
-    rssm->setStatus("FINISHED");
+    rssm->setStatus(RTP_STATUS_FINISHED);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(FINISHED)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
     send(rinpOut, "profileOut");
 }
-
 
 bool RTPPayloadSender::sendPacket()
 {

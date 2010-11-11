@@ -40,9 +40,9 @@ class INET_API RTPPayloadSender : public cSimpleModule
     //protected:
 
         /**
-         * Constructor, with activity() stack size.
+         * Constructor.
          */
-        RTPPayloadSender() : cSimpleModule(32768) {}
+        RTPPayloadSender();
 
         /**
          * Cleaning up. Calls closeSourceFile.
@@ -55,7 +55,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
          */
         virtual void initialize();
 
-        virtual void activity();
+        virtual void handleMessage(cMessage * msg);
 
         /**
          * A sender module's transmission can be in different states.

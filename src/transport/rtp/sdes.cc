@@ -26,14 +26,16 @@
 Register_Class(SDESItem);
 
 
-SDESItem::SDESItem() : cObject() {
+SDESItem::SDESItem() : cObject()
+{
     _type = SDES_UNDEF;
     _length = 2;
     _content = "";
 };
 
 
-SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject() {
+SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
+{
     if (NULL == content)
         throw cRuntimeError("The content parameter must be a valid pointer.");
     _type = type;
@@ -45,16 +47,19 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject() {
 };
 
 
-SDESItem::SDESItem(const SDESItem& sdesItem) : cObject() {
+SDESItem::SDESItem(const SDESItem& sdesItem) : cObject()
+{
     operator=(sdesItem);
 };
 
 
-SDESItem::~SDESItem() {
+SDESItem::~SDESItem()
+{
 };
 
 
-SDESItem& SDESItem::operator=(const SDESItem& sdesItem) {
+SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
+{
     cObject::operator=(sdesItem);
     _type = sdesItem._type;
     _length = sdesItem._length;
@@ -63,36 +68,42 @@ SDESItem& SDESItem::operator=(const SDESItem& sdesItem) {
 };
 
 
-SDESItem *SDESItem::dup() const {
+SDESItem *SDESItem::dup() const
+{
     return new SDESItem(*this);
 };
 
 
-std::string SDESItem::info() {
+std::string SDESItem::info() const
+{
     std::stringstream out;
     out << "SDESItem=" << _content;
     return out.str();
 };
 
 
-void SDESItem::dump(std::ostream& os) {
+void SDESItem::dump(std::ostream& os) const
+{
     os << "SDESItem:" << endl;
     os << "  type = " << _type << endl;
     os << "  content = " << _content << endl;
 };
 
 
-SDESItem::SDES_ITEM_TYPE SDESItem::getType() {
+SDESItem::SDES_ITEM_TYPE SDESItem::getType() const
+{
     return _type;
 };
 
 
-const char *SDESItem::getContent() {
+const char *SDESItem::getContent() const
+{
     return opp_strdup(_content);
 };
 
 
-int SDESItem::getLength() {
+int SDESItem::getLength() const
+{
     // bytes needed for this sdes item are
     // one byte for type, one for length
     // and the string
@@ -107,23 +118,27 @@ int SDESItem::getLength() {
 Register_Class(SDESChunk);
 
 
-SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name) {
+SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name)
+{
     _ssrc = ssrc;
     _length = 4;
 };
 
 
-SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk) {
+SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk)
+{
     setName(sdesChunk.getName());
     operator=(sdesChunk);
 };
 
 
-SDESChunk::~SDESChunk() {
+SDESChunk::~SDESChunk()
+{
 };
 
 
-SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk) {
+SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
+{
     cArray::operator=(sdesChunk);
     _ssrc = sdesChunk._ssrc;
     _length = sdesChunk._length;
@@ -131,19 +146,22 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk) {
 };
 
 
-SDESChunk *SDESChunk::dup() const {
+SDESChunk *SDESChunk::dup() const
+{
     return new SDESChunk(*this);
 };
 
 
-std::string SDESChunk::info() {
+std::string SDESChunk::info() const
+{
     std::stringstream out;
     out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();
     return out.str();
 };
 
 
-void SDESChunk::dump(std::ostream& os) {
+void SDESChunk::dump(std::ostream& os) const
+{
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     for (int i = 0; i < size(); i++) {
@@ -154,7 +172,8 @@ void SDESChunk::dump(std::ostream& os) {
 };
 
 
-void SDESChunk::addSDESItem(SDESItem *sdesItem) {
+void SDESChunk::addSDESItem(SDESItem *sdesItem)
+{
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {
             SDESItem *compareItem = (SDESItem *)(get(i));
@@ -168,21 +187,23 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
 
     //sdesItem->setOwner(this);
     add(sdesItem);
-    _length = _length + (sdesItem->getLength());
-
+    _length += sdesItem->getLength();
 };
 
 
-uint32 SDESChunk::getSSRC() {
+uint32 SDESChunk::getSsrc() const
+{
     return _ssrc;
 };
 
 
-void SDESChunk::setSSRC(uint32 ssrc) {
+void SDESChunk::setSsrc(uint32 ssrc)
+{
     _ssrc = ssrc;
 };
 
 
-int SDESChunk::getLength() {
+int SDESChunk::getLength() const
+{
     return _length;
 };

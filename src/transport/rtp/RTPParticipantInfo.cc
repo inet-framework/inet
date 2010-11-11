@@ -78,17 +78,15 @@ void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t a
 }
 
 
-void RTPParticipantInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
+void RTPParticipantInfo::processSenderReport(SenderReport &report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
-    delete report;
 }
 
 
-void RTPParticipantInfo::processReceptionReport(ReceptionReport *report, simtime_t arrivalTime)
+void RTPParticipantInfo::processReceptionReport(ReceptionReport &report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
-    delete report;
 }
 
 
@@ -146,15 +144,15 @@ bool RTPParticipantInfo::toBeDeleted(simtime_t now)
 }
 
 
-uint32 RTPParticipantInfo::getSSRC()
+uint32 RTPParticipantInfo::getSsrc()
 {
-    return _sdesChunk->getSSRC();
+    return _sdesChunk->getSsrc();
 }
 
 
-void RTPParticipantInfo::setSSRC(uint32 ssrc)
+void RTPParticipantInfo::setSsrc(uint32 ssrc)
 {
-    _sdesChunk->setSSRC(ssrc);
+    _sdesChunk->setSsrc(ssrc);
 }
 
 

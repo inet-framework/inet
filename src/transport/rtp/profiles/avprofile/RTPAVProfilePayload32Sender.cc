@@ -220,7 +220,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
 
             rtpPacket->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
-            rtpPacket->setSSRC(_ssrc);
+            rtpPacket->setSsrc(_ssrc);
 
 
             RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");

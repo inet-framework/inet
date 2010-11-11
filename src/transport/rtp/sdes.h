@@ -82,28 +82,28 @@ class INET_API SDESItem : public cObject
         /**
          * Writes a short info about this SDESItem into the given string.
          */
-        virtual std::string info();
+        virtual std::string info() const;
 
         /**
          * Writes an info about this SDESItem into the give output stream.
          */
-        virtual void dump(std::ostream& os);
+        virtual void dump(std::ostream& os) const;
 
         /**
          * Returns the type of this sdes item.
          */
-        virtual SDES_ITEM_TYPE getType();
+        virtual SDES_ITEM_TYPE getType() const;
 
         /**
          * Returns the stored sdes string.
          */
-        virtual const char *getContent();
+        virtual const char *getContent() const;
 
         /**
          * This method returns the size of this SDESItem in bytes as it
          * would be in the real world.
          */
-        virtual int getLength();
+        virtual int getLength() const;
 
     protected:
 
@@ -160,12 +160,12 @@ class INET_API SDESChunk : public cArray
         /**
          * Writes a short info about this SDESChunk into the given string.
          */
-        virtual std::string info();
+        virtual std::string info() const;
 
         /**
          * Writes a longer info about this SDESChunk into the given stream.
          */
-        virtual void dump(std::ostream& os);
+        virtual void dump(std::ostream& os) const;
 
         /**
          * Adds an SDESItem to this SDESChunk. If there is already an SDESItem
@@ -176,17 +176,17 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the ssrc identifier this SDESChunk is for.
          */
-        virtual uint32 getSSRC();
+        virtual uint32 getSsrc() const;
 
         /**
          * Sets the ssrc identifier this SDESChunk is for.
          */
-        virtual void setSSRC(uint32 ssrc);
+        virtual void setSsrc(uint32 ssrc);
 
         /**
          * Returns the length in bytes of this SDESChunk.
          */
-        virtual int getLength();
+        virtual int getLength() const;
 
     protected:
 
@@ -202,4 +202,3 @@ class INET_API SDESChunk : public cArray
 };
 
 #endif
-

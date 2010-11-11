@@ -38,17 +38,14 @@ SenderReport::SenderReport() : cObject()
     _byteCount = 0;
 }
 
-
 SenderReport::SenderReport(const SenderReport& senderReport) : cObject()
 {
     operator=(senderReport);
 }
 
-
 SenderReport::~SenderReport()
 {
 }
-
 
 SenderReport& SenderReport::operator=(const SenderReport& senderReport)
 {
@@ -60,20 +57,17 @@ SenderReport& SenderReport::operator=(const SenderReport& senderReport)
     return *this;
 }
 
-
 SenderReport *SenderReport::dup() const
 {
     return new SenderReport(*this);
 }
 
-
-std::string SenderReport::info()
+std::string SenderReport::info() const
 {
     std::stringstream out;
     out << "SenderReport.timeStamp=" << _rtpTimeStamp;
     return out.str();
 }
-
 
 void SenderReport::dump(std::ostream& os) const
 {
@@ -84,8 +78,7 @@ void SenderReport::dump(std::ostream& os) const
     os << "  byteCount = " << _byteCount << endl;
 }
 
-
-uint64 SenderReport::getNTPTimeStamp()
+uint64 SenderReport::getNTPTimeStamp() const
 {
     return _ntpTimeStamp;
 }
@@ -96,48 +89,42 @@ void SenderReport::setNTPTimeStamp(uint64 ntpTimeStamp)
     _ntpTimeStamp = ntpTimeStamp;
 }
 
-
-uint32 SenderReport::getRTPTimeStamp()
+uint32 SenderReport::getRTPTimeStamp() const
 {
     return _rtpTimeStamp;
 }
-
 
 void SenderReport::setRTPTimeStamp(uint32 rtpTimeStamp)
 {
     _rtpTimeStamp = rtpTimeStamp;
 }
 
-
-uint32 SenderReport::getPacketCount()
+uint32 SenderReport::getPacketCount() const
 {
     return _packetCount;
 }
-
 
 void SenderReport::setPacketCount(uint32 packetCount)
 {
     _packetCount = packetCount;
 }
 
-
-uint32 SenderReport::getByteCount()
+uint32 SenderReport::getByteCount() const
 {
     return _byteCount;
 }
-
 
 void SenderReport::setByteCount(uint32 byteCount)
 {
     _byteCount = byteCount;
 }
 
+
 //
 // ReceptionReport
 //
 
 Register_Class(ReceptionReport);
-
 
 ReceptionReport::ReceptionReport() : cObject()
 {
@@ -150,17 +137,14 @@ ReceptionReport::ReceptionReport() : cObject()
     _delaySinceLastSR = 0;
 }
 
-
 ReceptionReport::ReceptionReport(const ReceptionReport& receptionReport) : cObject()
 {
     operator=(receptionReport);
 }
 
-
 ReceptionReport::~ReceptionReport()
 {
 }
-
 
 ReceptionReport& ReceptionReport::operator=(const ReceptionReport& receptionReport)
 {
@@ -175,20 +159,17 @@ ReceptionReport& ReceptionReport::operator=(const ReceptionReport& receptionRepo
     return *this;
 }
 
-
 ReceptionReport *ReceptionReport::dup() const
 {
     return new ReceptionReport(*this);
 }
 
-
-std::string ReceptionReport::info()
+std::string ReceptionReport::info() const
 {
     std::stringstream out;
     out << "ReceptionReport.ssrc=" << _ssrc;
     return out.str();
 }
-
 
 void ReceptionReport::dump(std::ostream& os) const
 {
@@ -202,86 +183,73 @@ void ReceptionReport::dump(std::ostream& os) const
     os << "  delaySinceLastSR = " << _delaySinceLastSR << endl;
 }
 
-
-uint32 ReceptionReport::getSSRC()
+uint32 ReceptionReport::getSsrc() const
 {
     return _ssrc;
 }
 
-
-void ReceptionReport::setSSRC(uint32 ssrc)
+void ReceptionReport::setSsrc(uint32 ssrc)
 {
     _ssrc = ssrc;
 }
 
-
-uint8 ReceptionReport::getFractionLost()
+uint8 ReceptionReport::getFractionLost() const
 {
     return _fractionLost;
 }
-
 
 void ReceptionReport::setFractionLost(uint8 fractionLost)
 {
     _fractionLost = fractionLost;
 }
 
-
-int ReceptionReport::getPacketsLostCumulative()
+int ReceptionReport::getPacketsLostCumulative() const
 {
     return _packetsLostCumulative;
 }
-
 
 void ReceptionReport::setPacketsLostCumulative(int packetsLostCumulative)
 {
     _packetsLostCumulative = packetsLostCumulative;
 }
 
-
-uint32 ReceptionReport::getSequenceNumber()
+uint32 ReceptionReport::getSequenceNumber() const
 {
     return _extendedHighestSequenceNumber;
 }
-
 
 void ReceptionReport::setSequenceNumber(uint32 sequenceNumber)
 {
     _extendedHighestSequenceNumber = sequenceNumber;
 }
 
-
-int ReceptionReport::getJitter()
+int ReceptionReport::getJitter() const
 {
     return _jitter;
 }
-
 
 void ReceptionReport::setJitter(int jitter)
 {
     _jitter = jitter;
 }
 
-
-int ReceptionReport::getLastSR()
+int ReceptionReport::getLastSR() const
 {
     return _lastSR;
 }
-
 
 void ReceptionReport::setLastSR(int lastSR)
 {
     _lastSR = lastSR;
 }
 
-
-int ReceptionReport::getDelaySinceLastSR()
+int ReceptionReport::getDelaySinceLastSR() const
 {
     return _delaySinceLastSR;
 }
-
 
 void ReceptionReport::setDelaySinceLastSR(int delaySinceLastSR)
 {
     _delaySinceLastSR = delaySinceLastSR;
 }
+

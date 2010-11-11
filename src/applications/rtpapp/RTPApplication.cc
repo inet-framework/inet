@@ -140,10 +140,10 @@ void RTPApplication::handleMessage(cMessage* msgIn)
         {
             RTPInterfacePacket *rifpIn = check_and_cast<RTPInterfacePacket *>(msgIn);
 
-            if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED)
+            if (rifpIn->getType() == RTP_IFP_SESSION_ENTERED)
             {
                 ev << "Session Entered" << endl;
-                ssrc = rifpIn->getSSRC();
+                ssrc = rifpIn->getSsrc();
                 sessionEntered = true;
                 if (opp_strcmp(_fileName, ""))
                 {
@@ -159,27 +159,27 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                     scheduleAt(simTime() + _sessionLeaveDelay, selfMsg);
                 }
             }
-            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_MODULE_CREATED)
+            else if (rifpIn->getType() == RTP_IFP_SENDER_MODULE_CREATED)
             {
                 ev << "Sender Module Created" << endl;
                 cMessage *selfMsg = new cMessage("startTransmission", START_TRANSMISSION);
                 scheduleAt(simTime() + _transmissionStartDelay, selfMsg);
             }
-            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_STATUS)
+            else if (rifpIn->getType() == RTP_IFP_SENDER_STATUS)
             {
                 RTPSenderStatusMessage *rsim = (RTPSenderStatusMessage *)(rifpIn->decapsulate());
-                if (!opp_strcmp(rsim->getStatus(), "PLAYING"))
+                if (rsim->getStatus() == RTP_STATUS_PLAYING)
                 {
                     ev << "PLAYING" << endl;
                 }
-                else if (!opp_strcmp(rsim->getStatus(), "FINISHED"))
+                else if (rsim->getStatus() == RTP_STATUS_FINISHED)
                 {
                     transmissionFinished = true;
                     ev << "FINISHED" << endl;
                     cMessage *selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
                     scheduleAt(simTime() + _sessionLeaveDelay, selfMsg);
                 }
-                else if (!opp_strcmp(rsim->getStatus(), "STOPPED"))
+                else if (rsim->getStatus() == RTP_STATUS_STOPPED)
                 {
                     transmissionFinished = true;
                     ev << "FINISHED" << endl;
@@ -192,7 +192,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 }
                 cancelAndDelete(rsim);
             }
-            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_LEFT)
+            else if (rifpIn->getType() == RTP_IFP_SESSION_LEFT)
             {
                 sessionLeft = true;
             }

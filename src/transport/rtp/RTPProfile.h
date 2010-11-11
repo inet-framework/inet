@@ -51,7 +51,7 @@ class INET_API RTPProfile : public cSimpleModule
             int gateId;
           public:
             SSRCGate(uint32 ssrc=0) {this->ssrc = ssrc; gateId = 0;}
-            uint32 getSSRC() {return ssrc;}
+            uint32 getSsrc() {return ssrc;}
             void setSSRC(uint32 ssrc) {this->ssrc = ssrc;}
             int getGateId() {return gateId;}
             void setGateId(int gateId) {this->gateId = gateId;}
@@ -187,7 +187,8 @@ class INET_API RTPProfile : public cSimpleModule
          * Stores information to which gate rtp data packets
          * from a ssrc must be forwarded.
          */
-        cArray *_ssrcGates;
+        typedef std::map<uint32,SSRCGate *> SSRCGateMap;
+        SSRCGateMap _ssrcGates;
 
         /**
          * The percentage of the available bandwidth to be used for rtcp.

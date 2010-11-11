@@ -64,7 +64,7 @@ class INET_API SenderReport : public cObject
         /**
          * Writes a short info about this SenderReport into the given string.
          */
-        virtual std::string info();
+        virtual std::string info() const;
 
         /**
          * Writes a longer info about this SenderReport into the given stream.
@@ -74,7 +74,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained ntp time stamp.
          */
-        virtual uint64 getNTPTimeStamp();
+        virtual uint64 getNTPTimeStamp() const;
 
         /**
          * Sets the ntp time stamp.
@@ -84,7 +84,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained rtp time stamp.
          */
-        virtual uint32 getRTPTimeStamp();
+        virtual uint32 getRTPTimeStamp() const;
 
         /**
          * Sets the rtp time stamp.
@@ -94,7 +94,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the number of packets sent as stored in this SenderReport.
          */
-        virtual uint32 getPacketCount();
+        virtual uint32 getPacketCount() const;
 
         /**
          * Sets the number of packets sent.
@@ -104,7 +104,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns how many bytes have been sent as store in this SenderReport.
          */
-        virtual uint32 getByteCount();
+        virtual uint32 getByteCount() const;
 
         /**
          * Sets the value how many bytes have been sent.
@@ -171,7 +171,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Writes a short info about this ReceptionReport into the given string.
          */
-        virtual std::string info();
+        virtual std::string info() const;
 
         /**
          * Writes a longer info about this ReceptionReport into the given stream.
@@ -181,17 +181,17 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the ssrc identifier for which sender this ReceptionReport is.
          */
-        virtual uint32 getSSRC();
+        virtual uint32 getSsrc() const;
 
         /**
          * Sets the ssrc identifier of the sender this ReceptionReport is for.
          */
-        virtual void setSSRC(uint32 ssrc);
+        virtual void setSsrc(uint32 ssrc);
 
         /**
          * Returns the fraction of packets lost as stored in this ReceptionReport.
          */
-        virtual uint8 getFractionLost();
+        virtual uint8 getFractionLost() const;
 
         /**
          * Sets the fraction of packets lost.
@@ -201,7 +201,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the number of expected minus the number of packets received.
          */
-        virtual int getPacketsLostCumulative();
+        virtual int getPacketsLostCumulative() const;
 
         /**
          * Sets the number of expected minus the number of packets received.
@@ -211,7 +211,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the extended highest sequence number received.
          */
-        virtual uint32 getSequenceNumber();
+        virtual uint32 getSequenceNumber() const;
 
         /**
          * Set the extended highest sequence number received.
@@ -221,7 +221,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the interarrival jitter.
          */
-        virtual int getJitter();
+        virtual int getJitter() const;
 
         /**
          * Sets ths interarrival jitter.
@@ -231,7 +231,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the rtp time stamp of the last SenderReport received from this sender.
          */
-        virtual int getLastSR();
+        virtual int getLastSR() const;
 
         /**
          * Sets the rtp time stamp of the last SenderReport received from this sender.
@@ -242,7 +242,7 @@ class INET_API ReceptionReport : public cObject
          * Returns the delay since the last SenderReport of this sender has
          * been received in units of 1/65536 seconds.
          */
-        virtual int getDelaySinceLastSR();
+        virtual int getDelaySinceLastSR() const;
 
         /**
          * Sets the delay since the last SenderReport of this sender has
@@ -291,4 +291,3 @@ class INET_API ReceptionReport : public cObject
 };
 
 #endif
-

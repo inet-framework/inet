@@ -83,23 +83,23 @@ void RTP::handleMessageFromApp(cMessage *msg)
 
     switch(rifp->getType())
     {
-    case RTPInterfacePacket::RTP_IFP_ENTER_SESSION:
+    case RTP_IFP_ENTER_SESSION:
         enterSession(rifp);
         break;
 
-    case RTPInterfacePacket::RTP_IFP_CREATE_SENDER_MODULE:
+    case RTP_IFP_CREATE_SENDER_MODULE:
         createSenderModule(rifp);
         break;
 
-    case RTPInterfacePacket::RTP_IFP_DELETE_SENDER_MODULE:
+    case RTP_IFP_DELETE_SENDER_MODULE:
         deleteSenderModule(rifp);
         break;
 
-    case RTPInterfacePacket::RTP_IFP_SENDER_CONTROL:
+    case RTP_IFP_SENDER_CONTROL:
         senderModuleControl(rifp);
         break;
 
-    case RTPInterfacePacket::RTP_IFP_LEAVE_SESSION:
+    case RTP_IFP_LEAVE_SESSION:
         leaveSession(rifp);
         break;
 
@@ -115,27 +115,27 @@ void RTP::handleMessageFromProfile(cMessage *msg)
 
     switch(rinp->getType())
     {
-    case RTPInnerPacket::RTP_INP_PROFILE_INITIALIZED:
+    case RTP_INP_PROFILE_INITIALIZED:
         profileInitialized(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SENDER_MODULE_CREATED:
+    case RTP_INP_SENDER_MODULE_CREATED:
         senderModuleCreated(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SENDER_MODULE_DELETED:
+    case RTP_INP_SENDER_MODULE_DELETED:
         senderModuleDeleted(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED:
+    case RTP_INP_SENDER_MODULE_INITIALIZED:
         senderModuleInitialized(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SENDER_MODULE_STATUS:
+    case RTP_INP_SENDER_MODULE_STATUS:
         senderModuleStatus(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_DATA_OUT:
+    case RTP_INP_DATA_OUT:
         dataOut(rinp);
         break;
 
@@ -152,11 +152,11 @@ void RTP::handleMessageFromRTCP(cMessage *msg)
 
     switch(rinp->getType())
     {
-    case RTPInnerPacket::RTP_INP_RTCP_INITIALIZED:
+    case RTP_INP_RTCP_INITIALIZED:
         rtcpInitialized(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SESSION_LEFT:
+    case RTP_INP_SESSION_LEFT:
         sessionLeft(rinp);
         break;
 
@@ -211,8 +211,8 @@ void RTP::leaveSession(RTPInterfacePacket *rifp)
 void RTP::createSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
-    ev << rifp->getSSRC()<<endl;
-    rinp->createSenderModule(rifp->getSSRC(), rifp->getPayloadType(), rifp->getFileName());
+    ev << rifp->getSsrc()<<endl;
+    rinp->createSenderModule(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
     send(rinp, "profileOut");
 
     delete rifp;
@@ -222,7 +222,7 @@ void RTP::createSenderModule(RTPInterfacePacket *rifp)
 void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
-    rinp->deleteSenderModule(rifp->getSSRC());
+    rinp->deleteSenderModule(rifp->getSsrc());
     send(rinp, "profileOut");
 
     delete rifp;
@@ -232,7 +232,7 @@ void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
 void RTP::senderModuleControl(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleControl()");
-    rinp->senderModuleControl(rinp->getSSRC(), (RTPSenderControlMessage *)(rifp->decapsulate()));
+    rinp->senderModuleControl(rinp->getSsrc(), (RTPSenderControlMessage *)(rifp->decapsulate()));
     send(rinp, "profileOut");
 
     delete rifp;
@@ -258,7 +258,7 @@ void RTP::profileInitialized(RTPInnerPacket *rinp)
 void RTP::senderModuleCreated(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleCreated()");
-    rifp->senderModuleCreated(rinp->getSSRC());
+    rifp->senderModuleCreated(rinp->getSsrc());
     send(rifp, "appOut");
 
     delete rinp;
@@ -268,7 +268,7 @@ void RTP::senderModuleCreated(RTPInnerPacket *rinp)
 void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleDeleted()");
-    rifp->senderModuleDeleted(rinp->getSSRC());
+    rifp->senderModuleDeleted(rinp->getSsrc());
     send(rifp, "appOut");
 
     // perhaps we should send a message to rtcp module
@@ -285,7 +285,7 @@ void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleStatus()");
-    rifp->senderModuleStatus(rinp->getSSRC(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
+    rifp->senderModuleStatus(rinp->getSsrc(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
     send(rifp, "appOut");
 
     delete rinp;
@@ -321,7 +321,7 @@ void RTP::dataOut(RTPInnerPacket *rinp)
 void RTP::rtcpInitialized(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionEntered()");
-    rifp->sessionEntered(rinp->getSSRC());
+    rifp->sessionEntered(rinp->getSsrc());
     send(rifp, "appOut");
 
     delete rinp;
