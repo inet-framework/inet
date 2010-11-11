@@ -38,9 +38,10 @@ RTPPayloadReceiver::~RTPPayloadReceiver()
 void RTPPayloadReceiver::initialize()
 {
     const char *fileName = par("outputFileName");
+    const char *logFileName = par("outputLogFileName");
     openOutputFile(fileName);
-    char logName[100];
-    sprintf (logName, "outputLogLoss%d.log", getId());
+    char logName[200];
+    sprintf(logName, logFileName, getId());
     _outputLogLoss.open(logName);
     _packetArrivalSignal = registerSignal("packetArrival");
 }
