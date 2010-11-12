@@ -32,6 +32,7 @@ class INET_API RTPApplication : public cSimpleModule
          */
         RTPApplication() : cSimpleModule() {}
 
+    protected:
         /**
          * Reads the OMNeT++ parameters.
          */
@@ -45,7 +46,6 @@ class INET_API RTPApplication : public cSimpleModule
         virtual void handleMessage(cMessage* msg);
 
     protected:
-
         enum SelfMsgKind
         {
             ENTER_SESSION,
@@ -116,5 +116,3 @@ class INET_API RTPApplication : public cSimpleModule
 };
 
 #endif
-
-

@@ -24,6 +24,7 @@
 #define __INET_RTPPAYLOADSENDER_H
 
 #include <fstream>
+
 #include "INETDefs.h"
 #include "RTPInnerPacket.h"
 
@@ -36,9 +37,7 @@
  */
 class INET_API RTPPayloadSender : public cSimpleModule
 {
-    public: //FIXME
-    //protected:
-
+    public:
         /**
          * Constructor.
          */
@@ -49,6 +48,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
          */
         virtual ~RTPPayloadSender();
 
+    protected:
         /**
          * Chooses sequence number and time stamp base values and
          * reads the omnet parameter "mtu".
@@ -66,7 +66,6 @@ class INET_API RTPPayloadSender : public cSimpleModule
         };
 
     protected:
-
         /**
          * The input file stream for the data file.
          */
@@ -211,4 +210,3 @@ class INET_API RTPPayloadSender : public cSimpleModule
 };
 
 #endif
-

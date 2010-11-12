@@ -100,7 +100,7 @@ class INET_API RTPParticipantInfo : public cObject
          * Returns a copy of the sdes chunk used for storing source
          * description items about this system.
          */
-        virtual SDESChunk *getSDESChunk();
+        virtual SDESChunk *getSDESChunk() const;
 
         /**
          * Adds this sdes item to the sdes chunk of this participant.
@@ -148,12 +148,12 @@ class INET_API RTPParticipantInfo : public cObject
          * data packet during the last two rtcp intervals (including
          * the current one).
          */
-        virtual bool isSender();
+        virtual bool isSender() const;
 
         /**
          * Returns the ssrc identifier of the rtp endsystem.
          */
-        virtual uint32 getSsrc();
+        virtual uint32 getSsrc() const;
 
         /**
          * Sets the ssrc identifier.
@@ -163,7 +163,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ip address of the rtp endsystem.
          */
-        virtual IPAddress getAddress();
+        virtual IPAddress getAddress() const;
 
         /**
          * Sets the ip address of the rtp endsystem.
@@ -174,7 +174,7 @@ class INET_API RTPParticipantInfo : public cObject
          * Returns the port used by this endsystem for
          * transmitting rtp packets.
          */
-        virtual int getRTPPort();
+        virtual int getRTPPort() const;
 
         /**
          * Sets the port used by the endsystem for
@@ -186,7 +186,7 @@ class INET_API RTPParticipantInfo : public cObject
          * Returns the port used by this endsystem for
          * transmitting rtcp packets.
          */
-        virtual int getRTCPPort();
+        virtual int getRTCPPort() const;
 
         /**
          * Sets the port used by the endsystem for

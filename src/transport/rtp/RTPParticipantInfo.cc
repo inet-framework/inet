@@ -41,18 +41,15 @@ RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject()
     _rtcpPort = PORT_UNDEF;
 }
 
-
 RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo) : cObject()
 {
     operator=(participantInfo);
 }
 
-
 RTPParticipantInfo::~RTPParticipantInfo()
 {
     delete _sdesChunk;
 }
-
 
 RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& participantInfo)
 {
@@ -64,12 +61,10 @@ RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& part
     return *this;
 }
 
-
 RTPParticipantInfo *RTPParticipantInfo::dup() const
 {
     return new RTPParticipantInfo(*this);
 }
-
 
 void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
 {
@@ -83,17 +78,17 @@ void RTPParticipantInfo::processSenderReport(SenderReport &report, simtime_t arr
     // useful code can be found in subclasses
 }
 
-
 void RTPParticipantInfo::processReceptionReport(ReceptionReport &report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-
 void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
-    for (int i = 0; i < sdesChunk->size(); i++) {
-        if (sdesChunk->exist(i)) {
+    for (int i = 0; i < sdesChunk->size(); i++)
+    {
+        if (sdesChunk->exist(i))
+        {
             SDESItem *sdesItem = (SDESItem *)(sdesChunk->remove(i));
             addSDESItem(sdesItem);
         }
@@ -101,72 +96,60 @@ void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arriva
     delete sdesChunk;
 }
 
-
-SDESChunk *RTPParticipantInfo::getSDESChunk()
+SDESChunk *RTPParticipantInfo::getSDESChunk() const
 {
     return new SDESChunk(*_sdesChunk);
 }
-
 
 void RTPParticipantInfo::addSDESItem(SDESItem *sdesItem)
 {
     _sdesChunk->addSDESItem(sdesItem);
 }
 
-
-bool RTPParticipantInfo::isSender()
+bool RTPParticipantInfo::isSender() const
 {
     return (_silentIntervals <= 1);
 }
-
 
 ReceptionReport *RTPParticipantInfo::receptionReport(simtime_t now)
 {
     return NULL;
 }
 
-
 SenderReport *RTPParticipantInfo::senderReport(simtime_t now)
 {
     return NULL;
 }
-
 
 void RTPParticipantInfo::nextInterval(simtime_t now)
 {
     _silentIntervals++;
 }
 
-
 bool RTPParticipantInfo::toBeDeleted(simtime_t now)
 {
     return false;
 }
 
-
-uint32 RTPParticipantInfo::getSsrc()
+uint32 RTPParticipantInfo::getSsrc() const
 {
     return _sdesChunk->getSsrc();
 }
-
 
 void RTPParticipantInfo::setSsrc(uint32 ssrc)
 {
     _sdesChunk->setSsrc(ssrc);
 }
 
-
 void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content)
 {
     _sdesChunk->addSDESItem(new SDESItem(type, content));
 }
 
-
-IPAddress RTPParticipantInfo::getAddress()
+IPAddress RTPParticipantInfo::getAddress() const
 {
     return _address;
 }
-
 
 void RTPParticipantInfo::setAddress(IPAddress address)
 {
@@ -174,7 +157,7 @@ void RTPParticipantInfo::setAddress(IPAddress address)
 }
 
 
-int RTPParticipantInfo::getRTPPort()
+int RTPParticipantInfo::getRTPPort() const
 {
     return _rtpPort;
 }
@@ -186,7 +169,7 @@ void RTPParticipantInfo::setRTPPort(int rtpPort)
 }
 
 
-int RTPParticipantInfo::getRTCPPort()
+int RTPParticipantInfo::getRTCPPort() const
 {
     return _rtcpPort;
 }

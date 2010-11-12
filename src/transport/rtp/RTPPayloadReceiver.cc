@@ -21,9 +21,11 @@
  */
 
 #include <fstream>
+
 #include "RTPPayloadReceiver.h"
-#include "RTPPacket.h"
+
 #include "RTPInnerPacket.h"
+#include "RTPPacket.h"
 
 
 Define_Module(RTPPayloadReceiver);
@@ -33,7 +35,6 @@ RTPPayloadReceiver::~RTPPayloadReceiver()
 {
     closeOutputFile();
 }
-
 
 void RTPPayloadReceiver::initialize()
 {
@@ -46,33 +47,31 @@ void RTPPayloadReceiver::initialize()
     _packetArrivalSignal = registerSignal("packetArrival");
 }
 
-
 void RTPPayloadReceiver::handleMessage(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
-    if (rinp->getType() == RTP_INP_DATA_IN) {
+    if (rinp->getType() == RTP_INP_DATA_IN)
+    {
         RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->decapsulate());
         processPacket(packet);
         delete rinp;
     }
-    else {
+    else
+    {
         error("RTPInnerPacket of wrong type received");
         delete rinp;
     }
 }
-
 
 void RTPPayloadReceiver::processPacket(RTPPacket *packet)
 {
     emit(_packetArrivalSignal, (double)(packet->getTimeStamp()));
 }
 
-
 void RTPPayloadReceiver::openOutputFile(const char *fileName)
 {
     _outputFileStream.open(fileName);
 }
-
 
 void RTPPayloadReceiver::closeOutputFile()
 {
