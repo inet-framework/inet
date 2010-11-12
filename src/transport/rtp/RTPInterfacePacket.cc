@@ -31,29 +31,15 @@ std::string RTPInterfacePacket::info() const
     return out.str();
 }
 
-void RTPInterfacePacket::dump(std::ostream& os) const
-{
-    os << "RTPInterfacePacket:" << endl;
-    os << "  type = " << type_var << endl;
-    os << "  commonName = " << commonName_var << endl;
-    os << "  profileName = " << profileName_var << endl;
-    os << "  bandwidth = " << bandwidth_var << endl;
-    os << "  destinationAddress = " << destinationAddress_var << endl;
-    os << "  port = " << port_var << endl;
-    os << "  ssrc = " << ssrc_var << endl;
-    os << "  payloadType = " << payloadType_var << endl;
-    os << "  fileName = " << fileName_var << endl;
-}
-
-void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port)
-{
-    type_var = RTP_IFP_ENTER_SESSION;
-    commonName_var = commonName;
-    profileName_var = profileName;
-    bandwidth_var = bandwidth;
-    destinationAddress_var = destinationAddress;
-    port_var = port;
-}
+//void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port)
+//{
+//    type_var = RTP_IFP_ENTER_SESSION;
+//    commonName_var = commonName;
+//    profileName_var = profileName;
+//    bandwidth_var = bandwidth;
+//    destinationAddress_var = destinationAddress;
+//    port_var = port;
+//}
 
 void RTPInterfacePacket::sessionEntered(uint32 ssrc)
 {
@@ -61,13 +47,13 @@ void RTPInterfacePacket::sessionEntered(uint32 ssrc)
     ssrc_var = ssrc;
 }
 
-void RTPInterfacePacket::createSenderModule(uint32 ssrc, int payloadType, const char *fileName)
-{
-    type_var = RTP_IFP_CREATE_SENDER_MODULE;
-    ssrc_var = ssrc;
-    payloadType_var =payloadType;
-    fileName_var = fileName;
-}
+//void RTPInterfacePacket::createSenderModule(uint32 ssrc, int payloadType, const char *fileName)
+//{
+//    type_var = RTP_IFP_CREATE_SENDER_MODULE;
+//    ssrc_var = ssrc;
+//    payloadType_var =payloadType;
+//    fileName_var = fileName;
+//}
 
 void RTPInterfacePacket::senderModuleCreated(uint32 ssrc)
 {
@@ -75,11 +61,11 @@ void RTPInterfacePacket::senderModuleCreated(uint32 ssrc)
     ssrc_var = ssrc;
 }
 
-void RTPInterfacePacket::deleteSenderModule(uint32 ssrc)
-{
-    type_var = RTP_IFP_DELETE_SENDER_MODULE;
-    ssrc_var = ssrc;
-}
+//void RTPInterfacePacket::deleteSenderModule(uint32 ssrc)
+//{
+//    type_var = RTP_IFP_DELETE_SENDER_MODULE;
+//    ssrc_var = ssrc;
+//}
 
 void RTPInterfacePacket::senderModuleDeleted(uint32 ssrc)
 {
@@ -87,19 +73,19 @@ void RTPInterfacePacket::senderModuleDeleted(uint32 ssrc)
     ssrc_var = ssrc;
 }
 
-void RTPInterfacePacket::senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg)
-{
-    type_var = RTP_IFP_SENDER_CONTROL;
-    ssrc_var = ssrc;
-    encapsulate(msg);
-}
+//void RTPInterfacePacket::senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg)
+//{
+//    type_var = RTP_IFP_SENDER_CONTROL;
+//    ssrc_var = ssrc;
+//    encapsulate(msg);
+//}
 
-void RTPInterfacePacket::senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg)
-{
-    type_var = RTP_IFP_SENDER_STATUS;
-    ssrc_var = ssrc;
-    encapsulate(msg);
-}
+//void RTPInterfacePacket::senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg)
+//{
+//    type_var = RTP_IFP_SENDER_STATUS;
+//    ssrc_var = ssrc;
+//    encapsulate(msg);
+//}
 
 /*
 void RTPInterfacePacket::startTransmission(uint32 ssrc, int payloadType, const char *fileName)
@@ -135,10 +121,10 @@ void RTPInterfacePacket::transmissionStopped(uint32 ssrc)
 }
 */
 
-void RTPInterfacePacket::leaveSession()
-{
-    type_var = RTP_IFP_LEAVE_SESSION;
-}
+//void RTPInterfacePacket::leaveSession()
+//{
+//    type_var = RTP_IFP_LEAVE_SESSION;
+//}
 
 void RTPInterfacePacket::sessionLeft()
 {

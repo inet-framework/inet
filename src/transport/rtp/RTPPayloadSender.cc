@@ -22,6 +22,7 @@
 
 #include "RTPPayloadSender.h"
 
+#include "RTPInterfacePacket.h"
 
 Define_Module(RTPPayloadSender);
 
@@ -31,13 +32,11 @@ RTPPayloadSender::RTPPayloadSender()
     _reminderMessage = NULL;
 }
 
-
 RTPPayloadSender::~RTPPayloadSender()
 {
     closeSourceFile();
     cancelAndDelete(_reminderMessage);
 }
-
 
 void RTPPayloadSender::initialize()
 {
@@ -66,33 +65,32 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
         {
             RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
             delete rinpIn;
-            const char *command;
-            command = rscm->getCommand();
-            if (!opp_strcmp(command, "PLAY"))
+            short command = rscm->getCommand();
+            if (command == RTP_CONTROL_PLAY)
             {
                 play();
             }
-            else if (!opp_strcmp(command, "PLAY_UNTIL_TIME"))
+            else if (command == RTP_CONTROL_PLAY_UNTIL_TIME)
             {
                 playUntilTime(rscm->getCommandParameter1());
             }
-            else if (!opp_strcmp(command, "PLAY_UNTIL_BYTE"))
+            else if (command == RTP_CONTROL_PLAY_UNTIL_BYTE)
             {
                 playUntilByte(rscm->getCommandParameter1());
             }
-            else if (!opp_strcmp(command, "PAUSE"))
+            else if (command == RTP_CONTROL_PAUSE)
             {
                 pause();
             }
-            else if (!opp_strcmp(command, "STOP"))
+            else if (command ==RTP_CONTROL_STOP)
             {
                 stop();
             }
-            else if (!opp_strcmp(command, "SEEK_TIME"))
+            else if (command == RTP_CONTROL_SEEK_TIME)
             {
                 seekTime(rscm->getCommandParameter1());
             }
-            else if (!opp_strcmp(command, "SEEK_BYTE"))
+            else if (command == RTP_CONTROL_SEEK_BYTE)
             {
                 seekByte(rscm->getCommandParameter1());
             }

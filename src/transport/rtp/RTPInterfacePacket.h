@@ -48,15 +48,10 @@ class RTPInterfacePacket : public RTPInterfacePacket_Base
     virtual std::string info() const;
 
     /**
-     * Writes a longer info about this RTPInterfacePacket into the given stream.
-     */
-    virtual void dump(std::ostream& os) const;
-
-    /**
      * Called by the rtp application to make the rtp layer enter an
      * rtp session with the given parameters.
      */
-    virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port);
+//    virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port);
 
     /**
      * Called by the rtp module to inform the application that the rtp session
@@ -64,12 +59,12 @@ class RTPInterfacePacket : public RTPInterfacePacket_Base
      */
     virtual void sessionEntered(uint32 ssrc);
 
-    virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
+//    virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
     virtual void senderModuleCreated(uint32 ssrc);
-    virtual void deleteSenderModule(uint32 ssrc);
+//    virtual void deleteSenderModule(uint32 ssrc);
     virtual void senderModuleDeleted(uint32 ssrc);
-    virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
-    virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
+//    virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
+//    virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
 
     /**
      * Called by the application to order the rtp layer to start
@@ -106,7 +101,7 @@ class RTPInterfacePacket : public RTPInterfacePacket_Base
      * Called by the application to order the rtp layer to
      * stop participating in this rtp session.
      */
-    virtual void leaveSession();
+//    virtual void leaveSession();
 
     /**
      * Called by the rtp module to inform the application

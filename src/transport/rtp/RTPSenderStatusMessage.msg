@@ -31,15 +31,15 @@ cplusplus {{
 //
 enum RTPSenderStatus
 {
-    RTP_STATUS_UNDEF = 0;
-    RTP_STATUS_PLAYING = 1;
-    RTP_STATUS_FINISHED = 2;
-    RTP_STATUS_STOPPED = 3;
-    RTP_STATUS_PAUSED = 4;
+    _RTP_STATUS_UNDEF = 0;
+    _RTP_STATUS_PLAYING = 1;
+    _RTP_STATUS_FINISHED = 2;
+    _RTP_STATUS_STOPPED = 3;
+    _RTP_STATUS_PAUSED = 4;
 }
 
 packet RTPSenderStatusMessage
 {
-    short status enum(RTPSenderStatus) = RTP_STATUS_UNDEF;
+    short status enum(RTPSenderStatus);
     uint32 timeStamp;
 };

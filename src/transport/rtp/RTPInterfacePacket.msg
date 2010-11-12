@@ -51,7 +51,7 @@ enum RTP_IFP_TYPE
 // rtp session, transmission of files and feedback about the success of the
 // operations.
 //
-packet RTPInterfacePacket
+message RTPInterfacePacket
 {
     @customize(true);  // see the generated C++ header for more info
 
@@ -64,4 +64,78 @@ packet RTPInterfacePacket
     uint32 ssrc;
     int payloadType;
     string fileName;
+};
+
+class RTPControlInfo
+{
+    short type @enum(RTP_IFP_TYPE);
+};
+
+class RTPCIEnterSession extends RTPControlInfo
+{
+    type = RTP_IFP_ENTER_SESSION;
+    string commonName;
+    string profileName;
+    int bandwidth;
+    IPAddress destinationAddress;
+    int port;
+};
+
+class RTPCISessionEntered extends RTPControlInfo
+{
+    type = RTP_IFP_SESSION_ENTERED;
+    uint32 ssrc;
+};
+
+enum RTPCISenderControlCommand
+{
+    RTPCISCC_PLAY = 1;
+    RTPCISCC_STOP = 2;
+};
+
+class RTPCISenderControl extends RTPControlInfo
+{
+    type = RTP_IFP_SENDER_CONTROL;
+    uint32 ssrc;
+    // from RTPSenderControlMessage:
+    short command;
+    float commandParameter1;
+    float commandParameter2;
+}
+
+enum RTPCISenderStatuses
+{
+    RTP_STATUS_PLAYING = 1;
+    RTP_STATUS_FINISHED = 2;
+    RTP_STATUS_STOPPED = 3;
+    RTP_STATUS_PAUSED = 4;
+}
+
+class RTPCISenderStatus extends RTPControlInfo
+{
+    type = RTP_IFP_SENDER_STATUS;
+    uint32 ssrc;
+    // from RTPSenderStatusMessage:
+    short status enum(RTPCISenderStatuses);
+    uint32 timeStamp;
+};
+
+class RTPCILeaveSession extends RTPControlInfo
+{
+    type = RTP_IFP_LEAVE_SESSION;
+    // TODO do I need any sesson identifier?
+};
+
+class RTPCICreateSenderModule extends RTPControlInfo
+{
+    type = RTP_IFP_CREATE_SENDER_MODULE;
+    uint32 ssrc;
+    int payloadType;
+    string fileName;
+};
+
+class RTPCIDeleteSenderModule extends RTPControlInfo
+{
+    type = RTP_IFP_DELETE_SENDER_MODULE;
+    uint32 ssrc;
 };

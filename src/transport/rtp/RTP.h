@@ -72,18 +72,17 @@ class INET_API RTP : public cSimpleModule
         /**
          * Creates the profile module and initializes it.
          */
-        virtual void enterSession(RTPInterfacePacket *rifp);
+        virtual void enterSession(RTPCIEnterSession *rifp);
 
         /**
          * Destroys the profile module and orders the rtcp module
          * to send an rtcp bye packet.
          */
-        virtual void leaveSession(RTPInterfacePacket *rifp);
+        virtual void leaveSession(RTPCILeaveSession *rifp);
 
-        virtual void createSenderModule(RTPInterfacePacket *rifp);
-        virtual void deleteSenderModule(RTPInterfacePacket *rifp);
-        virtual void senderModuleControl(RTPInterfacePacket *rifp);
-
+        virtual void createSenderModule(RTPCICreateSenderModule *rifp);
+        virtual void deleteSenderModule(RTPCIDeleteSenderModule *rifp);
+        virtual void senderModuleControl(RTPCISenderControl *rifp);
 
         /**
          * Called when the profile module is initialized.
