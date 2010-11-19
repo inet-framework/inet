@@ -177,9 +177,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                         if (opp_strcmp(_fileName, ""))
                         {
                             ev << "CreateSenderModule" << endl;
-//                            RTPInterfacePacket *rifpOut = new RTPInterfacePacket("createSenderModule()");
-//                            rifpOut->createSenderModule(ssrc, _payloadType, opp_strdup(_fileName));
-//                            send(rifpOut, "rtpOut");
                             RTPCICreateSenderModule* ci = new RTPCICreateSenderModule();
                             ci->setSsrc(ssrc);
                             ci->setPayloadType(_payloadType);
@@ -231,6 +228,10 @@ void RTPApplication::handleMessage(cMessage* msgIn)
 
                 case RTP_IFP_SESSION_LEFT:
                     sessionLeft = true;
+                    break;
+
+                case RTP_IFP_SENDER_MODULE_DELETED:
+                    ev << "Sender Module Deleted" << endl;
                     break;
 
                 default:

@@ -36,7 +36,6 @@ enum RTPSenderStatus;
 //
 enum RTP_IFP_TYPE
 {
-    RTP_IFP_UNDEF = 0;
     RTP_IFP_ENTER_SESSION = 1;
     RTP_IFP_SESSION_ENTERED = 2;
     RTP_IFP_CREATE_SENDER_MODULE = 3;
@@ -59,11 +58,20 @@ message RTPControlMsg
 {
 };
 
+// base class
 class RTPControlInfo
 {
     short type @enum(RTP_IFP_TYPE);
 };
 
+// base class
+class RTPSessionControlInfo extends RTPControlInfo
+{
+    uint32 ssrc;
+};
+
+
+// App to RTP
 class RTPCIEnterSession extends RTPControlInfo
 {
     type = RTP_IFP_ENTER_SESSION;
@@ -74,65 +82,67 @@ class RTPCIEnterSession extends RTPControlInfo
     int port;
 };
 
-class RTPCISessionEntered extends RTPControlInfo
+// RTP to App
+class RTPCISessionEntered extends RTPSessionControlInfo
 {
     type = RTP_IFP_SESSION_ENTERED;
-    uint32 ssrc;
 };
 
-class RTPCISenderControl extends RTPControlInfo
+// App to RTP
+class RTPCISenderControl extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_CONTROL;
-    uint32 ssrc;
     // from RTPSenderControlMessage:
     short command @enum(RTPSenderControlMessageCommands);
     float commandParameter1;
     float commandParameter2;
 }
 
-class RTPCISenderStatus extends RTPControlInfo
+// RTP to App
+class RTPCISenderStatus extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_STATUS;
-    uint32 ssrc;
     // from RTPSenderStatusMessage:
     short status @enum(RTPSenderStatus);
     uint32 timeStamp;
 };
 
+// App to RTP
 class RTPCILeaveSession extends RTPControlInfo
 {
     type = RTP_IFP_LEAVE_SESSION;
     // TODO do I need any sesson identifier?
 };
 
+// RTP to App
 class RTPCISessionLeft extends RTPControlInfo
 {
     type = RTP_IFP_SESSION_LEFT;
     // TODO do I need any sesson identifier?
 };
 
-class RTPCICreateSenderModule extends RTPControlInfo
+// App to RTP
+class RTPCICreateSenderModule extends RTPSessionControlInfo
 {
     type = RTP_IFP_CREATE_SENDER_MODULE;
-    uint32 ssrc;
     int payloadType;
     string fileName;
 };
 
-class RTPCISenderModuleCreated extends RTPControlInfo
+// RTP to App
+class RTPCISenderModuleCreated extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_CREATED;
-    uint32 ssrc;
 };
 
-class RTPCIDeleteSenderModule extends RTPControlInfo
+// App to RTP
+class RTPCIDeleteSenderModule extends RTPSessionControlInfo
 {
     type = RTP_IFP_DELETE_SENDER_MODULE;
-    uint32 ssrc;
 };
 
-class RTPCISenderModuleDeleted extends RTPControlInfo
+// RTP to App
+class RTPCISenderModuleDeleted extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_DELETED;
-    uint32 ssrc;
 };
