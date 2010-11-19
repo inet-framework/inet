@@ -26,6 +26,10 @@ cplusplus {{
 
 class noncobject IPAddress;
 
+enum RTPSenderControlMessageCommands;
+
+enum RTPSenderStatus;
+
 //
 // An enumeration to distinguish the different functions of the
 // RTPInterfacePacket.
@@ -46,24 +50,13 @@ enum RTP_IFP_TYPE
 };
 
 //
-// The class RTPInterfacePacket is used for communication between an RTPApplication
+// The next classes are used for communication between an RTPApplication
 // and an RTPLayer module. Its offers functionality for starting and stopping of an
 // rtp session, transmission of files and feedback about the success of the
 // operations.
-//
-message RTPInterfacePacket
-{
-    @customize(true);  // see the generated C++ header for more info
 
-    short type @enum(RTP_IFP_TYPE);
-    string commonName;
-    string profileName;
-    int bandwidth;
-    IPAddress destinationAddress;
-    int port;
-    uint32 ssrc;
-    int payloadType;
-    string fileName;
+message RTPControlMsg
+{
 };
 
 class RTPControlInfo
@@ -87,28 +80,14 @@ class RTPCISessionEntered extends RTPControlInfo
     uint32 ssrc;
 };
 
-enum RTPCISenderControlCommand
-{
-    RTPCISCC_PLAY = 1;
-    RTPCISCC_STOP = 2;
-};
-
 class RTPCISenderControl extends RTPControlInfo
 {
     type = RTP_IFP_SENDER_CONTROL;
     uint32 ssrc;
     // from RTPSenderControlMessage:
-    short command;
+    short command @enum(RTPSenderControlMessageCommands);
     float commandParameter1;
     float commandParameter2;
-}
-
-enum RTPCISenderStatuses
-{
-    RTP_STATUS_PLAYING = 1;
-    RTP_STATUS_FINISHED = 2;
-    RTP_STATUS_STOPPED = 3;
-    RTP_STATUS_PAUSED = 4;
 }
 
 class RTPCISenderStatus extends RTPControlInfo
@@ -116,13 +95,19 @@ class RTPCISenderStatus extends RTPControlInfo
     type = RTP_IFP_SENDER_STATUS;
     uint32 ssrc;
     // from RTPSenderStatusMessage:
-    short status enum(RTPCISenderStatuses);
+    short status @enum(RTPSenderStatus);
     uint32 timeStamp;
 };
 
 class RTPCILeaveSession extends RTPControlInfo
 {
     type = RTP_IFP_LEAVE_SESSION;
+    // TODO do I need any sesson identifier?
+};
+
+class RTPCISessionLeft extends RTPControlInfo
+{
+    type = RTP_IFP_SESSION_LEFT;
     // TODO do I need any sesson identifier?
 };
 
@@ -134,8 +119,20 @@ class RTPCICreateSenderModule extends RTPControlInfo
     string fileName;
 };
 
+class RTPCISenderModuleCreated extends RTPControlInfo
+{
+    type = RTP_IFP_SENDER_MODULE_CREATED;
+    uint32 ssrc;
+};
+
 class RTPCIDeleteSenderModule extends RTPControlInfo
 {
     type = RTP_IFP_DELETE_SENDER_MODULE;
+    uint32 ssrc;
+};
+
+class RTPCISenderModuleDeleted extends RTPControlInfo
+{
+    type = RTP_IFP_SENDER_MODULE_DELETED;
     uint32 ssrc;
 };

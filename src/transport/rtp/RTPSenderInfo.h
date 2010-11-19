@@ -24,8 +24,8 @@
 #define __INET_RTPSENDERINFO_H
 
 #include "INETDefs.h"
-#include "RTPParticipantInfo.h"
 #include "reports.h"
+#include "RTPParticipantInfo.h"
 
 
 /**
@@ -34,9 +34,7 @@
  */
 class INET_API RTPSenderInfo : public RTPParticipantInfo
 {
-
     public:
-
         /**
          * Default constructor.
          */
@@ -104,10 +102,9 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * A sender info shall never be deleted!
          */
-        virtual bool toBeDeleted(simtime_t now);
+        virtual bool toBeDeleted(simtime_t now) const;
 
     protected:
-
         /**
          * The time when the transmission was started.
          */
@@ -137,8 +134,6 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
          * The number of data bytes this sender has sent.
          */
         uint32 _bytesSent;
-
 };
 
 #endif
-

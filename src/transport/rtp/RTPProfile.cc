@@ -81,29 +81,31 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg)
 
     RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
 
-    if (rinpIn->getType() == RTP_INP_INITIALIZE_PROFILE)
+    switch (rinpIn->getType())
     {
+    case RTP_INP_INITIALIZE_PROFILE:
         initializeProfile(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_CREATE_SENDER_MODULE)
-    {
+        break;
+
+    case RTP_INP_CREATE_SENDER_MODULE:
         createSenderModule(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_DELETE_SENDER_MODULE)
-    {
+        break;
+
+    case RTP_INP_DELETE_SENDER_MODULE:
         deleteSenderModule(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_CONTROL)
-    {
+        break;
+
+    case RTP_INP_SENDER_MODULE_CONTROL:
         senderModuleControl(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_DATA_IN)
-    {
+        break;
+
+    case RTP_INP_DATA_IN:
         dataIn(rinpIn);
-    }
-    else
-    {
-        error("RTPInnerPacket from RTPModule has wrong type");
+        break;
+
+   default:
+        error("RTPInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
+        break;
     }
 
     ev << "handleMessageFromRTP Exit "<<endl;
@@ -114,21 +116,22 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
 {
     RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
 
-    if (rinpIn->getType() == RTP_INP_DATA_OUT)
+    switch (rinpIn->getType())
     {
+    case RTP_INP_DATA_OUT:
         dataOut(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_INITIALIZED)
-    {
+        break;
+
+    case RTP_INP_SENDER_MODULE_INITIALIZED:
         senderModuleInitialized(rinpIn);
-    }
-    else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_STATUS)
-    {
+        break;
+
+    case RTP_INP_SENDER_MODULE_STATUS:
         senderModuleStatus(rinpIn);
-    }
-    else
-    {
-        error("Profile received RTPInnerPacket from sender module with wrong type");
+        break;
+
+    default:
+        error("Profile received RTPInnerPacket from sender module with wrong type: %d", rinpIn->getType());
     }
 }
 

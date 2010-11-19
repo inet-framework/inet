@@ -50,9 +50,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
        */
       virtual void initialize();
 
-
     protected:
-
         /**
          * A reordering queue for incoming packets.
          */
@@ -64,6 +62,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
          * the data file.
          */
         uint32 _lowestAllowedTimeStamp;
+
         uint32 _highestSequenceNumber;
 
         /**
@@ -72,9 +71,6 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
          * of one frame if needed.
          */
         virtual void processPacket(RTPPacket *packet);
-
-
 };
 
 #endif
-

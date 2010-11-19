@@ -27,6 +27,7 @@
 #include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 
+
 /**
  * An RTP is the center of the rtp layer of an endsystem.
  * It creates the profile module, sends and receives rtp data packets
@@ -36,7 +37,6 @@
 class INET_API RTP : public cSimpleModule
 {
     protected:
-
         /**
          * Initializes variables.
          */
@@ -48,7 +48,6 @@ class INET_API RTP : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
 
     protected:
-
         /**
          * Handles messages received from the applicaiton.
          */
@@ -110,7 +109,6 @@ class INET_API RTP : public cSimpleModule
          * has left the rtp session.
          */
         virtual void sessionLeft(RTPInnerPacket *rinp);
-
 
     protected:
         /**
@@ -215,4 +213,3 @@ class INET_API RTP : public cSimpleModule
 };
 
 #endif
-

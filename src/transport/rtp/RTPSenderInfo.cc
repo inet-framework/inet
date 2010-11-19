@@ -35,18 +35,15 @@ RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     _bytesSent = 0;
 }
 
-
 RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo()
 {
     operator=(senderInfo);
 }
 
-
 RTPSenderInfo::~RTPSenderInfo()
 {
 
 }
-
 
 RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
 {
@@ -60,12 +57,10 @@ RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
     return *this;
 }
 
-
 RTPSenderInfo *RTPSenderInfo::dup() const
 {
     return new RTPSenderInfo(*this);
 }
-
 
 void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id,  simtime_t arrivalTime)
 {
@@ -78,16 +73,15 @@ void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id,  simtime_t arriv
     RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-
 void RTPSenderInfo::processReceptionReport(ReceptionReport *report, simtime_t arrivalTime)
 {
     delete report;
 }
 
-
 SenderReport *RTPSenderInfo::senderReport(simtime_t now)
 {
-    if (isSender()) {
+    if (isSender())
+    {
         SenderReport *senderReport = new SenderReport();
         // ntp time stamp is 64 bit integer
 
@@ -100,37 +94,33 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now)
         senderReport->setByteCount(_bytesSent);
         return senderReport;
     }
-    else {
+    else
+    {
         return NULL;
     }
 }
-
 
 void RTPSenderInfo::setStartTime(simtime_t startTime)
 {
     _startTime = startTime;
 }
 
-
 void RTPSenderInfo::setClockRate(int clockRate)
 {
     _clockRate = clockRate;
 }
-
 
 void RTPSenderInfo::setTimeStampBase(uint32 timeStampBase)
 {
     _timeStampBase = timeStampBase;
 }
 
-
 void RTPSenderInfo::setSequenceNumberBase(uint16 sequenceNumberBase)
 {
     _sequenceNumberBase = sequenceNumberBase;
 }
 
-
-bool RTPSenderInfo::toBeDeleted(simtime_t now)
+bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 {
     return false;
 }

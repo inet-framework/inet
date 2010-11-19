@@ -19,8 +19,8 @@
  * This file declares the source description classes SDESItem and SDESChunk.
  */
 
-#ifndef __INET_SDES_H
-#define __INET_SDES_H
+#ifndef __INET_RTP_SDES_H
+#define __INET_RTP_SDES_H
 
 #include "INETDefs.h"
 
@@ -30,14 +30,14 @@
  */
 class INET_API SDESItem : public cObject
 {
-
     public:
         /**
          * This enumeration holds the types of source description items
          * as defined in the rfc. In this implementation only SDES_UNDEF
          * and SDES_CNAME are usable.
          */
-        enum SDES_ITEM_TYPE {
+        enum SDES_ITEM_TYPE
+        {
             SDES_UNDEF = 0,
             SDES_CNAME = 1,
             SDES_NAME = 2,
@@ -106,7 +106,6 @@ class INET_API SDESItem : public cObject
         virtual int getLength() const;
 
     protected:
-
         /**
          * The type of this SDESItem.
          */
@@ -130,7 +129,6 @@ class INET_API SDESItem : public cObject
  */
 class INET_API SDESChunk : public cArray
 {
-
     public:
         /**
          * Default constructor.
@@ -189,7 +187,6 @@ class INET_API SDESChunk : public cArray
         virtual int getLength() const;
 
     protected:
-
         /**
          * The ssrc identifier this SDESChunk is for.
          */

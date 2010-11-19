@@ -23,6 +23,7 @@
 #include <string.h>
 #include "sdes.h"
 
+
 Register_Class(SDESItem);
 
 
@@ -32,7 +33,6 @@ SDESItem::SDESItem() : cObject()
     _length = 2;
     _content = "";
 };
-
 
 SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
 {
@@ -46,17 +46,14 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
     _length = 2 + strlen(_content);
 };
 
-
 SDESItem::SDESItem(const SDESItem& sdesItem) : cObject()
 {
     operator=(sdesItem);
 };
 
-
 SDESItem::~SDESItem()
 {
 };
-
 
 SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
 {
@@ -67,12 +64,10 @@ SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
     return *this;
 };
 
-
 SDESItem *SDESItem::dup() const
 {
     return new SDESItem(*this);
 };
-
 
 std::string SDESItem::info() const
 {
@@ -81,7 +76,6 @@ std::string SDESItem::info() const
     return out.str();
 };
 
-
 void SDESItem::dump(std::ostream& os) const
 {
     os << "SDESItem:" << endl;
@@ -89,18 +83,15 @@ void SDESItem::dump(std::ostream& os) const
     os << "  content = " << _content << endl;
 };
 
-
 SDESItem::SDES_ITEM_TYPE SDESItem::getType() const
 {
     return _type;
 };
 
-
 const char *SDESItem::getContent() const
 {
     return opp_strdup(_content);
 };
-
 
 int SDESItem::getLength() const
 {
@@ -124,18 +115,15 @@ SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name)
     _length = 4;
 };
 
-
 SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk)
 {
     setName(sdesChunk.getName());
     operator=(sdesChunk);
 };
 
-
 SDESChunk::~SDESChunk()
 {
 };
-
 
 SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
 {
@@ -145,12 +133,10 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
     return *this;
 };
 
-
 SDESChunk *SDESChunk::dup() const
 {
     return new SDESChunk(*this);
 };
-
 
 std::string SDESChunk::info() const
 {
@@ -159,25 +145,28 @@ std::string SDESChunk::info() const
     return out.str();
 };
 
-
 void SDESChunk::dump(std::ostream& os) const
 {
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
-    for (int i = 0; i < size(); i++) {
-        if (exist(i)) {
+    for (int i = 0; i < size(); i++)
+    {
+        if (exist(i))
+        {
             //FIXME get(i)->dump(os);
         };
     };
 };
 
-
 void SDESChunk::addSDESItem(SDESItem *sdesItem)
 {
-    for (int i = 0; i < size(); i++) {
-        if (exist(i)) {
+    for (int i = 0; i < size(); i++)
+    {
+        if (exist(i))
+        {
             SDESItem *compareItem = (SDESItem *)(get(i));
-            if (compareItem->getType() == sdesItem->getType()) {
+            if (compareItem->getType() == sdesItem->getType())
+            {
                 remove(compareItem);
                 _length = _length - compareItem->getLength();
                 delete compareItem;
@@ -190,18 +179,15 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem)
     _length += sdesItem->getLength();
 };
 
-
 uint32 SDESChunk::getSsrc() const
 {
     return _ssrc;
 };
 
-
 void SDESChunk::setSsrc(uint32 ssrc)
 {
     _ssrc = ssrc;
 };
-
 
 int SDESChunk::getLength() const
 {

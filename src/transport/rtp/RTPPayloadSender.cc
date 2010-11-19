@@ -101,13 +101,18 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
             delete rscm;
         }
     }
-    else
+    else if (msg == _reminderMessage)
     {
+        _reminderMessage = NULL;
         if (!sendPacket())
         {
             endOfFile();
         }
         delete msg;
+    }
+    else
+    {
+        error("Unknown message!");
     }
 }
 
@@ -144,7 +149,7 @@ void RTPPayloadSender::play()
 {
     _status = PLAYING;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("PLAYING");
-    rssm->setStatus(RTP_STATUS_PLAYING);
+    rssm->setStatus(RTP_SENDER_STATUS_PLAYING);
     rssm->setTimeStamp(_timeStamp);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PLAYING)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
@@ -168,11 +173,12 @@ void RTPPayloadSender::playUntilByte(int position)
 
 void RTPPayloadSender::pause()
 {
-    cancelEvent(_reminderMessage);
+    cancelAndDelete(_reminderMessage);
+    _reminderMessage = NULL;
     _status = STOPPED;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PAUSED)");
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
-    rsim->setStatus(RTP_STATUS_PAUSED);
+    rsim->setStatus(RTP_SENDER_STATUS_PAUSED);
     rinpOut->senderModuleStatus(_ssrc, rsim);
     send(rinpOut, "profileOut");
 }
@@ -189,10 +195,11 @@ void RTPPayloadSender::seekByte(int position)
 
 void RTPPayloadSender::stop()
 {
-    cancelEvent(_reminderMessage);
+    cancelAndDelete(_reminderMessage);
+    _reminderMessage = NULL;
     _status = STOPPED;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("STOPPED");
-    rssm->setStatus(RTP_STATUS_STOPPED);
+    rssm->setStatus(RTP_SENDER_STATUS_STOPPED);
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleStatus(STOPPED)");
     rinp->senderModuleStatus(_ssrc, rssm);
     send(rinp, "profileOut");
@@ -201,8 +208,8 @@ void RTPPayloadSender::stop()
 void RTPPayloadSender::endOfFile()
 {
     _status = STOPPED;
-    RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage();
-    rssm->setStatus(RTP_STATUS_FINISHED);
+    RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("FINISHED");
+    rssm->setStatus(RTP_SENDER_STATUS_FINISHED);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(FINISHED)");
     rinpOut->senderModuleStatus(_ssrc, rssm);
     send(rinpOut, "profileOut");

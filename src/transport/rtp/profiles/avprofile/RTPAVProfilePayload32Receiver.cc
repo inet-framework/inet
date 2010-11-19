@@ -21,12 +21,14 @@
  *  * implemented.
  *  */
 
-#include "RTPPayloadReceiver.h"
 #include "RTPAVProfilePayload32Receiver.h"
-#include "RTPPacket.h"
+
 #include "RTPMpegPacket_m.h"
+#include "RTPPacket.h"
+
 
 Define_Module(RTPAVProfilePayload32Receiver);
+
 
 int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
 {
@@ -38,7 +40,6 @@ RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver()
     delete _queue;
 }
 
-
 void RTPAVProfilePayload32Receiver::initialize()
 {
     RTPPayloadReceiver::initialize();
@@ -48,32 +49,32 @@ void RTPAVProfilePayload32Receiver::initialize()
     _highestSequenceNumber = 0;
 }
 
-
 void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 {
     // the first packet sets the lowest allowed time stamp
-    if (_lowestAllowedTimeStamp == 0) {
+    if (_lowestAllowedTimeStamp == 0)
+    {
         _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
         _highestSequenceNumber = rtpPacket->getSequenceNumber();
         _outputLogLoss <<"sequenceNumberBase"<< rtpPacket->getSequenceNumber() << endl;
     }
     else
     {
-        if (rtpPacket->getSequenceNumber() > _highestSequenceNumber+1)
+        for (int i = _highestSequenceNumber+1; i< rtpPacket->getSequenceNumber(); i++ )
         {
-            for (int i = _highestSequenceNumber+1; i< rtpPacket->getSequenceNumber(); i++ )
-            {
-                //char line[100];
-                //sprintf(line, "%i", i);
-                _outputLogLoss << i << endl;
-            }
-         }
-         }
+            //char line[100];
+            //sprintf(line, "%i", i);
+            _outputLogLoss << i << endl;
+        }
+    }
 
-    if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) || (rtpPacket->getSequenceNumber()<= _highestSequenceNumber)) {
+    if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) ||
+            (rtpPacket->getSequenceNumber()<= _highestSequenceNumber))
+    {
         delete rtpPacket;
     }
-    else {
+    else
+    {
         // is this packet from the next frame ?
         // this can happen when the marked packet has been
         // lost or arrives late
@@ -90,10 +91,11 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
         // we received a packet of the next frame
         _highestSequenceNumber = rtpPacket->getSequenceNumber();
 
-        if (nextTimeStamp || marked) {
-
+        if (nextTimeStamp || marked)
+        {
             // a marked packet belongs to this frame
-            if (marked && !nextTimeStamp) {
+            if (marked && !nextTimeStamp)
+            {
                 _queue->insert(rtpPacket);
             }
 
@@ -102,7 +104,8 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 
             // the queue contains all packets for this frame
             // we have received
-            while (!_queue->empty()) {
+            while (!_queue->empty())
+            {
                 RTPPacket *readPacket = (RTPPacket *)(_queue->pop());
                 RTPMpegPacket *mpegPacket = (RTPMpegPacket *)(readPacket->decapsulate());
                 if (pictureType == 0)
@@ -115,24 +118,26 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 
             // we start the next frame
             // set the allowed time stamp
-            if (nextTimeStamp) {
+            if (nextTimeStamp)
+            {
                 _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
                 _queue->insert(rtpPacket);
             }
 
             // we have calculated a frame
-            if (frameSize > 0) {
+            if (frameSize > 0)
+            {
                 char line[100];
                 // what picture type is it
-                char picture = ' ';
-                if (pictureType == 1)
-                    picture = 'I';
-                else if (pictureType == 2)
-                    picture = 'P';
-                else if (pictureType == 3)
-                    picture = 'B';
-                else if (pictureType == 4)
-                    picture = 'D';
+                char picture;
+                switch(pictureType)
+                {
+                    case 1: picture = 'I'; break;
+                    case 2: picture = 'P'; break;
+                    case 3: picture = 'B'; break;
+                    case 4: picture = 'D'; break;
+                    default: picture = ' ';
+                }
 
                 // create sim line
                 sprintf(line, "%f %i %c-Frame", simTime().dbl(), frameSize * 8, picture);
@@ -140,12 +145,11 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                 _outputFileStream << line << endl;
             }
         }
-        // we are not at the end of the frame
-        // so just insert this packet
-        else {
+        else
+        {
+            // we are not at the end of the frame
+            // so just insert this packet
             _queue->insert(rtpPacket);
         }
     }
 }
-
-

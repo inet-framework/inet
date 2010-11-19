@@ -188,7 +188,6 @@ char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
     return opp_strdup(name);
 }
 
-
 void RTPParticipantInfo::dump() const
 {
     std::cout <<" adress= "<< _address

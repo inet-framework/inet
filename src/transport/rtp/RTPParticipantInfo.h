@@ -42,9 +42,7 @@
  */
 class INET_API RTPParticipantInfo : public cObject
 {
-
     public:
-
         /**
          * Default constructor.
          */
@@ -204,7 +202,6 @@ class INET_API RTPParticipantInfo : public cObject
         virtual void dump() const;
 
     protected:
-
         /**
          * Used for storing sdes information about this rtp endsystem.
          * The ssrc identifier is also stored here.

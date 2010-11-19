@@ -35,9 +35,7 @@
  */
 class INET_API RTPReceiverInfo : public RTPParticipantInfo
 {
-
     public:
-
         /**
          * Default constructor.
          */
@@ -107,9 +105,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
          */
         virtual bool toBeDeleted(simtime_t now);
 
-
     protected:
-
         /**
          * The sequence number of the first RTPPacket received.
          */
@@ -212,4 +208,3 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
 };
 
 #endif
-

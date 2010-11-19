@@ -103,11 +103,12 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
     _packetsReceived++;
     _itemsReceived++;
 
-    if (_packetsReceived == 1) {
+    if (_packetsReceived == 1)
+    {
         _sequenceNumberBase = packet->getSequenceNumber();
     }
-    else {
-
+    else
+    {
         /*if (packet->getSequenceNumber() > _highestSequenceNumber+1)
         {
             _packetLostOutVector.record(packet->getSequenceNumber() - _highestSequenceNumber -1);
@@ -124,21 +125,25 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
             }
         }*/
 
-        if (packet->getSequenceNumber() > _highestSequenceNumber) {
+        if (packet->getSequenceNumber() > _highestSequenceNumber)
+        {
             // it is possible that this is a late packet from the
             // previous sequence wrap
             if (!(packet->getSequenceNumber() > 0xFFEF && _highestSequenceNumber < 0x10))
                 _highestSequenceNumber = packet->getSequenceNumber();
         }
-        else {
+        else
+        {
             // is it a sequence number wrap around 0xFFFF to 0x0000 ?
-            if (packet->getSequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF) {
+            if (packet->getSequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF)
+            {
                 _sequenceNumberCycles += 0x00010000;
                 _highestSequenceNumber = packet->getSequenceNumber();
             }
         }
         // calculate interarrival jitter
-        if (_clockRate != 0) {
+        if (_clockRate != 0)
+        {
             simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
@@ -157,11 +162,13 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
 void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
 {
     _lastSenderReportArrivalTime = arrivalTime;
-    if (_lastSenderReportRTPTimeStamp == 0) {
+    if (_lastSenderReportRTPTimeStamp == 0)
+    {
         _lastSenderReportRTPTimeStamp = report->getRTPTimeStamp();
         _lastSenderReportNTPTimeStamp = report->getNTPTimeStamp();
     }
-    else if (_clockRate == 0) {
+    else if (_clockRate == 0)
+    {
         uint32 rtpTicks = report->getRTPTimeStamp() - _lastSenderReportRTPTimeStamp;
         uint64 ntpDifference = report->getNTPTimeStamp() - _lastSenderReportNTPTimeStamp;
         long double ntpSeconds = (long double)ntpDifference / (long double)(0xFFFFFFFF);
@@ -183,7 +190,8 @@ void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTi
 
 ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
-    if (isSender()) {
+    if (isSender())
+    {
         ReceptionReport *receptionReport = new ReceptionReport();
         receptionReport->setSsrc(getSsrc());
 
@@ -194,7 +202,8 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         int32 packetsReceivedInInterval = _packetsReceived - _packetsReceivedPrior;
         int32 packetsLostInInterval = packetsExpectedInInterval - packetsReceivedInInterval;
         uint8 fractionLost = 0;
-        if (packetsLostInInterval > 0) {
+        if (packetsLostInInterval > 0)
+        {
             fractionLost = (packetsLostInInterval << 8) / packetsExpectedInInterval;
         }
 
@@ -222,7 +231,8 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 void RTPReceiverInfo::nextInterval(simtime_t now)
 {
     _inactiveIntervals++;
-    if (_inactiveIntervals == 5) {
+    if (_inactiveIntervals == 5)
+    {
         _startOfInactivity = now;
     }
     _highestSequenceNumberPrior = _highestSequenceNumber + _sequenceNumberCycles;

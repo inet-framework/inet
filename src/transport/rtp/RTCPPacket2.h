@@ -35,7 +35,7 @@ class RTCPSDESPacket : public RTCPSDESPacket_Base
     void addSDESChunk(SDESChunk *sdesChunk);
 };
 
- class RTCPByePacket : public RTCPByePacket_Base
+class RTCPByePacket : public RTCPByePacket_Base
 {
   public:
     RTCPByePacket(const char *name=NULL, int kind=0);
