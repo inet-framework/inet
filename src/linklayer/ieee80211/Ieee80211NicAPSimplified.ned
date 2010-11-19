@@ -18,9 +18,10 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
-import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAPSimplified;
 import inet.linklayer.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAPSimplified;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -28,7 +29,7 @@ import inet.linklayer.radio.Ieee80211Radio;
 // for a wireless Access Point (AP), but using a simplified mgmt module
 // that does not support handovers.
 //
-module Ieee80211NicAPSimplified
+module Ieee80211NicAPSimplified like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");

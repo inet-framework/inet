@@ -20,9 +20,10 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.Mac80211;
-import inet.linklayer.mf80211.phyLayer.decider.Decider80211;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval80211;
+import inet.linklayer.mf80211.phyLayer.decider.Decider80211;
+import inet.linklayer.mf80211.macLayer.Mac80211;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -33,7 +34,7 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval80211;
 // @see ~Mac80211, ~Decider80211, ~SnrEval80211
 // @author Marc Loebbers
 //
-module Nic80211
+module Nic80211 like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");

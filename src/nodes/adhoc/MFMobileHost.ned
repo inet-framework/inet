@@ -36,6 +36,8 @@ import inet.transport.udp.UDP;
 // This model contains the Mobility Framework's 802.11 implementation ~Nic80211,
 // and IP, TCP and UDP protocols. The mobility model can be dynamically
 // specified with the mobilityType parameter.
+// 
+//(deprecated - use AdhocHost instead with Nic80211 as the NIC parameter)
 //
 // @see ~MobileHost, ~WirelessHost
 //

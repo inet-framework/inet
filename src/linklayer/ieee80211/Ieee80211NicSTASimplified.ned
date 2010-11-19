@@ -18,9 +18,10 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
-import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSTASimplified;
 import inet.linklayer.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSTASimplified;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -28,7 +29,7 @@ import inet.linklayer.radio.Ieee80211Radio;
 // for a host (STA), but using a simplified mgmt module that does not
 // support handovers.
 //
-module Ieee80211NicSTASimplified
+module Ieee80211NicSTASimplified like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");

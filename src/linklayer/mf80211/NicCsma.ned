@@ -20,9 +20,10 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
-import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 import inet.linklayer.mfcore.BasicDecider;
+import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
+import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -42,7 +43,7 @@ import inet.linklayer.mfcore.BasicDecider;
 // @see BasicMacLayer, ~BasicDecider, ~BasicSnrEval
 // @author Marc Loebbers
 //
-module NicCsma
+module NicCsma like IWirelessNic
 {
     gates:
         input uppergateIn; // to upper layers

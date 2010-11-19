@@ -18,17 +18,18 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
-import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSTA;
 import inet.linklayer.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSTA;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.IWirelessNic;
 
 
 //
 // This NIC implements an 802.11 network interface card,
 // in a STA, using infrastructure mode.
 //
-module Ieee80211NicSTA
+module Ieee80211NicSTA like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");

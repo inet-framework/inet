@@ -18,9 +18,10 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
-import inet.linklayer.ieee80211.mgmt.Ieee80211Mgmt;
 import inet.linklayer.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mgmt.Ieee80211Mgmt;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -28,7 +29,7 @@ import inet.linklayer.radio.Ieee80211Radio;
 // It can be configured via the mgmtType parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
-module Ieee80211Nic
+module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string mgmtType; // name of the management module type

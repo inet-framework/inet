@@ -36,6 +36,8 @@ import inet.transport.udp.UDP;
 // This model contains the new IEEE 802.11 implementation ~Ieee80211Nic,
 // and IP, TCP and UDP protocols. The mobility model can be
 // dynamically specified with the mobilityType parameter.
+// 
+// (deprecated - use AdhocHost instead with Ieee80211NicAdhoc as the NIC parameter)
 //
 // @see ~MFMobileHost, ~WirelessHost
 //
