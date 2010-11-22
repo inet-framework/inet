@@ -24,8 +24,8 @@
 #include "UDPControlInfo_m.h"
 
 #include "RTP.h"
-#include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
+#include "RTPInterfacePacket_m.h"
 #include "RTPProfile.h"
 
 #include "RTPSenderControlMessage_m.h"

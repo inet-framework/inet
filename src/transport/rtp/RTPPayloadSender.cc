@@ -22,7 +22,8 @@
 
 #include "RTPPayloadSender.h"
 
-#include "RTPInterfacePacket.h"
+#include "RTPInterfacePacket_m.h"
+
 
 Define_Module(RTPPayloadSender);
 

@@ -18,7 +18,7 @@
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
 #include "RTPApplication.h"
-#include "RTPInterfacePacket.h"
+#include "RTPInterfacePacket_m.h"
 
 Define_Module(RTPApplication)
 

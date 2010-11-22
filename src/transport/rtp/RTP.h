@@ -24,8 +24,8 @@
 
 #include "INETDefs.h"
 #include "IPvXAddress.h"
-#include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
+#include "RTPInterfacePacket_m.h"
 
 
 /**
