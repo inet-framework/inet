@@ -61,66 +61,6 @@ class INET_API RTPPayloadSender : public cSimpleModule
         PLAYING  ///< Data is being sent.
     };
 
-  protected:
-    /**
-     * The input file stream for the data file.
-     */
-    std::ifstream  _inputFileStream;
-
-    /**
-     * The maximum size of an RTPPacket.
-     */
-    int _mtu;
-
-    /**
-     * The ssrc identifier of this sender module.
-     */
-    uint32 _ssrc;
-
-    /**
-     * The payload type this sender creates.
-     */
-    int _payloadType;
-
-    /**
-     * The clock rate in ticks per second this sender uses.
-     */
-    int _clockRate;
-
-    /**
-     * The first rtp time stamp used for created rtp data
-     * packets. The value is chosen randomly.
-     */
-    uint32 _timeStampBase;
-
-    /**
-     * The current rtp time stamp.
-     */
-    uint32 _timeStamp;
-
-    /**
-     * The first sequence number used for created rtp data
-     * packets. The value is chosen randomly.
-     */
-    uint16 _sequenceNumberBase;
-
-    /**
-     * The current sequence number.
-     */
-    uint16 _sequenceNumber;
-
-    /**
-     * The current state of data transmission.
-     */
-    SenderStatus _status;
-
-    /**
-    A self message used as timer for the moment the next packet must be sent.
-    It's a member variable because when playing gets paused or stopped the timer
-    must be cancelled.
-    */
-    cMessage *_reminderMessage;
-
     /**
      * This method is called when a newly create sender module
      * received its initialization message from profile module.
@@ -203,6 +143,66 @@ class INET_API RTPPayloadSender : public cSimpleModule
      * useful. This implementation doesn't send packets it just returns
      */
     virtual bool sendPacket();
+
+  protected:
+    /**
+     * The input file stream for the data file.
+     */
+    std::ifstream  _inputFileStream;
+
+    /**
+     * The maximum size of an RTPPacket.
+     */
+    int _mtu;
+
+    /**
+     * The ssrc identifier of this sender module.
+     */
+    uint32 _ssrc;
+
+    /**
+     * The payload type this sender creates.
+     */
+    int _payloadType;
+
+    /**
+     * The clock rate in ticks per second this sender uses.
+     */
+    int _clockRate;
+
+    /**
+     * The first rtp time stamp used for created rtp data
+     * packets. The value is chosen randomly.
+     */
+    uint32 _timeStampBase;
+
+    /**
+     * The current rtp time stamp.
+     */
+    uint32 _timeStamp;
+
+    /**
+     * The first sequence number used for created rtp data
+     * packets. The value is chosen randomly.
+     */
+    uint16 _sequenceNumberBase;
+
+    /**
+     * The current sequence number.
+     */
+    uint16 _sequenceNumber;
+
+    /**
+     * The current state of data transmission.
+     */
+    SenderStatus _status;
+
+    /**
+    A self message used as timer for the moment the next packet must be sent.
+    It's a member variable because when playing gets paused or stopped the timer
+    must be cancelled.
+    */
+    cMessage *_reminderMessage;
 };
 
 #endif

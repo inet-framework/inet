@@ -61,7 +61,8 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      * Called by the rtp module to inform the rtcp module about mandatory
      * information for starting the rtp session.
      */
-    virtual void setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port);
+    virtual void setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth,
+            int rtcpPercentage, IPAddress address, int port);
 
     /**
      * Called by the rtcp module after it has waited for half an rtcp interval
@@ -77,7 +78,8 @@ class RTPInnerPacket : public RTPInnerPacket_Base
     virtual void setSenderModuleDeletedPkt(uint32 ssrc);
 
     virtual void setInitializeSenderModulePkt(uint32 ssrc, const char *fileName, int mtu);
-    virtual void setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase);
+    virtual void setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate,
+            int timeStampBase, int sequenceNumberBase);
 
     virtual void setSenderModuleControlPkt(uint32 ssrc, RTPSenderControlMessage *msg);
     virtual void setSenderModuleStatusPkt(uint32 ssrc, RTPSenderStatusMessage *msg);

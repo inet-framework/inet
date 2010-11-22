@@ -51,7 +51,16 @@ void RTPPayloadSender::initialize()
 
 void RTPPayloadSender::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == findGate("profileIn"))
+    if (msg == _reminderMessage)
+    {
+        delete msg;
+        _reminderMessage = NULL;
+        if (!sendPacket())
+        {
+            endOfFile();
+        }
+    }
+    else if (msg->getArrivalGateId() == findGate("profileIn"))
     {
         RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
         if (rinpIn->getType() == RTP_INP_INITIALIZE_SENDER_MODULE)
@@ -62,50 +71,42 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
         {
             RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
             delete rinpIn;
-            short command = rscm->getCommand();
-            if (command == RTP_CONTROL_PLAY)
+            switch(rscm->getCommand())
             {
+            case RTP_CONTROL_PLAY:
                 play();
-            }
-            else if (command == RTP_CONTROL_PLAY_UNTIL_TIME)
-            {
+                break;
+
+            case RTP_CONTROL_PLAY_UNTIL_TIME:
                 playUntilTime(rscm->getCommandParameter1());
-            }
-            else if (command == RTP_CONTROL_PLAY_UNTIL_BYTE)
-            {
+                break;
+
+            case RTP_CONTROL_PLAY_UNTIL_BYTE:
                 playUntilByte(rscm->getCommandParameter1());
-            }
-            else if (command == RTP_CONTROL_PAUSE)
-            {
+                break;
+
+            case RTP_CONTROL_PAUSE:
                 pause();
-            }
-            else if (command ==RTP_CONTROL_STOP)
-            {
+                break;
+
+            case RTP_CONTROL_STOP:
                 stop();
-            }
-            else if (command == RTP_CONTROL_SEEK_TIME)
-            {
+                break;
+
+            case RTP_CONTROL_SEEK_TIME:
                 seekTime(rscm->getCommandParameter1());
-            }
-            else if (command == RTP_CONTROL_SEEK_BYTE)
-            {
+                break;
+
+            case RTP_CONTROL_SEEK_BYTE:
                 seekByte(rscm->getCommandParameter1());
-            }
-            else
-            {
+                break;
+
+            default:
                 error("unknown sender control message");
+                break;
             }
             delete rscm;
         }
-    }
-    else if (msg == _reminderMessage)
-    {
-        _reminderMessage = NULL;
-        if (!sendPacket())
-        {
-            endOfFile();
-        }
-        delete msg;
     }
     else
     {

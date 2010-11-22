@@ -27,7 +27,7 @@ void RTPApplication::initialize(int stage)
 {
     // because of IPAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     // read all omnet parameters
@@ -88,11 +88,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 case ENTER_SESSION:
                 {
                     ev << "enterSession" << endl;
-//                    // create an RTPInterfacePacket to enter the session
-//                    RTPInterfacePacket *rifpOut1 = new RTPInterfacePacket("enterSession()");
-//                    rifpOut1->enterSession(opp_strdup(_commonName), opp_strdup(_profileName), _bandwidth, _destinationAddress, _port);
-//                    // and send it to the rtp layer
-//                    send(rifpOut1, "rtpOut");
                     RTPCIEnterSession* ci = new RTPCIEnterSession();
                     ci->setCommonName(_commonName);
                     ci->setProfileName(_profileName);
@@ -108,11 +103,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 case START_TRANSMISSION:
                 {
                     ev << "startTransmission" << endl;
-//                    RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
-//                    rscm->setCommand("PLAY");
-//                    RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(PLAY)");
-//                    rifpOut->senderModuleControl(ssrc, rscm);
-//                    send(rifpOut, "rtpOut");
                     RTPCISenderControl *ci = new RTPCISenderControl();
                     ci->setCommand(RTP_CONTROL_PLAY);
                     ci->setSsrc(ssrc);
@@ -129,11 +119,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 case STOP_TRANSMISSION:
                 {
                     ev << "stopTransmission" << endl;
-//                    RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
-//                    rscm->setCommand("STOP");
-//                    RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(STOP)");
-//                    rifpOut->senderModuleControl(ssrc, rscm);
-//                    send(rifpOut, "rtpOut");
                     RTPCISenderControl *ci = new RTPCISenderControl();
                     ci->setCommand(RTP_CONTROL_STOP);
                     ci->setSsrc(ssrc);
@@ -146,9 +131,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 case LEAVE_SESSION:
                 {
                     ev << "leaveSession" << endl;
-//                    RTPInterfacePacket *rifpOut = new RTPInterfacePacket("leaveSession()");
-//                    rifpOut->leaveSession();
-//                    send(rifpOut, "rtpOut");
                     RTPCILeaveSession* ci = new RTPCILeaveSession();
                     cMessage *msg = new RTPControlMsg("Leave Session");
                     msg->setControlInfo(ci);

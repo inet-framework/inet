@@ -236,7 +236,8 @@ void RTCP::createSocket()
 
 void RTCP::scheduleInterval()
 {
-    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos.size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos.size()) /
+            (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
     // interval length must be at least 5 seconds
     if (intervalLength < 5.0)
@@ -414,16 +415,10 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 }
                 else
                 {
-                    if (participantInfo->getAddress() == address)
+                    if ((participantInfo->getAddress() == address) &&
+                            (participantInfo->getRTCPPort() == PORT_UNDEF))
                     {
-                        if (participantInfo->getRTCPPort() == PORT_UNDEF)
-                        {
-                            participantInfo->setRTCPPort(port);
-                        }
-                        else
-                        {
-                            // check for ssrc conflict
-                        }
+                        participantInfo->setRTCPPort(port);
                     }
                     else
                     {
@@ -465,16 +460,10 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 }
                 else
                 {
-                    if (participantInfo->getAddress() == address)
+                    if ((participantInfo->getAddress() == address) &&
+                            (participantInfo->getRTCPPort() == PORT_UNDEF))
                     {
-                        if (participantInfo->getRTCPPort() == PORT_UNDEF)
-                        {
-                            participantInfo->setRTCPPort(port);
-                        }
-                        else
-                        {
-                            // check for ssrc conflict
-                        }
+                        participantInfo->setRTCPPort(port);
                     }
                     else
                     {
@@ -497,7 +486,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                         }
                         else
                             //cancelAndDelete(receptionReport);
-                             delete receptionReport;
+                            delete receptionReport;
                     }
                 }
             }
