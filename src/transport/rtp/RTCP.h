@@ -32,203 +32,201 @@
  */
 class INET_API RTCP : public cSimpleModule
 {
-    public:
-        RTCP();
+  public:
+    RTCP();
+    virtual ~RTCP();
 
-    protected:
-        /**
-         * Initializes variables.
-         */
-        virtual void initialize();
+  protected:
+    /**
+     * Initializes variables.
+     */
+    virtual void initialize();
 
-        virtual ~RTCP();
+    /**
+     * Message handling. Dispatches messages by arrival gate.
+     */
+    virtual void handleMessage(cMessage *msg);
 
-        /**
-         * Message handling. Dispatches messages by arrival gate.
-         */
-        virtual void handleMessage(cMessage *msg);
+    /**
+     * Handles messages from the RTP module.
+     */
+    virtual void handleMessageFromRTP(cMessage *msg);
 
-        /**
-         * Handles messages from the RTP module.
-         */
-        virtual void handleMessageFromRTP(cMessage *msg);
+    /**
+     * Handles messages coming from the socket layer.
+     */
+    virtual void handleMessageFromUDP(cMessage *msg);
 
-        /**
-         * Handles messages coming from the socket layer.
-         */
-        virtual void handleMessageFromUDP(cMessage *msg);
+    /**
+     * Handles self messages.
+     */
+    virtual void handleSelfMessage(cMessage *msg);
 
-        /**
-         * Handles self messages.
-         */
-        virtual void handleSelfMessage(cMessage *msg);
+    /**
+     * Initializes the rtcp module when the session is started.
+     */
+    virtual void initializeRTCP(RTPInnerPacket *rinp);
 
-        /**
-         * Initializes the rtcp module when the session is started.
-         */
-        virtual void initializeRTCP(RTPInnerPacket *rinp);
+    /**
+     * Stores information about the new transmission.
+     */
+    virtual void senderModuleInitialized(RTPInnerPacket *rinp);
 
-        /**
-         * Stores information about the new transmission.
-         */
-        virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+    /**
+     * Stores information about an outgoing RTP data packet.
+     */
+    virtual void dataOut(RTPInnerPacket *packet);
 
-        /**
-         * Stores information about an outgoing RTP data packet.
-         */
-        virtual void dataOut(RTPInnerPacket *packet);
+    /**
+     * Stores information about an outgoing RTP data packet.
+     */
+    virtual void dataIn(RTPInnerPacket *rinp);
 
-        /**
-         * Stores information about an outgoing RTP data packet.
-         */
-        virtual void dataIn(RTPInnerPacket *rinp);
+    /**
+     * Makes the rtcp module send an RTCPByePacket in the next
+     * RTCPCompoundPacket to tell other participants in the RTP
+     * session that this end system leaves.
+    */
+    virtual void leaveSession(RTPInnerPacket *rinp);
 
-        /**
-         * Makes the rtcp module send an RTCPByePacket in the next
-         * RTCPCompoundPacket to tell other participants in the RTP
-         * session that this end system leaves.
-        */
-        virtual void leaveSession(RTPInnerPacket *rinp);
+    /**
+     * Called when the socket layer has finished a connect.
+     */
+    virtual void connectRet();
 
-        /**
-         * Called when the socket layer has finished a connect.
-         */
-        virtual void connectRet();
+    /**
+     * Called when this rtcp module receives data from the
+     * socket layer.
+     */
+    virtual void readRet(cPacket *sifpIn);
 
-        /**
-         * Called when this rtcp module receives data from the
-         * socket layer.
-         */
-        virtual void readRet(cPacket *sifpIn);
+    /**
+     * Request a server socket from the socket layer.
+     */
+    virtual void createSocket();
 
-    protected:
-        /**
-         * The maximum size an RTCPCompundPacket can have.
-         */
-        int _mtu;
+    /**
+     * Chooses the ssrc identifier for this end system.
+     */
+    virtual void chooseSSRC();
 
-        /**
-         * The bandwidth for this RTP session.
-         */
-        int _bandwidth;
+    /**
+     * Calculates the length of the next rtcp interval an issues
+     * a self message to remind itself.
+     */
+    virtual void scheduleInterval();
 
-        /**
-         * The percentage of bandwidth for rtcp.
-         */
-        int _rtcpPercentage;
+    /**
+     * Creates and sends an RTCPCompoundPacket.
+     */
+    virtual void createPacket();
 
-        /**
-         * The destination address.
-         */
-        IPAddress _destinationAddress;
+    /**
+     * Extracts information of a sent RTPPacket.
+     */
+    virtual void processOutgoingRTPPacket(RTPPacket *packet);
 
-        /**
-         * The rtcp port.
-         */
-        int _port;
+    /**
+     * Extracts information of a received RTPPacket.
+     */
+    virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port);
 
-        /**
-         * True when this end system has chosen its ssrc identifier.
-         */
-        bool _ssrcChosen;
+    /**
+     * Extracts information of a received RTCPCompoundPacket.
+     */
+    virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port);
 
-        /**
-         * True when this end system is about to leave the session.
-         */
-        bool _leaveSession;
+    /**
+     * Returns the RTPParticipantInfo object used for storing information
+     * about the RTP end system with this ssrc identifier.
+     * Returns NULL if this end system is unknown.
+     */
+    virtual RTPParticipantInfo* findParticipantInfo(uint32 ssrc);
 
-        /**
-         * The RTPSenderInfo about this end system.
-         */
-        RTPSenderInfo *_senderInfo;
+    /**
+     * Recalculates the average size of an RTCPCompoundPacket when
+     * one of this size has been sent or received.
+     */
+    virtual void calculateAveragePacketSize(int size);
 
-        /**
-         * Information about all known RTP end system participating in
-         * this RTP session.
-         */
-        cArray *_participantInfos;
+  protected:
+    /**
+     * The maximum size an RTCPCompundPacket can have.
+     */
+    int _mtu;
 
-        /**
-         * The server socket for receiving rtcp packets.
-         */
-        int _socketFdIn;
+    /**
+     * The bandwidth for this RTP session.
+     */
+    int _bandwidth;
 
-        /**
-         * The client socket for sending rtcp packets.
-         */
-        int _socketFdOut;
+    /**
+     * The percentage of bandwidth for rtcp.
+     */
+    int _rtcpPercentage;
 
-        /**
-         * The number of packets this rtcp module has
-         * calculated.
-         */
-        int _packetsCalculated;
+    /**
+     * The destination address.
+     */
+    IPAddress _destinationAddress;
 
-        /**
-         * The average size of an RTCPCompoundPacket.
-         */
-        double _averagePacketSize;
+    /**
+     * The rtcp port.
+     */
+    int _port;
 
-        /**
-         * The output vector for statistical data about the
-         * behaviour of rtcp. Every participant's rtcp module
-         * writes its calculated rtcp interval (without variation
-         */
-//        cOutVector *_rtcpIntervalOutVector;
+    /**
+     * True when this end system has chosen its ssrc identifier.
+     */
+    bool _ssrcChosen;
 
-        /**
-         * Request a server socket from the socket layer.
-         */
-        virtual void createSocket();
+    /**
+     * True when this end system is about to leave the session.
+     */
+    bool _leaveSession;
 
-        /**
-         * Chooses the ssrc identifier for this end system.
-         */
-        virtual void chooseSSRC();
+    /**
+     * The RTPSenderInfo about this end system.
+     */
+    RTPSenderInfo *_senderInfo;
 
-        /**
-         * Calculates the length of the next rtcp interval an issues
-         * a self message to remind itself.
-         */
-        virtual void scheduleInterval();
+    /**
+     * Information about all known RTP end system participating in
+     * this RTP session.
+     */
+    cArray _participantInfos;
 
-        /**
-         * Creates and sends an RTCPCompoundPacket.
-         */
-        virtual void createPacket();
+    /**
+     * The server socket for receiving rtcp packets.
+     */
+    int _socketFdIn;
 
-        /**
-         * Extracts information of a sent RTPPacket.
-         */
-        virtual void processOutgoingRTPPacket(RTPPacket *packet);
+    /**
+     * The client socket for sending rtcp packets.
+     */
+    int _socketFdOut;
 
-        /**
-         * Extracts information of a received RTPPacket.
-         */
-        virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port);
+    /**
+     * The number of packets this rtcp module has
+     * calculated.
+     */
+    int _packetsCalculated;
 
-        /**
-         * Extracts information of a received RTCPCompoundPacket.
-         */
-        virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port);
+    /**
+     * The average size of an RTCPCompoundPacket.
+     */
+    double _averagePacketSize;
 
-        /**
-         * Returns the RTPParticipantInfo object used for storing information
-         * about the RTP end system with this ssrc identifier.
-         * Returns NULL if this end system is unknown.
-         */
-        virtual RTPParticipantInfo* findParticipantInfo(uint32 ssrc);
+    /**
+     * The output vector for statistical data about the
+     * behaviour of rtcp. Every participant's rtcp module
+     * writes its calculated rtcp interval (without variation
+     */
+//  cOutVector *_rtcpIntervalOutVector;
 
-        /**
-         * Recalculates the average size of an RTCPCompoundPacket when
-         * one of this size has been sent or received.
-         */
-        virtual void calculateAveragePacketSize(int size);
-
-    protected:
-        //statistics
-        simsignal_t rcvdPkBytesSignal;
-        simsignal_t endToEndDelaySignal;
+    //statistics
+    simsignal_t rcvdPkBytesSignal;
+    simsignal_t endToEndDelaySignal;
 };
 
 #endif

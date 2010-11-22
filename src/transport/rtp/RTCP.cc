@@ -31,12 +31,11 @@ Define_Module(RTCP);
 
 RTCP::RTCP()
 {
-    _participantInfos = NULL;
+    _senderInfo = NULL;
 }
 
 void RTCP::initialize()
 {
-
     // initialize variables
     _ssrcChosen = false;
     _leaveSession = false;
@@ -46,7 +45,7 @@ void RTCP::initialize()
     _packetsCalculated = 0;
     _averagePacketSize = 0.0;
 
-    _participantInfos = new cArray("ParticipantInfos");
+    _participantInfos.setName("ParticipantInfos");
 
     rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
     endToEndDelaySignal = registerSignal("endToEndDelay");
@@ -54,7 +53,8 @@ void RTCP::initialize()
 
 RTCP::~RTCP()
 {
-    delete _participantInfos;
+    if (!_ssrcChosen)
+        delete _senderInfo;
 }
 
 void RTCP::handleMessage(cMessage *msg)
@@ -209,16 +209,19 @@ void RTCP::createSocket()
 {
     // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
     // we just manage the UDP socket by hand...
-    if (_socketFdIn == -1) {
+    if (_socketFdIn == -1)
+    {
         _socketFdIn = UDPSocket::generateSocketId();
         UDPControlInfo *ctrl = new UDPControlInfo();
         IPAddress ipaddr(_destinationAddress);
 
-        if (ipaddr.isMulticast()) {
+        if (ipaddr.isMulticast())
+        {
             ctrl->setSrcAddr(IPAddress(_destinationAddress));
             ctrl->setSrcPort(_port);
         }
-        else {
+        else
+        {
              ctrl->setSrcPort(_port);
              ctrl->setSockId(_socketFdOut);
         }
@@ -233,7 +236,7 @@ void RTCP::createSocket()
 
 void RTCP::scheduleInterval()
 {
-    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos.size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
     // interval length must be at least 5 seconds
     if (intervalLength < 5.0)
@@ -261,7 +264,7 @@ void RTCP::chooseSSRC()
 
     ev << "chooseSSRC" << ssrc;
     _senderInfo->setSsrc(ssrc);
-    _participantInfos->add(_senderInfo);
+    _participantInfos.add(_senderInfo);
     _ssrcChosen = true;
 }
 
@@ -286,11 +289,11 @@ void RTCP::createPacket()
     reportPacket->setSsrc(_senderInfo->getSsrc());
 
     // insert receiver reports for packets from other sources
-    for (int i = 0; i < _participantInfos->size(); i++)
+    for (int i = 0; i < _participantInfos.size(); i++)
     {
-        if (_participantInfos->exist(i))
+        if (_participantInfos.exist(i))
         {
-            RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos->get(i));
+            RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos.get(i));
             if (participantInfo->getSsrc() != _senderInfo->getSsrc())
             {
                 ReceptionReport *report = ((RTPReceiverInfo *)participantInfo)->receptionReport(simTime());
@@ -303,7 +306,7 @@ void RTCP::createPacket()
 
             if (participantInfo->toBeDeleted(simTime()))
             {
-                _participantInfos->remove(participantInfo);
+                _participantInfos.remove(participantInfo);
                 delete participantInfo;
                 // perhaps inform the profile
             }
@@ -363,7 +366,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int po
         participantInfo = new RTPParticipantInfo(ssrc);
         participantInfo->setAddress(address);
         participantInfo->setRTPPort(port);
-        _participantInfos->add(participantInfo);
+        _participantInfos.add(participantInfo);
     }
     else
     {
@@ -407,7 +410,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                     participantInfo = new RTPReceiverInfo(ssrc);
                     participantInfo->setAddress(address);
                     participantInfo->setRTCPPort(port);
-                    _participantInfos->add(participantInfo);
+                    _participantInfos.add(participantInfo);
                 }
                 else
                 {
@@ -458,7 +461,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                     participantInfo = new RTPReceiverInfo(ssrc);
                     participantInfo->setAddress(address);
                     participantInfo->setRTCPPort(port);
-                    _participantInfos->add(participantInfo);
+                    _participantInfos.add(participantInfo);
                 }
                 else
                 {
@@ -518,7 +521,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                             participantInfo = new RTPReceiverInfo(ssrc);
                             participantInfo->setAddress(address);
                             participantInfo->setRTCPPort(port);
-                            _participantInfos->add(participantInfo);
+                            _participantInfos.add(participantInfo);
                         }
                         else
                         {
@@ -536,7 +539,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
 
                 if (participantInfo != NULL && participantInfo != _senderInfo)
                 {
-                    _participantInfos->remove(participantInfo);
+                    _participantInfos.remove(participantInfo);
 
                     delete participantInfo;
                     // perhaps it would be useful to inform
@@ -557,15 +560,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
 RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 {
     char *ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
-    int participantIndex = _participantInfos->find(ssrcString);
-    if (participantIndex != -1)
-    {
-        return (RTPParticipantInfo *)(_participantInfos->get(participantIndex));
-    }
-    else
-    {
-        return NULL;
-    }
+    return (RTPParticipantInfo *)(_participantInfos.get(ssrcString));
 }
 
 void RTCP::calculateAveragePacketSize(int size)

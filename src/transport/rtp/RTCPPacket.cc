@@ -6,17 +6,8 @@
 
 Register_Class(RTCPPacket);
 
-RTCPPacket::RTCPPacket(const char *name, int kind) : RTCPPacket_Base(name,kind)
-{
-}
-
 
 Register_Class(RTCPCompoundPacket);
-
-RTCPCompoundPacket::RTCPCompoundPacket(const char *name, int kind)
-  : RTCPCompoundPacket_Base(name,kind)
-{
-}
 
 void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket)
 {

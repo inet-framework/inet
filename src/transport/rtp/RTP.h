@@ -77,7 +77,9 @@ class INET_API RTP : public cSimpleModule
     virtual void leaveSession(RTPCILeaveSession *rifp);
 
     virtual void createSenderModule(RTPCICreateSenderModule *rifp);
+
     virtual void deleteSenderModule(RTPCIDeleteSenderModule *rifp);
+
     virtual void senderModuleControl(RTPCISenderControl *rifp);
 
     /**
@@ -86,8 +88,11 @@ class INET_API RTP : public cSimpleModule
     virtual void profileInitialized(RTPInnerPacket *rinp);
 
     virtual void senderModuleCreated(RTPInnerPacket *rinp);
+
     virtual void senderModuleDeleted(RTPInnerPacket *rinp);
+
     virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+
     virtual void senderModuleStatus(RTPInnerPacket *rinp);
 
     /**

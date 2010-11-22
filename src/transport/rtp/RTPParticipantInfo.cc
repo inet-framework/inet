@@ -24,9 +24,9 @@
 Register_Class(RTPParticipantInfo);
 
 
-RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject()
+RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc)
+  : cObject(), _sdesChunk("SDESChunk", ssrc)
 {
-    _sdesChunk = new SDESChunk("SDESChunk", ssrc);
     // because there haven't been sent any RTP packets
     // by this endsystem at all, the number of silent
     // intervals would be undefined; to calculate with
@@ -45,13 +45,12 @@ RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo
 
 RTPParticipantInfo::~RTPParticipantInfo()
 {
-    delete _sdesChunk;
 }
 
 RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& participantInfo)
 {
     cObject::operator=(participantInfo);
-    _sdesChunk = new SDESChunk(*(participantInfo._sdesChunk));
+    _sdesChunk = participantInfo._sdesChunk;
     _address = participantInfo._address;
     _rtpPort = participantInfo._rtpPort;
     _rtcpPort = participantInfo._rtcpPort;
@@ -95,12 +94,12 @@ void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arriva
 
 SDESChunk *RTPParticipantInfo::getSDESChunk() const
 {
-    return new SDESChunk(*_sdesChunk);
+    return new SDESChunk(_sdesChunk);
 }
 
 void RTPParticipantInfo::addSDESItem(SDESItem *sdesItem)
 {
-    _sdesChunk->addSDESItem(sdesItem);
+    _sdesChunk.addSDESItem(sdesItem);
 }
 
 bool RTPParticipantInfo::isSender() const
@@ -130,17 +129,17 @@ bool RTPParticipantInfo::toBeDeleted(simtime_t now)
 
 uint32 RTPParticipantInfo::getSsrc() const
 {
-    return _sdesChunk->getSsrc();
+    return _sdesChunk.getSsrc();
 }
 
 void RTPParticipantInfo::setSsrc(uint32 ssrc)
 {
-    _sdesChunk->setSsrc(ssrc);
+    _sdesChunk.setSsrc(ssrc);
 }
 
 void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content)
 {
-    _sdesChunk->addSDESItem(new SDESItem(type, content));
+    _sdesChunk.addSDESItem(new SDESItem(type, content));
 }
 
 IPAddress RTPParticipantInfo::getAddress() const

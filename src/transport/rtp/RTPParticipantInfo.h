@@ -211,7 +211,7 @@ class INET_API RTPParticipantInfo : public cObject
      * Used for storing sdes information about this RTP endsystem.
      * The ssrc identifier is also stored here.
      */
-    SDESChunk *_sdesChunk;
+    SDESChunk _sdesChunk;
 
     /**
      * Used for storing the ip address of this endsystem.
