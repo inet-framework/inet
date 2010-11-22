@@ -15,9 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPPacket.h
- * This file declares the class RTPPacket.
- */
 
 #ifndef __INET_RTPPACKET_H
 #define __INET_RTPPACKET_H
@@ -26,13 +23,12 @@
 #include "RTPPacket_m.h"
 
 /**
- * This class represents an rtp data packet.
+ * This class represents an RTP data packet.
  * Real data can either be encapsulated or simulated by
  * adding length.
- * Following rtp header fields exist but aren't used: padding, extension,
+ * Following RTP header fields exist but aren't used: padding, extension,
  * csrcCount. The csrcList can't be used because csrcCount is always 0.
  */
-
 class RTPPacket : public RTPPacket_Base
 {
   public:

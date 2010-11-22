@@ -15,9 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPProfile.h
- * This file declares the class RTPProfile.
- */
 
 #ifndef __INET_RTPPROFILE_H
 #define __INET_RTPPROFILE_H

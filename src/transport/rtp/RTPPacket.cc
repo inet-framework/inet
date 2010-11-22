@@ -15,14 +15,11 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPPacket.cc
- * This file contains the implementaion of member functions of the class RTPPacket.
- */
 
 #include "RTPPacket.h"
 
-Register_Class(RTPPacket);
 
+Register_Class(RTPPacket);
 
 std::string RTPPacket::info() const
 {

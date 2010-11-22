@@ -15,9 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPInnerPacket.h
- * This file declares the class RTPInnerPacket.
- */
 
 #ifndef __INET_RTPINNERPACKET_H
 #define __INET_RTPINNERPACKET_H
@@ -26,7 +23,7 @@
 
 
 /**
- * This class is used for communication between submodules of the rtp layer module.
+ * This class is used for communication between submodules of the RTP layer module.
  */
 class RTPInnerPacket : public RTPInnerPacket_Base
 {
@@ -117,4 +114,3 @@ class RTPInnerPacket : public RTPInnerPacket_Base
 };
 
 #endif
-

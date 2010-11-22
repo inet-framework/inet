@@ -15,16 +15,15 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPProfile.cc
- * This file contains the implementaion of member functions of the class RTPProfile.
- */
 
 #include <string.h>
+
 #include "RTPProfile.h"
+
 #include "RTPInnerPacket.h"
-#include "RTPPayloadSender.h"
-#include "RTPPayloadReceiver.h"
 #include "RTPParticipantInfo.h"
+#include "RTPPayloadReceiver.h"
+#include "RTPPayloadSender.h"
 
 
 Define_Module(RTPProfile);

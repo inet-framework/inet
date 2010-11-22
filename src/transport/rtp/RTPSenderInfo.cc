@@ -16,10 +16,6 @@
  ***************************************************************************/
 
 
-/** \file RTPSenderInfo.cc
- * This file contains the implementation of member functions of the class RTPSenderInfo.
- */
-
 #include "RTPSenderInfo.h"
 
 
@@ -42,7 +38,6 @@ RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantIn
 
 RTPSenderInfo::~RTPSenderInfo()
 {
-
 }
 
 RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)

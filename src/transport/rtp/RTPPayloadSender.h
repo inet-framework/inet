@@ -16,10 +16,6 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadSender.h
- * This file declares the class RTPPayloadSender.
- */
-
 #ifndef __INET_RTPPAYLOADSENDER_H
 #define __INET_RTPPAYLOADSENDER_H
 
@@ -31,7 +27,7 @@
 
 /**
  * The class RTPPayloadSender is the base class for all modules creating
- * rtp data packets. It provides functionality needed by every rtp data
+ * RTP data packets. It provides functionality needed by every RTP data
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
  */
@@ -44,7 +40,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
         RTPPayloadSender();
 
         /**
-         * Cleaning up. Calls closeSourceFile.
+         * Destructor. Calls closeSourceFile.
          */
         virtual ~RTPPayloadSender();
 

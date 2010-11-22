@@ -15,12 +15,9 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPParticipantInfo.cc
- * This file contains the implementation of member functions of the class RTPParticipantInfo.
- * \sa RTPParticipantInfo
- */
 
 #include "RTPParticipantInfo.h"
+
 #include "reports.h"
 
 
@@ -30,7 +27,7 @@ Register_Class(RTPParticipantInfo);
 RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject()
 {
     _sdesChunk = new SDESChunk("SDESChunk", ssrc);
-    // because there haven't been sent any rtp packets
+    // because there haven't been sent any RTP packets
     // by this endsystem at all, the number of silent
     // intervals would be undefined; to calculate with
     // it but not to regard this endsystem as a sender

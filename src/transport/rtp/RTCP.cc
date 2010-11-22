@@ -15,20 +15,16 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTCP.cc
- * This file contains the implementation of member functions of the class
- * RTCP.
- */
+
+#include "UDPSocket.h"
 
 #include "IPAddress.h"
-#include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
-
 #include "RTCP.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
-#include "RTPSenderInfo.h"
 #include "RTPReceiverInfo.h"
+#include "RTPSenderInfo.h"
+#include "UDPControlInfo_m.h"
 
 
 Define_Module(RTCP);
@@ -64,14 +60,21 @@ RTCP::~RTCP()
 void RTCP::handleMessage(cMessage *msg)
 {
     // first distinguish incoming messages by arrival gate
-    if (msg->getArrivalGateId() == findGate("rtpIn")) {
+    if (msg->isSelfMessage())
+    {
+        handleSelfMessage(msg);
+    }
+    else if (msg->getArrivalGateId() == findGate("rtpIn"))
+    {
         handleMessageFromRTP(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("udpIn")) {
+    else if (msg->getArrivalGateId() == findGate("udpIn"))
+    {
         handleMessageFromUDP(msg);
     }
-    else {
-        handleSelfMessage(msg);
+    else
+    {
+        error("Message from unknown gate");
     }
 
     delete msg;
@@ -123,7 +126,8 @@ void RTCP::handleMessageFromUDP(cMessage *msg)
 void RTCP::handleSelfMessage(cMessage *msg)
 {
     // it's time to create an rtcp packet
-    if (!_ssrcChosen) {
+    if (!_ssrcChosen)
+    {
         chooseSSRC();
         RTPInnerPacket *rinp1 = new RTPInnerPacket("rtcpInitialized()");
         rinp1->rtcpInitialized(_senderInfo->getSsrc());
@@ -132,7 +136,8 @@ void RTCP::handleSelfMessage(cMessage *msg)
 
     createPacket();
 
-    if (!_leaveSession) {
+    if (!_leaveSession)
+    {
         scheduleInterval();
     }
 }

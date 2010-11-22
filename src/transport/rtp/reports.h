@@ -26,7 +26,7 @@
 #include "reports_m.h"
 
 /**
- * The class SenderReport represents an rtp sender report as contained
+ * The class SenderReport represents an RTP sender report as contained
  * in an RTCPSenderReportPacket.
  */
 class SenderReport : public SenderReport_Base
@@ -50,9 +50,8 @@ class SenderReport : public SenderReport_Base
     virtual void dump(std::ostream& os) const;
 };
 
-
 /**
- * The class ReceptionReport represents an rtp receiver report stored
+ * The class ReceptionReport represents an RTP receiver report stored
  * in an RTPSenderReportPacket or RTPReceiverReport.
  */
 class ReceptionReport : public ReceptionReport_Base

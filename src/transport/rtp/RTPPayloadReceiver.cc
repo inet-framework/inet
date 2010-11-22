@@ -16,10 +16,6 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadReceiver.cc
- * This file contains method implementations for RTPPayloadReceiver.
- */
-
 #include <fstream>
 
 #include "RTPPayloadReceiver.h"

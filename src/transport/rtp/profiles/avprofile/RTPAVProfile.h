@@ -15,10 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPAVProfile.h
- * This file file declares the class RTPAVProfile, a subclass
- * of RTPProfile.
- */
 
 #include <omnetpp.h>
 

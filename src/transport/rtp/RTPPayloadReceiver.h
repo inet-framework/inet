@@ -25,13 +25,14 @@
 
 
 #include <fstream>
+
 #include "INETDefs.h"
 #include "RTPPacket.h"
 
 
 /**
  * The class RTPPayloadReceiver acts as a base class for modules
- * processing incoming rtp data packets.
+ * processing incoming RTP data packets.
  */
 class INET_API RTPPayloadReceiver : public cSimpleModule
 {

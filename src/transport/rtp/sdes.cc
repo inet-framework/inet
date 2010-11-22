@@ -15,12 +15,9 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file sdes.cc
- * This file contains the implementations for member functions of the
- * classes SDESItem and SDESChunk.
- */
 
 #include <string.h>
+
 #include "sdes.h"
 
 
@@ -32,7 +29,7 @@ SDESItem::SDESItem() : cObject()
     _type = SDES_UNDEF;
     _length = 2;
     _content = "";
-};
+}
 
 SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
 {
@@ -44,16 +41,16 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
     // one byte for the length field and bytes for
     // the content string
     _length = 2 + strlen(_content);
-};
+}
 
 SDESItem::SDESItem(const SDESItem& sdesItem) : cObject()
 {
     operator=(sdesItem);
-};
+}
 
 SDESItem::~SDESItem()
 {
-};
+}
 
 SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
 {
@@ -62,36 +59,36 @@ SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
     _length = sdesItem._length;
     _content = opp_strdup(sdesItem._content);
     return *this;
-};
+}
 
 SDESItem *SDESItem::dup() const
 {
     return new SDESItem(*this);
-};
+}
 
 std::string SDESItem::info() const
 {
     std::stringstream out;
     out << "SDESItem=" << _content;
     return out.str();
-};
+}
 
 void SDESItem::dump(std::ostream& os) const
 {
     os << "SDESItem:" << endl;
     os << "  type = " << _type << endl;
     os << "  content = " << _content << endl;
-};
+}
 
 SDESItem::SDES_ITEM_TYPE SDESItem::getType() const
 {
     return _type;
-};
+}
 
 const char *SDESItem::getContent() const
 {
     return opp_strdup(_content);
-};
+}
 
 int SDESItem::getLength() const
 {
@@ -99,7 +96,7 @@ int SDESItem::getLength() const
     // one byte for type, one for length
     // and the string
     return _length + 2;
-};
+}
 
 
 //
@@ -108,22 +105,21 @@ int SDESItem::getLength() const
 
 Register_Class(SDESChunk);
 
-
 SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name)
 {
     _ssrc = ssrc;
     _length = 4;
-};
+}
 
 SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk)
 {
     setName(sdesChunk.getName());
     operator=(sdesChunk);
-};
+}
 
 SDESChunk::~SDESChunk()
 {
-};
+}
 
 SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
 {
@@ -131,19 +127,19 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
     _ssrc = sdesChunk._ssrc;
     _length = sdesChunk._length;
     return *this;
-};
+}
 
 SDESChunk *SDESChunk::dup() const
 {
     return new SDESChunk(*this);
-};
+}
 
 std::string SDESChunk::info() const
 {
     std::stringstream out;
     out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();
     return out.str();
-};
+}
 
 void SDESChunk::dump(std::ostream& os) const
 {
@@ -153,10 +149,10 @@ void SDESChunk::dump(std::ostream& os) const
     {
         if (exist(i))
         {
-            //FIXME get(i)->dump(os);
-        };
-    };
-};
+            ((const SDESItem *)(get(i)))->dump(os);
+        }
+    }
+}
 
 void SDESChunk::addSDESItem(SDESItem *sdesItem)
 {
@@ -170,26 +166,26 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem)
                 remove(compareItem);
                 _length = _length - compareItem->getLength();
                 delete compareItem;
-            };
+            }
         }
-    };
+    }
 
     //sdesItem->setOwner(this);
     add(sdesItem);
     _length += sdesItem->getLength();
-};
+}
 
 uint32 SDESChunk::getSsrc() const
 {
     return _ssrc;
-};
+}
 
 void SDESChunk::setSsrc(uint32 ssrc)
 {
     _ssrc = ssrc;
-};
+}
 
 int SDESChunk::getLength() const
 {
     return _length;
-};
+}

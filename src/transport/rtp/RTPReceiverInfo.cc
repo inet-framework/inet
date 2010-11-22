@@ -16,10 +16,6 @@
  ***************************************************************************/
 
 
-/** \file RTPReceiverInfo.cc
- * This file contains the implementation of member functions of the class RTPReceiverInfo.
- */
-
 #include "RTPReceiverInfo.h"
 
 
@@ -47,10 +43,7 @@ RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     _inactiveIntervals = 0;
     _startOfInactivity = 0.0;
     _itemsReceived = 0;
-    //_jitterOutVector.setName("Jitter");
-    //_packetLostOutVector.setName("Packet Lost");
-
-    //packetSequenceLostLogFile = NULL;
+    packetSequenceLostLogFile = NULL;
 }
 
 RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo()
@@ -144,7 +137,8 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
         // calculate interarrival jitter
         if (_clockRate != 0)
         {
-            simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
+            simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp
+                    - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;
@@ -153,8 +147,6 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
         _lastPacketRTPTimeStamp = packet->getTimeStamp();
         _lastPacketArrivalTime = arrivalTime;
     }
-
-    //_jitterOutVector.record((uint32)_jitter);
 
     RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
@@ -195,10 +187,12 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         ReceptionReport *receptionReport = new ReceptionReport();
         receptionReport->setSsrc(getSsrc());
 
-        uint64 packetsExpected = _sequenceNumberCycles + (uint64)_highestSequenceNumber - (uint64)_sequenceNumberBase + (uint64)1;
+        uint64 packetsExpected = _sequenceNumberCycles + (uint64)_highestSequenceNumber
+                - (uint64)_sequenceNumberBase + (uint64)1;
         uint64 packetsLost = packetsExpected - _packetsReceived;
 
-        int32 packetsExpectedInInterval = _sequenceNumberCycles + _highestSequenceNumber - _highestSequenceNumberPrior;
+        int32 packetsExpectedInInterval =
+                _sequenceNumberCycles + _highestSequenceNumber - _highestSequenceNumberPrior;
         int32 packetsReceivedInInterval = _packetsReceived - _packetsReceivedPrior;
         int32 packetsLostInInterval = packetsExpectedInInterval - packetsReceivedInInterval;
         uint8 fractionLost = 0;
@@ -219,8 +213,8 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         // the delay since the arrival of the last sender report in units
         // of 1 / 65536 seconds
         // 0 if no sender report has ben received
-
-        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (uint32)(SIMTIME_DBL(now - _lastSenderReportArrivalTime) * 65536.0));
+        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0
+                : (uint32)(SIMTIME_DBL(now - _lastSenderReportArrivalTime) * 65536.0));
 
         return receptionReport;
     }
@@ -231,7 +225,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 void RTPReceiverInfo::nextInterval(simtime_t now)
 {
     _inactiveIntervals++;
-    if (_inactiveIntervals == 5)
+    if (_inactiveIntervals == MAX_INACTIVE_INTERVALS)
     {
         _startOfInactivity = now;
     }
@@ -242,17 +236,17 @@ void RTPReceiverInfo::nextInterval(simtime_t now)
 
 bool RTPReceiverInfo::isActive()
 {
-    return (_inactiveIntervals < 5);
+    return (_inactiveIntervals < MAX_INACTIVE_INTERVALS);
 }
 
 bool RTPReceiverInfo::isValid()
 {
-    return (_itemsReceived >= 5);
+    return (_itemsReceived >= MAX_INACTIVE_INTERVALS);
 }
 
 bool RTPReceiverInfo::toBeDeleted(simtime_t now)
 {
-    // an rtp system should be removed from the list of known systems
+    // an RTP system should be removed from the list of known systems
     // when it hasn't been validated and hasn't been active for
     // 5 rtcp intervals or if it has been validated and has been
     // inactive for 30 minutes

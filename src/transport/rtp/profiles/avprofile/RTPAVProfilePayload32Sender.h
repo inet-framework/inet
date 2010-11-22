@@ -15,9 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPAVProfilePayload32Sender.h
- * This file declares the class RTPAVProfilePayload32Sender.
- */
 
 #ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 #define __INET_RTPAVPROFILEPAYLOAD32SENDER_H

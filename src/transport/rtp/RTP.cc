@@ -15,24 +15,20 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTP.cc
- * This file contains the implementation of member functions of the class RTP.
- */
-
-#include "IPAddress.h"
-#include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
 
 #include "RTP.h"
+
+#include "IPAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "RTPProfile.h"
-
 #include "RTPSenderControlMessage_m.h"
 #include "RTPSenderStatusMessage_m.h"
+#include "UDPControlInfo_m.h"
+#include "UDPSocket.h"
+
 
 Define_Module(RTP);
-
 
 //
 // methods inherited from cSimpleModule
@@ -107,7 +103,7 @@ void RTP::handleMessageFromApp(cMessage *msg)
         break;
 
     default:
-        error("unknown RTPInterfacePacket type from application");
+        error("unknown RTPControlInfo type from application");
     }
 }
 
@@ -290,7 +286,7 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
     ci->setSsrc(rinp->getSsrc());
     ci->setStatus(ssm->getStatus());
     ci->setTimeStamp(ssm->getTimeStamp());
-    cMessage *msg = new cMessage("senderModuleStatus()");
+    cMessage *msg = new RTPControlMsg("senderModuleStatus()");
     msg->setControlInfo(ci);
     send(msg, "appOut");
     delete ssm;
@@ -336,7 +332,7 @@ void RTP::rtcpInitialized(RTPInnerPacket *rinp)
 void RTP::sessionLeft(RTPInnerPacket *rinp)
 {
     RTPCISessionLeft* ci = new RTPCISessionLeft();
-    cMessage *msg = new cMessage("sessionLeft()");
+    cMessage *msg = new RTPControlMsg("sessionLeft()");
     msg->setControlInfo(ci);
     send(msg, "appOut");
 

@@ -15,10 +15,6 @@
  ***************************************************************************/
 
 
-/** \file RTCP.h
- * This file declares the class RTCP.
- */
-
 #ifndef __INET_RTCPENDSYSTEMMODULE_H
 #define __INET_RTCPENDSYSTEMMODULE_H
 
@@ -26,13 +22,13 @@
 #include "IPAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
-#include "RTPSenderInfo.h"
 #include "RTPReceiverInfo.h"
+#include "RTPSenderInfo.h"
 
 /**
  * The class RTCP is responsible for creating, receiving and
  * processing of rtcp packets. It also keeps track of this and other
- * rtp end systems.
+ * RTP end systems.
  */
 class INET_API RTCP : public cSimpleModule
 {
@@ -53,7 +49,7 @@ class INET_API RTCP : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
 
         /**
-         * Handles messages from the rtp module.
+         * Handles messages from the RTP module.
          */
         virtual void handleMessageFromRTP(cMessage *msg);
 
@@ -78,18 +74,18 @@ class INET_API RTCP : public cSimpleModule
         virtual void senderModuleInitialized(RTPInnerPacket *rinp);
 
         /**
-         * Stores information about an outgoing rtp data packet.
+         * Stores information about an outgoing RTP data packet.
          */
         virtual void dataOut(RTPInnerPacket *packet);
 
         /**
-         * Stores information about an outgoing rtp data packet.
+         * Stores information about an outgoing RTP data packet.
          */
         virtual void dataIn(RTPInnerPacket *rinp);
 
         /**
          * Makes the rtcp module send an RTCPByePacket in the next
-         * RTCPCompoundPacket to tell other participants in the rtp
+         * RTCPCompoundPacket to tell other participants in the RTP
          * session that this end system leaves.
         */
         virtual void leaveSession(RTPInnerPacket *rinp);
@@ -112,7 +108,7 @@ class INET_API RTCP : public cSimpleModule
         int _mtu;
 
         /**
-         * The bandwidth for this rtp session.
+         * The bandwidth for this RTP session.
          */
         int _bandwidth;
 
@@ -147,8 +143,8 @@ class INET_API RTCP : public cSimpleModule
         RTPSenderInfo *_senderInfo;
 
         /**
-         * Information about all known rtp end system participating in
-         * this rtp session.
+         * Information about all known RTP end system participating in
+         * this RTP session.
          */
         cArray *_participantInfos;
 
@@ -218,7 +214,7 @@ class INET_API RTCP : public cSimpleModule
 
         /**
          * Returns the RTPParticipantInfo object used for storing information
-         * about the rtp end system with this ssrc identifier.
+         * about the RTP end system with this ssrc identifier.
          * Returns NULL if this end system is unknown.
          */
         virtual RTPParticipantInfo* findParticipantInfo(uint32 ssrc);

@@ -16,13 +16,10 @@
  ***************************************************************************/
 
 
-/** \file RTPInnerPacket.cc
- * This file contains the implementation of member functions
- * of RTPInnerPacket.
- */
-
 #include "RTPInnerPacket.h"
+
 #include "RTPPacket.h"
+
 
 Register_Class(RTPInnerPacket);
 
