@@ -84,16 +84,19 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     _inputFileStream >> unit;
     _inputFileStream.get(description, 100, '\n');
 
-    int pictureType = 0;
+    int pictureType;
+    char *ptr;
 
-    if (strchr(description, 'I'))
-        pictureType = 1;
-    else if (strchr(description, 'P'))
-        pictureType = 2;
-    else if (strchr(description, 'B'))
-        pictureType = 3;
-    else if (strchr(description, 'D'))
-        pictureType = 4;
+    for (ptr = description; *ptr == ' '; ptr++)
+        ;
+    switch(*ptr)
+    {
+        case 'I': pictureType = 1; break;
+        case 'P': pictureType = 2; break;
+        case 'B': pictureType = 3; break;
+        case 'D': pictureType = 4; break;
+        default: pictureType = 0; break;
+    }
 
     int bytesRemaining = bits / 8;
 
