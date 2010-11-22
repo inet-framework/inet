@@ -238,3 +238,9 @@ bool IPAddress::isWellFormed(const char *text)
 }
 
 
+IPAddress IPAddress::getBroadcastAddress (IPAddress netmask)
+{
+   IPAddress br(getInt() | ~(netmask.getInt()));
+   return br;
+}
+

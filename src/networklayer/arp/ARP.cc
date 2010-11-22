@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 Andras Varga
+ * Copyright (C) 2008 Alfonso Ariza Quintana (global arp)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -36,45 +37,72 @@ static std::ostream& operator<< (std::ostream& out, const ARP::ARPCacheEntry& e)
     return out;
 }
 
+ARP::ARPCache ARP::globalArpCache;
 
 Define_Module (ARP);
 
-void ARP::initialize()
+void ARP::initialize(int stage)
 {
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
+    if (stage==0) 
+    {
+        globalArpCache.clear();
 
-    nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut",0)->getId();
+        sentReqSignal = registerSignal("sentReq");
+        sentReplySignal = registerSignal("sentReply");
+        initiatedResolutionSignal = registerSignal("initiatedResolution");
+        failedResolutionSignal = registerSignal("failedResolution");
+    }
 
-    retryTimeout = par("retryTimeout");
-    retryCount = par("retryCount");
-    cacheTimeout = par("cacheTimeout");
-    doProxyARP = par("proxyARP");
+    if (stage==4)
+    {
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTableAccess().get();
 
-    pendingQueue.setName("pendingQueue");
+        nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut",0)->getId();
 
-    // init statistics
-    numRequestsSent = numRepliesSent = 0;
-    numResolutions = numFailedResolutions = 0;
-    WATCH(numRequestsSent);
-    WATCH(numRepliesSent);
-    WATCH(numResolutions);
-    WATCH(numFailedResolutions);
+        retryTimeout = par("retryTimeout");
+        retryCount = par("retryCount");
+        cacheTimeout = par("cacheTimeout");
+        doProxyARP = par("proxyARP");
+        globalARP = par("globalARP");
 
-    WATCH_PTRMAP(arpCache);
+        pendingQueue.setName("pendingQueue");
 
-    sentReqSignal = registerSignal("sentReq");
-    sentReplySignal = registerSignal("sentReply");
-    initiatedResolutionSignal = registerSignal("initiatedResolution");
-    failedResolutionSignal = registerSignal("failedResolution");
+        // init statistics
+        numRequestsSent = numRepliesSent = 0;
+        numResolutions = numFailedResolutions = 0;
+        WATCH(numRequestsSent);
+        WATCH(numRepliesSent);
+        WATCH(numResolutions);
+        WATCH(numFailedResolutions);
+
+        WATCH_PTRMAP(arpCache);
+        WATCH_PTRMAP(globalArpCache);
+
+        // initialize global cache
+        for (int i=0; i<ift->getNumInterfaces(); i++)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isLoopback())
+                continue;
+            ARPCacheEntry *entry = new ARPCacheEntry();
+            entry->ie = ie;
+            entry->pending = false;
+            entry->timer = NULL;
+            entry->numRetries = 0;
+            entry->macAddress = ie->getMacAddress();
+            IPAddress nextHopAddr = ie->ipv4Data()->getIPAddress();
+            ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(nextHopAddr,entry));
+            entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+        }
+    }
+
 }
 
 void ARP::finish()
 {
-    recordScalar("ARP requests sent", numRequestsSent);
-    recordScalar("ARP replies sent", numRepliesSent);
-    recordScalar("ARP resolutions", numResolutions);
-    recordScalar("failed ARP resolutions", numFailedResolutions);
+    if (globalARP)
+        return;
 }
 
 ARP::~ARP()
@@ -84,6 +112,12 @@ ARP::~ARP()
         ARPCache::iterator i = arpCache.begin();
         delete (*i).second;
         arpCache.erase(i);
+    }
+    while (!globalArpCache.empty())
+    {
+        ARPCache::iterator i = globalArpCache.begin();
+        delete (*i).second;
+        globalArpCache.erase(i);
     }
 }
 
@@ -147,16 +181,9 @@ void ARP::processOutboundPacket(cMessage *msg)
         EV << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
     }
 
-    //
-    // Handle multicast IP addresses. RFC 1112, section 6.4 says:
-    // "An IP host group address is mapped to an Ethernet multicast address
-    // by placing the low-order 23 bits of the IP address into the low-order
-    // 23 bits of the Ethernet multicast address 01-00-5E-00-00-00 (hex).
-    // Because there are 28 significant bits in an IP host group address,
-    // more than one host group address may map to the same Ethernet multicast
-    // address."
-    //
-    if (nextHopAddr.isMulticast())
+    // Handle multicast IP addresses
+    if (nextHopAddr.isMulticast() || nextHopAddr == IPAddress::ALLONES_ADDRESS ||
+            nextHopAddr == ie->ipv4Data()->getIPAddress().getBroadcastAddress(ie->ipv4Data()->getNetmask())) // also include the network broadcast
     {
         // FIXME: we do a simpler solution right now: send to the Broadcast MAC address
         EV << "destination address is multicast, sending packet to broadcast MAC address\n";
@@ -164,7 +191,7 @@ void ARP::processOutboundPacket(cMessage *msg)
         sendPacketToNIC(msg, ie, broadcastAddr);
         return;
 #if 0
-        // experimental RFC 1112 code
+        // experimental  RFC 1112, section 6.4 code
         // TBD needs counterpart to be implemented in EtherMAC processReceivedDataFrame().
         unsigned char macBytes[6];
         macBytes[0] = 0x01;
@@ -178,6 +205,16 @@ void ARP::processOutboundPacket(cMessage *msg)
         sendPacketToNIC(msg, ie, multicastMacAddr);
         return;
 #endif
+    }
+
+    if (globalARP)
+    {
+        ARPCache::iterator it = globalArpCache.find(nextHopAddr);
+        if (it==globalArpCache.end())
+            opp_error("Addres not found in global");
+        else
+            sendPacketToNIC(msg, ie, (*it).second->macAddress);
+        return;
     }
 
     // try look up
@@ -491,4 +528,68 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     }
 }
 
+const MACAddress ARP::getDirectAddressResolution(const IPAddress & add) const
+{
+    ARPCache::const_iterator it;
+    MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
+    if (globalARP)
+    {
+        it = globalArpCache.find(add);
+        if (it!=globalArpCache.end())
+            address = (*it).second->macAddress;
+    }
+    else
+    {
+        it = arpCache.find(add);
+        if (it!=arpCache.end())
+            address = (*it).second->macAddress;
+    }
+    return address;
+}
 
+const IPAddress ARP::getInverseAddressResolution(const MACAddress &add) const
+{
+    IPAddress address;
+    ARPCache::const_iterator it;
+    if (globalARP)
+    {
+        for (it = globalArpCache.begin(); it!=globalArpCache.end(); it++)
+            if ((*it).second->macAddress==add)
+            {
+                address = (*it).first;
+                return address;
+            }
+    }
+    else
+    {
+        for (it = arpCache.begin(); it!=arpCache.end(); it++)
+            if ((*it).second->macAddress==add)
+            {
+                address = (*it).first;
+                return address;
+            }
+    }
+    return address;
+}
+
+void ARP::setChangeAddress(const IPAddress &oldAddress)
+{
+    Enter_Method_Silent();
+    ARPCache::iterator it;
+    MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
+    if (globalARP)
+    {
+        it = globalArpCache.find(oldAddress);
+        if (it!=globalArpCache.end())
+        {
+            ARPCacheEntry *entry = (*it).second;
+            globalArpCache.erase(it);
+            entry->pending = false;
+            entry->timer = NULL;
+            entry->numRetries = 0;
+            IPAddress nextHopAddr = entry->ie->ipv4Data()->getIPAddress();
+            ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(),std::make_pair(nextHopAddr,entry));
+            entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+        }
+    }
+}
