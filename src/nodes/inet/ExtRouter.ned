@@ -30,6 +30,7 @@ import inet.nodes.inet.NetworkLayer;
 //
 // External router.
 //
+// @deprecated use Router instead and configure the numExternalInterfaces parameter
 module ExtRouter
 {
     parameters:

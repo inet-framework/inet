@@ -34,6 +34,8 @@ import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
 // @see ~WirelessHost, ~WirelessHostSimplified
 // @see ~MobileHost, ~MFMobileHost
 //
+// @deprecated: use AccessPoint instead with wlanNicType=Ieee80211NicAPSimplified
+// 
 module WirelessAPSimplified
 {
     parameters:

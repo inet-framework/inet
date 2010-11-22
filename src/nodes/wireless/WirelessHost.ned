@@ -45,12 +45,14 @@ import inet.transport.udp.UDP;
 // @see ~WirelessHost, ~WirelessHostSimplified
 // @see ~MobileHost, ~MFMobileHost
 //
+// @deprecated: use StandardHost with numRadios=1 instead
+//
 module WirelessHost
 {
     parameters:
         @node();
         @labels(node,ethernet-node,wireless-node);
-        @display("i=device/wifilaptop");
+        @display("i=device/wifilaptop;bgb=431,430");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         // string tcpAppType = default(""); // Obsolete
@@ -112,7 +114,7 @@ module WirelessHost
         }
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
-                @display("p=240,350,row,90;q=txQueue");
+                @display("p=325,350,row,90;q=txQueue");
         }
         wlan: Ieee80211NicSTA {
             parameters:
