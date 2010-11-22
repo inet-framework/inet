@@ -130,7 +130,7 @@ void RTCP::handleSelfMessage(cMessage *msg)
     {
         chooseSSRC();
         RTPInnerPacket *rinp1 = new RTPInnerPacket("rtcpInitialized()");
-        rinp1->rtcpInitialized(_senderInfo->getSsrc());
+        rinp1->setRtcpInitializedPkt(_senderInfo->getSsrc());
         send(rinp1, "rtpOut");
     }
 
@@ -347,7 +347,7 @@ void RTCP::createPacket()
     if (_leaveSession)
     {
         RTPInnerPacket *rinp = new RTPInnerPacket("sessionLeft()");
-        rinp->sessionLeft();
+        rinp->setSessionLeftPkt();
         send(rinp, "rtpOut");
     }
 }

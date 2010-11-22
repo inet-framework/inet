@@ -199,7 +199,7 @@ void RTP::leaveSession(RTPCILeaveSession *rifp)
     profileModule->deleteModule();
     _leaveSession = true;
     RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
-    rinp->leaveSession();
+    rinp->setLeaveSessionPkt();
     send(rinp,"rtcpOut");
 
     delete rifp;
@@ -209,7 +209,7 @@ void RTP::createSenderModule(RTPCICreateSenderModule *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
     ev << rifp->getSsrc()<<endl;
-    rinp->createSenderModule(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
+    rinp->setCreateSenderModulePkt(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
     send(rinp, "profileOut");
 
     delete rifp;
@@ -218,7 +218,7 @@ void RTP::createSenderModule(RTPCICreateSenderModule *rifp)
 void RTP::deleteSenderModule(RTPCIDeleteSenderModule *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
-    rinp->deleteSenderModule(rifp->getSsrc());
+    rinp->setDeleteSenderModulePkt(rifp->getSsrc());
     send(rinp, "profileOut");
 
     delete rifp;
@@ -231,7 +231,7 @@ void RTP::senderModuleControl(RTPCISenderControl *rifp)
     scm->setCommand(rifp->getCommand());
     scm->setCommandParameter1(rifp->getCommandParameter1());
     scm->setCommandParameter2(rifp->getCommandParameter2());
-    rinp->senderModuleControl(rinp->getSsrc(), scm);
+    rinp->setSenderModuleControlPkt(rinp->getSsrc(), scm);
     send(rinp, "profileOut");
 
     delete rifp;
@@ -359,7 +359,7 @@ void RTP::readRet(cMessage *sifp)
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
-         rinp1->dataIn(new RTPPacket(*msg), IPAddress(_destinationAddress), _port);
+         rinp1->setDataInPkt(new RTPPacket(*msg), IPAddress(_destinationAddress), _port);
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
          send(rinp2, "rtcpOut");
          send(rinp1, "profileOut");
@@ -431,7 +431,7 @@ void RTP::createSocket()
 void RTP::initializeProfile()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeProfile()");
-    rinp->initializeProfile(_mtu);
+    rinp->setInitializeProfilePkt(_mtu);
     send(rinp, "profileOut");
 }
 
@@ -439,6 +439,6 @@ void RTP::initializeRTCP()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
     int rtcpPort = _port + 1;
-    rinp->initializeRTCP(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
+    rinp->setInitializeRTCPPkt(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
 }

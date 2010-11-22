@@ -48,20 +48,20 @@ void RTPInnerPacket::dump(std::ostream& os) const
     os << "  sequenceNumberBase = " << sequenceNumberBase_var << endl;
 }
 
-void RTPInnerPacket::initializeProfile(int mtu)
+void RTPInnerPacket::setInitializeProfilePkt(int mtu)
 {
     type_var = RTP_INP_INITIALIZE_PROFILE;
     mtu_var = mtu;
 }
 
-void RTPInnerPacket::profileInitialized(int rtcpPercentage, int port)
+void RTPInnerPacket::setProfileInitializedPkt(int rtcpPercentage, int port)
 {
     type_var = RTP_INP_PROFILE_INITIALIZED;
     rtcpPercentage_var = rtcpPercentage;
     port_var = port;
 }
 
-void RTPInnerPacket::initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port)
+void RTPInnerPacket::setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port)
 {
     type_var = RTP_INP_INITIALIZE_RTCP;
     commonName_var = commonName;
@@ -72,13 +72,13 @@ void RTPInnerPacket::initializeRTCP(const char *commonName, int mtu, int bandwid
     port_var = port;
 }
 
-void RTPInnerPacket::rtcpInitialized(uint32 ssrc)
+void RTPInnerPacket::setRtcpInitializedPkt(uint32 ssrc)
 {
     type_var = RTP_INP_RTCP_INITIALIZED;
     ssrc_var = ssrc;
 }
 
-void RTPInnerPacket::createSenderModule(uint32 ssrc, int payloadType, const char *fileName)
+void RTPInnerPacket::setCreateSenderModulePkt(uint32 ssrc, int payloadType, const char *fileName)
 {
     type_var = RTP_INP_CREATE_SENDER_MODULE;
     ssrc_var = ssrc;
@@ -86,25 +86,25 @@ void RTPInnerPacket::createSenderModule(uint32 ssrc, int payloadType, const char
     fileName_var = fileName;
 }
 
-void RTPInnerPacket::senderModuleCreated(uint32 ssrc)
+void RTPInnerPacket::setSenderModuleCreatedPkt(uint32 ssrc)
 {
     type_var = RTP_INP_SENDER_MODULE_CREATED;
     ssrc_var = ssrc;
 }
 
-void RTPInnerPacket::deleteSenderModule(uint32 ssrc)
+void RTPInnerPacket::setDeleteSenderModulePkt(uint32 ssrc)
 {
     type_var = RTP_INP_DELETE_SENDER_MODULE;
     ssrc_var = ssrc;
 }
 
-void RTPInnerPacket::senderModuleDeleted(uint32 ssrc)
+void RTPInnerPacket::setSenderModuleDeletedPkt(uint32 ssrc)
 {
     type_var = RTP_INP_SENDER_MODULE_DELETED;
     ssrc_var = ssrc;
 }
 
-void RTPInnerPacket::initializeSenderModule(uint32 ssrc, const char *fileName, int mtu)
+void RTPInnerPacket::setInitializeSenderModulePkt(uint32 ssrc, const char *fileName, int mtu)
 {
     type_var = RTP_INP_INITIALIZE_SENDER_MODULE;
     ssrc_var = ssrc;
@@ -112,7 +112,7 @@ void RTPInnerPacket::initializeSenderModule(uint32 ssrc, const char *fileName, i
     mtu_var = mtu;
 }
 
-void RTPInnerPacket::senderModuleInitialized(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase)
+void RTPInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase)
 {
     type_var = RTP_INP_SENDER_MODULE_INITIALIZED;
     ssrc_var = ssrc;
@@ -122,38 +122,38 @@ void RTPInnerPacket::senderModuleInitialized(uint32 ssrc, int payloadType, int c
     sequenceNumberBase_var = sequenceNumberBase;
 }
 
-void RTPInnerPacket::senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg)
+void RTPInnerPacket::setSenderModuleControlPkt(uint32 ssrc, RTPSenderControlMessage *msg)
 {
     type_var = RTP_INP_SENDER_MODULE_CONTROL;
     ssrc_var = ssrc;
     encapsulate(msg);
 }
 
-void RTPInnerPacket::senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg)
+void RTPInnerPacket::setSenderModuleStatusPkt(uint32 ssrc, RTPSenderStatusMessage *msg)
 {
     type_var = RTP_INP_SENDER_MODULE_STATUS;
     ssrc_var = ssrc;
     encapsulate(msg);
 }
 
-void RTPInnerPacket::leaveSession()
+void RTPInnerPacket::setLeaveSessionPkt()
 {
     type_var = RTP_INP_LEAVE_SESSION;
 }
 
 
-void RTPInnerPacket::sessionLeft()
+void RTPInnerPacket::setSessionLeftPkt()
 {
     type_var = RTP_INP_SESSION_LEFT;
 }
 
-void RTPInnerPacket::dataOut(RTPPacket *packet)
+void RTPInnerPacket::setDataOutPkt(RTPPacket *packet)
 {
     type_var = RTP_INP_DATA_OUT;
     encapsulate(packet);
 }
 
-void RTPInnerPacket::dataIn(RTPPacket *packet, IPAddress address, int port)
+void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPAddress address, int port)
 {
     type_var = RTP_INP_DATA_IN;
     address_var = address;

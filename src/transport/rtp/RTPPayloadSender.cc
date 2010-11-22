@@ -122,7 +122,7 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
     openSourceFile(fileName);
     delete rinpIn;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleInitialized()");
-    rinpOut->senderModuleInitialized(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
+    rinpOut->setSenderModuleInitializedPkt(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
     send(rinpOut, "profileOut");
     _status = STOPPED;
     ev << "initializeSenderModule Exit" << endl;
@@ -149,7 +149,7 @@ void RTPPayloadSender::play()
     rssm->setStatus(RTP_SENDER_STATUS_PLAYING);
     rssm->setTimeStamp(_timeStamp);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PLAYING)");
-    rinpOut->senderModuleStatus(_ssrc, rssm);
+    rinpOut->setSenderModuleStatusPkt(_ssrc, rssm);
     send(rinpOut, "profileOut");
 
     if (!sendPacket())
@@ -176,7 +176,7 @@ void RTPPayloadSender::pause()
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PAUSED)");
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
     rsim->setStatus(RTP_SENDER_STATUS_PAUSED);
-    rinpOut->senderModuleStatus(_ssrc, rsim);
+    rinpOut->setSenderModuleStatusPkt(_ssrc, rsim);
     send(rinpOut, "profileOut");
 }
 
@@ -198,7 +198,7 @@ void RTPPayloadSender::stop()
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("STOPPED");
     rssm->setStatus(RTP_SENDER_STATUS_STOPPED);
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleStatus(STOPPED)");
-    rinp->senderModuleStatus(_ssrc, rssm);
+    rinp->setSenderModuleStatusPkt(_ssrc, rssm);
     send(rinp, "profileOut");
 }
 
@@ -208,7 +208,7 @@ void RTPPayloadSender::endOfFile()
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("FINISHED");
     rssm->setStatus(RTP_SENDER_STATUS_FINISHED);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(FINISHED)");
-    rinpOut->senderModuleStatus(_ssrc, rssm);
+    rinpOut->setSenderModuleStatusPkt(_ssrc, rssm);
     send(rinpOut, "profileOut");
 }
 

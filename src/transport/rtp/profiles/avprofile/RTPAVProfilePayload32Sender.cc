@@ -147,7 +147,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");
 
 
-            rinpOut->dataOut(rtpPacket);
+            rinpOut->setDataOutPkt(rtpPacket);
 
             send(rinpOut, "profileOut");
         }

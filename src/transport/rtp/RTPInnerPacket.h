@@ -48,63 +48,63 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      * Called by the rtp module after creating the profile module. It
      * informes the profile about the maximum size an rtp packet can have.
      */
-    virtual void initializeProfile(int mtu);
+    virtual void setInitializeProfilePkt(int mtu);
 
     /**
      * Called by the profile module after it has received the initializeProfile()
      * message. It informs the rtp module about the percentage of the available
      * bandwidth to be used by rtcp and the preferred port for this profile.
      */
-    virtual void profileInitialized(int rtcpPercentage, int port);
+    virtual void setProfileInitializedPkt(int rtcpPercentage, int port);
 
     /**
      * Called by the rtp module to inform the rtcp module about mandatory
      * information for starting the rtp session.
      */
-    virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port);
+    virtual void setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port);
 
     /**
      * Called by the rtcp module after it has waited for half an rtcp interval
      * for incoming messages from other session participants. It informs the rtp
      * module which later informs the rtp application about the ssrc identifier
      */
-    virtual void rtcpInitialized(uint32 ssrc);
+    virtual void setRtcpInitializedPkt(uint32 ssrc);
 
-    virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
-    virtual void senderModuleCreated(uint32 ssrc);
+    virtual void setCreateSenderModulePkt(uint32 ssrc, int payloadType, const char *fileName);
+    virtual void setSenderModuleCreatedPkt(uint32 ssrc);
 
-    virtual void deleteSenderModule(uint32 ssrc);
-    virtual void senderModuleDeleted(uint32 ssrc);
+    virtual void setDeleteSenderModulePkt(uint32 ssrc);
+    virtual void setSenderModuleDeletedPkt(uint32 ssrc);
 
-    virtual void initializeSenderModule(uint32 ssrc, const char *fileName, int mtu);
-    virtual void senderModuleInitialized(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase);
+    virtual void setInitializeSenderModulePkt(uint32 ssrc, const char *fileName, int mtu);
+    virtual void setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase);
 
-    virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
-    virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
+    virtual void setSenderModuleControlPkt(uint32 ssrc, RTPSenderControlMessage *msg);
+    virtual void setSenderModuleStatusPkt(uint32 ssrc, RTPSenderStatusMessage *msg);
 
     /**
      * Called by the rtp module to inform the rtcp module that the session
      * should be left.
      */
-    virtual void leaveSession();
+    virtual void setLeaveSessionPkt();
 
     /**
      * Called by the rtcp module when the rtcp bye packet has been sent
      * to the network.
      */
-    virtual void sessionLeft();
+    virtual void setSessionLeftPkt();
 
     /**
      * Capsulates the outgoing RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void dataOut(RTPPacket *packet);
+    virtual void setDataOutPkt(RTPPacket *packet);
 
     /**
      * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void dataIn(RTPPacket *packet, IPAddress address, int port);
+    virtual void setDataInPkt(RTPPacket *packet, IPAddress address, int port);
 
     /**
      * Returns the maximum transmission unit stored in this RTPInnerPacket.

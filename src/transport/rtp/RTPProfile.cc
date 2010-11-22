@@ -146,7 +146,7 @@ void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
     _mtu = rinp->getMTU();
     delete rinp;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
-    rinpOut->profileInitialized(_rtcpPercentage, _preferredPort);
+    rinpOut->setProfileInitializedPkt(_rtcpPercentage, _preferredPort);
     send(rinpOut, "rtpOut");
     ev << "initializeProfile Exit"<<endl;
 }
@@ -176,11 +176,11 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     rtpPayloadSender->scheduleStart(simTime());
 
     RTPInnerPacket *rinpOut1 = new RTPInnerPacket("senderModuleCreated()");
-    rinpOut1->senderModuleCreated(ssrc);
+    rinpOut1->setSenderModuleCreatedPkt(ssrc);
     send(rinpOut1, "rtpOut");
 
     RTPInnerPacket *rinpOut2 = new RTPInnerPacket("initializeSenderModule()");
-    rinpOut2->initializeSenderModule(ssrc, rinp->getFileName(), _mtu);
+    rinpOut2->setInitializeSenderModulePkt(ssrc, rinp->getFileName(), _mtu);
     send(rinpOut2, "payloadSenderOut");
 
     delete rinp;
@@ -193,7 +193,7 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
-    rinpOut->senderModuleDeleted(rinpIn->getSsrc());
+    rinpOut->setSenderModuleDeletedPkt(rinpIn->getSsrc());
     delete rinpIn;
 
     send(rinpOut, "rtpOut");
