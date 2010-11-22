@@ -23,7 +23,8 @@ import inet.networklayer.ipv4.IGMP;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.arp.ARP;
-import inet.base.IPlugin;
+import inet.base.IHook;
+
 
 //
 // Network layer of an IP node.
@@ -34,8 +35,8 @@ module NetworkLayer
 {
     parameters:
         bool proxyARP = default(true);
-        string toIfPluginType = default("DummyPlugin");
-        string fromIfPluginType = default("DummyPlugin");
+        string outputHookType = default("EmptyHook");
+        string inputHookType = default("EmptyHook");
 
         @display("i=block/fork");
     gates:
@@ -88,11 +89,11 @@ module NetworkLayer
         }
 
         // a placeholder in the traffic coming from the network interfaces 
-        fromIfPlugin[sizeof(ifIn)]: <fromIfPluginType> like IPlugin {
+        inputHook[sizeof(ifIn)]: <inputHookType> like IHook {
             @display("p=85,254");
         }
         // a placeholder if traffic going to the network interfaces
-        toIfPlugin[sizeof(ifOut)]: <toIfPluginType> like IPlugin {
+        outputHook[sizeof(ifOut)]: <outputHookType> like IHook {
             @display("p=202,232");
         }
     connections allowunconnected:
@@ -126,12 +127,12 @@ module NetworkLayer
         ip.queueOut --> arp.ipIn;
 
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> fromIfPlugin[i].in;
-            fromIfPlugin[i].out --> ip.queueIn[i];
+            ifIn[i] --> inputHook[i].in;
+            inputHook[i].out --> ip.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> toIfPlugin[i].in;
-            toIfPlugin[i].out --> ifOut[i];
+            arp.nicOut[i] --> outputHook[i].in;
+            outputHook[i].out --> ifOut[i];
         }
 }
 

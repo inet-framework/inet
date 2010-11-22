@@ -18,7 +18,7 @@ package inet.base;
 // 
 // Generic module that can be inserted in some points in the model
 // 
-moduleinterface IPlugin
+moduleinterface IHook
 {
     @display("i=block/socket;is=vs");
     gates:

@@ -19,13 +19,13 @@
 
 package inet.linklayer.ppp;
 
-import inet.base.IPlugin;
+import inet.base.IHook;
 
 
 //
 // Thruput measurement utility module.
 //
-simple ThruputMeter like IPlugin
+simple ThruputMeter like IHook
 {
     parameters:
         @node();

@@ -16,9 +16,9 @@
 package inet.base;
 
 // 
-// Generic pass throuh module
+// Generic pass-through module
 // 
-module DummyPlugin like IPlugin
+module EmptyHook like IHook
 {
     @display("i=block/layer;is=vs");
     gates:

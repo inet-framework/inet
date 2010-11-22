@@ -19,23 +19,23 @@
 
 package inet.linklayer.ppp;
 
-import inet.base.IPlugin;
+import inet.base.IHook;
 
 
 //
 // Drops generator module.
 //
-simple DropsGenerator like IPlugin
+simple DropsGenerator like IHook
 {
     parameters:
         @node();
         string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
                                           // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/lightning");
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
-        @statistic[droppedPkBytes](title="Dropped packet bytes";record=count,sum,vector);
-        gates:
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[droppedPkBytes](title="Dropped packet bytes"; record=count,sum,vector);
+    gates:
         input in;
         output out;
 }
