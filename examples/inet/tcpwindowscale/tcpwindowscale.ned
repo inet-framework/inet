@@ -4,11 +4,12 @@
 
 package inet.examples.inet.tcpwindowscale;
 
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.StandardHostWithDLThruputMeter;
 import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
 
-network tcpwindowscale {
+
+network tcpwindowscale
+{
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -18,7 +19,7 @@ network tcpwindowscale {
             gates:
                 pppg[1];
         }
-        server: StandardHostWithDLThruputMeter {
+        server: StandardHost {
             parameters:
                 @display("p=350,100;i=device/server");
             gates:
@@ -28,7 +29,8 @@ network tcpwindowscale {
         client.pppg[0] <--> LFNPath <--> server.pppg[0];
 }
 
-channel LFNPath extends DatarateChannel {
+channel LFNPath extends DatarateChannel
+{
     parameters:
         datarate = 1Gbps;
         delay = 565ms;

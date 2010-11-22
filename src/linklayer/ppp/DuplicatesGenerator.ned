@@ -19,10 +19,13 @@
 
 package inet.linklayer.ppp;
 
+import inet.base.IPlugin;
+
+
 //
 // Duplicate generator module.
 //
-simple DuplicatesGenerator
+simple DuplicatesGenerator like IPlugin
 {
     parameters:
         @node();

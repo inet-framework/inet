@@ -20,12 +20,12 @@
 
 package inet.examples.inet.redtest;
 
-import inet.linklayer.ppp.ThruputMeter;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
 import inet.world.ScenarioManager;
+import inet.world.ChannelInstaller;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.linklayer.ppp.ThruputMeter;
 
 
 network REDTestTh

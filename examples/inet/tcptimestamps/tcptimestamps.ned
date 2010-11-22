@@ -4,15 +4,16 @@
 
 package inet.examples.inet.tcptimestamps;
 
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.StandardHostWithULDropsGenerator;
 import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
 
-network tcptimestamps {
+
+network tcptimestamps
+{
     parameters:
         @display("bgb=400,200");
     submodules:
-        client: StandardHostWithULDropsGenerator {
+        client: StandardHost {
             parameters:
                 @display("p=50,100");
             gates:
@@ -28,7 +29,8 @@ network tcptimestamps {
         client.pppg[0] <--> NormalPath <--> server.pppg[0];
 }
 
-channel NormalPath extends DatarateChannel {
+channel NormalPath extends DatarateChannel
+{
     parameters:
         datarate = 100Mbps;
         delay = 0.5ms;

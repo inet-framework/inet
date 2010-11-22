@@ -26,6 +26,7 @@ import inet.transport.sctp.SCTP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.mobility.BasicMobility;
+import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.INetworkInterface;
@@ -64,14 +65,16 @@ module StandardHost
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
-        string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
+        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
         string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
     gates:
         input radioIn[numRadios] @directIn;
+        inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         namTrace: NAMTraceWriter {
@@ -132,11 +135,15 @@ module StandardHost
         }
         wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
-                @display("p=186,390;q=queue");
+                @display("p=132,390;q=queue");
         }
         eth[sizeof(ethg)]: <ethNicType> like INetworkInterface {
             parameters:
-                @display("p=336,390,row,90;q=txQueue");
+                @display("p=250,390,row,90;q=txQueue");
+        }
+        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface  {
+            parameters:
+                @display("p=369,390,row,90;q=txQueue");
         }
         ext[numExtInterfaces]: ExtInterface {
             parameters:
@@ -180,6 +187,12 @@ module StandardHost
             ethg[i] <--> eth[i].phys;
             eth[i].netwOut --> networkLayer.ifIn++;
             eth[i].netwIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..sizeof(pppg)-1 {
+            pppg[i] <--> ppp[i].phys;
+            ppp[i].netwOut --> networkLayer.ifIn++;
+            ppp[i].netwIn <-- networkLayer.ifOut++;
         }
 
         for i=0..numExtInterfaces-1 {

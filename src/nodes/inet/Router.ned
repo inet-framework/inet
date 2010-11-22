@@ -42,9 +42,10 @@ module Router
         @display("i=abstract/router");
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
+        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
         string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
         int namid = default(-1);
         string routingFile = default("");
     gates:
@@ -88,7 +89,7 @@ module Router
             parameters:
                 @display("p=195,242,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface {
             parameters:
                 @display("p=320,242,row,90;q=txQueue");
         }

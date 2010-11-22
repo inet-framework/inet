@@ -4,12 +4,13 @@
 
 package inet.examples.inet.tcpsack;
 
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHostWithULDropsGenerator;
-import inet.nodes.inet.StandardHostWithDLDuplicatesGenerator;
 import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
 
-network tcpsack {
+
+network tcpsack
+{
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -19,14 +20,14 @@ network tcpsack {
             gates:
                 pppg[2];
         }
-        client: StandardHostWithULDropsGenerator {
+        client: StandardHost {
             parameters:
                 @display("p=50,100");
             gates:
                 pppg[1];
         }
-        server: StandardHostWithULDropsGenerator { // for config 1-5
-//        server: StandardHostWithDLDuplicatesGenerator { // for config 6
+        server: StandardHost { // for config 1-5
+            //        server: StandardHostWithDLDuplicatesGenerator { // for config 6
             parameters:
                 @display("p=350,100;i=device/server");
             gates:
@@ -37,7 +38,8 @@ network tcpsack {
         router.pppg[1] <--> NormalPath <--> server.pppg[0];
 }
 
-channel NormalPath extends DatarateChannel {
+channel NormalPath extends DatarateChannel
+{
     parameters:
         datarate = 100Mbps;
         delay = 0.0565us; // 10m

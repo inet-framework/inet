@@ -19,6 +19,9 @@
 
 package inet.linklayer.ppp;
 
+import inet.linklayer.INetworkInterface;
+
+
 //
 // PPP implementation.
 //
@@ -43,7 +46,7 @@ package inet.linklayer.ppp;
 //
 // @see ~PPPInterface, ~OutputQueue, ~PPPFrame
 //
-simple PPP
+simple PPP like INetworkInterface
 {
     parameters:
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite

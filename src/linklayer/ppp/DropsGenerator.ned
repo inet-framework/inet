@@ -19,10 +19,13 @@
 
 package inet.linklayer.ppp;
 
+import inet.base.IPlugin;
+
+
 //
 // Drops generator module.
 //
-simple DropsGenerator
+simple DropsGenerator like IPlugin
 {
     parameters:
         @node();
