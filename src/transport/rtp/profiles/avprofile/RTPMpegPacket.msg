@@ -16,11 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "INETDefs.h"
-}}
-
-
 //
 // An RTPMpegPacket is intended to be capsulated into an RTPPacket when
 // transmitting mpeg data with rtp under the rtp audio/video profile.

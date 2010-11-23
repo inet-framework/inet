@@ -16,10 +16,6 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadReceiver.h
- * This file declares the class RTPPayloadReceiver.
- */
-
 #ifndef __INET_RTPPAYLOADRECEIVER_H
 #define __INET_RTPPAYLOADRECEIVER_H
 
@@ -27,7 +23,10 @@
 #include <fstream>
 
 #include "INETDefs.h"
-#include "RTPPacket.h"
+
+
+//Forward declarations
+class RTPPacket;
 
 
 /**

@@ -19,9 +19,10 @@
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 
-#include "INETDefs.h"
-#include "reports.h"
+
 #include "RTPParticipantInfo.h"
+
+#include "INETDefs.h"
 
 
 /**

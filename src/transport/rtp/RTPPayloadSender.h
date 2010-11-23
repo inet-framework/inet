@@ -19,10 +19,14 @@
 #ifndef __INET_RTPPAYLOADSENDER_H
 #define __INET_RTPPAYLOADSENDER_H
 
+
 #include <fstream>
 
 #include "INETDefs.h"
-#include "RTPInnerPacket.h"
+
+
+//Forward declarations:
+class RTPInnerPacket;
 
 
 /**

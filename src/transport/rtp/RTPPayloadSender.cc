@@ -19,6 +19,7 @@
 #include "RTPPayloadSender.h"
 
 #include "RTPInterfacePacket_m.h"
+#include "RTPInnerPacket.h"
 
 
 Define_Module(RTPPayloadSender);

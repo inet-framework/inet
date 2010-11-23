@@ -20,14 +20,15 @@
 #define __INET_RTPPARTICIPANTINFO_H
 
 
-#include <stdio.h>
-
 #include "INETDefs.h"
 #include "IPAddress.h"
-#include "reports.h"
-#include "RTCPPacket.h"
-#include "RTPPacket.h"
 #include "sdes.h"
+
+
+//Forward declarations:
+class ReceptionReport;
+class RTPPacket;
+class SenderReport;
 
 /**
  * This class is a super class for classes intended for storing information

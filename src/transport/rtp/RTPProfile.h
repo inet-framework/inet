@@ -19,8 +19,12 @@
 #ifndef __INET_RTPPROFILE_H
 #define __INET_RTPPROFILE_H
 
+
 #include "INETDefs.h"
-#include "RTPInnerPacket.h"
+
+
+//Forward declarations:
+class RTPInnerPacket;
 
 
 /**

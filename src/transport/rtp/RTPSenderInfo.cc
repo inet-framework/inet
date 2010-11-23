@@ -18,6 +18,9 @@
 
 #include "RTPSenderInfo.h"
 
+#include "reports.h"
+#include "RTPPacket.h"
+
 
 Register_Class(RTPSenderInfo);
 

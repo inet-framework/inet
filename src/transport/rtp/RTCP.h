@@ -18,12 +18,18 @@
 #ifndef __INET_RTCPENDSYSTEMMODULE_H
 #define __INET_RTCPENDSYSTEMMODULE_H
 
+
 #include "INETDefs.h"
 #include "IPAddress.h"
-#include "RTPInnerPacket.h"
-#include "RTPParticipantInfo.h"
-#include "RTPReceiverInfo.h"
-#include "RTPSenderInfo.h"
+
+
+//Forward declarations:
+class RTCPCompoundPacket;
+class RTPInnerPacket;
+class RTPPacket;
+class RTPSenderInfo;
+class RTPParticipantInfo;
+
 
 /**
  * The class RTCP is responsible for creating, receiving and

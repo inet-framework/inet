@@ -21,7 +21,6 @@
 #include "RTPProfile.h"
 
 #include "RTPInnerPacket.h"
-#include "RTPParticipantInfo.h"
 #include "RTPPayloadReceiver.h"
 #include "RTPPayloadSender.h"
 
