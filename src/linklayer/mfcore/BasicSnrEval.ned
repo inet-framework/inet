@@ -50,6 +50,7 @@ simple BasicSnrEval
         double transmitterPower @unit("mW"); // power used for transmission of messages
         double bitrate @unit("bps"); // bitrate
         int headerLength @unit(b);  // header length of the ~AirFrame
+        double carrierFrequency @unit(Hz)=default(0Hz); 
     gates:
         input uppergateIn; // from the MAC layer
         output uppergateOut; // to the decider sub-module

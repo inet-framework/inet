@@ -24,6 +24,7 @@
 #include <map>
 
 #include "ChannelAccess.h"
+#include "ChannelAccessExtended.h"
 #include "AirFrame_m.h"
 #include "SnrControlInfo_m.h"
 
@@ -52,7 +53,8 @@
  * @ingroup snrEval
  * @ingroup basicModules
  */
-class INET_API BasicSnrEval : public ChannelAccess
+// class INET_API BasicSnrEval : public ChannelAccess
+class INET_API BasicSnrEval : public ChannelAccessExtended
 {
   protected:
     /** @brief a parameter that has to be read in from omnetpp.ini*/
@@ -69,6 +71,7 @@ class INET_API BasicSnrEval : public ChannelAccess
     int uppergateOut;
     int uppergateIn;
     /*@}*/
+    double carrierFrequency;
 
   protected:
     /** @brief Initialization of the module and some variables*/
@@ -78,6 +81,8 @@ class INET_API BasicSnrEval : public ChannelAccess
     virtual void handleMessage( cMessage* );
 
   protected:
+
+	virtual bool processAirFrame(AirFrame *);
     /**
      * @name Handle Messages
      * @brief Functions to redefine by the programmer
@@ -156,8 +161,8 @@ class INET_API BasicSnrEval : public ChannelAccess
     /*@{*/
 
     /** @brief Create a new AirFrame */
-    virtual AirFrame* createCapsulePkt() {
-        return new AirFrame();
+    virtual AirFrameExtended* createCapsulePkt() {
+        return new AirFrameExtended();
     };
     /*@}*/
 

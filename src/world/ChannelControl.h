@@ -57,12 +57,13 @@ class INET_API ChannelControl : public cSimpleModule
         cGate *radioInGate;
         int channel;
         Coord pos; // cached
-        std::set<HostRef> neighbors;  // cached neighbour list
+        std::set<HostRef> neighbors; // cached neighbour list
 
         // we cache neighbors set in an std::vector, because std::set iteration is slow;
         // std::vector is created and updated on demand
         bool isNeighborListValid;
         HostRefVector neighborList;
+        virtual bool getIsModuleListValid(){return isNeighborListValid;}
     };
     HostList hosts;
 
@@ -119,6 +120,9 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Registers the given host. If radioInGate==NULL, the "radioIn" gate is assumed */
     virtual HostRef registerHost(cModule *host, const Coord& initialPos, cGate *radioInGate=NULL);
 
+    /** @brief Unregisters the given host */
+    virtual void unregisterHost(cModule *host);
+
     /** @brief Returns the module that was registered as HostRef h */
     cModule *getHost(HostRef h) const {return h->host;}
 
@@ -162,7 +166,7 @@ class INET_API ChannelControl : public cSimpleModule
 
     /** @brief Returns the number of radio channels (frequencies) simulated */
     const int getNumChannels() {return numChannels;}
+    const HostRef lookupHostByName(const char *name);
 };
 
 #endif
-

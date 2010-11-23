@@ -39,7 +39,8 @@ Define_Module(BasicSnrEval);
  */
 void BasicSnrEval::initialize(int stage)
 {
-    ChannelAccess::initialize(stage);
+    // ChannelAccess::initialize(stage);
+    ChannelAccessExtended::initialize(stage);
 
     coreEV << "Initializing BasicSnrEval, stage=" << stage << endl;
 
@@ -54,11 +55,42 @@ void BasicSnrEval::initialize(int stage)
         bitrate = par("bitrate");
 
         transmitterPower = par("transmitterPower");
+        carrierFrequency = par("carrierFrequency");
 
         // transmitter power CANNOT be greater than in ChannelControl
         if (transmitterPower > (double) (cc->par("pMax")))
             error("transmitterPower cannot be bigger than pMax in ChannelControl!");
     }
+}
+
+/**
+ *
+Determine if the packet must be delete or process
+ */
+
+bool BasicSnrEval::processAirFrame(AirFrame *airframe)
+{
+
+	int chnum = airframe->getChannelNumber();
+	AirFrameExtended *airframeext = dynamic_cast<AirFrameExtended *>(airframe);
+	if (ccExt && airframeext)
+	{
+		double perc = ccExt->getPercentage();
+		double fqFrame = airframeext->getCarrierFrequency();
+		if (fqFrame > 0.0 && carrierFrequency>0.0)
+		{
+			if (chnum == getChannelNumber() && (fabs((fqFrame - carrierFrequency)/carrierFrequency)<=perc))
+				return true;
+			else
+				return false;
+		}
+		else
+			return (chnum == getChannelNumber());
+	}
+	else
+	{
+		return (chnum == getChannelNumber());
+	}
 }
 
 /**
@@ -97,7 +129,7 @@ void BasicSnrEval::handleMessage(cMessage *msg)
         else
             handleSelfMsg(msg);
     }
-    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == getChannelNumber())
+    else if (processAirFrame (check_and_cast<AirFrame *>(msg)))
     {
         // must be an AirFrame
         AirFrame *frame = (AirFrame *) msg;
@@ -137,7 +169,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
  */
 AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
 {
-    AirFrame *frame = createCapsulePkt();
+	AirFrameExtended *frame = createCapsulePkt();
     frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
     frame->setBitLength(headerLength);
@@ -145,6 +177,7 @@ AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
     frame->setSenderPos(getMyPosition());
+    frame->setCarrierFrequency(carrierFrequency);
     return frame;
 }
 

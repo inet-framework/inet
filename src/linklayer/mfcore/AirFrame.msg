@@ -51,5 +51,16 @@ packet AirFrame
     int channelNumber; // Channel on which the packet is sent
     simtime_t duration; // Time it takes to transmit the packet, in seconds
     double bitrate;
+    double snr;
+    double lossRate;
+    double powRec; // Power in the receiver
     Coord senderPos;
+}
+//
+// Support of multiples gates
+//
+packet AirFrameExtended extends AirFrame
+{
+   double carrierFrequency; // 
+   double bandwidth;
 }
