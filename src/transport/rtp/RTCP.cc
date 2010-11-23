@@ -361,6 +361,7 @@ void RTCP::processOutgoingRTPPacket(RTPPacket *packet)
 
 void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port)
 {
+    bool good = false;
     uint32 ssrc = packet->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == NULL)
@@ -369,24 +370,33 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int po
         participantInfo->setAddress(address);
         participantInfo->setRTPPort(port);
         _participantInfos.add(participantInfo);
+        good = true;
     }
     else
     {
         // check for ssrc conflict
-        if (participantInfo->getAddress() != address)
+        if (participantInfo->getAddress() == address)
         {
-            // we have an address conflict
-        }
-        if (participantInfo->getRTPPort() == PORT_UNDEF)
-        {
-            participantInfo->setRTPPort(port);
-        }
-        else if (participantInfo->getRTPPort() != port)
-        {
-            // we have an rtp port conflict
+            if (participantInfo->getRTPPort() == port)
+            {
+                good = true;
+            }
+            else if (participantInfo->getRTPPort() == PORT_UNDEF)
+            {
+                participantInfo->setRTPPort(port);
+                good = true;
+            }
         }
     }
-    participantInfo->processRTPPacket(packet, getId(),  packet->getArrivalTime());
+    if (good)
+    {
+        participantInfo->processRTPPacket(packet, getId(),  packet->getArrivalTime());
+    }
+    else
+    {
+        ev << "Incoming packet address/port conflict, packet dropped.\n";
+        delete packet;
+    }
 }
 
 void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port)
