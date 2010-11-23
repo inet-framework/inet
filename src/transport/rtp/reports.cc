@@ -15,10 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file reports.cc
- * This file contains the implementations of member functions of the
- * class INET_API SenderReport and ReceptionReport.
- */
 
 #include "reports.h"
 
