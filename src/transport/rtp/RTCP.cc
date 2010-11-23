@@ -93,23 +93,23 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
     switch(rinp->getType())
     {
     case RTP_INP_INITIALIZE_RTCP:
-        initializeRTCP(rinp);
+        handleInitializeRTCP(rinp);
         break;
 
     case RTP_INP_SENDER_MODULE_INITIALIZED:
-        senderModuleInitialized(rinp);
+        handleSenderModuleInitialized(rinp);
         break;
 
     case RTP_INP_DATA_OUT:
-        dataOut(rinp);
+        handleDataOut(rinp);
         break;
 
     case RTP_INP_DATA_IN:
-        dataIn(rinp);
+        handleDataIn(rinp);
         break;
 
     case RTP_INP_LEAVE_SESSION:
-        leaveSession(rinp);
+        handleLeaveSession(rinp);
         break;
 
     default:
@@ -146,7 +146,7 @@ void RTCP::handleSelfMessage(cMessage *msg)
 // methods for different messages
 //
 
-void RTCP::initializeRTCP(RTPInnerPacket *rinp)
+void RTCP::handleInitializeRTCP(RTPInnerPacket *rinp)
 {
     _mtu = rinp->getMTU();
     _bandwidth = rinp->getBandwidth();
@@ -163,7 +163,7 @@ void RTCP::initializeRTCP(RTPInnerPacket *rinp)
     createSocket();
 }
 
-void RTCP::senderModuleInitialized(RTPInnerPacket *rinp)
+void RTCP::handleSenderModuleInitialized(RTPInnerPacket *rinp)
 {
     _senderInfo->setStartTime(simTime());
     _senderInfo->setClockRate(rinp->getClockRate());
@@ -171,20 +171,20 @@ void RTCP::senderModuleInitialized(RTPInnerPacket *rinp)
     _senderInfo->setSequenceNumberBase(rinp->getSequenceNumberBase());
 }
 
-void RTCP::dataOut(RTPInnerPacket *packet)
+void RTCP::handleDataOut(RTPInnerPacket *packet)
 {
     RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(packet->decapsulate());
     processOutgoingRTPPacket(rtpPacket);
 }
 
-void RTCP::dataIn(RTPInnerPacket *rinp)
+void RTCP::handleDataIn(RTPInnerPacket *rinp)
 {
     RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(rinp->decapsulate());
     //rtpPacket->dump();
     processIncomingRTPPacket(rtpPacket, rinp->getAddress(), rinp->getPort());
 }
 
-void RTCP::leaveSession(RTPInnerPacket *rinp)
+void RTCP::handleLeaveSession(RTPInnerPacket *rinp)
 {
     _leaveSession = true;
 }

@@ -65,29 +65,29 @@ class INET_API RTCP : public cSimpleModule
     /**
      * Initializes the rtcp module when the session is started.
      */
-    virtual void initializeRTCP(RTPInnerPacket *rinp);
+    virtual void handleInitializeRTCP(RTPInnerPacket *rinp);
 
     /**
      * Stores information about the new transmission.
      */
-    virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+    virtual void handleSenderModuleInitialized(RTPInnerPacket *rinp);
 
     /**
      * Stores information about an outgoing RTP data packet.
      */
-    virtual void dataOut(RTPInnerPacket *packet);
+    virtual void handleDataOut(RTPInnerPacket *packet);
 
     /**
      * Stores information about an outgoing RTP data packet.
      */
-    virtual void dataIn(RTPInnerPacket *rinp);
+    virtual void handleDataIn(RTPInnerPacket *rinp);
 
     /**
      * Makes the rtcp module send an RTCPByePacket in the next
      * RTCPCompoundPacket to tell other participants in the RTP
      * session that this end system leaves.
     */
-    virtual void leaveSession(RTPInnerPacket *rinp);
+    virtual void handleLeaveSession(RTPInnerPacket *rinp);
 
     /**
      * Called when the socket layer has finished a connect.
