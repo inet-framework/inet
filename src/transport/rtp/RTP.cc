@@ -197,13 +197,15 @@ void RTP::enterSession(RTPCIEnterSession *rifp)
 
 void RTP::leaveSession(RTPCILeaveSession *rifp)
 {
-    cModule *profileModule = gate("profileOut")->getNextGate()->getOwnerModule();
-    profileModule->deleteModule();
-    _leaveSession = true;
-    RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
-    rinp->setLeaveSessionPkt();
-    send(rinp,"rtcpOut");
-
+    if (!_leaveSession)
+    {
+        _leaveSession = true;
+        cModule *profileModule = gate("profileOut")->getNextGate()->getOwnerModule();
+        profileModule->deleteModule();
+        RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
+        rinp->setLeaveSessionPkt();
+        send(rinp,"rtcpOut");
+    }
     delete rifp;
 }
 
