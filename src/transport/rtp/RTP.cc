@@ -18,7 +18,9 @@
 
 #include "RTP.h"
 
+#include "InterfaceEntry.h"
 #include "IPAddress.h"
+#include "RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "RTPProfile.h"
@@ -370,12 +372,17 @@ void RTP::readRet(cMessage *sifp)
 
 int RTP::resolveMTU()
 {
-    // TODO this is not what it should be
-    // do something like mtu path discovery
-    // for the simulation we can use this example value
-    // it's 1500 bytes (ethernet) minus ip
+    // it returns MTU bytelength (ethernet) minus ip
     // and udp headers
-    return 1500 - 20 - 8;
+    // TODO: How to do get the valid length of IP and ETHERNET header?
+    RoutingTableAccess routingTableAccess;
+    const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(_destinationAddress);
+    if(rtie == NULL)
+    {
+        opp_error("No interface for remote address %s found!", _destinationAddress.str().c_str());
+    }
+    int pmtu = rtie->getMTU();
+    return pmtu - 20 - 8;
 }
 
 void RTP::createProfile()
