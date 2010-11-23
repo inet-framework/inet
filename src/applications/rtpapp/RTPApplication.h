@@ -18,6 +18,7 @@
 #define __INET_RTPAPPLICATION_H
 
 #include "INETDefs.h"
+#include "IPAddress.h"
 
 /**
  * The class RTPApplication is just a very simple sample for an application
@@ -109,10 +110,8 @@ class INET_API RTPApplication : public cSimpleModule
         simtime_t _sessionLeaveDelay;
 
         uint32 ssrc;
-        bool sessionEntered;
-        bool transmissionStarted;
-        bool transmissionFinished;
-        bool sessionLeft;
+
+        bool isActiveSession;
 };
 
 #endif
