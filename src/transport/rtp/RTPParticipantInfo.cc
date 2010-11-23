@@ -15,22 +15,20 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPParticipantInfo.cc
- * This file contains the implementation of member functions of the class RTPParticipantInfo.
- * \sa RTPParticipantInfo
- */
 
 #include "RTPParticipantInfo.h"
+
 #include "reports.h"
+#include "RTPPacket.h"
 
 
 Register_Class(RTPParticipantInfo);
 
 
-RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject()
+RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc)
+  : cObject(), _sdesChunk("SDESChunk", ssrc)
 {
-    _sdesChunk = new SDESChunk("SDESChunk", ssrc);
-    // because there haven't been sent any rtp packets
+    // because there haven't been sent any RTP packets
     // by this endsystem at all, the number of silent
     // intervals would be undefined; to calculate with
     // it but not to regard this endsystem as a sender
@@ -41,35 +39,29 @@ RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject()
     _rtcpPort = PORT_UNDEF;
 }
 
-
 RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo) : cObject()
 {
     operator=(participantInfo);
 }
 
-
 RTPParticipantInfo::~RTPParticipantInfo()
 {
-    delete _sdesChunk;
 }
-
 
 RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& participantInfo)
 {
     cObject::operator=(participantInfo);
-    _sdesChunk = new SDESChunk(*(participantInfo._sdesChunk));
+    _sdesChunk = participantInfo._sdesChunk;
     _address = participantInfo._address;
     _rtpPort = participantInfo._rtpPort;
     _rtcpPort = participantInfo._rtcpPort;
     return *this;
 }
 
-
 RTPParticipantInfo *RTPParticipantInfo::dup() const
 {
     return new RTPParticipantInfo(*this);
 }
-
 
 void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
 {
@@ -78,24 +70,22 @@ void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t a
 }
 
 
-void RTPParticipantInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
+void RTPParticipantInfo::processSenderReport(SenderReport &report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
-    delete report;
 }
 
-
-void RTPParticipantInfo::processReceptionReport(ReceptionReport *report, simtime_t arrivalTime)
+void RTPParticipantInfo::processReceptionReport(ReceptionReport &report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
-    delete report;
 }
-
 
 void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
-    for (int i = 0; i < sdesChunk->size(); i++) {
-        if (sdesChunk->exist(i)) {
+    for (int i = 0; i < sdesChunk->size(); i++)
+    {
+        if (sdesChunk->exist(i))
+        {
             SDESItem *sdesItem = (SDESItem *)(sdesChunk->remove(i));
             addSDESItem(sdesItem);
         }
@@ -103,72 +93,60 @@ void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arriva
     delete sdesChunk;
 }
 
-
-SDESChunk *RTPParticipantInfo::getSDESChunk()
+SDESChunk *RTPParticipantInfo::getSDESChunk() const
 {
-    return new SDESChunk(*_sdesChunk);
+    return new SDESChunk(_sdesChunk);
 }
-
 
 void RTPParticipantInfo::addSDESItem(SDESItem *sdesItem)
 {
-    _sdesChunk->addSDESItem(sdesItem);
+    _sdesChunk.addSDESItem(sdesItem);
 }
 
-
-bool RTPParticipantInfo::isSender()
+bool RTPParticipantInfo::isSender() const
 {
     return (_silentIntervals <= 1);
 }
-
 
 ReceptionReport *RTPParticipantInfo::receptionReport(simtime_t now)
 {
     return NULL;
 }
 
-
 SenderReport *RTPParticipantInfo::senderReport(simtime_t now)
 {
     return NULL;
 }
-
 
 void RTPParticipantInfo::nextInterval(simtime_t now)
 {
     _silentIntervals++;
 }
 
-
 bool RTPParticipantInfo::toBeDeleted(simtime_t now)
 {
     return false;
 }
 
-
-uint32 RTPParticipantInfo::getSSRC()
+uint32 RTPParticipantInfo::getSsrc() const
 {
-    return _sdesChunk->getSSRC();
+    return _sdesChunk.getSsrc();
 }
 
-
-void RTPParticipantInfo::setSSRC(uint32 ssrc)
+void RTPParticipantInfo::setSsrc(uint32 ssrc)
 {
-    _sdesChunk->setSSRC(ssrc);
+    _sdesChunk.setSsrc(ssrc);
 }
-
 
 void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content)
 {
-    _sdesChunk->addSDESItem(new SDESItem(type, content));
+    _sdesChunk.addSDESItem(new SDESItem(type, content));
 }
 
-
-IPAddress RTPParticipantInfo::getAddress()
+IPAddress RTPParticipantInfo::getAddress() const
 {
     return _address;
 }
-
 
 void RTPParticipantInfo::setAddress(IPAddress address)
 {
@@ -176,7 +154,7 @@ void RTPParticipantInfo::setAddress(IPAddress address)
 }
 
 
-int RTPParticipantInfo::getRTPPort()
+int RTPParticipantInfo::getRTPPort() const
 {
     return _rtpPort;
 }
@@ -188,7 +166,7 @@ void RTPParticipantInfo::setRTPPort(int rtpPort)
 }
 
 
-int RTPParticipantInfo::getRTCPPort()
+int RTPParticipantInfo::getRTCPPort() const
 {
     return _rtcpPort;
 }
@@ -206,7 +184,6 @@ char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);
 }
-
 
 void RTPParticipantInfo::dump() const
 {

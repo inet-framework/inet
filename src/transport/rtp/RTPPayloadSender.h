@@ -16,199 +16,197 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadSender.h
- * This file declares the class RTPPayloadSender.
- */
-
 #ifndef __INET_RTPPAYLOADSENDER_H
 #define __INET_RTPPAYLOADSENDER_H
 
+
 #include <fstream>
+
 #include "INETDefs.h"
-#include "RTPInnerPacket.h"
+
+
+//Forward declarations:
+class RTPInnerPacket;
 
 
 /**
  * The class RTPPayloadSender is the base class for all modules creating
- * rtp data packets. It provides functionality needed by every rtp data
+ * RTP data packets. It provides functionality needed by every RTP data
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
  */
 class INET_API RTPPayloadSender : public cSimpleModule
 {
-    public: //FIXME
-    //protected:
+  public:
+    /**
+     * Constructor.
+     */
+    RTPPayloadSender();
 
-        /**
-         * Constructor, with activity() stack size.
-         */
-        RTPPayloadSender() : cSimpleModule(32768) {}
+    /**
+     * Destructor. Calls closeSourceFile.
+     */
+    virtual ~RTPPayloadSender();
 
-        /**
-         * Cleaning up. Calls closeSourceFile.
-         */
-        virtual ~RTPPayloadSender();
+  protected:
+    /**
+     * Chooses sequence number and time stamp base values and
+     * reads the omnet parameter "mtu".
+     */
+    virtual void initialize();
 
-        /**
-         * Chooses sequence number and time stamp base values and
-         * reads the omnet parameter "mtu".
-         */
-        virtual void initialize();
+    virtual void handleMessage(cMessage * msg);
 
-        virtual void activity();
+    /**
+     * A sender module's transmission can be in different states.
+     */
+    enum SenderStatus {
+        STOPPED, //< No transmission.
+        PLAYING  ///< Data is being sent.
+    };
 
-        /**
-         * A sender module's transmission can be in different states.
-         */
-        enum SenderStatus {
-            STOPPED, //< No transmission.
-            PLAYING  ///< Data is being sent.
-        };
+    /**
+     * This method is called when a newly create sender module
+     * received its initialization message from profile module.
+     * It returns an RTP_INP_SENDER_MODULE_INITIALIZED message which
+     */
+    virtual void initializeSenderModule(RTPInnerPacket *);
 
-    protected:
+    /**
+     * This method is called by initializeSenderModule and opens the
+     * source data file as an inputFileStream stored in member
+     * variable _inputFileStream. Most data formats can use
+     * this method directly, but when using a library for a certain
+     * data format which offers an own open routine this method
+     * must be overwritten.
+     */
+    virtual void openSourceFile(const char *fileName);
 
-        /**
-         * The input file stream for the data file.
-         */
-        std::ifstream  _inputFileStream;
+    /**
+     * This method is called by the destructor and closes the data file.
+     */
+    virtual void closeSourceFile();
 
-        /**
-         * The maximum size of an RTPPacket.
-         */
-        int _mtu;
+    /**
+     * Starts data transmission.
+     * Every sender module must implement this method.
+     */
+    virtual void play();
 
-        /**
-         * The ssrc identifier of this sender module.
-         */
-        uint32 _ssrc;
+    /**
+     * Starts transmission from the current file position and plays until given
+     * time (relative to start of file) is reached.
+     * Implementation in sender modules is optional.
+     */
+    virtual void playUntilTime(simtime_t moment);
 
-        /**
-         * The payload type this sender creates.
-         */
-        int _payloadType;
+    /**
+     * Starts transmission from the current file position and plays until given
+     * byte position (excluding file header) is reached.
+     * Implementation in sender modules is optional.
+    */
+    virtual void playUntilByte(int position);
 
-        /**
-         * The clock rate in ticks per second this sender uses.
-         */
-        int _clockRate;
+    /**
+     * When data is being transmitted this methods suspends till
+     * a new PLAY command.
+     * Implementation in sender modules is optional.
+     */
+    virtual void pause();
 
-        /**
-         * The first rtp time stamp used for created rtp data
-         * packets. The value is chosen randomly.
-         */
-        uint32 _timeStampBase;
+    /**
+     * When the data transmission is paused the current position is
+     * changed to this time (relative to start of file).
+     * Implementation in sender modules is optional.
+     */
+    virtual void seekTime(simtime_t moment);
 
-        /**
-         * The current rtp time stamp.
-         */
-        uint32 _timeStamp;
+    /**
+     * When the data transmission is paused the current position is
+     * changed to this byte position (excluding file header).
+     * Implementation in sender modules is optional.
+     */
+    virtual void seekByte(int position);
 
-        /**
-         * The first sequence number used for created rtp data
-         * packets. The value is chosen randomly.
-         */
-        uint16 _sequenceNumberBase;
+    /**
+     * This method stop data transmission and resets the sender module so
+     * that a following PLAY command would start the transmission at the
+     * beginning again.
+     */
+    virtual void stop();
 
-        /**
-         * The current sequence number.
-         */
-        uint16 _sequenceNumber;
+    /**
+     * This method gets called when the sender module reaches the end of
+     * file. For the transmission it has the same effect like stop().
+     */
+    virtual void endOfFile();
 
-        /**
-         * The current state of data transmission.
-         */
-        SenderStatus _status;
+    /**
+     * This method gets called when one (or more) rtp data packets have
+     * to be sent. Subclasses must overwrite this method to do something
+     * useful. This implementation doesn't send packets it just returns
+     */
+    virtual bool sendPacket();
 
-        /**
-        A self message used as timer for the moment the next packet must be sent.
-        It's a member variable because when playing gets paused or stopped the timer
-        must be cancelled.
-        */
-        cMessage *_reminderMessage;
+  protected:
+    /**
+     * The input file stream for the data file.
+     */
+    std::ifstream  _inputFileStream;
 
-        /**
-         * This method is called when a newly create sender module
-         * received its initialization message from profile module.
-         * It returns an RTP_INP_SENDER_MODULE_INITIALIZED message which
-         */
-        virtual void initializeSenderModule(RTPInnerPacket *);
+    /**
+     * The maximum size of an RTPPacket.
+     */
+    int _mtu;
 
-        /**
-         * This method is called by initializeSenderModule and opens the
-         * source data file as an inputFileStream stored in member
-         * variable _inputFileStream. Most data formats can use
-         * this method directly, but when using a library for a certain
-         * data format which offers an own open routine this method
-         * must be overwritten.
-         */
-        virtual void openSourceFile(const char *fileName);
+    /**
+     * The ssrc identifier of this sender module.
+     */
+    uint32 _ssrc;
 
-        /**
-         * This method is called by the destructor and closes the data file.
-         */
-        virtual void closeSourceFile();
+    /**
+     * The payload type this sender creates.
+     */
+    int _payloadType;
 
-        /**
-         * Starts data transmission.
-         * Every sender module must implement this method.
-         */
-        virtual void play();
+    /**
+     * The clock rate in ticks per second this sender uses.
+     */
+    int _clockRate;
 
-        /**
-         * Starts transmission from the current file position and plays until given
-         * time (relative to start of file) is reached.
-         * Implementation in sender modules is optional.
-         */
-        virtual void playUntilTime(simtime_t moment);
+    /**
+     * The first rtp time stamp used for created rtp data
+     * packets. The value is chosen randomly.
+     */
+    uint32 _timeStampBase;
 
-        /**
-         * Starts transmission from the current file position and plays until given
-         * byte position (excluding file header) is reached.
-         * Implementation in sender modules is optional.
-        */
-        virtual void playUntilByte(int position);
+    /**
+     * The current rtp time stamp.
+     */
+    uint32 _timeStamp;
 
-        /**
-         * When data is being transmitted this methods suspends till
-         * a new PLAY command.
-         * Implementation in sender modules is optional.
-         */
-        virtual void pause();
+    /**
+     * The first sequence number used for created rtp data
+     * packets. The value is chosen randomly.
+     */
+    uint16 _sequenceNumberBase;
 
-        /**
-         * When the data transmission is paused the current position is
-         * changed to this time (relative to start of file).
-         * Implementation in sender modules is optional.
-         */
-        virtual void seekTime(simtime_t moment);
+    /**
+     * The current sequence number.
+     */
+    uint16 _sequenceNumber;
 
-        /**
-         * When the data transmission is paused the current position is
-         * changed to this byte position (excluding file header).
-         * Implementation in sender modules is optional.
-         */
-        virtual void seekByte(int position);
+    /**
+     * The current state of data transmission.
+     */
+    SenderStatus _status;
 
-        /**
-         * This method stop data transmission and resets the sender module so
-         * that a following PLAY command would start the transmission at the
-         * beginning again.
-         */
-        virtual void stop();
-
-        /**
-         * This method gets called when the sender module reaches the end of
-         * file. For the transmission it has the same effect like stop().
-         */
-        virtual void endOfFile();
-
-        /**
-         * This method gets called when one (or more) rtp data packets have
-         * to be sent. Subclasses must overwrite this method to do something
-         * useful. This implementation doesn't send packets it just returns
-         */
-        virtual bool sendPacket();
+    /**
+    A self message used as timer for the moment the next packet must be sent.
+    It's a member variable because when playing gets paused or stopped the timer
+    must be cancelled.
+    */
+    cMessage *_reminderMessage;
 };
 
 #endif
-

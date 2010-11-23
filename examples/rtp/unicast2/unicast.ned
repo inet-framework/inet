@@ -1,8 +1,10 @@
-package inet.examples.rtp.unicast;
+package inet.examples.rtp.unicast2;
 
 import inet.transport.rtp.RTPHost;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
 
-network RTPNetwork
+
+network RTPUnicast2
 {
     types:
         channel ethernet extends ned.DatarateChannel
@@ -16,19 +18,29 @@ network RTPNetwork
     submodules:
         sender: RTPHost {
             parameters:
+                IPForward = false;
                 profileName = "inet.transport.rtp.RTPAVProfile";
-                destinationAddress = "10.0.0.2";
+                destinationAddress = "receiver";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "server.irt";
+                fileName = "../data/moving.mpg.gdf";
+                payloadType = 32;
+                @display("p=185,128");
         }
         receiver: RTPHost {
             parameters:
+                IPForward = false;
                 profileName = "inet.transport.rtp.RTPAVProfile";
-                destinationAddress = "10.0.0.1";
+                destinationAddress = "sender";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "client.irt";
+                fileName = "";
+                payloadType = 32;
+                @display("p=54,128");
+        }
+        configurator: FlatNetworkConfigurator {
+            parameters:
+                @display("p=54,23");
         }
     connections:
         sender.pppg++ <--> ethernet <--> receiver.pppg++;

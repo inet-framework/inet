@@ -37,9 +37,20 @@ cplusplus {{
 //    - SEEK_TIME : go to temporal position within the file (not allowed while playing)
 //    - SEEK_BYTE : go to data byte (not allowed while playing)
 //
+enum RTPSenderControlMessageCommands
+{
+    RTP_CONTROL_PLAY = 1;
+    RTP_CONTROL_PLAY_UNTIL_TIME = 2;
+    RTP_CONTROL_PLAY_UNTIL_BYTE = 3;
+    RTP_CONTROL_PAUSE = 4;
+    RTP_CONTROL_STOP = 5;
+    RTP_CONTROL_SEEK_TIME = 6;
+    RTP_CONTROL_SEEK_BYTE = 7;
+};
+
 packet RTPSenderControlMessage
 {
-    string command;
+    short command @enum(RTPSenderControlMessageCommands);
     float commandParameter1;
     float commandParameter2;
 };

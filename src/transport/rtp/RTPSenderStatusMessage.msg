@@ -29,8 +29,16 @@ cplusplus {{
 // If a message must provide more information than just a string, a new class
 // defining this parameter can derived.
 //
+enum RTPSenderStatus
+{
+    RTP_SENDER_STATUS_PLAYING = 1;
+    RTP_SENDER_STATUS_FINISHED = 2;
+    RTP_SENDER_STATUS_STOPPED = 3;
+    RTP_SENDER_STATUS_PAUSED = 4;
+}
+
 packet RTPSenderStatusMessage
 {
-    string status;
+    short status @enum(RTPSenderStatus);
     uint32 timeStamp;
 };

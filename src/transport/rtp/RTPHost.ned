@@ -15,6 +15,8 @@ import ned.IdealChannel;
 module RTPHost
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
         string profileName;
         string destinationAddress;
         int portNumber;
@@ -22,8 +24,8 @@ module RTPHost
         string fileName;
         int payloadType;
         // network information
-        bool IPForward;
-        string routingFile;
+        bool IPForward = default(false);
+        string routingFile = default("");
         @display("i=device/pc2;bgb=323,371");
 
     gates:

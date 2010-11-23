@@ -10,3 +10,6 @@ integrated into the INET Framework
 
 Andras Varga
 ported to OMNeT++ 4.0, refactoring
+
+Zoltan Bojthe
+bugfixes, refactoring
