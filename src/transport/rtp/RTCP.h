@@ -24,11 +24,15 @@
 
 
 //Forward declarations:
+class RTCPByePacket;
 class RTCPCompoundPacket;
+class RTCPReceiverReportPacket;
+class RTCPSDESPacket;
+class RTCPSenderReportPacket;
 class RTPInnerPacket;
 class RTPPacket;
-class RTPSenderInfo;
 class RTPParticipantInfo;
+class RTPSenderInfo;
 
 
 /**
@@ -141,6 +145,13 @@ class INET_API RTCP : public cSimpleModule
      * Extracts information of a received RTCPCompoundPacket.
      */
     virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port);
+    void processIncomingRTCPSenderReportPacket(
+            RTCPSenderReportPacket *rtcpSenderReportPacket, IPAddress address, int port);
+    void processIncomingRTCPReceiverReportPacket(
+            RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPAddress address, int port);
+    void processIncomingRTCPSDESPacket(
+            RTCPSDESPacket *rtcpSDESPacket, IPAddress address, int port, simtime_t arrivalTime);
+    void processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPAddress address, int port);
 
     /**
      * Returns the RTPParticipantInfo object used for storing information
