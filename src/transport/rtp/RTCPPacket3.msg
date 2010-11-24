@@ -23,8 +23,7 @@ cplusplus {{
 #include "sdes.h"
 }}
 
-struct cArray;
-struct SenderReport;
+class noncobject SenderReport;
 packet RTCPReceiverReportPacket;
 
 packet RTCPSenderReportPacket extends RTCPReceiverReportPacket
