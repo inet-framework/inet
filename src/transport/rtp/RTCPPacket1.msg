@@ -17,7 +17,7 @@
 // TODO generated message class
 //
 
-struct cArray;
+class cArray;
 
 enum RTCPPacketType
 {
