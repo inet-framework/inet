@@ -19,16 +19,21 @@
 
 package inet.nodes.ipv6;
 
-import inet.applications.pingapp.PingApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.udpapp.UDPApp;
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv6.RoutingTable6;
-import inet.transport.tcp.ITCP;
+import inet.util.NAMTraceWriter;
 import inet.transport.udp.UDP;
+import inet.transport.tcp.ITCP;
+import inet.transport.sctp.SCTP;
+import inet.networklayer.ipv6.RoutingTable6;
+import inet.networklayer.common.InterfaceTable;
+import inet.mobility.BasicMobility;
+import inet.linklayer.ext.ExtInterface;
+import inet.linklayer.IWirelessNic;
+import inet.linklayer.INetworkInterface;
+import inet.base.NotificationBoard;
+import inet.applications.udpapp.UDPApp;
+import inet.applications.tcpapp.TCPApp;
+import inet.applications.sctpapp.SCTPApp;
+import inet.applications.pingapp.PingApp;
 
 
 //
@@ -38,64 +43,100 @@ module StandardHost6
 {
     parameters:
         @node();
-        @labels(node,ethernet-node);
+        @labels(node,ethernet-node,wireless-node);
+        @display("i=device/pc2");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
+        int numSctpApps = default(0);
         // string tcpAppType = default(""); // Obsolete
         // string udpAppType = default(""); // Obsolete
+        string tcpAppType = default("n/a");
+        string udpAppType = default("n/a");
+        string sctpAppType = default("n/a");
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
-        @display("i=device/laptop");
+        int numExtInterfaces = default(0);
+        int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
+        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
+        string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
+        string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
+        bool IPForward = default(false);
+        int namid = default(-1);
+        string routingFile = default("");
     gates:
+        input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        namTrace: NAMTraceWriter {
+            parameters:
+                namid = namid;
+                @display("p=57,294");
+        }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=60,70");
+                @display("p=57,54");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=60,150");
+                @display("p=57,134");
         }
         routingTable6: RoutingTable6 {
             parameters:
-                isRouter = false;
-                @display("p=60,230");
+                isRouter = IPForward;
+                routingTableFile = routingFile;
+                @display("p=57,214");
+        }
+        mobility: <mobilityType> like BasicMobility {
+            parameters:
+                @display("p=57,368");
         }
         tcpApp[numTcpApps]: <> like TCPApp {
             parameters:
-                @display("p=163,67");
+                @display("p=186,54");
         }
         tcp: <tcpType> like ITCP {
             parameters:
-                @display("p=163,154");
+                @display("p=186,141");
         }
         udpApp[numUdpApps]: <> like UDPApp {
             parameters:
-                @display("p=272,67");
+                @display("p=336,54");
         }
         udp: UDP {
             parameters:
-                @display("p=272,154");
+                @display("p=336,141");
+        }
+        sctpApp[numSctpApps]: <sctpAppType> like SCTPApp {
+            parameters:
+                @display("p=501,54");
+        }
+        sctp: SCTP {
+            @display("p=501,141;i=block/wheelbarrow");
         }
         pingApp: PingApp {
             parameters:
-                @display("p=343,200");
+                @display("p=501,230");
         }
         networkLayer: NetworkLayer6 {
             parameters:
-                @display("p=248,247;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
+                @display("p=336,230;q=queue");
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
-                @display("p=205,350,row,90;q=txQueue");
+                @display("p=132,390;q=queue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <ethNicType> like INetworkInterface {
             parameters:
-                @display("p=240,350,row,90;q=txQueue");
+                @display("p=250,390,row,90;q=txQueue");
+        }
+        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface {
+            parameters:
+                @display("p=369,390,row,90;q=txQueue");
+        }
+        ext[numExtInterfaces]: ExtInterface {
+            parameters:
+                @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {
@@ -114,20 +155,38 @@ module StandardHost6
         udp.ipv6Out --> networkLayer.udpIn;
         udp.ipv6In <-- networkLayer.udpOut;
 
+        for i=0..numSctpApps-1 {
+            sctpApp[i].sctpOut --> sctp.from_appl++;
+            sctp.to_appl++ --> sctpApp[i].sctpIn;
+        }
+        sctp.to_ipv6 --> networkLayer.sctpIn;
+        networkLayer.sctpOut --> sctp.from_ipv6;
+
         networkLayer.pingOut --> pingApp.pingv6In;
         networkLayer.pingIn <-- pingApp.pingv6Out;
 
         // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
+        for i=0..sizeof(radioIn)-1 {
+            radioIn[i] --> wlan[i].radioIn;
+            wlan[i].uppergateOut --> networkLayer.ifIn++;
+            wlan[i].uppergateIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+            eth[i].netwOut --> networkLayer.ifIn++;
+            eth[i].netwIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..sizeof(pppg)-1 {
+            pppg[i] <--> ppp[i].phys;
+            ppp[i].netwOut --> networkLayer.ifIn++;
+            ppp[i].netwIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..numExtInterfaces-1 {
+            ext[i].netwOut --> networkLayer.ifIn++;
+            ext[i].netwIn <-- networkLayer.ifOut++;
         }
 }
 

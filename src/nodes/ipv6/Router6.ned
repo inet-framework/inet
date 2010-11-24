@@ -18,11 +18,14 @@
 
 package inet.nodes.ipv6;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
+import inet.util.NAMTraceWriter;
 import inet.networklayer.ipv6.RoutingTable6;
+import inet.networklayer.common.InterfaceTable;
+import inet.mobility.BasicMobility;
+import inet.linklayer.ext.ExtInterface;
+import inet.linklayer.IWirelessNic;
+import inet.linklayer.INetworkInterface;
+import inet.base.NotificationBoard;
 
 
 //
@@ -32,52 +35,87 @@ module Router6
 {
     parameters:
         @node();
-        @labels(node,ethernet-node);
+        @labels(node,ethernet-node,wireless-node);
         @display("i=abstract/router");
+        int numExtInterfaces = default(0);
+        int numRadios = default(0);               // the number of radios in the router. by default no wireless
+        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
+        string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
+        string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
+        int namid = default(-1);
+        string routingFile = default("");
     gates:
+        input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        namTrace: NAMTraceWriter {
+            parameters:
+                namid = namid;
+                @display("p=375,54");
+        }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=60,60");
+                @display("p=57,54");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=150,60");
+                @display("p=177,54");
         }
         routingTable6: RoutingTable6 {
             parameters:
                 isRouter = true;
-                @display("p=240,60");
+                routingTableFile = routingFile;
+                @display("p=281,54");
+        }
+        mobility: <mobilityType> like BasicMobility {
+            parameters:
+                @display("p=468,54");
         }
         networkLayer: NetworkLayer6 {
             parameters:
-                @display("p=200,141;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
+                @display("p=242,143;q=queue");
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
-                @display("p=90,257,row,110;q=l2queue");
+                @display("p=72,242;q=queue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <ethNicType> like INetworkInterface {
             parameters:
-                @display("p=145,257,row,110;q=l2queue");
+                @display("p=195,242,row,90;q=txQueue");
+        }
+        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface {
+            parameters:
+                @display("p=320,242,row,90;q=txQueue");
+        }
+        ext[numExtInterfaces]: ExtInterface {
+            parameters:
+                @display("p=460,242,row,90;q=txQueue;i=block/ifcard");
         }
     connections allowunconnected:
         // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
+        for i=0..sizeof(radioIn)-1 {
+            radioIn[i] --> wlan[i].radioIn;
+            wlan[i].uppergateOut --> networkLayer.ifIn++;
+            wlan[i].uppergateIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+            eth[i].netwOut --> networkLayer.ifIn++;
+            eth[i].netwIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..sizeof(pppg)-1 {
+            pppg[i] <--> ppp[i].phys;
+            ppp[i].netwOut --> networkLayer.ifIn++;
+            ppp[i].netwIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..numExtInterfaces-1 {
+            ext[i].netwOut --> networkLayer.ifIn++;
+            ext[i].netwIn <-- networkLayer.ifOut++;
         }
 }
 
