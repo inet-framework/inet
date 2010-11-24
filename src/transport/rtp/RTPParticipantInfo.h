@@ -40,7 +40,7 @@ class SenderReport;
  * \sa RTPReceiverInformation
  * \sa RTPSenderInformation
  */
-class INET_API RTPParticipantInfo : public cObject
+class INET_API RTPParticipantInfo : public cNamedObject
 {
   public:
     /**
