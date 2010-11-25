@@ -20,6 +20,8 @@
 #define __INET_RTPPARTICIPANTINFO_H
 
 
+#include "RTPParticipantInfo_m.h"
+
 #include "INETDefs.h"
 #include "IPAddress.h"
 #include "sdes.h"
@@ -40,7 +42,7 @@ class SenderReport;
  * \sa RTPReceiverInformation
  * \sa RTPSenderInformation
  */
-class INET_API RTPParticipantInfo : public cNamedObject
+class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
 {
   public:
     /**
@@ -159,38 +161,13 @@ class INET_API RTPParticipantInfo : public cNamedObject
     virtual void setSsrc(uint32 ssrc);
 
     /**
-     * Returns the ip address of the RTP endsystem.
+     * Creates a new SDESItem and adds it to the SDESChunk stored in
+     * this RTPParticipantInfo.
      */
-    virtual IPAddress getAddress() const;
+    virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
 
-    /**
-     * Sets the ip address of the RTP endsystem.
-     */
-    virtual void setAddress(IPAddress address);
-
-    /**
-     * Returns the port used by this endsystem for
-     * transmitting RTP packets.
-     */
-    virtual int getRTPPort() const;
-
-    /**
-     * Sets the port used by the endsystem for
-     * transmitting RTP packets.
-     */
-    virtual void setRTPPort(int rtpPort);
-
-    /**
-     * Returns the port used by this endsystem for
-     * transmitting rtcp packets.
-     */
-    virtual int getRTCPPort() const;
-
-    /**
-     * Sets the port used by the endsystem for
-     * transmitting rtcp packets.
-     */
-    virtual void setRTCPPort(int rtpPort);
+    virtual void parsimPack(cCommBuffer *b) { throw cRuntimeError("The parsimPack() not implemented."); }
+    virtual void parsimUnpack(cCommBuffer *b) { throw cRuntimeError("The parsimUnpack() not implemented."); }
 
     /**
      * This method returns the given 32 bit ssrc identifier as
@@ -199,35 +176,12 @@ class INET_API RTPParticipantInfo : public cNamedObject
      */
     static char *ssrcToName(uint32 ssrc);
 
-    /**
-     * Creates a new SDESItem and adds it to the SDESChunk stored in
-     * this RTPParticipantInfo.
-     */
-    virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
-
-    virtual void dump() const;
-
   protected:
     /**
      * Used for storing sdes information about this RTP endsystem.
      * The ssrc identifier is also stored here.
      */
     SDESChunk _sdesChunk;
-
-    /**
-     * Used for storing the ip address of this endsystem.
-     */
-    IPAddress _address;
-
-    /**
-     * Used for storing the port for RTP by this endsystem.
-     */
-    int _rtpPort;
-
-    /**
-     * Used for storing the port for rtcp by this endsystem.
-     */
-    int _rtcpPort;
 
     /**
      * Stores the number of rtcp intervals (including the current one)
@@ -238,4 +192,3 @@ class INET_API RTPParticipantInfo : public cNamedObject
 };
 
 #endif
-
