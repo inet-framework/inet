@@ -34,7 +34,7 @@ simple GenericRadio like Radio
         double thermalNoise @unit("dBm") = default(-110dBm); // base noise level (dBm)
         double pathLossAlpha = default(2); // used by the path loss calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
-        double sensitivity @unit("mW") = default(-85mW); // received signals with power below sensitivity are ignored
+        double sensitivity @unit("dBm") = default(-85dBm); // received signals with power below sensitivity are ignored
         int headerLengthBits @unit(b); // length of physical layer framing (preamble, etc)
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method

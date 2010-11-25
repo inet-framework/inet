@@ -40,7 +40,7 @@ simple Ieee80211Radio like Radio
         double pathLossAlpha = default(2); // used by the path loss calculation
         double shadowingDeviation @unit("dB") = default(0dB); // used by the shadowing model calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
-        double sensitivity @unit("mW"); // received signals with power below sensitivity are ignored
+        double sensitivity @unit("dBm"); // received signals with power below sensitivity are ignored
         @display("i=block/wrxtx");
     gates:
         input uppergateIn @labels(PhyControlInfo/down,Ieee80211Frame);   // from higher layer protocol (MAC)
