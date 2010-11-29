@@ -115,6 +115,7 @@ network = Throughput
 #debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 100s
+**.vector-recording = false
 
 *.playgroundSizeX = 400
 *.playgroundSizeY = 400

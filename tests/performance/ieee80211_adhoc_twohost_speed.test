@@ -109,6 +109,7 @@ network = Throughput
 #debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 100s
+**.vector-recording = false
 
 *.playgroundSizeX = 400
 *.playgroundSizeY = 400
@@ -186,7 +187,7 @@ library("omnetpp", warn.conflicts=FALSE)
 scafile <- 'results/General-0.sca'
 linecount <- 1
 rcvdBytes <-  11000000/8
-expectedRate <- 51.8 # %
+expectedRate <- 52.0 # %
 maxDeviation <- 2.0 # %
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation

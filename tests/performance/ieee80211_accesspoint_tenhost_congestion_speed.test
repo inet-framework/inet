@@ -114,7 +114,7 @@ network = Throughput
 #cmdenv-output-file = omnetpp.log
 #debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
-sim-time-limit = 200s
+sim-time-limit = 100s
 **.vector-recording = false
 
 *.playgroundSizeX = 400
@@ -168,7 +168,7 @@ sim-time-limit = 200s
 
 description = "1 host over AP"
 Throughput.numCli = 10
-**.cli.waitTime = 30ms
+**.cli.waitTime = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
@@ -221,6 +221,7 @@ if(length(sinkRcvd$value) == linecount & isGood)
     print(sinkRcvd)
     cat("\n")
 }
+
 
 expectedRateMin <- rate/cnt * (100-unbalancedRate)/100
 expectedRateMax <- rate/cnt * (100+unbalancedRate)/100
