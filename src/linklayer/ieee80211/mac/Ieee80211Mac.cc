@@ -622,7 +622,7 @@ simtime_t Ieee80211Mac::getDIFS()
 simtime_t Ieee80211Mac::getEIFS()
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
+    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / BITRATE_HEADER;
 }
 
 simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
