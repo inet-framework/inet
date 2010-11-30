@@ -91,7 +91,7 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
-        basicBitrate = 2e6; //FIXME make it parameter
+        basicBitrate = par("basicBitrate");
         rtsThreshold = par("rtsThresholdBytes");
 
         // the variable is renamed due to a confusion in the standard
