@@ -68,6 +68,13 @@ Ieee80211Mac::~Ieee80211Mac()
 
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
+
+    while(!transmissionQueue.empty())
+    {
+        Ieee80211Frame *temp = transmissionQueue.front();
+        transmissionQueue.pop_front();
+        delete temp;
+    }
 }
 
 /****************************************************************
