@@ -146,7 +146,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     Mode mode;
 
     /** Sequence number to be assigned to the next frame */
-    int sequenceNumber;
+    uint16 sequenceNumber;
 
     /**
      * Indicates that the last frame received had bit errors in it or there was a
