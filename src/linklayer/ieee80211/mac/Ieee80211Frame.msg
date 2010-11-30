@@ -128,7 +128,7 @@ packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
     byteLength = LENGTH_MGMT / 8;
     MACAddress address3;
     short fragmentNumber;
-    short sequenceNumber;
+    uint16 sequenceNumber;
 }
 
 //
