@@ -15,12 +15,12 @@ import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
 
-
 module ThroughputClient
 {
     parameters:
         int idx;
-        int maxIdx;
+        int maxCli;
+        int maxSrv;
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -33,7 +33,7 @@ module ThroughputClient
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
-                destAddress = "20:00:00:00:00:0"+string(idx);
+                destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
                 @display("b=40,24;p=180,60,col");
         }
         wlan: Ieee80211NicAdhoc {
@@ -42,7 +42,7 @@ module ThroughputClient
         }
         mobility: CircleMobility {
             parameters:
-                startAngle = 360deg * idx / maxIdx;
+                startAngle = 360deg * idx / maxCli;
                 @display("p=50,141");
         }
     connections allowunconnected:
@@ -54,7 +54,7 @@ module ThroughputServer
 {
     parameters:
         int idx;
-        int maxIdx;
+        int maxSrv;
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -74,7 +74,7 @@ module ThroughputServer
         }
         mobility: NullMobility {
             parameters:
-                x = 350 * (idx+1) / maxIdx;
+                x = 350 * (idx+1) / maxSrv;
                 @display("p=50,141");
         }
     connections allowunconnected:
@@ -86,6 +86,7 @@ network Throughput
 {
     parameters:
         int numCli;
+        int numSrv;
         double playgroundSizeX;
         double playgroundSizeY;
         @display("b=297,203");
@@ -93,13 +94,15 @@ network Throughput
         cliHost[numCli]: ThroughputClient {
             parameters:
                 idx = index;
-                maxIdx = numCli;
+                maxCli = numCli;
+                maxSrv = numSrv;
+                wlan.mac.address = "auto";
                 @display("r=,,#707070");
         }
-        srvHost[numCli]: ThroughputServer {
+        srvHost[numSrv]: ThroughputServer {
             parameters:
                 idx = index;
-                maxIdx = numCli;
+                maxSrv = numSrv;
                 wlan.mac.address = "20:00:00:00:00:0"+string(ancestorIndex(2));
                 @display("p=350,350;r=,,#707070");
         }
@@ -110,7 +113,6 @@ network Throughput
                 @display("p=61,46");
         }
 }
-
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
@@ -146,7 +148,6 @@ sim-time-limit = 100s
 *.channelcontrol.alpha = 2
 
 # access point
-**.cliHost[*].wlan.mac.address = "auto"
 
 # nic settings
 **.mac.address = "auto"
@@ -167,11 +168,11 @@ sim-time-limit = 100s
 # cli
 **.cli.reqLength = 1250B
 **.cli.respLength = 0
-**.cli.destAddress = "20:00:00:00:00:00"
 **.cli.destStation = ""
 
-description = "1 host over AP"
+description = "10 host to 10 host on adhoc"
 Throughput.numCli = 10
+Throughput.numSrv = 10
 **.cli.waitTime = 10ms
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -190,6 +191,8 @@ expectedRate <- 52.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
 unbalancedRate <- 3.0 # %
 # begin TEST:
+expectedRateMin <- expectedRate - maxDeviation
+expectedRateMax <- expectedRate + maxDeviation
 
 dataset <- loadDataset(scafile)
 
@@ -203,13 +206,15 @@ sinkRcvd <- sink[sink$name == "rcvdPkBytes:sum",]
 #print(sinkRcvd)
 cnt <- length(sinkRcvd$value)
 #print(cnt)
-expectedRateMin <- (expectedRate - maxDeviation)
-expectedRateMax <- (expectedRate + maxDeviation)
 
 cat("  IEEE80211 TEST RESULT:\n")
 
-cat("    SPEED ")
+sinkRcvd$rate <- sinkRcvd$value * 100 / (rcvdBytes * secs)
 
+avgValue <- sum(sinkRcvd$value) / length(sinkRcvd$value)
+sinkRcvd$urate <- (sinkRcvd$value - avgValue) * 100 / avgValue
+
+cat("    SPEED ")
 
 rate <- sum(sinkRcvd$value) * 100 / (rcvdBytes * max(secs))
 isGood <- (rate >= expectedRateMin) & (rate <= expectedRateMax)
@@ -221,15 +226,6 @@ if(length(sinkRcvd$value) == linecount & isGood)
     print(sinkRcvd)
     cat("\n")
 }
-
-avgValue <- sum(sinkRcvd$value) / length(sinkRcvd$value)
-
-sinkRcvd$rate <- sinkRcvd$value * 100 / (rcvdBytes * secs)
-
-sinkRcvd$urate <- (sinkRcvd$value - avgValue) * 100 / avgValue
-
-expectedRateMin <- rate/cnt * (100-unbalancedRate)/100
-expectedRateMax <- rate/cnt * (100+unbalancedRate)/100
 
 sinkRcvd$isGood <- (sinkRcvd$urate >= -unbalancedRate) & (sinkRcvd$urate <= unbalancedRate)
 
@@ -244,9 +240,10 @@ if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
     cat("BAD:\n")
 #    print(sinkRcvd[!sinkRcvd$isGood,])
     print(sinkRcvd)
+    cat("\n")
 }
 
-cat("\n")
+cat("END\n")
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: check.r.out
@@ -255,5 +252,6 @@ OMNETPP TEST RESULT:
   IEEE80211 TEST RESULT:
     SPEED OK
     BALANCE OK
+END
 
 %#--------------------------------------------------------------------------------------------------------------

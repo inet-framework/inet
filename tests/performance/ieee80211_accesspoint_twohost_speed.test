@@ -8,19 +8,20 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.world.ChannelControl;
+import inet.nodes.wireless.WirelessAPSimplified;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
-import inet.nodes.wireless.WirelessAPSimplified;
-
 
 module ThroughputClient
 {
     parameters:
+        int idx;
+        int maxCli;
+        int maxSrv;
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -33,6 +34,7 @@ module ThroughputClient
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
+                destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
                 @display("b=40,24;p=180,60,col");
         }
         wlan: Ieee80211NicSTASimplified {
@@ -41,6 +43,7 @@ module ThroughputClient
         }
         mobility: CircleMobility {
             parameters:
+                startAngle = 360deg * idx / maxCli;
                 @display("p=50,141");
         }
     connections allowunconnected:
@@ -51,6 +54,8 @@ module ThroughputClient
 module ThroughputServer
 {
     parameters:
+        int idx;
+        int maxSrv;
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -70,6 +75,7 @@ module ThroughputServer
         }
         mobility: NullMobility {
             parameters:
+                x = 350 * (idx+1) / maxSrv;
                 @display("p=50,141");
         }
     connections allowunconnected:
@@ -81,16 +87,24 @@ network Throughput
 {
     parameters:
         int numCli;
+        int numSrv;
         double playgroundSizeX;
         double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
             parameters:
+                idx = index;
+                maxCli = numCli;
+                maxSrv = numSrv;
+                wlan.mac.address = "auto";
                 @display("r=,,#707070");
         }
-        srvHost: ThroughputServer {
+        srvHost[numSrv]: ThroughputServer {
             parameters:
+                idx = index;
+                maxSrv = numSrv;
+                wlan.mac.address = "20:00:00:00:00:0"+string(ancestorIndex(2));
                 @display("p=350,350;r=,,#707070");
         }
         ap: WirelessAPSimplified {
@@ -104,7 +118,6 @@ network Throughput
                 @display("p=61,46");
         }
 }
-
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
@@ -132,16 +145,6 @@ sim-time-limit = 100s
 **.mobility.r = 100
 **.mobility.speed = 1 mps
 **.mobility.updateInterval = 100ms
-**.cliHost[0].mobility.startAngle = 0
-**.cliHost[1].mobility.startAngle = 36deg
-**.cliHost[2].mobility.startAngle = 72deg
-**.cliHost[3].mobility.startAngle = 108deg
-**.cliHost[4].mobility.startAngle = 144deg
-**.cliHost[5].mobility.startAngle = 180deg
-**.cliHost[6].mobility.startAngle = 216deg
-**.cliHost[7].mobility.startAngle = 252deg
-**.cliHost[8].mobility.startAngle = 288deg
-**.cliHost[9].mobility.startAngle = 324deg
 
 # channel physical parameters
 *.channelcontrol.carrierFrequency = 2.4GHz
@@ -151,10 +154,8 @@ sim-time-limit = 100s
 
 # access point
 **.ap.wlan.mac.address = "10:00:00:00:00:00"
-**.srvHost.wlan.mac.address = "20:00:00:00:00:00"
-**.cliHost[*].wlan.mac.address = "auto"
 **.mgmt.accessPointAddress = "10:00:00:00:00:00"
-**.mgmt.frameCapacity = 10
+**.mgmt.frameCapacity = 100
 
 # nic settings
 **.mac.address = "auto"
@@ -175,11 +176,11 @@ sim-time-limit = 100s
 # cli
 **.cli.reqLength = 1250B
 **.cli.respLength = 0
-**.cli.destAddress = "20:00:00:00:00:00"
 **.cli.destStation = ""
 
-description = "1 host over AP"
+description = "1 host to 1 host over AP"
 Throughput.numCli = 1
+Throughput.numSrv = 1
 **.cli.waitTime = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -192,48 +193,73 @@ library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
 scafile <- 'results/General-0.sca'
-linecount <- 1
-rcvdBytes <-  11000000/8
-expectedRate <- 25.6 # %
-maxDeviation <- 2.0 # %
+linecount <- 1 # count of client-server pairs
+rcvdBytes <-  11000000/8 # bytes
+expectedRate <- 26.0 # %
+maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
+unbalancedRate <- 3.0 # %
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation
 expectedRateMax <- expectedRate + maxDeviation
-
 
 dataset <- loadDataset(scafile)
 
 cat("\nOMNETPP TEST RESULT:\n")
 
-sink <- dataset$scalars[dataset$scalars$module == "Throughput.srvHost.sink",]
+sink <- dataset$scalars[grep("\\.srvHost\\[\\d\\]\\.sink", dataset$scalars$module),]
 #print(sink)
 secs <- (sink$value[sink$name == "rcvdPkBytes:count"] / sink$value[sink$name == "packetPerSec"])
 sinkRcvd <- sink[sink$name == "rcvdPkBytes:sum",]
 
-cat("  IEEE80211 SPEED TEST RESULT:\n")
+#print(sinkRcvd)
+cnt <- length(sinkRcvd$value)
+#print(cnt)
+
+cat("  IEEE80211 TEST RESULT:\n")
 
 sinkRcvd$rate <- sinkRcvd$value * 100 / (rcvdBytes * secs)
-sinkRcvd$isGood <- sinkRcvd$rate >= expectedRateMin && sinkRcvd$rate <= expectedRateMax
+
+avgValue <- sum(sinkRcvd$value) / length(sinkRcvd$value)
+sinkRcvd$urate <- (sinkRcvd$value - avgValue) * 100 / avgValue
+
+cat("    SPEED ")
+
+rate <- sum(sinkRcvd$value) * 100 / (rcvdBytes * max(secs))
+isGood <- (rate >= expectedRateMin) & (rate <= expectedRateMax)
+if(length(sinkRcvd$value) == linecount & isGood)
+{
+    cat("OK\n")
+} else {
+    cat("BAD: rate is", rate, "%, expected rate is", expectedRate, "%\n")
+    print(sinkRcvd)
+    cat("\n")
+}
+
+sinkRcvd$isGood <- (sinkRcvd$urate >= -unbalancedRate) & (sinkRcvd$urate <= unbalancedRate)
 
 #print(sinkRcvd)
 
-cat("    SRV RCVD ")
+cat("    BALANCE ")
 
-if(length(sinkRcvd$value) == linecount && min(sinkRcvd$isGood))
+if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
 {
     cat("OK\n")
 } else {
     cat("BAD:\n")
-    print(sinkRcvd[!sinkRcvd$isGood,])
+#    print(sinkRcvd[!sinkRcvd$isGood,])
+    print(sinkRcvd)
+    cat("\n")
 }
 
-cat("\n")
+cat("END\n")
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: check.r.out
 
 OMNETPP TEST RESULT:
-  IEEE80211 SPEED TEST RESULT:
-    SRV RCVD OK
+  IEEE80211 TEST RESULT:
+    SPEED OK
+    BALANCE OK
+END
 
 %#--------------------------------------------------------------------------------------------------------------
