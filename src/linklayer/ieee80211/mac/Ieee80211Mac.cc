@@ -967,32 +967,32 @@ void Ieee80211Mac::resetStateVariables()
     }
 }
 
-bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
+bool Ieee80211Mac::isMediumStateChange(cMessage *msg) const
 {
     return msg == mediumStateChange || (msg == endReserve && radioState == RadioState::IDLE);
 }
 
-bool Ieee80211Mac::isMediumFree()
+bool Ieee80211Mac::isMediumFree() const
 {
     return radioState == RadioState::IDLE && !endReserve->isScheduled();
 }
 
-bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame)
+bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame) const
 {
     return frame && frame->getReceiverAddress().isBroadcast();
 }
 
-bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
+bool Ieee80211Mac::isForUs(Ieee80211Frame *frame) const
 {
     return frame && frame->getReceiverAddress() == address;
 }
 
-bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
+bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame) const
 {
     return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
 }
 
-Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()
+Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS() const
 {
     return (Ieee80211Frame *)endSIFS->getContextPointer();
 }
