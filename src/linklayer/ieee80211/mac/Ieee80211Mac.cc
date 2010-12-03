@@ -600,29 +600,29 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 /****************************************************************
  * Timing functions.
  */
-simtime_t Ieee80211Mac::getSIFS()
+simtime_t Ieee80211Mac::getSIFS() const
 {
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
     return SIFS;
 }
 
-simtime_t Ieee80211Mac::getSlotTime()
+simtime_t Ieee80211Mac::getSlotTime() const
 {
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
     return ST;
 }
 
-simtime_t Ieee80211Mac::getPIFS()
+simtime_t Ieee80211Mac::getPIFS() const
 {
     return getSIFS() + getSlotTime();
 }
 
-simtime_t Ieee80211Mac::getDIFS()
+simtime_t Ieee80211Mac::getDIFS() const
 {
     return getSIFS() + 2 * getSlotTime();
 }
 
-simtime_t Ieee80211Mac::getEIFS()
+simtime_t Ieee80211Mac::getEIFS() const
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
     return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / BITRATE_HEADER;

@@ -279,14 +279,14 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
   protected:
     /**
      * @name Timing functions
-     * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
+     * @brief Calculate various timings based on transmission rate and physical layer characteristics.
      */
     //@{
-    virtual simtime_t getSIFS();
-    virtual simtime_t getSlotTime();
-    virtual simtime_t getDIFS();
-    virtual simtime_t getEIFS();
-    virtual simtime_t getPIFS();
+    virtual simtime_t getSIFS() const;
+    virtual simtime_t getSlotTime() const;
+    virtual simtime_t getDIFS() const;
+    virtual simtime_t getEIFS() const;
+    virtual simtime_t getPIFS() const;
     virtual simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 
