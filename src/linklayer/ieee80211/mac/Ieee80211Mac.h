@@ -146,7 +146,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     Mode mode;
 
     /** Sequence number to be assigned to the next frame */
-    int sequenceNumber;
+    uint16 sequenceNumber;
 
     /**
      * Indicates that the last frame received had bit errors in it or there was a
@@ -279,14 +279,14 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
   protected:
     /**
      * @name Timing functions
-     * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
+     * @brief Calculate various timings based on transmission rate and physical layer characteristics.
      */
     //@{
-    virtual simtime_t getSIFS();
-    virtual simtime_t getSlotTime();
-    virtual simtime_t getDIFS();
-    virtual simtime_t getEIFS();
-    virtual simtime_t getPIFS();
+    virtual simtime_t getSIFS() const;
+    virtual simtime_t getSlotTime() const;
+    virtual simtime_t getDIFS() const;
+    virtual simtime_t getEIFS() const;
+    virtual simtime_t getPIFS() const;
     virtual simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 
@@ -375,22 +375,22 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Used by the state machine to identify medium state change events.
         This message is currently optimized away and not sent through the kernel. */
-    virtual bool isMediumStateChange(cMessage *msg);
+    virtual bool isMediumStateChange(cMessage *msg) const;
 
     /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
-    virtual bool isMediumFree();
+    virtual bool isMediumFree() const;
 
     /** @brief Returns true if message is a broadcast message */
-    virtual bool isBroadcast(Ieee80211Frame *msg);
+    virtual bool isBroadcast(Ieee80211Frame *msg) const;
 
     /** @brief Returns true if message destination address is ours */
-    virtual bool isForUs(Ieee80211Frame *msg);
+    virtual bool isForUs(Ieee80211Frame *msg) const;
 
     /** @brief Checks if the frame is a data or management frame */
-    virtual bool isDataOrMgmtFrame(Ieee80211Frame *frame);
+    virtual bool isDataOrMgmtFrame(Ieee80211Frame *frame) const;
 
     /** @brief Returns the last frame received before the SIFS period. */
-    virtual Ieee80211Frame *getFrameReceivedBeforeSIFS();
+    virtual Ieee80211Frame *getFrameReceivedBeforeSIFS() const;
 
     /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
