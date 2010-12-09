@@ -82,12 +82,17 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
     EtherFrame *etherframe = check_and_cast<EtherFrame *>(msg);
 
     // check we really have a STA with that dest address
-    STAList::iterator it = staList.find(etherframe->getDest());
-    if (it==staList.end() || it->second.status!=ASSOCIATED)
+    const MACAddress& macAddr = etherframe->getDest();
+
+    if (!macAddr.isBroadcast())
     {
-        EV << "STA with MAC address " << etherframe->getDest() << " not associated with this AP, dropping frame\n";
-        delete etherframe; // XXX count drops?
-        return;
+        STAList::iterator it = staList.find(etherframe->getDest());
+        if (it==staList.end() || it->second.status!=ASSOCIATED)
+        {
+            EV << "STA with MAC address " << etherframe->getDest() << " not associated with this AP, dropping frame\n";
+            delete etherframe; // XXX count drops?
+            return;
+        }
     }
 
     // convert Ethernet frame
