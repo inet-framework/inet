@@ -72,7 +72,7 @@ class Ieee802Ctrl
 {
     MACAddress src;  // src MAC address (can be left empty when sending)
     MACAddress dest; // dest MAC address
-    int etherType;   // used with EthernetIIFrame
+    int etherType enum (EtherType);   // used with EthernetIIFrame
     int ssap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
     int dsap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
