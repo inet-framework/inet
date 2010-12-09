@@ -204,7 +204,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
+    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // frame goes to the AP
     frame->setToDS(true);
@@ -215,6 +215,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setAddress3(ctrl->getDest());
+    frame->setEtherType(ctrl->getEtherType());
     delete ctrl;
 
     frame->encapsulate(msg);

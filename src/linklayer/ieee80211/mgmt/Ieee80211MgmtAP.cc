@@ -378,5 +378,3 @@ void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *fram
 {
     dropManagementFrame(frame);
 }
-
-

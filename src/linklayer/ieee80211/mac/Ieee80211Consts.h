@@ -31,6 +31,8 @@ const unsigned int LENGTH_ACK = 112; //bits
 const unsigned int LENGTH_MGMT = 28 * 8; //bits
 const unsigned int LENGTH_DATAHDR = 34 * 8; //bits
 
+const unsigned int SNAP_HEADER_BYTES = 8;
+
 // time slot ST, short interframe space SIFS, distributed interframe
 // space DIFS, and extended interframe space EIFS
 

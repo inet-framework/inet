@@ -19,11 +19,12 @@
 // Required for MACAddress declarations
 //
 cplusplus {{
-//FIXME account for LLC(3)+SNAP(5) headers in data frames!!! +add SNAP orgcode, localcode into the msg?
 #include "Ieee80211Consts.h"
 #include "MACAddress.h"
+#include "Ieee802Ctrl_m.h" // for EtherType
 }}
 
+enum EtherType;
 class noncobject MACAddress;
 
 //
@@ -139,6 +140,15 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
     byteLength = LENGTH_DATAHDR / 8;
     type = ST_DATA;
     MACAddress address4;
+}
+
+//
+// 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte EtherType>)
+//
+packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
+{
+    byteLength = LENGTH_DATAHDR / 8 + SNAP_HEADER_BYTES;
+    int etherType enum (EtherType);
 }
 
 //
