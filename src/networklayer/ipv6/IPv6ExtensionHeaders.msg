@@ -43,8 +43,8 @@ class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 //
 class IPv6RoutingHeader extends IPv6ExtensionHeader
 {
-    unsigned char routingType;
-    unsigned char segmentsLeft;
+    uint8 routingType;
+    uint8 segmentsLeft;
     IPv6Address address[];
 }
 
