@@ -30,6 +30,10 @@ moduleinterface IEtherMAC
         string address;         // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
+        bool duplexEnabled;     // whether duplex mode can be enabled or not; whether
+                                // MAC will actually use duplex mode depends on the result
+                                // of the auto-configuration process (duplex is only
+                                // possible with DTE-to-DTE connection).
         int txQueueLimit;       // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule;     // name of optional external queue module
