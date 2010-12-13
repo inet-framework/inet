@@ -324,8 +324,8 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     {
         EV << "NUD in progress. Cancelling NUD Timer\n";
         bubble("Reachability Confirmed via NUD.");
-        cancelEvent(msg);
-        delete msg;
+        cancelAndDelete(msg);
+        nce->nudTimeoutEvent = NULL;
     }
 
     // TODO (see header file for description)
@@ -893,7 +893,7 @@ void IPv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
     if (rdEntry != NULL)
     {
         EV << "rdEntry is not NULL, RD cancelled!" << endl;
-        cancelEvent(rdEntry->timeoutMsg);
+        cancelAndDelete(rdEntry->timeoutMsg);
         rdList.erase(rdEntry);
         delete rdEntry;
     }
@@ -1396,7 +1396,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
     }
     /*d) If the prefix advertised does not match the prefix of an address already
          in the list, and the Valid Lifetime is not 0, form an address (and add
-         it to the list) by combining the advertised prefix with the link’s
+         it to the list) by combining the advertised prefix with the linkï¿½s
          interface identifier as follows:*/
     if (isPrefixAssignedToInterface == false && validLifetime != 0)
     {
@@ -2015,7 +2015,8 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
         //- It sends any packets queued for the neighbour awaiting address
         //  resolution.
         sendQueuedPacketsToIPv6Module(nce);
-        cancelEvent(nce->arTimer);
+        cancelAndDelete(nce->arTimer);
+        nce->arTimer = NULL;
     }
 }
 
@@ -2086,8 +2087,8 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
                 EV << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
                 nce->reachabilityExpires = simTime() + ie->ipv6Data()->_getReachableTime();
-                cancelEvent(msg);
-                delete msg;
+                cancelAndDelete(msg);
+                nce->nudTimeoutEvent = NULL;
             }
         }
         else
