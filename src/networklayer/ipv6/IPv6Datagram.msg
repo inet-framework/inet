@@ -61,6 +61,7 @@ packet IPv6Datagram
 //
 class IPv6ExtensionHeader
 {
-    @customize(true);
+    short extensionType;
+    short byteLength = 8;
 }
 

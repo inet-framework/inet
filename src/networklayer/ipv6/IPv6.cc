@@ -27,7 +27,7 @@
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPv6Message_m.h"
-#include "IPv6ExtensionHeaders_m.h"
+#include "IPv6ExtensionHeaders.h"
 
 
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
