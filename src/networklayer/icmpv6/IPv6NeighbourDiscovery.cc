@@ -72,9 +72,9 @@ void IPv6NeighbourDiscovery::initialize(int stage)
         cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
         //We want routers to boot up faster!
         if (rt6->isRouter())
-            scheduleAt(uniform(0,0.3), msg);//Random Router bootup time
+            scheduleAt(simTime()+uniform(0,0.3), msg);//Random Router bootup time
         else
-            scheduleAt(uniform(0.4,1), msg);//Random Host bootup time
+            scheduleAt(simTime()+uniform(0.4,1), msg);//Random Host bootup time
     }
 }
 
