@@ -27,6 +27,7 @@
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPv6Message_m.h"
+#include "IPv6ExtensionHeaders_m.h"
 
 
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
@@ -504,8 +505,6 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
-    datagram->setByteLength(datagram->calculateHeaderByteLength());
-    datagram->encapsulate(transportPacket);
 
     // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
     destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
@@ -530,7 +529,19 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     // set other fields
     datagram->setHopLimit(controlInfo->getHopLimit()>0 ? controlInfo->getHopLimit() : 32); //FIXME use iface hop limit instead of 32?
     datagram->setTransportProtocol(controlInfo->getProtocol());
+
+    // #### Move extension headers from ctrlInfo to datagram if present
+    while (0 < controlInfo->getExtensionHeaderArraySize())
+    {
+    	IPv6ExtensionHeader* extHeader = controlInfo->removeFirstExtensionHeader();
+    	datagram->addExtensionHeader(extHeader);
+    	// EV << "Move extension header to datagram." << endl;
+    }
+
     delete controlInfo;
+
+    datagram->setByteLength(datagram->calculateHeaderByteLength());
+    datagram->encapsulate(transportPacket);
 
     // setting IP options is currently not supported
 
@@ -559,5 +570,3 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     // send datagram to link layer
     send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
-
-

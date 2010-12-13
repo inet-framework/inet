@@ -19,10 +19,15 @@
 enum IPProtocolId;
 
 class noncobject IPv6Address;
+class noncobject IPv6ExtensionHeaderPtr;
 
 cplusplus {{
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
+
+class IPv6ExtensionHeader;
+typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
+std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 }}
 
 
@@ -60,6 +65,5 @@ class IPv6ControlInfo
     short hopLimit;       // hop limit
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see InterfaceTable)
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
 }
-
-
