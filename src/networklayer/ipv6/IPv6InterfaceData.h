@@ -80,13 +80,13 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      */
     struct AdvPrefix
     {
-        IPv6Address prefix;
         short prefixLength;
-        simtime_t advValidLifetime; // see comment above
-        bool advOnLinkFlag;
-        simtime_t advPreferredLifetime; // see comment above
-        bool advAutonomousFlag;
+        bool advOnLinkFlag; 	//L-flag
+        bool advAutonomousFlag; //A-flag
         // USE_MOBILITY: bool advRtrAddr;
+        simtime_t advValidLifetime; // see comment above
+        simtime_t advPreferredLifetime; // see comment above
+        IPv6Address prefix;
     };
 
     /*************RFC 2461: Section 10 Protocol Constants**********************/
