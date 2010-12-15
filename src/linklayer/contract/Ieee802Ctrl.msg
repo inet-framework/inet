@@ -28,7 +28,6 @@ class noncobject MACAddress;
 //
 enum Ieee802MessageKind
 {
-
     IEEE802CTRL_DATA = 2003;  // data to/from higher layer
     IEEE802CTRL_REGISTER_DSAP = 2004;  // higher layer registers itself in LLC
     IEEE802CTRL_DEREGISTER_DSAP = 2005;  // higher layer deregisters itself in LLC
@@ -41,7 +40,6 @@ enum Ieee802MessageKind
 //
 enum SAPCode
 {
-
     SAP_IBM_SNA = 0x04;
     SAP_IP = 0x06;
     SAP_3COM = 0x80;
@@ -58,7 +56,6 @@ enum SAPCode
 //
 enum EtherType
 {
-
     ETHERTYPE_IP = 0x0800;
     ETHERTYPE_ARP = 0x0806;
     ETHERTYPE_RARP = 0x8035;

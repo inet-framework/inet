@@ -97,6 +97,3 @@ void printNotificationBanner(int category, const cPolymorphic *details);
 
 #endif
 
-
-
-

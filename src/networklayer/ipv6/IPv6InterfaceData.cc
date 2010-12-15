@@ -291,4 +291,3 @@ simtime_t IPv6InterfaceData::generateReachableTime()
     return uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
-

@@ -72,7 +72,3 @@ void printNotificationBanner(int category, const cPolymorphic *details)
        << (details ? details->info() : "") << "\n";
 }
 
-
-
-
-
