@@ -31,16 +31,32 @@ class noncobject MACAddress;
 
 //
 // IPv6ND Prefix Information
-// RFC 2461 Section 4.6.2
+// RFC 2461 / RFC 4861 Section 4.6.2
 //
 class IPv6NDPrefixInformation
 {
-    unsigned int prefixLength;
-    bool onlinkFlag;
-    bool autoAddressConfFlag;
+    unsigned short prefixLength;
+    bool onlinkFlag;		//L-bit
+    bool autoAddressConfFlag;	//A-bit
     unsigned int validLifetime;
     unsigned int preferredLifetime;
     IPv6Address prefix;
+}
+
+// MIPv6 New Advertisement Interval Option
+// RFC 3775 Section 7.3
+//
+class MIPv6NDAdvertisementInterval
+{
+    unsigned int advertisementInterval;
+}
+
+//MIPv6 Home Agent Information Option
+//RFC 3775 Section 7.4
+class MIPv6HAInformation
+{
+    unsigned int homeAgentPreference;
+    unsigned int homeAgentLifetime;  
 }
 
 //
@@ -77,17 +93,18 @@ packet IPv6RouterSolicitation extends IPv6NDMessage
 packet IPv6RouterAdvertisement extends IPv6NDMessage
 {
     //Additional ICMP fields
-    unsigned int curHopLimit;
-    bool managedAddrConfFlag;
-    bool otherStatefulConfFlag;
+    unsigned short curHopLimit;
+    bool managedAddrConfFlag;	//M-bit
+    bool otherStatefulConfFlag;	//O-bit
+	bool homeAgentFlag = false;		//H-bit // RFC 5175 Section 3. // set default value of false, 4.9.07 - CB 
     unsigned short routerLifetime;  // 0 indicates router is not a default router
     unsigned int reachableTime;
     unsigned int retransTimer;
 
     //Possible Options
-    MACAddress sourceLinkLayerAddress;
-    unsigned int MTU;
-    IPv6NDPrefixInformation prefixInformation[];
+    MACAddress sourceLinkLayerAddress;		//source link layer option
+    unsigned int MTU;				//MTU option
+	IPv6NDPrefixInformation prefixInformation[];	//Prefix Information Option
 }
 
 //
@@ -110,13 +127,13 @@ packet IPv6NeighbourSolicitation extends IPv6NDMessage
 packet IPv6NeighbourAdvertisement extends IPv6NDMessage
 {
     //Additional ICMP fields
-    bool routerFlag;
-    bool solicitedFlag;
-    bool overrideFlag;
+    bool routerFlag;	//R-flag
+    bool solicitedFlag;	//S-flag
+    bool overrideFlag;	//O-flag
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
     //Possible Options
-    MACAddress targetLinkLayerAddress;
+    MACAddress targetLinkLayerAddress;	//Target Link Layer Address option
 }
 
 //
