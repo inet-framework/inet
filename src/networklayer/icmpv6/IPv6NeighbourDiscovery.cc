@@ -32,6 +32,7 @@ Define_Module(IPv6NeighbourDiscovery);
 
 
 IPv6NeighbourDiscovery::IPv6NeighbourDiscovery()
+    : neighbourCache(*this)
 {
 }
 
@@ -928,6 +929,7 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
         bubble("Max number of RS messages sent");
         EV << "No RA messages were received. Assume no routers are on-link";
         delete rdEntry;
+        rdList.erase(rdEntry);
         delete msg;
     }
 }
@@ -1174,7 +1176,8 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
         if (ra->getRouterLifetime() != 0)
         {
             EV << "RA's router lifetime is non-zero, creating an entry in the "
-               << "Host's default router list.\n" << ra->getRouterLifetime();
+               << "Host's default router list with lifetime=" << ra->getRouterLifetime() << "\n";
+
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             if (ra->getSourceLinkLayerAddress().isUnspecified())

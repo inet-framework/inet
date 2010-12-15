@@ -108,10 +108,11 @@ class INET_API IPv6NeighbourCache
     typedef NeighbourMap::iterator iterator;
 
   protected:
+    cSimpleModule &neighbourDiscovery; // for cancelAndDelete() calls
     NeighbourMap neighbourMap;
 
   public:
-    IPv6NeighbourCache();
+    IPv6NeighbourCache(cSimpleModule &neighbourDiscovery);
     virtual ~IPv6NeighbourCache() {}
 
     /** Returns a neighbour entry, or NULL. */
