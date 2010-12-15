@@ -59,6 +59,7 @@ enum EtherType
     ETHERTYPE_IP = 0x0800;
     ETHERTYPE_ARP = 0x0806;
     ETHERTYPE_RARP = 0x8035;
+    ETHERTYPE_IPv6 = 0x86DD;
 }
 
 
