@@ -659,6 +659,7 @@ void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFram
 
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
+    delete frame;
 }
 
 void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
