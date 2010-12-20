@@ -40,8 +40,8 @@ class IPv6NDPrefixInformation
     bool onlinkFlag;		//L-bit
     bool autoAddressConfFlag;	//A-bit
     bool routerAddressFlag;		//R-bit: used in case of MIPv6 when the H-bit is set
-    unsigned int validLifetime;
-    unsigned int preferredLifetime;
+    unsigned int validLifetime;    // seconds
+    unsigned int preferredLifetime;    // seconds
     IPv6Address prefix;
 }
 
