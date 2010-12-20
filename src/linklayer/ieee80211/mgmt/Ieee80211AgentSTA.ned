@@ -36,6 +36,9 @@ simple Ieee80211AgentSTA
         double authenticationTimeout @unit("s") = default(5s); // timeout for the authentication procedure
         double associationTimeout @unit("s") = default(5s); // timeout for the association procedure
         @display("i=block/control");
+        @statistic[sentRequest](title="sent requests";record=vector);
+        @statistic[acceptConfirm](title="accepted confirms";record=vector);
+        @statistic[dropConfirm](title="dropped confirms";record=vector);
     gates:
         input mgmtIn;
         output mgmtOut;
