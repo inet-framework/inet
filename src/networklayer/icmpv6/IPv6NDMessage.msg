@@ -32,12 +32,14 @@ class noncobject MACAddress;
 //
 // IPv6ND Prefix Information
 // RFC 2461 / RFC 4861 Section 4.6.2
+// RFC 3775 Section 7.2 (routerAddressFlag)
 //
 class IPv6NDPrefixInformation
 {
     unsigned short prefixLength;
     bool onlinkFlag;		//L-bit
     bool autoAddressConfFlag;	//A-bit
+    bool routerAddressFlag;		//R-bit: used in case of MIPv6 when the H-bit is set
     unsigned int validLifetime;
     unsigned int preferredLifetime;
     IPv6Address prefix;
@@ -48,7 +50,7 @@ class IPv6NDPrefixInformation
 //
 class MIPv6NDAdvertisementInterval
 {
-    unsigned int advertisementInterval;
+    unsigned int advertisementInterval;    // milliseconds
 }
 
 //MIPv6 Home Agent Information Option
@@ -56,7 +58,7 @@ class MIPv6NDAdvertisementInterval
 class MIPv6HAInformation
 {
     unsigned int homeAgentPreference;
-    unsigned int homeAgentLifetime;  
+    unsigned int homeAgentLifetime;    // seconds  
 }
 
 //
@@ -89,6 +91,7 @@ packet IPv6RouterSolicitation extends IPv6NDMessage
 //
 // Router Advertisement Message Format
 // RFC 2461 Section 4.2
+// RFC 3775 Section 7.1, RFC 5175 Section 3. (homeAgentFlag)
 //
 packet IPv6RouterAdvertisement extends IPv6NDMessage
 {
@@ -96,7 +99,7 @@ packet IPv6RouterAdvertisement extends IPv6NDMessage
     unsigned short curHopLimit;
     bool managedAddrConfFlag;	//M-bit
     bool otherStatefulConfFlag;	//O-bit
-	bool homeAgentFlag = false;		//H-bit // RFC 5175 Section 3. // set default value of false, 4.9.07 - CB 
+    bool homeAgentFlag = false;		//H-bit
     unsigned short routerLifetime;  // 0 indicates router is not a default router
     unsigned int reachableTime;
     unsigned int retransTimer;
@@ -104,7 +107,7 @@ packet IPv6RouterAdvertisement extends IPv6NDMessage
     //Possible Options
     MACAddress sourceLinkLayerAddress;		//source link layer option
     unsigned int MTU;				//MTU option
-	IPv6NDPrefixInformation prefixInformation[];	//Prefix Information Option
+    IPv6NDPrefixInformation prefixInformation[];	//Prefix Information Option
 }
 
 //
