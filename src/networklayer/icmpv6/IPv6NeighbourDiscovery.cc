@@ -789,8 +789,8 @@ void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
     //Here, we need to check how many DAD messages for the interface entry were
     //sent vs. DupAddrDetectTransmits
     EV << "numOfDADMessagesSent is: " << dadEntry->numNSSent << endl;
-    EV << "dupAddrDetectTrans is: " << ie->ipv6Data()->dupAddrDetectTransmits() << endl;
-    if (dadEntry->numNSSent < ie->ipv6Data()->dupAddrDetectTransmits())
+    EV << "dupAddrDetectTrans is: " << ie->ipv6Data()->getDupAddrDetectTransmits() << endl;
+    if (dadEntry->numNSSent < ie->ipv6Data()->getDupAddrDetectTransmits())
     {
         bubble("Sending another DAD NS message.");
         IPv6Address destAddr = tentativeAddr.formSolicitedNodeMulticastAddress();
