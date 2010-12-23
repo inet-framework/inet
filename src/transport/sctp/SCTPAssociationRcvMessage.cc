@@ -1,4 +1,3 @@
-//
 // Copyright (C) 2005-2010 Irene Ruengeler
 // Copyright (C) 2009-2010 Thomas Dreibholz
 //
@@ -1615,7 +1614,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
     }
     else {
-        if (path->pathErrorCount >= (uint32)sctpMain->par("pathMaxRetrans")) {
+        if (path->pathErrorCount > (uint32)sctpMain->par("pathMaxRetrans")) {
             bool notifyUlp = false;
 
             sctpEV3 << "pathErrorCount exceeded\n";
