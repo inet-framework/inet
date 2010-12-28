@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
-//               2009 Thomas Reschka
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -53,7 +53,7 @@ class TCPSerializer
          * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
          */
         int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
-        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
+                const IPvXAddress &srcIp, const IPvXAddress &destIp);
 
         /**
          * Puts a packet sniffed from the wire into a TCPSegment.
@@ -65,7 +65,7 @@ class TCPSerializer
          * Calculate checksum with pseudo header.
          */
         static uint16_t checksum(const void *addr, unsigned int count,
-        		const IPvXAddress &srcIp, const IPvXAddress &destIp);
+                const IPvXAddress &srcIp, const IPvXAddress &destIp);
 };
 
 #endif

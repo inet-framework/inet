@@ -44,6 +44,7 @@ void DumbTCP::initialize()
     TCPAlgorithm::initialize();
 
     rexmitTimer = new cMessage("REXMIT");
+    rexmitTimer->setContextPointer(conn);
 }
 
 void DumbTCP::established(bool active)
@@ -122,7 +123,7 @@ void DumbTCP::dataSent(uint32)
 
 void DumbTCP::restartRexmitTimer()
 {
-	// NO retransmit timer in dumb TCP
+    // NO retransmit timer in dumb TCP
 }
 
 

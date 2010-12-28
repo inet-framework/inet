@@ -15,7 +15,7 @@
 package inet.examples.hybridpon.arptest;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.linklayer.hybridpon.LambdaSplitter;
+import inet.nodes.hybridpon.LambdaSplitter;
 import inet.nodes.hybridpon.Olt;
 import inet.nodes.hybridpon.Onu;
 import inet.nodes.inet.Router;

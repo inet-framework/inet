@@ -1,0 +1,9 @@
+2010-04-26  Andras Varga
+
+    * PathLossReceptionModel.h/cc, Ieee80211Radio.ned: checked in shadowing
+    component patch from Nikos Simantirakis (simantirakis@rt-solutions.de).
+    "It implements a shadowing component for the path loss reception model.
+    This random variable has a normal distribution in dB and results to
+    log-normal distribution in mW. This is a widespread and common model
+    used for reproducing shadowing effects (Rappaport, T. S. (2002),
+    Wireless Communications - Principles and Practice, Prentice Hall PTR)."

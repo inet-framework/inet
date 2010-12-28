@@ -58,6 +58,8 @@ TCPStateVariables::TCPStateVariables()
     fin_rcvd = false;
     rcv_fin_seq = 0;
     afterRto = false;
+
+    last_ack_sent = 0;
 }
 
 std::string TCPStateVariables::info() const

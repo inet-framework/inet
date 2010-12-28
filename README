@@ -83,7 +83,7 @@ Bottom-up:
      contract/           API to transport layer functionality
      tcp/                TCP protocol (supporting SACK) (default TCP implementation)
      tcp_nsc/            TCP protocol using Network Simulation Cradle
-     tcp_old/            TCP old (obsolete) TCP implementation (without SACK) for refeence only
+     tcp_old/            TCP old (obsolete) TCP implementation (without SACK) for reference only
      udp/                UDP protocol
      rtp/                Realtime Transport Protocol (not yet integrated)
      sctp/               Stream Control Transmission Protocol
@@ -107,11 +107,15 @@ Bottom-up:
 
  examples/               example networks
    ethernet/             example Ethernet networks
-   inet/                 IP-based example networks
+   inet/                 TCP/IP-based example networks
    ipv6/                 IPv6-based example networks
-   mpls/                 example networks for MPLS/LDP/RSVP-TE
+   sctp/                 SCTP examples
    rtp/                  RTP examples (not yet integrated)
-   mobileadhoc/          mobile and ad-hoc networks (incomplete)
+   emulation/            example networks using external interface to connect with real networks
+   adhoc/                mobile and ad-hoc networks (incomplete)
+   wireless/             IEEE 802.11 examples
+   mpls/                 example networks for MPLS/LDP/RSVP-TE
+   ospfv2/               OSPF examples
 
  doc/                    documentation
 

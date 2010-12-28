@@ -9,16 +9,17 @@ for the names of people who have contributed to the INET Framework.
 
 Example simulations are grouped into the following subdirectories:
 
-   ethernet/           example Ethernet networks
-   inet/               TCP/IP-based example networks
-   ipv6/               IPv6-based example networks
-   sctp/               SCTP examples
-   rtp/                RTP examples (not yet integrated)
-   emulation/          example networks using external interface to connect with real networks
-   adhoc/              mobile and ad-hoc networks (incomplete)
-   wireless/           IEEE 802.11 examples
-   mpls/               example networks for MPLS/LDP/RSVP-TE
-   ospfv2/             OSPF examples
+   ethernet/             example Ethernet networks
+   inet/                 TCP/IP-based example networks
+   ipv6/                 IPv6-based example networks
+   sctp/                 SCTP examples
+   rtp/                  RTP examples (not yet integrated)
+   emulation/            example networks using external interface to connect with real networks
+   adhoc/                mobile and ad-hoc networks (incomplete)
+   wireless/             IEEE 802.11 examples
+   mpls/                 example networks for MPLS/LDP/RSVP-TE
+   ospfv2/               OSPF examples
 
+   
 The package's main README file contains links to additional info to help you
 get started with the framework.

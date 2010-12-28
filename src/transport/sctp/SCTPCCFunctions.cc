@@ -18,6 +18,9 @@
 
 #include "SCTPAssociation.h"
 
+#ifdef _MSC_VER
+inline double rint(double x) {return floor(x+.5);}
+#endif
 
 // #define sctpEV3 std::cout
 

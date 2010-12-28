@@ -214,7 +214,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
     {
         if (uit->fecid != oldItem.fecid)
         {
-        	uit++;
+            uit++;
             continue;
         }
 
@@ -436,7 +436,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     {
         if (dit->peer != peerIP)
         {
-        	dit++;
+            dit++;
             continue;
         }
 
@@ -457,7 +457,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     {
         if (uit->peer != peerIP)
         {
-        	uit++;
+            uit++;
             continue;
         }
 

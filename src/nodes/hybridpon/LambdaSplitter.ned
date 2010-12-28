@@ -7,7 +7,7 @@
 //
 
 
-package inet.linklayer.hybridpon;
+package inet.nodes.hybridpon;
 
 //
 // Model of a lambda (wavelenth) splitter -- implemented by

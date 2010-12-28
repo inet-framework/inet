@@ -27,7 +27,7 @@ import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 import inet.nodes.hybridpon.Olt;
 import inet.nodes.hybridpon.Onu;
-import inet.linklayer.hybridpon.LambdaSplitter;
+import inet.nodes.hybridpon.LambdaSplitter;
 
 
 //

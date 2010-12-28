@@ -37,7 +37,8 @@ class INET_API TCPSessionApp : public cSimpleModule
 
     // statistics
     int packetsRcvd;
-    int bytesRcvd;
+    long bytesRcvd;
+    long bytesSent;
     int indicationsRcvd;
 
   public:

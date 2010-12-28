@@ -1,11 +1,11 @@
 2010-03-26  Andras Varga
 
-	* fix: represent port numbers with ushort
+    * fix: represent port numbers with ushort
 
 2008-06-29  Andras Varga
 
-	* factored out createUDPPacket()
+    * factored out createUDPPacket()
 
 2005-07-14  Andras Varga
 
-	* UDPModule renamed to UDP
+    * UDPModule renamed to UDP
