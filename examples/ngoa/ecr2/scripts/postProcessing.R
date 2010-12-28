@@ -117,7 +117,7 @@ for (.i in 4:4) {
                  remove_missing(.df[c('n', 'dr', 'interpolated')]), all=T)  # merge to remove duplicated rows with NAs
     .da.dfs[[.i]] <- .df
 
-    .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+    .limits <- aes(ymin = mean - ci.width, ymax = mean + ci.width)
     .p <- ggplot(data=.df, aes(gropu=n, colour=factor(n), x=dr, y=interpolated)) + geom_line()
     .p <- .p + xlab("Number of Hosts per ONU") + ylab(.ylabels[.i])
     .p <- .p + geom_point(aes(group=n, colour=factor(n), x=dr, y=mean))
@@ -150,7 +150,7 @@ dev.off()
 
 ## ## generate plots
 ## da.plots <- list()  # debug
-## .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+## .limits <- aes(ymin = mean - ci.width, ymax = mean + ci.width)
 ## p.da.http <- ggplot(data=da.http.delay, aes(gropu=n, colour=factor(n), x=dr, y=interpolated)) + geom_line()
 ## p.da.http <- p.da.http + geom_point(aes(group=n, colour=factor(n), x=dr, y=mean))
 ## p.da.http <- p.da.http + geom_errorbar(.limits, width=0.1)
@@ -183,7 +183,7 @@ setwd(.hp.wd)
 for (.i in 1:7) {
     .df <- subset(hp.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
-    .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+    .limits <- aes(ymin = mean - ci.width, ymax = mean + ci.width)
     .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()
     .p <- .p + xlab("Number of Hosts per ONU") + ylab(.ylabels[.i])
     .p <- .p + geom_point(aes(group=tx, colour=factor(tx), x=n, y=mean))
