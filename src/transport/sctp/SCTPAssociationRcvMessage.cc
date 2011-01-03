@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2005-2010 Irene Ruengeler
 // Copyright (C) 2009-2010 Thomas Dreibholz
 //
