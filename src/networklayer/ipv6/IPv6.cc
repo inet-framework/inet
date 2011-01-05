@@ -473,9 +473,8 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(msg, "transportOut", gateindex);
         }
-     }
+    }
 }
-
 
 cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
 {
@@ -572,3 +571,4 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     // send datagram to link layer
     send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
+
