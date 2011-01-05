@@ -21,7 +21,6 @@
 #include "NotifierConsts.h"
 
 
-
 Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP  1

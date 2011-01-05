@@ -208,6 +208,19 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
         sta->authSeqExpected = 1;
     }
 
+    // reset authentication status, when starting a new auth sequence
+    // The statements below are added because the L2 handover time was greater than before when
+    // a STA wants to re-connect to an AP with which it was associated before. When the STA wants to
+    // associate again with the previous AP, then since the AP is already having an entry of the STA
+    // because of old association, and thus it is expecting an authentication frame number 3 but it
+    // receives authentication frame number 1 from STA, which will cause the AP to return an Auth-Error
+    // making the MN STA to start the handover process all over again.
+    if (frameAuthSeq == 1)
+    {
+        sta->status = NOT_AUTHENTICATED;
+        sta->authSeqExpected = 1;
+    }
+
     // check authentication sequence number is OK
     if (frameAuthSeq != sta->authSeqExpected)
     {
