@@ -76,6 +76,8 @@ void IPv6NeighbourDiscovery::initialize(int stage)
             scheduleAt(simTime()+uniform(0,0.3), msg);//Random Router bootup time
         else
             scheduleAt(simTime()+uniform(0.4,1), msg);//Random Host bootup time
+
+        startDADSignal = registerSignal("startDAD");
     }
 }
 
@@ -781,6 +783,8 @@ void IPv6NeighbourDiscovery::initiateDAD(const IPv6Address& tentativeAddr,
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
     scheduleAt(simTime()+ie->ipv6Data()->getRetransTimer(), msg);
+
+    emit(startDADSignal, 1);
 }
 
 void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
