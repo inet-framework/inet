@@ -229,9 +229,9 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
     // sort() produces increasing order, so "better" addresses should
     // compare as "less", to make them appear first in the array
     if (a.tentative!=b.tentative)
-         return !a.tentative; // tentative=false is better
+        return !a.tentative; // tentative=false is better
     if (a.address.getScope()!=b.address.getScope())
-         return a.address.getScope()>b.address.getScope(); // bigger scope is better
+        return a.address.getScope()>b.address.getScope(); // bigger scope is better
     return (a.expiryTime==0 && b.expiryTime!=0) || a.expiryTime>b.expiryTime;  // longer expiry time is better
 }
 

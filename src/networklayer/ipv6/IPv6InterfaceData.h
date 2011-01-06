@@ -534,7 +534,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      * Arg-less version.
      */
     virtual simtime_t generateReachableTime();
-  };
+};
 
 #endif
 

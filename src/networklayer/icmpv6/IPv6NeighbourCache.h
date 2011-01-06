@@ -77,7 +77,7 @@ class INET_API IPv6NeighbourCache
         short numProbesSent;
         cMessage *nudTimeoutEvent; // DELAY or PROBE timer
 
-        //WEI-We could have a seperate AREntry in the ND module.
+        //WEI-We could have a separate AREntry in the ND module.
         //But we should merge those information in the neighbour cache for a
         //cleaner solution. if reachability state is INCOMPLETE, it means that
         //addr resolution is being performed for this NCE.
