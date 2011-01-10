@@ -81,7 +81,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     struct AdvPrefix
     {
         short prefixLength;
-        bool advOnLinkFlag; 	//L-flag
+        bool advOnLinkFlag;     //L-flag
         bool advAutonomousFlag; //A-flag
         // USE_MOBILITY: bool advRtrAddr;
         simtime_t advValidLifetime; // see comment above

@@ -143,7 +143,7 @@ void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
 void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 {
     //delete it->second.nudTimeoutEvent;
-	neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent); // 20.9.07 - CB
+    neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent); // 20.9.07 - CB
     it->second.nudTimeoutEvent = NULL;
     neighbourMap.erase(it);
 }

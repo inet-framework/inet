@@ -44,7 +44,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const {return dgram;}
     virtual IPv6Datagram *removeOrigDatagram();
-    
+
     /**
      * Returns the number of extension headers in this datagram
      */

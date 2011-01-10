@@ -165,10 +165,10 @@ class INET_API MACAddress
     bool operator>(const MACAddress& addr) const {return compare (addr)>0;}
 
     /**
-     * Compares two MAC addresses. 
+     * Compares two MAC addresses.
      * Returns -1, 0 or 1.
      */
-    int compare(const MACAddress& addr) const  
+    int compare(const MACAddress& addr) const
     {
         return address[0] < addr.address[0] ? -1 : address[0] > addr.address[0] ? 1 :
                address[1] < addr.address[1] ? -1 : address[1] > addr.address[1] ? 1 :

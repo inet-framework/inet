@@ -178,7 +178,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
-    
+
     // Discard frame if STA is not associated (assocAP.address is unspecified).
     if (frame->getReceiverAddress().isUnspecified())
         delete frame;

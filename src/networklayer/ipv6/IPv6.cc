@@ -534,9 +534,9 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     // #### Move extension headers from ctrlInfo to datagram if present
     while (0 < controlInfo->getExtensionHeaderArraySize())
     {
-    	IPv6ExtensionHeader* extHeader = controlInfo->removeFirstExtensionHeader();
-    	datagram->addExtensionHeader(extHeader);
-    	// EV << "Move extension header to datagram." << endl;
+        IPv6ExtensionHeader* extHeader = controlInfo->removeFirstExtensionHeader();
+        datagram->addExtensionHeader(extHeader);
+        // EV << "Move extension header to datagram." << endl;
     }
 
     delete controlInfo;

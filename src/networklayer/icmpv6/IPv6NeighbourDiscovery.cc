@@ -455,7 +455,8 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     Neighbour *nce = (Neighbour *) timeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
     if ( nceKey == NULL )
-    	opp_error("The nceKey is NULL at nce->MAC=%s, isRouter=%d", nce->macAddress.str().c_str(), nce->isRouter);
+        opp_error("The nceKey is NULL at nce->MAC=%s, isRouter=%d", nce->macAddress.str().c_str(), nce->isRouter);
+
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
 
     if (nce->reachabilityState == IPv6NeighbourCache::DELAY)

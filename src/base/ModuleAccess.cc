@@ -76,7 +76,7 @@ cModule *findContainingNode(cModule *from)
     for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
     {
         if (_isNode(curmod))
-        	return curmod;
+            return curmod;
     }
     return NULL;
 }

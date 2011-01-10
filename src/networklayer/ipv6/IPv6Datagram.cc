@@ -83,7 +83,7 @@ int IPv6Datagram::calculateHeaderByteLength() const
 
 IPv6ExtensionHeaderPtr IPv6Datagram::removeFirstExtensionHeader()
 {
-	static IPv6ExtensionHeaderPtr null;
+    static IPv6ExtensionHeaderPtr null;
     if ( extensionHeaders.size() == 0)
         return (null=NULL);
     IPv6ExtensionHeaderPtr eh = extensionHeaders.front();
@@ -93,12 +93,12 @@ IPv6ExtensionHeaderPtr IPv6Datagram::removeFirstExtensionHeader()
 
 IPv6Datagram::~IPv6Datagram()
 {
-	IPv6ExtensionHeaderPtr eh;
+    IPv6ExtensionHeaderPtr eh;
 
-	while ( ! extensionHeaders.empty() )
-	{
-		eh = extensionHeaders.back();
-		extensionHeaders.pop_back(); // remove pointer element from container
-		delete eh; // delete the header
-	}
+    while ( ! extensionHeaders.empty() )
+    {
+        eh = extensionHeaders.back();
+        extensionHeaders.pop_back(); // remove pointer element from container
+        delete eh; // delete the header
+    }
 }

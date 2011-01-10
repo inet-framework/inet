@@ -188,7 +188,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                             OSPF::IPv4Address externalAddr = ipv4AddressFromULong(currentLSA->getHeader().getLinkStateID());
                             int ifName = intf->getIfIndex();
                            router->addExternalRouteInIPTable(externalAddr, externalLSA->getContents(), ifName);
-                        }						
+                        }
                     }
 
                     EV << "    (update installed)\n";

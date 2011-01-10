@@ -39,19 +39,19 @@ void EtherHub::initialize()
     double datarate = 0.0;
     for (int i=0; i<ports; i++)
     {
-    	cGate* igate = gate("ethg$i", i);
-    	double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
+        cGate* igate = gate("ethg$i", i);
+        double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
 
-    	if (i == 0)
-    		datarate = drate;
-    	else if (datarate != drate)
-    		throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
+        if (i == 0)
+            datarate = drate;
+        else if (datarate != drate)
+            throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
 
-    	drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
-    	if (datarate != drate)
-    		throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
+        drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+        if (datarate != drate)
+            throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
 
-    	igate->setDeliverOnReceptionStart(true);
+        igate->setDeliverOnReceptionStart(true);
     }
 }
 

@@ -28,9 +28,9 @@ IPv6ControlInfo::~IPv6ControlInfo()
 
     while ( ! extensionHeaders.empty() )
     {
-    	IPv6ExtensionHeader* eh = extensionHeaders.back();
-    	extensionHeaders.pop_back();
-    	delete eh;
+        IPv6ExtensionHeader* eh = extensionHeaders.back();
+        extensionHeaders.pop_back();
+        delete eh;
     }
 }
 

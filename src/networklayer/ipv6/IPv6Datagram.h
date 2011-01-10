@@ -67,7 +67,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
      * headers.
      */
     virtual int calculateHeaderByteLength() const;
-    
+
     /**
      * Removes and returns the first extension header of this datagram
      */

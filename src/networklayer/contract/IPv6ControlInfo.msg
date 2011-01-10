@@ -47,8 +47,8 @@ std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 // - srcAddr: it will be set to the address of the outgoing interface
 // - timeToLive
 //
-// When IPv6 delivers a packet to higher layers, it also attaches an 
-// IPv6ControlInfo to it. It fills in the following fields: 
+// When IPv6 delivers a packet to higher layers, it also attaches an
+// IPv6ControlInfo to it. It fills in the following fields:
 //  - srcAddr, destAddr, protocol, hopLimit: values from the original datagram
 //  - interfaceId: the interface on which the datagram arrived, or -1 if it was
 //    created locally
