@@ -38,11 +38,8 @@
 #include <netinet/in.h>
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing)||(TCP_NSC::testingS)) ? (std::cout) : (ev))
+#define tcpEV ((ev.disable_tracing)||(TCP_NSC::testingS)) ? ev : ev
 
-#define tcpEV ev
-//#define tcpEV std::cout
 
 struct nsc_iphdr
 {
