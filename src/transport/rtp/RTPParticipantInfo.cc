@@ -25,36 +25,34 @@
 Register_Class(RTPParticipantInfo);
 
 
-RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc)
-  : cObject(), _sdesChunk("SDESChunk", ssrc)
+RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) :
+    RTPParticipantInfo_Base(),
+    _sdesChunk("SDESChunk", ssrc)
 {
+    setName(ssrcToName(ssrc));
     // because there haven't been sent any RTP packets
     // by this endsystem at all, the number of silent
     // intervals would be undefined; to calculate with
     // it but not to regard this endsystem as a sender
     // it is set to 3; see isSender() for details
     _silentIntervals = 3;
-    _address = IPAddress::UNSPECIFIED_ADDRESS;
-    _rtpPort = PORT_UNDEF;
-    _rtcpPort = PORT_UNDEF;
 }
 
-RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo) : cObject()
+RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& other) : RTPParticipantInfo_Base()
 {
-    operator=(participantInfo);
+    operator=(other);
 }
 
 RTPParticipantInfo::~RTPParticipantInfo()
 {
 }
 
-RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& participantInfo)
+RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& other)
 {
-    cObject::operator=(participantInfo);
-    _sdesChunk = participantInfo._sdesChunk;
-    _address = participantInfo._address;
-    _rtpPort = participantInfo._rtpPort;
-    _rtcpPort = participantInfo._rtcpPort;
+    RTPParticipantInfo_Base::operator=(other);
+    setName(other.getName());
+    _sdesChunk = other._sdesChunk;
+    _silentIntervals = other._silentIntervals;
     return *this;
 }
 
@@ -68,7 +66,6 @@ void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t a
     _silentIntervals = 0;
     delete packet;
 }
-
 
 void RTPParticipantInfo::processSenderReport(SenderReport &report, simtime_t arrivalTime)
 {
@@ -143,52 +140,9 @@ void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *
     _sdesChunk.addSDESItem(new SDESItem(type, content));
 }
 
-IPAddress RTPParticipantInfo::getAddress() const
-{
-    return _address;
-}
-
-void RTPParticipantInfo::setAddress(IPAddress address)
-{
-    _address = address;
-}
-
-
-int RTPParticipantInfo::getRTPPort() const
-{
-    return _rtpPort;
-}
-
-
-void RTPParticipantInfo::setRTPPort(int rtpPort)
-{
-    _rtpPort = rtpPort;
-}
-
-
-int RTPParticipantInfo::getRTCPPort() const
-{
-    return _rtcpPort;
-}
-
-
-void RTPParticipantInfo::setRTCPPort(int rtcpPort)
-{
-    _rtcpPort = rtcpPort;
-}
-
-
 char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
 {
     char name[9];
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);
-}
-
-void RTPParticipantInfo::dump() const
-{
-    std::cout <<" adress= "<< _address
-              <<" rtpPort= "<< _rtpPort
-              <<" rtcpPort= "<< _rtcpPort
-              << endl;
 }
