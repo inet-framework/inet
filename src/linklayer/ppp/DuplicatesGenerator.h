@@ -31,13 +31,13 @@ class INET_API DuplicatesGenerator : public cSimpleModule
 {
   protected:
     unsigned int numPackets;
-	unsigned int numDuplicated;
-	bool generateFurtherDuplicates;
+    unsigned int numDuplicated;
+    bool generateFurtherDuplicates;
     simsignal_t rcvdPkBytesSignal;
     simsignal_t sentPkBytesSignal;
     simsignal_t duplPkBytesSignal;
 
-	std::vector<unsigned int> duplicatesVector;
+    std::vector<unsigned int> duplicatesVector;
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

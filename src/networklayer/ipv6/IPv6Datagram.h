@@ -37,6 +37,8 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
     IPv6Datagram(const char *name=NULL, int kind=0) : IPv6Datagram_Base(name,kind) {}
     IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other.getName()) {operator=(other);}
     IPv6Datagram& operator=(const IPv6Datagram& other);
+    ~IPv6Datagram();
+
     virtual IPv6Datagram *dup() const {return new IPv6Datagram(*this);}
 
     /** Generated but unused method, should not be called. */
@@ -65,21 +67,11 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
      * headers.
      */
     virtual int calculateHeaderByteLength() const;
-};
 
-/**
- * Represents an IPv6 extension header. More info in the IPv6Datagram.msg file
- * (and the documentation generated from it).
- */
-class INET_API IPv6ExtensionHeader : public IPv6ExtensionHeader_Base
-{
-  public:
-    IPv6ExtensionHeader() : IPv6ExtensionHeader_Base() {}
-    IPv6ExtensionHeader(const IPv6ExtensionHeader& other) : IPv6ExtensionHeader_Base() {operator=(other);}
-    IPv6ExtensionHeader& operator=(const IPv6ExtensionHeader& other) {IPv6ExtensionHeader_Base::operator=(other); return *this;}
-    virtual IPv6ExtensionHeader *dup() const {throw cRuntimeError(this, "dup() should be redefined");}
-    virtual IPProtocolId getExtensionType() const;
-    virtual int getByteLength() const;
+    /**
+     * Removes and returns the first extension header of this datagram
+     */
+    virtual IPv6ExtensionHeader* removeFirstExtensionHeader();
 };
 
 #endif

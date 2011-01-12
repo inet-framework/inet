@@ -54,10 +54,12 @@ const char *notificationCategoryName(int category)
         case NF_IPv6_ROUTE_DELETED: return "IPv6-ROUTE-DEL";
 
         case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
+        case NF_MIPv6_RO_COMPLETED: return "MIPv6 RO COMPLETED";
 
         case NF_OVERLAY_TRANSPORTADDRESS_CHANGED: return "OVERLAY-TRANSPORTADDESS";
         case NF_OVERLAY_NODE_LEAVE: return "OVERLAY-NODE-LEAVE";
         case NF_OVERLAY_NODE_GRACEFUL_LEAVE: return "NODE-GRACEFUL-LEAVE";
+
 
         default: sprintf(buf, "%d", category); s = buf;
     }
@@ -71,8 +73,4 @@ void printNotificationBanner(int category, const cPolymorphic *details)
        << notificationCategoryName(category) << " "
        << (details ? details->info() : "") << "\n";
 }
-
-
-
-
 

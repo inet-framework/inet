@@ -21,6 +21,7 @@
 #include "IPv6ControlInfo_m.h"
 
 class IPv6Datagram;
+class IPv6ExtensionHeader;
 
 /**
  * Control information for sending/receiving packets over IPv6.
@@ -31,6 +32,9 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
 {
   protected:
     IPv6Datagram *dgram;
+    typedef std::vector<IPv6ExtensionHeader*> ExtensionHeaders;
+    ExtensionHeaders extensionHeaders;
+
   public:
     IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram=NULL;}
     virtual ~IPv6ControlInfo();
@@ -40,8 +44,33 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const {return dgram;}
     virtual IPv6Datagram *removeOrigDatagram();
+
+    /**
+     * Returns the number of extension headers in this datagram
+     */
+    virtual unsigned int getExtensionHeaderArraySize() const;
+
+    /** Generated but unused method, should not be called. */
+    virtual void setExtensionHeaderArraySize(unsigned int size);
+
+    /**
+     * Returns the kth extension header in this datagram
+     */
+    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k);
+
+    /** Generated but unused method, should not be called. */
+    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var);
+
+    /**
+     * Adds an extension header to the datagram, at the given position.
+     * The default (atPos==-1) is to add the header at the end.
+     */
+    virtual void addExtensionHeader(IPv6ExtensionHeader* eh, int atPos=-1);
+
+    /**
+     * Remove the first extension header and return it.
+     */
+    IPv6ExtensionHeader* removeFirstExtensionHeader();
 };
 
 #endif
-
-

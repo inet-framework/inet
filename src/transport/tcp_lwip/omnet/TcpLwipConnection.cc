@@ -35,11 +35,7 @@
 #include <dlfcn.h>
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing)||(TCP_lwip::testingS)) ? (std::cout) : (ev))
-
-#define tcpEV ev
-//#define tcpEV std::cout
+#define tcpEV ((ev.disable_tracing)||(TCP_lwip::testingS)) ? ev : ev
 
 
 TcpLwipConnection::Stats::Stats()

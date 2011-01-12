@@ -55,10 +55,7 @@ bool TCP_NSC::testingS;
 bool TCP_NSC::logverboseS;
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing) || (TCP_NSC::testingS)) ? ev : std::cout)
-#define tcpEV ev
-//#define tcpEV std::cout
+#define tcpEV ((ev.disable_tracing) || (TCP_NSC::testingS)) ? ev : ev
 
 struct nsc_iphdr
 {
@@ -385,7 +382,6 @@ TCP_NSC::~TCP_NSC()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection &connP)
 {
-
     cMessage *msg = connP.createEstablishedMsg();
     if(msg)
     {
@@ -728,7 +724,6 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         // must be a TCPSegment
         TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
         handleIpInputMessage(tcpseg);
-
     }
     else // must be from app
     {

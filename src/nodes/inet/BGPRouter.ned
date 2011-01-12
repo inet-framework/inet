@@ -94,7 +94,7 @@ module BGPRouter
         ospf.ipOut --> networkLayer.ospfIn;
         ospf.ipIn <-- networkLayer.ospfOut;
 
-        // connections to network outside		
+        // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
             ppp[i].netwOut --> networkLayer.ifIn[i];

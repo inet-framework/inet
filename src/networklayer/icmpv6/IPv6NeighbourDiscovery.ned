@@ -30,6 +30,7 @@ simple IPv6NeighbourDiscovery
 {
     parameters:
         @display("i=block/network");
+        @statistic[startDAD](title="start DAD";record=count,vector);
     gates:
         input ipv6In;
         output ipv6Out;

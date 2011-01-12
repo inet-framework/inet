@@ -55,6 +55,8 @@ simple PingApp
         @statistic[drop](title="dropped packets";record=count,vector);
         @statistic[sentPacket](title="sent packets";record=count,vector);
         @statistic[outOfOrderArrival](title="Out of order arrival packets";record=count,vector);
+        @statistic[pingTx](title="sent ping seq.no.";record=count,vector);
+        @statistic[pingRx](title="received ping seq.no.";record=count,vector);
     gates:
         input pingIn;
         output pingOut;

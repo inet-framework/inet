@@ -54,7 +54,7 @@ class INET_API UDPBasicApp : public UDPAppBase
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
-	virtual void finish();
+    virtual void finish();
 };
 
 #endif

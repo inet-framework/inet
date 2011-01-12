@@ -75,6 +75,10 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
 
     numberOfFastRetransmissions      = 0;
     numberOfTimerBasedRetransmissions = 0;
+    numberOfHeartbeatsSent = 0;
+    numberOfHeartbeatsRcvd = 0;
+    numberOfHeartbeatAcksSent = 0;
+    numberOfHeartbeatAcksRcvd = 0;
 
     char str[128];
     snprintf(str, sizeof(str), "HB_TIMER %d:%s",assoc->assocId,addr.str().c_str());
@@ -105,6 +109,15 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     snprintf(str, sizeof(str), "TSN Received %d:%s",assoc->assocId,addr.str().c_str());
     pathRcvdTSN = new cOutVector(str);
 
+    snprintf(str, sizeof(str), "HB Sent %d:%s",assoc->assocId,addr.str().c_str());
+    pathHb = new cOutVector(str);
+    snprintf(str, sizeof(str), "HB ACK Sent %d:%s",assoc->assocId,addr.str().c_str());
+    pathHbAck = new cOutVector(str);
+    snprintf(str, sizeof(str), "HB Received %d:%s",assoc->assocId,addr.str().c_str());
+    pathRcvdHb = new cOutVector(str);
+    snprintf(str, sizeof(str), "HB ACK Received %d:%s",assoc->assocId,addr.str().c_str());
+    pathRcvdHbAck = new cOutVector(str);
+
 
 
     SCTPPathInfo* pinfo = new SCTPPathInfo("pinfo");
@@ -129,6 +142,10 @@ SCTPPathVariables::~SCTPPathVariables()
 
     delete pathTSN;
     delete pathRcvdTSN;
+    delete pathHb;
+    delete pathRcvdHb;
+    delete pathHbAck;
+    delete pathRcvdHbAck;
 
 }
 

@@ -244,7 +244,7 @@ class INET_API IPAddress
      */
     static bool isWellFormed(const char *text);
 
-    /** 
+    /**
      * Only keeps the n first bits of the address, completing it with zeros.
      * Typical usage is when the length of an IP prefix is done and to check
      * the address ends with the right number of 0.

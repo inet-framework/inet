@@ -67,7 +67,7 @@ void OSPF::Router::addWatches()
     WATCH(routerID);
     WATCH_PTRVECTOR(areas);
     WATCH_PTRVECTOR(asExternalLSAs);
-	WATCH_PTRVECTOR(routingTable);
+    WATCH_PTRVECTOR(routingTable);
 }
 
 
@@ -1587,7 +1587,7 @@ void OSPF::Router::updateExternalRoute(OSPF::IPv4Address networkAddress, const O
 }
 
 /**
- * Add an AS External Route in IPRoutingTable 
+ * Add an AS External Route in IPRoutingTable
  * @param networkAddress        [in] The external route's network address.
  * @param externalRouteContents [in] Route configuration data for the external route.
  * @param ifIndex               [in]
@@ -1596,7 +1596,7 @@ void OSPF::Router::addExternalRouteInIPTable(OSPF::IPv4Address networkAddress, c
 {
     IRoutingTable* simRoutingTable = RoutingTableAccess().get();
     IInterfaceTable* simInterfaceTable = InterfaceTableAccess().get();
-    int	routingEntryNumber = simRoutingTable->getNumRoutes();
+    int routingEntryNumber = simRoutingTable->getNumRoutes();
     bool inRoutingTable = false;
 
     // add the external route to the IP routing table if it was not added by another module

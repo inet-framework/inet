@@ -62,8 +62,8 @@ void UDPBasicApp::initialize(int stage)
 
 void UDPBasicApp::finish()
 {
-	recordScalar("packets sent", numSent);
-	recordScalar("packets received", numReceived);
+    recordScalar("packets sent", numSent);
+    recordScalar("packets received", numReceived);
 }
 
 IPvXAddress UDPBasicApp::chooseDestAddr()

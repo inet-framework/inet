@@ -24,12 +24,12 @@
 
 
 /**
- * A C++ interface to abstract the functionality of IInterfaceTable.
- * Referring to IInterfaceTable via this interface makes it possible to
- * transparently replace IInterfaceTable with a different implementation,
+ * A C++ interface to abstract the functionality of InterfaceTable.
+ * Referring to InterfaceTable via this interface makes it possible to
+ * transparently replace InterfaceTable with a different implementation,
  * without any change to the base INET.
  *
- * @see IInterfaceTable, InterfaceEntry
+ * @see InterfaceTable, InterfaceEntry
  */
 class INET_API IInterfaceTable
 {
@@ -112,7 +112,7 @@ class INET_API IInterfaceTable
     /**
      * Returns the first interface with the isLoopback flag set.
      * (If there's no loopback, it returns NULL -- but this
-     * should never happen because IInterfaceTable itself registers a
+     * should never happen because InterfaceTable itself registers a
      * loopback interface on startup.)
      */
     virtual InterfaceEntry *getFirstLoopbackInterface() = 0;

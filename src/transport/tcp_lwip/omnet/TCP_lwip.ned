@@ -25,7 +25,7 @@ import inet.transport.tcp.ITCP;
 
 //
 // \TCP model based on the Network Simulation Cradle by Sam Jansen.
-// \TCP segments are represented by the class ByteArrayMessage which 
+// \TCP segments are represented by the class ByteArrayMessage which
 // carries a network byte order packet. Compatible with both IPv4 and IPv6.
 //
 // <b>Communication with clients</b>
