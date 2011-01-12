@@ -1037,7 +1037,7 @@ tcp_receive(struct tcp_pcb *pcb)
      further. */
   if (tcplen > 0) {
 
-	notifyAboutIncomingSegmentProcessing(pcb, seqno, inseg.dataptr, inseg.len);
+    notifyAboutIncomingSegmentProcessing(pcb, seqno, inseg.dataptr, inseg.len);
 
     /* This code basically does three things:
 

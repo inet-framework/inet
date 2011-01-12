@@ -27,6 +27,7 @@
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPv6Message_m.h"
+#include "IPv6ExtensionHeaders.h"
 
 
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
@@ -472,9 +473,8 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(msg, "transportOut", gateindex);
         }
-     }
+    }
 }
-
 
 cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
 {
@@ -504,8 +504,6 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
-    datagram->setByteLength(datagram->calculateHeaderByteLength());
-    datagram->encapsulate(transportPacket);
 
     // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
     destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
@@ -522,15 +520,29 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src)==NULL)
+        {
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
+        }
         datagram->setSrcAddress(src);
     }
 
     // set other fields
     datagram->setHopLimit(controlInfo->getHopLimit()>0 ? controlInfo->getHopLimit() : 32); //FIXME use iface hop limit instead of 32?
     datagram->setTransportProtocol(controlInfo->getProtocol());
+
+    // #### Move extension headers from ctrlInfo to datagram if present
+    while (0 < controlInfo->getExtensionHeaderArraySize())
+    {
+        IPv6ExtensionHeader* extHeader = controlInfo->removeFirstExtensionHeader();
+        datagram->addExtensionHeader(extHeader);
+        // EV << "Move extension header to datagram." << endl;
+    }
+
     delete controlInfo;
+
+    datagram->setByteLength(datagram->calculateHeaderByteLength());
+    datagram->encapsulate(transportPacket);
 
     // setting IP options is currently not supported
 
@@ -559,5 +571,4 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     // send datagram to link layer
     send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
-
 

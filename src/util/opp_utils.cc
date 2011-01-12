@@ -53,4 +53,14 @@ unsigned long atoul(const char *s)
     return d;
 }
 
+std::string stripnonalnum(const char *s)
+{
+    std::string result;
+    for (; *s; s++)
+        if (isalnum(*s))
+            result += *s;
+    return result;
+}
+
+
 }

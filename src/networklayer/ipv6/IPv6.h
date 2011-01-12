@@ -136,7 +136,5 @@ class INET_API IPv6 : public QueueBase
     virtual void endService(cPacket *msg);
 };
 
-
 #endif
-
 

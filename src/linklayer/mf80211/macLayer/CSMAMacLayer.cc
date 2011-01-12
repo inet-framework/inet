@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 
+#include "opp_utils.h"
 #include "CSMAMacLayer.h"
 #include "Ieee802Ctrl_m.h"
 #include "IInterfaceTable.h"
@@ -63,16 +64,8 @@ void CSMAMacLayer::registerInterface()
 {
     InterfaceEntry *e = new InterfaceEntry();
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    // interface name: NIC module's name without special characters ([])
+    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     const char *addrstr = par("address");
     if (!strcmp(addrstr, "auto"))

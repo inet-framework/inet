@@ -39,7 +39,7 @@ class INET_API BGPRouting : public cSimpleModule, public TCPSocket::CallbackInte
 {
 public:
     BGPRouting()
-        : _myAS(0), _rt(0), _inft(0) {}
+        : _myAS(0), _inft(0), _rt(0) {}
 
     virtual ~BGPRouting();
 

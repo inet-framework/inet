@@ -64,6 +64,8 @@ class INET_API PingApp : public cSimpleModule
     simsignal_t dropSignal;
     simsignal_t sentPacketSignal;
     simsignal_t outOfOrderArrivalSignal;
+    simsignal_t pingTxSignal;
+    simsignal_t pingRxSignal;
     long dropCount;
     long outOfOrderArrivalCount;
 };

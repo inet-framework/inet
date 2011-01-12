@@ -458,7 +458,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             }
         }
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo())!=NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)

@@ -25,6 +25,13 @@ IPv6ControlInfo::~IPv6ControlInfo()
         drop(dgram);
         delete dgram;
     }
+
+    while ( ! extensionHeaders.empty() )
+    {
+        IPv6ExtensionHeader* eh = extensionHeaders.back();
+        extensionHeaders.pop_back();
+        delete eh;
+    }
 }
 
 void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
@@ -47,4 +54,47 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
     return ret;
 }
 
+unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const
+{
+    return extensionHeaders.size();
+}
 
+void IPv6ControlInfo::setExtensionHeaderArraySize(unsigned int size)
+{
+    throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
+}
+
+IPv6ExtensionHeaderPtr& IPv6ControlInfo::getExtensionHeader(unsigned int k)
+{
+    ASSERT(k>=0 && k<extensionHeaders.size());
+    return extensionHeaders[k];
+}
+
+void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
+{
+    throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
+}
+
+void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
+{
+    ASSERT(eh);
+    if (atPos<0 || atPos>=extensionHeaders.size())
+    {
+        extensionHeaders.push_back(eh);
+        return;
+    }
+
+    // insert at position atPos, shift up the rest of the array
+    extensionHeaders.insert(extensionHeaders.begin()+atPos, eh);
+}
+
+IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
+{
+    if (extensionHeaders.empty())
+        return NULL;
+
+    ExtensionHeaders::iterator first = extensionHeaders.begin();
+    IPv6ExtensionHeader* ret = *first;
+    extensionHeaders.erase(first);
+    return ret;
+}

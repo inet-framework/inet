@@ -262,7 +262,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
     // Note: If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
     // TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
-	// "LAST-ACK STATE
+    // "LAST-ACK STATE
     //    The only thing that can arrive in this state is an
     //    acknowledgment of our FIN.  If our FIN is now acknowledged,
     //    delete the TCB, enter the CLOSED state, and return."
