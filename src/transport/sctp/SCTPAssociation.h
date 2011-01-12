@@ -263,10 +263,18 @@ class INET_API SCTPPathVariables : public cPolymorphic
         unsigned int        numberOfDuplicates;
         unsigned int        numberOfFastRetransmissions;
         unsigned int        numberOfTimerBasedRetransmissions;
+        unsigned int        numberOfHeartbeatsSent;
+        unsigned int        numberOfHeartbeatAcksSent;
+        unsigned int        numberOfHeartbeatsRcvd;
+        unsigned int        numberOfHeartbeatAcksRcvd;
 
         // ====== Output Vectors ==============================================
         cOutVector*         pathTSN;
         cOutVector*         pathRcvdTSN;
+        cOutVector*         pathHb;
+        cOutVector*         pathRcvdHb;
+        cOutVector*         pathHbAck;
+        cOutVector*         pathRcvdHbAck;
         cOutVector*         statisticsPathRTO;
         cOutVector*         statisticsPathRTT;
         cOutVector*         statisticsPathSSthresh;
@@ -718,6 +726,7 @@ class INET_API SCTPAssociation : public cObject
         inline void sendToIP(SCTPMessage* sctpmsg, const bool qs = false) {
             sendToIP(sctpmsg, remoteAddr, qs);
         }
+        void recordInPathVectors(SCTPMessage* pMsg, const IPvXAddress& rDest);
         void scheduleSack();
         /** Utility: signal to user that connection timed out */
         void signalConnectionTimeout();

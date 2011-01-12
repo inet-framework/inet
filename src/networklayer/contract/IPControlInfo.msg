@@ -49,8 +49,8 @@ cplusplus {{
 // - options: \IP Options currently not used
 // - Identifier is currently always chosen by the \IP layer
 //
-// When IP delivers a packet to higher layers, it also attaches an IPControlInfo 
-// to it. It fills in the following fields: 
+// When IP delivers a packet to higher layers, it also attaches an IPControlInfo
+// to it. It fills in the following fields:
 //  - srcAddr, destAddr, protocol, diffServCodePoint: values from the original datagram
 //  - interfaceId: the interface on which the datagram arrived, or -1 if it was
 //    created locally

@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+#include "opp_utils.h"
 #include "Ieee80211Mac.h"
 #include "RadioState.h"
 #include "IInterfaceTable.h"
@@ -68,6 +69,13 @@ Ieee80211Mac::~Ieee80211Mac()
 
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
+
+    while(!transmissionQueue.empty())
+    {
+        Ieee80211Frame *temp = transmissionQueue.front();
+        transmissionQueue.pop_front();
+        delete temp;
+    }
 }
 
 /****************************************************************
@@ -84,7 +92,7 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
-        basicBitrate = 2e6; //FIXME make it parameter
+        basicBitrate = par("basicBitrate");
         rtsThreshold = par("rtsThresholdBytes");
 
         // the variable is renamed due to a confusion in the standard
@@ -179,16 +187,8 @@ void Ieee80211Mac::registerInterface()
 
     InterfaceEntry *e = new InterfaceEntry();
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    // interface name: NIC module's name without special characters ([])
+    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // address
     e->setMACAddress(address);
@@ -294,7 +294,8 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
     }
     else
     {
-        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
+        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d",
+                msg->getClassName(), msg->getName(), msg->getKind());
     }
 }
 
@@ -590,32 +591,32 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 /****************************************************************
  * Timing functions.
  */
-simtime_t Ieee80211Mac::getSIFS()
+simtime_t Ieee80211Mac::getSIFS() const
 {
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
     return SIFS;
 }
 
-simtime_t Ieee80211Mac::getSlotTime()
+simtime_t Ieee80211Mac::getSlotTime() const
 {
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
     return ST;
 }
 
-simtime_t Ieee80211Mac::getPIFS()
+simtime_t Ieee80211Mac::getPIFS() const
 {
     return getSIFS() + getSlotTime();
 }
 
-simtime_t Ieee80211Mac::getDIFS()
+simtime_t Ieee80211Mac::getDIFS() const
 {
     return getSIFS() + 2 * getSlotTime();
 }
 
-simtime_t Ieee80211Mac::getEIFS()
+simtime_t Ieee80211Mac::getEIFS() const
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
+    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / BITRATE_HEADER;
 }
 
 simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
@@ -676,7 +677,8 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS()
+            + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -693,7 +695,8 @@ void Ieee80211Mac::cancelTimeoutPeriod()
 
 void Ieee80211Mac::scheduleCTSTimeoutPeriod()
 {
-    scheduleAt(simTime() + computeFrameDuration(LENGTH_RTS, basicBitrate) + getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(LENGTH_RTS, basicBitrate) + getSIFS() +
+            computeFrameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
@@ -835,7 +838,8 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
         frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate) + computeFrameDuration(frameToSend));
+        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate)
+                + computeFrameDuration(frameToSend));
 
     return frame;
 }
@@ -848,7 +852,8 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(frameToACK->getDuration() - getSIFS()
+                - computeFrameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -869,7 +874,8 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS() - computeFrameDuration(LENGTH_CTS, basicBitrate));
+    frame->setDuration(rtsFrame->getDuration() - getSIFS()
+            - computeFrameDuration(LENGTH_CTS, basicBitrate));
 
     return frame;
 }
@@ -952,32 +958,32 @@ void Ieee80211Mac::resetStateVariables()
     }
 }
 
-bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
+bool Ieee80211Mac::isMediumStateChange(cMessage *msg) const
 {
     return msg == mediumStateChange || (msg == endReserve && radioState == RadioState::IDLE);
 }
 
-bool Ieee80211Mac::isMediumFree()
+bool Ieee80211Mac::isMediumFree() const
 {
     return radioState == RadioState::IDLE && !endReserve->isScheduled();
 }
 
-bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame)
+bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame) const
 {
     return frame && frame->getReceiverAddress().isBroadcast();
 }
 
-bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
+bool Ieee80211Mac::isForUs(Ieee80211Frame *frame) const
 {
     return frame && frame->getReceiverAddress() == address;
 }
 
-bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
+bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame) const
 {
     return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
 }
 
-Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()
+Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS() const
 {
     return (Ieee80211Frame *)endSIFS->getContextPointer();
 }

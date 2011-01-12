@@ -178,7 +178,12 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+
+    // Discard frame if STA is not associated (assocAP.address is unspecified).
+    if (frame->getReceiverAddress().isUnspecified())
+        delete frame;
+    else
+        sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
@@ -204,7 +209,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
+    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // frame goes to the AP
     frame->setToDS(true);
@@ -215,6 +220,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setAddress3(ctrl->getDest());
+    frame->setEtherType(ctrl->getEtherType());
     delete ctrl;
 
     frame->encapsulate(msg);
@@ -554,7 +560,15 @@ int Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
 
 void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    sendUp(decapsulate(frame));
+    // Only send the Data frame up to the higher layer if the STA is associated with an AP,
+    // else delete the frame
+    if (isAssociated)
+        sendUp(decapsulate(frame));
+    else
+    {
+        EV << "Rejecting data frame as STA is not associated with an AP" << endl;
+        delete frame;
+    }
 }
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
@@ -658,6 +672,7 @@ void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFram
 
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
+    delete frame;
 }
 
 void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)

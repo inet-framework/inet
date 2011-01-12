@@ -54,6 +54,8 @@ void PingApp::initialize()
     dropSignal = registerSignal("drop");
     sentPacketSignal = registerSignal("sentPacket");
     outOfOrderArrivalSignal = registerSignal("outOfOrderArrival");
+    pingTxSignal = registerSignal("pingTx");
+    pingRxSignal = registerSignal("pingRx");
 
     dropCount = outOfOrderArrivalCount = 0;
     WATCH(dropCount);
@@ -106,8 +108,9 @@ void PingApp::sendPing()
     msg->setByteLength(packetSize);
 
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
-    sendSeqNo++;
+    emit(pingTxSignal, sendSeqNo);
     emit(sentPacketSignal, 1L);
+    sendSeqNo++;
 }
 
 void PingApp::scheduleNextPing(cMessage *timer)
@@ -182,6 +185,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 {
     EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
+    emit(pingRxSignal, seqNo);
 
     delayStat.collect(rtt);
     emit(endToEndDelaySignal, rtt);

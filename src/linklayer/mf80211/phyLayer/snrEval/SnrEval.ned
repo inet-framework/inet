@@ -47,7 +47,7 @@ simple SnrEval
         int headerLength @unit(b);
         double thermalNoise @unit("dBm");
         double pathLossAlpha;
-        double sensitivity @unit(mW);
+        double sensitivity @unit(dBm);
         @display("i=block/wrxtx");
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)

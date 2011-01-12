@@ -21,7 +21,6 @@
 #include "NotifierConsts.h"
 
 
-
 Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP  1
@@ -44,6 +43,11 @@ void Ieee80211AgentSTA::initialize(int stage)
 
         NotificationBoard *nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
+
+        //Statistics:
+        sentRequestSignal = registerSignal("sentRequest");
+        acceptConfirmSignal = registerSignal("acceptConfirm");
+        dropConfirmSignal = registerSignal("dropConfirm");
 
         // start up: send scan request
         scheduleAt(simTime()+uniform(0,maxChannelTime), new cMessage("startUp", MK_STARTUP));
@@ -131,6 +135,7 @@ void Ieee80211AgentSTA::sendScanRequest()
         req->setChannelList(i, channelsToScan[i]);
     //XXX BSSID, SSID are left at default ("any")
 
+    emit(sentRequestSignal, PR_SCAN_REQUEST);
     sendRequest(req);
 }
 
@@ -140,6 +145,7 @@ void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address)
     Ieee80211Prim_AuthenticateRequest *req = new Ieee80211Prim_AuthenticateRequest();
     req->setAddress(address);
     req->setTimeout(authenticationTimeout);
+    emit(sentRequestSignal, PR_AUTHENTICATE_REQUEST);
     sendRequest(req);
 }
 
@@ -149,6 +155,7 @@ void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, int
     Ieee80211Prim_DeauthenticateRequest *req = new Ieee80211Prim_DeauthenticateRequest();
     req->setAddress(address);
     req->setReasonCode(reasonCode);
+    emit(sentRequestSignal, PR_DEAUTHENTICATE_REQUEST);
     sendRequest(req);
 }
 
@@ -158,6 +165,7 @@ void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
     Ieee80211Prim_AssociateRequest *req = new Ieee80211Prim_AssociateRequest();
     req->setAddress(address);
     req->setTimeout(associationTimeout);
+    emit(sentRequestSignal, PR_ASSOCIATE_REQUEST);
     sendRequest(req);
 }
 
@@ -167,6 +175,7 @@ void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
     Ieee80211Prim_ReassociateRequest *req = new Ieee80211Prim_ReassociateRequest();
     req->setAddress(address);
     req->setTimeout(associationTimeout);
+    emit(sentRequestSignal, PR_REASSOCIATE_REQUEST);
     sendRequest(req);
 }
 
@@ -176,6 +185,7 @@ void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, int r
     Ieee80211Prim_DisassociateRequest *req = new Ieee80211Prim_DisassociateRequest();
     req->setAddress(address);
     req->setReasonCode(reasonCode);
+    emit(sentRequestSignal, PR_DISASSOCIATE_REQUEST);
     sendRequest(req);
 }
 
@@ -186,11 +196,13 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
     if (bssIndex==-1)
     {
         EV << "No (suitable) AP found, continue scanning\n";
+        emit(dropConfirmSignal, PR_SCAN_CONFIRM);
         sendScanRequest();
         return;
     }
 
     dumpAPList(resp);
+    emit(acceptConfirmSignal, PR_SCAN_CONFIRM);
 
     Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
     EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
@@ -233,6 +245,7 @@ void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateCon
     if (resp->getResultCode()!=PRC_SUCCESS)
     {
         EV << "Authentication error\n";
+        emit(dropConfirmSignal, PR_AUTHENTICATE_CONFIRM);
 
         // try scanning again, maybe we'll have better luck next time, possibly with a different AP
         EV << "Going back to scanning\n";
@@ -241,6 +254,7 @@ void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateCon
     else
     {
         EV << "Authentication successful, let's try to associate\n";
+        emit(acceptConfirmSignal, PR_AUTHENTICATE_CONFIRM);
         sendAssociateRequest(resp->getAddress());
     }
 }
@@ -250,6 +264,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     if (resp->getResultCode()!=PRC_SUCCESS)
     {
         EV << "Association error\n";
+        emit(dropConfirmSignal, PR_ASSOCIATE_CONFIRM);
 
         // try scanning again, maybe we'll have better luck next time, possibly with a different AP
         EV << "Going back to scanning\n";
@@ -258,6 +273,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     else
     {
         EV << "Association successful\n";
+        emit(acceptConfirmSignal, PR_ASSOCIATE_CONFIRM);
         // we are happy!
         getParentModule()->getParentModule()->bubble("Associated with AP");
     }
@@ -269,12 +285,14 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     if (resp->getResultCode()!=PRC_SUCCESS)
     {
         EV << "Reassociation error\n";
+        emit(dropConfirmSignal, PR_REASSOCIATE_CONFIRM);
         EV << "Going back to scanning\n";
         sendScanRequest();
     }
     else
     {
         EV << "Reassociation successful\n";
+        emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }
 }

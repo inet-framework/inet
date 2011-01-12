@@ -23,7 +23,7 @@
 #include "ICMPv6.h"
 #include "ICMPv6Message_m.h"  // for TIME_EXCEEDED
 #include "IPv6Datagram.h"
-#include "IPv6ExtensionHeaders_m.h"
+#include "IPv6ExtensionHeaders.h"
 
 
 IPv6FragBuf::IPv6FragBuf()

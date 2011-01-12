@@ -44,6 +44,11 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     simtime_t authenticationTimeout;
     simtime_t associationTimeout;
 
+    //Statistics:
+    simsignal_t sentRequestSignal;
+    simsignal_t acceptConfirmSignal;
+    simsignal_t dropConfirmSignal;
+
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);

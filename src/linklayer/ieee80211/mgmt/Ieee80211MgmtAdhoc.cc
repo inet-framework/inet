@@ -46,11 +46,12 @@ void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
+    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // copy receiver address from the control info (sender address will be set in MAC)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setReceiverAddress(ctrl->getDest());
+    frame->setEtherType(ctrl->getEtherType());
     delete ctrl;
 
     frame->encapsulate(msg);

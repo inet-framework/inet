@@ -25,8 +25,6 @@
 #include "TCPVirtualDataRcvQueue.h"
 
 /**
- * FIXME
- *
  * @see TCPMsgBasedSendQueue
  */
 class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
@@ -65,7 +63,6 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
      *
      */
     virtual cPacket *extractBytesUpTo(uint32 seq);
-
 };
 
 #endif

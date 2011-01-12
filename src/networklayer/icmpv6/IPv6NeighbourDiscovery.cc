@@ -32,6 +32,7 @@ Define_Module(IPv6NeighbourDiscovery);
 
 
 IPv6NeighbourDiscovery::IPv6NeighbourDiscovery()
+    : neighbourCache(*this)
 {
 }
 
@@ -72,9 +73,11 @@ void IPv6NeighbourDiscovery::initialize(int stage)
         cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
         //We want routers to boot up faster!
         if (rt6->isRouter())
-            scheduleAt(uniform(0,0.3), msg);//Random Router bootup time
+            scheduleAt(simTime()+uniform(0,0.3), msg);//Random Router bootup time
         else
-            scheduleAt(uniform(0.4,1), msg);//Random Host bootup time
+            scheduleAt(simTime()+uniform(0.4,1), msg);//Random Host bootup time
+
+        startDADSignal = registerSignal("startDAD");
     }
 }
 
@@ -324,8 +327,8 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     {
         EV << "NUD in progress. Cancelling NUD Timer\n";
         bubble("Reachability Confirmed via NUD.");
-        cancelEvent(msg);
-        delete msg;
+        cancelAndDelete(msg);
+        nce->nudTimeoutEvent = NULL;
     }
 
     // TODO (see header file for description)
@@ -451,6 +454,9 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     EV << "NUD has timed out\n";
     Neighbour *nce = (Neighbour *) timeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
+    if ( nceKey == NULL )
+        opp_error("The nceKey is NULL at nce->MAC=%s, isRouter=%d", nce->macAddress.str().c_str(), nce->isRouter);
+
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
 
     if (nce->reachabilityState == IPv6NeighbourCache::DELAY)
@@ -778,6 +784,8 @@ void IPv6NeighbourDiscovery::initiateDAD(const IPv6Address& tentativeAddr,
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
     scheduleAt(simTime()+ie->ipv6Data()->getRetransTimer(), msg);
+
+    emit(startDADSignal, 1);
 }
 
 void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
@@ -788,8 +796,8 @@ void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
     //Here, we need to check how many DAD messages for the interface entry were
     //sent vs. DupAddrDetectTransmits
     EV << "numOfDADMessagesSent is: " << dadEntry->numNSSent << endl;
-    EV << "dupAddrDetectTrans is: " << ie->ipv6Data()->dupAddrDetectTransmits() << endl;
-    if (dadEntry->numNSSent < ie->ipv6Data()->dupAddrDetectTransmits())
+    EV << "dupAddrDetectTrans is: " << ie->ipv6Data()->getDupAddrDetectTransmits() << endl;
+    if (dadEntry->numNSSent < ie->ipv6Data()->getDupAddrDetectTransmits())
     {
         bubble("Sending another DAD NS message.");
         IPv6Address destAddr = tentativeAddr.formSolicitedNodeMulticastAddress();
@@ -893,7 +901,7 @@ void IPv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
     if (rdEntry != NULL)
     {
         EV << "rdEntry is not NULL, RD cancelled!" << endl;
-        cancelEvent(rdEntry->timeoutMsg);
+        cancelAndDelete(rdEntry->timeoutMsg);
         rdList.erase(rdEntry);
         delete rdEntry;
     }
@@ -928,6 +936,7 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
         bubble("Max number of RS messages sent");
         EV << "No RA messages were received. Assume no routers are on-link";
         delete rdEntry;
+        rdList.erase(rdEntry);
         delete msg;
     }
 }
@@ -1174,7 +1183,8 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
         if (ra->getRouterLifetime() != 0)
         {
             EV << "RA's router lifetime is non-zero, creating an entry in the "
-               << "Host's default router list.\n" << ra->getRouterLifetime();
+               << "Host's default router list with lifetime=" << ra->getRouterLifetime() << "\n";
+
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             if (ra->getSourceLinkLayerAddress().isUnspecified())
@@ -1396,7 +1406,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
     }
     /*d) If the prefix advertised does not match the prefix of an address already
          in the list, and the Valid Lifetime is not 0, form an address (and add
-         it to the list) by combining the advertised prefix with the link’s
+         it to the list) by combining the advertised prefix with the linkï¿½s
          interface identifier as follows:*/
     if (isPrefixAssignedToInterface == false && validLifetime != 0)
     {
@@ -1702,8 +1712,6 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolici
     //Neighbour Solicitation Information
     MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
 
-    int ifID = ie->getInterfaceId();
-
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
     if (nsCtrlInfo->getSrcAddr().isUnspecified())
@@ -1839,53 +1847,54 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
     //RFC 2461
     //Section 7.2.6: Sending Unsolicited Neighbor Advertisements
 
-    /*In some cases a node may be able to determine that its link-layer
-    address has changed (e.g., hot-swap of an interface card) and may
-    wish to inform its neighbors of the new link-layer address quickly.
-    In such cases a node MAY send up to MAX_NEIGHBOR_ADVERTISEMENT
-    unsolicited Neighbor Advertisement messages to the all-nodes
-    multicast address.  These advertisements MUST be separated by at
-    least RetransTimer seconds.
+    // In some cases a node may be able to determine that its link-layer
+    // address has changed (e.g., hot-swap of an interface card) and may
+    // wish to inform its neighbors of the new link-layer address quickly.
+    // In such cases a node MAY send up to MAX_NEIGHBOR_ADVERTISEMENT
+    // unsolicited Neighbor Advertisement messages to the all-nodes
+    // multicast address.  These advertisements MUST be separated by at
+    // least RetransTimer seconds.
 
-    The Target Address field in the unsolicited advertisement is set to
-    an IP address of the interface, and the Target Link-Layer Address
-    option is filled with the new link-layer address.  The Solicited flag
-    MUST be set to zero, in order to avoid confusing the Neighbor
-    Unreachability Detection algorithm.  If the node is a router, it MUST
-    set the Router flag to one; otherwise it MUST set it to zero.  The
-    Override flag MAY be set to either zero or one.  In either case,
-    neighboring nodes will immediately change the state of their Neighbor
-    Cache entries for the Target Address to STALE, prompting them to
-    verify the path for reachability.  If the Override flag is set to
-    one, neighboring nodes will install the new link-layer address in
-    their caches.  Otherwise, they will ignore the new link-layer
-    address, choosing instead to probe the cached address.
+    // The Target Address field in the unsolicited advertisement is set to
+    // an IP address of the interface, and the Target Link-Layer Address
+    // option is filled with the new link-layer address.
+    // The Solicited flag MUST be set to zero, in order to avoid confusing
+    // the Neighbor Unreachability Detection algorithm.
+    // If the node is a router, it MUST set the Router flag to one;
+    // otherwise it MUST set it to zero.
+    // The Override flag MAY be set to either zero or one.  In either case,
+    // neighboring nodes will immediately change the state of their Neighbor
+    // Cache entries for the Target Address to STALE, prompting them to
+    // verify the path for reachability.  If the Override flag is set to
+    // one, neighboring nodes will install the new link-layer address in
+    // their caches.  Otherwise, they will ignore the new link-layer
+    // address, choosing instead to probe the cached address.
 
-    A node that has multiple IP addresses assigned to an interface MAY
-    multicast a separate Neighbor Advertisement for each address.  In
-    such a case the node SHOULD introduce a small delay between the
-    sending of each advertisement to reduce the probability of the
-    advertisements being lost due to congestion.
+    // A node that has multiple IP addresses assigned to an interface MAY
+    // multicast a separate Neighbor Advertisement for each address.  In
+    // such a case the node SHOULD introduce a small delay between the
+    // sending of each advertisement to reduce the probability of the
+    // advertisements being lost due to congestion.
 
-    A proxy MAY multicast Neighbor Advertisements when its link-layer
-    address changes or when it is configured (by system management or
-    other mechanisms) to proxy for an address.  If there are multiple
-    nodes that are providing proxy services for the same set of addresses
-    the proxies SHOULD provide a mechanism that prevents multiple proxies
-    from multicasting advertisements for any one address, in order to
-    reduce the risk of excessive multicast traffic.
+    // A proxy MAY multicast Neighbor Advertisements when its link-layer
+    // address changes or when it is configured (by system management or
+    // other mechanisms) to proxy for an address.  If there are multiple
+    // nodes that are providing proxy services for the same set of addresses
+    // the proxies SHOULD provide a mechanism that prevents multiple proxies
+    // from multicasting advertisements for any one address, in order to
+    // reduce the risk of excessive multicast traffic.
 
-    Also, a node belonging to an anycast address MAY multicast
-    unsolicited Neighbor Advertisements for the anycast address when the
-    node's link-layer address changes.
+    // Also, a node belonging to an anycast address MAY multicast
+    // unsolicited Neighbor Advertisements for the anycast address when the
+    // node's link-layer address changes.
 
-    Note that because unsolicited Neighbor Advertisements do not reliably
-    update caches in all nodes (the advertisements might not be received
-    by all nodes), they should only be viewed as a performance
-    optimization to quickly update the caches in most neighbors.  The
-    Neighbor Unreachability Detection algorithm ensures that all nodes
-    obtain a reachable link-layer address, though the delay may be
-    slightly longer.*/
+    // Note that because unsolicited Neighbor Advertisements do not reliably
+    // update caches in all nodes (the advertisements might not be received
+    // by all nodes), they should only be viewed as a performance
+    // optimization to quickly update the caches in most neighbors.  The
+    // Neighbor Unreachability Detection algorithm ensures that all nodes
+    // obtain a reachable link-layer address, though the delay may be
+    // slightly longer.
 }
 
 void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
@@ -2015,7 +2024,8 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
         //- It sends any packets queued for the neighbour awaiting address
         //  resolution.
         sendQueuedPacketsToIPv6Module(nce);
-        cancelEvent(nce->arTimer);
+        cancelAndDelete(nce->arTimer);
+        nce->arTimer = NULL;
     }
 }
 
@@ -2086,8 +2096,8 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
                 EV << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
                 nce->reachabilityExpires = simTime() + ie->ipv6Data()->_getReachableTime();
-                cancelEvent(msg);
-                delete msg;
+                cancelAndDelete(msg);
+                nce->nudTimeoutEvent = NULL;
             }
         }
         else

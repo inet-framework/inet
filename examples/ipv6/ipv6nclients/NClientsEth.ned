@@ -36,11 +36,12 @@ network NClientsEth
         channel fiberline extends DatarateChannel
         {
             delay = 1us;
-            datarate = 512Mbps;
+            datarate = 1Gbps;
         }
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         configurator: FlatNetworkConfigurator6 {

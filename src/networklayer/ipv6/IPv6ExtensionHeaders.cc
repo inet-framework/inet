@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,32 +16,10 @@
 //
 
 
-#ifndef __INET_UDPSINK_H
-#define __INET_UDPSINK_H
+#include "IPv6ExtensionHeaders.h"
 
-#include <omnetpp.h>
-#include "UDPAppBase.h"
-
-
-/**
- * Consumes and prints packets received from the UDP module. See NED for more info.
- */
-class INET_API UDPSink : public UDPAppBase
+void IPv6RoutingHeader::setAddressArraySize(unsigned int size)
 {
-  protected:
-    int numReceived;
-    simsignal_t rcvdPkBytesSignal;
-
-  protected:
-    virtual void processPacket(cPacket *msg);
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-};
-
-
-#endif
-
-
+    IPv6RoutingHeader_Base::setAddressArraySize(size);
+    byteLength_var = 8 + 16 * size;
+}

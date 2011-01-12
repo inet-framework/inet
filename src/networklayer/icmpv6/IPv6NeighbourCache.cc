@@ -37,7 +37,8 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
     return os;
 }
 
-IPv6NeighbourCache::IPv6NeighbourCache()
+IPv6NeighbourCache::IPv6NeighbourCache(cSimpleModule &neighbourDiscovery)
+    : neighbourDiscovery(neighbourDiscovery)
 {
     WATCH_MAP(neighbourMap);
 }
@@ -134,13 +135,16 @@ void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
     Key key(addr, interfaceID);
     NeighbourMap::iterator it = neighbourMap.find(key);
     ASSERT(it!=neighbourMap.end()); // entry must exist
-    delete it->second.nudTimeoutEvent;
+    neighbourDiscovery.cancelAndDelete( it->second.nudTimeoutEvent );
+    it->second.nudTimeoutEvent = NULL;
     neighbourMap.erase(it);
 }
 
 void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 {
-    delete it->second.nudTimeoutEvent;
+    //delete it->second.nudTimeoutEvent;
+    neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent); // 20.9.07 - CB
+    it->second.nudTimeoutEvent = NULL;
     neighbourMap.erase(it);
 }
 

@@ -48,13 +48,14 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     sendOrEnqueue(frame);
 }
 
-EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
+EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 {
+    Ieee80211DataFrameWithSNAP *frame = check_and_cast<Ieee80211DataFrameWithSNAP *>(frame_);
     // create a matching ethernet frame
-    EtherFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
+    EthernetIIFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
-    //XXX set ethertype
+    ethframe->setEtherType(frame->getEtherType());
 
     // encapsulate the payload in there
     cPacket *payload = frame->decapsulate();
@@ -69,12 +70,20 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
 Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethframe)
 {
     // create new frame
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(ethframe->getName());
+    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(ethframe->getName());
     frame->setFromDS(true);
 
     // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
     frame->setReceiverAddress(ethframe->getDest());
     frame->setAddress3(ethframe->getSrc());
+
+    // copy EtherType from original frame
+    if (dynamic_cast<EthernetIIFrame *>(ethframe))
+        frame->setEtherType(((EthernetIIFrame *)ethframe)->getEtherType());
+    else if (dynamic_cast<EtherFrameWithSNAP *>(ethframe))
+        frame->setEtherType(((EtherFrameWithSNAP *)ethframe)->getLocalcode());
+    else
+        error("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
 
     // encapsulate payload
     cPacket *payload = ethframe->decapsulate();

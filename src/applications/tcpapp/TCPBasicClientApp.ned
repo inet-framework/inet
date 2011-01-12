@@ -61,7 +61,7 @@ package inet.applications.tcpapp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the names of 
+// The module parameter dataTransferMode should be set the names of
 // classes that manage the actual send and receive queues in TCP layer.
 // Currently you have three choices:
 //
