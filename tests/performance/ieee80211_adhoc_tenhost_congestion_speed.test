@@ -8,10 +8,9 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.world.ChannelControl;
-import inet.nodes.wireless.WirelessAPSimplified;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
@@ -37,7 +36,7 @@ module ThroughputClient
                 destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211NicAdhoc {
             parameters:
                 @display("p=112,134;q=queue");
         }
@@ -69,7 +68,7 @@ module ThroughputServer
             parameters:
                 @display("p=210,68,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211NicAdhoc {
             parameters:
                 @display("p=120,158;q=queue");
         }
@@ -106,10 +105,6 @@ network Throughput
                 maxSrv = numSrv;
                 wlan.mac.address = "20:00:00:00:00:0"+string(ancestorIndex(2));
                 @display("p=350,350;r=,,#707070");
-        }
-        ap: WirelessAPSimplified {
-            parameters:
-                @display("p=200,200;r=,,#707070");
         }
         channelcontrol: ChannelControl {
             parameters:
@@ -153,9 +148,6 @@ sim-time-limit = 100s
 *.channelcontrol.alpha = 2
 
 # access point
-**.ap.wlan.mac.address = "10:00:00:00:00:00"
-**.mgmt.accessPointAddress = "10:00:00:00:00:00"
-**.mgmt.frameCapacity = 100
 
 # nic settings
 **.mac.address = "auto"
@@ -178,10 +170,10 @@ sim-time-limit = 100s
 **.cli.respLength = 0
 **.cli.destStation = ""
 
-description = "10 host to 10 host over AP"
+description = "10 host to 10 host on adhoc"
 Throughput.numCli = 10
 Throughput.numSrv = 10
-**.cli.waitTime = 30ms
+**.cli.waitTime = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
@@ -195,9 +187,9 @@ library("omnetpp", warn.conflicts=FALSE)
 scafile <- 'results/General-0.sca'
 linecount <- 10 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
-expectedRate <- 23.0 # %
+expectedRate <- 52.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
-unbalancedRate <- 20.0 # %
+unbalancedRate <- 5.0 # %
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation
 expectedRateMax <- expectedRate + maxDeviation
