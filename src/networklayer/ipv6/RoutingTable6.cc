@@ -484,8 +484,7 @@ void RoutingTable6::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopA
         if (it->second.interfaceId==interfaceId && it->second.nextHopAddr==nextHopAddr)
         {
             // move the iterator past this element before removing it
-            DestCache::iterator oldIt = it++;
-            destCache.erase(oldIt);
+            destCache.erase(it++);
         }
         else
         {
