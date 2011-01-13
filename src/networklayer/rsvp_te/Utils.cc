@@ -64,8 +64,8 @@ void append(std::vector<int>& dest, const std::vector<int>& src)
 
 cModule *getPayloadOwner(cPacket *msg)
 {
-    while(msg->getEncapsulatedMsg())
-        msg = msg->getEncapsulatedMsg();
+    while(msg->getEncapsulatedPacket())
+        msg = msg->getEncapsulatedPacket();
 
     if (msg->hasPar("owner"))
         return simulation.getModule(msg->par("owner"));

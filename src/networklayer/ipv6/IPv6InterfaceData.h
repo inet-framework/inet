@@ -22,8 +22,9 @@
 
 
 #include <vector>
+
 #include <omnetpp.h>
-#include "INETDefs.h"
+
 #include "IPv6Address.h"
 #include "InterfaceEntry.h"
 
