@@ -19,24 +19,26 @@
 #ifndef IPV6NEIGHBOURDISCOVERY_H
 #define IPV6NEIGHBOURDISCOVERY_H
 
-#include <stdio.h>
-#include <string.h>
+
 #include <vector>
 #include <set>
+#include <map>
+
 #include <omnetpp.h>
+
 #include "IPv6Address.h"
 #include "IPv6Datagram.h"
 #include "IPv6NDMessage_m.h"
 #include "IPv6ControlInfo.h"
-#include "IPv6InterfaceData.h"
 #include "InterfaceEntry.h"
-#include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
-#include "RoutingTable6.h"
-#include "RoutingTable6Access.h"
 #include "IPv6NeighbourCache.h"
-#include "ICMPv6.h"
-#include "ICMPv6Access.h"
+
+
+//Forward declarations:
+class ICMPv6;
+class IInterfaceTable;
+class RoutingTable6;
+
 
 /**
  * Implements RFC 2461 Neighbor Discovery for IPv6.

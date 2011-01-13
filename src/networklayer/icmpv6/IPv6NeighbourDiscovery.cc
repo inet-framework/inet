@@ -18,6 +18,10 @@
 
 #include "IPv6NeighbourDiscovery.h"
 
+#include "ICMPv6Access.h"
+#include "IPv6InterfaceData.h"
+#include "InterfaceTableAccess.h"
+#include "RoutingTable6Access.h"
 
 #define MK_ASSIGN_LINKLOCAL_ADDRESS 0
 #define MK_SEND_PERIODIC_RTRADV 1
