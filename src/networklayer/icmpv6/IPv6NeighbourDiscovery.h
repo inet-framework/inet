@@ -332,4 +332,6 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /*ICMPv6DestUnreachableMsg *createAndSendUnreachableMessage(
             const IPv6Address& destAddress, InterfaceEntry *ie);*/
 };
+
 #endif //IPV6NEIGHBOURDISCOVERY_H
+

@@ -24,7 +24,6 @@
 #include "InterfaceTableAccess.h"
 
 
-
 Define_Module(RoutingTable6);
 
 
@@ -158,9 +157,11 @@ void RoutingTable6::parseXMLConfigFile()
                 const char *ifname = ifTag->getAttribute("name");
                 if (!ifname)
                     error("<interface> without name attribute at %s", child->getSourceLocation());
+
                 InterfaceEntry *ie = ift->getInterfaceByName(ifname);
                 if (!ie)
                     error("no interface named %s was registered, %s", ifname, child->getSourceLocation());
+
                 configureInterfaceFromXML(ie, ifTag);
             }
         }
@@ -281,10 +282,12 @@ static const char *getRequiredAttr(cXMLElement *elem, const char *attrName)
                   elem->getTagName(), attrName, elem->getSourceLocation());
     return s;
 }
+
 static bool toBool(const char *s, bool defaultValue=false)
 {
     if (!s)
         return defaultValue;
+
     return !strcmp(s,"on") || !strcmp(s,"true") || !strcmp(s,"yes");
 }
 
@@ -300,7 +303,8 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
     //TODO: leave this off first!! They overwrite stuff!
-/* TODO: Wei commented out the stuff below. To be checked why (Andras).
+
+    /* TODO: Wei commented out the stuff below. To be checked why (Andras).
     d->setMaxRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
     d->setMinRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
     d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
@@ -315,7 +319,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     d->setBaseReachableTime(OPP_Global::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
     d->setRetransTimer(OPP_Global::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
     d->setDupAddrDetectTransmits(OPP_Global::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
-*/
+    */
 
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
     // element, but we don't check that)
@@ -332,6 +336,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
         if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(),pfxLen))
             opp_error("element <%s> at %s: wrong IPv6Address/prefix syntax %s",
                       node->getTagName(), node->getSourceLocation(), node->getNodeValue());
+
         prefix.prefixLength = pfxLen;
         prefix.advValidLifetime = OPP_Global::atoul(getRequiredAttr(node, "AdvValidLifetime"));
         prefix.advOnLinkFlag = toBool(getRequiredAttr(node, "AdvOnLinkFlag"));
@@ -357,6 +362,7 @@ InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
 
     if (addr.isUnspecified())
         return NULL;
+
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->getInterface(i);
@@ -384,6 +390,7 @@ bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
 
     if (dest==IPv6Address::ALL_NODES_1 || dest==IPv6Address::ALL_NODES_2)
         return true;
+
     if (isRouter() && (dest==IPv6Address::ALL_ROUTERS_1 || dest==IPv6Address::ALL_ROUTERS_2 || dest==IPv6Address::ALL_ROUTERS_5))
         return true;
 
@@ -490,7 +497,7 @@ void RoutingTable6::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopA
 }
 
 void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
-                                            int interfaceId, simtime_t expiryTime)
+        int interfaceId, simtime_t expiryTime)
 {
     // see if prefix exists in table
     IPv6Route *route = NULL;
@@ -527,7 +534,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
 }
 
 void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
-                                            int interfaceId, simtime_t expiryTime)
+        int interfaceId, simtime_t expiryTime)
 {
     // FIXME this is very similar to the one above -- refactor!!
 
@@ -597,7 +604,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
 }
 
 void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,
-    simtime_t routerLifetime)
+        simtime_t routerLifetime)
 {
     // create route object
     IPv6Route *route = new IPv6Route(IPv6Address(), 0, IPv6Route::FROM_RA);
@@ -622,6 +629,7 @@ bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
     // For metric, a smaller value is better (we report that as "less").
     if (a->getPrefixLength()!=b->getPrefixLength())
         return a->getPrefixLength() > b->getPrefixLength();
+
     return a->getMetric() < b->getMetric();
 }
 
