@@ -172,7 +172,7 @@ void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cPacket *msg)
 
     int size = msg->getByteLength();
     int color = 0;
-    for (cPacket *em = msg; em; em = em->getEncapsulatedMsg())
+    for (cPacket *em = msg; em; em = em->getEncapsulatedPacket())
         if (em->hasPar("color"))
             {color = em->par("color").longValue(); break;}
 

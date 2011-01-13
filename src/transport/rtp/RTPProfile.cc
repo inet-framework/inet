@@ -205,7 +205,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     ev << "dataIn(RTPInnerPacket *rinp) Enter"<<endl;
     processIncomingPacket(rinp);
 
-    RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->getEncapsulatedMsg());
+    RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket());
 
     uint32 ssrc = packet->getSSRC();
 
