@@ -19,7 +19,9 @@
 #define __INET_ROUTINGTABLE6_H
 
 #include <vector>
+
 #include <omnetpp.h>
+
 #include "INETDefs.h"
 #include "IPv6Address.h"
 #include "IInterfaceTable.h"
@@ -82,7 +84,6 @@ class INET_API IPv6Route : public cPolymorphic
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
 };
-
 
 /**
  * Represents the IPv6 routing table and neighbour discovery data structures.

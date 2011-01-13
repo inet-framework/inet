@@ -66,7 +66,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // do not reply with error message to error message
     if (origDatagram->getTransportProtocol() == IP_PROT_ICMP)
     {
-        ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->getEncapsulatedMsg());
+        ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->getEncapsulatedPacket());
         if (recICMPMsg->getType()<128)
         {
             EV << "ICMP error received -- do not reply to it" << endl;

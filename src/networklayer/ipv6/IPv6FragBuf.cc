@@ -71,9 +71,9 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
                                            !fh->getMoreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
-    // content (getEncapsulatedMsg()), other (empty) ones are only
+    // content (getEncapsulatedPacket()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->getEncapsulatedMsg())
+    if (datagram->getEncapsulatedPacket())
     {
         delete buf->datagram;
         buf->datagram = datagram;

@@ -155,7 +155,7 @@ void IP::handleReceivedICMP(ICMPMessage *msg)
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->getEncapsulatedMsg());
+            IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);

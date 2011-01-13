@@ -248,7 +248,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
     // do not reply with error message to error message
     if (origDatagram->getTransportProtocol() == IP_PROT_IPv6_ICMP)
     {
-        ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->getEncapsulatedMsg());
+        ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->getEncapsulatedPacket());
         if (recICMPMsg->getType()<128)
         {
             EV << "ICMP error received -- do not reply to it" << endl;
