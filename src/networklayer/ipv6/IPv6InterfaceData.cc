@@ -18,6 +18,7 @@
 
 #include <sstream>
 #include <algorithm>
+
 #include "IPv6InterfaceData.h"
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...

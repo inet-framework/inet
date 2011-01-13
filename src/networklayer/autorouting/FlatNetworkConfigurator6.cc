@@ -17,7 +17,9 @@
 //
 
 #include <algorithm>
+
 #include "FlatNetworkConfigurator6.h"
+
 #include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
 #ifndef WITHOUT_IPv6

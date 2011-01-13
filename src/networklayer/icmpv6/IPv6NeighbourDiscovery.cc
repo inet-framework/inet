@@ -18,6 +18,10 @@
 
 #include "IPv6NeighbourDiscovery.h"
 
+#include "ICMPv6Access.h"
+#include "IPv6InterfaceData.h"
+#include "InterfaceTableAccess.h"
+#include "RoutingTable6Access.h"
 
 #define MK_ASSIGN_LINKLOCAL_ADDRESS 0
 #define MK_SEND_PERIODIC_RTRADV 1
@@ -648,7 +652,6 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
     scheduleAt(simTime()+ie->ipv6Data()->_getRetransTimer(), msg);
 }
 
-
 void IPv6NeighbourDiscovery::processARTimeout(cMessage *arTimeoutMsg)
 {
     //AR timeouts are cancelled when a valid solicited NA is received.
@@ -942,7 +945,7 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 }
 
 void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
-    IPv6ControlInfo *rsCtrlInfo)
+        IPv6ControlInfo *rsCtrlInfo)
 {
     if (validateRSPacket(rs, rsCtrlInfo) == false) return;
     //Find out which interface the RS message arrived on.
@@ -1017,7 +1020,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
 }
 
 bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
-    IPv6ControlInfo *rsCtrlInfo)
+        IPv6ControlInfo *rsCtrlInfo)
 {
     bool result = true;
     /*6.1.1.  Validation of Router Solicitation Messages
@@ -1051,7 +1054,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
 }
 
 IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
-    const IPv6Address& destAddr, InterfaceEntry *ie)
+        const IPv6Address& destAddr, InterfaceEntry *ie)
 {
     EV << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
@@ -1123,7 +1126,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 }
 
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
-    IPv6ControlInfo *raCtrlInfo)
+        IPv6ControlInfo *raCtrlInfo)
 {
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
 
@@ -1160,7 +1163,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 }
 
 void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *ra,
-    IPv6ControlInfo *raCtrlInfo)
+        IPv6ControlInfo *raCtrlInfo)
 {
     EV << "Processing RA for Router Updates\n";
     //RFC2461: Section 6.3.4
@@ -1286,7 +1289,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
 }
 
 void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
-    InterfaceEntry *ie)
+        InterfaceEntry *ie)
 {
     //Continued from section 6.3.4
     /*Prefix Information options that have the "on-link" (L) flag set indicate a
@@ -1370,7 +1373,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 }
 
 void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
-    IPv6NDPrefixInformation& prefixInfo, InterfaceEntry *ie)
+        IPv6NDPrefixInformation& prefixInfo, InterfaceEntry *ie)
 {
     EV << "Processing Prefix Info for address auto-configuration.\n";
     IPv6Address prefix = prefixInfo.getPrefix();
@@ -1537,7 +1540,7 @@ void IPv6NeighbourDiscovery::sendSolicitedRA(cMessage *msg)
 }
 
 bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra,
-    IPv6ControlInfo *raCtrlInfo)
+        IPv6ControlInfo *raCtrlInfo)
 {
     bool result = true;
 
@@ -1574,8 +1577,8 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra,
 }
 
 IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
-    const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
-    const IPv6Address& dgSrcAddr, InterfaceEntry *ie)
+        const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
+        const IPv6Address& dgSrcAddr, InterfaceEntry *ie)
 {
     MACAddress myMacAddr = ie->getMacAddress();
 
@@ -1599,7 +1602,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
 }
 
 void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo)
+        IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
     InterfaceEntry *ie = ift->getInterfaceById(nsCtrlInfo->getInterfaceId());
@@ -1636,7 +1639,7 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
 }
 
 bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo)
+        IPv6ControlInfo *nsCtrlInfo)
 {
     bool result = true;
     /*RFC 2461:7.1.1. Validation of Neighbor Solicitations(some checks are omitted)
@@ -1679,7 +1682,7 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns,
 }
 
 void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo)
+        IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
     IPv6Address nsSrcAddr = nsCtrlInfo->getSrcAddr();
@@ -1707,7 +1710,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
 }
 
 void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
+        IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
     MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
@@ -1726,7 +1729,7 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolici
 }
 
 void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
+        IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
 {
     //RFC 2461, Section 7.2.3
     /*If the Source Address is not the unspecified address and, on link layers
@@ -1767,7 +1770,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicita
 }
 
 void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns,
-    IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
+        IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
 {
     IPv6NeighbourAdvertisement *na = new IPv6NeighbourAdvertisement("NApacket");
     //RFC 2461: Section 7.2.4
@@ -1898,7 +1901,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 }
 
 void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
-    IPv6ControlInfo *naCtrlInfo)
+        IPv6ControlInfo *naCtrlInfo)
 {
     if (validateNAPacket(na, naCtrlInfo) == false)
     {
@@ -1941,7 +1944,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
 }
 
 bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na,
-    IPv6ControlInfo *naCtrlInfo)
+        IPv6ControlInfo *naCtrlInfo)
 {
     bool result = true;//adopt optimistic approach
 
@@ -1981,7 +1984,7 @@ bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na,
 }
 
 void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
-                    IPv6NeighbourAdvertisement *na, Neighbour *nce)
+        IPv6NeighbourAdvertisement *na, Neighbour *nce)
 {
     MACAddress naMacAddr = na->getTargetLinkLayerAddress();
     bool naRouterFlag = na->getRouterFlag();
@@ -2030,7 +2033,7 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
 }
 
 void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
-    IPv6NeighbourAdvertisement *na, Neighbour *nce)
+        IPv6NeighbourAdvertisement *na, Neighbour *nce)
 {
     bool naRouterFlag = na->getRouterFlag();
     bool naSolicitedFlag = na->getSolicitedFlag();
@@ -2149,7 +2152,7 @@ IPv6Redirect *IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry
 }
 
 void IPv6NeighbourDiscovery::processRedirectPacket(IPv6Redirect *redirect,
-    IPv6ControlInfo *ctrlInfo)
+        IPv6ControlInfo *ctrlInfo)
 {
     //First we need to extract information from the redirect message
     IPv6Address targetAddr = redirect->getTargetAddress();//Addressed to me
