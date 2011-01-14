@@ -303,20 +303,37 @@ void TCPSocket::processMessage(cMessage *msg)
     }
 }
 
+TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char * transferMode)
+{
+    if(0 == transferMode || 0 == transferMode[0])
+        return TCP_TRANSFER_UNDEFINED;
+
+    if (0==strcmp(transferMode, "bytecount"))
+        return TCP_TRANSFER_BYTECOUNT;
+
+    if (0 == strcmp(transferMode, "object"))
+        return TCP_TRANSFER_OBJECT;
+
+    if (0 == strcmp(transferMode, "bytestream"))
+        return TCP_TRANSFER_BYTESTREAM;
+
+    return TCP_TRANSFER_UNDEFINED;
+}
+
 void TCPSocket::readDataTransferModePar(cComponent &component)
 {
     //FIXME inkabb legyen egy kulon string to enum konverter fveny, ez pedig nem kell.
 
     const char *transferMode = component.par("dataTransferMode");
 
-    if(0 == transferMode || 0 == transferMode[0])
-        throw cRuntimeError("Missing/empty dataTransferMode parameter at %s.", component.getFullPath().c_str());
-    else if (0==strcmp(transferMode, "bytecount"))
-        dataTransferMode = TCP_TRANSFER_BYTECOUNT;
-    else if (0 == strcmp(transferMode, "object"))
-        dataTransferMode = TCP_TRANSFER_OBJECT;
-    else if (0 == strcmp(transferMode, "bytestream"))
-        dataTransferMode = TCP_TRANSFER_BYTESTREAM;
-    else
+    if(0 == transferMode)
+        throw cRuntimeError("Missing dataTransferMode parameter at %s.", component.getFullPath().c_str());
+
+    TCPDataTransferMode x = convertStringToDataTransferMode(transferMode);
+
+    if (x == TCP_TRANSFER_UNDEFINED)
         throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
+
+    dataTransferMode = x;
 }
+
