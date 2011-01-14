@@ -1,9 +1,10 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.inet.OSPFRouter;
+import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.OSPFRouter;
+import inet.linklayer.ethernet.EtherHub;
 
 
 module OSPF_Area2
@@ -12,6 +13,12 @@ module OSPF_Area2
         @display("p=10,10;b=424,400");
     gates:
         inout ethg[];
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
     submodules:
         RT8: OSPFRouter {
             parameters:
@@ -62,12 +69,12 @@ module OSPF_Area2
                 ethg[1];
         }
     connections:
-        N8.ethg[1] <--> {  delay = 0.1us; } <--> H11.ethg[0];
-        N6.ethg[2] <--> {  delay = 0.1us; } <--> RT8.ethg[0];
-        N6.ethg[3] <--> {  delay = 0.1us; } <--> H8.ethg[0];
-        RT8.ethg[1] <--> {  delay = 0.1us; } <--> N7.ethg[0];
-        N7.ethg[1] <--> {  delay = 0.1us; } <--> H10.ethg[0];
-        N7.ethg[2] <--> {  delay = 0.1us; } <--> H9.ethg[0];
+        N8.ethg[1] <--> C <--> H11.ethg[0];
+        N6.ethg[2] <--> C <--> RT8.ethg[0];
+        N6.ethg[3] <--> C <--> H8.ethg[0];
+        RT8.ethg[1] <--> C <--> N7.ethg[0];
+        N7.ethg[1] <--> C <--> H10.ethg[0];
+        N7.ethg[2] <--> C <--> H9.ethg[0];
 
         // towards other areas
         ethg[0] <--> N8.ethg[0];
