@@ -75,8 +75,8 @@ network CompareMACs
 sim-time-limit = 1s
 
 tkenv-plugin-path = ../../../etc/plugins
-**.vector-recording = true
 #record-eventlog = true
+**.vector-recording = false
 
 network = CompareMACs
 
@@ -107,7 +107,7 @@ network = CompareMACs
 
 **.mac.address = "auto"
 *.host_iq_*.mac.txQueueLimit = 100000
-*.host_eq_*.queue.frameCapacity = 10000
+*.host_eq_*.queue.frameCapacity = 100
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
@@ -131,7 +131,7 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 cat("\nCHECK SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "packets sent",]
+x <- dataset$scalars[dataset$scalars$name == "sentPkBytes:count",]
 xx <- x[grep("_F_A.cli$",x$module)==1,]
 
 if(length(xx$value) != linecount)
@@ -192,6 +192,7 @@ if(length(xx$value) != linecount)
 }
 
 cat("\n")
+
 %#--------------------------------------------------------------------------------------------------------------
 %contains: check.r.out
 

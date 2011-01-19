@@ -2,10 +2,9 @@
 
 package inet.examples.rtp.multicast1;
 
-import inet.nodes.inet.Router;
-import inet.transport.rtp.RTPHost;
 import ned.DatarateChannel;
-
+import inet.transport.rtp.RTPHost;
+import inet.nodes.inet.Router;
 
 network RTPMulticast1
 {
@@ -18,7 +17,8 @@ network RTPMulticast1
     submodules:
         host1: RTPHost {
             parameters:
-                profileName = "RTPAVProfile";
+                IPForward = false;
+                profileName = "inet.transport.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -27,7 +27,8 @@ network RTPMulticast1
         }
         host2: RTPHost {
             parameters:
-                profileName = "RTPAVProfile";
+                IPForward = false;
+                profileName = "inet.transport.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -36,7 +37,8 @@ network RTPMulticast1
         }
         host3: RTPHost {
             parameters:
-                profileName = "RTPAVProfile";
+                IPForward = false;
+                profileName = "inet.transport.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -45,7 +47,8 @@ network RTPMulticast1
         }
         host4: RTPHost {
             parameters:
-                profileName = "RTPAVProfile";
+                IPForward = false;
+                profileName = "inet.transport.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -57,14 +60,13 @@ network RTPMulticast1
                 routingFile = "router1.mrt";
                 @display("p=150,150");
             gates:
-                pppg[4];
+                pppg[];
 
         }
     connections:
-        host1.pppg[0] <--> ethernet <--> router1.pppg[0];
-        host2.pppg[0] <--> ethernet <--> router1.pppg[1];
-        host3.pppg[0] <--> ethernet <--> router1.pppg[2];
-        host4.pppg[0] <--> ethernet <--> router1.pppg[3];
+        host1.pppg++ <--> ethernet <--> router1.pppg++;
+        host2.pppg++ <--> ethernet <--> router1.pppg++;
+        host3.pppg++ <--> ethernet <--> router1.pppg++;
+        host4.pppg++ <--> ethernet <--> router1.pppg++;
 
 }
-

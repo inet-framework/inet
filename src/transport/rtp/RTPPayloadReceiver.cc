@@ -16,14 +16,12 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadReceiver.cc
- * This file contains method implementations for RTPPayloadReceiver.
- */
-
 #include <fstream>
+
 #include "RTPPayloadReceiver.h"
-#include "RTPPacket.h"
+
 #include "RTPInnerPacket.h"
+#include "RTPPacket.h"
 
 
 Define_Module(RTPPayloadReceiver);
@@ -34,44 +32,42 @@ RTPPayloadReceiver::~RTPPayloadReceiver()
     closeOutputFile();
 }
 
-
 void RTPPayloadReceiver::initialize()
 {
     const char *fileName = par("outputFileName");
+    const char *logFileName = par("outputLogFileName");
     openOutputFile(fileName);
-    char logName[100];
-    sprintf (logName, "outputLogLoss%d.log", getId());
+    char logName[200];
+    sprintf(logName, logFileName, getId());
     _outputLogLoss.open(logName);
     _packetArrivalSignal = registerSignal("packetArrival");
 }
 
-
 void RTPPayloadReceiver::handleMessage(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
-    if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
+    if (rinp->getType() == RTP_INP_DATA_IN)
+    {
         RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->decapsulate());
         processPacket(packet);
         delete rinp;
     }
-    else {
+    else
+    {
         error("RTPInnerPacket of wrong type received");
         delete rinp;
     }
 }
-
 
 void RTPPayloadReceiver::processPacket(RTPPacket *packet)
 {
     emit(_packetArrivalSignal, (double)(packet->getTimeStamp()));
 }
 
-
 void RTPPayloadReceiver::openOutputFile(const char *fileName)
 {
     _outputFileStream.open(fileName);
 }
-
 
 void RTPPayloadReceiver::closeOutputFile()
 {

@@ -16,33 +16,32 @@
  ***************************************************************************/
 
 
-/** \file RTPPayloadReceiver.h
- * This file declares the class RTPPayloadReceiver.
- */
-
 #ifndef __INET_RTPPAYLOADRECEIVER_H
 #define __INET_RTPPAYLOADRECEIVER_H
 
 
 #include <fstream>
+
 #include "INETDefs.h"
-#include "RTPPacket.h"
+
+
+//Forward declarations
+class RTPPacket;
 
 
 /**
  * The class RTPPayloadReceiver acts as a base class for modules
- * processing incoming rtp data packets.
+ * processing incoming RTP data packets.
  */
 class INET_API RTPPayloadReceiver : public cSimpleModule
 {
-
-  protected:
-
+  public:
     /**
      * Destructor. Disposes the queue object and closes the output file.
      */
     virtual ~RTPPayloadReceiver();
 
+  protected:
     /**
      * Initializes the receiver module, opens the output file and creates
      * a queue for incoming packets.
@@ -56,46 +55,44 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
 
-    protected:
+    /**
+     * Writes contents of this RTPPacket into the output file. Must be overwritten
+     * by subclasses.
+     */
+    virtual void processPacket(RTPPacket *packet);
 
-        /**
-         * The output file stream.
-         */
-        std::ofstream _outputFileStream;
+    /**
+     * This method is called by initialize and opens the output file stream.
+     * For most payload receivers this method works well, only when using
+     * a library for a payload type which provides an own open method it must
+     */
+    virtual void openOutputFile(const char *fileName);
 
-        /**
-         * The output file stream.
-         */
-        std::ofstream _outputLogLoss;
+    /**
+     * Closes the output file stream.
+     */
+    virtual void closeOutputFile();
 
-        /**
-         * The payload type this RTPPayloadReceiver module processes.
-         */
-        int _payloadType;
+  protected:
+   /**
+     * The output file stream.
+     */
+    std::ofstream _outputFileStream;
 
-        /**
-         * An output signal used to store arrival of rtp data packets.
-         */
-        simsignal_t _packetArrivalSignal;
+    /**
+     * The output file stream.
+     */
+    std::ofstream _outputLogLoss;
 
-        /**
-         * Writes contents of this RTPPacket into the output file. Must be overwritten
-         * by subclasses.
-         */
-        virtual void processPacket(RTPPacket *packet);
+    /**
+     * The payload type this RTPPayloadReceiver module processes.
+     */
+    int _payloadType;
 
-        /**
-         * This method is called by initialize and opens the output file stream.
-         * For most payload receivers this method works well, only when using
-         * a library for a payload type which provides an own open method it must
-         */
-        virtual void openOutputFile(const char *fileName);
-
-        /**
-         * Closes the output file stream.
-         */
-        virtual void closeOutputFile();
+    /**
+     * An output signal used to store arrival of rtp data packets.
+     */
+    simsignal_t _packetArrivalSignal;
 };
 
 #endif
-

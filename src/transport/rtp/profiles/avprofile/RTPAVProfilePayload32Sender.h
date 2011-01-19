@@ -15,11 +15,12 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPAVProfilePayload32Sender.h
- * This file declares the class RTPAVProfilePayload32Sender.
- */
+
+#ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
+#define __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 
 #include <omnetpp.h>
+
 #include "RTPPayloadSender.h"
 
 /**
@@ -72,4 +73,4 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
         double _frameNumber;
 };
 
-
+#endif // __INET_RTPAVPROFILEPAYLOAD32SENDER_H

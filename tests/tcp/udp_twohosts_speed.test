@@ -1,0 +1,132 @@
+%description:
+Testing TCP communication speed
+    TCP
+    TCP_NSC
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import ned.DatarateChannel;
+
+
+network UdpClientServer
+{
+    @display("bgb=232,193");
+    types:
+        channel C extends DatarateChannel
+        {
+            datarate = 10Mbps;
+            delay = 0.1us;
+        }
+    submodules:
+        host1: StandardHost {
+            parameters:
+                @display("p=53,67;i=device/pc3");
+        }
+        host2: StandardHost {
+            parameters:
+                @display("p=181,67;i=device/pc2");
+        }
+        configurator: FlatNetworkConfigurator {
+            parameters:
+                @display("p=109,142");
+        }
+    connections:
+        host1.ethg++ <--> C <--> host2.ethg++;
+}
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = UdpClientServer
+total-stack = 7MB
+tkenv-plugin-path = ../../../etc/plugins
+#debug-on-errors = true
+#record-eventlog = true
+**.vector-recording = false
+
+sim-time-limit = 16s
+
+## UDP apps
+**.numUdpApps = 1
+**.udpAppType = "UDPEchoApp"
+**.udpApp[0].localPort = 1234
+**.udpApp[0].destPort = 1234
+**.udpApp[0].messageFreq = 1.6ms
+**.host1.udpApp[0].destAddresses = "host2"
+**.host2.udpApp[0].destAddresses = "host1"
+**.udpApp[0].messageLength = 1000 bytes
+
+**.arp.cacheTimeout = 1s
+
+# NIC configuration
+**.ppp[*].queueType = "DropTailQueue" # in routers
+**.ppp[*].queue.frameCapacity = 10  # in routers
+
+*.configurator.networkAddress = "192.168.1.0"
+#**.eth.mac.txrate = 10Mbps;
+
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 2
+sentBytes <- 10000000
+rcvdBytes <-  9000000
+
+# begin TEST:
+
+dataset <- loadDataset(scafile)
+
+cat("\nOMNETPP TEST RESULT:\n")
+
+udpApp <- dataset$scalars[grep("\\.host\\d\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
+udpSent <- udpApp[udpApp$name == "sentPkBytes:sum",]
+udpRcvd <- udpApp[udpApp$name == "rcvdPkBytes:sum",]
+
+cat("  UDP SPEED TEST RESULT:\n")
+
+#print(udpSent)
+cat("    UDP SENT ")
+if(length(udpSent$value) == linecount && min(udpSent$value) >= sentBytes)
+{
+    cat("OK\n")
+} else {
+    cat("BAD:\n")
+    udpSent$rate = udpSent$value*100/sentBytes
+    print(udpSent[udpSent$value < sentBytes,])
+}
+
+#print(udpRcvd)
+cat("    UDP RCVD ")
+if(length(udpRcvd$value) == linecount && min(udpRcvd$value) >= rcvdBytes)
+{
+    cat("OK\n")
+} else {
+    cat("BAD:\n")
+    udpRcvd$rate = udpRcvd$value*100/rcvdBytes
+    print(udpRcvd[udpRcvd$value < rcvdBytes,])
+}
+
+cat("\n")
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT:
+  UDP SPEED TEST RESULT:
+    UDP SENT OK
+    UDP RCVD OK
+
+%#--------------------------------------------------------------------------------------------------------------

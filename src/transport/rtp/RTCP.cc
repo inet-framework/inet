@@ -15,31 +15,28 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTCP.cc
- * This file contains the implementation of member functions of the class
- * RTCP.
- */
-
-#include "IPAddress.h"
-#include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
 
 #include "RTCP.h"
+
+#include "IPAddress.h"
+#include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
-#include "RTPSenderInfo.h"
 #include "RTPReceiverInfo.h"
+#include "RTPSenderInfo.h"
+#include "UDPControlInfo_m.h"
+#include "UDPSocket.h"
+
 
 Define_Module(RTCP);
 
 RTCP::RTCP()
 {
-    _participantInfos = NULL;
+    _senderInfo = NULL;
 }
 
 void RTCP::initialize()
 {
-
     // initialize variables
     _ssrcChosen = false;
     _leaveSession = false;
@@ -49,7 +46,7 @@ void RTCP::initialize()
     _packetsCalculated = 0;
     _averagePacketSize = 0.0;
 
-    _participantInfos = new cArray("ParticipantInfos");
+    _participantInfos.setName("ParticipantInfos");
 
     rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
     endToEndDelaySignal = registerSignal("endToEndDelay");
@@ -57,21 +54,28 @@ void RTCP::initialize()
 
 RTCP::~RTCP()
 {
-    delete _participantInfos;
+    if (!_ssrcChosen)
+        delete _senderInfo;
 }
 
 void RTCP::handleMessage(cMessage *msg)
 {
-
     // first distinguish incoming messages by arrival gate
-    if (msg->getArrivalGateId() == findGate("rtpIn")) {
+    if (msg->isSelfMessage())
+    {
+        handleSelfMessage(msg);
+    }
+    else if (msg->getArrivalGateId() == findGate("rtpIn"))
+    {
         handleMessageFromRTP(msg);
     }
-    else if (msg->getArrivalGateId() == findGate("udpIn")) {
+    else if (msg->getArrivalGateId() == findGate("udpIn"))
+    {
         handleMessageFromUDP(msg);
     }
-    else {
-        handleSelfMessage(msg);
+    else
+    {
+        error("Message from unknown gate");
     }
 
     delete msg;
@@ -83,31 +87,30 @@ void RTCP::handleMessage(cMessage *msg)
 
 void RTCP::handleMessageFromRTP(cMessage *msg)
 {
-
     // from the rtp module all messages are of type RTPInnerPacket
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
     // distinguish by type
     switch(rinp->getType())
     {
-    case RTPInnerPacket::RTP_INP_INITIALIZE_RTCP:
-        initializeRTCP(rinp);
+    case RTP_INP_INITIALIZE_RTCP:
+        handleInitializeRTCP(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED:
-        senderModuleInitialized(rinp);
+    case RTP_INP_SENDER_MODULE_INITIALIZED:
+        handleSenderModuleInitialized(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_DATA_OUT:
-        dataOut(rinp);
+    case RTP_INP_DATA_OUT:
+        handleDataOut(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_DATA_IN:
-        dataIn(rinp);
+    case RTP_INP_DATA_IN:
+        handleDataIn(rinp);
         break;
 
-    case RTPInnerPacket::RTP_INP_LEAVE_SESSION:
-        leaveSession(rinp);
+    case RTP_INP_LEAVE_SESSION:
+        handleLeaveSession(rinp);
         break;
 
     default:
@@ -115,27 +118,27 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
     }
 }
 
-
 void RTCP::handleMessageFromUDP(cMessage *msg)
 {
     // from SocketLayer all message are of type cMessage
     readRet(PK(msg));
 }
 
-
 void RTCP::handleSelfMessage(cMessage *msg)
 {
     // it's time to create an rtcp packet
-    if (!_ssrcChosen) {
+    if (!_ssrcChosen)
+    {
         chooseSSRC();
         RTPInnerPacket *rinp1 = new RTPInnerPacket("rtcpInitialized()");
-        rinp1->rtcpInitialized(_senderInfo->getSSRC());
+        rinp1->setRtcpInitializedPkt(_senderInfo->getSsrc());
         send(rinp1, "rtpOut");
     }
 
     createPacket();
 
-    if (!_leaveSession) {
+    if (!_leaveSession)
+    {
         scheduleInterval();
     }
 }
@@ -144,7 +147,7 @@ void RTCP::handleSelfMessage(cMessage *msg)
 // methods for different messages
 //
 
-void RTCP::initializeRTCP(RTPInnerPacket *rinp)
+void RTCP::handleInitializeRTCP(RTPInnerPacket *rinp)
 {
     _mtu = rinp->getMTU();
     _bandwidth = rinp->getBandwidth();
@@ -157,13 +160,11 @@ void RTCP::initializeRTCP(RTPInnerPacket *rinp)
     SDESItem *sdesItem = new SDESItem(SDESItem::SDES_CNAME, rinp->getCommonName());
     _senderInfo->addSDESItem(sdesItem);
 
-
     // create server socket for receiving rtcp packets
     createSocket();
 }
 
-
-void RTCP::senderModuleInitialized(RTPInnerPacket *rinp)
+void RTCP::handleSenderModuleInitialized(RTPInnerPacket *rinp)
 {
     _senderInfo->setStartTime(simTime());
     _senderInfo->setClockRate(rinp->getClockRate());
@@ -171,27 +172,23 @@ void RTCP::senderModuleInitialized(RTPInnerPacket *rinp)
     _senderInfo->setSequenceNumberBase(rinp->getSequenceNumberBase());
 }
 
-
-void RTCP::dataOut(RTPInnerPacket *packet)
+void RTCP::handleDataOut(RTPInnerPacket *packet)
 {
     RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(packet->decapsulate());
     processOutgoingRTPPacket(rtpPacket);
 }
 
-
-void RTCP::dataIn(RTPInnerPacket *rinp)
+void RTCP::handleDataIn(RTPInnerPacket *rinp)
 {
     RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(rinp->decapsulate());
     //rtpPacket->dump();
     processIncomingRTPPacket(rtpPacket, rinp->getAddress(), rinp->getPort());
 }
 
-
-void RTCP::leaveSession(RTPInnerPacket *rinp)
+void RTCP::handleLeaveSession(RTPInnerPacket *rinp)
 {
     _leaveSession = true;
 }
-
 
 void RTCP::connectRet()
 {
@@ -200,7 +197,6 @@ void RTCP::connectRet()
     cMessage *reminderMessage = new cMessage("Interval");
     scheduleAt(simTime() + intervalLength, reminderMessage);
 }
-
 
 void RTCP::readRet(cPacket *sifpIn)
 {
@@ -214,16 +210,19 @@ void RTCP::createSocket()
 {
     // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
     // we just manage the UDP socket by hand...
-    if (_socketFdIn == -1) {
+    if (_socketFdIn == -1)
+    {
         _socketFdIn = UDPSocket::generateSocketId();
         UDPControlInfo *ctrl = new UDPControlInfo();
         IPAddress ipaddr(_destinationAddress);
 
-        if (ipaddr.isMulticast()) {
+        if (ipaddr.isMulticast())
+        {
             ctrl->setSrcAddr(IPAddress(_destinationAddress));
             ctrl->setSrcPort(_port);
         }
-        else {
+        else
+        {
              ctrl->setSrcPort(_port);
              ctrl->setSockId(_socketFdOut);
         }
@@ -236,10 +235,10 @@ void RTCP::createSocket()
     }
 }
 
-
-void RTCP::scheduleInterval(){
-
-    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+void RTCP::scheduleInterval()
+{
+    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos.size()) /
+            (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
     // interval length must be at least 5 seconds
     if (intervalLength < 5.0)
@@ -255,21 +254,21 @@ void RTCP::scheduleInterval(){
     scheduleAt(simTime() + intervalLength, reminderMessage);
 }
 
-
-void RTCP::chooseSSRC(){
-
+void RTCP::chooseSSRC()
+{
     uint32 ssrc = 0;
     bool ssrcConflict = false;
-    do {
+    do
+    {
         ssrc = intrand(0x7fffffff);
         ssrcConflict = findParticipantInfo(ssrc) != NULL;
     } while (ssrcConflict);
+
     ev << "chooseSSRC" << ssrc;
-    _senderInfo->setSSRC(ssrc);
-    _participantInfos->add(_senderInfo);
+    _senderInfo->setSsrc(ssrc);
+    _participantInfos.add(_senderInfo);
     _ssrcChosen = true;
 }
-
 
 void RTCP::createPacket()
 {
@@ -279,31 +278,37 @@ void RTCP::createPacket()
 
     // if this rtcp end system is a sender (see SenderInformation::isSender() for
     // details) insert a sender report
-    if (_senderInfo->isSender()) {
+    if (_senderInfo->isSender())
+    {
         RTCPSenderReportPacket *senderReportPacket = new RTCPSenderReportPacket("SenderReportPacket");
-        senderReportPacket->setSenderReport(_senderInfo->senderReport(simTime()));
+        SenderReport *senderReport = _senderInfo->senderReport(simTime());
+        senderReportPacket->setSenderReport(*senderReport);
+        delete senderReport;
         reportPacket = senderReportPacket;
     }
     else
         reportPacket = new RTCPReceiverReportPacket("ReceiverReportPacket");
-    reportPacket->setSSRC(_senderInfo->getSSRC());
-
+    reportPacket->setSsrc(_senderInfo->getSsrc());
 
     // insert receiver reports for packets from other sources
-    for (int i = 0; i < _participantInfos->size(); i++) {
-
-        if (_participantInfos->exist(i)) {
-            RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos->get(i));
-            if (participantInfo->getSSRC() != _senderInfo->getSSRC()) {
+    for (int i = 0; i < _participantInfos.size(); i++)
+    {
+        if (_participantInfos.exist(i))
+        {
+            RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos.get(i));
+            if (participantInfo->getSsrc() != _senderInfo->getSsrc())
+            {
                 ReceptionReport *report = ((RTPReceiverInfo *)participantInfo)->receptionReport(simTime());
-                if (report != NULL) {
+                if (report != NULL)
+                {
                     reportPacket->addReceptionReport(report);
                 }
             }
             participantInfo->nextInterval(simTime());
 
-            if (participantInfo->toBeDeleted(simTime())) {
-                _participantInfos->remove(participantInfo);
+            if (participantInfo->toBeDeleted(simTime()))
+            {
+                _participantInfos.remove(participantInfo);
                 delete participantInfo;
                 // perhaps inform the profile
             }
@@ -321,9 +326,10 @@ void RTCP::createPacket()
     compoundPacket->addRTCPPacket(sdesPacket);
 
     // create rtcp app/bye packets if needed
-    if (_leaveSession) {
+    if (_leaveSession)
+    {
         RTCPByePacket *byePacket = new RTCPByePacket("ByePacket");
-        byePacket->setSSRC(_senderInfo->getSSRC());
+        byePacket->setSsrc(_senderInfo->getSsrc());
         compoundPacket->addRTCPPacket(byePacket);
     }
 
@@ -340,206 +346,241 @@ void RTCP::createPacket()
 
     send(msg, "udpOut");
 
-    if (_leaveSession) {
+    if (_leaveSession)
+    {
         RTPInnerPacket *rinp = new RTPInnerPacket("sessionLeft()");
-        rinp->sessionLeft();
+        rinp->setSessionLeftPkt();
         send(rinp, "rtpOut");
     }
 }
-
 
 void RTCP::processOutgoingRTPPacket(RTPPacket *packet)
 {
     _senderInfo->processRTPPacket(packet, getId(), simTime());
 }
 
-
 void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port)
 {
-    uint32 ssrc = packet->getSSRC();
+    bool good = false;
+    uint32 ssrc = packet->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-    if (participantInfo == NULL) {
+    if (participantInfo == NULL)
+    {
         participantInfo = new RTPParticipantInfo(ssrc);
         participantInfo->setAddress(address);
         participantInfo->setRTPPort(port);
-        _participantInfos->add(participantInfo);
+        _participantInfos.add(participantInfo);
+        good = true;
     }
-    else {
+    else
+    {
         // check for ssrc conflict
-        if (participantInfo->getAddress() != address) {
-            // we have an address conflict
-        }
-        if (participantInfo->getRTPPort() == PORT_UNDEF) {
-            participantInfo->setRTPPort(port);
-        }
-        else if (participantInfo->getRTPPort() != port) {
-            // we have an rtp port conflict
+        if (participantInfo->getAddress() == address)
+        {
+            if (participantInfo->getRTPPort() == port)
+            {
+                good = true;
+            }
+            else if (participantInfo->getRTPPort() == PORT_UNDEF)
+            {
+                participantInfo->setRTPPort(port);
+                good = true;
+            }
         }
     }
-    participantInfo->processRTPPacket(packet, getId(),  packet->getArrivalTime());
+    if (good)
+    {
+        participantInfo->processRTPPacket(packet, getId(),  packet->getArrivalTime());
+    }
+    else
+    {
+        ev << "Incoming packet address/port conflict, packet dropped.\n";
+        delete packet;
+    }
 }
-
 
 void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
-    cArray *rtcpPackets = packet->getRtcpPackets();
-
+    cArray &rtcpPackets = packet->getRtcpPackets();
     simtime_t arrivalTime = packet->getArrivalTime();
-    delete packet;
 
-   for (int i = 0; i < rtcpPackets->size(); i++) {
-        if (rtcpPackets->exist(i)) {
+    for (int i = 0; i < rtcpPackets.size(); i++)
+    {
+        RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets.remove(i));
+        if (rtcpPacket)
+        {
             // remove the rtcp packet from the rtcp compound packet
-            RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets->remove(i));
-            if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_SR) {
-                RTCPSenderReportPacket *rtcpSenderReportPacket = (RTCPSenderReportPacket *)rtcpPacket;
-                uint32 ssrc = rtcpSenderReportPacket->getSSRC();
-                RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
+            switch (rtcpPacket->getPacketType())
+            {
+            case RTCP_PT_SR:
+                processIncomingRTCPSenderReportPacket(
+                        (RTCPSenderReportPacket *)rtcpPacket, address, port);
+                break;
 
-                if (participantInfo == NULL) {
-                    participantInfo = new RTPReceiverInfo(ssrc);
-                    participantInfo->setAddress(address);
-                    participantInfo->setRTCPPort(port);
-                    _participantInfos->add(participantInfo);
-                }
-                else {
-                    if (participantInfo->getAddress() == address) {
-                        if (participantInfo->getRTCPPort() == PORT_UNDEF) {
-                            participantInfo->setRTCPPort(port);
-                        }
-                        else {
-                            // check for ssrc conflict
-                        }
-                    }
-                    else {
-                        // check for ssrc conflict
-                    }
-                }
-                participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), simTime());
+            case RTCP_PT_RR:
+                processIncomingRTCPReceiverReportPacket(
+                        (RTCPReceiverReportPacket *)rtcpPacket, address, port);
+                break;
 
-                cArray *receptionReports = rtcpSenderReportPacket->getReceptionReports();
-                for (int j = 0; j < receptionReports->size(); j++) {
-                    if (receptionReports->exist(j)) {
-                        ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports->remove(j));
-                        if (_senderInfo) {
-                            if (receptionReport->getSSRC() == _senderInfo->getSSRC()) {
-                                _senderInfo->processReceptionReport(receptionReport, simTime());
-                            }
-                        }
-                        else
-                            //cancelAndDelete(receptionReport);
-                            delete receptionReport;
-                    }
-                }
-                delete receptionReports;
+            case RTCP_PT_SDES:
+                processIncomingRTCPSDESPacket(
+                        (RTCPSDESPacket *)rtcpPacket, address, port, arrivalTime);
+                break;
 
-            }
-            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_RR) {
-                RTCPReceiverReportPacket *rtcpReceiverReportPacket = (RTCPReceiverReportPacket *)rtcpPacket;
-                uint32 ssrc = rtcpReceiverReportPacket->getSSRC();
-                RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-                if (participantInfo == NULL) {
-                    participantInfo = new RTPReceiverInfo(ssrc);
-                    participantInfo->setAddress(address);
-                    participantInfo->setRTCPPort(port);
-                    _participantInfos->add(participantInfo);
-                }
-                else {
-                    if (participantInfo->getAddress() == address) {
-                        if (participantInfo->getRTCPPort() == PORT_UNDEF) {
-                            participantInfo->setRTCPPort(port);
-                        }
-                        else {
-                            // check for ssrc conflict
-                        }
-                    }
-                    else {
-                        // check for ssrc conflict
-                    }
-                }
+            case RTCP_PT_BYE:
+                processIncomingRTCPByePacket(
+                        (RTCPByePacket *)rtcpPacket, address, port);
+                break;
 
-                cArray *receptionReports = rtcpReceiverReportPacket->getReceptionReports();
-                for (int j = 0; j < receptionReports->size(); j++) {
-                    if (receptionReports->exist(j)) {
-                        ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports->remove(j));
-                        if (_senderInfo) {
-
-                            if (receptionReport->getSSRC() == _senderInfo->getSSRC()) {
-                                _senderInfo->processReceptionReport(receptionReport, simTime());
-                            }
-                        }
-
-                         else
-                            //cancelAndDelete(receptionReport);
-                             delete receptionReport;
-                    }
-                }
-                delete receptionReports;
-            }
-            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_SDES) {
-                RTCPSDESPacket *rtcpSDESPacket = (RTCPSDESPacket *)rtcpPacket;
-                cArray *sdesChunks = rtcpSDESPacket->getSdesChunks();
-
-                for (int j = 0; j < sdesChunks->size(); j++) {
-                    if (sdesChunks->exist(j)) {
-                        // remove the sdes chunk from the cArray of sdes chunks
-                        SDESChunk *sdesChunk = (SDESChunk *)(sdesChunks->remove(j));
-                        // this is needed to avoid seg faults
-                        //sdesChunk->setOwner(this);
-                        uint32 ssrc = sdesChunk->getSSRC();
-                        RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-                        if (participantInfo == NULL) {
-                            participantInfo = new RTPReceiverInfo(ssrc);
-                            participantInfo->setAddress(address);
-                            participantInfo->setRTCPPort(port);
-                            _participantInfos->add(participantInfo);
-                        }
-                        else {
-                            // check for ssrc conflict
-                        }
-                        participantInfo->processSDESChunk(sdesChunk, arrivalTime);
-                    }
-                }
-                delete sdesChunks;
-
-            }
-            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_BYE) {
-                RTCPByePacket *rtcpByePacket = (RTCPByePacket *)rtcpPacket;
-                uint32 ssrc = rtcpByePacket->getSSRC();
-                RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-
-                if (participantInfo != NULL && participantInfo != _senderInfo) {
-                    _participantInfos->remove(participantInfo);
-
-                    delete participantInfo;
-                    // perhaps it would be useful to inform
-                    // the profile to remove the corresponding
-                    // receiver module
-                }
-            }
-            else {
+            default:
                 // app rtcp packets
+                break;
             }
-        delete rtcpPacket;
+            delete rtcpPacket;
         }
     }
-    delete rtcpPackets;
+    delete packet;
 }
 
+void RTCP::processIncomingRTCPSenderReportPacket(
+        RTCPSenderReportPacket *rtcpSenderReportPacket, IPAddress address, int port)
+{
+    uint32 ssrc = rtcpSenderReportPacket->getSsrc();
+    RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
+
+    if (participantInfo == NULL)
+    {
+        participantInfo = new RTPReceiverInfo(ssrc);
+        participantInfo->setAddress(address);
+        participantInfo->setRTCPPort(port);
+        _participantInfos.add(participantInfo);
+    }
+    else
+    {
+        if ((participantInfo->getAddress() == address) &&
+                (participantInfo->getRTCPPort() == PORT_UNDEF))
+        {
+            participantInfo->setRTCPPort(port);
+        }
+        else
+        {
+            // check for ssrc conflict
+        }
+    }
+    participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), simTime());
+
+    cArray &receptionReports = rtcpSenderReportPacket->getReceptionReports();
+    for (int j = 0; j < receptionReports.size(); j++)
+    {
+        if (receptionReports.exist(j))
+        {
+            ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
+            if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc()))
+            {
+                _senderInfo->processReceptionReport(receptionReport, simTime());
+            }
+            else
+                //cancelAndDelete(receptionReport);
+                delete receptionReport;
+        }
+    }
+}
+
+void RTCP::processIncomingRTCPReceiverReportPacket(
+        RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPAddress address, int port)
+{
+    uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
+    RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
+    if (participantInfo == NULL)
+    {
+        participantInfo = new RTPReceiverInfo(ssrc);
+        participantInfo->setAddress(address);
+        participantInfo->setRTCPPort(port);
+        _participantInfos.add(participantInfo);
+    }
+    else
+    {
+        if ((participantInfo->getAddress() == address) &&
+                (participantInfo->getRTCPPort() == PORT_UNDEF))
+        {
+            participantInfo->setRTCPPort(port);
+        }
+        else
+        {
+            // check for ssrc conflict
+        }
+    }
+
+    cArray &receptionReports = rtcpReceiverReportPacket->getReceptionReports();
+    for (int j = 0; j < receptionReports.size(); j++)
+    {
+        if (receptionReports.exist(j))
+        {
+            ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
+            if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc()))
+            {
+                _senderInfo->processReceptionReport(receptionReport, simTime());
+            }
+            else
+                //cancelAndDelete(receptionReport);
+                delete receptionReport;
+        }
+    }
+}
+
+void RTCP::processIncomingRTCPSDESPacket(
+        RTCPSDESPacket *rtcpSDESPacket, IPAddress address, int port, simtime_t arrivalTime)
+{
+    cArray &sdesChunks = rtcpSDESPacket->getSdesChunks();
+
+    for (int j = 0; j < sdesChunks.size(); j++)
+    {
+        if (sdesChunks.exist(j))
+        {
+            // remove the sdes chunk from the cArray of sdes chunks
+            SDESChunk *sdesChunk = (SDESChunk *)(sdesChunks.remove(j));
+            // this is needed to avoid seg faults
+            //sdesChunk->setOwner(this);
+            uint32 ssrc = sdesChunk->getSsrc();
+            RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
+            if (participantInfo == NULL)
+            {
+                participantInfo = new RTPReceiverInfo(ssrc);
+                participantInfo->setAddress(address);
+                participantInfo->setRTCPPort(port);
+                _participantInfos.add(participantInfo);
+            }
+            else
+            {
+                // check for ssrc conflict
+            }
+            participantInfo->processSDESChunk(sdesChunk, arrivalTime);
+        }
+    }
+}
+
+void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPAddress address, int port)
+{
+    uint32 ssrc = rtcpByePacket->getSsrc();
+    RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
+
+    if (participantInfo != NULL && participantInfo != _senderInfo)
+    {
+        _participantInfos.remove(participantInfo);
+
+        delete participantInfo;
+        // perhaps it would be useful to inform
+        // the profile to remove the corresponding
+        // receiver module
+    }
+}
 
 RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 {
     char *ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
-    int participantIndex = _participantInfos->find(ssrcString);
-    if (participantIndex != -1) {
-        return (RTPParticipantInfo *)(_participantInfos->get(participantIndex));
-    }
-    else {
-        return NULL;
-    }
+    return (RTPParticipantInfo *)(_participantInfos.get(ssrcString));
 }
-
 
 void RTCP::calculateAveragePacketSize(int size)
 {
