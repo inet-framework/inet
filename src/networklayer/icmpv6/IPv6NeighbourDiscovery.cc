@@ -1143,6 +1143,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
             delete ra;
             return;
         }
+
         cancelRouterDiscovery(ie);//Cancel router discovery if it is in progress.
         EV << "Interface is a host, processing RA.\n";
 
@@ -1155,7 +1156,9 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         {
             IPv6NDPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
             if (prefixInfo.getAutoAddressConfFlag() == true)//If auto addr conf is set
+            {
                 processRAPrefixInfoForAddrAutoConf(prefixInfo, ie);//We process prefix Info and form an addr
+            }
         }
     }
     delete raCtrlInfo;
@@ -1504,7 +1507,10 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     reset to a uniformly-distributed random value between the interface's
     configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
     causes the next advertisement to be sent and a new random value to be chosen.*/
-    simtime_t interval = uniform(ie->ipv6Data()->getMinRtrAdvInterval(), ie->ipv6Data()->getMaxRtrAdvInterval());
+
+    simtime_t interval;
+
+    interval = uniform(ie->ipv6Data()->getMinRtrAdvInterval(), ie->ipv6Data()->getMaxRtrAdvInterval());
     nextScheduledTime = simTime() + interval;
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)

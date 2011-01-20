@@ -53,6 +53,7 @@ simple BGPRouting
     parameters:
         @display("i=block/network2");
         string bgpConfigFile;
+        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
     gates:
         input fromTCP;
         output toTCP;

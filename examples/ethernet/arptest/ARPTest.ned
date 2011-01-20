@@ -29,6 +29,11 @@ network ARPTest
             delay = 1us;
             datarate = 512Mbps;
         }
+        channel ethline extends DatarateChannel
+        {
+            delay = 50ns;
+            datarate = 100Mbps;
+        }
     submodules:
         client: StandardHost {
             @display("p=71,64;i=device/laptop_l");
@@ -55,10 +60,10 @@ network ARPTest
             @display("p=495,160");
         }
     connections:
-        client.ethg++ <--> switch.ethg++;
-        switch.ethg++ <--> host1.ethg++;
-        switch.ethg++ <--> host2.ethg++;
-        router.ethg++ <--> switch.ethg++;
+        client.ethg++ <--> ethline <--> switch.ethg++;
+        switch.ethg++ <--> ethline <--> host1.ethg++;
+        switch.ethg++ <--> ethline <--> host2.ethg++;
+        router.ethg++ <--> ethline <--> switch.ethg++;
         router.pppg++ <--> fiberline <--> net.pppg++;
         server.pppg++ <--> fiberline <--> net.pppg++;
 }

@@ -16,6 +16,7 @@ network Backbone
         channel C extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         channelInstaller: ChannelInstaller {
