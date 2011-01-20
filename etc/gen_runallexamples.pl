@@ -2,10 +2,10 @@
 
 
 @the_skiplist = <<END_OF_SKIPLIST =~ m/(\S.*\S)/g;
-examples/adhoc/ieee80211/omnetpp.ini  Ping2         # interactive
-examples/adhoc/mf80211/omnetpp.ini  Ping2         # interactive
-examples/ethernet/lans/defaults.ini  General
-examples/mpls/testte_failure/omnetpp.ini  General        # <!> Error in module (PPP) RSVPTE4.LSR2.ppp[1].ppp (id=70) at event #13304, t=2.009399999999: Cannot schedule message (cMessage)pppEndTxEvent to the past, t=0.
+examples/adhoc/ieee80211/omnetpp.ini  Ping2         # interactive parameter `Net80211.numHosts'
+examples/adhoc/mf80211/omnetpp.ini  Ping2         # interactive parameter `Net80211.numHosts'
+examples/ethernet/lans/defaults.ini  General      # included ini file
+examples/mpls/ldp/omnetpp.ini  General              # <!> Error in module (LDP) LDPTEST.LSR5.ldp (id=133) at event #893, t=0.023541800236: Model error: ASSERT: condition uit == fecUp.end() false in function processLABEL_REQUEST, networklayer/ldp/LDP.cc line 952.
 examples/mpls/testte_failure2/omnetpp.ini  General        # <!> Error in module (RSVP) RSVPTE4.LSR1.rsvp (id=22) at event #2, t=0: Model error: not a local peer: 10.1.1.1.
 examples/rtp/multicast1/omnetpp.ini  General         # interactive parameter `RTPMulticast1.host1.IPForward'
 examples/rtp/multicast2/omnetpp.ini  General         # <!> Error: Network `rtpNetwork' or `inet.examples.rtp.multicast2.rtpNetwork' not found, check .ini and .ned files.
@@ -15,6 +15,11 @@ examples/wireless/lan80211/omnetpp-ftp.ini  NHosts         # interactive
 examples/wireless/lan80211/omnetpp-streaming.ini  Streaming2
 examples/wireless/test2/omnetpp.ini  General        # interactive parameter `Throughput.cliHost[0].wlan.agent.probeDelay'
 END_OF_SKIPLIST
+
+
+# next line DISABLE previous skiplist:
+@the_skiplist = ();
+
 
 foreach $i ( @the_skiplist )
 {
