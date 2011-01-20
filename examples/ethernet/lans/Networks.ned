@@ -33,6 +33,11 @@ import ned.DatarateChannel;
 //
 network MixedLAN
 {
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 01us;  datarate = 100Mbps;
+        }
     submodules:
         channelInstaller: ChannelInstaller {
             parameters:
@@ -105,21 +110,21 @@ network MixedLAN
                 ethg[4];
         }
     connections:
-        bus.ethg[0] <--> busHostA.ethg;
-        bus.ethg[1] <--> busHostB.ethg;
-        bus.ethg[2] <--> switch.ethg[4];
-        bus.ethg[3] <--> busHostC.ethg;
-        bus.ethg[4] <--> hub.ethg[3];
-        bus.ethg[5] <--> busHostD.ethg;
+        bus.ethg[0] <--> C <--> busHostA.ethg;
+        bus.ethg[1] <--> C <--> busHostB.ethg;
+        bus.ethg[2] <--> C <--> switch.ethg[4];
+        bus.ethg[3] <--> C <--> busHostC.ethg;
+        bus.ethg[4] <--> C <--> hub.ethg[3];
+        bus.ethg[5] <--> C <--> busHostD.ethg;
 
-        switch.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostA.ethg;
-        switch.ethg[1] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostB.ethg;
-        switch.ethg[2] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostC.ethg;
-        switch.ethg[3] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> switchHostD.ethg;
+        switch.ethg[0] <--> C <--> switchHostA.ethg;
+        switch.ethg[1] <--> C <--> switchHostB.ethg;
+        switch.ethg[2] <--> C <--> switchHostC.ethg;
+        switch.ethg[3] <--> C <--> switchHostD.ethg;
 
-        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
+        hub.ethg[0] <--> { delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
+        hub.ethg[1] <--> { delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
+        hub.ethg[2] <--> { delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
 }
 
 

@@ -87,6 +87,8 @@ package inet.transport.tcp;
 //
 // <b>Configuring TCP</b>
 //
+// FIXME - The sendQueueClass and receiveQueueClass parameters are removed!!!
+//
 // The module parameters sendQueueClass and receiveQueueClass should be
 // set the names of classes that manage the actual send and receive queues.
 // Currently you have two choices:

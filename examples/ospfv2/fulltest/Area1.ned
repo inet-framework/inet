@@ -19,6 +19,7 @@ module OSPF_Area1
         channel C extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         RT1: OSPFRouter {

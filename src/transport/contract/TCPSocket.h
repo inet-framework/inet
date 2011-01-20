@@ -246,6 +246,13 @@ class INET_API TCPSocket
     const char *getTCPAlgorithmClass() const {return tcpAlgorithmClass.c_str();}
 
     /**
+     * Convert a string to TCPDataTransferMode enum.
+     * Returns TCP_TRANSFER_UNDEFINED when string has an invalid value
+     * Generate runtime error, when string is NULL;
+     */
+    static TCPDataTransferMode convertStringToDataTransferMode(const char * transferMode);
+
+    /**
      * Sets the dataTransferMode parameter of the subsequent connect() or listen() calls.
      * @see TCPCommand
      */

@@ -17,6 +17,7 @@ module OneNetArea
         channel C extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         H3: StandardHost {

@@ -149,8 +149,6 @@ void EtherMACBase::initialize()
     // initalize pause
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
-
-    EV << "EtherMACBase class size = " << sizeof(EtherMACBase) << "(long size:" << sizeof(long) << ", cOutVector size = " << sizeof(cOutVector) << ")\n";
 }
 
 void EtherMACBase::initializeQueueModule()

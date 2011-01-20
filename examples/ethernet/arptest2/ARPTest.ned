@@ -15,14 +15,21 @@
 
 package inet.examples.ethernet.arptest2;
 
-import inet.linklayer.ethernet.EtherBus;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
+import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.linklayer.ethernet.EtherBus;
 
 
 network ARPTest
 {
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 500ns;
+            datarate = 10Mbps;
+        }
     submodules:
         server: StandardHost {
             @display("p=480,198;i=device/server_l");
@@ -68,16 +75,16 @@ network ARPTest
             @display("p=46,111");
         }
     connections:
-        server.ethg++ <--> router8.ethg++;
-        bus2.ethg++ <--> router5.ethg++;
-        bus2.ethg++ <--> router6.ethg++;
-        bus2.ethg++ <--> router7.ethg++;
-        router8.ethg++ <--> router7.ethg++;
-        bus1.ethg++ <--> router1.ethg++;
-        bus1.ethg++ <--> router5.ethg++;
-        bus1.ethg++ <--> router2.ethg++;
-        bus1.ethg++ <--> router3.ethg++;
-        bus1.ethg++ <--> router4.ethg++;
-        client.ethg++ <--> router1.ethg++;
+        server.ethg++ <--> ethline <--> router8.ethg++;
+        bus2.ethg++ <--> ethline <--> router5.ethg++;
+        bus2.ethg++ <--> ethline <--> router6.ethg++;
+        bus2.ethg++ <--> ethline <--> router7.ethg++;
+        router8.ethg++ <--> ethline <--> router7.ethg++;
+        bus1.ethg++ <--> ethline <--> router1.ethg++;
+        bus1.ethg++ <--> ethline <--> router5.ethg++;
+        bus1.ethg++ <--> ethline <--> router2.ethg++;
+        bus1.ethg++ <--> ethline <--> router3.ethg++;
+        bus1.ethg++ <--> ethline <--> router4.ethg++;
+        client.ethg++ <--> ethline <--> router1.ethg++;
 }
 

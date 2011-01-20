@@ -40,6 +40,7 @@ network NClientsEth
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 10Mbps;
         }
     submodules:
         configurator: FlatNetworkConfigurator6;

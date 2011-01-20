@@ -30,6 +30,12 @@ channel pppline extends DatarateChannel
     datarate = 1 Gbps;
 }
 
+channel ethline extends DatarateChannel
+{
+    delay = 100ms;
+    datarate = 1 Gbps;
+}
+
 network Traceroute
 {
     parameters:
@@ -179,23 +185,23 @@ network Traceroute
                 pppg[2];
         }
     connections allowunconnected:
-        cli1.ethg[0]  <--> switch1.ethg[0];
-        cli2.ethg[0]  <--> switch1.ethg[1];
-        switch1.ethg[2]  <--> router1.ethg[0];
+        cli1.ethg[0]  <--> ethline <--> switch1.ethg[0];
+        cli2.ethg[0]  <--> ethline <--> switch1.ethg[1];
+        switch1.ethg[2]  <--> ethline <--> router1.ethg[0];
         router1.pppg[0] <--> pppline <--> Router5.pppg[0];
         Router5.pppg[2] <--> pppline <--> extRouter.pppg[0];
-        cli3.ethg[0]  <--> switch2.ethg[0];
-        cli4.ethg[0]  <--> switch2.ethg[1];
-        switch2.ethg[2]  <--> router2.ethg[0];
+        cli3.ethg[0]  <--> ethline <--> switch2.ethg[0];
+        cli4.ethg[0]  <--> ethline <--> switch2.ethg[1];
+        switch2.ethg[2]  <--> ethline <--> router2.ethg[0];
         router2.pppg[0] <--> pppline <--> Router5.pppg[1];
-        cli5.ethg[0]  <--> switch3.ethg[0];
-        cli6.ethg[0]  <--> switch3.ethg[1];
-        switch3.ethg[2]  <--> router3.ethg[0];
+        cli5.ethg[0]  <--> ethline <--> switch3.ethg[0];
+        cli6.ethg[0]  <--> ethline <--> switch3.ethg[1];
+        switch3.ethg[2]  <--> ethline <--> router3.ethg[0];
         router3.pppg[0] <--> pppline <--> Router6.pppg[0];
         Router6.pppg[2] <--> pppline <--> extRouter.pppg[1];
-        cli7.ethg[0]  <--> switch4.ethg[0];
-        cli8.ethg[0]  <--> switch4.ethg[1];
-        switch4.ethg[2]  <--> router4.ethg[0];
+        cli7.ethg[0]  <--> ethline <--> switch4.ethg[0];
+        cli8.ethg[0]  <--> ethline <--> switch4.ethg[1];
+        switch4.ethg[2]  <--> ethline <--> router4.ethg[0];
         router4.pppg[0] <--> pppline <--> Router6.pppg[1];
 }
 

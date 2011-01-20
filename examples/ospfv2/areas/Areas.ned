@@ -27,6 +27,6 @@ network OSPF_AreaTest
                 ethg[1];
         }
     connections:
-        Area1.ethg[0] <--> {  delay = 0.1us; } <--> Area2.ethg[0];
+        Area1.ethg[0] <--> {  delay = 0.1us; datarate = 100 Mbps; } <--> Area2.ethg[0];
 }
 

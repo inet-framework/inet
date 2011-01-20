@@ -134,6 +134,7 @@ void BGPRouting::listenConnectionFromPeer(BGP::SessionID sessionID)
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TCPSocket::LISTENING)
     {
         _BGPSessions[sessionID]->getSocketListen()->setOutputGate(gate("toTCP"));
+        _BGPSessions[sessionID]->getSocketListen()->readDataTransferModePar(*this);
         _BGPSessions[sessionID]->getSocketListen()->bind(BGP::TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
     }
@@ -151,6 +152,7 @@ void BGPRouting::openTCPConnectionToPeer(BGP::SessionID sessionID)
     }
     socket->setCallbackObject(this, (void*)sessionID);
     socket->setOutputGate(gate("toTCP"));
+    socket->readDataTransferModePar(*this);
     socket->bind(intfEntry->ipv4Data()->getIPAddress(),0);
     _socketMap.addSocket(socket);
 
@@ -163,6 +165,7 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
     if (!socket)
     {
         socket = new TCPSocket(msg);
+        socket->readDataTransferModePar(*this);
         socket->setOutputGate(gate("toTCP"));
         IPAddress peerAddr = socket->getRemoteAddress().get4();
         BGP::SessionID i = findIdFromPeerAddr(_BGPSessions, peerAddr);
