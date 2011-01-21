@@ -19,7 +19,6 @@
 // Required for MACAddress declarations
 //
 cplusplus {{
-//FIXME account for LLC(3)+SNAP(5) headers in data frames!!! +add SNAP orgcode, localcode into the msg?
 #include "Ieee80211Consts.h"
 #include "MACAddress.h"
 #include "Ieee802Ctrl_m.h" // for EtherType
