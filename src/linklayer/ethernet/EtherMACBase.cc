@@ -129,9 +129,9 @@ void EtherMACBase::initialize()
     initializeNotificationBoard();
     initializeStatistics();
 
-    calculateParameters();
-
     registerInterface(); // needs MAC address
+
+    calculateParameters();
 
     lastTxFinishTime = -1.0; // never equals with current simtime.
 
@@ -259,18 +259,10 @@ void EtherMACBase::initializeStatistics()
 
 void EtherMACBase::registerInterface()
 {
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
-    if (!ift)
-        return;
-
     interfaceEntry = new InterfaceEntry();
 
     // interface name: NIC module's name without special characters ([])
     interfaceEntry->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
-
-    // data rate
-    ASSERT(curEtherDescr);
-    interfaceEntry->setDatarate(curEtherDescr->txrate); // FIXME
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);
@@ -287,9 +279,32 @@ void EtherMACBase::registerInterface()
     interfaceEntry->setBroadcast(true);
 
     // add
-    ift->addInterface(interfaceEntry, this);
+    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    if (ift)
+        ift->addInterface(interfaceEntry, this);
 }
 
+void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
+{
+    if (dynamic_cast<cPostPathCreateNotification *>(obj))
+    {
+        cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
+        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+            refreshConnection(true);
+    }
+    else if (dynamic_cast<cPostPathCutNotification *>(obj))
+    {
+        cPostPathCutNotification *gcobj = (cPostPathCutNotification *)obj;
+        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+            refreshConnection(false);
+    }
+}
+
+void EtherMACBase::refreshConnection(bool connected_par)
+{
+    connected = connected_par;
+    calculateParameters();
+}
 
 bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
 {
@@ -310,18 +325,27 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
 
 void EtherMACBase::calculateParameters()
 {
-    if (disabled || !connected)
+    cChannel *inTrChannel = NULL;
+
+    transmissionChannel = physOutGate->getTransmissionChannel();
+    inTrChannel = physInGate->getIncomingTransmissionChannel();
+
+    connected = (transmissionChannel != NULL) && (inTrChannel != NULL);
+
+    if (!connected)
     {
         curEtherDescr = &nullEtherDescr;
         carrierExtension = false;
         transmissionChannel = NULL;
-
+        interfaceEntry->setDown(true);
+        interfaceEntry->setDatarate(0);
         return;
     }
+
     carrierExtension = false; // FIXME
-    transmissionChannel = physOutGate->getTransmissionChannel();
     double txrate = transmissionChannel->getNominalDatarate();
-    double drate = physInGate->getIncomingTransmissionChannel()->getNominalDatarate();
+    double drate = inTrChannel->getNominalDatarate();
+
     if (txrate != drate)
         throw cRuntimeError(this, "The input/output datarates are differs (%f / %f)", drate, txrate);
 
@@ -331,9 +355,12 @@ void EtherMACBase::calculateParameters()
         if (txrate == etherDescrs[i].txrate)
         {
             curEtherDescr = &etherDescrs[i];
+            interfaceEntry->setDown(false);
+            interfaceEntry->setDatarate(txrate);
             return;
         }
     }
+
     error("Invalid transmission rate %e on channel %s at %s modul", txrate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
 }
 

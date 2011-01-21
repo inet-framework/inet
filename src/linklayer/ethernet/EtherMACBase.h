@@ -33,7 +33,7 @@ class IPassiveQueue;
 /**
  * Base class for ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public cSimpleModule, public INotifiable
+class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public cListener
 {
   protected:
     enum MACTransmitState
@@ -225,6 +225,9 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     virtual void updateHasSubcribers() = 0;
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
+    // model change related functions
+    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+    virtual void refreshConnection(bool connected);
 };
 
 #endif
