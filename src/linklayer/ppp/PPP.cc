@@ -153,7 +153,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // add
     IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    if (ift)
+        ift->addInterface(e, this);
 
     return e;
 }
@@ -164,7 +165,7 @@ void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
     {
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
         if (physOutGate == gcobj->pathStartGate)
-            refreshOutGateConnection(false);
+            refreshOutGateConnection(true);
     }
     else if (dynamic_cast<cPostPathCutNotification *>(obj))
     {
