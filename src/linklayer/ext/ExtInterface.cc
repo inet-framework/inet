@@ -20,6 +20,7 @@
 
 #define WANT_WINSOCK2
 
+#include <platdep/sockets.h>
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -171,15 +172,15 @@ void ExtInterface::handleMessage(cMessage *msg)
 void ExtInterface::displayBusy()
 {
     getDisplayString().setTagArg("i",1, "yellow");
-    gate("physOut")->getDisplayString().setTagArg("o",0,"yellow");
-    gate("physOut")->getDisplayString().setTagArg("o",1,"3");
+    gate("physOut")->getDisplayString().setTagArg("ls",0,"yellow");
+    gate("physOut")->getDisplayString().setTagArg("ls",1,"3");
 }
 
 void ExtInterface::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
-    gate("physOut")->getDisplayString().setTagArg("o",0,"black");
-    gate("physOut")->getDisplayString().setTagArg("o",1,"1");
+    gate("physOut")->getDisplayString().setTagArg("ls",0,"black");
+    gate("physOut")->getDisplayString().setTagArg("ls",1,"1");
 }
 
 void ExtInterface::updateDisplayString()

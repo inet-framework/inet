@@ -105,7 +105,7 @@ void PPP::initialize(int stage)
         if (ev.isGUI())
         {
             if (connected) {
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("o",0);
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
             }
             else {
                 // we are not connected: gray out our icon
@@ -319,8 +319,8 @@ void PPP::handleMessage(cMessage *msg)
 void PPP::displayBusy()
 {
     getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    datarateChannel->getDisplayString().setTagArg("o",0,"yellow");
-    datarateChannel->getDisplayString().setTagArg("o",1,"3");
+    datarateChannel->getDisplayString().setTagArg("ls",0,"yellow");
+    datarateChannel->getDisplayString().setTagArg("ls",1,"3");
 }
 
 void PPP::displayIdle()
@@ -328,8 +328,8 @@ void PPP::displayIdle()
     getDisplayString().setTagArg("i",1,"");
     if (datarateChannel)
     {
-        datarateChannel->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
-        datarateChannel->getDisplayString().setTagArg("o",1,"1");
+        datarateChannel->getDisplayString().setTagArg("ls",0,oldConnColor.c_str());
+        datarateChannel->getDisplayString().setTagArg("ls",1,"1");
     }
 }
 
