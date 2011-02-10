@@ -1,6 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-20110211
+-------------
+- additional statistics in the SCTP module (Alberto Cortes)
+- minor changes in #includes to ensure compatibility with upcoming OMNeT++ 4.2
+
 
 INET-20100723
 -------------
@@ -23,8 +28,8 @@ INET-20100723
   input for the NetAnim program (http://www.nsnam.org/wiki/index.php/NetAnim)
 
 - Ieee80211Radio: added a shadowing component for the path loss reception model
-  (Nikos Simantirakis). This is a random variable has a normal distribution 
-  in dB and results to -normal distribution in mW. This is a widespread and 
+  (Nikos Simantirakis). This is a random variable has a normal distribution
+  in dB and results to -normal distribution in mW. This is a widespread and
   common model used for reproducing shadowing effects (Rappaport, T. S. (2002),
   Communications - Principles and Practice, Prentice Hall PTR).
 
@@ -43,14 +48,14 @@ INET-20100323
   Thomas Dreibholz
 
 - added support for Sam Jensen's Network Simulation Cradle,
-  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks available 
-  in simulations. Currently NSC supports the FreeBSD, OpenBSD, lwIP and Linux 
-  stacks. The TCP_NSC module (transport/tcp_nsc) is a drop-in replacement for the 
-  normal TCP module (transport/tcp), and can be activated with a single parameter 
-  setting in StandardHost. See src/transport/tcp_nsc, 3rdparty/README, and 
+  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks available
+  in simulations. Currently NSC supports the FreeBSD, OpenBSD, lwIP and Linux
+  stacks. The TCP_NSC module (transport/tcp_nsc) is a drop-in replacement for the
+  normal TCP module (transport/tcp), and can be activated with a single parameter
+  setting in StandardHost. See src/transport/tcp_nsc, 3rdparty/README, and
   examples/inet/tcpclientserver.
 
-- added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP 
+- added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP
   version is still available as TCP_old. See src/transport/tcp/ChangeLog for details.
 
 INET-20090325
