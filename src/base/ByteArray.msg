@@ -1,5 +1,6 @@
 //
 // (C) 2005 Vojtech Janota
+// (C) 2010 Zoltan Bojthe
 //
 // This library is free software, you can redistribute it
 // and/or modify
@@ -14,17 +15,14 @@
 
 cplusplus {{
 #include "INETDefs.h"
-
-#include "ByteArray.h"
 }}
 
-class noncobject ByteArray;
 
 //
 // Message that carries raw bytes. Used with emulation-related features.
 //
-packet ByteArrayMessage
+class ByteArray
 {
     @customize(true);
-    ByteArray byteArray;
+    char data[];
 }
