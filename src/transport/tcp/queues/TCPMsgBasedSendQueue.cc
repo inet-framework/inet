@@ -46,6 +46,9 @@ std::string TCPMsgBasedSendQueue::info() const
 
 void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
 {
+    // DEBUG by Joseph Kim (kyeongsoo.kim@gmail.com)
+    ASSERT(msg->getByteLength() > 0);
+
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     end += msg->getByteLength();
 
