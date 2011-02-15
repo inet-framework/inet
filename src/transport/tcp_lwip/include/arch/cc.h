@@ -6,12 +6,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <omnetpp.h>
+
 #define PACK_STRUCT_STRUCT __attribute__ (( __packed__ ))
 #define LWIP_PLATFORM_ASSERT(c) assert(c)
 /*
 #define LWIP_PLATFORM_DIAG(c) do { printf("%u] ", get_stack_id()); printf(c); } while (0)
 */
-#define LWIP_PLATFORM_DIAG(c) printf(c)
+//#define LWIP_PLATFORM_DIAG(c) printf(c)
+#define LWIP_PLATFORM_DIAG(c) do { ev<<"(LWIP):"; ev.printf c; } while (0)
 
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
@@ -44,5 +47,11 @@ typedef int16_t s16_t;
 #ifndef s32_t
 typedef int32_t s32_t;
 #endif
+
+#define U16_F   "hu"
+#define X16_F   "hx"
+#define S16_F   "hi"
+#define S32_F   "i"
+#define U32_F   "u"
 
 #endif

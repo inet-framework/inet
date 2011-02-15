@@ -8,6 +8,10 @@
 #define NO_SYS 1
 
 
+#define LWIP_DEBUG
+
+#define TCP_DEBUG LWIP_DBG_ON
+
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */

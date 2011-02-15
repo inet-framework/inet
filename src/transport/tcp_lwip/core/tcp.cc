@@ -680,9 +680,12 @@ tcp_slowtmr(void)
          (pcb->keep_idle + TCP_MAXIDLE) / TCP_SLOW_INTERVAL)
 #endif /* LWIP_TCP_KEEPALIVE */
       {
-        LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: KEEPALIVE timeout. Aborting connection to %"U16_F".%"U16_F".%"U16_F".%"U16_F".\n",
-                                ip4_addr1(&pcb->remote_ip), ip4_addr2(&pcb->remote_ip),
-                                ip4_addr3(&pcb->remote_ip), ip4_addr4(&pcb->remote_ip)));
+//        LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: KEEPALIVE timeout. Aborting connection to %"U16_F".%"U16_F".%"U16_F".%"U16_F".\n",
+//                                ip4_addr1(&pcb->remote_ip), ip4_addr2(&pcb->remote_ip),
+//                                ip4_addr3(&pcb->remote_ip), ip4_addr4(&pcb->remote_ip)));
+        LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: KEEPALIVE timeout. Aborting connection to %s\n",
+                                pcb->remote_ip.addr.str().c_str()
+                                ));
         
         ++pcb_remove;
         ++pcb_reset;
