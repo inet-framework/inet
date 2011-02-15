@@ -33,6 +33,22 @@ inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
 //@}
 
 
+class Sack : public Sack_Base
+{
+  public:
+    Sack() : Sack_Base() {}
+    Sack(unsigned int start_par, unsigned int end_par) { setSegment(start_par, end_par); }
+    Sack(const Sack& other) : Sack_Base() {operator=(other);}
+    Sack& operator=(const Sack& other) {Sack_Base::operator=(other); return *this;}
+    virtual Sack *dup() const {return new Sack(*this);}
+    // ADD CODE HERE to redefine and implement pure virtual functions from Sack_Base
+    virtual bool empty() const;
+    virtual bool contains(const Sack & other) const;
+    virtual void clear();
+    virtual void setSegment(unsigned int start_par, unsigned int end_par);
+    virtual std::string str() const;
+};
+
 /**
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
@@ -84,6 +100,11 @@ class INET_API TCPSegment : public TCPSegment_Base
      * @param endSeqNo: sequence no of new last byte+1
      */
     virtual void truncateSegment(uint32 firstSeqNo, uint32 endSeqNo);
+
+    /**
+     * Calculate Length of Options Array in bytes
+     */
+    virtual unsigned short getOptionsArrayLength();
 };
 
 #endif

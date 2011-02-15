@@ -100,6 +100,7 @@ enum TCPOptionNumbers
 //
 class Sack
 {
+    @customize(true);
     unsigned int start;     // start seq no. of sack block
     unsigned int end;       // end seq no. of sack block
 }
@@ -147,7 +148,7 @@ packet TCPSegment
     unsigned int ackNo;
 
     // TCP Header Length - default: 20 bytes
-    // if header options are used the headerLength is greater then 20 bytes (default)
+    // if header options are used the headerLength is greater than 20 bytes (default)
     unsigned short headerLength = TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
 
     bool urgBit; // URG: urgent pointer field significant if set

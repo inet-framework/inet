@@ -1,3 +1,20 @@
+2011-01-31  Thomas Reschka
+
+    * although not compliant with RFC 793, page 46: restored Zoltan Bojthe's modifications
+      in isSegmentAcceptable() to accept an ACK on end of window to fix bug #160
+
+    * added rcvNASegVector ("rcvd naseg"): total number of received not acceptable segments
+
+2011-01-30  Thomas Reschka
+
+    * added check for "acceptable ack" in isSegmentAcceptable(). Based on [RFC 793, page 25].
+
+2011-01-23  Thomas Reschka
+
+    * extended condition in processSegment1stThru8th() to avoid D-SACK generation at reception of ooo segments without payload.
+
+    * added ASSERT in addSacks() to avoid generation of SACKs with equal start and end sequence number.
+
 2010-07-12  Thomas Reschka
 
     * fixed bug in retransmitData() - snd_nxt must stay at snd_una after RTO.
@@ -7,7 +24,7 @@
     * extended condition in processSegment1stThru8th() to allow calling processAckInEstabEtc() in LAST-ACK state.
       If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
       TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
-	  "LAST-ACK STATE
+      "LAST-ACK STATE
          The only thing that can arrive in this state is an
          acknowledgment of our FIN.  If our FIN is now acknowledged,
          delete the TCB, enter the CLOSED state, and return."

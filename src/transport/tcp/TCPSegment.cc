@@ -18,8 +18,39 @@
 
 #include "TCPSegment.h"
 
-Register_Class(TCPSegment);
 
+Register_Class(Sack);
+
+bool Sack::empty() const
+{
+    return (start_var == 0 && end_var == 0);
+}
+
+bool Sack::contains(const Sack & other) const
+{
+    return seqLE(start_var, other.start_var) && seqLE(other.end_var, end_var);
+}
+
+void Sack::clear()
+{
+    start_var = end_var = 0;
+}
+
+void Sack::setSegment(unsigned int start_par, unsigned int end_par)
+{
+    setStart(start_par);
+    setEnd(end_par);
+}
+
+std::string Sack::str() const
+{
+    std::stringstream out;
+
+    out << "[" << start_var << ".." << end_var << ")";
+    return out.str();
+}
+
+Register_Class(TCPSegment);
 
 TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 {
@@ -43,6 +74,17 @@ TCPSegment::~TCPSegment()
 
 void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
 {
+    ASSERT(payloadLength_var > 0);
+
+    // must have common part:
+#ifndef NDEBUG
+    if (!(seqLess(sequenceNo_var, endSeqNo) && seqLess(firstSeqNo, sequenceNo_var + payloadLength_var)))
+    {
+        opp_error("truncateSegment(%u,%u) called on [%u, %u) segment\n",
+                firstSeqNo, endSeqNo, sequenceNo_var, sequenceNo_var + payloadLength_var);
+    }
+#endif
+
     if(seqLess(sequenceNo_var, firstSeqNo))
     {
         unsigned int truncleft = firstSeqNo - sequenceNo_var;
@@ -137,3 +179,12 @@ cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
     return msg;
 }
 
+unsigned short TCPSegment::getOptionsArrayLength()
+{
+    unsigned short usedLength = 0;
+
+    for (uint i=0; i < getOptionsArraySize(); i++)
+        usedLength += getOptions(i).getLength();
+
+    return usedLength;
+}

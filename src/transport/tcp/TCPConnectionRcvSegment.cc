@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2009-2011 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -125,7 +125,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         if (state->ts_enabled)
         {
             uint32 tsval = getTSval(tcpseg);
-            // FIXME check TS rounding on all other code
             if (tsval != 0 && seqLess(tsval, state->ts_recent) &&
                     (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
             {
@@ -159,7 +158,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             {
                 tcpEV << "SYN with unacceptable seqNum in " <<  stateName(fsm.getState()) << " state received (SYN duplicat?)\n";
             }
-            else if (state->sack_enabled && seqLess((tcpseg->getSequenceNo()+tcpseg->getPayloadLength()), state->rcv_nxt))
+            else if (tcpseg->getPayloadLength() > 0 && state->sack_enabled && seqLess((tcpseg->getSequenceNo() + tcpseg->getPayloadLength()), state->rcv_nxt))
             {
                 state->start_seqno = tcpseg->getSequenceNo();
                 state->end_seqno = tcpseg->getSequenceNo() + tcpseg->getPayloadLength();
@@ -176,6 +175,12 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             // The received segment is not "valid" therefore the ACK will not bear a SACK option, if snd_dsack (D-SACK) is not set.
             sendAck();
         }
+
+        state->rcv_naseg++;
+
+        if (rcvNASegVector)
+            rcvNASegVector->record(state->rcv_naseg);
+
         return TCP_E_IGNORE;
     }
 
@@ -462,8 +467,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // transmitted if possible without incurring undue delay.
         //"
 
-        tcpseg->truncateSegment(state->rcv_nxt, state->rcv_nxt + state->rcv_wnd);
-
         if (tcpseg->getPayloadLength()>0)
         {
             // check for full sized segment
@@ -473,10 +476,14 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             if (tcpseg->getPayloadLength() == 1)
                 state->ack_now = true;    // TODO how to check if it is really a persist probe?
 
+            tcpseg->truncateSegment(state->rcv_nxt, state->rcv_nxt + state->rcv_wnd);
+
             updateRcvQueueVars();
+
             if (state->freeRcvBuffer >= tcpseg->getPayloadLength()) // enough freeRcvBuffer in rcvQueue for new segment?
             {
                 tcpEV2 << "Processing segment text in a data transfer state\n";
+				
 
                 // insert into receive buffers. If this segment is contiguous with
                 // previously received ones (seqNo==rcv_nxt), rcv_nxt can be increased;

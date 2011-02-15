@@ -127,7 +127,14 @@ enum TCPEventCode
 
 #define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
 
+#define TCP_OPTIONS_MAX_SIZE      40    // bytes, 15*4 bytes (15 is the largest number in 4 bits length data offset field)
+#define TCP_OPTION_SACK_MIN_SIZE  10
 #define TCP_OPTION_TS_SIZE  12
+
+#ifndef SACKS_AS_C_ARRAY
+    typedef std::list<Sack> SackList;
+#endif
+
 /**
  * Contains state variables ("TCB") for TCP.
  *
@@ -233,7 +240,11 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 end_seqno;        // end sequence number of last received out-of-order segment
     bool snd_sack;           // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack;          // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
+#ifdef SACKS_AS_C_ARRAY
     Sack sacks_array[MAX_SACK_BLOCKS]; // MAX_SACK_BLOCKS is set to 60
+#else
+    SackList sacks_array; // MAX_SACK_BLOCKS is set to 60
+#endif
     uint32 highRxt;          // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
     uint32 pipe;             // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
     uint32 recoveryPoint;    // RFC 3517
@@ -246,6 +257,7 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 snd_sacks;        // number of sent sacks
     uint32 rcv_sacks;        // number of received sacks
     uint32 rcv_oooseg;       // number of received out-of-order segments
+    uint32 rcv_naseg;        // number of received not acceptable segments
 
     // receiver buffer / receiver queue related variables
     uint32 maxRcvBuffer;     // maximal amount of bytes in tcp receive queue
@@ -358,6 +370,7 @@ class INET_API TCPConnection
     cOutVector *sndSacksVector;  // number of sent Sacks
     cOutVector *rcvSacksVector;  // number of received Sacks
     cOutVector *rcvOooSegVector; // number of received out-of-order segments
+    cOutVector *rcvNASegVector;  // number of received not acceptable segments
 
     cOutVector *sackedBytesVector;        // current number of received sacked bytes
     cOutVector *tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
@@ -433,7 +446,7 @@ class INET_API TCPConnection
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(TCPSegment *tcpseg);
+    virtual bool isSegmentAcceptable(TCPSegment *tcpseg) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -451,10 +464,10 @@ class INET_API TCPConnection
     virtual TCPSegment addSacks(TCPSegment *tcpseg);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(TCPSegment *tcpseg);
+    virtual uint32 getTSval(TCPSegment *tcpseg) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(TCPSegment *tcpseg);
+    virtual uint32 getTSecr(TCPSegment *tcpseg) const;
   public:
     /** Utility: send ACK */
     virtual void sendAck();
@@ -528,7 +541,7 @@ class INET_API TCPConnection
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */
-    virtual void printConnBrief();
+    virtual void printConnBrief() const;
     /** Utility: prints important header fields */
     static void printSegmentBrief(TCPSegment *tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
@@ -633,7 +646,7 @@ class INET_API TCPConnection
      * sequence number range of the next segment that is to be
      * transmitted..."
      */
-    virtual uint32 nextSeg();
+    virtual bool nextSeg(uint32 &seqNum);
 
     /**
      * Utility: send data during Loss Recovery phase (if SACK is enabled).
@@ -653,12 +666,12 @@ class INET_API TCPConnection
     /**
      * Utility: converts a given simtime to a timestamp (TS).
      */
-    virtual uint32 convertSimtimeToTS(simtime_t simtime);
+    static uint32 convertSimtimeToTS(simtime_t simtime);
 
     /**
      * Utility: converts a given timestamp (TS) to a simtime.
      */
-    virtual simtime_t convertTSToSimtime(uint32 timestamp);
+    static simtime_t convertTSToSimtime(uint32 timestamp);
 
     /**
      * Utility: checks if send queue is empty (no data to send).

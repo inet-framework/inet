@@ -206,12 +206,10 @@ uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
     RegionList::iterator i = regionList.begin();
     while (i!=regionList.end())
     {
-        if (seqLE(i->begin, fromSeqNum) && seqLE(fromSeqNum, i->end))
+        if (seqLE(i->begin, fromSeqNum) && seqLess(fromSeqNum, i->end))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
-            if (seqLess(i->begin, fromSeqNum))
-                return i->begin;
-            return fromSeqNum;
+            return i->begin;
         }
         i++;
     }
@@ -223,12 +221,10 @@ uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
     RegionList::iterator i = regionList.begin();
     while (i!=regionList.end())
     {
-        if (seqLE(i->begin, toSeqNum) && seqLE(toSeqNum, i->end))
+        if (seqLess(i->begin, toSeqNum) && seqLE(toSeqNum, i->end))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
-            if (seqLess(toSeqNum, i->end))
-                return i->end;
-            return toSeqNum;
+            return i->end;
         }
         i++;
     }
