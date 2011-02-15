@@ -49,15 +49,42 @@ module SubTest
         }
 }
 
-network TcpSpeedTest
+module STest
 {
     parameters:
-        int n = 3; // number of available tcpType-s: TCP,TCP_NSC,TCP_lwip
+        string srvTcpType = default("n/a");
     submodules:
-        subTests[n*n]: SubTest {
+        clients_INET: SubTest {
             parameters:
-                srvTcpType = choose((index % n),    "TCP TCP_NSC TCP_lwip");
-                cliTcpType = choose(int(index / n), "TCP TCP_NSC TCP_lwip");
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP";
+        }
+        clients_NSC: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_NSC";
+        }
+        clients_LWIP: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_lwip";
+        }
+}
+
+network TcpSpeedTest
+{
+    submodules:
+        server_INET: STest {
+            parameters:
+                srvTcpType = "TCP";
+        }
+        server_NSC: STest {
+            parameters:
+                srvTcpType = "TCP_NSC";
+        }
+        server_LWIP: STest {
+            parameters:
+                srvTcpType = "TCP_lwip";
         }
         configurator: FlatNetworkConfigurator {
             @display("p=70,40");
@@ -75,8 +102,8 @@ tkenv-plugin-path = ../../../etc/plugins
 #record-eventlog = true
 **.vector-recording = false
 
-#sim-time-limit = 2s+60s
-sim-time-limit = 2s+60s+12s
+sim-time-limit = 2s+60s
+#sim-time-limit = 2s+60s+12s
 
 #client app:
 **.client*.tcpApp[0].active = true
@@ -97,8 +124,8 @@ sim-time-limit = 2s+60s+12s
 
 # NIC configuration
 **.ppp[*].queueType = "DropTailQueue" # in routers
-#**.ppp[*].queue.frameCapacity = 10
-**.ppp[*].queue.frameCapacity = 100  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
+**.ppp[*].queue.frameCapacity = 10
+#**.ppp[*].queue.frameCapacity = 100  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
 
 *.configurator.networkAddress = "192.168.1.0"
 

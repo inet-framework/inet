@@ -38,23 +38,51 @@ module SubTest
                 tcpApp[0].connectAddress = replace(fullPath(),".client.tcpApp[0]",".server");
         }
     connections:
-        client.pppg++ <--> C <--> server.pppg++;
+        server.pppg++ <--> C <--> client.pppg++;
+}
+
+module STest
+{
+    parameters:
+        string srvTcpType = default("n/a");
+    submodules:
+        clients_INET: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP";
+        }
+        clients_NSC: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_NSC";
+        }
+        clients_LWIP: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_lwip";
+        }
 }
 
 network TcpSpeedTest
 {
-    parameters:
-        int n = 3; // number of available tcpType-s: TCP TCP_NSC TCP_lwip
     submodules:
-        subTests[n*n]: SubTest {
+        server_INET: STest {
             parameters:
-                srvTcpType = choose((index % n),    "TCP TCP_NSC TCP_lwip");
-                cliTcpType = choose(int(index / n), "TCP TCP_NSC TCP_lwip");
+                srvTcpType = "TCP";
+        }
+        server_NSC: STest {
+            parameters:
+                srvTcpType = "TCP_NSC";
+        }
+        server_LWIP: STest {
+            parameters:
+                srvTcpType = "TCP_lwip";
         }
         configurator: FlatNetworkConfigurator {
             @display("p=70,40");
         }
 }
+
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
