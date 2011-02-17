@@ -151,9 +151,6 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     cMessage *pNsiTimerM;
 
-    void decode_tcpip(const void *, int);
-    void decode_tcp(const void *, int);
-
   public:
     static bool testingS;    // switches between tcpEV and testingEV
     static bool logverboseS; // if !testingS, turns on more verbose logging

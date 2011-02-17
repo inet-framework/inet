@@ -233,102 +233,6 @@ IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 }
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
-void TCP_NSC::decode_tcp(const void *packet_data, int hdr_len)
-{
-    struct tcphdr const *tcp = (struct tcphdr const*)packet_data;
-    char buf[4096];
-
-    sprintf(buf, "Src port:%hu Dst port:%hu Seq:%u Ack:%u Off:%hhu %s\n",
-            ntohs(tcp->th_sport), ntohs(tcp->th_dport), ntohl(tcp->th_seq),
-            ntohl(tcp->th_ack), (unsigned char)tcp->th_offs,
-            flags2str(tcp->th_flags)
-          );
-    tcpEV << this << ": " << buf;
-    sprintf(buf, "Win:%hu Sum:%hu Urg:%hu\n",
-            ntohs(tcp->th_win), ntohs(tcp->th_sum), ntohs(tcp->th_urp));
-    tcpEV << this << ": " << buf;
-
-    if(hdr_len > 20)
-    {
-        unsigned char const *opt = (unsigned char const*)packet_data + sizeof(struct tcphdr);
-
-        tcpEV << this << ": " << ("Options: ");
-        while(
-                (*opt != 0) &&
-                ((unsigned int)opt < (unsigned int)packet_data + tcp->th_offs*4)
-             )
-        {
-            unsigned char len = opt[1];
-            if(len == 0 && opt[0] != 1)
-            {
-                sprintf(buf, "0-length option(%u)\n", opt[0]);
-                tcpEV << this << ": " << buf;
-                break;
-            }
-
-            len -= 2;
-
-            switch(*opt)
-            {
-                case 1: tcpEV << ("No-Op "); opt++; break;
-                case 2: {       unsigned short mss = 0;
-                            //assert(len == 2);
-                            if(len == 2) {
-                                mss = (opt[2] << 8) + (opt[3]);
-                                sprintf(buf, "MSS(%u) ", mss);
-                                tcpEV << buf;
-                            } else {
-                                sprintf(buf, "MSS:l:%u ", len);
-                                tcpEV << buf;
-                            }
-                            opt += opt[1];
-                            break;
-                        }
-                case 3: {
-                            unsigned char ws = 0;
-                            ASSERT(len == 1);
-                            ws = opt[2];
-                            sprintf(buf, "WS(%u) ", ws);
-                            tcpEV << buf;
-                            opt += opt[1];
-                            break;
-                        }
-                case 4: {
-                            sprintf(buf, "SACK-Permitted ");
-                            tcpEV << buf;
-                            opt += opt[1];
-                            break;
-                        }
-                case 5: {
-                            tcpEV << ("SACK ");
-                            opt += opt[1];
-                            break;
-                        }
-                case 8: {
-                            int i;
-                            tcpEV << ("Timestamp(");
-                            for(i = 0; i < len; i++) {
-                                sprintf(buf, "%02x", opt[2+i]);
-                                tcpEV << buf;
-                            }
-                            tcpEV << (") ");
-                            opt += opt[1];
-                            break;
-                        }
-                default:{
-                            sprintf(buf, "%u:%u ", opt[0], opt[1]);
-                            tcpEV << buf;
-                            opt += opt[1];
-                            break;
-                        }
-            };
-
-        }
-        tcpEV << ("\n");
-    }
-
-}
-
 void TCP_NSC::initialize()
 {
     tcpEV << this << ": initialize\n";
@@ -520,8 +424,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     ih->tot_len = htons(totalIpLen);
     ih->check = 0;
     ih->check = TCPIPchecksum::checksum(ih, ipHdrLen);
-
-    decode_tcp( (void *)tcph, totalTcpLen);
 
     // receive msg from network
 
