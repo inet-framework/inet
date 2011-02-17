@@ -639,8 +639,12 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         }
     }
 
-    uint n = std::min (std::min (state->sacks_array.size(), MAX_SACK_ENTRIES),
-            (((TCP_OPTIONS_MAX_SIZE - used_options_len) - 2) / 8));    // 2: option header, 8: size of one sack entry
+    uint n = state->sacks_array.size();
+
+    uint maxnode = ((TCP_OPTIONS_MAX_SIZE - used_options_len) - 2) / 8;    // 2: option header, 8: size of one sack entry
+
+    if (n > maxnode)
+    	n = maxnode;
 
     if (n == 0)
     {
