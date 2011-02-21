@@ -52,16 +52,15 @@ void ByteArrayBuffer::push(const void* bufferP, unsigned int bufferLengthP)
 unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP, unsigned int srcOffsP) const
 {
     unsigned int copiedBytes = 0;
-    unsigned int bytes = bufferLengthP;
-
     DataList::const_iterator i;
-    for(i=this->dataListM.begin(); (0 < bytes) && (i != dataListM.end()); ++i)
+
+    for(i = this->dataListM.begin(); (copiedBytes < bufferLengthP) && (i != dataListM.end()); ++i)
     {
-        unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes, bytes, srcOffsP);
+        unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes,
+                bufferLengthP - copiedBytes, srcOffsP);
         if (cbytes)
         {
             copiedBytes += cbytes;
-            bytes -= cbytes;
             srcOffsP = 0;
         }
         else
@@ -82,9 +81,11 @@ unsigned int ByteArrayBuffer::drop(unsigned int lengthP)
     ASSERT(lengthP <= dataLengthM);
 
     unsigned int length = lengthP;
+
     while (length > 0)
     {
         unsigned int sliceLength = dataListM.front().getDataArraySize();
+
         if (sliceLength <= length)
         {
             dataListM.pop_front();
@@ -105,8 +106,10 @@ unsigned int ByteArrayBuffer::drop(unsigned int lengthP)
 void ByteArrayBuffer::clear()
 {
     dataLengthM = 0;
+
     while (dataListM.begin() != dataListM.end())
     {
         dataListM.pop_front();
     }
 }
+
