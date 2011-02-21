@@ -11,10 +11,10 @@ Supported software:
 
   $ tar xvfj nsc-0.5.2.tar.bz2
 
-  When you use it on a 64 bit system, you must use the 'nsc-0.5.2-amd64.patch'.
+  When you use it on a 64 bit system, you must use the 'patch_for_nsc-0.5.2-amd64.txt'.
   The NSC works with this patch on 32 bit system, too.
 
-  $ patch -p 1 <nsc-0.5.2-amd64.patch
+  $ patch -p 1 <patch_for_nsc-0.5.2-amd64.txt
 
   Build the 'nsc-0.5.2'.
 
