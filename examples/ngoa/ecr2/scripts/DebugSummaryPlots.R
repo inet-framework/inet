@@ -53,7 +53,8 @@ for (.i in 1:7) {
     else {
         .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
         .p <- ggplot(data=.df, aes(group=n, colour=factor(n), x=dr, y=mean)) + geom_line()
-        .p <- .p + xlab("Line Rate [Gbps]") + ylab(.labels.measure[.i])
+        ## .p <- .p + xlab("Line Rate [Gbps]") + ylab(.labels.measure[.i])
+        .p <- .p + xlab("Line Rate [Mbps]") + ylab(.labels.measure[.i])
         ## .p <- .p + geom_point(aes(group=n, colour=factor(n), x=dr, y=mean), size=.pt_size)
         .p <- .p + geom_point(aes(group=n, shape=factor(n), x=dr, y=mean), size=.pt_size) + scale_shape_manual("n", values=0:9)
         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("n")
@@ -61,20 +62,26 @@ for (.i in 1:7) {
     }
 }
 
-## ### generate summary plots for dedicated access with Debug_4 configuration
-## .debug_4.data <- paste(.debug.wd, paste(.debug_4.base, "data", sep="."), sep="/")
-## .df <- read.csv(.debug_4.data, header=TRUE)
-## .df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$rtt, .df$repetition), ] # order data frame
-## .debug_4.df <- ddply(.df, c(.(n), .(dr)), function(df) {return(GetMeansAndCiWidths(df))})
-## .debug_4.plots <- list()
-## for (.i in 1:7) {
-##     .df <- subset(.debug_4.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
-##     names(.df)[3:4] <- c("mean", "ci.width")
-##     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##     .p <- ggplot(data=.df, aes(group=n, colour=factor(n), x=dr, y=mean)) + geom_line()
-##     .p <- .p + xlab("Line Rate [Gbps]") + ylab(.labels.measure[.i])
-##     ## .p <- .p + geom_point(aes(group=n, colour=factor(n), x=dr, y=mean), size=.pt_size)
-##     .p <- .p + geom_point(aes(group=n, shape=factor(n), x=dr, y=mean), size=.pt_size) + scale_shape_manual("n", values=0:9)
-##     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("n")
-##     .debug_4.plots[[.i]] <- .p
-## }
+### generate summary plots for dedicated access with Debug_4 configuration
+.debug_4.data <- paste(.debug.wd, paste(.debug_4.base, "data", sep="."), sep="/")
+.df <- read.csv(.debug_4.data, header=TRUE)
+.df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.debug_4.df <- ddply(.df, c(.(n), .(dr)), function(df) {return(GetMeansAndCiWidths(df))})
+.debug_4.plots <- list()
+for (.i in 1:7) {
+    .df <- subset(.debug_4.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+    names(.df)[3:4] <- c("mean", "ci.width")
+    if (prod(is.na(.df$mean)) == 1) {
+        ## all values are missing
+        .debug_4.plots[[.i]] <- FALSE
+    }
+    else {
+        .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+        .p <- ggplot(data=.df, aes(group=n, colour=factor(n), x=dr, y=mean)) + geom_line()
+        .p <- .p + xlab("Line Rate [Mbps]") + ylab(.labels.measure[.i])
+        ## .p <- .p + geom_point(aes(group=n, colour=factor(n), x=dr, y=mean), size=.pt_size)
+        .p <- .p + geom_point(aes(group=n, shape=factor(n), x=dr, y=mean), size=.pt_size) + scale_shape_manual("n", values=0:9)
+        .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("n")
+        .debug_4.plots[[.i]] <- .p
+    }
+}
