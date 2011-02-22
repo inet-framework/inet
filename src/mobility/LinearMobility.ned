@@ -23,7 +23,7 @@ package inet.mobility;
 // Angle only changes when the mobile node hits a wall: then it reflects
 // off the wall at the same angle.
 //
-// @see ChannelControl
+// @see ~ChannelControl
 // @author Emin Ilker Cetinbas
 //
 simple LinearMobility like BasicMobility

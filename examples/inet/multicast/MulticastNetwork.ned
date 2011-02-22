@@ -137,7 +137,7 @@ network MulticastNetwork
         host5.pppg[0] <--> dialup <--> router4.pppg[0];
         host6.pppg[0] <--> dialup <--> router4.pppg[1];
 
-        // * Router Connections * (172.1.0.x)
+        // * ~Router Connections * (172.1.0.x)
         router2.pppg[0] <--> fiberrouter <--> router1.pppg[3];
         router2.pppg[1] <--> fiberrouter <--> router3.pppg[1];
         router2.pppg[2] <--> fiberrouter <--> router4.pppg[2];

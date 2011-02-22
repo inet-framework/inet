@@ -25,7 +25,7 @@ cplusplus {{
 
 
 //
-// Not the real ICMP codes; here it's set up so that codes above 128 are
+// Not the real ~ICMP codes; here it's set up so that codes above 128 are
 // informational
 //
 enum ICMPType
@@ -72,9 +72,9 @@ enum ICMPDestinationUnreachableCodes
 }}
 
 //
-// ICMP message class
+// ~ICMP message class
 //
-// Note: receiver MUST NOT decapsulate the datagram from ICMP error messages,
+// Note: receiver MUST NOT decapsulate the datagram from ~ICMP error messages,
 // because their contents is conceptually truncated. decapsulate() would result
 // in a "length became negative" error; use getEncapsulatedMsg() instead.
 //

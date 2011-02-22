@@ -29,7 +29,7 @@ class noncobject IPAddress;
 
 //
 // This enumeration is a list of all possibly types of
-// an RTPInnerPacket.
+// an ~RTPInnerPacket.
 //
 enum RTP_INP_TYPE
 {
@@ -59,42 +59,42 @@ packet RTPInnerPacket
 {
     @customize(true);  // see the generated C++ header for more info
 
-    // The type of this RTPInnerPacket.
+    // The type of this ~RTPInnerPacket.
     short type enum(RTP_INP_TYPE) = RTP_INP_UNDEF;
 
-    // The CNAME stored in this RTPInnerPacket.
+    // The CNAME stored in this ~RTPInnerPacket.
     string commonName;
 
-    // The mtu stored in this RTPInnerPacket.
+    // The mtu stored in this ~RTPInnerPacket.
     int mtu;
 
-    // The bandwidth stored in this RTPInnerPacket.
+    // The bandwidth stored in this ~RTPInnerPacket.
     int bandwidth;
 
-    // The rtcp percentage stored in this RTPInnerPacket.
+    // The rtcp percentage stored in this ~RTPInnerPacket.
     int rtcpPercentage;
 
-    // The address stored this RTPInnerPacket.
+    // The address stored this ~RTPInnerPacket.
     IPAddress address = IPAddress::UNSPECIFIED_ADDRESS;
 
-    // The port stored this RTPInnerPacket.
+    // The port stored this ~RTPInnerPacket.
     int port = PORT_UNDEF;
 
-    // The ssrc identifier stored in this RTPInnerPacket.
+    // The ssrc identifier stored in this ~RTPInnerPacket.
     uint32 ssrc;
 
-    // The payload type stored in this RTPInnerPacket.
+    // The payload type stored in this ~RTPInnerPacket.
     int payloadType;
 
-    // The file name stored in this RTPInnerPacket.
+    // The file name stored in this ~RTPInnerPacket.
     string fileName;
 
-    // The clock rate stored in this RTPInnerPacket.
+    // The clock rate stored in this ~RTPInnerPacket.
     int clockRate;
 
-    // The rtp time stamp base stored in this RTPInnerPacket.
+    // The rtp time stamp base stored in this ~RTPInnerPacket.
     int timeStampBase;
 
-    // The rtp sequence number base stored in this RTPInnerPacket.
+    // The rtp sequence number base stored in this ~RTPInnerPacket.
     int sequenceNumberBase;
 };

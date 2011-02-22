@@ -20,7 +20,7 @@ package inet.linklayer.ethernet;
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
-// Doesn't do encapsulation/decapsulation; see EtherLLC and EtherEncap for
+// Doesn't do encapsulation/decapsulation; see ~EtherLLC and ~EtherEncap for
 // that.
 //
 // Supported variations:
@@ -28,14 +28,14 @@ package inet.linklayer.ethernet;
 // - 100Mb Ethernet duplex or half-duplex
 // - 1Gb Ethernet
 //
-// Supports all three Ethernet frame types. (It handles EtherFrame message class;
+// Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
 // RAW mode (only used by the IPX protocol) is not supported.
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to EtherLLC (in hosts)
-//   or MACRelayUnitPP (in a switch)
+// - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
+//   or ~MACRelayUnitPP (in a switch)
 //
 // <b>Operation</b>
 //
@@ -55,9 +55,9 @@ package inet.linklayer.ethernet;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (EtherLLC or EtherEncap).
+// this is done by higher layers (~EtherLLC or ~EtherEncap).
 //
-// When a frame is received from the higher layers, it must be an EtherFrame,
+// When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
 // (including the destination MAC address). The source address, if left empty,
 // will be filled in. Then frame is queued and transmitted according
@@ -72,7 +72,7 @@ package inet.linklayer.ethernet;
 // <b>Autoconfiguration</b>
 //
 // A very short period at the beginning of the simulation is spent on
-// all EtherMAC's exchanging autoconfiguration messages, during which
+// all ~EtherMAC's exchanging autoconfiguration messages, during which
 // the selection of transmission rate and full duplex/half duplex mode
 // takes place.
 //
@@ -88,7 +88,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see OutputQueue)
+// In routers, MAC relies on an external queue module (see ~OutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -124,8 +124,8 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EtherMACFullDuplex, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
-// @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
+// @see ~EtherMACFullDuplex, ~EthernetInterface, ~OutputQueue, ~EtherEncap, ~EtherLLC
+// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
 simple EtherMAC like IEtherMAC
 {
@@ -157,7 +157,7 @@ simple EtherMAC like IEtherMAC
         @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error";record=sum,count,vector);
         @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";record=sum,count,vector);
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }

@@ -21,14 +21,14 @@ package inet.util;
 
 //
 // When placed inside a host or router, it writes a NAM trace, based on
-// notifications it receives via the NotificationBoard. It expects to find
-// a NAMTrace module named "nam" at network level. If the "nam" module
+// notifications it receives via the ~NotificationBoard. It expects to find
+// a ~NAMTrace module named "nam" at network level. If the "nam" module
 // is missing, this module does not do anything and has no runtime
 // overhead.
 //
 // This module has no gates and does not process messages.
 //
-// @see NAMTrace, NotificationBoard
+// @see ~NAMTrace, ~NotificationBoard
 //
 simple NAMTraceWriter
 {

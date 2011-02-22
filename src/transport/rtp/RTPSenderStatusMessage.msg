@@ -22,7 +22,7 @@ cplusplus {{
 }}
 
 //
-// Messages of type RTPSenderStatusMessage are used to send information
+// Messages of type ~RTPSenderStatusMessage are used to send information
 // from an rtp sender module to the application. Within this class a status
 // string is defined in which the information is stored. This can be "PLAYING",
 // "STOPPED" or "FINISHED".

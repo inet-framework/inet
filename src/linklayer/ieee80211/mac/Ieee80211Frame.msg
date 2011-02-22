@@ -21,7 +21,7 @@
 cplusplus {{
 #include "Ieee80211Consts.h"
 #include "MACAddress.h"
-#include "Ieee802Ctrl_m.h" // for EtherType
+#include "Ieee802Ctrl_m.h" // for ~EtherType
 }}
 
 enum EtherType;
@@ -143,7 +143,7 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 }
 
 //
-// 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte EtherType>)
+// 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte ~EtherType>)
 //
 packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {

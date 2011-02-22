@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        SnrControlInfo.msg
+// * file:        ~SnrControlInfo.msg
 // *
 // * author:      Marc Loebbers
 // *
@@ -31,7 +31,7 @@ class noncobject SnrList;
 //
 // This class is used by the snrEval to send SNR information
 // to the decider. After recieving a packet from the channel the
-// snrEval calculates SNR information, writes this into the SnrControlInfo
+// snrEval calculates SNR information, writes this into the ~SnrControlInfo
 // and attaches the ControlInfo to the Airframe.
 //
 // This control info can be used for complex information,
@@ -55,17 +55,17 @@ class noncobject SnrList;
 //
 // When the list is complete and you want to send the message, you
 // have to give the list to the control info  before attaching it to
-// the AirFrame.
+// the ~AirFrame.
 //
-// SnrControlInfo* cInfo = new SnrControlInfo;<br>
+// ~SnrControlInfo* cInfo = new ~SnrControlInfo;<br>
 // cInfo->setSnrList( listName );<br>
 // msg->setControlInfo( cInfo );
 //
-// When receiving an AirFrame (in the deceider module) you probably want to
+// When receiving an ~AirFrame (in the deceider module) you probably want to
 // read the list. Therefore you have to get a copy of that list:
 //
-// SnrControlInfo* cInfo = new SnrControlInfo;<br>
-// cInfo = static_cast<SnrControlInfo*>(msg->removeControlInfo());<br>
+// ~SnrControlInfo* cInfo = new ~SnrControlInfo;<br>
+// cInfo = static_cast<~SnrControlInfo*>(msg->removeControlInfo());<br>
 // SnrList receivedList* = new SnrList;<br>
 // receivedList = cInfo->getSnrList();<br>
 // delete cInfo;

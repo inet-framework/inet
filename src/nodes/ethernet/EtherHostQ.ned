@@ -30,12 +30,12 @@ import inet.applications.ethernet.EtherAppCli;
 //
 // An example host with one Ethernet port and traffic generators that
 // generate Ethernet traffic directly. This host model does not contain
-// higher layer protocols (\IP, \TCP).
+// higher layer protocols (IP, TCP).
 //
 module EtherHostQ
 {
     parameters:
-        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
+        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("DropTailQueue");
         @node();
         @labels(node,ethernet-node);

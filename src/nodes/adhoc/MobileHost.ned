@@ -33,11 +33,11 @@ import inet.transport.udp.UDP;
 
 //
 // Models a mobile host with a wireless (802.11b) card in ad-hoc mode.
-// This model contains the new IEEE 802.11 implementation, Ieee80211Nic,
-// and IP, TCP and UDP protocols. The mobility model can be
+// This model contains the new IEEE 802.11 implementation, ~Ieee80211Nic,
+// and ~IP, ~TCP and ~UDP protocols. The mobility model can be
 // dynamically specified with the mobilityType parameter.
 //
-// @see MFMobileHost, WirelessHost
+// @see ~MFMobileHost, ~WirelessHost
 //
 module MobileHost
 {

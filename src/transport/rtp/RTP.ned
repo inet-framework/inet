@@ -1,50 +1,50 @@
 package inet.transport.rtp;
 
 //
-// The \RTP module is the center of the \RTP layer of an endsystem.
-// It communicates with the application, and sends and receives \RTP data
+// The RTP module is the center of the RTP layer of an endsystem.
+// It communicates with the application, and sends and receives RTP data
 // packets.
 //
 // Much of the work is done by dynamically created Profile, and Payload
 // Sender and Receiver modules (the latter two are created by Profile).
 //
-// See RTPProfile, RTPAVProfile
+// See ~RTPProfile, ~RTPAVProfile
 //
 // TODO Translate:
-// Az RTP az appIn gate-en a következő üzeneteket fogadja az application-tól:
-// olyan msg-t, ami RTPControlInfo leszármazott controlinfo-t tartalmaz.
-//   - RTPCIEnterSession: Enter new session
-//         Create and initialize an RTPProfile module for the session.
+// Az ~RTP az appIn gate-en a következő üzeneteket fogadja az application-tól:
+// olyan msg-t, ami ~RTPControlInfo leszármazott controlinfo-t tartalmaz.
+//   - ~RTPCIEnterSession: Enter new session
+//         Create and initialize an ~RTPProfile module for the session.
 //         params: profileName, commonName, bandwidth, destinationAddress, port
-//   - RTPCICreateSenderModule:
+//   - ~RTPCICreateSenderModule:
 //         Küld a profile-nak egy msg-t, hogy hozzon létre új modult a fileName fájl küldésére.
 //         params: ssrc, payloadType, fileName
-//   - RTPCIDeleteSenderModule:
+//   - ~RTPCIDeleteSenderModule:
 //         Küld a profile-nak egy msg-t, hogy törölje a küldő modult.
 //         params: ssrc
-//   - RTPCISenderControl:
+//   - ~RTPCISenderControl:
 //         Küld a profile-nak egy msg-t, hogy a modul hajtsa végre a <command> parancsot.
-//         params: ssrc, command (see RTPSenderControlMessageCommands), parameter1, parameter2
-//   - RTPCILeaveSession: Leave session
-//         Delete RTPProfile module.
+//         params: ssrc, command (see ~RTPSenderControlMessageCommands), parameter1, parameter2
+//   - ~RTPCILeaveSession: Leave session
+//         Delete ~RTPProfile module.
 //         params: ---
 //   - 
-// Az RTP az appOut gate-en a következő üzeneteket küldi az application-nek:
-// Olyan RTPControlMsg msg-t, ami RTPControlInfo leszármazottat tartalmaz:
-//   - RTPCISenderModuleCreated:
+// Az ~RTP az appOut gate-en a következő üzeneteket küldi az application-nek:
+// Olyan ~RTPControlMsg msg-t, ami ~RTPControlInfo leszármazottat tartalmaz:
+//   - ~RTPCISenderModuleCreated:
 //         Elküldi az App részére a létrehozott modulhoz tartozó ssrc-t
 //         params: ssrc
-//   - RTPCISenderModuleDeleted:
+//   - ~RTPCISenderModuleDeleted:
 //         Értesíti az App-ot, hogy a modul törölve lett.
 //         params: ssrc
-//   - RTPCISenderStatus:
+//   - ~RTPCISenderStatus:
 //         Elküldi az App részére a modul állapotát. (PLAYING, FINISHED, STOPPED, PAUSED)
-//         params: ssrc, status (see RTPSenderStatus), timeStamp
-//   - RTPCISessionEntered:
-//         Értesíti az App-ot, hogy létrehozott egy új session-t (RTPProfile-t).
+//         params: ssrc, status (see ~RTPSenderStatus), timeStamp
+//   - ~RTPCISessionEntered:
+//         Értesíti az App-ot, hogy létrehozott egy új session-t (~RTPProfile-t).
 //         params: ssrc
-//   - RTPCISessionLeft:
-//         Értesíti az App-ot, hogy véget lett a session-nek és törölte az RTPProfile-t.
+//   - ~RTPCISessionLeft:
+//         Értesíti az App-ot, hogy véget lett a session-nek és törölte az ~RTPProfile-t.
 //         params: ---
 
 simple RTP

@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ConstSpeedMobility.cc
+// * file:        ~ConstSpeedMobility.cc
 // *
 // * author:      Steffen Sroka
 // *
@@ -23,19 +23,19 @@ package inet.mobility;
 //
 // Controls all movement related things of a host
 //
-// ConstSpeedMobility does not use one of the standard mobility approaches.
+// ~ConstSpeedMobility does not use one of the standard mobility approaches.
 // The user can define a velocity for each Host and an update interval. If
 // the velocity is greater than zero (i.e. the Host is not stationary) the
-// ConstSpeedMobility module calculates a random target position for the Host.
+// ~ConstSpeedMobility module calculates a random target position for the Host.
 // Depending to the update interval and the velocity it calculates the number of
 // steps to reach the destination and the step-size. Every update interval
-// ConstSpeedMobility calculates the new position on its way to the target
+// ~ConstSpeedMobility calculates the new position on its way to the target
 // position and updates the display. Once the target position is reached
-// ConstSpeedMobility calculates a new target position.
+// ~ConstSpeedMobility calculates a new target position.
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see ChannelControl
+// @see ~ChannelControl
 // @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
 //
 simple ConstSpeedMobility like BasicMobility

@@ -21,10 +21,10 @@ cplusplus {{
 #include <iostream>
 #include "INETDefs.h"
 
-    // default TCP header length: 20 bytes
+    // default ~TCP header length: 20 bytes
     #define TCP_HEADER_OCTETS  20    // without options
 
-    // maximum TCP header length (base+options): 60 = 4 * 15 bytes
+    // maximum ~TCP header length (base+options): 60 = 4 * 15 bytes
     const unsigned int TCP_MAX_HEADER_OCTETS = 60;
 
     // maximum allowed sack entry number, if no other options are used
@@ -52,7 +52,7 @@ struct TCPPayloadMessage
 }
 
 //
-// TCP Option Numbers
+// ~TCP Option Numbers
 // Reference: http://www.iana.org/assignments/tcp-parameters/
 // Date: 2010-07-04
 //
@@ -114,9 +114,9 @@ class TCPOption
 }
 
 //
-// Represents a \TCP segment, to be used with the TCP module.
+// Represents a TCP segment, to be used with the ~TCP module.
 //
-// \TCP header fields not explicitly modelled: work on going
+// TCP header fields not explicitly modelled: work on going
 // - Data Offset (number of 32 bit words in the header): represented
 //   by cMessage::length().
 // - Reserved (reserved for future use)
@@ -124,7 +124,7 @@ class TCPOption
 // - Header Options: Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
 // - Padding
 //
-// cMessage::getKind() may be set to an arbitrary value: TCP entities will
+// cMessage::getKind() may be set to an arbitrary value: ~TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
 packet TCPSegment
@@ -147,7 +147,7 @@ packet TCPSegment
     // to receive
     unsigned int ackNo;
 
-    // TCP Header Length - default: 20 bytes
+    // ~TCP Header Length - default: 20 bytes
     // if header options are used the headerLength is greater than 20 bytes (default)
     unsigned short headerLength = TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
 
@@ -174,7 +174,7 @@ packet TCPSegment
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
     TCPOption options[];
 
-    // Payload length in octets (not an actual \TCP header field).
+    // Payload length in octets (not an actual TCP header field).
     // This may not always be the same as encapsulatedPacket()->getByteLength();
     // e.g. when simulating a virtual data stream there's no encapsulated
     // packet at all.
@@ -183,11 +183,11 @@ packet TCPSegment
     // Message objects (cMessages) that travel in this segment as data.
     // (This field is used only with TCPMsgBasedSendQueue/RcvQueue and
     // not with TCPVirtualBytesSendQueue/RcvQueue.)  Every message object
-    // is put into the TCPSegment that would (in real life) carry its
+    // is put into the ~TCPSegment that would (in real life) carry its
     // last octet. That is, if message object 'msg' with length=100 bytes
     // occupies sequence number range 10000..10099, it will travel in the
-    // TCPSegment which carries the octet 10099. This way it is easily achieved
-    // that the receiving TCP passes up the message object to its client
+    // ~TCPSegment which carries the octet 10099. This way it is easily achieved
+    // that the receiving ~TCP passes up the message object to its client
     // when the last byte of the message has arrived.
     abstract TCPPayloadMessage payload[];
 }

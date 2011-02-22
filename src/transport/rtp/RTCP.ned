@@ -1,7 +1,7 @@
 package inet.transport.rtp;
 
 //
-// RTCP end system.
+// ~RTCP end system.
 //
 simple RTCP
 {

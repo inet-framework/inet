@@ -25,7 +25,7 @@ typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 class noncobject IPAddress;
 
 //
-// Represents a link in the TED and in LinkStateMsg packets.
+// Represents a link in the ~TED and in ~LinkStateMsg packets.
 //
 struct TELinkStateInfo
 {
@@ -39,13 +39,13 @@ struct TELinkStateInfo
 
     simtime_t timestamp;    // time of originating this entry
     unsigned int sourceId;  // FIXME looks like this is the same as advrouter -- really needed?
-    unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
+    unsigned int messageId; // id assigned to originating ~LinkStateMsg (FIXME or?)
     bool state;             // false = down, true = up
 }
 
 
 //
-// Data structure supplied with NF_TED_CHANGE NotificationBoard notifications.
+// Data structure supplied with NF_TED_CHANGE ~NotificationBoard notifications.
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.
 //

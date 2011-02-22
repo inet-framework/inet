@@ -19,9 +19,9 @@ import inet.networklayer.extras.Dummy;
 
 //
 // Failed router. Discards all incoming traffic and generates nothing. Its
-// interface (gates, parameters) is fully compatible with the LDP_LSR router
-// and node failures may thus be simulated by replacing the RSVP_LSR
-// with \LDP_FAILED.
+// interface (gates, parameters) is fully compatible with the ~LDP_LSR router
+// and node failures may thus be simulated by replacing the ~RSVP_LSR
+// with LDP_FAILED.
 //
 module LDP_FAILED
 {

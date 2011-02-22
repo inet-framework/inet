@@ -21,7 +21,7 @@ package inet.networklayer.ted;
 //
 // Collaborations
 //
-// The link state database is kept in the TED module.
+// The link state database is kept in the ~TED module.
 //
 simple LinkStateRouting
 {

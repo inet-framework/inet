@@ -32,7 +32,7 @@ import inet.transport.udp.UDP;
 
 
 //
-// \IPv6 host with TCP, UDP layers and applications.
+// IPv6 host with ~TCP, ~UDP layers and applications.
 //
 module StandardHost6
 {
@@ -43,7 +43,7 @@ module StandardHost6
         int numUdpApps = default(0);
         string tcpAppType = default("");
         string udpAppType = default("");
-        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_lwip, TCP_NSC)
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         @display("i=device/laptop");
     gates:
         inout pppg[] @labels(PPPFrame-conn);

@@ -76,7 +76,7 @@ network NClientsEth
 
         //XXX
         // Mixing ethernet and ppp currently doesn't work, due to a bug in
-        // FlatNetworkConfigurator6::determineGateIndex.
+        // ~FlatNetworkConfigurator6::determineGateIndex.
         //
         // r1.pppg++ <--> fiberline <--> r2.pppg++;
         // r2.pppg++ <--> fiberline <--> r3.pppg++;

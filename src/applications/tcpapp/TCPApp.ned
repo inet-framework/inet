@@ -18,8 +18,8 @@
 package inet.applications.tcpapp;
 
 //
-// Template for TCP applications. It shows what gates a TCP app
-// needs, to be able to be used in StandardHost etc.
+// Template for ~TCP applications. It shows what gates a ~TCP app
+// needs, to be able to be used in ~StandardHost etc.
 //
 moduleinterface TCPApp
 {

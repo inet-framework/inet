@@ -20,13 +20,13 @@
 package inet.networklayer.autorouting;
 
 //
-// Configures \IPv6 addresses and routing tables for a "flat" network,
+// Configures IPv6 addresses and routing tables for a "flat" network,
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
 // FIXME: add documentation!
 //
-// @see FlatNetworkConfigurator
+// @see ~FlatNetworkConfigurator
 //
 simple FlatNetworkConfigurator6
 {

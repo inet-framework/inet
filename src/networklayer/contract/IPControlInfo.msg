@@ -29,14 +29,14 @@ cplusplus {{
 
 
 //
-// Control information for sending/receiving packets over \IP.
+// Control information for sending/receiving packets over IP.
 //
-// To send a packet over \IP, fill in an IPControlInfo object,
+// To send a packet over IP, fill in an ~IPControlInfo object,
 // attach it to the packet with the C++ method setControlInfo(),
-// the send it to the IP module.
+// the send it to the ~IP module.
 //
 // When sending, the following fields are required:
-// - protocol: a value from IPProtocolId
+// - protocol: a value from ~IPProtocolId
 // - destAddr
 //
 // Optional fields:
@@ -46,25 +46,25 @@ cplusplus {{
 // - dontFragment: default: false
 //
 // Not supported:
-// - options: \IP Options currently not used
-// - Identifier is currently always chosen by the \IP layer
+// - options: IP Options currently not used
+// - Identifier is currently always chosen by the IP layer
 //
-// When IP delivers a packet to higher layers, it also attaches an IPControlInfo
+// When ~IP delivers a packet to higher layers, it also attaches an ~IPControlInfo
 // to it. It fills in the following fields:
 //  - srcAddr, destAddr, protocol, diffServCodePoint: values from the original datagram
 //  - interfaceId: the interface on which the datagram arrived, or -1 if it was
 //    created locally
 //
-// IP also puts the original datagram object into the control info, because
-// it may be needed by higher layers (for example, by ICMP for error reporting).
+// ~IP also puts the original datagram object into the control info, because
+// it may be needed by higher layers (for example, by ~ICMP for error reporting).
 //
 class IPControlInfo
 {
     @customize(true);
-    IPAddress destAddr;   // destination IP address
-    IPAddress srcAddr;    // source IP address
+    IPAddress destAddr;   // destination ~IP address
+    IPAddress srcAddr;    // source ~IP address
     int interfaceId = -1; // interface on which the datagram was received, or
-                          // should be sent (see InterfaceTable)
+                          // should be sent (see ~InterfaceTable)
     short protocol enum(IPProtocolId);  // encapsulated protocol
     unsigned char diffServCodePoint;  // for QoS
     short timeToLive;     // maximum hop count
@@ -73,7 +73,7 @@ class IPControlInfo
 
 
 //
-// Control info attached to packets sent from IP to ARP.
+// Control info attached to packets sent from ~IP to ~ARP.
 //
 // Next hop address is used on a LAN to determine the MAC destination
 // address (and it may be used on other multicast networks for similar
@@ -81,7 +81,7 @@ class IPControlInfo
 //
 class IPRoutingDecision
 {
-    int interfaceId = -1; // interface on which dgram should be sent (see InterfaceTable)
+    int interfaceId = -1; // interface on which dgram should be sent (see ~InterfaceTable)
     IPAddress nextHopAddr;
 }
 

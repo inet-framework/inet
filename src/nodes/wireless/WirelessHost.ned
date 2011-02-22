@@ -37,13 +37,13 @@ import inet.transport.udp.UDP;
 
 //
 // Models a host with one wireless (802.11b) card in infrastructure mode.
-// This module is basically a StandardHost with an Ieee80211NicSTA added.
-// It should be used in conjunction with WirelessAP, or any other AP model
-// which contains Ieee80211NicAP.
+// This module is basically a ~StandardHost with an ~Ieee80211NicSTA added.
+// It should be used in conjunction with ~WirelessAP, or any other AP model
+// which contains ~Ieee80211NicAP.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see ~WirelessAP, ~WirelessAPSimplified, ~WirelessAPWithEth, ~WirelessAPWithEthSimplified
+// @see ~WirelessHost, ~WirelessHostSimplified
+// @see ~MobileHost, ~MFMobileHost
 //
 module WirelessHost
 {

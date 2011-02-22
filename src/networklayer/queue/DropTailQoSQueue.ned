@@ -21,7 +21,7 @@ package inet.networklayer.queue;
 //
 // Drop-tail queue with QoS support, to be used in network interfaces.
 // Performs priority queueing.
-// Conforms to the OutputQueue interface.
+// Conforms to the ~OutputQueue interface.
 //
 simple DropTailQoSQueue like OutputQueue
 {

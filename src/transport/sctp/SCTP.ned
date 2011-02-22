@@ -21,7 +21,7 @@ package inet.transport.sctp;
 simple SCTP
 {
         parameters:
-        // ====== SCTP Association Parameters =================================
+        // ====== ~SCTP Association Parameters =================================
         int numGapReports                   = default(3);
         double rtoInitial @unit(s)          = default(3s);
         double rtoMin @unit(s)              = default(1s);

@@ -20,10 +20,10 @@
 package inet.networklayer.ipv4;
 
 //
-// ICMP implementation
+// ~ICMP implementation
 //
-// Receive ICMP message from localDeliver and process it:
-//   - echo/timestamp reply: strip ICMP header and send to pingOut
+// Receive ~ICMP message from localDeliver and process it:
+//   - echo/timestamp reply: strip ~ICMP header and send to pingOut
 //   - echo/timestamp request: create reply and send to IPSend
 //   - destination unreachable: ignore/send to IPRouting (static)?
 //   - time exceeded: ignore ?
@@ -31,7 +31,7 @@ package inet.networklayer.ipv4;
 //   - redirect ?
 //#FIXME question marks above...
 //
-// Receive echo/timestamp message from pingIn: encapsulate in ICMP header
+// Receive echo/timestamp message from pingIn: encapsulate in ~ICMP header
 // and send to IPSend
 //
 // author: Jochen Reber
@@ -43,7 +43,7 @@ simple ICMP
     parameters:
         @display("i=block/control_s");
     gates:
-        input localIn @labels(IPControlInfo/up);  // delivered ICMP packets
+        input localIn @labels(IPControlInfo/up);  // delivered ~ICMP packets
         input pingIn;  // ping requests from app
         output pingOut;  // result of ping
         output sendOut @labels(IPControlInfo/down);  // towards network

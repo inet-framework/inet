@@ -18,11 +18,11 @@ package inet.networklayer.ted;
 // Traffic Engineering Database. Stores network topology with detailed
 // link information, including total and reserved bandwidths.
 //
-// TED is filled in and kept up-to-date via link state routing protocols,
-// like LinkStateRouting or (in the future) OSPF-TE.
+// ~TED is filled in and kept up-to-date via link state routing protocols,
+// like ~LinkStateRouting or (in the future) OSPF-TE.
 //
-// \TED exposes several public methods for querying the current network state
-// and allows RSVP and individual applications to calculate feasible LSPs
+// TED exposes several public methods for querying the current network state
+// and allows ~RSVP and individual applications to calculate feasible LSPs
 // meeting the chosen bandwidth criteria.
 //
 simple TED

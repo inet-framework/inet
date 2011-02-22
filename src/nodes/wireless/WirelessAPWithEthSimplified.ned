@@ -30,11 +30,11 @@ import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
 //
 // Models a 802.11 Access Point with Ethernet ports, but using a simplified NIC
 // that does not support handovers. It can be used in conjunction with
-// WirelessHostSimplified, or any other host model containing WirelessNicSTASimplified.
+// ~WirelessHostSimplified, or any other host model containing WirelessNicSTASimplified.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see ~WirelessAP, ~WirelessAPSimplified, ~WirelessAPWithEth, ~WirelessAPWithEthSimplified
+// @see ~WirelessHost, ~WirelessHostSimplified
+// @see ~MobileHost, ~MFMobileHost
 //
 module WirelessAPWithEthSimplified
 {
@@ -42,7 +42,7 @@ module WirelessAPWithEthSimplified
         @node();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~MACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
     gates:
         inout ethg[] @labels(EtherFrame-conn);
         input radioIn @directIn;

@@ -21,7 +21,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Used in 802.11 infrastructure mode: in a station (STA), this module
 // controls channel scanning, association and handovers, by sending commands
-// (e.g. Ieee80211Prim_ScanRequest) to the management module (Ieee80211MgmtSTA).
+// (e.g. ~Ieee80211Prim_ScanRequest) to the management module (~Ieee80211MgmtSTA).
 //
 // @author Andras Varga
 //
@@ -36,9 +36,9 @@ simple Ieee80211AgentSTA
         double authenticationTimeout @unit("s") = default(5s); // timeout for the authentication procedure
         double associationTimeout @unit("s") = default(5s); // timeout for the association procedure
         @display("i=block/control");
-        @statistic[sentRequest](title="sent requests";record=vector); // ENUM! Ieee80211PrimRequestCode
-        @statistic[acceptConfirm](title="accepted confirms";record=vector); // ENUM! Ieee80211PrimConfirmCode
-        @statistic[dropConfirm](title="dropped confirms";record=vector); // ENUM! Ieee80211PrimConfirmCode
+        @statistic[sentRequest](title="sent requests";record=vector); // ENUM! ~Ieee80211PrimRequestCode
+        @statistic[acceptConfirm](title="accepted confirms";record=vector); // ENUM! ~Ieee80211PrimConfirmCode
+        @statistic[dropConfirm](title="dropped confirms";record=vector); // ENUM! ~Ieee80211PrimConfirmCode
     gates:
         input mgmtIn;
         output mgmtOut;

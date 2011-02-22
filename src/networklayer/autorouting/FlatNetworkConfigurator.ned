@@ -19,7 +19,7 @@
 package inet.networklayer.autorouting;
 
 //
-// Configures \IP addresses and routing tables for a "flat" network,
+// Configures IP addresses and routing tables for a "flat" network,
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
@@ -28,23 +28,23 @@ package inet.networklayer.autorouting;
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#  assign \IP addresses to hosts and routers. All hosts and
+//   -#  assign IP addresses to hosts and routers. All hosts and
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
-//       paths to the routing tables (see RoutingTable::addRoutingEntry()).
+//       paths to the routing tables (see ~RoutingTable::addRoutingEntry()).
 //
 // How does it know which modules are routers, hosts, et.c that need to
 // be configured, and what is the network topology? The configurator
 // picks all modules which have a @node property and their connections,
 // and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
-// IP nodes.
+// ~IP nodes.
 //
-// It is assumed that the routing table (RoutingTable module) is the
+// It is assumed that the routing table (~RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts
 // and routers.
 //
@@ -54,7 +54,7 @@ package inet.networklayer.autorouting;
 // should be absent or empty.
 //
 // All the above takes place in initialization stage 2. (In stage 0,
-// interfaces register themselves in the InterfaceTable modules, and
+// interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
 simple FlatNetworkConfigurator

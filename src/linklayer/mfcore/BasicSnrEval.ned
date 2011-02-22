@@ -1,5 +1,5 @@
 //****************************************************************************
-// * file:        BasicSnrEval.h
+// * file:        ~BasicSnrEval.h
 // *
 // * author:      Marc Loebbers
 // *
@@ -23,11 +23,11 @@ package inet.linklayer.mfcore;
 //
 // The basic class for all snrEval modules
 //
-// The BasicSnrEval module provides functionality like en- and
+// The ~BasicSnrEval module provides functionality like en- and
 // decapsulation of messages. If you use the standard message formats
 // everythng should work fine. Before a packet is sent some
 // information, e.g. transmission power, can be written to the
-// AirFrame header. If you write your own snrEval, just subclass and
+// ~AirFrame header. If you write your own snrEval, just subclass and
 // redefine the handleUpperMsg function (see description of the
 // function). After receiving a message it can be processed in
 // handleLowerMsgStart. Then it is buffered for the time the
@@ -40,7 +40,7 @@ package inet.linklayer.mfcore;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see SnrEval
+// @see ~SnrEval
 // @author Marc Loebbers
 //
 simple BasicSnrEval
@@ -49,7 +49,7 @@ simple BasicSnrEval
         bool coreDebug = default(false); // debug switch for the core framework
         double transmitterPower @unit("mW"); // power used for transmission of messages
         double bitrate @unit("bps"); // bitrate
-        int headerLength @unit(b);  // header length of the AirFrame
+        int headerLength @unit(b);  // header length of the ~AirFrame
     gates:
         input uppergateIn; // from the MAC layer
         output uppergateOut; // to the decider sub-module

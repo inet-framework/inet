@@ -79,7 +79,7 @@ network REDTestDebug
                 @display("p=248,135");
         }
     connections:
-// FIXME adjust to the new TCPDump module
+// FIXME adjust to the new ~TCPDump module
 //        r1.pppg$o++ --> {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
 //        th.out --> dump.a$i;
 //        dump.b$o --> r2.pppg$i++;

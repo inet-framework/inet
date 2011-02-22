@@ -28,7 +28,7 @@ import inet.util.NAMTraceWriter;
 
 
 //
-// \IP host with TCPSpoof in the application layer.
+// IP host with ~TCPSpoof in the application layer.
 //
 module TCPSpoofingHost
 {

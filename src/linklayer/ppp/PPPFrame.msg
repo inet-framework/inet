@@ -17,7 +17,7 @@
 
 
 //
-// PPP header+trailer length:
+// ~PPP header+trailer length:
 //    - Flag(8) + Address(8) + Control(8) + Protocol(16) + FCS(16) = 7 octets.
 // (The terminating Flag is not counted, as rfc1331 states that
 // only one Flag is required between back-to-back frames.)
@@ -30,7 +30,7 @@ const int PPP_OVERHEAD_BYTES = 7;
 
 
 //
-// PPP frame.
+// ~PPP frame.
 //
 // Constant-value header fields are not modelled:
 // Flag (=0x7e), address (=0xff), control (=0x03), CRC (bitError())

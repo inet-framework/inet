@@ -19,12 +19,12 @@
 package inet.applications.udpapp;
 
 //
-// Video stream server. To be used with UDPVideoStreamCli.
+// Video stream server. To be used with ~UDPVideoStreamCli.
 //
 // The server will wait for incoming "video streaming requests".
 // When a request arrives, it draws a random video stream size
 // using the videoSize parameter, and starts streaming to the client.
-// During streaming, it will send \UDP packets of size packetLen at every
+// During streaming, it will send UDP packets of size packetLen at every
 // waitInterval, until videoSize is reached. The parameters packetLen
 // and waitInterval can be set to constant values to create CBR traffic,
 // or to random values (e.g. waitInterval=uniform(1e-6, 1.01e-6)) to
@@ -32,7 +32,7 @@ package inet.applications.udpapp;
 //
 // The server can serve several clients, and several streams per client.
 //
-// @see UDPVideoStreamCli
+// @see ~UDPVideoStreamCli
 //
 simple UDPVideoStreamSvr like UDPApp
 {

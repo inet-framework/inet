@@ -19,14 +19,14 @@
 package inet.world;
 
 //
-// ScenarioManager is for setting up and controlling simulation experiments.
+// ~ScenarioManager is for setting up and controlling simulation experiments.
 // You can schedule certain events to take place at specified times,
 // like changing a parameter value, changing the bit error rate of
 // a connection, removing or adding connections, removing or
 // adding routes in a routing table, etc, so that you can observe the
 // transient behaviour.
 //
-// ScenarioManager executes a script specified in XML. It has a few
+// ~ScenarioManager executes a script specified in XML. It has a few
 // built-in commands, while other commands are dispatched to be carried out
 // by given simple modules. (The C++ class of these simple modules' needs
 // to implement the IScriptable interface, and the processCommand() method

@@ -26,7 +26,7 @@ import inet.networklayer.ipv6.RoutingTable6;
 
 
 //
-// \IPv6 router.
+// IPv6 router.
 //
 module Router6
 {

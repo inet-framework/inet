@@ -25,15 +25,15 @@ import inet.networklayer.queue.OutputQueue;
 
 
 //
-// Ethernet network interface. Complements EtherMAC and EtherEncap
+// Ethernet network interface. Complements ~EtherMAC and ~EtherEncap
 // with an output queue for QoS and RED support.
 //
-// @see EthernetInterface2, EthernetInterfaceNoQueue
+// @see EthernetInterface2, ~EthernetInterfaceNoQueue
 //
 module EthernetInterface like INetworkInterface
 {
     parameters:
-        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
+        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("DropTailQueue");
         @display("i=block/ifcard");
     gates:

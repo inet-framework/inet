@@ -40,30 +40,30 @@ packet RTPPacket
 
     byteLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
 
-    // The rtp version of this RTPPacket.
+    // The rtp version of this ~RTPPacket.
     uint8 version = 2;
 
-    // Set to 1 if padding is used in this RTPPacket, 0 otherwise.
+    // Set to 1 if padding is used in this ~RTPPacket, 0 otherwise.
     // This implementation doesn't use padding bytes, so it is always 0.
     bool padding = false;
 
-    // Set to 1, if this RTPPacket contains an rtp header extension, 0 otherwise.
+    // Set to 1, if this ~RTPPacket contains an rtp header extension, 0 otherwise.
     // This implementation doesn't support rtp header extensions, so it is always 0.
     bool extension = false;
 
-    // The marker of this RTPPacket.
+    // The marker of this ~RTPPacket.
     bool marker = false;
 
-    // The type of payload carried in this RTPPacket.
+    // The type of payload carried in this ~RTPPacket.
     int8 payloadType;
 
-    // The sequence number of this RTPPacket.
+    // The sequence number of this ~RTPPacket.
     uint16 sequenceNumber;
 
-    // The rtp time stamp of this RTPPacket.
+    // The rtp time stamp of this ~RTPPacket.
     uint32 timeStamp;
 
-    // The ssrc identifier of the creator of this RTPPacket.
+    // The ssrc identifier of the creator of this ~RTPPacket.
     uint32 ssrc;
 
     // no mixers, no contributing sources

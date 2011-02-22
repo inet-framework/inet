@@ -20,7 +20,7 @@
 package inet.linklayer.etherswitch;
 
 //
-// A MACRelayUnit implementation which models one or more CPUs
+// A ~MACRelayUnit implementation which models one or more CPUs
 // with shared memory, working from a single shared queue.
 //
 // It also models fixed delay for precessing each frame.
@@ -36,9 +36,9 @@ package inet.linklayer.etherswitch;
 simple MACRelayUnitNP like MACRelayUnit
 {
     parameters:
-        string addressTableFile = default("");  // see MACRelayUnit
-        int addressTableSize = default(100); // see MACRelayUnit
-        double agingTime @unit("s") = default(120s); // see MACRelayUnit
+        string addressTableFile = default("");  // see ~MACRelayUnit
+        int addressTableSize = default(100); // see ~MACRelayUnit
+        double agingTime @unit("s") = default(120s); // see ~MACRelayUnit
         int numCPUs = default(1);  // number of CPUs
         double processingTime @unit("s") = default(0s);  // processing time of one frame
         int bufferSize @unit("B") = default(1MB);  // memory

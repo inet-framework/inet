@@ -29,12 +29,12 @@ import inet.linklayer.ieee80211.Ieee80211NicAP;
 
 //
 // Models a 802.11 Access Point with Ethernet ports.
-// It can be used in conjunction with WirelessHost, or any other host model
+// It can be used in conjunction with ~WirelessHost, or any other host model
 // containing WirelessNicSTA.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see ~WirelessAP, ~WirelessAPSimplified, ~WirelessAPWithEth, ~WirelessAPWithEthSimplified
+// @see ~WirelessHost, ~WirelessHostSimplified
+// @see ~MobileHost, ~MFMobileHost
 //
 module WirelessAPWithEth
 {
@@ -42,7 +42,7 @@ module WirelessAPWithEth
         @node();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~MACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
     gates:
         input radioIn @directIn;
         inout ethg[] @labels(EtherFrame-conn);
@@ -54,7 +54,7 @@ module WirelessAPWithEth
                 lowerLayerIn[sizeof(ethg)+1];
                 lowerLayerOut[sizeof(ethg)+1];
         }
-        wlan: Ieee80211NicAP { // see also Ieee80211NicAPSimplified
+        wlan: Ieee80211NicAP { // see also ~Ieee80211NicAPSimplified
             parameters:
                 @display("p=89,225;q=queue");
         }

@@ -34,7 +34,7 @@ class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
 
 //
-// IPv6 datagram. RFC 2460 Section 3.
+// ~IPv6 datagram. RFC 2460 Section 3.
 //
 // Header fields not explicitly modelled:
 //    - version (=6): represented by the class name itself
@@ -52,7 +52,7 @@ packet IPv6Datagram
     short hopLimit = 0;
     int transportProtocol enum(IPProtocolId);
 
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
 
 

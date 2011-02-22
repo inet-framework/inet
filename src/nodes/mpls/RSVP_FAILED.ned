@@ -18,9 +18,9 @@ import inet.networklayer.extras.Dummy;
 
 //
 // Failed router. Discards all incoming traffic and generates nothing. Its
-// interface (gates, parameters) is fully compatible with the RSVP_LSR router
-// and node failures may thus be simulated by replacing the RSVP_LSR
-// with \RSVP_FAILED.
+// interface (gates, parameters) is fully compatible with the ~RSVP_LSR router
+// and node failures may thus be simulated by replacing the ~RSVP_LSR
+// with RSVP_FAILED.
 //
 module RSVP_FAILED
 {

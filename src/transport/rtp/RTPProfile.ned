@@ -1,8 +1,8 @@
 package inet.transport.rtp;
 
 //
-// Generic \RTP Profile. RTPProfile is internal to the RTP module;
-// instances are created and connected dynamically by RTP.
+// Generic RTP Profile. ~RTPProfile is internal to the ~RTP module;
+// instances are created and connected dynamically by ~RTP.
 //
 simple RTPProfile
 {
@@ -19,8 +19,8 @@ simple RTPProfile
 }
 
 //
-// Audio-Video \RTP Profile. RTPAVProfile is internal to the RTP module;
-// instances are created and connected dynamically by RTP.
+// Audio-Video RTP Profile. ~RTPAVProfile is internal to the ~RTP module;
+// instances are created and connected dynamically by ~RTP.
 //
 simple RTPAVProfile
 {

@@ -22,7 +22,7 @@ import inet.world.ScenarioManager;
 
 
 //
-// Example network to demonstrate \RSVP-TE.
+// Example network to demonstrate RSVP-TE.
 //
 // See the README file in the model directory for scenario description.
 //

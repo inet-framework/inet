@@ -27,7 +27,7 @@ import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
 
 
 //
-// Well, it Models a 802.11 Access Point with a Sink.
+// Well, it Models a 802.11 Access Point with a ~Sink.
 //
 module WirelessAPWithSink
 {

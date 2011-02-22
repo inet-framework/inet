@@ -22,12 +22,12 @@ package inet.linklayer.ethernet;
 //
 // Ethernet network interface. Assumes inifinite queue.
 //
-// @see EthernetInterface
+// @see ~EthernetInterface
 //
 module EthernetInterfaceNoQueue
 {
     parameters:
-        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
+        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
         @display("i=block/ifcard");
     gates:
         input netwIn;

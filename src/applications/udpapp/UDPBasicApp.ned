@@ -20,8 +20,8 @@
 package inet.applications.udpapp;
 
 //
-// Sends \UDP packets to the given \IP address at the given interval.
-// Compatible with both IPv4 and IPv6.
+// Sends UDP packets to the given IP address at the given interval.
+// Compatible with both IPv4 and ~IPv6.
 //
 // The interval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
@@ -30,17 +30,17 @@ package inet.applications.udpapp;
 // class is used to resolve the address.) To disable the model, set
 // destAddresses to "".
 //
-// The peer can be UDPSink or another UDPBasicApp (it handles received packets
-// exactly like UDPSink).
+// The peer can be ~UDPSink or another ~UDPBasicApp (it handles received packets
+// exactly like ~UDPSink).
 //
 simple UDPBasicApp like UDPApp
 {
     parameters:
-        int localPort; // if -1, app doesn't bind in UDP
+        int localPort; // if -1, app doesn't bind in ~UDP
         int destPort;
         volatile int messageLength @unit("B"); // length of messages to generate, in bytes
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

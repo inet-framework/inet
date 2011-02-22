@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        BasicDecider.ned
+// * file:        ~BasicDecider.ned
 // *
 // * author:      Marc Loebbers
 // *

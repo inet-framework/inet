@@ -19,7 +19,7 @@
 package inet.applications.udpapp;
 
 //
-// Similar to UDPBasicApp, but it sends back the packet after reception.
+// Similar to ~UDPBasicApp, but it sends back the packet after reception.
 //
 simple UDPEchoApp like UDPApp
 {
@@ -28,7 +28,7 @@ simple UDPEchoApp like UDPApp
         int destPort;
         volatile int messageLength @unit("B"); // length of messages to generate, int bytes
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

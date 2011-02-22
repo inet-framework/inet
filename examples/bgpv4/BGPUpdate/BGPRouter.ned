@@ -30,7 +30,7 @@ import inet.base.NotificationBoard;
 
 
 //
-// Example \IP router with BGPv4 and OSPFv4 support.
+// Example IP router with BGPv4 and OSPFv4 support.
 //
 module BGPRouter
 {

@@ -28,7 +28,7 @@ import inet.linklayer.ppp.PPPInterfaceNoQueue;
 import inet.networklayer.ospfv2.OSPFRouting;
 
 //
-// \IP router with BGPv4 and OSPFv4 support.
+// IP router with BGPv4 and OSPFv4 support.
 //
 module BGPRouter
 {

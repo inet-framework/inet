@@ -20,9 +20,9 @@
 package inet.applications.generic;
 
 //
-// Prototype for modules that generate traffic directly over IP.
+// Prototype for modules that generate traffic directly over ~IP.
 //
-// @see IPTrafGen, IPTrafSink
+// @see ~IPTrafGen, ~IPTrafSink
 //
 moduleinterface IPTrafficGenerator
 {

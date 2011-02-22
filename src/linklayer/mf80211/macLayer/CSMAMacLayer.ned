@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        CSMAMacLayer.ned
+//* file:        ~CSMAMacLayer.ned
 //*
 //* author:      Marc Löbbers
 //*

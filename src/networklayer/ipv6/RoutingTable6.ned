@@ -19,9 +19,9 @@
 package inet.networklayer.ipv6;
 
 //
-// \IPv6 Routing Table and Neighbour Discovery data structures.
+// IPv6 Routing Table and Neighbour Discovery data structures.
 //
-// @see IPv6, IPv6NeighbourDiscovery, ICMPv6
+// @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
 //
 simple RoutingTable6
 {

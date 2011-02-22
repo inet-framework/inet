@@ -50,7 +50,7 @@ struct EroObj_t;
 
 
 //
-// \RSVP message common part
+// RSVP message common part
 //
 packet RSVPMessage
 {

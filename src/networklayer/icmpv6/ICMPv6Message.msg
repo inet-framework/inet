@@ -23,7 +23,7 @@ cplusplus {{
 }}
 
 //
-//# TODO consolidate this file's contents with ICMPMessage.msg
+//# TODO consolidate this file's contents with ~ICMPMessage.msg
 //
 
 
@@ -56,7 +56,7 @@ enum ICMPv6Type
 
 
 //
-// ICMPv6 "codes" for type ICMPv6_DESTINATION_UNREACHABLE
+// ~ICMPv6 "codes" for type ICMPv6_DESTINATION_UNREACHABLE
 //
 enum ICMPv6DEST_UN
 {
@@ -70,7 +70,7 @@ enum ICMPv6DEST_UN
 
 
 //
-// ICMPv6 "codes" for type ICMPv6_TIME_EXCEEDED
+// ~ICMPv6 "codes" for type ICMPv6_TIME_EXCEEDED
 //
 enum ICMPv6_TIME_EX
 {
@@ -80,7 +80,7 @@ enum ICMPv6_TIME_EX
 }
 
 //
-// ICMPv6 "codes" for type ICMPv6_PARAMETER_PROBLEM
+// ~ICMPv6 "codes" for type ICMPv6_PARAMETER_PROBLEM
 //
 enum ICMPv6_PARAMETER_PROB
 {
@@ -92,18 +92,18 @@ enum ICMPv6_PARAMETER_PROB
 
 
 //
-// Represents an ICMPv6 packet.
+// Represents an ~ICMPv6 packet.
 //
 // Notes:
 //    1. number of octets excluding the error datagram that is usually appended
 //       in optInfo, i.e. the Type|CODE|CHECKSUM|UNUSED/POINTER/MTU/OTHER
 //       as defined in RFC2463
-//    2. Any ICMP type with MSB set, i.e. >=128 is an Informational ICMP message
+//    2. Any ~ICMP type with MSB set, i.e. >=128 is an Informational ~ICMP message
 //
 packet ICMPv6Message
 {
     int type enum(ICMPv6Type);
-        //int code; //TODO: this should be specific to different ICMP types.
+        //int code; //TODO: this should be specific to different ~ICMP types.
 }
 
 //
@@ -132,19 +132,19 @@ packet ICMPv6ParamProblemMsg extends ICMPv6Message
 }
 
 //
-// ICMPv6 Echo Request packet (RFC2463: Section 4).
-// Data is attached through encapsulation (see ICMPv6.cc)
+// ~ICMPv6 Echo Request packet (RFC2463: Section 4).
+// Data is attached through encapsulation (see ~ICMPv6.cc)
 //
 packet ICMPv6EchoRequestMsg extends ICMPv6Message
 {
     int code; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
-        //Data is attached through encapsulation. See ICMPv6.cc
+        //Data is attached through encapsulation. See ~ICMPv6.cc
 }
 
 //
-// ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ICMPv6.cc)
+// ~ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ~ICMPv6.cc)
 //
 packet ICMPv6EchoReplyMsg extends ICMPv6Message
 {

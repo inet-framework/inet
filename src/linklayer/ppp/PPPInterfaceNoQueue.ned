@@ -23,9 +23,9 @@ import inet.linklayer.INetworkInterface;
 
 
 //
-// \PPP interface. Assumes inifinite queue.
+// PPP interface. Assumes inifinite queue.
 //
-// @see PPPInterface
+// @see ~PPPInterface
 //
 module PPPInterfaceNoQueue like INetworkInterface
 {

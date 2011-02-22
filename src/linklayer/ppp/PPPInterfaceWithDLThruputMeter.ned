@@ -25,10 +25,10 @@ import inet.networklayer.queue.OutputQueue;
 
 
 //
-// \PPP interface. Complements the PPP module with an output queue
+// PPP interface. Complements the ~PPP module with an output queue
 // for QoS and RED support.
 //
-// @see PPPInterfaceNoQueue
+// @see ~PPPInterfaceNoQueue
 //
 module PPPInterfaceWithDLThruputMeter
 {

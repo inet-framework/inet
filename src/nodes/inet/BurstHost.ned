@@ -26,8 +26,8 @@ import inet.networklayer.ipv4.RoutingTable;
 
 
 //
-// Definition of an IP node with a transport generator that connects
-// to IP directly, without TCP or UDP.
+// Definition of an ~IP node with a transport generator that connects
+// to ~IP directly, without ~TCP or ~UDP.
 //
 module BurstHost
 {

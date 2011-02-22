@@ -20,7 +20,7 @@ package inet.mobility;
 //
 // Moves the node around a rectangle.
 //
-// @see ChannelControl
+// @see ~ChannelControl
 // @author Andras Varga
 //
 simple RectangleMobility like BasicMobility

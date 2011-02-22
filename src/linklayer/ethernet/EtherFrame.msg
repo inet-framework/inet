@@ -34,7 +34,7 @@ enum SAPCode;
 // containing their common header fields.
 //
 // This class should never be instantiated by the models, only specific
-// subclasses: EthernetJam, EtherIFG and submodules of EtherFrame.
+// subclasses: EthernetJam, EtherIFG and submodules of ~EtherFrame.
 packet EtherTraffic
 {
 }
@@ -58,7 +58,7 @@ packet EtherPadding extends EtherTraffic
 // containing their common header fields.
 //
 // This class should never be instantiated by the models, only specific
-// subclasses: EthernetIIFrame, EtherFrameWithLLC and EtherFrameWithSNAP.
+// subclasses: ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP.
 //
 // Source and destination MAC address are stored in data members.
 // Other fields include:
@@ -77,7 +77,7 @@ packet EtherFrame extends EtherTraffic
 
 
 //
-// Ethernet II headers contain a 16-bit EtherType to identify
+// Ethernet II headers contain a 16-bit ~EtherType to identify
 // the encapsulated protocol.
 //
 // Header length: src(6)+dest(6)+etherType(2) = 14 bytes
@@ -112,8 +112,8 @@ packet EtherFrameWithLLC extends EtherFrame
 //
 packet EtherFrameWithSNAP extends EtherFrame
 {
-    long orgCode;  // SNAP organization code, 0 for IP and ARP
-    int localcode; // SNAP local code (stores EtherType for IP and ARP)
+    long orgCode;  // SNAP organization code, 0 for ~IP and ~ARP
+    int localcode; // SNAP local code (stores ~EtherType for ~IP and ~ARP)
 }
 
 

@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ErrAndCollDecider.ned
+// * file:        ~ErrAndCollDecider.ned
 // *
 // * author:      Marc Loebbers
 // *
@@ -21,7 +21,7 @@
 package inet.linklayer.mf80211.phyLayer.decider;
 
 //
-// Decider module to use with digital channel modules like GilbertElliotSnr
+// Decider module to use with digital channel modules like ~GilbertElliotSnr
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //

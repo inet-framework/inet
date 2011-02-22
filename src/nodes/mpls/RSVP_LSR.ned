@@ -29,10 +29,10 @@ import inet.util.NAMTraceWriter;
 
 
 //
-// An \RSVP-TE capable router.
+// An RSVP-TE capable router.
 //
-// \RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. \RSVP uses transport protocols to route packets. TED is used
+// RSVP occupies the Transport layer; however, it is not a transport protocol
+// itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
 module RSVP_LSR

@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        Nic80211.ned
+// * file:        ~Nic80211.ned
 // *
 // * author:      Marc Loebbers
 // *
@@ -30,7 +30,7 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval80211;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see Mac80211, Decider80211, SnrEval80211
+// @see ~Mac80211, ~Decider80211, ~SnrEval80211
 // @author Marc Loebbers
 //
 module Nic80211

@@ -22,7 +22,7 @@ import inet.networklayer.extras.Dummy;
 
 
 //
-// A failed \IP router. Simply discards all packets it receives, and that's all.
+// A failed IP router. Simply discards all packets it receives, and that's all.
 //
 module FailedRouter
 {

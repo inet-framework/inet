@@ -37,7 +37,7 @@ import inet.util.TCPDump;
 
 
 //
-// \IP host with SCTP, TCP, UDP layers and applications.
+// IP host with ~SCTP, ~TCP, ~UDP layers and applications.
 //
 module StandardHost
 {
@@ -51,7 +51,7 @@ module StandardHost
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
         string sctpAppType = default("n/a");
-        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_lwip, TCP_NSC)
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");

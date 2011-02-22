@@ -27,7 +27,7 @@ import inet.util.NAMTraceWriter;
 
 
 //
-// \IP router.
+// IP router.
 //
 module Router
 {

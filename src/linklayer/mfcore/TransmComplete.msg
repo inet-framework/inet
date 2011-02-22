@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        TransmComplete.msg
+// * file:        ~TransmComplete.msg
 // *
 // * author:      Marc Loebbers
 // *
@@ -25,8 +25,8 @@ cplusplus {{
 //
 // Timer to indicate a completely received frame
 //
-// This message class is used within BasicSnrEval to indicate that an
-// AirFrame is completely received. It has no parameters and was only
+// This message class is used within ~BasicSnrEval to indicate that an
+// ~AirFrame is completely received. It has no parameters and was only
 // introduced to differentiate this timer from other self messages
 //
 // This component has been taken over from Mobility Framework 1.0a5.

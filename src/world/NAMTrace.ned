@@ -19,11 +19,11 @@
 package inet.world;
 
 //
-// NAMTrace manages a "nam" trace file which can be played back with ns2's
-// Network ANimator, nam. The trace is actually written by NAMTraceWriter
+// ~NAMTrace manages a "nam" trace file which can be played back with ns2's
+// Network ANimator, nam. The trace is actually written by ~NAMTraceWriter
 // modules which should occur per host or router.
 //
-// @see NAMTraceWriter
+// @see ~NAMTraceWriter
 //
 simple NAMTrace
 {

@@ -20,19 +20,19 @@
 package inet.linklayer.ppp;
 
 //
-// \PPP implementation.
+// PPP implementation.
 //
-// Packets are encapsulated in PPPFrame.
+// Packets are encapsulated in ~PPPFrame.
 //
-// \PPP is a complex protocol with strong support for link configuration
+// PPP is a complex protocol with strong support for link configuration
 // and maintenance. This model ignores those details, and only performs
 // simple encapsulation/decapsulation and queuing.
 //
-// In routers, \PPP relies on an external queue module (see OutputQueue)
+// In routers, PPP relies on an external queue module (see ~OutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
-// In hosts, no such queue is used, so \PPP contains an internal
+// In hosts, no such queue is used, so PPP contains an internal
 // queue named txQueue to queue up packets waiting for transmission.
 // Conceptually, txQueue is of infinite size, but for better diagnostics
 // one can specify a hard limit in the txQueueLimit parameter -- if this is
@@ -41,7 +41,7 @@ package inet.linklayer.ppp;
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see PPPInterface, OutputQueue, PPPFrame
+// @see ~PPPInterface, ~OutputQueue, ~PPPFrame
 //
 simple PPP
 {

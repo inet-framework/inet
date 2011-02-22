@@ -31,12 +31,12 @@ package inet.linklayer.ethernet;
 // being used. This allows for a much simpler simulation model
 // for MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
-// EtherMACFullDuplex implements Ethernet without shared medium and CSMA/CD.
-// (If you need half-duplex operation, see EtherMAC which is for a full-blown
+// ~EtherMACFullDuplex implements Ethernet without shared medium and CSMA/CD.
+// (If you need half-duplex operation, see ~EtherMAC which is for a full-blown
 // and therefore more complicated Ethernet MAC model.)
 //
-// EtherMACFullDuplex performs transmission and reception of frames.
-// It does not do encapsulation/decapsulation; see EtherLLC and EtherEncap
+// ~EtherMACFullDuplex performs transmission and reception of frames.
+// It does not do encapsulation/decapsulation; see ~EtherLLC and ~EtherEncap
 // for that.
 //
 // Supported variations:
@@ -44,14 +44,14 @@ package inet.linklayer.ethernet;
 // - 100Mb Ethernet (full duplex mode)
 // - 1Gb Ethernet (full duplex mode)
 //
-// Supports all three Ethernet frame types. (It handles EtherFrame message class;
+// Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
 // RAW mode (only used by the IPX protocol) is not supported.
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to EtherLLC (in hosts)
-//   or MACRelayUnitPP (in a switch)
+// - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
+//   or ~MACRelayUnitPP (in a switch)
 //
 // <b>Operation</b>
 //
@@ -71,9 +71,9 @@ package inet.linklayer.ethernet;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (EtherLLC or EtherEncap).
+// this is done by higher layers (~EtherLLC or ~EtherEncap).
 //
-// When a frame is received from the higher layers, it must be an EtherFrame,
+// When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
 // (including the destination MAC address). The source address, if left empty,
 // will be filled in. Then frame is queued and transmitted according
@@ -87,7 +87,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Autoconfiguration</b>
 //
-// EtherMACFullDuplex does NOT include autoconfiguration. \Link speed is taken from
+// ~EtherMACFullDuplex does NOT include autoconfiguration. Link speed is taken from
 // the <tt>datarate</tt> attribute of the connection instead of module parameters
 // or autoconfiguration.
 //
@@ -95,7 +95,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Disabling and disconnecting</b>
 //
-// If the MAC is not connected to the network ("\cable unplugged"), it will
+// If the MAC is not connected to the network ("cable unplugged"), it will
 // start up in "disabled" mode. A disabled MAC simply discards any messages
 // it receives. It is currently not supported to dynamically connect/disconnect
 // a MAC.
@@ -103,7 +103,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see OutputQueue)
+// In routers, MAC relies on an external queue module (see ~OutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -139,8 +139,8 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
-// @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
+// @see ~EthernetInterface, ~EthernetInterface, ~OutputQueue, ~EtherEncap, ~EtherLLC
+// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
 simple EtherMACFullDuplex like IEtherMAC
 {
@@ -167,7 +167,7 @@ simple EtherMACFullDuplex like IEtherMAC
         @statistic[txPausePkUnits](title="Sent pause";record=count,stats,vector);
         @statistic[rxPkBytesFromHL](title="Received bytes from higher layer";record=sum,count,vector);
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
         inout phys @labels(EtherFrame);            // to physical layer or the network
 }

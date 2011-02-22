@@ -21,12 +21,12 @@ cplusplus {{
 }}
 
 //
-// A message of the type RTPSenderControlMessage is created by an application to control
+// A message of the type ~RTPSenderControlMessage is created by an application to control
 // the behavior of an rtp sender module. With this class the application can send a command
 // string to the sender module like "PLAY" or "STOP". A message can have up to two float
 // parameters.
 //
-// Following commands are evaluated in RTPPayloadSender (although correct behavior must
+// Following commands are evaluated in ~RTPPayloadSender (although correct behavior must
 // be implemented in modules for certain payload types):
 //    - PLAY : start playing from current position
 //    - PAUSE : pause playing, stay at current position

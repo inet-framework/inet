@@ -19,8 +19,8 @@
 package inet.linklayer.ethernet;
 
 //
-// Interface for Ethernet MAC implementations. All EtherMAC implementations should
-// implement this (i.e. EtherMAC like IEtherMAC)
+// Interface for Ethernet MAC implementations. All ~EtherMAC implementations should
+// implement this (i.e. ~EtherMAC like ~IEtherMAC)
 //
 moduleinterface IEtherMAC
 {
@@ -41,7 +41,7 @@ moduleinterface IEtherMAC
         int mtu;
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to EtherLLC or MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to EtherLLC or MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }

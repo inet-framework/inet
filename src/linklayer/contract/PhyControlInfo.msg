@@ -25,7 +25,7 @@ cplusplus {{
 // Command codes for controlling the physical layer (the radio). These constants
 // should be set as message kind on a message sent to the radio module.
 //
-// @see PhyControlInfo
+// @see ~PhyControlInfo
 //
 enum PhyCommandCode
 {

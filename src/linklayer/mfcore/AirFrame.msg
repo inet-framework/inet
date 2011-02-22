@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        AirFrame.msg
+// * file:        ~AirFrame.msg
 // *
 // * author:      Marc Loebbers
 // *
@@ -28,7 +28,7 @@ class noncobject Coord;
 //
 // Format of the messages that are sent to the channel
 //
-// subclass if you want to create your own AirFrame message class
+// subclass if you want to create your own ~AirFrame message class
 //
 // This message format is used to send a packet from a snrEval module
 // to the channel. All other snrEval modules that can 'hear' this

@@ -49,7 +49,7 @@ network KIDSNw1
             gates:
                 pppg[1];
         }
-        // First Hop Router
+        // First Hop ~Router
         fhrouter[2]: Router {
             parameters:
                 routingFile = (index==0 ? "fhrouter1.irt" : (index==1 ? "fhrouter5.irt" : "PROBLEM"));
@@ -66,7 +66,7 @@ network KIDSNw1
             gates:
                 pppg[2];
         }
-        // Border Gatgeway Router
+        // Border Gatgeway ~Router
         bgrouter[2]: Router {
             parameters:
 

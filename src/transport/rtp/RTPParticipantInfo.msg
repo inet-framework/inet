@@ -26,13 +26,13 @@ class noncobject IPAddress;
 
 ///**
 // * This class is a super class for classes intended for storing information
-// * about RTP end systems.
+// * about ~RTP end systems.
 // * It has two subclasses: RTPReceiverInformation which is used for storing
-// * information about other system participating in an RTP session.
-// * RTPSenderInformation is used by an RTP endsystem for storing information
+// * information about other system participating in an ~RTP session.
+// * RTPSenderInformation is used by an ~RTP endsystem for storing information
 // * about itself.
-// * \sa RTPReceiverInformation
-// * \sa RTPSenderInformation
+// * sa RTPReceiverInformation
+// * sa RTPSenderInformation
 // */
 class RTPParticipantInfo extends cNamedObject
 {
@@ -43,9 +43,9 @@ class RTPParticipantInfo extends cNamedObject
     // Used for storing the ip address of this endsystem.
     IPAddress address = IPAddress::UNSPECIFIED_ADDRESS;
 
-    // Used for storing the port for RTP by this endsystem.
+    // Used for storing the port for ~RTP by this endsystem.
     int RTPPort = PORT_UNDEF;
 
-    // Used for storing the port for RTCP by this endsystem.
+    // Used for storing the port for ~RTCP by this endsystem.
     int RTCPPort = PORT_UNDEF;
 };

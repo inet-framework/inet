@@ -23,7 +23,7 @@ cplusplus {{
 
 
 //
-// Represents payload in an ICMP/ICMPv6 Echo Request/Reply.
+// Represents payload in an ~ICMP/~ICMPv6 Echo Request/Reply.
 //
 packet PingPayload
 {

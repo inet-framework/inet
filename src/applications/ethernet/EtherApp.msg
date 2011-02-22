@@ -24,9 +24,9 @@ cplusplus {{
 
 
 //
-// Request packet sent by EtherAppCli. Contains the number of bytes to be
+// Request packet sent by ~EtherAppCli. Contains the number of bytes to be
 // sent back as response; if this value is greater than ~1400, the reply
-// will consist of several Ethernet frames. See also EtherAppResp.
+// will consist of several Ethernet frames. See also ~EtherAppResp.
 //
 packet EtherAppReq
 {
@@ -35,7 +35,7 @@ packet EtherAppReq
 }
 
 //
-// Packet sent back by EtherAppSrv in response to an EtherAppReq.
+// Packet sent back by ~EtherAppSrv in response to an ~EtherAppReq.
 //
 packet EtherAppResp
 {

@@ -20,7 +20,7 @@ package inet.networklayer.queue;
 
 //
 // Drop-tail queue, to be used in network interfaces.
-// Conforms to the OutputQueue interface.
+// Conforms to the ~OutputQueue interface.
 //
 simple DropTailQueue like OutputQueue
 {

@@ -21,7 +21,7 @@ package inet.applications.udpapp;
 //
 // Video streaming client.
 //
-// @see UDPVideoStreamSvr
+// @see ~UDPVideoStreamSvr
 //
 simple UDPVideoStreamCli like UDPApp
 {

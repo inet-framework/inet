@@ -19,13 +19,13 @@
 package inet.applications.tcpapp;
 
 //
-// This module hosts TCP-based server applications. It dynamically creates
+// This module hosts ~TCP-based server applications. It dynamically creates
 // and launches a new "thread" object for each incoming connection.
 //
 // Server threads should be subclassed from the TCPServerThreadBase
 // C++ class, registered in the C++ code using the Register_Class() macro,
 // and the class name should be specified in the serverThreadClass
-// parameter of TCPSrvHostApp. The thread object will receive events
+// parameter of ~TCPSrvHostApp. The thread object will receive events
 // via a callback interface (methods like established(), dataArrived(),
 // peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
 // method.
@@ -33,47 +33,47 @@ package inet.applications.tcpapp;
 // Example server thread class: TCPGenericSrvThread (in the C++ documentation only).
 //
 // IMPORTANT: Before you try to use this module, make sure you actually need it!
-// In most cases, TCPGenericSrvApp and GenericAppMsg will be completely
+// In most cases, ~TCPGenericSrvApp and ~GenericAppMsg will be completely
 // enough, and they are a lot easier to handle. You'll want to subclass your
-// client from TCPGenericCliAppBase then; check TelnetApp and TCPBasicClientApp
+// client from TCPGenericCliAppBase then; check ~TelnetApp and ~TCPBasicClientApp
 // for examples.
 //
 // <b>Configuring App</b>
 //
 // The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in TCP layer.
+// classes that manage the actual send and receive queues in ~TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
 //      These classes manage "virtual bytes", that is, only byte counts are
-//      transmitted over the \TCP connection and no actual data. cMessage
+//      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over TCP, the receiver-side client will see a
+//      length = 1 megabyte over ~TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
 // It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while TCPEchoApp or TCPSinkApp can work with any (but TCPEchoApp will
+// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
+// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
 // display different behaviour with both!) In the future, other send queue
 // and receive queue classes may be implemented, e.g. to allow transmission
 // of "raw bytes" (actual byte arrays).
 //
 //   -# use "object", which transmit
-//      cMessage objects (and subclasses) over a \TCP connection. The same
+//      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
-//      sender-side TCP entity will be reproduced on the receiver side.
+//      sender-side ~TCP entity will be reproduced on the receiver side.
 //      If a client sends a cMessage with length = 1 megabyte, the
 //      receiver-side client will receive the same message object (or a clone)
-//      after the TCP entities have completed simulating the transmission
+//      after the ~TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes not implemented in TCP_NSC yet.
+//      These classes not implemented in ~TCP_NSC yet.
 //
 //   -# use "bytestream", which transmit real bytes of messages.
 //      These classes not imnplemented yet.
 //
-// Compatible with both IPv4 and IPv6.
+// Compatible with both IPv4 and ~IPv6.
 //
 simple TCPSrvHostApp like TCPApp
 {

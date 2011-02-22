@@ -35,13 +35,13 @@ import inet.transport.udp.UDP;
 //
 // Models a host with one wireless (802.11b) card in infrastructure mode,
 // but using a simplified NIC that does not support handovers.
-// This module is basically a StandardHost with an Ieee80211NicSTASimplified
-// added. It should be used in conjunction with WirelessAPSimplified,
-// or any other AP model which contains Ieee80211NicAPSimplified.
+// This module is basically a ~StandardHost with an ~Ieee80211NicSTASimplified
+// added. It should be used in conjunction with ~WirelessAPSimplified,
+// or any other AP model which contains ~Ieee80211NicAPSimplified.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see ~WirelessAP, ~WirelessAPSimplified, ~WirelessAPWithEth, ~WirelessAPWithEthSimplified
+// @see ~WirelessHost, ~WirelessHostSimplified
+// @see ~MobileHost, ~MFMobileHost
 //
 module WirelessHostSimplified
 {

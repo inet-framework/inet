@@ -18,13 +18,13 @@
 package inet.networklayer.extras;
 
 //
-// NetworkInfo does not send or receive messages and has no parameters
-// either. Instead it is invoked from ScenarioManager scripts. E.g.:
+// ~NetworkInfo does not send or receive messages and has no parameters
+// either. Instead it is invoked from ~ScenarioManager scripts. E.g.:
 //
 // <pre><nohtml>
 // <scenario>
 //   <at t="2">
-//     <routing module="NetworkInfo" target="LSR2" file="LSR2_002.txt"/>
+//     <routing module="~NetworkInfo" target="LSR2" file="LSR2_002.txt"/>
 //   </at>
 // </scenario>
 // </nohtml></pre>

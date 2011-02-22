@@ -22,7 +22,7 @@ package inet.linklayer.etherswitch;
 //
 // Prototype for modules providing Ethernet switch functionality.
 // These modules handle the mapping between ports and MAC addresses,
-// and forward frames (EtherFrame) to appropriate ports.
+// and forward frames (~EtherFrame) to appropriate ports.
 //
 // Functions:
 // - relays frames based on their dest MAC addresses (dest-->port mapping)
@@ -37,12 +37,12 @@ package inet.linklayer.etherswitch;
 // of the simulation; this controlled by the addressTableFile module parameter.
 //
 // This module is not a concrete implementation, it just defines gates and
-// parameters a MACRelayUnit should have. Concrete inplementations add
+// parameters a ~MACRelayUnit should have. Concrete inplementations add
 // capacity and performance aspects to the model (number of frames processed
 // per second, amount of memory available in the switch, etc.)
 // C++ implementations can subclass from the class <tt>MACRelayUnitBase</tt>.
 //
-// Known implementations are MACRelayUnitNP and MACRelayUnitPP.
+// Known implementations are ~MACRelayUnitNP and ~MACRelayUnitPP.
 //
 moduleinterface MACRelayUnit
 {

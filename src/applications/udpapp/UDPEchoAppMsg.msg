@@ -19,7 +19,7 @@ cplusplus {{
 }}
 
 //
-// Message class used by UDPEchoApp.
+// Message class used by ~UDPEchoApp.
 //
 packet UDPEchoAppMsg
 {

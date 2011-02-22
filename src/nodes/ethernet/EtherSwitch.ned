@@ -37,12 +37,12 @@ import inet.linklayer.etherswitch.MACRelayUnit;
 module EtherSwitch
 {
     parameters:
-        string macType = default("EtherMAC"); // EtherMAC or EtherMACFullDuplex
+        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
-                                                          // values are MACRelayUnitNP and MACRelayUnitPP
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~MACRelayUnit; currently possible
+                                                          // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:

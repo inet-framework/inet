@@ -62,13 +62,13 @@ class MIPv6HAInformation
 }
 
 //
-// Neighbour Discovery for IPv6.
+// Neighbour Discovery for ~IPv6.
 // RFC 2461
 //
-// ICMP fields inherited from ICMPv6Message:
+// ~ICMP fields inherited from ~ICMPv6Message:
 //    - Type
 //
-// ICMP fields not implemented:
+// ~ICMP fields not implemented:
 //    - Checksum
 //    - Reserved
 //
@@ -79,7 +79,7 @@ packet IPv6NDMessage extends ICMPv6Message
 }
 
 //
-// Router Solicitation Message Format
+// ~Router Solicitation Message Format
 // RFC 2461 Section 4.1
 //
 packet IPv6RouterSolicitation extends IPv6NDMessage
@@ -89,13 +89,13 @@ packet IPv6RouterSolicitation extends IPv6NDMessage
 }
 
 //
-// Router Advertisement Message Format
+// ~Router Advertisement Message Format
 // RFC 2461 Section 4.2
 // RFC 3775 Section 7.1, RFC 5175 Section 3. (homeAgentFlag)
 //
 packet IPv6RouterAdvertisement extends IPv6NDMessage
 {
-    //Additional ICMP fields
+    //Additional ~ICMP fields
     unsigned short curHopLimit;
     bool managedAddrConfFlag;    //M-bit
     bool otherStatefulConfFlag;    //O-bit
@@ -116,7 +116,7 @@ packet IPv6RouterAdvertisement extends IPv6NDMessage
 //
 packet IPv6NeighbourSolicitation extends IPv6NDMessage
 {
-    //Additional ICMP fields
+    //Additional ~ICMP fields
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
     //Possible Options
@@ -129,14 +129,14 @@ packet IPv6NeighbourSolicitation extends IPv6NDMessage
 //
 packet IPv6NeighbourAdvertisement extends IPv6NDMessage
 {
-    //Additional ICMP fields
+    //Additional ~ICMP fields
     bool routerFlag;    //R-flag
     bool solicitedFlag;    //S-flag
     bool overrideFlag;    //O-flag
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
     //Possible Options
-    MACAddress targetLinkLayerAddress;    //Target Link Layer Address option
+    MACAddress targetLinkLayerAddress;    //Target ~Link Layer Address option
 }
 
 //
@@ -145,7 +145,7 @@ packet IPv6NeighbourAdvertisement extends IPv6NDMessage
 //
 packet IPv6Redirect extends IPv6NDMessage
 {
-    //Additional ICMP fields
+    //Additional ~ICMP fields
     IPv6Address targetAddress;
     IPv6Address destinationAddress;
 

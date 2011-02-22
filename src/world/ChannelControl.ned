@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ChannelControl.ned
+// * file:        ~ChannelControl.ned
 // *
 // * author:      Andras Varga, Steffen Sroka, Daniel Willkomm
 // *
@@ -21,7 +21,7 @@
 package inet.world;
 
 //
-// ChannelControl has exactly one instance in every network model that
+// ~ChannelControl has exactly one instance in every network model that
 // contains mobile or wireless nodes. This module gets informed about the
 // location and movement of nodes, and determines which nodes are within
 // communication or interference distance. This info is then used by the
@@ -31,12 +31,12 @@ package inet.world;
 // according to the given playground size (sets <tt>"p=0,0;b=$playgroundSizeX,
 // $playgroundSizeY"</tt>).
 //
-// This ChannelControl is a different implementation from the one in
+// This ~ChannelControl is a different implementation from the one in
 // Mobility Framework 1.0a5: here we use sendDirect(), while the MF version
 // used normal send() and dynamic connections.
 //
-// @author Andras Varga (based on MF's ChannelControl by Steffen Sroka and Daniel Willkomm)
-// @see BasicMobility
+// @author Andras Varga (based on MF's ~ChannelControl by Steffen Sroka and Daniel Willkomm)
+// @see ~BasicMobility
 //
 simple ChannelControl
 {

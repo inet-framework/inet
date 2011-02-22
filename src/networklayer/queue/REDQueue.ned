@@ -20,7 +20,7 @@ package inet.networklayer.queue;
 
 //
 // RED (Random Early Detection) queue, to be used in routers' network
-// interfaces. Conforms to the OutputQueue interface.
+// interfaces. Conforms to the ~OutputQueue interface.
 //
 // Implements the original RED algorithm from
 // "Random Early Detection Gateways for Congestion Avoidance" by

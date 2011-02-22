@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        SnrDecider.ned
+// * file:        ~SnrDecider.ned
 // *
 // * author:      Marc Loebbers
 // *
@@ -21,7 +21,7 @@
 package inet.linklayer.mf80211.phyLayer.decider;
 
 //
-// Decider module to be used with SnrEval
+// Decider module to be used with ~SnrEval
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //

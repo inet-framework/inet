@@ -27,12 +27,12 @@ import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
 
 //
 // Models a 802.11 Access Point, but using a simplified NIC that does not
-// support handovers. It should be used in conjunction with WirelessHostSimplified,
+// support handovers. It should be used in conjunction with ~WirelessHostSimplified,
 // or any other host model containing WirelessNicSTASimplified.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see ~WirelessAP, ~WirelessAPSimplified, ~WirelessAPWithEth, ~WirelessAPWithEthSimplified
+// @see ~WirelessHost, ~WirelessHostSimplified
+// @see ~MobileHost, ~MFMobileHost
 //
 module WirelessAPSimplified
 {

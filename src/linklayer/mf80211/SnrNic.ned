@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        SnrNic.ned
+//* file:        ~SnrNic.ned
 //*
 //* author:      Daniel Willkomm
 //*
@@ -29,7 +29,7 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 
 
 // This is the easiest nic to implement "real" network behaviour. It uses
-// the CsmaMacLayer and the SnrDecider and SnrEval modules.
+// the CsmaMacLayer and the ~SnrDecider and ~SnrEval modules.
 //
 // The csma mac provides basic medium access and is used here to prevent a
 // host from trying to send a message while it is still in receive mode.
@@ -37,12 +37,12 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 // The phy layer modules allow to account for collision and take fading into
 // account so that messages can actually be lost.
 //
-// IMPORTANT:<br> In order to work with the ChannelControl module the snrEval
+// IMPORTANT:<br> In order to work with the ~ChannelControl module the snrEval
 // module has to be called "snrEval" in the ned file.
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see BasicMacLayer, SnrDecider, SnrEval
+// @see BasicMacLayer, ~SnrDecider, ~SnrEval
 //
 // @author Daniel Willkomm
 //

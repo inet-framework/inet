@@ -23,7 +23,7 @@ cplusplus {{
 
 
 //
-// Represents an \UDP packet, to be used with the UDP module.
+// Represents an UDP packet, to be used with the ~UDP module.
 //
 packet UDPPacket
 {

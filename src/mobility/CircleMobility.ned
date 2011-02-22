@@ -20,7 +20,7 @@ package inet.mobility;
 //
 // Moves the node around a circle.
 //
-// @see ChannelControl
+// @see ~ChannelControl
 // @author Andras Varga
 //
 simple CircleMobility like BasicMobility

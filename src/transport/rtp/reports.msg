@@ -15,14 +15,14 @@
 // *                                                                         *
 // ***************************************************************************/
 //
-///** \file reports.h
-// * This file declares the classes SenderReport and ReceptionReport as used
-// * in RTCPSenderReportPacket and RTCPReceiverReportPacket.
+///** file reports.h
+// * This file declares the classes ~SenderReport and ~ReceptionReport as used
+// * in ~RTCPSenderReportPacket and ~RTCPReceiverReportPacket.
 // */
 //
 ///**
-// * The class SenderReport represents an rtp sender report as contained
-// * in an RTCPSenderReportPacket.
+// * The class ~SenderReport represents an rtp sender report as contained
+// * in an ~RTCPSenderReportPacket.
 // */
 
 class SenderReport
@@ -43,14 +43,14 @@ class SenderReport
 };
 
 ///**
-// * The class ReceptionReport represents an rtp receiver report stored
+// * The class ~ReceptionReport represents an rtp receiver report stored
 // * in an RTPSenderReportPacket or RTPReceiverReport.
 // */
 class ReceptionReport
 {
     @customize(true);
 
-    // The ssrc identifier of the sender this ReceptionReport is for.
+    // The ssrc identifier of the sender this ~ReceptionReport is for.
     uint32 ssrc;
 
     // The fraction lost.
@@ -65,10 +65,10 @@ class ReceptionReport
     // The interarrival jitter.
     int jitter;
 
-    // The rtp time stamp of the last SenderReport received from this source.
+    // The rtp time stamp of the last ~SenderReport received from this source.
     int lastSR;
 
-    // The delay since the last SenderReport from this sender has been
+    // The delay since the last ~SenderReport from this sender has been
     // received in units of 1/65536 seconds.
     int delaySinceLastSR;
 };

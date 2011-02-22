@@ -21,33 +21,33 @@
 package inet.transport.udp;
 
 //
-// UDP protocol implementation, for IPv4 and IPv6.
+// ~UDP protocol implementation, for IPv4 and ~IPv6.
 //
-// The \UDP protocol header is represented by the class UDPPacket.
+// The UDP protocol header is represented by the class ~UDPPacket.
 //
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending an \UDP packet, the application should attach an UDPControlInfo
-// object to the payload, and send it to UDP.
-// UDP will also attach an UDPControlInfo object to any payload
+// For sending an UDP packet, the application should attach an ~UDPControlInfo
+// object to the payload, and send it to ~UDP.
+// ~UDP will also attach an ~UDPControlInfo object to any payload
 // message in sends up to the application.
 //
-// For receiving \UDP packets, the connected applications should first
-// "bind" to the given \UDP port. This can be done by sending an
-// arbitrary message with message kind UDP_C_BIND and an UDPControlInfo
+// For receiving UDP packets, the connected applications should first
+// "bind" to the given UDP port. This can be done by sending an
+// arbitrary message with message kind UDP_C_BIND and an ~UDPControlInfo
 // attached with srcPort filled in.
 //
 // If there is only one app which doesn't bind to any port, it will
 // receive all packets.
 //
-// <b>Communication with the \IP (IPv4/IPv6) layer</b>
+// <b>Communication with the IP (IPv4/~IPv6) layer</b>
 //
-// The UDP model relies on sending and receiving IPControlInfo/IPv6ControlInfo
-// objects attached to UDPPacket objects as control info
+// The ~UDP model relies on sending and receiving ~IPControlInfo/~IPv6ControlInfo
+// objects attached to ~UDPPacket objects as control info
 // (see cMessage::setControlInfo()).
 //
-// @see UDPPacket, UDPControlInfo, UDPCommandCode
+// @see ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
 //
 simple UDP
 {
