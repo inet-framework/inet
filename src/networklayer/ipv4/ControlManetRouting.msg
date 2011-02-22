@@ -32,7 +32,7 @@ enum ManetControlType
 }
 
 //
-// ~ICMP message class
+// ICMP message class
 //
 packet ControlManetRouting
 {

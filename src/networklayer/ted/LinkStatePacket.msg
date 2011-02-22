@@ -18,7 +18,7 @@ cplusplus {{
 }}
 
 
-// Represents a link in the ~TED and in ~LinkStateMsg packets; from ~TED.msg.
+// Represents a link in the ~TED and in ~LinkStateMsg packets; from TED.msg.
 struct TELinkStateInfo;
 
 

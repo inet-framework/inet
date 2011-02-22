@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        ~TransmComplete.msg
+// * file:        TransmComplete.msg
 // *
 // * author:      Marc Loebbers
 // *

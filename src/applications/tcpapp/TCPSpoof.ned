@@ -19,11 +19,11 @@
 package inet.applications.tcpapp;
 
 //
-// Sends fabricated ~TCP packets. This is a base implementation,
+// Sends fabricated TCP packets. This is a base implementation,
 // you'll probably have to customize it in C++ according to
 // what you want to send and when you want to send it.
 //
-// Compatible with both IPv4 and ~IPv6.
+// Compatible with both IPv4 (~IP) and ~IPv6.
 //
 simple TCPSpoof
 {
@@ -32,7 +32,7 @@ simple TCPSpoof
         string destAddress = default(""); // destination address
         int srcPort; // local port number
         int destPort; // destination port number
-        int seqNo; // sequence number (-1 for ~TCP ISS)
+        int seqNo; // sequence number (-1 for TCP ISS)
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");

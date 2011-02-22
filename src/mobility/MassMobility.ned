@@ -22,7 +22,7 @@ package inet.mobility;
 
 //
 // This is a random mobility model for a mobile host with a mass. It is the
-// one used in "Optimized Smooth Handoffs in Mobile ~IP" by Perkins &Wang.
+// one used in "Optimized Smooth Handoffs in Mobile IP" by Perkins &Wang.
 //
 // "An MH moves within the room according to the following pattern. It moves
 // along a straight line for a certain period of time before it makes a turn.

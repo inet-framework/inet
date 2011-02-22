@@ -21,32 +21,34 @@ package inet.transport.tcp;
 
 //
 // TCP protocol implementation.
+//
 // This implementation supports:
 //   - RFC  793 - Transmission Control Protocol
-//   - RFC  896 - Congestion Control in ~IP/~TCP Internetworks
+//   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-//   - RFC 1323 - ~TCP Extensions for High Performance
-//   - RFC 2018 - ~TCP Selective Acknowledgment Options
-//   - RFC 2581 - ~TCP Congestion Control
-//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for ~TCP
-//   - RFC 3042 - Enhancing ~TCP's Loss Recovery Using Limited Transmit
-//   - RFC 3390 - Increasing ~TCP's Initial Window
+//   - RFC 1323 - TCP Extensions for High Performance
+//   - RFC 2018 - TCP Selective Acknowledgment Options
+//   - RFC 2581 - TCP Congestion Control
+//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+//   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//   - RFC 3390 - Increasing TCP's Initial Window
 //   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
-//                Algorithm for ~TCP
-//   - RFC 3782 - The NewReno Modification to ~TCP's Fast Recovery Algorithm
-// Compatible with both IPv4 and ~IPv6.
+//                Algorithm for TCP
+//   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//
+// This module is compatible with both IPv4 (~IP) and ~IPv6.
 //
 // A TCP segment is represented by the class ~TCPSegment.
 //
 // <b>Communication with clients</b>
 //
-// For communication between client applications and ~TCP, the ~TcpCommandCode
+// For communication between client applications and TCP, the ~TcpCommandCode
 // and ~TcpStatusInd enums are used as message kinds, and ~TCPCommand
 // and its subclasses are used as control info.
 //
-// To open a connection from a client app, send a cMessage to ~TCP with
+// To open a connection from a client app, send a cMessage to TCP with
 // TCP_C_OPEN_ACTIVE as message kind and a ~TCPOpenCommand object filled in
-// and attached to it as control info. (The peer ~TCP will have to be LISTENing;
+// and attached to it as control info. (The peer TCP will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
 // message kind.) With passive open, there's a possibility to cause the connection
 // "fork" on an incoming connection, leaving the original connection LISTENing
@@ -54,20 +56,20 @@ package inet.transport.tcp;
 //
 // The client app can send data by assigning the TCP_C_SEND message kind
 // and attaching a ~TCPSendCommand control info object to the data packet,
-// and sending it to ~TCP. The server app will receive data as messages
+// and sending it to TCP. The server app will receive data as messages
 // with the TCP_I_DATA message kind and ~TCPSendCommand control info.
 //
-// To close, the client sends a cMessage to ~TCP with the TCP_C_CLOSE message kind
+// To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and ~TCPCommand control info.
 //
-// ~TCP sends notifications to the application whenever there's a significant
-// change in the state of the connection: established, remote ~TCP closed,
+// TCP sends notifications to the application whenever there's a significant
+// change in the state of the connection: established, remote TCP closed,
 // closed, timed out, connection refused, connection reset, etc. These
 // notifications are also cMessages with message kind TCP_I_xxx
 // (TCP_I_ESTABLISHED, etc.) and ~TCPCommand as control info.
 //
-// One ~TCP module can serve several application modules, and several
-// connections per application. The <i>k</i>th application connects to ~TCP's
+// One TCP module can serve several application modules, and several
+// connections per application. The <i>k</i>th application connects to TCP's
 // appIn[k] and appOut[k] ports. When talking to applications, a
 // connection is identified by the (application port index, connId) pair,
 // where connId is assigned by the application in the OPEN call.
@@ -76,16 +78,16 @@ package inet.transport.tcp;
 //
 // The TCPSocket C++ class is provided to simplify managing TCP connections
 // from applications. TCPSocket handles the job of assembling and sending
-// command messages (OPEN, CLOSE, etc) to ~TCP, and it also simplifies
-// the task of dealing with packets and notification messages coming from ~TCP.
+// command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
+// the task of dealing with packets and notification messages coming from TCP.
 //
 // <b>Communication with the IP layer</b>
 //
-// The ~TCP model relies on sending and receiving ~IPControlInfo objects
+// The TCP model relies on sending and receiving ~IPControlInfo objects
 // attached to TCP segment objects as control info
 // (see cMessage::setControlInfo()).
 //
-// <b>Configuring ~TCP</b>
+// <b>Configuring TCP</b>
 //
 // FIXME - The sendQueueClass and receiveQueueClass parameters are removed!!!
 //
@@ -98,7 +100,7 @@ package inet.transport.tcp;
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over ~TCP, the receiver-side client will see a
+//      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
 // It depends on the client (app) modules which sendQueue/rcvQueue they require.
@@ -111,10 +113,10 @@ package inet.transport.tcp;
 //   -# use "TCPMsgBasedSendQueue" and "TCPMsgBasedRcvQueue", which transmit
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
-//      sender-side ~TCP entity will be reproduced on the receiver side.
+//      sender-side TCP entity will be reproduced on the receiver side.
 //      If a client sends a cMessage with length = 1 megabyte, the
 //      receiver-side client will receive the same message object (or a clone)
-//      after the ~TCP entities have completed simulating the transmission
+//      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
 //
@@ -147,7 +149,7 @@ package inet.transport.tcp;
 //
 // <b>Standards</b>
 //
-// The ~TCP module itself implements the following:
+// The TCP module itself implements the following:
 //  - all RFC 793 TCP states and state transitions
 //  - connection setup and teardown as in RFC 793
 //  - generally, RFC 793 compliant segment processing
@@ -156,16 +158,16 @@ package inet.transport.tcp;
 //    to the user
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //  - The basic SACK implementation (RFC 2018 and RFC 2883) is located in
-//    ~TCP main (and not in flavours).
-//    This means that all existing ~TCP algorithm classes may be used with
+//    TCP main (and not in flavours).
+//    This means that all existing TCP algorithm classes may be used with
 //    SACK, although currently only TCPReno makes sense.
 //  - RFC 3517 - (SACK)-based Loss Recovery algorithm which is a conservative
 //    replacement of the fast recovery algorithm (RFC2581) integrated to
 //    TCPReno but not to TCPNewReno, TCPTahoe, TCPNoCongestionControl and DumbTCP.
 //  - changes from RFC 2001 to RFC 2581:
-//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a ~TCP receiver SHOULD send an immediate ACK
+//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
-//  - ~TCP header options:
+//  - TCP header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
@@ -201,7 +203,7 @@ package inet.transport.tcp;
 //  - no RECEIVE command. Received data are always forwarded to the app as
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control
-//    between ~TCP and the app.
+//    between TCP and the app.
 //  - all timeouts are precisely calculated: timer granularity (which is caused
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix TCP
 //    implementations) is not simulated
@@ -216,7 +218,7 @@ package inet.transport.tcp;
 //
 // <b>Tests</b>
 //
-// There are automated test cases (*.test files) for ~TCP -- see the ~Test
+// There are automated test cases (*.test files) for TCP -- see the ~Test
 // directory in the source distribution.
 //
 // Please also see ChangeLog.

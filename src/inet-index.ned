@@ -21,12 +21,11 @@
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
 // <center>release 20110211</center>
 //
-// <nohtml>INET Framework contains IPv4, ~IPv6, ~TCP, ~SCTP, ~UDP protocol implementations,
-// and several application models. The framework also includes an ~MPLS model
-// with RSVP-TE and ~LDP signalling. ~Link-layer models are ~PPP, Ethernet and 802.11.
+// INET Framework contains IPv4, IPv6, TCP, SCTP, UDP protocol implementations,
+// and several application models. The framework also includes an MPLS model
+// with RSVP-TE and LDP signalling. Link-layer models are PPP, Ethernet and 802.11.
 // Static routing can be set up using network autoconfigurators, or one can use
 // routing protocol implementations.
-// </nohtml>
 //
 // The INET Framework supports wireless and mobile simulations as well. Support
 // for mobility and wireless communication has been derived from the
@@ -53,7 +52,7 @@
 //  - IP layer: ~IP, ~ARP and ~ICMP; ~RoutingTable
 //  - IPv6 support: ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6, ~RoutingTable6;
 //    see <a href="ipv6overview.html">IPv6 model overview</a>
-//  - transport layer: ~TCP, ~UDP
+//  - transport layer: ~TCP, ~UDP, ~SCTP
 //  - ~InterfaceTable and ~NotificationBoard are there in every
 //    host and router model
 //  - queues in router network interfaces: ~DropTailQueue, ~REDQueue,
@@ -75,8 +74,8 @@
 //  - MPLS models: the core modules are ~MPLS, ~LIBTable, ~LDP, ~RSVP, ~TED,
 //    ~LinkStateRouting; MPLS-enabled routers are ~LDP_LSR, ~RSVP_LSR;
 //    see also the list of <a href="standards.html">implemented standards</a>
-//  - dynamic routing is provided by the Daemon module (the Quagga routing
-//    daemon ported into the INET Framework) used inside QuaggaRouter;
+//  - dynamic routing is provided by the ~Daemon module (the Quagga routing
+//    daemon ported into the INET Framework) used inside ~QuaggaRouter;
 //    alternatively one can run ~OSPFRouter which relies on the ~OSPFRouting
 //    module;
 //  - support for recording <i>nam</i> traces is provided by ~NAMTrace and
@@ -98,7 +97,7 @@
 // during 2003 by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au) and other
 // students at the University of Technology, Sydney under supervision of
 // Dr Robin Brown. The package consisted of around 10,000 LOCs, and was
-// published at http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone (now
+// published at http://charlie.it.uts.edu.au/~~tkaphan/xtn/capstone (now
 // unavailable).
 //
 // After a period of IPSuite being unmaintained, Andras Varga took over
@@ -143,7 +142,7 @@
 // got first included in the July 2005 INET snapshot, and gradually refined
 // afterwards.
 //
-// The SCTP implementation was contributed by Michael Tuexen, Irene Ruengeler 
+// The SCTP implementation was contributed by Michael Tuexen, Irene Ruengeler
 // and Thomas Dreibholz
 //
 // Support for Sam Jensen's Network Simulation Cradle,

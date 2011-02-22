@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        ~SnrControlInfo.msg
+// * file:        SnrControlInfo.msg
 // *
 // * author:      Marc Loebbers
 // *
@@ -48,27 +48,33 @@ class noncobject SnrList;
 //
 // So, every list entry should look something like this:
 //
-// SnrListEntry listEntry;<br>
-// listEntry.time = snrStartingTime;<br>
+// <pre>
+// SnrListEntry listEntry;
+// listEntry.time = snrStartingTime;
 // listEntry.snr  = snrLevel;<br>
 // listName.push_back( listEntry );
+// </pre>
 //
 // When the list is complete and you want to send the message, you
 // have to give the list to the control info  before attaching it to
 // the ~AirFrame.
 //
-// ~SnrControlInfo* cInfo = new ~SnrControlInfo;<br>
-// cInfo->setSnrList( listName );<br>
+// <pre>
+// SnrControlInfo* cInfo = new SnrControlInfo;
+// cInfo->setSnrList( listName );
 // msg->setControlInfo( cInfo );
+// </pre>
 //
 // When receiving an ~AirFrame (in the deceider module) you probably want to
 // read the list. Therefore you have to get a copy of that list:
 //
-// ~SnrControlInfo* cInfo = new ~SnrControlInfo;<br>
+// <pre>
+// SnrControlInfo* cInfo = new SnrControlInfo;<br>
 // cInfo = static_cast<~SnrControlInfo*>(msg->removeControlInfo());<br>
 // SnrList receivedList* = new SnrList;<br>
 // receivedList = cInfo->getSnrList();<br>
 // delete cInfo;
+// </pre>
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //

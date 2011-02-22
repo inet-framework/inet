@@ -24,7 +24,7 @@ package inet.networklayer.extras;
 // <pre><nohtml>
 // <scenario>
 //   <at t="2">
-//     <routing module="~NetworkInfo" target="LSR2" file="LSR2_002.txt"/>
+//     <routing module="NetworkInfo" target="LSR2" file="LSR2_002.txt"/>
 //   </at>
 // </scenario>
 // </nohtml></pre>

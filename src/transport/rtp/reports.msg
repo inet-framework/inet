@@ -1,30 +1,16 @@
-///***************************************************************************
-//                          reports.h  -  description
-//                             -------------------
-//    begin                : Tue Oct 23 2001
-//    copyright            : (C) 2001 by Matthias Oppitz
-//    email                : Matthias.Oppitz@gmx.de
-// ***************************************************************************/
 //
-///***************************************************************************
-// *                                                                         *
-// *   This program is free software; you can redistribute it and/or modify  *
-// *   it under the terms of the GNU General Public License as published by  *
-// *   the Free Software Foundation; either version 2 of the License, or     *
-// *   (at your option) any later version.                                   *
-// *                                                                         *
-// ***************************************************************************/
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// at your option) any later version.
 //
-///** file reports.h
-// * This file declares the classes ~SenderReport and ~ReceptionReport as used
-// * in ~RTCPSenderReportPacket and ~RTCPReceiverReportPacket.
-// */
+// (C) 2001 by Matthias Oppitz <Matthias.Oppitz@gmx.de>
 //
-///**
-// * The class ~SenderReport represents an rtp sender report as contained
-// * in an ~RTCPSenderReportPacket.
-// */
 
+//
+// Represents an RTP sender report as contained
+// in an ~RTCPSenderReportPacket.
+//
 class SenderReport
 {
     @customize(true);
@@ -42,10 +28,10 @@ class SenderReport
     uint32 byteCount;
 };
 
-///**
-// * The class ~ReceptionReport represents an rtp receiver report stored
-// * in an RTPSenderReportPacket or RTPReceiverReport.
-// */
+//
+// Rrepresents an RTP receiver report stored
+// in an RTPSenderReportPacket or RTPReceiverReport.
+//
 class ReceptionReport
 {
     @customize(true);

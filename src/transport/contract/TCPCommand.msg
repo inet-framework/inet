@@ -102,7 +102,7 @@ class TCPErrorInfo extends TCPCommand
 }
 
 //
-// Defines what to transmit as payload in ~TCP segments
+// Defines what to transmit as payload in TCP segments
 //
 enum TCPDataTransferMode
 {
@@ -113,7 +113,7 @@ enum TCPDataTransferMode
 }
 
 //
-// Control info to be used for active or passive ~TCP open.
+// Control info to be used for active or passive TCP open.
 //
 // localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
 // localAddr is optional because ~TCP can learn it from ~IP when a packet
@@ -121,7 +121,7 @@ enum TCPDataTransferMode
 // ephemeral ports.
 //
 // The sendQueueClass, receiveQueueClass and tcpAlgorithmClass fields
-// allow per-connection ~TCP configuration. These fields may contain
+// allow per-connection TCP configuration. These fields may contain
 // names of classes subclassed from TCPSendQueue, TCPReceiveQueue
 // and TCPAlgorithm, respectively. If not set, module parameters with
 // similar names are used.
@@ -133,7 +133,7 @@ enum TCPDataTransferMode
 // and the connection structure with the old connId remains listening.
 // With fork=false, all the above does not happen: the first connection
 // is accepted (with the original connId), and further incoming connections
-// will be refused by ~TCP by sending an RST segment.
+// will be refused by TCP by sending an RST segment.
 //
 // @see ~TcpCommandCode, ~TCP
 //
@@ -145,7 +145,7 @@ class TCPOpenCommand extends TCPCommand
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
     int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts
-    string tcpAlgorithmClass; // ~TCP congestion control algorithm; leave empty for default
+    string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 
 
@@ -161,7 +161,7 @@ class TCPSendCommand extends TCPCommand
 
 //
 // Sent with message kind TCP_I_ESTABLISHED, to let the app know
-// about the local and remote ~IP address and port.
+// about the local and remote IP address and port.
 //
 // @see ~TcpCommandCode, ~TCP
 //

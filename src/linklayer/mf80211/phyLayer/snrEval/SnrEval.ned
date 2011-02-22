@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~SnrEval.ned
+// * file:        SnrEval.ned
 // *
 // * author:      Marc Loebbers, Andras Varga, Levente Meszaros
 // *

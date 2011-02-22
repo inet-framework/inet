@@ -24,13 +24,13 @@ package inet.networklayer.ipv4;
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over ~IP from a higher layer protocol, the module should
+// To send a packet over IPv4 from a higher layer protocol, the module should
 // fill in an ~IPControlInfo object, attach it to the packet with cMessage's
 // setControlInfo() method, the send it to the ~IP module.
 //
 // When ~IP sends up a packet to a higher layer protocol, it will also attach
-// an ~IPControlInfo to the packet, with the source and destination ~IP address,
-// etc. of the ~IP datagram in which the packet arrived.
+// an ~IPControlInfo to the packet, with the source and destination IP address,
+// etc. of the IP datagram in which the packet arrived.
 //
 // ~IP can serve several higher-layer protocols. When delivering packets
 // to them, the output gate is determined from the Protocol field in the
@@ -73,7 +73,7 @@ package inet.networklayer.ipv4;
 //
 // The current performance model comes from the QueueBase C++ base class.
 // If you need a more sophisticated performance model, you may change the
-// module implementation (the ~IP class), and: (1) override the startService()
+// module implementation (the IP class), and: (1) override the startService()
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //

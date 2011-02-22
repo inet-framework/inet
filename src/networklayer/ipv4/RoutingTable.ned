@@ -23,7 +23,7 @@ package inet.networklayer.ipv4;
 // ~InterfaceTable.)
 //
 // For hosts, the routerId module parameter should be empty (""),
-// in which case the loopback ~IP address will be set to 127.0.0.1/8.
+// in which case the loopback IP address will be set to 127.0.0.1/8.
 // For routers which have a routerId set, the loopback address will be set to
 // routerId. (See also RFC 2072 "Router Renumbering Guide".)
 //
@@ -48,10 +48,10 @@ package inet.networklayer.ipv4;
 simple RoutingTable
 {
     parameters:
-        string routerId = default("auto"); // for routers, the router id using ~IP address dotted
+        string routerId = default("auto"); // for routers, the router id using IP address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
-        bool IPForward = default(true);  // turns ~IP forwarding on/off
+        bool IPForward = default(true);  // turns IP forwarding on/off
         string routingFile = default("");  // routing table file name
         @display("i=block/table");
 }

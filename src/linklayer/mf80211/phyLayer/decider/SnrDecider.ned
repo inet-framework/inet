@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~SnrDecider.ned
+// * file:        SnrDecider.ned
 // *
 // * author:      Marc Loebbers
 // *

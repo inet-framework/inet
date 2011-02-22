@@ -33,7 +33,7 @@ class noncobject IPAddressVector;
 class noncobject EroVector;
 
 //
-// Intserv/~RSVP: Session Structure
+// Intserv/RSVP: Session Structure
 //
 struct SessionObj_t
 {
@@ -45,7 +45,7 @@ struct SessionObj_t
 }
 
 //
-// Intserv/~RSVP: ~RSVP HOP Structure
+// Intserv/RSVP: RSVP HOP Structure
 //
 struct RsvpHopObj_t
 {
@@ -54,7 +54,7 @@ struct RsvpHopObj_t
 }
 
 //
-// Intserv/~RSVP: Sender Template Structure
+// Intserv/RSVP: Sender Template Structure
 //
 struct SenderTemplateObj_t
 {
@@ -64,7 +64,7 @@ struct SenderTemplateObj_t
 
 
 //
-// Intserv/~RSVP: Sender Tspec Structure
+// Intserv/RSVP: Sender Tspec Structure
 //
 struct SenderTspecObj_t
 {
@@ -72,21 +72,21 @@ struct SenderTspecObj_t
 }
 
 //
-// Intserv/~RSVP: Sender Tspec Structure
+// Intserv/RSVP: Sender Tspec Structure
 //
 struct FlowSpecObj_t extends SenderTspecObj_t
 {
 }
 
 //
-// Intserv/~RSVP: Sender Template Structure
+// Intserv/RSVP: Sender Template Structure
 //
 struct FilterSpecObj_t extends SenderTemplateObj_t
 {
 }
 
 //
-// Intserv/~RSVP: Label Request Object Structure
+// Intserv/RSVP: Label Request Object Structure
 //
 struct LabelRequestObj_t
 {
@@ -95,7 +95,7 @@ struct LabelRequestObj_t
 }
 
 //
-// Intserv/~RSVP: Sender Descriptor Structure
+// Intserv/RSVP: Sender Descriptor Structure
 //
 struct SenderDescriptor_t
 {
@@ -104,7 +104,7 @@ struct SenderDescriptor_t
 }
 
 //
-// Intserv/~RSVP: Explicit Routing Object Structure
+// Intserv/RSVP: Explicit Routing Object Structure
 //
 struct EroObj_t
 {
@@ -113,7 +113,7 @@ struct EroObj_t
 }
 
 //
-// Intserv/~RSVP: Flow Descriptor Structure
+// Intserv/RSVP: Flow Descriptor Structure
 //
 struct FlowDescriptor_t
 {

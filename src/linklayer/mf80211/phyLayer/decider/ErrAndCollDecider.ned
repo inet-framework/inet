@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~ErrAndCollDecider.ned
+// * file:        ErrAndCollDecider.ned
 // *
 // * author:      Marc Loebbers
 // *

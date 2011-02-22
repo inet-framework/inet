@@ -16,7 +16,7 @@
 package inet.networklayer.rsvp_te;
 
 //
-// Implements RSVP-TE, a signalling protocol for ~MPLS. The module
+// Implements RSVP-TE, a signalling protocol for MPLS. The module
 // processes RSVP-TE messages, installs labels and does the reservation
 // along LSP paths.
 //
@@ -100,7 +100,7 @@ simple RSVP
 {
     parameters:
         xml traffic; // specifies paths to set up
-        string peers; // names of the interfaces towards ~RSVP peers
+        string peers; // names of the interfaces towards RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");

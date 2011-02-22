@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~GilbertElliotSnr.ned
+// * file:        GilbertElliotSnr.ned
 // *
 // * author:      Marc Loebbers
 // *

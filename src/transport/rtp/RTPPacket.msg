@@ -21,19 +21,19 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
-//
-// This class represents an rtp data packet. Real data can either
-// be encapsulated, or simulated by adding length.
-//
-// The following rtp header fields exist but aren't used:
-// padding, extension, csrcCount. The csrcList can't be used
-// because csrcCount is always 0.
-//
 enum RTPPacketEnums
 {
     RTPPACKET_FIX_HEADERLENGTH = 12;
 }
 
+//
+// This class represents an RTP data packet. Real data can either
+// be encapsulated, or simulated by adding length.
+//
+// The following RTP header fields exist but aren't used:
+// padding, extension, csrcCount. The csrcList can't be used
+// because csrcCount is always 0.
+//
 packet RTPPacket
 {
     @customize(true);  // see the generated C++ header for more info
@@ -51,7 +51,7 @@ packet RTPPacket
     // This implementation doesn't support rtp header extensions, so it is always 0.
     bool extension = false;
 
-    // The marker of this ~RTPPacket.
+    // The marker.
     bool marker = false;
 
     // The type of payload carried in this ~RTPPacket.

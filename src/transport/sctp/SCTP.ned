@@ -18,10 +18,13 @@
 
 package inet.transport.sctp;
 
+//
+// Implements the SCTP protocol.
+//
 simple SCTP
 {
-        parameters:
-        // ====== ~SCTP Association Parameters =================================
+    parameters:
+        //#====== SCTP Association Parameters =================================
         int numGapReports                   = default(3);
         double rtoInitial @unit(s)          = default(3s);
         double rtoMin @unit(s)              = default(1s);
@@ -38,17 +41,17 @@ simple SCTP
         int sendQueueLimit                  = default(0);
         double validCookieLifetime @unit(s) = default(10s);
 
-        // ====== Testing =====================================================
+        //#====== Testing =====================================================
 
-        // ====== Heartbeats ==================================================
+        //#====== Heartbeats ==================================================
         bool enableHeartbeats                   = default(true);
         double hbInterval @unit(s)              = default(30s);
 
-        // ====== Nagle Algorithm =============================================
+        //#====== Nagle Algorithm =============================================
         bool nagleEnabled                       = default(true);
         int naglePoint                          = default(1468);
 
-        // ====== Congestion Control ==========================================
+        //#====== Congestion Control ==========================================
         bool fastRecoverySupported              = default(true);
         string sctpAlgorithmClass               = default("SCTPAlg");
         int ccModule                            = default(0);           // RFC4960=0
@@ -58,13 +61,6 @@ simple SCTP
         int swsLimit                            = default(3000);        // Limit for SWS
         bool udpEncapsEnabled                   = default(false);
 
-
-
-
-
-
-
-
     gates:
         input from_appl[];
         input from_ip;
@@ -73,3 +69,4 @@ simple SCTP
         output to_ip;
         output to_ipv6;
 }
+

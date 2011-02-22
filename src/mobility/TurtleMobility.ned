@@ -104,7 +104,7 @@ package inet.mobility;
 //
 //
 //
-// You can find the DTD with the sources: ~TurtleMobility.dtd.
+// You can find the DTD with the sources: TurtleMobility.dtd.
 //
 // @see ~ChannelControl
 // @author Andras Varga

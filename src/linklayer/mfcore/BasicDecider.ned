@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~BasicDecider.ned
+// * file:        BasicDecider.ned
 // *
 // * author:      Marc Loebbers
 // *
@@ -44,7 +44,7 @@ package inet.linklayer.mfcore;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @author Marc Löbbers, Daniel Willkomm
+// @author Marc Lï¿½bbers, Daniel Willkomm
 //
 simple BasicDecider
 {

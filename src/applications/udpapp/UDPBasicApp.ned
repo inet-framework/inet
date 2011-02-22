@@ -21,7 +21,7 @@ package inet.applications.udpapp;
 
 //
 // Sends UDP packets to the given IP address at the given interval.
-// Compatible with both IPv4 and ~IPv6.
+// Compatible with both IPv4 (~IP) and ~IPv6.
 //
 // The interval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
@@ -36,7 +36,7 @@ package inet.applications.udpapp;
 simple UDPBasicApp like UDPApp
 {
     parameters:
-        int localPort; // if -1, app doesn't bind in ~UDP
+        int localPort; // if -1, app doesn't bind in UDP
         int destPort;
         volatile int messageLength @unit("B"); // length of messages to generate, in bytes
         volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)

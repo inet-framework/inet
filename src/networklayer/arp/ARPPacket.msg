@@ -24,14 +24,14 @@ cplusplus {{
 #include "IPAddress.h"
 #include "MACAddress.h"
 
-// ~ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
+// ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
 #define ARP_HEADER_BYTES   28
 }}
 
 
 
 //
-// The list of practically important ~ARP opcodes
+// The list of practically important ARP opcodes
 //
 enum ARPOpcode
 {
@@ -44,9 +44,9 @@ enum ARPOpcode
 
 
 //
-// ~ARP packet. This is a specialized version: prepared for IEEE 802 hardware
+// ARP packet. This is a specialized version: prepared for IEEE 802 hardware
 // addresses and IPv4. Packet fields are therefore represented by C++ classes
-// MACAddress and IPAddress. Also, some ~ARP protocol header fields are
+// MACAddress and IPAddress. Also, some ARP protocol header fields are
 // not modelled explicitly (their values are implied):
 //   - hardwareType (not needed for modelling);
 //   - protocol type (0x800 IPv4)

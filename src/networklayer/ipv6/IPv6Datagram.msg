@@ -34,7 +34,7 @@ class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
 
 //
-// ~IPv6 datagram. RFC 2460 Section 3.
+// IPv6 datagram. RFC 2460 Section 3.
 //
 // Header fields not explicitly modelled:
 //    - version (=6): represented by the class name itself

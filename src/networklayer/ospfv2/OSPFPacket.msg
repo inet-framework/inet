@@ -93,7 +93,6 @@ enum LSAType
 //
 // Represents an OSPF LSA header
 //
-//class ~OSPFLSAHeader extends cObject
 class OSPFLSAHeader
 {
     unsigned short lsAge = 0;
@@ -109,7 +108,6 @@ class OSPFLSAHeader
 //
 // common ancestor type for all LSAs
 //
-//class ~OSPFLSA extends cObject
 class OSPFLSA
 {
     OSPFLSAHeader header;
@@ -129,7 +127,6 @@ struct TOSData
     unsigned char tosMetric[3];
 }
 
-//class ~Link extends cObject
 class Link
 {
     IPAddress linkID;
@@ -141,7 +138,7 @@ class Link
 }
 
 //
-// Represents an OSPF ~Router LSA
+// Represents an OSPF Router LSA
 //
 class OSPFRouterLSA extends OSPFLSA
 {
@@ -234,7 +231,7 @@ struct LSARequest
 }
 
 //
-// Represents an OSPF ~Link State Request packet
+// Represents an OSPF Link State Request packet
 //
 packet OSPFLinkStateRequestPacket extends OSPFPacket
 {
@@ -242,7 +239,7 @@ packet OSPFLinkStateRequestPacket extends OSPFPacket
 }
 
 //
-// Represents an OSPF ~Link State Update packet
+// Represents an OSPF Link State Update packet
 //
 packet OSPFLinkStateUpdatePacket extends OSPFPacket
 {
@@ -254,7 +251,7 @@ packet OSPFLinkStateUpdatePacket extends OSPFPacket
 }
 
 //
-// Represents an OSPF ~Link State Acknowledgement packet
+// Represents an OSPF Link State Acknowledgement packet
 //
 packet OSPFLinkStateAcknowledgementPacket extends OSPFPacket
 {

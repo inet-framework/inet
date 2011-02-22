@@ -20,7 +20,7 @@
 package inet.networklayer.ipv4;
 
 //
-// Placeholder for the ~IGMP protocol
+// Placeholder for the IGMP protocol
 //
 // author: Andras Varga
 //
@@ -29,7 +29,7 @@ module IGMP
     parameters:
         @display("i=block/cogwheel_s");
     gates:
-        input localIn @labels(IPControlInfo/up);  // delivered ~IGMP packets
+        input localIn @labels(IPControlInfo/up);  // delivered IGMP packets
         output sendOut @labels(IPControlInfo/down); // to ~IP
     connections allowunconnected:
 }

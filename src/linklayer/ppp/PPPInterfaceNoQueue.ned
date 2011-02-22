@@ -23,7 +23,7 @@ import inet.linklayer.INetworkInterface;
 
 
 //
-// PPP interface. Assumes inifinite queue.
+// PPP interface. Assumes infinite queue.
 //
 // @see ~PPPInterface
 //

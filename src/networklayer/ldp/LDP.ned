@@ -17,16 +17,16 @@
 package inet.networklayer.ldp;
 
 //
-// Handles and processes ~LDP messages.
+// Handles and processes LDP messages.
 //
-// The ~LDP protocol is used by one LSR (Label Switched Router) to inform
+// The LDP protocol is used by one LSR (Label Switched Router) to inform
 // another LSR of the label bindings it has made. The LSR uses this protocol
 // to establish label switched paths through a network by mapping network layer
 // routing information directly to data-link layer switched paths.
 //
 // Operations
 //
-// All ~LDP message types are subclassed from ~LDPPacket, and include
+// All LDP message types are subclassed from ~LDPPacket, and include
 // ~LDPHello, ~LDPNotify, ~LDPLabelRequest, ~LDPIni and ~LDPAddress.
 //
 // Message processing in the ~LDP module is explained in
@@ -39,7 +39,7 @@ simple LDP
     parameters:
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount"); // ~TCP data transfer mode
+        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount"); // TCP data transfer mode
         @display("i=block/control");
     gates:
         input tcpIn @labels(TCPCommand/up);

@@ -180,7 +180,7 @@
 // modules -- as opposed to "interface" packets.
 //
 //
-// @page appreg.html, ~EtherLLC: SAP Registration
+// @page appreg.html, EtherLLC: SAP Registration
 //
 // The Ethernet model supports multiple applications or higher layer
 // protocols.
@@ -249,7 +249,7 @@
 
 
 //
-// @page largenet.html, ~LargeNet model description
+// @page largenet.html, LargeNet model description
 //
 // The ~LargeNet model demonstrates how one can put together models of large
 // LANs with little effort, making use of MAC auto-configuration.
@@ -262,7 +262,7 @@
 // 100Mb full duplex, 100Mb half duplex, 10Mb UTP, 10Mb bus ("thin Ethernet"),
 // switched hubs, repeating hubs.
 //
-// The topology is in ~LargeNet.ned, and it looks like this: there's chain
+// The topology is in LargeNet.ned, and it looks like this: there's chain
 // of n=15 large "backbone" switches (switchBB[]) as well as four more
 // large switches (switchA, switchB, switchC, switchD) connected to
 // somewhere the middle of the backbone (switchBB[4]). These 15+4 switches

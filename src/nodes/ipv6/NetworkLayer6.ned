@@ -30,9 +30,9 @@ import inet.networklayer.ipv6.IPv6ErrorHandling;
 
 
 //
-// Represents an ~IPv6 network layer (L3).
+// Represents an IPv6 network layer (L3).
 //
-// The module has ports to connect to a higher layer (~TCP,~UDP) and
+// The module has ports to connect to a higher layer (TCP, UDP) and
 // several network interfaces.
 //
 module NetworkLayer6
@@ -77,7 +77,7 @@ module NetworkLayer6
                 @display("p=208,171");
         }
     connections allowunconnected:  // FIXME remove 'nocheck'!
-        // ~IPv6 to transport Layer
+        // IPv6 to transport Layer
         ipv6.transportOut[0] --> { @display("m=n"); } --> tcpOut;
         ipv6.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
 
@@ -90,22 +90,22 @@ module NetworkLayer6
         ipv6.transportOut[3] --> { @display("m=n"); } --> ospfOut;
         ipv6.transportIn[3] <-- { @display("m=n"); } <-- ospfIn;
 
-        // ~IPv6 to ~ICMPv6
+        // IPv6 to ICMPv6
         ipv6.icmpOut --> icmpv6.ipv6In;
         ipv6.icmpIn <-- icmpv6.ipv6Out;
 
-        // ~ICMPv6 to ~IPv6ErrorHandling
+        // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;
 
-        // ~ICMPv6 to ping I/O
+        // ICMPv6 to ping I/O
         icmpv6.pingOut --> pingOut;
         icmpv6.pingIn <-- pingIn;
 
-        // ~IPv6 to Neighbour Discovery
+        // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;
         ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
 
-        // ~IPv6 to L2
+        // IPv6 to L2
         for i=0..sizeof(ifOut)-1 {
             ifIn[i] --> { @display("m=s"); } --> ipv6.queueIn[i];
             ifOut[i] <-- { @display("m=s"); } <-- ipv6.queueOut[i];

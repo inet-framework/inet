@@ -61,8 +61,8 @@ cplusplus {{
 class IPControlInfo
 {
     @customize(true);
-    IPAddress destAddr;   // destination ~IP address
-    IPAddress srcAddr;    // source ~IP address
+    IPAddress destAddr;   // destination IP address
+    IPAddress srcAddr;    // source IP address
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
     short protocol enum(IPProtocolId);  // encapsulated protocol

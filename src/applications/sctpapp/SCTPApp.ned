@@ -16,13 +16,12 @@
 //
 
 
-//
-// Not an actual module type. It only shows which gates an ~SCTP app should have
-// to be able to be used in ~StandardHost etc.
-//
-
 package inet.applications.sctpapp;
 
+//
+// Not an actual module type. It only shows which gates an SCTP app should have
+// to be able to be used in ~StandardHost etc.
+//
 moduleinterface SCTPApp
 {
     parameters:

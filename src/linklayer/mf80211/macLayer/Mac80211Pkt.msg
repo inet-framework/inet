@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        ~Mac80211Pkt.msg
+// * file:        Mac80211Pkt.msg
 // *
 // * author:      Marc Löbbers
 // * copyright:   (c) by 'the Glimmer Twins'

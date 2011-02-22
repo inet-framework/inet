@@ -83,7 +83,7 @@
 //   The routing table submodule within the host (router) must be called
 //   <code>routingTable</code> for other modules to find it.
 //
-// - ~RoutingTable6. This is like ~RoutingTable, but for ~IPv6.
+// - ~RoutingTable6. This is like ~RoutingTable, but for IPv6.
 //
 // - ~NotificationBoard. This module makes it possible for several modules to
 //   communicate in a publish-subscribe manner. For example, the radio module
@@ -100,7 +100,7 @@
 //
 // Some modules have only one instance, at global network level:
 //
-// - ~FlatNetworkConfigurator assigns ~IP addresses to hosts and routers,
+// - ~FlatNetworkConfigurator assigns IP addresses to hosts and routers,
 //   and sets up static routing.
 //
 // - ~ScenarioManager makes simulations scriptable. Modules can be made to support
@@ -119,10 +119,10 @@
 // decapsulation.
 //
 // It is often necessary to convey extra information with the packet. For
-// example, when an application-layer module wants to send data over ~TCP, some
-// connection identifier needs to be specified for ~TCP. When ~TCP sends a
-// segment over ~IP, ~IP will need a destination address and possibly other
-// parameters like TTL. When ~IP sends a datagram to an Ethernet interface for
+// example, when an application-layer module wants to send data over TCP, some
+// connection identifier needs to be specified for TCP. When TCP sends a
+// segment over IP, IP will need a destination address and possibly other
+// parameters like TTL. When IP sends a datagram to an Ethernet interface for
 // transmission, a destination MAC address must be specified. This extra
 // information is attached to the message object to as <i>control info</i>.
 //
@@ -131,26 +131,26 @@
 // Control info only holds auxiliary information for the next protocol layer,
 // and is not supposed to be sent over the network to other hosts and routers.
 //
-// @page ipaddresses.html, Specifying ~IP (~IPv6) addresses in module parameters
+// @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
 //
 // In INET, ~TCP, ~UDP and all application layer modules work with
-// both IPv4 and ~IPv6. Internally they use the IPvXAddress C++ class, which
-// can represent both IPv4 and ~IPv6 addresses.
+// both IPv4 and IPv6. Internally they use the IPvXAddress C++ class, which
+// can represent both IPv4 and IPv6 addresses.
 //
 // Most modules use the IPAddressResolver C++ class to resolve addresses
 // specified in module parameters in omnetpp.ini.
 // IPAddressResolver accepts the following syntax:
 //
 //    - literal IPv4 address: "186.54.66.2"
-//    - literal ~IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
+//    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
 //    - module name: "server", "subnet.server[3]"
 //    - interface of a host or router: "server/eth0", "subnet.server[3]/eth0"
-//    - IPv4 or ~IPv6 address of a host or router: "server(ipv4)",
+//    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
 //      "subnet.server[3](ipv6)"
-//    - IPv4 or ~IPv6 address of an interface of a host or router:
+//    - IPv4 or IPv6 address of an interface of a host or router:
 //      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
 //
-// @page irt.html, The ~IP routing files
+// @page irt.html, The IP routing files
 //
 // Routing files are files with <tt>.irt</tt> or <tt>.mrt</tt> extension,
 // and their names are passed in the routingFileName parameter
@@ -243,7 +243,7 @@
 //
 //
 //
-// @page ipv6overview.html, ~IPv6 model overview
+// @page ipv6overview.html, IPv6 model overview
 //
 // IPv6 support is implemented by several cooperating modules. The ~IPv6 module
 // implements IPv6 datagram handling (sending, forwarding etc). It relies on
@@ -254,7 +254,7 @@
 // in <tt>IPv6InterfaceData</tt> objects attached to <tt>InterfaceEntry</tt>
 // as its <tt>ipv6()</tt> member.
 //
-// The module ~IPv6NeighbourDiscovery implements all tasks associated with
+// The ~IPv6NeighbourDiscovery module implements all tasks associated with
 // neighbour discovery and stateless address autoconfiguration. The data
 // structures themselves (destination cache, neighbour cache, prefix list)
 // are kept in ~RoutingTable6, and are accessed via public C++ methods.
@@ -262,9 +262,9 @@
 // when ~IPv6 receives one, it forwards the packet to ~IPv6NeighbourDiscovery.
 //
 // The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-// the module ~ICMPv6, just like with IPv4. ICMP errors are sent into
-// ~IPv6ErrorHandling, which the user can extend or replace to get errors
-// handled in any way they like.
+// the ~ICMPv6 module, just like with IPv4. ICMP errors are sent to
+// ~IPv6ErrorHandling, which the user can extend or replace to have errors
+// handled in the way she likes.
 //
 
 package inet;

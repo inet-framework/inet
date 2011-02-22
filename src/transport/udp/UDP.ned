@@ -21,7 +21,7 @@
 package inet.transport.udp;
 
 //
-// ~UDP protocol implementation, for IPv4 and ~IPv6.
+// UDP protocol implementation, for IPv4 and IPv6.
 //
 // The UDP protocol header is represented by the class ~UDPPacket.
 //
@@ -41,7 +41,7 @@ package inet.transport.udp;
 // If there is only one app which doesn't bind to any port, it will
 // receive all packets.
 //
-// <b>Communication with the IP (IPv4/~IPv6) layer</b>
+// <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
 // The ~UDP model relies on sending and receiving ~IPControlInfo/~IPv6ControlInfo
 // objects attached to ~UDPPacket objects as control info

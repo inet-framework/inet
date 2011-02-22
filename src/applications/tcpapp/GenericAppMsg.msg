@@ -37,7 +37,7 @@ packet GenericAppMsg
 {
     int expectedReplyLength; // in bytes
     double replyDelay;       // reply after this many seconds
-    bool serverClose;        // with ~TCP: if true, server should close the
+    bool serverClose;        // with TCP: if true, server should close the
                              // connection after sending the reply
 }
 

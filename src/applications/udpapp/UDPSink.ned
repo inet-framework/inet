@@ -25,7 +25,7 @@ package inet.applications.udpapp;
 simple UDPSink like UDPApp
 {
     parameters:
-        int localPort; // if -1, app doesn't bind in ~UDP
+        int localPort; // if -1, app doesn't bind in UDP
         @display("i=block/sink");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
     gates:

@@ -20,11 +20,11 @@
 package inet.networklayer.icmpv6;
 
 //
-// ~ICMPv6 implementation.
+// ICMPv6 implementation.
 //
-// To send ~ICMPv6 Echo Request, send any message to port pingIn with ~IPv6ControlInfo
+// To send an ICMPv6 Echo Request, send any message to port pingIn with ~IPv6ControlInfo
 // attached. The message will be used as ping payload (encapsulated into an ~ICMPv6Message).
-// When ~ICMPv6 Echo Reply is received, the payload message will be sent to pingOut.
+// When an ICMPv6 Echo Reply is received, the payload message will be sent to pingOut.
 //
 // @see ~IPv6, ~RoutingTable6, ~IPv6NeighbourDiscovery
 //#FIXME gate descriptions needed...

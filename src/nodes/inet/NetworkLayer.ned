@@ -30,7 +30,7 @@ import inet.networklayer.ipv4.IP;
 //
 // Network layer of an IP node.
 //
-// Interfaces to transport layer: ~TCP, ~UDP, echo/ping, ~RSVP
+// Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //
 module NetworkLayer
 {
@@ -115,7 +115,7 @@ module NetworkLayer
 
         ip.queueOut --> arp.ipIn;
 
-        // L2 interfaces to ~IP and from ~ARP
+        // L2 interfaces to IP and from ARP
         for i=0..sizeof(ifOut)-1 {
             ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
             ifOut[i] <-- { @display("m=s"); } <-- arp.nicOut[i];

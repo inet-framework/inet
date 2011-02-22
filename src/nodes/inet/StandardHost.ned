@@ -37,7 +37,7 @@ import inet.util.TCPDump;
 
 
 //
-// IP host with ~SCTP, ~TCP, ~UDP layers and applications.
+// IP host with SCTP, TCP, UDP layers and applications.
 //
 module StandardHost
 {

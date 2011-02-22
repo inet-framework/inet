@@ -21,10 +21,10 @@ cplusplus {{
 #include <iostream>
 #include "INETDefs.h"
 
-    // default ~TCP header length: 20 bytes
+    // default TCP header length: 20 bytes
     #define TCP_HEADER_OCTETS  20    // without options
 
-    // maximum ~TCP header length (base+options): 60 = 4 * 15 bytes
+    // maximum TCP header length (base+options): 60 = 4 * 15 bytes
     const unsigned int TCP_MAX_HEADER_OCTETS = 60;
 
     // maximum allowed sack entry number, if no other options are used
@@ -52,7 +52,7 @@ struct TCPPayloadMessage
 }
 
 //
-// ~TCP Option Numbers
+// TCP Option Numbers
 // Reference: http://www.iana.org/assignments/tcp-parameters/
 // Date: 2010-07-04
 //
@@ -124,7 +124,7 @@ class TCPOption
 // - Header Options: Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
 // - Padding
 //
-// cMessage::getKind() may be set to an arbitrary value: ~TCP entities will
+// cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
 packet TCPSegment
@@ -147,7 +147,7 @@ packet TCPSegment
     // to receive
     unsigned int ackNo;
 
-    // ~TCP Header Length - default: 20 bytes
+    // TCP Header Length - default: 20 bytes
     // if header options are used the headerLength is greater than 20 bytes (default)
     unsigned short headerLength = TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
 

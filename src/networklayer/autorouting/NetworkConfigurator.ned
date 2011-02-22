@@ -30,7 +30,7 @@ package inet.networklayer.autorouting;
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
-//       paths to the routing tables (see ~RoutingTable::addRoutingEntry()).
+//       paths to the routing tables (see RoutingTable::addRoutingEntry()).
 //
 // How does it know which modules are routers, hosts, et.c that need to
 // be configured, and what is the network topology? The configurator

@@ -38,7 +38,7 @@ enum SCTPErrorCode
 
 
 //
-// Control info for ~SCTP connections. This class is to be set as control info
+// Control info for SCTP connections. This class is to be set as control info
 // (see cMessage::setControlInfo()) on all messages exchanged between ~SCTP and
 // application, in both directions. Some commands and indications
 // (SCTP_C_OPEN_xxx, SCTP_I_STATUS) use subclasses.
@@ -95,7 +95,7 @@ class SCTPErrorInfo extends SCTPCommand
 // is accepted (with the original connId), and further incoming connections
 // will be refused by ~SCTP by sending an RST segment.
 //
-// @see ~TcpCommandCode, SCTPMain
+// @see ~TcpCommandCode, ~SCTP
 //
 class SCTPOpenCommand extends SCTPCommand
 {
@@ -118,7 +118,7 @@ class SCTPOpenCommand extends SCTPCommand
 //
 // Control info to be used with the SEND command.
 //
-// @see ~TcpCommandCode, SCTPMain
+// @see ~TcpCommandCode, ~SCTP
 //
 class SCTPSendCommand extends SCTPCommand
 {
@@ -130,9 +130,9 @@ class SCTPSendCommand extends SCTPCommand
 
 //
 // Sent with message kind SCTP_I_ESTABLISHED, to let the app know
-// about the local and remote ~IP address and port.
+// about the local and remote IP address and port.
 //
-// @see ~TcpCommandCode, SCTPMain
+// @see ~TcpCommandCode, ~SCTP
 //
 class SCTPConnectInfo extends SCTPCommand
 {
@@ -152,7 +152,7 @@ class SCTPConnectInfo extends SCTPCommand
 // For explanation of variables, see RFC 793 or SCTPStateVariables in
 // SCTPConnection.h.
 //
-// @see ~TcpStatusInd, ~TcpCommandCode, SCTPMain
+// @see ~TcpStatusInd, ~TcpCommandCode, ~SCTP
 //
 class SCTPStatusInfo extends SCTPCommand
 {

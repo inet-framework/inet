@@ -13,19 +13,19 @@
 
 
 //
-// @page standards.html, ~MPLS/~RSVP/~LDP Model - Implemented Standards
+// @page standards.html, MPLS/RSVP/LDP Model - Implemented Standards
 //
 // The implementation follows those RFCs below:
-// - RFC 2702: Requirements for Traffic Engineering Over ~MPLS
+// - RFC 2702: Requirements for Traffic Engineering Over MPLS
 // - RFC 2205: Resource ReSerVation Protocol
 // - RFC 3031: Multiprotocol Label Switching Architecture
-// - RFC 3036: ~LDP Specification
+// - RFC 3036: LDP Specification
 // - RFC 3209: RSVP-TE Extension to RSVP for LSP tunnels
 // - RFC 2205: RSVP Version 1 - Functional Specification
 // - RFC 2209: RSVP Message processing Version 1
 //
 //#------------------------------------------------------------------------
-// @page mpls-pseudocode.html, ~MPLS Operation
+// @page mpls-pseudocode.html, MPLS Operation
 //
 // The following algorithm is carried out by the ~MPLS module:
 //
@@ -33,12 +33,12 @@
 // Step 1: - Check which layer the packet is coming from
 // Alternative 1: From layer 3
 //     Step 1: Find and check the next hop of this packet
-//     Alternative 1: Next hop belongs to this ~MPLS cloud
-//         Step 1: Encapsulate the packet in an ~MPLS packet with
+//     Alternative 1: Next hop belongs to this MPLS cloud
+//         Step 1: Encapsulate the packet in an MPLS packet with
 //         IP_NATIVE_LABEL label
 //         Step 2: Send to the next hop
 //         Step 3: Return
-//     Alternative 2: Next hop does not belong to this ~MPLS cloud
+//     Alternative 2: Next hop does not belong to this MPLS cloud
 //         Step 1: Send the packet to the next hop
 // Alternative 2: From layer 2
 //     Step 1: Record the packet incoming interface
@@ -54,7 +54,7 @@
 //     Alternative 2: No
 //         Step 1: Continue to the next step
 //     Step 3: Check the packet type
-//     Alternative 1: The packet is native ~IP
+//     Alternative 1: The packet is native IP
 //         Step 1: Check the LSR type
 //         Alternative 1: The LSR is an Ingress Router
 //             Step 1: Look up LIB for outgoing label
@@ -73,7 +73,7 @@
 //         Alternative 2: The LSR is not an Ingress Router
 //             Step 1: Print out the error
 //             Step 2: Delete the packet and return
-//     Alternative 2: The packet is ~MPLS
+//     Alternative 2: The packet is MPLS
 //         Step 1: Check the LSR type
 //         Alternative 1: The LSR is an Egress Router
 //             Step 1: POP the top label
@@ -98,23 +98,23 @@
 //
 //
 //#------------------------------------------------------------------------
-// @page ldp-processing.html, ~LDP Message Processing
+// @page ldp-processing.html, LDP Message Processing
 //
 // The simulation follows message processing rules specified in RFC3036
-// (~LDP Specification). A summary of the algorithm used in the RFC is
+// (LDP Specification). A summary of the algorithm used in the RFC is
 // presented below.
 //
 // <b>Label Request Message processing</b>
 //
 // An LSR may transmit a Request message under any of the conditions below:
 // - The LSR recognizes a new FEC via the forwarding tale, and the next hop
-//   is its ~LDP peer. The LIB of this LSR does not have a mapping from the
+//   is its LDP peer. The LIB of this LSR does not have a mapping from the
 //   next hop for the given FEC.
 // - Network topology changes, the next hop to the FEC is no longer valid
 //   and new mapping is not available.
-// - The LSR receives a Label Request for a FEC from an upstream ~LDP and it
+// - The LSR receives a Label Request for a FEC from an upstream LDP and it
 //   does not have label binding information for this FEC. The FEC next hop
-//   is an ~LDP peer.
+//   is an LDP peer.
 //
 // Upon receiving a Label Request message, the following procedures will be
 // performed:
@@ -174,7 +174,7 @@
 // The following is a sample of lib table file.
 //
 // <pre>
-// #lib table for ~MPLS network simulation test
+// #lib table for MPLS network simulation test
 // #lib1.table for LSR1 - this is an edge router
 // #no incoming label for traffic from in-intf 0 &1 - LSR1 is ingress router for those traffic
 // #no outgoing label for traffic from in_intf 2 &3 - LSR 1 is egress router for those traffic
@@ -192,7 +192,7 @@
 // CSPF stands for Constraint Shortest Path First.
 // This constraint-based routing is executed online by Ingress Router.
 // The CSPF calculates an optimum explicit route (ER), based on
-// specific constraints. CSPF relies on a Traffic Engineering Database (~TED)
+// specific constraints. CSPF relies on a Traffic Engineering Database (TED)
 // to do those calculations. The resulting route is then used by RSVP-TE.
 //
 // The CSPF in particular and any constraint based routing process requires following
@@ -256,7 +256,7 @@
 // - <bandwidth></bandwidth> specifies the requested BW.
 // - <delay></delay> specifies the requested delay.
 // - <route></route> specifies the explicit route. This is a comma-separated
-//   list of ~IP-address, hop-type pairs (also separated by comma).
+//   list of IP address, hop-type pairs (also separated by comma).
 //   A hop type has a value of 1 if the hop is a loose hop and 0 otherwise.
 //
 // The following presents an example file:
@@ -286,8 +286,8 @@
 //
 // An example of using RSVP-TE as signaling protocol can be found in
 // ExplicitRouting folder distributed with the simulation. In this
-// example, a network similar to the network in ~LDP-~MPLS example is
-// setup. Instead of using ~LDP, "signaling" parameter is set to 2 (value
+// example, a network similar to the network in LDP-MPLS example is
+// setup. Instead of using LDP, "signaling" parameter is set to 2 (value
 // of RSVP-TE handler). The following xml file is used for traffic
 // control. Note the explicit routes specified in the second connection.
 // It indicates that the route is a strict one since the values of every

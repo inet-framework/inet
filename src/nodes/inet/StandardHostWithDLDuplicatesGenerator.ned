@@ -38,7 +38,7 @@ import inet.util.TCPDump;
 
 
 //
-// IP host with ~SCTP, ~TCP, ~UDP layers and applications AND ~PPPInterfaceWithDLDuplicatesGenerator.
+// IP host with SCTP, TCP, UDP layers and applications AND ~PPPInterfaceWithDLDuplicatesGenerator.
 //
 module StandardHostWithDLDuplicatesGenerator
 {

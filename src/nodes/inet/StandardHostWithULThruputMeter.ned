@@ -38,7 +38,7 @@ import inet.util.TCPDump;
 
 
 //
-// IP host with ~SCTP, ~TCP, ~UDP layers and applications AND ~PPPInterfaceWithULThruputMeter.
+// IP host with SCTP, TCP, UDP layers and applications AND ~PPPInterfaceWithULThruputMeter.
 //
 module StandardHostWithULThruputMeter
 {

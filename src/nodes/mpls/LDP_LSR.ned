@@ -31,9 +31,9 @@ import inet.util.NAMTraceWriter;
 
 
 //
-// An ~LDP-capable router.
+// An LDP-capable router.
 //
-// ~LDP Capable Routers are main building blocks for an ~LDP ~MPLS network.
+// LDP Capable Routers are the main building blocks for an LDP MPLS network.
 //
 module LDP_LSR
 {

@@ -32,7 +32,7 @@ import inet.transport.udp.UDP;
 
 
 //
-// IPv6 host with ~TCP, ~UDP layers and applications.
+// IPv6 host with TCP and UDP layers and applications.
 //
 module StandardHost6
 {

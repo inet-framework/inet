@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~ChannelControl.ned
+// * file:        ChannelControl.ned
 // *
 // * author:      Andras Varga, Steffen Sroka, Daniel Willkomm
 // *
@@ -35,7 +35,7 @@ package inet.world;
 // Mobility Framework 1.0a5: here we use sendDirect(), while the MF version
 // used normal send() and dynamic connections.
 //
-// @author Andras Varga (based on MF's ~ChannelControl by Steffen Sroka and Daniel Willkomm)
+// @author Andras Varga (based on MF's ChannelControl by Steffen Sroka and Daniel Willkomm)
 // @see ~BasicMobility
 //
 simple ChannelControl

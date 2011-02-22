@@ -18,7 +18,7 @@ cplusplus {{
 #define LDP_BASEHEADER_BYTES  10
 
 // FIXME: the length below is just a guess. TBD find lengths for individual TLVs
-// making up different ~LDP packet types, and determine length for each packet type
+// making up different LDP packet types, and determine length for each packet type
 #define LDP_HEADER_BYTES  (LDP_BASEHEADER_BYTES+20)
 }}
 
@@ -26,7 +26,7 @@ cplusplus {{
 class noncobject IPAddress;
 
 //
-// ~LDP message types
+// LDP message types
 //
 enum LDP_MESSAGE_TYPES
 {
@@ -57,7 +57,7 @@ struct FEC_TLV
 }
 
 //
-// Base class for ~LDP packets
+// Base class for LDP packets
 //
 packet LDPPacket
 {
@@ -68,7 +68,7 @@ packet LDPPacket
 
 
 //
-// ~LDP Label Mapping Message
+// LDP Label Mapping Message
 //
 packet LDPLabelMapping extends LDPPacket
 {
@@ -77,7 +77,7 @@ packet LDPLabelMapping extends LDPPacket
 }
 
 //
-// ~LDP Label Request Message
+// LDP Label Request Message
 //
 packet LDPLabelRequest extends LDPPacket
 {
@@ -86,7 +86,7 @@ packet LDPLabelRequest extends LDPPacket
 
 
 //
-// ~LDP Hello Message
+// LDP Hello Message
 //
 packet LDPHello extends LDPPacket
 {
@@ -96,7 +96,7 @@ packet LDPHello extends LDPPacket
 }
 
 //
-// ~LDP notification message
+// LDP notification message
 //
 packet LDPNotify extends LDPPacket
 {
@@ -105,7 +105,7 @@ packet LDPNotify extends LDPPacket
 }
 
 //
-// ~LDP Ini Message
+// LDP Ini Message
 //
 //# FIXME currently unused
 packet LDPIni extends LDPPacket
@@ -118,7 +118,7 @@ packet LDPIni extends LDPPacket
 }
 
 //
-// ~LDP Address Message
+// LDP Address Message
 //
 //# FIXME currently unused
 packet LDPAddress extends LDPPacket

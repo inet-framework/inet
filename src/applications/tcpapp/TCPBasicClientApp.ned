@@ -19,9 +19,9 @@
 package inet.applications.tcpapp;
 
 //
-// Client for a generic request-response style protocol over ~TCP.
+// Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
-// Compatible with both IPv4 and ~IPv6.
+// Compatible with both IPv4 (~IP) and ~IPv6.
 //
 // The model communicates with the server in sessions. During a session,
 // the client opens a single TCP connection to the server, sends several
@@ -62,7 +62,7 @@ package inet.applications.tcpapp;
 // <b>Configuring App</b>
 //
 // The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in ~TCP layer.
+// classes that manage the actual send and receive queues in TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
@@ -70,7 +70,7 @@ package inet.applications.tcpapp;
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over ~TCP, the receiver-side client will see a
+//      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
 // It depends on the client (app) modules which sendQueue/rcvQueue they require.
@@ -83,16 +83,16 @@ package inet.applications.tcpapp;
 //   -# use "object", which transmit
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
-//      sender-side ~TCP entity will be reproduced on the receiver side.
+//      sender-side TCP entity will be reproduced on the receiver side.
 //      If a client sends a cMessage with length = 1 megabyte, the
 //      receiver-side client will receive the same message object (or a clone)
-//      after the ~TCP entities have completed simulating the transmission
+//      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes not implemented in ~TCP_NSC yet.
+//      These classes are not implemented in ~TCP_NSC yet.
 //
 //   -# use "bytestream", which transmit real bytes of messages.
-//      These classes not imnplemented yet.
+//      These classes are not implemented yet.
 //
 // @see ~TCPGenericSrvApp, ~GenericAppMsg, ~TelnetApp
 //

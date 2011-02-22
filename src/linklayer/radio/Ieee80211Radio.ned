@@ -25,7 +25,7 @@ package inet.linklayer.radio;
 // is the same as the ~Radio module's.
 //
 // The implementation is largely based on the Mobility Framework's
-// ~SnrEval80211 and ~Decider80211 modules.
+// SnrEval80211 and Decider80211 modules.
 //
 // @see ~Radio
 // @author Andras Varga

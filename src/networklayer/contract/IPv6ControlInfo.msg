@@ -60,8 +60,8 @@ class IPv6ControlInfo
 {
     @customize(true);
     int protocol enum(IPProtocolId);  // transport layer protocol
-    IPv6Address destAddr; // destination ~IPv6 address
-    IPv6Address srcAddr;  // source ~IPv6 address
+    IPv6Address destAddr; // destination IPv6 address
+    IPv6Address srcAddr;  // source IPv6 address
     short hopLimit;       // hop limit
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)

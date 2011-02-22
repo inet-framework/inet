@@ -112,8 +112,8 @@ packet EtherFrameWithLLC extends EtherFrame
 //
 packet EtherFrameWithSNAP extends EtherFrame
 {
-    long orgCode;  // SNAP organization code, 0 for ~IP and ~ARP
-    int localcode; // SNAP local code (stores ~EtherType for ~IP and ~ARP)
+    long orgCode;  // SNAP organization code, 0 for IP and ARP
+    int localcode; // SNAP local code (stores ~EtherType for IP and ARP)
 }
 
 

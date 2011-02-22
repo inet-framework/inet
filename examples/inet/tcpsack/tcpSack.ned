@@ -26,7 +26,7 @@ network tcpsack {
                 pppg[1];
         }
         server: StandardHostWithULDropsGenerator { // for config 1-5
-//        server: ~StandardHostWithDLDuplicatesGenerator { // for config 6
+//        server: StandardHostWithDLDuplicatesGenerator { // for config 6
             parameters:
                 @display("p=350,100;i=device/server");
             gates:

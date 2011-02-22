@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ~ConstSpeedMobility.cc
+// * file:        ConstSpeedMobility.cc
 // *
 // * author:      Steffen Sroka
 // *

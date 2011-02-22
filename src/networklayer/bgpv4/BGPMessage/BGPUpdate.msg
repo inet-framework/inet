@@ -63,7 +63,7 @@ class BGPUpdatePathAttributeList
 //
 // BGP UPDATE fields modelled:
 //   - Unfeasible routes length: 2 octets (number of withdrawn routes)
-//   - Withdrawn routes : variable size  (list of ~IP prefixes of unfeasible routes)
+//   - Withdrawn routes : variable size  (list of IP prefixes of unfeasible routes)
 //   - Total Path Attributes Length: 1 octet (if = 0, no Path Attributes)
 //   - Path Attributes:
 //     - Attribute Type (2 octets)
@@ -71,7 +71,7 @@ class BGPUpdatePathAttributeList
 //     - Attribute Values (variable size)
 // - Network Layer Reachability Information: (variable size)
 //    - Length : 1 octet
-//    - prefix : variable size (contains the ~IP prefix; IPv4: 4 octets)
+//    - prefix : variable size (contains the IP prefix; IPv4: 4 octets)
 //
 packet BGPUpdateMessage extends BGPHeader
 {

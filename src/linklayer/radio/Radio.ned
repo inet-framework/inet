@@ -1,6 +1,6 @@
 //
 // Copyright (C) Andras Varga, Levente Meszaros
-// Based on the Mobility Framework's ~SnrEval by Marc Loebbers
+// Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,7 +20,7 @@
 package inet.linklayer.radio;
 
 //
-// Prototype for radio modules. ~Radio modules deal with the transmission
+// Prototype for radio modules. Radio modules deal with the transmission
 // of frames over a wireless medium (the radio channel).
 //
 // <b>Transmission</b>

@@ -19,8 +19,8 @@
 package inet.linklayer.ethernet;
 
 //
-// Interface for Ethernet MAC implementations. All ~EtherMAC implementations should
-// implement this (i.e. ~EtherMAC like ~IEtherMAC)
+// Interface for Ethernet MAC implementations. All Ethernet MAC implementations
+// should implement this (i.e. declared as: EtherMAC like IEtherMAC)
 //
 moduleinterface IEtherMAC
 {

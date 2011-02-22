@@ -21,7 +21,7 @@ package inet.applications.generic;
 
 //
 // Consumes and prints packets received from the ~IP module.
-// Compatible with both IPv4 and ~IPv6.
+// Compatible with both IPv4 and IPv6.
 //
 simple IPTrafSink like IPTrafficGenerator
 {
@@ -39,11 +39,11 @@ simple IPTrafSink like IPTrafficGenerator
 
 
 //
-// Sends ~IP or ~IPv6 datagrams to the given address at the given interval.
+// Sends IP or IPv6 datagrams to the given address at the given interval.
 // The interval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
-// dotted decimal notation (or, for ~IPv6, in the usual notation with colons),
+// dotted decimal notation (or, for IPv6, in the usual notation with colons),
 // or with the module name. (The IPAddressResolver class is used to resolve
 // the address.) To disable the model, set destAddresses to "".
 //

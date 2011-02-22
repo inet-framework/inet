@@ -1,5 +1,5 @@
 //****************************************************************************
-// * file:        ~BasicSnrEval.h
+// * file:        BasicSnrEval.h
 // *
 // * author:      Marc Loebbers
 // *

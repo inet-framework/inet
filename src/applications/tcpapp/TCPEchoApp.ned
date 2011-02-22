@@ -19,7 +19,7 @@
 package inet.applications.tcpapp;
 
 //
-// Accepts any number of incoming ~TCP connections, and sends back the
+// Accepts any number of incoming TCP connections, and sends back the
 // messages that arrive on them, The lengths of the messages are
 // multiplied by echoFactor before sending them back (echoFactor=1 will
 // result in sending back the same message unmodified.) The reply can also be
@@ -34,7 +34,7 @@ package inet.applications.tcpapp;
 // app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
-// Compatible with both IPv4 and ~IPv6.
+// Compatible with both IPv4 (~IP) and ~IPv6.
 //
 simple TCPEchoApp like TCPApp
 {

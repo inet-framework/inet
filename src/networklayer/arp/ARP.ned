@@ -31,14 +31,14 @@ package inet.networklayer.arp;
 // <tt>InterfaceEntry</tt> (see ~InterfaceTable). Since routing files
 // (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~RoutingTable)
 // may modify the default interface configuration, you must take care that
-// these files don't contain the word <tt>BROADCAST</tt> e.g. for ~PPP
+// these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.
 //
 simple ARP
 {
     parameters:
-        double retryTimeout @unit("s") = default(1s); // number seconds ~ARP waits between retries to resolve an IP address
-        int retryCount = default(3);   // number of times ~ARP will attempt to resolve an IP address
+        double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an IP address
+        int retryCount = default(3);   // number of times ARP will attempt to resolve an IP address
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool proxyARP = default(true);        // sets proxy ARP mode (replying to ARP requests for the addresses for which a routing table entry exists)
         @display("i=block/layer");

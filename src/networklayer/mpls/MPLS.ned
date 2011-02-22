@@ -25,7 +25,7 @@ package inet.networklayer.mpls;
 //
 // Operations
 //
-// ~MPLS packets are represented by the message class MPLSPacket.
+// MPLS packets are represented by the ~MPLSPacket class.
 // The local LIB (Label Information Base) is stored in a ~LIBTable module
 // in the LSR.
 //
@@ -39,10 +39,10 @@ package inet.networklayer.mpls;
 //
 // Collaborations
 //
-// ~MPLS module is required to interact with L2 (~Link Layer) and L3 (Network
+// ~MPLS module is required to interact with L2 (Link Layer) and L3 (Network
 // Layer) in the OSI model. In addition, it needs to obtain label information
 // from the LIB component and label query result from the ~LDP module. Messages
-// the model communicates with L2 and Network Layers are L2 packets (~PPP,
+// the model communicates with L2 and Network Layers are L2 packets (PPP,
 // Frame Relay, ATM, Ethernet, etc.), and IP native packets. Specifically,
 // ~MPLS module encapsulates IP packet and is encapsulated in L2 packet.
 // Different L2 protocols may require different methods of encapsulation to
