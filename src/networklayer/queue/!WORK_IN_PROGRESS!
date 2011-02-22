@@ -1,2 +1,0 @@
-Although we have BasicDSCPClassifier, currently there's no ready-made
-solution to assign DSCP values to packets.
