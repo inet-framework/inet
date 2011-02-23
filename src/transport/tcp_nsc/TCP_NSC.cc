@@ -236,6 +236,16 @@ IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 void TCP_NSC::initialize()
 {
     tcpEV << this << ": initialize\n";
+
+    const char *q;
+    q = par("sendQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+
+    q = par("receiveQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+
     WATCH_MAP(tcpAppConnMapM);
 
     cModule *netw = simulation.getSystemModule();

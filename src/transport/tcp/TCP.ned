@@ -237,6 +237,8 @@ simple TCP like ITCP
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
+        string sendQueueClass = default("");    // Obsoleted!!!
+        string receiveQueueClass = default(""); // Obsoleted!!!
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);

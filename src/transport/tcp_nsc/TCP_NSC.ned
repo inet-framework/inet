@@ -86,8 +86,8 @@ simple TCP_NSC like ITCP
         // full library name of the tcp stack implementation
         string stackName = default("liblinux2.6.26.so") @choice("liblinux2.6.10.so","liblinux2.6.18.so","liblinux2.6.26.so","liblwip.so","libopenbsd3.5.so","libfreebsd5.3.so");
         int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack
-        string sendQueueClass = default("TCP_NSC_VirtualDataSendQueue");
-        string receiveQueueClass = default("TCP_NSC_VirtualDataReceiveQueue");
+        string sendQueueClass = default("");    // Obsoleted!!!
+        string receiveQueueClass = default(""); // Obsoleted!!!
     gates:
         input appIn[];
         input ipIn;

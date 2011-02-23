@@ -63,6 +63,15 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize()
 {
+    const char *q;
+    q = par("sendQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+
+    q = par("receiveQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     WATCH(lastEphemeralPort);
 
