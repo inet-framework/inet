@@ -41,8 +41,8 @@ module StandardHost6
         @labels(node,ethernet-node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        string tcpAppType = default("");
-        string udpAppType = default("");
+        string tcpAppType = default(""); // Obsolete
+        string udpAppType = default(""); // Obsolete
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         @display("i=device/laptop");
     gates:
@@ -62,7 +62,7 @@ module StandardHost6
                 isRouter = false;
                 @display("p=60,230");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
+        tcpApp[numTcpApps]: <> like TCPApp {
             parameters:
                 @display("p=163,67");
         }
@@ -70,7 +70,7 @@ module StandardHost6
             parameters:
                 @display("p=163,154");
         }
-        udpApp[numUdpApps]: <udpAppType> like UDPApp {
+        udpApp[numUdpApps]: <> like UDPApp {
             parameters:
                 @display("p=272,67");
         }

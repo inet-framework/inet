@@ -27,13 +27,13 @@ module SubTest
         server: StandardHost {
             parameters:
                 numTcpApps = 1;
-                tcpAppType = "TCPEchoApp";
+                tcpApp[0].type-name = "TCPEchoApp";
                 tcpType = srvTcpType;
         }
         client: StandardHost {
             parameters:
                 numTcpApps = 1;
-                tcpAppType = "TCPSessionApp";
+                tcpApp[0].type-name = "TCPSessionApp";
                 tcpType = cliTcpType;
                 tcpApp[0].connectAddress = replace(fullPath(),".client.tcpApp[0]",".server");
         }

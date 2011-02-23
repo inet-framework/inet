@@ -38,8 +38,8 @@ module TCPSpoofingHost
         @display("i=device/pc2;i2=status/excl");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        string tcpAppType = default("");
-        string udpAppType = default("");
+        string tcpAppType = default(""); // Obsolete
+        string udpAppType = default(""); // Obsolete
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");

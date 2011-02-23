@@ -49,9 +49,9 @@ module StandardHostWithDLDuplicatesGenerator
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int numSctpApps = default(0);
-        string tcpAppType = default("n/a");
-        string udpAppType = default("n/a");
-        string sctpAppType = default("n/a");
+        string tcpAppType = default(""); // Obsolete
+        string udpAppType = default(""); // Obsolete
+        string sctpAppType = default(""); // Obsolete
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         bool IPForward = default(false);
         int namid = default(-1);
@@ -81,7 +81,7 @@ module StandardHostWithDLDuplicatesGenerator
                 routingFile = routingFile;
                 @display("p=57,214");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
+        tcpApp[numTcpApps]: <> like TCPApp {
             parameters:
                 @display("p=186,54");
         }
@@ -89,7 +89,7 @@ module StandardHostWithDLDuplicatesGenerator
             parameters:
                 @display("p=186,141");
         }
-        udpApp[numUdpApps]: <udpAppType> like UDPApp {
+        udpApp[numUdpApps]: <> like UDPApp {
             parameters:
                 @display("p=336,54");
         }
@@ -97,7 +97,7 @@ module StandardHostWithDLDuplicatesGenerator
             parameters:
                 @display("p=336,141");
         }
-        sctpApp[numSctpApps]: <sctpAppType> like SCTPApp {
+        sctpApp[numSctpApps]: <> like SCTPApp {
             parameters:
                 @display("p=501,54");
         }

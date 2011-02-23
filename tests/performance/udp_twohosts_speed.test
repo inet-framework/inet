@@ -54,7 +54,7 @@ sim-time-limit = 16s
 
 ## UDP apps
 **.numUdpApps = 1
-**.udpAppType = "UDPEchoApp"
+**.udpApp[0].type-name = "UDPEchoApp"
 **.udpApp[0].localPort = 1234
 **.udpApp[0].destPort = 1234
 **.udpApp[0].messageFreq = 1.6ms
