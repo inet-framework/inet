@@ -103,7 +103,7 @@ network Throughput
             parameters:
                 idx = index;
                 maxSrv = numSrv;
-                wlan.mac.address = "20:00:00:00:00:0"+string(ancestorIndex(2));
+                wlan.mac.address = "20:00:00:00:00:0"+string(index);
                 @display("p=350,350;r=,,#707070");
         }
         channelcontrol: ChannelControl {

@@ -29,7 +29,6 @@ module SubTest
         server: StandardHost {
             parameters:
                 numTcpApps = 1;
-                tcpApp[0].type-name = "TCPEchoApp";
                 tcpType = srvTcpType;
         }
         switch: Router {
@@ -38,7 +37,6 @@ module SubTest
         client[k]: StandardHost {
             parameters:
                 numTcpApps = 1;
-                tcpApp[0].type-name = "TCPSessionApp";
                 tcpType = cliTcpType;
                 tcpApp[0].connectAddress = substringBeforeLast(fullPath(),".client[")+".server";
         }
@@ -104,6 +102,9 @@ tkenv-plugin-path = ../../../etc/plugins
 
 #sim-time-limit = 2s+60s
 sim-time-limit = 2s+60s+12s
+
+**.server*.tcpApp[0].type-name = "TCPEchoApp"
+**.client*.tcpApp[0].type-name = "TCPSessionApp"
 
 #client app:
 **.client*.tcpApp[0].active = true
