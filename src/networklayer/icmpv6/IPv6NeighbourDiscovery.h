@@ -111,7 +111,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         //stores information about Router Discovery for an interface
         struct RDEntry {
             int interfaceId; //interface on which Router Discovery is performed
-            int numRSSent; //number of Router Solicitations sent since start of sim
+            unsigned int numRSSent; //number of Router Solicitations sent since start of sim
             cMessage *timeoutMsg; //the message to cancel when RA is received
         };
         typedef std::set<RDEntry*> RDList; //FIXME why ptrs are stored?
@@ -119,7 +119,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         //An entry that stores information for an Advertising Interface
         struct AdvIfEntry {
             int interfaceId;
-            int numRASent;//number of Router Advertisements sent since start of sim
+            unsigned int numRASent;//number of Router Advertisements sent since start of sim
             simtime_t nextScheduledRATime;//stores time when next RA will be sent.
             cMessage *raTimeoutMsg;//the message to cancel when resetting RA timer
         };

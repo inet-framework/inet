@@ -18,7 +18,8 @@
 
 
 //Define_Module(TCPSerializer);
-#include "platdep/sockets.h"
+#include <platdep/sockets.h>
+
 #include "TCPSerializer.h"
 
 #include "IPProtocolId_m.h"

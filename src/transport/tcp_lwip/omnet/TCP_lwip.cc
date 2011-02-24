@@ -40,6 +40,9 @@ Define_Module(TCP_lwip);
 bool TCP_lwip::testingS;
 bool TCP_lwip::logverboseS;
 
+#ifdef tcpEV
+#undef tcpEV
+#endif
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
 #define tcpEV ((ev.disable_tracing) || (TCP_lwip::testingS)) ? ev : ev
 

@@ -108,10 +108,12 @@ void ARP::handleMessage(cMessage *msg)
 
 void ARP::updateDisplayString()
 {
-    char buf[80];
-    sprintf(buf, "%d cache entries\nsent req:%ld repl:%ld fail:%ld",
-                 arpCache.size(), numRequestsSent, numRepliesSent, numFailedResolutions);
-    getDisplayString().setTagArg("t",0,buf);
+    std::stringstream os;
+
+    os << arpCache.size() << " cache entries\nsent req:" << numRequestsSent
+            << " repl:" << numRepliesSent << " fail:" << numFailedResolutions;
+
+    getDisplayString().setTagArg("t",0, os.str().c_str());
 }
 
 void ARP::processOutboundPacket(cMessage *msg)

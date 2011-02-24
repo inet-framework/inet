@@ -54,6 +54,9 @@ const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 bool TCP_NSC::testingS;
 bool TCP_NSC::logverboseS;
 
+#ifdef tcpEV
+#undef tcpEV
+#endif
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
 #define tcpEV ((ev.disable_tracing) || (TCP_NSC::testingS)) ? ev : ev
 
@@ -104,22 +107,6 @@ struct nsc_ipv6hdr
     uint32_t saddr[4];
     uint32_t daddr[4];
 } __attribute__((packed));
-
-static char *flags2str(unsigned char flags)
-{
-    static char buf[512];
-    buf[0]='\0';
-    if(flags & TH_FIN) strcat(buf, " FIN");
-    if(flags & TH_SYN) strcat(buf, " SYN");
-    if(flags & TH_RST) strcat(buf, " RST");
-    if(flags & TH_PUSH) strcat(buf, " PUSH");
-    if(flags & TH_ACK) strcat(buf, " ACK");
-    if(flags & TH_URG) strcat(buf, " URG");
-//    if(flags & TH_ECE) strcat(buf, " ECE");
-//    if(flags & TH_CWR) strcat(buf, " CWR");
-
-    return buf;
-}
 
 static std::ostream& operator<<(std::ostream& osP, const TCP_NSC_Connection& connP)
 {
