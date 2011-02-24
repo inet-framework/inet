@@ -51,8 +51,8 @@ module WirelessHostSimplified
         @display("i=device/wifilaptop");
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        string tcpAppType = default(""); // Obsolete
-        string udpAppType = default(""); // Obsolete
+        // string tcpAppType = default(""); // Obsolete
+        // string udpAppType = default(""); // Obsolete
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");

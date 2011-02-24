@@ -41,8 +41,8 @@ module StandardHost6
         @labels(node,ethernet-node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        string tcpAppType = default(""); // Obsolete
-        string udpAppType = default(""); // Obsolete
+        // string tcpAppType = default(""); // Obsolete
+        // string udpAppType = default(""); // Obsolete
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         @display("i=device/laptop");
     gates:

@@ -48,9 +48,9 @@ module StandardHost
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int numSctpApps = default(0);
-        string tcpAppType = default(""); // Obsolete!
-        string udpAppType = default(""); // Obsolete!
-        string sctpAppType = default(""); // Obsolete!
+        // string tcpAppType = default(""); // Obsolete!
+        // string udpAppType = default(""); // Obsolete!
+        // string sctpAppType = default(""); // Obsolete!
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         bool IPForward = default(false);
         int namid = default(-1);
