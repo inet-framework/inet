@@ -16,75 +16,79 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPLWIP_VIRTUALDATAQUEUES_H
-#define __INET_TCPLWIP_VIRTUALDATAQUEUES_H
+#ifndef __INET_TCPLWIP_DATASTREAMQUEUES_H
+#define __INET_TCPLWIP_DATASTREAMQUEUES_H
 
 #include <omnetpp.h>
 
 #include "TcpLwipQueues.h"
 
+#include "ByteArrayBuffer.h"
 #include "TCPConnection.h"
 
 /**
- * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ * Send/Receive queue that manages "data stream", that is, valid bytes.
  */
 
-class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
+class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
 {
   public:
     /**
      * Ctor.
      */
-    TcpLwipVirtualDataSendQueue();
+    TcpLwipDataStreamSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipVirtualDataSendQueue();
+    virtual ~TcpLwipDataStreamSendQueue();
 
     virtual void setConnection(TcpLwipConnection *connP);
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const;
 
     virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
-    virtual unsigned long getBytesAvailable() const;
+    unsigned long getBytesAvailable() const;
 
     virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
-    virtual void discardUpTo(uint32 seqNumP);
+    virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
-    long int unsentTcpLayerBytesM;
+    ByteArrayBuffer byteArrayBufferM;
 };
 
-class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
+class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
 {
   public:
     /**
      * Ctor.
      */
-    TcpLwipVirtualDataReceiveQueue();
+    TcpLwipDataStreamReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipVirtualDataReceiveQueue();
+    virtual ~TcpLwipDataStreamReceiveQueue();
 
     // see TcpLwipReceiveQueue
     virtual void setConnection(TcpLwipConnection *connP);
 
     // see TcpLwipReceiveQueue
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void *bufferP, size_t bufferLengthP);
+            const void* bufferP, size_t bufferLengthP);
 
     // see TcpLwipReceiveQueue
     virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
 
     // see TcpLwipReceiveQueue
-    virtual cPacket *extractBytesUpTo();
+    virtual unsigned long getExtractableBytesUpTo() const;
+
+    // see TcpLwipReceiveQueue
+    virtual cPacket* extractBytesUpTo();
 
     // see TcpLwipReceiveQueue
     virtual uint32 getAmountOfBufferedBytes() const;
@@ -99,7 +103,8 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
-    long int bytesInQueueM;
+    /// store bytes
+    ByteArrayBuffer byteArrayBufferM;
 };
 
-#endif
+#endif // __INET_TCPLWIP_DATASTREAMQUEUES_H

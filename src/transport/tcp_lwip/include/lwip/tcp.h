@@ -106,7 +106,7 @@ class LwipTcpLayer
     /** notify the Omnet about received packet processing is begin
      *  Omnet change the data in buffer, if need
      */
-    void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqno, void *dataptr, int len);
+    void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqno, const void *dataptr, int len);
 
 
   protected:

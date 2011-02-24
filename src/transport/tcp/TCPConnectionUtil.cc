@@ -174,6 +174,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 {
     TCPConnection *conn = new TCPConnection(tcpMain, appGateIndex, connId);
 
+    conn->transferMode = transferMode;
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
@@ -325,7 +326,7 @@ void TCPConnection::sendToApp(cMessage *msg)
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
-    TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
+    transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
     sendQueue = tcpMain->createSendQueue(transferMode);
     sendQueue->setConnection(this);
@@ -1325,7 +1326,7 @@ unsigned short TCPConnection::updateRcvWnd()
     updateRcvQueueVars();
     win = state->freeRcvBuffer;
 
-    // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879]:
+    // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
     if (win < (state->maxRcvBuffer / 4) && win < state->snd_mss)
         win = 0;

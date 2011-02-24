@@ -24,6 +24,7 @@
 
 #include "IPProtocolId_m.h"
 #include "TCPIPchecksum.h"
+#include "TCPSegment.h"
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
@@ -125,21 +126,15 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
     if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=NULL
     {
         unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
-        // TCPPayloadMessage *tcpP = check_and_cast<TCPPayloadMessage* >(tcpseg->getEncapsulatedPacket()); // FIXME
         char *tcpData = (char *)options+lengthCounter;
-        memset(tcpData, 't', dataLength); // fill data part with 't'
-        /*
-        for (unsigned int i=0; i < dataLength; i++)
+
+        if (tcpseg->getByteArray().getDataArraySize() > 0)
         {
-            if (i < tcpseg->getPayloadArraySize())
-            {
-//              tcpData[i] = (unsigned char) tcpP.msg; // FIXME
-                tcpData[i] = 't'; // FIXME - write 't' as dummy data
-            }
-            else
-                {tcpData[i] = 't';} // write 't' as dummy data
+            ASSERT(tcpseg->getByteArray().getDataArraySize() == dataLength);
+            tcpseg->getByteArray().copyDataToBuffer(tcpData, dataLength);
         }
-        */
+        else
+            memset(tcpData, 't', dataLength); // fill data part with 't'
     }
     return writtenbytes;
 }
@@ -155,7 +150,7 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
     return writtenbytes;
 }
 
-void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSegment *tcpseg)
+void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSegment *tcpseg, bool withBytes)
 {
     ASSERT(buf);
     ASSERT(tcpseg);
@@ -171,18 +166,12 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
 
     // set flags
     unsigned char flags = tcp->th_flags;
-    if ((flags & TH_FIN) == TH_FIN)
-        tcpseg->setFinBit(true);
-    if ((flags & TH_SYN) == TH_SYN)
-        tcpseg->setSynBit(true);
-    if ((flags & TH_RST) == TH_RST)
-        tcpseg->setRstBit(true);
-    if ((flags & TH_PUSH) == TH_PUSH)
-        tcpseg->setPshBit(true);
-    if ((flags & TH_ACK) == TH_ACK)
-        tcpseg->setAckBit(true);
-    if ((flags & TH_URG) == TH_URG)
-        tcpseg->setUrgBit(true);
+    tcpseg->setFinBit((flags & TH_FIN) == TH_FIN);
+    tcpseg->setSynBit((flags & TH_SYN) == TH_SYN);
+    tcpseg->setRstBit((flags & TH_RST) == TH_RST);
+    tcpseg->setPshBit((flags & TH_PUSH) == TH_PUSH);
+    tcpseg->setAckBit((flags & TH_ACK) == TH_ACK);
+    tcpseg->setUrgBit((flags & TH_URG) == TH_URG);
 
     tcpseg->setWindow(ntohs(tcp->th_win));
     // Checksum (header checksum): modelled by cMessage::hasBitError()
@@ -236,7 +225,13 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
     } // if options present
 
     tcpseg->setByteLength(bufsize);
-    tcpseg->setPayloadLength(bufsize - tcpseg->getHeaderLength());
+    tcpseg->setPayloadLength(bufsize - hdrLength);
+
+    if(withBytes)
+    {
+        // parse data
+        tcpseg->getByteArray().setDataFromBuffer(buf + hdrLength, bufsize - hdrLength);
+    }
 }
 
 uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,

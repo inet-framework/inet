@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <dlfcn.h>
 
+
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
 #define tcpEV ((ev.disable_tracing)||(TCP_lwip::testingS)) ? ev : ev
 
@@ -71,6 +72,7 @@ void TcpLwipConnection::Stats::recordSend(const TCPSegment &tcpsegP)
 {
     sndWndVector.record(tcpsegP.getWindow());
     sndSeqVector.record(tcpsegP.getSequenceNo());
+
     if (tcpsegP.getAckBit())
         sndAckVector.record(tcpsegP.getAckNo());
 }
@@ -79,6 +81,7 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 {
     rcvWndVector.record(tcpsegP.getWindow());
     rcvSeqVector.record(tcpsegP.getSequenceNo());
+
     if (tcpsegP.getAckBit())
         rcvAckVector.record(tcpsegP.getAckNo());
 }
@@ -104,6 +107,7 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIn
 
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
+
     if(tcpLwipM.recordStatisticsM)
         statsM = new Stats();
 }
@@ -126,6 +130,7 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
 
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
+
     if(tcpLwipM.recordStatisticsM)
         statsM = new Stats();
 }
@@ -134,6 +139,7 @@ TcpLwipConnection::~TcpLwipConnection()
 {
     if(pcbM)
         pcbM->callback_arg = NULL;
+
     delete receiveQueueM;
     delete sendQueueM;
     delete statsM;
@@ -163,6 +169,7 @@ const char *TcpLwipConnection::indicationName(int code)
 {
 #define CASE(x) case x: s=#x+6; break
     const char *s = "unknown";
+
     switch (code)
     {
         CASE(TCP_I_DATA);
@@ -175,6 +182,7 @@ const char *TcpLwipConnection::indicationName(int code)
         CASE(TCP_I_TIMED_OUT);
         CASE(TCP_I_STATUS);
     }
+
     return s;
 #undef CASE
 }
@@ -241,6 +249,7 @@ void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort
 void TcpLwipConnection::close()
 {
     onCloseM = true;
+
     if (0 == sendQueueM->getBytesAvailable())
     {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
@@ -262,6 +271,7 @@ void TcpLwipConnection::send(cPacket *msgP)
 void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)
 {
     receiveQueueM->notifyAboutSending(&tcpsegP);
+
     if (statsM)
         statsM->recordSend(tcpsegP);
 }
@@ -276,6 +286,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
 
     u32_t ss = pcbM->snd_lbb;
     error = tcpLwipM.getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
+
     if(error == ERR_OK)
     {
         written = datalen;
@@ -285,7 +296,6 @@ int TcpLwipConnection::send_data(void *data, int datalen)
         // Chances are that datalen is too large to fit in the send
         // buffer. If it is really large (larger than a typical MSS,
         // say), we should try segmenting the data ourselves.
-
         while(1)
         {
             u16_t snd_buf = pcbM->snd_buf;
@@ -300,13 +310,14 @@ int TcpLwipConnection::send_data(void *data, int datalen)
             written += snd_buf;
             datalen -= snd_buf;
         }
-
     }
+
     if(written > 0)
     {
         ASSERT(pcbM->snd_lbb - ss == (u32_t)written);
         return written;
     }
+
     return error;
 }
 
@@ -329,9 +340,9 @@ void TcpLwipConnection::do_SEND()
         {
             tcpEV << "TCP_lwip connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
             break;
-
         }
     }
+
     totalSentM += allsent;
     tcpEV << "do_SEND(): " << connIdM <<
             " send:" << allsent <<
@@ -339,9 +350,11 @@ void TcpLwipConnection::do_SEND()
             ", total sent:" << totalSentM <<
             ", all bytes:" << totalSentM+sendQueueM->getBytesAvailable() <<
             "\n";
+
     if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
     {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
     }
 }
+

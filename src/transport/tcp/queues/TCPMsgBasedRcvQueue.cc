@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,6 +19,9 @@
 
 #include "TCPMsgBasedRcvQueue.h"
 
+#include "TCPCommand_m.h"
+#include "TCPSegment.h"
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 
@@ -27,6 +31,14 @@ TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 
 TCPMsgBasedRcvQueue::~TCPMsgBasedRcvQueue()
 {
+    while (! payloadList.empty())
+    {
+        EV << "SendQueue Destructor: Drop msg from " << this->getFullPath() <<
+                " Queue: offset=" << payloadList.begin()->first <<
+                ", length=" << payloadList.begin()->second->getByteLength() << endl;
+        delete payloadList.begin()->second;
+        payloadList.erase(payloadList.begin());
+    }
 }
 
 void TCPMsgBasedRcvQueue::init(uint32 startSeq)
@@ -42,7 +54,7 @@ std::string TCPMsgBasedRcvQueue::info() const
 
     for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
     {
-        os << " [" << i->begin << ".." << i->end << ")";
+        os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
     }
 
     os << " " << payloadList.size() << "msgs";
@@ -56,13 +68,14 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
     cPacket *msg;
     uint32 endSeqNo;
-
-    while ((msg=tcpseg->removeFirstPayloadMessage(endSeqNo))!=NULL)
+    while (NULL != (msg = tcpseg->removeFirstPayloadMessage(endSeqNo)))
     {
         // insert, avoiding duplicates
         PayloadList::iterator i = payloadList.find(endSeqNo);
-        if (i!=payloadList.end()) {delete msg; continue;}
-        payloadList[endSeqNo] = msg;
+        if (i != payloadList.end())
+            delete msg;
+        else
+            payloadList[endSeqNo] = msg;
     }
 
     return rcv_nxt;

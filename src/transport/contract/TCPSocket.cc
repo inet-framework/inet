@@ -45,7 +45,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     localPrt = remotePrt = -1;
     cb = NULL;
     yourPtr = NULL;
-
+    dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
     gateToTcp = NULL;
 
     if (msg->getKind()==TCP_I_ESTABLISHED)
@@ -61,7 +61,6 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
-    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 const char *TCPSocket::stateName(int state)

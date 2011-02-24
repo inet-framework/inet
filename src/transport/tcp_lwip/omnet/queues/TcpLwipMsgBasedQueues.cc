@@ -23,6 +23,7 @@
 
 #include "TCPCommand_m.h"
 #include "TcpLwipConnection.h"
+#include "TCPSegment.h"
 #include "TCPSerializer.h"
 #include "TCP_lwip.h"
 
@@ -32,9 +33,6 @@ Register_Class(TcpLwipMsgBasedSendQueue);
 Register_Class(TcpLwipMsgBasedReceiveQueue);
 
 
-/**
- * Ctor.
- */
 TcpLwipMsgBasedSendQueue::TcpLwipMsgBasedSendQueue()
     :
     beginM(0),
@@ -43,23 +41,18 @@ TcpLwipMsgBasedSendQueue::TcpLwipMsgBasedSendQueue()
 {
 }
 
-/**
- * Virtual dtor.
- */
 TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
     while (! payloadQueueM.empty())
     {
-        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath() << " Queue: seqno=" << payloadQueueM.front().endSequenceNo <<
-                ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
+        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath()
+                << " Queue: seqno=" << payloadQueueM.front().endSequenceNo
+                << ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
         delete payloadQueueM.front().msg;
         payloadQueueM.pop_front();
     }
 }
 
-/**
- * set connection queue.
- */
 void TcpLwipMsgBasedSendQueue::setConnection(TcpLwipConnection *connP)
 {
     TcpLwipSendQueue::setConnection(connP);
@@ -68,14 +61,6 @@ void TcpLwipMsgBasedSendQueue::setConnection(TcpLwipConnection *connP)
     unsentTcpLayerBytesM = 0;
 }
 
-/**
- * Called on SEND app command, it inserts in the queue the data the user
- * wants to send. Implementations of this abstract class will decide
- * what this means: copying actual bytes, just increasing the
- * "last byte queued" variable, or storing cMessage object(s).
- * The msg object should not be referenced after this point (sendQueue may
- * delete it.)
- */
 void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
@@ -90,46 +75,28 @@ void TcpLwipMsgBasedSendQueue::enqueueAppData(cPacket *msgP)
     payloadQueueM.push_back(payload);
 }
 
-int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP)
+unsigned int TcpLwipMsgBasedSendQueue::getBytesForTcpLayer(
+        void* bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
     return (unsentTcpLayerBytesM > bufferLengthP) ? bufferLengthP : unsentTcpLayerBytesM;
 }
 
-/**
- * Remove msgLengthP bytes from the queue
- * But the TCP layer sometimes reread from this datapart (when data destroyed in IP Layer)
- *
- * called with return value of socket->send_data() if larger than 0
- */
-void TcpLwipMsgBasedSendQueue::dequeueTcpLayerMsg(int msgLengthP)
+void TcpLwipMsgBasedSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
     ASSERT(msgLengthP <= unsentTcpLayerBytesM);
 
     unsentTcpLayerBytesM -= msgLengthP;
 }
 
-/**
- * Utility function: returns how many bytes are available in the queue.
- */
-ulong TcpLwipMsgBasedSendQueue::getBytesAvailable()
+unsigned long TcpLwipMsgBasedSendQueue::getBytesAvailable() const
 {
     return unsentTcpLayerBytesM;
 }
 
-/**
- * Called when the TCP wants to send or retransmit data, it constructs
- * a TCP segment which contains the data from the requested sequence
- * number range. The actually returned segment may contain less then
- * maxNumBytes bytes if the subclass wants to reproduce the original
- * segment boundaries when retransmitting.
- *
- * The method called before called the send() to IP layer
- */
-
 TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, int tcpLengthP)
+        const void* tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -137,17 +104,19 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 
     TCPSegment *tcpseg = new TCPSegment("tcp-segment");
 
-    TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg);
+    TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg, false);
 
     uint32 fromSeq = tcpseg->getSequenceNo();
     uint32 numBytes = tcpseg->getPayloadLength();
     uint32 toSeq = fromSeq+numBytes;
+
     if( (! isValidSeqNoM) && (numBytes > 0))
     {
         for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
         {
             i->endSequenceNo += fromSeq;
         }
+
         beginM += fromSeq;
         endM += fromSeq;
         isValidSeqNoM = true;
@@ -166,16 +135,20 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
 #endif
 
     const char *payloadName = NULL;
+
     if (numBytes > 0)
     {
         // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
         i = payloadQueueM.begin();
+
         while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
             ++i;
+
         while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
         {
             if (!payloadName)
                 payloadName = i->msg->getName();
+
             cPacket* msg = i->msg->dup();
             tcpseg->addPayloadMessage(msg, i->endSequenceNo);
             ++i;
@@ -198,15 +171,12 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     return tcpseg;
 }
 
-/**
- * Tells the queue that bytes up to seqNum have been
- * transmitted and ACKed, so they can be removed from the queue.
- */
 void TcpLwipMsgBasedSendQueue::discardAckedBytes()
 {
     if (isValidSeqNoM)
     {
         uint32 seqNum = connM->pcbM->lastack;
+
         if(seqLE(beginM, seqNum) && seqLE(seqNum, endM))
         {
             beginM = seqNum;
@@ -221,22 +191,18 @@ void TcpLwipMsgBasedSendQueue::discardAckedBytes()
     }
 }
 
+////////////////////////////////////////////////////////////////////////
 
-/**
- * Ctor.
- */
 TcpLwipMsgBasedReceiveQueue::TcpLwipMsgBasedReceiveQueue()
     :
     bytesInQueueM(0)
 {
 }
 
-/**
- * Virtual dtor.
- */
 TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
 {
     PayloadList::iterator i;
+
     while ((i = payloadListM.begin()) != payloadListM.end())
     {
         delete i->second;
@@ -244,9 +210,6 @@ TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
     }
 }
 
-/**
- * Add a connection queue.
- */
 void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
 {
     ASSERT(connP);
@@ -257,8 +220,8 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
     lastExtractedSeqNoM = 0;
 }
 
-void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
-        TCPSegment *tcpsegP, uint32 seqNoP, void* bufferP, size_t bufferLengthP)
+void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
+        TCPSegment *tcpsegP, uint32 seqNoP, const void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
@@ -268,17 +231,20 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
 
     cPacket *msg;
     uint32 endSeqNo;
-    while ((msg=tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
+
+    while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
     {
         if(seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
         {
             // insert, avoiding duplicates
             PayloadList::iterator i = payloadListM.find(endSeqNo);
+
             if (i != payloadListM.end())
             {
                 ASSERT(msg->getByteLength() == i->second->getByteLength());
                 delete i->second;
             }
+
             payloadListM[endSeqNo] = msg;
         }
         else
@@ -288,36 +254,26 @@ void TcpLwipMsgBasedReceiveQueue::insertBytesFromSegment(
     }
 }
 
-/**
- * The method called when data received from LWIP
- * The method should set status of the data in queue to received.
- *
- * The method called after socket->read_data() successful
- */
-void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, int dataLengthP)
+void TcpLwipMsgBasedReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
 {
     bytesInQueueM += dataLengthP;
 }
 
-/**
- * Should create a packet to be passed up to the app.
- * It should return NULL if there's no more data to be passed up --
- * this method is called several times until it returns NULL.
- *
- * the method called after socket->read_data() successful
- */
 cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
+
     if(!isValidSeqNoM)
     {
         isValidSeqNoM = true;
         lastExtractedSeqNoM = connM->pcbM->rcv_nxt - bytesInQueueM;
+
         if(connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
             lastExtractedSeqNoM--; // received FIN
     }
+
     uint32 firstSeqNo = lastExtractedSeqNoM;
     uint32 lastSeqNo = firstSeqNo + bytesInQueueM;
 
@@ -327,66 +283,47 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
         delete payloadListM.begin()->second;
         payloadListM.erase(payloadListM.begin());
     }
+
     // pass up payload messages, in sequence number order
     if (! payloadListM.empty())
     {
         uint32 endSeqNo = payloadListM.begin()->first;
+
         if (seqLE(endSeqNo, lastSeqNo))
         {
             dataMsg = payloadListM.begin()->second;
             uint32 dataLength = dataMsg->getByteLength();
 
             ASSERT(endSeqNo - dataLength == firstSeqNo);
+
             payloadListM.erase(payloadListM.begin());
             lastExtractedSeqNoM += dataLength;
             bytesInQueueM -= dataLength;
 
-            IPvXAddress localAddr((connM->pcbM->local_ip.addr));
-            IPvXAddress remoteAddr((connM->pcbM->remote_ip.addr));
-            TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-            tcpConnectInfo->setConnId(connM->connIdM);
-            tcpConnectInfo->setLocalAddr(localAddr);
-            tcpConnectInfo->setRemoteAddr(remoteAddr);
-            tcpConnectInfo->setLocalPort(connM->pcbM->local_port);
-            tcpConnectInfo->setRemotePort(connM->pcbM->remote_port);
-            dataMsg->setControlInfo(tcpConnectInfo);
             dataMsg->setKind(TCP_I_DATA);
         }
     }
+
     return dataMsg;
 }
 
-/**
- * Returns the number of bytes currently buffered in queue.
- */
-uint32 TcpLwipMsgBasedReceiveQueue::getAmountOfBufferedBytes()
+uint32 TcpLwipMsgBasedReceiveQueue::getAmountOfBufferedBytes() const
 {
     return bytesInQueueM;
 }
 
-/**
- * Returns the number of blocks currently buffered in queue.
- */
-uint32 TcpLwipMsgBasedReceiveQueue::getQueueLength()
+uint32 TcpLwipMsgBasedReceiveQueue::getQueueLength() const
 {
     return payloadListM.size();
 }
 
-/**
- * Shows current queue status.
- */
-void TcpLwipMsgBasedReceiveQueue::getQueueStatus()
+void TcpLwipMsgBasedReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
 
-/**
- * notify the queue about output messages
- *
- * called when connM send out a packet.
- * for read AckNo, if have
- */
 void TcpLwipMsgBasedReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 {
     // nothing to do
 }
+

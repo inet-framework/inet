@@ -29,6 +29,7 @@
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TcpLwipConnection.h"
+#include "TcpLwipDataStreamQueues.h"
 #include "TcpLwipMsgBasedQueues.h"
 #include "TcpLwipVirtualDataQueues.h"
 #include "TCPSegment.h"
@@ -102,14 +103,17 @@ TCP_lwip::~TCP_lwip()
 {
     tcpEV << this << ": destructor\n";
     isAliveM = false;
+
     while (!tcpAppConnMapM.empty())
     {
         TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
         delete i->second;
         tcpAppConnMapM.erase(i);
     }
+
     if(pLwipFastTimerM)
         cancelAndDelete(pLwipFastTimerM);
+
     if(pLwipTcpLayerM)
         delete pLwipTcpLayerM;
 }
@@ -214,15 +218,18 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
-void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, void *dataptr, int len)
+void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, const void *dataptr, int len)
 {
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
     if(conn)
     {
-        conn->receiveQueueM->insertBytesFromSegment(pCurTcpSegM, seqNo, dataptr, len);
+        conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
     else
     {
+        if (pCurTcpSegM->getPayloadLength())
+            error("conn is null, and received packet has data");
+
         tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
     }
 }
@@ -326,9 +333,17 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
 
     while(cPacket *dataMsg = conn.receiveQueueM->extractBytesUpTo())
     {
+        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+        tcpConnectInfo->setConnId(conn.connIdM);
+        tcpConnectInfo->setLocalAddr(conn.pcbM->local_ip.addr);
+        tcpConnectInfo->setRemoteAddr(conn.pcbM->remote_ip.addr);
+        tcpConnectInfo->setLocalPort(conn.pcbM->local_port);
+        tcpConnectInfo->setRemotePort(conn.pcbM->remote_port);
+        dataMsg->setControlInfo(tcpConnectInfo);
         // send Msg to Application layer:
         send(dataMsg, "appOut", conn.appGateIndexM);
     }
+
     conn.do_SEND();
     return err;
 }
@@ -351,6 +366,7 @@ void TCP_lwip::removeConnection(TcpLwipConnection &conn)
 err_t TCP_lwip::tcp_event_err(TcpLwipConnection &conn, err_t err)
 {
     tcpEV << this << ": tcp_event_err: " << err << " , conn Id: " << conn.connIdM << "\n";
+
     switch(err)
     {
     case ERR_ABRT:
@@ -366,6 +382,7 @@ err_t TCP_lwip::tcp_event_err(TcpLwipConnection &conn, err_t err)
     default:
         throw cRuntimeError("invalid LWIP error code: %d", err);
     }
+
     return err;
 }
 
@@ -386,6 +403,7 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
     int connId = controlInfo->getConnId();
 
     TcpLwipConnection *conn = findAppConn(connId);
+
     if (!conn)
     {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
@@ -393,12 +411,12 @@ void TCP_lwip::handleAppMessage(cMessage *msgP)
         TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
 
         // add into appConnMap
-        conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(),
-                                     dataTransferMode);
+        conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(), dataTransferMode);
         tcpAppConnMapM[connId] = conn;
 
         tcpEV << this << ": TCP connection created for " << msgP << "\n";
     }
+
     processAppCommand(*conn, msgP);
 }
 
@@ -436,6 +454,7 @@ void TCP_lwip::handleMessage(cMessage *msgP)
         tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
         // must be a TCPSegment
         TCPSegment *tcpseg = dynamic_cast<TCPSegment *>(msgP);
+
         if(tcpseg)
         {
             handleIpInputMessage(tcpseg);
@@ -486,6 +505,7 @@ void TCP_lwip::updateDisplayString()
         else
         {
             enum LwipTcpLayer::tcp_state state = pcb->state;
+
             switch(state)
             {
                case LwipTcpLayer::CLOSED:      numCLOSED++; break;
@@ -502,6 +522,7 @@ void TCP_lwip::updateDisplayString()
             }
         }
     }
+
     char buf2[200];
     buf2[0] = '\0';
     if (numINIT>0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
@@ -516,6 +537,7 @@ void TCP_lwip::updateDisplayString()
     if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
     if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
     if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+
     getDisplayString().setTagArg("t",0,buf2);
 }
 
@@ -540,6 +562,7 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
 
     TCPSegment *tcpseg;
+
     if(conn)
     {
         tcpseg = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
@@ -548,9 +571,10 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
     {
         tcpseg = new TCPSegment("tcp-segment");
 
-        TCPSerializer().parse((const unsigned char *)dataP, lenP, tcpseg);
+        TCPSerializer().parse((const unsigned char *)dataP, lenP, tcpseg, true);
         ASSERT(tcpseg->getPayloadLength() == 0);
     }
+
     ASSERT(tcpseg);
 
     tcpEV << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP <<
@@ -581,10 +605,12 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP, IP
         output = "ipv6Out";
         // send over IPv6
     }
+
     if(conn)
     {
         conn->notifyAboutSending(*tcpseg);
     }
+
     send(tcpseg, output);
 }
 
@@ -689,7 +715,7 @@ TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPDataTransferMode transferModeP)
     {
         case TCP_TRANSFER_BYTECOUNT:    return new TcpLwipVirtualDataSendQueue();
         case TCP_TRANSFER_OBJECT:       return new TcpLwipMsgBasedSendQueue();
-        case TCP_TRANSFER_BYTESTREAM:   //return new TcpLwipByteStreamSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:   return new TcpLwipDataStreamSendQueue();
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
@@ -700,7 +726,7 @@ TcpLwipReceiveQueue* TCP_lwip::createReceiveQueue(TCPDataTransferMode transferMo
     {
         case TCP_TRANSFER_BYTECOUNT:    return new TcpLwipVirtualDataReceiveQueue();
         case TCP_TRANSFER_OBJECT:       return new TcpLwipMsgBasedReceiveQueue();
-        case TCP_TRANSFER_BYTESTREAM:   //return new TcpLwipByteStreamReceiveQueue();
+        case TCP_TRANSFER_BYTESTREAM:   return new TcpLwipDataStreamReceiveQueue();
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }

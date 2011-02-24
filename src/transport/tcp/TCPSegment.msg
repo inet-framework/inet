@@ -20,15 +20,7 @@
 cplusplus {{
 #include <iostream>
 #include "INETDefs.h"
-
-    // default TCP header length: 20 bytes
-    #define TCP_HEADER_OCTETS  20    // without options
-
-    // maximum TCP header length (base+options): 60 = 4 * 15 bytes
-    const unsigned int TCP_MAX_HEADER_OCTETS = 60;
-
-    // maximum allowed sack entry number, if no other options are used
-    const unsigned int MAX_SACK_ENTRIES = 4;
+#include "ByteArray.h"
 
     typedef cPacket *cPacketPtr;
 
@@ -39,16 +31,25 @@ cplusplus {{
 
     inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
     inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
-}}
 
+    // default TCP header length: 20 bytes
+    #define TCP_HEADER_OCTETS  20    // without options
+
+    // maximum TCP header length (base+options): 60 = 4 * 15 bytes
+    const unsigned int TCP_MAX_HEADER_OCTETS = 60;
+
+    // maximum allowed sack entry number, if no other options are used
+    const unsigned int MAX_SACK_ENTRIES = 4;
+}}
 
 struct cPacketPtr;
 
+class noncobject ByteArray;
 
 struct TCPPayloadMessage
 {
     unsigned int endSequenceNo;
-    cPacketPtr msg;
+    cPacketPtr msg;      // pointer to payload msg
 }
 
 //
@@ -181,13 +182,16 @@ packet TCPSegment
     unsigned long payloadLength;
 
     // Message objects (cMessages) that travel in this segment as data.
-    // (This field is used only with TCPMsgBasedSendQueue/RcvQueue and
-    // not with TCPVirtualBytesSendQueue/RcvQueue.)  Every message object
-    // is put into the ~TCPSegment that would (in real life) carry its
-    // last octet. That is, if message object 'msg' with length=100 bytes
-    // occupies sequence number range 10000..10099, it will travel in the
-    // ~TCPSegment which carries the octet 10099. This way it is easily achieved
-    // that the receiving ~TCP passes up the message object to its client
+    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_OBJECT)
+    // Every message object is put into the TCPSegment that would (in real life)
+    // carry its first octet. That is, if message object 'msg' with length=100 bytes
+    // occupies stream offset number range 10000..10099, it will travel in the
+    // TCPSegment which carries the octet 10000. This way it is easily achieved
+    // that the receiving TCP passes up the message object to its client
     // when the last byte of the message has arrived.
     abstract TCPPayloadMessage payload[];
+
+    // Message bytes that travel in this segment as data.
+    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_BYTESTREAM)
+    ByteArray byteArray;
 }

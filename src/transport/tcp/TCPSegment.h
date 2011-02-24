@@ -56,12 +56,13 @@ class Sack : public Sack_Base
 class INET_API TCPSegment : public TCPSegment_Base
 {
   protected:
-    std::list<TCPPayloadMessage> payloadList;
+    typedef std::list<TCPPayloadMessage> PayloadList;
+    PayloadList payloadList;
 
   public:
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
-    virtual ~TCPSegment();
+    ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const {return new TCPSegment(*this);}
     virtual void parsimPack(cCommBuffer *b);
@@ -69,6 +70,7 @@ class INET_API TCPSegment : public TCPSegment_Base
 
     /** Generated but unused method, should not be called. */
     virtual void setPayloadArraySize(unsigned int size);
+
     /** Generated but unused method, should not be called. */
     virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var);
 
@@ -83,17 +85,15 @@ class INET_API TCPSegment : public TCPSegment_Base
     virtual TCPPayloadMessage& getPayload(unsigned int k);
 
     /**
-     * Adds a message object to the TCP segment. The sequence number+1 of the
-     * last byte of the message should be passed as 2nd argument
+     * Adds a message object to the TCP segment.
      */
     virtual void addPayloadMessage(cPacket *msg, uint32 endSequenceNo);
 
     /**
      * Removes and returns the first message object in this TCP segment.
-     * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
+     * It also returns the segment offset number of its last sequence no.
      */
-    virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
-
+    virtual cPacket *removeFirstPayloadMessage(uint32 &endSequenceNo);
     /**
      * Truncate segment.
      * @param firstSeqNo: sequence no of new first byte
@@ -105,8 +105,14 @@ class INET_API TCPSegment : public TCPSegment_Base
      * Calculate Length of Options Array in bytes
      */
     virtual unsigned short getOptionsArrayLength();
+
+  protected:
+    /**
+     * Truncate segment data. Called from truncateSegment().
+     * @param truncleft: number of bytes for truncate from begin of data
+     * @param truncright: number of bytes for truncate from end of data
+     */
+    virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
 
 #endif
-
-

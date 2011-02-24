@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,31 +16,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H
-#define __INET_TCP_NSC_VIRTUALDATAQUEUES_H
+#ifndef __INET_TCP_NSC_DATASTREAMQUEUES_H
+#define __INET_TCP_NSC_DATASTREAMQUEUES_H
 
 #include <omnetpp.h>
 
 #include "TCP_NSC_Queues.h"
 
+#include "ByteArrayBuffer.h"
 #include "TCPConnection.h"
 
 /**
  * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
  */
 
-class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
+class INET_API TCP_NSC_DataStreamSendQueue : public TCP_NSC_SendQueue
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_VirtualDataSendQueue();
+    TCP_NSC_DataStreamSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_VirtualDataSendQueue();
+    virtual ~TCP_NSC_DataStreamSendQueue();
 
     virtual void setConnection(TCP_NSC_Connection *connP);
 
@@ -52,26 +53,26 @@ class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
 
     virtual unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment* createSegmentWithBytes(const void* tcpDataP, int tcpLengthP);
+    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, int tcpLengthP);
 
     virtual void discardUpTo(uint32 seqNumP);
 
   protected:
-    long int unsentNscBytesM;
+    ByteArrayBuffer byteArrayBufferM;
 };
 
-class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
+class INET_API TCP_NSC_DataStreamReceiveQueue : public TCP_NSC_ReceiveQueue
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_VirtualDataReceiveQueue();
+    TCP_NSC_DataStreamReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_VirtualDataReceiveQueue();
+    virtual ~TCP_NSC_DataStreamReceiveQueue();
 
     virtual void setConnection(TCP_NSC_Connection *connP);
 
@@ -90,7 +91,7 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
     virtual void notifyAboutSending(const TCPSegment *tcpsegP);
 
   protected:
-    long int bytesInQueueM;
+    ByteArrayBuffer byteArrayBufferM;
 };
 
-#endif
+#endif // __INET_TCP_NSC_DATASTREAMQUEUES_H

@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -341,11 +342,12 @@ class INET_API TCPConnection
     // TCP queues
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
- public:
+    TCPDataTransferMode transferMode;   // TCP transfer mode: bytecount, object, bytestream
 
+  public:
     TCPSACKRexmitQueue *rexmitQueue;
 
- protected:
+  protected:
     // TCP behavior in data transfer state
     TCPAlgorithm *tcpAlgorithm;
 
@@ -358,7 +360,7 @@ class INET_API TCPConnection
     // statistics
     cOutVector *sndWndVector;   // snd_wnd
     cOutVector *rcvWndVector;   // rcv_wnd
-    cOutVector *rcvAdvVector;   // current advertised window (=rcv_avd)
+    cOutVector *rcvAdvVector;   // current advertised window (=rcv_adv)
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo

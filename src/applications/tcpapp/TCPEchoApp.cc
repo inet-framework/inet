@@ -13,6 +13,8 @@
 
 
 #include "TCPEchoApp.h"
+
+#include "ByteArrayMessage.h"
 #include "TCPSocket.h"
 #include "TCPCommand_m.h"
 
@@ -48,6 +50,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
         bytesSent += ((cPacket *)msg)->getByteLength();
         emit(sentPkBytesSignal, (long)(((cPacket *)msg)->getByteLength()));
     }
+
     send(msg, "tcpOut");
 }
 
@@ -61,6 +64,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     {
         // we'll close too
         msg->setKind(TCP_C_CLOSE);
+
         if (delay==0)
             sendDown(msg);
         else
@@ -87,8 +91,23 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             delete ind;
 
             long byteLen = pkt->getByteLength()*echoFactor;
-            if (byteLen<1) byteLen=1;
+
+            if (byteLen < 1)
+                byteLen = 1;
+
             pkt->setByteLength(byteLen);
+
+            ByteArrayMessage *baMsg = dynamic_cast<ByteArrayMessage *>(pkt);
+
+            // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
+            if (baMsg)
+            {
+                ByteArray& outdata = baMsg->getByteArray();
+                ByteArray indata = outdata;
+                outdata.setDataArraySize(byteLen);
+                for (long i=0; i < byteLen; i++)
+                    outdata.setData(i, indata.getData(i/echoFactor));
+            }
 
             if (delay==0)
                 sendDown(pkt);

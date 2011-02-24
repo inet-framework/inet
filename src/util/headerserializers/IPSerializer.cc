@@ -152,7 +152,7 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         break;
       case IP_PROT_TCP:
         encapPacket = new TCPSegment("tcp-from-wire");
-        TCPSerializer().parse(buf + headerLength, (unsigned int)(std::min(totalLength, bufsize) - headerLength), (TCPSegment *)encapPacket);
+        TCPSerializer().parse(buf + headerLength, (unsigned int)(std::min(totalLength, bufsize) - headerLength), (TCPSegment *)encapPacket, true);
         break;
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());

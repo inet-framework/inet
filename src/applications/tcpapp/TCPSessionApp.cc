@@ -14,6 +14,7 @@
 
 #include "TCPSessionApp.h"
 
+#include "ByteArrayMessage.h"
 #include "GenericAppMsg_m.h"
 #include "IPAddressResolver.h"
 
@@ -24,23 +25,29 @@ Define_Module(TCPSessionApp);
 void TCPSessionApp::parseScript(const char *script)
 {
     const char *s = script;
+
     while (*s)
     {
         Command cmd;
 
         // parse time
         while (isspace(*s)) s++;
+
         if (!*s || *s==';') break;
+
         const char *s0 = s;
         cmd.tSend = strtod(s,&const_cast<char *&>(s));
+
         if (s==s0)
             throw cRuntimeError("syntax error in script: simulation time expected");
 
         // parse number of bytes
         while (isspace(*s)) s++;
+
         if (!isdigit(*s))
             throw cRuntimeError("syntax error in script: number of bytes expected");
         cmd.numBytes = atoi(s);
+
         while (isdigit(*s)) s++;
 
         // add command
@@ -48,10 +55,14 @@ void TCPSessionApp::parseScript(const char *script)
 
         // skip delimiter
         while (isspace(*s)) s++;
+
         if (!*s) break;
+
         if (*s!=';')
             throw cRuntimeError("syntax error in script: separator ';' missing");
+
         s++;
+
         while (isspace(*s)) s++;
     }
 }
@@ -87,12 +98,45 @@ void TCPSessionApp::waitUntil(simtime_t t)
     cMessage *timeoutMsg = new cMessage("timeout");
     scheduleAt(t, timeoutMsg);
     cMessage *msg=NULL;
+
     while ((msg=receive())!=timeoutMsg)
     {
         count(msg);
         socket.processMessage(msg);
     }
+
     delete timeoutMsg;
+}
+
+cPacket* TCPSessionApp::genDataMsg(long sendBytes)
+{
+    switch (socket.getDataTransferMode())
+    {
+        case TCP_TRANSFER_BYTECOUNT:
+        case TCP_TRANSFER_OBJECT:
+        {
+            cPacket *msg = NULL;
+            msg = new cPacket("data1");
+            msg->setByteLength(sendBytes);
+            return msg;
+        }
+
+        case TCP_TRANSFER_BYTESTREAM:
+        {
+            ByteArrayMessage *msg = new ByteArrayMessage("data1");
+            unsigned char *ptr = new unsigned char[sendBytes];
+
+            for (int i = 0; i < sendBytes; i++)
+                ptr[i] = (bytesSent + i) & 0xFF;
+
+            msg->getByteArray().assignBuffer(ptr, sendBytes);
+            msg->setByteLength(sendBytes);
+            return msg;
+        }
+
+        default:
+            throw cRuntimeError("Invalid TCP data transfer mode: %d", socket.getDataTransferMode());
+    }
 }
 
 void TCPSessionApp::activity()
@@ -121,6 +165,7 @@ void TCPSessionApp::activity()
 
     const char *script = par("sendScript");
     parseScript(script);
+
     if (sendBytes>0 && commands.size()>0)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
@@ -133,6 +178,7 @@ void TCPSessionApp::activity()
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
+
     if (ev.isGUI()) getDisplayString().setTagArg("t",0, active?"connecting":"listening");
 
     if (active)
@@ -144,6 +190,7 @@ void TCPSessionApp::activity()
     while (socket.getState()!=TCPSocket::CONNECTED)
     {
         socket.processMessage(receive());
+
         if (socket.getState()==TCPSocket::SOCKERROR)
             return;
     }
@@ -152,23 +199,23 @@ void TCPSessionApp::activity()
     if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
 
     // send
-    if (sendBytes>0)
+    if (sendBytes > 0)
     {
         waitUntil(tSend);
         EV << "sending " << sendBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
-        msg->setByteLength(sendBytes);
-        bytesSent += sendBytes;  //FIXME ez valszeg kikerult
+        cPacket *msg = genDataMsg(sendBytes);
+        bytesSent += sendBytes;
         emit(sentPkBytesSignal, sendBytes);
         socket.send(msg);
     }
+
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
     {
         waitUntil(i->tSend);
         EV << "sending " << i->numBytes << " bytes\n";
-        cPacket *msg = new cPacket("data1");
+        cPacket *msg = genDataMsg(i->numBytes);
         msg->setByteLength(i->numBytes);
-        bytesSent += i->numBytes;  //FIXME ez valszeg kikerult
+        bytesSent += i->numBytes;
         emit(sentPkBytesSignal, i->numBytes);
         socket.send(msg);
     }
@@ -197,3 +244,4 @@ void TCPSessionApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+

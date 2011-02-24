@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipQUEUES_H
-#define __INET_TcpLwipQUEUES_H
+#ifndef __INET_TCPLWIP_QUEUES_H
+#define __INET_TCPLWIP_QUEUES_H
 
 #include <omnetpp.h>
 //#include "TCPConnection.h"
@@ -27,7 +27,7 @@
 class TcpLwipConnection;
 
 /**
- * Abstract base class for TCP_NSC send queues. In fact a single object
+ * Abstract base class for TCP_LWIP send queues. In fact a single object
  * represents both the send queue and the retransmission queue
  * (no need to separate them). The TCPConnection object knows
  * which data in the queue have already been transmitted ("retransmission
@@ -71,12 +71,12 @@ class TcpLwipConnection;
  *   receiving side when its last byte has arrived on the simulated
  *   connection.
  *
- * Different TCP_NSCSendQueue subclasses can be written to accomodate
+ * Different TcpLwipSendQueue subclasses can be written to accomodate
  * different needs.
  *
- * This class goes hand-in-hand with TCP_NSCReceiveQueue.
+ * This class goes hand-in-hand with TcpLwipReceiveQueue.
  *
- * @see TCP_NSCReceiveQueue
+ * @see TcpLwipReceiveQueue
  */
 
 class INET_API TcpLwipSendQueue : public cPolymorphic
@@ -108,29 +108,23 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
     virtual void enqueueAppData(cPacket *msgP) = 0;
 
     /**
-     * Copy data to the buffer for send to NSC.
+     * Copy data to the buffer for send to LWIP.
      * returns lengh of copied data.
      * create msg for socket->send_data()
      *
      * called before called socket->send_data()
      */
-//    virtual int getNscMsg(void* bufferP, int bufferLengthP) = 0;
-    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) = 0;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const = 0;
 
     /**
-     * The function should remove msgLengthP bytes from NSCqueue
-     *
-     * But the NSC sometimes reread from this datapart (when data destroyed in IP Layer)
-     * inside of createSegmentWithBytes() function.
-     *
-     * called with return value of socket->send_data() if larger than 0
+     * This function should remove msgLengthP bytes from TCP layer queue
      */
-    virtual void dequeueTcpLayerMsg(int msgLengthP) = 0;
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP) = 0;
 
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual ulong getBytesAvailable() = 0;
+    virtual unsigned long getBytesAvailable() const = 0;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -142,7 +136,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP) = 0;
+    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
 
   protected:
     TcpLwipConnection *connM;
@@ -170,21 +164,16 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      * Called when a TCP segment arrives, it should extract the payload
      * from the segment and store it in the receive queue. The segment
      * object should *not* be deleted.
-     *
-     * The method should return the number of bytes to copied to buffer.
-     *
-     * The method should fill the bufferP for data sending to NSC stack
-     *
-     * called before nsc_stack->if_receive_packet() called
+     * //FIXME revise this comment
      */
-    virtual void insertBytesFromSegment(TCPSegment *tcpsegP, uint32 seqNo, void* bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo, const void* bufferP, size_t bufferLengthP) = 0;
 
     /**
-     * The method called when data received from NSC
+     * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueTcpLayerData(void* dataP, int dataLengthP) = 0;
+    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP) = 0;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -199,17 +188,17 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() = 0;
+    virtual uint32 getAmountOfBufferedBytes() const = 0;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() = 0;
+    virtual uint32 getQueueLength() const = 0;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() = 0;
+    virtual void getQueueStatus() const = 0;
 
     /**
      * notify the queue about output messages

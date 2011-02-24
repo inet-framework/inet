@@ -53,6 +53,8 @@ class INET_API TCPSessionApp : public cSimpleModule
     virtual void waitUntil(simtime_t t);
     virtual void count(cMessage *msg);
 
+    virtual cPacket* genDataMsg(long sendBytes);
+
     virtual void activity();
     virtual void finish();
 };
