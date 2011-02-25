@@ -104,6 +104,15 @@ class TCPErrorInfo extends TCPCommand
 //
 // Defines what to transmit as payload in TCP segments
 //
+// Currently you have the following choices:
+//   - TCP_TRANSFER_BYTECOUNT:
+//      TCP layer will transmit byte counts only.
+//   - TCP_TRANSFER_OBJECT:
+//      TCP layer will transmit the copy of application packet C++ objects
+//   - TCP_TRANSFER_BYTESTREAM:
+//      TCP layer will transmit bytes of the application packet.
+// See ~ITCP for details.
+//
 enum TCPDataTransferMode
 {
     TCP_TRANSFER_UNDEFINED = 0;         // Invalid value
@@ -120,12 +129,6 @@ enum TCPDataTransferMode
 // is received from the peer; localPort is optional because ~TCP supports
 // ephemeral ports.
 //
-// The sendQueueClass, receiveQueueClass and tcpAlgorithmClass fields
-// allow per-connection TCP configuration. These fields may contain
-// names of classes subclassed from TCPSendQueue, TCPReceiveQueue
-// and TCPAlgorithm, respectively. If not set, module parameters with
-// similar names are used.
-//
 // The fork parameter is used with passive open, and controls what happens
 // when an incoming connection is received. With fork=true, it emulates
 // the Unix accept(2) syscall semantics: a new connection structure
@@ -134,6 +137,13 @@ enum TCPDataTransferMode
 // With fork=false, all the above does not happen: the first connection
 // is accepted (with the original connId), and further incoming connections
 // will be refused by TCP by sending an RST segment.
+//
+// The dataTransferMode and tcpAlgorithmClass fields
+// allow per-connection TCP configuration.
+// The dataTransferMode field set the 
+// The tcpAlgorithmClass field may contain name of class subclassed from
+// TCPAlgorithm, respectively.
+// If not set, module parameters with similar names are used.
 //
 // @see ~TcpCommandCode, ~TCP
 //

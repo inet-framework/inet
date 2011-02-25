@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,6 +21,7 @@ package inet.transport.tcp;
 
 //
 // TCP protocol implementation.
+// See the ~ITCP for the TCP layer general informations.
 //
 // This implementation supports:
 //   - RFC  793 - Transmission Control Protocol
@@ -89,36 +90,8 @@ package inet.transport.tcp;
 //
 // <b>Configuring TCP</b>
 //
-// FIXME - The sendQueueClass and receiveQueueClass parameters are removed!!!
-//
-// The module parameters sendQueueClass and receiveQueueClass should be
-// set the names of classes that manage the actual send and receive queues.
-// Currently you have two choices:
-//
-//   -# set them to "TCPVirtualDataSendQueue" and "TCPVirtualDataRcvQueue".
-//      These classes manage "virtual bytes", that is, only byte counts are
-//      transmitted over the TCP connection and no actual data. cMessage
-//      contents, and even message boundaries are not preserved with these
-//      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over TCP, the receiver-side client will see a
-//      sequence of MSS-sized messages.
-//
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "TCPMsgBasedSendQueue" and "TCPMsgBasedRcvQueue", which transmit
-//      cMessage objects (and subclasses) over a TCP connection. The same
-//      message object sequence that was sent by the client to the
-//      sender-side TCP entity will be reproduced on the receiver side.
-//      If a client sends a cMessage with length = 1 megabyte, the
-//      receiver-side client will receive the same message object (or a clone)
-//      after the TCP entities have completed simulating the transmission
-//      of 1 megabyte over the connection. This is a different behaviour
-//      from TCPVirtualDataSendQueue/RcvQueue.
+// The obsoleted sendQueueClass and receiveQueueClass parameters are removed!
+// You must set the dataTransferMode in ~TCPOpenCommand message.
 //
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled
 //      Limited Transmit algorithm (RFC 3042) integrated to TCPBaseAlg
@@ -136,8 +109,7 @@ package inet.transport.tcp;
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
-// Note that ~TCPOpenCommand allows sendQueueClass, receiveQueueClass and
-// tcpAlgorithmClass to be chosen per-connection.
+// Note that ~TCPOpenCommand allows tcpAlgorithmClass to be chosen per-connection.
 //
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
