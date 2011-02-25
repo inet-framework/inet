@@ -1,11 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-20110211
+INET-20110225
 -------------
 - additional statistics in the SCTP module (Alberto Cortes)
+- Fix for SCTP Path.Max.Retrans threshold problem (Alberto Cortes)
 - minor changes in #includes to ensure compatibility with upcoming OMNeT++ 4.2
-
 
 INET-20100723
 -------------
