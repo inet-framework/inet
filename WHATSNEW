@@ -127,9 +127,10 @@ to open the connection. So this feature is actually backwards compatible
 
 
 
-INET-20110211
+INET-20110225
 -------------
 - additional statistics in the SCTP module (Alberto Cortes)
+- Fix for SCTP Path.Max.Retrans threshold problem (Alberto Cortes)
 - minor changes in #includes to ensure compatibility with upcoming OMNeT++ 4.2
 
 

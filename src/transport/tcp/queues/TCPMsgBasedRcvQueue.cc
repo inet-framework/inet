@@ -52,12 +52,12 @@ std::string TCPMsgBasedRcvQueue::info() const
 
     os << "rcv_nxt=" << rcv_nxt;
 
-    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i)
     {
         os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
     }
 
-    os << " " << payloadList.size() << "msgs";
+    os << " " << payloadList.size() << " msgs";
 
     return os.str();
 }

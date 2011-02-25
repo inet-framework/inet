@@ -152,11 +152,11 @@ void RoutingTable::updateDisplayString()
     std::stringstream os;
 
     if (! routerId.isUnspecified())
-        os << "routerId: " << routerId.str() << '\n';
+        os << "routerId: " << routerId << '\n';
 
     os << routes.size() << "+" << multicastRoutes.size() << " routes";
 
-    getDisplayString().setTagArg("t",0, os.str().c_str());
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void RoutingTable::handleMessage(cMessage *msg)
