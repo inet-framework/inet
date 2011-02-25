@@ -149,12 +149,13 @@ void RoutingTable::updateDisplayString()
     if (!ev.isGUI())
         return;
 
-    char buf[80];
-    if (routerId.isUnspecified())
-        sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
-    else
-        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
-    getDisplayString().setTagArg("t",0,buf);
+    std::stringstream os;
+
+    if (!routerId.isUnspecified())
+        os << "routerId: " << routerId <<"\n";
+
+    os << "" << routes.size() << "+" << multicastRoutes.size() << " routes";
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void RoutingTable::handleMessage(cMessage *msg)

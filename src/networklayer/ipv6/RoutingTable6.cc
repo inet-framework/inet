@@ -171,9 +171,10 @@ void RoutingTable6::updateDisplayString()
     if (!ev.isGUI())
         return;
 
-    char buf[80];
-    sprintf(buf, "%d routes\n%d destcache entries", getNumRoutes(), destCache.size());
-    getDisplayString().setTagArg("t",0,buf);
+    std::stringstream os;
+
+    os << getNumRoutes() << " routes\n" << destCache.size() << " destcache entries";
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 void RoutingTable6::handleMessage(cMessage *msg)
