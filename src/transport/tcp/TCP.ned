@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,6 +24,7 @@ package inet.transport.tcp;
 //   - RFC  793 - Transmission Control Protocol
 //   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+//   - RFC 1323 - TCP Extensions for High Performance
 //   - RFC 2018 - TCP Selective Acknowledgment Options
 //   - RFC 2581 - TCP Congestion Control
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
@@ -142,7 +143,7 @@ package inet.transport.tcp;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    RFC 763 but may not be what you'd expect.
+//    RFC 793 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
@@ -166,23 +167,25 @@ package inet.transport.tcp;
 //  - changes from RFC 2001 to RFC 2581:
 //      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
-//    - TCP header options:
+//  - TCP header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
 //        (local parameter) and the value specified in the MSS option
 //        received during connection startup. Based on [RFC 2581, page 1].
+//      - WS: Window Scale option, based on RFC 1323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
-//    - flow control: finite receive buffer size (initiated by parameter
-//      advertisedWindow). If receive buffer is exhausted (by out-of-order
-//      segments) and the payload length of a new received segment
-//      is higher than free receiver buffer, the new segment will be dropped.
-//      Such drops are recorded in tcpRcvQueueDropsVector.
-
+//      - TS: Timestamps option, based on RFC 1323.
+//  - flow control: finite receive buffer size (initiated by parameter
+//    advertisedWindow). If receive buffer is exhausted (by out-of-order
+//    segments) and the payload length of a new received segment
+//    is higher than free receiver buffer, the new segment will be dropped.
+//    Such drops are recorded in tcpRcvQueueDropsVector.
+//
 // The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
-//  - delayed acks, with 200ms timeout (optional)
+//  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
@@ -205,20 +208,10 @@ package inet.transport.tcp;
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
-//  - Re-starting Idle Connections (RFC 2581)
-//    RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//    more than one retransmission timeout, cwnd is reduced to the value
-//    of the restart window (RW) before transmission begins.
-//    For the purposes of this standard, we define RW = IW."
 //
 // TCPNewReno/TCPReno/TCPTahoe issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm (RFC 896) possibly not precisely implemented
-//  - Re-starting Idle Connections (RFC 2581)
-//      RFC 2581, pages 7 and 8: "When TCP has not received a segment for
-//      more than one retransmission timeout, cwnd is reduced to the value
-//      of the restart window (RW) before transmission begins.
-//      For the purposes of this standard, we define RW = IW."
 //
 // The above problems are relatively easy to fix, and will be resolved in the
 // next iteration. Also, other TCPAlgorithms will be added.
@@ -234,12 +227,14 @@ simple TCP like ITCP
 {
     parameters:
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
-        bool delayedAcksEnabled = default(false); // delayed ACKs enabled/disabled
+        bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // maximum segment size (header option)
+        bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
         string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
         string receiveQueueClass = default("TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue

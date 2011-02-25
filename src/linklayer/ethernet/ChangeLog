@@ -1,70 +1,70 @@
 2008-07-26  Andras Varga
 
-	* EtherMAC2: refactored to use cGate::getDatarateChannel()
+    * EtherMAC2: refactored to use cGate::getDatarateChannel()
 
 2008-07-07  Andras Varga
 
-	* removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has
-	built-in message IDs, message tree IDs and sequence chart
-	visualization)
+    * removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has
+      built-in message IDs, message tree IDs and sequence chart
+      visualization)
 
-	* EtherMAC2: performance: only fire notifications if someone is listening
+    * EtherMAC2: performance: only fire notifications if someone is listening
 
-	* EtherMAC2: made notification consistent with PPP: use TxDetails as
-	"details" object
+    * EtherMAC2: made notification consistent with PPP: use TxDetails as
+      "details" object
 
-	* EtherMAC, EtherMAC2: performance: remember output gate pointer
-	instead of looking it up for each send()
+    * EtherMAC, EtherMAC2: performance: remember output gate pointer
+      instead of looking it up for each send()
 
 2008-06-29  Andras Varga
 
-	* moved class declarations from .cc files into separate .h files
-	  for EtherHub, EtherLLC, EtherEncap, etc
+    * moved class declarations from .cc files into separate .h files
+      for EtherHub, EtherLLC, EtherEncap, etc
 
 2006-XX-XX Levente Meszaros
 
-	* created EtherMAC2, which is a simplified, duplex-only version of
- 	  EtherMAC (i.e. it does not contain the CSMA/CD algorithm)
+    * created EtherMAC2, which is a simplified, duplex-only version of
+      EtherMAC (i.e. it does not contain the CSMA/CD algorithm)
 
 2004-05-10  Andras Varga
 
-	* EtherMAC: auto MAC address assignment
+    * EtherMAC: auto MAC address assignment
 
-	* EtherMAC: auto-configuration of transmission rate and duplex/half duplex i
-	  mode.
+    * EtherMAC: auto-configuration of transmission rate and duplex/half duplex i
+      mode.
 
-	* it's no longer an error if EtherMAC is not connected to the network
-	  ("unplugged cable")
+    * it's no longer an error if EtherMAC is not connected to the network
+      ("unplugged cable")
 
-	* elaboration of Ethernet frame types: Ethernet II, 802.3 with LLC,
-	  802.3 with LLC and SNAP.
+    * elaboration of Ethernet frame types: Ethernet II, 802.3 with LLC,
+      802.3 with LLC and SNAP.
 
-	* added EtherEncap, which does encapsulation/decapsulation with
-	  Ethernet II frames.
+    * added EtherEncap, which does encapsulation/decapsulation with
+      Ethernet II frames.
 
-	* communication between LLC and higher layers changed: now it uses
-	  controlInfo() as introduced in OMNeT++ 3.0
+    * communication between LLC and higher layers changed: now it uses
+      controlInfo() as introduced in OMNeT++ 3.0
 
-	* PAUSE handling fixed: PAUSE frames to be sent have now priority
-	  in the MAC (they overtake normal frames in the queue).
-	  MACRelayUnits: minimal time interval introduced that must elapse
-	  before sending another PAUSE frame.
+    * PAUSE handling fixed: PAUSE frames to be sent have now priority
+      in the MAC (they overtake normal frames in the queue).
+      MACRelayUnits: minimal time interval introduced that must elapse
+      before sending another PAUSE frame.
 
-	* new example network: models a very large Ethernet LAN. Ini files
-	  for old example networks available in test/ subdir.
+    * new example network: models a very large Ethernet LAN. Ini files
+      for old example networks available in test/ subdir.
 
-	* sample application changed to EtherAppCli+EtherAppSrv. EtherAppCli
-	  sends requests of at configurable intervals to EtherAppSrv.
-	  Each request contains how many bytes EtherAppSrv should send back
-	  in response. If this number is 0, no frames are sent; if it is
-	  larger than ~1500, several frames are sent back.
+    * sample application changed to EtherAppCli+EtherAppSrv. EtherAppCli
+      sends requests of at configurable intervals to EtherAppSrv.
+      Each request contains how many bytes EtherAppSrv should send back
+      in response. If this number is 0, no frames are sent; if it is
+      larger than ~1500, several frames are sent back.
 
 2004-01-20  Andras Varga
 
-	* Various fixes on the switch model:
-	- address table reading was broken
-	- fixed bug in MACRelayUnitNP and PP (referencing a deleted message)
-	- fixed crash at removing aged entries from table
-	- zero addressTableSize to mean unlimited table
-	- table management: if table full, throw out oldest entry
+    * Various fixes on the switch model:
+    - address table reading was broken
+    - fixed bug in MACRelayUnitNP and PP (referencing a deleted message)
+    - fixed crash at removing aged entries from table
+    - zero addressTableSize to mean unlimited table
+    - table management: if table full, throw out oldest entry
 

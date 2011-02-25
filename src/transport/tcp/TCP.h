@@ -114,8 +114,8 @@ class INET_API TCP : public cSimpleModule
     {
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
-        short localPort;
-        short remotePort;
+        int localPort;   // -1: unspec
+        int remotePort;  // -1: unspec
 
         inline bool operator<(const SockPair& b) const
         {
@@ -137,8 +137,8 @@ class INET_API TCP : public cSimpleModule
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
-    short lastEphemeralPort;
-    std::multiset<short> usedEphemeralPorts;
+    ushort lastEphemeralPort;
+    std::multiset<ushort> usedEphemeralPorts;
 
   protected:
     /** Factory method; may be overriden for customizing TCP */
@@ -188,7 +188,7 @@ class INET_API TCP : public cSimpleModule
     /**
      * To be called from TCPConnection: reserves an ephemeral port for the connection.
      */
-    virtual short getEphemeralPort();
+    virtual ushort getEphemeralPort();
 };
 
 #endif

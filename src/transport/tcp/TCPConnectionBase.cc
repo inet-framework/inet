@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -58,6 +58,7 @@ TCPStateVariables::TCPStateVariables()
     snd_fin_seq = 0;
     fin_rcvd = false;
     rcv_fin_seq = 0;
+    sentBytes = 0;
 
     nagle_enabled = false;      // will be set from configureStateVariables()
     delayed_acks_enabled = false; // will be set from configureStateVariables()
@@ -67,6 +68,22 @@ TCPStateVariables::TCPStateVariables()
     ack_now = false;
 
     afterRto = false;
+
+    time_last_data_sent = 0;
+
+    ws_support = false;       // will be set from configureStateVariables()
+    ws_enabled = false;
+    snd_ws = false;
+    rcv_ws = false;
+    rcv_wnd_scale = 0;        // will be set from configureStateVariables()
+    snd_wnd_scale = 0;      
+
+    ts_support = false;       // will be set from configureStateVariables()
+    ts_enabled = false;
+    snd_initial_ts = false;
+    rcv_initial_ts = false;
+    ts_recent = 0;
+    last_ack_sent = 0;
 
     sack_support = false;       // will be set from configureStateVariables()
     sack_enabled = false;
@@ -130,6 +147,10 @@ std::string TCPStateVariables::detailedInfo() const
     out << "limited_transmit_enabled = " << limited_transmit_enabled << "\n";
     out << "increased_IW_enabled = " << increased_IW_enabled << "\n";
     out << "delayed_acks_enabled = " << delayed_acks_enabled << "\n";
+    out << "ws_support = " << ws_support << "\n";
+    out << "ws_enabled = " << ws_enabled << "\n";
+    out << "ts_support = " << ts_support << "\n";
+    out << "ts_enabled = " << ts_enabled << "\n";
     out << "sack_support = " << sack_support << "\n";
     out << "sack_enabled = " << sack_enabled << "\n";
     out << "snd_sack_perm = " << snd_sack_perm << "\n";

@@ -31,9 +31,9 @@ class INET_API DuplicatesGenerator : public cSimpleModule
 {
   protected:
     unsigned int numPackets;
-	unsigned int numDuplicated;
-	bool generateFurtherDuplicates;
-	std::vector<unsigned int> duplicatesVector;
+    unsigned int numDuplicated;
+    bool generateFurtherDuplicates;
+    std::vector<unsigned int> duplicatesVector;
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

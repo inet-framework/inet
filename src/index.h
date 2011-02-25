@@ -18,7 +18,7 @@
 // This file is used only during the doxygen documentation generation.
 
 /**
- * @page WHATSNEW What's New
+ * @page whatsnew What's New
  *
  * @verbinclude WHATSNEW
  */

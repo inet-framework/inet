@@ -507,7 +507,7 @@ SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
     return i==sctpAppConnMap.end() ? NULL : i->second;
 }
 
-int16 SCTP::getEphemeralPort()
+uint16 SCTP::getEphemeralPort()
 {
     if (nextEphemeralPort==5000)
         error("Ephemeral port range 1024..4999 exhausted (email SCTP model "
@@ -804,6 +804,18 @@ void SCTP::removeAssociation(SCTPAssociation *conn)
         snprintf((char*)&str, sizeof(str), "Number of Timer-Based Retransmissions %d:%s",
                  conn->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfTimerBasedRetransmissions);
+        snprintf((char*)&str, sizeof(str), "Number of Heartbeats Sent %d:%s",
+                 conn->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfHeartbeatsSent);
+        snprintf((char*)&str, sizeof(str), "Number of Heartbeats Received %d:%s",
+                 conn->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfHeartbeatsRcvd);
+        snprintf((char*)&str, sizeof(str), "Number of Heartbeat ACKs Sent %d:%s",
+                 conn->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfHeartbeatAcksSent);
+        snprintf((char*)&str, sizeof(str), "Number of Heartbeat ACKs Received %d:%s",
+                 conn->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfHeartbeatAcksRcvd);
     }
 
 

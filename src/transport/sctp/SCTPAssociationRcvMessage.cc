@@ -71,8 +71,8 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
     }
 
     SCTPPathVariables* path      = getPath(src);
-    const int32  srcPort             = sctpmsg->getDestPort();
-    const int32  destPort        = sctpmsg->getSrcPort();
+    const uint16 srcPort         = sctpmsg->getDestPort();
+    const uint16 destPort        = sctpmsg->getSrcPort();
     const uint32 numberOfChunks = sctpmsg->getChunksArraySize();
     sctpEV3 << "numberOfChunks=" <<numberOfChunks << endl;
 
@@ -223,6 +223,10 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             }
             trans = true;
             delete heartbeatChunk;
+            if (path) {
+                path->numberOfHeartbeatsRcvd++;
+                path->pathRcvdHb->record(path->numberOfHeartbeatsRcvd);
+            }
             break;
         case HEARTBEAT_ACK:
             sctpEV3 << "SCTPAssociationRcvMessage: HEARTBEAT_ACK received" << endl;
@@ -1348,6 +1352,8 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 SCTPEventCode SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk* hback,
                                                                              SCTPPathVariables*     path)
 {
+    path->numberOfHeartbeatAcksRcvd++;
+    path->pathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
     /* hb-ack goes to pathmanagement, reset error counters, stop timeout timer */
     const IPvXAddress addr          = hback->getRemoteAddr();
     const simtime_t hbTimeField = hback->getTimeField();
@@ -1609,7 +1615,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
     }
     else {
-        if (path->pathErrorCount >= (uint32)sctpMain->par("pathMaxRetrans")) {
+        if (path->pathErrorCount > (uint32)sctpMain->par("pathMaxRetrans")) {
             bool notifyUlp = false;
 
             sctpEV3 << "pathErrorCount exceeded\n";

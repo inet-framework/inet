@@ -20,6 +20,7 @@
 
 #define WANT_WINSOCK2
 
+#include <platdep/sockets.h>
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -134,6 +135,7 @@ void ExtInterface::handleMessage(cMessage *msg)
 
         if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&
             (ipPacket->getTransportProtocol() != IPPROTO_SCTP) &&
+            (ipPacket->getTransportProtocol() != IPPROTO_TCP) &&
             (ipPacket->getTransportProtocol() != IPPROTO_UDP))
         {
             EV << "Can not send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
@@ -176,15 +178,15 @@ void ExtInterface::handleMessage(cMessage *msg)
 void ExtInterface::displayBusy()
 {
     getDisplayString().setTagArg("i",1, "yellow");
-    gate("physOut")->getDisplayString().setTagArg("o",0,"yellow");
-    gate("physOut")->getDisplayString().setTagArg("o",1,"3");
+    gate("physOut")->getDisplayString().setTagArg("ls",0,"yellow");
+    gate("physOut")->getDisplayString().setTagArg("ls",1,"3");
 }
 
 void ExtInterface::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
-    gate("physOut")->getDisplayString().setTagArg("o",0,"black");
-    gate("physOut")->getDisplayString().setTagArg("o",1,"1");
+    gate("physOut")->getDisplayString().setTagArg("ls",0,"black");
+    gate("physOut")->getDisplayString().setTagArg("ls",1,"1");
 }
 
 void ExtInterface::updateDisplayString()
@@ -193,7 +195,7 @@ void ExtInterface::updateDisplayString()
     if (ev.disable_tracing)
         getDisplayString().setTagArg("t",0,"");
     if(connected)
-        sprintf(buf, "pcap device: %s\nrcv:%llu snt:%llu", device, (unsigned long long)numRcvd, (unsigned long long)numSent);
+        sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
     else
         sprintf(buf, "not connected");
     getDisplayString().setTagArg("t", 0, buf);
@@ -201,6 +203,7 @@ void ExtInterface::updateDisplayString()
 
 void ExtInterface::finish()
 {
-    std::cout<<getFullPath()<<": "<<numSent<<" bytes sent, "<<numRcvd<<" bytes received, "<<numDropped <<" bytes dropped.\n";
+    std::cout << getFullPath() << ": " << numSent << " packets sent, " <<
+            numRcvd << " packets received, " << numDropped <<" packets dropped.\n";
 }
 

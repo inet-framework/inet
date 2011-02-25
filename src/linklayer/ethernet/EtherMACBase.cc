@@ -658,8 +658,8 @@ void EtherMACBase::updateConnectionColor(int txState)
     cGate *g = physOutGate;
     while (g && g->getType()==cGate::OUTPUT)
     {
-        g->getDisplayString().setTagArg("o",0,color);
-        g->getDisplayString().setTagArg("o",1, color[0] ? "3" : "1");
+        g->getDisplayString().setTagArg("ls",0,color);
+        g->getDisplayString().setTagArg("ls",1, color[0] ? "3" : "1");
         g = g->getNextGate();
     }
 }

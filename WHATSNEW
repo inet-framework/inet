@@ -1,6 +1,44 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-20110225
+-------------
+- additional statistics in the SCTP module (Alberto Cortes)
+- Fix for SCTP Path.Max.Retrans threshold problem (Alberto Cortes)
+- minor changes in #includes to ensure compatibility with upcoming OMNeT++ 4.2
+
+INET-20100723
+-------------
+- TCP improvement (Thomas Reschka, Zoltan Bojthe).
+  * implemented RFC 1323 (TCP Extensions for High Performance):
+      - Window Scale option
+      - Timestamps option (Round-Trip Time Measurement - RTTM)
+      - Protect Against Wrapped Sequence Numbers (PAWS)
+      - added a PAWS modification according to the latest proposal
+        of the tcplw@cray.com list (Braden 1993/04/26)
+  * implemented missing part of RFC 2581: Re-starting Idle Connections
+  * various fixes
+  * see details in src/transport/tcp/ChangeLog.
+
+- added examples for new TCP features (Thomas Reschka):
+  * examples/inet/tcptimestamps
+  * examples/inet/tcpwindowscale
+
+- added NetAnimTrace module (Andras Varga). This module can be used to record
+  input for the NetAnim program (http://www.nsnam.org/wiki/index.php/NetAnim)
+
+- Ieee80211Radio: added a shadowing component for the path loss reception model
+  (Nikos Simantirakis). This is a random variable has a normal distribution
+  in dB and results to -normal distribution in mW. This is a widespread and
+  common model used for reproducing shadowing effects (Rappaport, T. S. (2002),
+  Communications - Principles and Practice, Prentice Hall PTR).
+
+- bugfix and small improvements in SCTP, TCPSessionApp, ThruputMeter
+
+- cosmetic changes in many other files (comments, indentation, compiler warning
+  elimination, variable renaming, etc.)
+
+
 INET-20100323
 -------------
 - added "label" annotations to gates and modules to support the adaptive palette
@@ -10,14 +48,14 @@ INET-20100323
   Thomas Dreibholz
 
 - added support for Sam Jensen's Network Simulation Cradle,
-  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks available 
-  in simulations. Currently NSC supports the FreeBSD, OpenBSD, lwIP and Linux 
-  stacks. The TCP_NSC module (transport/tcp_nsc) is a drop-in replacement for the 
-  normal TCP module (transport/tcp), and can be activated with a single parameter 
-  setting in StandardHost. See src/transport/tcp_nsc, 3rdparty/README, and 
+  http://www.wand.net.nz/~stj2/nsc/, which makes real-world TCP stacks available
+  in simulations. Currently NSC supports the FreeBSD, OpenBSD, lwIP and Linux
+  stacks. The TCP_NSC module (transport/tcp_nsc) is a drop-in replacement for the
+  normal TCP module (transport/tcp), and can be activated with a single parameter
+  setting in StandardHost. See src/transport/tcp_nsc, 3rdparty/README, and
   examples/inet/tcpclientserver.
 
-- added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP 
+- added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP
   version is still available as TCP_old. See src/transport/tcp/ChangeLog for details.
 
 INET-20090325

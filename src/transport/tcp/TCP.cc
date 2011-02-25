@@ -282,10 +282,10 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
     return i==tcpAppConnMap.end() ? NULL : i->second;
 }
 
-short TCP::getEphemeralPort()
+ushort TCP::getEphemeralPort()
 {
     // start at the last allocated port number + 1, and search for an unused one
-    short searchUntil = lastEphemeralPort++;
+    ushort searchUntil = lastEphemeralPort++;
     if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -394,7 +394,7 @@ void TCP::removeConnection(TCPConnection *conn)
 
     // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
     // deletes ALL occurrences of the port from the multiset.
-    std::multiset<short>::iterator it = usedEphemeralPorts.find(conn->localPort);
+    std::multiset<ushort>::iterator it = usedEphemeralPorts.find(conn->localPort);
     if (it!=usedEphemeralPorts.end())
         usedEphemeralPorts.erase(it);
 

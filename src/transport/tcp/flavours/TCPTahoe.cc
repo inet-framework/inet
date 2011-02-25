@@ -54,7 +54,7 @@ void TCPTahoe::processRexmitTimer(TCPEventCode& event)
     state->afterRto = true;
 
     // Tahoe retransmits only one segment at the front of the queue
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
@@ -125,7 +125,7 @@ void TCPTahoe::receivedDuplicateAck()
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
-        conn->retransmitOneSegment();
+        conn->retransmitOneSegment(false);
 
         // Do not restart REXMIT timer.
         // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.

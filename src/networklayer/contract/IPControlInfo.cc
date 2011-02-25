@@ -22,8 +22,8 @@ IPControlInfo::~IPControlInfo()
 {
     if (dgram)
     {
-    	drop(dgram);
-    	delete dgram;
+        drop(dgram);
+        delete dgram;
     }
 }
 

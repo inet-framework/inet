@@ -75,7 +75,7 @@ class Test_TraCI : public cSimpleModule, public INotifiable {
 			}
 			catch (std::runtime_error e) {
 				error((std::string("command parse error for attribute \"") + name + "\": " + e.what()).c_str());
-				throw e;
+				throw;
 			}
 		}
 

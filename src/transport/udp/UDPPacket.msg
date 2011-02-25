@@ -27,7 +27,7 @@ cplusplus {{
 //
 packet UDPPacket
 {
-    int sourcePort = -1;
-    int destinationPort = -1;
+    unsigned short sourcePort;
+    unsigned short destinationPort;
 }
 

@@ -49,7 +49,7 @@
 /*...*/
 
 /* from sys/types.h --A */
-typedef	u_int32_t	in_addr_t;	/* base type for internet address */
+typedef u_int32_t   in_addr_t;  /* base type for internet address */
 
 /*
  * Internet address (a structure for historical reasons)

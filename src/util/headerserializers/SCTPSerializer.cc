@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "platdep/sockets.h"
 #include "headers/defs.h"
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
@@ -28,7 +29,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "SCTPSerializer.h"
 #include "SCTPAssociation.h"
-#include "platdep/intxtypes.h"
+//#include "platdep/intxtypes.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...

@@ -1,21 +1,21 @@
 2008-09-09  Tamas Borbely
 
-	* LDP: made combatible with MSVC 8.0. (In debug mode it asserts
+    * LDP: made combatible with MSVC 8.0. (In debug mode it asserts
         that the std::vector iterator is not moved before begin().)
 
 2005-11-02  Andras Varga
 
-	* checked in Vojta Janota's implementation (losely based on Andras' code)
+    * checked in Vojta Janota's implementation (losely based on Andras' code)
 
 2004  Andras Varga
 
-	* started to reimplement from scratch (NewLDP.h, NewLDP.cc)
+    * started to reimplement from scratch (NewLDP.h, NewLDP.cc)
 
 2003-10-03  Andras Varga
 
-	* fixed a lot of "unused variable" warnings
-	* made it compile with MSVC 6.0
+    * fixed a lot of "unused variable" warnings
+    * made it compile with MSVC 6.0
 
 2003-09-19  Andras Varga
 
-	* original version  from Xuan Thang Nguyen, UTS
+    * original version  from Xuan Thang Nguyen, UTS

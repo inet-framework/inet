@@ -54,8 +54,8 @@ class INET_API UDP : public cSimpleModule
         bool onlyLocalPortIsSet;
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
-        short localPort;
-        short remotePort;
+        ushort localPort;
+        ushort remotePort;
         int interfaceId; // FIXME do real sockets allow filtering by input interface??
     };
 
@@ -69,7 +69,7 @@ class INET_API UDP : public cSimpleModule
     SocketsByPortMap socketsByPortMap;
 
     // other state vars
-    short lastEphemeralPort;
+    ushort lastEphemeralPort;
     ICMP *icmp;
     ICMPv6 *icmpv6;
 
@@ -93,15 +93,15 @@ class INET_API UDP : public cSimpleModule
     virtual void unbind(int sockId);
 
     // ephemeral port
-    virtual short getEphemeralPort();
+    virtual ushort getEphemeralPort();
 
     virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
     virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
-    virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
+    virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);
     virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
     virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
-    virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
+    virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cPacket *icmpErrorMsg); // TODO use ICMPMessage

@@ -1,34 +1,34 @@
 2008-09-10  Tamas Borbely
 
-	* ModuleAccess: use findModuleWhereverInNode() instead of
+    * ModuleAccess: use findModuleWhereverInNode() instead of
         findModuleSomewhereUp. It goes up in the hierarchy up to
         to @node module and search inside them recursively.
 
 2008-07-04  Andras Varga
 
-	* NotificationBoard: added bool hasSubscribers(int category) method.
-	By using a local boolean 'hasSubscriber' flag, it allows performance-
-	critical clients to leave out calls to fireChangeNotification() if
-	there's no one subscribed anyway. The flag should be refreshed on
-	each NF_SUBSCRIBERLIST_CHANGED notification (newly added too).
+    * NotificationBoard: added bool hasSubscribers(int category) method.
+    By using a local boolean 'hasSubscriber' flag, it allows performance-
+    critical clients to leave out calls to fireChangeNotification() if
+    there's no one subscribed anyway. The flag should be refreshed on
+    each NF_SUBSCRIBERLIST_CHANGED notification (newly added too).
 
 2008-07-02  Andras Varga
 
-	* INotifiable: receiveChangeNotification() signature change: details
-	object pointer became "const"
+    * INotifiable: receiveChangeNotification() signature change: details
+    object pointer became "const"
 
 2008-06-30  Andras Varga
 
-	* NotifierConsts: added constants for overlay networks [from Ingmar
-	Baumgart, OverSim]
+    * NotifierConsts: added constants for overlay networks [from Ingmar
+    Baumgart, OverSim]
 
 2008-06-29  Andras Varga
 
-	* AbstractQueue improved so that if serviceTime is zero, it does not
-	  schedule a timer but sends out the message (i.e. invokes endService())
-	  immediately
+    * AbstractQueue improved so that if serviceTime is zero, it does not
+      schedule a timer but sends out the message (i.e. invokes endService())
+      immediately
 
 2006-05-09  Andras Varga
 
-	* added FSMA.h (written by Levente Meszaros for the IEEE802.11 model)
+    * added FSMA.h (written by Levente Meszaros for the IEEE802.11 model)
 

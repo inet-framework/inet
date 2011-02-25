@@ -29,39 +29,39 @@ void DuplicatesGenerator::initialize()
     WATCH(numDuplicated);
     WATCH(generateFurtherDuplicates);
 
-	const char *vector = par("duplicatesVector");
+    const char *vector = par("duplicatesVector");
     parseVector(vector);
 
     if (duplicatesVector.size()==0)
-    	{EV << "DuplicatesGenerator: Empty duplicatesVector" << endl;}
+        {EV << "DuplicatesGenerator: Empty duplicatesVector" << endl;}
     else
     {
-    	EV << "DuplicatesGenerator: duplicatesVector=" << vector << endl;
-    	generateFurtherDuplicates = true;
+        EV << "DuplicatesGenerator: duplicatesVector=" << vector << endl;
+        generateFurtherDuplicates = true;
     }
 }
 
 void DuplicatesGenerator::handleMessage(cMessage *msg)
 {
-	numPackets++;
+    numPackets++;
 
-	if (generateFurtherDuplicates)
-	{
-		if (numPackets==duplicatesVector[0])
-		{
-			EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
-			cMessage *dupmsg = (cMessage*) msg->dup();
-			send(dupmsg, "out");
-			numDuplicated++;
-			duplicatesVector.erase(duplicatesVector.begin());
-			if (duplicatesVector.size()==0)
-			{
-				EV << "DuplicatesGenerator: End of duplicatesVector reached." << endl;
-				generateFurtherDuplicates = false;
-			}
-		}
-	}
-	send(msg, "out");
+    if (generateFurtherDuplicates)
+    {
+        if (numPackets==duplicatesVector[0])
+        {
+            EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
+            cMessage *dupmsg = (cMessage*) msg->dup();
+            send(dupmsg, "out");
+            numDuplicated++;
+            duplicatesVector.erase(duplicatesVector.begin());
+            if (duplicatesVector.size()==0)
+            {
+                EV << "DuplicatesGenerator: End of duplicatesVector reached." << endl;
+                generateFurtherDuplicates = false;
+            }
+        }
+    }
+    send(msg, "out");
 }
 
 void DuplicatesGenerator::parseVector(const char *vector)
@@ -71,7 +71,7 @@ void DuplicatesGenerator::parseVector(const char *vector)
     {
         // parse packet numbers
         while (isspace(*v)) v++;
-		if (!*v || *v==';') break;
+        if (!*v || *v==';') break;
         if (!isdigit(*v))
             throw cRuntimeError("syntax error in duplicatesVector: packet number expected");
         if (duplicatesVector.size()>0 && duplicatesVector.back() >= (unsigned int)atoi(v))
