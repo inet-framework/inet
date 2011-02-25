@@ -57,6 +57,11 @@ void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
     payloadQueue.push_back(payload);
 }
 
+uint32 TCPMsgBasedSendQueue::getBufferStartSeq()
+{
+    return begin;
+}
+
 uint32 TCPMsgBasedSendQueue::getBufferEndSeq()
 {
     return end;

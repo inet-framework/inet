@@ -1,58 +1,58 @@
 2008-09-09  Tamas Borbely
 
-	* IP: set timeToLive to 1 if the destination is isLinkLocalMulticast() to
+    * IP: set timeToLive to 1 if the destination is isLinkLocalMulticast() to
         prevent broadcasting to non-neighbouring routers.
 
 2008-07-08  Andras Varga
 
-	* RoutingTable: implemented routing cache [code based on OverSim
-	patch]; similar performance optimization for isLocalAddress()
+    * RoutingTable: implemented routing cache [code based on OverSim
+    patch]; similar performance optimization for isLocalAddress()
 
-	* IP: performance: remember outputQueue gate pointer instead of
-	looking up the gate by name for each send(). Note: could do the
-	same optmization for other gates as well, but this gate is much
-	more often used than the others
+    * IP: performance: remember outputQueue gate pointer instead of
+    looking up the gate by name for each send(). Note: could do the
+    same optmization for other gates as well, but this gate is much
+    more often used than the others
 
 2008-07-07  Andras Varga
 
-	* introduced IRoutingTable, to allow users implement their own
-	RoutingTables and plug them into INET simulations, without any
-	change to the base INET.
+    * introduced IRoutingTable, to allow users implement their own
+    RoutingTables and plug them into INET simulations, without any
+    change to the base INET.
 
 2008-07-02  Andras Varga
 
-	* RoutingTable: properly fire notifications on routing table changes
+    * RoutingTable: properly fire notifications on routing table changes
 
 2008-07-01  Andras Varga
 
-	* wrapped naked data members of IPv4Route into getters/setters
+    * wrapped naked data members of IPv4Route into getters/setters
 
-	* RoutingTable: enforce by returning "const" pointers that routes
-	already added cannot be changed any more (one must delete and
-	re-add it)
+    * RoutingTable: enforce by returning "const" pointers that routes
+    already added cannot be changed any more (one must delete and
+    re-add it)
 
 2008-06-29  Andras Varga
 
-	* IP: factored out a createIPDatagram method
+    * IP: factored out a createIPDatagram method
 
 2005-10-28  Andras Varga
 
-	* IP.cc: obey new "outputPort" field of IPControlInfo when sending
-	multicast datagram
+    * IP.cc: obey new "outputPort" field of IPControlInfo when sending
+    multicast datagram
 
-	* RoutingTableParser.cc: 5th field of a route in routing files is
-	the metric (so far it was "preferences" but in fact it was unused)
+    * RoutingTableParser.cc: 5th field of a route in routing files is
+    the metric (so far it was "preferences" but in fact it was unused)
 
 2005-07-06  Andras Varga
 
-	* IP.cc: don't forward "link-local" multicast addresses (224.0.0.x)
+    * IP.cc: don't forward "link-local" multicast addresses (224.0.0.x)
 
 2005-07-04  Andras Varga
 
-	* RoutingTable: localDeliver() ignores interface netmask [reported by
-	Michael Tuexen]
+    * RoutingTable: localDeliver() ignores interface netmask [reported by
+    Michael Tuexen]
 
-	* RoutingTable: interface netmask functionality is now achieved by
-	routes of type IFACENETMASK added to the routing table. These routes
-	are re-build whenever notification is received that there was a change
-	in the interface IPv4 configurations.
+    * RoutingTable: interface netmask functionality is now achieved by
+    routes of type IFACENETMASK added to the routing table. These routes
+    are re-build whenever notification is received that there was a change
+    in the interface IPv4 configurations.

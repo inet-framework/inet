@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -81,7 +81,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
  * control is implemented in subclasses such as TCPTahoeAlg or TCPRenoAlg.
  *
  * Implements:
- *   - delayed acks
+ *   - delayed ACK algorithm (RFC 1122)
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
  *   - Nagle's algorithm (RFC 896) to prevent silly window syndrome
  *   - Increased Initial Window (RFC 3390)
@@ -137,6 +137,12 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
      * in 200ms/500ms ticks, as needed)
      */
     virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+
+    /**
+     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * to update state vars with new measured RTT value.
+     */
+    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
 
     /**
      * Send data, observing Nagle's algorithm and congestion window

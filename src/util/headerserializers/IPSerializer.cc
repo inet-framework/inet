@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen, Andras Varga
-//               2009 Thomas Reschka
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,6 +17,7 @@
 //
 
 #include <algorithm> // std::min
+#include "platdep/sockets.h"
 #include "headers/defs.h"
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff

@@ -16,7 +16,7 @@ checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
 	echo; \
 	echo '======================================================================='; \
-	echo 'src/Makefile does not exist. Please use "make makefiles" to genrate it!'; \
+	echo 'src/Makefile does not exist. Please use "make makefiles" to generate it!'; \
 	echo '======================================================================='; \
 	echo; \
 	exit 1; \

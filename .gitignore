@@ -2,6 +2,8 @@
 *_m.h
 *_m.cc
 src/Makefile
+/doc/doxy/
+/doc/neddoc/
 
 # ignore binary files
 out/
@@ -24,3 +26,4 @@ backups
 *~
 xxx
 /3rdparty
+/tmp/

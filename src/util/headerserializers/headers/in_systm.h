@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1982, 1986, 1993
- *	The Regents of the University of California.  All rights reserved.
+ *  The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,8 +12,8 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
+ *  This product includes software developed by the University of
+ *  California, Berkeley and its contributors.
  * 4. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
@@ -30,7 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)in_systm.h	8.1 (Berkeley) 6/10/93
+ *  @(#)in_systm.h  8.1 (Berkeley) 6/10/93
  * $FreeBSD: src/sys/netinet/in_systm.h,v 1.9 1999/12/29 04:41:00 peter Exp $
  */
 
@@ -50,10 +50,10 @@
  * the bytes before transmission at each protocol level.  The n_ types
  * represent the types with the bytes in ``high-ender'' order.
  */
-typedef u_int16_t n_short;		/* short as received from the net */
-typedef u_int32_t n_long;		/* long as received from the net */
+typedef u_int16_t n_short;      /* short as received from the net */
+typedef u_int32_t n_long;       /* long as received from the net */
 
-typedef	u_int32_t n_time;		/* ms since 00:00 GMT, byte rev */
+typedef u_int32_t n_time;        /* ms since 00:00 GMT, byte rev */
 
 /*...*/
 

@@ -1,0 +1,30 @@
+# filename: server.mrt
+# author: Thomas Reschka
+# routing table for router of tcp example "tcpsack"
+
+ifconfig:
+
+# interface 0 to client
+name: ppp0
+    inet_addr: 172.0.0.100
+    Mask: 255.255.255.0
+    MTU: 1500
+    POINTTOPOINT MULTICAST
+
+# interface 1 to server
+name: ppp1
+    inet_addr: 172.0.1.100
+    Mask: 255.255.255.0
+    MTU: 1500
+    POINTTOPOINT MULTICAST
+
+ifconfigend.
+
+
+route:
+
+#Destination     Gateway          Genmask          Flags  Metric  Iface
+172.0.0.1        172.0.0.1        255.255.255.0    H      0       ppp0
+172.0.1.111      172.0.1.111      255.255.255.0    H      0       ppp1
+
+routeend.

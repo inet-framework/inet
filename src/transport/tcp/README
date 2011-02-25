@@ -9,6 +9,7 @@ This implementation supports:
   - RFC  793 - Transmission Control Protocol
   - RFC  896 - Congestion Control in IP/TCP Internetworks
   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+  - RFC 1323 - TCP Extensions for High Performance
   - RFC 2018 - TCP Selective Acknowledgment Options
   - RFC 2581 - TCP Congestion Control
   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP

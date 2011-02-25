@@ -42,7 +42,7 @@ void TCPNoCongestionControl::processRexmitTimer(TCPEventCode& event)
         return;
 
     // Tahoe-style retransmission: only one segment
-    conn->retransmitOneSegment();
+    conn->retransmitOneSegment(true);
 }
 
 void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)

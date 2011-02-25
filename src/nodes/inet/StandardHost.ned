@@ -37,7 +37,7 @@ import inet.util.TCPDump;
 
 
 //
-// \IP host with TCP, UDP layers and applications.
+// \IP host with SCTP, TCP, UDP layers and applications.
 //
 module StandardHost
 {
@@ -166,7 +166,7 @@ module StandardHost
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> tcpdump.ifIn[i]; //I.R.
+            ppp[i].netwOut --> tcpdump.ifIn[i];
             tcpdump.out2[i] --> networkLayer.ifIn[i];
             ppp[i].netwIn <-- tcpdump.ifOut[i];
             tcpdump.in2[i] <-- networkLayer.ifOut[i];
@@ -174,7 +174,7 @@ module StandardHost
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+i]; //I.R.
+            eth[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+i];
             tcpdump.out2[sizeof(pppg)+i] --> networkLayer.ifIn[sizeof(pppg)+i];
             eth[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)+i];
             tcpdump.in2[sizeof(pppg)+i] <-- networkLayer.ifOut[sizeof(pppg)+i];
@@ -187,4 +187,3 @@ module StandardHost
             tcpdump.in2[sizeof(pppg)+sizeof(ethg)+i] <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
         }
 }
-

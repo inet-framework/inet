@@ -21,8 +21,8 @@
 
 #define WANT_WINSOCK2
 
-#include <platdep/timeutil.h>
 #include <platdep/sockets.h>
+#include <platdep/timeutil.h>
 #include "INETDefs.h"
 #include <omnetpp.h>
 

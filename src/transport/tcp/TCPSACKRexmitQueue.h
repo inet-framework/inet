@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009 Thomas Reschka
+// Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -71,6 +71,21 @@ class INET_API TCPSACKRexmitQueue
     virtual void init(uint32 seqNum);
 
     /**
+     * Returns a string for debug purposes.
+     */
+    virtual std::string str() const;
+
+    /**
+     * Prints the current rexmitQueue status for debug purposes.
+     */
+    virtual void info();
+
+    /**
+     * Returns the sequence number of the first byte stored in the buffer.
+     */
+    virtual uint32 getBufferStartSeq();
+
+    /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
@@ -133,11 +148,6 @@ class INET_API TCPSACKRexmitQueue
      * Resets rexmitted bit of all segments in rexmit queue.
      */
     virtual void resetRexmittedBit();
-
-    /**
-     * Returns a string for debug purposes.
-     */
-    virtual std::string str() const;
 
     /**
      * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.

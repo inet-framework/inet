@@ -25,7 +25,7 @@
 
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
-#include "tcp.h"
+#include "headers/tcp.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TCP_NSC_Queues.h"
@@ -1049,6 +1049,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     uint32_t nscRemoteAddr = inetSockPair.remoteM.ipAddrM.isUnspecified()
         ? ntohl(INADDR_ANY)
         : mapRemote2Nsc(inetSockPair.remoteM.ipAddrM); // Don't remove! It's insert remoteAddr into MAP.
+    (void)nscRemoteAddr; // Eliminate "unused variable" warning.
 
     if (inetSockPair.localM.portM == -1)
         opp_error("Error processing command OPEN_PASSIVE: local port must be specified");

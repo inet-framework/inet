@@ -41,7 +41,7 @@ int32 SCTPAssociation::calculateBytesToSendOnPath(const SCTPPathVariables* pathV
     const SCTPDataMsg* datMsg = peekOutboundDataMsg();
     if(datMsg != NULL) {
         const uint32 ums = datMsg->getBooksize();        // Get user message size
-            const uint32 num = (uint32)floor((pathVar->pmtu - 32) / (ums + SCTP_DATA_CHUNK_LENGTH));
+            const uint32 num = (uint32)floor((double)(pathVar->pmtu - 32) / (ums + SCTP_DATA_CHUNK_LENGTH));
             if (num * ums > state->peerRwnd) {
                 // Receiver cannot handle data yet
                 bytesToSend = 0;
@@ -418,7 +418,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                 stopTimer(SackTimer);
                 sctpAlgorithm->sackSent();
                 state->sackAllowed = false;
-                sendToIP(sctpMsg, path->remoteAddress);
+                sendToIP(sctpMsg, state->lastDataSourceAddress);
                 if ((bytesToSend > 0) || (bytes.chunk) || (bytes.packet)) {
                     sctpMsg = new SCTPMessage("send");
                     sctpMsg->setByteLength(SCTP_COMMON_HEADER);

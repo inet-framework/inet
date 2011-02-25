@@ -24,6 +24,7 @@ Register_Class(PathLossReceptionModel);
 void PathLossReceptionModel::initializeFrom(cModule *radioModule)
 {
     pathLossAlpha = radioModule->par("pathLossAlpha");
+    shadowingDeviation = radioModule->par("shadowingDeviation");
 
     cModule *cc = ChannelControl::get();
     if (pathLossAlpha < (double) (cc->par("alpha")))
@@ -34,6 +35,24 @@ double PathLossReceptionModel::calculateReceivedPower(double pSend, double carri
 {
     const double speedOfLight = 300000000.0;
     double waveLength = speedOfLight / carrierFrequency;
-    return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
+    if (shadowingDeviation == 0.0)
+        return pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha));
+    else
+    {
+        // This code implements a shadowing component for the path loss reception model. The random
+        // variable has a normal distribution in dB and results to log-normal distribution in mW.
+        // This is a widespread and common model used for reproducing shadowing effects
+        // (Rappaport, T. S. (2002), Wireless Communications - Principles and Practice, Prentice Hall PTR).
+        double xs = normal(0.0, shadowingDeviation);
+        double mWValue = pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha));
+        double dBmValue = mW2dBm(mWValue);
+        dBmValue += xs;
+        double mWValueWithShadowing = pow(10.0, dBmValue/10.0);
+        return mWValueWithShadowing;
+    }
 }
 
+double PathLossReceptionModel::mW2dBm(double mW)
+{
+     return 10*log10(mW);
+}

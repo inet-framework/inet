@@ -17,6 +17,9 @@
 //
 
 
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
@@ -30,10 +33,6 @@
 #include "IPv4InterfaceData.h"
 #include "IPv6InterfaceData.h"
 #include "IPv6Address.h"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <sys/time.h>
 #include "UDPControlInfo_m.h"
 
 
@@ -188,6 +187,29 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
     return assoc;
 }
 
+void SCTPAssociation::recordInPathVectors(SCTPMessage* pMsg,
+                                          const IPvXAddress& rDest)
+{
+    uint32 n_chunks = pMsg->getChunksArraySize();
+    if (n_chunks == 0)
+       return;
+
+    SCTPPathVariables* p_path = getPath(rDest);
+
+    for (uint32 i = 0 ; i < n_chunks ; i++) {
+        const SCTPChunk* p_chunk = check_and_cast<const SCTPChunk *>(pMsg->getChunks(i));
+        if (p_chunk->getChunkType() == DATA) {
+            const SCTPDataChunk* p_data_chunk = check_and_cast<const SCTPDataChunk *>(p_chunk);
+            p_path->pathTSN->record(p_data_chunk->getTsn());
+        } else if (p_chunk->getChunkType() == HEARTBEAT) {
+            p_path->numberOfHeartbeatsSent++;
+            p_path->pathHb->record(p_path->numberOfHeartbeatsSent);
+        } else if (p_chunk->getChunkType() == HEARTBEAT_ACK) {
+            p_path->numberOfHeartbeatAcksSent++;
+            p_path->pathHbAck->record(p_path->numberOfHeartbeatAcksSent);
+        }
+    }
+}
 
 void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
                                          const IPvXAddress& dest,
@@ -236,6 +258,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");
         }
+        recordInPathVectors(sctpmsg, dest);
     }
     sctpEV3 << "Sent to " << dest << endl;
 }

@@ -1,8 +1,8 @@
 Changes from Pascal Rouseau:
 
 diff -u -r1.1 TCPReno.cc
---- TCPReno.cc	4 Aug 2005 10:49:09 -0000	1.1
-+++ TCPReno.cc	29 Nov 2005 00:19:20 -0000
+--- TCPReno.cc  4 Aug 2005 10:49:09 -0000   1.1
++++ TCPReno.cc  29 Nov 2005 00:19:20 -0000
 @@ -132,8 +132,9 @@
          conn->retransmitOneSegment();
 
