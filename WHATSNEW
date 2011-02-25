@@ -15,7 +15,41 @@ The most significant changes:
 - support for more than one type of tcpApp and udpApp in StandardHost
   (elimination of tcpAppType/udpAppType parameters)  ===> MEG NINCS MEGCSINALVA, TODO!!!
 
-TODO MERGE topic/stdhost-extensions branch!!!
+- added new AdhocHost for basic node types used in adhoc networks. Supports
+  mobility and multiple wireless radios. It obsoletes the MFMobileHost
+  (use AdhocHost with wlanNicType=Nic80211) and MobileHost (use AdhocHost
+  with default parameters)
+
+- added new AccessPoint module with support for mobility, relaying between
+  wireless and ethernet ports and cofigurable wireless, ethernet and relay type.
+  obsoletes: WirelessAP and WirelessAPWithEth (use AccessPoint), WirelessAPSimplified and 
+  WirelessAPWithEthSimplified (use AccessPoint with wlanNicType=Ieee80211NicAPSimplified),
+  WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified (use 
+  StandardHost with numRadios=1 and wlanNicType=Ieee80211NicSTASimplified)
+  
+- in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
+  or external interfaces are used. Wired interfaces must implement INetworkInterface while wireless 
+  modules implement IWirlessNic. Mobility type and number of wireless cards (default=0)
+  can be also configured via parameters. The use of interfaces obsoletes several older modules
+  which differed only in interface types (like WirelessHost or ExtRouter)
+  
+- enhanced Router to support external interfaces, ppp, wireless, ethernet etc. This module
+  is similar to StandarHost except it does not contain the transport layer and application layer
+  protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router) 
+  
+- in NetworkLayer and NetworkLayer6 added dummy modules implementing IHook interface 
+  that can be inserted above the physical layer. This allows to insert thruput metering, 
+  packet drop and duplication modules etc. without modifying the module. New modules implementing
+  IHook: ThruputMeter, DropsGenerator, DuplicatesGenerator and EmptyHook (which is a NOP)
+  use **.networkLayer.outputHookType = "ThruputMeter" to configure it. (use inputHookType
+  for incoming traffic)
+  
+- added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol, 
+  it is now possible to use a much faster implementation by specifying (by Alfonso Ariza Quintana): 
+  **.networkLayer.arp.globalARP=true
+  
+- multi radios per host (multi channel) are supported by StandardHost, AdhocHost and Router if
+  ChannelControllerExtended is used in the network.     
 
 - point-to-point Ethernet links can now use normal DatarateChannels
   (EtherMAC's txrate parameter was removed)
@@ -62,6 +96,14 @@ TODO MERGE topic/stdhost-extensions branch!!!
 - many smaller bug fixes and refactoring, mostly invisible for users
 
 In more details:
+
+* Reorganized StandardHost:
+ 
+Several changes were introduced to make the basic building blocks of
+simulation (StandardHost, AdhocHost, Router etc.) more configurable,
+without the need to copy and modify the modules or derive a new module
+type. Applications, tcp type, nic, mobility, routing protocols can be 
+configured using paramaters or the **.like-type=typename in the .ini file.
 
 * Ethernet point-to-point links:
 
