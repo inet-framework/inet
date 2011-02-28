@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,38 +14,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
-
-
-package inet.linklayer.ppp;
+package inet.linklayer.ethernet;
 
 import inet.linklayer.IWiredNic;
 
 
 //
-// PPP interface. Assumes infinite queue.
+// Ethernet network interface which supports full-duplex operation only.
+// Complements ~EtherMACFullDuplex and ~EtherEncap with an output queue for QoS and
+// RED support.
 //
-// @see ~PPPInterface
+// @see EthernetInterface, EthernetInterfaceNoQueue
 //
-module PPPInterfaceNoQueue like IWiredNic
+module EthernetInterfaceFullDuplex extends EthernetInterface like IWiredNic
 {
     parameters:
-        @display("i=block/ifcard");
-    gates:
-        input netwIn;
-        output netwOut;
-        inout phys @labels(PPPFrame);
-    submodules:
-        ppp: PPP {
-            parameters:
-                queueModule = "";
-                txQueueLimit = 100000; // prevents overflow in bogus simulations
-                @display("p=80,80;q=txQueue");
-        }
-    connections:
-        netwIn --> { @display("m=n"); } --> ppp.netwIn;
-        netwOut <-- { @display("m=n"); } <-- ppp.netwOut;
-        phys <--> { @display("m=s"); } <--> ppp.phys;
+        macType = "EtherMACFullDuplex";
 }
-
-

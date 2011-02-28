@@ -24,7 +24,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.mobility.BasicMobility;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.INetworkInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 
 
@@ -41,7 +41,7 @@ module Router6
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
-        string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
+        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
         string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
         int namid = default(-1);
         string routingFile = default("");
@@ -81,11 +81,11 @@ module Router6
             parameters:
                 @display("p=72,242;q=queue");
         }
-        eth[sizeof(ethg)]: <ethNicType> like INetworkInterface {
+        eth[sizeof(ethg)]: <ethNicType> like IWiredNic {
             parameters:
                 @display("p=195,242,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface {
+        ppp[sizeof(pppg)]: <pppNicType> like IWiredNic {
             parameters:
                 @display("p=320,242,row,90;q=txQueue");
         }

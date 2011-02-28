@@ -26,10 +26,9 @@ import inet.transport.sctp.SCTP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.mobility.BasicMobility;
-import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.INetworkInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.UDPApp;
 import inet.applications.tcpapp.TCPApp;
@@ -67,7 +66,7 @@ module StandardHost
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
-        string ethNicType = default("EthernetInterface2"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only  
+        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only  
         string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue  
         bool IPForward = default(false);
         int namid = default(-1);
@@ -137,11 +136,11 @@ module StandardHost
             parameters:
                 @display("p=132,390;q=queue");
         }
-        eth[sizeof(ethg)]: <ethNicType> like INetworkInterface {
+        eth[sizeof(ethg)]: <ethNicType> like IWiredNic {
             parameters:
                 @display("p=250,390,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: <pppNicType> like INetworkInterface  {
+        ppp[sizeof(pppg)]: <pppNicType> like IWiredNic {
             parameters:
                 @display("p=369,390,row,90;q=txQueue");
         }

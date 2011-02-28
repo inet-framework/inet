@@ -20,8 +20,8 @@
 
 package inet.linklayer.ethernet;
 
-import inet.linklayer.INetworkInterface;
 import inet.networklayer.queue.OutputQueue;
+import inet.linklayer.IWiredNic;
 
 
 //
@@ -30,7 +30,7 @@ import inet.networklayer.queue.OutputQueue;
 //
 // @see EthernetInterface2, ~EthernetInterfaceNoQueue
 //
-module EthernetInterface like INetworkInterface
+module EthernetInterface like IWiredNic
 {
     parameters:
         string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex

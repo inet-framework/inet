@@ -21,7 +21,7 @@ package inet.linklayer;
 //
 // Prototype module for link layer protocols.
 //
-moduleinterface INetworkInterface
+moduleinterface IWiredNic
 {
     parameters:
         @display("i=block/ifcard");
