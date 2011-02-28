@@ -689,33 +689,30 @@ void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
     tcpEV << this << ": Loading stack " << stacknameP << "\n";
 
     handle = dlopen(stacknameP, RTLD_NOW);
-    if(!handle) {
-        fputs("The loading of NSC stack is unsuccessful: ", stderr);
-        fputs(dlerror(), stderr);
-        fputs("\nCheck the LD_LIBRARY_PATH or stackname!\n", stderr);
-        exit(1);
+
+    if(!handle)
+    {
+        opp_error("The loading of '%s' NSC stack is unsuccessful: %s. Check the LD_LIBRARY_PATH or stackname!", stacknameP, dlerror());
     }
 
     create = (FCreateStack)dlsym(handle, "nsc_create_stack");
-    if(!create) {
-        fputs(dlerror(), stderr);
-        fputs("\n", stderr);
-        exit(1);
+
+    if(!create)
+    {
+        opp_error("The '%s' NSC stack creation unsuccessful: %s", stacknameP, dlerror());
     }
 
     pStackM = create(this, this, NULL);
 
     tcpEV << "TCP_NSC " << this << " has stack " << pStackM << "\n";
 
-    fprintf(stderr, "Created stack = %p\n", pStackM);
-
-    fprintf(stderr, "Initialising stack, name=%s\n", pStackM->get_name());
+    tcpEV << "TCP_NSC " << this << "Initializing stack, name=" << pStackM->get_name() << endl;
 
     pStackM->init(pStackM->get_hz());
 
     pStackM->buffer_size(bufferSizeP);
 
-    fprintf(stderr, "done.\n");
+    tcpEV << "TCP_NSC " << this << "Stack initialized, name=" << pStackM->get_name() << endl;
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
@@ -781,8 +778,9 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
     int64 scale = t.getScale();
     int64 secs = raw / scale;
     int64 usecs = (raw - (secs * scale));
+
     //usecs = usecs * 1000000 / scale;
-    if(scale>1000000) // scale always 10^n
+    if(scale > 1000000) // scale always 10^n
         usecs /= (scale / 1000000);
     else
         usecs *= (1000000 / scale);
@@ -875,6 +873,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     // record seq (only if we do send data) and ackno
     if (sndNxtVector && tcpseg->getPayloadLength()!=0)
         sndNxtVector->record(tcpseg->getSequenceNo());
+
     if (sndAckVector)
         sndAckVector->record(tcpseg->getAckNo());
 
