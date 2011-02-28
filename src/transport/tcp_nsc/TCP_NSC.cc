@@ -1058,10 +1058,10 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
     connP.pNscSocketM->get_var("cwnd_", result, sizeof(result));
     statusInfo->setSnd_wnd(atoi(result));
 
-    statusInfo->setLocalAddr(connP.localM.ipAddrM);
-    statusInfo->setRemoteAddr(connP.remoteM.ipAddrM);
-    statusInfo->setLocalPort(connP.localM.portM);
-    statusInfo->setRemotePort(connP.remoteM.portM);
+    statusInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
+    statusInfo->setRemoteAddr(connP.inetSockPairM.remoteM.ipAddrM);
+    statusInfo->setLocalPort(connP.inetSockPairM.localM.portM);
+    statusInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     //connP.pNscSocketM->get_var("ssthresh_", result, sizeof(result));
     //connP.pNscSocketM->get_var("rxtcur_", result, sizeof(result));
 
