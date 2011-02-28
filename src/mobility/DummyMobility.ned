@@ -15,6 +15,11 @@
 
 package inet.mobility;
 
+//
+// A placeholder module used when a node does not need mobility support.
+// (i.e. when a StandardHost does not have a wireless card so its
+// physical location is irrelevant).
+//
 module DummyMobility like BasicMobility
 {
 }
