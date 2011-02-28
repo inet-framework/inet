@@ -111,7 +111,7 @@ class TCPErrorInfo extends TCPCommand
 //      TCP layer will transmit the copy of application packet C++ objects
 //   - TCP_TRANSFER_BYTESTREAM:
 //      TCP layer will transmit bytes of the application packet.
-// See ~ITCP for details.
+// See ~ITCP (the TCP layer interface) for details.
 //
 enum TCPDataTransferMode
 {

@@ -23,14 +23,14 @@ import inet.transport.tcp.ITCP;
 
 
 //
-// TCP model based on the LWIP project.
+// TCP model based on the LWIP 1.3.2 project.
+// The original LWIP is available on http://savannah.nongnu.org/projects/lwip/ page.
 //
 // See ~ITCP for general TCP layer informations.
 //
 simple TCP_lwip like ITCP
 {
     parameters:
-        int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack //FIXME remove????
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
