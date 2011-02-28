@@ -203,9 +203,9 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
 //TODO    statusInfo.setState(fsm.getState());
 //TODO    statusInfo.setStateName(stateName(fsm.getState()));
 
-    statusInfo.setLocalAddr(IPvXAddress((pcbM->local_ip.addr)));
+    statusInfo.setLocalAddr((pcbM->local_ip.addr));
     statusInfo.setLocalPort(pcbM->local_port);
-    statusInfo.setRemoteAddr(IPvXAddress((pcbM->remote_ip.addr)));
+    statusInfo.setRemoteAddr((pcbM->remote_ip.addr));
     statusInfo.setRemotePort(pcbM->remote_port);
 
     statusInfo.setSnd_mss(pcbM->mss);
