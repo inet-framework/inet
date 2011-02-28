@@ -24,7 +24,7 @@ import inet.transport.tcp.ITCP;
 
 //
 // TCP model based on the Network Simulation Cradle by Sam Jansen.
-// The NSC is available on http://research.wand.net.nz/software/nsc.php page.
+// The NSC is available on the http://research.wand.net.nz/software/nsc.php page.
 // You must read the inet/3dparty/README before use this TCP implementation.
 // This model is compatible with both IPv4 (~IP) and ~IPv6.
 // The TCP_TRANSFER_OBJECT data transfer mode isn't implemented yet.
@@ -33,7 +33,7 @@ import inet.transport.tcp.ITCP;
 // <b>Settings</b>
 //
 // stackName: You can select a TCP implementation with the stackName parameter
-// (On 64 bit systems, the liblinux2.6.26.so and liblinux2.6.16.so are available only).
+// (On the 64 bit systems, the liblinux2.6.26.so and liblinux2.6.16.so are available only).
 //
 // stackBufferSize: The buffer size value for selected TCP implementation.
 // The NSC sets the wmem_max, rmem_max, tcp_rmem, tcp_wmem parameters to this value

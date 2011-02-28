@@ -20,7 +20,7 @@ package inet.transport.tcp;
 
 //
 // Interface for TCP protocol implementations. All TCP implementations should
-// implement this (i.e. declared as: TCP like ~ITCP)
+// implement this (i.e. declared as: TCP like ITCP)
 // The existing implementations are these: ~TCP, ~TCP_NSC and ~TCP_lwip.
 //
 // <b>Communication with applications</b>

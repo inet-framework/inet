@@ -182,7 +182,7 @@ packet TCPSegment
     unsigned long payloadLength;
 
     // Message objects (cMessages) that travel in this segment as data.
-    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_OBJECT)
+    // This field is used only when the ~TCPDataTransferMode is TCP_TRANSFER_OBJECT.
     // Every message object is put into the TCPSegment that would (in real life)
     // carry its first octet. That is, if message object 'msg' with length=100 bytes
     // occupies stream offset number range 10000..10099, it will travel in the
@@ -192,6 +192,6 @@ packet TCPSegment
     abstract TCPPayloadMessage payload[];
 
     // Message bytes that travel in this segment as data.
-    // (This field is used only with TCPDataTransferMode==TCP_TRANSFER_BYTESTREAM)
+    // This field is used only when the ~TCPDataTransferMode is TCP_TRANSFER_BYTESTREAM.
     ByteArray byteArray;
 }

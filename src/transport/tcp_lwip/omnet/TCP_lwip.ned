@@ -24,7 +24,7 @@ import inet.transport.tcp.ITCP;
 
 //
 // TCP model based on the LWIP 1.3.2 project.
-// The original LWIP is available on http://savannah.nongnu.org/projects/lwip/ page.
+// The original LWIP is available on the http://savannah.nongnu.org/projects/lwip/ page.
 //
 // See ~ITCP for general TCP layer informations.
 //
