@@ -19,10 +19,9 @@
 
 package inet.nodes.ethernet;
 
-import inet.networklayer.queue.OutputQueue;
+import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.ethernet.EtherLLC;
-import inet.linklayer.ethernet.EtherEncap;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.applications.ethernet.EtherAppCli;
 
@@ -43,7 +42,7 @@ module EtherHostQ
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        queue: <queueType> like OutputQueue {
+        queue: <queueType> like IOutputQueue {
             parameters:
                 @display("p=99,201;q=l2queue");
         }

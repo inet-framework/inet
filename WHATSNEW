@@ -17,7 +17,7 @@ The most significant changes:
 
 - Interfaces renamed for starting with I letter. BasicMobility -> IMobility, 
   TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
-  Radio->IRadio
+  Radio->IRadio, Ieee80211Mgmt->IIeee80211Mgmt, OutputQueue->IOutputQueue
 
 - added new AdhocHost for basic node types used in adhoc networks. Supports
   mobility and multiple wireless radios. It obsoletes the MFMobileHost

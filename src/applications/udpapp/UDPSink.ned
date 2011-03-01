@@ -22,7 +22,7 @@ package inet.applications.udpapp;
 //
 // Consumes and prints packets received from the ~UDP module.
 //
-simple UDPSink like UDPApp
+simple UDPSink like IUDPApp
 {
     parameters:
         int localPort; // if -1, app doesn't bind in UDP

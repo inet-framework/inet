@@ -20,7 +20,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.networklayer.queue.OutputQueue;
+import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.IWiredNic;
 
 
@@ -41,7 +41,7 @@ module EthernetInterface like IWiredNic
         output netwOut;
         inout phys @labels(EtherFrame);
     submodules:
-        queue: <queueType> like OutputQueue {
+        queue: <queueType> like IOutputQueue {
             parameters:
                 @display("p=92,71;q=l2queue");
         }

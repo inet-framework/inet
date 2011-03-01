@@ -91,7 +91,7 @@ package inet.linklayer.ethernet;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~OutputQueue)
+// In routers, MAC relies on an external queue module (see ~IOutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -123,7 +123,7 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see ~EthernetInterface, ~EthernetInterface, ~OutputQueue, ~EtherEncap, ~EtherLLC
+// @see ~EthernetInterface, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLLC
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
 simple EtherMACFullDuplex like IEtherMAC

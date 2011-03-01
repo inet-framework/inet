@@ -31,7 +31,7 @@ import inet.linklayer.IWiredNic;
 // and maintenance. This model ignores those details, and only performs
 // simple encapsulation/decapsulation and queuing.
 //
-// In routers, PPP relies on an external queue module (see ~OutputQueue)
+// In routers, PPP relies on an external queue module (see ~IOutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -44,7 +44,7 @@ import inet.linklayer.IWiredNic;
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see ~PPPInterface, ~OutputQueue, ~PPPFrame
+// @see ~PPPInterface, ~IOutputQueue, ~PPPFrame
 //
 simple PPP like IWiredNic
 {

@@ -33,7 +33,7 @@ package inet.applications.udpapp;
 // The peer can be ~UDPSink or another ~UDPBasicApp (it handles received packets
 // exactly like ~UDPSink).
 //
-simple UDPBasicApp like UDPApp
+simple UDPBasicApp like IUDPApp
 {
     parameters:
         int localPort; // if -1, app doesn't bind in UDP

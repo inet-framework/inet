@@ -25,8 +25,8 @@ import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.UDPApp;
-import inet.applications.tcpapp.TCPApp;
+import inet.applications.udpapp.IUDPApp;
+import inet.applications.tcpapp.ITCPApp;
 import inet.applications.pingapp.PingApp;
 
 
@@ -71,7 +71,7 @@ module MobileHost
                 routingFile = routingFile;
                 @display("p=60,230");
         }
-        tcpApp[numTcpApps]: <> like TCPApp {
+        tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
                 @display("p=163,67");
         }
@@ -79,7 +79,7 @@ module MobileHost
             parameters:
                 @display("p=163,154");
         }
-        udpApp[numUdpApps]: <> like UDPApp {
+        udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
                 @display("p=272,67");
         }

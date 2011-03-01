@@ -29,10 +29,11 @@ import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.UDPApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.sctpapp.SCTPApp;
+import inet.applications.udpapp.IUDPApp;
+import inet.applications.tcpapp.ITCPApp;
+import inet.applications.sctpapp.ISCTPApp;
 import inet.applications.pingapp.PingApp;
+
 
 //
 // IP host with SCTP, TCP, UDP layers and applications.
@@ -98,7 +99,7 @@ module StandardHost
             parameters:
                 @display("p=57,368");
         }
-        tcpApp[numTcpApps]: <> like TCPApp {
+        tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
                 @display("p=186,54");
         }
@@ -106,7 +107,7 @@ module StandardHost
             parameters:
                 @display("p=186,141");
         }
-        udpApp[numUdpApps]: <> like UDPApp {
+        udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
                 @display("p=336,54");
         }
@@ -114,7 +115,7 @@ module StandardHost
             parameters:
                 @display("p=336,141");
         }
-        sctpApp[numSctpApps]: <> like SCTPApp {
+        sctpApp[numSctpApps]: <> like ISCTPApp {
             parameters:
                 @display("p=501,54");
         }

@@ -65,7 +65,7 @@ package inet.applications.tcpapp;
 //      These classes are not implemented yet.
 //
 
-simple TelnetApp like TCPApp
+simple TelnetApp like ITCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")

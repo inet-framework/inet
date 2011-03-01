@@ -58,7 +58,7 @@ package inet.applications.tcpapp;
 // arrives on them.
 // Compatible with both IPv4 (~IP) and ~IPv6.
 //
-simple TCPSinkApp like TCPApp
+simple TCPSinkApp like ITCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")

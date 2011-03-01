@@ -21,7 +21,7 @@ package inet.applications.udpapp;
 //
 // Similar to ~UDPBasicApp, but it sends back the packet after reception.
 //
-simple UDPEchoApp like UDPApp
+simple UDPEchoApp like IUDPApp
 {
     parameters:
         int localPort;

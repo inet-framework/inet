@@ -23,8 +23,8 @@ import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWirelessNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.UDPApp;
-import inet.applications.tcpapp.TCPApp;
+import inet.applications.udpapp.IUDPApp;
+import inet.applications.tcpapp.ITCPApp;
 import inet.applications.pingapp.PingApp;
 
 
@@ -71,13 +71,13 @@ module AdhocHost
         mobility: <mobilityType> like IMobility {
             @display("p=60,331");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
+        tcpApp[numTcpApps]: <tcpAppType> like ITCPApp {
             @display("p=198,67");
         }
         tcp: TCP {
             @display("p=198,154");
         }
-        udpApp[numUdpApps]: <udpAppType> like UDPApp {
+        udpApp[numUdpApps]: <udpAppType> like IUDPApp {
             @display("p=346,67");
         }
         udp: UDP {

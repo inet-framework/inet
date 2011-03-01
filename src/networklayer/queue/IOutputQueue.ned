@@ -29,7 +29,7 @@ package inet.networklayer.queue;
 //
 // @see ~DropTailQueue, ~DropTailQoSQueue, ~REDQueue
 //
-moduleinterface OutputQueue
+moduleinterface IOutputQueue
 {
     parameters:
         @display("i=block/queue");

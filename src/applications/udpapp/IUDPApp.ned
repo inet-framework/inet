@@ -22,7 +22,7 @@ package inet.applications.udpapp;
 // Template for UDP applications. It shows what gates a UDP app
 // needs, to be able to be used in ~StandardHost etc.
 //
-moduleinterface UDPApp
+moduleinterface IUDPApp
 {
     parameters:
         @display("i=block/app");

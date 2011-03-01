@@ -34,7 +34,7 @@ package inet.applications.udpapp;
 //
 // @see ~UDPVideoStreamCli
 //
-simple UDPVideoStreamSvr like UDPApp
+simple UDPVideoStreamSvr like IUDPApp
 {
     parameters:
         int serverPort; // port to listen on

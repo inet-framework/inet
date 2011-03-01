@@ -23,7 +23,7 @@ package inet.applications.udpapp;
 //
 // @see ~UDPVideoStreamSvr
 //
-simple UDPVideoStreamCli like UDPApp
+simple UDPVideoStreamCli like IUDPApp
 {
     parameters:
         int localPort;

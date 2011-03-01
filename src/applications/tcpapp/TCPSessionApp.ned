@@ -91,7 +91,7 @@ package inet.applications.tcpapp;
 //      These classes are not implemented yet.
 //
 
-simple TCPSessionApp like TCPApp
+simple TCPSessionApp like ITCPApp
 {
     parameters:
         string address = default("");

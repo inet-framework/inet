@@ -117,7 +117,7 @@ package inet.linklayer.ethernet;
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see ~EtherMACFullDuplex, ~EthernetInterface, ~OutputQueue, ~EtherEncap, ~EtherLLC
+// @see ~EtherMACFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLLC
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
 simple EtherMAC like IEtherMAC

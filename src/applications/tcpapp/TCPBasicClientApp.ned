@@ -96,7 +96,7 @@ package inet.applications.tcpapp;
 //
 // @see ~TCPGenericSrvApp, ~GenericAppMsg, ~TelnetApp
 //
-simple TCPBasicClientApp like TCPApp
+simple TCPBasicClientApp like ITCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")

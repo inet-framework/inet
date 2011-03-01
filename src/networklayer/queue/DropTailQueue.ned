@@ -20,9 +20,9 @@ package inet.networklayer.queue;
 
 //
 // Drop-tail queue, to be used in network interfaces.
-// Conforms to the ~OutputQueue interface.
+// Conforms to the ~IOutputQueue interface.
 //
-simple DropTailQueue like OutputQueue
+simple DropTailQueue like IOutputQueue
 {
     parameters:
         int frameCapacity = default(100);

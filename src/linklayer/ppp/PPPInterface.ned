@@ -19,7 +19,7 @@
 
 package inet.linklayer.ppp;
 
-import inet.networklayer.queue.OutputQueue;
+import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.IWiredNic;
 
 
@@ -39,7 +39,7 @@ module PPPInterface like IWiredNic
         output netwOut;
         inout phys @labels(PPPFrame);
     submodules:
-        queue: <queueType> like OutputQueue {
+        queue: <queueType> like IOutputQueue {
             parameters:
                 @display("p=60,85;q=l2queue");
         }

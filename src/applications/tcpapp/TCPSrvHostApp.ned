@@ -75,7 +75,7 @@ package inet.applications.tcpapp;
 //
 // Compatible with both IPv4 (IP) and ~IPv6.
 //
-simple TCPSrvHostApp like TCPApp
+simple TCPSrvHostApp like ITCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")

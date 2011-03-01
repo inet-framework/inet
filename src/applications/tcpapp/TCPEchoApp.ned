@@ -36,7 +36,7 @@ package inet.applications.tcpapp;
 //
 // Compatible with both IPv4 (~IP) and ~IPv6.
 //
-simple TCPEchoApp like TCPApp
+simple TCPEchoApp like ITCPApp
 {
     parameters:
         string address = default(""); // local address; may be left empty ("")

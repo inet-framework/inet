@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2006 Andras Varga and Levente M�sz�ros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.applications.tcpapp;
+
+package inet.linklayer.ieee80211.mgmt;
 
 //
-// Template for TCP applications. It shows what gates a TCP app
-// needs, to be able to be used in ~StandardHost etc.
+// This is not a concrete module type, but a prototype for all IEEE 802.11
+// management module types. It exists to specify what gates a management
+// module should have in order to be usable within ~Ieee80211Nic.
 //
-moduleinterface TCPApp
+moduleinterface IIeee80211Mgmt
 {
     parameters:
-        @display("i=block/app");
-
+        @display("i=block/cogwheel");
+        @statistic[dataQueueLen](title="Data queue len";record=histogram,vector);
+        @statistic[droppedPacket](title="Dropped packet";record=histogram,vector);
     gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
+        input uppergateIn;
+        output uppergateOut;
+        input macIn @labels(Ieee80211Frame);
+        output macOut @labels(Ieee80211Frame);
 }
-

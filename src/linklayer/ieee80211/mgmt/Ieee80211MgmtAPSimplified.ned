@@ -39,7 +39,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211MgmtAPSimplified like Ieee80211Mgmt
+simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
 {
     parameters:
         int frameCapacity = default(100);

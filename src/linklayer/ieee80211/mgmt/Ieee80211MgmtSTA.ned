@@ -25,7 +25,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211MgmtSTA like Ieee80211Mgmt
+simple Ieee80211MgmtSTA like IIeee80211Mgmt
 {
     parameters:
         int frameCapacity = default(100); // maximum queue length

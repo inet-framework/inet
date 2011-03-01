@@ -27,9 +27,10 @@ import inet.linklayer.ieee80211.Ieee80211NicSTA;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.UDPApp;
-import inet.applications.tcpapp.TCPApp;
+import inet.applications.udpapp.IUDPApp;
+import inet.applications.tcpapp.ITCPApp;
 import inet.applications.pingapp.PingApp;
+
 
 //
 // Models a host with one wireless (802.11b) card in infrastructure mode.
@@ -76,7 +77,7 @@ module WirelessHost
                 routingFile = routingFile;
                 @display("p=60,230");
         }
-        tcpApp[numTcpApps]: <> like TCPApp {
+        tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
                 @display("p=163,67");
         }
@@ -84,7 +85,7 @@ module WirelessHost
             parameters:
                 @display("p=163,154");
         }
-        udpApp[numUdpApps]: <> like UDPApp {
+        udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
                 @display("p=272,67");
         }

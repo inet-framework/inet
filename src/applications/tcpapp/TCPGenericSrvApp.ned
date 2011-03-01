@@ -38,7 +38,7 @@ package inet.applications.tcpapp;
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
 
-simple TCPGenericSrvApp like TCPApp
+simple TCPGenericSrvApp like ITCPApp
 {
     parameters:
         string address = default(""); // local address; may be left empty ("")
