@@ -30,9 +30,9 @@ package inet.linklayer.ieee80211.mgmt;
 // to use the full version, ~Ieee80211MgmtAP.
 //
 // When simulating an AP that has other (Ethernet or wireless) interfaces
-// as well, this module can be connected to a ~MACRelayUnit which performs
+// as well, this module can be connected to a ~IMACRelayUnit which performs
 // bridging of Ethernet frames. This module will perform conversion from/to
-// ~EtherFrame for ~MACRelayUnit.
+// ~EtherFrame for ~IMACRelayUnit.
 //
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
@@ -45,8 +45,8 @@ simple Ieee80211MgmtAPSimplified like Ieee80211Mgmt
         int frameCapacity = default(100);
         @display("i=block/cogwheel");
     gates:
-        input uppergateIn; // from ~MACRelayUnit; can be left unconnected
-        output uppergateOut; // to ~MACRelayUnit; can be left unconnected
+        input uppergateIn; // from ~IMACRelayUnit; can be left unconnected
+        output uppergateOut; // to ~IMACRelayUnit; can be left unconnected
         input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
 }

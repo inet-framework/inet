@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.mobility;
+
+import inet.base.mobility.IMobility;
 
 //
 // A LOGO-style movement model, with the script coming from XML. It can be
@@ -109,7 +110,7 @@ package inet.mobility;
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple TurtleMobility like BasicMobility
+simple TurtleMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

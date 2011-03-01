@@ -18,12 +18,14 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // This mobility module does nothing; it can be used for stationary nodes.
 //
 // @author Andras Varga
 //
-simple NullMobility like BasicMobility
+simple NullMobility like IMobility
 {
     parameters:
         double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)

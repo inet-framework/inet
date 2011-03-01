@@ -45,7 +45,7 @@
 //  - ~EtherSwitch, ~EtherBus, ~EtherHub model switching hub, repeating hub and
 //    the old coxial cable;
 //  - basic compnents of the model: ~EtherMAC, ~EtherLLC/~EtherEncap module types,
-//    ~MACRelayUnit (~MACRelayUnitNP and ~MACRelayUnitPP), ~EtherFrame message type,
+//    ~IMACRelayUnit (~MACRelayUnitNP and ~MACRelayUnitPP), ~EtherFrame message type,
 //    MACAddress class
 //
 // Related documentation:
@@ -106,7 +106,7 @@
 // MAC and LLC are implemented as separate modules (~EtherMAC and
 // ~EtherLLC/~EtherEncap) because encapsulation/decapsulation functionality
 // is not always needed. (Switches don't do encapsulation/decapsulation.)
-// In switches, ~EtherMAC is used with ~MACRelayUnit.
+// In switches, ~EtherMAC is used with ~IMACRelayUnit.
 //
 //
 // <h3>~EtherLLC and higher layers</h3>
@@ -238,7 +238,7 @@
 // ~EtherMAC, however, transmits PAUSE frames received by higher layers,
 // and ~EtherLLC can be instructed by a command to send a PAUSE frame to MAC.
 //
-// ~MACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
+// ~IMACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
 // scheme for sending PAUSE frames -- this can be refined if the need arises.
 //
 // For background on PAUSE, see e.g.

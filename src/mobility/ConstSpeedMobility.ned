@@ -20,6 +20,8 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // Controls all movement related things of a host
 //
@@ -38,7 +40,7 @@ package inet.mobility;
 // @see ~ChannelControl
 // @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
 //
-simple ConstSpeedMobility like BasicMobility
+simple ConstSpeedMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

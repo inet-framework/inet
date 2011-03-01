@@ -15,6 +15,10 @@ The most significant changes:
 - support for more than one type of tcpApp and udpApp in StandardHost
   (elimination of tcpAppType/udpAppType parameters)  ===> MEG NINCS MEGCSINALVA, TODO!!!
 
+- Interfaces renamed for starting with I letter. BasicMobility -> IMobility, 
+  TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
+  Radio->IRadio
+
 - added new AdhocHost for basic node types used in adhoc networks. Supports
   mobility and multiple wireless radios. It obsoletes the MFMobileHost
   (use AdhocHost with wlanNicType=Nic80211) and MobileHost (use AdhocHost

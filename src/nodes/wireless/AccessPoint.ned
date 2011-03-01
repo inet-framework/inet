@@ -3,31 +3,30 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.nodes.wireless;
 
-import inet.mobility.BasicMobility;
-import inet.linklayer.etherswitch.MACRelayUnit;
+import inet.linklayer.etherswitch.IMACRelayUnit;
 import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.IWirelessNic;
+import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 
-
 //
-// A generic access point supporting multiple wireless radios, and 
-// multiple ethernet ports. The type of the ethernet MAC, relay Unit 
-// and wireless card can be specified as parameters. 
+// A generic access point supporting multiple wireless radios, and
+// multiple ethernet ports. The type of the ethernet MAC, relay Unit
+// and wireless card can be specified as parameters.
 // By default the access point is stationary (NullMobility), but can be
-// changed also if needed. 
+// changed also if needed.
 //
 module AccessPoint
 {
@@ -36,16 +35,16 @@ module AccessPoint
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
+        string relayUnitType = default("MACRelayUnitNP"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
         string wlanNicType = default("Ieee80211NicAP"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic. Use only the NICs for access points
-        string ethMacType = default("EtherMACFullDuplex"); // used ethernet interfaces. see: IEtherMAC and IEtherMACFullDuplex for simplified, full dupley only mac  
+        string ethMacType = default("EtherMACFullDuplex"); // used ethernet interfaces. see: IEtherMAC and IEtherMACFullDuplex for simplified, full dupley only mac
         int numRadios = default(1);               // the number of radios in the access point
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         //@ TODO make the relayUnit optional too (present only if ethSize+wlanSize>1)
-        relayUnit: <relayUnitType> like MACRelayUnit {
+        relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=151,121");
         }
@@ -64,7 +63,7 @@ module AccessPoint
             parameters:
                 @display("p=59,43");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=59,107");
         }

@@ -17,6 +17,8 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // Random Waypoint mobility model.
 //
@@ -37,7 +39,7 @@ package inet.mobility;
 //
 // @author Georg Lutz
 //
-simple RandomWPMobility like BasicMobility
+simple RandomWPMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

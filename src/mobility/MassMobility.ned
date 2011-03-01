@@ -20,6 +20,8 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // This is a random mobility model for a mobile host with a mass. It is the
 // one used in "Optimized Smooth Handoffs in Mobile IP" by Perkins &Wang.
@@ -49,7 +51,7 @@ package inet.mobility;
 // @see ~ChannelControl
 // @author Emin Ilker Cetinbas, Andras Varga
 //
-simple MassMobility like BasicMobility
+simple MassMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

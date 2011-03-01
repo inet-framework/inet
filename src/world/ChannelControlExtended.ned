@@ -1,8 +1,8 @@
 //***************************************************************************
 // * file:        ChannelControl.ned
 // *
-// * author:      Andras Varga, Steffen Sroka, Daniel Willkomm, 
-// *              Juan-Carlos Maureira, Alfonso Ariza 
+// * author:      Andras Varga, Steffen Sroka, Daniel Willkomm,
+// *              Juan-Carlos Maureira, Alfonso Ariza
 // *
 // * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 // *              Technische Universitaet Berlin, Germany.
@@ -21,11 +21,11 @@
 package inet.world;
 
 //
-// ChannelControlExtended has exactly one instance in every network model that 
+// ChannelControlExtended has exactly one instance in every network model that
 // contains mobile or wireless nodes. This module behaves exactly like ChannelControl
 // except this supports multiple radio interfaces per host.
-// 
-// @see BasicMobility
+//
+// @see IMobility
 // @see ChannelControl
 //
 simple ChannelControlExtended

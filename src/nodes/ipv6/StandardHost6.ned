@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.nodes.ipv6;
 
 import inet.util.NAMTraceWriter;
@@ -25,16 +24,15 @@ import inet.transport.tcp.ITCP;
 import inet.transport.sctp.SCTP;
 import inet.networklayer.ipv6.RoutingTable6;
 import inet.networklayer.common.InterfaceTable;
-import inet.mobility.BasicMobility;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
+import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.UDPApp;
 import inet.applications.tcpapp.TCPApp;
 import inet.applications.sctpapp.SCTPApp;
 import inet.applications.pingapp.PingApp;
-
 
 //
 // IPv6 host with TCP, SCTP and UDP layers and applications.
@@ -54,10 +52,10 @@ module StandardHost6
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
-        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
+        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterfaceFUllDuplex for simplified, full duplex only  
-        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue  
+        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterfaceFUllDuplex for simplified, full duplex only
+        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue
         bool IPForward = default(false);             // whether to support forwarding of IP packets (i.e. routing)
         int namid = default(-1);
         xml routingTableFile;  //# TODO a reasonable default should be provided
@@ -85,7 +83,7 @@ module StandardHost6
                 routingTableFile = routingTableFile;
                 @display("p=57,214");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=57,368");
         }

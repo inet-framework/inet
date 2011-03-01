@@ -22,7 +22,7 @@
 package inet.nodes.ethernet;
 
 import inet.linklayer.ethernet.IEtherMAC;
-import inet.linklayer.etherswitch.MACRelayUnit;
+import inet.linklayer.etherswitch.IMACRelayUnit;
 
 
 //
@@ -41,12 +41,12 @@ module EtherSwitch
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the ~MACRelayUnit; currently possible
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
                                                           // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        relayUnit: <relayUnitType> like MACRelayUnit {
+        relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=200,50");
             gates:

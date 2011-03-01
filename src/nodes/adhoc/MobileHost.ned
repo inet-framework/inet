@@ -15,20 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.nodes.adhoc;
 
-import inet.applications.pingapp.PingApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.udpapp.UDPApp;
-import inet.base.NotificationBoard;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
-import inet.mobility.BasicMobility;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
-import inet.transport.tcp.TCP;
 import inet.transport.udp.UDP;
+import inet.transport.tcp.TCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
+import inet.base.mobility.IMobility;
+import inet.base.NotificationBoard;
+import inet.applications.udpapp.UDPApp;
+import inet.applications.tcpapp.TCPApp;
+import inet.applications.pingapp.PingApp;
 
 
 //
@@ -36,7 +35,7 @@ import inet.transport.udp.UDP;
 // This model contains the new IEEE 802.11 implementation ~Ieee80211Nic,
 // and IP, TCP and UDP protocols. The mobility model can be
 // dynamically specified with the mobilityType parameter.
-// 
+//
 // (deprecated - use AdhocHost instead with Ieee80211NicAdhoc as the NIC parameter)
 //
 // @see ~MFMobileHost, ~WirelessHost
@@ -104,7 +103,7 @@ module MobileHost
             parameters:
                 @display("p=248,349;q=queue");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=149,307");
         }

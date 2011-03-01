@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.nodes.inet;
 
 import inet.util.NAMTraceWriter;
@@ -25,27 +24,26 @@ import inet.transport.tcp.ITCP;
 import inet.transport.sctp.SCTP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.mobility.BasicMobility;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
+import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.UDPApp;
 import inet.applications.tcpapp.TCPApp;
 import inet.applications.sctpapp.SCTPApp;
 import inet.applications.pingapp.PingApp;
 
-
 //
 // IP host with SCTP, TCP, UDP layers and applications.
-// IP forwarding is disabled by default (see IPForward). 
+// IP forwarding is disabled by default (see IPForward).
 // - Can be connected via ethernet interface to other nodes using
-//   the ethg gate. By default full duplex connections are supported 
-//   only (twisted pair). Set ethNicType to "EthernetInterface" for 
+//   the ethg gate. By default full duplex connections are supported
+//   only (twisted pair). Set ethNicType to "EthernetInterface" for
 //   a full/half duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
-//   by the numRadios parameter. Wirless card type is configured by the 
-//   wlanNicType parameter. 
+//   by the numRadios parameter. Wirless card type is configured by the
+//   wlanNicType parameter.
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces
 //
@@ -64,10 +62,10 @@ module StandardHost
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
-        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
+        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only  
-        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue  
+        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only
+        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
@@ -96,7 +94,7 @@ module StandardHost
                 routingFile = routingFile;
                 @display("p=57,214");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=57,368");
         }

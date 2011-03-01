@@ -25,7 +25,7 @@ package inet.world;
 // contains mobile or wireless nodes. This module gets informed about the
 // location and movement of nodes, and determines which nodes are within
 // communication or interference distance. This info is then used by the
-// radio interfaces of nodes at transmissions. 
+// radio interfaces of nodes at transmissions.
 // Must be named as "channelControl" inside the network.
 //
 // Side effect: updates the containing compound module's display string
@@ -37,7 +37,7 @@ package inet.world;
 // used normal send() and dynamic connections.
 //
 // @author Andras Varga (based on MF's ChannelControl by Steffen Sroka and Daniel Willkomm)
-// @see ~BasicMobility
+// @see ~IMobility
 //
 simple ChannelControl
 {

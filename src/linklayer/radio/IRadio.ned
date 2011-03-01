@@ -78,7 +78,7 @@ package inet.linklayer.radio;
 // It is also possible to specify a different bitrate for individual frames;
 // to do that, attach a ~PhyControlInfo with bitrate filled in to the frame.
 //
-moduleinterface Radio
+moduleinterface IRadio
 {
     parameters:
         @display("i=block/wrxtx");

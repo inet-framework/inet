@@ -17,13 +17,15 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // Moves the node around a rectangle.
 //
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple RectangleMobility like BasicMobility
+simple RectangleMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

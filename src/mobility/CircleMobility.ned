@@ -17,13 +17,15 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // Moves the node around a circle.
 //
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple CircleMobility like BasicMobility
+simple CircleMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch

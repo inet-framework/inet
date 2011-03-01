@@ -16,14 +16,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
 package inet.examples.adhoc.mobility;
 
+import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.mobility.BasicMobility;
-
 
 //
 // A host for demonstrating mobility models only -- it contains
@@ -43,10 +39,10 @@ module PlainMobilityHost
             parameters:
                 @display("p=70,67");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=132,141");
         }
-   connections allowunconnected:
+    connections allowunconnected:
 }
 

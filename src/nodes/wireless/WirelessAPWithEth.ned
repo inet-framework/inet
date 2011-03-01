@@ -23,7 +23,7 @@ package inet.nodes.wireless;
 import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
 import inet.linklayer.ethernet.EtherMAC;
-import inet.linklayer.etherswitch.MACRelayUnit;
+import inet.linklayer.etherswitch.IMACRelayUnit;
 import inet.linklayer.ieee80211.Ieee80211NicAP;
 
 
@@ -37,19 +37,19 @@ import inet.linklayer.ieee80211.Ieee80211NicAP;
 // @see ~MobileHost, ~MFMobileHost
 //
 // @deprecated: use AccessPoint instead
-// 
+//
 module WirelessAPWithEth
 {
     parameters:
         @node();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the ~MACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
     gates:
         input radioIn @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        relayUnit: <relayUnitType> like MACRelayUnit {
+        relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=169,124");
             gates:

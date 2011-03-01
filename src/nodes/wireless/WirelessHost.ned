@@ -15,25 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-
 package inet.nodes.wireless;
 
-import inet.applications.pingapp.PingApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.udpapp.UDPApp;
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ieee80211.Ieee80211NicSTA;
-import inet.linklayer.ppp.PPPInterface;
-import inet.mobility.BasicMobility;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
-import inet.transport.tcp.TCP;
 import inet.transport.udp.UDP;
-
+import inet.transport.tcp.TCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.ieee80211.Ieee80211NicSTA;
+import inet.linklayer.ethernet.EthernetInterface;
+import inet.base.mobility.IMobility;
+import inet.base.NotificationBoard;
+import inet.applications.udpapp.UDPApp;
+import inet.applications.tcpapp.TCPApp;
+import inet.applications.pingapp.PingApp;
 
 //
 // Models a host with one wireless (802.11b) card in infrastructure mode.
@@ -120,7 +116,7 @@ module WirelessHost
             parameters:
                 @display("p=120,350;q=queue");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=58,301");
         }

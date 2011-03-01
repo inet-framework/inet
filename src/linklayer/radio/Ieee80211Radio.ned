@@ -22,15 +22,15 @@ package inet.linklayer.radio;
 //
 // Physical layer for the IEEE 802.11 models. Its external interface
 // (including gates and how it communicates with other modules)
-// is the same as the ~Radio module's.
+// is the same as the ~IRadio module's.
 //
 // The implementation is largely based on the Mobility Framework's
 // SnrEval80211 and Decider80211 modules.
 //
-// @see ~Radio
+// @see ~IRadio
 // @author Andras Varga
 //
-simple Ieee80211Radio like Radio
+simple Ieee80211Radio like IRadio
 {
     parameters:
         int channelNumber = default(0); // channel identifier

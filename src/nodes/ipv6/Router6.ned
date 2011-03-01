@@ -15,18 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.nodes.ipv6;
 
 import inet.util.NAMTraceWriter;
 import inet.networklayer.ipv6.RoutingTable6;
 import inet.networklayer.common.InterfaceTable;
-import inet.mobility.BasicMobility;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
+import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-
 
 //
 // IPv6 router.
@@ -39,10 +37,10 @@ module Router6
         @display("i=abstract/router");
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string mobilityType = default("DummyMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
+        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
-        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
+        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue
         int namid = default(-1);
         xml routingTableFile;  //# TODO provide a default
     gates:
@@ -69,7 +67,7 @@ module Router6
                 routingTableFile = routingTableFile;
                 @display("p=281,54");
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=468,54");
         }

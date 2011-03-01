@@ -22,10 +22,10 @@ package inet.linklayer.radio;
 // Generic radio module. The implementation is largely based on the
 // Mobility Framework's ~SnrEval and Decider modules.
 //
-// @see ~Radio
+// @see ~IRadio
 // @author Andras Varga
 //
-simple GenericRadio like Radio
+simple GenericRadio like IRadio
 {
     parameters:
         int channelNumber = default(0); // channel identifier

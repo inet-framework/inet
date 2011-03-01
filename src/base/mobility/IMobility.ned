@@ -16,14 +16,14 @@
 //
 
 
-package inet.mobility;
+package inet.base.mobility;
 
 //
 // This is not an actual mobility model, but a prototype for other mobility models.
 //
 // @author Andras Varga
 //
-moduleinterface BasicMobility
+moduleinterface IMobility
 {
     @display("i=block/cogwheel");
 }

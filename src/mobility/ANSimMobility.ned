@@ -18,13 +18,15 @@
 
 package inet.mobility;
 
+import inet.base.mobility.IMobility;
+
 //
 // Uses the <position_change> elements of the ANSim tool's
 // trace file.
 //
 // @author Andras Varga
 //
-simple ANSimMobility like BasicMobility
+simple ANSimMobility like IMobility
 {
     parameters:
         bool debug = default(false); // debug switch
