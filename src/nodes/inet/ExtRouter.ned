@@ -37,7 +37,7 @@ module ExtRouter
     parameters:
         @node();
         @labels(node,ethernet-node);
-        @display("i=abstract/router;i2=status/connect");
+        @display("i=abstract/router;i2=status/connect;bgb=404,325");
         string routingFile = default("");
         int numExtInterfaces = default(0);
     gates:
@@ -47,23 +47,23 @@ module ExtRouter
         namTrace: NAMTraceWriter {
             parameters:
                 namid = -1; // auto
-                @display("p=330,60;i=block/sink");
+                @display("p=353,60;i=block/sink");
         }
         notificationBoard: NotificationBoard {
             @display("p=60,60;i=block/control");
         }
         interfaceTable: InterfaceTable {
-            @display("p=150,60;i=block/table");
+            @display("p=169,60;i=block/table");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "auto";
                 routingFile = routingFile;
-                @display("p=240,60;i=block/table");
+                @display("p=265,60;i=block/table");
         }
         networkLayer: NetworkLayer {
-            @display("p=184,133;i=block/fork;q=queue");
+            @display("p=208,127;i=block/fork;q=queue");
             gates:
                 //ifIn[sizeof(out)+sizeof(ethOut)+sizeof(extOut)],
                 //ifOut[sizeof(out)+sizeof(ethOut)+sizeof(extOut)];
@@ -71,13 +71,13 @@ module ExtRouter
                 ifOut[sizeof(pppg)+sizeof(ethg)+1];
         }
         ppp[sizeof(pppg)]: PPPInterface {
-            @display("p=178,265,row,110;q=l2queue;i=block/ifcard");
+            @display("p=208,265,row,110;q=l2queue;i=block/ifcard");
         }
         eth[sizeof(ethg)]: EthernetInterface {
-            @display("p=297,265,row,110;q=l2queue;i=block/ifcard");
+            @display("p=326,265,row,110;q=l2queue;i=block/ifcard");
         }
         ext[numExtInterfaces]: ExtInterface {
-            @display("p=50,265,row,110;i=block/ifcard");
+            @display("p=69,265,row,110;i=block/ifcard");
         }
     connections allowunconnected:
         // connections to network outside

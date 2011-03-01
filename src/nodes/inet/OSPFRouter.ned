@@ -68,11 +68,11 @@ module OSPFRouter
         }
         ppp[sizeof(pppg)]: PPPInterface {
             parameters:
-                @display("p=90,257,row,110;q=l2queue");
+                @display("p=145,257,row,110;q=l2queue");
         }
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
-                @display("p=145,257,row,110;q=l2queue");
+                @display("p=261,257,row,110;q=l2queue");
         }
     connections allowunconnected:
         ospf.ipOut --> networkLayer.ospfIn;

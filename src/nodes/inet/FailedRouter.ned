@@ -29,7 +29,7 @@ module FailedRouter
     parameters:
         @node();
         @labels(node);
-        @display("i=abstract/router;i2=status/noentry");
+        @display("i=abstract/router;i2=status/noentry;bgb=201,155");
         int namid = default(-1);
         string routingFile = default("");
     gates:
@@ -37,6 +37,7 @@ module FailedRouter
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         dummy: Dummy {
+            @display("p=67,62");
             gates:
                 in[sizeof(pppg)];
                 out[sizeof(pppg)];

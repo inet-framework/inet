@@ -35,7 +35,7 @@ module BGPRouter
     parameters:
         @node();
         @labels(node,ethernet-node);
-        @display("i=abstract/router");
+        @display("i=abstract/router;bgb=266,369");
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);
@@ -58,31 +58,31 @@ module BGPRouter
         }
         ospf: OSPFRouting {
             parameters:
-                @display("p=252,188,row;i=block/network2");
+                @display("p=225,191,row;i=block/network2");
         }
         bgp: BGPRouting {
             parameters:
-                @display("p=168,42;i=block/network");
+                @display("p=211,44;i=block/network");
         }
         tcp: TCP {
             parameters:
-                @display("p=160,194;i=block/transport");
+                @display("p=147,116;i=block/transport");
         }
         networkLayer: NetworkLayer {
             parameters:
                 proxyARP = true;
-                @display("p=216,300;i=block/layer;q=queue");
+                @display("p=126,191;i=block/layer;q=queue");
             gates:
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
         ppp[sizeof(pppg)]: PPPInterfaceNoQueue {
             parameters:
-                @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
+                @display("p=76,305,row,110;q=l2queue;i=block/ifcard");
         }
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
-                @display("p=145,257,row,110;q=l2queue");
+                @display("p=186,305,row,110;q=l2queue");
         }
     connections allowunconnected:
         bgp.toTCP --> tcp.appIn++;
