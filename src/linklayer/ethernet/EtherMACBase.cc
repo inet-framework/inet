@@ -370,14 +370,16 @@ void EtherMACBase::calculateParameters()
         }
     }
 
-    error("Invalid transmission rate %e on channel %s at %s modul", txrate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+    error("Invalid transmission rate %e on channel %s at %s modul",
+            txrate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
 }
 
 void EtherMACBase::printParameters()
 {
     // Dump parameters
-    EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl;
-    EV << "txrate: " << curEtherDescr->txrate << ", " << (duplexMode ? "full-duplex" : "half-duplex") << endl;
+    EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
+       << "txrate: " << curEtherDescr->txrate << ", "
+       << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
@@ -394,13 +396,13 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(address))
     {
-        throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
+        error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME)
     {
-        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
     }
 
@@ -425,11 +427,14 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     {
         if (!isPauseFrame)
         {
-            if (txQueue.innerQueue->queueLimit && txQueue.innerQueue->queue.length() > txQueue.innerQueue->queueLimit)
+            if (txQueue.innerQueue->queueLimit
+                    && txQueue.innerQueue->queue.length() > txQueue.innerQueue->queueLimit)
+            {
                 error("txQueue length exceeds %d -- this is probably due to "
                       "a bogus app model generating excessive traffic "
                       "(or if this is normal, increase txQueueLimit!)",
                       txQueue.innerQueue->queueLimit);
+            }
 
             // store frame and possibly begin transmitting
             EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
@@ -441,7 +446,8 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 
             // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
             if (!txQueue.innerQueue->queue.empty())
-                txQueue.innerQueue->queue.insertBefore(txQueue.innerQueue->queue.front(), frame);  // front() frame is probably being transmitted
+                // front() frame is probably being transmitted
+                txQueue.innerQueue->queue.insertBefore(txQueue.innerQueue->queue.front(), frame);
             else
                 txQueue.innerQueue->queue.insert(frame);
         }
@@ -460,7 +466,8 @@ void EtherMACBase::processMsgFromNetwork(EtherTraffic *frame)
     {
         if (simTime() - frame->getSendingTime() >= curEtherDescr->shortestFrameDuration)
         {
-            error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
+            error("very long frame propagation time detected, "
+                  "maybe cable exceeds maximum allowed length? "
                   "(%lgs corresponds to an approx. %lgm cable)",
                   SIMTIME_STR(simTime() - frame->getSendingTime()),
                   SIMTIME_STR((simTime() - frame->getSendingTime()) * SPEED_OF_LIGHT));
@@ -531,7 +538,8 @@ void EtherMACBase::processPauseCommand(int pauseUnits)
     }
     else if (transmitState == PAUSE_STATE)
     {
-        EV << "PAUSE frame received, pausing for " << pauseUnitsRequested << " more time units from now\n";
+        EV << "PAUSE frame received, pausing for " << pauseUnitsRequested
+           << " more time units from now\n";
         cancelEvent(endPauseMsg);
 
         if (pauseUnits > 0)
@@ -653,7 +661,7 @@ void EtherMACBase::scheduleEndIFGPeriod()
     if (frameBursting
             && (simTime() == lastTxFinishTime)
             && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-            && (bytesSentInBurst + INTERFRAME_GAP_BITS/8 + curTxFrame->getByteLength()
+            && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
                     <= curEtherDescr->maxBytesInBurst)
        )
     {
@@ -745,7 +753,6 @@ void EtherMACBase::finish()
     {
         simtime_t t = simTime();
         recordScalar("simulated time", t);
-//        recordScalar("txrate (Mb)", txrate/1000000);
         recordScalar("full duplex", duplexMode);
 
         if (t > 0)
@@ -778,7 +785,7 @@ void EtherMACBase::updateDisplayString()
     else
         color = "";
 
-    getDisplayString().setTagArg("i",1,color);
+    getDisplayString().setTagArg("i", 1, color);
 
     if (!strcmp(getParentModule()->getClassName(),"EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
