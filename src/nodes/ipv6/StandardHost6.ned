@@ -37,7 +37,7 @@ import inet.applications.pingapp.PingApp;
 
 
 //
-// IPv6 host with TCP and UDP layers and applications.
+// IPv6 host with TCP, SCTP and UDP layers and applications.
 //
 module StandardHost6
 {

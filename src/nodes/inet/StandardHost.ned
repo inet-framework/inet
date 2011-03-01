@@ -37,7 +37,7 @@ import inet.applications.pingapp.PingApp;
 
 
 //
-// \IP host with SCTP, TCP, UDP layers and applications.
+// IP host with SCTP, TCP, UDP layers and applications.
 // IP forwarding is disabled by default (see IPForward). 
 // - Can be connected via ethernet interface to other nodes using
 //   the ethg gate. By default full duplex connections are supported 
