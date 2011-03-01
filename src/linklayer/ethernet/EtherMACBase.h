@@ -46,6 +46,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
         BACKOFF_STATE,
         PAUSE_STATE
     };
+
     enum MACReceiveState
     {
         RX_IDLE_STATE = 1,
@@ -95,11 +96,18 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
       public:
         InnerQueue * innerQueue;
         IPassiveQueue *extQueue;
+
         MacQueue() : innerQueue(NULL), extQueue(NULL) {};
+
         ~MacQueue() { delete innerQueue; };
+
         bool isEmpty();
-        void setExternalQueue(IPassiveQueue *_extQueue) { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
-        void setInternalQueue(const char* name=NULL, int limit=0) { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
+
+        void setExternalQueue(IPassiveQueue *_extQueue)
+                { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
+
+        void setInternalQueue(const char* name=NULL, int limit=0)
+                { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
     };
 
     MACAddress address;             // own MAC address
@@ -231,3 +239,4 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 };
 
 #endif
+

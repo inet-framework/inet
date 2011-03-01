@@ -19,8 +19,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "opp_utils.h"
+
 #include "EtherMACBase.h"
+
+#include "opp_utils.h"
 #include "IPassiveQueue.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -188,7 +190,9 @@ void EtherMACBase::initializeMACAddress()
 void EtherMACBase::initializeNotificationBoard()
 {
     hasSubscribers = false;
-    if (interfaceEntry) {
+
+    if (interfaceEntry)
+    {
         nb = NotificationBoardAccess().getIfExists();
         notifDetails.setInterfaceEntry(interfaceEntry);
         nb->subscribe(this, NF_SUBSCRIBERLIST_CHANGED);
@@ -202,8 +206,10 @@ void EtherMACBase::initializeFlags()
 
     // initialize connected flag
     connected = physOutGate->getPathEndGate()->isConnected();
+
     if (!connected)
         EV << "MAC not connected to a network.\n";
+
     WATCH(connected);
 
     // TODO: this should be settable from the gui
@@ -280,6 +286,7 @@ void EtherMACBase::registerInterface()
 
     // add
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+
     if (ift)
         ift->addInterface(interfaceEntry, this);
 }
@@ -289,12 +296,14 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
     if (dynamic_cast<cPostPathCreateNotification *>(obj))
     {
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
+
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection(true);
     }
     else if (dynamic_cast<cPostPathCutNotification *>(obj))
     {
         cPostPathCutNotification *gcobj = (cPostPathCutNotification *)obj;
+
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection(false);
     }
@@ -350,7 +359,7 @@ void EtherMACBase::calculateParameters()
         throw cRuntimeError(this, "The input/output datarates are differs (%f / %f)", drate, txrate);
 
     // Check valid speeds
-    for(int i=0; i<NUM_OF_ETHERDESCRS; i++)
+    for(int i = 0; i < NUM_OF_ETHERDESCRS; i++)
     {
         if (txrate == etherDescrs[i].txrate)
         {
@@ -399,10 +408,13 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     if (frame->getSrc().isUnspecified())
         frame->setSrc(address);
 
-    bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame)!=NULL);
+    bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame) != NULL);
+
     if (!isPauseFrame)
+    {
         numFramesFromHL++;
         emit(rxPkBytesFromHLSignal, (long)(frame->getByteLength()));
+    }
 
     if(txQueue.extQueue)
     {
@@ -433,6 +445,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
             else
                 txQueue.innerQueue->queue.insert(frame);
         }
+
         if(NULL == curTxFrame && !txQueue.innerQueue->queue.empty())
             curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
     }
@@ -445,7 +458,7 @@ void EtherMACBase::processMsgFromNetwork(EtherTraffic *frame)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime()-frame->getSendingTime() >= curEtherDescr->shortestFrameDuration)
+        if (simTime() - frame->getSendingTime() >= curEtherDescr->shortestFrameDuration)
         {
             error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
                   "(%lgs corresponds to an approx. %lgm cable)",
@@ -460,7 +473,7 @@ void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
     int pauseUnits;
     EtherPauseFrame *pauseFrame;
 
-    if ((pauseFrame=dynamic_cast<EtherPauseFrame*>(frame))!=NULL)
+    if ((pauseFrame=dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
     {
         pauseUnits = pauseFrame->getPauseTime();
         delete frame;
@@ -468,7 +481,7 @@ void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
         emit(rxPausePkUnitsSignal, pauseUnits);
         processPauseCommand(pauseUnits);
     }
-    else if ((dynamic_cast<EtherPadding*>(frame))!=NULL)
+    else if ((dynamic_cast<EtherPadding*>(frame)) != NULL)
     {
         delete frame;
     }
@@ -510,17 +523,18 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
 
 void EtherMACBase::processPauseCommand(int pauseUnits)
 {
-    if (transmitState==TX_IDLE_STATE)
+    if (transmitState == TX_IDLE_STATE)
     {
         EV << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
-        if (pauseUnits>0)
+        if (pauseUnits > 0)
             scheduleEndPausePeriod(pauseUnits);
     }
-    else if (transmitState==PAUSE_STATE)
+    else if (transmitState == PAUSE_STATE)
     {
         EV << "PAUSE frame received, pausing for " << pauseUnitsRequested << " more time units from now\n";
         cancelEvent(endPauseMsg);
-        if (pauseUnits>0)
+
+        if (pauseUnits > 0)
             scheduleEndPausePeriod(pauseUnits);
     }
     else
@@ -554,7 +568,7 @@ void EtherMACBase::handleEndIFGPeriod()
 void EtherMACBase::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully, without collision
-    if (transmitState!=TRANSMITTING_STATE || (!duplexMode && receiveState!=RX_IDLE_STATE))
+    if (transmitState != TRANSMITTING_STATE || (!duplexMode && receiveState != RX_IDLE_STATE))
         error("End of transmission, and incorrect state detected");
 
     if (NULL == curTxFrame)
@@ -580,7 +594,7 @@ void EtherMACBase::handleEndTxPeriod()
 
 void EtherMACBase::getNextFrameFromQueue()
 {
-    if(txQueue.extQueue)
+    if (txQueue.extQueue)
     {
         txQueue.extQueue->requestPacket();
     }
@@ -600,7 +614,9 @@ void EtherMACBase::prepareTxFrame(EtherFrame *frame)
     frame->setOrigByteLength(frame->getByteLength());
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
     bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength = inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+    int64 minFrameLength =
+            inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+
     if (frame->getByteLength() < minFrameLength)
     {
         frame->setByteLength(minFrameLength);
@@ -611,6 +627,7 @@ void EtherMACBase::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
         error("At end of PAUSE not in PAUSE_STATE!");
+
     EV << "Pause finished, resuming transmissions\n";
     beginSendFrames();
 }
@@ -636,7 +653,8 @@ void EtherMACBase::scheduleEndIFGPeriod()
     if (frameBursting
             && (simTime() == lastTxFinishTime)
             && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-            && (bytesSentInBurst + INTERFRAME_GAP_BITS/8 + curTxFrame->getByteLength() <= curEtherDescr->maxBytesInBurst)
+            && (bytesSentInBurst + INTERFRAME_GAP_BITS/8 + curTxFrame->getByteLength()
+                    <= curEtherDescr->maxBytesInBurst)
        )
     {
         EtherPadding *gap = new EtherPadding("IFG");
@@ -654,7 +672,7 @@ void EtherMACBase::scheduleEndIFGPeriod()
         bytesSentInBurst = 0;
         framesSentInBurst = 0;
         transmitState = WAIT_IFG_STATE;
-        scheduleAt(simTime()+transmissionChannel->calculateDuration(&gap), endIFGMsg);
+        scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
     }
 }
 
@@ -675,15 +693,15 @@ void EtherMACBase::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
     cPacket pause;
-    pause.setBitLength(pauseUnits*PAUSE_BITTIME);
+    pause.setBitLength(pauseUnits * PAUSE_BITTIME);
     simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
-    scheduleAt(simTime()+pausePeriod, endPauseMsg);
+    scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }
 
 bool EtherMACBase::checkAndScheduleEndPausePeriod()
 {
-    if (pauseUnitsRequested>0)
+    if (pauseUnitsRequested > 0)
     {
         // if we received a PAUSE frame recently, go into PAUSE state
         EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
@@ -730,12 +748,12 @@ void EtherMACBase::finish()
 //        recordScalar("txrate (Mb)", txrate/1000000);
         recordScalar("full duplex", duplexMode);
 
-        if (t>0)
+        if (t > 0)
         {
-            recordScalar("frames/sec sent", numFramesSent/t);
-            recordScalar("frames/sec rcvd", numFramesReceivedOK/t);
-            recordScalar("bits/sec sent",   (8.0*numBytesSent)/t);
-            recordScalar("bits/sec rcvd",   (8.0*numBytesReceivedOK)/t);
+            recordScalar("frames/sec sent", numFramesSent / t);
+            recordScalar("frames/sec rcvd", numFramesReceivedOK / t);
+            recordScalar("bits/sec sent",   (8.0 * numBytesSent) / t);
+            recordScalar("bits/sec rcvd",   (8.0 * numBytesReceivedOK) / t);
         }
     }
 }
@@ -744,23 +762,26 @@ void EtherMACBase::updateDisplayString()
 {
     // icon coloring
     const char *color;
-    if (receiveState==RX_COLLISION_STATE)
+
+    if (receiveState == RX_COLLISION_STATE)
         color = "red";
-    else if (transmitState==TRANSMITTING_STATE)
+    else if (transmitState == TRANSMITTING_STATE)
         color = "yellow";
-    else if (transmitState==JAMMING_STATE)
+    else if (transmitState == JAMMING_STATE)
         color = "red";
-    else if (receiveState==RECEIVING_STATE)
+    else if (receiveState == RECEIVING_STATE)
         color = "#4040ff";
-    else if (transmitState==BACKOFF_STATE)
+    else if (transmitState == BACKOFF_STATE)
         color = "white";
-    else if (transmitState==PAUSE_STATE)
+    else if (transmitState == PAUSE_STATE)
         color = "gray";
     else
         color = "";
+
     getDisplayString().setTagArg("i",1,color);
+
     if (!strcmp(getParentModule()->getClassName(),"EthernetInterface"))
-        getParentModule()->getDisplayString().setTagArg("i",1,color);
+        getParentModule()->getDisplayString().setTagArg("i", 1, color);
 
     // connection coloring
     updateConnectionColor(transmitState);
@@ -768,7 +789,9 @@ void EtherMACBase::updateDisplayString()
 #if 0
     // this code works but didn't turn out to be very useful
     const char *txStateName;
-    switch (transmitState) {
+
+    switch (transmitState)
+    {
         case TX_IDLE_STATE:      txStateName="IDLE"; break;
         case WAIT_IFG_STATE:     txStateName="WAIT_IFG"; break;
         case SEND_IFG_STATE:     txStateName="SEND_IFG"; break;
@@ -778,8 +801,11 @@ void EtherMACBase::updateDisplayString()
         case PAUSE_STATE:        txStateName="PAUSE"; break;
         default: error("wrong tx state");
     }
+
     const char *rxStateName;
-    switch (receiveState) {
+
+    switch (receiveState)
+    {
         case RX_IDLE_STATE:      rxStateName="IDLE"; break;
         case RECEIVING_STATE:    rxStateName="RX"; break;
         case RX_COLLISION_STATE: rxStateName="COLL"; break;
@@ -789,31 +815,32 @@ void EtherMACBase::updateDisplayString()
     char buf[80];
     sprintf(buf, "tx:%s rx: %s\n#boff:%d #cTx:%d",
                  txStateName, rxStateName, backoffs, numConcurrentTransmissions);
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 #endif
 }
 
 void EtherMACBase::updateConnectionColor(int txState)
 {
     const char *color;
-    if (txState==TRANSMITTING_STATE)
+
+    if (txState == TRANSMITTING_STATE)
         color = "yellow";
-    else if (txState==JAMMING_STATE || txState==BACKOFF_STATE)
+    else if (txState == JAMMING_STATE || txState == BACKOFF_STATE)
         color = "red";
     else
         color = "";
 
     cGate *g = physOutGate;
-    while (g && g->getType()==cGate::OUTPUT)
+    while (g && g->getType() == cGate::OUTPUT)
     {
-        g->getDisplayString().setTagArg("ls",0,color);
-        g->getDisplayString().setTagArg("ls",1, color[0] ? "3" : "1");
+        g->getDisplayString().setTagArg("ls", 0, color);
+        g->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");
         g = g->getNextGate();
     }
 }
 
 void EtherMACBase::receiveChangeNotification(int category, const cPolymorphic *)
 {
-    if (category==NF_SUBSCRIBERLIST_CHANGED)
+    if (category == NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();
 }

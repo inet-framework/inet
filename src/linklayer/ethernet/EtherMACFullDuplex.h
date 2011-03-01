@@ -20,6 +20,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "EtherFrame_m.h"
 #include "EtherMACBase.h"
 

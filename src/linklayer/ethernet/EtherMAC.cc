@@ -18,7 +18,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
+
 #include "EtherMAC.h"
+
 #include "Ieee802Ctrl_m.h"
 #include "IPassiveQueue.h"
 
@@ -113,6 +115,7 @@ void EtherMAC::handleMessage (cMessage *msg)
     {
         // Process different self-messages (timer signals)
         EV << "Self-message " << msg << " received\n";
+
         switch (msg->getKind())
         {
             case ENDIFG:
@@ -154,7 +157,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EtherMACBase::processFrameFromUpperLayer(frame);
 
-    if ((duplexMode || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
+    if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE)
     {
         EV << "No incoming carrier signals detected, frame clear to send, wait IFG first\n";
         scheduleEndIFGPeriod();
@@ -170,7 +173,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 
     simtime_t endRxTime = simTime() + msg->getDuration();
 
-    if (!duplexMode && (transmitState==TRANSMITTING_STATE || transmitState==SEND_IFG_STATE))
+    if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
         if (dynamic_cast<EtherJam*>(msg) != NULL)
@@ -195,22 +198,24 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         numCollisions++;
         emit(collisionSignal, 1L);
     }
-    else if (receiveState==RX_IDLE_STATE)
+    else if (receiveState == RX_IDLE_STATE)
     {
         if (dynamic_cast<EtherJam*>(msg) != NULL)
             error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Start reception of frame\n";
         numConcurrentTransmissions++;
+
         if (frameBeingReceived)
             error("frameBeingReceived!=0 in RX_IDLE_STATE");
+
         frameBeingReceived = (EtherFrame *)msg;
         scheduleEndRxPeriod(msg);
         channelBusySince = simTime();
     }
-    else if (receiveState==RECEIVING_STATE
-            && dynamic_cast<EtherJam*>(msg)==NULL
-            && endRxMsg->getArrivalTime()-simTime() < curEtherDescr->halfBitTime)
+    else if (receiveState == RECEIVING_STATE
+            && dynamic_cast<EtherJam*>(msg) == NULL
+            && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -238,14 +243,14 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         // handle overlapping receptions
         if (dynamic_cast<EtherJam*>(msg) != NULL)
         {
-            if (numConcurrentTransmissions<=0)
+            if (numConcurrentTransmissions <= 0)
                 error("numConcurrentTransmissions=%d on jam arrival (stray jam?)",numConcurrentTransmissions);
 
             numConcurrentTransmissions--;
             EV << "Jam signal received, this marks end of one transmission\n";
 
             // by the time jamming ends, all transmissions will have been aborted
-            if (numConcurrentTransmissions==0)
+            if (numConcurrentTransmissions == 0)
             {
                 EV << "Last jam signal received, collision will ends when jam ends\n";
                 cancelEvent(endRxMsg);
@@ -270,7 +275,8 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 
         // delete collided frames: arrived frame as well as the one we're currently receiving
         delete msg;
-        if (receiveState==RECEIVING_STATE)
+
+        if (receiveState == RECEIVING_STATE)
         {
             delete frameBeingReceived;
             frameBeingReceived = NULL;
@@ -309,7 +315,7 @@ void EtherMAC::startFrameTransmission()
     send(frame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
-    if (!duplexMode && receiveState!=RX_IDLE_STATE)
+    if (!duplexMode && receiveState != RX_IDLE_STATE)
     {
         // During the IFG period the hardware cannot listen to the channel,
         // so it might happen that receptions have begun during the IFG,
@@ -324,7 +330,7 @@ void EtherMAC::startFrameTransmission()
         sendJamSignal();
         // numConcurrentTransmissions stays the same: +1 transmission, -1 jam
 
-        if (receiveState==RECEIVING_STATE)
+        if (receiveState == RECEIVING_STATE)
         {
             delete frameBeingReceived;
             frameBeingReceived = NULL;
@@ -353,7 +359,7 @@ void EtherMAC::handleEndTxPeriod()
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode)
     {
-        simtime_t dt = simTime()-channelBusySince;
+        simtime_t dt = simTime() - channelBusySince;
         totalSuccessfulRxTxTime += dt;
     }
 
@@ -370,7 +376,8 @@ void EtherMAC::handleEndRxPeriod()
 {
     EV << "Frame reception complete\n";
     simtime_t dt = simTime()-channelBusySince;
-    if (receiveState==RECEIVING_STATE) // i.e. not RX_COLLISION_STATE
+
+    if (receiveState == RECEIVING_STATE) // i.e. not RX_COLLISION_STATE
     {
         EtherTraffic *frame = frameBeingReceived;
         frameBeingReceived = NULL;
@@ -385,7 +392,7 @@ void EtherMAC::handleEndRxPeriod()
     receiveState = RX_IDLE_STATE;
     numConcurrentTransmissions = 0;
 
-    if (transmitState==TX_IDLE_STATE)
+    if (transmitState == TX_IDLE_STATE)
     {
         beginSendFrames();
     }
@@ -395,10 +402,11 @@ void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
         error("At end of BACKOFF not in BACKOFF_STATE!");
+
     if (NULL == curTxFrame)
         error("At end of BACKOFF and not have current tx frame!");
 
-    if (receiveState==RX_IDLE_STATE)
+    if (receiveState == RX_IDLE_STATE)
     {
         EV << "Backoff period ended, wait IFG\n";
         scheduleEndIFGPeriod();
@@ -414,6 +422,7 @@ void EtherMAC::handleEndJammingPeriod()
 {
     if (transmitState != JAMMING_STATE)
         error("At end of JAMMING not in JAMMING_STATE!");
+
     EV << "Jamming finished, executing backoff\n";
     handleRetransmission();
 }
@@ -422,8 +431,10 @@ void EtherMAC::sendJamSignal()
 {
     cPacket *jam = new EtherJam("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
+
     if (ev.isGUI())
         updateConnectionColor(JAMMING_STATE);
+
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
     send(jam, physOutGate);
 
@@ -433,7 +444,7 @@ void EtherMAC::sendJamSignal()
 
 void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
 {
-    scheduleAt(simTime()+frame->getDuration(), endRxMsg);
+    scheduleAt(simTime() + frame->getDuration(), endRxMsg);
     receiveState = RECEIVING_STATE;
 }
 
@@ -452,11 +463,11 @@ void EtherMAC::handleRetransmission()
     }
 
     EV << "Executing backoff procedure\n";
-    int backoffrange = (backoffs>=BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
+    int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0,backoffrange-1);
     simtime_t backofftime = slotNumber * curEtherDescr->slotTime;
 
-    scheduleAt(simTime()+backofftime, endBackoffMsg);
+    scheduleAt(simTime() + backofftime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
 
     numBackoffs++;
@@ -467,7 +478,9 @@ void EtherMAC::printState()
 {
 #define CASE(x) case x: EV << #x; break
     EV << "transmitState: ";
-    switch (transmitState) {
+
+    switch (transmitState)
+    {
         CASE(TX_IDLE_STATE);
         CASE(WAIT_IFG_STATE);
         CASE(SEND_IFG_STATE);
@@ -476,14 +489,18 @@ void EtherMAC::printState()
         CASE(BACKOFF_STATE);
         CASE(PAUSE_STATE);
     }
+
     EV << ",  receiveState: ";
-    switch (receiveState) {
+    switch (receiveState)
+    {
         CASE(RX_IDLE_STATE);
         CASE(RECEIVING_STATE);
         CASE(RX_COLLISION_STATE);
     }
+
     EV << ",  backoffs: " << backoffs;
     EV << ",  numConcurrentTransmissions: " << numConcurrentTransmissions;
+
     if (txQueue.innerQueue)
         EV << ",  queueLength: " << txQueue.innerQueue->queue.length() << endl;
 #undef CASE
