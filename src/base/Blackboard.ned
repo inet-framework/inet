@@ -21,7 +21,8 @@ package inet.base;
 
 //
 // Blackboard for sharing information among modules in a host or router.
-// Accessed via direct method calls.
+// Accessed via direct method calls. Must be called "blackboard" inside
+// the host.
 //
 simple Blackboard
 {

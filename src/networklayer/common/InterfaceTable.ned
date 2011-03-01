@@ -25,6 +25,7 @@ package inet.networklayer.common;
 // will also be created. This table only contains protocol-independent
 // properties of interfaces -- IPv4 or IPv6 specific per-interface data
 // (addresses etc) are kept in ~RoutingTable and ~RoutingTable6.
+// Must be named as "interfaceTable".
 //
 // This module has no gates; all functionality can be accessed via member
 // functions of the C++ module class. For detailed info, please see the C++

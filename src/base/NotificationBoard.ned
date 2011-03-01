@@ -28,7 +28,7 @@ package inet.base;
 // The ~NotificationBoard has exactly one instance within a host or router
 // model, and acts as a intermediary between module where state changes
 // can occur and modules which are interested in learning about those
-// changes.
+// changes. It *must* be named as "notificationBoard" to work correctly.
 //
 // ~NotificationBoard is accessed via direct C++ method calls (not
 // message exchange). Modules can "subscribe" to categories of changes

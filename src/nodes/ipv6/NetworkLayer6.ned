@@ -17,10 +17,6 @@
 //
 // Edited with OMNeT++ Academic/Noncommercial Edition.
 //
-
-
-
-
 package inet.nodes.ipv6;
 
 import inet.networklayer.ipv6.IPv6ErrorHandling;
@@ -28,7 +24,6 @@ import inet.networklayer.ipv6.IPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 import inet.networklayer.icmpv6.ICMPv6;
 import inet.base.IHook;
-
 
 //
 // Represents an IPv6 network layer (L3).
@@ -40,8 +35,8 @@ module NetworkLayer6
 {
     parameters:
         @display("i=block/fork");
-        string outputHookType = default("EmptyHook");
-        string inputHookType = default("EmptyHook");
+        string outputHookType = default("Nop");
+        string inputHookType = default("Nop");
     gates:
         input ifIn[] @labels(IPv6Datagram);
         output ifOut[] @labels(IPv6Datagram);

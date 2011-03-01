@@ -35,8 +35,8 @@ module NetworkLayer
 {
     parameters:
         bool proxyARP = default(true);
-        string outputHookType = default("EmptyHook");
-        string inputHookType = default("EmptyHook");
+        string outputHookType = default("Nop");
+        string inputHookType = default("Nop");
 
         @display("i=block/fork");
     gates:

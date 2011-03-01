@@ -22,7 +22,7 @@ package inet.base;
 //
 // Just lets messages through without any change or delay.
 //
-module Nop
+module Nop like IHook
 {
     gates:
         input in;
