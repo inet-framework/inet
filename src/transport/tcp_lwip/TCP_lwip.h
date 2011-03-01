@@ -70,7 +70,8 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
 
     virtual netif* ip_route(IPvXAddress const & ipAddr);
 
-    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo, const void *dataptr, int len);
+    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+            const void *dataptr, int len);
 
     // internal event functions:
 

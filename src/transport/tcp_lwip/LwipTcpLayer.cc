@@ -95,7 +95,7 @@ struct netif * LwipTcpLayer::ip_route(struct ip_addr *addr)
 {
     IPvXAddress ipAddr;
 
-    if(addr)
+    if (addr)
         ipAddr = addr->addr;
 
     return stackIf.ip_route(ipAddr);

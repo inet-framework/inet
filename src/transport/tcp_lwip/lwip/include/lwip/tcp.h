@@ -71,6 +71,7 @@ class LwipTcpLayer
     struct tcp_seg;
 
     LwipTcpStackIf &stackIf;
+
     /** Constructor */
     LwipTcpLayer(LwipTcpStackIf &stackIfP);
 

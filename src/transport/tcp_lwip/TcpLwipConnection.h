@@ -73,13 +73,16 @@ class INET_API TcpLwipConnection
         cOutVector tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
         cOutVector tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
     };
+
     // prevent copy constructor:
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPDataTransferMode dataTransferModeP);
+    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP,
+            TCPDataTransferMode dataTransferModeP);
 
-    TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
+    TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP,
+            LwipTcpLayer::tcp_pcb *pcbP);
 
     ~TcpLwipConnection();
 
@@ -91,7 +94,8 @@ class INET_API TcpLwipConnection
 
     void listen(IPvXAddress& localAddr, unsigned short localPort);
 
-    void connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort);
+    void connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr,
+            unsigned short remotePort);
 
     void close();
 

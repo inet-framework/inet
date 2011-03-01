@@ -37,7 +37,9 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
         unsigned int endSequenceNo;
         cPacket *msg;
     };
+
     typedef std::list<Payload> PayloadQueue;
+
     PayloadQueue payloadQueueM;
 
     uint32 beginM;  // 1st sequence number stored

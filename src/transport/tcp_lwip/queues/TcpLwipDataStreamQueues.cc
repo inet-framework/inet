@@ -147,7 +147,7 @@ cPacket* TcpLwipDataStreamReceiveQueue::extractBytesUpTo()
     ByteArrayMessage *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
-    if(bytesInQueue)
+    if (bytesInQueue)
     {
         dataMsg = new ByteArrayMessage("DATA");
         dataMsg->setKind(TCP_I_DATA);

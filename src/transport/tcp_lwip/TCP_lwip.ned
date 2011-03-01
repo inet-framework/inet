@@ -17,7 +17,7 @@
 //
 
 
-package inet.transport.tcp_lwip.omnet;
+package inet.transport.tcp_lwip;
 
 import inet.transport.tcp.ITCP;
 

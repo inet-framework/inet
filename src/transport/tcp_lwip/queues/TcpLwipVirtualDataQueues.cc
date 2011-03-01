@@ -141,7 +141,7 @@ cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
 
     cPacket *dataMsg = NULL;
 
-    if(bytesInQueueM)
+    if (bytesInQueueM)
     {
         dataMsg = new cPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);

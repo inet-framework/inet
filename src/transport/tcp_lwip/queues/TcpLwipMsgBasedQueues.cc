@@ -110,9 +110,9 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     uint32 numBytes = tcpseg->getPayloadLength();
     uint32 toSeq = fromSeq+numBytes;
 
-    if( (! isValidSeqNoM) && (numBytes > 0))
+    if ((! isValidSeqNoM) && (numBytes > 0))
     {
-        for(i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
+        for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
         {
             i->endSequenceNo += fromSeq;
         }
@@ -128,7 +128,7 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
 #ifdef DEBUG_LWIP
-    for(i=payloadQueueM.begin(); i!=payloadQueueM.end(); ++i)
+    for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
     {
         EV << "  buffered msg: endseq=" << i->endSequenceNo << ", length=" << i->msg->getByteLength() << endl;
     }
@@ -141,10 +141,10 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
         // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
         i = payloadQueueM.begin();
 
-        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
+        while (i != payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
             ++i;
 
-        while (i!=payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
+        while (i != payloadQueueM.end() && seqLE(i->endSequenceNo, toSeq))
         {
             if (!payloadName)
                 payloadName = i->msg->getName();
@@ -177,7 +177,7 @@ void TcpLwipMsgBasedSendQueue::discardAckedBytes()
     {
         uint32 seqNum = connM->pcbM->lastack;
 
-        if(seqLE(beginM, seqNum) && seqLE(seqNum, endM))
+        if (seqLE(beginM, seqNum) && seqLE(seqNum, endM))
         {
             beginM = seqNum;
 
@@ -234,7 +234,7 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
 
     while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
     {
-        if(seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
+        if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
         {
             // insert, avoiding duplicates
             PayloadList::iterator i = payloadListM.find(endSeqNo);
@@ -265,12 +265,12 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
 
     cPacket *dataMsg = NULL;
 
-    if(!isValidSeqNoM)
+    if (!isValidSeqNoM)
     {
         isValidSeqNoM = true;
         lastExtractedSeqNoM = connM->pcbM->rcv_nxt - bytesInQueueM;
 
-        if(connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
+        if (connM->pcbM->state >= LwipTcpLayer::CLOSE_WAIT)
             lastExtractedSeqNoM--; // received FIN
     }
 

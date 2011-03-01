@@ -87,7 +87,8 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 }
 
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP, TCPDataTransferMode dataTransferModeP)
+TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP,
+        TCPDataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
@@ -108,11 +109,12 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIn
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
 
-    if(tcpLwipM.recordStatisticsM)
+    if (tcpLwipM.recordStatisticsM)
         statsM = new Stats();
 }
 
-TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
+TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP,
+        LwipTcpLayer::tcp_pcb *pcbP)
     :
     connIdM(connIdP),
     appGateIndexM(connP.appGateIndexM),
@@ -131,13 +133,13 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP, Lwip
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
 
-    if(tcpLwipM.recordStatisticsM)
+    if (tcpLwipM.recordStatisticsM)
         statsM = new Stats();
 }
 
 TcpLwipConnection::~TcpLwipConnection()
 {
-    if(pcbM)
+    if (pcbM)
         pcbM->callback_arg = NULL;
 
     delete receiveQueueM;
@@ -237,7 +239,8 @@ void TcpLwipConnection::listen(IPvXAddress& localAddr, unsigned short localPort)
     totalSentM = 0;
 }
 
-void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort, IPvXAddress& remoteAddr, unsigned short remotePort)
+void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort,
+        IPvXAddress& remoteAddr, unsigned short remotePort)
 {
     onCloseM = false;
     struct ip_addr dest_addr;
@@ -287,11 +290,11 @@ int TcpLwipConnection::send_data(void *data, int datalen)
     u32_t ss = pcbM->snd_lbb;
     error = tcpLwipM.getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
 
-    if(error == ERR_OK)
+    if (error == ERR_OK)
     {
         written = datalen;
     }
-    else if(error == ERR_MEM)
+    else if (error == ERR_MEM)
     {
         // Chances are that datalen is too large to fit in the send
         // buffer. If it is really large (larger than a typical MSS,
@@ -299,20 +302,24 @@ int TcpLwipConnection::send_data(void *data, int datalen)
         while(1)
         {
             u16_t snd_buf = pcbM->snd_buf;
-            if(0 == snd_buf)
+            if (0 == snd_buf)
                 break;
-            if(datalen < snd_buf)
+
+            if (datalen < snd_buf)
                 break;
+
             error = tcpLwipM.getLwipTcpLayer()->tcp_write(
                     pcbM, ((const char *)data) + written, snd_buf, 1);
-            if(error != ERR_OK)
+
+            if (error != ERR_OK)
                 break;
+
             written += snd_buf;
             datalen -= snd_buf;
         }
     }
 
-    if(written > 0)
+    if (written > 0)
     {
         ASSERT(pcbM->snd_lbb - ss == (u32_t)written);
         return written;
@@ -331,14 +338,15 @@ void TcpLwipConnection::do_SEND()
     {
         int sent = send_data(buffer, bytes);
 
-        if(sent > 0)
+        if (sent > 0)
         {
             sendQueueM->dequeueTcpLayerMsg(sent);
             allsent += sent;
         }
         else
         {
-            tcpEV << "TCP_lwip connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
+            tcpEV << "TCP_lwip connection: " << connIdM << ": Error do sending, err is "
+                    << sent << endl;
             break;
         }
     }
@@ -349,7 +357,7 @@ void TcpLwipConnection::do_SEND()
             ", unsent:" << sendQueueM->getBytesAvailable() <<
             ", total sent:" << totalSentM <<
             ", all bytes:" << totalSentM+sendQueueM->getBytesAvailable() <<
-            "\n";
+            endl;
 
     if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
     {

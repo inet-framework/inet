@@ -166,7 +166,8 @@ class INET_API TcpLwipReceiveQueue : public cPolymorphic
      * object should *not* be deleted.
      * //FIXME revise this comment
      */
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo, const void* bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
+            const void* bufferP, size_t bufferLengthP) = 0;
 
     /**
      * The method called when data received from LWIP
