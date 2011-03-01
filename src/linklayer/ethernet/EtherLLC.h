@@ -18,8 +18,10 @@
 #ifndef __INET_ETHERLLC_H
 #define __INET_ETHERLLC_H
 
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "INETDefs.h"
+
+// Forward declarations:
+class EtherFrameWithLLC;
 
 
 /**

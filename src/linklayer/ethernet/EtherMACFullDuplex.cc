@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <stdio.h>
-#include <string.h>
-#include <omnetpp.h>
-
 #include "EtherMACFullDuplex.h"
 
+#include "EtherFrame_m.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"

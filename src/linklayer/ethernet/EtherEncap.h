@@ -18,9 +18,13 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
-#include <stdio.h>
+#include "INETDefs.h"
+
 #include "Ethernet.h"
-#include "EtherFrame_m.h"
+
+// Forward declarations:
+class EtherFrame;
+
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.

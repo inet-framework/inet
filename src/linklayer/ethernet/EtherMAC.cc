@@ -17,10 +17,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <omnetpp.h>
 
 #include "EtherMAC.h"
 
+#include "EtherFrame_m.h"
+#include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "IPassiveQueue.h"
 

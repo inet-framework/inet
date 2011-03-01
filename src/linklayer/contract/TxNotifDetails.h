@@ -21,6 +21,11 @@
 
 #include "INETDefs.h"
 
+
+// Forward declarations:
+class InterfaceEntry;
+
+
 /**
  * Details class for the NF_PP_TX_BEGIN, NF_PP_TX_END and NF_PP_RX_END
  * notifications (normally triggered from PPP).

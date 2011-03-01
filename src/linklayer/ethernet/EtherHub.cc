@@ -23,7 +23,7 @@ Define_Module(EtherHub);
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    out.printf("(%s)%s",msg->getClassName(),msg->getFullName());
+    out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
     return out;
 }
 
@@ -37,7 +37,8 @@ void EtherHub::initialize()
     ports = gateSize("ethg");
 
     double datarate = 0.0;
-    for (int i=0; i<ports; i++)
+
+    for (int i=0; i < ports; i++)
     {
         cGate* igate = gate("ethg$i", i);
         double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
@@ -48,6 +49,7 @@ void EtherHub::initialize()
             throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
 
         drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+
         if (datarate != drate)
             throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
 
@@ -64,20 +66,21 @@ void EtherHub::handleMessage(cMessage *msg)
     numMessages++;
     emit(pkBytesSignal, (long)(PK(msg)->getByteLength()));
 
-    if (ports<=1)
+    if (ports <= 1)
     {
         delete msg;
         return;
     }
-    for (int i=0; i<ports; i++)
+
+    for (int i=0; i < ports; i++)
     {
-        if (i!=arrivalPort)
+        if (i != arrivalPort)
         {
-            bool isLast = (arrivalPort==ports-1) ? (i==ports-2) : (i==ports-1);
+            bool isLast = (arrivalPort == ports-1) ? (i == ports-2) : (i == ports-1);
             cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
             // stop current transmission
             gate("ethg$o",i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
-            send(msg2,"ethg$o",i);
+            send(msg2, "ethg$o", i);
         }
     }
 }
@@ -86,6 +89,8 @@ void EtherHub::finish ()
 {
     simtime_t t = simTime();
     recordScalar("simulated time", t);
-    if (t>0)
-        recordScalar("messages/sec", numMessages/t);
+
+    if (t > 0)
+        recordScalar("messages/sec", numMessages / t);
 }
+

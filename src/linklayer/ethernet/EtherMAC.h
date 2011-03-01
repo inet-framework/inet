@@ -18,13 +18,8 @@
 #ifndef __INET_ETHERMAC_H
 #define __INET_ETHERMAC_H
 
-#include <stdio.h>
-#include <string.h>
-#include <omnetpp.h>
-
 #include "INETDefs.h"
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
+
 #include "EtherMACBase.h"
 
 

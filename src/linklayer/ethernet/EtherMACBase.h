@@ -19,16 +19,18 @@
 #ifndef __INET_ETHER_MAC_BASE_H
 #define __INET_ETHER_MAC_BASE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
-#include "InterfaceEntry.h"
+
+#include "INotifiable.h"
+#include "MACAddress.h"
 #include "TxNotifDetails.h"
-#include "NotificationBoard.h"
 
-
+// Forward declarations:
+class EtherFrame;
+class EtherTraffic;
+class InterfaceEntry;
 class IPassiveQueue;
+class NotificationBoard;
 
 /**
  * Base class for ethernet MAC implementations.

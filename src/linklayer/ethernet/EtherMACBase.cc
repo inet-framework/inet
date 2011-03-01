@@ -16,16 +16,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <stdio.h>
-#include <string.h>
-#include <omnetpp.h>
-
 #include "EtherMACBase.h"
 
-#include "opp_utils.h"
-#include "IPassiveQueue.h"
-#include "IInterfaceTable.h"
+#include "EtherFrame_m.h"
+#include "Ethernet.h"
+#include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
+#include "IPassiveQueue.h"
+#include "NotificationBoard.h"
+#include "opp_utils.h"
+
 
 static const double SPEED_OF_LIGHT = 200000000.0;
 

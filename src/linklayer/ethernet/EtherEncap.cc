@@ -16,12 +16,11 @@
 */
 
 #include <stdio.h>
+
 #include "EtherEncap.h"
+
 #include "EtherFrame_m.h"
-#include "Ieee802Ctrl_m.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
-#include "EtherMAC.h"
 
 
 Define_Module(EtherEncap);

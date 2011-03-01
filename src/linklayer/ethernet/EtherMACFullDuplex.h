@@ -18,10 +18,8 @@
 #ifndef __INET_ETHER_DUPLEX_MAC_H
 #define __INET_ETHER_DUPLEX_MAC_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
-#include "EtherFrame_m.h"
 #include "EtherMACBase.h"
 
 /**
