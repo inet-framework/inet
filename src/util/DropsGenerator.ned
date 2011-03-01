@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,25 +17,25 @@
 
 
 
-package inet.linklayer.ppp;
+package inet.util;
 
 import inet.base.IHook;
 
 
 //
-// Thruput measurement utility module.
+// Drops generator module.
 //
-simple ThruputMeter like IHook
+simple DropsGenerator like IHook
 {
     parameters:
         @node();
-        double startTime @unit("s") = default(0s);
-        int batchSize = default(50);
-        double maxInterval @unit("s") = default(1s);
-        @display("i=block/timer_vs");
+        string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
+                                          // packet numbers in ascending order e.g. "5;6;12;13;"
+        @display("i=status/lightning");
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[droppedPkBytes](title="Dropped packet bytes"; record=count,sum,vector);
     gates:
         input in;
         output out;
 }
-
-

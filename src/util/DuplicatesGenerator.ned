@@ -17,7 +17,7 @@
 
 
 
-package inet.linklayer.ppp;
+package inet.util;
 
 import inet.base.IHook;
 

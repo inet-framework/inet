@@ -22,10 +22,10 @@ package inet.examples.inet.redtest;
 
 import inet.world.ScenarioManager;
 import inet.world.ChannelInstaller;
+import inet.util.ThruputMeter;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.linklayer.ppp.ThruputMeter;
 
 
 network REDTestTh
