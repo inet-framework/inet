@@ -70,8 +70,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // internal utility functions:
 
     void changeAddresses(TCP_NSC_Connection &connP,
-        const TCP_NSC_Connection::SockPair &inetSockPairP,
-        const TCP_NSC_Connection::SockPair &nscSockPairP);
+            const TCP_NSC_Connection::SockPair &inetSockPairP,
+            const TCP_NSC_Connection::SockPair &nscSockPairP);
 
     // find a TCP_NSC_Connection by connection ID
     TCP_NSC_Connection *findAppConn(int connIdP);
@@ -117,8 +117,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // return original remote ip from mapped ip
     // assert if not exists in map
     // nscAddrP has IP in host byte order
-    IPvXAddress const & mapNsc2Remote(u_int32_t nscAddrP);
     // x == mapNsc2Remote(mapRemote2Nsc(x))
+    IPvXAddress const & mapNsc2Remote(u_int32_t nscAddrP);
 
     // send a connection established msg to application layer
     void sendEstablishedMsg(TCP_NSC_Connection &connP);
@@ -170,24 +170,10 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     static const char * bufferSizeParamNameS; // name of buffersize parameter
 
     // statistics
-    cOutVector *sndWndVector;   // snd_wnd
-    cOutVector *rcvWndVector;   // rcv_wnd
-    cOutVector *rcvAdvVector;   // current advertised window (=rcv_avd)
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo
     cOutVector *rcvAckVector;   // received ackNo (= snd_una)
-    cOutVector *unackedVector;  // number of bytes unacknowledged
-
-    cOutVector *dupAcksVector;   // current number of received dupAcks
-    cOutVector *pipeVector;      // current sender's estimate of bytes outstanding in the network
-    cOutVector *sndSacksVector;  // number of sent Sacks
-    cOutVector *rcvSacksVector;  // number of received Sacks
-    cOutVector *rcvOooSegVector; // number of received out-of-order segments
-
-    cOutVector *sackedBytesVector;                // current number of received sacked bytes
-    cOutVector *tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
-    cOutVector *tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
 };
 
 #endif

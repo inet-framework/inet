@@ -36,6 +36,7 @@ TCPSocket::TCPSocket()
 TCPSocket::TCPSocket(cMessage *msg)
 {
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
+
     if (!ind)
         opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
 
@@ -48,7 +49,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
     gateToTcp = NULL;
 
-    if (msg->getKind()==TCP_I_ESTABLISHED)
+    if (msg->getKind() == TCP_I_ESTABLISHED)
     {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
@@ -95,6 +96,7 @@ void TCPSocket::bind(int lPort)
 {
     if (sockstate!=NOT_BOUND)
         opp_error("TCPSocket::bind(): socket already bound");
+
     if (lPort<0 || lPort>65535)
         opp_error("TCPSocket::bind(): invalid port number %d", lPort);
 
@@ -104,10 +106,11 @@ void TCPSocket::bind(int lPort)
 
 void TCPSocket::bind(IPvXAddress lAddr, int lPort)
 {
-    if (sockstate!=NOT_BOUND)
+    if (sockstate != NOT_BOUND)
         opp_error("TCPSocket::bind(): socket already bound");
+
     // allow -1 here, to make it possible to specify address only
-    if ((lPort<0 || lPort>65535) && lPort!=-1)
+    if ((lPort < 0 || lPort > 65535) && lPort != -1)
         opp_error("TCPSocket::bind(): invalid port number %d", lPort);
 
     localAddr = lAddr;
@@ -138,9 +141,10 @@ void TCPSocket::listen(bool fork)
 
 void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
 {
-    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
+    if (sockstate != NOT_BOUND && sockstate != BOUND)
         opp_error( "TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
-    if (remotePort<0 || remotePort>65535)
+
+    if (remotePort < 0 || remotePort > 65535)
         opp_error("TCPSocket::connect(): invalid remote port number %d", remotePort);
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
@@ -164,7 +168,7 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
 
 void TCPSocket::send(cMessage *msg)
 {
-    if (sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED)
+    if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
         opp_error("TCPSocket::send(): not connected or connecting");
 
     msg->setKind(TCP_C_SEND);
@@ -176,7 +180,7 @@ void TCPSocket::send(cMessage *msg)
 
 void TCPSocket::close()
 {
-    if (sockstate!=CONNECTED && sockstate!=PEER_CLOSED && sockstate!=CONNECTING && sockstate!=LISTENING)
+    if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
         opp_error("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
@@ -184,12 +188,12 @@ void TCPSocket::close()
     cmd->setConnId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
-    sockstate = sockstate==CONNECTED ? LOCALLY_CLOSED : CLOSED;
+    sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
 void TCPSocket::abort()
 {
-    if (sockstate!=NOT_BOUND && sockstate!=BOUND && sockstate!=CLOSED && sockstate!=SOCKERROR)
+    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR)
     {
         cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
         TCPCommand *cmd = new TCPCommand();
@@ -214,14 +218,13 @@ void TCPSocket::renewSocket()
     connId = ev.getUniqueNumber();
     remoteAddr = localAddr = IPvXAddress();
     remotePrt = localPrt = -1;
-
     sockstate = NOT_BOUND;
 }
 
 bool TCPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<TCPCommand *>(msg->getControlInfo()) &&
-           ((TCPCommand *)(msg->getControlInfo()))->getConnId()==connId;
+           ((TCPCommand *)(msg->getControlInfo()))->getConnId() == connId;
 }
 
 bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
@@ -241,6 +244,7 @@ void TCPSocket::processMessage(cMessage *msg)
 
     TCPStatusInfo *status;
     TCPConnectInfo *connectInfo;
+
     switch (msg->getKind())
     {
         case TCP_I_DATA:
@@ -248,13 +252,17 @@ void TCPSocket::processMessage(cMessage *msg)
                  cb->socketDataArrived(connId, yourPtr, PK(msg), false);
              else
                  delete msg;
+
              break;
+
         case TCP_I_URGENT_DATA:
              if (cb)
                  cb->socketDataArrived(connId, yourPtr, PK(msg), true);
              else
                  delete msg;
+
              break;
+
         case TCP_I_ESTABLISHED:
              // Note: this code is only for sockets doing active open, and nonforking
              // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
@@ -268,37 +276,53 @@ void TCPSocket::processMessage(cMessage *msg)
              localPrt = connectInfo->getLocalPort();
              remotePrt = connectInfo->getRemotePort();
              delete msg;
+
              if (cb)
                  cb->socketEstablished(connId, yourPtr);
+
              break;
+
         case TCP_I_PEER_CLOSED:
              sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
              delete msg;
+
              if (cb)
                  cb->socketPeerClosed(connId, yourPtr);
+
              break;
+
         case TCP_I_CLOSED:
              sockstate = CLOSED;
              delete msg;
+
              if (cb)
                  cb->socketClosed(connId, yourPtr);
+
              break;
+
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
              sockstate = SOCKERROR;
+
              if (cb)
                  cb->socketFailure(connId, yourPtr, msg->getKind());
+
              delete msg;
              break;
+
         case TCP_I_STATUS:
              status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
              delete msg;
+
              if (cb)
                  cb->socketStatusArrived(connId, yourPtr, status);
+
              break;
+
         default:
-             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
+             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
+                     msg->getKind());
     }
 }
 
@@ -307,7 +331,7 @@ TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char * tran
     if(0 == transferMode || 0 == transferMode[0])
         return TCP_TRANSFER_UNDEFINED;
 
-    if (0==strcmp(transferMode, "bytecount"))
+    if (0 == strcmp(transferMode, "bytecount"))
         return TCP_TRANSFER_BYTECOUNT;
 
     if (0 == strcmp(transferMode, "object"))
@@ -321,17 +345,17 @@ TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char * tran
 
 void TCPSocket::readDataTransferModePar(cComponent &component)
 {
-    //FIXME inkabb legyen egy kulon string to enum konverter fveny, ez pedig nem kell.
-
     const char *transferMode = component.par("dataTransferMode");
 
     if(0 == transferMode)
-        throw cRuntimeError("Missing dataTransferMode parameter at %s.", component.getFullPath().c_str());
+        throw cRuntimeError("Missing dataTransferMode parameter at %s.",
+                component.getFullPath().c_str());
 
     TCPDataTransferMode x = convertStringToDataTransferMode(transferMode);
 
     if (x == TCP_TRANSFER_UNDEFINED)
-        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.", transferMode, component.getFullPath().c_str());
+        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.",
+                transferMode, component.getFullPath().c_str());
 
     dataTransferMode = x;
 }

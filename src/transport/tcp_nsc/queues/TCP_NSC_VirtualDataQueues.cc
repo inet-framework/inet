@@ -130,6 +130,7 @@ cPacket* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
+
     if(bytesInQueueM)
     {
         dataMsg = new cPacket("DATA");
@@ -137,6 +138,7 @@ cPacket* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
         dataMsg->setByteLength(bytesInQueueM);
         bytesInQueueM -= dataMsg->getByteLength();
     }
+
     return dataMsg;
 }
 

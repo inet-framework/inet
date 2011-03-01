@@ -40,7 +40,7 @@ class INET_API TCP_NSC_Connection
     class SockAddr
     {
       public:
-        SockAddr() : ipAddrM(),portM(-1) {}
+        SockAddr() : ipAddrM(), portM(-1) {}
         IPvXAddress ipAddrM;
         unsigned short portM;
 

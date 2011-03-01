@@ -138,6 +138,7 @@ cPacket* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
 
     ByteArrayMessage *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
+
     if(bytesInQueue)
     {
         dataMsg = new ByteArrayMessage("DATA");
@@ -148,6 +149,7 @@ cPacket* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
         dataMsg->setByteLength(extractedBytes);
         dataMsg->getByteArray().assignBuffer(data, extractedBytes);
     }
+
     return dataMsg;
 }
 
