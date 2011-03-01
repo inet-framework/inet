@@ -13,7 +13,7 @@ The most significant changes:
   recording in most places (see @statistic properties in NED files)
 
 - support for more than one type of tcpApp and udpApp in StandardHost
-  (elimination of tcpAppType/udpAppType parameters)  ===> MEG NINCS MEGCSINALVA, TODO!!!
+  (elimination of tcpAppType/udpAppType parameters)
 
 - Interfaces renamed for starting with I letter. BasicMobility -> IMobility, 
   TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
@@ -30,28 +30,28 @@ The most significant changes:
   WirelessAPWithEthSimplified (use AccessPoint with wlanNicType=Ieee80211NicAPSimplified),
   WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified (use 
   StandardHost with numRadios=1 and wlanNicType=Ieee80211NicSTASimplified)
-  
+
 - in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
   or external interfaces are used. Wired interfaces must implement INetworkInterface while wireless 
   modules implement IWirlessNic. Mobility type and number of wireless cards (default=0)
   can be also configured via parameters. The use of interfaces obsoletes several older modules
   which differed only in interface types (like WirelessHost or ExtRouter)
-  
+
 - enhanced Router to support external interfaces, ppp, wireless, ethernet etc. This module
   is similar to StandarHost except it does not contain the transport layer and application layer
   protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router) 
-  
+
 - in NetworkLayer and NetworkLayer6 added dummy modules implementing IHook interface 
   that can be inserted above the physical layer. This allows to insert thruput metering, 
   packet drop and duplication modules etc. without modifying the module. New modules implementing
   IHook: ThruputMeter, DropsGenerator, DuplicatesGenerator and EmptyHook (which is a NOP)
   use **.networkLayer.outputHookType = "ThruputMeter" to configure it. (use inputHookType
   for incoming traffic)
-  
+
 - added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol, 
   it is now possible to use a much faster implementation by specifying (by Alfonso Ariza Quintana): 
   **.networkLayer.arp.globalARP=true
-  
+
 - multi radios per host (multi channel) are supported by StandardHost, AdhocHost and Router if
   ChannelControllerExtended is used in the network.     
 
@@ -157,20 +157,7 @@ dataTransferMode field of TCPOpenCommand. Potential values are:
    TCP_TRANSFER_BYTESTREAM = 3; // Transmit actual bytes
 
 Ideally, all 3 TCP implementations should understand all 3 transfer modes;
-currently BYTESTREAM support is missing from some.
-
-
-* TCP changes to support "read" syscalls
-
-Support for application-imposed flow control was added to TCP. In that
-mode, TCP only sends received data to the app if the app has issued a READ
-request, and TCP only buffers 64K data for the app (~rcv window). The
-buffer space remaining from the 64K is reported to the sender TCP as the
-window size, so if the buffer is full no data will be accepted from the
-sender. This mode of operation has to be enabled in the TCPOpenCommand used
-to open the connection. So this feature is actually backwards compatible
-(if you don't enable app-imposed flow control, everything works as before).
-
+currently OBJECT support is missing from TCP_NSC.
 
 
 INET-20110225
