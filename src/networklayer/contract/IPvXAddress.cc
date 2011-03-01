@@ -15,8 +15,10 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
 #include "IPvXAddress.h"
+
+#include <iostream>
+
 
 bool IPvXAddress::tryParse(const char *addr)
 {
@@ -37,6 +39,12 @@ bool IPvXAddress::tryParse(const char *addr)
 
     // no luck
     return false;
+}
+
+void IPvXAddress::set(const char *addr)
+{
+    if (!tryParse(addr))
+        throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
 }
 
 

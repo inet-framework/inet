@@ -84,28 +84,35 @@ class INET_API IPvXAddress
     /**
      * Get IPv4 address. Throws exception if this is an IPv6 address.
      */
-    IPAddress get4() const {
+    IPAddress get4() const
+    {
         if (isv6)
             throw cRuntimeError("IPvXAddress: cannot return IPv6 address %s as IPv4", str().c_str());
+
         return IPAddress(d[0]);
     }
 
     /**
      * Get IPv6 address. Throws exception if this is an IPv4 address.
      */
-    IPv6Address get6() const {
-        if (!isv6)  {
-            if (d[0]==0) // allow null address to be returned as IPv6
+    IPv6Address get6() const
+    {
+        if (!isv6)
+        {
+            if (d[0] == 0) // allow null address to be returned as IPv6
                 return IPv6Address();
+
             throw cRuntimeError("IPvXAddress: cannot return IPv4 address %s as IPv6", str().c_str());
         }
+
         return IPv6Address(d[0], d[1], d[2], d[3]);
     }
 
     /**
      * Set to an IPv4 address.
      */
-    void set(const IPAddress& addr)  {
+    void set(const IPAddress& addr)
+    {
         isv6 = false;
         d[0] = addr.getInt();
     }
@@ -113,26 +120,32 @@ class INET_API IPvXAddress
     /**
      * Set to an IPv6 address.
      */
-    void set(const IPv6Address& addr)  {
-        if (addr.isUnspecified()) {
+    void set(const IPv6Address& addr)
+    {
+        if (addr.isUnspecified())
+        {
             // we always represent nulls as IPv4 null
             isv6 = false; d[0] = 0;
             return;
         }
+
         isv6 = true;
-        uint32 *w = const_cast<IPv6Address&>(addr).words();
+        const uint32 *w = addr.words();
         d[0] = w[0]; d[1] = w[1]; d[2] = w[2]; d[3] = w[3];
     }
 
     /**
      * Assignment
      */
-    void set(const IPvXAddress& addr) {
+    void set(const IPvXAddress& addr)
+    {
         isv6 = addr.isv6;
         d[0] = addr.d[0];
-        if (isv6) {
+
+        if (isv6)
+        {
             d[1] = addr.d[1]; d[2] = addr.d[2]; d[3] = addr.d[3];
-         }
+        }
     }
 
     /**
@@ -140,10 +153,7 @@ class INET_API IPvXAddress
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
-    void set(const char *addr) {
-        if (!tryParse(addr))
-            throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
-    }
+    void set(const char *addr);
 
     /**
      * Assignment
@@ -177,8 +187,9 @@ class INET_API IPvXAddress
     /**
      * True if the structure has not been assigned any address yet.
      */
-    bool isUnspecified() const {
-        return !isv6 && d[0]==0;
+    bool isUnspecified() const
+    {
+        return !isv6 && d[0] == 0;
     }
 
     /**
@@ -197,22 +208,25 @@ class INET_API IPvXAddress
      * Returns true if the two addresses are equal
      */
     bool equals(const IPAddress& addr) const {
-        return !isv6 && d[0]==addr.getInt();
+        return !isv6 && d[0] == addr.getInt();
     }
 
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPv6Address& addr) const {
-        uint32 *w = const_cast<IPv6Address&>(addr).words();
-        return isv6 && d[0]==w[0] && d[1]==w[1] && d[2]==w[2] && d[3]==w[3];
+    bool equals(const IPv6Address& addr) const
+    {
+        const uint32 *w = addr.words();
+        return isv6 && d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0];
     }
 
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPvXAddress& addr) const {
-        return (isv6 == addr.isv6) && (d[0]==addr.d[0]) && (!isv6 || (d[1]==addr.d[1] && d[2]==addr.d[2] && d[3]==addr.d[3]));
+    bool equals(const IPvXAddress& addr) const
+    {
+        return (isv6 == addr.isv6) && (d[0] == addr.d[0])
+                && (!isv6 || (d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1]));
     }
 
     /**
@@ -248,11 +262,12 @@ class INET_API IPvXAddress
     /**
      * Compares two addresses.
      */
-    bool operator<(const IPvXAddress& addr) const {
-        if (isv6!=addr.isv6)
+    bool operator<(const IPvXAddress& addr) const
+    {
+        if (isv6 != addr.isv6)
             return !isv6;
         else if (!isv6)
-            return d[0]<addr.d[0];
+            return d[0] < addr.d[0];
         else
             return memcmp(&d, &addr.d, 16) < 0;  // this provides an ordering, though not surely the one one would expect
     }
@@ -274,12 +289,14 @@ inline void doPacking(cCommBuffer *buf, const IPvXAddress& addr)
 
 inline void doUnpacking(cCommBuffer *buf, IPvXAddress& addr)
 {
-    if (buf->checkFlag()) {
+    if (buf->checkFlag())
+    {
         IPv6Address tmp;
         doUnpacking(buf, tmp);
         addr.set(tmp);
     }
-    else {
+    else
+    {
         IPAddress tmp;
         doUnpacking(buf, tmp);
         addr.set(tmp);
@@ -287,5 +304,4 @@ inline void doUnpacking(cCommBuffer *buf, IPvXAddress& addr)
 }
 
 #endif
-
 
