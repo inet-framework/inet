@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2006 Levente Meszaros
-//               2010 Zoltan Bojthe
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,6 +21,7 @@ package inet.linklayer.ethernet;
 
 //
 // Ethernet MAC which supports full duplex operation ONLY.
+// See the ~IEtherMAC for general informations.
 //
 // Most of today's Ethernet networks are switched, and operate
 // in full duplex mode. Full-duplex transmission can be used for
@@ -47,11 +48,6 @@ package inet.linklayer.ethernet;
 // Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
 // RAW mode (only used by the IPX protocol) is not supported.
-//
-// Expected environment:
-// - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
-//   or ~MACRelayUnitPP (in a switch)
 //
 // <b>Operation</b>
 //
@@ -85,14 +81,6 @@ package inet.linklayer.ethernet;
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.
 //
-// <b>Autoconfiguration</b>
-//
-// ~EtherMACFullDuplex does NOT include autoconfiguration. Link speed is taken from
-// the <tt>datarate</tt> attribute of the connection instead of module parameters
-// or autoconfiguration.
-//
-// For more info see <a href="ether-overview.html">Ethernet Model Overview</a>.
-//
 // <b>Disabling and disconnecting</b>
 //
 // If the MAC is not connected to the network ("cable unplugged"), it will
@@ -120,21 +108,17 @@ package inet.linklayer.ethernet;
 //
 // <b>Statistics</b>
 //
-// Output vectors and WATCHes:
-// - framesSent: number of frames sent
-// - framesReceivedOK: number of frames received without collision or CRC error
-// - bytesSent: bytes sent, including Ethernet frame fields (but excluding preamble and SFD)
-// - bytesReceivedOK: total bytes received, including Ethernet frame fields
-//   (but excluding preamble and SFD), including discarded frames (see also
-//   framesPassedToHL)
-// - droppedIfaceDown: number of frames from higher layer dropped
-// - droppedBitError: number of frames dropped because of bit errors
-// - droppedNotForUs: number of frames dropped because destination address didn't match
-// - framesPassedToHL: number of frames actually passed up to higher layer
-// - pauseFramesRcvd: number of PAUSE frames received from network
-// - pauseFramesSent: number of PAUSE frames sent out
-// - collisions: number of collisions (NOT number of collided frames!) sensed
-// - backoffs: number of retransmissions
+// Output vectors:
+// - txPkBytes: bytes sent, including Ethernet frame fields (but excluding preamble and SFD)
+// - rxPkBytesOK: total bytes received  without collision or CRC error,
+//   including Ethernet frame fields (but excluding preamble and SFD)
+// - passedUpPkBytes: number of bytes of frames actually passed up to higher layer
+// - txPausePkUnits: number of PAUSE frames sent out
+// - rxPausePkUnits: number of PAUSE frames received from network
+// - rxPkBytesFromHL: number of bytes of frames received from higher layer
+// - droppedPkBytesIfaceDown: number of bytes of frames from higher layer dropped
+// - droppedPkBytesBitError: number of bytes of frames dropped because of bit errors
+// - droppedPkBytesNotForUs: number of bytes of frames dropped because destination address didn't match
 //
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.

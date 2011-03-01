@@ -19,10 +19,12 @@ cplusplus {{
 
 
 //
-// Message that carries raw bytes. Used with emulation-related features.
+// Class that carries raw bytes.
+// For example, used by ~ByteArrayMessage and some TCP queues.
 //
 class ByteArray
 {
     @customize(true);
     char data[];
 }
+

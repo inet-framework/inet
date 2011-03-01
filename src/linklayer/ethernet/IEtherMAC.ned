@@ -20,7 +20,31 @@ package inet.linklayer.ethernet;
 
 //
 // Interface for Ethernet MAC implementations. All Ethernet MAC implementations
-// should implement this (i.e. declared as: EtherMAC like IEtherMAC)
+// should implement this (i.e. declared as: EtherMAC like IEtherMAC).
+// The existing implementations are these: ~EtherMAC and ~EtherMACFullDuplex.
+//
+// Doesn't do encapsulation/decapsulation; see ~EtherLLC and ~EtherEncap for
+// that.
+//
+// Expected environment:
+// - phys$i and phys$o should be connected to the "network"
+// - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
+//   or ~MACRelayUnitPP (in a switch)
+//
+// The module does not perform encapsulation or decapsulation of frames --
+// this is done by higher layers (~EtherLLC or ~EtherEncap).
+//
+// When a frame is received from the higher layers, it must be an ~EtherFrame,
+// and with all protocol fields filled out
+// (including the destination MAC address). The source address, if left empty,
+// will be filled in. Then frame is queued and transmitted according
+// to the CSMA/CD protocol.
+//
+// Data frames received from the network are EtherFrames. They are passed to
+// the higher layers without modification.
+// Also, the module properly responds to PAUSE frames, but never sends them
+// by itself -- however, it transmits PAUSE frames received from upper layers.
+// See <a href="ether-pause.html">PAUSE handling</a> for more info.
 //
 moduleinterface IEtherMAC
 {
@@ -45,3 +69,4 @@ moduleinterface IEtherMAC
         output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
+

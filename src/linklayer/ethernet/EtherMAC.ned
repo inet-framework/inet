@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +21,7 @@ package inet.linklayer.ethernet;
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
+// See the ~IEtherMAC for the Ethernet MAC layer general informations.
 // Doesn't do encapsulation/decapsulation; see ~EtherLLC and ~EtherEncap for
 // that.
 //
@@ -69,13 +71,6 @@ package inet.linklayer.ethernet;
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.
 //
-// <b>Autoconfiguration</b>
-//
-// A very short period at the beginning of the simulation is spent on
-// all ~EtherMAC's exchanging autoconfiguration messages, during which
-// the selection of transmission rate and full duplex/half duplex mode
-// takes place.
-//
 // For more info see <a href="ether-overview.html">Ethernet Model Overview</a>.
 //
 // <b>Disabling and disconnecting</b>
@@ -105,21 +100,19 @@ package inet.linklayer.ethernet;
 //
 // <b>Statistics</b>
 //
-// Output vectors and WATCHes:
-// - framesSent: number of frames sent
-// - framesReceivedOK: number of frames received without collision or CRC error
-// - bytesSent: bytes sent, including Ethernet frame fields (but excluding preamble and SFD)
-// - bytesReceivedOK: total bytes received, including Ethernet frame fields
-//   (but excluding preamble and SFD), including discarded frames (see also
-//   framesPassedToHL)
-// - droppedIfaceDown: number of frames from higher layer dropped
-// - droppedBitError: number of frames dropped because of bit errors
-// - droppedNotForUs: number of frames dropped because destination address didn't match
-// - framesPassedToHL: number of frames actually passed up to higher layer
-// - pauseFramesRcvd: number of PAUSE frames received from network
-// - pauseFramesSent: number of PAUSE frames sent out
-// - collisions: number of collisions (NOT number of collided frames!) sensed
-// - backoffs: number of retransmissions
+// Output vectors:
+// - txPkBytes: bytes sent, including Ethernet frame fields (but excluding preamble and SFD)
+// - rxPkBytesOK: total bytes received  without collision or CRC error,
+//   including Ethernet frame fields (but excluding preamble and SFD)
+// - passedUpPkBytes: number of bytes of frames actually passed up to higher layer
+// - txPausePkUnits: number of PAUSE frames sent out
+// - rxPausePkUnits: number of PAUSE frames received from network
+// - rxPkBytesFromHL: number of bytes of frames received from higher layer
+// - collision: number of collisions (NOT number of collided frames!) sensed
+// - backoff: number of retransmissions
+// - droppedPkBytesIfaceDown: number of bytes of frames from higher layer dropped
+// - droppedPkBytesBitError: number of bytes of frames dropped because of bit errors
+// - droppedPkBytesNotForUs: number of bytes of frames dropped because destination address didn't match
 //
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
@@ -145,17 +138,17 @@ simple EtherMAC like IEtherMAC
         bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
-        @statistic[collision](title="Collision";record=count,vector);
-        @statistic[backoff](title="Backoff";record=count,vector);
         @statistic[txPkBytes](title="TX bytes";record=sum,count,vector);
         @statistic[rxPkBytesOk](title="RX bytes";record=sum,count,vector);
         @statistic[passedUpPkBytes](title="Passed up packet bytes to higher layer";record=sum,count,vector);
         @statistic[txPausePkUnits](title="Sent pause";record=count,stats,vector);
         @statistic[rxPausePkUnits](title="Received pause";record=count,stats,vector);
         @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer";record=sum,count,vector);
-        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";record=sum,count,vector);
-        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error";record=sum,count,vector);
+        @statistic[collision](title="Collision";record=count,vector);
+        @statistic[backoff](title="Backoff";record=count,vector);
         @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";record=sum,count,vector);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error";record=sum,count,vector);
+        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";record=sum,count,vector);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
