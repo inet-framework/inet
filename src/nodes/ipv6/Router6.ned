@@ -44,7 +44,7 @@ module Router6
         string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only  
         string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue  
         int namid = default(-1);
-        string routingFile = default("");
+        xml routingTableFile;  //# TODO provide a default
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -66,7 +66,7 @@ module Router6
         routingTable6: RoutingTable6 {
             parameters:
                 isRouter = true;
-                routingTableFile = routingFile;
+                routingTableFile = routingTableFile;
                 @display("p=281,54");
         }
         mobility: <mobilityType> like BasicMobility {

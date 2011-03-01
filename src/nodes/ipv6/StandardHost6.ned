@@ -58,9 +58,9 @@ module StandardHost6
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
         string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterfaceFUllDuplex for simplified, full duplex only  
         string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue  
-        bool IPForward = default(false);
+        bool IPForward = default(false);             // whether to support forwarding of IP packets (i.e. routing)
         int namid = default(-1);
-        string routingFile = default("");
+        xml routingTableFile;  //# TODO a reasonable default should be provided
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -82,7 +82,7 @@ module StandardHost6
         routingTable6: RoutingTable6 {
             parameters:
                 isRouter = IPForward;
-                routingTableFile = routingFile;
+                routingTableFile = routingTableFile;
                 @display("p=57,214");
         }
         mobility: <mobilityType> like BasicMobility {
