@@ -1,9 +1,9 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-XX.XX
+INET-1.99.0
 ----------
-This is a major feature release, with new models and also incompatible
+This is a beta of a major feature release, with new models and also incompatible
 changes. If you are upgrading from an earlier INET version, expect to have
 to revise your existing omnetpp.ini files and possibly NED/C++ files as well.
 
@@ -15,9 +15,10 @@ The most significant changes:
 - support for more than one type of tcpApp and udpApp in StandardHost
   (elimination of tcpAppType/udpAppType parameters)
 
-- Interfaces renamed for starting with I letter. BasicMobility -> IMobility, 
+- Interfaces renamed to start with letter "I". BasicMobility -> IMobility, 
   TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
-  Radio->IRadio, Ieee80211Mgmt->IIeee80211Mgmt, OutputQueue->IOutputQueue
+  Radio->IRadio, Ieee80211Mgmt->IIeee80211Mgmt, OutputQueue->IOutputQueue,
+  INetworkInterface->IWiredNic
 
 - added new AdhocHost for basic node types used in adhoc networks. Supports
   mobility and multiple wireless radios. It obsoletes the MFMobileHost
@@ -32,7 +33,7 @@ The most significant changes:
   StandardHost with numRadios=1 and wlanNicType=Ieee80211NicSTASimplified)
 
 - in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
-  or external interfaces are used. Wired interfaces must implement INetworkInterface while wireless 
+  or external interfaces are used. Wired interfaces must implement IWiredNic while wireless 
   modules implement IWirlessNic. Mobility type and number of wireless cards (default=0)
   can be also configured via parameters. The use of interfaces obsoletes several older modules
   which differed only in interface types (like WirelessHost or ExtRouter)
@@ -42,9 +43,10 @@ The most significant changes:
   protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router) 
 
 - in NetworkLayer and NetworkLayer6 added dummy modules implementing IHook interface 
-  that can be inserted above the physical layer. This allows to insert thruput metering, 
-  packet drop and duplication modules etc. without modifying the module. New modules implementing
-  IHook: ThruputMeter, DropsGenerator, DuplicatesGenerator and EmptyHook (which is a NOP)
+  that can be inserted at the bottom of network layer (above link layer). 
+  This allows to insert thruput metering, packet drop and duplication modules etc. 
+  without modifying the module. New modules implementing IHook: 
+  ThruputMeter, DropsGenerator, DuplicatesGenerator and Nop.
   use **.networkLayer.outputHookType = "ThruputMeter" to configure it. (use inputHookType
   for incoming traffic)
 
@@ -53,7 +55,7 @@ The most significant changes:
   **.networkLayer.arp.globalARP=true
 
 - multi radios per host (multi channel) are supported by StandardHost, AdhocHost and Router if
-  ChannelControllerExtended is used in the network.     
+  ChannelControllerExtended is used in the network.
 
 - point-to-point Ethernet links can now use normal DatarateChannels
   (EtherMAC's txrate parameter was removed)
@@ -107,7 +109,7 @@ Several changes were introduced to make the basic building blocks of
 simulation (StandardHost, AdhocHost, Router etc.) more configurable,
 without the need to copy and modify the modules or derive a new module
 type. Applications, tcp type, nic, mobility, routing protocols can be 
-configured using paramaters or the **.like-type=typename in the .ini file.
+configured using paramaters or the **.type-name=typename in the .ini file.
 
 * Ethernet point-to-point links:
 

@@ -12,10 +12,22 @@ TODO: implement missing models:
      TDMA; QoS supports for cross-layer design
      and also, Group Mobility,  etc.
 
+TODO: derive BGPRouter from OSPFRouter that should be derived from Router
+
+TODO: Remove ChannelInstaller. Channels can now implement thruput metering in C++.
+
+TODO: is the namId needed at StandardHost level? Possibly implement namtrace as a plugin?
+
+TODO: port NAM trace writer to use signals mechanism
+
+TODO: Add ThruputMetering channel (NED definition)
+
+TODO: remove MobileHost, MFMobileHost and most of the obsolete modules in nosed/wireless
+
+TODO: provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
+
 TODO: integrate models:
    HTTPTools, VoIPTools, HIPSim++, MobileWiMAX, ...
-
-TODO: TCP congestion control algorithms are all present in the Linux kernel, extract and use them in our TCP!
 
 TODO: for omnetpp-4.1: eliminate NotificationBoard, use signals instead
 
@@ -25,14 +37,12 @@ TODO: IPv6 works only eth, not work on ppp. See examples/ipv6/nclients.
 
 TODO: implement node failure/recovery by using signals mechanism
 
-TODO: port NAM trace writer to use signals mechanism
-
 TODO: pcacp file recording using signals mechanism
 
 TODO: VideoStrmReq problem on IPv6: 
       "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
 
-TODO: add SCTP for StandardHost6 (IPv6)
+TODO: check if SCTP in StandardHost6 (IPv6) is working properly
 
 BUG:  if SCTPServer.echoFactor not 0, then will a runtime error:
       "Error in module (SCTP) P5.server.sctp (id=22): User error: stream with id 2 not found."
@@ -82,7 +92,6 @@ TODO: add SCTP to the whatsnew file
 
 
 TODO:
-- fix Ethernet channel usage (should use datarate on the channel!)
 - failure/recovery (replacing with failed router is problematic!)
 - gate labelling for the NED editor
 
@@ -129,8 +138,6 @@ The paper is excellent work, and literally cries for follow-ups:
    would be value in doing that.
 -----------------------
 
-
-TODO: ethernet: use normal channels
 TODO: eliminate cast after dup(), like (AirFrame*)airframe->dup()
 
 TODO: IRoutingTable6, ITED, etc!

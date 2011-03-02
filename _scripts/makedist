@@ -3,10 +3,12 @@
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
 INET_ROOT=`pwd`
 
+export VERSION=`cat Version | sed 's/^.*-//'` 
 if [ "$BUILDID" = "" ]; then
   # generate our own build identifier
   export BUILDDATE=`date +%Y%m%d`
-  export BUILDID=$BUILDDATE-`git describe --tags | awk -F '-g' '{print $2;}'`
+  export BUILDHASH=`git describe --tags | awk -F '-g' '{print $2;}'`
+  export BUILDID="$VERSION-$BUILDHASH"
 fi
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
