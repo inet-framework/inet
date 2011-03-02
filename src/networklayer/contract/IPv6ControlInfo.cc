@@ -80,7 +80,7 @@ void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHead
 void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
 {
     ASSERT(eh);
-    if (atPos<0 || atPos>=extensionHeaders.size())
+    if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size())
     {
         extensionHeaders.push_back(eh);
         return;
