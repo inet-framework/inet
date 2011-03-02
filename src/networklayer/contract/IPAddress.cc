@@ -94,10 +94,12 @@ void IPAddress::set(const char *text)
 {
     unsigned char buf[4];
     if (!text)
-        opp_error("IP address string is NULL");
+        throw cRuntimeError("IP address string is NULL");
+
     bool ok = parseIPAddress(text, buf);
     if (!ok)
-        opp_error("Invalid IP address string `%s'", text);
+        throw cRuntimeError("Invalid IP address string `%s'", text);
+
     set(buf[0], buf[1], buf[2], buf[3]);
 }
 

@@ -64,7 +64,8 @@ void checkTags(const cXMLElement *node, const char *allowed)
             if(!strcmp(child->getTagName(), tags[i]))
                 break;
         if(i == tags.size())
-            opp_error("subtag <%s> not expected in <%s>", child->getTagName(), node->getTagName());
+            throw cRuntimeError("subtag <%s> not expected in <%s>",
+                    child->getTagName(), node->getTagName());
     }
 }
 

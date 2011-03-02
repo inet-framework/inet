@@ -366,7 +366,8 @@ bool TCPConnection::processAppCommand(cMessage *msg)
         case TCP_E_CLOSE: process_CLOSE(event, tcpCommand, msg); break;
         case TCP_E_ABORT: process_ABORT(event, tcpCommand, msg); break;
         case TCP_E_STATUS: process_STATUS(event, tcpCommand, msg); break;
-        default: opp_error("wrong event code");
+        default:
+            throw cRuntimeError(tcpMain, "wrong event code");
     }
 
     // then state transitions
@@ -384,8 +385,8 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
         case TCP_C_CLOSE:        return TCP_E_CLOSE;
         case TCP_C_ABORT:        return TCP_E_ABORT;
         case TCP_C_STATUS:       return TCP_E_STATUS;
-        default: opp_error("Unknown message kind in app command");
-                 return (TCPEventCode)0; // to satisfy compiler
+        default:
+            throw cRuntimeError(tcpMain, "Unknown message kind in app command");
     }
 }
 

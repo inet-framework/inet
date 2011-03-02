@@ -28,7 +28,7 @@ void PathLossReceptionModel::initializeFrom(cModule *radioModule)
 
     cModule *cc = ChannelControl::get();
     if (pathLossAlpha < (double) (cc->par("alpha")))
-        opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
+        throw cRuntimeError(this, "PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
 }
 
 double PathLossReceptionModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)

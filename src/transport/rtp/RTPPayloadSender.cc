@@ -135,7 +135,7 @@ void RTPPayloadSender::openSourceFile(const char *fileName)
     _inputFileStream.open(fileName);
     if (!_inputFileStream)
     {
-        opp_error("sender module: error open data file");
+        throw cRuntimeError(this, "sender module: error open data file");
     }
 }
 

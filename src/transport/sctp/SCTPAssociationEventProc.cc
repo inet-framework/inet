@@ -54,7 +54,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
         remotePort = openCmd->getRemotePort();
         state->numRequests = openCmd->getNumRequests();
         if (rAddr.isUnspecified() || remotePort==0)
-        opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+            throw cRuntimeError(this, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
         if (localPort==0)
         {
@@ -69,7 +69,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
         break;
 
     default:
-        opp_error("Error processing command OPEN_ACTIVE: connection already exists");
+        throw cRuntimeError(this, "Error processing command OPEN_ACTIVE: connection already exists");
     }
 
 }
@@ -99,13 +99,15 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
             state->messagesToPush = openCmd->getMessagesToPush();
 
             if (localPort==0)
-                opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
+                throw cRuntimeError(this, "Error processing command OPEN_PASSIVE: local port must be specified");
+
             sctpEV3 << "Assoc "<<assocId<<"::Starting to listen on: " << lAddr << ":" << localPort << "\n";
 
             sctpMain->updateSockPair(this, lAddr, IPvXAddress(), localPort, 0);
             break;
+
         default:
-        opp_error("Error processing command OPEN_PASSIVE: connection already exists");
+            throw cRuntimeError(this, "Error processing command OPEN_PASSIVE: connection already exists");
     }
 }
 
@@ -143,7 +145,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
      stream = associter->second;
   }
   else {
-     opp_error("stream with id %d not found", streamId);
+     throw cRuntimeError(this, "stream with id %d not found", streamId);
   }
 
   char name[64];

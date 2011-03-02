@@ -79,7 +79,7 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
 
     fp = fopen(filename, "r");
     if (fp == NULL)
-        opp_error("Error opening routing table file `%s'", filename);
+        throw cRuntimeError("Error opening routing table file `%s'", filename);
 
     // read the whole into the file[] char-array
     for (charpointer = 0;
@@ -174,7 +174,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
             char *name = parseEntry(ifconfigFile, "name:", charpointer,buf);
             ie = ift->getInterfaceByName(name);
             if (!ie)
-                opp_error("Error in routing file: interface name `%s' not registered by any L2 module", name);
+                throw cRuntimeError("Error in routing file: interface name `%s' not registered by any L2 module", name);
+
             continue;
         }
 
@@ -312,7 +313,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         {
             // if entry is not the default entry
             if (!IPAddress::isWellFormed(str))
-                opp_error("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IP address", str);
+                throw cRuntimeError("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IP address", str);
+
             e->setHost(IPAddress(str));
         }
 
@@ -326,7 +328,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         else
         {
             if (!IPAddress::isWellFormed(str))
-                opp_error("Syntax error in routing file: `%s' on 2nd column should be `*' or a valid IP address", str);
+                throw cRuntimeError("Syntax error in routing file: `%s' on 2nd column should be `*' or a valid IP address", str);
+
             e->setGateway(IPAddress(str));
         }
 
@@ -334,7 +337,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
         if (!IPAddress::isWellFormed(str))
-            opp_error("Syntax error in routing file: `%s' on 3rd column should be a valid IP address", str);
+            throw cRuntimeError("Syntax error in routing file: `%s' on 3rd column should be a valid IP address", str);
+
         e->setNetmask(IPAddress(str));
 
         // 4th entry: flags
@@ -348,7 +352,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
             } else if (str[i] == 'G') {
                 e->setType(IPRoute::REMOTE);
             } else {
-                opp_error("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);
+                throw cRuntimeError("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);
             }
         }
 
@@ -357,7 +361,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         skipBlanks(routeFile, pos);
         int metric = atoi(str);
         if (metric==0 && str[0]!='0')
-            opp_error("Syntax error in routing file: 5th column should be numeric not `%s'", str);
+            throw cRuntimeError("Syntax error in routing file: 5th column should be numeric not `%s'", str);
+
         e->setMetric(metric);
 
         // 6th entry: interface
@@ -367,7 +372,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         skipBlanks(routeFile, pos);
         InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
         if (!ie)
-            opp_error("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
+            throw cRuntimeError("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
+
         e->setInterface(ie);
 
         // add entry

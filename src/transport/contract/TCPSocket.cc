@@ -38,7 +38,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
 
     if (!ind)
-        opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
+        throw cRuntimeError("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
 
     connId = ind->getConnId();
     sockstate = CONNECTED;
@@ -87,7 +87,7 @@ const char *TCPSocket::stateName(int state)
 void TCPSocket::sendToTCP(cMessage *msg)
 {
     if (!gateToTcp)
-        opp_error("TCPSocket: setOutputGate() must be invoked before socket can be used");
+        throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
@@ -95,10 +95,10 @@ void TCPSocket::sendToTCP(cMessage *msg)
 void TCPSocket::bind(int lPort)
 {
     if (sockstate!=NOT_BOUND)
-        opp_error("TCPSocket::bind(): socket already bound");
+        throw cRuntimeError("TCPSocket::bind(): socket already bound");
 
     if (lPort<0 || lPort>65535)
-        opp_error("TCPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("TCPSocket::bind(): invalid port number %d", lPort);
 
     localPrt = lPort;
     sockstate = BOUND;
@@ -107,11 +107,11 @@ void TCPSocket::bind(int lPort)
 void TCPSocket::bind(IPvXAddress lAddr, int lPort)
 {
     if (sockstate != NOT_BOUND)
-        opp_error("TCPSocket::bind(): socket already bound");
+        throw cRuntimeError("TCPSocket::bind(): socket already bound");
 
     // allow -1 here, to make it possible to specify address only
     if ((lPort < 0 || lPort > 65535) && lPort != -1)
-        opp_error("TCPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("TCPSocket::bind(): invalid port number %d", lPort);
 
     localAddr = lAddr;
     localPrt = lPort;
@@ -121,7 +121,7 @@ void TCPSocket::bind(IPvXAddress lAddr, int lPort)
 void TCPSocket::listen(bool fork)
 {
     if (sockstate!=BOUND)
-        opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before listen()"
+        throw cRuntimeError(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before listen()"
                                        : "TCPSocket::listen(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
@@ -142,10 +142,10 @@ void TCPSocket::listen(bool fork)
 void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
-        opp_error( "TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
+        throw cRuntimeError( "TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
 
     if (remotePort < 0 || remotePort > 65535)
-        opp_error("TCPSocket::connect(): invalid remote port number %d", remotePort);
+        throw cRuntimeError("TCPSocket::connect(): invalid remote port number %d", remotePort);
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
@@ -169,7 +169,7 @@ void TCPSocket::connect(IPvXAddress remoteAddress, int remotePort)
 void TCPSocket::send(cMessage *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
-        opp_error("TCPSocket::send(): not connected or connecting");
+        throw cRuntimeError("TCPSocket::send(): not connected or connecting");
 
     msg->setKind(TCP_C_SEND);
     TCPSendCommand *cmd = new TCPSendCommand();
@@ -181,7 +181,7 @@ void TCPSocket::send(cMessage *msg)
 void TCPSocket::close()
 {
     if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
-        opp_error("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
+        throw cRuntimeError("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TCPCommand *cmd = new TCPCommand();
@@ -321,7 +321,7 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         default:
-             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
+             throw cRuntimeError("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
                      msg->getKind());
     }
 }

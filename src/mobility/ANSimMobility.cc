@@ -27,8 +27,11 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
     cXMLElement *child = node->getFirstChild();
     while (child && strcmp(child->getTagName(), tagname)!=0)
         child = child->getNextSibling();
+
     if (!child)
-        opp_error("element <%s> has no <%s> child at %s", node->getTagName(), tagname, node->getSourceLocation());
+        throw cRuntimeError("element <%s> has no <%s> child at %s",
+                node->getTagName(), tagname, node->getSourceLocation());
+
     return child;
 }
 
@@ -98,7 +101,7 @@ void ANSimMobility::extractDataFrom(cXMLElement *node)
     const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
 
     if (!endTimeStr || !xStr || !yStr)
-        error("no content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
+        throw cRuntimeError("no content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
 
     targetTime = atof(endTimeStr);
     targetPos.x = atof(xStr);

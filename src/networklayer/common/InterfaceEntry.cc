@@ -144,7 +144,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
     p->ownerp = this;
     configChanged();
 #else
-    opp_error("setIPv4Data(): INET was compiled without IPv4 support");
+    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
 #endif
 }
 
@@ -155,7 +155,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
     p->ownerp = this;
     configChanged();
 #else
-    opp_error("setIPv4Data(): INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv6 support");
 #endif
 }
 

@@ -29,13 +29,14 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 {
     GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
     if (!appmsg)
-        opp_error("Message (%s)%s is not a GenericAppMsg -- "
+        throw cRuntimeError(this, "Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
                   "dataTransferMode parameters "
                   "(try \"object\")",
                   msg->getClassName(), msg->getName());
+
     if (appmsg->getReplyDelay()>0)
-        opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"
+        throw cRuntimeError(this, "Cannot process (%s)%s: %s class doesn't support replyDelay field"
                   " of GenericAppMsg, try to use TCPGenericSrvApp instead",
                   msg->getClassName(), msg->getName(), getClassName());
 

@@ -30,7 +30,8 @@ IPControlInfo::~IPControlInfo()
 void IPControlInfo::setOrigDatagram(IPDatagram *d)
 {
     if (dgram)
-        opp_error("IPControlInfo::setOrigDatagram(): a datagram is already attached");
+        throw cRuntimeError(this, "IPControlInfo::setOrigDatagram(): a datagram is already attached");
+
     dgram = d;
     take(dgram);
 }
@@ -38,9 +39,10 @@ void IPControlInfo::setOrigDatagram(IPDatagram *d)
 IPDatagram *IPControlInfo::removeOrigDatagram()
 {
     if (!dgram)
-        opp_error("IPControlInfo::removeOrigDatagram(): no datagram attached "
+        throw cRuntimeError(this, "IPControlInfo::removeOrigDatagram(): no datagram attached "
                   "(already removed, or maybe this IPControlInfo does not come "
                   "from the IP module?)");
+
     IPDatagram *ret = dgram;
     drop(dgram);
     dgram = NULL;

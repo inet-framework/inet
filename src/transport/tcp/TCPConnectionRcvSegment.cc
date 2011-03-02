@@ -1266,7 +1266,8 @@ void TCPConnection::process_TIMEOUT_CONN_ESTAB()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received CONN_ESTAB timeout in state %s", stateName(fsm.getState()));
+            throw cRuntimeError(tcpMain, "Internal error: received CONN_ESTAB timeout in state %s",
+                    stateName(fsm.getState()));
     }
 }
 
@@ -1286,7 +1287,9 @@ void TCPConnection::process_TIMEOUT_2MSL()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received time-wait (2MSL) timeout in state %s", stateName(fsm.getState()));
+            throw cRuntimeError(tcpMain,
+                    "Internal error: received time-wait (2MSL) timeout in state %s",
+                    stateName(fsm.getState()));
     }
 }
 
@@ -1301,7 +1304,8 @@ void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received FIN_WAIT_2 timeout in state %s", stateName(fsm.getState()));
+            throw cRuntimeError(tcpMain, "Internal error: received FIN_WAIT_2 timeout in state %s",
+                    stateName(fsm.getState()));
     }
 }
 
@@ -1332,7 +1336,9 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
     {
         case TCP_S_SYN_SENT: sendSyn(); break;
         case TCP_S_SYN_RCVD: sendSynAck(); break;
-        default:  opp_error("Internal error: SYN-REXMIT timer expired while in state %s", stateName(fsm.getState()));
+        default:
+            throw cRuntimeError(tcpMain, "Internal error: SYN-REXMIT timer expired while in state %s",
+                    stateName(fsm.getState()));
     }
 
     // reschedule timer

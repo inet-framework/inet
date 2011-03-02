@@ -80,7 +80,7 @@ void MassMobility::handleSelfMsg(cMessage * msg)
         scheduleAt(simTime() + changeInterval->doubleValue(), msg);
         break;
     default:
-        opp_error("Unknown self message kind in MassMobility class");
+        throw cRuntimeError(this, "Unknown self message kind in MassMobility class");
         break;
     }
 

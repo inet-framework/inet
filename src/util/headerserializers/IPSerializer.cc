@@ -98,7 +98,7 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
                                                    dgram->getSrcAddress(), dgram->getDestAddress());
         break;
       default:
-        opp_error("IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
+        throw cRuntimeError(dgram, "IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
     }
 
     ip->ip_len = htons(packetLength);
@@ -155,7 +155,7 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         TCPSerializer().parse(buf + headerLength, (unsigned int)(std::min(totalLength, bufsize) - headerLength), (TCPSegment *)encapPacket, true);
         break;
       default:
-        opp_error("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());
+        throw cRuntimeError("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());
     }
 
     ASSERT(encapPacket);

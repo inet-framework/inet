@@ -60,7 +60,7 @@ void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
 #ifndef NDEBUG
     if (!(seqLess(sequenceNo_var, endSeqNo) && seqLess(firstSeqNo, sequenceNo_var + payloadLength_var)))
     {
-        opp_error("truncateSegment(%u,%u) called on [%u, %u) segment\n",
+        throw cRuntimeError(this, "truncateSegment(%u,%u) called on [%u, %u) segment\n",
                 firstSeqNo, endSeqNo, sequenceNo_var, sequenceNo_var + payloadLength_var);
     }
 #endif

@@ -161,7 +161,7 @@ void RoutingTable::updateDisplayString()
 
 void RoutingTable::handleMessage(cMessage *msg)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError(this, "This module doesn't process messages");
 }
 
 void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *details)

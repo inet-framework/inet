@@ -456,10 +456,10 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg) const
 void TCPConnection::sendSyn()
 {
     if (remoteAddr.isUnspecified() || remotePort==-1)
-        opp_error("Error processing command OPEN_ACTIVE: foreign socket unspecified");
+        throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: foreign socket unspecified");
 
     if (localPort==-1)
-        opp_error("Error processing command OPEN_ACTIVE: local port unspecified");
+        throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
     TCPSegment *tcpseg = createTCPSegment("SYN");

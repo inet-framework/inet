@@ -587,7 +587,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                         }
                         sctpEV3 << "sendAll: insert in retransmissionQ tsn=" << datVar->tsn << "\n";
                         if(!retransmissionQ->checkAndInsertChunk(datVar->tsn, datVar)) {
-                            opp_error("Cannot add datVar to retransmissionQ!");
+                            throw cRuntimeError(this, "Cannot add datVar to retransmissionQ!");
                             // Falls es hier aufschlaegt, muss ueberlegt werden, ob es OK ist, dass datVars nicht eingefuegt werden koennen.
                         }
                         else {

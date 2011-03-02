@@ -521,8 +521,9 @@ IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, I
     {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src)==NULL)
-            opp_error("Wrong source address %s in (%s)%s: no interface with such address",
+            throw cRuntimeError(this, "Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
+
         datagram->setSrcAddress(src);
     }
 

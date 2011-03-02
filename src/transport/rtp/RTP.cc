@@ -379,10 +379,13 @@ int RTP::resolveMTU()
     // TODO: How to do get the valid length of IP and ETHERNET header?
     RoutingTableAccess routingTableAccess;
     const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(_destinationAddress);
+
     if(rtie == NULL)
     {
-        opp_error("No interface for remote address %s found!", _destinationAddress.str().c_str());
+        throw cRuntimeError(this, "No interface for remote address %s found!",
+                _destinationAddress.str().c_str());
     }
+
     int pmtu = rtie->getMTU();
     return pmtu - 20 - 8;
 }

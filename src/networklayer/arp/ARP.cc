@@ -211,7 +211,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     {
         ARPCache::iterator it = globalArpCache.find(nextHopAddr);
         if (it==globalArpCache.end())
-            opp_error("Addres not found in global");
+            throw cRuntimeError(this, "Addres not found in global");
         else
             sendPacketToNIC(msg, ie, (*it).second->macAddress);
         return;

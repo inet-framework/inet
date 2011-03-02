@@ -31,7 +31,8 @@ IPvXAddress IPAddressResolver::resolve(const char *s, int addrType)
 {
     IPvXAddress addr;
     if (!tryResolve(s, addr, addrType))
-        opp_error("IPAddressResolver: address `%s' not configured (yet?)", s);
+        throw cRuntimeError("IPAddressResolver: address `%s' not configured (yet?)", s);
+
     return addr;
 }
 
@@ -59,7 +60,7 @@ bool IPAddressResolver::tryResolve(const char *s, IPvXAddress& result, int addrT
         (!leftparenp && rightparenp) ||
         (rightparenp && rightparenp!=endp-1))
     {
-        opp_error("IPAddressResolver: syntax error parsing address spec `%s'", s);
+        throw cRuntimeError("IPAddressResolver: syntax error parsing address spec `%s'", s);
     }
 
     // parse fields: modname, ifname, protocol
@@ -73,9 +74,11 @@ bool IPAddressResolver::tryResolve(const char *s, IPvXAddress& result, int addrT
     // find module and check protocol
     cModule *mod = simulation.getModuleByPath(modname.c_str());
     if (!mod)
-        opp_error("IPAddressResolver: module `%s' not found", modname.c_str());
+        throw cRuntimeError("IPAddressResolver: module `%s' not found", modname.c_str());
+
     if (!protocol.empty() && protocol!="ipv4" && protocol!="ipv6")
-        opp_error("IPAddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
+        throw cRuntimeError("IPAddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
+
     if (!protocol.empty())
         addrType = protocol=="ipv4" ? ADDR_IPv4 : ADDR_IPv6;
 
@@ -106,7 +109,8 @@ IPvXAddress IPAddressResolver::addressOf(cModule *host, const char *ifname, int 
     IInterfaceTable *ift = interfaceTableOf(host);
     InterfaceEntry *ie = ift->getInterfaceByName(ifname);
     if (!ie)
-        opp_error("IPAddressResolver: no interface called `%s' in interface table", ifname, ift->getFullPath().c_str());
+        throw cRuntimeError("IPAddressResolver: no interface called `%s' in interface table", ifname, ift->getFullPath().c_str());
+
     return getAddressFrom(ie, addrType);
 }
 
@@ -127,8 +131,9 @@ IPvXAddress IPAddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType
     }
     else
     {
-        opp_error("IPAddressResolver: unknown addrType %d", addrType);
+        throw cRuntimeError("IPAddressResolver: unknown addrType %d", addrType);
     }
+
     return ret;
 }
 
@@ -151,8 +156,9 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     }
     else
     {
-        opp_error("IPAddressResolver: unknown addrType %d", addrType);
+        throw cRuntimeError("IPAddressResolver: unknown addrType %d", addrType);
     }
+
     return ret;
 }
 
@@ -160,7 +166,7 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(IInterfaceTable *ift)
 {
     IPAddress addr;
     if (ift->getNumInterfaces()==0)
-        opp_error("IPAddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("IPAddressResolver: interface table `%s' has no interface registered "
                   "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
@@ -181,7 +187,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(IInterfaceTable *ift)
 #ifndef WITHOUT_IPv6
     // browse interfaces and pick a globally routable address
     if (ift->getNumInterfaces()==0)
-        opp_error("IPAddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("IPAddressResolver: interface table `%s' has no interface registered "
                   "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     IPv6Address addr;
@@ -218,8 +224,9 @@ IInterfaceTable *IPAddressResolver::interfaceTableOf(cModule *host)
     // find IInterfaceTable
     cModule *mod = host->getSubmodule("interfaceTable");
     if (!mod)
-        opp_error("IPAddressResolver: IInterfaceTable not found as submodule "
+        throw cRuntimeError("IPAddressResolver: IInterfaceTable not found as submodule "
                   " `interfaceTable' in host/router `%s'", host->getFullPath().c_str());
+
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
@@ -228,8 +235,9 @@ IRoutingTable *IPAddressResolver::routingTableOf(cModule *host)
     // find IRoutingTable
     cModule *mod = host->getSubmodule("routingTable");
     if (!mod)
-        opp_error("IPAddressResolver: IRoutingTable not found as submodule "
+        throw cRuntimeError("IPAddressResolver: IRoutingTable not found as submodule "
                   " `routingTable' in host/router `%s'", host->getFullPath().c_str());
+
     return check_and_cast<IRoutingTable *>(mod);
 }
 
@@ -239,8 +247,9 @@ RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
     // find IRoutingTable
     cModule *mod = host->getSubmodule("routingTable6");
     if (!mod)
-        opp_error("IPAddressResolver: RoutingTable6 not found as submodule "
+        throw cRuntimeError("IPAddressResolver: RoutingTable6 not found as submodule "
                   " `routingTable6' in host/router `%s'", host->getFullPath().c_str());
+
     return check_and_cast<RoutingTable6 *>(mod);
 }
 #endif
@@ -250,8 +259,9 @@ NotificationBoard *IPAddressResolver::notificationBoardOf(cModule *host)
     // find NotificationBoard
     cModule *mod = host->getSubmodule("notificationBoard");
     if (!mod)
-        opp_error("IPAddressResolver: NotificationBoard not found as submodule "
+        throw cRuntimeError("IPAddressResolver: NotificationBoard not found as submodule "
                   " notificationBoard' in host/router `%s'", host->getFullPath().c_str());
+
     return check_and_cast<NotificationBoard *>(mod);
 }
 
@@ -280,7 +290,4 @@ NotificationBoard *IPAddressResolver::findNotificationBoardOf(cModule *host)
     cModule *mod = host->getSubmodule("notificationBoard");
     return dynamic_cast<NotificationBoard *>(mod);
 }
-
-
-
 

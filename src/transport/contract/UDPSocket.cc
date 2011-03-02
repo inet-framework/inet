@@ -55,7 +55,7 @@ int UDPSocket::generateSocketId()
 void UDPSocket::sendToUDP(cMessage *msg)
 {
     if (!gateToUdp)
-        opp_error("UDPSocket: setOutputGate() must be invoked before socket can be used");
+        throw cRuntimeError("UDPSocket: setOutputGate() must be invoked before socket can be used");
 
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
@@ -63,16 +63,18 @@ void UDPSocket::sendToUDP(cMessage *msg)
 void UDPSocket::setUserId(int userId)
 {
     if (sockstate!=NOT_BOUND)
-        opp_error("UDPSocket::setUserId(): cannot change userId after socket is bound");
+        throw cRuntimeError("UDPSocket::setUserId(): cannot change userId after socket is bound");
+
     usrId = userId;
 }
 
 void UDPSocket::bind(int lPort)
 {
     if (sockstate!=NOT_BOUND)
-        opp_error("UDPSocket::bind(): socket already bound");
+        throw cRuntimeError("UDPSocket::bind(): socket already bound");
+
     if (lPort<=0 || lPort>65535)
-        opp_error("UDPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", lPort);
 
     localPrt = lPort;
 
@@ -90,9 +92,10 @@ void UDPSocket::bind(int lPort)
 void UDPSocket::bind(IPvXAddress lAddr, int lPort)
 {
     if (sockstate!=NOT_BOUND)
-        opp_error("UDPSocket::bind(): socket already bound");
+        throw cRuntimeError("UDPSocket::bind(): socket already bound");
+
     if (lPort<=0 || lPort>65535)
-        opp_error("UDPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", lPort);
 
     localAddr = lAddr;
     localPrt = lPort;
@@ -112,11 +115,13 @@ void UDPSocket::bind(IPvXAddress lAddr, int lPort)
 void UDPSocket::connect(IPvXAddress addr, int port)
 {
     if (sockstate!=BOUND)
-        opp_error( "UDPSocket::connect(): socket must be bound before connect() can be called");
+        throw cRuntimeError( "UDPSocket::connect(): socket must be bound before connect() can be called");
+
     if (addr.isUnspecified())
-        opp_error("UDPSocket::connect(): unspecified remote address");
+        throw cRuntimeError("UDPSocket::connect(): unspecified remote address");
+
     if (port<=0 || port>65535)
-        opp_error("UDPSocket::connect(): invalid remote port number %d", port);
+        throw cRuntimeError("UDPSocket::connect(): invalid remote port number %d", port);
 
     remoteAddr = addr;
     remotePrt = port;
@@ -147,7 +152,8 @@ void UDPSocket::sendTo(cMessage *msg, IPvXAddress destAddr, int destPort)
 void UDPSocket::send(cMessage *msg)
 {
     if (remoteAddr.isUnspecified() || remotePrt==0)
-        opp_error("UDPSocket::send(): must call connect() before using send()");
+        throw cRuntimeError("UDPSocket::send(): must call connect() before using send()");
+
     sendTo(msg, remoteAddr, remotePrt);
 }
 
@@ -203,7 +209,7 @@ void UDPSocket::processMessage(cMessage *msg)
                  cb->socketPeerClosed(sockId, yourPtr);
              break;
         default:
-             opp_error("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+             throw cRuntimeError("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
     }
 }
 

@@ -144,9 +144,9 @@ void UDP::connect(int sockId, IPvXAddress addr, int port)
     if (it==socketsByIdMap.end())
         error("socket id=%d doesn't exist (already closed?)", sockId);
     if (addr.isUnspecified())
-        opp_error("connect: unspecified remote address");
+        throw cRuntimeError(this, "connect: unspecified remote address");
     if (port<=0 || port>65535)
-        opp_error("connect: invalid remote port number %d", port);
+        throw cRuntimeError(this, "connect: invalid remote port number %d", port);
 
     SockDesc *sd = it->second;
     sd->remoteAddr = addr;

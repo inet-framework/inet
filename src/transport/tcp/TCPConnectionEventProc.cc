@@ -49,7 +49,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             remotePort = openCmd->getRemotePort();
 
             if (remoteAddr.isUnspecified() || remotePort==-1)
-                opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+                throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
             if (localPort==-1)
             {
@@ -69,7 +69,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             break;
 
         default:
-            opp_error("Error processing command OPEN_ACTIVE: connection already exists");
+            throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: connection already exists");
     }
 
     delete openCmd;
@@ -94,7 +94,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             localPort = openCmd->getLocalPort();
 
             if (localPort==-1)
-                opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
+                throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: local port must be specified");
 
             tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
@@ -102,7 +102,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             break;
 
         default:
-            opp_error("Error processing command OPEN_PASSIVE: connection already exists");
+            throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: connection already exists");
     }
 
     delete openCmd;
@@ -118,7 +118,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
     switch(fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command SEND: connection not open");
+            throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");
 
         case TCP_S_LISTEN:
             tcpEV << "SEND command turns passive open into active open, sending initial SYN\n";
@@ -151,7 +151,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
         case TCP_S_TIME_WAIT:
-            opp_error("Error processing command SEND: connection closing");
+            throw cRuntimeError(tcpMain, "Error processing command SEND: connection closing");
     }
 
     delete sendCommand; // msg itself has been taken by the sendQueue
@@ -165,7 +165,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     switch(fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command CLOSE: connection not open");
+            throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
 
         case TCP_S_LISTEN:
             // Nothing to do here
@@ -214,7 +214,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
         case TCP_S_TIME_WAIT:
             // RFC 793 is not entirely clear on how to handle a duplicate close request.
             // Here we treat it as an error.
-            opp_error("Duplicate CLOSE command: connection already closing");
+            throw cRuntimeError(tcpMain, "Duplicate CLOSE command: connection already closing");
     }
 }
 
@@ -231,7 +231,7 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     switch(fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command ABORT: connection not open");
+            throw cRuntimeError("Error processing command ABORT: connection not open");
 
         case TCP_S_SYN_RCVD:
         case TCP_S_ESTABLISHED:
@@ -254,7 +254,7 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
     delete tcpCommand; // but reuse msg for reply
 
     if (fsm.getState()==TCP_S_INIT)
-        opp_error("Error processing command STATUS: connection not open");
+        throw cRuntimeError("Error processing command STATUS: connection not open");
 
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
 

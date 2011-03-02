@@ -37,7 +37,8 @@ IPv6ControlInfo::~IPv6ControlInfo()
 void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
 {
     if (dgram)
-        opp_error("IPv6ControlInfo::setOrigDatagram(): a datagram is already attached");
+        throw cRuntimeError(this, "IPv6ControlInfo::setOrigDatagram(): a datagram is already attached");
+
     dgram = d;
     take(dgram);
 }
@@ -45,9 +46,10 @@ void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
 IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
 {
     if (!dgram)
-        opp_error("IPv6ControlInfo::removeOrigDatagram(): no datagram attached "
+        throw cRuntimeError(this, "IPv6ControlInfo::removeOrigDatagram(): no datagram attached "
                   "(already removed, or maybe this IPv6ControlInfo does not come "
                   "from the IPv6 module?)");
+
     IPv6Datagram *ret = dgram;
     drop(dgram);
     dgram = NULL;
