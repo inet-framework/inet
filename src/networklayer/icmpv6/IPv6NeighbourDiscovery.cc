@@ -1705,8 +1705,10 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
         if (rt6->isLocalAddress(nsSrcAddr))
             EV << "NS comes from myself. Ignoring NS\n";
         else
+        {
             EV << "NS comes from another node. Address is duplicate!\n";
             error("Duplicate Address Detected! Manual Attention Required!");
+        }
     }
     else if (nsSrcAddr.isUnicast())
     {
