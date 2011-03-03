@@ -96,6 +96,7 @@ Bottom-up:
      pingapp/            ping application
 
    world/                scenario manager, MF channel manager
+     inet/               global Internet delay model
 
    nodes/                protocol stacks, host and router models
      inet/               IP-based components

@@ -1,0 +1,50 @@
+The Delfoi Global Internet Delay Model
+
+Overview:
+The DELFOI (Delay Estimation Localized For Omnet++/Inet) model implements
+end-to-end Internet delay including
+  - node specific access network delay
+  - node specific access bandwidths
+  - Global Network Positioning (GNP) estimates of node to node minimum backbone
+    delay
+  - region-to-region specific jitter
+
+The model usually is parametrized from user measurements obtained through the
+website www.speedtest.net. With the parametrization file installed, it is
+very easy to use (see example).
+
+The parametrization for each node is sampled from the group (e.g. "US") specified
+as Par or property.
+
+More info:
+- Berndt, P., Battré, D. and Kao, O. "A Hybrid Approach to Modeling End-to-End
+  Delay in P2P Networks"'Proceedings of the Workshop on Advanced Video
+  Streaming Techniques for Peer-to-Peer Networks and Social Networking', ACM
+  Press, 2010.
+- Berndt, P., Raack, M. and Kao, O. "Spanning a Global Delay Model from
+  HTTP-Measurements"'Proc of the Annual International Conference on Network
+  Technologies & Communications (NTC 2010)', Global Science and Technology Forum
+  (GSTF), 2010, pp. N77-N82.
+- Example: examples/inet/gnpping
+
+Requirements:
+- gnplib
+  https://sourceforge.net/projects/gnplib/
+
+- Parametrization data: 
+  speedtest.net datasets may be obtained from Ookla
+  http://www.speedtest.net/contact.php
+  Three days worth of measurement data ought to suffice.
+
+- Automated scripts to generate parametrization data ("measured_data.xml") from
+  speedtest.net measurements are included with gnplib
+  in the vibello directory.
+
+- Alternatively, an XML data set (though without access delay!) can be
+  obtained from
+  http://peerfact.kom.e-technik.tu-darmstadt.de/de/downloads/
+  (You still need gnplib.)
+
+--
+Philipp dot Berndt
+at TU-Berlin dot de
