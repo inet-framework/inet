@@ -26,7 +26,7 @@
 #include "InterfaceEntry.h"
 #include "IInterfaceTable.h"
 
-#ifndef WITHOUT_IPv4
+#ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
 #endif
 

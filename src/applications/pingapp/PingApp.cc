@@ -16,12 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <limits.h>
-#include <stdlib.h>
+//#include <limits.h>
+//#include <stdlib.h>
 #include <iostream>
 
-#include "IPAddressResolver.h"
 #include "PingApp.h"
+
+#include "IPAddressResolver.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_IPv4

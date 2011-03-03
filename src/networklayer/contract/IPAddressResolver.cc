@@ -18,9 +18,13 @@
 
 #include "IPAddressResolver.h"
 #include "IInterfaceTable.h"
-#include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
+
+#ifdef WITH_IPv4
+#include "IPv4InterfaceData.h"
+#endif
+
 #ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #include "RoutingTable6.h"

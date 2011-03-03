@@ -29,7 +29,7 @@
 #include <omnetpp.h>
 #include "ExtFrame_m.h"
 #include "cSocketRTScheduler.h"
-#include "IPDatagram.h"
+//#include "IPDatagram.h"
 
 #ifndef IPPROTO_SCTP
 #define IPPROTO_SCTP 132

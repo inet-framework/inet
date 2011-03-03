@@ -19,7 +19,10 @@
 
 #include <omnetpp.h>
 #include "IPTrafGen.h"
+
+#ifdef WITH_IPv4
 #include "IPControlInfo.h"
+#endif
 
 #ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
