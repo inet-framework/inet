@@ -22,7 +22,7 @@
         name="IPv4"
         description = "Basic IPv4 support"
         requiredFeatures = ""
-        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.nodes.ipv4 inet.networklayer.icmp inet.examples.inet"
+        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.nodes.inet inet.networklayer.contract.ipv4 inet.networklayer.icmp inet.examples.inet"
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
         linkerFlags = ""

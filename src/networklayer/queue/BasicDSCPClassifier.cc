@@ -18,7 +18,11 @@
 
 #include <omnetpp.h>
 #include "BasicDSCPClassifier.h"
+
+#ifdef WITH_IPv4
 #include "IPDatagram.h"
+#endif
+
 #ifdef WITH_IPv6
 #include "IPv6Datagram.h"
 #endif
@@ -34,6 +38,7 @@ int BasicDSCPClassifier::getNumQueues()
 
 int BasicDSCPClassifier::classifyPacket(cMessage *msg)
 {
+#ifdef WITH_IPv4
     if (dynamic_cast<IPDatagram *>(msg))
     {
         // IPv4 QoS: map DSCP to queue number
@@ -41,16 +46,18 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
         int dscp = datagram->getDiffServCodePoint();
         return classifyByDSCP(dscp);
     }
+    else
+#endif
 #ifdef WITH_IPv6
-    else if (dynamic_cast<IPv6Datagram *>(msg))
+    if (dynamic_cast<IPv6Datagram *>(msg))
     {
         // IPv6 QoS: map Traffic Class to queue number
         IPv6Datagram *datagram = (IPv6Datagram *)msg;
         int dscp = datagram->getTrafficClass();
         return classifyByDSCP(dscp);
     }
-#endif
     else
+#endif
     {
         return BEST_EFFORT; // lowest priority ("best effort")
     }
