@@ -25,8 +25,6 @@ import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.util.NAMTraceWriter;
-
 
 //
 // \InternetCloud
@@ -42,11 +40,6 @@ module InternetCloud
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = -1; // auto
-                @display("p=330,60");
-        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=60,60");
