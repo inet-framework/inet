@@ -21,9 +21,9 @@
 
 package inet.examples.adhoc.mf80211;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.adhoc.MFMobileHost;
 import inet.world.ChannelControl;
+import inet.nodes.adhoc.MFMobileHost;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network Net80211

@@ -24,18 +24,27 @@
 
 #include <omnetpp.h>
 #include <string.h>
-#include "UDPPacket.h"
+
 #include "UDP.h"
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
+
+#include "UDPPacket.h"
+
+#ifdef WITH_IPv4
 #include "ICMPAccess.h"
+#include "ICMPMessage_m.h"
+#include "IPControlInfo.h"
+#include "IPDatagram_m.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "ICMPv6Access.h"
+#include "ICMPv6Message_m.h"
+#include "IPv6ControlInfo.h"
+#include "IPv6Datagram_m.h"
+#endif
+
 
 // the following is only for ICMP error processing
-#include "ICMPMessage_m.h"
-#include "ICMPv6Message_m.h"
-#include "IPDatagram_m.h"
-#include "IPv6Datagram_m.h"
 
 
 #define EPHEMERAL_PORTRANGE_START 1024
@@ -203,7 +212,14 @@ void UDP::handleMessage(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
-        if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
+        if (false
+#ifdef WITH_IPv4
+                || dynamic_cast<ICMPMessage *>(msg)
+#endif
+#ifdef WITH_IPv6
+                || dynamic_cast<ICMPv6Message *>(msg)
+#endif
+        )
             processICMPError(PK(msg));
         else
             processUDPPacket(check_and_cast<UDPPacket *>(msg));
@@ -234,6 +250,7 @@ void UDP::updateDisplayString()
 
 bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
 {
+#ifdef WITH_IPv4
     // IPv4 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
         return false;
@@ -244,10 +261,14 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
     if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
         return false;
     return true;
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
 }
 
 bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
 {
+#ifdef WITH_IPv6
     // IPv6 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
         return false;
@@ -258,6 +279,9 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
     if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
         return false;
     return true;
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }
 
 bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort)
@@ -269,6 +293,7 @@ bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAd
 
 void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
 {
+#ifdef WITH_IPv4
     // send payload with UDPControlInfo up to the application -- IPv4 version
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
@@ -283,10 +308,14 @@ void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, 
     emit(passedUpPkSignal, payload);
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
 }
 
 void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 {
+#ifdef WITH_IPv6
     // send payload with UDPControlInfo up to the application -- IPv6 version
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
@@ -301,6 +330,9 @@ void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl
     emit(passedUpPkSignal, payload);
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }
 
 void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
@@ -309,6 +341,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
+#ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         if (!icmp)
@@ -317,7 +350,11 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
         if (!ctrl4->getDestAddr().isMulticast())
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo())!=NULL)
+    else
+#endif
+
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo())!=NULL)
     {
         if (!icmpv6)
             icmpv6 = ICMPv6Access().get();
@@ -326,6 +363,8 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
             icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
     }
     else
+#endif
+
     {
         error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName());
     }
@@ -338,6 +377,7 @@ void UDP::processICMPError(cPacket *msg)
     IPvXAddress localAddr, remoteAddr;
     ushort localPort, remotePort;
 
+#ifdef WITH_IPv4
     if (dynamic_cast<ICMPMessage *>(msg))
     {
         ICMPMessage *icmpMsg = (ICMPMessage *)msg;
@@ -352,7 +392,11 @@ void UDP::processICMPError(cPacket *msg)
         remotePort = packet->getDestinationPort();
         delete icmpMsg;
     }
-    else if (dynamic_cast<ICMPv6Message *>(msg))
+    else
+#endif
+
+#ifdef WITH_IPv6
+    if (dynamic_cast<ICMPv6Message *>(msg))
     {
         ICMPv6Message *icmpMsg = (ICMPv6Message *)msg;
         type = icmpMsg->getType();
@@ -366,6 +410,12 @@ void UDP::processICMPError(cPacket *msg)
         remotePort = packet->getDestinationPort();
         delete icmpMsg;
     }
+    else
+#endif
+    {
+        throw cRuntimeError("Not an ICMP error message!");
+    }
+
     EV << "ICMP error received: type=" << type << " code=" << code
        << " about packet " << localAddr << ":" << localPort << " > "
        << remoteAddr << ":" << remotePort << "\n";
@@ -444,6 +494,8 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 
     // deliver a copy of the packet to each matching socket
     cPacket *payload = udpPacket->getEncapsulatedPacket();
+
+#ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
@@ -458,7 +510,10 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             }
         }
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
@@ -473,6 +528,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         }
     }
     else
+#endif
     {
         error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName());
     }
@@ -504,6 +560,7 @@ void UDP::processMsgFromApp(cPacket *appData)
 
     if (!udpCtrl->getDestAddr().isIPv6())
     {
+#ifdef WITH_IPv4
         // send to IPv4
         EV << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPControlInfo *ipControlInfo = new IPControlInfo();
@@ -516,9 +573,13 @@ void UDP::processMsgFromApp(cPacket *appData)
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket,"ipOut");
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send to IPv6
         EV << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
@@ -531,6 +592,9 @@ void UDP::processMsgFromApp(cPacket *appData)
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket,"ipv6Out");
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
     numSent++;
 }

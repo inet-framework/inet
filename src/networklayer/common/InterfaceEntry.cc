@@ -30,7 +30,7 @@
 #include "IPv4InterfaceData.h"
 #endif
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #endif
 
@@ -139,7 +139,7 @@ void InterfaceEntry::changed(int category)
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 {
-#ifndef WITHOUT_IPv4
+#ifdef WITH_IPv4
     ipv4data = p;
     p->ownerp = this;
     configChanged();
@@ -150,7 +150,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 
 void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 {
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     ipv6data = p;
     p->ownerp = this;
     configChanged();

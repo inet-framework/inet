@@ -26,7 +26,7 @@ import inet.util.ThruputMeter;
 import inet.util.TCPDump;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network REDTestDebug

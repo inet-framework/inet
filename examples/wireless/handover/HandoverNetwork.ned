@@ -18,10 +18,10 @@
 
 package inet.examples.wireless.handover;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.wireless.WirelessAP;
-import inet.nodes.wireless.WirelessHost;
 import inet.world.ChannelControl;
+import inet.nodes.wireless.WirelessHost;
+import inet.nodes.wireless.WirelessAP;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network HandoverNetwork

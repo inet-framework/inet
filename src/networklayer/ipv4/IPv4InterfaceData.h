@@ -24,8 +24,8 @@
 #define __IPv4INTERFACEDATA_H
 
 #include <vector>
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IPAddress.h"
 #include "InterfaceEntry.h"
 

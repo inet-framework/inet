@@ -20,14 +20,14 @@
 #ifndef __TCPDUMP_H
 #define __TCPDUMP_H
 
-#include <omnetpp.h>
-#include <assert.h>
-#include "IPAddress.h"
-//#include "IPDatagram_m.h"
-#include "IPDatagram.h"
-#include "SCTPMessage.h"
-#include "TCPSegment.h"
-#include "IPv6Datagram_m.h"
+
+#include "INETDefs.h"
+
+// Foreign declarations:
+class IPDatagram;
+class IPv6Datagram;
+class SCTPMessage;
+class TCPSegment;
 
 #define PCAP_MAGIC           0xa1b2c3d4
 #define RBUFFER_SIZE 65535
@@ -84,7 +84,7 @@ class TCPDumper
         void dump(const char *label, const char *msg);
         void tcpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
         void tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
-        void dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment=NULL);//FIXME: Temporary hack
+        void dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const char *comment=NULL);
         void udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment);
         const char* intToChunk(int32 type);
         FILE *dumpfile;

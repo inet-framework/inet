@@ -23,10 +23,10 @@
 
 package inet.examples.inet.routerperf;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.BurstHost;
-import inet.nodes.inet.Router;
 import inet.world.ChannelInstaller;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.BurstHost;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network RouterPerfNetwork

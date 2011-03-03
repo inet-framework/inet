@@ -17,14 +17,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifdef WITH_TCP_NSC
 
 #include "TCP_NSC.h"
 
 #include "headers/defs.h"   // for endian macros
 
+#ifdef WITH_IPv4
 #include "IPControlInfo.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
+#endif
+
 #include "headers/tcp.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
@@ -289,6 +294,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
+#ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPControlInfo *controlInfo = (IPControlInfo *)tcpsegP->removeControlInfo();
@@ -296,7 +302,10 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         inetSockPair.localM.ipAddrM = controlInfo->getDestAddr();
         delete controlInfo;
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
         inetSockPair.remoteM.ipAddrM = controlInfo->getSrcAddr();
@@ -321,6 +330,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         }
     }
     else
+#endif
     {
         error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
@@ -832,6 +842,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     if (!dest.isIPv6())
     {
+#ifdef WITH_IPv4
         // send over IPv4
         IPControlInfo *controlInfo = new IPControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -840,9 +851,13 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipOut";
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -851,6 +866,9 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         tcpseg->setControlInfo(controlInfo);
 
         output ="ipv6Out";
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
 
     if (conn)
@@ -1078,4 +1096,3 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
     send(msgP, "appOut", connP.appGateIndexM);
 }
 
-#endif // WITH_TCP_NSC

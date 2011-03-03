@@ -47,4 +47,3 @@ void IPvXAddress::set(const char *addr)
         throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
 }
 
-

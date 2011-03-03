@@ -20,8 +20,6 @@
 #include "TcpLwipConnection.h"
 
 #include "headers/defs.h"   // for endian macros
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
 #include "TCP_lwip.h"

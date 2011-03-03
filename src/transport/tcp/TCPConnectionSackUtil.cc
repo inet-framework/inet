@@ -24,8 +24,6 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "TCPSendQueue.h"
 #include "TCPSACKRexmitQueue.h"
 #include "TCPReceiveQueue.h"

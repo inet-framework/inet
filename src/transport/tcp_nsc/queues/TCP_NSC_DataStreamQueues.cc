@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef WITH_TCP_NSC
 
 #include <omnetpp.h>
 
@@ -173,4 +172,3 @@ void TCP_NSC_DataStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
     // nothing to do
 }
 
-#endif // WITH_TCP_NSC

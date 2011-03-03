@@ -25,7 +25,7 @@ import inet.world.ChannelInstaller;
 import inet.util.ThruputMeter;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network REDTestTh

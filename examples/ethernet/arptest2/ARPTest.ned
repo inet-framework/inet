@@ -18,8 +18,9 @@ package inet.examples.ethernet.arptest2;
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.linklayer.ethernet.EtherBus;
+import inet.examples.emulation.traceroute.ethline;
 
 
 network ARPTest

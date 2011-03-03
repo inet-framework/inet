@@ -24,7 +24,6 @@
 #include "IPAddress.h"
 #include "IPv6Address.h"
 
-
 /**
  * Stores an IPv4 or an IPv6 address. This class should be used everywhere
  * in transport layer and up, to guarantee IPv4/IPv6 transparence.
@@ -179,7 +178,21 @@ class INET_API IPvXAddress
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
      */
-    std::string str() const {return isv6 ? get6().str() : get4().str();}
+    std::string str() const
+    {
+    	if (isv6)
+    	{
+    		return get6().str();
+    	}
+    	else if (d[0] == 0)
+    	{
+			return std::string("<unspec>");
+    	}
+    	else
+    	{
+			return get4().str();
+    	}
+    }
     //@}
 
     /** name Comparison */

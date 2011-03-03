@@ -20,7 +20,11 @@
 #include <omnetpp.h>
 #include "IPTrafGen.h"
 #include "IPControlInfo.h"
+
+#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
+#endif
+
 #include "IPAddressResolver.h"
 
 
@@ -52,6 +56,8 @@ void IPTrafSink::printPacket(cPacket *msg)
 {
     IPvXAddress src, dest;
     int protocol = -1;
+
+#ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
@@ -59,13 +65,17 @@ void IPTrafSink::printPacket(cPacket *msg)
         dest = ctrl->getDestAddr();
         protocol = ctrl->getProtocol();
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
+#endif
+
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
         dest = ctrl->getDestAddr();
         protocol = ctrl->getProtocol();
     }
+#endif
 
     ev  << msg << endl;
     ev  << "Payload length: " << msg->getByteLength() << " bytes" << endl;
@@ -145,6 +155,7 @@ void IPTrafGen::sendPacket()
     IPvXAddress destAddr = chooseDestAddr();
     if (!destAddr.isIPv6())
     {
+#ifdef WITH_IPv4
         // send to IPv4
         IPControlInfo *controlInfo = new IPControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
@@ -156,9 +167,13 @@ void IPTrafGen::sendPacket()
 
         emit(sentPkBytesSignal, (long)(payload->getByteLength()));
         send(payload, "ipOut");
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send to IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setDestAddr(destAddr.get6());
@@ -169,7 +184,10 @@ void IPTrafGen::sendPacket()
         printPacket(payload);
 
         send(payload, "ipv6Out");
-    }
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
+	}
     numSent++;
 }
 

@@ -22,7 +22,7 @@
 
 #include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #include "RoutingTable6.h"
 #endif
@@ -33,7 +33,7 @@ Define_Module(FlatNetworkConfigurator6);
 
 void FlatNetworkConfigurator6::initialize(int stage)
 {
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     // FIXME refactor: make routers[] array? (std::vector<cTopology::Node*>)
     // FIXME: spare common beginning for all stages?
 
@@ -75,7 +75,7 @@ bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
     return IPAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 {
     // assign advertised prefixes to all router interfaces

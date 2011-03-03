@@ -18,10 +18,10 @@
 
 package inet.examples.inet.tcpclientserver;
 
-import inet.util.NetAnimTrace;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.util.NetAnimTrace;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network ClientServer

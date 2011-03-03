@@ -24,8 +24,15 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
+
+#ifdef WITH_IPv4
 #include "IPControlInfo.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
+#endif
+
 #include "TCPSendQueue.h"
 #include "TCPSACKRexmitQueue.h"
 #include "TCPReceiveQueue.h"
@@ -230,6 +237,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
     if (!remoteAddr.isIPv6())
     {
+#ifdef WITH_IPv4
         // send over IPv4
         IPControlInfo *controlInfo = new IPControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -238,9 +246,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         tcpseg->setControlInfo(controlInfo);
 
         tcpMain->send(tcpseg,"ipOut");
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -249,6 +261,9 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         tcpseg->setControlInfo(controlInfo);
 
         tcpMain->send(tcpseg,"ipv6Out");
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
 }
 
@@ -259,6 +274,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
 
     if (!dest.isIPv6())
     {
+#ifdef WITH_IPv4
         // send over IPv4
         IPControlInfo *controlInfo = new IPControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -267,9 +283,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         tcpseg->setControlInfo(controlInfo);
 
         check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipOut");
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -278,6 +298,9 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         tcpseg->setControlInfo(controlInfo);
 
         check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipv6Out");
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
 }
 

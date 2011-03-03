@@ -22,8 +22,14 @@
 //#include "headers/in_systm.h"
 #include "lwip/ip.h"
 
+#ifdef WITH_IPv4
 #include "IPControlInfo.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
+#endif
+
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
 #include "TCPCommand_m.h"
@@ -130,6 +136,7 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     int interfaceId = -1;
 
     // get src/dest addresses
+#ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPControlInfo *controlInfo = (IPControlInfo *)tcpsegP->removeControlInfo();
@@ -138,7 +145,11 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
         interfaceId = controlInfo->getInterfaceId();
         delete controlInfo;
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
+    else
+#endif
+
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
         srcAddr = controlInfo->getSrcAddr();
@@ -147,6 +158,8 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
         delete controlInfo;
     }
     else
+#endif
+
     {
         error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
@@ -589,6 +602,7 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
 
     if (!destP.isIPv6())
     {
+#ifdef WITH_IPv4
         // send over IPv4
         IPControlInfo *controlInfo = new IPControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -597,9 +611,13 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipOut";
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
     else
     {
+#ifdef WITH_IPv6
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -609,6 +627,9 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
 
         output = "ipv6Out";
         // send over IPv6
+#else
+        throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
     }
 
     if (conn)

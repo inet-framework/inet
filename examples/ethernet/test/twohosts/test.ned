@@ -3,7 +3,6 @@ package inet.examples.ethernet.test.twohosts;
 
 import ned.DatarateChannel;
 import inet.nodes.ethernet.EtherHostQ;
-import inet.nodes.ethernet.EtherHost;
 
 
 network SpeedTest

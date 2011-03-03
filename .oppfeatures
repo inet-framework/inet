@@ -1,0 +1,40 @@
+<features>
+    <feature
+        name="TCP_LWIP"
+        description = "TCP LWIP implementation"
+        requiredFeatures = ""
+        nedPackages = "inet.transport.tcp_lwip"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TCP_LWIP"
+        linkerFlags = ""
+        />
+    <feature
+        name="TCP_NSC"
+        description = "Network Simulation Cradle: a TCP module that wraps real
+                      OS stacks: Linux, FreeBSD, OpenBSD and lwIP. You must read the inet/3dparty/README file before you enable this feature"
+        requiredFeatures = ""
+        nedPackages = "inet.transport.tcp_nsc"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TCP_NSC"
+        linkerFlags = ""
+        />
+    <feature
+        name="IPv4"
+        description = "Basic IPv4 support"
+        requiredFeatures = ""
+        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.nodes.ipv4 inet.networklayer.icmp inet.examples.inet"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IPv4"
+        linkerFlags = ""
+        />
+    <feature
+        name="IPv6"
+        description = "Basic IPv6 support"
+        requiredFeatures = ""
+        nedPackages = "inet.networklayer.ipv6 inet.networklayer.autorouting.ipv6 inet.nodes.ipv6 inet.networklayer.contract.ipv6 inet.networklayer.icmpv6 inet.examples.ipv6"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IPv6"
+        linkerFlags = ""
+        />
+</features>
+

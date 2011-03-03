@@ -19,12 +19,12 @@
 
 package inet.examples.ipv6.ipv6nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import inet.nodes.ipv6.Router6;
-import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
+import inet.nodes.ipv6.StandardHost6;
+import inet.nodes.ipv6.Router6;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
+import inet.linklayer.ethernet.EtherHub;
+import inet.examples.ethernet.lans.ethernetline;
 
 
 network NClientsEth

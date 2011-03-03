@@ -21,9 +21,12 @@
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 #include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "ICMPMessage_m.h"
+
+#ifdef WITH_IPv6
+#include "IPv6ControlInfo.h"
 #include "ICMPv6Message_m.h"
+#endif
 
 #include "TCPDataStreamRcvQueue.h"
 #include "TCPDataStreamSendQueue.h"
@@ -108,7 +111,19 @@ void TCP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
-        if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
+        if (
+#ifdef WITH_IPv4
+        		dynamic_cast<ICMPMessage *>(msg)
+#else
+        		false
+#endif
+        		||
+#ifdef WITH_IPv6
+        		dynamic_cast<ICMPv6Message *>(msg)
+#else
+        		false
+#endif
+        		)
         {
             tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msg;
@@ -120,6 +135,8 @@ void TCP::handleMessage(cMessage *msg)
 
             // get src/dest addresses
             IPvXAddress srcAddr, destAddr;
+
+#ifdef WITH_IPv4
             if (dynamic_cast<IPControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
                 IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
@@ -127,7 +144,11 @@ void TCP::handleMessage(cMessage *msg)
                 destAddr = controlInfo->getDestAddr();
                 delete controlInfo;
             }
-            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
+            else
+#endif
+
+#ifdef WITH_IPv6
+            if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
                 IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->getSrcAddr();
@@ -135,6 +156,8 @@ void TCP::handleMessage(cMessage *msg)
                 delete controlInfo;
             }
             else
+#endif
+
             {
                 error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }

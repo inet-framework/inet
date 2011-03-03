@@ -18,10 +18,10 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.wireless.WirelessAPSimplified;
-import inet.nodes.wireless.WirelessHostSimplified;
 import inet.world.ChannelControl;
+import inet.nodes.wireless.WirelessHostSimplified;
+import inet.nodes.wireless.WirelessAPSimplified;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network Lan80211

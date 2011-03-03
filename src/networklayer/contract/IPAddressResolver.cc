@@ -21,7 +21,7 @@
 #include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #include "RoutingTable6.h"
 #endif
@@ -184,7 +184,7 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(IInterfaceTable *ift)
 
 IPv6Address IPAddressResolver::getIPv6AddressFrom(IInterfaceTable *ift)
 {
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     // browse interfaces and pick a globally routable address
     if (ift->getNumInterfaces()==0)
         throw cRuntimeError("IPAddressResolver: interface table `%s' has no interface registered "
@@ -210,7 +210,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(IInterfaceTable *ift)
 
 IPv6Address IPAddressResolver::getInterfaceIPv6Address(InterfaceEntry *ie)
 {
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     if (!ie->ipv6Data())
         return IPv6Address();
     return ie->ipv6Data()->getPreferredAddress();
@@ -241,7 +241,7 @@ IRoutingTable *IPAddressResolver::routingTableOf(cModule *host)
     return check_and_cast<IRoutingTable *>(mod);
 }
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
 {
     // find IRoutingTable
@@ -277,7 +277,7 @@ IRoutingTable *IPAddressResolver::findRoutingTableOf(cModule *host)
     return dynamic_cast<IRoutingTable *>(mod);
 }
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
 RoutingTable6 *IPAddressResolver::findRoutingTable6Of(cModule *host)
 {
     cModule *mod = host->getSubmodule("routingTable6");

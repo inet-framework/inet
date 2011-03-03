@@ -17,13 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifdef WITH_TCP_NSC
 
 #include "TCP_NSC_Connection.h"
 
 #include "headers/defs.h"   // for endian macros
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include <sim_interface.h> // NSC header
 #include "headers/tcp.h"
 #include "TCP_NSC.h"
@@ -212,6 +209,4 @@ void TCP_NSC_Connection::abort()
 {
     close();
 }
-
-#endif // WITH_TCP_NSC
 

@@ -2,10 +2,11 @@
 
 package inet.examples.rtp.multicast11;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import ned.DatarateChannel;
 import inet.transport.rtp.RTPHost;
 import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+
 
 network RTPMulticast11
 {

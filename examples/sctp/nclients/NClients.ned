@@ -21,13 +21,13 @@
 
 package inet.examples.sctp.nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import inet.world.NAMTrace;
 import ned.DatarateChannel;
+import inet.world.NAMTrace;
+import inet.world.ChannelInstaller;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.examples.ethernet.lans.ethernetline;
 
 
 network NClients
