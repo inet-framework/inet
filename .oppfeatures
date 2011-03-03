@@ -36,5 +36,14 @@
         compileFlags = "-DWITH_IPv6"
         linkerFlags = ""
         />
+    <feature
+        name="RTP"
+        description = "Real Time Protocol support"
+        requiredFeatures = "IPv4"
+        nedPackages = "inet.applications.rtpapp inet.transport.rtp inet.examples.rtp"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_RTP"
+        linkerFlags = ""
+        />
 </features>
 
