@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2010 Philipp Berndt
+// based on ../../networklayer/autorouting/FlatNetworkConfigurator.cc
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -16,20 +18,78 @@
 //
 
 #include <algorithm>
+#include <gnplib/impl/network/gnp/GnpLatencyModel.h>
+#include <gnplib/impl/network/gnp/GnpNetLayerFactory.h>
+#include <gnplib/api/common/random/Rng.h>
+#include <gnplib/impl/network/AbstractNetLayer.h>
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
-#include "FlatNetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
+#include "GnpNetworkConfigurator.h"
 
+namespace {
+const char* INTERNET_CLOUD = "InternetCloud";
 
-Define_Module(FlatNetworkConfigurator);
-
-
-void FlatNetworkConfigurator::initialize(int stage)
+bool isInternetNode(const cModule* module)
 {
-    if (stage==2)
+    static const cModule* cached;
+    if (module == cached)
+        return true;
+    //if (dynamic_cast<InternetCloud*>(module)) InternetCloud currently is a CompoundModule
+    if (!strcmp(module->getModuleType()->getName(), INTERNET_CLOUD))
+    {
+        cached = module;
+        return true;
+    }
+    return false;
+}
+
+bool isInternetNode(const cTopology::Node* node)
+{
+    static const cTopology::Node* cached;
+    if (node == cached)
+        return true;
+    if (!strcmp(node->getModule()->getModuleType()->getName(), INTERNET_CLOUD))
+    {
+        cached = node;
+        return true;
+    }
+    return false;
+}
+}
+
+using gnplib::impl::network::gnp::GnpNetLayerFactory;
+using gnplib::impl::network::gnp::GnpLatencyModel;
+using gnplib::impl::network::gnp::GnpNetLayer;
+
+Define_Module(GnpNetworkConfigurator);
+
+GnpNetworkConfigurator::GnpNetworkConfigurator()
+: netLayerFactoryGnp(new GnpNetLayerFactory) { }
+
+/**
+ * Produces random integer in range [0,r) using generator 0.
+ */
+int intrand2(int r)
+{
+	return intrand(r);
+}
+
+void GnpNetworkConfigurator::initialize(int stage)
+{
+    if (stage==0)
+    {
+	// Configure gnplib to use omnet's random number generator 
+        gnplib::api::common::random::Rng::intrand = &intrand2;
+        gnplib::api::common::random::Rng::dblrand = &dblrand;
+
+        GnpLatencyModel*latencyModelGnp(new GnpLatencyModel);
+        netLayerFactoryGnp->setGnpFile(par("gnpFile"));
+        netLayerFactoryGnp->setLatencyModel(latencyModelGnp);
+    }
+    else if (stage==2)
     {
         cTopology topo("topo");
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]
@@ -53,7 +113,10 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 }
 
-void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
+GnpNetworkConfigurator::~GnpNetworkConfigurator()
+{ }
+
+void GnpNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // extract topology
     topo.extractByProperty("node");
@@ -70,26 +133,42 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
             nodeInfo[i].ift = IPAddressResolver().interfaceTableOf(mod);
             nodeInfo[i].rt = IPAddressResolver().routingTableOf(mod);
         }
+        if (mod->hasPar("group"))
+            nodeInfo[i].group=mod->par("group").stdstringValue();
+        else
+        {
+            const cProperty* prop=mod->getProperties()->get("group");
+            if (prop)
+            {
+                nodeInfo[i].group=prop->getValue("");
+                EV<<"mod uses group "<<prop->getValue("")<<endl;
+            } else
+            {
+                if (!isInternetNode(mod))
+                {
+                    EV<<"Module "<< mod->getFullName() <<" has no GNP group par/property"<<endl;
+                }
+            }
+        }
     }
 }
 
-void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
+void GnpNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // assign IP addresses
-    uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
-    int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
-    if (topo.getNumNodes()>maxNodes)
-        error("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
-
-    int numIPNodes = 0;
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
+        if (nodeInfo[i].group.empty())
+            continue;
+        cTopology::Node *node = topo.getNode(i);
+        GnpNetLayer* netLayer=netLayerFactoryGnp->newNetLayer(nodeInfo[i].group); // TODO: This is a memory leak!!!
+        uint32 addr=netLayer->getNetID().getID();
 
-        uint32 addr = networkAddress | uint32(++numIPNodes);
+        EV << "Assigning " << node->getModule()->getFullName() << " of group \"" << nodeInfo[i].group << "\" IP-Id " << addr << " (pseudo-IP address " << IPAddress(addr) << ")\n";
+
         nodeInfo[i].address.set(addr);
 
         // find interface table and assign address to all (non-loopback) interfaces
@@ -103,10 +182,71 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
                 ie->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
+
+        // Parametrize DatarateChannel connected to the Internet with node-specific data
+        InterfaceEntry *ie(0);
+        for (int k = 0; k<node->getNumOutLinks(); ++k)
+        {
+            cTopology::LinkOut* linkOut = node->getLinkOut(k);
+            EV << node->getModule()->getFullName() << " is connected to " << linkOut->getRemoteNode()->getModule()->getModuleType()->getName() << "\n";
+            if (isInternetNode(linkOut->getRemoteNode()))
+            {
+                cDatarateChannel* internet_uplink = dynamic_cast<cDatarateChannel*>(linkOut->getLocalGate()->getChannel());
+                if (internet_uplink)
+                {
+                    if (ie)
+                       throw cRuntimeError("Can't connect %s upstream to the Internet with more than one interface", node->getModule()->getFullName());
+                    ie = ift->getInterfaceByNodeOutputGateId(linkOut->getLocalGate()->getId());
+
+                    const double upstream_bw_bps(netLayer->getMaxUploadBandwidth()*8.0); // bytes/s -> bit/s
+                    const double upstream_delay_s(netLayer->getAccessLatency()/(2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
+                    EV << "Configuring upstream channel with " << upstream_bw_bps << "bps and " << upstream_delay_s << "s wire delay" << endl;
+                    internet_uplink->setDatarate(upstream_bw_bps);
+                    //internet_uplink->par("datarate").setDoubleValue(upstream_bw_bps);
+                    internet_uplink->setDelay(upstream_delay_s);
+                    //internet_uplink->par("delay").setDoubleValue(upstream_delay_s);
+                    //internet_uplink->finalizeParameters();
+                    //internet_uplink->rereadPars();
+                }
+                else
+                {
+                    throw cRuntimeError("Please use a DatarateChannel to connect %s upstream to the Internet", node->getModule()->getFullName());
+                }
+            }
+
+        }
+
+        // Parametrize DatarateChannel connected from the Internet with node-specific data
+        for (int k = 0; k<node->getNumInLinks(); ++k)
+        {
+            cTopology::LinkIn* linkIn = node->getLinkIn(k);
+            if (isInternetNode(linkIn->getRemoteNode()))
+            {
+                cDatarateChannel* internet_downlink = dynamic_cast<cDatarateChannel*>(linkIn->getRemoteGate()->getChannel());
+                if (internet_downlink)
+                {
+                    if (linkIn->getLocalGateId() != ie->getNodeInputGateId())
+                         throw cRuntimeError("%s uses different interfaces to connect upstream/downstream to the Internet", node->getModule()->getFullName());
+                    const double downstream_bw_bps(netLayer->getMaxDownloadBandwidth()*8.0); // bytes/s -> bit/s
+                    const double downstream_delay_s(netLayer->getAccessLatency()/(2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
+                    EV << "Configuring downstream channel with " << downstream_bw_bps << "bps and " << downstream_delay_s << "s wire delay" << endl;
+                    internet_downlink->setDatarate(downstream_bw_bps);
+                    internet_downlink->setDelay(downstream_delay_s);
+                    //internet_downlink->finalizeParameters();
+                }
+                else
+                {
+                    throw cRuntimeError("Please use a DatarateChannel to connect %s downstream from the Internet", node->getModule()->getFullName());
+                }
+            }
+
+        }
+        EV << "Configured internet access from " << node->getModule()->getFullName() << " through " << ie->getName() << "\n";
+
     }
 }
 
-void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+void GnpNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i=0; i<topo.getNumNodes(); i++)
@@ -146,7 +286,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
     }
 }
 
-void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
+void GnpNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // fill in routing tables with static routes
     for (int i=0; i<topo.getNumNodes(); i++)
@@ -203,12 +343,12 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
     }
 }
 
-void FlatNetworkConfigurator::handleMessage(cMessage *msg)
+void GnpNetworkConfigurator::handleMessage(cMessage *msg)
 {
     error("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
+void GnpNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
     for (int i=0; i<topo.getNumNodes(); i++)

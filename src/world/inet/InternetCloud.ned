@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2010 Philipp Berndt
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,8 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+// Based on ../../nodes/inet/Router.ned
 
-package inet.nodes.inet;
+package inet.world.inet;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
@@ -27,14 +29,14 @@ import inet.util.NAMTraceWriter;
 
 
 //
-// \IP router.
+// \InternetCloud
 //
-module Router
+module InternetCloud
 {
     parameters:
         @node();
         @labels(node,ethernet-node);
-        @display("i=abstract/router");
+        @display("i=misc/cloud");
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);
@@ -60,7 +62,7 @@ module Router
                 routingFile = routingFile;
                 @display("p=240,60");
         }
-        networkLayer: NetworkLayer {
+        networkLayer: InternetLayer {
             parameters:
                 @display("p=200,141;q=queue");
             gates:

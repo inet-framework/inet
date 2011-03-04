@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2010 Philipp Berndt
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,9 +17,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+// Based on ../../nodes/inet/NetworkLayer.ned
 
 
-package inet.nodes.inet;
+package inet.world.inet;
 
 import inet.networklayer.arp.ARP;
 import inet.networklayer.ipv4.ErrorHandling;
@@ -28,14 +30,19 @@ import inet.networklayer.ipv4.IP;
 
 
 //
-// Network layer of an \IP node.
+// Network layer of the \InternetCloud
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //
-module NetworkLayer
+module InternetLayer
 {
     parameters:
         bool proxyARP = default(true);
+        bool usePingErRttData    = default(false);
+        bool useAnalyticalRtt    = default(false);
+        bool usePingErJitter     = default(true);
+        bool usePingErPacketLoss = default(false);
+
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(IPDatagram);
@@ -65,6 +72,15 @@ module NetworkLayer
                 transportIn[7]; //I.R.
                 transportOut[7];
                 queueIn[sizeof(ifIn)];
+        }
+
+        delayGenerator: InternetPropagationDelayGate {
+            parameters:
+                usePingErRttData    = usePingErRttData;
+                useAnalyticalRtt    = useAnalyticalRtt;
+                usePingErJitter     = usePingErJitter;
+                usePingErPacketLoss = usePingErPacketLoss;
+                useAccessLatency    = false;
         }
         arp: ARP {
             parameters:
@@ -113,7 +129,8 @@ module NetworkLayer
 
         icmp.errorOut --> errorHandling.in;
 
-        ip.queueOut --> arp.ipIn;
+        ip.queueOut --> delayGenerator.ipIn;
+        delayGenerator.ipOut --> arp.ipIn;
 
         // L2 interfaces to IP and from ARP
         for i=0..sizeof(ifOut)-1 {

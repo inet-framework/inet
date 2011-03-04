@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2010 Philipp Berndt
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -16,22 +17,17 @@
 //
 
 
-package inet.networklayer.autorouting;
+package inet.world.inet;
 
 //
-// Configures \IP addresses and routing tables for a "flat" network,
-// "flat" meaning that all hosts and routers will have the same
-// network address and will only differ in the host part.
+// Configures \IP addresses and routing tables from a GNP file.
 //
 // This module does't connect to any other modules (it has no gates),
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#  assign \IP addresses to hosts and routers. All hosts and
-//       routers will be in the same network (same network address).
-//       For simplicity, it will assign the same address to all interfaces
-//       of a router;
+//   -#  assign \IP addresses to hosts and routers.
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
@@ -57,11 +53,10 @@ package inet.networklayer.autorouting;
 // interfaces register themselves in the InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple FlatNetworkConfigurator
+simple GnpNetworkConfigurator
 {
     parameters:
-        string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)
-        string netmask = default("255.255.0.0"); // host part of addresses are autoconfigured
+	string gnpFile; // Filename of XML file containing embedded hosts and PingEr data
         @display("i=block/cogwheel_s");
         @labels(node);
 }

@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2010 Philipp Berndt
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -15,25 +16,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATNETWORKCONFIGURATOR_H
-#define __INET_FLATNETWORKCONFIGURATOR_H
+#ifndef __INET_GNPNETWORKCONFIGURATOR_H
+#define __INET_GNPNETWORKCONFIGURATOR_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
+#include <boost/scoped_ptr.hpp>
 
+namespace gnplib { namespace impl { namespace network { namespace gnp { class GnpNetLayerFactory; } } } }
 class IInterfaceTable;
 class IRoutingTable;
 
 
 /**
- * Configures IP addresses and routing tables for a "flat" network,
- * "flat" meaning that all hosts and routers will have the same
- * network address.
+ * Configures IP addresses and routing tables for a network.
+ * IP-Adresses are chosen from a GNP hosts file.
  *
  * For more info please see the NED file.
  */
-class INET_API FlatNetworkConfigurator : public cSimpleModule
+class INET_API GnpNetworkConfigurator : public cSimpleModule
 {
   protected:
     struct NodeInfo {
@@ -43,9 +45,13 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
         IRoutingTable *rt;
         IPAddress address;
         bool usesDefaultRoute;
+        std::string group;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
+public:
+    GnpNetworkConfigurator();
+    virtual ~GnpNetworkConfigurator();
   protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
@@ -57,6 +63,10 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     virtual void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
+
+private:
+    GnpNetworkConfigurator(const GnpNetworkConfigurator& orig);
+    boost::scoped_ptr<gnplib::impl::network::gnp::GnpNetLayerFactory> netLayerFactoryGnp;
 };
 
 #endif
