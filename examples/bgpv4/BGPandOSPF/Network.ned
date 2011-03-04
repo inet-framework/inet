@@ -1,11 +1,11 @@
 
 package inet.examples.bgpv4.BGPandOSPF;
 
-import inet.nodes.inet.BGPRouter;
-import inet.nodes.inet.OSPFRouter;
-import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.OSPFRouter;
 import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.bgp.BGPRouter;
 
 
 network BGPTest

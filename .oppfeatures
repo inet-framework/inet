@@ -90,4 +90,22 @@
         compileFlags = "-DWITH_SCTP_examples"
         linkerFlags = ""
         />
+    <feature
+        name="BGPv4"
+        description = "BGP support"
+        requiredFeatures = "IPv4"
+        nedPackages = "inet.networklayer.bgpv4 inet.nodes.bgp"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_BGPv4"
+        linkerFlags = ""
+        />
+    <feature
+        name="BGPv4_examples"
+        description = "Examples for BGPv4"
+        requiredFeatures = "BGPv4"
+        nedPackages = "inet.examples.bgpv4"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_RTP_examples"
+        linkerFlags = ""
+        />
 </features>

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.inet;
+package inet.nodes.bgp;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
