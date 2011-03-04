@@ -16,8 +16,16 @@
 #define __INET_UTILS_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IntServ.h"
+
+EroVector routeToEro(IPAddressVector rro);
+std::string vectorToString(IPAddressVector vec);
+std::string vectorToString(IPAddressVector vec, const char *delim);
+std::string vectorToString(EroVector vec);
+std::string vectorToString(EroVector vec, const char *delim);
 
 /**
  * TODO documentation

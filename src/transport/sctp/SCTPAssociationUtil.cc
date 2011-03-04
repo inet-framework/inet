@@ -438,7 +438,7 @@ void SCTPAssociation::sendInit()
     }
     else
     {
-        uint32 rlevel = getLevel(remoteAddr);
+        int rlevel = getLevel(remoteAddr);
         sctpEV3<<"level of remote address="<<rlevel<<"\n";
         for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
         {

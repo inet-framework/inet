@@ -18,20 +18,15 @@
 #ifndef __INET_INETCOMMON_H
 #define __INET_INETCOMMON_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include <string>
 
-#include "IntServ.h" // IPAddressVector, EroVector
 #include "IPvXAddress.h"
 
 std::string intToString(int i);
-std::string vectorToString(IPAddressVector vec);
-std::string vectorToString(IPAddressVector vec, const char *delim);
-std::string vectorToString(EroVector vec);
-std::string vectorToString(EroVector vec, const char *delim);
 
-EroVector routeToEro(IPAddressVector rro);
-uint32 getLevel(IPvXAddress addr);
+int getLevel(const IPvXAddress& addr);
 
 #endif
 

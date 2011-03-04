@@ -15,6 +15,62 @@
 #include "Utils.h"
 #include "IntServ.h"
 
+
+std::string vectorToString(IPAddressVector vec)
+{
+    return vectorToString(vec, ", ");
+}
+
+std::string vectorToString(IPAddressVector vec, const char *delim)
+{
+  std::ostringstream stream;
+  for(unsigned int i = 0; i < vec.size(); i++)
+  {
+      stream << vec[i];
+      if(i < vec.size() - 1)
+        stream << delim;
+  }
+  stream << std::flush;
+  std::string str(stream.str());
+  return str;
+}
+
+std::string vectorToString(EroVector vec)
+{
+    return vectorToString(vec, ", ");
+}
+
+std::string vectorToString(EroVector vec, const char *delim)
+{
+    std::ostringstream stream;
+    for(unsigned int i = 0; i < vec.size(); i++)
+    {
+        stream << vec[i].node;
+
+        if(i < vec.size() - 1)
+            stream << delim;
+    }
+    stream << std::flush;
+    std::string str(stream.str());
+    return str;
+}
+
+EroVector routeToEro(IPAddressVector rro)
+{
+    EroVector ero;
+
+    for(unsigned int i = 0; i < rro.size(); i++)
+    {
+        EroObj_t hop;
+        hop.L = false;
+        hop.node = rro[i];
+        ero.push_back(hop);
+    }
+
+    return ero;
+}
+
+
 void removeDuplicates(std::vector<int>& vec)
 {
     for (unsigned int i = 0; i < vec.size(); i++)

@@ -411,7 +411,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             {
                 adv = localAddressList;
             }
-            uint32 rlevel = getLevel(remoteAddr);
+            int rlevel = getLevel(remoteAddr);
             if (rlevel>0)
                 for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
                 {
