@@ -17,6 +17,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "GnpNetworkConfigurator.h"
+
+Define_Module(GnpNetworkConfigurator);
+
+#ifdef HAVE_GNPLIB
+
 #include <algorithm>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
 #include <gnplib/impl/network/gnp/GnpNetLayerFactory.h>
@@ -27,7 +33,6 @@
 #include "IPAddressResolver.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
-#include "GnpNetworkConfigurator.h"
 
 namespace {
 const char* INTERNET_CLOUD = "InternetCloud";
@@ -64,7 +69,6 @@ using gnplib::impl::network::gnp::GnpNetLayerFactory;
 using gnplib::impl::network::gnp::GnpLatencyModel;
 using gnplib::impl::network::gnp::GnpNetLayer;
 
-Define_Module(GnpNetworkConfigurator);
 
 GnpNetworkConfigurator::GnpNetworkConfigurator()
 : netLayerFactoryGnp(new GnpNetLayerFactory) { }
@@ -361,4 +365,27 @@ void GnpNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& n
     getDisplayString().setTagArg("t",0,buf);
 }
 
+#else
 
+// gnplib was not found => compile as stub
+
+namespace gnplib { namespace impl { namespace network { namespace gnp {
+    class GnpNetLayerFactory {};
+}}}}
+
+void GnpNetworkConfigurator::initialize(int stage)
+{
+    error("Please compile INET with gnplib support to use this module!");
+}
+
+GnpNetworkConfigurator::GnpNetworkConfigurator()
+: netLayerFactoryGnp(new gnplib::impl::network::gnp::GnpNetLayerFactory) {}
+GnpNetworkConfigurator::~GnpNetworkConfigurator() {}
+void GnpNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo) {}
+void GnpNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo) {}
+void GnpNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo) {}
+void GnpNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo) {}
+void GnpNetworkConfigurator::handleMessage(cMessage *msg) {}
+void GnpNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo) {}
+
+#endif

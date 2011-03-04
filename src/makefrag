@@ -36,7 +36,7 @@ ifndef HAVE_GNPLIB
     ifeq ($(HAVE_GNPLIB), yes)
       GNPLIB_LIBS := $(shell $(PKGCFG) --libs gnplib)
       LIBS += $(GNPLIB_LIBS)
-      CFLAGS += $(shell $(PKGCFG) --cflags gnplib)
+      CFLAGS += $(shell $(PKGCFG) --cflags gnplib) -DHAVE_GNPLIB
     endif
   endif
 endif

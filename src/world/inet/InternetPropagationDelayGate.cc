@@ -17,6 +17,10 @@
 
 #include "InternetPropagationDelayGate.h"
 
+Define_Module(InternetPropagationDelayGate);
+
+#ifdef HAVE_GNPLIB
+
 #include <gnplib/impl/network/gnp/GeoLocationOracle.h>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
 #include <gnplib/impl/network/IPv4NetID.h>
@@ -25,7 +29,6 @@
 namespace GeoLocationOracle=gnplib::impl::network::gnp::GeoLocationOracle;
 using gnplib::impl::network::IPv4NetID;
 
-Define_Module(InternetPropagationDelayGate);
 
 void InternetPropagationDelayGate::initialize(int stage)
 {
@@ -60,3 +63,16 @@ void InternetPropagationDelayGate::handleMessage(cMessage *msg)
         send(msg, outGateId);
     }
 }
+
+#else
+
+// gnplib was not found => compile as stub
+
+void InternetPropagationDelayGate::initialize(int stage)
+{
+    error("Please compile INET with gnplib support to use this module!");
+}
+
+void InternetPropagationDelayGate::handleMessage(cMessage *msg) {}
+
+#endif
