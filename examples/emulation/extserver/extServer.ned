@@ -4,7 +4,7 @@
 
 package inet.examples.emulation.extserver;
 
-import inet.nodes.inet.ExtRouter;
+import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -12,7 +12,7 @@ network extserver {
     parameters:
         @display("bgb=400,200");
     submodules:
-        router: ExtRouter {
+        router: Router {
             parameters:
                 numExtInterfaces = 1;
                 @display("p=200,100;i=abstract/router");

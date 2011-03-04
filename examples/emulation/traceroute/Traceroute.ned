@@ -20,7 +20,7 @@ package inet.examples.emulation.traceroute;
 
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.nodes.inet.ExtRouter;
+import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 
@@ -176,7 +176,7 @@ network Traceroute
             gates:
                pppg[3];
         }
-        extRouter: ExtRouter {
+        extRouter: Router {
             parameters:
                 routingFile = "extRouter.mrt";
                 numExtInterfaces = 1;

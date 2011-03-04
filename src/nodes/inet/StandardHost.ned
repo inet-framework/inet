@@ -24,7 +24,7 @@ import inet.transport.tcp.ITCP;
 import inet.transport.sctp.SCTP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ext.ExtInterface;
+import inet.linklayer.IExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
 import inet.base.mobility.IMobility;
@@ -67,6 +67,7 @@ module StandardHost
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
         string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only
         string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInerface and ~PPPInterfaceNoQueue
+        string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
@@ -143,7 +144,7 @@ module StandardHost
             parameters:
                 @display("p=369,390,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: ExtInterface {
+        ext[numExtInterfaces]: <extNicType> like IExtInterface {
             parameters:
                 @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }
