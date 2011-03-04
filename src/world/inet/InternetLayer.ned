@@ -25,7 +25,6 @@ package inet.world.inet;
 import inet.networklayer.arp.ARP;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
-import inet.networklayer.ipv4.IGMP;
 import inet.networklayer.ipv4.IP;
 
 
@@ -46,19 +45,7 @@ module InternetLayer
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(IPDatagram);
-        input tcpIn @labels(TCPSegment,IPControlInfo/down);
-        input udpIn @labels(UDPPacket,IPControlInfo/down);
-        input sctpIn @labels(IPControlInfo/down,SCTPPacket);   //I.R.
-        input rsvpIn @labels(IPControlInfo/down);
-        input ospfIn @labels(IPControlInfo/down);
-        input pingIn;
         output ifOut[];
-        output tcpOut @labels(TCPSegment,IPControlInfo/up);
-        output udpOut @labels(UDPPacket,IPControlInfo/up);
-        output sctpOut @labels(IPControlInfo/up,SCTPPacket); //I.R.
-        output rsvpOut @labels(IPControlInfo/up);
-        output ospfOut @labels(IPControlInfo/up);
-        output pingOut;
 
     submodules:
         ip: IP {
@@ -66,11 +53,11 @@ module InternetLayer
                 timeToLive = 32;
                 multicastTimeToLive = 32;
                 fragmentTimeout = 60s;
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6";   //I.R.
+                protocolMapping = "1:0";
                 @display("p=85,95;q=queue");
             gates:
-                transportIn[7]; //I.R.
-                transportOut[7];
+                transportIn[1];
+                transportOut[1];
                 queueIn[sizeof(ifIn)];
         }
 
@@ -81,6 +68,7 @@ module InternetLayer
                 usePingErJitter     = usePingErJitter;
                 usePingErPacketLoss = usePingErPacketLoss;
                 useAccessLatency    = false;
+                @display("p=163,95");
         }
         arp: ARP {
             parameters:
@@ -91,41 +79,17 @@ module InternetLayer
         }
         icmp: ICMP {
             parameters:
-                @display("p=160,63");
-        }
-        igmp: IGMP {
-            parameters:
-                @display("p=160,122");
+                @display("p=160,33");
         }
         errorHandling: ErrorHandling {
             parameters:
-                @display("p=239,63");
+                @display("p=239,33");
         }
     connections allowunconnected:
         // transport Layer
-        ip.transportOut[0] --> tcpOut;
-        ip.transportIn[0] <-- tcpIn;
 
-        ip.transportOut[1] --> udpOut;
-        ip.transportIn[1] <-- udpIn;
-
-        ip.transportOut[2] --> icmp.localIn;
-        ip.transportIn[2] <-- icmp.sendOut;
-
-        ip.transportOut[3] --> igmp.localIn;
-        ip.transportIn[3] <-- igmp.sendOut;
-
-        ip.transportOut[4] --> rsvpOut;
-        ip.transportIn[4] <-- rsvpIn;
-
-        ip.transportOut[5] --> ospfOut;
-        ip.transportIn[5] <-- ospfIn;
-
-        ip.transportOut[6] --> sctpOut;     //I.R.
-        ip.transportIn[6] <-- sctpIn;
-
-        icmp.pingOut --> pingOut;
-        icmp.pingIn <-- pingIn;
+        ip.transportOut[0] --> icmp.localIn;
+        ip.transportIn[0] <-- icmp.sendOut;
 
         icmp.errorOut --> errorHandling.in;
 
