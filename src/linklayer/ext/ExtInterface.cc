@@ -24,11 +24,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "opp_utils.h"
+
+#include "ExtInterface.h"
+
+#include "InterfaceEntry.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "ExtInterface.h"
 #include "IPSerializer.h"
+#include "opp_utils.h"
 
 
 Define_Module(ExtInterface);

@@ -13,9 +13,9 @@
 
 package inet.examples.mpls.net37;
 
-import inet.networklayer.autorouting.NetworkConfigurator;
-import inet.nodes.mpls.RSVP_LSR;
 import ned.DatarateChannel;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.networklayer.autorouting.NetworkConfigurator;
 
 
 network R37orig

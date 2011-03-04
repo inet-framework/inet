@@ -31,6 +31,10 @@
 #include "cSocketRTScheduler.h"
 //#include "IPDatagram.h"
 
+// Forward declarations:
+class InterfaceEntry;
+
+
 #ifndef IPPROTO_SCTP
 #define IPPROTO_SCTP 132
 #endif

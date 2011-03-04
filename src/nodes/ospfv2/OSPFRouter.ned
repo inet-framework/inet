@@ -16,14 +16,15 @@
 //
 
 
-package inet.nodes.inet;
+package inet.nodes.ospfv2;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ospfv2.OSPFRouting;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.ethernet.EthernetInterface;
+import inet.base.NotificationBoard;
 
 
 //

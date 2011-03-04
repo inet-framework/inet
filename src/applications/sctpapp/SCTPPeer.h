@@ -22,6 +22,7 @@
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
 
+class SCTPConnectInfo;
 
 class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
 {

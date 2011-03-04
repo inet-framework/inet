@@ -14,11 +14,11 @@
 
 package inet.examples.mpls.testte_failure2;
 
-import inet.networklayer.autorouting.NetworkConfigurator;
-import inet.networklayer.extras.FailureManager;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.RSVP_LSR;
 import inet.world.ScenarioManager;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.extras.FailureManager;
+import inet.networklayer.autorouting.NetworkConfigurator;
 
 
 //

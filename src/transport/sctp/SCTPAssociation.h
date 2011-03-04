@@ -19,25 +19,26 @@
 #ifndef __SCTPASSOCIATION_H
 #define __SCTPASSOCIATION_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPvXAddress.h"
 #include "IPAddress.h"
 #include "SCTP.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+//#include "RoutingTable.h"
+//#include "RoutingTableAccess.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "SCTPQueue.h"
 #include "SCTPSendStream.h"
 #include "SCTPReceiveStream.h"
 #include "SCTPMessage.h"
-#include "IPControlInfo.h"
+//#include "IPControlInfo.h"
 #include <list>
 #include <iostream>
 #include <errno.h>
 #include <math.h>
 #include <platdep/intxtypes.h>
-#include "common.h"
+//#include "common.h"
 
 
 class SCTPMessage;

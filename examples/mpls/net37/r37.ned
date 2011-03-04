@@ -12,12 +12,12 @@
 
 package inet.examples.mpls.net37;
 
-import inet.networklayer.autorouting.NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.RSVP_LSR;
-import inet.world.ChannelInstaller;
-import inet.world.NAMTrace;
 import ned.DatarateChannel;
+import inet.world.NAMTrace;
+import inet.world.ChannelInstaller;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.NetworkConfigurator;
 
 
 network R37

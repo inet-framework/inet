@@ -22,7 +22,8 @@
         name="IPv4"
         description = "Basic IPv4 support"
         requiredFeatures = ""
-        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.nodes.inet inet.networklayer.contract.ipv4 inet.networklayer.icmp"
+        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.networklayer.contract.ipv4 inet.networklayer.icmp
+                       inet.nodes.inet inet.util.headerserializers.ipv4"
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
         linkerFlags = ""
@@ -75,7 +76,7 @@
     <feature
         name="SCTP"
         description = "SCTP Protocol support"
-        requiredFeatures = "IPv4"
+        requiredFeatures = ""
         nedPackages = "inet.applications.sctpapp inet.transport.sctp"
         extraSourceFolders = ""
         compileFlags = "-DWITH_SCTP"
@@ -91,9 +92,58 @@
         linkerFlags = ""
         />
     <feature
+        name="ExternalInterface"
+        description = "External Interface"
+        requiredFeatures = "IPv4"
+        nedPackages = "inet.linklayer.ext"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EXT_IF"
+        linkerFlags = ""
+        />
+    <feature
+        name="MPLS"
+        description = "MPLS support"
+        requiredFeatures = ""
+        nedPackages = "inet.networklayer.mpls inet.nodes.mpls
+                       inet.networklayer.ldp
+                       inet.networklayer.rsvp_te
+                       inet.networklayer.ted
+                       "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_MPLS"
+        linkerFlags = ""
+        />
+    <feature
+        name="MPLS_examples"
+        description = "Examples for MPLS support"
+        requiredFeatures = "MPLS"
+        nedPackages = "inet.examples.mpls"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_MPLS_Examples"
+        linkerFlags = ""
+        />
+    <feature
+        name="OSPFv2"
+        description = "OSPFv2 support"
+        requiredFeatures = ""
+        nedPackages = "inet.networklayer.ospfv2 inet.nodes.ospfv2"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_OSPFv2"
+        linkerFlags = ""
+        />
+    <feature
+        name="OSPFv2_examples"
+        description = "Examples for OSPFv2"
+        requiredFeatures = "OSPFv2"
+        nedPackages = "inet.examples.ospfv2"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_OSPFv2_examples"
+        linkerFlags = ""
+        />
+    <feature
         name="BGPv4"
         description = "BGP support"
-        requiredFeatures = "IPv4"
+        requiredFeatures = "IPv4 OSPFv2"
         nedPackages = "inet.networklayer.bgpv4 inet.nodes.bgp"
         extraSourceFolders = ""
         compileFlags = "-DWITH_BGPv4"

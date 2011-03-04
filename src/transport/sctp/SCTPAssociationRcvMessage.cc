@@ -25,6 +25,7 @@
 #include "SCTPMessage_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
+#include "common.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"

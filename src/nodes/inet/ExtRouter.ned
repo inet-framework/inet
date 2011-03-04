@@ -17,14 +17,13 @@
 
 package inet.nodes.inet;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
 import inet.util.NAMTraceWriter;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.ext.ExtInterface;
-import inet.nodes.inet.NetworkLayer;
+import inet.linklayer.ethernet.EthernetInterface;
+import inet.base.NotificationBoard;
 
 
 //

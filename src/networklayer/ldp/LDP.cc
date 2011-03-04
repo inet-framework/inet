@@ -17,8 +17,10 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "ConstType.h"
+
 #include "LDP.h"
+
+//#include "ConstType.h"
 #include "LIBTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"

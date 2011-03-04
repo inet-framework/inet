@@ -18,10 +18,11 @@
 
 
 #include <string>
-#include <omnetpp.h>
 #include <iostream>
 #include <vector>
+
 #include "INETDefs.h"
+
 #include "LDPPacket_m.h"
 #include "UDPSocket.h"
 #include "TCPSocket.h"

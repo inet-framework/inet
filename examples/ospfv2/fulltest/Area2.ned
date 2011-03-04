@@ -2,8 +2,8 @@
 package inet.examples.ospfv2.fulltest;
 
 import ned.DatarateChannel;
+import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.OSPFRouter;
 import inet.linklayer.ethernet.EtherHub;
 
 

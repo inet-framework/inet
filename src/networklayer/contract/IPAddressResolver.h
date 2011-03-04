@@ -123,14 +123,16 @@ class INET_API IPAddressResolver
      */
     virtual IInterfaceTable *interfaceTableOf(cModule *host);
 
+#ifdef WITH_IPv4
     /**
      * The function tries to look up the IRoutingTable module as submodule
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
     virtual IRoutingTable *routingTableOf(cModule *host);
+#endif
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     /**
      * The function tries to look up the RoutingTable6 module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
@@ -151,12 +153,14 @@ class INET_API IPAddressResolver
      */
     virtual IInterfaceTable *findInterfaceTableOf(cModule *host);
 
+#ifdef WITH_IPv4
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
     virtual IRoutingTable *findRoutingTableOf(cModule *host);
+#endif
 
-#ifndef WITHOUT_IPv6
+#ifdef WITH_IPv6
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */

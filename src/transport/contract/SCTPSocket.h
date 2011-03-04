@@ -21,9 +21,11 @@
 
 
 #include <omnetpp.h>
-#include "SCTPCommand_m.h"
+
+//#include "SCTPCommand_m.h"
 #include "IPvXAddress.h"
-#include "RoutingTable.h"
+//#include "RoutingTable.h"
+#include "SCTPAssociation.h"
 
 
 class SCTPStatusInfo;
@@ -130,11 +132,11 @@ class  INET_API SCTPSocket
 
     /** @name Getter functions */
     //@{
-  //  IPvXAddress localAddress() {return localAddr;}
-  AddressVector getLocalAddresses()  {return localAddresses;}
+    //  IPvXAddress localAddress() {return localAddr;}
+    AddressVector getLocalAddresses()  {return localAddresses;}
     int getLocalPort() {return localPrt;}
-  //  IPvXAddress remoteAddress() {return remoteAddr;}
-  AddressVector getRemoteAddresses()  {return remoteAddresses;}
+    //  IPvXAddress remoteAddress() {return remoteAddr;}
+    AddressVector getRemoteAddresses()  {return remoteAddresses;}
     int getRemotePort() {return remotePrt;}
     IPvXAddress getRemoteAddr() {return remoteAddr;}
     //@}
@@ -151,7 +153,8 @@ class  INET_API SCTPSocket
     void setInboundStreams(int streams) {inboundStreams = streams;};
     int getOutboundStreams() {return outboundStreams;};
     int getLastStream() {return lastStream;};
- /**
+
+    /**
      * Bind the socket to a local port number.
      */
     void bind(int localPort);
@@ -160,7 +163,7 @@ class  INET_API SCTPSocket
      * Bind the socket to a local port number and IP address (useful with
      * multi-homing).
      */
-   void bind(IPvXAddress localAddr, int localPort);
+    void bind(IPvXAddress localAddr, int localPort);
 
     void bindx(AddressVector localAddr, int localPort);
 
@@ -179,19 +182,21 @@ class  INET_API SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-     void listen(bool fork=false, uint32 requests=0, uint32 messagesToPush=0);
+    void listen(bool fork=false, uint32 requests=0, uint32 messagesToPush=0);
+
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests);
 
-     void connectx(AddressVector remoteAddresses, int32 remotePort, uint32 numRequests=0);
+    void connectx(AddressVector remoteAddresses, int32 remotePort, uint32 numRequests=0);
+
     /**
      * Sends data packet.
      */
     void send(cPacket *msg, bool last=true, bool primary=true);
 
-      void sendNotification(cPacket *msg);
+    void sendNotification(cPacket *msg);
     void sendRequest(cPacket *msg);
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation
@@ -279,5 +284,4 @@ class  INET_API SCTPSocket
 };
 
 #endif
-
 

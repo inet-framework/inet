@@ -3,11 +3,11 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.inet.OSPFRouter;
-import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
 import ned.DatarateChannel;
+import inet.world.ChannelInstaller;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.nodes.inet.StandardHost;
+import inet.linklayer.ethernet.EtherHub;
 
 
 network OSPF_TestNetwork

@@ -15,10 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPSocket.h"
+
 #include "SCTP.h"
 #include "SCTPAssociation.h"
+#include "SCTPCommand_m.h"
 
 SCTPSocket::SCTPSocket(bool type)
 {

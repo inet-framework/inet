@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
@@ -30,8 +31,11 @@
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPv6Address.h"
+#include "common.h"
+
 
 #ifdef WITH_IPv4
+#include "IPControlInfo.h"
 #include "IPv4InterfaceData.h"
 #endif
 

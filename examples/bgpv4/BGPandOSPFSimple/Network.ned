@@ -2,8 +2,8 @@
 package inet.examples.bgpv4.BGPandOSPFSimple;
 
 import inet.world.ChannelInstaller;
+import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.OSPFRouter;
 import inet.nodes.bgp.BGPRouter;
 
 

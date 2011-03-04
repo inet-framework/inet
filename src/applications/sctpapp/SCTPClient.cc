@@ -17,9 +17,12 @@
 //
 
 
+#include "SCTPClient.h"
+
 #include "IPAddressResolver.h"
 #include "SCTPAssociation.h"
-#include "SCTPClient.h"
+#include "SCTPCommand_m.h"
+
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND         1

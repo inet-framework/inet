@@ -19,7 +19,7 @@
 #define __INET_IROUTINGTABLE_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 #include "IPAddress.h"
 #include "IPRoute.h"  // not strictly required, but most clients will need it anyway

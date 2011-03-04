@@ -28,8 +28,8 @@
 
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on IPv4 and IPv6 stuff!
-class IInterfaceTable;
 class InterfaceEntry;
+class IInterfaceTable;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
