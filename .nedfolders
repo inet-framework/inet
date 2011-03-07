@@ -1,9 +1,4 @@
 examples
 src
--inet.networklayer.ipv6
 -examples.ipv6
--inet.nodes.ipv6
--inet.examples.ipv6
--inet.networklayer.icmpv6
--inet.networklayer.autorouting.ipv6
--inet.networklayer.contract.ipv6
+-inet.networklayer.icmp
