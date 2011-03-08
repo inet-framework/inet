@@ -20,7 +20,7 @@ package inet.nodes.ipv6;
 import inet.util.NAMTraceWriter;
 import inet.networklayer.ipv6.RoutingTable6;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ext.ExtInterface;
+import inet.linklayer.IExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
 import inet.base.mobility.IMobility;
@@ -41,6 +41,7 @@ module Router6
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
         string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only
         string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue
+        string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         int namid = default(-1);
         xml routingTableFile;  //# TODO provide a default
     gates:
@@ -87,7 +88,7 @@ module Router6
             parameters:
                 @display("p=320,242,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: ExtInterface {
+        ext[numExtInterfaces]: <extNicType> like IExtInterface {
             parameters:
                 @display("p=460,242,row,90;q=txQueue;i=block/ifcard");
         }
