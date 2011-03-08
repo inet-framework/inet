@@ -19,8 +19,8 @@
 
 #include "SCTPSocket.h"
 
-#include "SCTP.h"
-#include "SCTPAssociation.h"
+//#include "SCTP.h"
+//#include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 
 SCTPSocket::SCTPSocket(bool type)

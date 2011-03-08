@@ -22,10 +22,8 @@
 
 #include <omnetpp.h>
 
-//#include "SCTPCommand_m.h"
 #include "IPvXAddress.h"
-//#include "RoutingTable.h"
-#include "SCTPAssociation.h"
+//#include "SCTPAssociation.h"
 
 
 class SCTPStatusInfo;
@@ -50,17 +48,17 @@ class  INET_API SCTPSocket
       public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int assocId, void *yourPtr, cPacket *msg, bool urgent) = 0;
-    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
+        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
         virtual void socketEstablished(int assocId, void *yourPtr, uint64 buffer) {}
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
         virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status){}// {delete status;}
-    virtual void sendRequestArrived() {}
-    virtual void shutdownReceivedArrived(int connId) {}
-    virtual void sendqueueFullArrived(int connId) {}
-    virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
-    virtual void addressAddedArrived(int assocId, IPvXAddress localAddr, IPvXAddress remoteAddr) {}
+        virtual void sendRequestArrived() {}
+        virtual void shutdownReceivedArrived(int connId) {}
+        virtual void sendqueueFullArrived(int connId) {}
+        virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
+        virtual void addressAddedArrived(int assocId, IPvXAddress localAddr, IPvXAddress remoteAddr) {}
     };
 
     enum State {NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR};

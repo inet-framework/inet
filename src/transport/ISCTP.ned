@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2005-2010 Irene Ruengeler
+// Copyright (C) 2009-2010 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -8,25 +9,36 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.applications.sctpapp;
+package inet.transport;
 
 //
-// Not an actual module type. It only shows which gates an SCTP app should have
-// to be able to be used in ~StandardHost etc.
+// Interface for SCTP protocol.
 //
-moduleinterface ISCTPApp
+moduleinterface ISCTP
 {
-    parameters:
-        @display("i=block/app");
     gates:
-        input sctpIn @labels(SCTPCommand/up);
-        output sctpOut @labels(SCTPCommand/down);
+        input from_appl[];
+        input from_ip;
+        input from_ipv6;
+        output to_appl[];
+        output to_ip;
+        output to_ipv6;
+}
+
+simple SCTP_Dummy like ISCTP
+{
+    gates:
+        input from_appl[];
+        input from_ip;
+        input from_ipv6;
+        output to_appl[];
+        output to_ip;
+        output to_ipv6;
 }

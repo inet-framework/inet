@@ -33,7 +33,11 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
 #include "UDPSerializer.h"
+
+#ifdef WITH_SCTP
 #include "SCTPSerializer.h"    //I.R.
+#endif
+
 #include "TCPIPchecksum.h"
 #include "TCPSerializer.h"    //I.R.
 
@@ -45,8 +49,10 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
+#ifdef WITH_SCTP
 #ifndef IP_PROT_SCTP    //I.R.
 #define IP_PROT_SCTP 132
+#endif
 #endif
 
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
@@ -92,10 +98,12 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
 
+#ifdef WITH_SCTP
       case IP_PROT_SCTP:    //I.R.
         packetLength += SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
+#endif
 
       case IP_PROT_TCP:        //I.R.
         packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
@@ -159,10 +167,12 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         UDPSerializer().parse(buf + headerLength, encapLength, (UDPPacket *)encapPacket);
         break;
 
+#ifdef WITH_SCTP
       case IP_PROT_SCTP:
         encapPacket = new SCTPMessage("sctp-from-wire");
         SCTPSerializer().parse(buf + headerLength, encapLength, (SCTPMessage *)encapPacket);
         break;
+#endif
 
       case IP_PROT_TCP:
         encapPacket = new TCPSegment("tcp-from-wire");

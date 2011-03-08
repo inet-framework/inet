@@ -21,7 +21,7 @@ package inet.nodes.ipv6;
 import inet.util.NAMTraceWriter;
 import inet.transport.udp.UDP;
 import inet.transport.tcp.ITCP;
-import inet.transport.sctp.SCTP;
+import inet.transport.ISCTP;
 import inet.networklayer.ipv6.RoutingTable6;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IExtInterface;
@@ -31,7 +31,7 @@ import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.IUDPApp;
 import inet.applications.tcpapp.ITCPApp;
-import inet.applications.sctpapp.ISCTPApp;
+import inet.applications.ISCTPApp;
 import inet.applications.pingapp.PingApp;
 
 
@@ -109,7 +109,7 @@ module StandardHost6
             parameters:
                 @display("p=501,54");
         }
-        sctp: SCTP {
+        sctp: <default("SCTP")> like ISCTP {
             @display("p=501,141;i=block/wheelbarrow");
         }
         pingApp: PingApp {

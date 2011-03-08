@@ -33,7 +33,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "SCTPAssociation.h"
 //#include "platdep/intxtypes.h"
 
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
 #include <arpa/inet.h>
 #include <sys/socket.h>

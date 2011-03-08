@@ -19,17 +19,21 @@
 //
 
 
+#include <errno.h>
+
 #include "TCPDump.h"
 
 #include "IPControlInfo_m.h"
-#include "SCTPMessage.h"
-#include "SCTPAssociation.h"
 #include "IPSerializer.h"
 #include "ICMPMessage.h"
 #include "UDPPacket_m.h"
 
 #include "IPAddress.h"
+
+#ifdef WITH_SCTP
 #include "SCTPMessage.h"
+#endif
+
 #include "TCPSegment.h"
 
 #ifdef WITH_IPv4
@@ -57,6 +61,7 @@ TCPDumper::~TCPDumper()
 
 void TCPDumper::ipDump(const char *label, IPDatagram *dgram, const char *comment)
 {
+#ifdef WITH_SCTP
      if (dynamic_cast<SCTPMessage *>(dgram->getEncapsulatedPacket()))
      {
           SCTPMessage *sctpmsg = check_and_cast<SCTPMessage *>(dgram->getEncapsulatedPacket());
@@ -65,11 +70,13 @@ void TCPDumper::ipDump(const char *label, IPDatagram *dgram, const char *comment
           sctpDump(label, sctpmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
      }
      else
-          delete dgram;
+#endif
+     delete dgram;
 }
 
 void TCPDumper::sctpDump(const char *label, SCTPMessage *sctpmsg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
+#ifdef WITH_SCTP
      std::ostream& out = *outp;
      uint32 numberOfChunks;
      SCTPChunk* chunk;
@@ -83,18 +90,23 @@ void TCPDumper::sctpDump(const char *label, SCTPMessage *sctpmsg, const std::str
      out << srcAddr  << "." << sctpmsg->getSrcPort()  << " > ";
 
      out << destAddr << "." << sctpmsg->getDestPort() << ": ";
+
      if (sctpmsg->hasBitError())
      {
           sctpmsg->setChecksumOk(false);
      }
+
      numberOfChunks = sctpmsg->getChunksArraySize();
      out << "numberOfChunks="<<numberOfChunks<<" VTag="<<sctpmsg->getTag()<<"\n";
+
      if (sctpmsg->hasBitError())
           out << "Packet has bit error!!\n";
+
      for (uint32 i=0; i<numberOfChunks; i++)
      {
           chunk = (SCTPChunk*)sctpmsg->getChunks(i);
           type  = chunk->getChunkType();
+
           switch (type)
           {
                 case INIT:
@@ -326,6 +338,7 @@ void TCPDumper::sctpDump(const char *label, SCTPMessage *sctpmsg, const std::str
           out << "# " << comment;
 
      out << endl;
+#endif
 }
 
 TCPDump::~TCPDump()
@@ -404,8 +417,10 @@ void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
         out << "UDP: Payload length=" << udppkt->getByteLength()-8 << endl;
         if (udppkt->getSourcePort()==9899 || udppkt->getDestinationPort() == 9899)
         {
+#ifdef WITH_SCTP
             if (dynamic_cast<SCTPMessage *>(udppkt->getEncapsulatedPacket()))
                 sctpDump("", (SCTPMessage *)(udppkt->getEncapsulatedPacket()), std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
+#endif
         }
     }
 }
@@ -600,12 +615,15 @@ void TCPDump::handleMessage(cMessage *msg)
         }
         else
 #endif
+#ifdef WITH_SCTP
         if (dynamic_cast<SCTPMessage *>(msg))
         {
             l2r = msg->arrivedOn("in1");
             tcpdump.sctpDump("", (SCTPMessage *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
-        else if (dynamic_cast<TCPSegment *>(msg))
+        else
+#endif
+        if (dynamic_cast<TCPSegment *>(msg))
         {
             if (PK(msg)->hasBitError())
             {
@@ -669,7 +687,7 @@ void TCPDump::handleMessage(cMessage *msg)
         }
     }
 
-
+#ifdef WITH_IPv4
     if (tcpdump.dumpfile!=NULL && dynamic_cast<IPDatagram *>(msg))
     {
         uint8 buf[MAXBUFLENGTH];
@@ -696,11 +714,12 @@ void TCPDump::handleMessage(cMessage *msg)
         fwrite(&hdr, sizeof(uint32), 1, tcpdump.dumpfile);
         fwrite(buf, serialized_ip, 1, tcpdump.dumpfile);
     }
-
+#endif
 
     // forward
     int32 index = msg->getArrivalGate()->getIndex();
     int32 id;
+
     if (msg->getArrivalGate()->isName("ifIn"))
         id = findGate("out2",index);
     else
