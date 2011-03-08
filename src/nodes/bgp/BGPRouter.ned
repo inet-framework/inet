@@ -22,7 +22,7 @@ import inet.linklayer.ethernet.EthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.nodes.inet.NetworkLayer;
-import inet.transport.tcp.TCP;
+import inet.transport.ITCP;
 import inet.networklayer.bgpv4.BGPRouting;
 import inet.linklayer.ppp.PPPInterfaceNoQueue;
 import inet.networklayer.ospfv2.OSPFRouting;
@@ -37,6 +37,7 @@ module BGPRouter
         @labels(node,ethernet-node);
         @display("i=abstract/router;bgb=266,369");
         string routingFile = default("");
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -64,7 +65,7 @@ module BGPRouter
             parameters:
                 @display("p=211,44;i=block/network");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=147,116;i=block/transport");
         }

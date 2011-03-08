@@ -19,12 +19,12 @@
 #ifndef __INET_TCP_NSC_DATASTREAMQUEUES_H
 #define __INET_TCP_NSC_DATASTREAMQUEUES_H
 
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "TCP_NSC_Queues.h"
-
 #include "ByteArrayBuffer.h"
-#include "TCPConnection.h"
+
 
 /**
  * Send/Receive queue that manages "virtual bytes", that is, byte counts only.

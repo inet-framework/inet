@@ -91,6 +91,9 @@ package inet.applications.tcpapp;
 //      These classes are not implemented yet.
 //
 
+import inet.applications.ITCPApp;
+
+
 simple TCPSessionApp like ITCPApp
 {
     parameters:
@@ -99,7 +102,7 @@ simple TCPSessionApp like ITCPApp
         bool active = default(true);
         string connectAddress;
         int connectPort = default(1000);
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double tOpen @unit("s") = default(1s);
         double tSend @unit("s") = default(1s);
         int sendBytes @unit("B") = default(1MB);

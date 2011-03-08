@@ -53,6 +53,9 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.ITCPApp;
+
+
 //
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them.
@@ -63,9 +66,9 @@ simple TCPSinkApp like ITCPApp
     parameters:
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/sink");
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=sum,count,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=sum,count,vector);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

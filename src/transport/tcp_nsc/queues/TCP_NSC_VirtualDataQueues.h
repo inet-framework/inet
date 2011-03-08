@@ -19,16 +19,15 @@
 #ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 #define __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "TCP_NSC_Queues.h"
 
-#include "TCPConnection.h"
 
 /**
- * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ * Send queue that manages "virtual bytes", that is, byte counts only.
  */
-
 class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
 {
   public:
@@ -60,6 +59,9 @@ class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
     long int unsentNscBytesM;
 };
 
+/**
+ * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ */
 class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
 {
   public:

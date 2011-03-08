@@ -65,6 +65,9 @@ package inet.applications.tcpapp;
 //      These classes are not implemented yet.
 //
 
+import inet.applications.ITCPApp;
+
+
 simple TelnetApp like ITCPApp
 {
     parameters:

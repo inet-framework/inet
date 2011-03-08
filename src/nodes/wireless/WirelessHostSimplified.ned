@@ -18,7 +18,7 @@
 package inet.nodes.wireless;
 
 import inet.transport.udp.UDP;
-import inet.transport.tcp.TCP;
+import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
@@ -28,8 +28,8 @@ import inet.linklayer.ethernet.EthernetInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.IUDPApp;
-import inet.applications.tcpapp.ITCPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.ITCPApp;
 
 
 //
@@ -58,6 +58,7 @@ module WirelessHostSimplified
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -82,7 +83,7 @@ module WirelessHostSimplified
             parameters:
                 @display("p=163,67");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=163,154");
         }

@@ -18,6 +18,9 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.ITCPApp;
+
+
 //
 // Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
@@ -103,7 +106,7 @@ simple TCPBasicClientApp like ITCPApp
         int port = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double startTime @unit("s") = default(1s); // time first session begins
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
@@ -112,9 +115,9 @@ simple TCPBasicClientApp like ITCPApp
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
-        @statistic[connect](title="Connections";record=sum,timeavg,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
+        @statistic[connect](title="Connections"; record=sum,timeavg,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

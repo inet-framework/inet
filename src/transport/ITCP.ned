@@ -16,7 +16,7 @@
 //
 
 
-package inet.transport.tcp;
+package inet.transport;
 
 //
 // Interface for TCP protocol implementations. All TCP implementations should
@@ -98,7 +98,7 @@ package inet.transport.tcp;
 //
 moduleinterface ITCP
 {
-        @display("i=block/wheelbarrow");
+    @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
         input ipIn @labels(TCPSegment,IPControlInfo/up);

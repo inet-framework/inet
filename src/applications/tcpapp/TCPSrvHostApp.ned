@@ -18,6 +18,9 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.ITCPApp;
+
+
 //
 // This module hosts TCP-based server applications. It dynamically creates
 // and launches a new "thread" object for each incoming connection.
@@ -81,7 +84,7 @@ simple TCPSrvHostApp like ITCPApp
         string address = default(""); // may be left empty ("")
         int port = default(1000); // port number to listen on
         string serverThreadClass; // class name of "thread" objects to launch on incoming connections
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);

@@ -25,7 +25,7 @@ import inet.networklayer.mpls.MPLS;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.TED;
 import inet.nodes.inet.NetworkLayer;
-import inet.transport.tcp.TCP;
+import inet.transport.ITCP;
 import inet.transport.udp.UDP;
 import inet.util.NAMTraceWriter;
 
@@ -47,6 +47,7 @@ module LDP_LSR
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
@@ -80,7 +81,7 @@ module LDP_LSR
                 peers = peers;
                 @display("p=360,150");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=177,145");
         }

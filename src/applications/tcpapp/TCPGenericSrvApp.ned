@@ -38,6 +38,9 @@ package inet.applications.tcpapp;
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
 
+import inet.applications.ITCPApp;
+
+
 simple TCPGenericSrvApp like ITCPApp
 {
     parameters:
@@ -45,8 +48,8 @@ simple TCPGenericSrvApp like ITCPApp
         int port = default(1000);     // port number to listen on
         double replyDelay @unit("s") = default(0s);
         @display("i=block/app");
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes";record=count,sum,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

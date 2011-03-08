@@ -20,19 +20,19 @@ package inet.nodes.inet;
 
 import inet.util.NAMTraceWriter;
 import inet.transport.udp.UDP;
-import inet.transport.tcp.ITCP;
+import inet.transport.ITCP;
 import inet.transport.ISCTP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.IExtInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 import inet.applications.udpapp.IUDPApp;
-import inet.applications.tcpapp.ITCPApp;
-import inet.applications.ISCTPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.ITCPApp;
+import inet.applications.ISCTPApp;
 
 
 //

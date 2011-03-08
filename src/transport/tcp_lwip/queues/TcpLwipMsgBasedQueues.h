@@ -19,16 +19,15 @@
 #ifndef __INET_TcpLwipMSGBASEDQUEUES_H
 #define __INET_TcpLwipMSGBASEDQUEUES_H
 
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "TcpLwipQueues.h"
 
-#include "TCPConnection.h"
 
 /**
- * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ * Send queue that manages "objects".
  */
-
 class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 {
   protected:
@@ -115,6 +114,9 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
     virtual void discardAckedBytes();
 };
 
+/**
+ * Receive queue that manages "objects".
+ */
 class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 {
   public:

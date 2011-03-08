@@ -19,17 +19,16 @@
 #ifndef __INET_TCPLWIP_DATASTREAMQUEUES_H
 #define __INET_TCPLWIP_DATASTREAMQUEUES_H
 
-#include <omnetpp.h>
 
-#include "TcpLwipQueues.h"
+#include "INETDefs.h"
 
 #include "ByteArrayBuffer.h"
-#include "TCPConnection.h"
+#include "TcpLwipQueues.h"
+
 
 /**
- * Send/Receive queue that manages "data stream", that is, valid bytes.
+ * Send queue that manages "data stream", that is, valid bytes.
  */
-
 class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
 {
   public:
@@ -61,6 +60,9 @@ class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
     ByteArrayBuffer byteArrayBufferM;
 };
 
+/**
+ * Receive queue that manages "data stream", that is, valid bytes.
+ */
 class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
 {
   public:

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.applications.tcpapp;
+package inet.applications;
 
 //
 // Template for TCP applications. It shows what gates a TCP app

@@ -19,16 +19,15 @@
 #ifndef __INET_TCPLWIP_VIRTUALDATAQUEUES_H
 #define __INET_TCPLWIP_VIRTUALDATAQUEUES_H
 
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "TcpLwipQueues.h"
 
-#include "TCPConnection.h"
 
 /**
- * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ * Send queue that manages "virtual bytes", that is, byte counts only.
  */
-
 class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
 {
   public:
@@ -60,6 +59,9 @@ class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
     long int unsentTcpLayerBytesM;
 };
 
+/**
+ * Receive queue that manages "virtual bytes", that is, byte counts only.
+ */
 class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
 {
   public:

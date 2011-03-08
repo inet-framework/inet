@@ -18,6 +18,9 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.ITCPApp;
+
+
 //
 // Accepts any number of incoming TCP connections, and sends back the
 // messages that arrive on them, The lengths of the messages are
@@ -43,7 +46,7 @@ simple TCPEchoApp like ITCPApp
         int port; // port number to listen on
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

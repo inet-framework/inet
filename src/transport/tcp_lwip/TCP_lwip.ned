@@ -19,7 +19,7 @@
 
 package inet.transport.tcp_lwip;
 
-import inet.transport.tcp.ITCP;
+import inet.transport.ITCP;
 
 
 //

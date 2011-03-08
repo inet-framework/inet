@@ -18,7 +18,7 @@
 package inet.examples.bgpv4.BGPOpen;
 
 import inet.util.MessageChecker;
-import inet.transport.tcp.TCP;
+import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
@@ -37,6 +37,7 @@ module BGPRouterSimple
         @labels(node,ethernet-node);
         @display("i=abstract/router");
         string routingFile;
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
@@ -67,7 +68,7 @@ module BGPRouterSimple
             parameters:
                 @display("i=block/downarrow_s;p=196,124");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=160,202;i=block/transport");
         }

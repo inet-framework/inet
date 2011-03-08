@@ -1,9 +1,31 @@
 <features>
     <feature
+        id="TCP_BASE"
+        name="TCP Base"
+        description = "The common part of TCP implementations"
+        requires = ""
+        labels = "protocols"
+        nedPackages = "inet.transport.tcp inet.applications.tcpapp"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TCP_BASE"
+        linkerFlags = ""
+        />
+    <feature
+        id="TCP_INET"
+        name="TCP (INET)"
+        description = "TCP implementation (original INET implementation)"
+        requires = "TCP_BASE"
+        labels = "protocols"
+        nedPackages = "inet.transport.tcp_inet"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TCP_INET"
+        linkerFlags = ""
+        />
+    <feature
         id="TCP_LWIP"
         name="TCP (LWIP)"
         description = "TCP implementation based on LWIP"
-        requires = ""
+        requires = "TCP_BASE"
         labels = "protocols"
         nedPackages = "inet.transport.tcp_lwip"
         extraSourceFolders = ""
@@ -15,7 +37,7 @@
         name="TCP (NSC)"
         description = "Network Simulation Cradle: a TCP module that wraps real
                       OS stacks: Linux, FreeBSD, OpenBSD and lwIP. You must read the inet/3dparty/README file before you enable this feature"
-        requires = ""
+        requires = "TCP_BASE"
         labels = "protocols"
         nedPackages = "inet.transport.tcp_nsc"
         extraSourceFolders = ""
