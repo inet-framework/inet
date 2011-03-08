@@ -21,7 +21,6 @@
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_NSC"
         linkerFlags = ""
-        enable="false"
         />
     <feature
         id="IPv4"
