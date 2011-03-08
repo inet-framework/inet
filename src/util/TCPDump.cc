@@ -32,6 +32,7 @@
 
 #ifdef WITH_SCTP
 #include "SCTPMessage.h"
+#include "SCTPAssociation.h"
 #endif
 
 #include "TCPSegment.h"

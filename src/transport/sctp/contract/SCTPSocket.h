@@ -23,7 +23,7 @@
 #include <omnetpp.h>
 
 #include "IPvXAddress.h"
-//#include "SCTPAssociation.h"
+#include "SCTPAssociation.h"
 
 
 class SCTPStatusInfo;

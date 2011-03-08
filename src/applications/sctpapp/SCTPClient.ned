@@ -18,6 +18,9 @@
 
 package inet.applications.sctpapp;
 
+import inet.applications.ISCTPApp;
+
+
 simple SCTPClient like ISCTPApp
 {
     parameters:
