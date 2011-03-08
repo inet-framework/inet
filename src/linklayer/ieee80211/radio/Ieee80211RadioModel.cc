@@ -37,11 +37,11 @@ double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
 }
 
 
-bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrChangeList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
-    for (SnrList::const_iterator iter = receivedList.begin(); iter != receivedList.end(); iter++)
+    for (SnrChangeList::const_iterator iter = receivedList.begin(); iter != receivedList.end(); iter++)
         if (iter->snr < snirMin)
             snirMin = iter->snr;
 

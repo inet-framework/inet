@@ -36,7 +36,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
 
     virtual double calculateDuration(AirFrame *airframe);
 
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
+    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrChangeList& receivedList);
 
   protected:
     // utility

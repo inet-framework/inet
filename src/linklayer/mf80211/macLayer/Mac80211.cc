@@ -21,6 +21,7 @@
 #include "opp_utils.h"
 #include "Mac80211.h"
 #include "Ieee802Ctrl_m.h"
+#include "PhyControlInfo_m.h"  // for COLLISION and BITERROR
 #include "RadioState.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -45,7 +46,7 @@ Mac80211::~Mac80211()
 
 void Mac80211::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MacBase::initialize(stage);
 
     if (stage == 0)
     {

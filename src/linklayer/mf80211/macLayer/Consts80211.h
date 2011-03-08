@@ -16,10 +16,6 @@ enum _802_11frameType {
   BEGIN_RECEPTION = 7,//carrier sensing from the phy to the mac :
   //beginning of reception
 
-  //used in the phy layer to indicate unrocognizable frames, and
-  //between the decider and the MAC
-  BITERROR = -1,//the phy has recognized a bit error in the packet
-  COLLISION = 9//packet lost due to collision
 };
 
 //frame lengths in bits

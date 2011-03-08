@@ -29,7 +29,6 @@ cplusplus {{
 //
 enum PhyCommandCode
 {
-
     PHY_C_CONFIGURERADIO = 1;
 }
 
@@ -42,4 +41,12 @@ class PhyControlInfo
     double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
 }
 
-
+//
+// Sent up from the radio as message kind value
+//
+// NOTE: make sure it does not conflict with _802_11frameType in Consts80211.h
+enum PhyIndication
+{
+	BITERROR = -1; // the phy has recognized a bit error in the packet
+	COLLISION = 9; // packet lost due to collision
+}

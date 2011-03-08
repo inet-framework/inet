@@ -22,7 +22,7 @@
 #define MAC_80211_H
 
 #include <list>
-#include "WirelessMacBase.h"
+#include "MacBase.h"
 #include "Mac80211Pkt_m.h"
 #include "Consts80211.h"
 #include "NotificationBoard.h"
@@ -37,7 +37,7 @@
  * @ingroup macLayer
  * @author David Raguin
  */
-class INET_API Mac80211 : public WirelessMacBase, public INotifiable
+class INET_API Mac80211 : public MacBase, public INotifiable
 {
     typedef std::list<Mac80211Pkt*> MacPktList;
 

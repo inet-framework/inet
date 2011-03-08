@@ -20,8 +20,6 @@
 #include "AbstractRadio.h"
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
-#include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
-
 
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
@@ -393,7 +391,7 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
  * -# the host is currently not sending a message
  * -# no other packet is already being received
  *
- * If all conditions apply a new SnrList is created and the RadioState
+ * If all conditions apply a new SnrChangeList is created and the RadioState
  * is changed to RECV.
  *
  * If the packet is just noise the receive power is added to the noise
@@ -425,8 +423,8 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
     {
         EV << "receiving frame " << airframe->getName() << endl;
 
-        // Put frame and related SnrList in receive buffer
-        SnrList snrList;
+        // Put frame and related SnrChangeList in receive buffer
+        SnrChangeList snrList;
         snrInfo.ptr = airframe;
         snrInfo.rcvdPower = rcvdPower;
         snrInfo.sList = snrList;
@@ -475,7 +473,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
  * Additionally the RadioState has to be updated.
  *
  * If the corresponding AirFrame was not only noise the corresponding
- * SnrList and the AirFrame are sent to the decider.
+ * SnrChangeList and the AirFrame are sent to the decider.
  */
 void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
 {
@@ -484,7 +482,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
     {
         EV << "reception of frame over, preparing to send packet to upper layer\n";
         // get Packet and list out of the receive buffer:
-        SnrList list;
+        SnrChangeList list;
         list = snrInfo.sList;
 
         // delete the pointer to indicate that no message is currently
@@ -542,7 +540,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
 
 void AbstractRadio::addNewSnr()
 {
-    SnrListEntry listEntry;     // create a new entry
+    SnrChangeListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
     listEntry.snr = snrInfo.rcvdPower / noiseLevel;
     snrInfo.sList.push_back(listEntry);

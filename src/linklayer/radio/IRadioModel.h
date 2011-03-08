@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 #include "AirFrame_m.h"
-#include "SnrList.h"
+#include "SnrChangeList.h"
 
 /**
  * Abstract class to encapsulate the calculation of received power of a
@@ -56,7 +56,7 @@ class INET_API IRadioModel : public cPolymorphic
      * frame. The calculation may take into account the modulation scheme,
      * possible error correction code, etc.
      */
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList) = 0;
+    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrChangeList& receivedList) = 0;
 };
 
 #endif

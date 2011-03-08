@@ -22,7 +22,7 @@
 #define CSMAMAC_LAYER_H
 
 #include <list>
-#include "WirelessMacBase.h"
+#include "MacBase.h"
 #include "NotificationBoard.h"
 #include "RadioState.h"
 #include "MacPkt_m.h"
@@ -68,7 +68,7 @@
  * @ingroup macLayer
  * @author Marc L�bbers, Yosia Hadisusanto
  */
-class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
+class INET_API CSMAMacLayer : public MacBase, public INotifiable
 {
   public:
     CSMAMacLayer();

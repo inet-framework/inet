@@ -20,7 +20,7 @@
 
 #include "Decider80211.h"
 #include "Consts80211.h"
-
+#include "PhyControlInfo_m.h"  // for COLLISION and BITERROR
 
 Define_Module(Decider80211);
 

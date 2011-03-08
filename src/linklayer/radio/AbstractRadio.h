@@ -24,7 +24,7 @@
 #include "AirFrame_m.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
-#include "SnrList.h"
+#include "SnrChangeList.h"
 
 
 
@@ -147,14 +147,14 @@ class INET_API AbstractRadio : public ChannelAccess
     //@}
 
     /**
-     * Struct to store a pointer to the message, rcvdPower AND a SnrList,
+     * Struct to store a pointer to the message, rcvdPower AND a SnrChangeList,
      * needed in addNewSnr().
      */
     struct SnrStruct
     {
         AirFrame *ptr;    ///< pointer to the message this information belongs to
         double rcvdPower; ///< received power of the message
-        SnrList sList;    ///< stores SNR over time
+        SnrChangeList sList;    ///< stores SNR over time
     };
 
     /**

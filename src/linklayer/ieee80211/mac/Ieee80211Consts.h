@@ -18,12 +18,6 @@
 #ifndef IEEE80211_CONSTS_H
 #define IEEE80211_CONSTS_H
 
-// XXX these are taken over from Consts80211.h
-// the phy has recognized a bit error in the packet
-#define BITERROR -1
-// packet lost due to collision
-#define COLLISION 9
-
 // frame lengths in bits
 const unsigned int LENGTH_RTS = 160; //bits
 const unsigned int LENGTH_CTS = 112; //bits

@@ -40,7 +40,7 @@ CSMAMacLayer::~CSMAMacLayer()
 
 void CSMAMacLayer::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MacBase::initialize(stage);
 
     if (stage == 0)
     {
