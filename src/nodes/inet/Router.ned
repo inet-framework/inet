@@ -42,7 +42,7 @@ module Router
         string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
         string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
         string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only
-        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInerface and PPPInterfaceNoQueue
+        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInterface and PPPInterfaceNoQueue
         string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         int namid = default(-1);
         string routingFile = default("");
