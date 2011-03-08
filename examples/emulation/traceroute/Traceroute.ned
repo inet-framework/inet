@@ -18,11 +18,11 @@
 
 package inet.examples.emulation.traceroute;
 
+import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
-import ned.DatarateChannel;
+
 
 channel pppline extends DatarateChannel
 {
@@ -174,7 +174,7 @@ network Traceroute
                 routingFile = "Router6.mrt";
                 @display("p=396,445;i=device/router");
             gates:
-               pppg[3];
+                pppg[3];
         }
         extRouter: Router {
             parameters:
@@ -185,23 +185,23 @@ network Traceroute
                 pppg[2];
         }
     connections allowunconnected:
-        cli1.ethg[0]  <--> ethline <--> switch1.ethg[0];
-        cli2.ethg[0]  <--> ethline <--> switch1.ethg[1];
-        switch1.ethg[2]  <--> ethline <--> router1.ethg[0];
+        cli1.ethg[0] <--> ethline <--> switch1.ethg[0];
+        cli2.ethg[0] <--> ethline <--> switch1.ethg[1];
+        switch1.ethg[2] <--> ethline <--> router1.ethg[0];
         router1.pppg[0] <--> pppline <--> Router5.pppg[0];
         Router5.pppg[2] <--> pppline <--> extRouter.pppg[0];
-        cli3.ethg[0]  <--> ethline <--> switch2.ethg[0];
-        cli4.ethg[0]  <--> ethline <--> switch2.ethg[1];
-        switch2.ethg[2]  <--> ethline <--> router2.ethg[0];
+        cli3.ethg[0] <--> ethline <--> switch2.ethg[0];
+        cli4.ethg[0] <--> ethline <--> switch2.ethg[1];
+        switch2.ethg[2] <--> ethline <--> router2.ethg[0];
         router2.pppg[0] <--> pppline <--> Router5.pppg[1];
-        cli5.ethg[0]  <--> ethline <--> switch3.ethg[0];
-        cli6.ethg[0]  <--> ethline <--> switch3.ethg[1];
-        switch3.ethg[2]  <--> ethline <--> router3.ethg[0];
+        cli5.ethg[0] <--> ethline <--> switch3.ethg[0];
+        cli6.ethg[0] <--> ethline <--> switch3.ethg[1];
+        switch3.ethg[2] <--> ethline <--> router3.ethg[0];
         router3.pppg[0] <--> pppline <--> Router6.pppg[0];
         Router6.pppg[2] <--> pppline <--> extRouter.pppg[1];
-        cli7.ethg[0]  <--> ethline <--> switch4.ethg[0];
-        cli8.ethg[0]  <--> ethline <--> switch4.ethg[1];
-        switch4.ethg[2]  <--> ethline <--> router4.ethg[0];
+        cli7.ethg[0] <--> ethline <--> switch4.ethg[0];
+        cli8.ethg[0] <--> ethline <--> switch4.ethg[1];
+        switch4.ethg[2] <--> ethline <--> router4.ethg[0];
         router4.pppg[0] <--> pppline <--> Router6.pppg[1];
 }
 
