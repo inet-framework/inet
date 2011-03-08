@@ -20,11 +20,11 @@
 
 package inet.nodes.wireless;
 
-import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
-import inet.linklayer.ethernet.EtherMAC;
-import inet.linklayer.etherswitch.IMACRelayUnit;
 import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
+import inet.linklayer.etherswitch.IMACRelayUnit;
+import inet.linklayer.ethernet.EtherMAC;
+import inet.base.NotificationBoard;
 
 
 //

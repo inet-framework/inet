@@ -52,13 +52,13 @@ class INET_API NAMTrace : public cSimpleModule
 
   public:
     /**
-     * Assign a nam ID to the given getModule(host or router).
+     * Assign a nam ID to the given module (host or router).
      * -1 means auto-assigned ID.
      */
     virtual int assignNamId(cModule *node, int namid=-1);
 
     /**
-     * Returns the nam ID of the given getModule(host or router). assignNamId() must
+     * Returns the nam ID of the given module (host or router). assignNamId() must
      * have been called for the given module before, at least with -1 (auto-ID).
      */
     virtual int getNamId(cModule *node) const;

@@ -18,7 +18,7 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.radio.Ieee80211Radio;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAPSimplified;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.IWirelessNic;

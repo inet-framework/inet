@@ -17,7 +17,10 @@
 //
 
 
-package inet.linklayer.radio;
+package inet.linklayer.ieee80211.radio;
+
+import inet.linklayer.radio.IRadio;
+
 
 //
 // Physical layer for the IEEE 802.11 models. Its external interface

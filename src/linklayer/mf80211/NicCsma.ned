@@ -20,9 +20,9 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mfcore.BasicDecider;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
+import inet.linklayer.mf80211.core.BasicDecider;
 import inet.linklayer.IWirelessNic;
 
 

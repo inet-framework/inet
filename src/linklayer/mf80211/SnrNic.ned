@@ -23,9 +23,9 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
-import inet.linklayer.mf80211.phyLayer.decider.SnrDecider;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
+import inet.linklayer.mf80211.phyLayer.decider.SnrDecider;
+import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
 
 
 // This is the easiest nic to implement "real" network behaviour. It uses

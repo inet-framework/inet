@@ -19,14 +19,14 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.applications.ethernet.EtherAppCli;
-import inet.base.NotificationBoard;
-import inet.base.Sink;
-import inet.mobility.CircleMobility;
-import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.nodes.wireless.WirelessAPSimplified;
 import inet.world.ChannelControl;
+import inet.nodes.wireless.WirelessAPSimplified;
+import inet.mobility.NullMobility;
+import inet.mobility.CircleMobility;
+import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.base.Sink;
+import inet.base.NotificationBoard;
+import inet.applications.ethernet.EtherAppCli;
 
 
 module ThroughputClient

@@ -39,9 +39,9 @@ simple GenericRadio like IRadio
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
         @display("i=block/wrxtx");
-        @statistic[bitrate](title="Bitrate";record=timeavg,vector;interpolationmode=sample-hold;);
-        @statistic[channelNumber](title="Channel no";record=histogram,vector;interpolationmode=sample-hold;); //vector
-        @statistic[radioState](title="Radio state (enum)";record=histogram,vector;interpolationmode=sample-hold;); //vector
+        @statistic[bitrate](title="Bitrate"; record=timeavg,vector; interpolationmode=sample-hold; );
+        @statistic[channelNumber](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
+        @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
     gates:
         input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output uppergateOut @labels(PhyControlInfo/up); // to decider (decider connects to higher layer protocol, i.e. the MAC)
