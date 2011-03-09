@@ -32,7 +32,10 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
+
+#ifdef WITH_UDP
 #include "UDPSerializer.h"
+#endif
 
 #ifdef WITH_SCTP
 #include "SCTPSerializer.h"    //I.R.
@@ -97,10 +100,12 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
 
+#ifdef WITH_UDP
       case IP_PROT_UDP:
         packetLength += UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
+#endif
 
 #ifdef WITH_SCTP
       case IP_PROT_SCTP:    //I.R.
@@ -168,10 +173,12 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         ICMPSerializer().parse(buf + headerLength, encapLength, (ICMPMessage *)encapPacket);
         break;
 
+#ifdef WITH_UDP
       case IP_PROT_UDP:
         encapPacket = new UDPPacket("udp-from-wire");
         UDPSerializer().parse(buf + headerLength, encapLength, (UDPPacket *)encapPacket);
         break;
+#endif
 
 #ifdef WITH_SCTP
       case IP_PROT_SCTP:

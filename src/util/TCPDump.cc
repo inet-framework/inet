@@ -26,9 +26,12 @@
 #include "IPControlInfo_m.h"
 #include "IPSerializer.h"
 #include "ICMPMessage.h"
-#include "UDPPacket_m.h"
-
 #include "IPAddress.h"
+
+
+#ifdef WITH_UDP
+#include "UDPPacket_m.h"
+#endif
 
 #ifdef WITH_SCTP
 #include "SCTPMessage.h"
@@ -393,6 +396,7 @@ TCPDump::TCPDump() : cSimpleModule(), tcpdump(ev.getOStream())
 
 void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)
 {
+#ifdef WITH_UDP
     cMessage *encapmsg = dgram->getEncapsulatedPacket();
     if (dynamic_cast<UDPPacket *>(encapmsg))
     {
@@ -426,6 +430,7 @@ void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
 #endif
         }
     }
+#endif
 }
 
 void TCPDumper::tcpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)

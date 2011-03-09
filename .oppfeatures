@@ -159,7 +159,7 @@
         id="MPLS"
         name="MPLS with LDP, RSVP_TE, TED"
         description = "MPLS support"
-        requires = "TCP_BASE"
+        requires = "TCP_BASE UDP"
         labels = "routing"
         nedPackages = "inet.networklayer.mpls inet.nodes.mpls
                        inet.networklayer.ldp

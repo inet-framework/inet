@@ -16,7 +16,7 @@
 //
 
 
-package inet.networklayer.autorouting;
+package inet.networklayer.autorouting.ipv4;
 
 //
 // Configures IP addresses and routing tables for a network.

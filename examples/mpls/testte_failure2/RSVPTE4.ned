@@ -18,7 +18,7 @@ import inet.world.ScenarioManager;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.extras.FailureManager;
-import inet.networklayer.autorouting.NetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 
 
 //

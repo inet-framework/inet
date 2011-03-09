@@ -17,7 +17,7 @@ import inet.world.NAMTrace;
 import inet.world.ChannelInstaller;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.NetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 
 
 network R37
