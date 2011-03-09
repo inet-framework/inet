@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.extras;
+package inet.networklayer.ipv4;
 
 //
 // ~NetworkInfo does not send or receive messages and has no parameters

@@ -20,8 +20,11 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
+
+#ifdef WITH_IPv4
 #include "IPControlInfo.h"
 #include "ICMPMessage_m.h"
+#endif
 
 #ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"

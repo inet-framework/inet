@@ -18,21 +18,22 @@
 #ifndef __INET_ARP_H
 #define __INET_ARP_H
 
-#include <stdio.h>
-#include <string.h>
-#include <vector>
+//#include <stdio.h>
+//#include <string.h>
+//#include <vector>
 #include <map>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
+#include "MACAddress.h"
+#include "ModuleAccess.h"
 #include "IPAddress.h"
-#include "ARPPacket_m.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
-#include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
-#include "IRoutingTable.h"
-#include "RoutingTableAccess.h"
 
-
+// Forward declarations:
+class ARPPacket;
+class IInterfaceTable;
+class InterfaceEntry;
+class IRoutingTable;
 
 /**
  * ARP implementation.

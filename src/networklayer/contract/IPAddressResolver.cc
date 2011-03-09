@@ -148,22 +148,33 @@ IPvXAddress IPAddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType
 IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
 {
     IPvXAddress ret;
+
+#ifdef WITH_IPv6
     if (addrType==ADDR_IPv6 || addrType==ADDR_PREFER_IPv6)
     {
         if (ie->ipv6Data())
             ret = getInterfaceIPv6Address(ie);
 
+#ifdef WITH_IPv4
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv6 && ie->ipv4Data())
             ret = ie->ipv4Data()->getIPAddress();
+#endif
     }
-    else if (addrType==ADDR_IPv4 || addrType==ADDR_PREFER_IPv4)
+    else
+#endif
+#ifdef WITH_IPv4
+    if (addrType==ADDR_IPv4 || addrType==ADDR_PREFER_IPv4)
     {
         if (ie->ipv4Data())
             ret = ie->ipv4Data()->getIPAddress();
+
+#ifdef WITH_IPv6
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv4 && ie->ipv6Data())
             ret = getInterfaceIPv6Address(ie);
+#endif
     }
     else
+#endif
     {
         throw cRuntimeError("IPAddressResolver: unknown addrType %d", addrType);
     }

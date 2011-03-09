@@ -51,6 +51,7 @@
         requires = ""
         labels = "protocols"
         nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.networklayer.contract.ipv4
+                       inet.networklayer.arp
                        inet.nodes.inet inet.util.headerserializers.ipv4"
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -62,7 +63,8 @@
         description = "Examples for Basic IPv4 support (IPv4)"
         requires = "IPv4"
         labels = "protocls examples"
-        nedPackages = "inet.examples.inet"
+        nedPackages = "inet.examples.inet
+                       inet.examples.ethernet.arptest inet.examples.ethernet.arptest2"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -137,7 +139,7 @@
         id="SCTP_examples"
         name="SCTP examples"
         description = "Examples for SCTP"
-        requires = "SCTP"
+        requires = "SCTP IPv4"
         labels = "protocols examples"
         nedPackages = "inet.examples.sctp"
         extraSourceFolders = ""
@@ -156,10 +158,21 @@
         linkerFlags = ""
         />
     <feature
+        id="ExternalInterface_examples"
+        name="External Interface examples"
+        description = "Examples for External Interface Support"
+        requires = "ExternalInterface"
+        labels = "nic"
+        nedPackages = "inet.examples.emulation"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="MPLS"
         name="MPLS with LDP, RSVP_TE, TED"
         description = "MPLS support"
-        requires = "TCP_BASE UDP"
+        requires = "TCP_BASE UDP IPv4"
         labels = "routing"
         nedPackages = "inet.networklayer.mpls inet.nodes.mpls
                        inet.networklayer.ldp
@@ -185,7 +198,7 @@
         id="OSPFv2"
         name="OSPFv2"
         description = "OSPFv2 support"
-        requires = ""
+        requires = "IPv4"
         labels = "routing"
         nedPackages = "inet.networklayer.ospfv2 inet.nodes.ospfv2"
         extraSourceFolders = ""
