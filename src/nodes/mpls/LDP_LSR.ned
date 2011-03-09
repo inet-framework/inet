@@ -26,7 +26,7 @@ import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.TED;
 import inet.nodes.inet.NetworkLayer;
 import inet.transport.ITCP;
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.util.NAMTraceWriter;
 
 
@@ -48,6 +48,7 @@ module LDP_LSR
         string routerId = default("auto");
         string routingFile = default("");
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+        string udpType = default("UDP");  // UDP implementation (~UDP)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
@@ -85,7 +86,7 @@ module LDP_LSR
             parameters:
                 @display("p=177,145");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             parameters:
                 @display("p=267,145");
         }

@@ -17,7 +17,7 @@
 
 package inet.nodes.wireless;
 
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
@@ -58,6 +58,7 @@ module WirelessHost
         string routingFile = default("");
         string mobilityType = default("NullMobility");
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+        string udpType = default("UDP");  // UDP implementation (~UDP)
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -90,7 +91,7 @@ module WirelessHost
             parameters:
                 @display("p=272,67");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             parameters:
                 @display("p=272,154");
         }

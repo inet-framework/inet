@@ -19,7 +19,7 @@
 package inet.nodes.ipv6;
 
 import inet.util.NAMTraceWriter;
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.transport.ISCTP;
 import inet.networklayer.ipv6.RoutingTable6;
@@ -101,7 +101,7 @@ module StandardHost6
             parameters:
                 @display("p=336,54");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             parameters:
                 @display("p=336,141");
         }

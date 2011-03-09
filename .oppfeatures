@@ -1,7 +1,7 @@
 <features>
     <feature
         id="TCP_BASE"
-        name="TCP Base --- under consruction"
+        name="TCP Base"
         description = "The common part of TCP implementations"
         requires = ""
         labels = "protocols"
@@ -90,10 +90,21 @@
         linkerFlags = ""
         />
     <feature
+        id="UDP"
+        name="UDP protocol --- under consruction"
+        description = "UDP protocol"
+        requires = ""
+        labels = ""
+        nedPackages = "inet.transport.udp"
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_UDP"
+        linkerFlags = ""
+        />
+    <feature
         id="RTP"
         name="RTP"
         description = "Real Time Protocol support"
-        requires = "IPv4"
+        requires = "UDP IPv4"
         labels = "protocols"
         nedPackages = "inet.applications.rtpapp inet.transport.rtp"
         extraSourceFolders = ""
@@ -243,17 +254,6 @@
         requires = "mobility"
         labels = "nic wireless"
         nedPackages = "inet.linklayer.ieee80211"
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
-        id="UDP"
-        name="UDP protocol --- under consruction"
-        description = "UDP protocol"
-        requires = ""
-        labels = ""
-        nedPackages = "inet.transport.udp"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""

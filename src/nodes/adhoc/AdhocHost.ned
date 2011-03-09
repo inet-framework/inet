@@ -15,7 +15,7 @@
 
 package inet.nodes.adhoc;
 
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
@@ -46,7 +46,8 @@ module AdhocHost
     // string udpAppType = default(""); // Obsolete!
     string routingFile = default("");
     string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
-    string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+    string tcpType = default("TCP");  // TCP implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+    string udpType = default("UDP");  // UDP implementation (~UDP)
     string wlanNicType = default("Ieee80211NicAdhoc"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
     int numRadios = default(1);
     @display("i=device/cellphone;bgb=525,394");
@@ -81,7 +82,7 @@ module AdhocHost
         udpApp[numUdpApps]: <> like IUDPApp {
             @display("p=346,67");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             @display("p=346,154");
         }
         pingApp: PingApp {

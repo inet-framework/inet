@@ -19,7 +19,7 @@
 package inet.nodes.inet;
 
 import inet.util.NAMTraceWriter;
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.transport.ISCTP;
 import inet.networklayer.ipv4.RoutingTable;
@@ -61,6 +61,7 @@ module StandardHost
         // string udpAppType = default(""); // Obsolete!
         // string sctpAppType = default(""); // Obsolete!
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+        string udpType = default("UDP");  // UDP implementation (~UDP)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
@@ -112,7 +113,7 @@ module StandardHost
             parameters:
                 @display("p=336,54");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             parameters:
                 @display("p=336,141");
         }

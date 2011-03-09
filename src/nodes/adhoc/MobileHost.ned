@@ -17,7 +17,7 @@
 
 package inet.nodes.adhoc;
 
-import inet.transport.udp.UDP;
+import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
@@ -84,7 +84,7 @@ module MobileHost
             parameters:
                 @display("p=272,67");
         }
-        udp: UDP {
+        udp: <udpType> like IUDP {
             parameters:
                 @display("p=272,154");
         }

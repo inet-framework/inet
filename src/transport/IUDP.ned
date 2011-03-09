@@ -18,12 +18,10 @@
 
 
 
-package inet.transport.udp;
-
-import inet.transport.IUDP;
+package inet.transport;
 
 //
-// UDP protocol implementation, for IPv4 and IPv6.
+// UDP protocol interface.
 //
 // The UDP protocol header is represented by the class ~UDPPacket.
 //
@@ -49,22 +47,12 @@ import inet.transport.IUDP;
 // objects attached to ~UDPPacket objects as control info
 // (see cMessage::setControlInfo()).
 //
-// @see ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
+// @see ~UDP, ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
 //
-simple UDP like IUDP
+moduleinterface IUDP
 {
     parameters:
         @display("i=block/transport");
-        @signal[sentPk](type=cPacket);
-        @signal[recvPk](type=cPacket);
-        @signal[passedUpPk](type=cPacket);
-        @signal[droppedPkWrongPort](type=cPacket);
-        @signal[droppedPkBadChecksum](type=cPacket);
-        @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[recvPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[passedUpPk](title="packets passed up"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; record=count,"vector(count)"; interpolationmode=none);
 
     gates:
         input appIn[] @labels(UDPControlInfo/down);
