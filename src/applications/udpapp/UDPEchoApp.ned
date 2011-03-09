@@ -18,6 +18,9 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Similar to ~UDPBasicApp, but it sends back the packet after reception.
 //

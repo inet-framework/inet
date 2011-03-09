@@ -23,7 +23,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWirelessNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.IUDPApp;
+import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
 import inet.applications.ITCPApp;
 

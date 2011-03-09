@@ -39,7 +39,11 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #endif
 
 #include "TCPIPchecksum.h"
+
+#ifdef WITH_TCP_BASE
+#include "TCPSegment.h"
 #include "TCPSerializer.h"    //I.R.
+#endif
 
 #if defined(_MSC_VER)
 #undef s_addr   /* MSVC #definition interferes with us */
@@ -105,11 +109,13 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
         break;
 #endif
 
+#ifdef WITH_TCP_BASE
       case IP_PROT_TCP:        //I.R.
         packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES,
                                                    dgram->getSrcAddress(), dgram->getDestAddress());
         break;
+#endif
 
       default:
         throw cRuntimeError(dgram, "IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
@@ -174,13 +180,15 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         break;
 #endif
 
+#ifdef WITH_TCP_BASE
       case IP_PROT_TCP:
         encapPacket = new TCPSegment("tcp-from-wire");
         TCPSerializer().parse(buf + headerLength, encapLength, (TCPSegment *)encapPacket, true);
         break;
+#endif
 
       default:
-        throw cRuntimeError("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());
+        throw cRuntimeError("IPSerializer: cannot parse protocol %d", dest->getTransportProtocol());
     }
 
     ASSERT(encapPacket);

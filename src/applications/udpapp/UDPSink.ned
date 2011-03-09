@@ -19,6 +19,9 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Consumes and prints packets received from the ~UDP module.
 //

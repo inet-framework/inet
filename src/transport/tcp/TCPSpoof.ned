@@ -16,7 +16,10 @@
 //
 
 
-package inet.applications.tcpapp;
+package inet.transport.tcp;
+
+import inet.transport.ITCP;
+
 
 //
 // Sends fabricated TCP packets. This is a base implementation,
@@ -25,7 +28,7 @@ package inet.applications.tcpapp;
 //
 // Compatible with both IPv4 (~IP) and ~IPv6.
 //
-simple TCPSpoof
+simple TCPSpoof like ITCP
 {
     parameters:
         string srcAddress = default("");  // local address; may be left empty ("")
@@ -36,10 +39,15 @@ simple TCPSpoof
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");
-        @statistic[sentPkBytesSignal](title="Sent packet bytes";record=count,sum,vector);
+        @statistic[sentPkBytesSignal](title="Sent packet bytes"; record=count,sum,vector);
 
     gates:
-        output ipv4Out @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
+
+        input appIn[] @labels(TCPCommand/down); // Not used!
+        input ipIn @labels(TCPSegment,IPControlInfo/up); // Not used!
+        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up); // Not used!
+        output appOut[] @labels(TCPCommand/up); // Not used!
 }
 

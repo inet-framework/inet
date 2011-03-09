@@ -27,7 +27,7 @@ import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.IUDPApp;
+import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
 import inet.applications.ITCPApp;
 

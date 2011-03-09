@@ -29,7 +29,7 @@ import inet.linklayer.IWiredNic;
 import inet.linklayer.IExtInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.udpapp.IUDPApp;
+import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
 import inet.applications.ITCPApp;
 import inet.applications.ISCTPApp;
@@ -60,7 +60,7 @@ module StandardHost
         // string tcpAppType = default(""); // Obsolete!
         // string udpAppType = default(""); // Obsolete!
         // string sctpAppType = default(""); // Obsolete!
-        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility

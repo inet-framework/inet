@@ -1,7 +1,7 @@
 <features>
     <feature
         id="TCP_BASE"
-        name="TCP Base"
+        name="TCP Base --- under consruction"
         description = "The common part of TCP implementations"
         requires = ""
         labels = "protocols"
@@ -46,7 +46,7 @@
         />
     <feature
         id="IPv4"
-        name="IP protocol (v4)"
+        name="IP protocol (v4) --- under consruction"
         description = "Basic IPv4 support"
         requires = ""
         labels = "protocols"
@@ -146,9 +146,9 @@
         />
     <feature
         id="MPLS"
-        name="MPLS"
+        name="MPLS with LDP, RSVP_TE, TED"
         description = "MPLS support"
-        requires = ""
+        requires = "TCP_BASE"
         labels = "routing"
         nedPackages = "inet.networklayer.mpls inet.nodes.mpls
                        inet.networklayer.ldp
@@ -215,6 +215,17 @@
         linkerFlags = ""
         />
     <feature
+        id="mobility"
+        name="Mobility"
+        description = "Mobility support for wireless simulations"
+        requires = ""
+        labels = ""
+        nedPackages = "inet.mobility"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="mf80211"
         name="802.11b (Mobility Framework)"
         description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
@@ -226,7 +237,7 @@
         linkerFlags = ""
         />
     <feature
-        id="80211"
+        id="_80211"
         name="802.11b (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
         requires = "mobility"
@@ -237,12 +248,12 @@
         linkerFlags = ""
         />
     <feature
-        id="mobility"
-        name="Mobility"
-        description = "Mobility support for wireless simulations"
+        id="UDP"
+        name="UDP protocol --- under consruction"
+        description = "UDP protocol"
         requires = ""
         labels = ""
-        nedPackages = "inet.mobility"
+        nedPackages = "inet.transport.udp"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""

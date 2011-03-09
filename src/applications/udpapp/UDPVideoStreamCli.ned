@@ -18,6 +18,9 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Video streaming client.
 //
@@ -31,8 +34,8 @@ simple UDPVideoStreamCli like IUDPApp
         int serverPort;
         double startTime @unit("s") = default(1s);
         @display("i=block/app");
-        @statistic[endToEndDelay](title="End-to-end delay";record=histogram,stats,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes";record=count,sum,vector);
+        @statistic[endToEndDelay](title="End-to-end delay"; record=histogram,stats,vector);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

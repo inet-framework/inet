@@ -1,6 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
+- Removed the TCPSpoofingHost node. Use instead StandardHost with the tcpType="TCPSpoof" parameter.
+
 INET-1.99.0
 ----------
 This is a beta of a major feature release, with new models and also incompatible

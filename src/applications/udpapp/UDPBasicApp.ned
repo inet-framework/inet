@@ -19,6 +19,9 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Sends UDP packets to the given IP address at the given interval.
 // Compatible with both IPv4 (~IP) and ~IPv6.
