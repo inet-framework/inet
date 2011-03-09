@@ -35,7 +35,9 @@
 #include "SCTPAssociation.h"
 #endif
 
+#ifdef WITH_TCP_BASE
 #include "TCPSegment.h"
+#endif
 
 #ifdef WITH_IPv4
 #include "IPDatagram.h"
@@ -430,12 +432,15 @@ void TCPDumper::tcpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
 {
 #ifdef WITH_IPv4
     cMessage *encapmsg = dgram->getEncapsulatedPacket();
+
+#ifdef WITH_TCP_BASE
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
          // if TCP, dump as TCP
          tcpDump(l2r, label, (TCPSegment *)encapmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
     }
     else
+#endif
     {
          // some other packet, dump what we can
          std::ostream& out = *outp;
@@ -458,12 +463,14 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const
 #ifdef WITH_IPv6
     cMessage *encapmsg = dgram->getEncapsulatedPacket();
 
+#ifdef WITH_TCP_BASE
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
          // if TCP, dump as TCP
          tcpDump(l2r, label, (TCPSegment *)encapmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
     }
     else
+#endif
     {
          // some other packet, dump what we can
          std::ostream& out = *outp;
@@ -483,6 +490,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const
 
 void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
+#ifdef WITH_TCP_BASE
      std::ostream& out = *outp;
 
     // seq and time (not part of the tcpdump format)
@@ -552,6 +560,9 @@ void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const s
         out << "# " << comment;
 
      out << endl;
+#else
+    throw cRuntimeError("INET compiled without any TCP features!");
+#endif
 }
 
 void TCPDump::initialize()
@@ -624,6 +635,7 @@ void TCPDump::handleMessage(cMessage *msg)
         }
         else
 #endif
+#ifdef TCP_BASE
         if (dynamic_cast<TCPSegment *>(msg))
         {
             if (PK(msg)->hasBitError())
@@ -635,6 +647,7 @@ void TCPDump::handleMessage(cMessage *msg)
             tcpdump.tcpDump(l2r, "", (TCPSegment *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
         else
+#endif
 #ifdef WITH_IPv4
         if (dynamic_cast<ICMPMessage *>(msg))
         {
