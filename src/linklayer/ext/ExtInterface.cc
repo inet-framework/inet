@@ -131,9 +131,9 @@ void ExtInterface::handleMessage(cMessage *msg)
         IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
 
         if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_SCTP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_TCP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_UDP))
+            (ipPacket->getTransportProtocol() != IP_PROT_SCTP) &&
+            (ipPacket->getTransportProtocol() != IP_PROT_TCP) &&
+            (ipPacket->getTransportProtocol() != IP_PROT_UDP))
         {
             EV << "Can not send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
             numDropped++;

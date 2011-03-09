@@ -23,6 +23,8 @@
 
 #include "TCPDump.h"
 
+#include "IPProtocolId_m.h"
+
 #ifdef WITH_UDP
 #include "UDPPacket_m.h"
 #endif
@@ -75,7 +77,7 @@ void TCPDumper::ipDump(const char *label, IPDatagram *dgram, const char *comment
      }
      else
 #endif
-     delete dgram;
+     ;
 }
 
 void TCPDumper::sctpDump(const char *label, SCTPMessage *sctpmsg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
@@ -608,7 +610,7 @@ void TCPDump::handleMessage(cMessage *msg)
 #ifdef WITH_IPv4
         if (dynamic_cast<IPDatagram *>(msg))
         {
-            if (((IPDatagram *)msg)->getTransportProtocol()==132)
+            if (((IPDatagram *)msg)->getTransportProtocol() == IP_PROT_SCTP)
             {
                 tcpdump.ipDump("", (IPDatagram *)msg);
             }
@@ -620,11 +622,11 @@ void TCPDump::handleMessage(cMessage *msg)
                     return;
                 }
                 l2r = msg->arrivedOn("in1");
-                if (((IPDatagram *)msg)->getTransportProtocol()==6)
+                if (((IPDatagram *)msg)->getTransportProtocol() == IP_PROT_TCP)
                 {
                     tcpdump.tcpDump(l2r, "", (IPDatagram *)msg, "");
                 }
-                else if (((IPDatagram *)msg)->getTransportProtocol()==17)
+                else if (((IPDatagram *)msg)->getTransportProtocol() == IP_PROT_UDP)
                     tcpdump.udpDump(l2r, "", (IPDatagram *)msg, "");
             }
         }

@@ -31,7 +31,9 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 };
 
 #include "IPSerializer.h"
+
 #include "ICMPSerializer.h"
+#include "IPProtocolId_m.h"
 
 #ifdef WITH_UDP
 #include "UDPSerializer.h"
@@ -54,12 +56,6 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
-#ifdef WITH_SCTP
-#ifndef IP_PROT_SCTP    //I.R.
-#define IP_PROT_SCTP 132
-#endif
 #endif
 
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us

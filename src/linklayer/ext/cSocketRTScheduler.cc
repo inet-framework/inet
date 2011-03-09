@@ -23,10 +23,6 @@
 
 #include "cSocketRTScheduler.h"
 
-#ifndef IPPROTO_SCTP
-#define IPPROTO_SCTP 132
-#endif
-
 #include <headers/ethernet.h>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
