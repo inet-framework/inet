@@ -5,7 +5,9 @@
         description = "The common part of TCP implementations"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.transport.tcp inet.applications.tcpapp"
+        nedPackages = "inet.transport.tcp
+                       inet.applications.tcpapp
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_BASE"
         linkerFlags = ""
@@ -50,9 +52,10 @@
         description = "Basic IPv4 support"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.networklayer.ipv4 inet.networklayer.autorouting.ipv4 inet.networklayer.contract.ipv4
+        nedPackages = "inet.networklayer.ipv4
+                       inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp
-                       inet.nodes.inet inet.util.headerserializers.ipv4"
+                       inet.nodes.inet"
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
         linkerFlags = ""
@@ -64,7 +67,8 @@
         requires = "IPv4"
         labels = "protocls examples"
         nedPackages = "inet.examples.inet
-                       inet.examples.ethernet.arptest inet.examples.ethernet.arptest2"
+                       inet.examples.ethernet.arptest
+                       inet.examples.ethernet.arptest2"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -75,7 +79,10 @@
         description = "Basic IPv6 support"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.networklayer.ipv6 inet.networklayer.autorouting.ipv6 inet.nodes.ipv6 inet.networklayer.contract.ipv6 inet.networklayer.icmpv6"
+        nedPackages = "inet.networklayer.ipv6
+                       inet.networklayer.autorouting.ipv6
+                       inet.nodes.ipv6
+                       inet.networklayer.icmpv6"
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
         linkerFlags = ""
@@ -108,7 +115,8 @@
         description = "Real Time Protocol support"
         requires = "UDP IPv4"
         labels = "protocols"
-        nedPackages = "inet.applications.rtpapp inet.transport.rtp"
+        nedPackages = "inet.applications.rtpapp
+                       inet.transport.rtp"
         extraSourceFolders = ""
         compileFlags = "-DWITH_RTP"
         linkerFlags = ""
@@ -178,7 +186,7 @@
                        inet.networklayer.ldp
                        inet.networklayer.rsvp_te
                        inet.networklayer.ted
-                       "
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_MPLS"
         linkerFlags = ""
@@ -200,7 +208,9 @@
         description = "OSPFv2 support"
         requires = "IPv4"
         labels = "routing"
-        nedPackages = "inet.networklayer.ospfv2 inet.nodes.ospfv2"
+        nedPackages = "inet.networklayer.ospfv2
+                       inet.nodes.ospfv2
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_OSPFv2"
         linkerFlags = ""
@@ -222,7 +232,9 @@
         description = "BGP support"
         requires = "IPv4 OSPFv2"
         labels = "routing"
-        nedPackages = "inet.networklayer.bgpv4 inet.nodes.bgp"
+        nedPackages = "inet.networklayer.bgpv4
+                       inet.nodes.bgp
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_BGPv4"
         linkerFlags = ""
@@ -267,6 +279,17 @@
         requires = "mobility"
         labels = "nic wireless"
         nedPackages = "inet.linklayer.ieee80211"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="wireless"
+        name="wireless, depends on IPv4, --TODO--"
+        description = "wireless, depends on IPv4"
+        requires = "IPv4"
+        labels = "nic wireless"
+        nedPackages = "inet.nodes.adhoc inet.nodes.wireless inet.examples.adhoc inet.examples.wireless"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
