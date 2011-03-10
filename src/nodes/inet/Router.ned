@@ -17,7 +17,6 @@
 
 package inet.nodes.inet;
 
-import inet.util.NAMTraceWriter;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IExtInterface;
@@ -54,18 +53,12 @@ module Router
         @display("i=abstract/router");
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        int namid = default(-1);
         string routingFile = default("");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=375,54");
-        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=57,54");
@@ -83,7 +76,7 @@ module Router
         }
         mobility: <default("NoMobility")> like IMobility {
             parameters:
-                @display("p=468,54");
+                @display("p=379,54");
         }
         networkLayer: NetworkLayer {
             parameters:

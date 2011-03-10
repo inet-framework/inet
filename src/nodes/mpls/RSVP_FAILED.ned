@@ -27,7 +27,6 @@ module RSVP_FAILED
     parameters:
         @labels(node);
         @display("i=abstract/router;i2=status/noentry");
-        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");

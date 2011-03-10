@@ -18,7 +18,6 @@
 
 package inet.nodes.ipv6;
 
-import inet.util.NAMTraceWriter;
 import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.transport.ISCTP;
@@ -29,8 +28,8 @@ import inet.linklayer.IWiredNic;
 import inet.linklayer.IExtInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
 import inet.applications.ISCTPApp;
 
@@ -52,18 +51,12 @@ module StandardHost6
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         bool IPForward = default(false);             // whether to support forwarding of IP packets (i.e. routing)
-        int namid = default(-1);
         xml routingTableFile;  //# TODO a reasonable default should be provided
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=57,294");
-        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=57,54");
@@ -80,7 +73,7 @@ module StandardHost6
         }
         mobility: <default("NoMobility")> like IMobility {
             parameters:
-                @display("p=57,368");
+                @display("p=57,301");
         }
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:

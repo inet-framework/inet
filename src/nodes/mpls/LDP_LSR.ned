@@ -9,25 +9,20 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-
-
-
-
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.ldp.LDP;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
-import inet.nodes.inet.NetworkLayer;
-import inet.transport.ITCP;
 import inet.transport.IUDP;
-import inet.util.NAMTraceWriter;
+import inet.transport.ITCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ted.TED;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.ldp.LDP;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ppp.PPPInterface;
+import inet.base.NotificationBoard;
 
 
 //
@@ -43,7 +38,6 @@ module LDP_LSR
         @display("i=abstract/router");
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
-        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
@@ -115,12 +109,6 @@ module LDP_LSR
         libTable: LIBTable {
             parameters:
                 @display("p=340,305");
-        }
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=70,310");
-
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;

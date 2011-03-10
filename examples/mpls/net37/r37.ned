@@ -13,7 +13,6 @@
 package inet.examples.mpls.net37;
 
 import ned.DatarateChannel;
-import inet.world.NAMTrace;
 import inet.world.ChannelInstaller;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.nodes.inet.StandardHost;
@@ -38,10 +37,6 @@ network R37
                 channelClass = "ThruputMeteringChannel";
                 channelAttrs = "format=u";
                 @display("p=100,160");
-        }
-        nam: NAMTrace {
-            parameters:
-                @display("p=100,220");
         }
         LSR0: RSVP_LSR {
             parameters:

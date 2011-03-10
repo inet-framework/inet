@@ -73,7 +73,6 @@ class INET_API InterfaceEntry : public cNamedObject
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int peernamid;        ///< used only when writing ns2 nam traces
     int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
     bool down;            ///< current state (up or down)
     bool broadcast;       ///< interface supports broadcast
@@ -122,7 +121,6 @@ class INET_API InterfaceEntry : public cNamedObject
     int getNetworkLayerGateIndex() const {return nwLayerGateIndex;}
     int getNodeOutputGateId() const   {return nodeOutputGateId;}
     int getNodeInputGateId() const    {return nodeInputGateId;}
-    int getPeerNamId() const          {return peernamid;}
     int getMTU() const                {return mtu;}
     bool isDown() const               {return down;}
     bool isBroadcast() const          {return broadcast;}
@@ -140,7 +138,6 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setNetworkLayerGateIndex(int i) {nwLayerGateIndex = i; configChanged();}
     virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
     virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
-    virtual void setPeerNamId(int ni)    {peernamid = ni; configChanged();}
     virtual void setMtu(int m)           {mtu = m; configChanged();}
     virtual void setDown(bool b)         {down = b; stateChanged();}
     virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}

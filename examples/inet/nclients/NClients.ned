@@ -21,13 +21,12 @@
 
 package inet.examples.inet.nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import inet.world.NAMTrace;
 import ned.DatarateChannel;
+import inet.world.ChannelInstaller;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.examples.ethernet.lans.ethernetline;
 
 
 network NClients
@@ -55,10 +54,6 @@ network NClients
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=185,50");
-        }
-        nam: NAMTrace {
-            parameters:
-                @display("p=260,50");
         }
         r1: Router {
             parameters:

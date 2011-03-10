@@ -16,7 +16,6 @@ package inet.examples.mpls.ldp;
 
 import ned.DatarateChannel;
 import inet.world.ScenarioManager;
-import inet.world.NAMTrace;
 import inet.nodes.mpls.LDP_LSR;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.extras.FailureManager;
@@ -41,10 +40,6 @@ network LDPTEST
             delay = 15us;
         }
     submodules:
-        nam: NAMTrace {
-            parameters:
-                @display("p=152,280");
-        }
         LSR1: LDP_LSR {
             parameters:
                 peers = "ppp0 ppp1 ppp2";

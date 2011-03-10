@@ -50,7 +50,6 @@ InterfaceEntry::InterfaceEntry()
     nwLayerGateIndex = -1;
     nodeOutputGateId = -1;
     nodeInputGateId = -1;
-    peernamid = -1;
 
     mtu = 0;
 

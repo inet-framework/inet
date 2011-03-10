@@ -22,7 +22,6 @@
 package inet.examples.sctp.nclients;
 
 import ned.DatarateChannel;
-import inet.world.NAMTrace;
 import inet.world.ChannelInstaller;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
@@ -55,10 +54,6 @@ network NClients
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=185,50");
-        }
-        nam: NAMTrace {
-            parameters:
-                @display("p=260,50");
         }
         r1: Router {
             parameters:

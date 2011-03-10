@@ -3,6 +3,12 @@ Recent changes in the INET Framework
 
 - Removed the TCPSpoofingHost node. Use instead StandardHost with the tcpType="TCPSpoof" parameter.
 
+- NAMTrace and NAMTraceWriter modules have been moved to the obsolete directory. 
+  Turn on event logging instead and use the eventlog animator in the IDE. Event 
+  logging can be turned on with --record-eventlog=true from the command line or 
+  using the toolbar button in Tkenv. Once the .elog file is generated, right 
+  click on it in the IDE and select Open with / Animation Player.
+
 INET-1.99.0
 ----------
 This is a beta of a major feature release, with new models and also incompatible

@@ -9,23 +9,19 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-
-
-
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.rsvp_te.RSVP;
-import inet.networklayer.rsvp_te.SimpleClassifier;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
 import inet.nodes.inet.NetworkLayer;
-import inet.util.NAMTraceWriter;
+import inet.networklayer.ted.TED;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.rsvp_te.SimpleClassifier;
+import inet.networklayer.rsvp_te.RSVP;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ppp.PPPInterface;
+import inet.base.NotificationBoard;
 
 
 //
@@ -41,7 +37,6 @@ module RSVP_LSR
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
-        int namid = default(-1);
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
@@ -105,12 +100,6 @@ module RSVP_LSR
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
-        }
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=70,270");
-
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;
