@@ -596,7 +596,7 @@ void TCPConnection::sendSegment(uint32 bytes)
             tcpEV << "sendSegment(" << bytes << ") forwarded " << forward << " bytes of snd_nxt from " << state->snd_nxt;
             state->snd_nxt += forward;
             tcpEV << " to "<< state->snd_nxt << endl;
-//            rexmitQueue->info();     // FIXME Why commented out this line?
+            // rexmitQueue->info();  // for show elements in rexmitQueue
         }
     }
 

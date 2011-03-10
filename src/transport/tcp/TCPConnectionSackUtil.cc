@@ -257,6 +257,8 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
     //       received SACK.
     //
     // (1.c) IsLost (S2) returns true."
+
+    // Note: state->highRxt == RFC.HighRxt + 1
     for (uint32 s2 = state->highRxt;
             seqLess(s2, state->snd_max) && seqLess(s2, highestSackedSeqNum);
             s2 += shift
@@ -266,9 +268,7 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
 
         if (!sacked)
         {
-            if (seqGreater(s2, state->highRxt) &&
-                    seqLess(s2, highestSackedSeqNum) &&
-                    isLost(s2))
+            if (isLost(s2))  // 1.a and 1.b are true, see "for" statement below
             {
                 seqNum = s2;
 
@@ -335,13 +335,10 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
 
             if (!sacked)
             {
-                if (seqGreater(s3, state->highRxt) &&
-                    seqLess(s3, highestSackedSeqNum))
-                {
-                    seqNum = s3;
+                // 1.a and 1.b are true, see "for" statement below
+                seqNum = s3;
 
-                    return true;
-                }
+                return true;
             }
         }
     }
