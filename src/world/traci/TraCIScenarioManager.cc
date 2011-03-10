@@ -291,14 +291,15 @@ void TraCIScenarioManager::init_traci() {
 	}
 
 	{
-		// subscribe to list of departed and arrived vehicles
+		// subscribe to list of departed and arrived vehicles, as well as simulation time
 		uint32_t beginTime = 0;
 		uint32_t endTime = 0x7FFFFFFF;
 		std::string objectId = "";
-		uint8_t variableNumber = 2;
+		uint8_t variableNumber = 3;
 		uint8_t variable1 = VAR_DEPARTED_VEHICLES_IDS;
 		uint8_t variable2 = VAR_ARRIVED_VEHICLES_IDS;
-		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_SIM_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1 << variable2);
+		uint8_t variable3 = VAR_TIME_STEP;
+		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_SIM_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1 << variable2 << variable3);
 		processSubcriptionResult(buf);
 		ASSERT(buf.eof());
 	}
@@ -611,17 +612,24 @@ bool TraCIScenarioManager::isInRegionOfInterest(const Coord& position, std::stri
 	return false;
 }
 
+uint32_t TraCIScenarioManager::getCurrentTimeMs() {
+	return static_cast<uint32_t>(round((simTime() * 1000).dbl()));
+}
+
 void TraCIScenarioManager::executeOneTimestep() {
 
 	MYDEBUG << "Triggering TraCI server simulation advance to t=" << simTime() <<endl;
 
-	uint32_t targetTime = static_cast<uint32_t>(simTime().dbl() * 1000);
-	TraCIBuffer buf = queryTraCI(CMD_SIMSTEP2, TraCIBuffer() << targetTime);
+	uint32_t targetTime = getCurrentTimeMs();
 
-	uint32_t count; buf >> count;
-	MYDEBUG << "Getting " << count << " subscription results" << endl;
-	for (uint32_t i = 0; i < count; ++i) {
-		processSubcriptionResult(buf);
+	if (targetTime > 0) {
+		TraCIBuffer buf = queryTraCI(CMD_SIMSTEP2, TraCIBuffer() << targetTime);
+
+		uint32_t count; buf >> count;
+		MYDEBUG << "Getting " << count << " subscription results" << endl;
+		for (uint32_t i = 0; i < count; ++i) {
+			processSubcriptionResult(buf);
+		}
 	}
 
 	if (!autoShutdownTriggered) scheduleAt(simTime()+updateInterval, executeOneTimestepTrigger);
@@ -733,6 +741,14 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 			if ((count > 0) && (count >= activeVehicleCount)) autoShutdownTriggered = true;
 			activeVehicleCount -= count;
+
+		} else if (variable1_resp == VAR_TIME_STEP) {
+			uint8_t varType; buf >> varType;
+			ASSERT(varType == TYPE_INTEGER);
+			uint32_t serverTimestep; buf >> serverTimestep;
+			MYDEBUG << "TraCI reports current time step as " << serverTimestep << "ms." << endl;
+			uint32_t omnetTimestep = getCurrentTimeMs();
+			ASSERT(omnetTimestep == serverTimestep);
 
 		} else {
 			error("Received unhandled sim subscription result");

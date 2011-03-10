@@ -193,6 +193,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 		ChannelControl* cc;
 
+		uint32_t getCurrentTimeMs(); /**< get current simulation time (in ms) */
+
 		void executeOneTimestep(); /**< read and execute all commands for the next timestep */
 
 		void connect();
