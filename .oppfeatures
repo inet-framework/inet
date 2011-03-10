@@ -25,8 +25,8 @@
         />
     <feature
         id="TCP_LWIP"
-        name="TCP (LWIP)"
-        description = "TCP implementation based on LWIP"
+        name="TCP (lwIP)"
+        description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)"
         requires = "TCP_BASE"
         labels = "protocols"
         nedPackages = "inet.transport.tcp_lwip"
@@ -37,8 +37,11 @@
     <feature
         id="TCP_NSC"
         name="TCP (NSC)"
-        description = "Network Simulation Cradle: a TCP module that wraps real
-                      OS stacks: Linux, FreeBSD, OpenBSD and lwIP. You must read the inet/3dparty/README file before you enable this feature"
+        description = "TCP module based on Sam Jensen's Network Simulation Cradle 
+                       (NSC, http://www.wand.net.nz/~stj2/nsc) that wraps real
+                       OS stacks: Linux, FreeBSD, OpenBSD and lwIP.
+                       NSC must be downloaded and installed separately; read 
+                       inet/3rdparty/README for more information."
         requires = "TCP_BASE"
         labels = "protocols"
         nedPackages = "inet.transport.tcp_nsc"
@@ -48,7 +51,7 @@
         />
     <feature
         id="IPv4"
-        name="IP protocol (v4) --- under consruction"
+        name="IP protocol (v4) --- under construction"
         description = "Basic IPv4 support"
         requires = ""
         labels = "protocols"
@@ -100,7 +103,7 @@
         />
     <feature
         id="UDP"
-        name="UDP protocol --- under consruction"
+        name="UDP protocol --- under construction"
         description = "UDP protocol"
         requires = ""
         labels = ""
