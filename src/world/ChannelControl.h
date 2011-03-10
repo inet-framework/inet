@@ -119,6 +119,9 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Registers the given host. If radioInGate==NULL, the "radioIn" gate is assumed */
     virtual HostRef registerHost(cModule *host, const Coord& initialPos, cGate *radioInGate=NULL);
 
+    /** @brief Unregisters the given host */
+    virtual void unregisterHost(cModule *host);
+
     /** @brief Returns the module that was registered as HostRef h */
     cModule *getHost(HostRef h) const {return h->host;}
 
@@ -127,9 +130,6 @@ class INET_API ChannelControl : public cSimpleModule
 
     /** @brief Returns the channel the given host listens on */
     int getHostChannel(HostRef h) const {return h->channel;}
-
-    /** @brief Unregisters the given host */
-    virtual void unregisterHost(cModule *host);
 
     /** @brief Returns the "handle" of a previously registered host */
     virtual HostRef lookupHost(cModule *host);
