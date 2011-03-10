@@ -73,6 +73,16 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 	protected:
 		/**
+		 * Coord equivalent for storing TraCI coordinates
+		 */
+		struct TraCICoord {
+			TraCICoord() : x(0), y(0) {}
+			TraCICoord(double x, double y) : x(x), y(y) {}
+			double x;
+			double y;
+		};
+
+		/**
 		 * Byte-buffer that stores values in TraCI byte-order
 		 */
 		class TraCIBuffer {
@@ -180,11 +190,11 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		bool autoShutdown; /**< Shutdown module as soon as no more vehicles are in the simulation */
 		int margin;
 		std::list<std::string> roiRoads; /**< which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty */
-		std::list<std::pair<Coord, Coord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
+		std::list<std::pair<TraCICoord, TraCICoord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
 
 		void* socketPtr;
-		Coord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
-		Coord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
+		TraCICoord netbounds1; /* network boundaries as reported by TraCI (x1, y1) */
+		TraCICoord netbounds2; /* network boundaries as reported by TraCI (x2, y2) */
 
 		size_t nextNodeVectorIndex; /**< next OMNeT++ module vector index to use */
 		std::map<std::string, cModule*> hosts; /**< vector of all hosts managed by us */
@@ -210,7 +220,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		 * returns whether a given position lies within the simulation's region of interest.
 		 * Modules are destroyed and re-created as managed vehicles leave and re-enter the ROI
 		 */
-		bool isInRegionOfInterest(const Coord& position, std::string road_id, double speed, double angle);
+		bool isInRegionOfInterest(const TraCICoord& position, std::string road_id, double speed, double angle);
 
 		/**
 		 * sends a single command via TraCI, checks status response, returns additional responses
@@ -240,12 +250,12 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		/**
 		 * convert TraCI coordinates to OMNeT++ coordinates
 		 */
-		Coord traci2omnet(Coord coord) const;
+		Coord traci2omnet(TraCICoord coord) const;
 
 		/**
 		 * convert OMNeT++ coordinates to TraCI coordinates
 		 */
-		Coord omnet2traci(Coord coord) const;
+		TraCICoord omnet2traci(Coord coord) const;
 
 		/**
 		 * convert TraCI angle to OMNeT++ angle (in rad)
