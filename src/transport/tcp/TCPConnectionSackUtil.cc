@@ -69,10 +69,10 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
             tmp.setStart(option.getValues(count++));
             tmp.setEnd(option.getValues(count++));
 
-            tcpEV << (i+1) << ". SACK: " << tmp.str() << endl;
+            tcpEV << (i + 1) << ". SACK: " << tmp.str() << endl;
 
             // check for D-SACK
-            if (i==0 && seqLE(tmp.getEnd(), tcpseg->getAckNo()))
+            if (i == 0 && seqLE(tmp.getEnd(), tcpseg->getAckNo()))
             {
                 // RFC 2883, page 8:
                 // "In order for the sender to check that the first (D)SACK block of an
@@ -138,7 +138,8 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
 
 bool TCPConnection::isLost(uint32 seqNum)
 {
-    ASSERT (state->sack_enabled);
+    ASSERT(state->sack_enabled);
+
     // RFC 3517, page 3: "This routine returns whether the given sequence number is
     // considered to be lost.  The routine returns true when either
     // DupThresh discontiguous SACKed sequences have arrived above
@@ -147,8 +148,8 @@ bool TCPConnection::isLost(uint32 seqNum)
     // false."
     ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una
 
-    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH ||     // DUPTHRESH = 3
-            rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss));
+    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH      // DUPTHRESH = 3
+            || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss));
 
     return isLost;
 }
@@ -297,7 +298,8 @@ void TCPConnection::setPipe()
 
 bool TCPConnection::nextSeg(uint32 &seqNum)
 {
-    ASSERT (state->sack_enabled);
+    ASSERT(state->sack_enabled);
+
     // RFC 3517, page 5: "This routine uses the scoreboard data structure maintained by the
     // Update() function to determine what to transmit based on the SACK
     // information that has arrived from the data receiver (and hence
@@ -342,7 +344,7 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
                 return true;
             }
 
-            break; // !isLost(x) --> !isLost(x+d)
+            break; // !isLost(x) --> !isLost(x + d)
         }
     }
 
@@ -411,12 +413,13 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
     // then NextSeg () MUST indicate failure, and no segment is
     // returned."
     seqNum = 0;
+
     return false;
 }
 
 void TCPConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
 {
-    ASSERT (state->sack_enabled && state->lossRecovery);
+    ASSERT(state->sack_enabled && state->lossRecovery);
 
     // RFC 3517 pages 7 and 8: "(5) In order to take advantage of potential additional available
     // cwnd, proceed to step (C) below.
@@ -448,7 +451,8 @@ void TCPConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
 
 void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 {
-    ASSERT (state->sack_enabled && state->lossRecovery);
+    ASSERT(state->sack_enabled && state->lossRecovery);
+
     // start sending from seqNum
     state->snd_nxt = seqNum;
 
@@ -459,14 +463,14 @@ void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
     sendSegment(state->snd_mss);
 
     uint32 sentSeqNum = seqNum + state->sentBytes;
-    ASSERT(seqLE(state->snd_nxt, sentSeqNum+1)); // +1 for FIN, if sent
+
+    ASSERT(seqLE(state->snd_nxt, sentSeqNum + 1)); // +1 for FIN, if sent
 
     // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
     // HighRxt MUST be set to the highest sequence number of the
     // retransmitted segment."
     if (seqLess(seqNum, state->snd_max)) // HighData = snd_max
     {
-//      ASSERT (sentSeqNum == rexmitQueue->getHighestRexmittedSeqNum());
         state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     }
 
@@ -532,13 +536,15 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     {
         if (seqLE(it->getEnd(), state->rcv_nxt) || it->empty())
         {
-            tcpEV << "\t SACK in sacks_array: " << " " << it->str() << " delete now" << endl;
+            tcpEV << "\t SACK in sacks_array: " << " " << it->str() << " delete now\n";
             it = state->sacks_array.erase(it);
         }
         else
         {
             tcpEV << "\t SACK in sacks_array: " << " " << it->str() << endl;
+
             ASSERT(seqGE(it->getStart(), state->rcv_nxt));
+
             it++;
         }
     }
@@ -691,9 +697,9 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     // write sacks from sacks_array to options
     uint counter = 0;
 
-    for (it = state->sacks_array.begin(); it != state->sacks_array.end() && counter < 2*n; it++)
+    for (it = state->sacks_array.begin(); it != state->sacks_array.end() && counter < 2 * n; it++)
     {
-        ASSERT (it->getStart() != it->getEnd());
+        ASSERT(it->getStart() != it->getEnd());
 
         option.setValues(counter++, it->getStart());
         option.setValues(counter++, it->getEnd());
@@ -755,4 +761,3 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 
     return *tcpseg;
 }
-

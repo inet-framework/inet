@@ -29,7 +29,7 @@
 class INET_API TCPSACKRexmitQueue
 {
   public:
-    TCPConnection *conn; // the connection that owns this queue
+    TCPConnection *conn;  // the connection that owns this queue
 
     struct Region
     {
@@ -37,14 +37,13 @@ class INET_API TCPSACKRexmitQueue
         uint32 endSeqNum;
         bool sacked;      // indicates whether region has already been sacked by data receiver
         bool rexmitted;   // indicates whether region has already been retransmitted by data sender
-        int cnt; // for debug only
     };
 
     typedef std::list<Region> RexmitQueue;
     RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
 
     uint32 begin;  // 1st sequence number stored
-    uint32 end;    // last sequence number stored +1
+    uint32 end;    // last sequence number stored + 1
 
   public:
     /**
@@ -64,7 +63,7 @@ class INET_API TCPSACKRexmitQueue
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first
-     * byte of app data should get. This is usually ISS+1 because SYN consumes
+     * byte of app data should get. This is usually ISS + 1 because SYN consumes
      * one byte in the sequence number space.
      *
      * init() may be called more than once; every call flushes the existing contents

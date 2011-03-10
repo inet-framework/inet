@@ -22,6 +22,15 @@ cplusplus {{
 #include "INETDefs.h"
 #include "ByteArray.h"
 
+    // default TCP header length: 20 bytes
+    #define TCP_HEADER_OCTETS  20    // without options
+
+    // maximum TCP header length (base + options): 60 = 4 * 15 bytes
+    const unsigned int TCP_MAX_HEADER_OCTETS = 60;
+
+    // maximum allowed sack entry number, if no other options are used
+    const unsigned int MAX_SACK_ENTRIES = 4;
+
     typedef cPacket *cPacketPtr;
 
     inline std::ostream& operator<<(std::ostream& os, cPacketPtr msg)
@@ -31,15 +40,6 @@ cplusplus {{
 
     inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
     inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
-
-    // default TCP header length: 20 bytes
-    #define TCP_HEADER_OCTETS  20    // without options
-
-    // maximum TCP header length (base+options): 60 = 4 * 15 bytes
-    const unsigned int TCP_MAX_HEADER_OCTETS = 60;
-
-    // maximum allowed sack entry number, if no other options are used
-    const unsigned int MAX_SACK_ENTRIES = 4;
 }}
 
 struct cPacketPtr;
@@ -140,7 +140,7 @@ packet TCPSegment
     // Sequence Number: first sequence number of the first data octet
     // in the respective segment (except if SYN is set; then the the
     // seq. number is the initial seq. number (ISS) and the first data
-    // octet is ISS+1)
+    // octet is ISS + 1)
     unsigned int sequenceNo;
 
     // Acknowledgement Number: if ACK flag is set, this field contains

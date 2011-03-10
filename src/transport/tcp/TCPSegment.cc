@@ -77,6 +77,7 @@ void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
     {
         truncright = sequenceNo_var + payloadLength_var - endSeqNo;
     }
+
     truncateData(truncleft, truncright);
 }
 

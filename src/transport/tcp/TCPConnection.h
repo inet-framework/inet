@@ -112,25 +112,21 @@ enum TCPEventCode
 
 /** @name Timeout values */
 //@{
-#define TCP_TIMEOUT_CONN_ESTAB    75    // 75 seconds
-#define TCP_TIMEOUT_FIN_WAIT_2   600    // 10 minutes
-#define TCP_TIMEOUT_2MSL         240    // 2 * 2 minutes
-#define TCP_TIMEOUT_SYN_REXMIT     3    // initially 3 seconds
+#define TCP_TIMEOUT_CONN_ESTAB      75  // 75 seconds
+#define TCP_TIMEOUT_FIN_WAIT_2     600  // 10 minutes
+#define TCP_TIMEOUT_2MSL           240  // 2 * 2 minutes
+#define TCP_TIMEOUT_SYN_REXMIT       3  // initially 3 seconds
 #define TCP_TIMEOUT_SYN_REXMIT_MAX 240  // 4 mins (will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner)
 //@}
 
-#define MAX_SYN_REXMIT_COUNT     12     // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
-
-#define MAX_SACK_BLOCKS           60    // will only be used with SACK
-#define DUPTHRESH                  3    // used for TCPTahoe, TCPReno and SACK (RFC 3517)
-
-#define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
-
-#define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
-
-#define TCP_OPTIONS_MAX_SIZE      40    // bytes, 15*4 bytes (15 is the largest number in 4 bits length data offset field)
-#define TCP_OPTION_SACK_MIN_SIZE  10
-#define TCP_OPTION_TS_SIZE  12
+#define MAX_SYN_REXMIT_COUNT        12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+#define TCP_MAX_WIN              65535  // 65535 bytes, largest value (16 bit) for (unscaled) window size
+#define DUPTHRESH                    3  // used for TCPTahoe, TCPReno and SACK (RFC 3517)
+#define MAX_SACK_BLOCKS             60  // will only be used with SACK
+#define TCP_OPTIONS_MAX_SIZE        40  // 40 bytes, 15 * 4 bytes (15 is the largest number in 4 bits length data offset field), TCP_MAX_HEADER_OCTETS - TCP_HEADER_OCTETS = 40
+#define TCP_OPTION_SACK_MIN_SIZE    10  // 10 bytes, option length = 8 * n + 2 bytes (NOP)
+#define TCP_OPTION_TS_SIZE          12  // 12 bytes, option length = 10 bytes + 2 bytes (NOP)
+#define PAWS_IDLE_TIME_THRESH   (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
 
 #ifndef SACKS_AS_C_ARRAY
     typedef std::list<Sack> SackList;
@@ -191,7 +187,7 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool fin_ack_rcvd;
 
     bool send_fin;       // true if a user CLOSE command has been "queued"
-    uint32 snd_fin_seq;  // if send_fin==true: FIN should be sent just before this sequence number
+    uint32 snd_fin_seq;  // if send_fin == true: FIN should be sent just before this sequence number
 
     bool fin_rcvd;       // whether FIN received or not
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
@@ -364,7 +360,7 @@ class INET_API TCPConnection
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo
-    cOutVector *rcvAckVector;   // received ackNo (= snd_una)
+    cOutVector *rcvAckVector;   // received ackNo (=snd_una)
     cOutVector *unackedVector;  // number of bytes unacknowledged
 
     cOutVector *dupAcksVector;   // current number of received dupAcks
@@ -563,7 +559,7 @@ class INET_API TCPConnection
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
+    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways = false);
 
   public:
     /**

@@ -66,4 +66,3 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
 };
 
 #endif
-

@@ -29,7 +29,7 @@ TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
 
 TCPMsgBasedSendQueue::~TCPMsgBasedSendQueue()
 {
-    for (PayloadQueue::iterator it=payloadQueue.begin(); it!=payloadQueue.end(); ++it)
+    for (PayloadQueue::iterator it = payloadQueue.begin(); it != payloadQueue.end(); ++it)
         delete it->msg;
 }
 
@@ -70,18 +70,20 @@ uint32 TCPMsgBasedSendQueue::getBufferEndSeq()
 TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
-    ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
+    ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     TCPSegment *tcpseg = new TCPSegment(NULL);
+
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
 
-    // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
+    // add payload messages whose endSequenceNo is between fromSeq and fromSeq + numBytes
     PayloadQueue::iterator i = payloadQueue.begin();
+
     while (i != payloadQueue.end() && seqLE(i->endSequenceNo, fromSeq))
         ++i;
 
-    uint32 toSeq = fromSeq+numBytes;
+    uint32 toSeq = fromSeq + numBytes;
     const char *payloadName = NULL;
 
     while (i != payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
@@ -107,7 +109,9 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
 void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
-    ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
+
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
+
     begin = seqNum;
 
     // remove payload messages whose endSequenceNo is below seqNum
@@ -117,4 +121,3 @@ void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
         payloadQueue.pop_front();
     }
 }
-

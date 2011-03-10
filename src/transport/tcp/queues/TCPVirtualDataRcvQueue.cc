@@ -121,9 +121,12 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::createRegionFromSegment(
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     Region *region = createRegionFromSegment(tcpseg);
+
     merge(region);
+
     if (seqGE(rcv_nxt, regionList.front()->getBegin()))
         rcv_nxt = regionList.front()->getEnd();
+
     return rcv_nxt;
 }
 
@@ -137,6 +140,7 @@ void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
 
     RegionList::iterator i = regionList.begin();
     Region::CompareStatus cmp;
+
     while (i != regionList.end() && Region::AFTER != (cmp = (*i)->compare(*seg)))
     {
         RegionList::iterator old = i++;
@@ -147,6 +151,7 @@ void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
             regionList.erase(old);
         }
     }
+
     regionList.insert(i, seg);
 }
 
@@ -154,11 +159,13 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 {
     cPacket *msg = NULL;
     Region *reg = extractTo(seq);
+
     if (reg)
     {
         msg = new cPacket("data");
         reg->copyTo(msg);
     }
+
     delete reg;
     return msg;
 }
@@ -172,6 +179,7 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 
     Region *reg = regionList.front();
     uint32 beg = reg->getBegin();
+
     if (seqLE(seq, beg))
         return NULL;
 
@@ -180,6 +188,7 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
         regionList.pop_front();
         return reg;
     }
+
     return reg->split(seq);
 }
 
@@ -214,29 +223,35 @@ void TCPVirtualDataRcvQueue::getQueueStatus()
 uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
 {
     RegionList::iterator i = regionList.begin();
-    while (i!=regionList.end())
+
+    while (i != regionList.end())
     {
         if (seqLE((*i)->getBegin(), fromSeqNum) && seqLess(fromSeqNum, (*i)->getEnd()))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
             return (*i)->getBegin();
         }
+
         i++;
     }
+
     return fromSeqNum;
 }
 
 uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
 {
     RegionList::iterator i = regionList.begin();
-    while (i!=regionList.end())
+
+    while (i != regionList.end())
     {
         if (seqLess((*i)->getBegin(), toSeqNum) && seqLE(toSeqNum, (*i)->getEnd()))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
             return (*i)->getEnd();
         }
+
         i++;
     }
+
     return toSeqNum;
 }

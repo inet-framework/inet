@@ -93,4 +93,3 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
     payloadList.erase(payloadList.begin());
     return msg;
 }
-

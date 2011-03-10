@@ -32,6 +32,3 @@ etc. The particular class to be used is selected at runtime (via a module
 parameter, e.g. from omnetpp.ini). This feature makes it easier to
 experiment with various flavours of TCP, test experimental congestion
 control schemes etc.
-
-
-

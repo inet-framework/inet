@@ -57,5 +57,3 @@ class INET_API TCPNoCongestionControl : public TCPBaseAlg
 };
 
 #endif
-
-

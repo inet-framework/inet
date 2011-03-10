@@ -144,9 +144,9 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 
     if (tcpseg->getPshBit())  tcpEV << "PSH ";
 
-    if (tcpseg->getPayloadLength()>0 || tcpseg->getSynBit())
+    if (tcpseg->getPayloadLength() > 0 || tcpseg->getSynBit())
     {
-        tcpEV << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo()+tcpseg->getPayloadLength()) << ") ";
+        tcpEV << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + tcpseg->getPayloadLength()) << ") ";
         tcpEV << "(l=" << tcpseg->getPayloadLength() << ") ";
     }
 
@@ -160,7 +160,7 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
     {
         tcpEV << "options ";
 
-        for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
+        for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++)
         {
             const TCPOption& option = tcpseg->getOptions(i);
             short kind = option.getKind();
@@ -387,7 +387,8 @@ void TCPConnection::configureStateVariables()
 
         if (algorithmName1 != algorithmName2) // TODO add additional checks for new SACK supporting algorithms here once they are implemented
         {
-            EV << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno" << endl;
+            EV << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno\n";
+
             ASSERT(false);
         }
     }
@@ -396,19 +397,27 @@ void TCPConnection::configureStateVariables()
 void TCPConnection::selectInitialSeqNum()
 {
     // set the initial send sequence number
-    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime())*250000.0, 1.0+(double)(unsigned)0xffffffffUL) & 0xffffffffUL;
+    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
 
-    sendQueue->init(state->iss+1); // +1 is for SYN
-    rexmitQueue->init(state->iss + 1); // +1 is for SYN
+    sendQueue->init(state->iss + 1); // + 1 is for SYN
+    rexmitQueue->init(state->iss + 1); // + 1 is for SYN
 }
 
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
-    // "There are four cases for the acceptability test for an incoming segment:"
+    // "There are four cases for the acceptability test for an incoming segment:
+    //    Segment Receive  Test
+    //    Length  Window
+    //    ------- -------  -------------------------------------------
+    //       0       0     SEG.SEQ = RCV.NXT
+    //       0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
+    //      >0       0     not acceptable
+    //      >0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
+    //                  or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND"
     uint32 len = tcpseg->getPayloadLength();
     uint32 seqNo = tcpseg->getSequenceNo();
     uint32 ackNo = tcpseg->getAckNo();
@@ -428,11 +437,8 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg) const
         if (state->rcv_wnd == 0)
             ret = false;
         else // rcv_wnd > 0
-//            ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
-            ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd)) // Accept an ACK on end of window
-            ||
-//            (seqLE(state->rcv_nxt, seqNo + len - 1) && seqLess(seqNo + len - 1, rcvWndEnd));
-            (seqLess(state->rcv_nxt, seqNo + len) && seqLE(seqNo + len, rcvWndEnd)); // Accept an ACK on end of window
+            ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
+                    || (seqLess(state->rcv_nxt, seqNo + len) && seqLE(seqNo + len, rcvWndEnd)); // Accept an ACK on end of window
     }
 
     // RFC 793, page 25:
@@ -448,17 +454,18 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg) const
     }
 
     if (!ret)
-        tcpEV << "Not Acceptable segment. seqNo=" << seqNo << " ackNo=" << ackNo << " len=" << len << " rcv_nxt=" << state->rcv_nxt  << " rcv_wnd=" << state->rcv_wnd << " afterRto=" << state->afterRto << "\n";
+        tcpEV << "Not Acceptable segment. seqNo=" << seqNo << " ackNo=" << ackNo << " len=" << len << " rcv_nxt="
+              << state->rcv_nxt  << " rcv_wnd=" << state->rcv_wnd << " afterRto=" << state->afterRto << "\n";
 
     return ret;
 }
 
 void TCPConnection::sendSyn()
 {
-    if (remoteAddr.isUnspecified() || remotePort==-1)
+    if (remoteAddr.isUnspecified() || remotePort == -1)
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: foreign socket unspecified");
 
-    if (localPort==-1)
+    if (localPort == -1)
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
@@ -468,7 +475,7 @@ void TCPConnection::sendSyn()
     updateRcvWnd();
     tcpseg->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss+1;
+    state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
     writeHeaderOptions(tcpseg);
@@ -488,7 +495,7 @@ void TCPConnection::sendSynAck()
     updateRcvWnd();
     tcpseg->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss+1;
+    state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
     writeHeaderOptions(tcpseg);
@@ -536,7 +543,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddr
 
     // notify
     if (tcpAlgorithm)
-       tcpAlgorithm->ackSent();
+        tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendAck()
@@ -584,9 +591,9 @@ void TCPConnection::sendSegment(uint32 bytes)
         // check rexmitQ and try to forward snd_nxt before sending new data
         uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
 
-        if (forward)
+        if (forward > 0)
         {
-            tcpEV << "sendSegment(" << bytes << ") forwarded " << forward << " bytes from " << state->snd_nxt;
+            tcpEV << "sendSegment(" << bytes << ") forwarded " << forward << " bytes of snd_nxt from " << state->snd_nxt;
             state->snd_nxt += forward;
             tcpEV << " to "<< state->snd_nxt << endl;
             rexmitQueue->info();
@@ -618,7 +625,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     // if sack_enabled copy region of tcpseg to rexmitQueue
     if (state->sack_enabled)
-        rexmitQueue->enqueueSentData(state->snd_nxt, state->snd_nxt+bytes);
+        rexmitQueue->enqueueSentData(state->snd_nxt, state->snd_nxt + bytes);
 
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
@@ -634,17 +641,17 @@ void TCPConnection::sendSegment(uint32 bytes)
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
         state->afterRto = false;
 
-    if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
+    if (state->send_fin && state->snd_nxt == state->snd_fin_seq)
     {
         tcpEV << "Setting FIN on segment\n";
         tcpseg->setFinBit(true);
-        state->snd_nxt = state->snd_fin_seq+1;
+        state->snd_nxt = state->snd_fin_seq + 1;
     }
 
     // add header options and update header length (from tcpseg_temp)
     tcpseg->setOptionsArraySize(tcpseg_temp->getOptionsArraySize());
 
-    for (uint i=0; i<tcpseg_temp->getOptionsArraySize(); i++)
+    for (uint i = 0; i < tcpseg_temp->getOptionsArraySize(); i++)
         tcpseg->setOptions(i, tcpseg_temp->getOptions(i));
 
     tcpseg->setHeaderLength(tcpseg_temp->getHeaderLength());
@@ -656,11 +663,9 @@ void TCPConnection::sendSegment(uint32 bytes)
 
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
+    // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
-    {
-        // we'll start sending from snd_max
         state->snd_nxt = state->snd_max;
-    }
 
     uint32 old_highRxt = 0;
 
@@ -670,7 +675,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     // check how many bytes we have
     ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
-    if (buffered==0)
+    if (buffered == 0)
         return false;
 
     // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
@@ -696,7 +701,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (state->ts_enabled)
         effectiveMaxBytesSend -= TCP_OPTION_TS_SIZE;
 
-    // last segment could be less than state->snd_mss (or less than snd_mss-TCP_OPTION_TS_SIZE is using TS option)
+    // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
     if (fullSegmentsOnly && buffered > (ulong)effectiveWin &&
             (bytesToSend < (effectiveMaxBytesSend)))
     {
@@ -710,7 +715,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         << ", in buffer " << buffered << " bytes)\n";
 
     uint32 old_snd_nxt = state->snd_nxt;
-    ASSERT(bytesToSend>0);
+
+    ASSERT(bytesToSend > 0);
 
 #ifdef TCP_SENDFRAGMENTS  /* normally undefined */
     // make agressive use of the window until the last byte
@@ -721,7 +727,9 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         bytesToSend -= state->sentBytes;
     }
 #else
-    // send <MSS segments only if it's the only segment we can send now - Note: If bytesToSend=1010, MSS=1012, ts_enabled=true => we may send 2 segments (1000 payload + optionsHeader and 10 payload + optionsHeader)
+    // send < MSS segments only if it's the only segment we can send now
+    // Note: if (bytesToSend == 1010 && MSS == 1012 && ts_enabled == true) => we may send
+    // 2 segments (1000 payload + 12 optionsHeader and 10 payload + 12 optionsHeader)
     // FIXME this should probably obey Nagle's alg -- to be checked
     if (bytesToSend <= state->snd_mss)
     {
@@ -736,6 +744,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
             bytesToSend -= state->sentBytes;
         }
     }
+
     // check how many bytes we have - last segment could be less than state->snd_mss
     buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
@@ -751,7 +760,8 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (seqGreater(state->snd_nxt, state->snd_max))
         state->snd_max = state->snd_nxt;
 
-    if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
+    if (unackedVector)
+        unackedVector->record(state->snd_max - state->snd_una);
 
     // notify (once is enough)
     tcpAlgorithm->ackSent();
@@ -774,7 +784,7 @@ bool TCPConnection::sendProbe()
     state->snd_nxt = state->snd_max;
 
     // check we have 1 byte to send
-    if (sendQueue->getBytesAvailable(state->snd_nxt)==0)
+    if (sendQueue->getBytesAvailable(state->snd_nxt) == 0)
     {
         tcpEV << "Cannot send probe because send buffer is empty\n";
         return false;
@@ -790,7 +800,8 @@ bool TCPConnection::sendProbe()
     // something we really sent)
     state->snd_max = state->snd_nxt;
 
-    if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
+    if (unackedVector)
+        unackedVector->record(state->snd_max - state->snd_una);
 
     // notify
     tcpAlgorithm->ackSent();
@@ -806,7 +817,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
     // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
-    // When FIN sent the snd_max-snd_nxt larger than bytes available in queue
+    // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
     ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
             sendQueue->getBytesAvailable(state->snd_nxt));
 
@@ -861,15 +872,14 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
 {
     tcpEV << "TCP Header Option(s) received:\n";
 
-    for (uint i=0; i<tcpseg->getOptionsArraySize(); i++)
+    for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++)
     {
         const TCPOption& option = tcpseg->getOptions(i);
         short kind = option.getKind();
         short length = option.getLength();
+        bool ok = true;
 
         tcpEV << "Option type " << kind << " (" << optionName(kind) << "), length " << length << "\n";
-
-        bool ok = true;
 
         switch(kind)
         {
@@ -901,6 +911,7 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
             case TCPOPTION_TIMESTAMP: // TS=8
                 ok = processTSOption(tcpseg, option);
                 break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TCPAlgorithm as well -- it may want to recognized additional options
 
@@ -948,10 +959,10 @@ bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option
     // the value specified in the MSS option received during connection startup.
     state->snd_mss = std::min(state->snd_mss, (uint32) option.getValues(0));
 
-    if (state->snd_mss==0)
+    if (state->snd_mss == 0)
         state->snd_mss = 536;
 
-    tcpEV << "TCP Header Option MSS(=" << option.getValues(0) << ") received, SMSS is set to: " << state->snd_mss << "\n";
+    tcpEV << "TCP Header Option MSS(=" << option.getValues(0) << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
 }
 
@@ -978,7 +989,7 @@ bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOption& option)
     state->rcv_ws = true;
     state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
     state->snd_wnd_scale = option.getValues(0);
-    tcpEV << "TCP Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to: " << state->ws_enabled << "\n";
+    tcpEV << "TCP Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
     if (state->snd_wnd_scale > 14) // RFC 1323, page 11: "the shift count must be limited to 14"
     {
@@ -1015,7 +1026,7 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
     {
         state->rcv_initial_ts = true;
         state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-        tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") received, TS (ts_enabled) is set to: " << state->ts_enabled << "\n";
+        tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") received, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
     }
     else
         tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") received\n";
@@ -1065,7 +1076,7 @@ bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOpti
 
     state->rcv_sack_perm = true;
     state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
-    tcpEV << "TCP Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to: " << state->sack_enabled << "\n";
+    tcpEV << "TCP Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
     return true;
 }
 
@@ -1074,9 +1085,10 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
     TCPOption option;
     uint t = 0;
 
+    // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
-            || ((fsm.getState()==TCP_S_SYN_SENT || fsm.getState()==TCP_S_SYN_RCVD)
-            && state->syn_rexmit_count>0))) // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
+            || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
+            && state->syn_rexmit_count > 0)))
     {
         // MSS header option
         if (state->snd_mss > 0)
@@ -1088,19 +1100,19 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             // Update MSS
             option.setValues(0, state->snd_mss);
             tcpEV << "TCP Header Option MSS(=" << state->snd_mss << ") sent\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
         }
 
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
-                || (fsm.getState()==TCP_S_SYN_SENT && state->syn_rexmit_count>0)))) // Is WS supported by host?
+                || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             // 1 padding byte
             option.setKind(TCPOPTION_NO_OPERATION); // NOP
             option.setLength(1);
             option.setValuesArraySize(0);
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
 
             option.setKind(TCPOPTION_WINDOW_SCALE);
@@ -1110,22 +1122,24 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             // Update WS variables
             ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
             state->rcv_wnd_scale = 0;
+
             while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"
             {
                 scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                 state->rcv_wnd_scale++;
             }
+
             option.setValues(0, state->rcv_wnd_scale); // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
-            tcpEV << "TCP Header Option WS(=" << option.getValues(0) << ") sent, WS (ws_enabled) is set to: " << state->ws_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpEV << "TCP Header Option WS(=" << option.getValues(0) << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
         }
 
         // SACK_PERMITTED header option
         if (state->sack_support && (state->rcv_sack_perm || (fsm.getState() == TCP_S_INIT
-                || (fsm.getState()==TCP_S_SYN_SENT && state->syn_rexmit_count>0)))) // Is SACK supported by host?
+                || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             if (!state->ts_support) // if TS is supported by host, do not add NOPs to this segment
             {
@@ -1133,7 +1147,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 option.setKind(TCPOPTION_NO_OPERATION); // NOP
                 option.setLength(1);
                 option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+2);
+                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
                 tcpseg->setOptions(t++, option);
                 tcpseg->setOptions(t++, option);
             }
@@ -1145,13 +1159,14 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             // Update SACK variables
             state->snd_sack_perm = true;
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
-            tcpEV << "TCP Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to: " << state->sack_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpEV << "TCP Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
         }
 
         // TS header option
-        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT || (fsm.getState()==TCP_S_SYN_SENT && state->syn_rexmit_count>0)))) // Is TS supported by host?
+        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
+                || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             if (!state->sack_support) // if SACK is supported by host, do not add NOPs to this segment
             {
@@ -1159,7 +1174,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 option.setKind(TCPOPTION_NO_OPERATION); // NOP
                 option.setLength(1);
                 option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+2);
+                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
                 tcpseg->setOptions(t++, option);
                 tcpseg->setOptions(t++, option);
             }
@@ -1186,16 +1201,16 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
 
             state->snd_initial_ts = true;
             state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-            tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") sent, TS (ts_enabled) is set to: " << state->ts_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
         }
 
         // TODO add new TCPOptions here once they are implemented
     }
-    else if (fsm.getState()==TCP_S_SYN_SENT || fsm.getState()==TCP_S_SYN_RCVD
-            || fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_FIN_WAIT_1
-            || fsm.getState()==TCP_S_FIN_WAIT_2) // connetion is not in INIT or LISTEN state
+    else if (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD
+            || fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_FIN_WAIT_1
+            || fsm.getState() == TCP_S_FIN_WAIT_2) // connetion is not in INIT or LISTEN state
     {
         // TS header option
         if (state->ts_enabled) // Is TS enabled?
@@ -1206,7 +1221,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 option.setKind(TCPOPTION_NO_OPERATION); // NOP
                 option.setLength(1);
                 option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+2);
+                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
                 tcpseg->setOptions(t++, option);
                 tcpseg->setOptions(t++, option);
             }
@@ -1232,7 +1247,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 option.setValues(1, 0);
 
             tcpEV << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") sent\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
+            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
             tcpseg->setOptions(t++, option);
         }
 
@@ -1256,7 +1271,6 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         }
 
         // TODO add new TCPOptions here once they are implemented
-
         // TODO delegate to TCPAlgorithm as well -- it may want to append additional options
     }
 
@@ -1293,7 +1307,7 @@ uint32 TCPConnection::getTSval(TCPSegment *tcpseg) const
 
 uint32 TCPConnection::getTSecr(TCPSegment *tcpseg) const
 {
-    for (uint i=0; i < tcpseg->getOptionsArraySize(); i++)
+    for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++)
     {
         const TCPOption& option = tcpseg->getOptions(i);
         short kind = option.getKind();
@@ -1346,6 +1360,7 @@ unsigned short TCPConnection::updateRcvWnd()
     if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv))
     {
         state->rcv_adv = state->rcv_nxt + win;
+
         if (rcvAdvVector)
             rcvAdvVector->record(state->rcv_adv);
     }
@@ -1386,15 +1401,16 @@ void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982]:
     if (doAlways || (tcpseg->getAckBit()
-        && (seqLess(state->snd_wl1, tcpseg->getSequenceNo()) ||
-        (state->snd_wl1 == tcpseg->getSequenceNo() && seqLE(state->snd_wl2, tcpseg->getAckNo())) ||
-        (state->snd_wl2 == tcpseg->getAckNo() && true_window > state->snd_wnd))))
+            && (seqLess(state->snd_wl1, tcpseg->getSequenceNo()) ||
+            (state->snd_wl1 == tcpseg->getSequenceNo() && seqLE(state->snd_wl2, tcpseg->getAckNo())) ||
+            (state->snd_wl2 == tcpseg->getAckNo() && true_window > state->snd_wnd))))
     {
         // send window should be updated
         state->snd_wnd = true_window;
         tcpEV << "Updating send window from segment: new wnd=" << state->snd_wnd << "\n";
         state->snd_wl1 = tcpseg->getSequenceNo();
         state->snd_wl2 = tcpseg->getAckNo();
+
         if (sndWndVector)
             sndWndVector->record(state->snd_wnd);
     }
@@ -1402,7 +1418,7 @@ void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
 
 void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow)
 {
-    ASSERT (state->limited_transmit_enabled);
+    ASSERT(state->limited_transmit_enabled);
 
     // RFC 3042, page 3:
     // "When a TCP sender has previously unsent data queued for transmission
@@ -1433,7 +1449,7 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     // can generate such ACKs to trigger inappropriate transmission of data
     // segments.  See [SCWA99] for a discussion of attacks by misbehaving
     // receivers."
-    if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old!=state->sackedBytes))
+    if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old != state->sackedBytes))
     {
         // check how many bytes we have
         ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
@@ -1444,9 +1460,11 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
 
             // check conditions from RFC 3042
             if (outstandingData + state->snd_mss <= state->snd_wnd &&
-                outstandingData + state->snd_mss <= congestionWindow + 2*state->snd_mss)
+                outstandingData + state->snd_mss <= congestionWindow + 2 * state->snd_mss)
             {
-                uint32 effectiveWin = std::min (state->snd_wnd, congestionWindow) - outstandingData + 2*state->snd_mss; // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
+                // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
+                uint32 effectiveWin = std::min(state->snd_wnd, congestionWindow) - outstandingData + 2 * state->snd_mss;
+
                 // bytes: number of bytes we're allowed to send now
                 uint32 bytes = std::min(effectiveWin, state->snd_mss);
 
@@ -1480,7 +1498,7 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
 
 uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
 {
-    ASSERT (SimTime::getScaleExp() <= -3); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    ASSERT(SimTime::getScaleExp() <= -3); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
 
     uint32 timestamp = (uint32) (simtime.dbl() * 1000);
     return timestamp;
@@ -1488,7 +1506,7 @@ uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
 
 simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
 {
-    ASSERT (SimTime::getScaleExp() <= -3); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    ASSERT(SimTime::getScaleExp() <= -3); // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
 
     simtime_t simtime = (simtime_t) ((double) timestamp * 0.001);
     return simtime;
@@ -1498,4 +1516,3 @@ bool TCPConnection::isSendQueueEmpty()
 {
     return (sendQueue->getBytesAvailable(state->snd_nxt) == 0);
 }
-

@@ -53,7 +53,7 @@ class INET_API TCPReceiveQueue : public cPolymorphic
     /**
      * Ctor.
      */
-    TCPReceiveQueue()  {conn=NULL;}
+    TCPReceiveQueue()  {conn = NULL;}
 
     /**
      * Virtual dtor.

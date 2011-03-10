@@ -89,5 +89,3 @@ class INET_API DumbTCP : public TCPAlgorithm
 };
 
 #endif
-
-

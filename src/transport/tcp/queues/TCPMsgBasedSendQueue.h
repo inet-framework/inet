@@ -38,7 +38,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     PayloadQueue payloadQueue;
 
     uint32 begin;  // 1st sequence number stored
-    uint32 end;    // last sequence number stored +1
+    uint32 end;    // last sequence number stored + 1
 
   public:
     /**
@@ -88,5 +88,3 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
 };
 
 #endif
-
-

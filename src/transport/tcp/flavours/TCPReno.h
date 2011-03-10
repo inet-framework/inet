@@ -59,5 +59,3 @@ class INET_API TCPReno : public TCPTahoeRenoFamily
 };
 
 #endif
-
-

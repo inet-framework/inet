@@ -26,10 +26,10 @@
 
 /** @name Comparing sequence numbers */
 //@{
-inline bool seqLess(uint32 a, uint32 b) {return a!=b && b-a<(1UL<<31);}
-inline bool seqLE(uint32 a, uint32 b) {return b-a<(1UL<<31);}
-inline bool seqGreater(uint32 a, uint32 b) {return a!=b && a-b<(1UL<<31);}
-inline bool seqGE(uint32 a, uint32 b) {return a-b<(1UL<<31);}
+inline bool seqLess(uint32 a, uint32 b) {return a != b && (b - a) < (1UL << 31);}
+inline bool seqLE(uint32 a, uint32 b) {return (b - a) < (1UL << 31);}
+inline bool seqGreater(uint32 a, uint32 b) {return a != b && (a - b) < (1UL << 31);}
+inline bool seqGE(uint32 a, uint32 b) {return (a - b) < (1UL << 31);}
 //@}
 
 
@@ -85,19 +85,21 @@ class INET_API TCPSegment : public TCPSegment_Base
     virtual TCPPayloadMessage& getPayload(unsigned int k);
 
     /**
-     * Adds a message object to the TCP segment.
+     * Adds a message object to the TCP segment. The sequence number + 1 of the
+     * last byte of the message should be passed as 2nd argument
      */
     virtual void addPayloadMessage(cPacket *msg, uint32 endSequenceNo);
 
     /**
      * Removes and returns the first message object in this TCP segment.
-     * It also returns the segment offset number of its last sequence no.
+     * It also returns the sequence number + 1 of its last octet in outEndSequenceNo.
      */
-    virtual cPacket *removeFirstPayloadMessage(uint32 &endSequenceNo);
+    virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+
     /**
      * Truncate segment.
      * @param firstSeqNo: sequence no of new first byte
-     * @param endSeqNo: sequence no of new last byte+1
+     * @param endSeqNo: sequence no of new last byte + 1
      */
     virtual void truncateSegment(uint32 firstSeqNo, uint32 endSeqNo);
 

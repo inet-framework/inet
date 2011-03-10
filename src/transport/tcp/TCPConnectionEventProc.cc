@@ -48,10 +48,10 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             localPort = openCmd->getLocalPort();
             remotePort = openCmd->getRemotePort();
 
-            if (remoteAddr.isUnspecified() || remotePort==-1)
+            if (remoteAddr.isUnspecified() || remotePort == -1)
                 throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
-            if (localPort==-1)
+            if (localPort == -1)
             {
                 localPort = tcpMain->getEphemeralPort();
                 tcpEV << "Assigned ephemeral port " << localPort << "\n";
@@ -93,7 +93,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             localAddr = openCmd->getLocalAddr();
             localPort = openCmd->getLocalPort();
 
-            if (localPort==-1)
+            if (localPort == -1)
                 throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: local port must be specified");
 
             tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
@@ -186,21 +186,23 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_max==sendQueue->getBufferEndSeq())
+            if (state->snd_max == sendQueue->getBufferEndSeq())
             {
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
                 tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
-                if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
+
+                if (unackedVector)
+                    unackedVector->record(state->snd_max - state->snd_una);
 
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
             else
             {
-                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq()-state->snd_max) <<
-                      " bytes pending, deferring sending of FIN\n";
+                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq() - state->snd_max)
+                      << " bytes pending, deferring sending of FIN\n";
                 event = TCP_E_IGNORE;
             }
             state->send_fin = true;
@@ -253,7 +255,7 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
 {
     delete tcpCommand; // but reuse msg for reply
 
-    if (fsm.getState()==TCP_S_INIT)
+    if (fsm.getState() == TCP_S_INIT)
         throw cRuntimeError("Error processing command STATUS: connection not open");
 
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
@@ -284,5 +286,3 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
     msg->setControlInfo(statusInfo);
     sendToApp(msg);
 }
-
-

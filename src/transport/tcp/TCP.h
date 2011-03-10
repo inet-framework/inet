@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2010-2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -107,10 +108,10 @@ class INET_API TCP : public cSimpleModule
 
         inline bool operator<(const AppConnKey& b) const
         {
-            if (appGateIndex!=b.appGateIndex)
-                return appGateIndex<b.appGateIndex;
+            if (appGateIndex != b.appGateIndex)
+                return appGateIndex < b.appGateIndex;
             else
-                return connId<b.connId;
+                return connId < b.connId;
         }
 
     };
@@ -123,20 +124,20 @@ class INET_API TCP : public cSimpleModule
 
         inline bool operator<(const SockPair& b) const
         {
-            if (remoteAddr!=b.remoteAddr)
-                return remoteAddr<b.remoteAddr;
-            else if (localAddr!=b.localAddr)
-                return localAddr<b.localAddr;
-            else if (remotePort!=b.remotePort)
-                return remotePort<b.remotePort;
+            if (remoteAddr != b.remoteAddr)
+                return remoteAddr < b.remoteAddr;
+            else if (localAddr != b.localAddr)
+                return localAddr < b.localAddr;
+            else if (remotePort != b.remotePort)
+                return remotePort < b.remotePort;
             else
-                return localPort<b.localPort;
+                return localPort < b.localPort;
         }
     };
 
   protected:
-    typedef std::map<AppConnKey,TCPConnection*> TcpAppConnMap;
-    typedef std::map<SockPair,TCPConnection*> TcpConnMap;
+    typedef std::map<AppConnKey, TCPConnection*> TcpAppConnMap;
+    typedef std::map<SockPair, TCPConnection*> TcpConnMap;
 
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
@@ -206,5 +207,3 @@ class INET_API TCP : public cSimpleModule
 };
 
 #endif
-
-

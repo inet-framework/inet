@@ -29,5 +29,3 @@ passed up to the application when its last byte has arrved on the simulated
 connection. This is done by TCPMsgBasedSendQueue/RcvQueue.
 
 You always choose the ones appropriate for your app model.
-
-

@@ -41,18 +41,21 @@ void TCPReno::recalculateSlowStartThreshold()
     // As discussed above, FlightSize is the amount of outstanding data in
     // the network."
 
-    // set ssthresh to flight size/2, but at least 2 SMSS
-    // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
+    // set ssthresh to flight size / 2, but at least 2 SMSS
+    // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
     uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
-    state->ssthresh = std::max(flight_size/2, 2*state->snd_mss);
-    if (ssthreshVector) ssthreshVector->record(state->ssthresh);
+    state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
+
+    if (ssthreshVector)
+        ssthreshVector->record(state->ssthresh);
 }
 
 void TCPReno::processRexmitTimer(TCPEventCode& event)
 {
     TCPTahoeRenoFamily::processRexmitTimer(event);
-    if (event==TCP_E_ABORT)
+
+    if (event == TCP_E_ABORT)
         return;
 
     // After REXMIT timeout TCP Reno should start slow start with snd_cwnd = snd_mss.
@@ -71,7 +74,10 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     // begin Slow Start (RFC 2581)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
-    if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+    if (cwndVector)
+        cwndVector->record(state->snd_cwnd);
+
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -84,14 +90,16 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->dupacks>=DUPTHRESH) // DUPTHRESH = 3
+    if (state->dupacks >= DUPTHRESH) // DUPTHRESH = 3
     {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
         tcpEV << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
         state->snd_cwnd = state->ssthresh;
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
     }
     else
     {
@@ -100,7 +108,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         //
         if (state->snd_cwnd < state->ssthresh)
         {
-            tcpEV << "cwnd<=ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
+            tcpEV << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
             // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
             // by at most SMSS bytes for each ACK received that acknowledges new data."
@@ -115,9 +123,10 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             // two lines below.
             //
             // int bytesAcked = state->snd_una - firstSeqAcked;
-            // state->snd_cwnd += bytesAcked*state->snd_mss;
+            // state->snd_cwnd += bytesAcked * state->snd_mss;
 
-            if (cwndVector) cwndVector->record(state->snd_cwnd);
+            if (cwndVector)
+                cwndVector->record(state->snd_cwnd);
 
             tcpEV << "cwnd=" << state->snd_cwnd << "\n";
         }
@@ -125,20 +134,24 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         {
             // perform Congestion Avoidance (RFC 2581)
             uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
-            if (incr==0)
+
+            if (incr == 0)
                 incr = 1;
+
             state->snd_cwnd += incr;
-            if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+            if (cwndVector)
+                cwndVector->record(state->snd_cwnd);
 
             //
-            // Note: some implementations use extra additive constant mss/8 here
+            // Note: some implementations use extra additive constant mss / 8 here
             // which is known to be incorrect (RFC 2581 p5)
             //
             // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
             // would require maintaining a bytes_acked variable here which we don't do
             //
 
-            tcpEV << "cwnd>ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
+            tcpEV << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
         }
     }
 
@@ -196,9 +209,9 @@ void TCPReno::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks==DUPTHRESH) // DUPTHRESH = 3
+    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
     {
-        tcpEV << "Reno on dupAck=DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
+        tcpEV << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled)
         {
@@ -238,9 +251,11 @@ void TCPReno::receivedDuplicateAck()
 
         // enter Fast Recovery
         recalculateSlowStartThreshold();
-        // "set cwnd to ssthresh plus 3*SMSS." (RFC 2581)
-        state->snd_cwnd = state->ssthresh + 3*state->snd_mss; // 20051129 (1)
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+        // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
+        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
+
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
 
         tcpEV << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -297,8 +312,10 @@ void TCPReno::receivedDuplicateAck()
         // additional segment that has left the network
         //
         state->snd_cwnd += state->snd_mss;
-        tcpEV << "Reno on dupAck>DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+        tcpEV << "Reno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
 
         // Note: Steps (A) - (C) of RFC 3517, page 7 ("Once a TCP is in the loss recovery phase the following procedure MUST be used for each arriving ACK")
         // should not be used here!

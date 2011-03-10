@@ -276,7 +276,7 @@ uint32 TCPSACKRexmitQueue::getHighestSackedSeqNum() const
             return i->endSeqNum;
     }
 
-    return begin;   // FIXME What is the invalid value?
+    return begin;
 }
 
 uint32 TCPSACKRexmitQueue::getHighestRexmittedSeqNum() const
@@ -287,7 +287,7 @@ uint32 TCPSACKRexmitQueue::getHighestRexmittedSeqNum() const
             return i->endSeqNum;
     }
 
-    return begin;   // FIXME What is the invalid value?
+    return begin;
 }
 
 uint32 TCPSACKRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeqNum) const
@@ -399,11 +399,10 @@ void TCPSACKRexmitQueue::getBlock(uint32 fromSeqNum, uint32 &length, bool &sacke
     while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum)) // search for seqNum
         i++;
 
-    ASSERT (i != rexmitQueue.end());
+    ASSERT(i != rexmitQueue.end());
     ASSERT(seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
 
     length = (i->endSeqNum - fromSeqNum);
     sacked = i->sacked;
     rexmitted = i->rexmitted;
 }
-

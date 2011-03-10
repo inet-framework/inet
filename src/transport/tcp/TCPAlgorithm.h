@@ -65,8 +65,11 @@ class INET_API TCPAlgorithm : public cPolymorphic
     /**
      * Creates and returns the TCP state variables.
      */
-    TCPStateVariables *getStateVariables() {
-        if (!state) state = createStateVariables();
+    TCPStateVariables *getStateVariables()
+    {
+        if (!state)
+            state = createStateVariables();
+
         return state;
     }
 
@@ -109,7 +112,7 @@ class INET_API TCPAlgorithm : public cPolymorphic
 
     /**
      * Called after receiving data which are in the window, but not at its
-     * left edge (seq!=rcv_nxt). This indicates that either segments got
+     * left edge (seq != rcv_nxt). This indicates that either segments got
      * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 2001
      * recommend sending an immediate ACK here (Fast Retransmit relies on
      * that).
@@ -129,16 +132,16 @@ class INET_API TCPAlgorithm : public cPolymorphic
      * we could advance snd_una). At this point the state variables
      * (snd_una, snd_wnd) have already been updated. The argument firstSeqAcked
      * is the previous snd_una value, that is, the number of bytes acked is
-     * (snd_una-firstSeqAcked). The dupack counter still reflects the old value
+     * (snd_una - firstSeqAcked). The dupack counter still reflects the old value
      * (needed for Reno and NewReno); it'll be reset to 0 after this call returns.
      */
     virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
 
     /**
-     * Called after we received a duplicate ACK (that is: ackNo==snd_una,
+     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
      * no data in segment, segment doesn't carry window update, and also,
      * we have unacked data). The dupack counter got already updated
-     * when calling this method (i.e. dupack==1 on first duplicate ACK.)
+     * when calling this method (i.e. dupacks == 1 on first duplicate ACK.)
      */
     virtual void receivedDuplicateAck() = 0;
 
@@ -175,5 +178,3 @@ class INET_API TCPAlgorithm : public cPolymorphic
 };
 
 #endif
-
-
