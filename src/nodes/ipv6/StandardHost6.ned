@@ -37,6 +37,7 @@ import inet.applications.ISCTPApp;
 
 //
 // IPv6 host with TCP, SCTP and UDP layers and applications.
+// see ~StandardHost for configuration.
 //
 module StandardHost6
 {
@@ -47,17 +48,9 @@ module StandardHost6
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int numSctpApps = default(0);
-        // string tcpAppType = default(""); // Obsolete
-        // string udpAppType = default(""); // Obsolete
-        // string sctpAppType = default(""); // Obsolete
         string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
-        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
-        string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterfaceFUllDuplex for simplified, full duplex only
-        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInterface and ~PPPInterfaceNoQueue
-        string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         bool IPForward = default(false);             // whether to support forwarding of IP packets (i.e. routing)
         int namid = default(-1);
         xml routingTableFile;  //# TODO a reasonable default should be provided
@@ -85,7 +78,7 @@ module StandardHost6
                 routingTableFile = routingTableFile;
                 @display("p=57,214");
         }
-        mobility: <mobilityType> like IMobility {
+        mobility: <default("NoMobility")> like IMobility {
             parameters:
                 @display("p=57,368");
         }
@@ -120,19 +113,19 @@ module StandardHost6
             parameters:
                 @display("p=336,230;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211NicSTA")> like IWirelessNic {
             parameters:
                 @display("p=132,390;q=queue");
         }
-        eth[sizeof(ethg)]: <ethNicType> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
             parameters:
                 @display("p=250,390,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: <pppNicType> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=369,390,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: <extNicType> like IExtInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExtInterface {
             parameters:
                 @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }

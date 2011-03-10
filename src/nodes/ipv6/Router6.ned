@@ -29,6 +29,8 @@ import inet.base.NotificationBoard;
 //
 // IPv6 router.
 //
+// see ~Router for configuration options
+//
 module Router6
 {
     parameters:
@@ -37,11 +39,6 @@ module Router6
         @display("i=abstract/router");
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
-        string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: EtherInterface (full/half duplex) or EtherInterface2 for simplified, full duplex only
-        string pppNicType = default("PPPInterface"); // used pp interfaces. see: PPPInterface and PPPInterfaceNoQueue
-        string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         int namid = default(-1);
         xml routingTableFile;  //# TODO provide a default
     gates:
@@ -68,7 +65,7 @@ module Router6
                 routingTableFile = routingTableFile;
                 @display("p=281,54");
         }
-        mobility: <mobilityType> like IMobility {
+        mobility: <default("NoMobility")> like IMobility {
             parameters:
                 @display("p=468,54");
         }
@@ -76,19 +73,19 @@ module Router6
             parameters:
                 @display("p=242,143;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211NicSTA")> like IWirelessNic {
             parameters:
                 @display("p=72,242;q=queue");
         }
-        eth[sizeof(ethg)]: <ethNicType> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
             parameters:
                 @display("p=195,242,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: <pppNicType> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=320,242,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: <extNicType> like IExtInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExtInterface {
             parameters:
                 @display("p=460,242,row,90;q=txQueue;i=block/ifcard");
         }

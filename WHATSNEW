@@ -24,21 +24,22 @@ The most significant changes:
 
 - added new AdhocHost for basic node types used in adhoc networks. Supports
   mobility and multiple wireless radios. It obsoletes the MFMobileHost
-  (use AdhocHost with wlanNicType=Nic80211) and MobileHost (use AdhocHost
+  (use AdhocHost with **.wlan.type-name=Nic80211) and MobileHost (use AdhocHost
   with default parameters)
 
 - added new AccessPoint module with support for mobility, relaying between
   wireless and ethernet ports and cofigurable wireless, ethernet and relay type.
   obsoletes: WirelessAP and WirelessAPWithEth (use AccessPoint), WirelessAPSimplified and 
-  WirelessAPWithEthSimplified (use AccessPoint with wlanNicType=Ieee80211NicAPSimplified),
+  WirelessAPWithEthSimplified (use AccessPoint with **.wlan.type-name=Ieee80211NicAPSimplified),
   WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified (use 
-  StandardHost with numRadios=1 and wlanNicType=Ieee80211NicSTASimplified)
+  StandardHost with numRadios=1 and **.wlan.type-name=Ieee80211NicSTASimplified)
 
 - in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
   or external interfaces are used. Wired interfaces must implement IWiredNic while wireless 
   modules implement IWirlessNic. Mobility type and number of wireless cards (default=0)
-  can be also configured via parameters. The use of interfaces obsoletes several older modules
-  which differed only in interface types (like WirelessHost or ExtRouter)
+  can be also configured via **.wlan.type-name and **.mobility.type-name. The use of 
+  interfaces obsoletes several older modules which differed only in interface types 
+  (like WirelessHost or ExtRouter)
 
 - enhanced Router to support external interfaces, ppp, wireless, ethernet etc. This module
   is similar to StandarHost except it does not contain the transport layer and application layer
@@ -49,7 +50,7 @@ The most significant changes:
   This allows to insert thruput metering, packet drop and duplication modules etc. 
   without modifying the module. New modules implementing IHook: 
   ThruputMeter, DropsGenerator, DuplicatesGenerator and Nop.
-  use **.networkLayer.outputHookType = "ThruputMeter" to configure it. (use inputHookType
+  use **.networkLayer.outputHook.type-name = "ThruputMeter" to configure it. (use inputHook
   for incoming traffic)
 
 - added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol, 

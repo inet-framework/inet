@@ -40,13 +40,19 @@ import inet.applications.ISCTPApp;
 // IP forwarding is disabled by default (see IPForward).
 // - Can be connected via ethernet interface to other nodes using
 //   the ethg gate. By default full duplex connections are supported
-//   only (twisted pair). Set ethNicType to "EthernetInterface" for
+//   only (twisted pair). Set **.eth.type-name="EthernetInterface" for
 //   a full/half duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
 //   by the numRadios parameter. Wirless card type is configured by the
-//   wlanNicType parameter.
+//   **.wlan.type-name parameter. see:  inet.linklayer.ieee80211 or other 
+//   modules implementing ~IWirelessNic
 // - Also external interfaces can be configured for HW in the loop simulation
-//   using the numExtInterfaces
+//   using the numExtInterfaces parameter and setting the type using
+//   **.ext.type-name in the INI file. see: ~ExtInerface and ~IExtInterface
+// - PPP interface type can be set using **.ppp.type-name see: ~PPPInterface 
+//   and ~PPPInterfaceNoQueue
+// - If wireless card is present, node mobility can be set using **.mobility.type-name
+//   see: inet.mobility and ~IMobility
 //
 module StandardHost
 {
@@ -64,11 +70,6 @@ module StandardHost
         string udpType = default("UDP");  // UDP implementation (~UDP)
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
-        string mobilityType = default("NoMobility"); // how the node moves around. MUST be specified if the host contains a wireless interface. see: inet.mobility
-        string wlanNicType = default("Ieee80211NicSTA"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing ~IWirelessNic
-        string ethNicType = default("EthernetInterfaceFullDuplex"); // used ethernet interfaces. see: ~EtherInterface (full/half duplex) or ~EtherInterface2 for simplified, full duplex only
-        string pppNicType = default("PPPInterface"); // used ppp interfaces. see: ~PPPInterface and ~PPPInterfaceNoQueue
-        string extNicType = default("ExtInterface"); // used External interfaces. see: ~ExtInerface and ~IExtInterface
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
@@ -97,7 +98,7 @@ module StandardHost
                 routingFile = routingFile;
                 @display("p=57,214");
         }
-        mobility: <mobilityType> like IMobility {
+        mobility: <default("NoMobility")> like IMobility {
             parameters:
                 @display("p=57,368");
         }
@@ -133,19 +134,19 @@ module StandardHost
                 proxyARP = false;
                 @display("p=336,230;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211NicSTA")> like IWirelessNic {
             parameters:
                 @display("p=132,390;q=queue");
         }
-        eth[sizeof(ethg)]: <ethNicType> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
             parameters:
                 @display("p=250,390,row,90;q=txQueue");
         }
-        ppp[sizeof(pppg)]: <pppNicType> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=369,390,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: <extNicType> like IExtInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExtInterface {
             parameters:
                 @display("p=501,390,row,90;q=txQueue;i=block/ifcard");
         }

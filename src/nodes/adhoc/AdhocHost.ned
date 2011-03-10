@@ -34,23 +34,25 @@ import inet.applications.ITCPApp;
 // This is a typical mobile node which can participate in adhoc routing
 // and may have TCP/UDP applications installed. Supports ICMP (ping) too.
 //
-// The applications, the mobility type, the wireless interface can be
-// configured via parameters.
+// - By default contains a single wireless cards, however it can be configured
+//   by the numRadios parameter. Wirless card type is configured by the
+//   **.wlan.type-name parameter. see:  inet.linklayer.ieee80211 or other 
+//   modules implementing ~IWirelessNic
+// - Node mobility can be set using **.mobility.type-name
+//   see: inet.mobility and ~IMobility
 //
 module AdhocHost
 {
     @node();
+    @display("i=device/cellphone;bgb=525,394");
     int numTcpApps = default(0);
     int numUdpApps = default(0);
     // string tcpAppType = default(""); // Obsolete!
     // string udpAppType = default(""); // Obsolete!
-    string routingFile = default("");
-    string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
     string tcpType = default("TCP");  // TCP implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
     string udpType = default("UDP");  // UDP implementation (~UDP)
-    string wlanNicType = default("Ieee80211NicAdhoc"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic
     int numRadios = default(1);
-    @display("i=device/cellphone;bgb=525,394");
+    string routingFile = default("");
 
     gates:
         input radioIn[numRadios] @directIn;
@@ -70,7 +72,7 @@ module AdhocHost
                 routingFile = routingFile;
                 @display("p=60,247");
         }
-        mobility: <mobilityType> like IMobility {
+        mobility: <default("NullMobility")> like IMobility {
             @display("p=60,331");
         }
         tcpApp[numTcpApps]: <> like ITCPApp {
@@ -92,7 +94,7 @@ module AdhocHost
             proxyARP = false;
             @display("p=279,247;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211NicAdhoc")> like IWirelessNic {
             @display("p=279,331,row,90;q=queue");
         }
     connections allowunconnected:

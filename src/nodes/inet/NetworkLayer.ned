@@ -35,8 +35,6 @@ module NetworkLayer
 {
     parameters:
         bool proxyARP = default(true);
-        string outputHookType = default("Nop");
-        string inputHookType = default("Nop");
 
         @display("i=block/fork");
     gates:
@@ -89,11 +87,11 @@ module NetworkLayer
         }
 
         // a placeholder in the traffic coming from the network interfaces 
-        inputHook[sizeof(ifIn)]: <inputHookType> like IHook {
+        inputHook[sizeof(ifIn)]: <default("Nop")> like IHook {
             @display("p=85,254");
         }
         // a placeholder if traffic going to the network interfaces
-        outputHook[sizeof(ifOut)]: <outputHookType> like IHook {
+        outputHook[sizeof(ifOut)]: <default("Nop")> like IHook {
             @display("p=202,232");
         }
     connections allowunconnected:
