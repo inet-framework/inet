@@ -1,6 +1,6 @@
 package inet.examples.bgpv4.BGPCompleteTest;
 
-import inet.world.ChannelInstaller;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.ethernet.EtherSwitch;
@@ -10,19 +10,14 @@ import inet.nodes.bgp.BGPRouter;
 network BGPTest
 {
     types:
-        channel LINK_100 extends ned.DatarateChannel
+        channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
                 delay = 0;
                 datarate = 100Mbps;
+                thruputDisplayFormat = "#N";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-                @display("p=42,24;i=block/cogwheel_s");
-        }
         A1: BGPRouter {
             parameters:
                 @display("p=178,45");

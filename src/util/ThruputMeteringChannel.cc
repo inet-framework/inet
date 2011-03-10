@@ -1,6 +1,3 @@
-//FIXME to be updated and enabled again
-#if 0//XXX
-
 //
 // Copyright (C) 2005 Andras Varga
 //
@@ -24,7 +21,7 @@ Register_Class(ThruputMeteringChannel);
 
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)
 {
-    fmtp = NULL;
+    fmt = NULL;
     batchSize = 10;    // packets
     maxInterval = 0.1; // seconds
 
@@ -35,64 +32,49 @@ ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChan
     intvlNumPackets = intvlNumBits = 0;
 }
 
-ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cDatarateChannel()
-{
-    setName(ch.getName());
-    operator=(ch);
-    cArray& parlist = _parList();
-    fmtp = (cPar *)parlist.get("format");
-}
-
 ThruputMeteringChannel::~ThruputMeteringChannel()
 {
 }
 
-ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringChannel& ch)
+//ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringChannel& ch)
+//{
+//    if (this==&ch) return *this;
+//    cDatarateChannel::operator=(ch);
+//    numPackets = ch.numPackets;
+//    numBits = ch.numBits;
+//    fmt = ch.fmt;
+//    return *this;
+//}
+
+void ThruputMeteringChannel::initialize()
 {
-    if (this==&ch) return *this;
-    cDatarateChannel::operator=(ch);
-    numPackets = ch.numPackets;
-    numBits = ch.numBits;
-    return *this;
+    cDatarateChannel::initialize();
+    fmt = par("thruputDisplayFormat");
 }
 
-cPar& ThruputMeteringChannel::addPar(const char *s)
+void ThruputMeteringChannel::processMessage(cMessage *msg, simtime_t t, result_t& result)
 {
-    cPar *p = &cDatarateChannel::addPar(s);
-    if (!opp_strcmp(s,"format"))
-        fmtp = p;
-    return *p;
-}
+    cDatarateChannel::processMessage(msg, t, result);
 
-cPar& ThruputMeteringChannel::addPar(cPar *p)
-{
-    cDatarateChannel::addPar(p);
-    const char *s = p->getName();
-    if (!opp_strcmp(s,"format"))
-        fmtp = p;
-    return *p;
-}
-
-bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
-{
-    bool ret = cDatarateChannel::deliver(msg, t);
+    cPacket *pkt = dynamic_cast<cPacket *>(msg);
+    // TODO handle disabled state (show with different style?/color? or print "disabled"?)
+    if (!pkt || !fmt || *fmt==0 || result.discard)
+        return;
 
     // count packets and bits
     numPackets++;
-    numBits += msg->getBitLength();
+    numBits += pkt->getBitLength();
 
     // packet should be counted to new interval
     if (intvlNumPackets >= batchSize || t-intvlStartTime >= maxInterval)
         beginNewInterval(t);
 
     intvlNumPackets++;
-    intvlNumBits += msg->getBitLength();
+    intvlNumBits += pkt->getBitLength();
     intvlLastPkTime = t;
 
     // update display string
     updateDisplay();
-
-    return ret;
 }
 
 void ThruputMeteringChannel::beginNewInterval(simtime_t now)
@@ -110,9 +92,6 @@ void ThruputMeteringChannel::beginNewInterval(simtime_t now)
 
 void ThruputMeteringChannel::updateDisplay()
 {
-    // retrieve format string
-    const char *fmt = fmtp ? fmtp->stringValue() : "B";
-
     // produce label, based on format string
     char buf[200];
     char *p = buf;
@@ -178,4 +157,3 @@ void ThruputMeteringChannel::updateDisplay()
     getSourceGate()->getDisplayString().setTagArg("t", 0, buf);
 }
 
-#endif

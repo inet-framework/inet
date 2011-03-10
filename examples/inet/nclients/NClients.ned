@@ -21,8 +21,7 @@
 
 package inet.examples.inet.nclients;
 
-import ned.DatarateChannel;
-import inet.world.ChannelInstaller;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
@@ -34,23 +33,19 @@ network NClients
     parameters:
         int n;
     types:
-        channel fiberline extends DatarateChannel
+        channel fiberline extends ThruputMeteringChannel
         {
             delay = 1us;
             datarate = 512Mbps;
+            thruputDisplayFormat = "u";
         }
-        channel ethernetline extends DatarateChannel
+        channel ethernetline extends ThruputMeteringChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;
+            thruputDisplayFormat = "u";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=u";
-                @display("p=98,50");
-        }
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=185,50");

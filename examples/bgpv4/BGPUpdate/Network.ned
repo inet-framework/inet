@@ -1,25 +1,20 @@
 package inet.examples.bgpv4.BGPUpdate;
 
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
 
 
 network BGPTest
 {
     types:
-        channel LINK_100 extends ned.DatarateChannel
+        channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
                 delay = 0;
                 datarate = 100Mbps;
+				thruputDisplayFormat = "#N";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                @display("p=130,40;i=block/cogwheel_s");
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-        }
         A: BGPRouter {
             parameters:
                 @display("p=160,92");

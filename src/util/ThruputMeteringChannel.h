@@ -1,6 +1,3 @@
-//FIXME upgrade and put back!!
-#if 0//XXX
-
 //
 // Copyright (C) 2005 Andras Varga
 //
@@ -29,7 +26,7 @@
  * get displayed on the link, using the connection's "t=" display
  * string tag.
  *
- * The display can be customised with the "format" attribute.
+ * The display can be customized with the "format" attribute.
  * In the format string, the following characters will get expanded:
  *   - 'N': number of packets
  *   - 'V': volume (in bytes)
@@ -51,7 +48,7 @@ class SIM_API ThruputMeteringChannel : public cDatarateChannel
 {
   protected:
     // configuration
-    cPar *fmtp;      // display format
+    const char *fmt;      // display format
     unsigned int batchSize; // number of packets in a batch
     simtime_t maxInterval; // max length of measurement interval (measurement ends
                         // if either batchSize or maxInterval is reached, whichever
@@ -84,7 +81,7 @@ class SIM_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Copy constructor.
      */
-    ThruputMeteringChannel(const ThruputMeteringChannel& ch);
+//    ThruputMeteringChannel(const ThruputMeteringChannel& ch);
 
     /**
      * Destructor.
@@ -94,32 +91,23 @@ class SIM_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Assignment
      */
-    ThruputMeteringChannel& operator=(const ThruputMeteringChannel& ch);
+//    ThruputMeteringChannel& operator=(const ThruputMeteringChannel& ch);
 
     /**
      * Creates and returns an exact copy of this object.
      * See cPolymorphic for more details.
      */
-    virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
+//    virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
 
     /**
-     * Redefined to add an extra attribute
+     * Add parameters and initialize the stat variables
      */
-    virtual cPar& addPar(const char *s);
+    virtual void initialize();
 
     /**
-     * Redefined to add an extra attribute
+     * Adds statistics and live display to the channel.
      */
-    virtual cPar& addPar(cPar *p);
-
-    /**
-     * Performs bit error rate, delay and transmission time modelling.
-     */
-    virtual bool deliver(cMessage *msg, simtime_t at);
+    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
 };
 
 #endif
-
-
-#endif
-

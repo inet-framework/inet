@@ -3,8 +3,7 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import ned.DatarateChannel;
-import inet.world.ChannelInstaller;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.linklayer.ethernet.EtherHub;
@@ -15,18 +14,13 @@ network OSPF_TestNetwork
     parameters:
         @display("p=10,10;b=704,560");
     types:
-        channel C extends DatarateChannel
+        channel C extends ThruputMeteringChannel
         {
             delay = 0.1us;
             datarate = 100Mbps;
+            thruputDisplayFormat = "#N";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-                @display("p=98,50");
-        }
         Area1: OSPF_Area1 {
             parameters:
                 @display("p=120,172;b=176,168");

@@ -20,12 +20,12 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EtherBus;
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.world.ChannelInstaller;
 import ned.DatarateChannel;
+import inet.util.ThruputMeteringChannel;
+import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.ethernet.EtherHost;
+import inet.linklayer.ethernet.EtherHub;
+import inet.linklayer.ethernet.EtherBus;
 
 
 //
@@ -34,17 +34,12 @@ import ned.DatarateChannel;
 network MixedLAN
 {
     types:
-        channel C extends DatarateChannel
+        channel C extends ThruputMeteringChannel
         {
-            delay = 01us;  datarate = 100Mbps;
+            delay = 01us;
+            datarate = 100Mbps;
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-                @display("p=75,52");
-        }
         bus: EtherBus {
             parameters:
                 positions = "10 20 24 35 40 48";
@@ -122,9 +117,9 @@ network MixedLAN
         switch.ethg[2] <--> C <--> switchHostC.ethg;
         switch.ethg[3] <--> C <--> switchHostD.ethg;
 
-        hub.ethg[0] <--> { delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
-        hub.ethg[1] <--> { delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
-        hub.ethg[2] <--> { delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
+        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
+        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
+        hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
 }
 
 
@@ -156,7 +151,8 @@ network SwitchedLAN
     types:
         channel C extends DatarateChannel
         {
-            delay = 0.1us;  datarate = 100Mbps;
+            delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         hostA: EtherHost {
@@ -220,7 +216,7 @@ network HubLAN
     connections:
         hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hostA.ethg;
         hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.4us; datarate = 100Mbps;} <--> hostC.ethg;
+        hub.ethg[2] <--> {  delay = 0.4us; datarate = 100Mbps; } <--> hostC.ethg;
         hub.ethg[3] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hostD.ethg;
 }
 
@@ -233,7 +229,8 @@ network BusLAN
     types:
         channel C extends DatarateChannel
         {
-            delay = 0;  datarate = 10Mbps;
+            delay = 0;
+            datarate = 10Mbps;
         }
     submodules:
         hostA: EtherHost {
@@ -276,14 +273,14 @@ channel ethernetline extends DatarateChannel
 
 module EtherHostFullDuplex extends EtherHost
 {
-	parameters:
-	    macType = "EtherMACFullDuplex";
+    parameters:
+        macType = "EtherMACFullDuplex";
 }
 
 module EtherSwitchFullDuplex extends EtherSwitch
 {
-	parameters:
-	    macType = "EtherMACFullDuplex";
+    parameters:
+        macType = "EtherMACFullDuplex";
 }
 
 network SwitchedDuplexLAN

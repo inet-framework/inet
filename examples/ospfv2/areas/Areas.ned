@@ -2,18 +2,12 @@
 
 package inet.examples.ospfv2.areas;
 
-import inet.world.ChannelInstaller;
+import inet.util.ThruputMeteringChannel;
 
 
 network OSPF_AreaTest
 {
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-                @display("p=456,36");
-        }
         Area1: TwoNetsArea {
             parameters:
                 @display("p=108,112;b=136,128");
@@ -27,6 +21,6 @@ network OSPF_AreaTest
                 ethg[1];
         }
     connections:
-        Area1.ethg[0] <--> {  delay = 0.1us; datarate = 100 Mbps; } <--> Area2.ethg[0];
+        Area1.ethg[0] <--> ThruputMeteringChannel {  delay = 0.1us; datarate = 100 Mbps; thruputDisplayFormat = "#N"; } <--> Area2.ethg[0];
 }
 

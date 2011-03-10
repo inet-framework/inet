@@ -21,7 +21,7 @@
 package inet.examples.inet.redtest;
 
 import inet.world.ScenarioManager;
-import inet.world.ChannelInstaller;
+import inet.util.ThruputMeteringChannel;
 import inet.util.ThruputMeter;
 import inet.util.TCPDump;
 import inet.nodes.inet.StandardHost;
@@ -31,13 +31,12 @@ import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 network REDTestDebug
 {
-    submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=b (u)";
-                @display("p=305,40");
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            thruputDisplayFormat = "b (u)";
         }
+    submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=147,40");
@@ -87,12 +86,12 @@ network REDTestDebug
 //        dump.a$o --> {  datarate = 1.5Mbps; delay = 20ms; } --> r1.pppg$i++;
 //        dump.b$i <-- {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
 
-        r1.pppg++ <--> {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
+        r1.pppg++ <--> C {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
 
-        s1.pppg++ <--> {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
-        s2.pppg++ <--> {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
-        s3.pppg++ <--> {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
-        s4.pppg++ <--> {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
+        s1.pppg++ <--> C {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
+        s2.pppg++ <--> C {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
+        s3.pppg++ <--> C {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
+        s4.pppg++ <--> C {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
 
 }
 
