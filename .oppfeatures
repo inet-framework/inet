@@ -65,7 +65,7 @@
         name="IP examples (v4)"
         description = "Examples for Basic IPv4 support (IPv4)"
         requires = "IPv4"
-        labels = "protocls examples"
+        labels = "protocols examples"
         nedPackages = "inet.examples.inet
                        inet.examples.ethernet.arptest
                        inet.examples.ethernet.arptest2"
