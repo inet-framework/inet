@@ -596,7 +596,7 @@ void TCPConnection::sendSegment(uint32 bytes)
             tcpEV << "sendSegment(" << bytes << ") forwarded " << forward << " bytes of snd_nxt from " << state->snd_nxt;
             state->snd_nxt += forward;
             tcpEV << " to "<< state->snd_nxt << endl;
-            rexmitQueue->info();
+//            rexmitQueue->info();     // FIXME Why commented out this line?
         }
     }
 
@@ -1263,7 +1263,6 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         // receiver SHOULD send an ACK for every valid segment that arrives
         // containing new data, and each of these "duplicate" ACKs SHOULD bear a
         // SACK option."
-        state->snd_sack = true; // FIXME HACK
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack))
         {
             addSacks(tcpseg);
