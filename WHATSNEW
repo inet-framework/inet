@@ -9,6 +9,17 @@ Recent changes in the INET Framework
   using the toolbar button in Tkenv. Once the .elog file is generated, right 
   click on it in the IDE and select Open with / Animation Player.
 
+- ChannelInstaller module has been removed. Implemented a ThruputMeteringChannel that
+  extends DatarateChannel. It adds thruputDisplayFormat that allows showing different
+  statistics along the source gate of the channel. Specifying "" as display format
+  results the same behavior as DatarateChannel (with no performance penalty).
+  If you want to gather statistics, you do not need this channel. The DatarateChannel
+  already emits signals "channelBusy", "messageSent" and "messageDiscarded" 
+  that can be used to calculate different statistics. Use "opp_run -h neddecls" 
+  to see what statistics are provided by default. e.g in INI file use
+  *.channel.throughput.result-recording-modes=+last
+  to store all channel's thoughput values as a scalar.
+
 INET-1.99.0
 ----------
 This is a beta of a major feature release, with new models and also incompatible
