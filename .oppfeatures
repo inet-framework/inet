@@ -103,11 +103,12 @@
         />
     <feature
         id="UDP"
-        name="UDP protocol --- under construction"
+        name="UDP protocol"
         description = "UDP protocol"
         requires = ""
         labels = ""
-        nedPackages = "inet.transport.udp"
+        nedPackages = "inet.transport.udp
+                       inet.applications.udpapp"
         extraSourceFolders = ""
         compileFlags = "-DWITH_UDP"
         linkerFlags = ""

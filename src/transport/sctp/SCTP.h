@@ -23,10 +23,12 @@
 #pragma warning(disable : 4786)
 #endif
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include <map>
+
 #include "IPvXAddress.h"
-#include "UDPSocket.h"
+
 
 
 class SCTPAssociation;
