@@ -24,7 +24,10 @@
 #define UDPVIDEOSTREAMSVR_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
+#include "IPvXAddress.h"
 #include "UDPAppBase.h"
 
 

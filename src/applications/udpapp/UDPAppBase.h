@@ -19,8 +19,10 @@
 #ifndef __INET_UDPAPPBASE_H
 #define __INET_UDPAPPBASE_H
 
-#include <omnetpp.h>
-#include "IPvXAddress.h"
+
+#include "INETDefs.h"
+
+class IPvXAddress;
 
 
 /**
