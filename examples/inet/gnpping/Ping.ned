@@ -22,8 +22,7 @@ package inet.examples.inet.gnpping;
 import inet.world.inet.GnpNetworkConfigurator;
 import inet.world.inet.InternetCloud;
 import inet.nodes.inet.StandardHost;
-import inet.base.DatarateChannel2; // Workaround for, as of OMNeT++ 4.0,
-                                   // defunct accessors in cDatarateChannel
+import ned.DatarateChannel;
 
 network PingNetwork
 {
@@ -46,10 +45,10 @@ network PingNetwork
         }
 
     connections:
-        recip.pppg$o++ --> DatarateChannel2 --> internet.pppg$i++;
-        recip.pppg$i++ <-- DatarateChannel2 <-- internet.pppg$o++;
+        recip.pppg$o++ --> DatarateChannel --> internet.pppg$i++;
+        recip.pppg$i++ <-- DatarateChannel <-- internet.pppg$o++;
         for i=0..numSenders-1 {
-          sender[i].pppg$o++ --> DatarateChannel2 --> internet.pppg$i++;
-          sender[i].pppg$i++ <-- DatarateChannel2 <-- internet.pppg$o++;
+          sender[i].pppg$o++ --> DatarateChannel --> internet.pppg$i++;
+          sender[i].pppg$i++ <-- DatarateChannel <-- internet.pppg$o++;
         }
 }

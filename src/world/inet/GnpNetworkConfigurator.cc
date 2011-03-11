@@ -21,7 +21,7 @@
 
 Define_Module(GnpNetworkConfigurator);
 
-#ifdef HAVE_GNPLIB
+#if defined(HAVE_GNPLIB) && OMNETPP_VERSION >= 0x0401
 
 #include <algorithm>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
@@ -85,6 +85,8 @@ void GnpNetworkConfigurator::initialize(int stage)
 {
     if (stage==0)
     {
+
+
 	// Configure gnplib to use omnet's random number generator 
         gnplib::api::common::random::Rng::intrand = &intrand2;
         gnplib::api::common::random::Rng::dblrand = &dblrand;
@@ -375,7 +377,19 @@ namespace gnplib { namespace impl { namespace network { namespace gnp {
 
 void GnpNetworkConfigurator::initialize(int stage)
 {
-    error("Please compile INET with gnplib support to use this module!");
+    error("Please compile INET with "
+#if OMNETPP_VERSION < 0x0401
+#warning "Need OMNeT++ version >= 4.1 for GnpNetworkConfigurator, disabling it."
+            "OMNeT++ version >= 4.1"
+#ifndef HAVE_GNPLIB
+            " and "
+#endif
+#endif
+#ifndef HAVE_GNPLIB
+#warning "Need gnplib support for GnpNetworkConfigurator, disabling it."
+            "gnplib support"
+#endif
+            " to use this module!");
 }
 
 GnpNetworkConfigurator::GnpNetworkConfigurator()

@@ -28,6 +28,7 @@ More info:
 - Example: examples/inet/gnpping
 
 Requirements:
+- OMNeT++ version >= 4.1
 - gnplib
   https://sourceforge.net/projects/gnplib/
 
