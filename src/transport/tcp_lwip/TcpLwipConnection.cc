@@ -25,14 +25,11 @@
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
 #include "TCP_lwip.h"
-#include "TcpLwipQueues.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
+#include "TcpLwipQueues.h"
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
-
-#include <assert.h>
-#include <dlfcn.h>
 
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)

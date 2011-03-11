@@ -23,9 +23,8 @@
 
 #include <map>
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
+
 #include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 #include "lwip/tcp.h"
