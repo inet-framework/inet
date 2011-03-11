@@ -5,7 +5,8 @@
         description = "The common part of TCP implementations"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.transport.tcp
+        nedPackages = "
+                       inet.transport.tcp
                        inet.applications.tcpapp
                       "
         extraSourceFolders = ""
@@ -18,7 +19,9 @@
         description = "TCP implementation (original INET implementation)"
         requires = "TCP_BASE"
         labels = "protocols"
-        nedPackages = "inet.transport.tcp_inet"
+        nedPackages = "
+                       inet.transport.tcp_inet
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_INET"
         linkerFlags = ""
@@ -29,7 +32,9 @@
         description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)"
         requires = "TCP_BASE"
         labels = "protocols"
-        nedPackages = "inet.transport.tcp_lwip"
+        nedPackages = "
+                       inet.transport.tcp_lwip
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_LWIP"
         linkerFlags = ""
@@ -44,21 +49,25 @@
                        inet/3rdparty/README for more information."
         requires = "TCP_BASE"
         labels = "protocols"
-        nedPackages = "inet.transport.tcp_nsc"
+        nedPackages = "
+                       inet.transport.tcp_nsc
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_NSC"
         linkerFlags = ""
         />
     <feature
         id="IPv4"
-        name="IP protocol (v4) --- under construction"
+        name="IP protocol (v4)"
         description = "Basic IPv4 support"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.networklayer.ipv4
+        nedPackages = "
+                       inet.networklayer.ipv4
                        inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp
-                       inet.nodes.inet"
+                       inet.nodes.inet
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
         linkerFlags = ""
@@ -69,9 +78,11 @@
         description = "Examples for Basic IPv4 support (IPv4)"
         requires = "IPv4"
         labels = "protocols examples"
-        nedPackages = "inet.examples.inet
+        nedPackages = "
+                       inet.examples.inet
                        inet.examples.ethernet.arptest
-                       inet.examples.ethernet.arptest2"
+                       inet.examples.ethernet.arptest2
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -82,10 +93,12 @@
         description = "Basic IPv6 support"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.networklayer.ipv6
+        nedPackages = "
+                       inet.networklayer.ipv6
                        inet.networklayer.autorouting.ipv6
+                       inet.networklayer.icmpv6
                        inet.nodes.ipv6
-                       inet.networklayer.icmpv6"
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
         linkerFlags = ""
@@ -96,7 +109,9 @@
         description = "Examples for Basic IPv6 support (IPv6)"
         requires = "IPv6"
         labels = "protocols examples"
-        nedPackages = "inet.examples.ipv6"
+        nedPackages = "
+                       inet.examples.ipv6
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -107,8 +122,10 @@
         description = "UDP protocol"
         requires = ""
         labels = ""
-        nedPackages = "inet.transport.udp
-                       inet.applications.udpapp"
+        nedPackages = "
+                       inet.transport.udp
+                       inet.applications.udpapp
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_UDP"
         linkerFlags = ""
@@ -119,8 +136,10 @@
         description = "Real Time Protocol support"
         requires = "UDP IPv4"
         labels = "protocols"
-        nedPackages = "inet.applications.rtpapp
-                       inet.transport.rtp"
+        nedPackages = "
+                       inet.applications.rtpapp
+                       inet.transport.rtp
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RTP"
         linkerFlags = ""
@@ -131,7 +150,9 @@
         description = "Examples for Real Time Protocol support (RTP)"
         requires = "RTP"
         labels = "protocols examples"
-        nedPackages = "inet.examples.rtp"
+        nedPackages = "
+                       inet.examples.rtp
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -142,7 +163,10 @@
         description = "SCTP Protocol support"
         requires = ""
         labels = "protocols"
-        nedPackages = "inet.applications.sctpapp inet.transport.sctp"
+        nedPackages = "
+                       inet.applications.sctpapp
+                       inet.transport.sctp
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_SCTP"
         linkerFlags = ""
@@ -153,7 +177,9 @@
         description = "Examples for SCTP"
         requires = "SCTP IPv4"
         labels = "protocols examples"
-        nedPackages = "inet.examples.sctp"
+        nedPackages = "
+                       inet.examples.sctp
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -164,7 +190,9 @@
         description = "Support for interfaces to connect the simulation to external events"
         requires = "IPv4"
         labels = "nic"
-        nedPackages = "inet.linklayer.ext"
+        nedPackages = "
+                       inet.linklayer.ext
+                      "
         extraSourceFolders = ""
         compileFlags = "-DWITH_EXT_IF"
         linkerFlags = ""
@@ -175,7 +203,9 @@
         description = "Examples for External Interface Support"
         requires = "ExternalInterface"
         labels = "nic"
-        nedPackages = "inet.examples.emulation"
+        nedPackages = "
+                       inet.examples.emulation
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -186,7 +216,8 @@
         description = "MPLS support"
         requires = "TCP_BASE UDP IPv4"
         labels = "routing"
-        nedPackages = "inet.networklayer.mpls inet.nodes.mpls
+        nedPackages = "
+                       inet.networklayer.mpls inet.nodes.mpls
                        inet.networklayer.ldp
                        inet.networklayer.rsvp_te
                        inet.networklayer.ted
@@ -201,7 +232,9 @@
         description = "Examples for MPLS support"
         requires = "MPLS"
         labels = "routing examples"
-        nedPackages = "inet.examples.mpls"
+        nedPackages = "
+                       inet.examples.mpls
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -212,7 +245,8 @@
         description = "OSPFv2 support"
         requires = "IPv4"
         labels = "routing"
-        nedPackages = "inet.networklayer.ospfv2
+        nedPackages = "
+                       inet.networklayer.ospfv2
                        inet.nodes.ospfv2
                       "
         extraSourceFolders = ""
@@ -225,7 +259,9 @@
         description = "Examples for OSPFv2"
         requires = "OSPFv2"
         labels = "routing examples"
-        nedPackages = "inet.examples.ospfv2"
+        nedPackages = "
+                       inet.examples.ospfv2
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -236,7 +272,8 @@
         description = "BGP support"
         requires = "IPv4 OSPFv2"
         labels = "routing"
-        nedPackages = "inet.networklayer.bgpv4
+        nedPackages = "
+                       inet.networklayer.bgpv4
                        inet.nodes.bgp
                       "
         extraSourceFolders = ""
@@ -249,7 +286,9 @@
         description = "Examples for BGPv4"
         requires = "BGPv4"
         labels = "routing examples"
-        nedPackages = "inet.examples.bgpv4"
+        nedPackages = "
+                       inet.examples.bgpv4
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -260,7 +299,9 @@
         description = "Mobility support for wireless simulations"
         requires = ""
         labels = ""
-        nedPackages = "inet.mobility"
+        nedPackages = "
+                       inet.mobility
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -271,7 +312,9 @@
         description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
         requires = "mobility"
         labels = "nic wireless"
-        nedPackages = "inet.linklayer.mf80211"
+        nedPackages = "
+                       inet.linklayer.mf80211
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -282,7 +325,9 @@
         description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
         requires = "mobility"
         labels = "nic wireless"
-        nedPackages = "inet.linklayer.ieee80211"
+        nedPackages = "
+                       inet.linklayer.ieee80211
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -293,7 +338,12 @@
         description = "wireless, depends on IPv4"
         requires = "IPv4"
         labels = "nic wireless"
-        nedPackages = "inet.nodes.adhoc inet.nodes.wireless inet.examples.adhoc inet.examples.wireless"
+        nedPackages = "
+                       inet.nodes.adhoc
+                       inet.nodes.wireless
+                       inet.examples.adhoc
+                       inet.examples.wireless
+                      "
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
