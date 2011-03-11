@@ -19,7 +19,7 @@
 #ifndef OPPSIM_NETINET_TCP_H
 #define OPPSIM_NETINET_TCP_H
 
-#include "headers/defs.h"   // for endian macros
+//#include "headers/defs.h"   // for endian macros
 
 #  define TH_FIN    0x01
 #  define TH_SYN    0x02
