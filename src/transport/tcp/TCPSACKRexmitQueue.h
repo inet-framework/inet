@@ -165,9 +165,15 @@ class INET_API TCPSACKRexmitQueue
      */
     virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum) const;
 
+    /*
+     * Get length from seqNum, sacked and rexmitted bit of a given SACK block.
+     */
     virtual void getBlock(uint32 seqNum, uint32 &length, bool &sacked, bool &rexmitted) const;
 
   protected:
+    /*
+     * Returns if TCPSACKRexmitQueue is valid or not.
+     */
     bool checkQueue() const;
 };
 

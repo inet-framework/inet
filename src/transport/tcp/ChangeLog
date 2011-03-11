@@ -1,3 +1,5 @@
+FIXME - add latest TCP updates and inprovements here, e.g. TRANSFERMODE
+
 2011-01-31  Thomas Reschka
 
     * although not compliant with RFC 793, page 46: restored Zoltan Bojthe's modifications
