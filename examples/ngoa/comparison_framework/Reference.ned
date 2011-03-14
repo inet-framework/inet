@@ -35,7 +35,7 @@ import inet.nodes.inet.StandardServerWithEthernetInterface2;
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2011-03-14
 //
-network DedicatedAccess
+network Reference
 {
     parameters:
         int N = default(1);	// number of ONUs (subscribers)
