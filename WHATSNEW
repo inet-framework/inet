@@ -3,10 +3,10 @@ Recent changes in the INET Framework
 
 - Removed the TCPSpoofingHost node. Use instead StandardHost with the tcpType="TCPSpoof" parameter.
 
-- NAMTrace and NAMTraceWriter modules have been moved to the obsolete directory. 
-  Turn on event logging instead and use the eventlog animator in the IDE. Event 
-  logging can be turned on with --record-eventlog=true from the command line or 
-  using the toolbar button in Tkenv. Once the .elog file is generated, right 
+- NAMTrace and NAMTraceWriter modules have been moved to the obsolete directory.
+  Turn on event logging instead and use the eventlog animator in the IDE. Event
+  logging can be turned on with --record-eventlog=true from the command line or
+  using the toolbar button in Tkenv. Once the .elog file is generated, right
   click on it in the IDE and select Open with / Animation Player.
 
 - ChannelInstaller module has been removed. Implemented a ThruputMeteringChannel that
@@ -34,7 +34,7 @@ The most significant changes:
 - support for more than one type of tcpApp and udpApp in StandardHost
   (elimination of tcpAppType/udpAppType parameters)
 
-- Interfaces renamed to start with letter "I". BasicMobility -> IMobility, 
+- Interfaces renamed to start with letter "I". BasicMobility -> IMobility,
   TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
   Radio->IRadio, Ieee80211Mgmt->IIeee80211Mgmt, OutputQueue->IOutputQueue,
   INetworkInterface->IWiredNic
@@ -44,38 +44,37 @@ The most significant changes:
   (use AdhocHost with **.wlan.type-name=Nic80211) and MobileHost (use AdhocHost
   with default parameters)
 
-- added new AccessPoint module with support for mobility, relaying between
-  wireless and ethernet ports and cofigurable wireless, ethernet and relay type.
-  obsoletes: WirelessAP and WirelessAPWithEth (use AccessPoint), WirelessAPSimplified and 
-  WirelessAPWithEthSimplified (use AccessPoint with **.wlan.type-name=Ieee80211NicAPSimplified),
-  WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified (use 
-  StandardHost with numRadios=1 and **.wlan.type-name=Ieee80211NicSTASimplified)
+- added new AccessPoint module with configurable wireless, ethernet and relay
+  unit and mobility module types. Obsoletes: WirelessAP and WirelessAPWithEth
+  (use AccessPoint), WirelessAPSimplified and WirelessAPWithEthSimplified
+  (use AccessPoint with **.wlan.type-name=Ieee80211NicAPSimplified),
+  WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified
+  (use StandardHost with numRadios=1 and **.wlan.type-name=Ieee80211NicSTASimplified)
 
 - in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
-  or external interfaces are used. Wired interfaces must implement IWiredNic while wireless 
-  modules implement IWirlessNic. Mobility type and number of wireless cards (default=0)
-  can be also configured via **.wlan.type-name and **.mobility.type-name. The use of 
-  interfaces obsoletes several older modules which differed only in interface types 
+  or external interfaces are used. Wired interfaces must implement IWiredNic, and wireless
+  modules must implement IWirelessNic. Mobility type and number of wireless cards (default=0)
+  can be also configured via **.wlan.type-name and **.mobility.type-name. The use of
+  interfaces obsoletes several older modules which differed only in interface types
   (like WirelessHost or ExtRouter)
 
 - enhanced Router to support external interfaces, ppp, wireless, ethernet etc. This module
-  is similar to StandarHost except it does not contain the transport layer and application layer
-  protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router) 
+  is similar to StandardHost except it does not contain the transport layer and application layer
+  protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router)
 
-- in NetworkLayer and NetworkLayer6 added dummy modules implementing IHook interface 
-  that can be inserted at the bottom of network layer (above link layer). 
-  This allows to insert thruput metering, packet drop and duplication modules etc. 
-  without modifying the module. New modules implementing IHook: 
-  ThruputMeter, DropsGenerator, DuplicatesGenerator and Nop.
-  use **.networkLayer.outputHook.type-name = "ThruputMeter" to configure it. (use inputHook
+- NetworkLayer and NetworkLayer6: added dummy modules that implement the IHook interface
+  at the bottom of network layer (above link layer). This allows one to insert
+  thruput metering, packet drop and duplication modules etc. without modifying the module.
+  New modules implementing IHook: ThruputMeter, DropsGenerator, DuplicatesGenerator and Nop.
+  Use **.networkLayer.outputHook.type-name = "ThruputMeter" to configure them (use inputHook
   for incoming traffic)
 
-- added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol, 
-  it is now possible to use a much faster implementation by specifying (by Alfonso Ariza Quintana): 
+- added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol,
+  it is now possible to use a much faster implementation by specifying (by Alfonso Ariza Quintana):
   **.networkLayer.arp.globalARP=true
 
-- multi radios per host (multi channel) are supported by StandardHost, AdhocHost and Router if
-  ChannelControllerExtended is used in the network.
+- multiple radios (on multiple channels) are supported by StandardHost, AdhocHost
+  and Router if ChannelControllerExtended is used in the network.
 
 - point-to-point Ethernet links can now use normal DatarateChannels
   (EtherMAC's txrate parameter was removed)
@@ -124,12 +123,12 @@ The most significant changes:
 In more details:
 
 * Reorganized StandardHost:
- 
+
 Several changes were introduced to make the basic building blocks of
 simulation (StandardHost, AdhocHost, Router etc.) more configurable,
 without the need to copy and modify the modules or derive a new module
-type. Applications, tcp type, nic, mobility, routing protocols can be 
-configured using paramaters or the **.type-name=typename in the .ini file.
+type. Applications, tcp type, nic, mobility, routing protocols can be
+configured using parameters or the **.type-name=typename in the .ini file.
 
 * Ethernet point-to-point links:
 
