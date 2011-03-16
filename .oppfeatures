@@ -58,7 +58,7 @@
         />
     <feature
         id="IPv4"
-        name="IP protocol (v4)"
+        name="IPv4 protocol"
         description = "Basic IPv4 support"
         requires = ""
         labels = "protocols"
@@ -74,7 +74,7 @@
         />
     <feature
         id="IPv4_examples"
-        name="IP examples (v4)"
+        name="IPv4 examples"
         description = "Examples for Basic IPv4 support (IPv4)"
         requires = "IPv4"
         labels = "protocols examples"
@@ -89,7 +89,7 @@
         />
     <feature
         id="IPv6"
-        name="IP protocol (v6)"
+        name="IPv6 protocol"
         description = "Basic IPv6 support"
         requires = ""
         labels = "protocols"
@@ -105,7 +105,7 @@
         />
     <feature
         id="IPv6_examples"
-        name="IP examples (v6)"
+        name="IPv6 examples"
         description = "Examples for Basic IPv6 support (IPv6)"
         requires = "IPv6"
         labels = "protocols examples"
