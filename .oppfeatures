@@ -336,7 +336,7 @@
         id="wireless"
         name="wireless, depends on IPv4, --TODO--"
         description = "wireless, depends on IPv4"
-        requires = "IPv4"
+        requires = "IPv4 mobility mf80211 _80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.nodes.adhoc
