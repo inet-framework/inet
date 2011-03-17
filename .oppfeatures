@@ -161,7 +161,7 @@
         id="SCTP"
         name="SCTP"
         description = "SCTP Protocol support"
-        requires = ""
+        requires = "IPv4"
         labels = "protocols"
         nedPackages = "
                        inet.applications.sctpapp

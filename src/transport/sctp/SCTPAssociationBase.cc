@@ -25,10 +25,8 @@
 
 #include "SCTP.h"
 #include "SCTPCommand_m.h"
-#include "IPControlInfo_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
-#include "IPv4InterfaceData.h"
 #include "RoutingTableAccess.h"
 
 
@@ -44,15 +42,19 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     primaryPathCandidate         = false;
     pathErrorCount               = 0;
     pathErrorThreshold       = assoc->getSctpMain()->par("pathMaxRetrans");
+
     if (!pathErrorThreshold) {
         pathErrorThreshold = PATH_MAX_RETRANS;
     }
+
     pathRto                      = assoc->getSctpMain()->par("rtoInitial");
     heartbeatTimeout             = pathRto;
     double interval              = (double)assoc->getSctpMain()->par("hbInterval");
+
     if (!interval) {
         interval = HB_INTERVAL;
     }
+
     heartbeatIntervalTimeout = pathRto+interval;
     srtt                         = pathRto;
     lastAckTime                  = 0;
@@ -63,9 +65,11 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
 
     RoutingTableAccess routingTableAccess;
     const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.get4());
+
     if(rtie == NULL) {
         throw cRuntimeError(this, "No interface for remote address %s found!", remoteAddress.get4().str().c_str());
     }
+
     pmtu                         = rtie->getMTU();
     rttvar                       = 0.0;
 
@@ -253,17 +257,21 @@ SCTPStateVariables::SCTPStateVariables()
     probingTimeout            = 1;
     numRequests               = 0;
     numMsgsReq.resize(65536);
+
     for (unsigned int i = 0; i < 65536; i++) {
         numMsgsReq[i] = 0;
     }
+
     for (unsigned int i = 0; i < MAX_GAP_COUNT; i++) {
         gapStartList[i] = 0;
         gapStopList[i]   = 0;
     }
+
     for (unsigned int i = 0; i < 32; i++) {
         localTieTag[i] = 0;
         peerTieTag[i]   = 0;
     }
+
     count = 0;
 }
 
@@ -343,6 +351,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
         StartTesting->setControlInfo(pinfo->dup());
         scheduleTimeout(StartTesting, sctpMain->testTimeout);
     }
+
     T1_InitTimer->setContextPointer(this);
     T2_ShutdownTimer->setContextPointer(this);
     SackTimer->setContextPointer(this);
@@ -360,6 +369,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
 
     // ====== Stream scheduling ==============================================
     ssModule = sctpMain->par("ssModule");
+
     switch (ssModule)
     {
         case ROUND_ROBIN:
@@ -401,9 +411,11 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 
     if (addr != IPvXAddress("0.0.0.0"))
         path = getPath(addr);
-     // first do actions
+
+    // first do actions
     SCTPEventCode event;
     event = SCTP_E_IGNORE;
+
     if (msg==T1_InitTimer)
     {
         process_TIMEOUT_INIT_REXMIT(event);
@@ -454,13 +466,14 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     {
         sctpAlgorithm->processTimer(msg, event);
     }
-     // then state transitions
-     return performStateTransition(event);
+
+    // then state transitions
+    return performStateTransition(event);
 }
 
-bool SCTPAssociation::processSCTPMessage(SCTPMessage*           sctpmsg,
-                                                      const IPvXAddress& msgSrcAddr,
-                                                      const IPvXAddress& msgDestAddr)
+bool SCTPAssociation::processSCTPMessage(SCTPMessage* sctpmsg,
+                                         const IPvXAddress& msgSrcAddr,
+                                         const IPvXAddress& msgDestAddr)
 {
     printConnBrief();
 
@@ -503,34 +516,49 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
     SCTPEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
     sctpEV3 << "App command: " << eventName(event) << "\n";
+
     switch (event)
     {
         case SCTP_E_ASSOCIATE: process_ASSOCIATE(event, sctpCommand, msg); break;
+
         case SCTP_E_OPEN_PASSIVE: process_OPEN_PASSIVE(event, sctpCommand, msg); break;
+
         case SCTP_E_SEND: process_SEND(event, sctpCommand, msg); break;
+
         case SCTP_E_CLOSE: process_CLOSE(event); break;
+
         case SCTP_E_ABORT: process_ABORT(event); break;
+
         case SCTP_E_RECEIVE: process_RECEIVE_REQUEST(event, sctpCommand); break;
+
         case SCTP_E_PRIMARY: process_PRIMARY(event, sctpCommand); break;
+
         case SCTP_E_QUEUE_BYTES_LIMIT: process_QUEUE_BYTES_LIMIT(sctpCommand); break;
-        case SCTP_E_QUEUE_MSGS_LIMIT:    process_QUEUE_MSGS_LIMIT(sctpCommand); break;
+
+        case SCTP_E_QUEUE_MSGS_LIMIT: process_QUEUE_MSGS_LIMIT(sctpCommand); break;
+
         case SCTP_E_SHUTDOWN: /*sendShutdown*/
-        sctpEV3<<"SCTP_E_SHUTDOWN in state "<<stateName(fsm->getState())<<"\n";
-            if (fsm->getState()==SCTP_S_SHUTDOWN_RECEIVED) {
-            sctpEV3<<"send shutdown ack\n";
+            sctpEV3 << "SCTP_E_SHUTDOWN in state " << stateName(fsm->getState()) << "\n";
+
+            if (fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED) {
+                sctpEV3 << "send shutdown ack\n";
                 sendShutdownAck(remoteAddr);
-                }
+            }
             break;  //I.R.
+
         case SCTP_E_STOP_SENDING: break;
+
         case SCTP_E_SEND_SHUTDOWN_ACK:
-                /*if (fsm->getState()==SCTP_S_SHUTDOWN_RECEIVED && getOutstandingBytes()==0
-                    && qCounter.roomSumSendStreams==0 && transmissionQ->getQueueSize()==0)
-                {
-                    sendShutdownAck(state->primaryPathIndex);
-                }*/
-                break;
+            /*if (fsm->getState()==SCTP_S_SHUTDOWN_RECEIVED && getOutstandingBytes()==0
+                && qCounter.roomSumSendStreams==0 && transmissionQ->getQueueSize()==0)
+            {
+                sendShutdownAck(state->primaryPathIndex);
+            }*/
+            break;
+
         default: throw cRuntimeError(this, "wrong event code");
     }
+
     delete sctpCommand;
     // then state transitions
     return performStateTransition(event);
@@ -540,6 +568,7 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
 bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 {
     sctpEV3<<"performStateTransition\n";
+
     if (event==SCTP_E_IGNORE)   // e.g. discarded segment
     {
         ev << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
@@ -548,6 +577,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     // state machine
     int32 oldState = fsm->getState();
+
     switch (fsm->getState())
     {
         case SCTP_S_CLOSED:
@@ -559,7 +589,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_RCV_INIT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_VALID_COOKIE_ECHO: FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
-                    case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
+                case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 default:;
             }
             break;
@@ -584,14 +614,19 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 default:;
             }
             break;
+
         case SCTP_S_ESTABLISHED:
             switch (event)
             {
                 case SCTP_E_SEND: FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                case SCTP_E_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);    break;
-                case SCTP_E_STOP_SENDING: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING); state->stopSending = true; state->lastTSN = state->nextTSN-1; break;    //I.R.
+                case SCTP_E_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING); break;
+                case SCTP_E_STOP_SENDING:
+                    FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);
+                    state->stopSending = true;
+                    state->lastTSN = state->nextTSN - 1;
+                    break;    //I.R.
                 case SCTP_E_RCV_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED); break;
                 case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 default:;
@@ -616,9 +651,12 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_NO_MORE_OUTSTANDING:
-                            FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);
+                    FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);
                     break;
-                case SCTP_E_SHUTDOWN: sendShutdownAck(remoteAddr); /*FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);*/ break;
+                case SCTP_E_SHUTDOWN:
+                    sendShutdownAck(remoteAddr);
+                    /*FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);*/
+                    break;
                 default:;
             }
             break;
@@ -629,7 +667,10 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_SHUTDOWN_ACK: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                case SCTP_E_RCV_SHUTDOWN: sendShutdownAck(remoteAddr); FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT); break;
+                case SCTP_E_RCV_SHUTDOWN:
+                    sendShutdownAck(remoteAddr);
+                    FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);
+                    break;
                 default:;
             }
             break;
@@ -648,20 +689,24 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     if (oldState!=fsm->getState())
     {
-        ev << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState()) << "    (event was: " << eventName(event) << ")\n";
-        sctpEV3 << sctpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm->getState()) << "  (on " << eventName(event) << ")\n";
+        ev << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState())
+           << "    (event was: " << eventName(event) << ")\n";
+        sctpEV3 << sctpMain->getName() << ": " << stateName(oldState) << " --> "
+                << stateName(fsm->getState()) << "  (on " << eventName(event) << ")\n";
         stateEntered(fsm->getState());
     }
     else
     {
-        ev<< "Staying in state: " << stateName(fsm->getState()) << " (event was: " << eventName(event) << ")\n";
+        ev << "Staying in state: " << stateName(fsm->getState())
+           << " (event was: " << eventName(event) << ")\n";
     }
-    if (event==SCTP_E_ABORT && oldState==fsm->getState() && fsm->getState()==SCTP_S_CLOSED)
+
+    if (event == SCTP_E_ABORT && oldState == fsm->getState() && fsm->getState() == SCTP_S_CLOSED)
         return true;
 
-    if (oldState!=fsm->getState() && fsm->getState()==SCTP_S_CLOSED)
+    if (oldState != fsm->getState() && fsm->getState() == SCTP_S_CLOSED)
     {
-        sctpEV3<<"return false because oldState="<<oldState<<" and new state is closed\n";
+        sctpEV3 << "return false because oldState=" << oldState << " and new state is closed\n";
         return false;
     }
     else
@@ -678,9 +723,11 @@ void SCTPAssociation::stateEntered(int32 status)
         {
             sctpEV3 << "State ESTABLISHED entered" << endl;
             stopTimer(T1_InitTimer);
+
             if (state->initChunk) {
                 delete state->initChunk;
             }
+
             state->nagleEnabled                   = (bool)sctpMain->par("nagleEnabled");
             state->enableHeartbeats               = (bool)sctpMain->par("enableHeartbeats");
             state->numGapReports                  = sctpMain->par("numGapReports");
@@ -708,6 +755,7 @@ void SCTPAssociation::stateEntered(int32 status)
             stat.throughput                      = 0;
             sctpMain->assocStatMap[stat.assocId] = stat;
             ccModule = sctpMain->par("ccModule");
+
             switch (ccModule)
             {
                 case RFC4960:
@@ -721,6 +769,7 @@ void SCTPAssociation::stateEntered(int32 status)
                     break;
                 }
             }
+
             pmStartPathManagement();
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
             sendEstabIndicationToApp();
@@ -740,22 +789,26 @@ void SCTPAssociation::stateEntered(int32 status)
             sctpMain->sctpVTagMap[assocId] = vtagPair;
             break;
         }
+
         case SCTP_S_CLOSED:
         {
             sendIndicationToApp(SCTP_I_CLOSED);
             break;
         }
+
         case SCTP_S_SHUTDOWN_PENDING:
         {
             if (getOutstandingBytes()==0 && transmissionQ->getQueueSize()==0 && qCounter.roomSumSendStreams==0)
                 sendShutdown();
             break;
         }
+
         case SCTP_S_SHUTDOWN_RECEIVED:
         {
             sctpEV3 << "Entered state SHUTDOWN_RECEIVED, osb=" << getOutstandingBytes()
                       << ", transQ=" << transmissionQ->getQueueSize()
                       << ", scount=" << qCounter.roomSumSendStreams << endl;
+
             if (getOutstandingBytes()==0 && transmissionQ->getQueueSize()==0 && qCounter.roomSumSendStreams==0) {
                 sendShutdownAck(remoteAddr);
             }
@@ -770,6 +823,7 @@ void SCTPAssociation::stateEntered(int32 status)
 void SCTPAssociation::removePath()
 {
     SCTPPathMap::iterator pathIterator;
+
     while((pathIterator = sctpPathMap.begin()) != sctpPathMap.end())
     {
         SCTPPathVariables* path = pathIterator->second;
