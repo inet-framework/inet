@@ -85,7 +85,8 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
                 // sequence space in the SACK block to the TCP state variable snd.una
                 // (which carries the total cumulative ACK), as this may result in the
                 // wrong conclusion if ACK packets are reordered."
-                tcpEV << "Received D-SACK below cumulative ACK=" << tcpseg->getAckNo() << " D-SACK: " << tmp.str() << endl;
+                tcpEV << "Received D-SACK below cumulative ACK=" << tcpseg->getAckNo()
+                      << " D-SACK: " << tmp.str() << endl;
                 // Note: RFC 2883 does not specify what should be done in this case.
                 // RFC 2883, page 9:
                 // "5. Detection of Duplicate Packets
@@ -148,7 +149,7 @@ bool TCPConnection::isLost(uint32 seqNum)
     // false."
     ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una
 
-    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH      // DUPTHRESH = 3
+    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH    // DUPTHRESH = 3
             || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss));
 
     return isLost;
@@ -179,9 +180,9 @@ void TCPConnection::setPipe()
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32 length = 0; // required for rexmitQueue->getBlock()
-    bool sacked;       // required for rexmitQueue->getBlock()
-    bool rexmitted;    // required for rexmitQueue->getBlock()
+    uint32 length = 0; // required for rexmitQueue->checkSackBlock()
+    bool sacked;       // required for rexmitQueue->checkSackBlock()
+    bool rexmitted;    // required for rexmitQueue->checkSackBlock()
 
     // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
@@ -191,7 +192,7 @@ void TCPConnection::setPipe()
     // HighACK and HighData that has not been SACKed:"
     for (uint32 s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length)
     {
-        rexmitQueue->getBlock(s1, length, sacked, rexmitted);
+        rexmitQueue->checkSackBlock(s1, length, sacked, rexmitted);
 
         if (!sacked)
         {
@@ -238,8 +239,8 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     uint32 highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
     uint32 shift = state->snd_mss;
-    bool sacked = false;           // required for rexmitQueue->getBlock()
-    bool rexmitted = false;        // required for rexmitQueue->getBlock()
+    bool sacked = false;           // required for rexmitQueue->checkSackBlock()
+    bool rexmitted = false;        // required for rexmitQueue->checkSackBlock()
 
     seqNum = 0;
 
@@ -264,11 +265,11 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
             s2 += shift
         )
     {
-        rexmitQueue->getBlock(s2, shift, sacked, rexmitted);
+        rexmitQueue->checkSackBlock(s2, shift, sacked, rexmitted);
 
         if (!sacked)
         {
-            if (isLost(s2))  // 1.a and 1.b are true, see "for" statement below
+            if (isLost(s2))  // 1.a and 1.b are true, see above "for" statement
             {
                 seqNum = s2;
 
@@ -331,11 +332,11 @@ bool TCPConnection::nextSeg(uint32 &seqNum)
                 s3 += shift
             )
         {
-            rexmitQueue->getBlock(s3, shift, sacked, rexmitted);
+            rexmitQueue->checkSackBlock(s3, shift, sacked, rexmitted);
 
             if (!sacked)
             {
-                // 1.a and 1.b are true, see "for" statement below
+                // 1.a and 1.b are true, see above "for" statement
                 seqNum = s3;
 
                 return true;
@@ -586,7 +587,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     uint maxnode = ((TCP_OPTIONS_MAX_SIZE - used_options_len) - 2) / 8;    // 2: option header, 8: size of one sack entry
 
     if (n > maxnode)
-    	n = maxnode;
+        n = maxnode;
 
     if (n == 0)
     {

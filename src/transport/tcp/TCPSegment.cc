@@ -116,7 +116,7 @@ void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
     ASSERT(payloadLength_var >= truncleft + truncright);
 
     if (0 != byteArray_var.getDataArraySize())
-    	byteArray_var.truncateData(truncleft, truncright);
+        byteArray_var.truncateData(truncleft, truncright);
 
     while (!payloadList.empty() && (payloadList.front().endSequenceNo - sequenceNo_var) <= truncleft)
     {

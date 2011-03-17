@@ -725,7 +725,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 state->start_seqno = tcpseg->getSequenceNo();
                 state->end_seqno = tcpseg->getSequenceNo() + tcpseg->getPayloadLength();
                 state->snd_sack = true;
-                tcpEV << "SND_SACK SET (rcv_nxt changed, but rexmitQ is not empty)\n";
+                tcpEV << "SND_SACK SET (rcv_nxt changed, but receiveQ is not empty)\n";
                 state->ack_now = true; // although not mentioned in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861] seems like we have to set ack_now
             }
         }

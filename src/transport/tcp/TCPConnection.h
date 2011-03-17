@@ -643,6 +643,8 @@ class INET_API TCPConnection
      * (and hence been marked in the scoreboard).  NextSeg () MUST return the
      * sequence number range of the next segment that is to be
      * transmitted..."
+     * Returns true if a valid sequence number (for the next segment) is found and
+     * returns false if no segment should be send.
      */
     virtual bool nextSeg(uint32 &seqNum);
 

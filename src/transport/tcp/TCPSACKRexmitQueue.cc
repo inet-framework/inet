@@ -390,7 +390,7 @@ uint32 TCPSACKRexmitQueue::getNumOfDiscontiguousSacks(uint32 fromSeqNum) const
     return counter;
 }
 
-void TCPSACKRexmitQueue::getBlock(uint32 fromSeqNum, uint32 &length, bool &sacked, bool &rexmitted) const
+void TCPSACKRexmitQueue::checkSackBlock(uint32 fromSeqNum, uint32 &length, bool &sacked, bool &rexmitted) const
 {
     ASSERT(seqLE(begin, fromSeqNum) && seqLess(fromSeqNum, end));
 

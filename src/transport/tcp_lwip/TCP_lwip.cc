@@ -18,8 +18,8 @@
 
 #include "TCP_lwip.h"
 
-#include "headers/defs.h"   // for endian macros
-#include "headers/in_systm.h"
+//#include "headers/defs.h"   // for endian macros
+//#include "headers/in_systm.h"
 #include "lwip/ip.h"
 
 #include "IPControlInfo.h"
