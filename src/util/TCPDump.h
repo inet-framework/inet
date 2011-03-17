@@ -69,9 +69,13 @@ static hdr_ethernet_t HDR_ETHERNET = {
  */
 class TCPDumper
 {
+    private:
+        int verbosity;
     protected:
         int32 seq;
         std::ostream *outp;
+    public:
+        FILE *dumpfile;
     public:
         TCPDumper(std::ostream& o);
         ~TCPDumper();
@@ -87,9 +91,6 @@ class TCPDumper
         void dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const char *comment=NULL);
         void udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment);
         const char* intToChunk(int32 type);
-        FILE *dumpfile;
-    private:
-        int verbosity;
 };
 
 

@@ -24,7 +24,7 @@ package inet.util;
 simple TCPDump {
     parameters:
         string dumpFile = default("");
-        bool threadEnable = default(false);
+        //bool threadEnable = default(false); // unused parameter, removed by ZBojthe
         int snaplen = default(65535);
         int verbosity = default(0);
     gates:
