@@ -19,8 +19,11 @@
 #define __INET_BGPCOMMON_H
 
 #include "IPDatagram.h"
-#include "TCPSocket.h"
+//#include "TCPSocket.h"
 #include "InterfaceEntry.h"
+
+//Forward declarations:
+class TCPSocket;
 
 namespace BGP
 {

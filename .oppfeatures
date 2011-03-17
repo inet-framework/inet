@@ -270,7 +270,7 @@
         id="BGPv4"
         name="BGPv4"
         description = "BGP support"
-        requires = "IPv4 OSPFv2"
+        requires = "IPv4 OSPFv2 TCP_BASE"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.bgpv4
