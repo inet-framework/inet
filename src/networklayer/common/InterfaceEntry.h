@@ -18,9 +18,9 @@
 #ifndef __INET_INTERFACEENTRY_H
 #define __INET_INTERFACEENTRY_H
 
-#include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "MACAddress.h"
 #include "InterfaceToken.h"
 #include "NotifierConsts.h"

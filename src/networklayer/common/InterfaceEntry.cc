@@ -16,14 +16,15 @@
 //
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <algorithm>
-#include <sstream>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <ctype.h>
+//#include <algorithm>
+//#include <sstream>
 
 #include "InterfaceEntry.h"
+
 #include "IInterfaceTable.h"
 
 #ifdef WITH_IPv4

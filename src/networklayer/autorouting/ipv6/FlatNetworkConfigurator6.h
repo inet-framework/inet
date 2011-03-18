@@ -19,7 +19,7 @@
 #ifndef __INET_FLATNETWORKCONFIGURATOR6_H
 #define __INET_FLATNETWORKCONFIGURATOR6_H
 
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 
