@@ -1,14 +1,2 @@
 examples
 src
--inet.examples.mpls
--inet.nodes.mpls
--inet.examples.rtp
--inet.networklayer.ted
--inet.networklayer.ldp
--examples.ipv6
--inet.networklayer.mpls
--inet.networklayer.rsvp_te
--inet.networklayer.icmp
--inet.applications.rtpapp
--inet.transport.udp
--inet.transport.rtp

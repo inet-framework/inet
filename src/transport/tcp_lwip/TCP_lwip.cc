@@ -137,7 +137,7 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
 
     // get src/dest addresses
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo())!=NULL)
+    if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo()) != NULL)
     {
         IPControlInfo *controlInfo = (IPControlInfo *)tcpsegP->removeControlInfo();
         srcAddr = controlInfo->getSrcAddr();
@@ -147,9 +147,8 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     }
     else
 #endif
-
 #ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
+    if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo()) != NULL)
     {
         IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
         srcAddr = controlInfo->getSrcAddr();
@@ -159,7 +158,6 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     }
     else
 #endif
-
     {
         error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }

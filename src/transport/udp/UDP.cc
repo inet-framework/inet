@@ -252,14 +252,18 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
 {
 #ifdef WITH_IPv4
     // IPv4 version
-    if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
+    if (sd->remotePort != 0 && sd->remotePort != udp->getSourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ipCtrl->getDestAddr())
+
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4() != ipCtrl->getDestAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ipCtrl->getSrcAddr())
+
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4() != ipCtrl->getSrcAddr())
         return false;
-    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
+
+    if (sd->interfaceId != -1 && sd->interfaceId != ipCtrl->getInterfaceId())
         return false;
+
     return true;
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
@@ -270,14 +274,18 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
 {
 #ifdef WITH_IPv6
     // IPv6 version
-    if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
+    if (sd->remotePort != 0 && sd->remotePort != udp->getSourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ipCtrl->getDestAddr())
+
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6() != ipCtrl->getDestAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ipCtrl->getSrcAddr())
+
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6() != ipCtrl->getSrcAddr())
         return false;
-    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
+
+    if (sd->interfaceId != -1 && sd->interfaceId != ipCtrl->getInterfaceId())
         return false;
+
     return true;
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
@@ -286,9 +294,9 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
 
 bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort)
 {
-    return (sd->remotePort==0 || sd->remotePort!=remotePort) &&
-           (sd->localAddr.isUnspecified() || sd->localAddr==localAddr) &&
-           (sd->remoteAddr.isUnspecified() || sd->remoteAddr==remoteAddr);
+    return (sd->remotePort == 0 || sd->remotePort != remotePort) &&
+           (sd->localAddr.isUnspecified() || sd->localAddr == localAddr) &&
+           (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr);
 }
 
 void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
@@ -342,29 +350,31 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
 
     // send back ICMP PORT_UNREACHABLE
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
+    if (dynamic_cast<IPControlInfo *>(ctrl) != NULL)
     {
         if (!icmp)
             icmp = ICMPAccess().get();
+
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
+
         if (!ctrl4->getDestAddr().isMulticast())
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
     }
     else
 #endif
-
 #ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo())!=NULL)
+    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
     {
         if (!icmpv6)
             icmpv6 = ICMPv6Access().get();
+
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
+
         if (!ctrl6->getDestAddr().isMulticast())
             icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
     }
     else
 #endif
-
     {
         error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName());
     }
@@ -394,7 +404,6 @@ void UDP::processICMPError(cPacket *msg)
     }
     else
 #endif
-
 #ifdef WITH_IPv6
     if (dynamic_cast<ICMPv6Message *>(msg))
     {
@@ -429,14 +438,17 @@ void UDP::processICMPError(cPacket *msg)
     }
     SockDescList& list = it->second;
     SockDesc *srcSocket = NULL;
-    for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+
+    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
     {
         SockDesc *sd = *it;
+
         if (sd->onlyLocalPortIsSet || matchesSocket(sd, localAddr, remoteAddr, remotePort))
         {
             srcSocket = sd; // FIXME what to do if there's more than one matching socket ???
         }
     }
+
     if (!srcSocket)
     {
         EV << "No matching socket, ignoring ICMP error\n";
@@ -468,12 +480,14 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     emit(rcvdPkSignal, udpPacket);
     // simulate checksum: discard packet if it has bit error
     EV << "Packet " << udpPacket->getName() << " received from network, dest port " << udpPacket->getDestinationPort() << "\n";
+
     if (udpPacket->hasBitError())
     {
         EV << "Packet has bit error, discarding\n";
         emit(droppedPkBadChecksumSignal, udpPacket);
         numDroppedBadChecksum++;
         delete udpPacket;
+
         return;
     }
 
@@ -482,12 +496,15 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 
     // send back ICMP error if no socket is bound to that port
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
-    if (it==socketsByPortMap.end())
+
+    if (it == socketsByPortMap.end())
     {
         EV << "No socket registered on port " << destPort << "\n";
         processUndeliverablePacket(udpPacket, ctrl);
+
         return;
     }
+
     SockDescList& list = it->second;
 
     int matches = 0;
@@ -499,9 +516,11 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
-        for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+
+        for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
         {
             SockDesc *sd = *it;
+
             if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl4))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
@@ -516,9 +535,11 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+
+        for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
         {
             SockDesc *sd = *it;
+
             if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl6))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
@@ -530,11 +551,12 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     else
 #endif
     {
-        error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName());
+        error("(%s)%s arrived from lower layer without control info",
+                udpPacket->getClassName(), udpPacket->getName());
     }
 
     // send back ICMP error if there is no matching socket
-    if (matches==0)
+    if (matches == 0)
     {
         EV << "None of the sockets on port " << destPort << " matches the packet\n";
         processUndeliverablePacket(udpPacket, ctrl);
@@ -607,17 +629,21 @@ UDPPacket *UDP::createUDPPacket(const char *name)
 void UDP::processCommandFromApp(cMessage *msg)
 {
     UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+
     switch (msg->getKind())
     {
         case UDP_C_BIND:
             bind(msg->getArrivalGate()->getIndex(), udpCtrl);
             break;
+
         case UDP_C_CONNECT:
             connect(udpCtrl->getSockId(), udpCtrl->getDestAddr(), udpCtrl->getDestPort());
             break;
+
         case UDP_C_UNBIND:
             unbind(udpCtrl->getSockId());
             break;
+
         default:
             error("unknown command code (message kind) %d received from app", msg->getKind());
     }
@@ -625,5 +651,4 @@ void UDP::processCommandFromApp(cMessage *msg)
     delete udpCtrl;
     delete msg;
 }
-
 

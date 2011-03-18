@@ -61,28 +61,31 @@ void IPTrafSink::printPacket(cPacket *msg)
     int protocol = -1;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
+    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
         dest = ctrl->getDestAddr();
         protocol = ctrl->getProtocol();
     }
+    else
 #endif
-
 #ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
+    if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
         dest = ctrl->getDestAddr();
         protocol = ctrl->getProtocol();
     }
+    else
 #endif
+    {}
 
     ev  << msg << endl;
     ev  << "Payload length: " << msg->getByteLength() << " bytes" << endl;
-    if (protocol!=-1)
+
+    if (protocol != -1)
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 

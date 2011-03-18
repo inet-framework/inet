@@ -390,8 +390,6 @@ Define_Module(TCPDump);
 
 TCPDump::TCPDump() : cSimpleModule(), tcpdump(ev.getOStream())
 {
-
-
 }
 
 void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)

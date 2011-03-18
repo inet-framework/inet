@@ -167,7 +167,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     IPvXAddress src, dest;
     int msgHopCount = -1;
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
+    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
@@ -177,7 +177,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 #endif
 
 #ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
+    if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
