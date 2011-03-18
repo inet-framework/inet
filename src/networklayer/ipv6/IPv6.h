@@ -93,7 +93,7 @@ class INET_API IPv6 : public QueueBase
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
-     * isLocalAddress() for local packets, to fragmentAndSend() for forwarded packets,
+     * localDeliver() for local packets, to fragmentAndSend() for forwarded packets,
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
@@ -108,7 +108,7 @@ class INET_API IPv6 : public QueueBase
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void isLocalAddress(IPv6Datagram *datagram);
+    virtual void localDeliver(IPv6Datagram *datagram);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
