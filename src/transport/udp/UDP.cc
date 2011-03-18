@@ -608,7 +608,7 @@ void UDP::processMsgFromApp(cPacket *appData)
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpCtrl->getSrcAddr().get6());
         ipControlInfo->setDestAddr(udpCtrl->getDestAddr().get6());
-        // ipControlInfo->setInterfaceId(udpCtrl->InterfaceId()); FIXME extend IPv6 with this!!!
+        ipControlInfo->setInterfaceId(udpCtrl->getInterfaceId());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
