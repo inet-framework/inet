@@ -254,9 +254,9 @@ IInterfaceTable *IPAddressResolver::interfaceTableOf(cModule *host)
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
-#ifdef WITH_IPv4
 IRoutingTable *IPAddressResolver::routingTableOf(cModule *host)
 {
+#ifdef WITH_IPv4
     // find IRoutingTable
     cModule *mod = host->getSubmodule("routingTable");
     if (!mod)
@@ -264,12 +264,14 @@ IRoutingTable *IPAddressResolver::routingTableOf(cModule *host)
                   " `routingTable' in host/router `%s'", host->getFullPath().c_str());
 
     return check_and_cast<IRoutingTable *>(mod);
-}
+#else
+    throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
+}
 
-#ifdef WITH_IPv6
 RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
 {
+#ifdef WITH_IPv6
     // find IRoutingTable
     cModule *mod = host->getSubmodule("routingTable6");
     if (!mod)
@@ -277,8 +279,10 @@ RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
                   " `routingTable6' in host/router `%s'", host->getFullPath().c_str());
 
     return check_and_cast<RoutingTable6 *>(mod);
-}
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
+}
 
 NotificationBoard *IPAddressResolver::notificationBoardOf(cModule *host)
 {
@@ -297,21 +301,25 @@ IInterfaceTable *IPAddressResolver::findInterfaceTableOf(cModule *host)
     return dynamic_cast<IInterfaceTable *>(mod);
 }
 
-#ifdef WITH_IPv4
 IRoutingTable *IPAddressResolver::findRoutingTableOf(cModule *host)
 {
+#ifdef WITH_IPv4
     cModule *mod = host->getSubmodule("routingTable");
     return dynamic_cast<IRoutingTable *>(mod);
-}
+#else
+    throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
+}
 
-#ifdef WITH_IPv6
 RoutingTable6 *IPAddressResolver::findRoutingTable6Of(cModule *host)
 {
+#ifdef WITH_IPv6
     cModule *mod = host->getSubmodule("routingTable6");
     return dynamic_cast<RoutingTable6 *>(mod);
-}
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
+}
 
 NotificationBoard *IPAddressResolver::findNotificationBoardOf(cModule *host)
 {

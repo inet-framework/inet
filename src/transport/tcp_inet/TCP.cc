@@ -114,19 +114,14 @@ void TCP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
-        if (
+        if (false
 #ifdef WITH_IPv4
-        		dynamic_cast<ICMPMessage *>(msg)
-#else
-        		false
+                || dynamic_cast<ICMPMessage *>(msg)
 #endif
-        		||
 #ifdef WITH_IPv6
-        		dynamic_cast<ICMPv6Message *>(msg)
-#else
-        		false
+                || dynamic_cast<ICMPv6Message *>(msg)
 #endif
-        		)
+            )
         {
             tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msg;
@@ -149,7 +144,6 @@ void TCP::handleMessage(cMessage *msg)
             }
             else
 #endif
-
 #ifdef WITH_IPv6
             if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
@@ -160,7 +154,6 @@ void TCP::handleMessage(cMessage *msg)
             }
             else
 #endif
-
             {
                 error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }

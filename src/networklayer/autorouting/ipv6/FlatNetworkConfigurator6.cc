@@ -33,7 +33,6 @@ Define_Module(FlatNetworkConfigurator6);
 
 void FlatNetworkConfigurator6::initialize(int stage)
 {
-#ifdef WITH_IPv6
     // FIXME refactor: make routers[] array? (std::vector<cTopology::Node*>)
     // FIXME: spare common beginning for all stages?
 
@@ -52,9 +51,6 @@ void FlatNetworkConfigurator6::initialize(int stage)
         addOwnAdvPrefixRoutes(topo);
         addStaticRoutes(topo);
     }
-#else
-    error("FlatNetworkConfigurator6 not supported: WITHOUT_IPv6 option was defined during compilation");
-#endif
 }
 
 void FlatNetworkConfigurator6::handleMessage(cMessage *)
@@ -75,7 +71,6 @@ bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
     return IPAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
-#ifdef WITH_IPv6
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 {
     // assign advertised prefixes to all router interfaces
@@ -265,6 +260,4 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
     // update display string
     setDisplayString(numIPNodes, topo.getNumNodes()-numIPNodes);
 }
-#endif
-
 
