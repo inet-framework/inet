@@ -1,0 +1,809 @@
+\documentclass[technote,onecolumn,10pt]{IEEEtran}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{datetime}
+\usepackage{graphicx}
+\usepackage{ifpdf}
+\usepackage{longtable}
+\usepackage{subfigure}
+\usepackage{url}
+%%% PDF bookmark settings
+\ifpdf
+% \usepackage{datetime}
+\usepackage{memhfixc}
+\usepackage[%%
+raiselinks=true,%%
+colorlinks,%%
+pdftex,%%
+pdfpagemode=UseOutlines,%%
+pdftitle={Summary of the Simulation Results for the ECR-Based Study of NGOA Architectures},%%
+pdfauthor={Kyeong Soo (Joseph) Kim (k.s.kim@swansea.ac.uk)},%%
+pdfsubject={simulation summary},%%
+pdfkeywords={equivalent circuit rate, passive optical network, next-generation optical access, OMNeT++},%%
+% pdfpagelayout=TwoColumnLeft,%%
+pdfstartview=FitV,%%
+bookmarksopen=true,%%
+bookmarksopenlevel=1%%
+]{hyperref}
+\pdfinfo{
+  /CreationDate (D:20110208144500)
+  /ModDate (D:\pdfdate)
+}
+\fi
+
+
+%%% R Sweave/pgfSweave settings
+\SweaveOpts{prefix.string=figures/Rplot}    % need to create "figures" subdirectory to save R plots
+\newif\ifIsPgfSweave   % to use pgfSweave or not (default is false).
+%% \IsPgfSweavetrue
+\ifIsPgfSweave
+\usepackage{tikz}
+\pgfrealjobname{arxiv}
+%% \usepackage[nogin]{Sweave}
+\fi
+\newif\ifDedicatedAccessWithOneOnu  % to inclue the results for dedicated access with N=1 or not
+%% \DedicatedAccessWithOneOnutrue
+\newif\ifIncludeSplineBasedEcr  % to include the spline-based ECR calculation or not
+\IncludeSplineBasedEcrtrue
+\newif\ifDebugR % to debug R commands or not
+\DebugRtrue
+
+
+\begin{document}
+
+
+\title{Summary of the Simulation Results for the ECR-Based Study of
+  NGOA Architectures}%%
+\author{%%
+  Kyeong Soo (Joseph) Kim\\
+  Senior Lecturer in Networking\\
+  Room 112, Digital Technium\\
+  Multidisciplinary Nanotechnology Centre, College of Engineering\\
+  Swansea University, Singleton Park, Swansea, SA2 8PP, Wales UK
+  Tel: +44 (0)1792 602024 / Fax: +44 (0)1792 602449\\
+  \ifpdf%%
+  \href{mailto:k.s.kim@swansea.ac.uk}{E-mail: k.s.kim@swansea.ac.uk}\\
+  \url{http://iat-hnrl.swan.ac.uk/~kks/}%%
+  \else%%
+  E-mail: k.s.kim@swansea.ac.uk\\
+  http://iat-hnrl.swan.ac.uk/~kks/%%
+  \fi%%
+}%%
+\longdate%%
+\date{\today}%%
+\maketitle%%
+
+
+\begin{abstract}
+  This technical note provides a summary of the simulation results for
+  the ECR-based study of next-generation optical access (NGOA)
+  architectures.
+\end{abstract}
+
+
+% \begin{IEEEkeywords}
+%   Access, passive optical network (PON), equivalent circuit rate
+%   (ECR), time division multiplexing (TDM), wavelength division
+%   multiplexing (WDM)
+% \end{IEEEkeywords}
+
+
+<<Setup,echo=F>>=
+library(cacheSweave)
+setCacheDir(".cache")
+@
+
+<<SummaryPlots,echo=F,results=hide,cache=T>>=
+###
+### Generate summary plots of all performance measures
+###
+source("./R/SummaryPlots.R")
+@
+
+% \ifIncludeSplineBasedEcr
+% <<EcrCalculationHttpDelayMonotoneSpline,echo=F,results=hide,cache=T>>=
+% ###
+% ### Calculate ECRs with HTTP delay based on monotone spline curves
+% ###
+% source("./R/EcrCalculationHttpDelayMonotoneSpline.R")
+% @
+
+% \ifDebugR
+% <<HttpDelayMonotoneSplineCurves,echo=F,results=hide,cache=T>>=
+% ###
+% ### Generate Plots for monotone spline curves of HTTP delays
+% ###
+% source("./R/HttpDelayMonotoneSplineCurves.R")
+% @
+% %%% end of \ifDebugR
+% \fi
+
+% %%% end of \ifIncludeSplineBasedEcr
+% \fi
+
+% <<EcrCalculationHttpDelayParametric,echo=F,results=hide,cache=T>>=
+% ###
+% ### Calculate ECRs with HTTP delay based on parametric hypothesis testing
+% ###
+% source("./R/EcrCalculationHttpDelayParametric.R")
+% @
+
+% %%<<CalculateAndPlotEcrsBasedOnHttpDelay-3,echo=F,results=hide,cache=T>>=
+% <<EcrCalculationHttpDelayNonparametric,echo=F,results=hide,cache=T>>=
+% ###
+% ### Calculate ECRs with HTTP delay based on non-parametric hypothesis testing
+% ###
+% source("./R/EcrCalculationHttpDelayNonparametric.R")
+% @
+
+\ifIsPgfSweave
+\else
+% %% print plots for dedicated access with N=1
+% <<label=da_N1_ftp_delay,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[1]])
+% @
+% <<label=da_N1_ftp_throughput,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[2]])
+% @
+% <<label=da_N1_ftp_transferrate,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[3]])
+% @
+% <<label=da_N1_http_delay,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[4]])
+% @
+% <<label=da_N1_http_throughput,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[5]])
+% @
+% <<label=da_N1_http_transferrate,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[6]])
+% @
+% <<label=da_N1_video_dfr,fig=T,include=F,echo=F>>=
+% print(.da_N1.plots[[7]])
+% @
+% %% print plots for dedicated access with N=16
+% <<label=da_N16_ftp_delay,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[1]])
+% @
+% <<label=da_N16_ftp_throughput,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[2]])
+% @
+% <<label=da_N16_ftp_transferrate,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[3]])
+% @
+% <<label=da_N16_http_delay,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[4]])
+% @
+% <<label=da_N16_http_throughput,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[5]])
+% @
+% <<label=da_N16_http_transferrate,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[6]])
+% @
+% <<label=da_N16_video_dfr,fig=T,include=F,echo=F>>=
+% print(.da_N16.plots[[7]])
+% @
+% %% print plots for hybrid PON
+% <<label=hp_ftp_delay,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[1]])
+% @
+% <<label=hp_ftp_throughput,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[2]])
+% @
+% <<label=hp_ftp_transferrate,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[3]])
+% @
+% <<label=hp_http_delay,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[4]])
+% @
+% <<label=hp_http_throughput,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[5]])
+% @
+% <<label=hp_http_transferrate,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[6]])
+% @
+% <<label=hp_video_dfr,fig=T,include=F,echo=F>>=
+% print(.hp.plots[[7]])
+% @
+% %% print plots for ECRs of hybrid PON
+% <<label=hp_ecr_http_delay_parametric,fig=T,include=F,echo=F>>=
+% print(.hp_ecr_http_delay_parametric.plots[[1]])
+% @
+% <<label=hp_mintx_http_delay_parametric,fig=T,include=F,echo=F>>=
+% print(.hp_ecr_http_delay_parametric.plots[[2]])
+% @
+% <<label=hp_ecr_http_delay_nonparametric,fig=T,include=F,echo=F>>=
+% print(.hp_ecr_http_delay_nonparametric.plots[[1]])
+% @
+% <<label=hp_mintx_http_delay_nonparametric,fig=T,include=F,echo=F>>=
+% print(.hp_ecr_http_delay_nonparametric.plots[[2]])
+% @
+\fi
+
+%% %%%
+%% %%% DEBUG
+%% %%%
+%% \section{Test}
+%% \setkeys{Gin}{width=.8\linewidth}
+%% \begin{figure}
+%%   \begin{center}
+%% %     notice the new options
+%%     <<testplot,echo=F,fig=T,tikz=T,external=T,width=5, height=5>>=
+%%     print(.hp.plots[[4]])
+%%     @
+%%   \end{center}
+%%   \caption{pgfSweave Test}
+%% \end{figure}
+
+
+\section{Introduction}
+%%
+\IEEEPARstart{O}{ptical} access has been considered an ideal solution
+to the problem of upgrading the current bottlenecked access to the one
+capable of delivering future broadband integrated services due to the
+huge capacity of optical fiber. Because optical fiber has been used in
+backbone networks, wide area networks (WANs), and metropolitan area
+networks (MANs), and are also being introduced in local area networks
+(LANs) with the advent of optical Ethernet, the implementation of the
+optical access will be the last step to future all-optical-network
+revolution \cite{Kim:03-1}.
+
+
+\section{Conclusions}
+\label{sec:conclusions}
+%%
+
+
+% \section{Acknowledgment}
+% %%
+% This work was supported in part by the Technology Strategy Board under
+% TP number BC017J.
+
+
+%%%
+%%% Appencides
+%%%
+\clearpage
+\appendices
+
+
+\section{Plots of the Whole Simulation and ECR Results}
+
+\ifDedicatedAccessWithOneOnu
+\subsection{Dedicated Access with $N=1$}
+%%%
+%%% plots for dedicated access with N=1
+%%%
+\ifIsPgfSweave
+\setkeys{Gin}{width=.45\linewidth}
+\fi
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_ftp_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[1]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_ftp_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_ftp_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[2]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_ftp_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_ftp_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[3]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_ftp_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of FTP traffic for dedicated access with $N=1$: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_http_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[4]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_http_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_http_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[5]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_http_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N1_http_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N1.plots[[6]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_http_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of HTTP traffic for dedicated access with $N=1$: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \setkeys{Gin}{width=.45\linewidth}
+  \begin{center}
+    \ifIsPgfSweave
+    <<da_N1_video_dfr,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+    print(.da_N1.plots[[7]])
+    @
+    \else
+    \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N1_video_dfr}
+    \fi
+  \end{center}
+  \caption{Decodable frame rate of UDP streaming video for dedicated access with $N=1$.}
+\end{figure*}
+\fi %%% end of \ifIncludeSubsectionOne
+
+\subsection{Dedicated Access with $N=16$}
+%%%
+%%% plots for dedicated access with N=16
+%%%
+\ifIsPgfSweave
+\setkeys{Gin}{width=.45\linewidth}
+\fi
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_ftp_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[1]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_ftp_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_ftp_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[2]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_ftp_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_ftp_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[3]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_ftp_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of FTP traffic for dedicated access with $N=16$: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_http_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[4]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_http_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_http_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[5]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_http_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<da_N16_http_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.da_N16.plots[[6]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_http_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of HTTP traffic for dedicated access with $N=16$: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \ifIsPgfSweave
+  \setkeys{Gin}{width=.45\linewidth}
+  \fi
+  \begin{center}
+    \ifIsPgfSweave
+    <<da_N16_video_dfr,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+    print(.da_N16.plots[[7]])
+    @
+    \else
+    \includegraphics*[width=.45\linewidth]{figures/Rplot-da_N16_video_dfr}
+    \fi
+  \end{center}
+  \caption{Decodable frame rate of UDP streaming video for dedicated access with $N=16$.}
+\end{figure*}
+
+
+\subsection{Hybrid PON}
+%%%
+%%% plots for hybrid PON
+%%%
+\ifIsPgfSweave
+\setkeys{Gin}{width=.45\linewidth}
+\fi
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_ftp_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[1]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_ftp_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_ftp_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[2]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_ftp_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_ftp_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[3]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_ftp_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of FTP traffic for hybrid TDM/WDM-PON: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_http_delay,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[4]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_http_delay}
+      \fi
+    }\\
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_http_throughput,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[5]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_http_throughput}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_http_transferrate,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.plots[[6]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_http_transferrate}
+      \fi
+    }
+  \end{center}
+  \caption{Performance measures of HTTP traffic for hybrid TDM/WDM-PON: (a) Average session
+    delay, (b) average throughput, and (b) mean transfer rate.}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \ifIsPgfSweave
+  \setkeys{Gin}{width=.45\linewidth}
+  \fi
+  \begin{center}
+    \ifIsPgfSweave
+    <<hp_video_dfr,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+    print(.hp.plots[[7]])
+    @
+    \else
+    \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_video_dfr}
+    \fi
+  \end{center}
+  \caption{Decodable frame rate of UDP streaming video for hybrid TDM/WDM-PON.}
+\end{figure*}
+
+
+% \section{ECR-Based Analysis of Hybrid PON}
+%
+% \subsection{ECR Calculation Procedure}
+% %%%
+% %%% ECR calculation procedure based on hypothesis testing
+% %%%
+% \begin{figure*}[htb]
+%   \centering
+%   \includegraphics*[angle=-90, width=.7\linewidth]{figures/ecr_calculation2}
+%   \caption{ECR calculation procedure based on two-sample hypothesis
+%     testing.}
+%   \label{fig:ecr_calculation2}
+% \end{figure*}
+
+% \subsection{Results}
+%%%
+%%% plots
+%%%
+\begin{figure*}[htb]
+  \begin{center}
+    \subfigure{
+      \centering
+      \ifIsPgfSweave
+      <<hp_ecr_http_delay_parametric,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp_ecr_http_delay_parametric.plots[[1]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_ecr_http_delay_parametric}
+      \fi
+    }
+    \subfigure{
+      \centering
+      \ifIsPgfSweave
+      <<hp_ecr_http_delay_nonparametric,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.ecr_http_delay_nonparametric.plots[[1]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_ecr_http_delay_nonparametric}
+      \fi
+    }\\
+    \setcounter{subfigure}{0}
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_mintx_http_delay_parametric,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp_ecr_http_delay_parametric.plots[[2]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_mintx_http_delay_parametric}
+      \fi
+    }
+    \subfigure[]{
+      \centering
+      \ifIsPgfSweave
+      <<hp_mintx_http_delay_nonparametric,echo=F,fig=T,tikz=T,external=T,width=5,height=5>>=
+      print(.hp.ecr_http_delay_nonparametric.plots[[2]])
+      @
+      \else
+      \includegraphics*[width=.45\linewidth]{figures/Rplot-hp_mintx_http_delay_nonparametric}
+      \fi
+    }
+  \end{center}
+  \caption{ECR for hybrid TDM/WDM-PON based on (a) parametric
+    (\textit{i.e.}, two-sample t-test) and (b) non-parametric
+    (\textit{i.e.},two-sample Wilcoxon test) hypothesis testing.}
+\end{figure*}
+
+
+\section{Tables of the Whole Simulation and ECR Result}
+
+\ifDedicatedAccessWithOneOnu
+\subsection{Dedicated Access with $N=1$}
+%%%
+%%% tables for dedicated access with N=1
+%%%
+<<echo=F,results=tex>>=
+## library(xtable)
+## for (.i in 1:7) {
+  ##     .df <- subset(.da.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+  ##     names(.df)[3:4] <- c("mean", "ci.width")
+  ##     print(xtable(.df, caption=paste(.labels.traffic[.i], .labels.measure[.i], sep=" "), label=""),
+  ##           tabular.environment="longtable", caption.placement = "top",
+  ##           include.rownames = FALSE, floating=FALSE)
+  ## }
+.df <- subset(.da_N1.df, select=c(1:8))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of FTP traffic for dedicated access with $N=1$.", label="tbl:da_N1_ftp")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+#      hline.after=14*1:)
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.da_N1.df, select=c(1, 2, 9:14))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of HTTP traffic for dedicated access with $N=1$.", label="tbl:da_N1_http")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.da_N1.df, select=c(1, 2, 15:16))
+names(.df)[3:4] <- c("dfr.mean", "dfr.ci.width")
+.tabledf <- xtable(.df, caption="Peformance measures of UDP streaming video for dedicated access with $N=1$.", label="tbl:da_N1_video")
+digits(.tabledf)[2:5] <- c(0, 1, rep(-4, 2))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+\fi %%% end of \ifIncludeSubsectionOne
+
+\subsection{Dedicated Access with $N=16$}
+%%%
+%%% tables for dedicated access with N=16
+%%%
+<<echo=F,results=tex>>=
+## for (.i in 1:7) {
+  ##     .df <- subset(.da.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+  ##     names(.df)[3:4] <- c("mean", "ci.width")
+  ##     print(xtable(.df, caption=paste(.labels.traffic[.i], .labels.measure[.i], sep=" "), label=""),
+  ##           tabular.environment="longtable", caption.placement = "top",
+  ##           include.rownames = FALSE, floating=FALSE)
+  ## }
+.df <- subset(.da_N16.df, select=c(1:8))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of FTP traffic for dedicated access with $N=16$.", label="tbl:da_N16_ftp")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+#      hline.after=14*1:)
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.da_N16.df, select=c(1, 2, 9:14))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of HTTP traffic for dedicated access with $N=16$.", label="tbl:da_N16_http")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.da_N16.df, select=c(1, 2, 15:16))
+names(.df)[3:4] <- c("dfr.mean", "dfr.ci.width")
+.tabledf <- xtable(.df, caption="Peformance measures of UDP streaming video for dedicated access with $N=16$.", label="tbl:da_N16_video")
+digits(.tabledf)[2:5] <- c(0, 1, rep(-4, 2))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+\subsection{Hybrid PON}
+%%%
+%%% tables for dedicated access
+%%%
+<<echo=F,results=tex>>=
+.df <- subset(.hp.df, select=c(1:8))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of FTTP traffic for hybrid TDM/WDM-PON.", label="tbl:hp_ftp")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.hp.df, select=c(1, 2, 9:14))
+names(.df)[3:8] <- c(
+"dly.mean", "dly.ci.width",
+"thr.mean", "thr.ci.width",
+"trf.mean", "trf.ci.width"
+)
+.tabledf <- xtable(.df, caption="Peformance measures of HTTP traffic for hybrid TDM/WDM-PON.", label="tbl:hp_http")
+digits(.tabledf)[2:9] <- c(0, 1, rep(-4, 6))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement = "top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+<<echo=F,results=tex>>=
+.df <- subset(.hp.df, select=c(1, 2, 15:16))
+names(.df)[3:4] <- c("dfr.mean", "dfr.ci.width")
+.tabledf <- xtable(.df, caption="Peformance measures of UDP streaming video for hybrid TDM/WDM-PON.", label="tbl:hp_video")
+digits(.tabledf)[2:5] <- c(0, 1, rep(-4, 2))
+print(.tabledf,
+      tabular.environment="longtable", caption.placement = "top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+% \section{Tables of Results of ECR-Based Analysis of Hybrid PON}
+%%%
+%%% tables
+%%%
+<<echo=F,results=tex>>=
+.tabledf <- xtable(.hp_ecr_http_delay_parametric,
+                   caption="ECR and p-value (at 10 Gbps) for hybrid TDM/WDM-PON (based on two-sample t-test).",
+                   label="tbl:hp_ecr_http_delay_parametric")
+digits(.tabledf)[2:5] <- c(0, 0, 1, -4)
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+<<echo=F,results=tex>>=
+.tabledf <- xtable(.hp_ecr_http_delay_nonparametric,
+                   caption="ECR and p-value (at 10 Gbps) for hybrid TDM/WDM-PON (based on two-sample Wilcoxon test).",
+                   label="tbl:hp_ecr_http_delay_nonparametric")
+digits(.tabledf)[2:5] <- c(0, 0, 1, -4)
+print(.tabledf,
+      tabular.environment="longtable", caption.placement="top",
+      include.rownames=FALSE, floating=FALSE, NA.string="NA")
+@
+
+
+%%% References
+\bibliographystyle{IEEEtran} \bibliography{IEEEabrv,kks}
+%% \begin{thebibliography}{10}
+%% \end{thebibliography}
+
+
+\end{document}
