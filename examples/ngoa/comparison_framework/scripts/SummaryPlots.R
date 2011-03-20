@@ -22,7 +22,11 @@ source(paste(.base.directory, "scripts/groupMeansAndCIs.R", sep="/"))
 
 ### define variables and functions
 .rf_N1.wd <- paste(.base.directory, "results/Reference/N1", sep="/")
+.hp_N16.wd <- paste(.base.directory, "results/HybridPon/N16_10h", sep="/")
+.hp_N32.wd <- paste(.base.directory, "results/HybridPon/N32_10h", sep="/")
 .rf_N1.base <- "N1"
+.hp_N16.base <- "N16_10h"
+.hp_N32.base <- "N32_10h"
 .labels.traffic <- c("FTP", "FTP", "FTP", "HTTP", "HTTP", "HTTP", "UDP Streaming Video")
 .labels.measure <- c("Average Session Delay [sec]",
                      "Average Session Throughput [Byte/sec]",
@@ -49,25 +53,49 @@ for (.i in 1:7) {
     .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line()
     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
     ## .p <- .p + geom_point(aes(group=dr, colour=factor(dr), x=n, y=mean), size=.pt_size)
-    .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("dr", values=0:9)
-    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("dr")
+    .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
+    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
     .rf_N1.plots[[.i]] <- .p
 }
 
 ### generate summary plots for hybrid PON with N=16
-.hp.data <- paste(.hp.wd, paste(.hp.base, "data", sep="."), sep="/")
-.hp.org <- read.csv(.hp.data, header=TRUE);
-.hp.org <- .hp.org[order(.hp.org$N, .hp.org$n, .hp.org$dr, .hp.org$tx, .hp.org$br, .hp.org$rtt, .hp.org$repetition), ] # order data frame
-.hp.df <- ddply(.hp.org, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
-.hp.plots <- list()
+.hp_N16.data <- paste(.hp_N16.wd, paste(.hp_N16.base, "data", sep="."), sep="/")
+.df <- read.csv(.hp_N16.data, header=TRUE);
+.df <- .df[order(.df$N, .df$n, .df$dr, .df$tx, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.hp_N16.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
+.hp_N16.plots <- list()
 for (.i in 1:7) {
-    .df <- subset(.hp.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+    .df <- subset(.hp_N16.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
     .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()
-    .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
+    ## .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
+    .p <- .p + xlab("Number of Users per ONU") + ylab(.labels.measure[.i])
     ## .p <- .p + geom_point(aes(group=tx, colour=factor(tx), x=n, y=mean), size=.pt_size)
-    .p <- .p + geom_point(aes(group=tx, shape=factor(tx), x=n, y=mean), size=.pt_size) + scale_shape_manual(expression(N[tx]), values=0:4)
-    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete(expression(N[tx]))
-    .hp.plots[[.i]] <- .p
+    ## .p <- .p + geom_point(aes(group=tx, shape=factor(tx), x=n, y=mean), size=.pt_size) + scale_shape_manual(paste("Number of TXs", paste("(", expression(N[tx]), ")", sep=""), sep="\n"), values=0:4)
+    .p <- .p + geom_point(aes(group=tx, shape=factor(tx), x=n, y=mean), size=.pt_size) + scale_shape_manual(paste("Number of", "Transceivers", sep="\n"), values=0:4)
+    ## .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete(paste("Number of TXs", paste("(", expression(N[tx]), ")", sep=""), sep="\n"))
+    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete(paste("Number of", "Transceivers", sep="\n"))
+    .hp_N16.plots[[.i]] <- .p
+}
+
+### generate summary plots for hybrid PON with N=32
+.hp_N32.data <- paste(.hp_N32.wd, paste(.hp_N32.base, "data", sep="."), sep="/")
+.df <- read.csv(.hp_N32.data, header=TRUE);
+.df <- .df[order(.df$N, .df$n, .df$dr, .df$tx, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.hp_N32.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
+.hp_N32.plots <- list()
+for (.i in 1:7) {
+    .df <- subset(.hp_N32.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
+    names(.df)[3:4] <- c("mean", "ci.width")
+    .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+    .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()
+    ## .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
+    .p <- .p + xlab("Number of Users per ONU") + ylab(.labels.measure[.i])
+    ## .p <- .p + geom_point(aes(group=tx, colour=factor(tx), x=n, y=mean), size=.pt_size)
+    ## .p <- .p + geom_point(aes(group=tx, shape=factor(tx), x=n, y=mean), size=.pt_size) + scale_shape_manual(paste("Number of TXs", paste("(", expression(N[tx]), ")", sep=""), sep="\n"), values=0:4)
+    .p <- .p + geom_point(aes(group=tx, shape=factor(tx), x=n, y=mean), size=.pt_size) + scale_shape_manual(paste("Number of", "Transceivers", sep="\n"), values=0:4)
+    ## .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete(paste("Number of TXs", paste("(", expression(N[tx]), ")", sep=""), sep="\n"))
+    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete(paste("Number of", "Transceivers", sep="\n"))
+    .hp_N32.plots[[.i]] <- .p
 }
