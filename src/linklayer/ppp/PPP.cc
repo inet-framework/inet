@@ -17,17 +17,26 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <omnetpp.h>
+
+#include "PPP.h"
+
 #include "opp_utils.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "PPP.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
 
 Define_Module(PPP);
+
+simsignal_t PPP::txStateSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::txPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::rxPkBytesOkSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::passedUpPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
 
 PPP::PPP()
 {
@@ -75,6 +84,7 @@ void PPP::initialize(int stage)
 
         // find queueModule
         queueModule = NULL;
+
         if (par("queueModule").stringValue()[0])
         {
             cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
@@ -104,10 +114,12 @@ void PPP::initialize(int stage)
         // display string stuff
         if (ev.isGUI())
         {
-            if (connected) {
+            if (connected)
+            {
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
             }
-            else {
+            else
+            {
                 // we are not connected: gray out our icon
                 getDisplayString().setTagArg("i",1,"#707070");
                 getDisplayString().setTagArg("i",2,"100");
@@ -279,7 +291,7 @@ void PPP::handleMessage(cMessage *msg)
     }
     else // arrived on gate "netwIn"
     {
-        if (datarateChannel==NULL)
+        if (datarateChannel == NULL)
         {
             EV << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
@@ -289,6 +301,7 @@ void PPP::handleMessage(cMessage *msg)
         else
         {
             emit(rcvdPkBytesFromHLSignal, (long)(PK(msg)->getByteLength()));
+
             if (endTransmissionEvent->isScheduled())
             {
                 // We are currently busy, so just queue up the packet.
@@ -326,6 +339,7 @@ void PPP::displayBusy()
 void PPP::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
+
     if (datarateChannel)
     {
         datarateChannel->getDisplayString().setTagArg("ls",0,oldConnColor.c_str());
@@ -397,5 +411,4 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
     delete pppFrame;
     return msg;
 }
-
 

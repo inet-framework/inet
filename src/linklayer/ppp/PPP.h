@@ -19,8 +19,8 @@
 #define __INET_PPP_H
 
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "PPPFrame_m.h"
 #include "TxNotifDetails.h"
 #include "INotifiable.h"
@@ -57,13 +57,13 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
     long numBitErr;
     long numDroppedIfaceDown;
 
-    simsignal_t txStateSignal;
-    simsignal_t txPkBytesSignal;
-    simsignal_t rxPkBytesOkSignal;
-    simsignal_t droppedPkBytesIfaceDownSignal;
-    simsignal_t droppedPkBytesBitErrorSignal;
-    simsignal_t passedUpPkBytesSignal;
-    simsignal_t rcvdPkBytesFromHLSignal;
+    static simsignal_t txStateSignal;
+    static simsignal_t txPkBytesSignal;
+    static simsignal_t rxPkBytesOkSignal;
+    static simsignal_t droppedPkBytesIfaceDownSignal;
+    static simsignal_t droppedPkBytesBitErrorSignal;
+    static simsignal_t passedUpPkBytesSignal;
+    static simsignal_t rcvdPkBytesFromHLSignal;
 
   protected:
     virtual InterfaceEntry *registerInterface(double datarate);

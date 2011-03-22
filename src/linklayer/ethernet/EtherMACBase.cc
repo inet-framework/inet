@@ -96,6 +96,15 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     }
 };
 
+simsignal_t EtherMACBase::txPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::rxPkBytesOkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::passedUpPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::txPausePkUnitsSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::rxPausePkUnitsSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::rxPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::droppedPkBytesNotForUsSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
 bool EtherMACBase::MacQueue::isEmpty()
 {
     return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
