@@ -43,14 +43,14 @@ source(paste(.base.directory, "scripts/groupMeansAndCIs.R", sep="/"))
 ### generate summary plots for reference architecture with N=1
 .rf_N1.data <- paste(.rf_N1.wd, paste(.rf_N1.base, "data", sep="."), sep="/")
 .df <- read.csv(.rf_N1.data, header=TRUE)
-.df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$repetition), ] # order data frame
 .rf_N1.df <- ddply(.df, c(.(n), .(dr)), function(df) {return(GetMeansAndCiWidths(df))})
 .rf_N1.plots <- list()
 for (.i in 1:7) {
     .df <- subset(.rf_N1.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-    .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line()
+    .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
     ## .p <- .p + geom_point(aes(group=dr, colour=factor(dr), x=n, y=mean), size=.pt_size)
     .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
@@ -61,14 +61,14 @@ for (.i in 1:7) {
 ### generate summary plots for hybrid PON with N=16
 .hp_N16.data <- paste(.hp_N16.wd, paste(.hp_N16.base, "data", sep="."), sep="/")
 .df <- read.csv(.hp_N16.data, header=TRUE);
-.df <- .df[order(.df$N, .df$n, .df$dr, .df$tx, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
 .hp_N16.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
 .hp_N16.plots <- list()
 for (.i in 1:7) {
     .df <- subset(.hp_N16.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-    .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()
+    .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()  + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
     ## .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
     .p <- .p + xlab("Number of Users per ONU") + ylab(.labels.measure[.i])
     ## .p <- .p + geom_point(aes(group=tx, colour=factor(tx), x=n, y=mean), size=.pt_size)
@@ -82,14 +82,14 @@ for (.i in 1:7) {
 ### generate summary plots for hybrid PON with N=32
 .hp_N32.data <- paste(.hp_N32.wd, paste(.hp_N32.base, "data", sep="."), sep="/")
 .df <- read.csv(.hp_N32.data, header=TRUE);
-.df <- .df[order(.df$N, .df$n, .df$dr, .df$tx, .df$br, .df$rtt, .df$repetition), ] # order data frame
+.df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
 .hp_N32.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
 .hp_N32.plots <- list()
 for (.i in 1:7) {
     .df <- subset(.hp_N32.df, select = c(1, 2, (.i*2+1):((.i+1)*2)))
     names(.df)[3:4] <- c("mean", "ci.width")
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-    .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line()
+    .p <- ggplot(data=.df, aes(group=tx, colour=factor(tx), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
     ## .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
     .p <- .p + xlab("Number of Users per ONU") + ylab(.labels.measure[.i])
     ## .p <- .p + geom_point(aes(group=tx, colour=factor(tx), x=n, y=mean), size=.pt_size)
