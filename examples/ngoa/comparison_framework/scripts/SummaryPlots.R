@@ -10,6 +10,7 @@
 
 ### load add-on packages and external source files
 library(ggplot2)
+library(reshape)
 library(plyr)
 library(xtable)
 ifelse (Sys.getenv("OS") == "Windows_NT",
@@ -43,7 +44,8 @@ source(paste(.base.directory, "scripts/groupMeansAndCIs.R", sep="/"))
 ### generate summary plots for reference architecture with N=1
 .rf_N1.data <- paste(.rf_N1.wd, paste(.rf_N1.base, "data", sep="."), sep="/")
 .df <- read.csv(.rf_N1.data, header=TRUE)
-.df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$repetition), ] # order data frame
+## .df <- .df[order(.df$N, .df$n, .df$dr, .df$br, .df$repetition), ] # order data frame
+.df <- sort_df(.df, vars=c("N", "n", "dr", "br", "repetition"))   # sort data frame
 .rf_N1.df <- ddply(.df, c(.(n), .(dr)), function(df) {return(GetMeansAndCiWidths(df))})
 .rf_N1.plots <- list()
 for (.i in 1:7) {
@@ -61,7 +63,8 @@ for (.i in 1:7) {
 ### generate summary plots for hybrid PON with N=16
 .hp_N16.data <- paste(.hp_N16.wd, paste(.hp_N16.base, "data", sep="."), sep="/")
 .df <- read.csv(.hp_N16.data, header=TRUE);
-.df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
+## .df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
+.df <- sort_df(.df, vars=c("N", "n", "tx", "br", "repetition"))   # sort data frame
 .hp_N16.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
 .hp_N16.plots <- list()
 for (.i in 1:7) {
@@ -82,7 +85,8 @@ for (.i in 1:7) {
 ### generate summary plots for hybrid PON with N=32
 .hp_N32.data <- paste(.hp_N32.wd, paste(.hp_N32.base, "data", sep="."), sep="/")
 .df <- read.csv(.hp_N32.data, header=TRUE);
-.df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
+## .df <- .df[order(.df$N, .df$n, .df$tx, .df$br, .df$repetition), ] # order data frame
+.df <- sort_df(.df, vars=c("N", "n", "tx", "br", "repetition"))   # sort data frame
 .hp_N32.df <- ddply(.df, c(.(n), .(tx)), function(df) {return(GetMeansAndCiWidths(df))})
 .hp_N32.plots <- list()
 for (.i in 1:7) {
