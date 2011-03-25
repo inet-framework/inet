@@ -1,6 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
+- fixed a bug #199 (missing control info) in UDP module when using IPv6 as a transport 
+
 INET-20110225
 -------------
 - additional statistics in the SCTP module (Alberto Cortes)
