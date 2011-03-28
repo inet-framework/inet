@@ -1,4 +1,4 @@
-<features>
+<features cppSourceRoots="src">
     <feature
         id="TCP_BASE"
         name="TCP Base"
