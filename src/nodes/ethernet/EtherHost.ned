@@ -19,10 +19,10 @@
 
 package inet.nodes.ethernet;
 
-import inet.applications.ethernet.EtherAppCli;
-import inet.applications.ethernet.EtherAppSrv;
 import inet.linklayer.ethernet.EtherLLC;
-import inet.linklayer.ethernet.IEtherMAC;
+import inet.linklayer.IEtherMAC;
+import inet.applications.ethernet.EtherAppSrv;
+import inet.applications.ethernet.EtherAppCli;
 
 
 //

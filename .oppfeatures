@@ -1,5 +1,34 @@
 <features cppSourceRoots="src">
     <feature
+        id="ETHERNET"
+        name="Ethernet"
+        description = "The Ethernet layer"
+        requires = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.applications.ethernet
+                       inet.linklayer.ethernet
+                       inet.linklayer.etherswitch
+                       inet.nodes.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_ETHERNET"
+        linkerFlags = ""
+        />
+    <feature
+        id="ETHERNET_examples"
+        name="Ethernet examples"
+        description = "Examples for the Ethernet layer"
+        requires = "ETHERNET"
+        labels = "protocols"
+        nedPackages = "
+                       inet.examples.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="TCP_BASE"
         name="TCP Base"
         description = "The common part of TCP implementations"
@@ -80,8 +109,6 @@
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.inet
-                       inet.examples.ethernet.arptest
-                       inet.examples.ethernet.arptest2
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -201,7 +228,7 @@
         id="ExternalInterface_examples"
         name="External Interface examples"
         description = "Examples for External Interface Support"
-        requires = "ExternalInterface"
+        requires = "ExternalInterface ETHERNET"
         labels = "nic"
         nedPackages = "
                        inet.examples.emulation
@@ -257,7 +284,7 @@
         id="OSPFv2_examples"
         name="OSPFv2 examples"
         description = "Examples for OSPFv2"
-        requires = "OSPFv2"
+        requires = "OSPFv2 ETHERNET"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.ospfv2
@@ -283,8 +310,8 @@
     <feature
         id="BGPv4_examples"
         name="BGPv4 examples"
-        description = "Examples for BGPv4"
-        requires = "BGPv4"
+        description = "Examples for BGPv4 ETHERNET"
+        requires = "BGPv4 ETHERNET"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.bgpv4
@@ -333,14 +360,26 @@
         linkerFlags = ""
         />
     <feature
-        id="wireless"
-        name="wireless, depends on IPv4, --TODO--"
+        id="WIRELESS"
+        name="wireless (depends on IPv4) --TODO--"
         description = "wireless, depends on IPv4"
         requires = "IPv4 mobility mf80211 _80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.nodes.adhoc
                        inet.nodes.wireless
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="WIRELESS_examples"
+        name="wireless examples --TODO--"
+        description = "wireless examples --TODO--"
+        requires = "WIRELESS ETHERNET"
+        labels = "nic wireless"
+        nedPackages = "
                        inet.examples.adhoc
                        inet.examples.wireless
                       "

@@ -24,7 +24,6 @@ import inet.util.TCPDump;
 import inet.nodes.ipv6.StandardHost6;
 import inet.nodes.ipv6.Router6;
 import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
-import inet.examples.ethernet.lans.ethernetline;
 
 
 network DemoNetworkEth

@@ -22,7 +22,6 @@
 
 package inet.examples.inet.flatnet;
 
-import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;

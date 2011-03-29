@@ -22,8 +22,7 @@ import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ospfv2.OSPFRouting;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ppp.PPPInterface;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 
 
@@ -67,11 +66,11 @@ module OSPFRouter
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=145,257,row,110;q=l2queue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=261,257,row,110;q=l2queue");
         }

@@ -19,6 +19,9 @@
 
 package inet.linklayer.ethernet;
 
+import inet.linklayer.IEtherMAC;
+
+
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // See the ~IEtherMAC for the Ethernet MAC layer general informations.
@@ -138,17 +141,17 @@ simple EtherMAC like IEtherMAC
         bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
-        @statistic[txPkBytes](title="TX bytes";record=sum,count,vector);
-        @statistic[rxPkBytesOk](title="RX bytes";record=sum,count,vector);
-        @statistic[passedUpPkBytes](title="Passed up packet bytes to higher layer";record=sum,count,vector);
-        @statistic[txPausePkUnits](title="Sent pause";record=count,stats,vector);
-        @statistic[rxPausePkUnits](title="Received pause";record=count,stats,vector);
-        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer";record=sum,count,vector);
-        @statistic[collision](title="Collision";record=count,vector);
-        @statistic[backoff](title="Backoff";record=count,vector);
-        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down";record=sum,count,vector);
-        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error";record=sum,count,vector);
-        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us";record=sum,count,vector);
+        @statistic[txPkBytes](title="TX bytes"; record=sum,count,vector);
+        @statistic[rxPkBytesOk](title="RX bytes"; record=sum,count,vector);
+        @statistic[passedUpPkBytes](title="Passed up packet bytes to higher layer"; record=sum,count,vector);
+        @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector);
+        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector);
+        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; record=sum,count,vector);
+        @statistic[collision](title="Collision"; record=count,vector);
+        @statistic[backoff](title="Backoff"; record=count,vector);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; record=sum,count,vector);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; record=sum,count,vector);
+        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us"; record=sum,count,vector);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP

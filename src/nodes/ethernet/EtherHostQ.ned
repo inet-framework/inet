@@ -20,8 +20,8 @@
 package inet.nodes.ethernet;
 
 import inet.networklayer.queue.IOutputQueue;
-import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.IEtherMAC;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.applications.ethernet.EtherAppCli;
 

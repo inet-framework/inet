@@ -25,7 +25,6 @@ import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-import inet.examples.ethernet.lans.ethernetline;
 
 
 network NClients

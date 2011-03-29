@@ -15,11 +15,12 @@
 
 package inet.nodes.wireless;
 
-import inet.linklayer.etherswitch.IMACRelayUnit;
-import inet.linklayer.ethernet.IEtherMAC;
 import inet.linklayer.IWirelessNic;
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IEtherMAC;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
+
 
 //
 // A generic access point supporting multiple wireless radios, and

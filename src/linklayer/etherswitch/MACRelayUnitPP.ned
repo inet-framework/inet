@@ -19,6 +19,9 @@
 
 package inet.linklayer.etherswitch;
 
+import inet.linklayer.IMACRelayUnit;
+
+
 //
 // A ~IMACRelayUnit implementation which models one CPU assigned to each
 // incoming port, working with shared memory but separate queues.
@@ -44,9 +47,9 @@ simple MACRelayUnitPP like IMACRelayUnit
         int highWatermark @unit("B") = default(512KB); // buffer usage threshold to send PAUSE frame
         int pauseUnits = default(300);       // time to put in PAUSE frames (in units of 512 bit times)
         @display("i=block/switch");
-        @statistic[processedBytes](title="Processed bytes";record=sum,count,vector);
-        @statistic[droppedBytes](title="Processed bytes";record=sum,count,vector);
-        @statistic[usedBufferBytes](title="Used buffer bytes";record=histogram,vector);
+        @statistic[processedBytes](title="Processed bytes"; record=sum,count,vector);
+        @statistic[droppedBytes](title="Processed bytes"; record=sum,count,vector);
+        @statistic[usedBufferBytes](title="Used buffer bytes"; record=histogram,vector);
     gates:
         input lowerLayerIn[] @labels(EtherFrame);
         output lowerLayerOut[] @labels(EtherFrame);

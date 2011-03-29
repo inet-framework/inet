@@ -23,6 +23,7 @@ package inet.transport;
 //
 moduleinterface ISCTP
 {
+    @display("i=block/wheelbarrow");
     gates:
         input from_appl[];
         input from_ip;
@@ -32,8 +33,11 @@ moduleinterface ISCTP
         output to_ipv6;
 }
 
-simple SCTP_Dummy like ISCTP
+simple SCTP_None like ISCTP
 {
+    parameters:
+        @display("i=old/x_noentry");
+        @class("UnimplementedModule");
     gates:
         input from_appl[];
         input from_ip;

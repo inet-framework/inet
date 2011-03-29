@@ -19,6 +19,9 @@
 
 package inet.linklayer.ethernet;
 
+import inet.linklayer.IEtherMAC;
+
+
 //
 // Ethernet network interface. Assumes inifinite queue.
 //

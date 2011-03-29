@@ -22,8 +22,8 @@ package inet.nodes.wireless;
 
 import inet.mobility.NullMobility;
 import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
-import inet.linklayer.etherswitch.IMACRelayUnit;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IEtherMAC;
 import inet.base.NotificationBoard;
 
 
@@ -60,7 +60,7 @@ module WirelessAPWithEthSimplified
             parameters:
                 @display("p=89,225;q=queue");
         }
-        eth[sizeof(ethg)]: EtherMAC {
+        eth[sizeof(ethg)]: <default("EtherMAC")> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 txQueueLimit = 1000; // increase if needed

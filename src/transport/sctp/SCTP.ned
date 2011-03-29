@@ -63,6 +63,7 @@ simple SCTP like ISCTP
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
+        @display("i=block/wheelbarrow");
 
     gates:
         input from_appl[];

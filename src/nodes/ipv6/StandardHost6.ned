@@ -47,7 +47,7 @@ module StandardHost6
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int numSctpApps = default(0);
-        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
+        string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         bool IPForward = default(false);             // whether to support forwarding of IP packets (i.e. routing)
@@ -87,7 +87,7 @@ module StandardHost6
             parameters:
                 @display("p=336,54");
         }
-        udp: <udpType> like IUDP {
+        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
             parameters:
                 @display("p=336,141");
         }
@@ -95,8 +95,9 @@ module StandardHost6
             parameters:
                 @display("p=501,54");
         }
-        sctp: <default("SCTP")> like ISCTP {
-            @display("p=501,141;i=block/wheelbarrow");
+        sctp: <default(hasClass("SCTP")?"SCTP":"SCTP_None")> like ISCTP {
+            parameters:
+                @display("p=501,141");
         }
         pingApp: PingApp {
             parameters:

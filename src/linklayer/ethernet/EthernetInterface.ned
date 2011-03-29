@@ -22,6 +22,7 @@ package inet.linklayer.ethernet;
 
 import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.IEtherMAC;
 
 
 //

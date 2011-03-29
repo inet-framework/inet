@@ -17,15 +17,15 @@
 
 package inet.nodes.bgp;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
 import inet.transport.ITCP;
-import inet.networklayer.bgpv4.BGPRouting;
-import inet.linklayer.ppp.PPPInterfaceNoQueue;
+import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ospfv2.OSPFRouting;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.bgpv4.BGPRouting;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
+
 
 //
 // IP router with BGPv4 and OSPFv4 support.
@@ -77,11 +77,11 @@ module BGPRouter
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
-        ppp[sizeof(pppg)]: PPPInterfaceNoQueue {
+        ppp[sizeof(pppg)]: <default("PPPInterfaceNoQueue")> like IWiredNic {
             parameters:
                 @display("p=76,305,row,110;q=l2queue;i=block/ifcard");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=186,305,row,110;q=l2queue");
         }

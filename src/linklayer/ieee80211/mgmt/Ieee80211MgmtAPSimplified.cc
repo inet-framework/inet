@@ -18,7 +18,11 @@
 
 #include "Ieee80211MgmtAPSimplified.h"
 #include "Ieee802Ctrl_m.h"
+
+#ifdef WITH_ETHERNET
 #include "EtherFrame_m.h"
+#endif
+
 
 Define_Module(Ieee80211MgmtAPSimplified);
 
@@ -37,9 +41,13 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 {
+#ifdef WITH_ETHERNET
     // convert Ethernet frames arriving from MACRelayUnit (i.e. from
     // the AP's other Ethernet or wireless interfaces)
     Ieee80211DataFrame *frame = convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+#else
+    Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(msg);
+#endif
     sendOrEnqueue(frame);
 }
 
@@ -70,7 +78,11 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
         // We don't need to call distributeReceivedDataFrame() here, because
         // if the frame needs to be distributed onto the wireless LAN too,
         // then relayUnit will send a copy back to us.
+#ifdef WITH_ETHERNET
         send(convertToEtherFrame(frame), "uppergateOut");
+#else
+        send(frame, "uppergateOut");
+#endif
     }
     else
     {

@@ -24,11 +24,11 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
 
 
@@ -112,7 +112,7 @@ module WirelessHostSimplified
             parameters:
                 @display("p=205,350,row,90;q=txQueue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=240,350,row,90;q=txQueue");
         }

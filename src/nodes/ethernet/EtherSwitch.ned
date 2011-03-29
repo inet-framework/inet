@@ -21,8 +21,8 @@
 
 package inet.nodes.ethernet;
 
-import inet.linklayer.ethernet.IEtherMAC;
-import inet.linklayer.etherswitch.IMACRelayUnit;
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IEtherMAC;
 
 
 //

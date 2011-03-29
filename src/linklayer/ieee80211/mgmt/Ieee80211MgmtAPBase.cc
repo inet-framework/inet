@@ -18,8 +18,10 @@
 
 #include "Ieee80211MgmtAPBase.h"
 #include "Ieee802Ctrl_m.h"
-#include "EtherFrame_m.h"
 
+#ifdef WITH_ETHERNET
+#include "EtherFrame_m.h"
+#endif
 
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
@@ -50,6 +52,7 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
 
 EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 {
+#ifdef WITH_ETHERNET
     Ieee80211DataFrameWithSNAP *frame = check_and_cast<Ieee80211DataFrameWithSNAP *>(frame_);
     // create a matching ethernet frame
     EthernetIIFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
@@ -65,10 +68,14 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 
     // done
     return ethframe;
+#else
+    throw cRuntimeError(this, "INET compiled without ETHERNET feature!");
+#endif
 }
 
 Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethframe)
 {
+#ifdef WITH_ETHERNET
     // create new frame
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(ethframe->getName());
     frame->setFromDS(true);
@@ -94,5 +101,8 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
 
     // done
     return frame;
+#else
+    throw cRuntimeError(this, "INET compiled without ETHERNET feature!");
+#endif
 }
 

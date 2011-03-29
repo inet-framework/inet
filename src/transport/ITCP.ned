@@ -107,3 +107,17 @@ moduleinterface ITCP
         output ipOut @labels(TCPSegment,IPControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }
+
+simple TCP_None like ITCP
+{
+    parameters:
+        @display("i=old/x_noentry");
+        @class("UnimplementedModule");
+    gates:
+        input appIn[] @labels(TCPCommand/down);
+        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
+        output appOut[] @labels(TCPCommand/up);
+        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
+}
