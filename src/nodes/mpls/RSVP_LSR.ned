@@ -20,7 +20,7 @@ import inet.networklayer.mpls.MPLS;
 import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 
 
@@ -83,7 +83,7 @@ module RSVP_LSR
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=88,329,row,90;q=l2queue");
         }

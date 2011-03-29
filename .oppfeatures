@@ -29,6 +29,19 @@
         linkerFlags = ""
         />
     <feature
+        id="PPP"
+        name="PPP"
+        description = "The PPP layer"
+        requires = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.linklayer.ppp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PPP"
+        linkerFlags = ""
+        />
+    <feature
         id="TCP_BASE"
         name="TCP Base"
         description = "The common part of TCP implementations"

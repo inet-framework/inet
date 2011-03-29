@@ -18,11 +18,11 @@
 
 package inet.nodes.inet;
 
-import inet.applications.generic.IPTrafficGenerator;
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
+import inet.applications.generic.IPTrafficGenerator;
 
 
 //
@@ -67,7 +67,7 @@ module BurstHost
                 ifIn[1];
                 ifOut[1];
         }
-        ppp[1]: PPPInterface {
+        ppp[1]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=198,262,row,90;q=txQueue");
         }

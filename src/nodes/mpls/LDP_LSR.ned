@@ -21,7 +21,7 @@ import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.ldp.LDP;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 
 
@@ -41,8 +41,7 @@ module LDP_LSR
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
-        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
-        string udpType = default("UDP");  // UDP implementation (~UDP)
+        string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
@@ -80,7 +79,7 @@ module LDP_LSR
             parameters:
                 @display("p=177,145");
         }
-        udp: <udpType> like IUDP {
+        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
             parameters:
                 @display("p=267,145");
         }
@@ -91,7 +90,7 @@ module LDP_LSR
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=105,388,row,90;q=l2queue");
         }

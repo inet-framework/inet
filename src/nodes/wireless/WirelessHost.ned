@@ -56,8 +56,7 @@ module WirelessHost
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
-        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
-        string udpType = default("UDP");  // UDP implementation (~UDP)
+        string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -90,7 +89,7 @@ module WirelessHost
             parameters:
                 @display("p=272,67");
         }
-        udp: <udpType> like IUDP {
+        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
             parameters:
                 @display("p=272,154");
         }

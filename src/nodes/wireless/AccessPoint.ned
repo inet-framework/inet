@@ -53,7 +53,7 @@ module AccessPoint
             parameters:
                 @display("p=89,225;q=queue");
         }
-        eth[sizeof(ethg)]: <etherMacType> like IEtherMAC {
+        eth[sizeof(ethg)]: <ethMacType> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 txQueueLimit = 1000; // increase if needed

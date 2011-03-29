@@ -22,7 +22,6 @@ import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.linklayer.IWiredNic;
 import inet.base.mobility.IMobility;
@@ -58,8 +57,7 @@ module WirelessHostSimplified
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
-        string tcpType = default("TCP");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC)
-        string udpType = default("UDP");  // UDP implementation (~UDP)
+        string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -92,7 +90,7 @@ module WirelessHostSimplified
             parameters:
                 @display("p=272,67");
         }
-        udp: <udpType> like IUDP {
+        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
             parameters:
                 @display("p=272,154");
         }
@@ -108,7 +106,7 @@ module WirelessHostSimplified
                 ifIn[(sizeof(pppg)+sizeof(ethg))+1];
                 ifOut[(sizeof(pppg)+sizeof(ethg))+1];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=205,350,row,90;q=txQueue");
         }

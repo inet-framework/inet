@@ -2,14 +2,14 @@
 
 package inet.transport.rtp;
 
-import inet.applications.rtpapp.RTPApplication;
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
-import inet.transport.udp.UDP;
 import ned.IdealChannel;
+import inet.transport.udp.UDP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
+import inet.applications.rtpapp.RTPApplication;
 
 
 module RTPHost
@@ -76,7 +76,7 @@ module RTPHost
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=202,320,row");
         }
