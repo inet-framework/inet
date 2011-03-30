@@ -18,9 +18,10 @@
 #ifndef __INET_IPVXADDRESS_H
 #define __INET_IPVXADDRESS_H
 
-#include <omnetpp.h>
 #include <string.h>
+
 #include "INETDefs.h"
+
 #include "IPAddress.h"
 #include "IPv6Address.h"
 

@@ -36,7 +36,6 @@ Define_Module(SCTPClient);
 void SCTPClient::initialize()
 {
     const char * address;
-    char* token;
     AddressVector addresses;
     sctpEV3<<"initialize SCTP Client\n";
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = echoedBytesSent = bytesRcvd = 0;
@@ -52,20 +51,22 @@ void SCTPClient::initialize()
     sentEchoedPkBytesSignal = registerSignal("sentEchoedPkBytes");
 
     // parameters
-    address=par("address");
+    address = par("address");
 
-    token = strtok((char*)address,",");
-    while (token != NULL)
+    cStringTokenizer tok(address, ",");
+
+    while (tok.hasMoreTokens())
     {
-        addresses.push_back(IPvXAddress(token));
-        token = strtok(NULL, ",");
+        addresses.push_back(IPvXAddress(tok.nextToken()));
     }
+
     int32 port = par("port");
     echoFactor = par("echoFactor");
     if (!echoFactor) echoFactor = false;
     ordered = (bool)par("ordered");
     finishEndsSimulation = (bool)par("finishEndsSimulation");
-    if (strcmp(address,"")==0)
+
+    if (address[0] == 0)
     {
         socket.bind(port);
     }
@@ -88,6 +89,7 @@ void SCTPClient::initialize()
     scheduleAt((simtime_t)par("startTime"), timeMsg);
     sendAllowed = true;
     bufferSize = 0;
+
     if ((simtime_t)par("stopTime")!=0)
     {
         stopTimer = new cMessage("StopTimer");
@@ -100,7 +102,8 @@ void SCTPClient::initialize()
         timer = false;
         stopTimer = NULL;
     }
-    if ((simtime_t)par("primaryTime")!=0)
+
+    if ((simtime_t)par("primaryTime") != 0)
     {
         primaryChangeTimer = new cMessage("PrimaryTime");
         primaryChangeTimer->setKind(MSGKIND_PRIMARY);
@@ -158,20 +161,25 @@ void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
     // determine number of requests in this session
     numRequestsToSend = (long) par("numRequestsPerSession");
     numPacketsToReceive = (long) par("numPacketsToReceive");
-    if (numRequestsToSend<1)
+
+    if (numRequestsToSend < 1)
         numRequestsToSend = 0;
-        sctpEV3<<"SCTPClient:numRequestsToSend="<<numRequestsToSend<<"\n";
+
+    sctpEV3 << "SCTPClient:numRequestsToSend=" << numRequestsToSend << "\n";
+
     // perform first request (next one will be sent when reply arrives)
-    if ((numRequestsToSend>0 && !timer) || timer)
+    if ((numRequestsToSend > 0 && !timer) || timer)
     {
         if ((simtime_t)par("thinkTime") > 0)
         {
             if (sendAllowed)
             {
                 sendRequest();
+
                 if (!timer)
                     numRequestsToSend--;
             }
+
             timeMsg->setKind(MSGKIND_SEND);
             scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeMsg);
         }
@@ -185,12 +193,14 @@ void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
                         sendRequest();
                     else
                         sendRequest(false);
+
                     if (!timer)
                     {
                         if (--numRequestsToSend == 0)
                             sendAllowed = false;
                     }
                 }
+
                 if (((!timer && numRequestsToSend>0) || timer) && sendAllowed)
                     sendQueueRequest();
             }
@@ -203,27 +213,33 @@ void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
                         sendRequest(true);
                     else
                         sendRequest(false);
+
                     if (!timer && (--numRequestsToSend == 0))
-                            sendAllowed = false;
-                    }
-                }
-            }
-            if ((!timer && numPacketsToReceive == 0) && (simtime_t)par("waitToClose")>0)
-            {
-                timeMsg->setKind(MSGKIND_ABORT);
-                scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), timeMsg);
-            }
-            if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
-            {
-                sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
-                socket.shutdown();
-                if (timeMsg->isScheduled())
-                    cancelEvent(timeMsg);
-                if (finishEndsSimulation) {
-                    endSimulation();
+                        sendAllowed = false;
                 }
             }
         }
+
+        if ((!timer && numPacketsToReceive == 0) && (simtime_t)par("waitToClose")>0)
+        {
+            timeMsg->setKind(MSGKIND_ABORT);
+            scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), timeMsg);
+        }
+
+        if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
+        {
+            sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
+            socket.shutdown();
+
+            if (timeMsg->isScheduled())
+                cancelEvent(timeMsg);
+
+            if (finishEndsSimulation)
+            {
+                endSimulation();
+            }
+        }
+    }
 }
 
 void SCTPClient::sendQueueRequest()
@@ -234,7 +250,7 @@ void SCTPClient::sendQueueRequest()
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setAssocId(socket.getConnectionId());
     cmsg->setControlInfo(qinfo);
-        sctpEV3 << "Sending queue request ..." << endl;
+    sctpEV3 << "Sending queue request ..." << endl;
     socket.sendRequest(cmsg);
 }
 
@@ -242,7 +258,8 @@ void SCTPClient::sendRequestArrived()
 {
     int32 count = 0;
 
-    sctpEV3<<"sendRequestArrived numRequestsToSend="<<numRequestsToSend<<"\n";
+    sctpEV3 << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
+
     while (((!timer && numRequestsToSend > 0) || timer) && count++ < queueSize && sendAllowed)
     {
         if (count == queueSize)
@@ -252,13 +269,17 @@ void SCTPClient::sendRequestArrived()
 
         if (!timer)
             numRequestsToSend--;
+
         if ((!timer && numRequestsToSend == 0))
         {
-            sctpEV3<<"no more packets to send, call shutdown\n";
+            sctpEV3 << "no more packets to send, call shutdown\n";
             socket.shutdown();
+
             if (timeMsg->isScheduled())
                 cancelEvent(timeMsg);
-            if (finishEndsSimulation) {
+
+            if (finishEndsSimulation)
+            {
                 endSimulation();
             }
         }
@@ -272,7 +293,8 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
     sctpEV3<<"Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
     SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->removeControlInfo());
     emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-    bytesRcvd+=msg->getByteLength();
+    bytesRcvd += msg->getByteLength();
+
     if (echoFactor > 0)
     {
         SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
@@ -280,14 +302,17 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
         echoedBytesSent += smsg->getByteLength();
         emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
         cmsg->encapsulate(smsg);
+
         if (ind->getSendUnordered())
             cmsg->setKind(SCTP_C_SEND_UNORDERED);
         else
             cmsg->setKind(SCTP_C_SEND_ORDERED);
+
         packetsSent++;
         delete msg;
         socket.send(cmsg, 1);
     }
+
     if ((long)par("numPacketsToReceive")>0)
     {
         numPacketsToReceive--;
@@ -296,6 +321,7 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
             close();
         }
     }
+
     delete ind;
 }
 
@@ -306,14 +332,15 @@ void SCTPClient::sendRequest(bool last)
 
     sendBytes = par("requestLength");
 
-
     if (sendBytes < 1)
         sendBytes=1;
+
     cPacket* cmsg = new cPacket("AppData");
     SCTPSimpleMessage* msg=new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
-    for (i=0; i<sendBytes; i++)
+
+    for (i=0; i < sendBytes; i++)
     {
         msg->setData(i, 'a');
     }
@@ -321,15 +348,19 @@ void SCTPClient::sendRequest(bool last)
     msg->setByteLength(sendBytes);
     msg->setCreationTime(simulation.getSimTime());
     cmsg->encapsulate(msg);
+
     if (ordered)
         cmsg->setKind(SCTP_C_SEND_ORDERED);
     else
         cmsg->setKind(SCTP_C_SEND_UNORDERED);
+
     // send SCTPMessage with SCTPSimpleMessage enclosed
     sctpEV3 << "Sending request ..." << endl;
     bufferSize -= sendBytes;
+
     if (bufferSize < 0)
         last = true;
+
     socket.send(cmsg, last);
     bytesSent+=sendBytes;
     emit(sentPkBytesSignal, (long)sendBytes);
@@ -337,15 +368,14 @@ void SCTPClient::sendRequest(bool last)
 
 void SCTPClient::handleTimer(cMessage *msg)
 {
-
     switch (msg->getKind())
     {
         case MSGKIND_CONNECT:
             ev << "starting session call connect\n";
             connect();
             break;
-        case MSGKIND_SEND:
 
+        case MSGKIND_SEND:
             if (((!timer && numRequestsToSend>0) || timer))
             {
                 if (sendAllowed)
@@ -356,50 +386,63 @@ void SCTPClient::handleTimer(cMessage *msg)
                 }
                 if ((simtime_t)par("thinkTime") > 0)
                     scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeMsg);
+
                 if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
                 {
                     socket.shutdown();
                     if (timeMsg->isScheduled())
                         cancelEvent(timeMsg);
-                    if (finishEndsSimulation) {
+
+                    if (finishEndsSimulation)
+                    {
                         endSimulation();
                     }
                 }
             }
             else if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
             {
-                    socket.shutdown();
-                    if (timeMsg->isScheduled())
-                        cancelEvent(timeMsg);
-                    if (finishEndsSimulation) {
-                        endSimulation();
-                    }
+                socket.shutdown();
+                if (timeMsg->isScheduled())
+                    cancelEvent(timeMsg);
+
+                if (finishEndsSimulation)
+                {
+                    endSimulation();
+                }
             }
             break;
+
         case MSGKIND_ABORT:
             close();
             break;
+
         case MSGKIND_PRIMARY:
             setPrimaryPath((const char*)par("newPrimary"));
             break;
+
         case MSGKIND_STOP:
             numRequestsToSend=0;
             sendAllowed = false;
             socket.abort();
             socket.close();
+
             if (timeMsg->isScheduled())
                 cancelEvent(timeMsg);
+
             socket.close();
-            if (finishEndsSimulation) {
+
+            if (finishEndsSimulation)
+            {
                 endSimulation();
             }
+
             break;
+
         default:
             ev<<"MsgKind ="<<msg->getKind()<<" unknown\n";
             break;
     }
 }
-
 
 void SCTPClient::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *msg)
 {
@@ -417,7 +460,7 @@ void SCTPClient::socketDataNotificationArrived(int32 connId, void *ptr, cPacket 
 
 void SCTPClient::shutdownReceivedArrived(int32 connId)
 {
-    if (numRequestsToSend==0)
+    if (numRequestsToSend == 0)
     {
         cPacket* cmsg = new cPacket("Request");
         SCTPInfo* qinfo = new SCTPInfo();
@@ -431,7 +474,7 @@ void SCTPClient::shutdownReceivedArrived(int32 connId)
 void SCTPClient::socketPeerClosed(int32, void *)
 {
     // close the connection (if not already closed)
-    if (socket.getState()==SCTPSocket::PEER_CLOSED)
+    if (socket.getState() == SCTPSocket::PEER_CLOSED)
     {
         ev << "remote SCTP closed, closing here as well\n";
         close();
@@ -443,6 +486,7 @@ void SCTPClient::socketClosed(int32, void *)
     // *redefine* to start another session etc.
     ev << "connection closed\n";
     setStatusString("closed");
+
     if (primaryChangeTimer)
     {
         cancelEvent(primaryChangeTimer);
@@ -464,9 +508,10 @@ void SCTPClient::socketFailure(int32, void *, int32 code)
 
 void SCTPClient::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
 {
-struct pathStatus ps;
-    SCTPPathStatus::iterator i=sctpPathStatus.find(status->getPathId());
-    if (i!=sctpPathStatus.end())
+    struct pathStatus ps;
+    SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
+
+    if (i != sctpPathStatus.end())
     {
         ps = i->second;
         ps.active=status->getActive();
@@ -485,14 +530,15 @@ void SCTPClient::setPrimaryPath (const char* str)
 
     cPacket* cmsg = new cPacket("CMSG-SetPrimary");
     SCTPPathInfo *pinfo = new SCTPPathInfo();
-    if (strcmp(str,"")!=0)
+
+    if (strcmp(str, "") != 0)
     {
         pinfo->setRemoteAddress(IPvXAddress(str));
     }
     else
     {
         str = (const char*)par("newPrimary");
-        if (strcmp(str, "")!=0)
+        if (strcmp(str, "") != 0)
             pinfo->setRemoteAddress(IPvXAddress(str));
         else
         {
@@ -507,9 +553,6 @@ void SCTPClient::setPrimaryPath (const char* str)
     socket.sendNotification(cmsg);
 }
 
-
-
-
 void SCTPClient::sendqueueFullArrived(int32 assocId)
 {
     sendAllowed = false;
@@ -519,26 +562,32 @@ void SCTPClient::sendqueueAbatedArrived(int32 assocId, uint64 buffer)
 {
     bufferSize = buffer;
     sendAllowed = true;
+
     while ((((!timer && numRequestsToSend>0) || timer) && sendAllowed && bufferSize>0) ||
-                    (((!timer && numRequestsToSend>0) || timer) && sendAllowed && buffer==0))
+            (((!timer && numRequestsToSend>0) || timer) && sendAllowed && buffer==0))
     {
-            if (!timer && numRequestsToSend==1)
-                        sendRequest(true);
-                    else
-                        sendRequest(false);
-          if (!timer && (--numRequestsToSend == 0))
-                sendAllowed = false;
+        if (!timer && numRequestsToSend==1)
+            sendRequest(true);
+        else
+            sendRequest(false);
+
+        if (!timer && (--numRequestsToSend == 0))
+            sendAllowed = false;
+    }
+
+    if ((!timer && numRequestsToSend == 0) && (simtime_t) par("waitToClose") == 0)
+    {
+        sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
+        socket.shutdown();
+
+        if (timeMsg->isScheduled())
+            cancelEvent(timeMsg);
+
+        if (finishEndsSimulation)
+        {
+            endSimulation();
         }
-        if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
-            {
-                sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
-                socket.shutdown();
-                if (timeMsg->isScheduled())
-                    cancelEvent(timeMsg);
-                if (finishEndsSimulation) {
-                    endSimulation();
-                }
-            }
+    }
 }
 
 void SCTPClient::addressAddedArrived(int32 assocId, IPvXAddress remoteAddr)
@@ -549,22 +598,25 @@ void SCTPClient::finish()
 {
     if (timeMsg->isScheduled())
         cancelEvent(timeMsg);
+
     delete timeMsg;
+
     if (stopTimer)
     {
         cancelEvent(stopTimer);
         delete stopTimer;
     }
+
     if (primaryChangeTimer)
     {
         cancelEvent(primaryChangeTimer);
         delete primaryChangeTimer;
         primaryChangeTimer = NULL;
     }
+
     ev << getFullPath() << ": opened " << numSessions << " sessions\n";
     ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     ev << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
     sctpEV3<<"Client finished\n";
 }
-
 

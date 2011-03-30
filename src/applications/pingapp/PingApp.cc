@@ -16,8 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//#include <limits.h>
-//#include <stdlib.h>
 #include <iostream>
 
 #include "PingApp.h"
@@ -123,6 +121,7 @@ void PingApp::sendPing()
 void PingApp::scheduleNextPing(cMessage *timer)
 {
     simtime_t nextPing = simTime() + intervalp->doubleValue();
+
     if ((count==0 || sendSeqNo<count) && (stopTime==0 || nextPing<stopTime))
         scheduleAt(nextPing, timer);
     else
@@ -166,6 +165,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     // get src, hopCount etc from packet, and print them
     IPvXAddress src, dest;
     int msgHopCount = -1;
+
 #ifdef WITH_IPv4
     if (dynamic_cast<IPControlInfo *>(msg->getControlInfo()) != NULL)
     {
@@ -174,8 +174,8 @@ void PingApp::processPingResponse(PingPayload *msg)
         dest = ctrl->getDestAddr();
         msgHopCount = ctrl->getTimeToLive();
     }
+    else
 #endif
-
 #ifdef WITH_IPv6
     if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
     {
@@ -184,7 +184,9 @@ void PingApp::processPingResponse(PingPayload *msg)
         dest = ctrl->getDestAddr();
         msgHopCount = ctrl->getHopLimit();
     }
+    else
 #endif
+    {}
 
     simtime_t rtt = simTime() - msg->getCreationTime();
 

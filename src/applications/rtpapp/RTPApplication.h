@@ -18,6 +18,7 @@
 #define __INET_RTPAPPLICATION_H
 
 #include "INETDefs.h"
+
 #include "IPAddress.h"
 
 /**

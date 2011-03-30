@@ -17,8 +17,9 @@
 //
 
 
-#include <omnetpp.h>
 #include "IPTrafGen.h"
+
+#include "IPAddressResolver.h"
 
 #ifdef WITH_IPv4
 #include "IPControlInfo.h"
@@ -27,8 +28,6 @@
 #ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
 #endif
-
-#include "IPAddressResolver.h"
 
 
 Define_Module(IPTrafSink);
@@ -50,9 +49,8 @@ void IPTrafSink::handleMessage(cMessage *msg)
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
-
 }
 
 void IPTrafSink::printPacket(cPacket *msg)
@@ -113,7 +111,7 @@ void IPTrafGen::initialize(int stage)
 {
     // because of IPAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     IPTrafSink::initialize();
@@ -127,7 +125,7 @@ void IPTrafGen::initialize(int stage)
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
+    while ((token = tokenizer.nextToken()) != NULL)
         destAddresses.push_back(IPAddressResolver().resolve(token));
 
     counter = 0;
@@ -138,7 +136,8 @@ void IPTrafGen::initialize(int stage)
     if (destAddresses.empty())
         return;
 
-    if (numPackets > 0) {
+    if (numPackets > 0)
+    {
         cMessage *timer = new cMessage("sendTimer");
         scheduleAt(startTime, timer);
     }
@@ -159,6 +158,7 @@ void IPTrafGen::sendPacket()
     payload->setByteLength(msgByteLength);
 
     IPvXAddress destAddr = chooseDestAddr();
+
     if (!destAddr.isIPv6())
     {
 #ifdef WITH_IPv4
@@ -219,6 +219,6 @@ void IPTrafGen::handleMessage(cMessage *msg)
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }

@@ -19,9 +19,9 @@
 #ifndef __SCTPCLIENT_H_
 #define __SCTPCLIENT_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPSocket.h"
-#include "SCTPAssociation.h"
 
 /**
  * Base class for clients app for SCTP-based request-reply protocols or apps.
@@ -67,14 +67,15 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         /** Utility: sends a request to the server */
         void sendRequest(bool last=true);
     public:
-
-        struct pathStatus {
+        struct pathStatus
+        {
             bool active;
             bool primaryPath;
             IPvXAddress  pid;
-            };
+        };
         typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
         SCTPPathStatus sctpPathStatus;
+
         /**
         * Initialization.
         */
@@ -92,6 +93,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         * at the end of the simulation.
         */
         void finish();
+
         /** @name Utility functions */
         //@{
         /** Issues an active OPEN to the address/port given as module parameters */
@@ -135,5 +137,4 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
 };
 
 #endif
-
 

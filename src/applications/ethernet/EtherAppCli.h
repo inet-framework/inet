@@ -19,6 +19,7 @@
 #define __INET_ETHERAPPCLI_H
 
 #include "INETDefs.h"
+
 #include "MACAddress.h"
 
 

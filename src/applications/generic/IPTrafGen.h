@@ -21,7 +21,8 @@
 #define __INET_IPTRAFGEN_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "IPvXAddress.h"
 

@@ -18,9 +18,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
 #include "EtherAppCli.h"
-#include "Ieee802Ctrl_m.h"
+
 #include "EtherApp_m.h"
+#include "Ieee802Ctrl_m.h"
 
 
 Define_Module (EtherAppCli);
@@ -77,9 +79,11 @@ MACAddress EtherAppCli::resolveDestMACAddress()
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
+
             cModule *destMAC = destStation->getSubmodule("mac");
             if (!destMAC)
                 error("module '%s' has no 'mac' submodule", destAddress);
+
             destMACAddress.setAddress(destMAC->par("address"));
         }
     }
