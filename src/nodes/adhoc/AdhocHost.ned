@@ -49,7 +49,7 @@ module AdhocHost
     int numUdpApps = default(0);
     // string tcpAppType = default(""); // Obsolete!
     // string udpAppType = default(""); // Obsolete!
-    string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+    string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     int numRadios = default(1);
     string routingFile = default("");
 
@@ -83,7 +83,7 @@ module AdhocHost
         udpApp[numUdpApps]: <> like IUDPApp {
             @display("p=346,67");
         }
-        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
+        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
             @display("p=346,154");
         }
         pingApp: PingApp {

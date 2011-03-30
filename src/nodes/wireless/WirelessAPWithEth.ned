@@ -44,7 +44,7 @@ module WirelessAPWithEth
         @node();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
+        string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the ~IMACRelayUnit (~MACRelayUnitNP, ~MACRelayUnitPP, etc)
     gates:
         input radioIn @directIn;
         inout ethg[] @labels(EtherFrame-conn);

@@ -65,7 +65,7 @@ module StandardHost
         // string tcpAppType = default(""); // Obsolete!
         // string udpAppType = default(""); // Obsolete!
         // string sctpAppType = default(""); // Obsolete!
-        string tcpType = default(hasClass("TCP")?"TCP":hasClass("TCP_lwip")?"TCP_lwip":hasClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         bool IPForward = default(false);
@@ -106,7 +106,7 @@ module StandardHost
             parameters:
                 @display("p=336,54");
         }
-        udp: <default(hasClass("UDP")?"UDP":"UDP_None")> like IUDP {
+        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
             parameters:
                 @display("p=336,141");
         }
@@ -114,7 +114,7 @@ module StandardHost
             parameters:
                 @display("p=501,54");
         }
-        sctp: <default(hasClass("SCTP")?"SCTP":"SCTP_None")> like ISCTP {
+        sctp: <default(haveClass("SCTP")?"SCTP":"SCTP_None")> like ISCTP {
             @display("p=501,141");
         }
         pingApp: PingApp {

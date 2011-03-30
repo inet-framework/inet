@@ -57,3 +57,13 @@ moduleinterface IMACRelayUnit
         output lowerLayerOut[] @labels(EtherFrame);
 }
 
+simple MACRelayUnit_None like IMACRelayUnit
+{
+    parameters:
+        @display("i=old/x_noentry");
+        @class("UnimplementedModule");
+    gates:
+        input lowerLayerIn[] @labels(EtherFrame);
+        output lowerLayerOut[] @labels(EtherFrame);
+}
+

@@ -20,15 +20,13 @@
 
 typedef cDynamicExpression::Value Value;  // abbreviation for local use
 
-Value nedf_hasClass(cComponent *context, Value argv[], int argc)
+Value nedf_haveClass(cComponent *context, Value argv[], int argc)
 {
-    std::string className = argv[0].s;
-
-    return (NULL != classes.getInstance()->lookup(className.c_str()));
+    return (NULL != classes.getInstance()->lookup(argv[0].s.c_str()));
 }
 
-Define_NED_Function2(nedf_hasClass,
-        "bool hasClass(string className)",
+Define_NED_Function2(nedf_haveClass,
+        "bool haveClass(string className)",
         "string",
         "Returns true if the given C++ class exists"
 );
