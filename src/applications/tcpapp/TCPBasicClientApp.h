@@ -14,7 +14,7 @@
 #ifndef __INET_TCPBASICCLIENTAPP_H
 #define __INET_TCPBASICCLIENTAPP_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "TCPGenericCliAppBase.h"
 
@@ -57,5 +57,4 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
 };
 
 #endif
-
 

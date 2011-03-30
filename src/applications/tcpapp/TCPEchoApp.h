@@ -14,8 +14,6 @@
 #ifndef __INET_TCPECHOAPP_H
 #define __INET_TCPECHOAPP_H
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
 
 

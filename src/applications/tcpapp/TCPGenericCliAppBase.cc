@@ -13,8 +13,9 @@
 
 
 #include "TCPGenericCliAppBase.h"
-#include "IPAddressResolver.h"
+
 #include "GenericAppMsg_m.h"
+#include "IPAddressResolver.h"
 
 
 

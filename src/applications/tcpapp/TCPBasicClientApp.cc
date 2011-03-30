@@ -56,8 +56,8 @@ void TCPBasicClientApp::sendRequest()
 
      long requestLength = par("requestLength");
      long replyLength = par("replyLength");
-     if (requestLength<1) requestLength=1;
-     if (replyLength<1) replyLength=1;
+     if (requestLength < 1) requestLength = 1;
+     if (replyLength < 1) replyLength = 1;
 
      sendPacket(requestLength, replyLength);
 }
@@ -92,11 +92,13 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
 
     // determine number of requests in this session
     numRequestsToSend = (long) par("numRequestsPerSession");
-    if (numRequestsToSend<1) numRequestsToSend=1;
+    if (numRequestsToSend < 1)
+        numRequestsToSend = 1;
 
     // perform first request if not already done (next one will be sent when reply arrives)
     if (!earlySend)
         sendRequest();
+
     numRequestsToSend--;
 }
 
@@ -104,7 +106,7 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, b
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
-    if (numRequestsToSend>0)
+    if (numRequestsToSend > 0)
     {
         EV << "reply arrived\n";
         timeoutMsg->setKind(MSGKIND_SEND);

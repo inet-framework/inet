@@ -60,23 +60,23 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     {
         sendDown(msg);
     }
-    else if (msg->getKind()==TCP_I_PEER_CLOSED)
+    else if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we'll close too
         msg->setKind(TCP_C_CLOSE);
 
-        if (delay==0)
+        if (delay == 0)
             sendDown(msg);
         else
             scheduleAt(simTime()+delay, msg); // send after a delay
     }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
         cPacket *pkt = check_and_cast<cPacket *>(msg);
         bytesRcvd += pkt->getByteLength();
         emit(rcvdPkBytesSignal, (long)(pkt->getByteLength()));
 
-        if (echoFactor==0)
+        if (echoFactor == 0)
         {
             delete pkt;
         }
@@ -105,14 +105,15 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 ByteArray& outdata = baMsg->getByteArray();
                 ByteArray indata = outdata;
                 outdata.setDataArraySize(byteLen);
+
                 for (long i=0; i < byteLen; i++)
                     outdata.setData(i, indata.getData(i/echoFactor));
             }
 
-            if (delay==0)
+            if (delay == 0)
                 sendDown(pkt);
             else
-                scheduleAt(simTime()+delay, pkt); // send after a delay
+                scheduleAt(simTime() + delay, pkt); // send after a delay
         }
     }
     else
@@ -125,7 +126,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     {
         char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 
