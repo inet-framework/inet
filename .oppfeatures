@@ -84,10 +84,10 @@
     <feature
         id="TCP_NSC"
         name="TCP (NSC)"
-        description = "TCP module based on Sam Jensen's Network Simulation Cradle 
+        description = "TCP module based on Sam Jensen's Network Simulation Cradle
                        (NSC, http://www.wand.net.nz/~stj2/nsc) that wraps real
                        OS stacks: Linux, FreeBSD, OpenBSD and lwIP.
-                       NSC must be downloaded and installed separately; read 
+                       NSC must be downloaded and installed separately; read
                        inet/3rdparty/README for more information."
         requires = "TCP_BASE"
         labels = "protocols"
@@ -226,8 +226,10 @@
         />
     <feature
         id="ExternalInterface"
-        name="External Interface support"
-        description = "Support for interfaces to connect the simulation to external events"
+        name="Network emulation support"
+        description = "Support for connecting the simulation to a real network.
+                       The ExternalInterface module is responsible for sending/receiving
+                       packets on the network."
         requires = "IPv4"
         labels = "nic"
         nedPackages = "
@@ -239,8 +241,8 @@
         />
     <feature
         id="ExternalInterface_examples"
-        name="External Interface examples"
-        description = "Examples for External Interface Support"
+        name="Network emulation examples"
+        description = "Examples for network emulation"
         requires = "ExternalInterface ETHERNET"
         labels = "nic"
         nedPackages = "
@@ -252,7 +254,7 @@
         />
     <feature
         id="MPLS"
-        name="MPLS with LDP, RSVP_TE, TED"
+        name="MPLS support (incl. LDP and RSVP-TE)"
         description = "MPLS support"
         requires = "TCP_BASE UDP IPv4"
         labels = "routing"
