@@ -1,47 +1,5 @@
 <features cppSourceRoots="src">
     <feature
-        id="ETHERNET"
-        name="Ethernet"
-        description = "The Ethernet layer"
-        requires = ""
-        labels = "protocols"
-        nedPackages = "
-                       inet.applications.ethernet
-                       inet.linklayer.ethernet
-                       inet.linklayer.etherswitch
-                       inet.nodes.ethernet
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_ETHERNET"
-        linkerFlags = ""
-        />
-    <feature
-        id="ETHERNET_examples"
-        name="Ethernet examples"
-        description = "Examples for the Ethernet layer"
-        requires = "ETHERNET"
-        labels = "protocols"
-        nedPackages = "
-                       inet.examples.ethernet
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
-        id="PPP"
-        name="PPP"
-        description = "The PPP layer"
-        requires = ""
-        labels = "protocols"
-        nedPackages = "
-                       inet.linklayer.ppp
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_PPP"
-        linkerFlags = ""
-        />
-    <feature
         id="TCP_BASE"
         name="TCP Base"
         description = "The common part of TCP implementations"
@@ -222,6 +180,48 @@
                       "
         extraSourceFolders = ""
         compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="ETHERNET"
+        name="Ethernet"
+        description = "The Ethernet layer"
+        requires = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.applications.ethernet
+                       inet.linklayer.ethernet
+                       inet.linklayer.etherswitch
+                       inet.nodes.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_ETHERNET"
+        linkerFlags = ""
+        />
+    <feature
+        id="ETHERNET_examples"
+        name="Ethernet examples"
+        description = "Examples for the Ethernet layer"
+        requires = "ETHERNET IPv4"
+        labels = "protocols"
+        nedPackages = "
+                       inet.examples.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="PPP"
+        name="PPP"
+        description = "The PPP layer"
+        requires = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.linklayer.ppp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PPP"
         linkerFlags = ""
         />
     <feature
