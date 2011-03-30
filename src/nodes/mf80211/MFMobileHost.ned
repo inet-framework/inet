@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.adhoc;
+package inet.nodes.mf80211;
 
 import inet.transport.IUDP;
 import inet.transport.ITCP;

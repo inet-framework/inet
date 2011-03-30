@@ -17,17 +17,6 @@
 
 package inet.nodes.adhoc;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
-import inet.base.mobility.IMobility;
-import inet.base.NotificationBoard;
-import inet.applications.IUDPApp;
-import inet.applications.pingapp.PingApp;
-import inet.applications.ITCPApp;
 
 
 //

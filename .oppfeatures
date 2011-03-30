@@ -67,6 +67,8 @@
                        inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp
                        inet.nodes.inet
+                       inet.nodes.adhoc
+                       inet.nodes.wireless
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -356,6 +358,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.mf80211
+                       inet.nodes.mf80211
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -375,24 +378,10 @@
         linkerFlags = ""
         />
     <feature
-        id="WIRELESS"
-        name="wireless (depends on IPv4) --TODO--"
-        description = "wireless, depends on IPv4"
-        requires = "IPv4 mobility mf80211 _80211"
-        labels = "nic wireless"
-        nedPackages = "
-                       inet.nodes.adhoc
-                       inet.nodes.wireless
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="WIRELESS_examples"
-        name="wireless examples --TODO--"
-        description = "wireless examples --TODO--"
-        requires = "WIRELESS ETHERNET"
+        name="wireless examples"
+        description = "wireless examples"
+        requires = "IPv4 ETHERNET _80211 mf80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc

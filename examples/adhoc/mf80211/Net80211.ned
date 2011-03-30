@@ -22,7 +22,7 @@
 package inet.examples.adhoc.mf80211;
 
 import inet.world.ChannelControl;
-import inet.nodes.adhoc.MFMobileHost;
+import inet.nodes.mf80211.MFMobileHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 

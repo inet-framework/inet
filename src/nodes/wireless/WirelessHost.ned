@@ -17,19 +17,8 @@
 
 package inet.nodes.wireless;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
+
 import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ieee80211.Ieee80211NicSTA;
-import inet.linklayer.IWiredNic;
-import inet.base.mobility.IMobility;
-import inet.base.NotificationBoard;
-import inet.applications.pingapp.PingApp;
-import inet.applications.IUDPApp;
-import inet.applications.ITCPApp;
 
 
 //
@@ -48,6 +37,6 @@ module WirelessHost extends StandardHost
 {
     @display("i=device/wifilaptop");
     mobilityType = default("NullMobility");
-    numRadios=1;
+    numRadios = 1;
 }
 
