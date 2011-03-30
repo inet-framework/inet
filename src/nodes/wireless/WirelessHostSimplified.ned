@@ -17,18 +17,6 @@
 
 package inet.nodes.wireless;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.linklayer.IWiredNic;
-import inet.base.mobility.IMobility;
-import inet.base.NotificationBoard;
-import inet.applications.pingapp.PingApp;
-import inet.applications.IUDPApp;
-import inet.applications.ITCPApp;
 
 
 //
@@ -44,119 +32,8 @@ import inet.applications.ITCPApp;
 //
 // @deprecated: use StandardHost with numRadios=1 and wlanNicType=Ieee80211eNicSTASimplified instead
 //
-module WirelessHostSimplified
+module WirelessHostSimplified extends WirelessHost
 {
-    parameters:
-        @node();
-        @labels(node,ethernet-node,wireless-node);
-        @display("i=device/wifilaptop");
-        int numTcpApps = default(0);
-        int numUdpApps = default(0);
-        // string tcpAppType = default(""); // Obsolete
-        // string udpAppType = default(""); // Obsolete
-        bool IPForward = default(false);
-        string routingFile = default("");
-        string mobilityType = default("NullMobility");
-        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
-        input radioIn @directIn;
-    submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,70");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=60,150");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = IPForward;
-                routerId = "";
-                routingFile = routingFile;
-                @display("p=60,230");
-        }
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=163,67");
-        }
-        tcp: <tcpType> like ITCP {
-            parameters:
-                @display("p=163,154");
-        }
-        udpApp[numUdpApps]: <> like IUDPApp {
-            parameters:
-                @display("p=272,67");
-        }
-        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
-            parameters:
-                @display("p=272,154");
-        }
-        pingApp: PingApp {
-            parameters:
-                @display("p=343,200");
-        }
-        networkLayer: NetworkLayer {
-            parameters:
-                proxyARP = false;
-                @display("p=248,247;q=queue");
-            gates:
-                ifIn[(sizeof(pppg)+sizeof(ethg))+1];
-                ifOut[(sizeof(pppg)+sizeof(ethg))+1];
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=205,350,row,90;q=txQueue");
-        }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
-            parameters:
-                @display("p=240,350,row,90;q=txQueue");
-        }
-        wlan: Ieee80211NicSTASimplified {
-            parameters:
-                @display("p=120,350;q=queue");
-        }
-        mobility: <mobilityType> like IMobility {
-            parameters:
-                @display("p=58,301");
-        }
-    connections allowunconnected:
-        for i=0..numTcpApps-1 {
-            tcpApp[i].tcpOut --> tcp.appIn++;
-            tcpApp[i].tcpIn <-- tcp.appOut++;
-        }
-
-        tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.tcpOut;
-
-        for i=0..numUdpApps-1 {
-            udpApp[i].udpOut --> udp.appIn++;
-            udpApp[i].udpIn <-- udp.appOut++;
-        }
-
-        udp.ipOut --> networkLayer.udpIn;
-        udp.ipIn <-- networkLayer.udpOut;
-
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
-
-        // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
-        }
-
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
-        }
-
-        radioIn --> wlan.radioIn;
-        wlan.uppergateOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
-        wlan.uppergateIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)];
+    wlanNicType = "Ieee80211eNicSTASimplified";
 }
 

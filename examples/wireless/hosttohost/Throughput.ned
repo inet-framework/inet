@@ -20,7 +20,7 @@
 package inet.examples.wireless.hosttohost;
 
 import inet.world.ChannelControl;
-import inet.nodes.wireless.WirelessAPSimplified;
+import inet.nodes.wireless.AccessPoint;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
@@ -28,6 +28,11 @@ import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
 
+
+module WirelessAPSimplified extends AccessPoint
+{
+    wlanNicType = "Ieee80211NicAPSimplified";
+}
 
 module ThroughputClient
 {

@@ -70,6 +70,8 @@ module StandardHost
         int numRadios = default(0);               // the number of radios in the standard host. by default no wireless
         bool IPForward = default(false);
         string routingFile = default("");
+        string mobilityType = default("NoMobility");
+        string wlanNicType = default("Ieee80211NicSTA");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -90,7 +92,7 @@ module StandardHost
                 routingFile = routingFile;
                 @display("p=57,214");
         }
-        mobility: <default("NoMobility")> like IMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=57,304");
         }
@@ -126,7 +128,7 @@ module StandardHost
                 proxyARP = false;
                 @display("p=336,230;q=queue");
         }
-        wlan[numRadios]: <default("Ieee80211NicSTA")> like IWirelessNic {
+        wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
                 @display("p=132,390;q=queue");
         }

@@ -15,6 +15,7 @@
 
 package inet.nodes.adhoc;
 
+
 import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
@@ -23,8 +24,8 @@ import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWirelessNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
 
 
@@ -51,7 +52,9 @@ module AdhocHost
     // string udpAppType = default(""); // Obsolete!
     string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     int numRadios = default(1);
+    string wlanNicType = default("Ieee80211NicAdhoc");
     string routingFile = default("");
+    bool IPForward = default(true);
 
     gates:
         input radioIn[numRadios] @directIn;
@@ -66,7 +69,7 @@ module AdhocHost
         }
         routingTable: RoutingTable {
             parameters:
-                IPForward = true;
+                IPForward = IPForward;
                 routerId = "";
                 routingFile = routingFile;
                 @display("p=60,247");
@@ -93,7 +96,7 @@ module AdhocHost
             proxyARP = false;
             @display("p=279,247;q=queue");
         }
-        wlan[numRadios]: <default("Ieee80211NicAdhoc")> like IWirelessNic {
+        wlan[numRadios]: <wlanNicType> like IWirelessNic {
             @display("p=279,331,row,90;q=queue");
         }
     connections allowunconnected:

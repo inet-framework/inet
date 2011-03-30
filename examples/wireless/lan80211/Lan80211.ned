@@ -20,9 +20,14 @@ package inet.examples.wireless.lan80211;
 
 import inet.world.ChannelControl;
 import inet.nodes.wireless.WirelessHostSimplified;
-import inet.nodes.wireless.WirelessAPSimplified;
+import inet.nodes.wireless.AccessPoint;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
+
+module WirelessAPSimplified extends AccessPoint
+{
+    wlanNicType = "Ieee80211NicAPSimplified";
+}
 
 network Lan80211
 {
