@@ -30,6 +30,9 @@
 
 Define_Module(RTCP);
 
+simsignal_t RTCP::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t RTCP::endToEndDelaySignal = SIMSIGNAL_NULL;
+
 RTCP::RTCP()
 {
     _senderInfo = NULL;

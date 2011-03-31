@@ -25,6 +25,10 @@
 
 Define_Module (EtherAppSrv);
 
+simsignal_t EtherAppSrv::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppSrv::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppSrv::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+
 void EtherAppSrv::initialize()
 {
     localSAP = ETHERAPP_SRV_SAP;

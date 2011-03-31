@@ -35,6 +35,10 @@
 
 Define_Module(SCTPPeer);
 
+simsignal_t SCTPPeer::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPPeer::sentEchoedPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPPeer::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+
 void SCTPPeer::initialize()
 {
     char * token;

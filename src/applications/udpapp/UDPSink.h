@@ -31,7 +31,7 @@ class INET_API UDPSink : public UDPAppBase
 {
   protected:
     int numReceived;
-    simsignal_t rcvdPkBytesSignal;
+    static simsignal_t rcvdPkBytesSignal;
 
   protected:
     virtual void processPacket(cPacket *msg);

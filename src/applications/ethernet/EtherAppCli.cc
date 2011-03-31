@@ -27,6 +27,10 @@
 
 Define_Module (EtherAppCli);
 
+simsignal_t EtherAppCli::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+
 void EtherAppCli::initialize(int stage)
 {
     // we can only initialize in the 2nd stage (stage==1), because

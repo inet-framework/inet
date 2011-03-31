@@ -24,6 +24,7 @@
 
 Define_Module(UDPSink);
 
+simsignal_t UDPSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
 void UDPSink::initialize()
 {
@@ -32,7 +33,8 @@ void UDPSink::initialize()
     rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
 
     int port = par("localPort");
-    if (port!=-1)
+
+    if (port != -1)
         bindToPort(port);
 }
 

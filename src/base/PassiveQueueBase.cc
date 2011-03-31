@@ -19,6 +19,11 @@
 #include <omnetpp.h>
 #include "PassiveQueueBase.h"
 
+simsignal_t PassiveQueueBase::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t PassiveQueueBase::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t PassiveQueueBase::droppedPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t PassiveQueueBase::queueingTimeSignal = SIMSIGNAL_NULL;
+
 static long getMsgByteLength(cMessage* msg)
 {
     if (msg->isPacket())

@@ -27,6 +27,8 @@
 Define_Module(RTPPayloadReceiver);
 
 
+simsignal_t RTPPayloadReceiver::_packetArrivalSignal = SIMSIGNAL_NULL;
+
 RTPPayloadReceiver::~RTPPayloadReceiver()
 {
     closeOutputFile();

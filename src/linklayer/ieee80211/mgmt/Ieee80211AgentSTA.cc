@@ -25,6 +25,10 @@ Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP  1
 
+simsignal_t Ieee80211AgentSTA::sentRequestSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211AgentSTA::dropConfirmSignal = SIMSIGNAL_NULL;
+
 void Ieee80211AgentSTA::initialize(int stage)
 {
     if (stage==0)

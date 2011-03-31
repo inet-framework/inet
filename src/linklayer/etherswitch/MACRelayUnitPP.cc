@@ -23,6 +23,9 @@
 
 Define_Module( MACRelayUnitPP );
 
+simsignal_t MACRelayUnitPP::processedBytesSignal = SIMSIGNAL_NULL;
+simsignal_t MACRelayUnitPP::droppedBytesSignal = SIMSIGNAL_NULL;
+simsignal_t MACRelayUnitPP::usedBufferBytesSignal = SIMSIGNAL_NULL;
 
 /* unused for now
 static std::ostream& operator<< (std::ostream& os, cMessage *msg)

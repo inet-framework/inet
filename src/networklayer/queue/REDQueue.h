@@ -47,9 +47,9 @@ class INET_API REDQueue : public PassiveQueueBase
     long numEarlyDrops;
 
     // statistics
-    simsignal_t queueLengthSignal;
-    simsignal_t avgQueueLengthSignal;
-    simsignal_t earlyDropPkBytesSignal;
+    static simsignal_t queueLengthSignal;
+    static simsignal_t avgQueueLengthSignal;
+    static simsignal_t earlyDropPkBytesSignal;
 
   protected:
     virtual void initialize();

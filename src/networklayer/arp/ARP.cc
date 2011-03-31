@@ -30,6 +30,11 @@
 #include "InterfaceTableAccess.h"
 
 
+simsignal_t ARP::sentReqSignal = SIMSIGNAL_NULL;
+simsignal_t ARP::sentReplySignal = SIMSIGNAL_NULL;
+simsignal_t ARP::failedResolutionSignal = SIMSIGNAL_NULL;
+simsignal_t ARP::initiatedResolutionSignal = SIMSIGNAL_NULL;
+
 static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();

@@ -20,6 +20,9 @@
 
 Define_Module(TCPGenericSrvApp);
 
+simsignal_t TCPGenericSrvApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericSrvApp::sentPkBytesSignal = SIMSIGNAL_NULL;
+
 void TCPGenericSrvApp::initialize()
 {
     const char *address = par("address");

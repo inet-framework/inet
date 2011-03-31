@@ -17,8 +17,11 @@
 
 
 #include "Ieee80211MgmtBase.h"
+
 #include "Ieee802Ctrl_m.h"
 
+
+simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = SIMSIGNAL_NULL;
 
 static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
@@ -45,8 +48,6 @@ void Ieee80211MgmtBase::initialize(int stage)
 
         // configuration
         frameCapacity = par("frameCapacity");
-
-
     }
     else if (stage==1)
     {
@@ -57,7 +58,6 @@ void Ieee80211MgmtBase::initialize(int stage)
         myAddress.setAddress(mac->par("address").stringValue());
     }
 }
-
 
 void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 {

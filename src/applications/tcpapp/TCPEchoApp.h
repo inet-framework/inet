@@ -30,8 +30,8 @@ class INET_API TCPEchoApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
 
-    simsignal_t rcvdPkBytesSignal;
-    simsignal_t sentPkBytesSignal;
+    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
 
   protected:
     virtual void sendDown(cMessage *msg);

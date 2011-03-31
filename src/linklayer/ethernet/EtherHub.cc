@@ -20,6 +20,7 @@
 
 Define_Module(EtherHub);
 
+simsignal_t EtherHub::pkBytesSignal = SIMSIGNAL_NULL;
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {

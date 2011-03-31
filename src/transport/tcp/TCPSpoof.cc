@@ -24,6 +24,8 @@
 
 Define_Module(TCPSpoof);
 
+simsignal_t TCPSpoof::sentPkBytesSignal = SIMSIGNAL_NULL;
+
 void TCPSpoof::initialize()
 {
     sentPkBytesSignal = registerSignal("sentPkBytes");

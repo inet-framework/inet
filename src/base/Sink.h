@@ -33,7 +33,7 @@ class INET_API Sink : public cSimpleModule
     double packetPerSec;
 
     //statistics:
-    simsignal_t rcvdPkBytesSignal;
+    static simsignal_t rcvdPkBytesSignal;
 
   protected:
     virtual void initialize();

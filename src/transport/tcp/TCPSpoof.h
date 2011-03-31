@@ -35,7 +35,7 @@ class INET_API TCPSpoof : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 
   protected:
-    simsignal_t sentPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
 };
 
 #endif

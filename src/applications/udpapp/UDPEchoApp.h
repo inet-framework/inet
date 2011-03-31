@@ -38,7 +38,7 @@ class UDPEchoApp : public UDPBasicApp
     virtual void finish();
 
   protected:
-    simsignal_t roundTripTimeSignal;
+    static simsignal_t roundTripTimeSignal;
 };
 
 #endif

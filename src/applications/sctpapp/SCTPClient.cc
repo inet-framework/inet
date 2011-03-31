@@ -33,6 +33,10 @@
 
 Define_Module(SCTPClient);
 
+simsignal_t SCTPClient::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::sentEchoedPkBytesSignal = SIMSIGNAL_NULL;
+
 void SCTPClient::initialize()
 {
     const char * address;

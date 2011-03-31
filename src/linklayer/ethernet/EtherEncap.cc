@@ -25,6 +25,10 @@
 
 Define_Module(EtherEncap);
 
+simsignal_t EtherEncap::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::rcvdPkBytesFromMACSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::sentPauseSignal = SIMSIGNAL_NULL;
+
 void EtherEncap::initialize()
 {
     seqNum = 0;

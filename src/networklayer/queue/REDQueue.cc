@@ -22,6 +22,10 @@
 
 Define_Module(REDQueue);
 
+simsignal_t REDQueue::queueLengthSignal = SIMSIGNAL_NULL;
+simsignal_t REDQueue::avgQueueLengthSignal = SIMSIGNAL_NULL;
+simsignal_t REDQueue::earlyDropPkBytesSignal = SIMSIGNAL_NULL;
+
 void REDQueue::initialize()
 {
     PassiveQueueBase::initialize();

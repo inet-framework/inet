@@ -19,6 +19,8 @@
 
 Define_Module(TCPSinkApp);
 
+simsignal_t TCPSinkApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+
 void TCPSinkApp::initialize()
 {
     cSimpleModule::initialize();

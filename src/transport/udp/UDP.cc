@@ -53,6 +53,11 @@
 
 Define_Module( UDP );
 
+simsignal_t UDP::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::passedUpPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::droppedPkWrongPortSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::droppedPkBadChecksumSignal = SIMSIGNAL_NULL;
 
 static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {

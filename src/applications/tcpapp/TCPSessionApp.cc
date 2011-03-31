@@ -21,6 +21,9 @@
 
 Define_Module(TCPSessionApp);
 
+simsignal_t TCPSessionApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSessionApp::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSessionApp::rcvdIndicationsSignal = SIMSIGNAL_NULL;
 
 void TCPSessionApp::parseScript(const char *script)
 {

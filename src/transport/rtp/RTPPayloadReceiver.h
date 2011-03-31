@@ -92,7 +92,7 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
     /**
      * An output signal used to store arrival of rtp data packets.
      */
-    simsignal_t _packetArrivalSignal;
+    static simsignal_t _packetArrivalSignal;
 };
 
 #endif

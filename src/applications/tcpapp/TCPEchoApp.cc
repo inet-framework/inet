@@ -21,6 +21,9 @@
 
 Define_Module(TCPEchoApp);
 
+simsignal_t TCPEchoApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPEchoApp::sentPkBytesSignal = SIMSIGNAL_NULL;
+
 void TCPEchoApp::initialize()
 {
     cSimpleModule::initialize();

@@ -46,6 +46,9 @@ Register_Enum(RadioState,
     RadioState::TRANSMIT,
     RadioState::SLEEP));
 
+simsignal_t Ieee80211Mac::stateSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211Mac::radioStateSignal = SIMSIGNAL_NULL;
+
 /****************************************************************
  * Construction functions.
  */

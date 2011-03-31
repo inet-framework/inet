@@ -53,9 +53,9 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         uint32 inStreams;
         uint32 outStreams;
 
-        simsignal_t sentPkBytesSignal;
-        simsignal_t rcvdPkBytesSignal;
-        simsignal_t sentEchoedPkBytesSignal;
+        static simsignal_t sentPkBytesSignal;
+        static simsignal_t rcvdPkBytesSignal;
+        static simsignal_t sentEchoedPkBytesSignal;
 
         bool ordered;
         bool sendAllowed;

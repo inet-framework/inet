@@ -208,9 +208,9 @@ class INET_API AbstractRadio : public ChannelAccess
     double sensitivity;
 
     // statistics:
-    simsignal_t bitrateSignal;
-    simsignal_t radioStateSignal; //enum
-    simsignal_t channelNumberSignal;
+    static simsignal_t bitrateSignal;
+    static simsignal_t radioStateSignal; //enum
+    static simsignal_t channelNumberSignal;
 };
 
 #endif

@@ -35,6 +35,13 @@ using std::cout;
 
 Define_Module(PingApp);
 
+simsignal_t PingApp::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::dropSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::sentPacketSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::outOfOrderArrivalSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::pingTxSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::pingRxSignal = SIMSIGNAL_NULL;
+
 void PingApp::initialize()
 {
     // read params

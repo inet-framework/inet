@@ -32,8 +32,10 @@
 #define MK_NUD_TIMEOUT 6
 #define MK_AR_TIMEOUT 7
 
+
 Define_Module(IPv6NeighbourDiscovery);
 
+simsignal_t IPv6NeighbourDiscovery::startDADSignal = SIMSIGNAL_NULL;
 
 IPv6NeighbourDiscovery::IPv6NeighbourDiscovery()
     : neighbourCache(*this)

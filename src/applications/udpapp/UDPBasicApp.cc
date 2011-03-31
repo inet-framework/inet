@@ -26,12 +26,14 @@
 Define_Module(UDPBasicApp);
 
 int UDPBasicApp::counter;
+simsignal_t UDPBasicApp::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
 void UDPBasicApp::initialize(int stage)
 {
     // because of IPAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     counter = 0;

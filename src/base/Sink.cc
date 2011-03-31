@@ -20,6 +20,7 @@
 
 Define_Module(Sink);
 
+simsignal_t Sink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
 void Sink::initialize()
 {

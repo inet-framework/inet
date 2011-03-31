@@ -24,6 +24,8 @@
 
 Define_Module(UDPEchoApp);
 
+simsignal_t UDPEchoApp::roundTripTimeSignal = SIMSIGNAL_NULL;
+
 void UDPEchoApp::initialize(int stage)
 {
     UDPBasicApp::initialize(stage);

@@ -19,6 +19,10 @@
 
 Define_Module(DropsGenerator);
 
+simsignal_t DropsGenerator::rcvdPkBytesSignal;
+simsignal_t DropsGenerator::sentPkBytesSignal;
+simsignal_t DropsGenerator::droppedPkBytesSignal;
+
 void DropsGenerator::initialize()
 {
     numPackets = 0;

@@ -22,6 +22,8 @@
 
 Define_Module(DropTailQueue);
 
+simsignal_t DropTailQueue::queueLengthSignal = SIMSIGNAL_NULL;
+
 void DropTailQueue::initialize()
 {
     PassiveQueueBase::initialize();
@@ -75,3 +77,4 @@ bool DropTailQueue::isEmpty()
 {
     return queue.empty();
 }
+

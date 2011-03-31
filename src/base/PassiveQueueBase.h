@@ -45,13 +45,13 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int numQueueDropped;
 
     /** Signal with size (or 0 if unknown) of packet when received it */
-    simsignal_t rcvdPkBytesSignal;
+    static simsignal_t rcvdPkBytesSignal;
     /** Signal with size (or 0 if unknown) of packet when sent out it */
-    simsignal_t sentPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
     /** Signal with size (or 0 if unknown) of packet when dropped it */
-    simsignal_t droppedPkBytesSignal;
+    static simsignal_t droppedPkBytesSignal;
     /** Signal with value of delaying time when sent out a packet. */
-    simsignal_t queueingTimeSignal;
+    static simsignal_t queueingTimeSignal;
 
   protected:
     virtual void initialize();

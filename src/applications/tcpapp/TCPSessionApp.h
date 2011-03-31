@@ -41,9 +41,9 @@ class INET_API TCPSessionApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
     int indicationsRcvd;
-    simsignal_t rcvdPkBytesSignal;
-    simsignal_t sentPkBytesSignal;
-    simsignal_t rcvdIndicationsSignal;
+    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
+    static simsignal_t rcvdIndicationsSignal;
 
   public:
     TCPSessionApp() : cSimpleModule(65536) {}

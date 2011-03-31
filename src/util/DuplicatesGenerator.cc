@@ -19,6 +19,10 @@
 
 Define_Module(DuplicatesGenerator);
 
+simsignal_t DuplicatesGenerator::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t DuplicatesGenerator::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t DuplicatesGenerator::duplPkBytesSignal = SIMSIGNAL_NULL;
+
 void DuplicatesGenerator::initialize()
 {
     numPackets = 0;

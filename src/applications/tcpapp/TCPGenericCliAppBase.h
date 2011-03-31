@@ -41,9 +41,9 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     int bytesRcvd;
 
     //statistics:
-    simsignal_t connectSignal;
-    simsignal_t rcvdPkBytesSignal;
-    simsignal_t sentPkBytesSignal;
+    static simsignal_t connectSignal;
+    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
 
   protected:
     /**

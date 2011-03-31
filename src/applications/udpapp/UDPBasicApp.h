@@ -41,8 +41,8 @@ class INET_API UDPBasicApp : public UDPAppBase
     int numSent;
     int numReceived;
 
-    simsignal_t sentPkBytesSignal;
-    simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
+    static simsignal_t rcvdPkBytesSignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();

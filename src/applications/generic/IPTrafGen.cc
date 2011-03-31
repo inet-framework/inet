@@ -33,6 +33,9 @@
 Define_Module(IPTrafSink);
 
 
+simsignal_t IPTrafSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t IPTrafSink::endToEndDelaySignal = SIMSIGNAL_NULL;
+
 void IPTrafSink::initialize()
 {
     numReceived = 0;

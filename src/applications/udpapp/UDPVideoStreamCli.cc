@@ -26,6 +26,8 @@
 
 Define_Module(UDPVideoStreamCli);
 
+simsignal_t UDPVideoStreamCli::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamCli::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
 void UDPVideoStreamCli::initialize()
 {

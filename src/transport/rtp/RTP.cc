@@ -32,6 +32,9 @@
 
 Define_Module(RTP);
 
+simsignal_t RTP::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t RTP::endToEndDelaySignal = SIMSIGNAL_NULL;
+
 //
 // methods inherited from cSimpleModule
 //

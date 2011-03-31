@@ -21,7 +21,7 @@
 
 Define_Module(NetAnimTrace);
 
-simsignal_t NetAnimTrace::messageSentSignal;
+simsignal_t NetAnimTrace::messageSentSignal = SIMSIGNAL_NULL;
 
 // TODO: after release of OMNeT++ 4.1 final, update this code to similar class in omnetpp/contrib/util
 

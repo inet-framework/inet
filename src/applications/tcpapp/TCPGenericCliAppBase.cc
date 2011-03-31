@@ -18,6 +18,9 @@
 #include "IPAddressResolver.h"
 
 
+simsignal_t TCPGenericCliAppBase::connectSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericCliAppBase::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericCliAppBase::sentPkBytesSignal = SIMSIGNAL_NULL;
 
 void TCPGenericCliAppBase::initialize()
 {

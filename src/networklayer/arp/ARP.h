@@ -72,10 +72,10 @@ class INET_API ARP : public cSimpleModule
     long numRequestsSent;
     long numRepliesSent;
 
-    simsignal_t sentReqSignal;
-    simsignal_t sentReplySignal;
-    simsignal_t failedResolutionSignal;
-    simsignal_t initiatedResolutionSignal;
+    static simsignal_t sentReqSignal;
+    static simsignal_t sentReplySignal;
+    static simsignal_t failedResolutionSignal;
+    static simsignal_t initiatedResolutionSignal;
 
     ARPCache arpCache;
     static ARPCache globalArpCache;

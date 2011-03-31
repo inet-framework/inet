@@ -24,6 +24,13 @@
 
 Define_Module(EtherLLC);
 
+simsignal_t EtherLLC::dsapSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::rcvdPkBytesFromMACSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::passedUpPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::droppedPkBytesUnknownDSAPSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::sendPauseSignal = SIMSIGNAL_NULL;
+
 void EtherLLC::initialize()
 {
     seqNum = 0;
@@ -90,10 +97,12 @@ void EtherLLC::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalPassedUp, totalFromHigherLayer);
+
     if (droppedUnknownDSAP>0)
     {
         sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %ld", droppedUnknownDSAP);
     }
+
     getDisplayString().setTagArg("t",0,buf);
 }
 

@@ -55,7 +55,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         virtual ~IPv6NeighbourDiscovery();
 
     private:
-        simsignal_t startDADSignal;
+        static simsignal_t startDADSignal;
 
     public:
         /**

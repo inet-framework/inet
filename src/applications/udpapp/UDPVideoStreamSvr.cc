@@ -22,10 +22,14 @@
 
 
 #include "UDPVideoStreamSvr.h"
+
 #include "UDPControlInfo_m.h"
 
 
 Define_Module(UDPVideoStreamSvr);
+
+simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamSvr::sentPkBytesSignal = SIMSIGNAL_NULL;
 
 inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d) {
     out << "client=" << d.clientAddr << ":" << d.clientPort
@@ -33,15 +37,13 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
     return out;
 }
 
-UDPVideoStreamSvr::UDPVideoStreamSvr() :
-    reqStreamBytesSignal(SIMSIGNAL_NULL),
-    sentPkBytesSignal(SIMSIGNAL_NULL)
+UDPVideoStreamSvr::UDPVideoStreamSvr()
 {
 }
 
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
-    for (unsigned int i=0; i<streamVector.size(); i++)
+    for (unsigned int i=0; i < streamVector.size(); i++)
         delete streamVector[i];
 }
 
@@ -107,7 +109,6 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     emit(reqStreamBytesSignal, d->videoSize);
 }
 
-
 void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 {
     VideoStreamData *d = (VideoStreamData *) timer->getContextPointer();
@@ -115,8 +116,10 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     // generate and send a packet
     cPacket *pkt = new cPacket("VideoStrmPk");
     long pktLen = packetLen->longValue();
+
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
+
     pkt->setByteLength(pktLen);
     sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
