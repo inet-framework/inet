@@ -23,14 +23,15 @@ package inet.linklayer.radio;
 simple PropagationModel like IRadio
 {
     parameters:
-	  double TransmissionAntennaGainIndB @unit("dB") = default(0dB);  // Transmission Antenna Gain 
-      double ReceiveAntennaGainIndB @unit("dB") = default(0dB);       // Receive Antenna Gain
-      double SystemLossFactor @unit("dB") = default(0dB);             // System Loss of Hardware 
-      double sigma=default(1); // LogNormalShadowingModel
-      double nak_m =default(1); // NakagamiModel
-      double KdB = default(8); // RiceModel
-      double  TransmiterAntennaHigh @unit("m") = default(1m);   // Transmitter Antenna High 
-      double  ReceiverAntennaHigh   @unit("m") = default(1m);	// Receiver Antenna High
+        double TransmissionAntennaGainIndB @unit("dB") = default(0dB);  // Transmission Antenna Gain 
+        double carrierFrequency @unit("Hz") = default(2.4GHz);
+        double ReceiveAntennaGainIndB @unit("dB") = default(0dB);       // Receive Antenna Gain
+        double SystemLossFactor @unit("dB") = default(0dB);             // System Loss of Hardware 
+        double sigma=default(1); // LogNormalShadowingModel
+        double nak_m =default(1); // NakagamiModel
+        double KdB = default(8); // RiceModel
+        double TransmiterAntennaHigh @unit("m") = default(1m);   // Transmitter Antenna High 
+        double ReceiverAntennaHigh   @unit("m") = default(1m);	// Receiver Antenna High
    gates:
         input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output uppergateOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)

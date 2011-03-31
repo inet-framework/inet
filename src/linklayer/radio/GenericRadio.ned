@@ -29,7 +29,6 @@ simple GenericRadio extends PropagationModel
 {
     parameters:
         int channelNumber = default(0); // channel identifier
-        double carrierFrequency @unit("Hz") = default(2.4GHz);
         double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)
         double bitrate @unit("bps"); // (in bits/s)
         double thermalNoise @unit("dBm") = default(-110dBm); // base noise level (dBm)
@@ -51,4 +50,5 @@ simple GenericRadio extends PropagationModel
         @statistic[bitrate](title="Bitrate"; record=timeavg,vector; interpolationmode=sample-hold; );
         @statistic[channelNumber](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
         @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
+        @class(GenericRadio);
 }

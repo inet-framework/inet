@@ -19,6 +19,7 @@
 
 package inet.linklayer.ieee80211.radio;
 
+import inet.linklayer.radio.PropagationModel;
 import inet.linklayer.radio.IRadio;
 
 
@@ -33,7 +34,7 @@ import inet.linklayer.radio.IRadio;
 // @see ~IRadio
 // @author Andras Varga
 //
-simple Ieee80211Radio like IRadio
+simple Ieee80211Radio extends PropagationModel like IRadio
 {
     parameters:
         int channelNumber = default(0); // channel identifier
@@ -45,8 +46,5 @@ simple Ieee80211Radio like IRadio
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         double sensitivity @unit("dBm"); // received signals with power below sensitivity are ignored
         @display("i=block/wrxtx");
-    gates:
-        input uppergateIn @labels(PhyControlInfo/down,Ieee80211Frame);   // from higher layer protocol (MAC)
-        output uppergateOut @labels(PhyControlInfo/up,Ieee80211Frame); // to decider (decider connects to higher layer protocol, i.e. the MAC)
-        input radioIn @labels(AirFrame); // to receive frames (~AirFrame) on the radio channel
+        @class(Ieee80211Radio);
 }
