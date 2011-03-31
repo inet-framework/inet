@@ -14,9 +14,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-message PowerControlMessage {
-	int moduleId;
+message PowerControlMessage
+{
+    int moduleId;
 };
 
-message EnableModuleMessage extends PowerControlMessage {};
-message DisableModuleMessage extends PowerControlMessage {};
+message EnableModuleMessage extends PowerControlMessage
+{
+};
+
+message DisableModuleMessage extends PowerControlMessage
+{
+};
+

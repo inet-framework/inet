@@ -21,20 +21,24 @@
 
 Define_Module(PowerControlManager);
 
-PowerControlManager* PowerControlManager::get() {
+PowerControlManager* PowerControlManager::get()
+{
     cModule* mod = simulation.getModuleByPath("powerControlManager");
-    if (check_and_cast<PowerControlManager*>(mod)) {
+
+    if (check_and_cast<PowerControlManager*>(mod))
+    {
          return check_and_cast<PowerControlManager*>(mod);
     }
+
     return NULL;
 }
 
 void PowerControlManager::initialize()
 {
-	EV << "Power Control Initialization" << endl;
-	// schedule a power control event for testing
+    EV << "Power Control Initialization" << endl;
+    // schedule a power control event for testing
 
-	//int run_id = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();a
+    //int run_id = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();a
 
     int repetition_id = atoi(simulation.getActiveEnvir()->getConfigEx()->getVariable("repetition"));
 
@@ -42,18 +46,22 @@ void PowerControlManager::initialize()
 
     cXMLElement* events_definition = par("powerControlEvents").xmlValue();
 
-    if (events_definition!=NULL) {
-    	// process enable events
+    if (events_definition != NULL)
+    {
+        // process enable events
         cXMLElementList enable_events = events_definition->getChildrenByTagName("Enable");
-        for(cXMLElementList::iterator it = enable_events.begin();it!=enable_events.end();it++)
+
+        for(cXMLElementList::iterator it = enable_events.begin(); it != enable_events.end(); it++)
         {
             cXMLElement* event = (*it);
-            if (event->getAttribute("module")!=NULL && event->getAttribute("when")!=NULL && event->getAttribute("eventId")!=NULL)
+            if (event->getAttribute("module") != NULL && event->getAttribute("when") != NULL
+                    && event->getAttribute("eventId") != NULL)
             {
                 std::string module_name = event->getAttribute("module");
                 simtime_t when = atof(event->getAttribute("when"));
                 std::string id_str = event->getAttribute("eventId");
-                if (id_str!="")
+
+                if (id_str != "")
                 {
                     int id_event = atoi(id_str.c_str());
                     if (repetition_id == id_event)
@@ -70,38 +78,45 @@ void PowerControlManager::initialize()
             }
             else
             {
-                error("PowerControlEvent definition does not specify module, when or eventId: %s",event->tostr(1).c_str());
+                error("PowerControlEvent definition does not specify module, when or eventId: %s",
+                        event->tostr(1).c_str());
             }
         }
 
         // process disable events
         cXMLElementList disable_events = events_definition->getChildrenByTagName("Disable");
-        for(cXMLElementList::iterator it = disable_events.begin();it!=disable_events.end();it++)
+
+        for(cXMLElementList::iterator it = disable_events.begin(); it != disable_events.end(); it++)
         {
             cXMLElement* event = (*it);
-            if (event->getAttribute("module")!=NULL && event->getAttribute("when")!=NULL && event->getAttribute("eventId")!=NULL)
+
+            if (event->getAttribute("module") != NULL && event->getAttribute("when") != NULL
+                    && event->getAttribute("eventId") != NULL)
             {
                 std::string module_name = event->getAttribute("module");
                 simtime_t when = atof(event->getAttribute("when"));
                 std::string id_str = event->getAttribute("eventId");
-                if (id_str!="")
+
+                if (id_str != "")
                 {
                     int id_event = atoi(id_str.c_str());
+
                     if (repetition_id == id_event)
                     {
                         // this event is meant for this run id. schedule it
-					    this->scheduleDisablePowerControlEvent(when,module_name);
+                        this->scheduleDisablePowerControlEvent(when, module_name);
                     }
-				}
+                }
                 else
                 {
                     // no run id provided. schedule the event
-                    this->scheduleDisablePowerControlEvent(when,module_name);
-			    }
+                    this->scheduleDisablePowerControlEvent(when, module_name);
+                }
             }
             else
             {
-                error("PowerControlEvent definition does not specify module, when or eventId: %s",event->tostr(1).c_str());
+                error("PowerControlEvent definition does not specify module, when or eventId: %s",
+                        event->tostr(1).c_str());
             }
         }
     }
@@ -110,7 +125,8 @@ void PowerControlManager::initialize()
 void PowerControlManager::scheduleEnablePowerControlEvent(simtime_t when, std::string module_name)
 {
     cModule* mod = simulation.getModuleByPath(module_name.c_str());
-    if (mod!=NULL)
+
+    if (mod != NULL)
         this->scheduleEnablePowerControlEvent(when,mod);
     else
         EV << "EnableEvent: module " << module_name << " does not exist. ignoring" << endl;
@@ -119,21 +135,22 @@ void PowerControlManager::scheduleEnablePowerControlEvent(simtime_t when, std::s
 void PowerControlManager::scheduleEnablePowerControlEvent(simtime_t when, cModule* mod)
 {
     cMethodCallContextSwitcher __ctx(this); __ctx.methodCallSilent("scheduleEnablePowerControlEvent()");
-    if (mod!=NULL)
+
+    if (mod != NULL)
     {
         std::stringstream  tmp;
         tmp << "Enable " << mod->getName();
         PowerControlMessage* msg = new EnableModuleMessage(tmp.str().c_str());
         msg->setModuleId(mod->getId());
         EV << "Scheduling EnablePowerControlEvent for " << mod->getFullPath() << " at " << when << endl;
-        this->scheduleAt(when,msg);
+        this->scheduleAt(when, msg);
     }
 }
 
 void PowerControlManager::scheduleDisablePowerControlEvent(simtime_t when, std::string module_name)
 {
     cModule* mod = simulation.getModuleByPath(module_name.c_str());
-    if (mod!=NULL)
+    if (mod != NULL)
         this->scheduleDisablePowerControlEvent(when,mod);
     else
         EV << "DisableEvent: module " << module_name << " does not exist. ignoring" << endl;
@@ -143,7 +160,7 @@ void PowerControlManager::scheduleDisablePowerControlEvent(simtime_t when, cModu
 {
 
     cMethodCallContextSwitcher __ctx(this); __ctx.methodCallSilent("scheduleDisablePowerControlEvent()");
-    if (mod!=NULL)
+    if (mod != NULL)
     {
         std::stringstream  tmp;
         tmp << "Disable " << mod->getName();
@@ -168,6 +185,7 @@ void PowerControlManager::handleMessage(cMessage *msg)
     }
     else
        	EV << "Ignoring external messages" << endl;
+
     delete(msg);
 }
 
@@ -175,12 +193,13 @@ void PowerControlManager::handleEnableModuleMessage(EnableModuleMessage* em)
 {
     int moduleId = em->getModuleId();
     cModule* mod = simulation.getModule(moduleId);
-    if (mod!=NULL)
+
+    if (mod != NULL)
     {
         EV << "arriving enabling event for module " << mod->getFullPath() << endl;
         mod->bubble("Enabling Device");
         this->enableModule(mod);
-        mod->getDisplayString().setTagArg("i",1,"");
+        mod->getDisplayString().setTagArg("i", 1, "");
     }
 }
 
@@ -188,15 +207,15 @@ void PowerControlManager::handleDisableModuleMessage(DisableModuleMessage* dm)
 {
     int moduleId = dm->getModuleId();
     cModule* mod = simulation.getModule(moduleId);
-    if (mod!=NULL)
+
+    if (mod != NULL)
     {
         EV << "arriving disabling event for module " << mod->getFullPath() << endl;
         mod->bubble("Disabling Device");
         this->disableModule(mod);
-        mod->getDisplayString().setTagArg("i",1,"red");
+        mod->getDisplayString().setTagArg("i", 1, "red");
     }
 }
-
 
 void PowerControlManager::enableModule(cModule* mod)
 {

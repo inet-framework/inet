@@ -21,42 +21,54 @@
 
 #include "INETDefs.h"
 
+
 class IPowerControl
 {
   private:
-	bool enable;
+    bool enable;
 
   public:
-	IPowerControl() {
-		this->enable = true;
-		WATCH(enable);
-	}
+    IPowerControl()
+    {
+        this->enable = true;
+        WATCH(enable);
+    }
 
-	virtual bool enableModule( ){
-		if (!this->enable) {
-			this->enable = true;
-			this->enablingInitialization();
-			return true;
-		}
-		return false;
-	}
-	virtual bool disableModule() {
-		if (this->enable) {
-			this->enable = false;
-			this->disablingInitialization();
-			return true;
-		}
-		return false;
-	}
+    virtual bool enableModule()
+    {
+        if (!this->enable)
+        {
+            this->enable = true;
+            this->enablingInitialization();
+            return true;
+        }
 
-	virtual bool isEnabled() {
-		return this->enable;
-	}
-protected:
-	/* Interfaces that modules might implement to perform any task
-	 * when enabling or disabling the module */
-	virtual void enablingInitialization() {};
-	virtual void disablingInitialization() {};
+        return false;
+    }
+
+    virtual bool disableModule()
+    {
+        if (this->enable)
+        {
+            this->enable = false;
+            this->disablingInitialization();
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual bool isEnabled()
+    {
+        return this->enable;
+    }
+
+  protected:
+    /* Interfaces that modules might implement to perform any task
+     * when enabling or disabling the module */
+    virtual void enablingInitialization() {};
+    virtual void disablingInitialization() {};
 };
 
 #endif /* IPOWERCONTROL_H_ */
+
