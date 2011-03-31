@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.util;
+package inet.world.powercontrol;
 
 //
 // TODO auto-generated module

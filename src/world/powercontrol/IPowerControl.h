@@ -19,13 +19,14 @@
 #ifndef IPOWERCONTROL_H_
 #define IPOWERCONTROL_H_
 
-#include "PowerControlManager.h"
+#include "INETDefs.h"
 
-class IPowerControl {
-private:
+class IPowerControl
+{
+  private:
 	bool enable;
-public:
 
+  public:
 	IPowerControl() {
 		this->enable = true;
 		WATCH(enable);

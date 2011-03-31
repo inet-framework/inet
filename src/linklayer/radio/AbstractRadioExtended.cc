@@ -21,12 +21,11 @@
 
 
 #include "AbstractRadioExtended.h"
+
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
-#include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
 #include "Radio80211aControlInfo_m.h"
 #include "BasicBattery.h"
-
 
 
 #define MK_TRANSMISSION_OVER  1

@@ -351,10 +351,24 @@
         linkerFlags = ""
         />
     <feature
+        id="radio"
+        name="Radio"
+        description = "Radio support for wireless simulations"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.battery
+                       inet.linklayer.radio
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="mf80211"
         name="802.11b (Mobility Framework)"
         description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
-        requires = "mobility"
+        requires = "IPv4 mobility radio"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.mf80211
@@ -368,7 +382,7 @@
         id="_80211"
         name="802.11b (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
-        requires = "mobility"
+        requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
