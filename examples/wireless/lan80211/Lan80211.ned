@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.world.ChannelControl;
+import inet.world.ChannelControlExtended;
 import inet.nodes.wireless.WirelessHostSimplified;
 import inet.nodes.wireless.AccessPoint;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
@@ -42,7 +42,7 @@ network Lan80211
         ap: WirelessAPSimplified {
             @display("p=213,174;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelcontrol: ChannelControlExtended {
             playgroundSizeX = playgroundSizeX;
             playgroundSizeY = playgroundSizeY;
             numChannels = 2;

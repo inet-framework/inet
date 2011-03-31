@@ -19,7 +19,7 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.world.ChannelControl;
+import inet.world.ChannelControlExtended;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
@@ -113,7 +113,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelcontrol: ChannelControlExtended {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;
