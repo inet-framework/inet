@@ -19,8 +19,7 @@
 
 package inet.linklayer.ieee80211.radio;
 
-import inet.linklayer.radio.PropagationModel;
-import inet.linklayer.radio.IRadio;
+import inet.linklayer.radio.AbstractRadio;
 
 
 //
@@ -34,17 +33,10 @@ import inet.linklayer.radio.IRadio;
 // @see ~IRadio
 // @author Andras Varga
 //
-simple Ieee80211Radio extends PropagationModel like IRadio
+simple Ieee80211Radio extends AbstractRadio
 {
     parameters:
-        int channelNumber = default(0); // channel identifier
-        double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)
-        double bitrate @unit("bps"); // (in bits/s)
-        double thermalNoise @unit("dBm") = default(-110dBm); // base noise level (dBm)
-        double pathLossAlpha = default(2); // used by the path loss calculation
-        double shadowingDeviation @unit("dB") = default(0dB); // used by the shadowing model calculation
-        double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
-        double sensitivity @unit("dBm"); // received signals with power below sensitivity are ignored
-        @display("i=block/wrxtx");
         @class(Ieee80211Radio);
+        @display("i=block/wrxtx");
+        double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
 }
