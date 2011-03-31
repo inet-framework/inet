@@ -20,10 +20,12 @@
 cplusplus {{
 #include "INETDefs.h"
 #include "Coord.h"
+#include "ModulationType.h"
 }}
 
 
 class noncobject Coord;
+class noncobject ModulationType;
 
 //
 // Format of the messages that are sent to the channel
@@ -63,4 +65,5 @@ packet AirFrameExtended extends AirFrame
 {
    double carrierFrequency; // 
    double bandwidth;
+   ModulationType modulationType;
 }

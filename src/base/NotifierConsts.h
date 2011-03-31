@@ -84,6 +84,9 @@ enum
 
     // - layer 7 (application)
     //...
+    // - battery
+    NF_BATTERY_CHANGED,
+    NF_BATTERY_CPUTIME_CONSUMED,
 };
 
 /**

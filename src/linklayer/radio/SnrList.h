@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*-  *******************************************************
- * file:        SnrChangeList.h
+ * file:        SnrList.h
  *
  * author:      Marc Löbbers
  *
@@ -17,8 +17,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#ifndef SNRCHANGELIST_H
-#define SNRCHANGELIST_H
+#ifndef SNRLIST_H
+#define SNRLIST_H
 
 #include <list>
 
@@ -26,14 +26,14 @@
  * @brief struct for SNR information
  *
  * used to store SNR information of a message and pass it to the
- * Decider. Each SnrChangeListEntry corresponds to one SNR value at a
+ * Decider. Each SnrListEntry corresponds to one SNR value at a
  * specific time.
  *
  * @ingroup basicUtils
  * @ingroup utils
  * @author Marc Löbbers
  */
-struct SnrChangeListEntry{
+struct SnrListEntry{
   /** @brief timestamp for this SNR value*/
   simtime_t time;
   /** @brief the SNR value*/
@@ -44,13 +44,13 @@ struct SnrChangeListEntry{
  * @brief List to store SNR information for a message
  *
  * used to store SNR information of a message and pass it to the
- * Decider. Each SnrChangeListEntry in this list corresponds to one SNR
+ * Decider. Each SnrListEntry in this list corresponds to one SNR
  * value at a specific time.
  *
  * @ingroup utils
  * @ingroup basicUtils
  * @author Marc Löbbers
  */
-typedef std::list<SnrChangeListEntry> SnrChangeList;
+typedef std::list<SnrListEntry> SnrList;
 
 #endif

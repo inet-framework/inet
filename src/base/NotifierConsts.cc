@@ -59,7 +59,8 @@ const char *notificationCategoryName(int category)
         case NF_OVERLAY_TRANSPORTADDRESS_CHANGED: return "OVERLAY-TRANSPORTADDESS";
         case NF_OVERLAY_NODE_LEAVE: return "OVERLAY-NODE-LEAVE";
         case NF_OVERLAY_NODE_GRACEFUL_LEAVE: return "NODE-GRACEFUL-LEAVE";
-
+        case NF_BATTERY_CHANGED: return "NF_BATTERY_CHANGED";
+        case NF_BATTERY_CPUTIME_CONSUMED: return "NF_BATTERY_CPUTIME_CONSUMED";
 
         default: sprintf(buf, "%d", category); s = buf;
     }
