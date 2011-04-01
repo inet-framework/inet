@@ -89,7 +89,7 @@ void AbstractRadio::initialize(int stage)
         // statistics
         bitrateSignal = registerSignal("bitrate");
         radioStateSignal = registerSignal("radioState");
-        channelNumberSignal = registerSignal("channel");
+        channelNumberSignal = registerSignal("channelNo");
     }
     else if (stage == 1)
     {

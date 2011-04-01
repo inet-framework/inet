@@ -35,8 +35,4 @@ simple GenericRadio extends AbstractRadio
         int headerLengthBits @unit(b); // length of physical layer framing (preamble, etc)
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
-        
-        @statistic[bitrate](title="Bitrate"; record=timeavg,vector; interpolationmode=sample-hold; );
-        @statistic[channelNumber](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
-        @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
 }

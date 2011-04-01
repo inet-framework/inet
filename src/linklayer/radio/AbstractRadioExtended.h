@@ -180,7 +180,6 @@ class INET_API AbstractRadioExtended : public ChannelAccessExtended, public IPow
     long numGivenUp;
     long numReceivedCorrectly;
     double lossRate;
-    cOutVector lostVector;
     //@}
 
     /** Power used to transmit messages */
@@ -259,6 +258,12 @@ class INET_API AbstractRadioExtended : public ChannelAccessExtended, public IPow
 
     // if true draw coverage circles
     bool drawCoverage;
+
+    // statistics:
+    static simsignal_t bitrateSignal;
+    static simsignal_t radioStateSignal; //enum
+    static simsignal_t channelNumberSignal;
+    static simsignal_t lossRateSignal;
 };
 
 #endif

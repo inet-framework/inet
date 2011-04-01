@@ -21,7 +21,6 @@
 
 
 #include "AbstractRadioExtended.h"
-
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
@@ -30,6 +29,11 @@
 
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
+
+simsignal_t AbstractRadioExtended::bitrateSignal = SIMSIGNAL_NULL;
+simsignal_t AbstractRadioExtended::radioStateSignal = SIMSIGNAL_NULL;
+simsignal_t AbstractRadioExtended::channelNumberSignal = SIMSIGNAL_NULL;
+simsignal_t AbstractRadioExtended::lossRateSignal = SIMSIGNAL_NULL;
 
 #define MIN_DISTANCE 0.001 // minimum distance 1 millimeter
 
@@ -82,7 +86,6 @@ void AbstractRadioExtended::initialize(int stage)
         // statistics
         numGivenUp = 0;
         numReceivedCorrectly = 0;
-        lostVector.setName("MAC loss rate");
 
         // Initialize radio state. If thermal noise is already to high, radio
         // state has to be initialized as RECV
@@ -113,6 +116,13 @@ void AbstractRadioExtended::initialize(int stage)
 
         radioModel = createRadioModel();
         radioModel->initializeFrom(this);
+
+        // statistics
+        bitrateSignal = registerSignal("bitrate");
+        radioStateSignal = registerSignal("radioState");
+        channelNumberSignal = registerSignal("channelNo");
+        lossRateSignal = registerSignal("lossRate");
+
         if (this->hasPar("drawCoverage"))
             drawCoverage = par("drawCoverage");
         else
@@ -143,9 +153,13 @@ void AbstractRadioExtended::initialize(int stage)
         else
             cc->updateHostChannel(myHostRef, rs.getChannelNumber());
 
+        // statistics
+        emit(bitrateSignal, rs.getBitrate());
+        emit(radioStateSignal, rs.getState());
+        emit(channelNumberSignal, rs.getChannelNumber());
+
     	// draw the interference distance
         this->updateDisplayString();
-
     }
 }
 
@@ -439,9 +453,7 @@ void AbstractRadioExtended::handleCommand(int msgkind, cPolymorphic *ctrl)
         }
     }
     else
-    {
         error("unknown command (msgkind=%d)", msgkind);
-    }
 }
 
 void AbstractRadioExtended::handleSelfMsg(cMessage *msg)
@@ -650,11 +662,7 @@ void AbstractRadioExtended::handleLowerMsgEnd(AirFrameExtended * airframe)
         //    delete airframe;
         if (!radioModel->isReceivedCorrectly(airframe, list))
         {
-#if OMNETPP_VERSION > 0x0400
             airframe->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
-#else
-            airframe->getEncapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
-#endif
             airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
 
             numGivenUp++;
@@ -665,7 +673,7 @@ void AbstractRadioExtended::handleLowerMsgEnd(AirFrameExtended * airframe)
         if ( (numReceivedCorrectly+numGivenUp)%50 == 0)
         {
             lossRate = (double)numGivenUp/((double)numReceivedCorrectly+(double)numGivenUp);
-            lostVector.record(lossRate);
+            emit(lossRateSignal, lossRate);
             numReceivedCorrectly = 0;
             numGivenUp = 0;
         }
@@ -741,6 +749,7 @@ void AbstractRadioExtended::changeChannel(int channel)
     // do channel switch
     EV << "Changing to channel #" << channel << "\n";
 
+    emit(channelNumberSignal, channel);
     rs.setChannelNumber(channel);
 
     //cc->updateHostChannel(myHostRef, channel);
@@ -863,6 +872,7 @@ void AbstractRadioExtended::setBitrate(double bitrate)
         error("changing the bitrate while transmitting is not allowed");
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
+    emit(bitrateSignal, bitrate);
     rs.setBitrate(bitrate);
 
     //XXX fire some notification?
@@ -870,6 +880,9 @@ void AbstractRadioExtended::setBitrate(double bitrate)
 
 void AbstractRadioExtended::setRadioState(RadioState::State newState)
 {
+    if(rs.getState() != newState)
+        emit(radioStateSignal, newState);
+
     rs.setState(newState);
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }
