@@ -3,8 +3,9 @@
         id="TCP_BASE"
         name="TCP Base"
         description = "The common part of TCP implementations"
+        initiallyEnabled = "true"
         requires = ""
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.transport.tcp
                        inet.applications.tcpapp
@@ -17,8 +18,9 @@
         id="TCP_INET"
         name="TCP (INET)"
         description = "TCP implementation (original INET implementation)"
+        initiallyEnabled = "true"
         requires = "TCP_BASE"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.transport.tcp_inet
                       "
@@ -30,8 +32,9 @@
         id="TCP_LWIP"
         name="TCP (lwIP)"
         description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)"
+        initiallyEnabled = "true"
         requires = "TCP_BASE"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.transport.tcp_lwip
                       "
@@ -47,8 +50,9 @@
                        OS stacks: Linux, FreeBSD, OpenBSD and lwIP.
                        NSC must be downloaded and installed separately; read
                        inet/3rdparty/README for more information."
+        initiallyEnabled = "false"
         requires = "TCP_BASE"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.transport.tcp_nsc
                       "
@@ -60,8 +64,9 @@
         id="IPv4"
         name="IPv4 protocol"
         description = "Basic IPv4 support"
+        initiallyEnabled = "true"
         requires = ""
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.networklayer.ipv4
                        inet.networklayer.autorouting.ipv4
@@ -78,6 +83,7 @@
         id="IPv4_examples"
         name="IPv4 examples"
         description = "Examples for Basic IPv4 support (IPv4)"
+        initiallyEnabled = "true"
         requires = "IPv4"
         labels = "protocols examples"
         nedPackages = "
@@ -91,8 +97,9 @@
         id="IPv6"
         name="IPv6 protocol"
         description = "Basic IPv6 support"
+        initiallyEnabled = "true"
         requires = ""
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.networklayer.ipv6
                        inet.networklayer.autorouting.ipv6
@@ -107,6 +114,7 @@
         id="IPv6_examples"
         name="IPv6 examples"
         description = "Examples for Basic IPv6 support (IPv6)"
+        initiallyEnabled = "true"
         requires = "IPv6"
         labels = "protocols examples"
         nedPackages = "
@@ -120,6 +128,7 @@
         id="UDP"
         name="UDP protocol"
         description = "UDP protocol"
+        initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
@@ -134,8 +143,9 @@
         id="RTP"
         name="RTP"
         description = "Real Time Protocol support"
+        initiallyEnabled = "true"
         requires = "UDP IPv4"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.applications.rtpapp
                        inet.transport.rtp
@@ -148,6 +158,7 @@
         id="RTP_examples"
         name="RTP examples"
         description = "Examples for Real Time Protocol support (RTP)"
+        initiallyEnabled = "true"
         requires = "RTP"
         labels = "protocols examples"
         nedPackages = "
@@ -161,8 +172,9 @@
         id="SCTP"
         name="SCTP"
         description = "SCTP Protocol support"
+        initiallyEnabled = "true"
         requires = "IPv4"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.applications.sctpapp
                        inet.transport.sctp
@@ -175,6 +187,7 @@
         id="SCTP_examples"
         name="SCTP examples"
         description = "Examples for SCTP"
+        initiallyEnabled = "true"
         requires = "SCTP IPv4"
         labels = "protocols examples"
         nedPackages = "
@@ -187,7 +200,11 @@
     <feature
         id="ETHERNET"
         name="Ethernet"
-        description = "The Ethernet layer"
+        description = "IEEE 802.3 models (MAC, LLC, Encap) with support for classic
+                       Ethernet (10Mbps), Fast Ethernet (100Mbps) and Gigabit Ethernet (1Gbps).
+                       Includes a switch model with various relay unit implementations,
+                       and also Ethernet-level traffic generators."
+        initiallyEnabled = "true"
         requires = ""
         labels = "protocols"
         nedPackages = "
@@ -203,7 +220,7 @@
     <feature
         id="ETHERNET_examples"
         name="Ethernet examples"
-        description = "Examples for the Ethernet layer"
+        description = "Examples for Ethernet"
         requires = "ETHERNET IPv4"
         labels = "protocols"
         nedPackages = "
@@ -216,7 +233,7 @@
     <feature
         id="PPP"
         name="PPP"
-        description = "The PPP layer"
+        description = "PPP protocol"
         requires = ""
         labels = "protocols"
         nedPackages = "
@@ -232,6 +249,7 @@
         description = "Support for connecting the simulation to a real network.
                        The ExternalInterface module is responsible for sending/receiving
                        packets on the network."
+        initiallyEnabled = "true"
         requires = "IPv4"
         labels = "nic"
         nedPackages = "
@@ -245,6 +263,7 @@
         id="ExternalInterface_examples"
         name="Network emulation examples"
         description = "Examples for network emulation"
+        initiallyEnabled = "true"
         requires = "ExternalInterface ETHERNET"
         labels = "nic"
         nedPackages = "
@@ -274,6 +293,7 @@
         id="MPLS_examples"
         name="MPLS examples"
         description = "Examples for MPLS support"
+        initiallyEnabled = "true"
         requires = "MPLS"
         labels = "routing examples"
         nedPackages = "
@@ -287,6 +307,7 @@
         id="OSPFv2"
         name="OSPFv2"
         description = "OSPFv2 support"
+        initiallyEnabled = "true"
         requires = "IPv4"
         labels = "routing"
         nedPackages = "
@@ -301,6 +322,7 @@
         id="OSPFv2_examples"
         name="OSPFv2 examples"
         description = "Examples for OSPFv2"
+        initiallyEnabled = "true"
         requires = "OSPFv2 ETHERNET"
         labels = "routing examples"
         nedPackages = "
@@ -314,6 +336,7 @@
         id="BGPv4"
         name="BGPv4"
         description = "BGP support"
+        initiallyEnabled = "true"
         requires = "IPv4 OSPFv2 TCP_BASE"
         labels = "routing"
         nedPackages = "
@@ -328,6 +351,7 @@
         id="BGPv4_examples"
         name="BGPv4 examples"
         description = "Examples for BGPv4 ETHERNET"
+        initiallyEnabled = "true"
         requires = "BGPv4 ETHERNET"
         labels = "routing examples"
         nedPackages = "
@@ -341,6 +365,7 @@
         id="mobility"
         name="Mobility"
         description = "Mobility support for wireless simulations"
+        initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
@@ -368,6 +393,7 @@
         id="mf80211"
         name="802.11b (Mobility Framework)"
         description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
+        initiallyEnabled = "true"
         requires = "IPv4 mobility radio"
         labels = "nic wireless"
         nedPackages = "
@@ -382,6 +408,7 @@
         id="_80211"
         name="802.11b (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
+        initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
@@ -395,6 +422,7 @@
         id="WIRELESS_examples"
         name="wireless examples"
         description = "wireless examples"
+        initiallyEnabled = "true"
         requires = "IPv4 ETHERNET _80211 mf80211"
         labels = "nic wireless"
         nedPackages = "
