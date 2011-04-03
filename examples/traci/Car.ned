@@ -18,13 +18,15 @@
 
 package inet.examples.traci;
 
-import inet.base.NotificationBoard;
-import inet.networklayer.common.InterfaceTable;
-import inet.mobility.traci.TraCIMobility;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.autorouting.HostAutoConfigurator;
 import inet.transport.udp.UDP;
 import inet.nodes.inet.NetworkLayer;
-import inet.linklayer.mf80211.Nic80211;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.mobility.traci.TraCIMobility;
+import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
+import inet.base.NotificationBoard;
+import inet.applications.traci.TraCIDemo;
 
 module Car
 {
@@ -38,6 +40,9 @@ module Car
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=140,462;i=block/control");
+        }
+        ac_wlan: HostAutoConfigurator {
+            @display("p=296,402");
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -66,11 +71,18 @@ module Car
                 ifIn[1];
                 ifOut[1];
         }
-        wlan: Nic80211 {
+        wlan: Ieee80211NicAdhoc {
             parameters:
                 @display("p=304,461;q=queue;i=block/ifcard");
         }
+        app: TraCIDemo {
+            parameters:
+                @display("p=384,46;i=block/app");
+        }
     connections allowunconnected:
+        udp.appOut++ --> app.udp$i;
+        udp.appIn++ <-- app.udp$o;
+
         udp.ipOut --> networkLayer.udpIn;
         udp.ipIn <-- networkLayer.udpOut;
 
@@ -78,6 +90,5 @@ module Car
         wlan.uppergateIn <-- networkLayer.ifOut[0];
 
         radioIn --> wlan.radioIn;
-
 }
 

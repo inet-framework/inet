@@ -21,41 +21,32 @@
 
 #include <omnetpp.h>
 
-#include <map>
-
-#include "UDPSocket.h"
-#include "BasicMobility.h"
-#include "world/traci/TraCIScenarioManager.h"
-#include "linklayer/ieee80211/mac/Ieee80211Mac.h"
-#include "linklayer/radio/Ieee80211Radio.h"
 #include "mobility/traci/TraCIMobility.h"
 
-//===========================================================================================
-// class TraCIDemo: Small IVC Demo
-//===========================================================================================
+/**
+ * Small IVC Demo
+ */
 class TraCIDemo : public BasicModule {
 	public:
-		TraCIDemo() {}
-		~TraCIDemo();
 		virtual int numInitStages() const {
 			return std::max(4, BasicModule::numInitStages());
 		}
 		virtual void initialize(int);
-		virtual void finish();
-		virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-		virtual void handleMessage(cMessage * msg);
+		virtual void receiveChangeNotification(int category, const cPolymorphic* details);
+		virtual void handleMessage(cMessage* msg);
+
+	protected:
+		bool debug;
+		TraCIMobility* traci;
+		bool sentMessage;
 
 	protected:
 		void setupLowerLayer();
 		virtual void handleSelfMsg(cMessage* apMsg);
 		virtual void handleLowerMsg(cMessage* apMsg);
-		virtual void handlePositionUpdate();
+
 		virtual void sendMessage();
-
-		bool debug;
-
-		TraCIMobility* traci;
-		bool triggeredFlooding;
+		virtual void handlePositionUpdate();
 };
 
 #endif

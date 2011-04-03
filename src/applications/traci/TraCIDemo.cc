@@ -16,26 +16,20 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <algorithm>
-#include <numeric>
-
 #include "applications/traci/TraCIDemo.h"
+
 #include "NotificationBoard.h"
+#include "UDPSocket.h"
 
 Define_Module(TraCIDemo);
 
-TraCIDemo::~TraCIDemo() {
-}
-
-void TraCIDemo::initialize(int aStage) {
-
-	BasicModule::initialize(aStage);
-
-	if (0 == aStage) {
+void TraCIDemo::initialize(int stage) {
+	BasicModule::initialize(stage);
+	if (stage == 0) {
 		debug = par("debug");
 
 		traci = TraCIMobilityAccess().get();
-		triggeredFlooding = false;
+		sentMessage = false;
 
 		NotificationBoard* nb = NotificationBoardAccess().get();
 		nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
@@ -53,47 +47,33 @@ void TraCIDemo::setupLowerLayer() {
 	send(msg, "udp$o");
 }
 
-void TraCIDemo::finish() {
+void TraCIDemo::handleMessage(cMessage* msg) {
+	if (msg->isSelfMessage()) {
+		handleSelfMsg(msg);
+	} else {
+		handleLowerMsg(msg);
+	}
+}
+
+void TraCIDemo::handleSelfMsg(cMessage* msg) {
+}
+
+void TraCIDemo::handleLowerMsg(cMessage* msg) {
+	if (!sentMessage) sendMessage();
+	delete msg;
 }
 
 void TraCIDemo::receiveChangeNotification(int category, const cPolymorphic *details) {
-	Enter_Method("receiveChangeNotification()");
+	Enter_Method_Silent();
 
 	if (category == NF_HOSTPOSITION_UPDATED) {
 		handlePositionUpdate();
-	} else {
-		error("should only be subscribed to NF_HOSTPOSITION_UPDATED, but received notification of category %d", category);
-	}
-}
-
-void TraCIDemo::handleMessage(cMessage* apMsg) {
-	if (apMsg->isSelfMessage()) {
-		handleSelfMsg(apMsg);
-	} else {
-		handleLowerMsg(apMsg);
-	}
-}
-
-void TraCIDemo::handleSelfMsg(cMessage* apMsg) {
-}
-
-void TraCIDemo::handleLowerMsg(cMessage* apMsg) {
-	if (cPacket* m = dynamic_cast<cPacket*>(apMsg)) {
-		sendMessage();
-	}
-
-	delete apMsg;
-}
-
-void TraCIDemo::handlePositionUpdate() {
-	if ((traci->getPosition().x < 7350) && (!triggeredFlooding)) {
-		triggeredFlooding = true;
-
-		sendMessage();
 	}
 }
 
 void TraCIDemo::sendMessage() {
+	sentMessage = true;
+
 	cPacket* newMessage = new cPacket();
 
 	newMessage->setKind(UDP_C_DATA);
@@ -107,3 +87,8 @@ void TraCIDemo::sendMessage() {
 	sendDelayed(newMessage, 0.010, "udp$o");
 }
 
+void TraCIDemo::handlePositionUpdate() {
+	if (traci->getPosition().x < 7350) {
+		if (!sentMessage) sendMessage();
+	}
+}
