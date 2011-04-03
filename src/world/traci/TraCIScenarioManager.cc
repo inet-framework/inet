@@ -367,6 +367,13 @@ void TraCIScenarioManager::commandSetMaximumSpeed(std::string nodeId, float maxS
 	ASSERT(buf.eof());
 }
 
+void TraCIScenarioManager::commandSetSpeed(std::string nodeId, double speed) {
+	uint8_t variableId = VAR_SPEED;
+	uint8_t variableType = TYPE_DOUBLE;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << speed);
+	ASSERT(buf.eof());
+}
+
 void TraCIScenarioManager::commandChangeRoute(std::string nodeId, std::string roadId, double travelTime) {
 	if (travelTime >= 0) {
 		uint8_t variableId = VAR_EDGE_TRAVELTIME;

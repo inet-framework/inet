@@ -56,6 +56,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 		std::pair<uint32_t, std::string> commandGetVersion();
 		void commandSetMaximumSpeed(std::string nodeId, float maxSpeed);
+		void commandSetSpeed(std::string nodeId, double speed);
 		void commandChangeRoute(std::string nodeId, std::string roadId, double travelTime);
 		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
 		void commandStopNode(std::string nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);

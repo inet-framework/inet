@@ -102,6 +102,9 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandSetMaximumSpeed(float maxSpeed) {
 			getManager()->commandSetMaximumSpeed(getExternalId(), maxSpeed);
 		}
+		void commandSetSpeed(double speed) {
+			getManager()->commandSetSpeed(getExternalId(), speed);
+		}
 		void commandChangeRoute(std::string roadId, double travelTime) {
 			getManager()->commandChangeRoute(getExternalId(), roadId, travelTime);
 		}
