@@ -33,8 +33,7 @@ do
 done
 
 echo "- Making ..."
-#make
-make MODE=release
+make
 
 echo ""
 echo "Finished updating OMNeT++."
