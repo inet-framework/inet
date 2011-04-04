@@ -1,0 +1,2 @@
+#!/bin/sh
+valgrind --tool=memcheck --leak-check=full --dsymutil=yes --log-file=valgrind.out -- opp_run -l../../src/inet -n"../../src;.." "$@"
