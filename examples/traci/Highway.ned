@@ -26,7 +26,7 @@ module Highway
     parameters:
         double playgroundSizeX;
         double playgroundSizeY;
-        @display("bgi=map;bgs=0.25");
+        @display("");
     submodules:
         channelcontrol: ChannelControl {
             parameters:
