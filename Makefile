@@ -11,7 +11,8 @@ cleanall: checkmakefiles
 
 makefiles:
 #	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF
-	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
+#	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
+	cd src && opp_makemake -f --deep --make-lib -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
