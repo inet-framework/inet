@@ -655,11 +655,11 @@ TraCIScenarioManager::TraCICoord TraCIScenarioManager::omnet2traci(Coord coord) 
 
 double TraCIScenarioManager::traci2omnetAngle(double angle) const {
 
+	// rotate angle so 0 is east (in TraCI's angle interpretation 0 is south)
+	angle = angle - 90;
+
 	// convert to rad
 	angle = angle * M_PI / 180.0;
-
-	// rotate angle so 0 is east (in TraCI's angle interpretation 0 is south)
-	angle = 1.5 * M_PI - angle;
 
 	// normalize angle to -M_PI <= angle < M_PI
 	while (angle < -M_PI) angle += 2 * M_PI;
@@ -670,15 +670,15 @@ double TraCIScenarioManager::traci2omnetAngle(double angle) const {
 
 double TraCIScenarioManager::omnet2traciAngle(double angle) const {
 
-	// rotate angle so 0 is south (in OMNeT++'s angle interpretation 0 is east)
-	angle = 1.5 * M_PI - angle;
-
 	// convert to degrees
 	angle = angle * 180 / M_PI;
 
-	// normalize angle to 0 <= angle < 360
-	while (angle < 0) angle += 360;
-	while (angle >= 360) angle -= 360;
+	// rotate angle so 0 is south (in OMNeT++'s angle interpretation 0 is east)
+	angle = angle + 90;
+
+	// normalize angle to -180 <= angle < 180
+	while (angle < -180) angle += 360;
+	while (angle >= 180) angle -= 360;
 
 	return angle;
 }
