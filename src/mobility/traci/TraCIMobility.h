@@ -70,6 +70,7 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual void preInitialize(std::string external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
 		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
 		virtual void changePosition();
+		virtual void updateDisplayString();
 		virtual void setExternalId(std::string external_id) {
 			this->external_id = external_id;
 		}
