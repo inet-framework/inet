@@ -19,7 +19,7 @@
 
 package inet.linklayer.ieee80211.radio;
 
-import inet.linklayer.radio.AbstractRadio;
+import inet.linklayer.radio.Radio;
 
 
 //
@@ -33,10 +33,10 @@ import inet.linklayer.radio.AbstractRadio;
 // @see ~IRadio
 // @author Andras Varga
 //
-simple Ieee80211Radio extends AbstractRadio
+simple Ieee80211Radio extends Radio
 {
     parameters:
-        @class(Ieee80211Radio);
         @display("i=block/wrxtx");
+        radioModel = "Ieee80211RadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
 }

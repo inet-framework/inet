@@ -16,16 +16,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ABSTRACTRADIO_H
-#define ABSTRACTRADIO_H
+#ifndef RADIO_H
+#define RADIO_H
 
-#include "ChannelAccess.h"
+#include "ChannelAccessExtended.h"
 #include "RadioState.h"
 #include "AirFrame_m.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
 #include "SnrList.h"
-
+#include "ObstacleControl.h"
+#include "IPowerControl.h"
 
 
 /**
@@ -52,12 +53,19 @@
  * and IRadioModel classes.
  *
  * @author Andras Varga, Levente Meszaros
+ *
+ * Power Control Interface allows to turn on/off the radio interface
+ * PowerControlManager helps to perform these tasks, however, user
+ * can implemenent its own manager to turn on/off an interface
+ *
+ * @author Juan-Carlos Maureira
+ *
  */
-class INET_API AbstractRadio : public ChannelAccess
+class INET_API Radio : public ChannelAccessExtended, public IPowerControl
 {
   public:
-    AbstractRadio();
-    virtual ~AbstractRadio();
+    Radio();
+    virtual ~Radio();
 
   protected:
     virtual void initialize(int stage);
@@ -65,7 +73,7 @@ class INET_API AbstractRadio : public ChannelAccess
 
     virtual void handleMessage(cMessage *msg);
 
-    virtual void handleUpperMsg(AirFrame*);
+    virtual void handleUpperMsg(AirFrameExtended*);
 
     virtual void handleSelfMsg(cMessage*);
 
@@ -75,22 +83,22 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual void handleLowerMsgStart(AirFrame *airframe);
 
     /** @brief Unbuffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgEnd(AirFrame *airframe);
+    virtual void handleLowerMsgEnd(AirFrameExtended *airframe);
 
     /** @brief Buffers message for 'transmission time' */
     virtual void bufferMsg(AirFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time' */
-    virtual AirFrame *unbufferMsg(cMessage *msg);
+    virtual AirFrameExtended *unbufferMsg(cMessage *msg);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(AirFrame *airframe);
+    virtual void sendUp(AirFrameExtended *airframe);
 
     /** Sends a message to the channel */
-    virtual void sendDown(AirFrame *airframe);
+    virtual void sendDown(AirFrameExtended *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
-    virtual AirFrame *encapsulatePacket(cPacket *msg);
+    virtual AirFrameExtended *encapsulatePacket(cPacket *msg);
 
     /** Sets the radio state, and also fires change notification */
     virtual void setRadioState(RadioState::State newState);
@@ -102,7 +110,7 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual void addNewSnr();
 
     /** Create a new AirFrame */
-    virtual AirFrame *createAirFrame() {return new AirFrame();}
+    virtual AirFrameExtended *createAirFrame() {return new AirFrameExtended();}
 
     /**
      * Change transmitter and receiver to a new channel.
@@ -119,23 +127,43 @@ class INET_API AbstractRadio : public ChannelAccess
      */
     virtual void setBitrate(double bitrate);
 
-    /**
-     * To be defined to provide a reception model. The reception model
-     * is responsible for modelling path loss, interference and antenna
-     * gain.
+    /** @brief updates the sensitivity value if the bitrate varies */
+    virtual void updateSensitivity(double bitrate);
+    /*
+     *  check if the packet must be processes
      */
-    virtual IReceptionModel *createReceptionModel() = 0;
-
-    /**
-     * To be defined to provide a radio model. The radio model is
-     * responsible for calculating frame duration, and modelling modulation
-     * scheme and possible forward error correction.
+    virtual bool processAirFrame(AirFrame *airframe);
+    /*
+     * Routines to connect or disconnect the transmission and reception  of packets
      */
-    virtual IRadioModel *createRadioModel() = 0;
 
+    virtual void disconnectTransceiver() {transceiverConnect=false;}
+    virtual void connectTransceiver() {transceiverConnect=true;}
+    virtual void disconnectReceiver();
+    virtual void connectReceiver();
+
+    virtual void registerBattery();
+
+    virtual void updateDisplayString();
+
+    // Power Control methods
+	virtual void enablingInitialization();
+	virtual void disablingInitialization();
+	//
+	double calcDistFreeSpace();
   protected:
+    cMessage *updateString;
+    simtime_t updateStringInterval;
+    ObstacleControl* obstacles;
     IRadioModel *radioModel;
     IReceptionModel *receptionModel;
+
+    /** @name Statistics */
+    //@{
+    long numGivenUp;
+    long numReceivedCorrectly;
+    double lossRate;
+    //@}
 
     /** Power used to transmit messages */
     double transmitterPower;
@@ -206,11 +234,19 @@ class INET_API AbstractRadio : public ChannelAccess
      * -85 dBm
      */
     double sensitivity;
+    /*
+     * this variable is used to disconnect the possibility of sent packets to the ChannelControl
+     */
+    bool transceiverConnect;
+
+    // if true draw coverage circles
+    bool drawCoverage;
 
     // statistics:
     static simsignal_t bitrateSignal;
     static simsignal_t radioStateSignal; //enum
     static simsignal_t channelNumberSignal;
+    static simsignal_t lossRateSignal;
 };
 
 #endif

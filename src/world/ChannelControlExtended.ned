@@ -40,7 +40,7 @@ simple ChannelControlExtended
         double carrierFrequency @unit("Hz") = default(2.4GHz); // carrier frequency of the channel (in Hz)
         double percentage = default(0.1);
         int numChannels = default(1); // number of radio channels (frequencies)
-        string propagationModel = default("PathLossReceptionModel") @enum("","PathLossReceptionModel","TwoRayGroundModel","RiceModel","RayleighModel","NakagamiModel","FreeSpaceModel","LogNormalShadowingModel");
+        string propagationModel = default("FreeSpaceModel") @enum("FreeSpaceModel","TwoRayGroundModel","RiceModel","RayleighModel","NakagamiModel","LogNormalShadowingModel");
         @display("i=misc/cloud");
         @labels(node);
 }

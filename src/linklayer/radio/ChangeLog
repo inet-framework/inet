@@ -1,3 +1,11 @@
+2011-04-05 Rudolf Hornig
+
+    * Refactored the radio framework. The AbstractRadioExtended has been renamed to 
+      Radio. PropagationModel is now configured globally in the channel controller.
+      RadioModel is configurable via a parameter instead of overriding a virtual 
+      factory method. GenericRadio.cc/.h and Ieee80211.cc/.h is removed as it is no longer
+      needed.
+      
 2010-04-26  Andras Varga
 
     * PathLossReceptionModel.h/cc, Ieee80211Radio.ned: checked in shadowing
