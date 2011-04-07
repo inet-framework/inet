@@ -4,21 +4,18 @@
 
 package inet.examples.wireless.multiradio;
 
-// numOfHosts: 3
-
-import inet.nodes.wireless.WirelessHost;
-import inet.nodes.inet.Router;
+import ned.DatarateChannel;
 import inet.world.ChannelControlExtended;
+import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-
+import inet.nodes.inet.Router;
 
 network MultiRadio
 {
     parameters:
-
         @display("bgb=505,274");
+        bool useEthernetSwitching = default(true);
+        bool useRouting = default(false);
     submodules:
         channelControl: ChannelControlExtended {
             @display("p=53,32");
@@ -33,16 +30,12 @@ network MultiRadio
         accessPoint1: AccessPoint {
             @display("p=150,99");
         }
-//        accessPoint2: AccessPoint {
-//
-//            @display("p=354,99");
-//        }
-        configurator: FlatNetworkConfigurator {
-            networkAddress = "192.168.1.0";
-            netmask = "255.255.255.0";
-            @display("p=150,32");
+        accessPoint2: AccessPoint {
+            @display("p=354,99");
         }
-//        router: Router {
-//            @display("p=255,168");
-//        }
+        router[useRouting ? 1 : 0]: Router {
+            @display("p=255,168");
+        }
+    connections:
+        accessPoint1.ethg++ <--> DatarateChannel {  datarate = 100Mbps; } <--> accessPoint2.ethg++ if useEthernetSwitching;
 }
