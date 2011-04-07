@@ -44,10 +44,10 @@ module AccessPoint
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        //@ TODO make the relayUnit optional too (present only if ethSize+wlanSize>1)
-        relayUnit: <relayUnitType> like IMACRelayUnit {
+        relayUnit[sizeof(ethg)+numRadios>1 ? 1 : 0]: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=151,121");
+                numWirelessPorts = numRadios;
         }
         wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
@@ -66,18 +66,21 @@ module AccessPoint
         }
         mobility: <mobilityType> like IMobility {
             parameters:
-                @display("p=59,107");
+                @display("p=169,43");
         }
     connections allowunconnected:
         // connections to network outside
-        for i=0..sizeof(radioIn)-1 {
+        // wireless interfaces MUST be connted first (i.e. ports 0..numRadios-1) 
+        // because broadcasts must be handled differently for wilreless IFs by the relayUnit
+        for i=0..numRadios-1 {
             radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> relayUnit.lowerLayerIn++;
-            wlan[i].uppergateIn <-- relayUnit.lowerLayerOut++;
+            wlan[i].uppergateOut --> relayUnit[0].lowerLayerIn++ if sizeof(relayUnit) > 0;
+            wlan[i].uppergateIn <-- relayUnit[0].lowerLayerOut++ if sizeof(relayUnit) > 0;
         }
+        // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> ethg[i];
-            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut++;
-            eth[i].upperLayerOut --> relayUnit.lowerLayerIn++;
+            eth[i].upperLayerIn <-- relayUnit[0].lowerLayerOut++ if sizeof(relayUnit) > 0;
+            eth[i].upperLayerOut --> relayUnit[0].lowerLayerIn++ if sizeof(relayUnit) > 0;
         }
 }
