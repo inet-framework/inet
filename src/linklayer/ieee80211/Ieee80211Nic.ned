@@ -32,7 +32,7 @@ import inet.linklayer.IWirelessNic;
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
-        string mgmtType; // name of the management module type
+        string mgmtType = default(Ieee80211MgmtSTASimplified); // name of the management module type (implements IIeee80211Mgmt)
         @display("i=block/ifcard");
     gates:
         input uppergateIn; // to upper layers

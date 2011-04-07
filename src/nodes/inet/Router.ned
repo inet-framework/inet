@@ -54,6 +54,7 @@ module Router
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         string routingFile = default("");
+        string wlanNicType = default("Ieee80211NicSTA");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -82,7 +83,7 @@ module Router
             parameters:
                 @display("p=242,143;q=queue");
         }
-        wlan[numRadios]: <default("Ieee80211NicSTA")> like IWirelessNic {
+        wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
                 @display("p=72,242;q=queue");
         }

@@ -27,7 +27,7 @@ package inet.linklayer.radio;
 simple Radio like IRadio
 {
     parameters:
-        int channelNumber = default(0); // channel identifier this radio listens on
+        int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211 
         double carrierFrequency @unit("Hz") = default(2.4GHz);
         double bitrate @unit("bps");
         double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)

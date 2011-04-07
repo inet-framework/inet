@@ -58,7 +58,7 @@ simple Ieee80211Mac
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         string queueModule = default("");    // name of optional external queue module
-        int maxQueueSize; // max queue length in frames; only used if queueModule==""
+        int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
         double basicBitrate @unit("bps") = default(2000000bps);
         int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS

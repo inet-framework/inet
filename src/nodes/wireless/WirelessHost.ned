@@ -36,7 +36,8 @@ import inet.nodes.inet.StandardHost;
 module WirelessHost extends StandardHost
 {
     @display("i=device/wifilaptop");
+    wlanNicType = default("Ieee80211Nic");
     mobilityType = default("NullMobility");
-    numRadios = 1;
+    numRadios = default(1);
 }
 

@@ -1,0 +1,6 @@
+This example demonstrates the use of multiple radio interfaces in a 
+single node. There are two wireless networks running on different
+channels. The two network is connected via a wireless router that 
+has two radio interfaces. The routing table is configured to pass
+packets between the networks.
+

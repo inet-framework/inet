@@ -57,7 +57,7 @@ void ChannelAccessExtended::initialize(int stage)
         else
             myHostRef = cc->lookupHost(hostModule);
         if (myHostRef==0)
-            error("host not registered yet in ChannelControl (this should be done by "
+            error("host not registered yet in 'channelControl' module (this should be done by "
                   "the Mobility module -- maybe this host doesn't have one?)");
     }
 }

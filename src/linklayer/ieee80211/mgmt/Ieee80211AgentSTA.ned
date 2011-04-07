@@ -30,9 +30,9 @@ simple Ieee80211AgentSTA
     parameters:
         bool activeScan = default(true);  // selects between active and passive scanning
         string channelsToScan = default("");  // list of channel numbers to scan (space delimited); empty means all channels
-        double probeDelay @unit("s"); // delay before sending a probe request during active scanning
-        double minChannelTime @unit("s"); // min interval to spend on a channel during active scanning
-        double maxChannelTime @unit("s"); // channel time for passive scanning, and max channel time for active scanning
+        double probeDelay @unit("s") = default(100ms); // delay before sending a probe request during active scanning
+        double minChannelTime @unit("s") = default(150ms); // min interval to spend on a channel during active scanning
+        double maxChannelTime @unit("s") = default(300ms); // channel time for passive scanning, and max channel time for active scanning
         double authenticationTimeout @unit("s") = default(5s); // timeout for the authentication procedure
         double associationTimeout @unit("s") = default(5s); // timeout for the association procedure
         @display("i=block/control");

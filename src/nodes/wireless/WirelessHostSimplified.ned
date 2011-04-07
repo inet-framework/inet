@@ -34,6 +34,6 @@ package inet.nodes.wireless;
 //
 module WirelessHostSimplified extends WirelessHost
 {
-    wlanNicType = "Ieee80211NicSTASimplified";
+    wlanNicType = default("Ieee80211Nic");
 }
 

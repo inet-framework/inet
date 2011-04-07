@@ -18,47 +18,13 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.radio.Ieee80211Radio;
-import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAdhoc;
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
-import inet.linklayer.IWirelessNic;
-
-
 //
 // This NIC implements an 802.11 network interface card in ad-hoc mode.
 //
-module Ieee80211NicAdhoc like IWirelessNic
+//  @deprecated use Ieee80211Nic instead with mgmtType = Ieee80211MgmtAdhoc
+//
+module Ieee80211NicAdhoc extends Ieee80211Nic
 {
     parameters:
-        @display("i=block/ifcard");
-    gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
-        input radioIn @labels(AirFrame); // to receive AirFrames
-    submodules:
-        mgmt: Ieee80211MgmtAdhoc {
-            parameters:
-                @display("p=96,69;q=wlanDataQueue");
-        }
-        mac: Ieee80211Mac {
-            parameters:
-                queueModule = "mgmt";
-                @display("p=96,155");
-        }
-        radio: Ieee80211Radio {
-            parameters:
-                @display("p=96,240");
-        }
-    connections:
-        radioIn --> radio.radioIn;
-        radio.uppergateIn <-- mac.lowergateOut;
-        radio.uppergateOut --> mac.lowergateIn;
-
-        mac.uppergateOut --> mgmt.macIn;
-        mac.uppergateIn <-- mgmt.macOut;
-
-        mgmt.uppergateOut --> uppergateOut;
-        mgmt.uppergateIn <-- uppergateIn;
-
+        mgmtType = "Ieee80211MgmtAdhoc";
 }
-
