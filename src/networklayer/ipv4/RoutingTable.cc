@@ -510,7 +510,7 @@ void RoutingTable::updateNetmaskRoutes()
             IPRoute *route = new IPRoute();
             route->setType(IPRoute::DIRECT);
             route->setSource(IPRoute::IFACENETMASK);
-            route->setHost(ie->ipv4Data()->getIPAddress());
+            route->setHost(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPAddress());
             route->setMetric(ie->ipv4Data()->getMetric());
