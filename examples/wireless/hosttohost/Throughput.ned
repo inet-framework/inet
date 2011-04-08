@@ -29,11 +29,6 @@ import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
 
 
-module WirelessAPSimplified extends AccessPoint
-{
-    wlanNicType = "Ieee80211NicAPSimplified";
-}
-
 module ThroughputClient
 {
     parameters:
@@ -54,7 +49,7 @@ module ThroughputClient
         wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = default("Ieee80211MgmtSTASimplified");
+                mgmtType = "Ieee80211MgmtSTASimplified";
         }
         mobility: CircleMobility {
             parameters:
@@ -84,7 +79,7 @@ module ThroughputServer
         wlan: Ieee80211Nic {
             parameters:
                 @display("p=120,158;q=queue");
-                mgmtType = default("Ieee80211MgmtSTASimplified");
+                mgmtType = "Ieee80211MgmtSTASimplified";
         }
         mobility: NullMobility {
             parameters:
@@ -111,9 +106,10 @@ network Throughput
             parameters:
                 @display("p=350,350;r=,,#707070");
         }
-        ap: WirelessAPSimplified {
+        ap: AccessPoint {
             parameters:
                 @display("p=200,200;r=,,#707070");
+                wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
         channelcontrol: ChannelControlExtended {
             parameters:

@@ -37,8 +37,8 @@ import inet.linklayer.IWirelessNic;
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
-        string mgmtType = default("Ieee80211MgmtSTASimplified"); // name of the management module type (implements IIeee80211Mgmt)
-        bool agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
+        string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
+        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
         @display("i=block/ifcard;bgb=259,320");
     gates:
         input uppergateIn; // to upper layers
@@ -46,7 +46,7 @@ module Ieee80211Nic like IWirelessNic
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         // optional agent module (can be either 0 or 1 sized vector)
-        agent[agentNeeded ? 1 : 0]: Ieee80211AgentSTA {
+        agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
                 @display("p=202,69");
         }
@@ -74,7 +74,7 @@ module Ieee80211Nic like IWirelessNic
         mgmt.uppergateOut --> uppergateOut;
         mgmt.uppergateIn <-- uppergateIn;
         
-        mgmt.agentOut --> agent[0].mgmtIn if agentNeeded;
-        mgmt.agentIn <-- agent[0].mgmtOut if agentNeeded;
+        mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
+        mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
 }
 

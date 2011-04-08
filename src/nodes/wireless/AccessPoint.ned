@@ -44,24 +44,22 @@ module AccessPoint
         @display("i=device/accesspoint");
         string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
-        string wlanNicType = default("Ieee80211Nic"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic. Use only the NICs for access points
-        string ethMacType = default("EtherMACFullDuplex"); // used ethernet interfaces. see: IEtherMAC and IEtherMACFullDuplex for simplified, full dupley only mac
         int numRadios = default(1);               // the number of radios in the access point
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        relayUnit[sizeof(ethg)+numRadios>1 ? 1 : 0]: <relayUnitType> like IMACRelayUnit {
+        relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:
                 @display("p=151,121");
                 numWirelessPorts = numRadios;
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=89,225;q=queue");
                 mgmtType = default("Ieee80211MgmtAP");
         }
-        eth[sizeof(ethg)]: <ethMacType> like IEtherMAC {
+        eth[sizeof(ethg)]: <default("EtherMACFullDuplex")> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 txQueueLimit = 1000; // increase if needed
@@ -82,13 +80,13 @@ module AccessPoint
         // because broadcasts must be handled differently for wilreless IFs by the relayUnit
         for i=0..numRadios-1 {
             radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> relayUnit[0].lowerLayerIn++ if sizeof(relayUnit) > 0;
-            wlan[i].uppergateIn <-- relayUnit[0].lowerLayerOut++ if sizeof(relayUnit) > 0;
+            wlan[i].uppergateOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
+            wlan[i].uppergateIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> ethg[i];
-            eth[i].upperLayerIn <-- relayUnit[0].lowerLayerOut++ if sizeof(relayUnit) > 0;
-            eth[i].upperLayerOut --> relayUnit[0].lowerLayerIn++ if sizeof(relayUnit) > 0;
+            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
+            eth[i].upperLayerOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
         }
 }
