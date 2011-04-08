@@ -45,83 +45,10 @@ import inet.base.NotificationBoard;
 // - If wireless card is present, node mobility can be set using **.mobility.type-name
 //   see: inet.mobility and ~IMobility
 //
-module Router
+module Router extends BaseHost
 {
     parameters:
-        @node();
-        @labels(node,ethernet-node,wireless-node);
         @display("i=abstract/router");
-        int numExtInterfaces = default(0);
-        int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string routingFile = default("");
-    gates:
-        input radioIn[numRadios] @directIn;
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
-    submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=57,54");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=177,54");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = true;
-                routerId = "auto";
-                routingFile = routingFile;
-                @display("p=281,54");
-        }
-        mobility: <default("NoMobility")> like IMobility {
-            parameters:
-                @display("p=379,54");
-        }
-        networkLayer: NetworkLayer {
-            parameters:
-                @display("p=242,143;q=queue");
-        }
-        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
-            parameters:
-                @display("p=72,242;q=queue");
-                mgmtType = default("Ieee80211MgmtSTA");
-        }
-        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
-            parameters:
-                @display("p=195,242,row,90;q=txQueue");
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=320,242,row,90;q=txQueue");
-        }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExtInterface {
-            parameters:
-                @display("p=460,242,row,90;q=txQueue;i=block/ifcard");
-        }
-    connections allowunconnected:
-        // connections to network outside
-        for i=0..sizeof(radioIn)-1 {
-            radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> networkLayer.ifIn++;
-            wlan[i].uppergateIn <-- networkLayer.ifOut++;
-        }
-
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn++;
-            eth[i].netwIn <-- networkLayer.ifOut++;
-        }
-
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn++;
-            ppp[i].netwIn <-- networkLayer.ifOut++;
-        }
-
-        for i=0..numExtInterfaces-1 {
-            ext[i].netwOut --> networkLayer.ifIn++;
-            ext[i].netwIn <-- networkLayer.ifOut++;
-        }
+        IPForward = true;
 }
 

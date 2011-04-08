@@ -19,7 +19,7 @@
 package inet.examples.adhoc.ieee80211;
 
 import inet.world.ChannelControlExtended;
-import inet.nodes.adhoc.MobileHost;
+import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
@@ -30,11 +30,11 @@ network Net80211
         double playgroundSizeX;
         double playgroundSizeY;
     submodules:
-        host[numHosts]: MobileHost {
+        host[numHosts]: AdhocHost {
             parameters:
-                @display("r=,,#707070");
+                @display("r=,,#707070;p=250,58");
         }
-        channelcontrol: ChannelControlExtended {
+        channelControl: ChannelControlExtended {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;

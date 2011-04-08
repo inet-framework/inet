@@ -16,18 +16,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
-
-
 package inet.examples.inet.routerperf;
 
 import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.Router;
-import inet.nodes.inet.BurstHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-
 
 network RouterPerfNetwork
 {

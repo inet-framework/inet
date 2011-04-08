@@ -42,85 +42,8 @@ import inet.applications.ITCPApp;
 // - Node mobility can be set using **.mobility.type-name
 //   see: inet.mobility and ~IMobility
 //
-module AdhocHost
+module AdhocHost extends WirelessHost
 {
-    @node();
-    @display("i=device/cellphone;bgb=525,394");
-    int numTcpApps = default(0);
-    int numUdpApps = default(0);
-    string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
-    int numRadios = default(1);
-    string routingFile = default("");
-    bool IPForward = default(true);
-
-    gates:
-        input radioIn[numRadios] @directIn;
-    submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,67");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=60,154");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = IPForward;
-                routerId = "";
-                routingFile = routingFile;
-                @display("p=60,247");
-        }
-        mobility: <default("NullMobility")> like IMobility {
-            @display("p=60,331");
-        }
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            @display("p=198,67");
-        }
-        tcp: <tcpType> like ITCP {
-            @display("p=198,154");
-        }
-        udpApp[numUdpApps]: <> like IUDPApp {
-            @display("p=346,67");
-        }
-        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
-            @display("p=346,154");
-        }
-        pingApp: PingApp {
-            @display("p=451,154");
-        }
-        networkLayer: NetworkLayer {
-            proxyARP = false;
-            @display("p=279,247;q=queue");
-        }
-        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
-            @display("p=279,331,row,90;q=queue");
-            mgmtType = default("Ieee80211MgmtAdhoc");
-        }
-    connections allowunconnected:
-        for i=0..sizeof(tcpApp)-1 {
-            tcpApp[i].tcpOut --> tcp.appIn++;
-            tcpApp[i].tcpIn <-- tcp.appOut++;
-        }
-
-        tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.tcpOut;
-
-        for i=0..sizeof(udpApp)-1 {
-            udpApp[i].udpOut --> udp.appIn++;
-            udpApp[i].udpIn <-- udp.appOut++;
-        }
-
-        udp.ipOut --> networkLayer.udpIn;
-        udp.ipIn <-- networkLayer.udpOut;
-
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
-
-        // connections to network outside
-        for i=0..sizeof(radioIn)-1 {
-            radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> networkLayer.ifIn++;
-            wlan[i].uppergateIn <-- networkLayer.ifOut++;
-        }
+    @display("i=device/cellphone");
+    wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");  // use adhoc management
 }

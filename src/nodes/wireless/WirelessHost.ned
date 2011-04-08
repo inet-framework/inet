@@ -17,12 +17,10 @@
 
 package inet.nodes.wireless;
 
-
 import inet.nodes.inet.StandardHost;
 
-
 //
-// Models a host with one wireless (802.11b) card in infrastructure mode.
+// Models a host with one wireless (802.11) card in infrastructure mode.
 // This module is basically a ~StandardHost with an ~Ieee80211NicSTA added.
 // It should be used in conjunction with ~WirelessAP, or any other AP model
 // which contains ~Ieee80211NicAP.
@@ -31,12 +29,8 @@ import inet.nodes.inet.StandardHost;
 // @see ~WirelessHost, ~WirelessHostSimplified
 // @see ~MobileHost, ~MFMobileHost
 //
-// @deprecated: use StandardHost with numRadios=1 instead
-//
 module WirelessHost extends StandardHost
 {
     @display("i=device/wifilaptop");
-    mobilityType = default("NullMobility");
     numRadios = default(1);
 }
-

@@ -16,8 +16,9 @@
 //
 
 
-package inet.nodes.inet;
+package inet.examples.inet.routerperf;
 
+import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWiredNic;

@@ -1,6 +1,66 @@
 Recent changes in the INET Framework
 ====================================
 
+- StandardHost and Router now have a common base (containing Link~ and NetworkLayer)
+  Wireless~ and AdhocHost is derived from StandardHost. All of them (including Router)
+  supports multiple wireless, ethernet, ppp and external interfaces. 
+  (i.e. multiple wireless radios are supported using different channels)
+
+- Several modules - especially inside StandardHost - turned optional. This reduces
+  the memory footprint of the StandardHost as modules are instanciated ONLY if 
+  they are needed by the simulation (i.e. during runtime TCP is present only 
+  if there are TCP Applications configured. Likewise for UDP and SCTP.)
+
+- Router and StandardHost have optional mobility support. The mobility module is created
+  only if there are wireless cards present in the node (numRadios>0). Of course
+  WirelessHost and AdhocHost have mobility by default. You can configure the mobility
+  type using the "mobilityType" parameter. BasicMobility have been renamed to 
+  NullMobility (resulting stationary nodes). There is a dummy mobility type
+  called NoMobility which does not have any C++ implementation. Nodes that 
+  do not need mobility support (i.e. no radios) should set their type to NoMobility.
+
+- FailedRouter has been removed (was a trivial node). BurstHost moved to the examle 
+  directory (it was not generic and was used only by a single example). MobileHost 
+  is removed. Use AdhocHost instead as a drop in replacement.
+
+- NetworkLayer now supports input and output hook modules that implement the IHook 
+  interface. The hook support can be turned on by the **.networkLayer.hookSupport 
+  parameter. You can install hooks by specifying 
+  **.networkLayer.inputHook[*].type-name="DropsGenerator" for example. Likewise 
+  **.networkLayer.outputHook[*].type-name="DuplicatesGenerator" for outbound traffic. 
+  As the name suggest you can do anything here (simulating packed drops, duplication 
+  or measuring thruput).The plugin modules are present only if you specfy
+  **.networkLayer.hookSupport = true
+
+- TCP, UDP and SCTP implementations are now plugable use the tcpType, udpType and
+  sctpType parameters in the host. You must implement ITCP, IUDP and ISCTP interface
+  and the specify the implementing NED type in the parameter. At the moment SCTP
+  and UDP have only a single implementation. TCP has: TCP (the default OMNeT++ IMPL.)
+  TCP_NSC (using network simulation cradle) and TCP_lwip (using the LWIp stack's 
+  implementation)
+
+- AccessPoint is generalized. Supports both (multiple) wireless and ethernet ports.
+  Relaying between ethernet and wireless ports are now supported. RelayUnit is created 
+  only if more than one ports are present on the AccessPoint. i.e. Having a single radio
+  and no ethernet connections will fall back to a single wireless NIC without 
+  relay unit. Having no radio and several ethernet ports connected is practically
+  an ethernet switch.
+
+- Wireless NICs now should implement IWirelessNIC. Now we have only a single Ieee80211Nic 
+  implementation instead of the 5 variants we have previously. Management type 
+  (Adhoc, AccessPoint, Station, AccessPointSimplified and StationSimplified) can 
+  be configured using the mgmtType parameter of the NIC (instead of having separate 
+  NIC types for each.)
+
+- Multiple radios on independent channels are now supported by all nodes. See the
+  wireless/multiradio example.
+
+- The radio infrastucture have been refactored. All radios should now implement
+  the IRadio interface. They are now pluggable. RadioModel can be configured
+  also via a module parameter. attenuationModel parameter moved from the radio
+  to the channelController (it is now global) and renamed to propagationModel.
+  Several new propagation model have been added (see NED file docs).
+
 - Removed the TCPSpoofingHost node. Use instead StandardHost with the tcpType="TCPSpoof" parameter.
 
 - NAMTrace and NAMTraceWriter modules have been moved to the obsolete directory.
