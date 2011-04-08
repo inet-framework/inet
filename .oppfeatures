@@ -522,4 +522,32 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="VOIPTOOL"
+        name="VoIPTool"
+        description = "Voice over IP tool"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       voiptool.applications.voiptool
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_WOIPTOOL"
+        linkerFlags = "-lavcodec -lavformat -lavutil"
+        />
+    <feature
+        id="VOIPTOOL_examples"
+        name="Voice over IP tool"
+        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
+        initiallyEnabled = "true"
+        requires = "VOIPTOOL"
+        labels = "examples"
+        nedPackages = "
+                       voiptool.examples.voiptool
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
