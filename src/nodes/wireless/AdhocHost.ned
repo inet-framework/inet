@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.nodes.adhoc;
+package inet.nodes.wireless;
 
 
 import inet.transport.IUDP;
@@ -48,11 +48,8 @@ module AdhocHost
     @display("i=device/cellphone;bgb=525,394");
     int numTcpApps = default(0);
     int numUdpApps = default(0);
-    // string tcpAppType = default(""); // Obsolete!
-    // string udpAppType = default(""); // Obsolete!
     string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     int numRadios = default(1);
-    string wlanNicType = default("Ieee80211NicAdhoc");
     string routingFile = default("");
     bool IPForward = default(true);
 
@@ -96,8 +93,9 @@ module AdhocHost
             proxyARP = false;
             @display("p=279,247;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             @display("p=279,331,row,90;q=queue");
+            mgmtType = default("Ieee80211MgmtAdhoc");
         }
     connections allowunconnected:
         for i=0..sizeof(tcpApp)-1 {

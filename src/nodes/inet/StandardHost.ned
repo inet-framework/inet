@@ -71,7 +71,6 @@ module StandardHost
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NoMobility");
-        string wlanNicType = default("Ieee80211NicSTA");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -128,9 +127,10 @@ module StandardHost
                 proxyARP = false;
                 @display("p=336,230;q=queue");
         }
-        wlan[numRadios]: <wlanNicType> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=132,390;q=queue");
+                mgmtType = default("Ieee80211MgmtSTA");
         }
         eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
             parameters:

@@ -34,4 +34,6 @@ moduleinterface IIeee80211Mgmt
         output uppergateOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
+        input agentIn;   // optional gates used for the agent in stations
+        output agentOut; // optional gates used for the agent in stations
 }

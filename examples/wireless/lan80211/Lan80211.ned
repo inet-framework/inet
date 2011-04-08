@@ -19,15 +19,10 @@
 package inet.examples.wireless.lan80211;
 
 import inet.world.ChannelControlExtended;
-import inet.nodes.wireless.WirelessHostSimplified;
+import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
-
-module WirelessAPSimplified extends AccessPoint
-{
-    wlanNicType = "Ieee80211NicAPSimplified";
-}
 
 network Lan80211
 {
@@ -36,11 +31,13 @@ network Lan80211
         int playgroundSizeX;
         int playgroundSizeY;
     submodules:
-        host[numHosts]: WirelessHostSimplified {
+        host[numHosts]: WirelessHost {
             @display("r=,,#707070");
+            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
         }
-        ap: WirelessAPSimplified {
+        ap: AccessPoint {
             @display("p=213,174;r=,,#707070");
+            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
         channelcontrol: ChannelControlExtended {
             playgroundSizeX = playgroundSizeX;

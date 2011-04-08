@@ -23,7 +23,7 @@ import inet.world.ChannelControlExtended;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
@@ -51,9 +51,10 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
         }
         mobility: CircleMobility {
             parameters:
@@ -80,9 +81,10 @@ module ThroughputServer
             parameters:
                 @display("p=210,68,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=120,158;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
         }
         mobility: NullMobility {
             parameters:

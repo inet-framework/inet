@@ -21,7 +21,7 @@ package inet.examples.wireless.throughput;
 
 import inet.world.ChannelControl;
 import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
 
@@ -43,9 +43,10 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
         }
         mobility: NullMobility {
             parameters:

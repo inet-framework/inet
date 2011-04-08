@@ -35,6 +35,6 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
         output uppergateOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
-        input agentIn;
-        output agentOut;
+        input agentIn;   // used for attaching an agent algorithm
+        output agentOut; // used for attaching an agent algorithm
 }

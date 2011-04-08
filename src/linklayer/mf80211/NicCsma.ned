@@ -45,7 +45,8 @@ import inet.linklayer.IWirelessNic;
 //
 module NicCsma like IWirelessNic
 {
-    gates:
+		string mgmtType = ""; // unused
+     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames

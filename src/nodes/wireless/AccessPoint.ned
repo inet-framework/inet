@@ -21,13 +21,20 @@ import inet.linklayer.IEtherMAC;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 
-
 //
 // A generic access point supporting multiple wireless radios, and
 // multiple ethernet ports. The type of the ethernet MAC, relay Unit
 // and wireless card can be specified as parameters.
+//
 // By default the access point is stationary (NullMobility), but can be
 // changed also if needed.
+//
+// The wlan[*].mgmtType can be configured for different management types
+// currently it can be: Ieee80211MgmtAPSimplified and Ieee80211MgmtAP.
+// By default it is Ieee80211MgmtAP. The Simplified version does not 
+// support channel scanning, authentication and association . 
+// In this case nodes must explicitly specify the hardware address
+// of the Wlan card they want to be associated with. 
 //
 module AccessPoint
 {
@@ -37,7 +44,7 @@ module AccessPoint
         @display("i=device/accesspoint");
         string mobilityType = default("NullMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
-        string wlanNicType = default("Ieee80211NicAP"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic. Use only the NICs for access points
+        string wlanNicType = default("Ieee80211Nic"); // used wireless interfaces. see:  inet.linklayer.ieee80211 or other modules implementing IWirelessNic. Use only the NICs for access points
         string ethMacType = default("EtherMACFullDuplex"); // used ethernet interfaces. see: IEtherMAC and IEtherMACFullDuplex for simplified, full dupley only mac
         int numRadios = default(1);               // the number of radios in the access point
     gates:
@@ -52,6 +59,7 @@ module AccessPoint
         wlan[numRadios]: <wlanNicType> like IWirelessNic {
             parameters:
                 @display("p=89,225;q=queue");
+                mgmtType = default("Ieee80211MgmtAP");
         }
         eth[sizeof(ethg)]: <ethMacType> like IEtherMAC {
             parameters:

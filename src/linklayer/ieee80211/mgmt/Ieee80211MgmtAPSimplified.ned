@@ -49,4 +49,6 @@ simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
         output uppergateOut; // to ~IMACRelayUnit; can be left unconnected
         input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
+        input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }

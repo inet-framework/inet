@@ -19,26 +19,37 @@
 package inet.linklayer.ieee80211;
 
 import inet.linklayer.ieee80211.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.IWirelessNic;
 
-
 //
 // This NIC implements an 802.11 network interface card.
 // It can be configured via the mgmtType parameter to act
-// as an AP or a STA, or for ad-hoc mode.
+// as an AP or a STA, or for ad-hoc mode. By default it is 
+// configured for a simplified station mode (no channel scanning
+// association, authentication etc.)
+//
+// Potential mgmType values: Ieee80211MgmtSTASimplified, Ieee80211MgmtSTA
+// Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc
 //
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
-        string mgmtType = default(Ieee80211MgmtSTASimplified); // name of the management module type (implements IIeee80211Mgmt)
-        @display("i=block/ifcard");
+        string mgmtType = default("Ieee80211MgmtSTASimplified"); // name of the management module type (implements IIeee80211Mgmt)
+        bool agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
+        @display("i=block/ifcard;bgb=259,320");
     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
+        // optional agent module (can be either 0 or 1 sized vector)
+        agent[agentNeeded ? 1 : 0]: Ieee80211AgentSTA {
+            parameters:
+                @display("p=202,69");
+        }
         mgmt: <mgmtType> like IIeee80211Mgmt {
             parameters:
                 @display("p=96,69;q=wlanDataQueue");
@@ -62,5 +73,8 @@ module Ieee80211Nic like IWirelessNic
 
         mgmt.uppergateOut --> uppergateOut;
         mgmt.uppergateIn <-- uppergateIn;
+        
+        mgmt.agentOut --> agent[0].mgmtIn if agentNeeded;
+        mgmt.agentIn <-- agent[0].mgmtOut if agentNeeded;
 }
 

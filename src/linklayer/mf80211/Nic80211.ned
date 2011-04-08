@@ -38,6 +38,7 @@ module Nic80211 like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");
+        string mgmtType = "";      // unused
     gates:
         input uppergateIn @labels(Ieee802Ctrl); // to upper layers
         output uppergateOut; // from upper layers

@@ -21,7 +21,7 @@
 package inet.examples.wireless.throughput;
 
 import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 
@@ -42,9 +42,10 @@ module WirelessAPWithSink
             parameters:
                 @display("p=169,124");
         }
-        wlan: Ieee80211NicAPSimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=89,225;q=queue");
+                mgmtType = default("Ieee80211MgmtAPSimplified");
         }
         notificationBoard: NotificationBoard {
             parameters:

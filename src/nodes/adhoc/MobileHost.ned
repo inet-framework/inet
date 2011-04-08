@@ -19,6 +19,9 @@ package inet.nodes.adhoc;
 
 
 
+import inet.nodes.wireless.AdhocHost;
+
+
 //
 // Models a mobile host with a wireless (802.11b) card in ad-hoc mode.
 // This model contains the new IEEE 802.11 implementation ~Ieee80211Nic,
