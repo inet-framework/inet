@@ -1,0 +1,15 @@
+### routing table of server connected to OLT
+
+ifconfig:
+
+# ethernet card 0 to ONUs
+name: eth0	inet_addr: 172.0.0.1	MTU: 1500	Metric: 1	BROADCAST MULTICAST
+
+ifconfigend.
+
+route:
+
+#default:	172.0.0.1       0.0.0.0         H   0   eth0
+default:	*	0.0.0.0	H	0	eth0
+
+routeend.

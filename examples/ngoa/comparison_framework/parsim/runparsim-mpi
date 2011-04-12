@@ -1,0 +1,2 @@
+#! /bin/sh
+mpiexec -n 3 ./run -f HybridPon.ini -u Cmdenv -c Parsim_N2 --parsim-communications-class=cMPICommunications -r 0
