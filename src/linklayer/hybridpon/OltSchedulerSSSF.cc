@@ -357,18 +357,19 @@ int OltSchedulerSSSF::scheduleOnuPoll(simtime_t t, HybridPonMessage *msg)
 //------------------------------------------------------------------------------
 // OltSchedulerSSSF::getTxTime --
 //
-//		frame based on the sequential scheduling algorithm.
+//      Calculates the earliest possible transmission time of a PON
+//      frame for a given channel.
 //
 // Arguments:
+//      const int       ch;         // CH index
 //      const bool		isGrant;	// flag for grant
 //		int				&txIdx;		// TX index
 //		int				&rxIdx;		// RX index
 //
 // Results:
-//      Calculates the earliest possible transmission time for given channel and
-//		The earliest possible transmission time is returned.
-//		Also, 'txIdx' and 'rxIdx' (only for a grant) are set to indices
-//		of the earliest available TX and RX, respectively.
+//      The earliest possible transmission time is returned and
+//		'txIdx' and 'rxIdx' (only for a grant) are set to indices of
+//		the earliest available TX and RX, respectively.
 //------------------------------------------------------------------------------
 
 simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
@@ -379,28 +380,24 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 	simtime_t t;
 	simtime_t now = simTime();
 
-	// Update all CH[], TX[], RX[] that are less than the current simulation
+	// Update CH[], TX[], RX[] that are less than the current simulation
 	// time to the current simulation time.
-	for (int i = 0; i < numOnus; i++)
-	{
-		if (CH[i] < now)
-		{
-			CH[i] = now;
-		}
-	}
+    if (CH[ch] < now)
+        CH[ch] = now;
+	// for (int i = 0; i < numOnus; i++)
+	// {
+	// 	if (CH[i] < now)
+	// 		CH[i] = now;
+	// }
 	for (int i = 0; i < numTransmitters; i++)
 	{
 		if (TX[i] < now)
-		{
 			TX[i] = now;
-		}
 	}
 	for (int i = 0; i < numReceivers; i++)
 	{
 		if (RX[i] < now)
-		{
 			RX[i] = now;
-		}
 	}
 
 #ifdef DEBUG_OLT_SCHEDULER_SSF
@@ -413,10 +410,8 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 	txIdx = 0;
 	for (int i = 1; i < numTransmitters; i++)
 	{
-		if (TX[i] <= TX[txIdx])
-		{
+		if (TX[i] < TX[txIdx])
 			txIdx = i;
-		}
 	}
 
 	if (isGrant == true)
@@ -425,27 +420,27 @@ simtime_t OltSchedulerSSSF::getTxTime(const int ch, const bool isGrant,
 		rxIdx = 0;
 		for (int i = 1; i < numReceivers; i++)
 		{
-			if (RX[i] <= RX[rxIdx])
-			{
+			if (RX[i] < RX[rxIdx])
 				rxIdx = i;
-			}
 		}
 
 		// Schedule transmission time 't' as follows:
 		// t = max(receiver is free, transmitter is free, channel is free)
-		t = max(max(RX[rxIdx] + GUARD_TIME - RTT[ch] - DS_GRANT_OVERHEAD_SIZE
-				/ lineRate, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
+		// t = max(max(RX[rxIdx] + GUARD_TIME - RTT[ch] - DS_GRANT_OVERHEAD_SIZE
+		// 		/ lineRate, TX[txIdx] + GUARD_TIME), CH[ch] + GUARD_TIME);
+		t = max(
+            RX[rxIdx]-RTT[ch]-DS_GRANT_OVERHEAD_SIZE/lineRate,
+            max(TX[txIdx], CH[ch])
+            ) + GUARD_TIME;
 	}
 	else
 	{
-		// data frame
-
 		// Schedule transmission time 't' as follows:
 		// t = max(transmitter is free, channel is free)
-		t = max(TX[txIdx] + GUARD_TIME, CH[ch] + GUARD_TIME);
+		t = max(TX[txIdx], CH[ch]) + GUARD_TIME;
 	}
 
-	return t; // Return the calculated transmission time.
+	return t; // Return the earliest transmission time.
 }
 
 //------------------------------------------------------------------------------
