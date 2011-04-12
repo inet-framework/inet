@@ -46,7 +46,7 @@ import inet.linklayer.IWiredNic;
 //
 // @see ~PPPInterface, ~IOutputQueue, ~PPPFrame
 //
-simple PPP like IWiredNic
+simple PPP
 {
     parameters:
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite

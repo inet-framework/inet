@@ -36,7 +36,6 @@ module NetworkLayer
     parameters:
         @display("i=block/fork");
         bool proxyARP = default(true);
-        bool hookSupport = default(false); // whether to allow plugin modules (hooks) to be installed between the physical interfaces and the network layer (drop and duplicate generators etc.). 
     gates:
         input ifIn[] @labels(IPDatagram);
         input tcpIn @labels(TCPSegment,IPControlInfo/down);
@@ -83,14 +82,6 @@ module NetworkLayer
                 @display("p=239,63");
         }
 
-        // a placeholder in the traffic coming from the network interfaces 
-        inputHook[sizeof(ifIn)]: <default("Nop")> like IHook if hookSupport {
-            @display("p=85,254");
-        }
-        // a placeholder if traffic going to the network interfaces
-        outputHook[sizeof(ifOut)]: <default("Nop")> like IHook if hookSupport {
-            @display("p=202,232");
-        }
     connections allowunconnected:
         // transport Layer
         ip.transportOut[0] --> tcpOut;
@@ -121,15 +112,11 @@ module NetworkLayer
 
         ip.queueOut --> arp.ipIn;
 
-        for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> inputHook[i].in if hookSupport ;
-            inputHook[i].out --> ip.queueIn[i] if hookSupport ;
-            ifIn[i] --> ip.queueIn[i] if !hookSupport ;
-        }
-        for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> outputHook[i].in if hookSupport ;
-            outputHook[i].out --> ifOut[i] if hookSupport ;
-            arp.nicOut[i] --> ifOut[i] if !hookSupport ;
-        }
+		for i=0..sizeof(ifIn)-1 {
+        	ifIn[i] --> ip.queueIn[i];
+		}
+		for i=0..sizeof(ifOut)-1 {
+        	arp.nicOut[i] --> ifOut[i];
+		}
 }
 

@@ -16,36 +16,19 @@
 //
 
 
-
-package inet.linklayer.ppp;
-
-import inet.linklayer.IWiredNic;
-
+package inet.networklayer.queue;
 
 //
-// PPP interface. Assumes infinite queue.
+// Empty, pass-through implementation for queue inteface. 
+// Conforms to the ~IOutputQueue interface.
 //
-// @see ~PPPInterface
-//
-module PPPInterfaceNoQueue like IWiredNic
+module NoQueue like IOutputQueue
 {
     parameters:
-        @display("i=block/ifcard");
+        @display("i=block/queue");
     gates:
-        input netwIn;
-        output netwOut;
-        inout phys @labels(PPPFrame);
-    submodules:
-        ppp: PPP {
-            parameters:
-                queueModule = "";
-                txQueueLimit = 100000; // prevents overflow in bogus simulations
-                @display("p=80,80;q=txQueue");
-        }
+        input in;
+        output out;
     connections:
-        netwIn --> { @display("m=n"); } --> ppp.netwIn;
-        netwOut <-- { @display("m=n"); } <-- ppp.netwOut;
-        phys <--> { @display("m=s"); } <--> ppp.phys;
+		in --> out;            
 }
-
-

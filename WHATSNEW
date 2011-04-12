@@ -23,14 +23,31 @@ Recent changes in the INET Framework
   directory (it was not generic and was used only by a single example). MobileHost 
   is removed. Use AdhocHost instead as a drop in replacement.
 
-- NetworkLayer now supports input and output hook modules that implement the IHook 
-  interface. The hook support can be turned on by the **.networkLayer.hookSupport 
-  parameter. You can install hooks by specifying 
-  **.networkLayer.inputHook[*].type-name="DropsGenerator" for example. Likewise 
-  **.networkLayer.outputHook[*].type-name="DuplicatesGenerator" for outbound traffic. 
-  As the name suggest you can do anything here (simulating packed drops, duplication 
-  or measuring thruput).The plugin modules are present only if you specfy
-  **.networkLayer.hookSupport = true
+- Network Interface Cards (Ieee80211Nic, EthernetInterface and PPPInterface)
+  now supports input and output hook modules that implement the IHook 
+  interface. The hook support can be turned on for example by the **.wlan[*].inputHooks=X
+  or **.wlan[*].outputHooks=Y parameter. You can install hooks by specifying 
+  **.wlan[*].inputHook[0].type-name="DropsGenerator". If you specify the number of
+  input hooks, the same amount of module types must be specified. As the name suggest 
+  you can do anything here (simulating packed drops, duplication or measuring thruput).
+
+  Installing two hooks in the input path:
+    **.ppp[*].numInputHooks = 2
+    **.ppp[*].inputHook[0].type-name = "DropsGenerator"
+    **.ppp[*].inputHook[1].type-name = "ThruputMeter"
+
+- Network interfaces can specify a queueType paramater. Possible values:
+  DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
+  To disable queueing use: **.ppp[*].queueType = "NoQueue"
+
+- PPPInterfaceNoQueue and EthernetInterfaceNoQueue removed. Use the 
+  queueType="NoQueue" parameter in the interfaces.
+
+- EthernetInterfaceFullDuplex removed. By default EthernetInterface is using a 
+  simplified mac that does not support CSMA/CD and works only with point-to-point 
+  links. Use the EthernetInterface with halfDuplexSupported parameter set to "true"
+  to turn on the CSMA/CD support.
+
 
 - TCP, UDP and SCTP implementations are now plugable use the tcpType, udpType and
   sctpType parameters in the host. You must implement ITCP, IUDP and ISCTP interface

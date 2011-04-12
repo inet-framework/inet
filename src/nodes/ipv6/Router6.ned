@@ -71,7 +71,7 @@ module Router6
             parameters:
                 @display("p=72,242;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=195,242,row,90;q=txQueue");
         }

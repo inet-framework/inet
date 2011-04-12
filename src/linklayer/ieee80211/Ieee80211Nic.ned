@@ -18,6 +18,7 @@
 
 package inet.linklayer.ieee80211;
 
+import inet.base.IHook;
 import inet.linklayer.ieee80211.radio.Ieee80211Radio;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
@@ -38,30 +39,35 @@ module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
+        int numOutputHooks = default(0);
+        int numInputHooks = default(0);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
-        @display("i=block/ifcard;bgb=259,320");
+        @display("i=block/ifcard;bgb=259,357");
     gates:
         input uppergateIn; // to upper layers
         output uppergateOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
+        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
+        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
+        
         // optional agent module (can be either 0 or 1 sized vector)
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
-                @display("p=202,69");
+                @display("p=202,136");
         }
         mgmt: <mgmtType> like IIeee80211Mgmt {
             parameters:
-                @display("p=96,69;q=wlanDataQueue");
+                @display("p=96,136;q=wlanDataQueue");
         }
         mac: Ieee80211Mac {
             parameters:
                 queueModule = "mgmt";
-                @display("p=96,155");
+                @display("p=96,222");
         }
         radio: Ieee80211Radio {
             parameters:
-                @display("p=96,240");
+                @display("p=96,307");
         }
     connections:
         radioIn --> radio.radioIn;
@@ -71,10 +77,21 @@ module Ieee80211Nic like IWirelessNic
         mac.uppergateOut --> mgmt.macIn;
         mac.uppergateIn <-- mgmt.macOut;
 
-        mgmt.uppergateOut --> uppergateOut;
-        mgmt.uppergateIn <-- uppergateIn;
-        
         mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
         mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
+
+        mgmt.uppergateOut --> uppergateOut if numInputHooks == 0;
+        mgmt.uppergateIn <-- uppergateIn if numOutputHooks == 0;
+
+        mgmt.uppergateOut --> inputHook[0].in if numInputHooks > 0;
+        for i=0..numInputHooks-2 {
+            inputHook[i].out --> inputHook[i+1].in;
+        }
+        inputHook[numInputHooks-1].out --> uppergateOut if numInputHooks > 0;
+        outputHook[0].in <-- uppergateIn if numOutputHooks > 0;
+        for i=0..numOutputHooks-2 {
+            outputHook[i].out --> outputHook[i+1].in;
+        }
+        mgmt.uppergateIn <-- outputHook[numOutputHooks-1].out if numOutputHooks > 0;
 }
 

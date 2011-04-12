@@ -111,7 +111,7 @@ module StandardHost6
             parameters:
                 @display("p=132,390;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=250,390,row,90;q=txQueue");
         }

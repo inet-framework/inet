@@ -85,7 +85,7 @@ module BaseHost
                 @display("p=159,386;q=queue");
                 mgmtType = default("Ieee80211MgmtSTA");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterfaceFullDuplex")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 @display("p=282,386,row,90;q=txQueue");
         }
@@ -97,7 +97,7 @@ module BaseHost
             parameters:
                 @display("p=547,386,row,90;q=txQueue;i=block/ifcard");
         }
-        
+
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(radioIn)-1 {
