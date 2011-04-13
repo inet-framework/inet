@@ -262,7 +262,7 @@ inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPAddress& addr)
+inline void doPacking(cCommBuffer *buf, IPAddress& addr)
 {
     buf->pack(addr.getInt());
 }
