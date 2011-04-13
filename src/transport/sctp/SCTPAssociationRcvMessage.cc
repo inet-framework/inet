@@ -1615,7 +1615,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
     }
     else {
-        if (path->pathErrorCount >= (uint32)sctpMain->par("pathMaxRetrans")) {
+        if (path->pathErrorCount > (uint32)sctpMain->par("pathMaxRetrans")) {
             bool notifyUlp = false;
 
             sctpEV3 << "pathErrorCount exceeded\n";
