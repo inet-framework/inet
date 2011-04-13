@@ -72,7 +72,6 @@
                        inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp
                        inet.nodes.inet
-                       inet.nodes.adhoc
                        inet.nodes.wireless
                       "
         extraSourceFolders = ""
