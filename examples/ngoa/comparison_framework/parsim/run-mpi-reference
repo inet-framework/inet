@@ -1,0 +1,2 @@
+#!/bin/sh
+mpiexec -np 2 opp_run -l ${HOME}/inet-hnrl/src/inet -n ${HOME}/inet-hnrl/examples:${HOME}/inet-hnrl/src --parsim-communications-class=cMPICommunications -u Cmdenv -f Reference.ini -c Parsim_N2 -r 0

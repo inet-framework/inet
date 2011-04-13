@@ -1,0 +1,4 @@
+#!/bin/sh
+#mpiexec --debugger gdb --debug -np 2 ./run --parsim-communications-class=cMPICommunications -u Cmdenv $*
+#mpiexec --debugger gdb --debug -np 2 opp_run -l ${HOME}/inet-hnrl/src/inet -n ${HOME}/inet-hnrl/examples:${HOME}/inet-hnrl/src --parsim-communications-class=cMPICommunications -u Cmdenv -f Reference.ini -c Parsim_N2 -r 0
+mpirun -np 2 urxvt -e gdb opp_run -x Reference.gdb
