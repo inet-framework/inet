@@ -17,14 +17,6 @@
 
 package inet.nodes.inet;
 
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IExtInterface;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IWiredNic;
-import inet.base.mobility.IMobility;
-import inet.base.NotificationBoard;
-
 //
 // \IP router supporting wireless, ethernet, ppp and external interfaces.
 // by default no wireless and external if is configured. The number of
@@ -45,7 +37,7 @@ import inet.base.NotificationBoard;
 // - If wireless card is present, node mobility can be set using **.mobility.type-name
 //   see: inet.mobility and ~IMobility
 //
-module Router extends BaseHost
+module Router extends NodeBase
 {
     parameters:
         @display("i=abstract/router");

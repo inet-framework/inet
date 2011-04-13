@@ -73,14 +73,6 @@ module NetworkLayer6
             parameters:
                 @display("p=239,154");
         }
-        // a placeholder in the traffic coming from the network interfaces 
-        inputHook[sizeof(ifIn)]: <default("Nop")> like IHook {
-            @display("p=84,247");
-        }
-        // a placeholder if traffic going to the network interfaces
-        outputHook[sizeof(ifOut)]: <default("Nop")> like IHook {
-            @display("p=227,247");
-        }
     connections allowunconnected:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer
         ipv6.transportOut[0] --> { @display("m=n"); } --> tcpOut;
@@ -115,12 +107,10 @@ module NetworkLayer6
 
         // IPv6 to L2
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> inputHook[i].in;
-            inputHook[i].out --> ipv6.queueIn[i];
+            ifIn[i] --> { @display("m=s"); } --> ipv6.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            ipv6.queueOut[i] --> outputHook[i].in;
-            outputHook[i].out --> ifOut[i];
+            ipv6.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }
 

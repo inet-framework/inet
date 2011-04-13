@@ -21,13 +21,6 @@ package inet.nodes.inet;
 import inet.transport.IUDP;
 import inet.transport.ITCP;
 import inet.transport.ISCTP;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IExtInterface;
-import inet.base.mobility.IMobility;
-import inet.base.NotificationBoard;
 import inet.applications.pingapp.PingApp;
 import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
@@ -53,7 +46,7 @@ import inet.applications.ISCTPApp;
 // - If wireless card is present, node mobility can be set using **.mobilityType
 //   see: inet.mobility and ~IMobility
 //
-module StandardHost extends BaseHost
+module StandardHost extends NodeBase
 {
     parameters:
         @display("i=device/pc2");
@@ -93,7 +86,7 @@ module StandardHost extends BaseHost
             parameters:
                 @display("p=501,230");
         }
-        
+
     connections allowunconnected:
         for i=0..numTcpApps-1 {
             tcpApp[i].tcpOut --> tcp.appIn++;

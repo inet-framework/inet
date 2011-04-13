@@ -34,7 +34,7 @@ import inet.base.NotificationBoard;
 //       - use this model only as a base type. In simulations use Router, StandardHost,
 //         WirelessHost and AndhocHost
 //
-module BaseHost
+module NodeBase
 {
     parameters:
         @display("bgb=611,448");
@@ -54,32 +54,32 @@ module BaseHost
             parameters:
                 @display("p=53,194");
         }
-        
+
         // optional mobility module. Required only if wireless cards are present
         mobility: <mobilityType> like IMobility if numRadios>0 {
             parameters:
                 @display("p=53,121");
         }
-        
+
         // network layer
         networkLayer: NetworkLayer {
             parameters:
                 @display("p=329,287;q=queue");
         }
-        
+
         routingTable: RoutingTable {
             parameters:
                 @display("p=53,287");
                 IPForward = IPForward;
                 routingFile = routingFile;
         }
-        
+
         // linklayer
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=53,386");
         }
-        
+
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=159,386;q=queue");
