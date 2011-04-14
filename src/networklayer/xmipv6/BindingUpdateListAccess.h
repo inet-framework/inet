@@ -25,8 +25,8 @@
 
 #include "INETDefs.h"
 
-#include "ModuleAccess.h"
 #include "BindingUpdateList.h"
+#include "ModuleAccess.h"
 
 
 /**

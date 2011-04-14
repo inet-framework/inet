@@ -84,7 +84,7 @@ class INET_API BindingCache : public cSimpleModule
     virtual ~BindingCache();
 
   protected:
-    int numInitStages() const  {return 2;}
+    int numInitStages() const {return 2;}
     virtual void initialize(int stage);
 
     /**
@@ -94,26 +94,28 @@ class INET_API BindingCache : public cSimpleModule
 
   public:
     /**
-     * Sets Binding Cache Entry (BCE) with provided values. If BCE does not yet exist, a new one will be created.
+     * Sets Binding Cache Entry (BCE) with provided values.
+     * If BCE does not yet exist, a new one will be created.
      */
-    void addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime, const uint seq, bool homeReg);
+    void addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime,
+            const uint seq, bool homeReg);
 
     /**
      * Returns sequence number of BCE for provided HoA.
      */
-    uint readBCSequenceNumber(const IPv6Address& HoA); // update 10.9.07 - CB
+    uint readBCSequenceNumber(const IPv6Address& HoA) const;
 
     /**
      * Added by CB, 29.08.07
      * Checks whether there is an entry in the BC for the given HoA and CoA
      */
-    bool isInBindingCache(const IPv6Address& HoA, IPv6Address& CoA);
+    bool isInBindingCache(const IPv6Address& HoA, IPv6Address& CoA) const;
 
     /**
      * Added by CB, 4.9.07
      * Checks whether there is an entry in the BC for the given HoA
      */
-    bool isInBindingCache(const IPv6Address& HoA);
+    bool isInBindingCache(const IPv6Address& HoA) const;
 
     /**
      * Added by CB, 4.9.07
@@ -124,13 +126,12 @@ class INET_API BindingCache : public cSimpleModule
     /**
      * Returns the value of the homeRegistration flag for the given HoA.
      */
-    bool getHomeRegistration(const IPv6Address& HoA); // 10.9.07 - CB
+    bool getHomeRegistration(const IPv6Address& HoA) const;
 
     /**
      * Returns the lifetime of the binding for the given HoA.
      */
-    uint getLifetime(const IPv6Address& HoA); // 10.9.07 - CB
-
+    uint getLifetime(const IPv6Address& HoA) const;
 
     /**
      * Generates a home token from the provided parameters.
@@ -144,13 +145,11 @@ class INET_API BindingCache : public cSimpleModule
      */
     virtual int generateCareOfToken(const IPv6Address& CoA, int nonce);
 
-
     /**
      * Generates the key Kbm from home and care-of keygen token.
      * For now, this return the sum of both tokens.
      */
     virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
-
 };
 
 #endif

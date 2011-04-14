@@ -36,8 +36,7 @@
 class INET_API HomeAddressOption : public HomeAddressOption_Base
 {
   public:
-    HomeAddressOption() {};
-    // HomeAddressOption() : HomeAddressOption_Base() {} // FIXME: Why not is it the constructor?
+    HomeAddressOption() : HomeAddressOption_Base() {}
     HomeAddressOption(const HomeAddressOption& other) : HomeAddressOption_Base() {operator=(other);}
     HomeAddressOption& operator=(const HomeAddressOption& other) {HomeAddressOption_Base::operator=(other); return *this;}
 

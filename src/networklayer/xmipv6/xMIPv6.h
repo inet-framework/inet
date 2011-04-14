@@ -102,7 +102,7 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     class TimerIfEntry
     {
-    public:
+      public:
         cMessage* timer; // pointer to the scheduled timer message
         virtual ~TimerIfEntry() {}; // to make it a polymorphic base class
 
@@ -126,8 +126,8 @@ class INET_API xMIPv6 : public cSimpleModule
 
         bool operator<(const Key& b) const
         {
-            if ( type == b.type )
-                return interfaceID==b.interfaceID ? dest<b.dest : interfaceID<b.interfaceID;
+            if (type == b.type)
+                return interfaceID == b.interfaceID ? dest < b.dest : interfaceID < b.interfaceID;
             else
                 return type < b.type;
         }
@@ -148,7 +148,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /** Subclasses for the different timers */
     class BUTransmitIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         uint buSequenceNumber ; // sequence number of the BU sent
         uint lifeTime; // lifetime of the BU sent, 4.9.07 - CB
         //Time variable related to the time at which BU was sent
@@ -159,14 +159,14 @@ class INET_API xMIPv6 : public cSimpleModule
     //##############################Added by Christian, 27.08.07#################################
     class TestInitTransmitIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         MobilityHeader* testInitMsg; // either the HoTI or CoTI
     };
     //##############################End Christian#################################
     //##############################Added by Christian, 27.08.07#################################
     class BRTransmitIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         uint retries; // number of BRRs already sent
     };
     //##############################End Christian#################################
@@ -174,23 +174,22 @@ class INET_API xMIPv6 : public cSimpleModule
     // Added 11.06.08 - CB
     class BULExpiryIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         IPv6Address CoA, HoA; // the CoA and HoA of the MN that were used for this BUL entry
     };
 
     class BCExpiryIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         IPv6Address HoA; // HoA of the MN
     };
 
     class TokenExpiryIfEntry : public TimerIfEntry
     {
-    public:
+      public:
         IPv6Address cnAddr; // CN whose token is expiring
         int tokenType; // KEY_XX indicates whether it is a care-of token, etc.
     };
-
 
   protected:
     /************************Miscellaneous Stuff***************************/
@@ -208,7 +207,8 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * This method finally creates the timer structure and schedules the message for sending.
      */
-    void createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie, const uint lifeTime, bool homeRegistration); // 4.9.07 - CB
+    void createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie, const uint lifeTime,
+            bool homeRegistration); // 4.9.07 - CB
 
     /**
      * Similiar to the previous one, this method creates an BU timer with registration lifetime equal to 0.
@@ -231,12 +231,14 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Method for creating and sending a BU by a MN.
      */
-    void createAndSendBUMessage(const IPv6Address& dest,InterfaceEntry* ie, const uint buSeq, const uint lifeTime, const int bindAuthData = 0);
+    void createAndSendBUMessage(const IPv6Address& dest,InterfaceEntry* ie, const uint buSeq,
+            const uint lifeTime, const int bindAuthData = 0);
 
     /**
      * Update the an entry of the BUL with the provided parameters.
      */
-    void updateBUL(BindingUpdate* bu, const IPv6Address& dest, const IPv6Address& CoA, InterfaceEntry* ie, const simtime_t sendTime); //04.06.07
+    void updateBUL(BindingUpdate* bu, const IPv6Address& dest, const IPv6Address& CoA,
+            InterfaceEntry* ie, const simtime_t sendTime); //04.06.07
 
     /**
      * This method takes an interface and a destination address and returns the appropriate IfEntry for an BU.
@@ -247,7 +249,9 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Append an IPv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the IPv6 Module
      */
-    void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr, const IPv6Address& srcAddr = IPv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1, simtime_t sendTime = 0); // overloaded for use at CN - CB
+    void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
+            const IPv6Address& srcAddr = IPv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
+            simtime_t sendTime = 0); // overloaded for use at CN - CB
     //void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
 
     /**
@@ -310,7 +314,8 @@ class INET_API xMIPv6 : public cSimpleModule
      /** Alain Tigyo, 21.03.2008
       *  The following method is used for triggering RO to a CN.
       */
-    virtual void triggerRouteOptimization(const IPv6Address& destAddress, const IPv6Address& HoA, InterfaceEntry* ie);
+    virtual void triggerRouteOptimization(const IPv6Address& destAddress,
+            const IPv6Address& HoA, InterfaceEntry* ie);
 
   protected:
     /**
@@ -322,7 +327,8 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates and schedules a timer for either a HoTI or a CoTI transmission.
      */
-    void createTestInitTimer(MobilityHeader* testInit, const IPv6Address& dest, InterfaceEntry* ie, simtime_t sendTime = 0); // 27.08.07 - CB
+    void createTestInitTimer(MobilityHeader* testInit, const IPv6Address& dest,
+            InterfaceEntry* ie, simtime_t sendTime = 0); // 27.08.07 - CB
 
     /**
      * If a TestInit timer was fired, this method gets called. The message is sent and the Binding Update List accordingly updated.
@@ -450,7 +456,7 @@ class INET_API xMIPv6 : public cSimpleModule
     void processBRRMessage(BindingRefreshRequest* brr, IPv6ControlInfo* ctrlInfo); // 18.9.07 - CB
 
 
-protected:
+  protected:
 //
 // Helper functions
 //
@@ -508,7 +514,8 @@ protected:
     /**
      * Creates or overwrites a timer for BUL expiry that fires at provided scheduledTime.
      */
-    void createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry* entry, InterfaceEntry* ie, simtime_t scheduledTime);
+    void createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry* entry,
+            InterfaceEntry* ie, simtime_t scheduledTime);
 
     /**
      * Handles the situation of a BUL expiry. Either a BU is sent in advance for renewal or the BUL entry is removed.
@@ -532,14 +539,20 @@ protected:
     /**
      * Creates or overwrites a timer for home keygen token expiry that fires at provided scheduledTime.
      */
-    void createHomeTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry* ie, simtime_t scheduledTime) { createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_HTOKEN_EXP); };
+    void createHomeTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry* ie, simtime_t scheduledTime)
+    {
+        createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_HTOKEN_EXP);
+    }
 
     /**
      * Creates or overwrites a timer for care-of keygen token expiry that fires at provided scheduledTime.
      */
-    void createCareOfTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry* ie, simtime_t scheduledTime) { createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_CTOKEN_EXP); };
+    void createCareOfTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry* ie, simtime_t scheduledTime)
+    {
+        createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_CTOKEN_EXP);
+    }
 
-private:
+  private:
     /**
      * Creates or overwrites a timer for {home, care-of} keygen token expiry that fires at provided scheduledTime.
      * Parameter tokenType is provided as KEY_XTOKEN_EXP
@@ -553,3 +566,4 @@ private:
 };
 
 #endif //__XMIPV6_H__
+

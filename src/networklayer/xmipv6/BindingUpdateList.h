@@ -78,17 +78,21 @@ class INET_API BindingUpdateList : public cSimpleModule
            was last sent to this destination, as needed to implement the rate
            limiting restriction for the return routability procedure. */
         simtime_t sentHoTI, sentCoTI;
+
         /* The state of any retransmissions needed for this return
            routability procedure.  This state includes the time remaining
            until the next retransmission attempt and the current state of the
            exponential back-off mechanism for retransmissions. */
         //simtime_t sendNext; // FIXME huh?
+
         /* Cookie values used in the Home Test Init and Care-of Test Init
            messages. */
         int cookieHoTI, cookieCoTI;
+
         /* Home and care-of keygen tokens received from the correspondent
            node.*/
         int tokenH, tokenC;
+
         /* Home and care-of nonce indices received from the correspondent
            node. */
         // not used
@@ -105,7 +109,6 @@ class INET_API BindingUpdateList : public cSimpleModule
     friend std::ostream& operator<<(std::ostream& os, const BindingUpdateListEntry& bul);
     typedef std::map<IPv6Address,BindingUpdateListEntry> BindingUpdateList6; 
     BindingUpdateList6 bindingUpdateList;
-
 
   public:
     BindingUpdateList();
@@ -124,7 +127,8 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Sets entry in the Binding Update List with provided values. If entry does not yet exist, a new one is created.
      */
-    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);//,const simtime_t& nextBUSentTime );
+    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa,
+           const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);//,const simtime_t& nextBUSentTime );
 
     /**
      * Creates a new entry in the BUL for the provided address.
@@ -140,7 +144,8 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Sets HoTI and/or CoTI values (transmission time, etc.) for the BUL entry.
      */
-    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa, simtime_t sentTime, int cookie, bool isHoTI); // BU for HoTI/CoTI
+    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa,
+            simtime_t sentTime, int cookie, bool isHoTI); // BU for HoTI/CoTI
 
     /**
      * Returns the BUL entry for a certain destination address.
@@ -148,11 +153,10 @@ class INET_API BindingUpdateList : public cSimpleModule
     virtual BindingUpdateList::BindingUpdateListEntry* lookup(const IPv6Address& dest); // checks whether BU exists for given address on provided interface
 
     /**
-     * Similiar to lookup(), but with the difference that this method always returns a valid BUL entry. If none existed prior
-     * to the call, a new entry is created.
+     * Similiar to lookup(), but with the difference that this method always returns
+     * a valid BUL entry. If none existed prior to the call, a new entry is created.
      */
     virtual BindingUpdateList::BindingUpdateListEntry* fetch(const IPv6Address& dest); // checks whether BU exists for given address on provided interface
-
 
     //
     // The following methods are related to RR stuff.
@@ -161,19 +165,17 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Returns the current mobility state for the CN identified by the provided IP address.
      */
-    virtual MobilityState getMobilityState(const IPv6Address& dest);
+    virtual MobilityState getMobilityState(const IPv6Address& dest) const;
 
     /**
      * Sets the mobility state to provided state for the CN identified by the provided IP address.
      */
     virtual void setMobilityState(const IPv6Address& dest, BindingUpdateList::MobilityState state);
 
-
     /**
      * Generates the Binding Authorization Data based on a certain destination address and CoA.
      */
     virtual int generateBAuthData(const IPv6Address& dest, const IPv6Address& CoA);
-
 
     /**
      * Generates the key Kbm from home and care-of keygen token.
@@ -181,13 +183,11 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
 
-
     /**
      * Generates a home token from the provided parameters.
      * Returns a static value for now.
      */
     virtual int generateHomeToken(const IPv6Address& HoA, int nonce);
-
 
     /**
      * Generates a care-of token from the provided paramters.
@@ -195,30 +195,25 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual int generateCareOfToken(const IPv6Address& CoA, int nonce);
 
-
     /**
      * Resets the token to UNDEFINED.
      */
     virtual void resetHomeToken(const IPv6Address& dest, const IPv6Address& hoa);
-
 
     /**
      * Resets the token to UNDEFINED.
      */
     virtual void resetCareOfToken(const IPv6Address& dest, const IPv6Address& hoa);
 
-
     /**
      * Returns true if a home keygen token is available.
      */
     virtual bool isHomeTokenAvailable(const IPv6Address& dest, InterfaceEntry* ie);
 
-
     /**
      * Returns true if a care-of keygen token is available.
      */
     virtual bool isCareOfTokenAvailable(const IPv6Address& dest, InterfaceEntry* ie);
-
 
     //
     // Additional methods
@@ -228,20 +223,17 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Checks whether there exists an entry in the BUL for the given
      * destination address.
      */
-    virtual bool isInBindingUpdateList(const IPv6Address& dest); // 10.9.07 - CB
-
+    virtual bool isInBindingUpdateList(const IPv6Address& dest) const; // 10.9.07 - CB
 
     /**
      * Returns the last used sequence number for the given dest. address.
      */
     virtual uint getSequenceNumber(const IPv6Address& dest); // 10.9.07 - CB
 
-
     /**
      * Returns the CoA that was registered for the provided dest. address.
      */
     virtual const IPv6Address& getCoA(const IPv6Address& dest); // 24.9.07 - CB
-
 
     /**
      * Checks whether there exists an entry in the BUL for the given
@@ -249,19 +241,16 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual bool isInBindingUpdateList(const IPv6Address& dest, const IPv6Address& HoA); // 20.9.07 - CB
 
-
     /**
      * Returns true if a binding has been acknowledged and it's lifetime
      * has not yet expired.
      */
     virtual bool isValidBinding(const IPv6Address& dest);
 
-
     /**
      * Returns true if a binding is about to expire.
      */
     virtual bool isBindingAboutToExpire(const IPv6Address& dest);
-
 
     /**
      * Returns true if a binding update has been sent to and acknowledged by
@@ -269,13 +258,11 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual bool sentBindingUpdate(const IPv6Address& dest);
 
-
     /**
      * Deletes an entry from the binding update list for the provided
      * destination address.
      */
     virtual void removeBinding(const IPv6Address& dest);
-
 
     /**
      * Sets the state of the binding cache entry to "not usable".
@@ -283,14 +270,12 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual void suspendBinding(const IPv6Address& dest);
 
-
     /**
      * These two methods indicate whether a CoTI or HoTI message
      * has been recently sent to the CN identified by parameter dest.
      */
     virtual bool recentlySentCOTI(const IPv6Address& dest, InterfaceEntry* ie);
     virtual bool recentlySentHOTI(const IPv6Address& dest, InterfaceEntry* ie);
-
 
   protected:
     /**

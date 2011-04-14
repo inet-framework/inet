@@ -24,19 +24,19 @@
 #include <set>
 #include <map>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv6Address.h"
-#include "IPv6Datagram.h"
 #include "IPv6NDMessage_m.h"
-#include "IPv6ControlInfo.h"
-#include "InterfaceEntry.h"
 #include "IPv6NeighbourCache.h"
 
 
 //Forward declarations:
 class ICMPv6;
 class IInterfaceTable;
+class InterfaceEntry;
+class IPv6ControlInfo;
+class IPv6Datagram;
 class RoutingTable6;
 
 #ifdef WITH_xMIPv6

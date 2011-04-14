@@ -92,12 +92,12 @@ void IPv6::endService(cPacket *msg)
     // 28.09.07 - CB
     // support for rescheduling datagrams which are supposed to be sent over
     // a tentative address.
-    if ( msg->isSelfMessage() )
+    if (msg->isSelfMessage())
     {
         ScheduledDatagram* sDgram = check_and_cast<ScheduledDatagram*>(msg);
 
         // take care of datagram which was supposed to be sent over a tentative address
-        if ( sDgram->ie->ipv6Data()->isTentativeAddress(sDgram->datagram->getSrcAddress()) )
+        if (sDgram->ie->ipv6Data()->isTentativeAddress(sDgram->datagram->getSrcAddress()))
         {
             // address is still tentative - enqueue again
             queue.insert(sDgram);
@@ -217,7 +217,7 @@ FIXME implement fragmentation here.
     EV << "fragmentation not implemented yet\n";
 
     // route packet
-    if (destIE!=NULL)
+    if (destIE != NULL)
         sendDatagramToOutput(datagram, destIE, MACAddress::BROADCAST_ADDRESS); // FIXME what MAC address to use?
     else if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, destIE, true);
@@ -240,8 +240,10 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     if (rt->isLocalAddress(destAddress))
     {
         EV << "local delivery\n";
+
         if (datagram->getSrcAddress().isUnspecified())
             datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+
         numLocalDeliver++;
         localDeliver(datagram);
         return;
@@ -317,15 +319,15 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 
     // tunneling support - CB
     // check if destination is covered by tunnel lists
-    if ( (datagram->getTransportProtocol() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
-         (datagram->getExtensionHeaderArraySize() == 0 ) && // we do not already have extension headers - FIXME: check for RH2 existence
-          ( (rt->isMobileNode() && rt->isHomeAddress( datagram->getSrcAddress() ) ) || // for MNs: only if source address is a HoA // 27.08.07 - CB
+    if ((datagram->getTransportProtocol() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
+         (datagram->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME: check for RH2 existence
+          ((rt->isMobileNode() && rt->isHomeAddress( datagram->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
              rt->isHomeAgent() || // but always check for tunnel if node is a HA
              !rt->isMobileNode() // or if it is a correspondent or non-MIP node
           )
         )
     {
-        if ( datagram->getTransportProtocol() == IP_PROT_IPv6EXT_MOB )
+        if (datagram->getTransportProtocol() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
             // as T2RH or HoA Opt. are not allowed with these messages
             interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL); // 10.06.08 - CB
@@ -337,7 +339,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     //else
         //interfaceId = -1;
 
-    if ( interfaceId > ift->getNumInterfaces() )
+    if (interfaceId > ift->getNumInterfaces())
     {
         // a virtual tunnel interface provides a path to the destination: do tunneling
         EV << "tunneling: src addr=" << datagram->getSrcAddress() << ", dest addr=" << destAddress << std::endl;
@@ -364,11 +366,12 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 #endif /* WITH_xMIPv6 */
 
 #ifdef WITH_xMIPv6
-     if ( rt->isMobileNode() )
+     if (rt->isMobileNode())
      {
           // if the source address is the HoA and we have a CoA then drop the packet
           // (address is topologically incorrect!)
-         if ( datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress() && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified() )
+         if (datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
+                 && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
          {
               EV << "Using HoA instead of CoA... dropping datagram" << endl;
              delete datagram;
@@ -397,7 +400,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 #ifdef WITH_xMIPv6
         // if the datagram has a tentative address as source we have to reschedule it
         // as it can not be sent before the address' tentative status is cleared - CB
-        if ( ie->ipv6Data()->isTentativeAddress(srcAddr) )
+        if (ie->ipv6Data()->isTentativeAddress(srcAddr))
         {
             EV << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram* sDgram = new ScheduledDatagram();
@@ -424,7 +427,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     numMulticast++;
 
     // if received from the network...
-    if (fromIE!=NULL)
+    if (fromIE != NULL)
     {
         // deliver locally
         if (rt->isLocalAddress(destAddr))
@@ -459,10 +462,10 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
     EV << "sending out datagram on every interface (except incoming one)\n";
-    for (int i=0; i<ift->getNumInterfaces(); i++)
+    for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (fromIE!=ie)
+        if (fromIE != ie)
             sendDatagramToOutput((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS);
     }
     delete datagram;
@@ -566,14 +569,17 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         EV << "This fragment completes the datagram.\n";
     }
 */
+
 #ifdef WITH_xMIPv6
     // #### 29.08.07 - CB
     // check for extension headers
-    if ( ! processExtensionHeaders(datagram) )
+    if (!processExtensionHeaders(datagram))
+    {
         // ext. header processing not yet finished
         // datagram was sent to another module or dropped
         // -> interrupt local delivery process
         return;
+    }
     // #### end CB
 #endif /* WITH_xMIPv6 */
 
@@ -581,17 +587,17 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     int protocol = datagram->getTransportProtocol();
     cPacket *packet = decapsulate(datagram);
 
-    if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
+    if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
     {
         EV << "Neigbour Discovery packet: passing it to ND module\n";
         send(packet, "ndOut");
     }
 #ifdef WITH_xMIPv6
-    else if (protocol==IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader*>(packet))
+    else if (protocol == IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader*>(packet))
     {
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
-        if ( rt->hasMIPv6Support() )
+        if (rt->hasMIPv6Support())
         {
             EV << "MIPv6 packet: passing it to xMIPv6 module\n";
             send(check_and_cast<MobilityHeader*>(packet), "xMIPv6Out");
@@ -610,12 +616,12 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         }
     }
 #endif /* WITH_xMIPv6 */
-    else if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message*>(packet))
+    else if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message*>(packet))
     {
         EV << "ICMPv6 packet: passing it to ICMPv6 module\n";
         send(packet, "icmpOut");
     }//Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
-    else if (protocol==IP_PROT_IP || protocol==IP_PROT_IPv6)
+    else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6)
     {
         EV << "Tunnelled IP datagram\n";
 
@@ -637,7 +643,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 #else /* WITH_xMIPv6 */
         // 21.9.07 - CB
         cGate* outGate = gate("transportOut", gateindex);
-        if (! outGate->isConnected() )
+        if (!outGate->isConnected())
         {
             EV << "Transport layer gate not connected - dropping packet!\n";
             delete packet;
@@ -786,13 +792,14 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
 }
 
 #ifdef WITH_xMIPv6
-bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId, IPv6Datagram* datagram)
+bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
+                                    int& interfaceId, IPv6Datagram* datagram)
 {
     // try destination cache
     //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
     nextHop = rt->lookupDestCache(destAddress, interfaceId);
 
-    if (interfaceId==-1)
+    if (interfaceId == -1)
     {
         // address not in destination cache: do longest prefix match in routing table
         EV << "do longest prefix match in routing table" << endl;
@@ -835,14 +842,14 @@ bool IPv6::processExtensionHeaders(IPv6Datagram* datagram)
     {
         IPv6ExtensionHeader* eh = datagram->removeFirstExtensionHeader();
 
-        if ( dynamic_cast<IPv6RoutingHeader*>(eh) )
+        if (dynamic_cast<IPv6RoutingHeader*>(eh))
         {
             IPv6RoutingHeader* rh = (IPv6RoutingHeader*) (eh);
             EV << "Routing Header with type=" << rh->getRoutingType() << endl;
 
             // type 2 routing header should be processed by MIPv6 module
             // if no MIP support, ignore the header
-            if ( rt->hasMIPv6Support() && rh->getRoutingType() == 2 )
+            if (rt->hasMIPv6Support() && rh->getRoutingType() == 2)
             {
                 // for simplicity, we set a context pointer on the datagram
                 datagram->setContextPointer(rh);
@@ -856,12 +863,12 @@ bool IPv6::processExtensionHeaders(IPv6Datagram* datagram)
                 EV << "Ignoring unknown routing header" << endl;
             }
         }
-        else if ( dynamic_cast<IPv6DestinationOptionsHeader*>(eh) )
+        else if (dynamic_cast<IPv6DestinationOptionsHeader*>(eh))
         {
             //IPv6DestinationOptionsHeader* doh = (IPv6DestinationOptionsHeader*) (eh);
             //EV << "object of type=" << typeid(eh).name() << endl;
 
-            if ( rt->hasMIPv6Support() && dynamic_cast<HomeAddressOption*>(eh) )
+            if (rt->hasMIPv6Support() && dynamic_cast<HomeAddressOption*>(eh))
             {
                 datagram->setContextPointer(eh);
                 EV << "Sending datagram with HoA Option to MIPv6 module" << endl;
