@@ -18,11 +18,17 @@
 
 
 #include <algorithm>
+
 #include "opp_utils.h"
+
 #include "RoutingTable6.h"
+
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
 
+#ifdef WITH_xMIPv6
+#include "IPv6TunnelingAccess.h"
+#endif /* WITH_xMIPv6 */
 
 Define_Module(RoutingTable6);
 
@@ -97,6 +103,17 @@ void RoutingTable6::initialize(int stage)
         isrouter = par("isRouter");
         WATCH(isrouter);
 
+#ifdef WITH_xMIPv6
+        // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
+        ishome_agent = false;
+        WATCH(ishome_agent);
+
+        ismobile_node = false;
+        WATCH(ismobile_node);
+
+        mipv6Support = false; // 4.9.07 - CB
+#endif /* WITH_xMIPv6 */
+
         // add IPv6InterfaceData to interfaces
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
@@ -164,6 +181,11 @@ void RoutingTable6::parseXMLConfigFile()
 
                 configureInterfaceFromXML(ie, ifTag);
             }
+
+#ifdef WITH_xMIPv6
+            else if (opp_strcmp(ifTag->getTagName(),"tunnel")==0)
+                configureTunnelFromXML(ifTag);
+#endif /* WITH_xMIPv6 */
         }
     }
 }
@@ -247,8 +269,14 @@ void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
         return;
     }
     //o  Its required Link-Local Address for each interface.
+
+#ifndef WITH_xMIPv6
     //IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->getInterfaceToken());
     //ie->ipv6Data()->assignAddress(linkLocalAddr, true, 0, 0);
+#else /* WITH_xMIPv6 */
+    IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->getInterfaceToken());
+    ie->ipv6Data()->assignAddress(linkLocalAddr, true, 0, 0);
+#endif /* WITH_xMIPv6 */
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
     for the node's interfaces (manually or automatically).*/
@@ -356,6 +384,36 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
         d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), 0, 0);  // set up with infinite lifetimes
     }
 }
+
+#ifdef WITH_xMIPv6
+void RoutingTable6::configureTunnelFromXML(cXMLElement* cfg)
+{
+    IPv6Tunneling* tunneling = IPv6TunnelingAccess().get();
+
+    // parse basic config (attributes)
+    cXMLElementList tunnelList = cfg->getElementsByTagName("tunnelEntry");
+    for (unsigned int i=0; i<tunnelList.size(); i++)
+    {
+        cXMLElement *node = tunnelList[i];
+
+        IPv6Address entry, exit, trigger;
+        entry.set( getRequiredAttr(node, "entryPoint") );
+        exit.set( getRequiredAttr(node, "exitPoint") );
+
+        cXMLElementList triggerList = node->getElementsByTagName("triggers");
+
+        if (triggerList.size() != 1)
+            opp_error("element <%s> at %s: Only exactly one trigger allowed",
+                    node->getTagName(), node->getSourceLocation());
+
+        cXMLElement *triggerNode = triggerList[0];
+        trigger.set( getRequiredAttr(triggerNode, "destination") );
+
+        EV << "New tunnel: " << "entry=" << entry << ",exit=" << exit << ",trigger=" << trigger << endl;
+        tunneling->createTunnel(IPv6Tunneling::NORMAL, entry, exit, trigger);
+    }
+}
+#endif /* WITH_xMIPv6 */
 
 InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
 {
@@ -612,6 +670,10 @@ void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifI
     route->setNextHop(nextHop);
     route->setMetric(10);//FIXME:should be filled from interface metric
 
+#ifdef WITH_xMIPv6
+    route->setExpiryTime(routerLifetime); // lifetime useful after transitioning to new AR // 27.07.08 - CB
+#endif /* WITH_xMIPv6 */
+
     // then add it
     addRoute(route);
 }
@@ -669,4 +731,123 @@ IPv6Route *RoutingTable6::getRoute(int i)
     ASSERT(i>=0 && i<(int)routeList.size());
     return routeList[i];
 }
+
+#ifdef WITH_xMIPv6
+//#####Added by Zarrar Yousaf##################################################################
+
+const IPv6Address& RoutingTable6::getDestinationAddress()
+{
+    DestCache::iterator it;
+    for (it = destCache.begin(); it != destCache.end(); ++it)
+        return it -> first;
+
+    return IPv6Address::UNSPECIFIED_ADDRESS; // in case we do not find anything - CB
+}
+
+const IPv6Address& RoutingTable6::getHomeAddress()
+{
+    for (int i=0; i<ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+
+        return ie->ipv6Data()->getMNHomeAddress();
+    }
+
+    return IPv6Address::UNSPECIFIED_ADDRESS;
+}
+
+// Added by CB
+bool RoutingTable6::isHomeAddress(const IPv6Address& addr)
+{
+    // check all interfaces whether they have the
+    // provided address as HoA
+    for (int i=0; i<ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if ( ie->ipv6Data()->getMNHomeAddress() == addr )
+            return true;
+    }
+
+    return false;
+}
+
+// Added by CB
+void RoutingTable6::removeDefaultRoutes(int interfaceID)
+{
+    EV << "/// Removing default route for interface=" << interfaceID << endl;
+
+    for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
+    {
+        // default routes have prefix length 0
+        if ( (((*it)->getInterfaceId()) == interfaceID) && ((*it)->getPrefixLength() == 0)  )
+            it = routeList.erase(it);
+        else
+            ++it;
+    }
+
+    updateDisplayString();
+}
+
+// Added by CB
+void RoutingTable6::removeAllRoutes()
+{
+    EV << "/// Removing all routes from rt6 " << endl;
+
+    for (unsigned int i=0; i<routeList.size(); i++)
+        delete routeList[i];
+
+    routeList.clear();
+
+    updateDisplayString();
+}
+
+// 4.9.07 - Added by CB
+void RoutingTable6::removePrefixes(int interfaceID)
+{
+    for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
+    {
+        // "real" prefixes have a length of larger then 0
+        if ( (((*it)->getInterfaceId()) == interfaceID) && ((*it)->getPrefixLength() > 0)  )
+            it = routeList.erase(it);
+        else
+            ++it;
+    }
+
+    updateDisplayString();
+}
+
+void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
+{
+    for (DestCache::iterator it=destCache.begin(); it!=destCache.end(); )
+    {
+        if (it->second.interfaceId==interfaceId)
+        {
+            // move the iterator past this element before removing it
+            //DestCache::iterator oldIt = it++;
+            //destCache.erase(oldIt);
+            destCache.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    updateDisplayString();
+}
+
+bool RoutingTable6::isOnLinkAddress(const IPv6Address& address)
+{
+    for (int j = 0; j < ift->getNumInterfaces(); j++)
+    {
+        InterfaceEntry *ie = ift->getInterface(j);
+
+        for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
+            if ( address.matches( ie->ipv6Data()->getAdvPrefix(i).prefix,  ie->ipv6Data()->getAdvPrefix(i).prefixLength) )
+                return true;
+    }
+
+    return false;
+}
+#endif /* WITH_xMIPv6 */
 

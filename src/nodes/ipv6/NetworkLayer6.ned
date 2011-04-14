@@ -23,7 +23,10 @@ import inet.networklayer.ipv6.IPv6ErrorHandling;
 import inet.networklayer.ipv6.IPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 import inet.networklayer.icmpv6.ICMPv6;
+import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.IIPv6Tunneling;
 import inet.base.IHook;
+
 
 //
 // Represents an IPv6 network layer (L3).
@@ -34,6 +37,7 @@ import inet.base.IHook;
 module NetworkLayer6
 {
     parameters:
+        bool xMIPv6Support = default(false);
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(IPv6Datagram);
@@ -90,6 +94,12 @@ module NetworkLayer6
         ipv6.transportOut[4] --> { @display("m=n"); } --> sctpOut;
         ipv6.transportIn[4] <-- { @display("m=n"); } <-- sctpIn;
 
+        // IPv6 to IPv6 Tunneling
+        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
+        iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
+        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
+        iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
+
         // IPv6 to ICMPv6
         ipv6.icmpOut --> icmpv6.ipv6In;
         ipv6.icmpIn <-- icmpv6.ipv6Out;
@@ -104,6 +114,10 @@ module NetworkLayer6
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;
         ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
+
+        //IPv6 to Mobile IPv6
+        ipv6.xMIPv6Out --> mipv6support.fromIPv6;
+        ipv6.xMIPv6In <-- mipv6support.toIPv6;
 
         // IPv6 to L2
         for i=0..sizeof(ifIn)-1 {
