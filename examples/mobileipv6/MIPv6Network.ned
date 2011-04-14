@@ -27,6 +27,7 @@ import inet.world.ChannelControlExtended;
 import inet.nodes.xmipv6.WirelessHost6;
 import inet.nodes.xmipv6.HomeAgent6;
 import inet.nodes.xmipv6.CorrespondentNode6;
+import inet.nodes.wireless.AccessPoint;
 import inet.nodes.ipv6.Router6;
 import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 import inet.linklayer.ethernet.EtherHub;
@@ -84,11 +85,11 @@ network mIPv6Network
                 @display("p=220,404");
         }
         CN[total_cn]: CorrespondentNode6;
-        AP_Home: WirelessAPWithEth {
+        AP_Home: AccessPoint {
             parameters:
                 @display("p=249,172;i=device/accesspoint_s");
         }
-        AP_1: WirelessAPWithEth {
+        AP_1: AccessPoint {
             parameters:
                 @display("p=566,172;i=device/accesspoint_s");
         }

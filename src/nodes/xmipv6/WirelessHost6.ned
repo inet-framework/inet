@@ -30,9 +30,9 @@ import inet.nodes.ipv6.StandardHost6;
 // added. It should be used in conjunction with WirelessAPSimplified,
 // or any other AP model which contains Ieee80211NicAPSimplified.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see AccessPoint
+// @see WirelessHost
+// @see AdhocHost
 //
 module WirelessHost6 extends StandardHost6
 {
