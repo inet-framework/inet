@@ -21,18 +21,8 @@
  */
 
 
-//#include "IPv6Datagram.h"
-//#include "IPv6ExtensionHeaders_m.h"
 #include "MobilityHeader.h"
 
 
 Register_Class(HomeAddressOption);
 
-/*
-HomeAddressOption& HomeAddressOption::operator=(const HomeAddressOption& other)
-{
-    HomeAddressOption_Base::operator=(other);
-
-    return *this;
-}
-*/

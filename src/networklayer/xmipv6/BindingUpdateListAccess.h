@@ -23,7 +23,8 @@
 #ifndef __BINDING_UPDATE_LIST_H__
 #define __BINDING_UPDATE_LIST_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "BindingUpdateList.h"
 
@@ -38,5 +39,4 @@ class INET_API BindingUpdateListAccess : public ModuleAccess<BindingUpdateList>
 };
 
 #endif
-
 

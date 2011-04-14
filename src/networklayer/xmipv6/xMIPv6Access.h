@@ -24,7 +24,8 @@
 #ifndef __XMIPV6ACCESS_H__
 #define __XMIPV6ACCESS_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "xMIPv6.h"
 

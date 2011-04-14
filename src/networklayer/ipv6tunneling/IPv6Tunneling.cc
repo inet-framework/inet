@@ -35,18 +35,17 @@
 //  - 8.: Tunnel Error Reporting and Processing
 
 
-#include <omnetpp.h>
-#include <stdlib.h>
-#include <string.h>
 #include "IPv6Tunneling.h"
+
+#include "InterfaceTableAccess.h"
+#include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
-#include "IPv6ControlInfo.h"
 #include "MobilityHeader_m.h" // for HA Option header
+#include "RoutingTable6Access.h"
 #include "xMIPv6Access.h"
 
 #include <algorithm>
-#include <utility>
 
 
 Define_Module(IPv6Tunneling);
@@ -135,8 +134,10 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType, const IPv6Address& entry,
         // default values: 5.
         // 6.4
         tunnels[vIfIndexTop].trafficClass = 0;
+
         // 6.5
         tunnels[vIfIndexTop].flowLabel = 0;
+
         // 6.3
         // The tunnel hop limit default value for hosts is the IPv6 Neighbor
         // Discovery advertised hop limit [ND-Spec].
@@ -144,6 +145,7 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType, const IPv6Address& entry,
             tunnels[vIfIndexTop].hopLimit = IPv6__INET_DEFAULT_ROUTER_HOPLIMIT;
         else
             tunnels[vIfIndexTop].hopLimit = 255;
+
         // 6.7
         // TODO perform path MTU on link (interface resolved via exit address)
         tunnels[vIfIndexTop].tunnelMTU = IPv6_MIN_MTU - 40;
@@ -173,8 +175,10 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType, const IPv6Address& entry,
 int IPv6Tunneling::findTunnel(const IPv6Address& src, const IPv6Address& dest, const IPv6Address& destTrigger) const
 {
     TI it = find_if( tunnels.begin(), tunnels.end(), bind1st( equalTunnel(), std::make_pair( (int) 0, Tunnel(src, dest, destTrigger) ) ) );
+
     if (it != tunnels.end())
         return it->first;
+
     return 0;
 }
 
@@ -515,10 +519,11 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
          && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB) )
     {
         EV << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;
-        xMIPv6* mipv6 = NULL;
-        mipv6 = xMIPv6Access().getIfExists();
+
+        xMIPv6* mipv6 = xMIPv6Access().getIfExists();
         if (!mipv6)
             return;
+
         mipv6->triggerRouteOptimization( dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
     }
 }
@@ -530,7 +535,7 @@ int IPv6Tunneling::lookupTunnels(const IPv6Address& dest)
     // we search here for tunnels which have a destination trigger and
     // check whether the trigger is equal to the destination
     // only split tunnels or mobility paths are possible entry points
-    for (Tunnels::iterator it=tunnels.begin(); it!=tunnels.end(); it++)
+    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++)
     {
         if ( (it->second.tunnelType != NON_SPLIT) && (it->second.destTrigger == dest) )
         {
@@ -548,7 +553,7 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
     // we'll just stop at the first match, because it is assumed that not
     // more than a single non-split tunnel is possible
-    for (Tunnels::iterator it=tunnels.begin(); it!=tunnels.end(); it++)
+    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++)
     {
         if ( it->second.tunnelType == NON_SPLIT )
         {
@@ -562,7 +567,7 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
 bool IPv6Tunneling::isTunnelExit(const IPv6Address& exit)
 {
-    for (Tunnels::iterator it=tunnels.begin(); it!=tunnels.end(); it++)
+    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++)
     {
         // mobility "tunnels" are not relevant for decapsulation
         // 17.10.07 - same for Home Address Option
@@ -599,15 +604,19 @@ std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun)
         case IPv6Tunneling::SPLIT:
             os << "split tunnel";
             break;
+
         case IPv6Tunneling::NON_SPLIT:
             os << "non-split tunnel";
             break;
+
         case IPv6Tunneling::T2RH:
             os << "T2RH path";
             break;
+
         case IPv6Tunneling::HA_OPT:
             os << "Home Address Option path";
             break;
+
         default:
             opp_error("Not a valid type for an existing tunnel!");
             break;

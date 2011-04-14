@@ -36,7 +36,7 @@
 #include "ICMPv6Message_m.h"
 
 #ifdef WITH_xMIPv6
-#include "MobilityHeader_m.h"
+#include "MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
 
 #include "IPv6ExtensionHeaders.h"

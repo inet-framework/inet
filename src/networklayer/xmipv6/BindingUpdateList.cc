@@ -21,9 +21,8 @@
  */
 
 
-#include <algorithm>
-#include "opp_utils.h"
 #include "BindingUpdateList.h"
+
 #include "IPv6InterfaceData.h"
 
 // secret key used in RR by CN

@@ -41,7 +41,7 @@ module LDP_LSR
         string peers;
         string routerId = default("auto");
         string routingFile = default("");
-        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TCP_lwip","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
@@ -79,7 +79,7 @@ module LDP_LSR
             parameters:
                 @display("p=177,145");
         }
-        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
+        udp: <default(firstAvailable("UDP","UDP_None"))> like IUDP {
             parameters:
                 @display("p=267,145");
         }
@@ -135,6 +135,4 @@ module LDP_LSR
             mpls.netwIn[i] <-- networkLayer.ifOut[i];
         }
 }
-
-
 

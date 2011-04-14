@@ -24,8 +24,8 @@
 #ifndef _IPv6MOBILITYHEADERS_H_
 #define _IPv6MOBILITYHEADERS_H_
 
-#include <list>
 #include "INETDefs.h"
+
 #include "MobilityHeader_m.h"
 
 
@@ -37,11 +37,10 @@ class INET_API HomeAddressOption : public HomeAddressOption_Base
 {
   public:
     HomeAddressOption() {};
+    // HomeAddressOption() : HomeAddressOption_Base() {} // FIXME: Why not is it the constructor?
     HomeAddressOption(const HomeAddressOption& other) : HomeAddressOption_Base() {operator=(other);}
-    //HomeAddressOption& operator=(const HomeAddressOption& other);
     HomeAddressOption& operator=(const HomeAddressOption& other) {HomeAddressOption_Base::operator=(other); return *this;}
 
     virtual HomeAddressOption *dup() const {return new HomeAddressOption(*this);}
 };
-
 #endif

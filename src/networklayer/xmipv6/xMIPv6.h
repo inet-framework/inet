@@ -26,22 +26,23 @@
 #include <vector>
 #include <map>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv6Address.h"
-#include "IPv6Datagram.h"
-#include "IPv6ControlInfo.h"
-#include "InterfaceEntry.h"
-#include "RoutingTable6.h"
-#include "IPv6NeighbourDiscovery.h"
-//###### ADDITIONAL HEADERS ADDED BY ZARRAR YOUSAF @ CNI, UNI Dortmund on 23.05.07 ######
-#include "MobilityHeader.h"
 #include "BindingUpdateList.h"
-#include "BindingCache.h"
-// Added by CB
 #include "IPv6Tunneling.h"
-// 14.01.08 - CB
-#include "NotificationBoard.h"
+#include "MobilityHeader.h" // for HAOpt & RH2
+
+// Foreign declarations:
+class BindingCache;
+class BindingUpdate;
+class InterfaceEntry;
+class IPv6ControlInfo;
+class IPv6Datagram;
+class IPv6NeighbourDiscovery;
+class IPv6Tunneling;
+class RoutingTable6;
+class NotificationBoard;
 
 // 13.9.07
 // Keys for timer list (=message type)

@@ -25,10 +25,13 @@
 #include <algorithm>
 
 #include "BindingCacheAccess.h"
+#include "BindingUpdateList.h"
 #include "BindingUpdateListAccess.h"
+#include "InterfaceTableAccess.h"
 #include "IPv6InterfaceData.h"
 #include "IPv6NeighbourDiscoveryAccess.h"
 #include "IPv6TunnelingAccess.h"
+#include "RoutingTable6Access.h"
 
 
 #define MK_SEND_PERIODIC_BU            1

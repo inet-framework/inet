@@ -19,7 +19,7 @@
 #define OPP_UTILS_H
 
 #include <string>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 

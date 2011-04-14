@@ -21,10 +21,7 @@
  */
 
 
-#include <algorithm>
-#include "opp_utils.h"
 #include "BindingCache.h"
-#include "IPv6InterfaceData.h"
 
 
 Define_Module(BindingCache);

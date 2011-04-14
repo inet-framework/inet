@@ -24,14 +24,12 @@
 #define __BINDINGUPDATELIST_H__
 
 
-#include <vector>
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPv6Address.h"
-#include "InterfaceTable.h"
-//added by zarrar on 12.06.07
-#include "MobilityHeader_m.h"
 
+#include "IPv6Address.h"
+
+// Foreign declarations:
+class InterfaceEntry;
 
 // used for the RR tokens
 #define UNDEFINED_TOKEN             0

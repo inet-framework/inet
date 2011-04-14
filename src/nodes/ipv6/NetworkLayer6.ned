@@ -75,7 +75,15 @@ module NetworkLayer6
         }
         neighbourDiscovery: IPv6NeighbourDiscovery {
             parameters:
-                @display("p=239,154");
+                @display("p=257,149");
+        }
+        iptunneling: <default(firstAvailable("IPv6Tunneling","IPv6Tunneling_None"))> like IIPv6Tunneling {
+            parameters:
+                @display("p=44,168");
+        }
+        mipv6support: <default(xMIPv6Support?"xMIPv6Support":"xMIPv6Support_None")> like IxMIPv6Support {
+            parameters:
+                @display("p=44,79");
         }
     connections allowunconnected:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer

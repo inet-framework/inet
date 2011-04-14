@@ -20,9 +20,10 @@
 #ifndef __IPv6_TUNNELING_ACCESS_H__
 #define __IPv6_TUNNELING_ACCESS_H__
 
-#include <omnetpp.h>
-#include "ModuleAccess.h"
+#include "INETDefs.h"
+
 #include "IPv6Tunneling.h"
+#include "ModuleAccess.h"
 
 
 /**

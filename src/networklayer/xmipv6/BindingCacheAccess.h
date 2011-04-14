@@ -23,7 +23,8 @@
 #ifndef __BINDING_CACHE_H__
 #define __BINDING_CACHE_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "BindingCache.h"
 
@@ -38,5 +39,4 @@ class INET_API BindingCacheAccess : public ModuleAccess<BindingCache>
 };
 
 #endif
-
 

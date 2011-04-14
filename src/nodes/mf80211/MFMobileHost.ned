@@ -52,7 +52,7 @@ module MFMobileHost
         bool IPForward = default(false);
         string routingFile = default("");
         string mobilityType = default("NullMobility");
-        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TCP_lwip","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
         @display("i=device/pocketpc_s");
     gates:
         input radioIn @directIn;
@@ -84,7 +84,7 @@ module MFMobileHost
             parameters:
                 @display("p=272,67");
         }
-        udp: <default(haveClass("UDP")?"UDP":"UDP_None")> like IUDP {
+        udp: <default(firstAvailable("UDP","UDP_None"))> like IUDP {
             parameters:
                 @display("p=272,154");
         }

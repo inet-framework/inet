@@ -23,13 +23,10 @@
 #ifndef __BINDINGCACHE_H__
 #define __BINDINGCACHE_H__
 
-#include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "IPv6Address.h"
-#include "InterfaceTable.h"
-//added by zarrar on 12.06.07
-#include "MobilityHeader_m.h"
 
 
 // these token must be equal to those in the BindingUpdateList file!
