@@ -44,7 +44,7 @@ module StandardHost6 extends NodeBase6
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
         IPForward = default(false);  // disable routing by default
-        xml routingTableFile;  //# TODO a reasonable default should be provided
+        routingTableFile;  //# TODO a reasonable default should be provided
     submodules:
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
