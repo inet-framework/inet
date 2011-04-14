@@ -21,7 +21,7 @@
 package inet.examples.mobileipv6;
 
 import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAP;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.linklayer.ethernet.EtherMAC;
 import inet.linklayer.IMACRelayUnit;
 import inet.base.NotificationBoard;
@@ -54,8 +54,9 @@ module WirelessAPWithEth
                 lowerLayerIn[sizeof(ethg)+1];
                 lowerLayerOut[sizeof(ethg)+1];
         }
-        wlan: Ieee80211NicAP { // see also Ieee80211NicAPSimplified
+        wlan: Ieee80211Nic { // see also Ieee80211NicAPSimplified
             parameters:
+                mgmtType = default("Ieee80211MgmtAP");
                 @display("p=89,225;q=queue");
         }
         eth[sizeof(ethg)]: EtherMAC {

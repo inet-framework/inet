@@ -26,7 +26,7 @@ import inet.nodes.ipv6.NetworkLayer6;
 import inet.networklayer.ipv6.RoutingTable6;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.ppp.PPPInterface;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
@@ -113,8 +113,9 @@ module SimpleWirelessHost6
             parameters:
                 @display("p=287,350,row,90;q=txQueue;i=block/ifcard");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
+                mgmtType = "Ieee80211MgmtSTASimplified";
                 @display("p=111,350;q=queue;i=block/ifcard");
         }
         mobility: <mobilityType> like IMobility {
