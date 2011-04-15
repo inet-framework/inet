@@ -43,7 +43,7 @@ module NodeBase6
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         string mobilityType = default("NullMobility");
-        string routingFile = default("");
+        xml routingTableFile;
         bool IPForward = default(true);
     gates:
         input radioIn[numRadios] @directIn;
@@ -71,7 +71,7 @@ module NodeBase6
             parameters:
                 @display("p=53,287");
                 isRouter = IPForward;
-                routingTableFile = routingFile;
+                routingTableFile = routingTableFile;
         }
 
         // linklayer
