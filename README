@@ -1,8 +1,3 @@
-xMIPv6 additions for OMNEST/OMNeT++ 4.0
-=======================================
-further info: http://www.kn.e-technik.tu-dortmund.de/content/view/232/lang,de/
-
-
 INET Framework for OMNEST/OMNeT++ 4.0
 =====================================
 
@@ -147,4 +142,10 @@ Bottom-up:
    performance/          performance tests for Ethernet, TCP, UDP, ieee80211 protocols
 
  3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
+
+
+xMIPv6 additions for INET Framework
+=======================================
+further info: http://www.kn.e-technik.tu-dortmund.de/content/view/232/lang,de/
+
 
