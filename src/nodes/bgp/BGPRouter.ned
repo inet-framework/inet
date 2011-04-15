@@ -18,93 +18,31 @@
 package inet.nodes.bgp;
 
 import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
+import inet.nodes.ospfv2.OSPFRouter;
 import inet.networklayer.bgpv4.BGPRouting;
-import inet.linklayer.IWiredNic;
-import inet.base.NotificationBoard;
 
 
 //
 // IP router with BGPv4 and OSPFv4 support.
 //
-module BGPRouter
+module BGPRouter extends OSPFRouter
 {
     parameters:
-        @node();
-        @labels(node,ethernet-node);
-        @display("i=abstract/router;bgb=266,369");
-        string routingFile = default("");
         string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,44;i=block/control_s");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=52,108;i=block/table_s");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = true;
-                routerId = "auto";
-                routingFile = routingFile;
-                @display("p=52,172;i=block/table2_s");
-        }
-        ospf: OSPFRouting {
-            parameters:
-                @display("p=225,191,row;i=block/network2");
-        }
         bgp: BGPRouting {
             parameters:
-                @display("p=211,44;i=block/network");
+                @display("p=239,33;i=block/network");
         }
         tcp: <tcpType> like ITCP {
             parameters:
-                @display("p=147,116;i=block/transport");
-        }
-        networkLayer: NetworkLayer {
-            parameters:
-                proxyARP = true;
-                @display("p=126,191;i=block/layer;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterfaceNoQueue")> like IWiredNic {
-            parameters:
-                @display("p=76,305,row,110;q=l2queue;i=block/ifcard");
-        }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
-            parameters:
-                @display("p=186,305,row,110;q=l2queue");
+                @display("p=161,72;i=block/transport");
         }
     connections allowunconnected:
-        bgp.toTCP --> tcp.appIn++;
-        bgp.fromTCP <-- tcp.appOut++;
+        bgp.tcpOut --> tcp.appIn++;
+        bgp.tcpIn <-- tcp.appOut++;
 
         tcp.ipOut --> networkLayer.tcpIn;
         tcp.ipIn <-- networkLayer.tcpOut;
-
-        ospf.ipOut --> networkLayer.ospfIn;
-        ospf.ipIn <-- networkLayer.ospfOut;
-
-        // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
-        }
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
-        }
 }
 

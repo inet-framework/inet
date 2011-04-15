@@ -17,6 +17,9 @@
 
 package inet.networklayer.bgpv4;
 
+import inet.applications.ITCPApp;
+
+
 //
 // Implements BGP Version 4.
 // TODO config file!
@@ -48,15 +51,15 @@ package inet.networklayer.bgpv4;
 //
 // @author Helene Lageber
 //
-simple BGPRouting
+simple BGPRouting like ITCPApp
 {
     parameters:
         @display("i=block/network2");
         string bgpConfigFile;
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
     gates:
-        input fromTCP;
-        output toTCP;
+        input tcpIn;
+        output tcpOut;
 }
 
 

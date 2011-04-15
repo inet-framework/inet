@@ -24,7 +24,6 @@ import inet.networklayer.ospfv2.OSPFRouting;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.bgpv4.BGPRouting;
-import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
 
@@ -58,7 +57,7 @@ module BGPRouter
         }
         ospf: OSPFRouting {
             parameters:
-                @display("p=252,188,row;i=block/network2");
+                @display("p=235,284,row;i=block/network2");
         }
         bgp: BGPRouting {
             parameters:
@@ -84,7 +83,7 @@ module BGPRouter
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
-        ppp[sizeof(pppg)]: <default("PPPInterfaceNoQueue")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
         }
@@ -93,8 +92,8 @@ module BGPRouter
                 @display("p=196,369,row,110;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
-        bgp.toTCP --> { @display("m=s"); } --> snifferOut.in;
-        bgp.fromTCP <-- { @display("m=s"); } <-- snifferIn.out;
+        bgp.tcpOut --> { @display("m=s"); } --> snifferOut.in;
+        bgp.tcpIn <-- { @display("m=s"); } <-- snifferIn.out;
 
         snifferOut.out --> { @display("m=s"); } --> tcp.appIn++;
         snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut++;

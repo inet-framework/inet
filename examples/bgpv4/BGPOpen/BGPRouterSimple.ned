@@ -80,13 +80,13 @@ module BGPRouterSimple
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: <default("PPPInterfaceNoQueue")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
-        bgp.toTCP --> { @display("m=s"); } --> snifferOut.in;
-        bgp.fromTCP <-- { @display("m=s"); } <-- snifferIn.out;
+        bgp.tcpOut --> { @display("m=s"); } --> snifferOut.in;
+        bgp.tcpIn <-- { @display("m=s"); } <-- snifferIn.out;
 
         snifferOut.out --> { @display("m=s"); } --> tcp.appIn++;
         snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut++;
