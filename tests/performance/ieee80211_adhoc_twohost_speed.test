@@ -7,13 +7,19 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.world.ChannelControl;
+import inet.world.ChannelControlExtended;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+
+module Ieee80211NicAdhoc extends Ieee80211Nic
+{
+    parameters:
+        mgmtType = "Ieee80211MgmtAdhoc";
+}
 
 module ThroughputClient
 {
@@ -106,7 +112,7 @@ network Throughput
                 wlan.mac.address = "20:00:00:00:00:0"+string(index);
                 @display("p=350,350;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelcontrol: ChannelControlExtended {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;

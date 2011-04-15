@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 channel C extends DatarateChannel

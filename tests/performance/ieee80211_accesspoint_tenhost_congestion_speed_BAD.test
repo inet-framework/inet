@@ -7,14 +7,26 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.world.ChannelControl;
-import inet.nodes.wireless.WirelessAPSimplified;
+import inet.world.ChannelControlExtended;
+import inet.nodes.wireless.AccessPoint;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+
+module Ieee80211NicSTASimplified extends Ieee80211Nic
+{
+    parameters:
+        mgmtType = "Ieee80211MgmtSTASimplified";
+}
+
+module WirelessAPSimplified extends AccessPoint
+{
+    parameters:
+        wlan[0].mgmtType = "Ieee80211MgmtAPSimplified";
+}
 
 module ThroughputClient
 {
@@ -111,7 +123,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelcontrol: ChannelControlExtended {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;
@@ -153,7 +165,7 @@ sim-time-limit = 100s
 *.channelcontrol.alpha = 2
 
 # access point
-**.ap.wlan.mac.address = "10:00:00:00:00:00"
+**.ap.wlan*.mac.address = "10:00:00:00:00:00"
 **.mgmt.accessPointAddress = "10:00:00:00:00:00"
 **.mgmt.frameCapacity = 100
 
