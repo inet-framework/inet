@@ -57,17 +57,20 @@ Directories of INET framework source are arranged roughly along the OSI layers.
 Bottom-up:
 
  src/
-   networkinterfaces/    L2 (data link layer) protocols
+   linklayer/            L2 (data link layer) protocols
      contract/           API to common L2 functionality
      ethernet/           Ethernet model (MAC, LLC, Encap)
      etherswitch/        Ethernet switch (relay unit) model
      ppp/                basic PPP model (framing only)
-     mfcore/             Core modules from the Mobility Framework (modified)
+     radio/              //TODO
+     ieee80211/          ieee 802.11 interface //TODO
      mf80211/            MF's 802.11b ad-hoc mode model (modified)
      ext/                External interface
 
-   network/              L3 (network layer) protocols
+   networklayer/         L3 (network layer) protocols
+     common/             InterfaceTable, InterfaceEntry modules //TODO
      contract/           API to common L3 functionality
+     extras/             FailureManager, Dummy //TODO
      autorouting/        autoconfiguration of static routes
      arp/                ARP protocol
      queue/              router queues (QoS, RED, etc)
@@ -78,6 +81,9 @@ Bottom-up:
      ldp/                LDP signalling protocol for MPLS
      rsvp_te/            RSVP-TE signalling protocol for MPLS (will be replaced soon)
      scenario/           specific for RSVP-TE (will be replaced soon)
+     bgpv4/              BGP V4 protocol (see BGPv4 feature) //TODO
+     ospfv2/             OSPF protocol //TODO
+     ted/                Traffic Engineering Database //TODO
 
    transport/            transport layer protocols
      contract/           API to transport layer functionality
@@ -94,13 +100,20 @@ Bottom-up:
      generic/            traffic generators (directly for IP)
      ethernet/           traffic generators (directly for Ethernet)
      pingapp/            ping application
+     rtpapp/             RTP application
+     sctpapp/            SCTP applications
 
-   world/                scenario manager, MF channel manager
+   world/                scenario manager, MF channel manager //TODO is here the MF ch.m.?
 
    nodes/                protocol stacks, host and router models
      inet/               IP-based components
      ipv6/               IPv6-based components
      mpls/               router models with MPLS/LDP/RSVP-TE
+     bgp/                IPv4 router with BGP and OSPF support
+     ethernet/           //TODO
+     mf80211/            host for mf80211
+     ospfv2/             an OSPFv2 router node
+     wireless/           nodes for wireless simulations
 
    base/                 common header files, base classes
    util/                 utility classes
@@ -116,6 +129,7 @@ Bottom-up:
    wireless/             IEEE 802.11 examples
    mpls/                 example networks for MPLS/LDP/RSVP-TE
    ospfv2/               OSPF examples
+   bgpv4                 BGP examples
 
  doc/                    documentation
 
@@ -124,6 +138,8 @@ Bottom-up:
    ipv6/                 for IPv6 components
    mpls/                 for the MPLS models
    newtcp/               for the TCP model
+   dlltest/              //TODO
+   performance/          performance tests for Ethernet, TCP, UDP, ieee80211 protocols
 
  3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
 
