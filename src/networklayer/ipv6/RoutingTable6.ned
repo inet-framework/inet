@@ -29,7 +29,7 @@ package inet.networklayer.ipv6;
 simple RoutingTable6
 {
     parameters:
-        xml routingTableFile;
+        xml routingTable = default(xml("<routingTable/>"));
         bool isRouter;
         @display("i=block/table");
 }

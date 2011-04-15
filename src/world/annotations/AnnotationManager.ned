@@ -27,7 +27,7 @@ simple AnnotationManager
     parameters:
         bool debug = default(false);  // emit debug messages?
         volatile bool draw = default(false);  // draw annotations?
-        xml annotations = default(emptyxmldoc("annotations")); // annotations to add at startup
+        xml annotations = default(xml("<annotations/>")); // annotations to add at startup
         @display("i=msg/paperclip");
         @labels(node);
 }

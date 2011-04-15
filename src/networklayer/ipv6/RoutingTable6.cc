@@ -136,7 +136,7 @@ void RoutingTable6::parseXMLConfigFile()
 {
     // TODO to be revised by Andras
     // configure interfaces from XML config file
-    cXMLElement *config = par("routingTableFile");
+    cXMLElement *config = par("routingTable");
     for (cXMLElement *child=config->getFirstChild(); child; child = child->getNextSibling())
     {
         //std::cout << "configuring interfaces from XML file." << endl;

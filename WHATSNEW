@@ -1,6 +1,14 @@
 Recent changes in the INET Framework
 ====================================
 
+- Added a new Ieee802.11 model, merged back from  the INETMANET fork. It supports
+  Ieee802.11 a,b,g,e,p protocols.
+
+- renamed routingTableFile to rountingTable in RoutingTable6. Added default parameter
+  value. You no longer need to specify **.routingTableFile = xmldoc("empty.xml") and
+  and copy an empty.xml file into the model directory. OMNeT++ 4.2 supports the 
+  xml("<inlinexml/>") syntax so we use that for the default value.
+
 - StandardHost and Router now have a common base (containing Link~ and NetworkLayer)
   Wireless~ and AdhocHost is derived from StandardHost. All of them (including Router)
   supports multiple wireless, ethernet, ppp and external interfaces. 

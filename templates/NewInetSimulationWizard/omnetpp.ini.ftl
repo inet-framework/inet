@@ -155,7 +155,6 @@ tkenv-plugin-path = ../../../etc/plugins
 
 <#if ipv6Layer> 
 # ip settings
-**.routingTableFile = xmldoc("empty.xml")
 
 # Ethernet NIC configuration
 **.eth[*].queueType = "DropTailQueue" # in routers

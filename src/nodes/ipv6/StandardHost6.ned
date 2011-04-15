@@ -34,8 +34,6 @@ import inet.applications.ISCTPApp;
 module StandardHost6 extends NodeBase6
 {
     parameters:
-        @node();
-        @labels(node,ethernet-node,wireless-node);
         @display("i=device/pc2");
         int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].type-name="TCPEchoApp" syntax 
         int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].type-name="UDPVideoStreamCli" syntax
@@ -44,7 +42,6 @@ module StandardHost6 extends NodeBase6
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
         IPForward = default(false);  // disable routing by default
-        routingTableFile;  //# TODO a reasonable default should be provided
     submodules:
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
