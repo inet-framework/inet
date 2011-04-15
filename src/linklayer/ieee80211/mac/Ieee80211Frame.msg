@@ -46,15 +46,21 @@ enum Ieee80211FrameType
     ST_DISASSOCIATION = 0x0a;
     ST_AUTHENTICATION = 0x0b;
     ST_DEAUTHENTICATION = 0x0c;
+    ST_NOACKACTION = 0x0e;
 
     // control (CFEND/CFEND_CFACK omitted):
     ST_PSPOLL = 0x1a;
     ST_RTS = 0x1b;
     ST_CTS = 0x1c;
     ST_ACK = 0x1d;
+    ST_BLOCKACK_REQ = 0x18;
+    ST_BLOCKACK     = 0x19;
 
     // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
+    //Feedback frame for multicast tramsmission
+    ST_LBMS_REQUEST = 0x30;
+    ST_LBMS_REPORT = 0x31;
 }
 
 //
@@ -76,6 +82,7 @@ packet Ieee80211Frame
     simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
     MACAddress receiverAddress; // aka address1
+    simtime_t MACArrive;
 }
 
 //
@@ -156,5 +163,81 @@ packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 //
 packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
 {
+    short Category;
+    //short action enum(WirelessNetworkManagementAction); // action
 }
 
+//
+// Format of the 802.11 LBMS frame
+//
+
+struct LBMSRequestElement
+{
+
+        MACAddress multicastAddress;
+        bool MulticastACKPolicy;
+        short RetryLimit;
+}
+
+packet Ieee80211LBMSRequest extends Ieee80211DataOrMgmtFrame
+{
+
+        type = ST_LBMS_REQUEST;
+        LBMSRequestElement element;
+}
+
+struct LBMSReportElement
+{
+
+        MACAddress multicastGroupAddress;
+        bool leader;
+}
+
+packet Ieee80211LBMSReport extends Ieee80211DataOrMgmtFrame
+{
+
+        type = ST_LBMS_REPORT;
+        LBMSReportElement element[];
+        double packetLoss;
+        double snr;
+}
+
+packet Ieee80211MeshFrame extends Ieee80211DataFrame
+{
+    type = ST_DATA;
+    byteLength = 38;
+    short TTL = 15; // Is used by experimental 80211 mesh protocol
+    long seqNumber;
+    MACAddress finalAddress; //virtual address used by anycast procedure
+                             // contain the initial address and avoid the necessity of search the IP address
+                             
+    // this fiels are used by fragmentation over ethernet, not necesasry, it's possible to use the fields un the Ieee80211 frame 
+    bool isFragment=false;
+    unsigned long realLength=0;
+      
+}
+
+packet Ieee80211BlockAckFrameReq extends Ieee80211TwoAddressFrame
+{
+    @customize(true);
+    type = ST_BLOCKACK_REQ;
+    byteLength = 24;
+    bool barAckPolicy;
+    bool multiTid;
+    bool compressed;
+    unsigned short tidInfo; //Block Acknowledgment request
+    unsigned short fragNumber=0;
+    unsigned short startingSequence;
+}
+
+packet Ieee80211BlockAckFrame extends Ieee80211TwoAddressFrame
+{
+    @customize(true);
+    type = ST_BLOCKACK;
+    byteLength = 152;
+    bool baAckPolicy;
+    bool multiTid;
+    bool compressed;
+    unsigned short tidInfo;
+    unsigned short startingSequence;
+}
