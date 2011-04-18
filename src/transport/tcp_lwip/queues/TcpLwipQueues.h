@@ -19,12 +19,11 @@
 #ifndef __INET_TCPLWIP_QUEUES_H
 #define __INET_TCPLWIP_QUEUES_H
 
-#include <omnetpp.h>
-//#include "TCPConnection.h"
-#include "TCPSegment.h"
+#include "INETDefs.h"
 
 // forward declarations:
 class TcpLwipConnection;
+class TCPSegment;
 
 /**
  * Abstract base class for TCP_LWIP send queues. In fact a single object

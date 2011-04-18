@@ -151,7 +151,8 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;
-    TCPSegment * pCurTcpSegM;
+    TCPSegment *pCurTcpSegM;
 };
 
 #endif
+

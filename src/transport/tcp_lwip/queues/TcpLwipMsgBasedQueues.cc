@@ -17,13 +17,10 @@
 //
 
 
-#include <omnetpp.h>
-
 #include "TcpLwipMsgBasedQueues.h"
 
 #include "TCPCommand_m.h"
 #include "TcpLwipConnection.h"
-#include "TCPSegment.h"
 #include "TCPSerializer.h"
 #include "TCP_lwip.h"
 
@@ -125,12 +122,14 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     if (numBytes && !seqLE(toSeq, endM))
         throw cRuntimeError("Implementation bug");
 
-    EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
+    EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq
+       << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
 #ifdef DEBUG_LWIP
     for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
     {
-        EV << "  buffered msg: endseq=" << i->endSequenceNo << ", length=" << i->msg->getByteLength() << endl;
+        EV << "  buffered msg: endseq=" << i->endSequenceNo
+           << ", length=" << i->msg->getByteLength() << endl;
     }
 #endif
 
@@ -235,7 +234,7 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
     ASSERT(bufferP);
     ASSERT(seqLE(tcpsegP->getSequenceNo(), seqNoP));
     uint32 lastSeqNo = seqNoP + bufferLengthP;
-    ASSERT(seqGE(tcpsegP->getSequenceNo()+tcpsegP->getPayloadLength(), lastSeqNo));
+    ASSERT(seqGE(tcpsegP->getSequenceNo() + tcpsegP->getPayloadLength(), lastSeqNo));
 
     cPacket *msg;
     uint32 endSeqNo;

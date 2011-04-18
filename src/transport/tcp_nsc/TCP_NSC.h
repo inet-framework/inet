@@ -22,19 +22,17 @@
 #define __TCP_NSC_H
 
 #include <map>
-#include <list>
-#include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
-#include "TCPCommand_m.h"
 
 #include <sim_interface.h> // NSC. We need this here to derive from classes
 
+#include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 #include "TCP_NSC_Connection.h"
 
 // forward declarations:
+class TCPCommand;
 class TCPSegment;
 class TCP_NSC_SendQueue;
 class TCP_NSC_ReceiveQueue;

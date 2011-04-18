@@ -17,8 +17,6 @@
 //
 
 
-#include <omnetpp.h>
-
 #include "TcpLwipDataStreamQueues.h"
 
 #include "ByteArrayMessage.h"
@@ -60,7 +58,8 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const
+unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(
+        void* bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -93,7 +92,7 @@ TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
             "tcpseg",
             tcpseg->getSynBit() ? " SYN":"",
             tcpseg->getFinBit() ? " FIN":"",
-            (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+            (tcpseg->getAckBit() && 0 == numBytes) ? " ACK":"",
             (unsigned long)numBytes,
             tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);

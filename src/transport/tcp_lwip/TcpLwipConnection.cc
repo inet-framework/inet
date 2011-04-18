@@ -325,7 +325,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
 
 void TcpLwipConnection::do_SEND()
 {
-    char buffer[8*536];
+    char buffer[8 * 536];
     int bytes;
     int allsent = 0;
 
@@ -341,7 +341,7 @@ void TcpLwipConnection::do_SEND()
         else
         {
             tcpEV << "TCP_lwip connection: " << connIdM << ": Error do sending, err is "
-                    << sent << endl;
+                  << sent << endl;
             break;
         }
     }

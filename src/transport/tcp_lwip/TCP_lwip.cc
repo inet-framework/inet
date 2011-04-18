@@ -329,8 +329,8 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     if (p == NULL)
     {
         // Received FIN:
-        tcpEV << this << ": tcp_event_recv(" << conn.connIdM <<
-                ", pbuf[NULL], " << (int)err << "):FIN\n";
+        tcpEV << this << ": tcp_event_recv(" << conn.connIdM
+              << ", pbuf[NULL], " << (int)err << "):FIN\n";
         conn.sendIndicationToApp((conn.pcbM->state == LwipTcpLayer::TIME_WAIT)
                 ? TCP_I_CLOSED : TCP_I_PEER_CLOSED);
         // TODO is it good?
@@ -339,8 +339,8 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     else
     {
         tcpEV << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", "
-                << p->tot_len << "], " << (int)err << ")\n";
-        conn.receiveQueueM->enqueueTcpLayerData(p->payload,p->tot_len);
+              << p->tot_len << "], " << (int)err << ")\n";
+        conn.receiveQueueM->enqueueTcpLayerData(p->payload, p->tot_len);
         pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
         pbuf_free(p);
     }
@@ -501,13 +501,13 @@ void TCP_lwip::updateDisplayString()
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t", 0, "");
         return;
     }
 
-    int numINIT=0, numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
-        numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
-        numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
+    int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
+        numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
+        numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
     for (TcpAppConnMap::iterator i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); ++i)
     {
@@ -540,20 +540,20 @@ void TCP_lwip::updateDisplayString()
 
     char buf2[200];
     buf2[0] = '\0';
-    if (numINIT>0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
-    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
-    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
-    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
-    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
-    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2),"estab:%d ", numESTABLISHED);
-    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
-    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
-    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
-    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
-    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
-    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+    if (numINIT > 0)        sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
+    if (numCLOSED > 0)      sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN > 0)      sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT > 0)    sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD > 0)    sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED > 0) sprintf(buf2+strlen(buf2), "estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT > 0)  sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK > 0)    sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1 > 0)  sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2 > 0)  sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING > 0)     sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT > 0)   sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
 
-    getDisplayString().setTagArg("t",0,buf2);
+    getDisplayString().setTagArg("t", 0, buf2);
 }
 
 TcpLwipConnection *TCP_lwip::findAppConn(int connIdP)
@@ -593,8 +593,8 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
 
     ASSERT(tcpseg);
 
-    tcpEV << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP <<
-            " from " << srcP << " to " << destP << "\n";
+    tcpEV << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
+          << " from " << srcP << " to " << destP << "\n";
 
     const char* output = "";
 
@@ -647,13 +647,33 @@ void TCP_lwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
 
     switch (msgP->getKind())
     {
-        case TCP_C_OPEN_ACTIVE: process_OPEN_ACTIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP); break;
-        case TCP_C_OPEN_PASSIVE: process_OPEN_PASSIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP); break;
-        case TCP_C_SEND: process_SEND(connP, check_and_cast<TCPSendCommand *>(tcpCommand), check_and_cast<cPacket*>(msgP)); break;
-        case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
-        case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
-        case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
-        default: throw cRuntimeError("wrong command from app: %d", msgP->getKind());
+        case TCP_C_OPEN_ACTIVE:
+            process_OPEN_ACTIVE(connP, check_and_cast<TCPOpenCommand *> (tcpCommand), msgP);
+            break;
+
+        case TCP_C_OPEN_PASSIVE:
+            process_OPEN_PASSIVE(connP, check_and_cast<TCPOpenCommand *> (tcpCommand), msgP);
+            break;
+
+        case TCP_C_SEND:
+            process_SEND(connP, check_and_cast<TCPSendCommand *> (tcpCommand),
+                    check_and_cast<cPacket*> (msgP));
+            break;
+
+        case TCP_C_CLOSE:
+            process_CLOSE(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_ABORT:
+            process_ABORT(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_STATUS:
+            process_STATUS(connP, tcpCommand, msgP);
+            break;
+
+        default:
+            throw cRuntimeError("wrong command from app: %d", msgP->getKind());
     }
 }
 
@@ -665,8 +685,8 @@ void TCP_lwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
         throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
     tcpEV << this << ": OPEN: "
-        << tcpCommandP->getLocalAddr() << ":" << tcpCommandP->getLocalPort() << " --> "
-        << tcpCommandP->getRemoteAddr() << ":" << tcpCommandP->getRemotePort() << "\n";
+          << tcpCommandP->getLocalAddr() << ":" << tcpCommandP->getLocalPort() << " --> "
+          << tcpCommandP->getRemoteAddr() << ":" << tcpCommandP->getRemotePort() << "\n";
 
     ASSERT(pLwipTcpLayerM);
 

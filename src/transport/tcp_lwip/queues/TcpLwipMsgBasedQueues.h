@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 #include "TcpLwipQueues.h"
+#include "TCPSegment.h"
 
 
 /**

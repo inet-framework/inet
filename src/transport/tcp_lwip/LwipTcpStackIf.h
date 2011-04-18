@@ -19,9 +19,7 @@
 #include "lwip/tcp.h"
 
 //forward declarations:
-// inet:
 class IPvXAddress;
-//lwip:
 struct pbuf;
 
 /**

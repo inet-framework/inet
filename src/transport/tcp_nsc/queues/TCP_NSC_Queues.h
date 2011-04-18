@@ -19,7 +19,7 @@
 #ifndef __INET_TCP_NSC_QUEUES_H
 #define __INET_TCP_NSC_QUEUES_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "TCPSegment.h"
 

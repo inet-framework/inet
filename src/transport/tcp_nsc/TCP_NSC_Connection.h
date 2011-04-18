@@ -20,12 +20,13 @@
 #ifndef __TCP_NSC_CONNECTION_H
 #define __TCP_NSC_CONNECTION_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPvXAddress.h"
 
 // forward declarations:
-class TCP_NSC;
 class TCPConnectInfo;
+class TCP_NSC;
 class TCP_NSC_ReceiveQueue;
 class TCP_NSC_SendQueue;
 class INetStack;

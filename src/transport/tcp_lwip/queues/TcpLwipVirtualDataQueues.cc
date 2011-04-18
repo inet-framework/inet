@@ -17,8 +17,6 @@
 //
 
 
-#include <omnetpp.h>
-
 #include "TcpLwipVirtualDataQueues.h"
 
 #include "TCPCommand_m.h"
@@ -90,9 +88,9 @@ TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
     char msgname[80];
     sprintf(msgname, "%.10s%s%s%s(l=%lu)",
             "tcpseg",
-            tcpseg->getSynBit() ? " SYN":"",
-            tcpseg->getFinBit() ? " FIN":"",
-            (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+            tcpseg->getSynBit() ? " SYN" : "",
+            tcpseg->getFinBit() ? " FIN" : "",
+            (tcpseg->getAckBit() && 0 == numBytes) ? " ACK" : "",
             (unsigned long)numBytes);
     tcpseg->setName(msgname);
 

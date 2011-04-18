@@ -18,8 +18,9 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "lwip/memp.h"
 #include "lwip/tcp.h"
+
+#include "lwip/memp.h"
 
 #include "IPvXAddress.h"
 #include "LwipTcpStackIf.h"

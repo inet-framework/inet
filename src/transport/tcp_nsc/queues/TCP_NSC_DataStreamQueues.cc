@@ -17,8 +17,6 @@
 //
 
 
-#include <omnetpp.h>
-
 #include "TCP_NSC_DataStreamQueues.h"
 
 #include "ByteArrayMessage.h"

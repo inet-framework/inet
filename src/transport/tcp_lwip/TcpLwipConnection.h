@@ -20,7 +20,7 @@
 #ifndef __TCP_LWIP_CONNECTION_H
 #define __TCP_LWIP_CONNECTION_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPvXAddress.h"
 #include "lwip/tcp.h"
@@ -128,7 +128,8 @@ class INET_API TcpLwipConnection
     bool isListenerM;
     bool onCloseM;
 
-    Stats * statsM;
+    Stats *statsM;
 };
 
 #endif
+
