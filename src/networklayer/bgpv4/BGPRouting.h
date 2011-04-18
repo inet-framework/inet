@@ -117,6 +117,7 @@ private:
     std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab);
     bool loadConfigFromXML(const char * filename);
+    BGP::ASID findMyAS(cXMLElementList& ASList, unsigned char* routerPositionPtr);
 
     TCPSocketMap                            _socketMap;
     BGP::ASID                               _myAS;

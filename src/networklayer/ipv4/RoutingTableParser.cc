@@ -118,7 +118,7 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
         }
     }
 
-    delete file;
+    delete[] file;
 
     // parse filtered files
     if (ifconfigFile)

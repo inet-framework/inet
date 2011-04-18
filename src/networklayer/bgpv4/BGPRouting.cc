@@ -491,29 +491,47 @@ void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab)
     }
 }
 
-BGP::ASID findMyAS(cXMLElementList& ASList, IRoutingTable* rtTable, unsigned char* routerPositionPtr)
+// find my own IP address in the configuration file and return the AS id under which it is configured
+// and also the 1 based position of the entry inside the AS config element
+BGP::ASID BGPRouting::findMyAS(cXMLElementList& asList, unsigned char* routerPositionPtr)
 {
-    const char* routerNode;
-    BGP::ASID myAS = 0;
-    for (cXMLElementList::iterator ASListIt = ASList.begin(); ASListIt != ASList.end() && myAS == 0; ASListIt++)
+    for (cXMLElementList::iterator asListIt = asList.begin(); asListIt != asList.end(); asListIt++)
     {
-        cXMLElementList routerList = (*ASListIt)->getChildrenByTagName("Router");
+        cXMLElementList routerList = (*asListIt)->getChildrenByTagName("Router");
         *routerPositionPtr = 1;
         for (cXMLElementList::iterator routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++)
         {
-            routerNode = (*routerListIt)->getAttribute("interAddr");
-            IPAddress routerAddr = IPAddress(routerNode);
-            if (isInIPTable(rtTable, routerAddr) == -1)
-            {
-                *routerPositionPtr +=1;
-                continue;
+            IPAddress routerAddr = IPAddress((*routerListIt)->getAttribute("interAddr"));
+            for (int i=0; i<_inft->getNumInterfaces(); i++) {
+                if (_inft->getInterface(i)->ipv4Data()->getIPAddress() == routerAddr)
+                    return atoi((*routerListIt)->getParentNode()->getAttribute("id"));
             }
-            myAS = atoi((*routerListIt)->getParentNode()->getAttribute("id"));
-            return myAS;
+            *routerPositionPtr++;
         }
     }
 
     return 0;
+//    const char* routerNode;
+//    BGP::ASID myAS = 0;
+//    for (cXMLElementList::iterator ASListIt = ASList.begin(); ASListIt != ASList.end() && myAS == 0; ASListIt++)
+//    {
+//        cXMLElementList routerList = (*ASListIt)->getChildrenByTagName("Router");
+//        *routerPositionPtr = 1;
+//        for (cXMLElementList::iterator routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++)
+//        {
+//            routerNode = (*routerListIt)->getAttribute("interAddr");
+//            IPAddress routerAddr = IPAddress(routerNode);
+//            if (isInIPTable(rtTable, routerAddr) == -1)
+//            {
+//                *routerPositionPtr +=1;
+//                continue;
+//            }
+//            myAS = atoi((*routerListIt)->getParentNode()->getAttribute("id"));
+//            return myAS;
+//        }
+//    }
+//
+//    return 0;
 }
 
 void BGPRouting::loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab)
@@ -542,7 +560,7 @@ void BGPRouting::loadSessionConfig(cXMLElementList& sessionList, simtime_t* dela
         }
         if (peerAddr.isUnspecified())
         {
-            error("In BGPRouting.xml :No valid external address for session ID : %s",(*sessionListIt)->getAttribute("id"));
+            error("BGP Error: No valid external address for session ID : %s",(*sessionListIt)->getAttribute("id"));
         }
 
         BGP::SessionID newSessionID = createSession(BGP::EGP, peerAddr.str().c_str());
@@ -606,7 +624,7 @@ std::vector<const char *>  BGPRouting::loadASConfig(cXMLElementList& ASConfig)
         }
         else
         {
-            error("error in BGPConfig.xml : unknown element named '%s' for AS %u", nodeName.c_str(), _myAS);
+            error("BGP Error: unknown element named '%s' for AS %u", nodeName.c_str(), _myAS);
         }
     }
     return routerInSameASList;
@@ -625,7 +643,7 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
     cXMLElement* paramNode = bgpConfig->getElementByPath("TimerParams");
     if (paramNode == 0)
     {
-        error ("In BGPRouting.xml :No configuration for BGP timer parameters");
+        error ("BGP Error: No configuration for BGP timer parameters");
     }
     cXMLElementList timerConfig = paramNode->getChildren();
     loadTimerConfig(timerConfig, delayTab);
@@ -633,10 +651,10 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
     //find my AS
     cXMLElementList ASList = bgpConfig->getElementsByTagName("AS");
     unsigned char routerPosition;
-    _myAS = findMyAS(ASList, _rt, &routerPosition);
+    _myAS = findMyAS(ASList, &routerPosition);
     if (_myAS == 0)
     {
-        error("In BGPRouting.xml : No AS configuration for Router ID: %s", _rt->getRouterId().str().c_str());
+        error("BGP Error:  No AS configuration for Router ID: %s", _rt->getRouterId().str().c_str());
     }
 
     // load EGP Session informations
@@ -658,7 +676,7 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
     }
     else
     {
-        error ("In BGPRouting.xml : No configuration for AS ID: %d", _myAS);
+        error ("BGP Error:  No configuration for AS ID: %d", _myAS);
     }
 
     //create IGP Session(s)
@@ -726,7 +744,7 @@ BGP::SessionID BGPRouting::createSession(BGP::type typeSession, const char* peer
         info.linkIntf = _rt->getInterfaceForDestAddr(peerAddr);
         if (info.linkIntf == 0)
         {
-            error("BGPRouting.xml : No configuration interface for peer address: %s", peerAddr);
+            error("BGP Error: No configuration interface for peer address: %s", peerAddr);
         }
         info.sessionID = info.peerAddr.getInt() + info.linkIntf->ipv4Data()->getIPAddress().getInt();
     }
