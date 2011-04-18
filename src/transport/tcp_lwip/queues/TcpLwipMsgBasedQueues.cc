@@ -218,6 +218,14 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
     isValidSeqNoM = false;
     lastExtractedSeqNoM = 0;
+
+    PayloadList::iterator i;
+
+    while ((i = payloadListM.begin()) != payloadListM.end())
+    {
+        delete i->second;
+        payloadListM.erase(i);
+    }
 }
 
 void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
@@ -234,7 +242,8 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
 
     while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
     {
-        if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo))
+        if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo)
+                && (!isValidSeqNoM || seqLess(lastExtractedSeqNoM, endSeqNo)))
         {
             // insert, avoiding duplicates
             PayloadList::iterator i = payloadListM.find(endSeqNo);
@@ -278,8 +287,10 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     uint32 lastSeqNo = firstSeqNo + bytesInQueueM;
 
     // remove old messages
-    while( (! payloadListM.empty()) && seqLess(payloadListM.begin()->first, firstSeqNo))
+    while( (! payloadListM.empty()) && seqLE(payloadListM.begin()->first, firstSeqNo))
     {
+        EV << "Remove old payload MSG: seqno=" << payloadListM.begin()->first
+           << ", len=" << payloadListM.begin()->second->getByteLength() << endl;
         delete payloadListM.begin()->second;
         payloadListM.erase(payloadListM.begin());
     }
