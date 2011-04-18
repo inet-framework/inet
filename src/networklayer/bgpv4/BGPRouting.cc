@@ -647,9 +647,7 @@ void BGPRouting::loadConfigFromXML (const char * filename)
     int routerPosition;
     _myAS = findMyAS(ASList, routerPosition);
     if (_myAS == 0)
-    {
         error("BGP Error:  No AS configuration for Router ID: %s", _rt->getRouterId().str().c_str());
-    }
 
     // load EGP Session informations
     cXMLElementList sessionList = bgpConfig->getElementsByTagName("Session");
@@ -663,15 +661,11 @@ void BGPRouting::loadConfigFromXML (const char * filename)
 
     cXMLElement* ASNode = bgpConfig->getElementByPath(ASXPath);
     std::vector<const char *> routerInSameASList;
-    if (ASNode != 0)
-    {
-        cXMLElementList ASConfig = ASNode->getChildren();
-        routerInSameASList = loadASConfig(ASConfig);
-    }
-    else
-    {
+    if (ASNode == NULL)
         error ("BGP Error:  No configuration for AS ID: %d", _myAS);
-    }
+
+    cXMLElementList ASConfig = ASNode->getChildren();
+    routerInSameASList = loadASConfig(ASConfig);
 
     //create IGP Session(s)
     if (routerInSameASList.size())
