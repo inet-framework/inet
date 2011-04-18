@@ -24,7 +24,6 @@ Define_Module(BGPRouting);
 
 bool            OSPFExist(IRoutingTable* rtTable);
 simtime_t*      loadTimerConfig(cXMLElementList& timerConfig);
-BGP::ASID       findMyAS(cXMLElementList& ASList, IRoutingTable* rtTable, unsigned char* routerPosition);
 unsigned char   ASLoopDetection(BGP::RoutingTableEntry* entry, BGP::ASID myAS);
 BGP::SessionID  findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession*> sessions, IPAddress peerAddr);
 int             isInIPTable(IRoutingTable* rtTable, IPAddress addr);
@@ -45,18 +44,16 @@ BGPRouting::~BGPRouting(void)
 
 void BGPRouting::initialize(int stage)
 {
-    if (stage==4)
+    if (stage==4) // we must wait until RoutingTable is completely initialized
     {
         _rt = RoutingTableAccess().get();
         _inft = InterfaceTableAccess().get();
 
         // read BGP configuration
         const char *fileName = par ("bgpConfigFile");
-        if (*fileName == 0 || !loadConfigFromXML (fileName))
-        {
-            error ("Error reading BGP configuration from file %s", fileName);
-        }
-
+        if (*fileName == 0)
+            error ("BGP configuration file name is empty");
+        loadConfigFromXML(fileName);
         createWatch("myAutonomousSystem", _myAS);
         WATCH_PTRVECTOR(_BGPRoutingTable);
     }
@@ -491,14 +488,14 @@ void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab)
     }
 }
 
-// find my own IP address in the configuration file and return the AS id under which it is configured
-// and also the 1 based position of the entry inside the AS config element
-BGP::ASID BGPRouting::findMyAS(cXMLElementList& asList, unsigned char* routerPositionPtr)
+BGP::ASID BGPRouting::findMyAS(cXMLElementList& asList, int& outRouterPosition)
 {
+    // find my own IP address in the configuration file and return the AS id under which it is configured
+    // and also the 1 based position of the entry inside the AS config element
     for (cXMLElementList::iterator asListIt = asList.begin(); asListIt != asList.end(); asListIt++)
     {
         cXMLElementList routerList = (*asListIt)->getChildrenByTagName("Router");
-        *routerPositionPtr = 1;
+        outRouterPosition = 1;
         for (cXMLElementList::iterator routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++)
         {
             IPAddress routerAddr = IPAddress((*routerListIt)->getAttribute("interAddr"));
@@ -506,7 +503,7 @@ BGP::ASID BGPRouting::findMyAS(cXMLElementList& asList, unsigned char* routerPos
                 if (_inft->getInterface(i)->ipv4Data()->getIPAddress() == routerAddr)
                     return atoi((*routerListIt)->getParentNode()->getAttribute("id"));
             }
-            *routerPositionPtr++;
+            outRouterPosition++;
         }
     }
 
@@ -630,28 +627,25 @@ std::vector<const char *>  BGPRouting::loadASConfig(cXMLElementList& ASConfig)
     return routerInSameASList;
 }
 
-bool BGPRouting::loadConfigFromXML (const char * filename)
+void BGPRouting::loadConfigFromXML (const char * filename)
 {
     cXMLElement* bgpConfig = ev.getXMLDocument (filename);
-    if (bgpConfig == 0)
-    {
+    if (bgpConfig == NULL)
         error ("Cannot read BGP configuration from file: %s", filename);
-    }
 
     // load bgp timer parameters informations
     simtime_t delayTab[BGP::NB_TIMERS];
     cXMLElement* paramNode = bgpConfig->getElementByPath("TimerParams");
-    if (paramNode == 0)
-    {
+    if (paramNode == NULL)
         error ("BGP Error: No configuration for BGP timer parameters");
-    }
+
     cXMLElementList timerConfig = paramNode->getChildren();
     loadTimerConfig(timerConfig, delayTab);
 
     //find my AS
     cXMLElementList ASList = bgpConfig->getElementsByTagName("AS");
-    unsigned char routerPosition;
-    _myAS = findMyAS(ASList, &routerPosition);
+    int routerPosition;
+    _myAS = findMyAS(ASList, routerPosition);
     if (_myAS == 0)
     {
         error("BGP Error:  No AS configuration for Router ID: %s", _rt->getRouterId().str().c_str());
@@ -694,8 +688,6 @@ bool BGPRouting::loadConfigFromXML (const char * filename)
             _BGPSessions[newSessionID]->setSocketListen(socketListenIGP);
         }
     }
-
-    return true;
 }
 
 unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition)
