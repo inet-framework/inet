@@ -20,7 +20,7 @@
 #ifndef __MODULATION_TYPE_H
 #define __MODULATION_TYPE_H
 
-#include <stdint.h>
+//#include <stdint.h>
 #include <string>
 #include <vector>
 #include <ostream>
