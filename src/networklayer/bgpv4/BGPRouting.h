@@ -116,8 +116,15 @@ private:
 
     std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab);
-    void loadConfigFromXML(const char * filename);
+    void loadConfigFromXML(const char* filename);
     BGP::ASID findMyAS(cXMLElementList& ASList, int& outRouterPosition);
+    bool ospfExist(IRoutingTable* rtTable);
+    void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab);
+    unsigned char asLoopDetection(BGP::RoutingTableEntry* entry, BGP::ASID myAS);
+    BGP::SessionID findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession*> sessions, IPAddress peerAddr);
+    int isInIPTable(IRoutingTable* rtTable, IPAddress addr);
+    BGP::SessionID findIdFromSocketConnId(std::map<BGP::SessionID, BGPSession*> sessions, int connId);
+    unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
     TCPSocketMap                            _socketMap;
     BGP::ASID                               _myAS;
