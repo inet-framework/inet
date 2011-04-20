@@ -1,0 +1,43 @@
+../../../bin/INET -f grid.ini -r 2 $*
+../../../bin/INET -f grid.ini -r 3 $*
+../../../bin/INET -f grid.ini -r 4 $*
+../../../bin/INET -f grid.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_73mr_off10.sca
+../../../bin/INET -f grid2.ini -r 2 $*
+../../../bin/INET -f grid2.ini -r 3 $*
+../../../bin/INET -f grid2.ini -r 4 $*
+../../../bin/INET -f grid2.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_76mr_off10.sca
+../../../bin/INET -f grid3.ini -r 2 $*
+../../../bin/INET -f grid3.ini -r 3 $*
+../../../bin/INET -f grid3.ini -r 4 $*
+../../../bin/INET -f grid3.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_85mr_off10.sca
+../../../bin/INET -f grid4.ini -r 2 $*
+../../../bin/INET -f grid4.ini -r 3 $*
+../../../bin/INET -f grid4.ini -r 4 $*
+../../../bin/INET -f grid4.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_95mr_off10.sca
+../../../bin/INET -f grid5.ini -r 2 $*
+../../../bin/INET -f grid5.ini -r 3 $*
+../../../bin/INET -f grid5.ini -r 4 $*
+../../../bin/INET -f grid5.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_70mr_off10.sca
+../../../bin/INET -f grid6.ini -r 2 $*
+../../../bin/INET -f grid6.ini -r 3 $*
+../../../bin/INET -f grid6.ini -r 4 $*
+../../../bin/INET -f grid6.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_80mr_off10.sca
+../../../bin/INET -f grid7.ini -r 2 $*
+../../../bin/INET -f grid7.ini -r 3 $*
+../../../bin/INET -f grid7.ini -r 4 $*
+../../../bin/INET -f grid7.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_90mr_off10.sca
+../../../bin/INET -f grid8.ini -r 2 $*
+../../../bin/INET -f grid8.ini -r 3 $*
+../../../bin/INET -f grid8.ini -r 4 $*
+../../../bin/INET -f grid8.ini -r 5 $*
+mv omnetpp.sca grid_clasico_sin_dup_corr_100n_200m_100mr_off10.sca
+
+
+

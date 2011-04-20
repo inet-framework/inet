@@ -31,6 +31,12 @@ IPFragBuf::IPFragBuf()
 
 IPFragBuf::~IPFragBuf()
 {
+	while (!bufs.empty())
+	{
+		if (bufs.begin()->second.datagram)
+			delete bufs.begin()->second.datagram;
+		bufs.erase(bufs.begin());
+	}
 }
 
 void IPFragBuf::init(ICMP *icmp)

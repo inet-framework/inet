@@ -1,0 +1,3 @@
+The multi radio example demonstrates MANET routing (AODV) in a 4x4 
+grid of hosts. Each host have 2 radios tuned to one of the available 
+3 chanels. 1Mb TCP data is sent from node 0 to node 15 in the grid.

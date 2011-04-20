@@ -1,0 +1,46 @@
+#!/bin/sh
+#../../../bin/INET -f grid2.ini -r 2 $*
+#../../../bin/INET -f grid2.ini -r 3 $*
+#../../../bin/INET -f grid2.ini -r 4 $*
+#../../../bin/INET -f grid2.ini -r 5 $*
+#mv omnetpp.sca grid_70mr.sca
+#../../../bin/INET -f grid3.ini -r 2 $* &
+#../../../bin/INET -f grid3.ini -r 3 $* &
+#../../../bin/INET -f grid3.ini -r 4 $*
+#../../../bin/INET -f grid3.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_80mr.sca
+#../../../bin/INET -f grid4.ini -r 2 $* &
+#../../../bin/INET -f grid4.ini -r 3 $* &
+#../../../bin/INET -f grid4.ini -r 4 $*
+#../../../bin/INET -f grid4.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_90mr.sca
+#../../../bin/INET -f grid5.ini -r 2 $*
+#../../../bin/INET -f grid5.ini -r 3 $*
+#../../../bin/INET -f grid5.ini -r 4 $*
+#../../../bin/INET -f grid5.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_100mr.sca
+../../../bin/INET -f grid6.ini -r 2 $*
+../../../bin/INET -f grid6.ini -r 3 $*
+../../../bin/INET -f grid6.ini -r 4 $*
+../../../bin/INET -f grid6.ini -r 5 $*
+mv omnetpp.sca grid_110mr.sca
+#../../../bin/INET -f grid7.ini -r 2 $*
+#../../../bin/INET -f grid7.ini -r 3 $*
+#../../../bin/INET -f grid7.ini -r 4 $*
+#../../../bin/INET -f grid7.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_120mr.sca
+#../../../bin/INET -f grid8.ini -r 2 $*
+#../../../bin/INET -f grid8.ini -r 3 $*
+#../../../bin/INET -f grid8.ini -r 4 $*
+#../../../bin/INET -f grid8.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_130mr.sca
+#../../../bin/INET -f grid9.ini -r 2 $*
+#../../../bin/INET -f grid9.ini -r 3 $*
+#../../../bin/INET -f grid9.ini -r 4 $*
+#../../../bin/INET -f grid9.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_140mr.sca
+#../../../bin/INET -f grid.ini -r 2 $*
+#../../../bin/INET -f grid.ini -r 3 $*
+#../../../bin/INET -f grid.ini -r 4 $*
+#../../../bin/INET -f grid.ini -r 5 $*
+#mv omnetpp.sca grid_dymo_promiscuo_100n_200m_150mr.sca

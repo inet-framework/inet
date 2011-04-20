@@ -78,6 +78,8 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     IPAddress routerId;
     bool IPForward;
 
+    // DSDV parameters
+    simtime_t timetolive_routing_entry;
     //
     // Routes:
     //
@@ -89,9 +91,16 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     typedef std::map<IPAddress, const IPRoute *> RoutingCache;
     mutable RoutingCache routingCache;
 
+    typedef std::vector<IPRouteRule *> RoutingRule;
+    RoutingRule outputRules;
+    RoutingRule inputRules;
+
+
     // local addresses cache (to speed up isLocalAddress())
     typedef std::set<IPAddress> AddressSet;
     mutable AddressSet localAddresses;
+    // JcM add: to handle the local broadcast address
+    mutable AddressSet localBroadcastAddresses;
 
   protected:
     // set IP address etc on local loopback
@@ -173,6 +182,12 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Checks if the address is a local one, i.e. one of the host's.
      */
     virtual bool isLocalAddress(const IPAddress& dest) const;
+    /** @name Routing functions (query the route table) */
+	//@{
+	/**
+	 * Checks if the address is a local broadcast one, i.e. 192.168.0.255/24
+	 */
+	virtual bool isLocalBroadcastAddress(const IPAddress& dest) const;
 
     /**
      * The routing function.
@@ -257,6 +272,18 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      */
     virtual std::vector<IPAddress> gatherAddresses() const;
     //@}
+    virtual void setTimeToLiveRoutingEntry(simtime_t a){timetolive_routing_entry = a;}
+    virtual simtime_t getTimeToLiveRoutingEntry(){return timetolive_routing_entry;}
+    // Dsdv time to live test entry
+    virtual void dsdvTestAndDelete();
+    virtual const bool testValidity(const IPRoute *entry) const;
+
+    // IP tables rules
+    virtual void addRule(bool output, IPRouteRule *entry);
+    virtual void delRule(IPRouteRule *entry);
+    virtual const IPRouteRule * getRule(bool output,int index) const;
+    virtual int getNumRules(bool output);
+    virtual const IPRouteRule * findRule(bool output,int prot,int sPort,const IPAddress &srcAddr,int dPort,const IPAddress &destAddr,const InterfaceEntry *) const;
 
 };
 

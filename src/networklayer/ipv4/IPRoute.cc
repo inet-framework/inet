@@ -48,6 +48,7 @@ std::string IPRoute::info() const
         case OSPF:         out << " OSPF"; break;
         case BGP:          out << " BGP"; break;
         case ZEBRA:        out << " ZEBRA"; break;
+        case MANET:        out << " MANET"; break;
         default:           out << " ???"; break;
     }
     return out.str();

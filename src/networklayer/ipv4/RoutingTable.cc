@@ -44,8 +44,11 @@ std::ostream& operator<<(std::ostream& os, const IPRoute& e)
     return os;
 };
 
+
 RoutingTable::RoutingTable()
 {
+ // DSDV
+    timetolive_routing_entry = timetolive_routing_entry.getMaxTime();
 }
 
 RoutingTable::~RoutingTable()
@@ -54,6 +57,16 @@ RoutingTable::~RoutingTable()
         delete routes[i];
     for (unsigned int i=0; i<multicastRoutes.size(); i++)
         delete multicastRoutes[i];
+    while (!inputRules.empty())
+    {
+        delete inputRules.back();
+        inputRules.pop_back();
+    }
+    while (!outputRules.empty())
+    {
+        delete outputRules.back();
+        outputRules.pop_back();
+    }
 }
 
 void RoutingTable::initialize(int stage)
@@ -149,14 +162,12 @@ void RoutingTable::updateDisplayString()
     if (!ev.isGUI())
         return;
 
-    std::stringstream os;
-
-    if (! routerId.isUnspecified())
-        os << "routerId: " << routerId << '\n';
-
-    os << routes.size() << "+" << multicastRoutes.size() << " routes";
-
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
+    char buf[80];
+    if (routerId.isUnspecified())
+        sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
+    else
+        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void RoutingTable::handleMessage(cMessage *msg)
@@ -303,6 +314,29 @@ bool RoutingTable::isLocalAddress(const IPAddress& dest) const
     return it!=localAddresses.end();
 }
 
+// JcM add: check if the dest addr is local network broadcast
+bool RoutingTable::isLocalBroadcastAddress(const IPAddress& dest) const
+{
+    Enter_Method("isLocalBroadcastAddress(%x)", dest.getInt()); // note: str().c_str() too slow here
+
+    if (localBroadcastAddresses.empty())
+    {
+        // collect interface addresses if not yet done
+        for (int i=0; i<ift->getNumInterfaces(); i++)
+        {
+            IPAddress interfaceAddr = ift->getInterface(i)->ipv4Data()->getIPAddress();
+            IPAddress broadcastAddr = interfaceAddr.getBroadcastAddress(ift->getInterface(i)->ipv4Data()->getNetmask());
+            if (!broadcastAddr.isUnspecified())
+            {
+                 localBroadcastAddresses.insert(broadcastAddr);
+            }
+        }
+    }
+
+    AddressSet::iterator it = localBroadcastAddresses.find(dest);
+    return it!=localBroadcastAddresses.end();
+}
+
 bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
 {
     Enter_Method("isLocalMulticastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
@@ -316,6 +350,39 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
     return false;
 }
 
+void RoutingTable::dsdvTestAndDelete()
+{
+     if (timetolive_routing_entry==timetolive_routing_entry.getMaxTime())
+           return;
+     for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
+     {
+
+           IPRoute *e = *i;
+           if (this->isLocalAddress(e->getHost()))
+                     continue;
+           if (((e->getHost()).str() != "*") && ((e->getHost()).str() != "<unspec>") && ((e->getHost()).str() != "127.0.0.1") && (simTime()-(e->getInstallTime()))>timetolive_routing_entry){
+                //EV << "Routes ends at" << routes.end() <<"\n";
+                deleteRoute(e);
+                //EV << "After deleting Routes ends at" << routes.end() <<"\n";
+                EV << "Deleting entry ip=" << e->getHost().str() <<"\n";
+                i--;
+           }
+      }
+
+}
+
+const bool RoutingTable::testValidity(const IPRoute *entry) const
+{
+     if (timetolive_routing_entry==timetolive_routing_entry.getMaxTime())
+           return true;
+     if (this->isLocalAddress(entry->getHost()))
+           return true;
+     if (((entry->getHost()).str() != "*") && ((entry->getHost()).str() != "<unspec>") && ((entry->getHost()).str() != "127.0.0.1") && (simTime()-(entry->getInstallTime()))>timetolive_routing_entry){
+                return false;
+      }
+      return true;
+
+}
 
 const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 {
@@ -323,22 +390,60 @@ const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 
     RoutingCache::iterator it = routingCache.find(dest);
     if (it != routingCache.end())
+    {
+        if (it->second==NULL)
+        {
+              routingCache.clear();
+              localAddresses.clear();
+        }
+        else if (testValidity(it->second))
+        {
+            if (it->second->getSource()==IPRoute::MANET)
+            {
+                if (IPAddress::maskedAddrAreEqual(dest, it->second->getHost(), IPAddress::ALLONES_ADDRESS))
         return it->second;
-
+            }
+            else
+                return it->second;
+        }
+    }
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     const IPRoute *bestRoute = NULL;
     uint32 longestNetmask = 0;
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
-        const IPRoute *e = *i;
-        if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) &&  // match
-            (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
+        IPRoute *e = *i;
+        if (testValidity(e))
         {
-            bestRoute = e;
-            longestNetmask = e->getNetmask().getInt();
+            if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) &&  // match
+                (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
+            {
+                bestRoute = e;
+                longestNetmask = e->getNetmask().getInt();
+            }
+    }
+    }
+
+    if (bestRoute && bestRoute->getSource()==IPRoute::MANET && bestRoute->getHost()!=dest)
+    {
+        bestRoute=NULL;
+        /* in this case we must find the mask must be 255.255.255.255 route */
+        for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
+        {
+           IPRoute *e = *i;
+           if (testValidity(e))
+           {
+              if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), IPAddress::ALLONES_ADDRESS) &&  // match
+               (!bestRoute || e->getNetmask().getInt()>longestNetmask))  // longest so far
+              {
+                 bestRoute = e;
+                 longestNetmask = e->getNetmask().getInt();
+              }
+           }
         }
     }
+
     routingCache[dest] = bestRoute;
     return bestRoute;
 }
@@ -524,3 +629,119 @@ void RoutingTable::updateNetmaskRoutes()
 }
 
 
+
+void RoutingTable::addRule(bool output,IPRouteRule *entry)
+{
+// first, find the rule if exist
+    delRule(entry);
+    if (output)
+    {
+        outputRules.push_back(entry);
+    }
+    else
+    {
+        inputRules.push_back(entry);
+    }
+}
+
+void RoutingTable::delRule(IPRouteRule *entry)
+{
+    for (unsigned int i;i<outputRules.size();i++)
+    {
+       if (outputRules[i]==entry)
+           outputRules.erase(outputRules.begin()+i);
+
+    }
+    for (unsigned int i;i<inputRules.size();i++)
+    {
+        if (inputRules[i]==entry)
+            inputRules.erase(inputRules.begin()+i);
+
+    }
+}
+
+const IPRouteRule * RoutingTable::getRule(bool output,int index) const
+{
+    if (output)
+    {
+        if (index < (int)outputRules.size())
+            return outputRules[index];
+        else
+            return NULL;
+    }
+    else
+    {
+        if (index < (int)inputRules.size())
+            return inputRules[index];
+        else
+            return NULL;
+    }
+}
+
+int RoutingTable::getNumRules(bool output)
+{
+    if (output)
+        return outputRules.size();
+    else
+        return inputRules.size();
+}
+
+const IPRouteRule * RoutingTable::findRule(bool output,int prot,int sPort,const IPAddress &srcAddr,int dPort,const IPAddress &destAddr,const InterfaceEntry *iface) const
+{
+	std::vector<IPRouteRule *>::const_iterator it;
+	std::vector<IPRouteRule *>::const_iterator endIt;
+    if (output)
+    {
+    	it = outputRules.begin();
+    	endIt = outputRules.end();
+    }
+    else
+    {
+    	it = inputRules.begin();
+    	endIt = inputRules.end();
+    }
+
+    while (it!=endIt)
+    {
+       IPRouteRule *e = (*it);
+       if (!srcAddr.isUnspecified() && !e->getSrcAddress().isUnspecified())
+       {
+           if (!IPAddress::maskedAddrAreEqual(srcAddr,e->getSrcAddress(),e->getSrcNetmask()))
+           {
+               it++;
+               continue;
+           }
+       }
+       if (!destAddr.isUnspecified() && !e->getDestAddress().isUnspecified())
+       {
+           if (!IPAddress::maskedAddrAreEqual(destAddr,e->getDestAddress(),e->getDestNetmask()))
+           {
+               it++;
+               continue;
+           }
+       }
+       if ((prot!=IP_PROT_NONE) && (e->getProtocol()!=IP_PROT_NONE) && (prot!=e->getProtocol()))
+       {
+           it++;
+           continue;
+       }
+       if ((sPort!=-1) && (e->getSrcPort()!=-1) && (sPort!=e->getSrcPort()))
+       {
+           it++;
+           continue;
+       }
+       if ((dPort!=-1) && (e->getDestPort()!=-1) && (sPort!=e->getDestPort()))
+       {
+           it++;
+           continue;
+       }
+       if ((iface!=NULL) && (e->getInterface()!=NULL) && (iface!=e->getInterface()))
+       {
+           it++;
+           continue;
+       }
+       // found valid src address, dest address src port and dest port
+       return e;
+    }
+    return NULL;
+}

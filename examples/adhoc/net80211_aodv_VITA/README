@@ -1,0 +1,2 @@
+Network for testing the 802.16e (WiMAX) model using the AODV routing protocol.
+The network contains a base station and 3 other terminals scattered around.

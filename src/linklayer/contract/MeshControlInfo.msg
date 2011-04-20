@@ -1,0 +1,38 @@
+//
+// Copyright (C) 2003 CTIE, Monash University
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+cplusplus {{
+#include "Ieee802Ctrl_m.h"
+#include "uint128.h"
+}}
+
+
+class noncobject Ieee802Ctrl;
+class noncobject Uint128;
+
+//
+// Control structure for communication between LLC and higher layers
+//
+class MeshControlInfo extends Ieee802Ctrl
+{
+// Mesh modifications
+    int inputId;     // used in Mesh network with several mac interfaces
+    bool previousFix; // Used to indicate if the previous node is fix
+    Uint128 vectorAddress[]; // Used to store the route find by proactive routing protocol
+}

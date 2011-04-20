@@ -20,10 +20,12 @@
 enum IPProtocolId;
 
 class noncobject IPAddress;
+class noncobject MACAddress;
 
 cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
+#include "MACAddress.h"
 }}
 
 
@@ -69,6 +71,12 @@ class IPControlInfo
     unsigned char diffServCodePoint;  // for QoS
     short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
+//     Used in the DSR protocol
+    IPAddress nextHopAddr; //Next hop Address (DSR)
+    bool moreFragments;    // more fragment" bit (DSR protocol)
+    MACAddress macSrc;  // src MAC address (can be left empty when sending)
+    MACAddress macDest; // dest MAC address
+
 }
 
 

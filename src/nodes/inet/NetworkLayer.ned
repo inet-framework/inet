@@ -44,6 +44,7 @@ module NetworkLayer
         input rsvpIn @labels(IPControlInfo/down);
         input ospfIn @labels(IPControlInfo/down);
         input pingIn;
+        input manetIn;
         output ifOut[];
         output tcpOut @labels(TCPSegment,IPControlInfo/up);
         output udpOut @labels(UDPPacket,IPControlInfo/up);
@@ -51,15 +52,16 @@ module NetworkLayer
         output rsvpOut @labels(IPControlInfo/up);
         output ospfOut @labels(IPControlInfo/up);
         output pingOut;
+        output manetOut;
 
     submodules:
         ip: IP {
             parameters:
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6";
+                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers
                 @display("p=85,95;q=queue");
             gates:
-                transportIn[7];
-                transportOut[7];
+                transportIn[8];
+                transportOut[8];
                 queueIn[sizeof(ifIn)];
         }
         arp: ARP {
@@ -105,6 +107,9 @@ module NetworkLayer
         ip.transportOut[6] --> sctpOut;
         ip.transportIn[6] <-- sctpIn;
 
+        ip.transportOut[7] --> manetOut;
+        ip.transportIn[7] <-- manetIn;
+
         icmp.pingOut --> pingOut;
         icmp.pingIn <-- pingIn;
 
@@ -112,11 +117,11 @@ module NetworkLayer
 
         ip.queueOut --> arp.ipIn;
 
-		for i=0..sizeof(ifIn)-1 {
-        	ifIn[i] --> ip.queueIn[i];
-		}
-		for i=0..sizeof(ifOut)-1 {
-        	arp.nicOut[i] --> ifOut[i];
-		}
+        for i=0..sizeof(ifIn)-1 {
+            ifIn[i] --> ip.queueIn[i];
+        }
+        for i=0..sizeof(ifOut)-1 {
+            arp.nicOut[i] --> ifOut[i];
+        }
 }
 

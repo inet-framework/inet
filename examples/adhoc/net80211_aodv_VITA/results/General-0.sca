@@ -1,0 +1,203 @@
+version 2
+run General-0-20101018-17:44:25-5953
+attr configname General
+attr datetime 20101018-17:44:25
+attr experiment General
+attr inifile /home/rhornig/omnetpp-4.1/samples/inetmanet/examples/adhoc/net80211_aodv_VITA/omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network inet.examples.adhoc.net80211_aodv_VITA.Net80211_aodv_VITA
+attr processid 5953
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].pingApp 	"Pings sent" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"simulated time" 	0.002005
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"Aodv totalSend " 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rreq send" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rreq rec" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rrep send" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rrep rec" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rrep ack send" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rrep ack rec" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rerr send" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].manetrouting 	"rerr rec" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mgmt 	"packets received by queue" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mgmt 	"packets dropped by queue" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of received packets" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of collisions" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of internal collisions" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of retry for AC 0" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of retry for AC 1" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of retry for AC 2" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"number of retry for AC 3" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent and receive bites" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent packet within AC 0" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent packet within AC 1" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent packet within AC 2" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent packet within AC 3" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sent in TXOP " 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sentWithoutRetry AC 0" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sentWithoutRetry AC 1" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sentWithoutRetry AC 2" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"sentWithoutRetry AC 3" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numGivenUp AC 0" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numGivenUp AC 1" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numGivenUp AC 2" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numGivenUp AC 3" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numDropped AC 0" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numDropped AC 1" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numDropped AC 2" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac 	"numDropped AC 3" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsReceiver.radioReceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR equal weights" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR weight UGS" 	4
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR weight RTPS" 	4
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR weight ERTPS" 	2
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR weight NRTPS" 	1
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.scheduling 	"WRR weight BE" 	1
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.radioTransceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.controlPlane.cp_basestation 	"Simulation Time" 	0.002005
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.controlPlane.cp_basestation 	"Downlink per second" 	2000000
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.controlPlane.cp_basestation 	"Downlink to Uplink ratio" 	0.5
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.controlPlane.cp_basestation 	"Uplink-Grant scheduling for more than one frame" 	0
+scalar Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.controlPlane.cp_basestation 	"Uplink-Grant compensation factor" 	1
+scalar Net80211_aodv_VITA.host[0].pingApp 	"Pings sent" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mgmt 	"packets received by queue" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mgmt 	"packets dropped by queue" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of received packets" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of collisions" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of internal collisions" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of retry for AC 0" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of retry for AC 1" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of retry for AC 2" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"number of retry for AC 3" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent and receive bites" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent packet within AC 0" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent packet within AC 1" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent packet within AC 2" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent packet within AC 3" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sent in TXOP " 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sentWithoutRetry AC 0" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sentWithoutRetry AC 1" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sentWithoutRetry AC 2" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"sentWithoutRetry AC 3" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numGivenUp AC 0" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numGivenUp AC 1" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numGivenUp AC 2" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numGivenUp AC 3" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numDropped AC 0" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numDropped AC 1" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numDropped AC 2" 	0
+scalar Net80211_aodv_VITA.host[0].wlan.mac 	"numDropped AC 3" 	0
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msReceiver.radioReceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR equal weights" 	0
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight UGS" 	4
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight RTPS" 	4
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight ERTPS" 	2
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight NRTPS" 	1
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight BE" 	1
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.radioTransceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[0].ieee80216NicMS.controlPlane.cp_mobilestation 	"Received DL-MAPs" 	0
+statistic Net80211_aodv_VITA.host[0].ieee80216NicMS.controlPlane.cp_mobilestation 	"Ranging Start Time"
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+scalar Net80211_aodv_VITA.host[1].pingApp 	"Pings sent" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mgmt 	"packets received by queue" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mgmt 	"packets dropped by queue" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of received packets" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of collisions" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of internal collisions" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of retry for AC 0" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of retry for AC 1" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of retry for AC 2" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"number of retry for AC 3" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent and receive bites" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent packet within AC 0" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent packet within AC 1" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent packet within AC 2" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent packet within AC 3" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sent in TXOP " 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sentWithoutRetry AC 0" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sentWithoutRetry AC 1" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sentWithoutRetry AC 2" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"sentWithoutRetry AC 3" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numGivenUp AC 0" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numGivenUp AC 1" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numGivenUp AC 2" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numGivenUp AC 3" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numDropped AC 0" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numDropped AC 1" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numDropped AC 2" 	0
+scalar Net80211_aodv_VITA.host[1].wlan.mac 	"numDropped AC 3" 	0
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msReceiver.radioReceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR equal weights" 	0
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight UGS" 	4
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight RTPS" 	4
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight ERTPS" 	2
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight NRTPS" 	1
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight BE" 	1
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.radioTransceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[1].ieee80216NicMS.controlPlane.cp_mobilestation 	"Received DL-MAPs" 	0
+statistic Net80211_aodv_VITA.host[1].ieee80216NicMS.controlPlane.cp_mobilestation 	"Ranging Start Time"
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+scalar Net80211_aodv_VITA.host[2].pingApp 	"Pings sent" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mgmt 	"packets received by queue" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mgmt 	"packets dropped by queue" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of received packets" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of collisions" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of internal collisions" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of retry for AC 0" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of retry for AC 1" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of retry for AC 2" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"number of retry for AC 3" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent and receive bites" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent packet within AC 0" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent packet within AC 1" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent packet within AC 2" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent packet within AC 3" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sent in TXOP " 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sentWithoutRetry AC 0" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sentWithoutRetry AC 1" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sentWithoutRetry AC 2" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"sentWithoutRetry AC 3" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numGivenUp AC 0" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numGivenUp AC 1" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numGivenUp AC 2" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numGivenUp AC 3" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numDropped AC 0" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numDropped AC 1" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numDropped AC 2" 	0
+scalar Net80211_aodv_VITA.host[2].wlan.mac 	"numDropped AC 3" 	0
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msReceiver.radioReceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR equal weights" 	0
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight UGS" 	4
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight RTPS" 	4
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight ERTPS" 	2
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight NRTPS" 	1
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.scheduling 	"WRR weight BE" 	1
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.radioTransceiver 	"# of collisions" 	0
+scalar Net80211_aodv_VITA.host[2].ieee80216NicMS.controlPlane.cp_mobilestation 	"Received DL-MAPs" 	0
+statistic Net80211_aodv_VITA.host[2].ieee80216NicMS.controlPlane.cp_mobilestation 	"Ranging Start Time"
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0

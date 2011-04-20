@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 #include "IPAddress.h"
 #include "IPRoute.h"  // not strictly required, but most clients will need it anyway
+#include "IPRouteRule.h"
 
 
 /** Returned by IRoutingTable as the result of multicast routing */
@@ -83,6 +84,13 @@ class INET_API IRoutingTable
      * Checks if the address is a local one, i.e. one of the host's.
      */
     virtual bool isLocalAddress(const IPAddress& dest) const = 0;
+
+    /** @name Routing functions (query the route table) */
+	//@{
+	/**
+	 * Checks if the address is a local broadcast one, i.e. one 192.168.0.255/24
+	 */
+	virtual bool isLocalBroadcastAddress(const IPAddress& dest) const = 0;
 
     /**
      * The routing function.
@@ -167,7 +175,17 @@ class INET_API IRoutingTable
      */
     virtual std::vector<IPAddress> gatherAddresses() const = 0;
     //@}
-
+   // Dsdv time to live test entry
+    virtual void setTimeToLiveRoutingEntry(simtime_t a) = 0;
+    virtual simtime_t getTimeToLiveRoutingEntry()=0;
+    virtual void dsdvTestAndDelete() = 0;
+    virtual const bool testValidity(const IPRoute *entry) const = 0;
+    // Rules (similar to linux iptables)
+    virtual void addRule(bool output,IPRouteRule *entry) = 0;
+    virtual void delRule(IPRouteRule *entry) = 0;
+    virtual const IPRouteRule * getRule(bool output,int index) const =0;
+    virtual int getNumRules(bool output)=0;
+    virtual const IPRouteRule * findRule(bool output,int prot,int sPort,const IPAddress &srcAddr,int dPort,const IPAddress &destAddr,const InterfaceEntry *) const =0;
 };
 
 #endif

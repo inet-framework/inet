@@ -1,0 +1,98 @@
+file 5459 1287416677                                            
+version 2
+run General-0-20101018-17:44:25-5953
+attr configname General
+attr datetime 20101018-17:44:25
+attr experiment General
+attr inifile /home/rhornig/omnetpp-4.1/samples/inetmanet/examples/adhoc/net80211_aodv_VITA/omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network inet.examples.adhoc.net80211_aodv_VITA.Net80211_aodv_VITA
+attr processid 5953
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 5  Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 4  Net80211_aodv_VITA.WiMAX_Basisstation[0].wlan.mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITBROADCAST=5, WAITCTS=6, WAITSIFS=7"
+attr enumname  Ieee80211egMac
+vector 306  Net80211_aodv_VITA.host[0].wlan.mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 305  Net80211_aodv_VITA.host[0].wlan.mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITBROADCAST=5, WAITCTS=6, WAITSIFS=7"
+attr enumname  Ieee80211egMac
+vector 621  Net80211_aodv_VITA.host[1].wlan.mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 620  Net80211_aodv_VITA.host[1].wlan.mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITBROADCAST=5, WAITCTS=6, WAITSIFS=7"
+attr enumname  Ieee80211egMac
+vector 936  Net80211_aodv_VITA.host[2].wlan.mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 935  Net80211_aodv_VITA.host[2].wlan.mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITBROADCAST=5, WAITCTS=6, WAITSIFS=7"
+attr enumname  Ieee80211egMac
+vector 281  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "ugs traffic rate"  ETV
+vector 282  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "rtps traffic rate"  ETV
+vector 283  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "ertps traffic rate"  ETV
+vector 284  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "nrtps traffic rate"  ETV
+vector 285  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "be traffic rate"  ETV
+vector 286  Net80211_aodv_VITA.WiMAX_Basisstation[0].ieee80216NicBS.bsTransceiver.cpsTransceiver.cps_transceiver  "thoughput uplink"  ETV
+vector 582  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ugs traffic rate"  ETV
+vector 583  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "rtps traffic rate"  ETV
+vector 584  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ertps traffic rate"  ETV
+vector 585  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "nrtps traffic rate"  ETV
+vector 586  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "be traffic rate"  ETV
+vector 587  Net80211_aodv_VITA.host[0].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "thoughput uplink"  ETV
+vector 897  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ugs traffic rate"  ETV
+vector 898  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "rtps traffic rate"  ETV
+vector 899  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ertps traffic rate"  ETV
+vector 900  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "nrtps traffic rate"  ETV
+vector 901  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "be traffic rate"  ETV
+vector 902  Net80211_aodv_VITA.host[1].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "thoughput uplink"  ETV
+vector 1212  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ugs traffic rate"  ETV
+vector 1213  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "rtps traffic rate"  ETV
+vector 1214  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "ertps traffic rate"  ETV
+vector 1215  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "nrtps traffic rate"  ETV
+vector 1216  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "be traffic rate"  ETV
+vector 1217  Net80211_aodv_VITA.host[2].ieee80216NicMS.msTransceiver.cpsTransceiver.cps_transceiver  "thoughput uplink"  ETV
+4	4973 16 0 0 0 0 2 0 0 0 0
+5	4989 16 0 0 0 0 2 0 0 0 0
+281	5005 19 2 2 0 0 1 1651856244 1651856244 1651856244 2.7286290508418e+18
+282	5024 19 2 2 0 0 1 1702453612 1702453612 1702453612 2.8983483010118e+18
+283	5043 19 2 2 0 0 1 1634882674 1634882674 1634882674 2.6728413577454e+18
+284	5062 19 2 2 0 0 1 1701016430 1701016430 1701016430 2.8934568951299e+18
+285	5081 19 2 2 0 0 1 1919252073 1919252073 1919252073 3.6835285197148e+18
+286	5100 17 2 2 0 0 1 19526441 19526441 19526441 3.8128189812648e+14
+305	5117 20 0 0 0 0 2 0 0 0 0
+306	5137 20 0 0 0 0 2 0 0 0 0
+582	5157 16 5 5 0 0 1 9021192 9021192 9021192 81381905100864
+583	5173 16 5 5 0 0 1 9021192 9021192 9021192 81381905100864
+584	5189 18 5 5 0 0 1 181191416 181191416 181191416 3.2830329232085e+16
+585	5207 18 5 5 0 0 1 181191416 181191416 181191416 3.2830329232085e+16
+586	5225 10 5 5 0 0 1 0 0 0 0
+587	5235 18 5 5 0 0 1 380425216 380425216 380425216 1.4472334496865e+17
+620	5253 20 0 0 0 0 2 0 0 0 0
+621	5273 20 0 0 0 0 2 0 0 0 0
+897	5293 10 7 7 0 0 1 0 0 0 0
+898	5303 10 7 7 0 0 1 0 0 0 0
+899	5313 10 7 7 0 0 1 0 0 0 0
+900	5323 10 7 7 0 0 1 0 0 0 0
+901	5333 10 7 7 0 0 1 0 0 0 0
+902	5343 10 7 7 0 0 1 0 0 0 0
+935	5353 20 0 0 0 0 2 0 0 0 0
+936	5373 20 0 0 0 0 2 0 0 0 0
+1212	5393 11 9 9 0 0 1 0 0 0 0
+1213	5404 11 9 9 0 0 1 0 0 0 0
+1214	5415 11 9 9 0 0 1 0 0 0 0
+1215	5426 11 9 9 0 0 1 0 0 0 0
+1216	5437 11 9 9 0 0 1 0 0 0 0
+1217	5448 11 9 9 0 0 1 0 0 0 0

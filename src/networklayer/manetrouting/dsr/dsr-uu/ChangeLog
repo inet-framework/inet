@@ -1,0 +1,15 @@
+0.1:
+	* Initial release.
+0.2:	
+	* Added spec file.
+	* Compilation fixes for kernel 2.6.12 on FC4 
+	* Fixed segmentation fault on module load on newer 2.4 kernels.
+	* Fixed bug in dsr_srt_find_addr that made automatic route
+	shortening not always work.
+	* Properly initialize grat_rrep_tbl.
+	* Fixed locking bugs in dsr-rreq.c
+	* Compile fixes for kernel > 2.6.14
+	* DSR now doesn't attach to a slave device until receiving a
+	NETDEV_REGISTER event for that device.
+	* Non IP packets are now freed in dsr_dev_start_xmit() and the
+	dsr_dev usage count should be correct when unregistering the device.

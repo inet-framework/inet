@@ -43,10 +43,10 @@ enum IPProtocolId
     IP_PROT_RSVP = 46;
     IP_PROT_IPv6_ICMP = 58;
     IP_PROT_NONE = 59;
-  //IP_PROT_IPv6_MOBILITY = 62;
     IP_PROT_OSPF = 89;
     IP_PROT_SCTP = 132;
-    IP_PROT_MANET = 254; //XXX Use for simplicity
+    IP_PROT_DSR  = 48;
+    IP_PROT_MANET = 138;
 
     IP_PROT_IPv6EXT_HOP = 0;       // Hop-by-hop option header.
     IP_PROT_IPv6EXT_DEST = 60;     // Destination options header.

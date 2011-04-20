@@ -181,6 +181,8 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(reply->getControlInfo());
     IPAddress src = ctrl->getSrcAddr();
     IPAddress dest = ctrl->getDestAddr();
+    // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the IP layer
+    ctrl->setInterfaceId(-1);
     ctrl->setSrcAddr(dest);
     ctrl->setDestAddr(src);
 

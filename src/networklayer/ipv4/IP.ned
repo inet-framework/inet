@@ -89,6 +89,7 @@ simple IP
         int multicastTimeToLive = default(32);
         string protocolMapping;
         double fragmentTimeout @unit("s") = default(60s);
+        bool forceBroadcast = default(false);
         @display("i=block/routing");
     gates:
         input transportIn[] @labels(IPControlInfo/down,TCPSegment,UDPPacket);

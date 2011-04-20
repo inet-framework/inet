@@ -140,10 +140,13 @@ packet IPDatagram
     unsigned char diffServCodePoint;
 
     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
-                                                         //#FIXME also: the RFC says that more than one IP Option is allowed
+                                                         //#FIXME also: the RFC says that more than one IP-Option is allowed
     IPRecordRouteOption recordRoute;
     IPTimestampOption timestampOption;
     IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
+    
+    // Virtual value, used by the new fragment mechanism
+    unsigned int totalPayloadLength;
 }
 
 

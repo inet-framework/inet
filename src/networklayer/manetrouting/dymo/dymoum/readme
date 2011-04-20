@@ -1,0 +1,258 @@
+DYMOUM 'README' file
+
+
+This information is also available from our MASIMUM website. On-line version
+could be more updated than this, check it at:
+
+                   http://masimum.inf.um.es/?Software:DYMOUM
+
+
+==============
+ Introduction
+==============
+
+DYMOUM is an implementation of the DYMO (Dynamic Manet On-demand) routing
+protocol both for Linux kernels and the ns2 network simulator. The code is
+released under the terms of the GNU General Public License (GPL).
+
+Linux and ns2 versions use almost the same code, which has been written in C
+and C++ programming languages. Linux version runs as a user space daemon which
+communicates with kernel space via netlink sockets. Only a little module is
+needed to be run in kernel space. User's kernel must have Netfilter support to
+run DYMOUM. Our code is inspired on AODVUU, a well-known AODV implementation
+for Linux and ns2.
+
+DYMOUM has been succesfully tested on real (but simple) ad hoc scenarios as
+well as on the ns2 network simulator.
+
+
+==============
+   Features
+==============
+
+* IPv4 only
+* Highly compliant with latest DYMO spec
+* Linux version
+      o Kernels 2.4 and 2.6 support
+      o Multiple network interfaces support
+      o Configurable from command line parameters
+      o Debug information through syslog and /proc systems
+   
+* ns2 version
+      o Support for latest ns2 releases
+      o MAC layer feedback support
+      o Configurable from TCL scripts
+      o Debug information
+
+
+==============
+ Installation
+==============
+
+---------------
+ Linux version
+---------------
+
+To install DYMOUM you need to have the source code of your installed kernel.
+The kernel must have Netfilter support (this is enabled by default in most
+Linux distributions; if your kernel has this feature disabled, you'll need to
+recompile it).
+
+Download the latest DYMOUM version from SourceForge.net
+(http://sourceforge.net/projects/dymoum/). Then execute the followings steps
+(substitute "0.1" for the version number of the software you have downloaded):
+
+$ tar zxvf dymoum-0.1.tgz
+$ cd dymoum-0.1
+$ make
+$ make install   # as root
+
+---------------
+  ns2 version
+---------------
+
+We assume that you have downloaded and unpackaged the allinone distribution of
+ns2 (any of the versions supported by DYMOUM). Copy dymoum-0.1.tgz to
+ns-allinone-2.28/ns-2.28/ (change "2.28" to your ns version number), and then
+do:
+
+$ cd ns-allinone-2.28/ns-2.28/
+$ tar zxvf dymoum-0.1.tgz
+$ ln -s ./dymoum-0.1 ./dymoum
+$ patch -p1 < dymoum/dymoum_ns-2.28_v0.1.patch
+
+If you haven't installed ns2 yet, then do the following:
+
+$ cd ..
+$ ./install
+
+On the other hand, if you are installing DYMOUM on a running installation of
+ns2:
+
+$ ./configure
+$ make distclean
+$ ./configure
+$ make
+
+NOTE: code should work on previous versions of ns2, but only patches for the
+latest ones are provided.
+
+
+==============
+    Using
+==============
+
+Before you learn how to use and configure DYMOUM, let's take a look to its
+default configuration.
+
+Path accumulation is enabled by default. This means that a node appends its own
+routing information to every RE it forwards. Hopefully this may avoid future
+route discoveries. However, the latest DYMO drafts advise not to activate this
+option unless there is an administrative decision behind. So, you could be
+interested in disabling this behavior following instructions in following
+subsections.
+
+When a route discovery fails (a RREQ is sent but no RREP is received), DYMOUM
+inmediately considers that there is no such route. This default behavior may be
+changed in order to retry a fixed number of route discoveries following a
+binary exponential backoff algorithm (see latest specs for further information).
+
+---------------
+ Linux version
+---------------
+
+By compiling and installing the software you get two different objects: an
+executable file called dymod which runs in user space, and a loadable kernel
+module called kdymo{.o|.ko} which deals with kernel space operations. You only
+need to launch dymod to get DYMOUM running.
+
+To get a full list of options supported by DYMOUM, execute (always as root):
+
+$ dymod -h   # or, alternatively...
+$ dymod --help
+
+Let's see some common invocations of DYMOUM. To execute the protocol on
+interface wlan0 just type:
+
+$ dymod -i wlan0
+
+If we are interested in several network interfaces, we just have to indicate
+them with a comma-separated list. See next example, where we also want to
+reissue RREQs following an exponential backoff algorithm when the first route
+discovery fails:
+
+$ dymod -r -i wlan0,eth1
+
+To put the software in daemon mode use the following command:
+
+$ dymod -d -i wlan0,wlan1
+
+Next invocation disables the path accumulation feature and enables the verbose
+mode, where lot of debugging information is generated:
+
+$ dymod -v -n -i eth1
+
+You can also avoid unidirectional links if nodes blacklist the neighbors which
+didn't send a unicast packet (ICMP ECHOREPLY messages are used within this
+implementation) when the S-bit of the DYMO header is set. To set the S-bit:
+
+$ dymod -s -i wlan0
+
+To monitor the link status with the neighbors, you must specify the interval at
+which HELLO messages are sent out:
+
+$ dymod -m 1 -i eth0
+
+Debug information is generated via syslog subsystem. Depending on your syslog
+configuration, dymod messages may be directed to /var/log/daemon.log,
+/var/log/syslog or something like that. If DYMOUM is not executed in daemon
+mode and verbose output is enabled, then debugging messages are also printed
+out to stderr.
+
+From /proc subsystem you can also obtain a little bit of information regarding
+the loadable kernel module execution. On file /proc/net/kdymo (or something
+similar, depending on your configuration) you will find the number of packet
+drops and the current number of data packets inside the queue.
+
+---------------
+  ns2 version
+---------------
+
+DYMOUM can be used like any other routing agent in ns2, so you can use
+node-config command to attach our routing agent to the mobile nodes which are
+to be created:
+
+$ns_ node-config -adhocRouting DYMOUM
+
+After creating your mobile nodes, now you can configure each DYMOUM routing
+agent individually or all at once. But first we'll see the configuration
+options of DYMOUM:
+
+    * debug_        : Print debugging messages on stdout
+    * no_path_acc_  : Disable path accumulation
+    * reissue_rreq_ : Try more route discoveries when it fails the first time
+    * s_bit_        : Set S-bit of DYMO header
+    * hello_ival_   : Specify the interval between HELLO messages. If set to 0
+                      or not indicated, neighborhood monitoring is performed
+                      via link layer feedback
+
+To configure all agents, put sentences like these:
+
+Agent/DYMOUM set debug_ true
+Agent/DYMOUM set reissue_rreq_ false
+Agent/DYMOUM set hello_ival_ 1
+
+To configure a single agent:
+
+set ra [$mobilenode agent 255]
+$ra set reissue_rreq_ true
+$ra set no_path_acc_ true
+
+Once you have performed your simulations, you get a trace file where you can
+see what happened during the execution. Let's see with some examples the format
+of the traces generated by DYMOUM. Following examples use the classic notation
+of ns2 trace files. However, tagged and new trace formats are also supported.
+
+s 6.053808264 _15_ RTR  --- 1 DYMOUM 48 [0 0 0 0] ------- [15:255 -1:255 1 0]
+        [ RE 0 0 28 10 0 1 21 0 0 [0 0 0 15 2] ]
+
+The line above indicates that node 15 is sending a DYMOUM packet (size of 48
+bytes) with a RE message. Specific information about the DYMOUM message is in
+the end of the line (from "RE" to the end): m bit, h bits, length, ttl, i bit,
+a bit, target address, target sequence number and thopcnt. Inside the final
+brackets there is a routing block with the following fields: g bit, prefix, hop
+count, node address and node sequence number. When path accumulation is
+enabled, more than one of these blocks are appended to the RE.
+
+r 10.712966365 _2_ RTR  --- 249 DYMOUM 32 [0 ffffffff 11 800] -------
+        [17:255 -1:255 1 0] [ RERR 0 0 12 10 0 [32 3] ]
+
+Now node 2 is receiving a RERR with following fields: m bit, h bits, length,
+ttl and i bit. The latest block inside the brackets contains: unode address and
+unode sequence number.
+
+s 10.007533000 _1_ RTR  --- 4 DYMOUM 28 [0 0 0 0] ------- [1:255 2:255 1 2]
+[ ECHOREPLY 8 ]
+
+When the S-bit is set in a reply (RE with A-bit disabled), the receiving node
+must send a unicast packet to the sender. This implementation uses ICMP
+ECHOREPLY messages, but for convenience we include these messages as if they
+were part of the DYMO protocol. The line above shows how node 1 is sending a
+ECHOREPLY with 8 bytes of length.
+
+
+UERR messages should not be generated right now because all message types are
+supported. Anyway, they would look like:
+
+UERR m h len target_address uelem_target_address uerr_node_address uelem_type
+
+
+==============
+   Author(s)
+==============
+
+Please send any comment or bug report to:
+
+* Francisco J. Ros <fjrm@dif.um.es>. Project administrator and main
+  developer.
+
