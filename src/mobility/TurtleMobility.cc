@@ -103,7 +103,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         {
             n = (long) getValue(nAttr);
             if (n<0)
-                error("<repeat>: negative repeat count at %s", stmt->getSourceLocation());
+                throw cRuntimeError("<repeat>: negative repeat count at %s", stmt->getSourceLocation());
         }
         loopVars.push(n);
     }
@@ -123,7 +123,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (yAttr)
             targetPos.y = pos.y = getValue(yAttr);
         if (speed<=0)
-            error("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
         if (bpAttr)
         {
             if (!strcmp(bpAttr,"reflect"))
@@ -135,7 +135,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             else if (!strcmp(bpAttr,"error"))
                 borderPolicy = RAISEERROR;
             else
-                error("<set>: value for attribute borderPolicy is invalid, should be "
+                throw cRuntimeError("<set>: value for attribute borderPolicy is invalid, should be "
                       "'reflect', 'wrap', 'placerandomly' or 'error' at %s",
                       stmt->getSourceLocation());
         }
@@ -145,7 +145,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *dAttr = stmt->getAttribute("d");
         const char *tAttr = stmt->getAttribute("t");
         if (!dAttr && !tAttr)
-            error("<forward>: must have at least attribute 't' or 'd' (or both) at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<forward>: must have at least attribute 't' or 'd' (or both) at %s", stmt->getSourceLocation());
         double d, t;
         if (tAttr && dAttr)
         {
@@ -166,9 +166,9 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             d = speed * t;
         }
         if (t<0)
-            error("<forward>: time (attribute t) is negative at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<forward>: time (attribute t) is negative at %s", stmt->getSourceLocation());
         if (d<0)
-            error("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
         // FIXME handle zeros properly...
         targetPos.x += d * cos(PI * angle / 180);
         targetPos.y += d * sin(PI * angle / 180);
@@ -178,17 +178,17 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
     {
         const char *angleAttr = stmt->getAttribute("angle");
         if (!angleAttr)
-            error("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
         angle += getValue(angleAttr);
     }
     else if (!strcmp(tag,"wait"))
     {
         const char *tAttr = stmt->getAttribute("t");
         if (!tAttr)
-            error("<wait>: required attribute 't' missing at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: required attribute 't' missing at %s", stmt->getSourceLocation());
         double t = getValue(tAttr);
         if (t<0)
-            error("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
         targetTime += t;  // targetPos is unchanged
     }
     else if (!strcmp(tag,"moveto"))
@@ -203,7 +203,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
         double t = tAttr ? getValue(tAttr) : pos.distance(targetPos)/speed;
         if (t<0)
-            error("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
         targetTime += t;
     }
     else if (!strcmp(tag,"moveby"))
@@ -218,7 +218,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
         double t = tAttr ? getValue(tAttr) : pos.distance(targetPos)/speed;
         if (t<0)
-            error("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
         targetTime += t;
     }
 }

@@ -40,7 +40,7 @@ void BonnMotionMobility::initialize(int stage)
 
         vecp = bmFile->getLine(nodeId);
         if (!vecp)
-            error("invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
+            throw cRuntimeError("invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
         vecpos = 0;
 
         // obtain initial position

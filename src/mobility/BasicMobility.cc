@@ -75,7 +75,7 @@ void BasicMobility::initialize(int stage)
 
         // check validity of position
         if (pos.x < 0 || pos.y < 0 || pos.x >= pgs.x || pos.y >= pgs.y)
-            error("node position (%d,%d) is outside the playground", pos.x, pos.y);
+            throw cRuntimeError("node position (%d,%d) is outside the playground", pos.x, pos.y);
 
         // adjusting the display string is no longer needed (Andras)
 
@@ -87,7 +87,7 @@ void BasicMobility::initialize(int stage)
 void BasicMobility::handleMessage(cMessage * msg)
 {
     if (!msg->isSelfMessage())
-        error("mobility modules can only receive self messages");
+        throw cRuntimeError("mobility modules can only receive self messages");
 
     handleSelfMsg(msg);
 }
@@ -190,7 +190,7 @@ void BasicMobility::raiseErrorIfOutside()
 {
     if (pos.x<0 || pos.x>=getPlaygroundSizeX() || pos.y<0 || pos.y>=getPlaygroundSizeY())
     {
-        error("node moved outside the playground of size %gx%g (x=%g,y=%g)",
+        throw cRuntimeError("node moved outside the playground of size %gx%g (x=%g,y=%g)",
               getPlaygroundSizeX(), getPlaygroundSizeY(), pos.x, pos.y);
     }
 }

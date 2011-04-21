@@ -46,7 +46,7 @@ void LineSegmentsMobilityBase::beginNextMove(cMessage *msg)
     setTargetPosition();
 
     if (targetTime<now)
-        error("LineSegmentsMobilityBase: targetTime<now was set in %s's beginNextMove()", getClassName());
+        throw cRuntimeError("LineSegmentsMobilityBase: targetTime<now was set in %s's beginNextMove()", getClassName());
 
     if (stationary)
     {
