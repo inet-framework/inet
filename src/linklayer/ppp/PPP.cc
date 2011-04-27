@@ -282,10 +282,10 @@ void PPP::handleMessage(cMessage *msg)
         {
             // pass up payload
             PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
-            cPacket *payload = decapsulate(pppFrame);
             emit(rxPkBytesOkSignal, (long)(pppFrame->getByteLength()));
+            cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
-            emit(passedUpPkBytesSignal, (long)(pppFrame->getByteLength()));
+            emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
             send(payload,"netwOut");
         }
     }
