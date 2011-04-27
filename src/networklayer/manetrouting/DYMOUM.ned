@@ -18,6 +18,7 @@
 package inet.networklayer.manetrouting;
 
 import inet.networklayer.manetrouting.base.BaseRouting;
+import inet.base.manetrouting.IManetRouting;
 
 
 //

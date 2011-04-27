@@ -15,7 +15,7 @@
 
 package inet.nodes.wireless;
 
-import inet.networklayer.manetrouting.IManetRouting;
+import inet.base.manetrouting.IManetRouting;
 
 //
 // A wireless host containing routing, mobility and battery components.
@@ -34,7 +34,7 @@ module AdhocHost extends WirelessHost
 {
     @display("i=device/cellphone");
     wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");  // use adhoc management
-    string routingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman","DummyManetRouting") = default("");  // used mobile routing protocol. see: inet.networklayer.manetrouting
+    string routingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman") = default("");  // used mobile routing protocol. see: inet.networklayer.manetrouting
     submodules:
         manetrouting: <routingProtocol> like IManetRouting if routingProtocol != "" {
             @display("p=159,287");

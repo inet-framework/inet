@@ -27,7 +27,10 @@
 #include "IPDatagram.h"
 #include "IPFragBuf.h"
 #include "ProtocolMap.h"
+
+#ifdef WITH_MANET
 #include "ControlManetRouting_m.h"
+#endif
 
 
 class ARPPacket;
@@ -151,7 +154,9 @@ class INET_API IP : public QueueBase
      */
     virtual void sendDatagramToOutput(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr);
 
+#ifdef WITH_MANET
     virtual void controlMessageToManetRouting(int,IPDatagram *datagram);
+#endif
     virtual void dsrFillDestIE(IPDatagram *, InterfaceEntry *&destIE,IPAddress &nextHopAddress);
 
     const IPRouteRule * checkInputRule(const IPDatagram*);

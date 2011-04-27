@@ -361,6 +361,34 @@
         linkerFlags = ""
         />
     <feature
+        id="MANET"
+        name="MANET routing"
+        description = "AdHoc MANET routing support (AODV, BATMAN, DSR, DSDV, DYMO, DYMO_FAU, OLSR)"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6 UDP _80211"
+        labels = "routing manet"
+        nedPackages = "
+                       inet.networklayer.manetrouting
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_MANET"
+        linkerFlags = ""
+        />
+    <feature
+        id="MANET_examples"
+        name="MANET routing examples"
+        description = "Eyamples for the MANET routing protocols"
+        initiallyEnabled = "true"
+        requires = "MANET"
+        labels = "routing manet examples"
+        nedPackages = "
+                       inet.examples.manetrouting
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="mobility"
         name="Mobility"
         description = "Mobility support for wireless simulations"
@@ -408,7 +436,7 @@
         name="802.11b (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
         initiallyEnabled = "true"
-        requires = "mobility radio"
+        requires = "mobility radio TCP_BASE"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211

@@ -18,6 +18,8 @@
 package inet.networklayer.manetrouting;
 
 import inet.networklayer.manetrouting.base.BaseRouting;
+import inet.base.manetrouting.IManetRouting;
+
 
 //
 // Optimized Link State Routing Protocol 
@@ -36,20 +38,20 @@ simple Batman extends BaseRouting like IManetRouting
 {
     parameters:
         @class(Batman);
-        int debugLevel=default(1);
-        double purgeTimeout @unit(s)=default(200s);
-        double originatorInterval @unit(s)=default(1s);
-        string preferedGateWay=default("0.0.0.0");
-        int routingClass=default(0);
-        bool  agregationEnable=default(true);
-        int GWClass_download_speed=default(0);
-        int GWClass_upload_speed=default(0);
-        volatile double jitter @unit(s)=default (uniform (0s,0.1s));
-        volatile double jitter2 @unit(s)=default (uniform (-0.1s,0.1s)); 
-        double MAX_AGGREGATION_MS @unit(s)=default (0.1s);
-        int MAX_AGGREGATION_BYTES  @unit(B) = default(512B);
-        double desynchronized @unit(s)=default (0s);
-        volatile double broadCastDelay @unit("s") = default (uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time)
+        int debugLevel = default(1);
+        double purgeTimeout @unit(s) = default(200s);
+        double originatorInterval @unit(s) = default(1s);
+        string preferedGateWay = default("0.0.0.0");
+        int routingClass = default(0);
+        bool agregationEnable = default(true);
+        int GWClass_download_speed = default(0);
+        int GWClass_upload_speed = default(0);
+        volatile double jitter @unit(s) = default(uniform (0s,0.1s));
+        volatile double jitter2 @unit(s) = default(uniform (-0.1s,0.1s));
+        double MAX_AGGREGATION_MS @unit(s) = default(0.1s);
+        int MAX_AGGREGATION_BYTES @unit(B) = default(512B);
+        double desynchronized @unit(s) = default(0s);
+        volatile double broadCastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time)
     gates:
         input from_ip;
         output to_ip;

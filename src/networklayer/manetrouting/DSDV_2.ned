@@ -17,6 +17,9 @@
 
 package inet.networklayer.manetrouting;
 
+import inet.base.manetrouting.IManetRouting;
+
+
 // 
 // Implements Destination-Sequenced Distance Vector.
 //

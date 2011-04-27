@@ -17,6 +17,9 @@
 
 package inet.networklayer.manetrouting;
 
+import inet.base.manetrouting.IManetRouting;
+
+
 // 
 // Ad hoc Dynamic Source Routing Routing (rfc4728)
 //
