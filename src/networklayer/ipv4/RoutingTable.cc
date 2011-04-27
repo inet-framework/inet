@@ -164,9 +164,9 @@ void RoutingTable::updateDisplayString()
 
     char buf[80];
     if (routerId.isUnspecified())
-        sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
+        sprintf(buf, "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
     else
-        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
+        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), (int)routes.size(), (int)multicastRoutes.size());
     getDisplayString().setTagArg("t",0,buf);
 }
 
