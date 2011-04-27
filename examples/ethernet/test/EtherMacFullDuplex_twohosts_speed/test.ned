@@ -2,13 +2,13 @@
 package inet.examples.ethernet.test.EtherMacFullDuplex_twohosts_speed;
 
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostQ;
+import inet.nodes.ethernet.EtherHost;
 
 
-module EtherHostFullDuplexQ extends EtherHostQ
+module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
-        macType = "EtherMACFullDuplex";
+		csmacdSupported = false;
 }
 
 network SpeedTest

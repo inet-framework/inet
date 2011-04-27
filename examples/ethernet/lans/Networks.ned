@@ -271,20 +271,20 @@ channel ethernetline extends DatarateChannel
         datarate = 10Mbps;
 }
 
-module EtherHostFullDuplex extends EtherHost
-{
-    parameters:
-        macType = "EtherMACFullDuplex";
-}
-
-module EtherSwitchFullDuplex extends EtherSwitch
-{
-    parameters:
-        macType = "EtherMACFullDuplex";
-}
-
 network SwitchedDuplexLAN
 {
+    types:
+        module EtherHostFullDuplex extends EtherHost
+        {
+            parameters:
+                csmacdSupported = false;
+        }
+        
+        module EtherSwitchFullDuplex extends EtherSwitch
+        {
+            parameters:
+                csmacdSupported = false;
+        }
     submodules:
         hostA: EtherHostFullDuplex {
             parameters:

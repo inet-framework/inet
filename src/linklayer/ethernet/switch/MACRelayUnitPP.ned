@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-package inet.linklayer.etherswitch;
+package inet.linklayer.ethernet.switch;
 
 import inet.linklayer.IMACRelayUnit;
 
 
 //
-// A ~IMACRelayUnit implementation which models one or more CPUs
-// with shared memory, working from a single shared queue.
+// A ~IMACRelayUnit implementation which models one CPU assigned to each
+// incoming port, working with shared memory but separate queues.
 //
 // It also models fixed delay for precessing each frame.
 // Finite memory is taken into account by dropping frames if
@@ -36,22 +34,21 @@ import inet.linklayer.IMACRelayUnit;
 // The watermark and the pause time is configurable; use zero
 // values to disable the PAUSE feature.
 //
-simple MACRelayUnitNP like IMACRelayUnit
+simple MACRelayUnitPP like IMACRelayUnit
 {
     parameters:
         int numWirelessPorts = default(0); // see ~IMACRelayUnit
         string addressTableFile = default("");  // see ~IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit
-        int numCPUs = default(1);  // number of CPUs
-        double processingTime @unit("s") = default(0s);  // processing time of one frame
-        int bufferSize @unit("B") = default(1MB);  // memory
-        int highWatermark @unit("B") = default(512KB);  // buffer usage threshold to send PAUSE frame
-        int pauseUnits = default(300);  // time to put in PAUSE frames (in units of 512 bit times)
+        double processingTime @unit("s") = default(0s);   // processing time of one frame
+        int bufferSize @unit("B") = default(1MB);   // memory
+        int highWatermark @unit("B") = default(512KB); // buffer usage threshold to send PAUSE frame
+        int pauseUnits = default(300);       // time to put in PAUSE frames (in units of 512 bit times)
         @display("i=block/switch");
+        @statistic[processedBytes](title="Processed bytes"; record=sum,count,vector);
+        @statistic[droppedBytes](title="Processed bytes"; record=sum,count,vector);
         @statistic[usedBufferBytes](title="Used buffer bytes"; record=histogram,vector);
-        @statistic[processedBytes](title="Processed bytes"; record=count,sum,vector);
-        @statistic[droppedBytes](title="Dropped bytes"; record=count,sum,vector);
     gates:
         input lowerLayerIn[] @labels(EtherFrame);
         output lowerLayerOut[] @labels(EtherFrame);

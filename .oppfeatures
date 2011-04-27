@@ -209,7 +209,6 @@
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
-                       inet.linklayer.etherswitch
                        inet.nodes.ethernet
                       "
         extraSourceFolders = ""

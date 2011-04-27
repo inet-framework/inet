@@ -3,7 +3,7 @@ package inet.examples.ethernet.test.compareMACs;
 
 import ned.DatarateChannel;
 import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHostQ;
+
 
 network CompareMACs
 {
@@ -18,38 +18,42 @@ network CompareMACs
         host_iq_1_F_A: EtherHost {
             parameters:
                 @display("p=70,70");
+                queueType = "NoQueue";
         }
         host_iq_1_F_B: EtherHost {
             parameters:
                 @display("p=210,70");
+                queueType = "NoQueue";
         }
-        host_eq_1_F_A: EtherHostQ {
+        host_eq_1_F_A: EtherHost {
             parameters:
                 @display("p=70,140");
         }
-        host_eq_1_F_B: EtherHostQ {
+        host_eq_1_F_B: EtherHost {
             parameters:
                 @display("p=210,140");
         }
         host_iq_2_F_A: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
                 @display("p=70,210");
+                queueType = "NoQueue";
+                csmacdSupported = false;
         }
         host_iq_2_F_B: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
                 @display("p=210,210");
+                queueType = "NoQueue";
+                csmacdSupported = false;
         }
-        host_eq_2_F_A: EtherHostQ {
+        host_eq_2_F_A: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
                 @display("p=70,280");
+                csmacdSupported = false;
         }
-        host_eq_2_F_B: EtherHostQ {
+        host_eq_2_F_B: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
                 @display("p=210,280");
+                csmacdSupported = false;
         }
 
     connections:

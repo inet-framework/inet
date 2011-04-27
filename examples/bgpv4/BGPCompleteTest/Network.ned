@@ -90,28 +90,24 @@ network BGPTest
         }
         PA3: EtherSwitch {
             parameters:
-                relayUnitType = "MACRelayUnitNP";
                 @display("p=52,86;i=device/switch");
             gates:
                 ethg[3];
         }
         PB1: EtherSwitch {
             parameters:
-                relayUnitType = "MACRelayUnitNP";
                 @display("p=132,302;i=device/switch");
             gates:
                 ethg[3];
         }
         PD1: EtherSwitch {
             parameters:
-                relayUnitType = "MACRelayUnitNP";
                 @display("p=612,78;i=device/switch");
             gates:
                 ethg[3];
         }
         PE1: EtherSwitch {
             parameters:
-                relayUnitType = "MACRelayUnitNP";
                 @display("p=452,318;i=device/switch");
             gates:
                 ethg[3];

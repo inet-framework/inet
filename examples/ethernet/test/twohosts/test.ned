@@ -2,7 +2,7 @@
 package inet.examples.ethernet.test.twohosts;
 
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostQ;
+import inet.nodes.ethernet.EtherHost;
 
 
 network SpeedTest
@@ -24,47 +24,47 @@ network SpeedTest
             datarate = 1000Mbps;
         }
     submodules:
-        host_10_H_A: EtherHostQ {
+        host_10_H_A: EtherHost {
             parameters:
                 mac.duplexEnabled = false;
                 @display("p=70,70");
         }
-        host_10_H_B: EtherHostQ {
+        host_10_H_B: EtherHost {
             parameters:
                 mac.duplexEnabled = false;
                 @display("p=210,70");
         }
-        host_10_F_A: EtherHostQ {
+        host_10_F_A: EtherHost {
             parameters:
                 @display("p=70,140");
         }
-        host_10_F_B: EtherHostQ {
+        host_10_F_B: EtherHost {
             parameters:
                 @display("p=210,140");
         }
-        host_100_H_A: EtherHostQ {
+        host_100_H_A: EtherHost {
             parameters:
                 mac.duplexEnabled = false;
                 @display("p=70,210");
         }
-        host_100_H_B: EtherHostQ {
+        host_100_H_B: EtherHost {
             parameters:
                 mac.duplexEnabled = false;
                 @display("p=210,210");
         }
-        host_100_F_A: EtherHostQ {
+        host_100_F_A: EtherHost {
             parameters:
                 @display("p=70,280");
         }
-        host_100_F_B: EtherHostQ {
+        host_100_F_B: EtherHost {
             parameters:
                 @display("p=210,280");
         }
-        host_1000_F_A: EtherHostQ {
+        host_1000_F_A: EtherHost {
             parameters:
                 @display("p=70,350");
         }
-        host_1000_F_B: EtherHostQ {
+        host_1000_F_B: EtherHost {
             parameters:
                 @display("p=210,350");
         }

@@ -16,14 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-
 package inet.nodes.ethernet;
 
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IEtherMAC;
-
 
 //
 // Model of an Ethernet switch.
@@ -31,16 +27,18 @@ import inet.linklayer.IEtherMAC;
 // The duplexChannel attributes of the MACs must be set according to the
 // medium connected to the port; if collisions are possible (it's a bus or hub)
 // it must be set to false, otherwise it can be set to true.
+// By default used half duples CSMA/CD mac
 //
 // This model does not contain the spanning tree algorithm.
 //
 module EtherSwitch
 {
     parameters:
-        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        bool csmacdSupported = default(true);  // by default use CSMA/CD 
+        string macType = default(csmacdSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
                                                           // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:

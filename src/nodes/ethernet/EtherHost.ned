@@ -19,6 +19,7 @@
 
 package inet.nodes.ethernet;
 
+import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.ethernet.EtherLLC;
 import inet.linklayer.IEtherMAC;
 import inet.applications.ethernet.EtherAppSrv;
@@ -28,18 +29,25 @@ import inet.applications.ethernet.EtherAppCli;
 //
 // An example host with one Ethernet port and traffic generators that
 // generate Ethernet traffic directly. This host model does not contain
-// higher layer protocols (IP, TCP).
+// higher layer protocols (IP, TCP). By default is configured to use
+// half duplex MAC (CSMA/CD).
 //
 module EtherHost
 {
     parameters:
-        string macType = default("EtherMAC"); // ~EtherMAC or ~EtherMACFullDuplex
+        bool csmacdSupported = default(true);  // by default use CSMA/CD 
+        string macType = default(csmacdSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        string queueType = default("DropTailQueue"); // DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
         @node();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
+        queue: <queueType> like IOutputQueue if queueType != "NoQueue" {
+            parameters:
+                @display("p=99,201;q=l2queue");
+        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = true;
@@ -59,13 +67,10 @@ module EtherHost
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = "";
-                @display("p=155,200;q=queue");
+                queueModule = (queueType == "NoQueue" ? "" : "queue");
+                @display("p=155,272;q=queue");
         }
     connections:
-        llc.lowerLayerIn <-- mac.upperLayerOut;
-        llc.lowerLayerOut --> mac.upperLayerIn;
-
         mac.phys <--> ethg;
 
         cli.out --> llc.upperLayerIn[0];
@@ -73,5 +78,8 @@ module EtherHost
 
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
+        llc.lowerLayerOut --> queue.in if queueType != "NoQueue";
+        queue.out --> mac.upperLayerIn if queueType != "NoQueue";
+        llc.lowerLayerOut --> mac.upperLayerIn if queueType == "NoQueue";
+        mac.upperLayerOut --> llc.lowerLayerIn;
 }
-

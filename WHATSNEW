@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+- Ethernet switch moved under the linklayer/ethernet/switch directory. EtherHostQ is now
+  EtherHost. To have no queue in the enthernet host specify queueType="NoQueue".
+  In EtherSwitch, EtherHost and inside the EthernetInterface (nic) the csmacdSupported
+  parameter can be used to switch between the full (EtherMAC) and the simplified 
+  (EtherMACFullDuplex) implementation.
+
 - Added a new Ieee802.11 model, merged back from  the INETMANET fork. It supports
   Ieee802.11 a,b,g,e,p protocols.
 

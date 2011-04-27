@@ -3,7 +3,6 @@ package inet.examples.ethernet.test.burstTests;
 
 import ned.DatarateChannel;
 import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherHostQ;
 
 network BurstTests
 {
@@ -15,38 +14,39 @@ network BurstTests
         }
 
     submodules:
-        host_1_H_A: EtherHostQ {
+        host_1_H_A: EtherHost {
             parameters:
                 @display("p=70,70");
         }
-        host_1_H_B: EtherHostQ {
+        host_1_H_B: EtherHost {
             parameters:
                 @display("p=210,70");
         }
-        host_1_F_A: EtherHostQ {
+        host_1_F_A: EtherHost {
             parameters:
                 @display("p=70,140");
         }
-        host_1_F_B: EtherHostQ {
+        host_1_F_B: EtherHost {
             parameters:
                 @display("p=210,140");
         }
-        host_2_H_A: EtherHostQ {
+        host_2_H_A: EtherHost {
             parameters:
                 @display("p=70,210");
         }
         host_2_H_B: EtherHost {
             parameters:
                 @display("p=210,210");
+                queueType = "NoQueue";
         }
-        host_2_F_A: EtherHostQ {
+        host_2_F_A: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                csmacdSupported = false;
                 @display("p=70,280");
         }
-        host_2_F_B: EtherHostQ {
+        host_2_F_B: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                csmacdSupported = false;
                 @display("p=210,280");
         }
 

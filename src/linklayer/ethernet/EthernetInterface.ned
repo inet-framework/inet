@@ -35,8 +35,8 @@ import inet.base.IHook;
 module EthernetInterface like IWiredNic
 {
     parameters:
-        bool halfDuplexSupported = default(false);  // by default no CSMA/CD so only only point-to-point duplex links are supported.
-        string macType = default(halfDuplexSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        bool csmacdSupported = default(false);  // by default no CSMA/CD so only only point-to-point duplex links are supported.
+        string macType = default(csmacdSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("DropTailQueue"); // DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
