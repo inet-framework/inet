@@ -27,14 +27,14 @@ package inet.nodes.inet;
 //   a full/half duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
 //   by the numRadios parameter. Wirless card type is configured by the
-//   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other 
+//   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessNic
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
 //   **.ext.typename in the INI file. see: ~ExtInerface and ~IExternalNic
-// - PPP interface type can be set using **.ppp.typename see: ~PPPInterface 
+// - PPP interface type can be set using **.ppp.typename see: ~PPPInterface
 //   and ~PPPInterfaceNoQueue
-// - If wireless card is present, node mobility can be set using **.mobility.type-name
+// - If wireless card is present, node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
 //
 module Router extends NodeBase

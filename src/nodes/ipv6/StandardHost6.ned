@@ -35,9 +35,9 @@ module StandardHost6 extends NodeBase6
 {
     parameters:
         @display("i=device/pc2");
-        int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].type-name="TCPEchoApp" syntax 
-        int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].type-name="UDPVideoStreamCli" syntax
-        int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].type-name="SCTPServer" syntax
+        int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].typename="TCPEchoApp" syntax
+        int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
+        int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
         string tcpType = default(firstAvailable("TCP", "TCP_lwip", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
