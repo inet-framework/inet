@@ -23,16 +23,16 @@ package inet.nodes.inet;
 // ethernet and ppp ports depend on the external connections.
 // - Can be connected via ethernet interface to other nodes using
 //   the ethg gate. By default full duplex connections are supported
-//   only (twisted pair). Set **.eth.type-name="EthernetInterface" for
+//   only (twisted pair). Set **.eth.typename="EthernetInterface" for
 //   a full/half duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
 //   by the numRadios parameter. Wirless card type is configured by the
-//   **.wlan.type-name parameter. see:  inet.linklayer.ieee80211 or other 
+//   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other 
 //   modules implementing ~IWirelessNic
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
-//   **.ext.type-name in the INI file. see: ~ExtInerface and ~IExtInterface
-// - PPP interface type can be set using **.ppp.type-name see: ~PPPInterface 
+//   **.ext.typename in the INI file. see: ~ExtInerface and ~IExternalNic
+// - PPP interface type can be set using **.ppp.typename see: ~PPPInterface 
 //   and ~PPPInterfaceNoQueue
 // - If wireless card is present, node mobility can be set using **.mobility.type-name
 //   see: inet.mobility and ~IMobility

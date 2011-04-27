@@ -17,7 +17,7 @@
 
 package inet.linklayer;
 
-moduleinterface IExtInterface
+moduleinterface IExternalNic
 {
     gates:
         input netwIn;

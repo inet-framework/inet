@@ -19,9 +19,9 @@ package inet.nodes.inet;
 
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IExtInterface;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.IExternalNic;
 import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 
@@ -93,7 +93,7 @@ module NodeBase
             parameters:
                 @display("p=407,386,row,90;q=txQueue");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExtInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
                 @display("p=547,386,row,90;q=txQueue;i=block/ifcard");
         }
