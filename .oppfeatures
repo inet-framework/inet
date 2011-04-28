@@ -432,13 +432,27 @@
         />
     <feature
         id="_80211"
-        name="802.11b (ad-hoc and infrastructure mode)"
-        description = "IEEE 802.11b ad-hoc and infrastucture mode NIC"
+        name="802.11a/b/g/e (ad-hoc and infrastructure mode)"
+        description = "IEEE 802.11a/b/g/e ad-hoc and infrastucture mode NIC"
         initiallyEnabled = "true"
-        requires = "mobility radio TCP_BASE"
+        requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="_80211_mesh"
+        name="802.11a/b/g/e (mesh networking mode)"
+        description = "IEEE 802.11a/b/g/e NIC supporting mesh networking"
+        initiallyEnabled = "true"
+        requires = "mobility radio TCP_BASE MANET OSPFv2 MPLS UDP IPv4 IPv6"
+        labels = "nic wireless mesh"
+        nedPackages = "
+                       inet.linklayer.ieee80211mesh
                       "
         extraSourceFolders = ""
         compileFlags = ""

@@ -18,6 +18,7 @@
 #ifndef __INET_INTERFACEENTRY_H
 #define __INET_INTERFACEENTRY_H
 
+#include <vector>
 
 #include "INETDefs.h"
 
@@ -33,6 +34,15 @@ class IInterfaceTable;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
+
+class INET_API MacEstimateCostProcess
+{
+public:
+	virtual double getCost(int,MACAddress &)=0;
+	virtual double getNumCost()=0;
+	virtual int getNumNeighbors()=0;
+	virtual int getNeighbors(MACAddress [])=0;
+};
 
 /**
  * Base class for protocol-specific data on an interface.
@@ -87,6 +97,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     InterfaceProtocolData *protocol3data; ///< extension point: data for a 3rd network-layer protocol
     InterfaceProtocolData *protocol4data; ///< extension point: data for a 4th network-layer protocol
+    std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
     // copying not supported: following are private and also left undefined
@@ -163,6 +174,12 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setIPv6Data(IPv6InterfaceData *p);
     virtual void setProtocol3Data(InterfaceProtocolData *p)  {protocol3data = p; configChanged();}
     virtual void setProtocol4Data(InterfaceProtocolData *p)  {protocol4data = p; configChanged();}
+    //@}
+
+    /** @name access to the cost process estimation  */
+    //@{
+    virtual bool setEstimateCostProcess(int,MacEstimateCostProcess *p);
+    virtual MacEstimateCostProcess* getEstimateCostProcess(int);
     //@}
 };
 

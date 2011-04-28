@@ -25,7 +25,6 @@
 // uncomment this if you do not want to log state machine transitions
 #define FSM_DEBUG
 
-#include <list>
 #include "WifiMode.h"
 #include "WirelessMacBase.h"
 #include "IPassiveQueue.h"
@@ -34,10 +33,6 @@
 #include "NotificationBoard.h"
 #include "RadioState.h"
 #include "FSMA.h"
-#include "TCPSegment.h"
-#include "IPDatagram.h"
-#include "ICMPMessage.h"
-#include "UDPPacket.h"
 #include "IQoSClassifier.h"
 
 /**

@@ -65,6 +65,7 @@ InterfaceEntry::InterfaceEntry()
     ipv6data = NULL;
     protocol3data = NULL;
     protocol4data = NULL;
+    estimateCostProcessArray.clear();
 }
 
 std::string InterfaceEntry::info() const
@@ -159,3 +160,23 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #endif
 }
 
+bool InterfaceEntry::setEstimateCostProcess(int position,MacEstimateCostProcess *p)
+{
+	if(estimateCostProcessArray.size()<=position)
+	{
+		estimateCostProcessArray.resize(position+1,NULL);
+	}
+	if (estimateCostProcessArray[position]!=NULL)
+		return false;
+	estimateCostProcessArray[position]=p;
+	return true;
+}
+
+MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
+{
+	if(position <estimateCostProcessArray.size())
+	{
+		return estimateCostProcessArray[position];
+	}
+	return NULL;
+}
