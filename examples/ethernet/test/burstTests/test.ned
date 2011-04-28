@@ -37,7 +37,6 @@ network BurstTests
         host_2_H_B: EtherHost {
             parameters:
                 @display("p=210,210");
-                queueType = "NoQueue";
         }
         host_2_F_A: EtherHost {
             parameters:

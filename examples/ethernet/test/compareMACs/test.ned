@@ -18,42 +18,42 @@ network CompareMACs
         host_iq_1_F_A: EtherHost {
             parameters:
                 @display("p=70,70");
-                queueType = "NoQueue";
         }
         host_iq_1_F_B: EtherHost {
             parameters:
                 @display("p=210,70");
-                queueType = "NoQueue";
         }
         host_eq_1_F_A: EtherHost {
             parameters:
                 @display("p=70,140");
+                queueType = "DropTailQueue";
         }
         host_eq_1_F_B: EtherHost {
             parameters:
                 @display("p=210,140");
+                queueType = "DropTailQueue";
         }
         host_iq_2_F_A: EtherHost {
             parameters:
                 @display("p=70,210");
-                queueType = "NoQueue";
                 csmacdSupported = false;
         }
         host_iq_2_F_B: EtherHost {
             parameters:
                 @display("p=210,210");
-                queueType = "NoQueue";
                 csmacdSupported = false;
         }
         host_eq_2_F_A: EtherHost {
             parameters:
                 @display("p=70,280");
                 csmacdSupported = false;
+                queueType = "DropTailQueue";
         }
         host_eq_2_F_B: EtherHost {
             parameters:
                 @display("p=210,280");
                 csmacdSupported = false;
+                queueType = "DropTailQueue";
         }
 
     connections:
