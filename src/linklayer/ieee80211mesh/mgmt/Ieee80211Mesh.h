@@ -61,7 +61,7 @@ private:
     double multipler_active_break;
     simtime_t timer_active_refresh;
     bool activeMacBreak;
-    int macBaseGateId;  // id of the nicOut[0] gate
+    int macBaseGateId;  // id of the nicOut[0] gate  // FIXME macBaseGateId is unused, what is it?
 
     // start routing proccess
     virtual void startReactive();

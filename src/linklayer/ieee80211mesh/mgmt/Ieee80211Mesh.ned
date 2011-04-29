@@ -55,6 +55,8 @@ simple Ieee80211Mesh like IIeee80211Mgmt
         output uppergateOut @labels(Ieee802Ctrl/up);
         input fromEthernet @labels(Ieee80211Frame);
         output toEthernet @labels(Ieee80211Frame);
-        input macIn[];
-        output macOut[];
+        input macIn;
+        output macOut;
+        input agentIn;   // optional gates used for the agent in stations
+        output agentOut; // optional gates used for the agent in stations
 }

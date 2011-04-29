@@ -123,7 +123,7 @@ void Ieee80211Mesh::initialize(int stage)
     }
     if (stage==4)
     {
-        macBaseGateId = gateSize("macOut")==0 ? -1 : gate("macOut",0)->getId();
+        macBaseGateId = gateSize("macOut")==0 ? -1 : gate("macOut",0)->getId(); // FIXME macBaseGateId is unused, what is it?
         EV << "macBaseGateId :" << macBaseGateId << "\n";
         ift = InterfaceTableAccess ().get();
         nb = NotificationBoardAccess().get();
