@@ -144,6 +144,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 {
     totalFromMAC++;
+    emit(rcvdPkBytesFromMACSignal, (long)(frame->getByteLength()));
 
     // decapsulate it and pass up to higher layers.
     int sap = frame->getDsap();
@@ -172,7 +173,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
     send(higherlayermsg, "upperLayerOut", port);
     totalPassedUp++;
-    emit(passedUpPkBytesSignal, (long)(frame->getByteLength()));
+    emit(passedUpPkBytesSignal, (long)(higherlayermsg->getByteLength()));
     delete frame;
 }
 
