@@ -11,12 +11,13 @@ Testing EtherMac communications
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostQ;
+import inet.nodes.ethernet.EtherHost;
 
 
-module EtherHostFullDuplexQ extends EtherHostQ
+module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
+        queueType = "DropTailQueue";
         macType = "EtherMAC";
         mac.duplexEnabled = true;
 }

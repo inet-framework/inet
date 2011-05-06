@@ -93,24 +93,22 @@ void EtherMAC::initializeFlags()
     physInGate->setDeliverOnReceptionStart(true);
 }
 
-void EtherMAC::handleMessage (cMessage *msg)
+void EtherMAC::handleMessage(cMessage *msg)
 {
-    if (disabled)
-    {
-        EV << "MAC is disabled -- dropping message " << msg << "\n";
-        delete msg;
-        return;
-    }
-
     printState();
+
     // some consistency check
-    if (!duplexMode && transmitState==TRANSMITTING_STATE && receiveState!=RX_IDLE_STATE)
+    if (!duplexMode && transmitState == TRANSMITTING_STATE && receiveState != RX_IDLE_STATE)
         error("Inconsistent state -- transmitting and receiving at the same time");
 
     if (!msg->isSelfMessage())
     {
         // either frame from upper layer, or frame/jam signal from the network
-        if (msg->getArrivalGate() == gate("upperLayerIn"))
+        if (!connected)
+            processMessageWhenNotConnected(msg);
+        else if (disabled)
+            processMessageWhenDisabled(msg);
+        else if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else
             processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
@@ -521,6 +519,22 @@ void EtherMAC::finish()
     recordScalar("rx channel collision (%)", 100*(totalCollisionTime/t));
     recordScalar("collisions",     numCollisions);
     recordScalar("backoffs",       numBackoffs);
+}
+
+void EtherMAC::refreshConnection(bool connected_par)
+{
+    Enter_Method_Silent();
+
+    EtherMACBase::refreshConnection(connected_par);
+
+    if (!connected)
+    {
+        delete frameBeingReceived;
+        frameBeingReceived = NULL;
+        cancelEvent(endRxMsg);
+        cancelEvent(endBackoffMsg);
+        cancelEvent(endJammingMsg);
+    }
 }
 
 void EtherMAC::updateHasSubcribers()

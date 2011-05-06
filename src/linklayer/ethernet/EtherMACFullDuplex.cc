@@ -54,11 +54,7 @@ void EtherMACFullDuplex::initializeFlags()
 
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
-    if (!connected)
-        processMessageWhenNotConnected(msg);
-    else if (disabled)
-        processMessageWhenDisabled(msg);
-    else if (msg->isSelfMessage())
+    if (msg->isSelfMessage())
     {
         EV << "Self-message " << msg << " received\n";
 
@@ -73,7 +69,11 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
     }
     else
     {
-        if (msg->getArrivalGate() == gate("upperLayerIn"))
+        if (!connected)
+            processMessageWhenNotConnected(msg);
+        else if (disabled)
+            processMessageWhenDisabled(msg);
+        else if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else if (msg->getArrivalGate() == gate("phys$i"))
             processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));

@@ -60,9 +60,9 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         MIN_ETHERNET_FRAME,
         0,
-        0.5/ETHERNET_TXRATE,
-        512.0/ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME/ETHERNET_TXRATE
+        0.5 / ETHERNET_TXRATE,
+        512.0 / ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME / ETHERNET_TXRATE
     },
     {
         FAST_ETHERNET_TXRATE,
@@ -70,9 +70,9 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         MIN_ETHERNET_FRAME,
         0,
-        0.5/FAST_ETHERNET_TXRATE,
-        512.0/ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME/FAST_ETHERNET_TXRATE
+        0.5 / FAST_ETHERNET_TXRATE,
+        512.0 / ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME / FAST_ETHERNET_TXRATE
     },
     {
         GIGABIT_ETHERNET_TXRATE,
@@ -80,9 +80,9 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         GIGABIT_MAX_BURST_BYTES,
         GIGABIT_MIN_FRAME_WITH_EXT,
         MIN_ETHERNET_FRAME,
-        0.5/GIGABIT_ETHERNET_TXRATE,
-        512.0/GIGABIT_ETHERNET_TXRATE,
-        GIGABIT_MIN_FRAME_WITH_EXT/GIGABIT_ETHERNET_TXRATE
+        0.5 / GIGABIT_ETHERNET_TXRATE,
+        512.0 / GIGABIT_ETHERNET_TXRATE,
+        GIGABIT_MIN_FRAME_WITH_EXT / GIGABIT_ETHERNET_TXRATE
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
@@ -90,9 +90,9 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         GIGABIT_MAX_BURST_BYTES,
         GIGABIT_MIN_FRAME_WITH_EXT,
         MIN_ETHERNET_FRAME,
-        0.5/FAST_GIGABIT_ETHERNET_TXRATE,
-        512.0/GIGABIT_ETHERNET_TXRATE,
-        GIGABIT_MIN_FRAME_WITH_EXT/FAST_GIGABIT_ETHERNET_TXRATE
+        0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
+        512.0 / GIGABIT_ETHERNET_TXRATE,
+        GIGABIT_MIN_FRAME_WITH_EXT / FAST_GIGABIT_ETHERNET_TXRATE
     }
 };
 
@@ -105,6 +105,7 @@ simsignal_t EtherMACBase::rxPkBytesFromHLSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::droppedPkBytesNotForUsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
+
 bool EtherMACBase::MacQueue::isEmpty()
 {
     return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
@@ -112,11 +113,15 @@ bool EtherMACBase::MacQueue::isEmpty()
 
 EtherMACBase::EtherMACBase()
 {
-    nb = NULL;
+    lastTxFinishTime = -1.0; // never equals with current simtime.
+    curEtherDescr = &nullEtherDescr;
+    transmissionChannel = NULL;
+    physInGate = NULL;
+    physOutGate = NULL;
     interfaceEntry = NULL;
+    nb = NULL;
     curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
-    lastTxFinishTime = -1.0; // never equals with current simtime.
 }
 
 EtherMACBase::~EtherMACBase()
@@ -132,6 +137,9 @@ void EtherMACBase::initialize()
 {
     physInGate = gate("phys$i");
     physOutGate = gate("phys$o");
+    transmissionChannel = NULL;
+    interfaceEntry = NULL;
+    curTxFrame = NULL;
 
     initializeFlags();
 
@@ -160,6 +168,8 @@ void EtherMACBase::initialize()
     // initalize pause
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
+
+    subscribe(POST_MODEL_CHANGE, this);
 }
 
 void EtherMACBase::initializeQueueModule()
@@ -170,7 +180,9 @@ void EtherMACBase::initializeQueueModule()
         IPassiveQueue *queueModule = check_and_cast<IPassiveQueue *>(module);
         EV << "Requesting first frame from queue module\n";
         txQueue.setExternalQueue(queueModule);
-        txQueue.extQueue->requestPacket();
+
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
     }
     else
     {
@@ -320,8 +332,36 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
 
 void EtherMACBase::refreshConnection(bool connected_par)
 {
-    connected = connected_par;
+    Enter_Method_Silent();
+
     calculateParameters();
+
+    if (!connected)
+    {
+        // cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
+        cancelEvent(endTxMsg);
+        cancelEvent(endIFGMsg);
+        cancelEvent(endPauseMsg);
+
+        if (curTxFrame)
+        {
+            delete curTxFrame;
+            curTxFrame = NULL;
+            lastTxFinishTime = simTime();
+        }
+
+        if (txQueue.extQueue)
+        {
+            txQueue.extQueue->clear();
+            ASSERT(0 == txQueue.extQueue->getNumPendingRequests());
+            txQueue.extQueue->requestPacket();
+        }
+        else
+            txQueue.innerQueue->queue.clear();
+
+        transmitState = TX_IDLE_STATE;
+        receiveState = RX_IDLE_STATE;
+    }
 }
 
 bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
@@ -343,23 +383,29 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
 
 void EtherMACBase::calculateParameters()
 {
-    cChannel *inTrChannel = NULL;
+    ASSERT(physInGate == gate("phys$i"));
+    ASSERT(physOutGate == gate("phys$o"));
 
-    transmissionChannel = physOutGate->getTransmissionChannel();
-    inTrChannel = physInGate->getIncomingTransmissionChannel();
+    cChannel *outTrChannel = physOutGate->findTransmissionChannel();
+    cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
 
-    connected = (transmissionChannel != NULL) && (inTrChannel != NULL);
+    connected = (outTrChannel != NULL) && (inTrChannel != NULL);
 
     if (!connected)
     {
         curEtherDescr = &nullEtherDescr;
         carrierExtension = false;
+
+        if (transmissionChannel)
+            transmissionChannel->forceTransmissionFinishTime(SimTime());
+
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
         interfaceEntry->setDatarate(0);
         return;
     }
 
+    transmissionChannel = outTrChannel;
     carrierExtension = false; // FIXME
     double txrate = transmissionChannel->getNominalDatarate();
     double drate = inTrChannel->getNominalDatarate();
@@ -489,7 +535,7 @@ void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
     int pauseUnits;
     EtherPauseFrame *pauseFrame;
 
-    if ((pauseFrame=dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
+    if ((pauseFrame = dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
     {
         pauseUnits = pauseFrame->getPauseTime();
         delete frame;
@@ -613,7 +659,8 @@ void EtherMACBase::getNextFrameFromQueue()
 {
     if (txQueue.extQueue)
     {
-        txQueue.extQueue->requestPacket();
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
     }
     else
     {
@@ -655,12 +702,24 @@ void EtherMACBase::processMessageWhenNotConnected(cMessage *msg)
     emit(droppedPkBytesIfaceDownSignal, (long)(PK(msg)->getByteLength()));
     numDroppedIfaceDown++;
     delete msg;
+
+    if (txQueue.extQueue)
+    {
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
+    }
 }
 
 void EtherMACBase::processMessageWhenDisabled(cMessage *msg)
 {
     EV << "MAC is disabled -- dropping message " << msg << endl;
     delete msg;
+
+    if (txQueue.extQueue)
+    {
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
+    }
 }
 
 void EtherMACBase::scheduleEndIFGPeriod()
@@ -846,12 +905,19 @@ void EtherMACBase::updateConnectionColor(int txState)
     else
         color = "";
 
-    cGate *g = physOutGate;
-    while (g && g->getType() == cGate::OUTPUT)
+    if (ev.isGUI())
     {
-        g->getDisplayString().setTagArg("ls", 0, color);
-        g->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");
-        g = g->getNextGate();
+        if (connected)
+        {
+            transmissionChannel->getDisplayString().setTagArg("ls", 0, color);
+            transmissionChannel->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");
+        }
+        else
+        {
+            // we are not connected: gray out our icon
+            getDisplayString().setTagArg("i",1,"#707070");
+            getDisplayString().setTagArg("i",2,"100");
+        }
     }
 }
 

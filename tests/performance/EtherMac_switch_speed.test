@@ -10,8 +10,14 @@ Testing EtherMac communications
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostQ;
+import inet.nodes.ethernet.EtherHost;
 import inet.nodes.ethernet.EtherSwitch;
+
+module EtherHostQ extends EtherHost
+{
+    parameters:
+        queueType = "DropTailQueue";
+}
 
 //
 // Sample Ethernet LAN: hosts connected via switch

@@ -1,0 +1,24 @@
+In this example the network consists of one client and one server only
+and demonstrates how to use different TCP implementations on different hosts
+in the same network.
+
+The default TCP implementation can be replaced using the StandardHost's tcpType 
+parameter. This example uses the Network Simulation Cradle library which contains
+real-world tcp implementations taken from Linux 2.6, OpenBSD, FreeBSD and lwIP.
+It can be downloaded from: http://www.wand.net.nz/~stj2/nsc/
+
+The NSC library must be present in <inet_root>/3rdparty/nsc-0.5.1 directory.
+
+To successfully build INET with NSC support you must first compile the NSC libraries
+in 3rdparty/nsc-0.5.1 . 
+Execute:
+
+  $ python scons.py
+
+The build process will create several TCP stack implementations as shared libraries.
+
+Build INET:
+
+  $ make clean
+  $ make
+

@@ -78,6 +78,9 @@ class INET_API EtherMAC : public EtherMACBase
 
     // notifications
     virtual void updateHasSubcribers();
+
+    // model change related functions
+    virtual void refreshConnection(bool connected);
 };
 
 #endif

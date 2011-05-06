@@ -10,7 +10,7 @@ Testing EtherMac communications
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHostQ;
+import inet.nodes.ethernet.EtherHost;
 import inet.linklayer.ethernet.EtherBus;
 
 //
@@ -35,44 +35,54 @@ network SpeedTest
             datarate = 1000Mbps;
         }
     submodules:
-        host_1_H_A: EtherHostQ {
+        host_1_H_A: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=70,70");
         }
-        host_1_H_B: EtherHostQ {
+        host_1_H_B: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=210,70");
         }
-        host_2_H_A: EtherHostQ {
+        host_2_H_A: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=70,140");
         }
-        host_2_H_B: EtherHostQ {
+        host_2_H_B: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=210,140");
         }
-        host_3_H_A: EtherHostQ {
+        host_3_H_A: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=70,210");
         }
-        host_3_H_B: EtherHostQ {
+        host_3_H_B: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=210,210");
         }
-        host_4_H_A: EtherHostQ {
+        host_4_H_A: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=70,280");
         }
-        host_4_H_B: EtherHostQ {
+        host_4_H_B: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=210,280");
         }
-        host_5_H_A: EtherHostQ {
+        host_5_H_A: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=70,350");
         }
-        host_5_H_B: EtherHostQ {
+        host_5_H_B: EtherHost {
             parameters:
+                queueType = "DropTailQueue";
                 @display("p=210,350");
         }
         bus: EtherBus {
