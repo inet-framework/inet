@@ -19,7 +19,7 @@
 #ifndef RADIO_H
 #define RADIO_H
 
-#include "ChannelAccessExtended.h"
+#include "ChannelAccess.h"
 #include "RadioState.h"
 #include "AirFrame_m.h"
 #include "IRadioModel.h"
@@ -61,7 +61,7 @@
  * @author Juan-Carlos Maureira
  *
  */
-class INET_API Radio : public ChannelAccessExtended, public IPowerControl
+class INET_API Radio : public ChannelAccess, public IPowerControl
 {
   public:
     Radio();
@@ -151,6 +151,7 @@ class INET_API Radio : public ChannelAccessExtended, public IPowerControl
 	virtual void disablingInitialization();
 	//
 	double calcDistFreeSpace();
+
   protected:
     cMessage *updateString;
     simtime_t updateStringInterval;

@@ -19,12 +19,15 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
 
-simple ChiangMobility like IMobility
+
+simple ChiangMobility extends MobilityBase
 {
     parameters:
         double updateInterval @unit("s") = default(0.1s);
         double stateTransitionUpdateInterval @unit("s") = default(3s);
-        double speed @unit("kph") = default(10kph);
+        double speed @unit("mps") = default(10mps); // in meter/sec
+        @class(ChiangMobility);
 }
+

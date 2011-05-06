@@ -16,11 +16,34 @@
 //
 
 #include "TurtleMobility.h"
+
 #include "FWMath.h"
 
 
 Define_Module(TurtleMobility);
 
+
+void TurtleMobility::initPos()
+{
+    LineSegmentsMobilityBase::initPos();
+
+    turtleScript = par("turtleScript");
+    nextStatement = turtleScript->getFirstChild();
+
+    speed = 1;
+    angle = 0;
+    borderPolicy = REFLECT;
+
+    // a dirty trick to extract starting position out of the script
+    // (start doing it, but then rewind to the beginning)
+    resumeScript();
+    targetPos = pos;
+    targetTime = simTime();
+    nextStatement = turtleScript->getFirstChild();
+
+    while (!loopVars.empty())
+        loopVars.pop();
+}
 
 /**
  * Reads the parameters.
@@ -35,23 +58,6 @@ void TurtleMobility::initialize(int stage)
 
     if (stage == 1)
     {
-        turtleScript = par("turtleScript");
-        nextStatement = turtleScript->getFirstChild();
-
-        speed = 1;
-        angle = 0;
-        borderPolicy = REFLECT;
-
-        // a dirty trick to extract starting position out of the script
-        // (start doing it, but then rewind to the beginning)
-        resumeScript();
-        targetPos = pos;
-        targetTime = simTime();
-        nextStatement = turtleScript->getFirstChild();
-        while (!loopVars.empty()) loopVars.pop();
-
-        updatePosition();
-
         WATCH(speed);
         WATCH(angle);
         //WATCH(borderPolicy);
@@ -82,7 +88,7 @@ void TurtleMobility::resumeScript()
     simtime_t now = targetTime;
 
     // interpret statement
-    while (nextStatement && targetTime==now)
+    while (nextStatement && targetTime == now)
     {
         executeStatement(nextStatement);
         gotoNextStatement();
@@ -95,35 +101,44 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
     EV << "doing <" << tag << ">\n";
 
-    if (!strcmp(tag,"repeat"))
+    if (!strcmp(tag, "repeat"))
     {
         const char *nAttr = stmt->getAttribute("n");
         long n = -1;  // infinity -- that's the default
+
         if (nAttr)
         {
             n = (long) getValue(nAttr);
-            if (n<0)
+
+            if (n < 0)
                 throw cRuntimeError("<repeat>: negative repeat count at %s", stmt->getSourceLocation());
         }
+
         loopVars.push(n);
     }
-    else if (!strcmp(tag,"set"))
+    else if (!strcmp(tag, "set"))
     {
         const char *speedAttr = stmt->getAttribute("speed");
         const char *angleAttr = stmt->getAttribute("angle");
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *bpAttr = stmt->getAttribute("borderPolicy");
+
         if (speedAttr)
             speed = getValue(speedAttr);
+
         if (angleAttr)
             angle = getValue(angleAttr);
+
         if (xAttr)
             targetPos.x = pos.x = getValue(xAttr);
+
         if (yAttr)
             targetPos.y = pos.y = getValue(yAttr);
-        if (speed<=0)
+
+        if (speed <= 0)
             throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
+
         if (bpAttr)
         {
             if (!strcmp(bpAttr,"reflect"))
@@ -144,9 +159,12 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
     {
         const char *dAttr = stmt->getAttribute("d");
         const char *tAttr = stmt->getAttribute("t");
+
         if (!dAttr && !tAttr)
             throw cRuntimeError("<forward>: must have at least attribute 't' or 'd' (or both) at %s", stmt->getSourceLocation());
+
         double d, t;
+
         if (tAttr && dAttr)
         {
             // cover distance d in time t (current speed is ignored)
@@ -165,30 +183,39 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             t = getValue(tAttr);
             d = speed * t;
         }
-        if (t<0)
+
+        if (t < 0)
             throw cRuntimeError("<forward>: time (attribute t) is negative at %s", stmt->getSourceLocation());
-        if (d<0)
+
+        if (d < 0)
             throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
+
         // FIXME handle zeros properly...
         targetPos.x += d * cos(PI * angle / 180);
         targetPos.y += d * sin(PI * angle / 180);
         targetTime += t;
     }
-    else if (!strcmp(tag,"turn"))
+    else if (!strcmp(tag, "turn"))
     {
         const char *angleAttr = stmt->getAttribute("angle");
+
         if (!angleAttr)
             throw cRuntimeError("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
+
         angle += getValue(angleAttr);
     }
-    else if (!strcmp(tag,"wait"))
+    else if (!strcmp(tag, "wait"))
     {
         const char *tAttr = stmt->getAttribute("t");
+
         if (!tAttr)
             throw cRuntimeError("<wait>: required attribute 't' missing at %s", stmt->getSourceLocation());
+
         double t = getValue(tAttr);
-        if (t<0)
+
+        if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
+
         targetTime += t;  // targetPos is unchanged
     }
     else if (!strcmp(tag,"moveto"))
@@ -196,14 +223,20 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *tAttr = stmt->getAttribute("t");
+
         if (xAttr)
             targetPos.x = getValue(xAttr);
+
         if (yAttr)
             targetPos.y = getValue(yAttr);
+
         // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos)/speed;
-        if (t<0)
-            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
+        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos) / speed;
+
+        if (t < 0)
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
+                    stmt->getSourceLocation());
+
         targetTime += t;
     }
     else if (!strcmp(tag,"moveby"))
@@ -211,14 +244,20 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *tAttr = stmt->getAttribute("t");
+
         if (xAttr)
             targetPos.x += getValue(xAttr);
+
         if (yAttr)
             targetPos.y += getValue(yAttr);
+
         // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos)/speed;
-        if (t<0)
-            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
+        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos) / speed;
+
+        if (t < 0)
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
+                    stmt->getSourceLocation());
+
         targetTime += t;
     }
 }
@@ -229,16 +268,28 @@ double TurtleMobility::getValue(const char *s)
     std::string str;
     if (strchr(s,'$'))
     {
+        char strMinX[32], strMinY[32];
         char strMaxX[32], strMaxY[32];
-        sprintf(strMaxX, "%g", getPlaygroundSizeX()-1);
-        sprintf(strMaxY, "%g", getPlaygroundSizeY()-1);
+        sprintf(strMinX, "%g", areaTopLeft.x);
+        sprintf(strMinY, "%g", areaTopLeft.y);
+        sprintf(strMaxX, "%g", areaBottomRight.x);
+        sprintf(strMaxY, "%g", areaBottomRight.y);
 
         str = s;
         std::string::size_type pos;
+
+        while ((pos = str.find("$MINX")) != std::string::npos)
+            str.replace(pos, sizeof("$MINX")-1, strMinX);
+
+        while ((pos = str.find("$MINY")) != std::string::npos)
+            str.replace(pos, sizeof("$MINY")-1, strMinY);
+
         while ((pos = str.find("$MAXX")) != std::string::npos)
             str.replace(pos, sizeof("$MAXX")-1, strMaxX);
+
         while ((pos = str.find("$MAXY")) != std::string::npos)
             str.replace(pos, sizeof("$MAXY")-1, strMaxY);
+
         s = str.c_str();
     }
 
@@ -249,16 +300,18 @@ double TurtleMobility::getValue(const char *s)
         return expr.doubleValue(this);
     }
     catch (std::exception& e) {
-        throw cRuntimeError(this, "wrong value '%s' around %s: %s", s, nextStatement->getSourceLocation(), e.what());
+        throw cRuntimeError(this, "wrong value '%s' around %s: %s", s,
+                nextStatement->getSourceLocation(), e.what());
     }
 }
 
 void TurtleMobility::gotoNextStatement()
 {
     // "statement either doesn't have a child, or it's a <repeat> and loop count is already pushed on the stack"
-    ASSERT(!nextStatement->getFirstChild() || (!strcmp(nextStatement->getTagName(),"repeat") && !loopVars.empty()));
+    ASSERT(!nextStatement->getFirstChild() || (!strcmp(nextStatement->getTagName(), "repeat")
+            && !loopVars.empty()));
 
-    if (nextStatement->getFirstChild() && (loopVars.top()!=0 || (loopVars.pop(),false)))   // !=0: positive or -1
+    if (nextStatement->getFirstChild() && (loopVars.top() != 0 || (loopVars.pop(), false)))   // !=0: positive or -1
     {
         // statement must be a <repeat> if it has children; repeat count>0 must be
         // on the stack; let's start doing the body.
@@ -268,12 +321,14 @@ void TurtleMobility::gotoNextStatement()
     {
         // no sibling -- either end of <repeat> body, or end of script
         ASSERT(nextStatement->getParentNode()==turtleScript ? loopVars.empty() : !loopVars.empty());
+
         if (!loopVars.empty())
         {
             // decrement and check loop counter
-            if (loopVars.top()!=-1)  // -1 means infinity
+            if (loopVars.top() != -1)  // -1 means infinity
                 loopVars.top()--;
-            if (loopVars.top()!=0)  // positive or -1
+
+            if (loopVars.top() != 0)  // positive or -1
             {
                 // go to beginning of <repeat> block again
                 nextStatement = nextStatement->getParentNode()->getFirstChild();
@@ -297,5 +352,4 @@ void TurtleMobility::gotoNextStatement()
         nextStatement = nextStatement->getNextSibling();
     }
 }
-
 

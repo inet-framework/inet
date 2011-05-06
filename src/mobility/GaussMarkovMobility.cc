@@ -61,41 +61,42 @@ void GaussMarkovMobility::handleSelfMsg(cMessage * msg)
 {
     preventBorderHugging();
     move();
-    updatePosition();
+    positionUpdated();
+
     if (!m_stationary)
         scheduleAt(simTime() + m_updateInterval, msg);
 }
 
 void GaussMarkovMobility::preventBorderHugging()
 {
-  bool left = (pos.x < m_margin);
-  bool right = (pos.x >= (getPlaygroundSizeX() - m_margin));
-  bool top = (pos.y < m_margin);
-  bool bottom = (pos.y >= (getPlaygroundSizeY() - m_margin));
+    bool left = (pos.x < areaTopLeft.x + m_margin);
+    bool right = (pos.x >= areaBottomRight.x - m_margin);
+    bool top = (pos.y < areaTopLeft.y + m_margin);
+    bool bottom = (pos.y >= areaBottomRight.y - m_margin);
 
-  double newMean = -1;
+    double newMean = -1;
 
-  if (top || bottom)
-  {
-      newMean = ((bottom) ? 270.0 : 90.0);
-      if (right)
-          newMean -= 45.0;
-      else if (left)
-          newMean += 45.0;
-  }  
-  else if (left)
-  {
-      newMean = 0.0;      
-  }
-  else if (right)
-  {
-      newMean = 180.0;
-  }
-      
-  if (newMean >= 0)
-  {
-      m_angleMean = newMean;
-  }
+    if (top || bottom)
+    {
+        newMean = ((bottom) ? 270.0 : 90.0);
+        if (right)
+            newMean -= 45.0;
+        else if (left)
+            newMean += 45.0;
+    }
+    else if (left)
+    {
+        newMean = 0.0;
+    }
+    else if (right)
+    {
+        newMean = 180.0;
+    }
+
+    if (newMean >= 0)
+    {
+        m_angleMean = newMean;
+    }
 }
 
 /**
@@ -127,3 +128,4 @@ void GaussMarkovMobility::move()
     EV << " mspeed= " << m_speedMean << " mangle " << m_angleMean << endl;
     EV << " xpos= " << pos.x << " ypos=" << pos.y << endl;
 }
+

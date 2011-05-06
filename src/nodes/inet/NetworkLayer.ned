@@ -23,7 +23,6 @@ import inet.networklayer.ipv4.IGMP;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.arp.ARP;
-import inet.base.IHook;
 
 
 //

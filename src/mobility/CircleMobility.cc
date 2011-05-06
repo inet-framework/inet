@@ -22,6 +22,30 @@
 Define_Module(CircleMobility);
 
 
+void CircleMobility::initPos()
+{
+    cx = par("cx");
+    cy = par("cy");
+    r = par("r");
+    ASSERT(r > 0);
+    angle = par("startAngle").doubleValue() / 180.0 * PI;
+    updateInterval = par("updateInterval");
+    double speed = par("speed");
+    omega = speed / r;
+
+    // calculate initial position
+    setPos();
+}
+
+void CircleMobility::setPos()
+{
+    pos.x = cx + r * cos(angle);
+    pos.y = cy + r * sin(angle);
+    // do something if we reach the wall
+    Coord dummyCoord; double dummyAngle;
+    handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
+}
+
 void CircleMobility::initialize(int stage)
 {
     BasicMobility::initialize(stage);
@@ -30,23 +54,8 @@ void CircleMobility::initialize(int stage)
 
     if (stage == 1)
     {
-        // read parameters
-        cx = par("cx");
-        cy = par("cy");
-        r = par("r");
-        ASSERT(r>0);
-        angle = par("startAngle").doubleValue()/180.0*PI;
-        updateInterval = par("updateInterval");
-        double speed = par("speed");
-        omega = speed/r;
-
-        // calculate initial position
-        pos.x = cx + r * cos(angle);
-        pos.y = cy + r * sin(angle);
-        updatePosition();
-
-        // if the initial speed is lower than 0, the node is stationary
-        stationary = (speed == 0);
+        // if the initial speed is 0, the node is stationary
+        stationary = (omega == 0);
 
         // host moves the first time after some random delay to avoid synchronized movements
         if (!stationary)
@@ -58,15 +67,14 @@ void CircleMobility::initialize(int stage)
 void CircleMobility::handleSelfMsg(cMessage * msg)
 {
     move();
-    updatePosition();
+    positionUpdated();
     scheduleAt(simTime() + updateInterval, msg);
 }
 
 void CircleMobility::move()
 {
     angle += omega * updateInterval;
-    pos.x = cx + r * cos(angle);
-    pos.y = cy + r * sin(angle);
+    setPos();
 
     EV << " xpos= " << pos.x << " ypos=" << pos.y << endl;
 }

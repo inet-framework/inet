@@ -49,7 +49,7 @@ Radio::Radio() : rs(this->getId())
 
 void Radio::initialize(int stage)
 {
-    ChannelAccessExtended::initialize(stage);
+    ChannelAccess::initialize(stage);
 
     EV << "Initializing AbstractRadio, stage=" << stage << endl;
 
@@ -130,6 +130,7 @@ void Radio::initialize(int stage)
         	updateStringInterval = par("refresCoverageInterval");
         else
         	updateStringInterval = 0;
+
     }
     else if (stage == 1)
     {

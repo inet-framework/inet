@@ -26,7 +26,7 @@
 #include <omnetpp.h>
 
 #include "BasicModule.h"
-#include "ChannelControl.h"
+//#include "ChannelControl.h"
 #include "Coord.h"
 
 
@@ -61,14 +61,11 @@ class INET_API BasicMobility : public BasicModule
     };
 
   protected:
-    /** @brief Pointer to ChannelControl -- these two must know each other */
-    ChannelControl *cc;
-
-    /** @brief Identifies this host in the ChannelControl module*/
-    ChannelControl::HostRef myHostRef;
-
     /** @brief Pointer to host module, to speed up repeated access*/
     cModule* hostPtr;
+
+    /** @brief x and y size of the area the nodes are in (in meters)*/
+    Coord areaTopLeft, areaBottomRight;
 
     /** @brief Stores the actual position of the host*/
     Coord pos;
@@ -80,10 +77,14 @@ class INET_API BasicMobility : public BasicModule
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 
+    virtual int numInitStages() const {return 4;}
+
     /** @brief Delete dynamically allocated objects*/
     virtual void finish() {}
 
   protected:
+    virtual void initPos();
+
     /** @brief Called upon arrival of a self messages*/
     virtual void handleSelfMsg(cMessage *msg) = 0;
 
@@ -95,16 +96,18 @@ class INET_API BasicMobility : public BasicModule
      * This function has to be called every time the position of the host
      * changes!
      */
-    virtual void updatePosition();
+    virtual void positionUpdated();
 
-    /** @brief Returns the width of the playground */
-    virtual double getPlaygroundSizeX() const  {return cc->getPgs()->x;}
-
-    /** @brief Returns the height of the playground */
-    virtual double getPlaygroundSizeY() const  {return cc->getPgs()->y;}
+//    /** @brief Returns the width of the playground */
+//    virtual double getPlaygroundSizeX() const {return playgroundSize.x;}
+//
+//    /** @brief Returns the height of the playground */
+//    virtual double getPlaygroundSizeY() const {return playgroundSize.y;}
 
     /** @brief Get a new random position for the host*/
     virtual Coord getRandomPosition();
+
+    virtual bool isOutside();
 
     /** @brief Utility function to reflect the node if it goes
      * outside the playground.

@@ -35,10 +35,6 @@ void RectangleMobility::initialize(int stage)
 
     if (stage == 1)
     {
-        x1 = par("x1");
-        y1 = par("y1");
-        x2 = par("x2");
-        y2 = par("y2");
         updateInterval = par("updateInterval");
         speed = par("speed");
 
@@ -46,8 +42,8 @@ void RectangleMobility::initialize(int stage)
         stationary = (speed == 0);
 
         // calculate helper vars
-        double dx = x2-x1;
-        double dy = y2-y1;
+        double dx = areaBottomRight.x - areaTopLeft.x;
+        double dy = areaBottomRight.y - areaTopLeft.y;
         corner1 = dx;
         corner2 = corner1 + dy;
         corner3 = corner2 + dx;
@@ -56,17 +52,19 @@ void RectangleMobility::initialize(int stage)
         // determine start position
         double startPos = par("startPos");
         startPos = fmod(startPos,4);
-        if (startPos<1)
-            d = startPos*dx; // top side
-        else if (startPos<2)
-            d = corner1 + (startPos-1)*dy; // right side
-        else if (startPos<3)
-            d = corner2 + (startPos-2)*dx; // bottom side
+
+        if (startPos < 1)
+            d = startPos * dx; // top side
+        else if (startPos < 2)
+            d = corner1 + (startPos - 1) * dy; // right side
+        else if (startPos < 3)
+            d = corner2 + (startPos - 2) * dx; // bottom side
         else
-            d = corner3 + (startPos-3)*dy; // left side
+            d = corner3 + (startPos - 3) * dy; // left side
+
         calculateXY();
         WATCH(d);
-        updatePosition();
+        positionUpdated();
 
         // host moves the first time after some random delay to avoid synchronized movements
         if (!stationary)
@@ -82,15 +80,19 @@ void RectangleMobility::initialize(int stage)
 void RectangleMobility::handleSelfMsg(cMessage * msg)
 {
     move();
-    updatePosition();
+    positionUpdated();
     scheduleAt(simTime() + updateInterval, msg);
 }
 
 void RectangleMobility::move()
 {
     d += speed * updateInterval;
-    while (d<0) d+=corner4;
-    while (d>=corner4) d-=corner4;
+
+    while (d < 0)
+        d += corner4;
+
+    while (d >= corner4)
+        d -= corner4;
 
     calculateXY();
     EV << " xpos= " << pos.x << " ypos=" << pos.y << " speed=" << speed << endl;
@@ -101,25 +103,25 @@ void RectangleMobility::calculateXY()
     if (d < corner1)
     {
         // top side
-        pos.x = x1 + d;
-        pos.y = y1;
+        pos.x = areaTopLeft.x + d;
+        pos.y = areaTopLeft.y;
     }
     else if (d < corner2)
     {
         // right side
-        pos.x = x2;
-        pos.y = y1 + d - corner1;
+        pos.x = areaBottomRight.x;
+        pos.y = areaTopLeft.y + d - corner1;
     }
     else if (d < corner3)
     {
         // bottom side
-        pos.x = x2 - d + corner2;
-        pos.y = y2;
+        pos.x = areaBottomRight.x - d + corner2;
+        pos.y = areaBottomRight.y;
     }
     else
     {
         // left side
-        pos.x = x1;
-        pos.y = y2 - d + corner3;
+        pos.x = areaTopLeft.x;
+        pos.y = areaBottomRight.y - d + corner3;
     }
 }

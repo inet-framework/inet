@@ -35,7 +35,7 @@ void LinearMobility::initialize(int stage)
         speed = par("speed");
         angle = par("angle");
         acceleration = par("acceleration");
-        angle = fmod(angle,360);
+        angle = fmod(angle, 360);
 
         // if the initial speed is lower than 0, the node is stationary
         stationary = (speed == 0);
@@ -54,7 +54,8 @@ void LinearMobility::initialize(int stage)
 void LinearMobility::handleSelfMsg(cMessage * msg)
 {
     move();
-    updatePosition();
+    positionUpdated();
+
     if (!stationary)
         scheduleAt(simTime() + updateInterval, msg);
 }

@@ -25,8 +25,17 @@ package inet.base.mobility;
 //
 moduleinterface IMobility
 {
-    @display("i=block/cogwheel");
+    parameters:
+        @display("i=block/cogwheel");
 }
 
-
+simple MobilityBase like IMobility
+{
+    parameters:
+        double constraintAreaX @unit("m") = default(0m); // topleft x position of the playground (in meters)
+        double constraintAreaY @unit("m") = default(0m); // topleft y position of the playground (in meters)
+        double constraintAreaWidth @unit("m") = default(600m); // x size of the playground (in meters)
+        double constraintAreaHeight @unit("m") = default(400m); // y size of the playground (in meters)
+        @display("i=block/cogwheel");
+}
 

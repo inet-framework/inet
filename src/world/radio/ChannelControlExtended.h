@@ -23,6 +23,7 @@
 #include <list>
 #include <deque>
 #include <set>
+
 #include <omnetpp.h>
 #include "ChannelControl.h"
 
@@ -39,6 +40,7 @@
 
 class ChannelAccess;
 class AbstractRadio;
+class AirFrameExtended;
 
 
 class INET_API ChannelControlExtended : public ChannelControl
@@ -100,7 +102,7 @@ class INET_API ChannelControlExtended : public ChannelControl
 
         double carrierFrequency;
         double percentage;
-        HostEntryExtended () {percentage=carrierFrequency=-1;}
+        HostEntryExtended () {percentage = carrierFrequency = -1;}
 
         //radioGatesList getHostGatesOnChannel(int);
         radioGatesList getHostGatesOnChannel(int,double);

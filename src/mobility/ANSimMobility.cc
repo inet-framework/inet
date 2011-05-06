@@ -61,7 +61,7 @@ void ANSimMobility::initialize(int stage)
         // set initial position;
         setTargetPosition();
         pos = targetPos;
-        updatePosition();
+        positionUpdated();
     }
 }
 

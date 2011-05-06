@@ -22,10 +22,16 @@
 #define CHANNEL_ACCESS_H
 
 #include <list>
-#include <omnetpp.h>
-#include "AirFrame_m.h"
+#include <limits>
+
+#include "INETDefs.h"
+
 #include "BasicModule.h"
 #include "ChannelControl.h"
+#include "ChannelControlExtended.h"
+
+// Forward declarations
+class AirFrame;
 
 /**
  * @brief Basic class for all physical layers, please don't touch!!
@@ -46,12 +52,29 @@
  */
 class INET_API ChannelAccess : public BasicModule
 {
+  public:
+    ChannelAccess() : cc(NULL), ccExt(NULL), myHostRef(NULL),
+            hostPos(std::numeric_limits<double>::min(), std::numeric_limits<double>::min()),
+            posFromDisplayString(true) {}
+
+    /**
+     * Called by the NotificationBoard whenever a change of a category
+     * occurs to which this client has subscribed.
+     */
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+
   protected:
     /** @brief Pointer to the ChannelControl module*/
     ChannelControl* cc;
 
+    /** @brief Pointer to the ChannelControl module*/
+    ChannelControlExtended* ccExt;
+
     /** @brief Identifies this host in the ChannelControl module*/
     ChannelControl::HostRef myHostRef;
+
+    Coord hostPos;
+    bool posFromDisplayString;
 
   protected:
     /** @brief Sends a message to all hosts in range*/

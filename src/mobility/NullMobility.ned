@@ -18,19 +18,22 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // This mobility module does nothing; it can be used for stationary nodes.
 //
 // @author Andras Varga
 //
-simple NullMobility like IMobility
+simple NullMobility extends MobilityBase
 {
     parameters:
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        bool initFromDisplayString = default(true);
         @display("i=block/cogwheel_s");
+        @class(NullMobility);
 }
 
 

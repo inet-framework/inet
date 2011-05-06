@@ -19,6 +19,7 @@
 #include "FWMath.h"
 #include <cassert>
 
+#include "AirFrame_m.h"
 
 #define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << "ChannelControl: "
 
@@ -72,8 +73,8 @@ void ChannelControl::initialize()
 
     coreEV << "initializing ChannelControl\n";
 
-    playgroundSize.x = par("playgroundSizeX");
-    playgroundSize.y = par("playgroundSizeY");
+//    playgroundSize.x = par("playgroundSizeX");
+//    playgroundSize.y = par("playgroundSizeY");
 
     numChannels = par("numChannels");
     transmissions.resize(numChannels);
@@ -95,11 +96,11 @@ void ChannelControl::initialize()
  */
 void ChannelControl::updateDisplayString(cModule *playgroundMod)
 {
-    cDisplayString& d = playgroundMod->getDisplayString();
-    d.setTagArg("bgp", 0, 0L);
-    d.setTagArg("bgp", 1, 0L);
-    d.setTagArg("bgb", 0, (long) playgroundSize.x);
-    d.setTagArg("bgb", 1, (long) playgroundSize.y);
+//    cDisplayString& d = playgroundMod->getDisplayString();
+//    d.setTagArg("bgp", 0, 0L);
+//    d.setTagArg("bgp", 1, 0L);
+//    d.setTagArg("bgb", 0, (long) playgroundSize.x);
+//    d.setTagArg("bgb", 1, (long) playgroundSize.y);
 }
 
 /**
@@ -139,14 +140,21 @@ double ChannelControl::calcInterfDist()
 ChannelControl::HostRef ChannelControl::registerHost(cModule *host, const Coord& initialPos, cGate *radioInGate)
 {
     Enter_Method_Silent();
-    if (lookupHost(host) != NULL)
-        error("ChannelControl::registerHost(): host (%s)%s already registered",
-              host->getClassName(), host->getFullPath().c_str());
+
+    HostRef hostRef = lookupHost(host);
+
+    if (hostRef != NULL)
+    {
+        hostRef->regCnt++;
+        return hostRef;
+    }
+
     if (!radioInGate)
         radioInGate = host->gate("radioIn"); // throws error if gate does not exist
 
     HostEntry he;
     he.host = host;
+    he.regCnt = 1;
     he.radioInGate = radioInGate;
     he.pos = initialPos;
     he.isNeighborListValid = false;
@@ -158,12 +166,19 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule *host, const Coord&
 void ChannelControl::unregisterHost(cModule *host)
 {
     Enter_Method_Silent();
-    for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++) {
-        if (it->host == host) {
+    for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
+    {
+        if (it->host == host)
+        {
             HostRef h = &*it;
+            h->regCnt--;
+
+            if (h->regCnt > 0)
+                return;
 
             // erase host from all registered hosts' neighbor list
-            for (HostList::iterator i2 = hosts.begin(); i2 != hosts.end(); ++i2) {
+            for (HostList::iterator i2 = hosts.begin(); i2 != hosts.end(); ++i2)
+            {
                 HostRef h2 = &*i2;
                 h2->neighbors.erase(h);
                 h2->isNeighborListValid = false;
@@ -175,6 +190,7 @@ void ChannelControl::unregisterHost(cModule *host)
             return;
         }
     }
+
     error("unregisterHost failed: no such host");
 }
 
@@ -344,5 +360,6 @@ const ChannelControl::HostRef ChannelControl::lookupHostByName(const char *name)
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
         if (strstr(it->host->getFullName(),name)!=NULL)
             return &(*it);
+
     return NULL;
 }

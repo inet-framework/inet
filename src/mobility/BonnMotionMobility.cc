@@ -51,7 +51,7 @@ void BonnMotionMobility::initialize(int stage)
             pos.y = vec[2];
             targetPos = pos;
         }
-        updatePosition();
+        positionUpdated();
     }
 }
 

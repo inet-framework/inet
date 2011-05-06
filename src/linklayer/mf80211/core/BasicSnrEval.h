@@ -24,7 +24,6 @@
 #include <map>
 
 #include "ChannelAccess.h"
-#include "ChannelAccessExtended.h"
 #include "AirFrame_m.h"
 #include "SnrControlInfo_m.h"
 
@@ -54,7 +53,7 @@
  * @ingroup basicModules
  */
 // class INET_API BasicSnrEval : public ChannelAccess
-class INET_API BasicSnrEval : public ChannelAccessExtended
+class INET_API BasicSnrEval : public ChannelAccess
 {
   protected:
     /** @brief a parameter that has to be read in from omnetpp.ini*/

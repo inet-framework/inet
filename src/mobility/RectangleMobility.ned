@@ -17,7 +17,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Moves the node around a rectangle.
@@ -25,17 +26,14 @@ import inet.base.mobility.IMobility;
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple RectangleMobility like IMobility
+simple RectangleMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
-        double x1; // rectangle is denoted by the (x1,y1) and (x2,y2) coords
-        double y1;
-        double x2;
-        double y2;
         double startPos; // in range [0.0,4.0): topleft=0, topright=1, bottomright=2, bottomleft=3
         double speed @unit("mps") = default(2mps); // speed of the host (in m/s)
         double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(RectangleMobility);
 }
 

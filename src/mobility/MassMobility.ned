@@ -20,7 +20,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // This is a random mobility model for a mobile host with a mass. It is the
@@ -51,16 +52,19 @@ import inet.base.mobility.IMobility;
 // @see ~ChannelControl
 // @author Emin Ilker Cetinbas, Andras Varga
 //
-simple MassMobility like IMobility
+simple MassMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double angle = default(uniform(0,360)); // start angel in degrees
+        bool initFromDisplayString = default(true);
         volatile double changeInterval @unit("s"); // frequency of changing speed and angle (can be random) [s]
         volatile double changeAngleBy @unit("deg"); // change angle by this much (can be random) [deg]
         volatile double speed @unit("mps") = default(2mps); // speed (can be random, updated every changeInterval) [m/s]
         double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(MassMobility);
 }
 

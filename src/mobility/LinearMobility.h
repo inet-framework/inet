@@ -19,7 +19,8 @@
 #ifndef LINEAR_MOBILITY_H
 #define LINEAR_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "BasicMobility.h"
 
 

@@ -410,6 +410,7 @@
         nedPackages = "
                        inet.battery
                        inet.linklayer.radio
+                       inet.world.radio
                       "
         extraSourceFolders = ""
         compileFlags = ""

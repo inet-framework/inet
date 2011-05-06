@@ -38,15 +38,23 @@ void StaticGridMobility::initialize(int aStage)
         marginX = par("marginX");
         marginY = par("marginY");
 
-        int size    = (int)ceil (sqrt(mNumHosts));
-        double row  = ceil((hostPtr->getIndex()) / size);
-        int col     = (hostPtr->getIndex()) % size;
-        pos.x       = marginX + col * (getPlaygroundSizeX() - 2*marginX) / (size-1);
-        if (pos.x >= getPlaygroundSizeX()) pos.x-=1;
-        pos.y       = marginY + row * (getPlaygroundSizeY() - 2*marginY) / (size-1);
-        if (pos.y >= getPlaygroundSizeY()) pos.y-=1;
+        int size = (int)ceil (sqrt(mNumHosts));
+        double row = ceil((hostPtr->getIndex()) / size);
+        int col = (hostPtr->getIndex()) % size;
 
-        updatePosition();
+        pos.x = areaTopLeft.x + marginX
+                + col * ((areaBottomRight.x - areaTopLeft.x) - 2 * marginX) / (size - 1);
+
+        if (pos.x >= areaBottomRight.x)
+            pos.x -= 1;
+
+        pos.y = areaTopLeft.y + marginY
+                + row * ((areaBottomRight.y - areaTopLeft.y) - 2 * marginY) / (size - 1);
+
+        if (pos.y >= areaBottomRight.y)
+            pos.y -= 1;
+
+        positionUpdated();
     }
 
 }

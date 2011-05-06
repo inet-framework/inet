@@ -17,7 +17,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Uses the native file format of BonnMotion (http://www.cs.uni-bonn.de/IV/BonnMotion/).
@@ -33,7 +34,7 @@ import inet.base.mobility.IMobility;
 //
 // @author Andras Varga
 //
-simple BonnMotionMobility like IMobility
+simple BonnMotionMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
@@ -41,6 +42,7 @@ simple BonnMotionMobility like IMobility
         int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
         double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(BonnMotionMobility);
 }
 
 

@@ -19,9 +19,6 @@
 
 package inet.linklayer.ppp;
 
-import inet.linklayer.IWiredNic;
-
-
 //
 // PPP implementation.
 //

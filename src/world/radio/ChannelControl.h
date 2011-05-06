@@ -19,11 +19,14 @@
 
 #include <vector>
 #include <list>
-#include <deque>
 #include <set>
-#include <omnetpp.h>
-#include "AirFrame_m.h"
+
+#include "INETDefs.h"
+
 #include "Coord.h"
+
+// Forward declarations
+class AirFrame;
 
 #define LIGHT_SPEED 3.0E+8
 #define TRANSMISSION_PURGE_INTERVAL 1.0
@@ -54,6 +57,7 @@ class INET_API ChannelControl : public cSimpleModule
      */
     struct HostEntry {
         cModule *host;
+        int regCnt; // counter of registration
         cGate *radioInGate;
         int channel;
         Coord pos; // cached
@@ -84,7 +88,7 @@ class INET_API ChannelControl : public cSimpleModule
     bool coreDebug;
 
     /** @brief x and y size of the area the nodes are in (in meters)*/
-    Coord playgroundSize;
+//    Coord playgroundSize;
 
     /** @brief the biggest interference distance in the network.*/
     double maxInterferenceDistance;
@@ -162,10 +166,11 @@ class INET_API ChannelControl : public cSimpleModule
     }
 
     /** @brief Returns the playground size */
-    const Coord *getPgs()  {return &playgroundSize;}
+//    const Coord *getPgs()  {return &playgroundSize;}
 
     /** @brief Returns the number of radio channels (frequencies) simulated */
     const int getNumChannels() {return numChannels;}
+
     const HostRef lookupHostByName(const char *name);
 };
 

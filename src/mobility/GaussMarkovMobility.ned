@@ -19,15 +19,17 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
 
-simple GaussMarkovMobility like IMobility
+
+simple GaussMarkovMobility extends MobilityBase
 {
     parameters:
         double updateInterval @unit("s") = default(0.1s);
         double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
-        double speed @unit("kph") = default(10kph);
+        double speed @unit("mps") = default(10mps); // meter/sec
         double angle @unit("deg") = default(0deg);
         double variance = default(40);
-        int margin = default(30);
+        int margin @unit("m") = default(30m);
+        @class(GaussMarkovMobility);
 }

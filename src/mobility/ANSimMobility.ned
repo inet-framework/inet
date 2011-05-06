@@ -18,7 +18,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Uses the <position_change> elements of the ANSim tool's
@@ -26,7 +27,7 @@ import inet.base.mobility.IMobility;
 //
 // @author Andras Varga
 //
-simple ANSimMobility like IMobility
+simple ANSimMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
@@ -35,6 +36,7 @@ simple ANSimMobility like IMobility
                                // -1 gets substituted to parent module's index
         double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(ANSimMobility);
 }
 
 

@@ -32,7 +32,6 @@ class INET_API RectangleMobility : public BasicMobility
 {
   protected:
     // configuration
-    double x1, y1, x2, y2; ///< rectangle bounds
     double speed;          ///< speed of the host
     double updateInterval; ///< time interval to update the hosts position
     bool stationary;       ///< if true, the host doesn't move

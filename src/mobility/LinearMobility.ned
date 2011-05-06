@@ -18,7 +18,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // This is a linear mobility model with speed, angle and acceleration parameters.
@@ -28,16 +29,18 @@ import inet.base.mobility.IMobility;
 // @see ~ChannelControl
 // @author Emin Ilker Cetinbas
 //
-simple LinearMobility like IMobility
+simple LinearMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        bool initFromDisplayString = default(true);
         double speed @unit("mps") = default(2mps); // speed of the host (in m/s)
         double angle @unit("deg") = default(0); // angle of linear motion (degreees)
         double acceleration = default(0); // acceleration of linear motion (m/s2)
         double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(LinearMobility);
 }
 

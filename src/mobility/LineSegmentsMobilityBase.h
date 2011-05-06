@@ -19,6 +19,7 @@
 #define LINESEGMENTS_MOBILITY_BASE_H
 
 #include <omnetpp.h>
+
 #include "BasicMobility.h"
 
 

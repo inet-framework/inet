@@ -64,7 +64,7 @@ void ConstSpeedMobility::initialize(int stage)
 void ConstSpeedMobility::handleSelfMsg(cMessage * msg)
 {
     move();
-    updatePosition();
+    positionUpdated();
     scheduleAt(simTime() + updateInterval, msg);
 }
 

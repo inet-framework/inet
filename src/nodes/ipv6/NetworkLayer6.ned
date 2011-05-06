@@ -23,7 +23,7 @@ import inet.networklayer.ipv6.IPv6ErrorHandling;
 import inet.networklayer.ipv6.IPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 import inet.networklayer.icmpv6.ICMPv6;
-import inet.base.IHook;
+
 
 //
 // Represents an IPv6 network layer (L3).

@@ -64,7 +64,7 @@ void ChiangMobility::handleSelfMsg(cMessage * msg)
     {
         case MoveMessageKind:
             move();
-            updatePosition();
+            positionUpdated();
             if (!m_stationary)
                 scheduleAt(simTime() + m_updateInterval, msg);
             break;

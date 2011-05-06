@@ -20,7 +20,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Controls all movement related things of a host
@@ -40,13 +41,15 @@ import inet.base.mobility.IMobility;
 // @see ~ChannelControl
 // @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
 //
-simple ConstSpeedMobility like IMobility
+simple ConstSpeedMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
         double vHost @unit("mps") = default(2mps); // speed of the host (in m/s)
         double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        bool initFromDisplayString = default(true);
         @display("i=block/cogwheel_s");
+        @class(ConstSpeedMobility);
 }

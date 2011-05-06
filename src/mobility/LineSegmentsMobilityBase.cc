@@ -100,7 +100,7 @@ void LineSegmentsMobilityBase::handleSelfMsg(cMessage *msg)
 
     //EV << " xpos=" << pos.x << " ypos=" << pos.y << endl;
 
-    updatePosition();
+    positionUpdated();
 }
 
 

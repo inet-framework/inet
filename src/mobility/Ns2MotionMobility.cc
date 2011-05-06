@@ -131,7 +131,7 @@ void Ns2MotionMobility::initialize(int stage)
         pos.x = ns2File->initial[0]+scrollX;
         pos.y = ns2File->initial[1]+scrollY;
         targetPos = pos;
-        updatePosition();
+        positionUpdated();
         vecpos = 0;
         WATCH(nodeId);
     }

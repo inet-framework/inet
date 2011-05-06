@@ -18,7 +18,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Places all nodes in a rectangular grid.
@@ -26,12 +27,13 @@ import inet.base.mobility.IMobility;
 // @see ChannelControl
 // @author Isabel Dietrich
 //
-simple StaticGridMobility like IMobility
+simple StaticGridMobility extends MobilityBase
 {
     parameters:
-        int marginX;
-        int marginY;
+        int marginX @unit("m");
+        int marginY @unit("m");
         bool debug = default(false); // debug switch
         int numHosts;
+        @class(StaticGridMobility);
 }
 

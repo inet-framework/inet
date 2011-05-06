@@ -17,7 +17,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // A LOGO-style movement model, with the script coming from XML. It can be
@@ -56,7 +57,7 @@ import inet.base.mobility.IMobility;
 //     <movement>
 //         <repeat>
 //             <set speed="uniform(20,60)"/>
-//             <moveto x="uniform(0,$MAXX)" y="uniform(0,$MAXY)"/>
+//             <moveto x="uniform($MINX,$MAXX)" y="uniform($MINY,$MAXY)"/>
 //         </repeat>
 //     </movement>
 // </nohtml></pre>
@@ -76,8 +77,8 @@ import inet.base.mobility.IMobility;
 // Attribute values can be literal numbers (e.g. x="100"), or any
 // distribution accepted in omnetpp.ini (e.g. speed="uniform(10,20)").
 // A new value will be chosen each time the statement is executed.
-// The $MAXX and $MAXY strings will be substituted with the
-// playground width and height minus 1, respectively.
+// The $MINX, $MAXX, $MINY and $MAXY strings will be substituted with the
+// limits of constraint area, respectively.
 //
 // t is time interval, calculated from the end of the previous movement.
 // x, y are absolute coordinates with <set> and <moveto>, and relative
@@ -110,14 +111,13 @@ import inet.base.mobility.IMobility;
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple TurtleMobility like IMobility
+simple TurtleMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
         xml turtleScript; // describes the movement
         double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
+        @class(TurtleMobility);
 }
-
-
 

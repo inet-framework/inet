@@ -19,6 +19,7 @@
 #define TURTLE_MOBILITY_H
 
 #include <stack>
+
 #include "LineSegmentsMobilityBase.h"
 
 
@@ -45,6 +46,8 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
   protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
+
+    virtual void initPos();
 
     /** @brief Overridden from LineSegmentsMobilityBase. Invokes resumeScript().*/
     virtual void setTargetPosition();

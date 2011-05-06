@@ -17,7 +17,8 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
+
 
 //
 // Random Waypoint mobility model.
@@ -39,14 +40,16 @@ import inet.base.mobility.IMobility;
 //
 // @author Georg Lutz
 //
-simple RandomWPMobility like IMobility
+simple RandomWPMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        bool initFromDisplayString = default(true);
         double updateInterval @unit("s") = default(0.1s);
         volatile double speed @unit("mps") = default(2mps); // use uniform(minSpeed, maxSpeed) or another distribution
         volatile double waitTime @unit("s"); // wait time between reaching a target and choosing a new one
         @display("i=block/cogwheel_s");
+        @class(RandomWPMobility);
 }

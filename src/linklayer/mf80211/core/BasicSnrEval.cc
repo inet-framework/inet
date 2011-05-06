@@ -40,7 +40,7 @@ Define_Module(BasicSnrEval);
 void BasicSnrEval::initialize(int stage)
 {
     // ChannelAccess::initialize(stage);
-    ChannelAccessExtended::initialize(stage);
+    ChannelAccess::initialize(stage);
 
     coreEV << "Initializing BasicSnrEval, stage=" << stage << endl;
 

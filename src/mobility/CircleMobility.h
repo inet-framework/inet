@@ -50,8 +50,13 @@ class INET_API CircleMobility : public BasicMobility
     /** @brief Called upon arrival of a self messages*/
     virtual void handleSelfMsg(cMessage *msg);
 
+    virtual void initPos();
+
     /** @brief Move the host*/
     virtual void move();
+
+  private:
+    void setPos();
 };
 
 #endif

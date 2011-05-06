@@ -18,7 +18,7 @@
 
 package inet.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.base.mobility.MobilityBase;
 
 
 //
@@ -35,16 +35,17 @@ import inet.base.mobility.IMobility;
 //
 // @author Andras Varga
 //
-simple Ns2MotionMobility like IMobility
+simple Ns2MotionMobility extends MobilityBase
 {
     parameters:
         bool debug = default(false); // debug switch
         string traceFile; // the BonnMotion trace file
         int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
         double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-        double scrollX = default(0);
-        double scrollY = default(0);
+        double scrollX @unit("m") = default(0m);
+        double scrollY @unit("m") = default(0m);
         @display("i=block/cogwheel_s");
+        @class(Ns2MotionMobility);
 }
 
 
