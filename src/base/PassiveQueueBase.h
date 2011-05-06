@@ -81,6 +81,16 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      * when one becomes available.
      */
     virtual void requestPacket();
+
+    /**
+     * Returns number of pending requests.
+     */
+    virtual int getNumPendingRequests() { return packetRequested; }
+
+    /**
+     * Clear all queued packets and stored requests.
+     */
+    virtual void clear();
 };
 
 #endif

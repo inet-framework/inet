@@ -28,6 +28,7 @@ static long getMsgByteLength(cMessage* msg)
 {
     if (msg->isPacket())
         return (long)(((cPacket*)msg)->getByteLength());
+
     return 0; // Unknown value
 }
 
@@ -58,7 +59,8 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     long msgBytes = getMsgByteLength(msg);
 
     emit(rcvdPkBytesSignal, msgBytes);
-    if (packetRequested>0)
+
+    if (packetRequested > 0)
     {
         packetRequested--;
         emit(sentPkBytesSignal, msgBytes);
@@ -91,7 +93,7 @@ void PassiveQueueBase::requestPacket()
     Enter_Method("requestPacket()");
 
     cMessage *msg = dequeue();
-    if (msg==NULL)
+    if (msg == NULL)
     {
         packetRequested++;
     }
@@ -104,7 +106,18 @@ void PassiveQueueBase::requestPacket()
     }
 }
 
+void PassiveQueueBase::clear()
+{
+    cMessage *msg;
+
+    while (NULL != (msg = dequeue()))
+        delete msg;
+
+    packetRequested = 0;
+}
+
 void PassiveQueueBase::finish()
 {
     msgId2TimeMap.clear();
 }
+
