@@ -47,6 +47,8 @@ class INET_API ScenarioManager : public cSimpleModule
     const char *getRequiredAttribute(cXMLElement *node, const char *attr);
     virtual cModule *getRequiredModule(cXMLElement *node, const char *attr);
     virtual cGate *getRequiredGate(cXMLElement *node, const char *modattr, const char *gateattr);
+    void createConnection(cXMLElementList &paramList, cChannelType *channelType,
+            cGate *srcGate, cGate *destGate);
 
     // dispatch to command processors
     virtual void processCommand(cXMLElement *node);

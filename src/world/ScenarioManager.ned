@@ -41,6 +41,16 @@ package inet.world;
 //     <at t="50">
 //         <set-param module="host[2].mobility" par="speed" value="10"/>
 //         <set-param module="host[3].mobility" par="speed" value="10"/>
+//         <connect src-module="host[2]" src-gate="ppp[0]"
+//                  dest-module="host[1]" dest-gate="ppp[0]"
+//                  channel-type="ned.DatarateChannel">
+//             <param name="datarate" value="10Mbps" />
+//             <param name="delay" value="0.1us" />
+//         </connect>
+//     </at>
+//     <at t="60">
+//         <disconnect src-module="host[2]" src-gate="ppp[0]" />
+//         <disconnect src-module="host[1]" src-gate="ppp[0]" />
 //     </at>
 // </scenario>
 // </pre>
@@ -52,9 +62,14 @@ package inet.world;
 // to be carried out at the same simulation time using <at>, and
 // then only the <at> command is needed to have a t attribute.
 //
+// connect/disconnect working between nodes, with have same parent
+//
 // Supported attributes:
 //    - <set-param>: module, par, value.
 //    - <set-channel-attr>: src-module, src-gate, attr, value.
+//    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
+//        - <param>: name, value
+//    - <disconnect>: src-module, src-gate
 //
 simple ScenarioManager
 {

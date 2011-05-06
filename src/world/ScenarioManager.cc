@@ -72,8 +72,10 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processSetChannelAttrCommand(node);
     // else if (!strcmp(tag,"create-module"))
     //    processCreateModuleCommand(node);
-    // else if (!strcmp(tag,"connect"))
-    //    processConnectCommand(node);
+     else if (!strcmp(tag,"connect"))
+        processConnectCommand(node);
+     else if (!strcmp(tag,"disconnect"))
+        processDisconnectCommand(node);
     else
         processModuleSpecificCommand(node);
 }
@@ -120,7 +122,8 @@ cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, 
     const char *gateStr = getRequiredAttribute(node, gateAttr);
     std::string gname;
     int gindex;
-    cGate *g = parseIndexedName(gateStr, gname, gindex) ? mod->gate(gname.c_str(), gindex) : mod->gate(gname.c_str());
+    parseIndexedName(gateStr, gname, gindex);
+    cGate *g = mod->gate(gname.c_str(), gindex);
     if (!g)
         error("module '%s' has no gate '%s' at %s", mod->getFullPath().c_str(), gateStr, node->getSourceLocation());
     return g;
@@ -200,14 +203,123 @@ void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
     // FIXME finish and test
 }
 
+void ScenarioManager::createConnection(cXMLElementList &paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
+{
+    if (!channelType)
+        srcGate->connectTo(destGate);
+    else
+    {
+        cChannel *channel = channelType->create("channel");
+
+        // set parameters:
+        for (cXMLElementList::iterator i = paramList.begin(); i != paramList.end(); i++)
+        {
+            cXMLElement *child = *i;
+            const char* name = getRequiredAttribute(child, "name");
+            const char* value = getRequiredAttribute(child, "value");
+            channel->par(name).parse(value);
+        }
+
+        // connect:
+        srcGate->connectTo(destGate, channel);
+    }
+}
+
 void ScenarioManager::processConnectCommand(cXMLElement *node)
 {
-    // FIXME finish and test
+    cGate *srcGate;
+    cModule *srcMod = getRequiredModule(node, "src-module");
+    const char *srcGateStr = getRequiredAttribute(node, "src-gate");
+    std::string srcGateName;
+    int srcGateIndex;
+    parseIndexedName(srcGateStr, srcGateName, srcGateIndex);
+    bool isSrcGateInOut = (srcMod->gateType(srcGateName.c_str()) == cGate::INOUT);
+
+    cGate *destGate;
+    cModule *destMod = getRequiredModule(node, "dest-module");
+    const char *destGateStr = getRequiredAttribute(node, "dest-gate");
+    std::string destGateName;
+    int destGateIndex;
+    parseIndexedName(destGateStr, destGateName, destGateIndex);
+    bool isDestGateInOut = (destMod->gateType(destGateName.c_str()) == cGate::INOUT);
+
+    if (srcMod->getParentModule() != destMod->getParentModule())
+        error("The parent modules of src-module and dest-module are differ at %s",
+                node->getSourceLocation());
+
+    // process <connect-channel> command
+    const char *channelTypeName = node->getAttribute("channel-type");
+    cChannelType *channelType = channelTypeName ? cChannelType::get(channelTypeName) : NULL;
+    cXMLElementList paramList;
+
+    if (channelTypeName)
+        paramList = node->getChildrenByTagName("param");
+
+    srcGate = isSrcGateInOut ?
+            srcMod->gateHalf(srcGateName.c_str(), cGate::OUTPUT, srcGateIndex) :
+            srcMod->gate(srcGateName.c_str(), srcGateIndex);
+    destGate = isDestGateInOut ?
+            destMod->gateHalf(destGateName.c_str(), cGate::INPUT, destGateIndex) :
+            destMod->gate(destGateName.c_str(), destGateIndex);
+
+    createConnection(paramList, channelType, srcGate, destGate);
+
+    if (isSrcGateInOut && isDestGateInOut)
+    {
+        destGate = srcMod->gateHalf(srcGateName.c_str(), cGate::INPUT, srcGateIndex);
+        srcGate = destMod->gateHalf(destGateName.c_str(), cGate::OUTPUT, destGateIndex);
+
+        createConnection(paramList, channelType, srcGate, destGate);
+    }
 }
 
 void ScenarioManager::processDisconnectCommand(cXMLElement *node)
 {
-    // FIXME finish and test
+    // process <disconnect> command
+    cModule *srcMod = getRequiredModule(node, "src-module");
+    cModule *parentMod = srcMod->getParentModule();
+    const char *srcGateStr = getRequiredAttribute(node, "src-gate");
+    std::string srcGateName;
+    int srcGateIndex;
+    parseIndexedName(srcGateStr, srcGateName, srcGateIndex);
+    cGate::Type srcGateType = srcMod->gateType(srcGateName.c_str());
+
+    cGate *srcGate;
+
+    if (srcGateType == cGate::INPUT)
+        error("The src-gate must be inout or output gate at %s", node->getSourceLocation());
+
+    if (srcGateType == cGate::INOUT)
+    {
+        cGate *g;
+
+        srcGate = srcMod->gateHalf(srcGateName.c_str(), cGate::OUTPUT, srcGateIndex);
+        g = srcGate->getNextGate();
+        if (!g)
+            return; // not connected
+
+        if (g->getOwnerModule()->getParentModule() != parentMod)
+            error("The src-gate connected to a node on another level at %s", node->getSourceLocation());
+
+        srcGate->disconnect();
+
+        srcGate = srcMod->gateHalf(srcGateName.c_str(), cGate::INPUT, srcGateIndex);
+        g = srcGate->getPreviousGate();
+        if (!g)
+            return; // not connected
+
+        if (g->getOwnerModule()->getParentModule() != parentMod)
+            error("The src-gate connected to a node on another level at %s", node->getSourceLocation());
+
+        g->disconnect();
+    }
+    else
+    {
+        srcGate = srcMod->gate(srcGateName.c_str(), srcGateIndex);
+        cGate *g = srcGate->getNextGate();
+        if (g && g->getOwnerModule()->getParentModule() == parentMod)
+            srcGate->disconnect();
+    }
 }
 
 void ScenarioManager::updateDisplayString()
