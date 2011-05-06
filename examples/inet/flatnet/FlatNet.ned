@@ -22,10 +22,10 @@
 
 package inet.examples.inet.flatnet;
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network FlatNet

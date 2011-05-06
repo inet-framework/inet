@@ -19,7 +19,7 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.NullMobility;
 import inet.mobility.CircleMobility;
@@ -94,8 +94,6 @@ network Throughput
 {
     parameters:
         int numCli;
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
@@ -113,8 +111,6 @@ network Throughput
         }
         channelcontrol: ChannelControlExtended {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
 }

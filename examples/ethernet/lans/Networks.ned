@@ -264,16 +264,16 @@ network BusLAN
         bus.ethg[3] <--> C <--> hostD.ethg;
 }
 
-channel ethernetline extends DatarateChannel
-{
-    parameters:
-        delay = 0.1us;
-        datarate = 10Mbps;
-}
-
 network SwitchedDuplexLAN
 {
     types:
+        channel ethernetline extends DatarateChannel
+        {
+            parameters:
+                delay = 0.1us;
+                datarate = 10Mbps;
+        }
+
         module EtherHostFullDuplex extends EtherHost
         {
             parameters:

@@ -402,6 +402,20 @@
         linkerFlags = ""
         />
     <feature
+        id="mobility_examples"
+        name="Mobility examples"
+        description = "Examples for Mobility support"
+        initiallyEnabled = "true"
+        requires = "mobility"
+        labels = "examples"
+        nedPackages = "
+                       inet.examples.mobility
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"

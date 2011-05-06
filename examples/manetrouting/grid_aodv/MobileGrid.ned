@@ -19,7 +19,7 @@
 
 package inet.examples.manetrouting.grid_aodv;
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
@@ -28,8 +28,6 @@ network MobileGrid
 {
     parameters:
         int numHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         host[numHosts]: AdhocHost {
             parameters:
@@ -38,8 +36,6 @@ network MobileGrid
         }
         channelcontrol: ChannelControlExtended {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=60,50;i=misc/sun");
         }
         configurator: FlatNetworkConfigurator {

@@ -17,7 +17,7 @@
 //
 
 package inet.examples.manetrouting.fg80211;
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
@@ -27,8 +27,6 @@ network Fg80211Net
     parameters:
         int numHosts;
         int numFixHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         fixhost[numFixHosts]: AdhocHost {
             parameters:
@@ -40,8 +38,6 @@ network Fg80211Net
         }
         channelcontrol: ChannelControlExtended {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=60,50;i=misc/sun");
         }
         configurator: FlatNetworkConfigurator {

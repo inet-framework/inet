@@ -24,23 +24,23 @@ import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
 
 
-channel pppline extends DatarateChannel
-{
-    delay = 100ms;
-    datarate = 1 Gbps;
-}
-
-channel ethline extends DatarateChannel
-{
-    delay = 100ms;
-    datarate = 1 Gbps;
-}
-
 network Traceroute
 {
     parameters:
         double testTimeout @unit(s) = default(0s);
         bool testing = default(false);
+    types:
+        channel pppline extends DatarateChannel
+        {
+            delay = 100ms;
+            datarate = 1 Gbps;
+        }
+        
+        channel ethline extends DatarateChannel
+        {
+            delay = 100ms;
+            datarate = 1 Gbps;
+        }
     submodules:
         cli1: StandardHost {
             parameters:

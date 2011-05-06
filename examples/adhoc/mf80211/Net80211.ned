@@ -21,7 +21,7 @@
 
 package inet.examples.adhoc.mf80211;
 
-import inet.world.ChannelControl;
+import inet.world.radio.ChannelControl;
 import inet.nodes.mf80211.MFMobileHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
@@ -30,8 +30,6 @@ network Net80211
 {
     parameters:
         int numHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         host[numHosts]: MFMobileHost {
             parameters:
@@ -39,8 +37,6 @@ network Net80211
         }
         channelcontrol: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=60,50");
         }
         configurator: FlatNetworkConfigurator {

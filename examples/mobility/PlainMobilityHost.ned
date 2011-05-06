@@ -16,35 +16,33 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+package inet.examples.mobility;
 
+import inet.base.mobility.IMobility;
+import inet.base.NotificationBoard;
 
-
-package inet.examples.adhoc.mobility;
-
-import inet.world.ChannelControl;
-import inet.world.ScenarioManager;
-
-
-network MobileNet
+//
+// A host for demonstrating mobility models only -- it contains
+// no protocol layers at all.
+//
+module PlainMobilityHost
 {
     parameters:
-        int numHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
+        @node();
+        @labels(node);
+        string mobilityType;
+        @display("i=device/pocketpc_s");
+    gates:
+        input radioIn @directIn;
     submodules:
-        host[numHosts]: PlainMobilityHost {
+        notificationBoard: NotificationBoard {
             parameters:
-                @display("p=300,300;r=,,#707070");
+                @display("p=70,67");
         }
-        channelcontrol: ChannelControl {
+        mobility: <mobilityType> like IMobility {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
-                @display("p=60,50");
+                @display("p=132,141");
         }
-        scenarioManager: ScenarioManager {
-            parameters:
-                @display("p=150,50");
-        }
+    connections allowunconnected:
 }
 

@@ -16,34 +16,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.wireless.lan80211;
-
-import inet.world.radio.ChannelControlExtended;
-import inet.nodes.wireless.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
-network Lan80211
+
+package inet.examples.mobility;
+
+import inet.world.radio.ChannelControl;
+import inet.world.ScenarioManager;
+import inet.examples.mobility.PlainMobilityHost;
+
+
+network MobileNet
 {
     parameters:
         int numHosts;
+        @display("bgb=600,400");
     submodules:
-        host[numHosts]: WirelessHost {
-            @display("r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
-        }
-        ap: AccessPoint {
-            @display("p=213,174;r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
-        }
-        channelcontrol: ChannelControlExtended {
-            numChannels = 2;
-            @display("p=61,46");
-        }
-        configurator: FlatNetworkConfigurator {
-            networkAddress = "145.236.0.0";
-            netmask = "255.255.0.0";
-            @display("p=140,50");
+        host[numHosts]: PlainMobilityHost {
+            parameters:
+                @display("p=300,300;r=,,#707070");
         }
 }
+

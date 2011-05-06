@@ -19,7 +19,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.world.ChannelControl;
+import inet.world.radio.ChannelControl;
 import inet.mobility.NullMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.NotificationBoard;
@@ -61,8 +61,6 @@ network Throughput
 {
     parameters:
         int numCli;
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
@@ -75,8 +73,6 @@ network Throughput
         }
         channelcontrol: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
 }

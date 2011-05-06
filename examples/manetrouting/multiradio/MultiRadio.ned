@@ -16,7 +16,7 @@
 // 
 package inet.examples.manetrouting.multiradio;
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 

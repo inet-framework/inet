@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.handover;
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
@@ -27,8 +27,6 @@ import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 network HandoverNetwork
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         host: WirelessHost {
             @display("p=50,130;r=,,#707070");
@@ -40,8 +38,6 @@ network HandoverNetwork
             @display("p=500,200;r=,,#707070");
         }
         channelcontrol: ChannelControlExtended {
-            playgroundSizeX = playgroundSizeX;
-            playgroundSizeY = playgroundSizeY;
             @display("p=60,50");
         }
         configurator: FlatNetworkConfigurator {

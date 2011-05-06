@@ -5,10 +5,11 @@
 package inet.examples.wireless.multiradio;
 
 import ned.DatarateChannel;
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.nodes.inet.Router;
+
 
 network MultiRadio
 {

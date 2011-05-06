@@ -33,20 +33,6 @@ channel cable extends DatarateChannel
         datarate = 100Mbps;
 }
 
-channel cabletobus extends DatarateChannel
-{
-    parameters:
-        delay = 0;
-        datarate = 10Mbps;
-}
-
-channel cabletoserver extends DatarateChannel
-{
-    parameters:
-        delay = 0;
-        datarate = 1Gbps;
-}
-
 
 //
 // Several hosts on an Ethernet hub
@@ -126,6 +112,13 @@ module LargeLAN
         @display("i=cloud");
     gates:
         inout ethg;
+    types:
+        channel cabletobus extends DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 10Mbps;
+        }
     submodules:
         switch: EtherSwitch {
             @display("is=s");
@@ -192,6 +185,13 @@ network LargeNet
         int ds;  // number of small LANs on switch D
         int dm;  // number of medium LANs on switch D
         int dl;  // number of large LANs on switch D
+    types:
+        channel cabletoserver extends DatarateChannel
+        {
+            parameters:
+                delay = 0;
+                datarate = 1Gbps;
+        }
     submodules:
         switchBB[n]: EtherSwitch {
             @display("is=s");
