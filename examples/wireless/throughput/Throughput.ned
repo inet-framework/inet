@@ -20,7 +20,7 @@
 package inet.examples.wireless.throughput;
 
 import inet.world.radio.ChannelControl;
-import inet.mobility.NullMobility;
+import inet.mobility.models.NullMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;

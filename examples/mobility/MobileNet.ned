@@ -16,15 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
 package inet.examples.mobility;
-
-import inet.world.radio.ChannelControl;
-import inet.world.ScenarioManager;
-import inet.examples.mobility.PlainMobilityHost;
-
 
 network MobileNet
 {

@@ -20,7 +20,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.mobility.NullMobility;
+import inet.mobility.models.NullMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;

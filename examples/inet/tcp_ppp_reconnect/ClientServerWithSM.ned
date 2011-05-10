@@ -19,7 +19,7 @@
 package inet.examples.inet.tcp_ppp_reconnect;
 
 import ned.DatarateChannel;
-import inet.world.ScenarioManager;
+import inet.world.scenario.ScenarioManager;
 import inet.util.NetAnimTrace;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;

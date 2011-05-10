@@ -12,13 +12,16 @@
 //
 // Simple battery model for inetmanet framework
 
-package inet.battery;
+package inet.battery.models;
+
+import inet.battery.IBattery;
+
 
 // 
 // a simple battery module
 //
-simple InetSimpleBattery
-{    
+simple InetSimpleBattery like IBattery
+{
     parameters:
         double nominal;
         double capacity;
@@ -26,5 +29,5 @@ simple InetSimpleBattery
         double resolution @unit(s);
         double publishDelta;
         double publishTime @unit(s);
-        bool ConsumedVector = default (false);
+        bool ConsumedVector = default(false);
 }

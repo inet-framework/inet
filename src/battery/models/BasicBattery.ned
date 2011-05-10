@@ -12,7 +12,10 @@
 //
 // Simple battery model for inetmanet framework
 
-package inet.battery;
+package inet.battery.models;
+
+import inet.battery.IBattery;
+
 
 //
 // @short Implementation of a simple battery model
@@ -33,6 +36,7 @@ package inet.battery;
 //              interval,
 // Note that resolution should be much smaller than the expected time to
 // first node failure.
-simple BasicBattery
+//
+simple BasicBattery like IBattery
 {
 }

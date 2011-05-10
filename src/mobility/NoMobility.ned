@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.base.mobility;
+package inet.mobility;
 
 //
 // A placeholder module used when a node does not need mobility support.
@@ -22,8 +22,8 @@ package inet.base.mobility;
 //
 module NoMobility like IMobility
 {
-        double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
-        double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
-        double constraintAreaWidth @unit("m") = default(600m); // x size of the playground (in meters)
-        double constraintAreaHeight @unit("m") = default(400m); // y size of the playground (in meters)
+    double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
+    double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
+    double constraintAreaWidth @unit("m") = default(600m); // x size of the playground (in meters)
+    double constraintAreaHeight @unit("m") = default(400m); // y size of the playground (in meters)
 }

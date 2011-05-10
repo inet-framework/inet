@@ -18,9 +18,9 @@
 //
 
 
-package inet.mobility;
+package inet.mobility.models;
 
-import inet.base.mobility.MobilityBase;
+import inet.mobility.MobilityBase;
 
 
 //

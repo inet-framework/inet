@@ -18,7 +18,7 @@
 
 package inet.examples.inet.redtest;
 
-import inet.world.ScenarioManager;
+import inet.world.scenario.ScenarioManager;
 import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;

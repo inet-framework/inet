@@ -22,11 +22,11 @@ import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
+import inet.mobility.IMobility;
 import inet.linklayer.mf80211.Nic80211;
-import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
-import inet.applications.IUDPApp;
 import inet.applications.pingapp.PingApp;
+import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
 
 

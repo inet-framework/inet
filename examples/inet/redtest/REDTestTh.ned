@@ -20,7 +20,7 @@
 
 package inet.examples.inet.redtest;
 
-import inet.world.ScenarioManager;
+import inet.world.scenario.ScenarioManager;
 import inet.util.ThruputMeteringChannel;
 import inet.util.ThruputMeter;
 import inet.nodes.inet.StandardHost;
@@ -77,9 +77,9 @@ network REDTestTh
         r1.pppg$o++ --> C {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
         th.out --> r2.pppg$i++;
 
-        s1.pppg++ <--> C { datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
-        s2.pppg++ <--> C { datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
-        s3.pppg++ <--> C { datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
-        s4.pppg++ <--> C { datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
+        s1.pppg++ <--> C {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
+        s2.pppg++ <--> C {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
+        s3.pppg++ <--> C {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
+        s4.pppg++ <--> C {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
 }
 

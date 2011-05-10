@@ -18,8 +18,9 @@
 
 package inet.examples.mobility;
 
-import inet.base.mobility.IMobility;
+import inet.mobility.IMobility;
 import inet.base.NotificationBoard;
+
 
 //
 // A host for demonstrating mobility models only -- it contains

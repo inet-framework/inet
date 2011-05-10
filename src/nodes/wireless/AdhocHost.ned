@@ -15,7 +15,8 @@
 
 package inet.nodes.wireless;
 
-import inet.base.manetrouting.IManetRouting;
+import inet.networklayer.IManetRouting;
+
 
 //
 // A wireless host containing routing, mobility and battery components.

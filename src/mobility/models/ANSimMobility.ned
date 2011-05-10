@@ -16,26 +16,28 @@
 //
 
 
-package inet.base.mobility;
+package inet.mobility.models;
+
+import inet.mobility.MobilityBase;
+
 
 //
-// This is not an actual mobility model, but a prototype for other mobility models.
+// Uses the <position_change> elements of the ANSim tool's
+// trace file.
 //
 // @author Andras Varga
 //
-moduleinterface IMobility
+simple ANSimMobility extends MobilityBase
 {
     parameters:
-        @display("i=block/cogwheel");
+        bool debug = default(false); // debug switch
+        xml ansimTrace; // the ANSim trace file in XML
+        int nodeId; // <position_change> elements to match;
+                               // -1 gets substituted to parent module's index
+        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
+        @display("i=block/cogwheel_s");
+        @class(ANSimMobility);
 }
 
-simple MobilityBase like IMobility
-{
-    parameters:
-        double constraintAreaX @unit("m") = default(0m); // topleft x position of the playground (in meters)
-        double constraintAreaY @unit("m") = default(0m); // topleft y position of the playground (in meters)
-        double constraintAreaWidth @unit("m") = default(600m); // x size of the playground (in meters)
-        double constraintAreaHeight @unit("m") = default(400m); // y size of the playground (in meters)
-        @display("i=block/cogwheel");
-}
+
 

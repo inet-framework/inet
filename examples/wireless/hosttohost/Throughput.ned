@@ -21,8 +21,8 @@ package inet.examples.wireless.hosttohost;
 
 import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AccessPoint;
-import inet.mobility.NullMobility;
-import inet.mobility.CircleMobility;
+import inet.mobility.models.NullMobility;
+import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;

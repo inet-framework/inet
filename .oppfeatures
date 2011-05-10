@@ -395,7 +395,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.mobility
+                       inet.mobility.models
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -422,7 +422,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.battery
+                       inet.battery.models
                        inet.linklayer.radio
                        inet.world.radio
                       "

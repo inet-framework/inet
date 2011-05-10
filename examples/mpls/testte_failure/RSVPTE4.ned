@@ -14,7 +14,7 @@
 
 package inet.examples.mpls.testte_failure;
 
-import inet.world.ScenarioManager;
+import inet.world.scenario.ScenarioManager;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.extras.FailureManager;

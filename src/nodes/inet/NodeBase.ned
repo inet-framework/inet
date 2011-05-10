@@ -19,10 +19,10 @@ package inet.nodes.inet;
 
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
+import inet.mobility.IMobility;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IExternalNic;
-import inet.base.mobility.IMobility;
 import inet.base.NotificationBoard;
 
 

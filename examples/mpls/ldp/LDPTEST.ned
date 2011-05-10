@@ -15,7 +15,7 @@
 package inet.examples.mpls.ldp;
 
 import ned.DatarateChannel;
-import inet.world.ScenarioManager;
+import inet.world.scenario.ScenarioManager;
 import inet.nodes.mpls.LDP_LSR;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.extras.FailureManager;

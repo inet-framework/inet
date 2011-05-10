@@ -16,9 +16,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-package inet.mobility;
+package inet.mobility.models;
 
-import inet.base.mobility.MobilityBase;
+import inet.mobility.MobilityBase;
 
 
 //
