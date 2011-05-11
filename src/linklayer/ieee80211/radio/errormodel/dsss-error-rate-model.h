@@ -20,7 +20,7 @@
 
 #ifndef DSS_ERROR_RATE_MODEL_H
 #define DSS_ERROR_RATE_MODEL_H
-#include <stdint.h>
+//#include <stdint.h>
 
 #ifdef ENABLE_GSL
 #include <gsl/gsl_math.h>

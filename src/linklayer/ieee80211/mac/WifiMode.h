@@ -19,7 +19,7 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "WifiPreambleType.h"
 #include "ModulationType.h"
 

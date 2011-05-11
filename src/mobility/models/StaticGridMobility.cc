@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "mobility/StaticGridMobility.h"
+#include "StaticGridMobility.h"
 
 Define_Module(StaticGridMobility);
 
@@ -38,8 +38,8 @@ void StaticGridMobility::initialize(int aStage)
         marginX = par("marginX");
         marginY = par("marginY");
 
-        int size = (int)ceil (sqrt(mNumHosts));
-        double row = ceil((hostPtr->getIndex()) / size);
+        int size = (int)ceil (sqrt((double)mNumHosts));
+        double row = ceil((hostPtr->getIndex()) / (double)size);
         int col = (hostPtr->getIndex()) % size;
 
         pos.x = areaTopLeft.x + marginX

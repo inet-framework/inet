@@ -70,10 +70,9 @@ class Uint128
     Uint128 () throw ();
     Uint128 (const Uint128 & a) throw ();
 
-#ifndef __GNUC__
-    inline Uint128 (const unsigned int & a) throw () : lo (a), hi (0ull) {};
-    inline Uint128 (const int & a) throw () : lo (a), hi (0ull) {};
-#endif
+    // Note: int / unsigned int operators conflict with other integer types with at least GCC and MSVC
+    // inline Uint128 (const unsigned int & a) throw () : lo (a), hi (0ull) {};
+    // inline Uint128 (const int & a) throw () : lo (a), hi (0ull) {};
 
     //   inline Uint128 (const unsigned __int64 & a) throw () : lo (a), hi (0ull) {};
     Uint128 (const int32_t & a) throw ();
@@ -90,10 +89,11 @@ class Uint128
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
     Uint128 & operator = (const Uint128 &other) {if (this==&other) return *this; lo = other.lo; hi = other.hi; return *this;}
-#ifndef __GNUC__
-    Uint128 & operator = (const int &a) {lo = a; hi = 0; return *this;}
-    Uint128 & operator = (const unsigned int &a) {lo = a; hi = 0; return *this;}
-#endif
+
+    // Note: int / unsigned int operators conflict with other integer types with at least GCC and MSVC
+    // Uint128 & operator = (const int &a) {lo = a; hi = 0; return *this;}
+    // Uint128 & operator = (const unsigned int &a) {lo = a; hi = 0; return *this;}
+
     Uint128 & operator = (const int32_t &a) {lo = a; hi = 0; return *this;}
     Uint128 & operator = (const uint32_t &a) {lo = a; hi = 0; return *this;}
     Uint128 & operator = (const int64_t &a) {lo = a; hi = 0; return *this;}

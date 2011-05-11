@@ -28,6 +28,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
+#include "FWMath.h"
 #include "IReceptionModel.h"
 #include <list>
 #include <string>

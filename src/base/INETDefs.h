@@ -106,6 +106,25 @@ static double erfc(double x)
 
     return x < 0 ? 2 - y : y;
 }
+
+// ISO C99 function, not in MSVC
+inline long lrint(double x)
+{
+    return (long)floor(x+0.5);
+}
+
+// ISO C99 function, not in MSVC
+inline double fmin(double a, double b)
+{
+    return a < b ? a : b;
+}
+
+// ISO C99 function, not in MSVC
+inline double fmax(double a, double b)
+{
+    return a > b ? a : b;
+}
 #endif
+
 
 #endif

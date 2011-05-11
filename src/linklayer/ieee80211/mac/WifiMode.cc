@@ -17,7 +17,6 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include <omnetpp.h>
 #include "WifiMode.h"
 #include "Ieee80211DataRate.h"
 

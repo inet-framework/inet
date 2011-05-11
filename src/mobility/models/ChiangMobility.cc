@@ -130,8 +130,8 @@ void ChiangMobility::move()
     if (0 != dx && 0 != dy)
     {
         //distribute speed evenly
-        dx *= (m_speed * m_updateInterval) / sqrt(2);
-        dy *= (m_speed * m_updateInterval) / sqrt(2);
+        dx *= (m_speed * m_updateInterval) / sqrt(2.0);
+        dy *= (m_speed * m_updateInterval) / sqrt(2.0);
     }
     else
     {

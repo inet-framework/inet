@@ -39,7 +39,7 @@ DsssErrorRateModel::GetDsssDbpskSuccessRate (double sinr, uint32_t nbits)
 {
   double EbN0 = sinr * 22000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
   double ber = 0.5 * exp (-EbN0);
-  return pow ((1.0 - ber), nbits);
+  return pow ((1.0 - ber), (int)nbits);
 }
 
 double 
@@ -47,7 +47,7 @@ DsssErrorRateModel::GetDsssDqpskSuccessRate (double sinr,uint32_t nbits)
 {
   double EbN0 = sinr * 22000000.0 / 1000000.0 / 2.0; // 2 bits per symbol, 1 MSPS
   double ber = DqpskFunction (EbN0);
-  return pow ((1.0 - ber), nbits);
+  return pow ((1.0 - ber), (int)nbits);
 }
 
 double 
@@ -78,7 +78,7 @@ DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits)
       double a4 =  1.0288981434358866e+000;
       ber = a1 * exp (-(pow ((sinr-a2)/a3,a4)));
     }
-  return pow ((1.0 - ber), nbits);
+  return pow ((1.0 - ber), (int)nbits);
 #endif
 }
 
@@ -112,7 +112,7 @@ DsssErrorRateModel::GetDsssDqpskCck11SuccessRate (double sinr,uint32_t nbits)
       double a6 =  2.2032715128698435e+000;
       ber =  (a1*sinr*sinr+a2*sinr+a3)/(sinr*sinr*sinr+a4*sinr*sinr+a5*sinr+a6);
     }
-  return pow ((1.0 - ber), nbits);
+  return pow ((1.0 - ber), (int)nbits);
 #endif
 }
 
@@ -155,7 +155,7 @@ DsssErrorRateModel::SymbolErrorProb16Cck (double e2)
 
 double DsssErrorRateModel::SymbolErrorProb256Cck (double e1) 
 {
-  return 1.0 - pow (1.0 - SymbolErrorProb16Cck (e1/2.0), 2.0);
+  return 1.0 - pow (1.0 - SymbolErrorProb16Cck (e1/2.0), 2);
 }
 
 #endif

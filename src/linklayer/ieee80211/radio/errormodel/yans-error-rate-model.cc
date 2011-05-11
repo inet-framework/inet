@@ -43,7 +43,7 @@ YansErrorRateModel::GetQamBer (double snr, unsigned int m, uint32_t signalSpread
 {
   double EbNo = snr * signalSpread / phyRate;
   double z = sqrt ((1.5 * Log2 (m) * EbNo) / (m - 1.0));
-  double z1 = ((1.0 - 1.0 / sqrt (m)) * erfc (z)) ;
+  double z1 = ((1.0 - 1.0 / sqrt ((double)m)) * erfc (z)) ;
   double z2 = 1 - pow ((1-z1), 2.0);
   double ber = z2 / Log2 (m);
   EV << "Qam m="<<m<<" rate=" << phyRate << " snr="<<snr<<" ber="<<ber << endl;
@@ -63,7 +63,7 @@ YansErrorRateModel::Factorial (uint32_t k) const
 double 
 YansErrorRateModel::Binomial (uint32_t k, double p, uint32_t n) const
 {
-  double retval = Factorial (n) / (Factorial (k) * Factorial (n-k)) * pow (p, k) * pow (1-p, n-k);
+  double retval = Factorial (n) / (Factorial (k) * Factorial (n-k)) * pow (p, (int)k) * pow (1-p, (int)(n-k));
   return retval;
 }
 double 
@@ -148,7 +148,7 @@ YansErrorRateModel::GetFecQamBer (double snr, uint32_t nbits,
   pd = CalculatePd (ber, dFree + 1);
   pmu += adFreePlusOne * pd;
   pmu = std::min (pmu, 1.0);
-  double pms = pow (1 - pmu, nbits);
+  double pms = pow (1 - pmu, (int)nbits);
   return pms;
 }
 
