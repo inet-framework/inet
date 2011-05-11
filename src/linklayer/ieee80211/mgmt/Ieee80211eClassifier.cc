@@ -30,7 +30,7 @@
 #ifdef WITH_UDP
   #include "UDPPacket_m.h"
 #endif
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
   #include "TCPSegment.h"
 #endif
 
@@ -85,7 +85,7 @@ int Ieee80211eClassifier::classifyPacket(cMessage *msg)
     }
 #endif
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
     TCPSegment *tcp = dynamic_cast<TCPSegment *>(ipData->getEncapsulatedPacket());
     if (tcp)
     {

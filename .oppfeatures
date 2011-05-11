@@ -1,17 +1,17 @@
 <features cppSourceRoots="src">
     <feature
-        id="TCP_BASE"
-        name="TCP Base"
+        id="TCP_COMMON"
+        name="TCP Common"
         description = "The common part of TCP implementations"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.transport.tcp
+                       inet.transport.tcp_common
                        inet.applications.tcpapp
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_TCP_BASE"
+        compileFlags = "-DWITH_TCP_COMMON"
         linkerFlags = ""
         />
     <feature
@@ -19,10 +19,10 @@
         name="TCP (INET)"
         description = "TCP implementation (original INET implementation)"
         initiallyEnabled = "true"
-        requires = "TCP_BASE"
+        requires = "TCP_COMMON"
         labels = ""
         nedPackages = "
-                       inet.transport.tcp_inet
+                       inet.transport.tcp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_INET"
@@ -33,7 +33,7 @@
         name="TCP (lwIP)"
         description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)"
         initiallyEnabled = "true"
-        requires = "TCP_BASE"
+        requires = "TCP_COMMON"
         labels = ""
         nedPackages = "
                        inet.transport.tcp_lwip
@@ -51,7 +51,7 @@
                        NSC must be downloaded and installed separately; read
                        inet/3rdparty/README for more information."
         initiallyEnabled = "false"
-        requires = "TCP_BASE"
+        requires = "TCP_COMMON"
         labels = ""
         nedPackages = "
                        inet.transport.tcp_nsc
@@ -275,7 +275,7 @@
         id="MPLS"
         name="MPLS support (incl. LDP and RSVP-TE)"
         description = "MPLS support"
-        requires = "TCP_BASE UDP IPv4"
+        requires = "TCP_COMMON UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.mpls inet.nodes.mpls
@@ -335,7 +335,7 @@
         name="BGPv4"
         description = "BGP support"
         initiallyEnabled = "true"
-        requires = "IPv4 OSPFv2 TCP_BASE"
+        requires = "IPv4 OSPFv2 TCP_COMMON"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.bgpv4
@@ -464,7 +464,7 @@
         name="802.11a/b/g/e (mesh networking mode)"
         description = "IEEE 802.11a/b/g/e NIC supporting mesh networking"
         initiallyEnabled = "true"
-        requires = "mobility radio TCP_BASE MANET OSPFv2 MPLS UDP IPv4 IPv6"
+        requires = "mobility radio TCP_COMMON MANET OSPFv2 MPLS UDP IPv4 IPv6"
         labels = "nic wireless mesh"
         nedPackages = "
                        inet.linklayer.ieee80211mesh

@@ -45,7 +45,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "TCPIPchecksum.h"
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
 #include "TCPSerializer.h"    //I.R.
 #endif
@@ -110,7 +110,7 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
         break;
 #endif
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
       case IP_PROT_TCP:        //I.R.
         packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES,
@@ -183,7 +183,7 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
         break;
 #endif
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
       case IP_PROT_TCP:
         encapPacket = new TCPSegment("tcp-from-wire");
         TCPSerializer().parse(buf + headerLength, encapLength, (TCPSegment *)encapPacket, true);

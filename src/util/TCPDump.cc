@@ -34,7 +34,7 @@
 #include "SCTPAssociation.h"
 #endif
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
 #endif
 
@@ -436,7 +436,7 @@ void TCPDumper::tcpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
 #ifdef WITH_IPv4
     cMessage *encapmsg = dgram->getEncapsulatedPacket();
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
          // if TCP, dump as TCP
@@ -466,7 +466,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const
 #ifdef WITH_IPv6
     cMessage *encapmsg = dgram->getEncapsulatedPacket();
 
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
          // if TCP, dump as TCP
@@ -493,7 +493,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const
 
 void TCPDumper::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
-#ifdef WITH_TCP_BASE
+#ifdef WITH_TCP_COMMON
      std::ostream& out = *outp;
 
     // seq and time (not part of the tcpdump format)
@@ -638,7 +638,7 @@ void TCPDump::handleMessage(cMessage *msg)
         }
         else
 #endif
-#ifdef TCP_BASE
+#ifdef TCP_COMMON
         if (dynamic_cast<TCPSegment *>(msg))
         {
             if (PK(msg)->hasBitError())
