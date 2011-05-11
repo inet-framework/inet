@@ -1,0 +1,338 @@
+2011-02-15  Zoltan Bojthe
+
+    * added some improvements:
+        - added TCPDataTransferMode
+              The sendQueueClass/rcvQueueClass parameters are gone. They were used to
+              select what to transmit inside TCP segments: C++ objects (cPacket) or byte
+              counts only. Now, this can (must) be specified per-connection by the app
+              layer, because the app knows best what it requires. Also, instead of two
+              class names now there is a single enum value; it should be put into the
+              dataTransferMode field of TCPOpenCommand. Potential values are:
+                 TCP_TRANSFER_UNDEFINED = 0;  // Invalid value
+                 TCP_TRANSFER_BYTECOUNT = 1;  // Transmit byte counts only
+                 TCP_TRANSFER_OBJECT = 2;     // Transmit the application packet C++ objects
+                 TCP_TRANSFER_BYTESTREAM = 3; // Transmit actual bytes
+        - added new DataStreamSendQueue
+        - added new moduleinterface ITCP
+        - added new functions to compare, merge and slitt regions in TCPVirtualDataRcvQueue
+
+    * added some optimizations:
+        - added check for truncateSegment()
+        - moved down truncateSegment() call
+        - added ASSERT to sendSegmentDuringLossRecoveryPhase()
+        - moved SACK-related functions from TCPConnectionUtil to a new file TCPConnectionSackUtil
+        - changed event logging
+        - changed code style to enhance code readability
+        - renamed local variable from skip_sacks_array to dsack_inserted in addSacks()
+        - optimised length calculation in sendSegment()
+        - replaced 'opp_error' by 'throw cRuntimeError'
+        - changed uint32 nextSeg() to bool nextSeg()
+        - optimised setPipe(), nextSeg(), addSacks()
+
+2011-01-31  Thomas Reschka
+
+    * added some improvements and optimizations:
+        - although not compliant with RFC 793, page 46: restored Zoltan Bojthe's modifications
+          in isSegmentAcceptable() to accept an ACK on end of window to fix bug #160
+        - added check for "acceptable ack" in isSegmentAcceptable(). Based on [RFC 793, page 25]
+        - added new rcvNASegVector ("rcvd naseg"): total number of received not acceptable segments
+        - added ASSERT in addSacks() to avoid generation of SACKs with equal start and end sequence number
+        - extended condition in processSegment1stThru8th() to avoid D-SACK generation at reception of ooo segments without payload
+        - moved up truncateSegment() call
+        - added ASSERT in truncateSegment()
+
+2010-07-12  Thomas Reschka
+
+    * fixed bug in retransmitData() - snd_nxt must stay at snd_una after RTO.
+
+    * eliminated ASSERT in TCPConnection::retransmitData(); - by moving up receivedDataAck() in processSegment1stThru8th().
+
+    * extended condition in processSegment1stThru8th() to allow calling processAckInEstabEtc() in LAST-ACK state.
+      If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
+      TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
+      "LAST-ACK STATE
+         The only thing that can arrive in this state is an
+         acknowledgment of our FIN.  If our FIN is now acknowledged,
+         delete the TCB, enter the CLOSED state, and return."
+
+2010-07-04  Thomas Reschka
+
+    * changed computation of Restart Window (RW) from RW = IW to RW = min(IW,cwnd). Based on [RFC 5681, page 11].
+
+    * updated TCP Option Numbers in TCPSegment.msg. Based on [http://www.iana.org/assignments/tcp-parameters/].
+
+2010-06-23  Zoltan Bojthe
+
+    * added some optimizations and improvements:
+        - optimized PAWS check
+        - optimized ASSERT condition in convertSimtimeToTS() and convertTSToSimtime()
+        - integrated scaleRcvWnd() into updateRcvWnd()
+        - simplified setting window size
+        - replaced use of '12' by constant TCP_OPTION_TS_SIZE in sendData(), setPipe() and nextSeg()
+        - added event logging in isSegmentAcceptable()
+        - renamed dataToSend() to isSendQueueEmpty(), optimized function body and adjusted its use in sendData()
+
+2010-06-19  Thomas Reschka
+
+    * implemented RFC 1323 (TCP Extensions for High Performance):
+        - Window Scale option
+        - Timestamps option (Round-Trip Time Measurement - RTTM)
+        - Protect Against Wrapped Sequence Numbers (PAWS)
+        - added a PAWS modification according to the latest proposal
+          of the tcplw@cray.com list (Braden 1993/04/26)
+
+    * implemented missing part of RFC 2581: Re-starting Idle Connections
+
+    * added some improvements:
+        - added check for TS and SACK support in writeHeaderOptions() to avoide unnecessary NOPs
+        - moved condition: if (rcvWndVector) rcvWndVector->record(state->rcv_wnd); into updateRcvWnd()
+        - changed parts of SACK implementation to respect potential use of TS option
+        - changed parts of updateWndInfo() to respect potential use of WS option
+        - changed parts of the delayedAck algorithm
+
+    * fixed 'TCP data transfer stopped before all bytes transmitted' issue. See bug #160
+
+    * fixed some issues (not yet reported):
+        - the node doing the passive open should use mss as cwnd! Calling receivedDataAck()
+          after receiving ACK for SYN,ACK changes cwnd to 2*mss!
+        - a SACK supporting node should not include a SACK_PERMITTED option in his SYN,ACK
+          when the received SYN was without SACK_PERMITTED 
+        - calling readHeaderOptions() was missing in certain situations (receivedOutOfOrderSegment(),
+          receiveSeqChanged(), receivedAckForDataNotYetSent()) now readHeaderOptions() is called in:
+          1. processSegmentInListen()
+          2. processSegmentInSynSent()
+          3. processSegment1stThru8th() [NEW]
+        - calling ackSent() was missing in sendSynAck() and sendRstAck()
+        - added condition: (bytes + options_len <= snd_mss) in sendSegment()
+        - added condition in processSACKOption() to check sack_enabled and current TCP state
+
+    * added some TCP patches submitted by Zoltan Bojthe (see tcpfixes branch):
+        - add a getBufferStartSeq() function to TCP queues
+        - bugfix for DumbTCP
+        - Eliminate ASSERT when resend last packet after sent a FIN
+        - Move sequence number compare functions to TCPSegment.h
+        - TCP fix: replace std::max() with seqGreater(), when comparing sequence numbers
+
+2010-03-26  Andras Varga
+
+    * fix: represent port numbers with ushort. Previously it was short 
+    at places, which caused problems for large port numbers due to sign 
+    extension [reported by Thomas Gamer]
+
+2010-02-27  Andras Varga
+
+    * added optionName() method
+
+2010-02-26  Andras Varga
+
+    * Broke up long function TCPConnection::readHeaderOptions()
+
+    * minor refactoring to increase readability
+
+2010-02-26  Andras Varga
+
+    * fixed following issues with patch submitted by Thomas Reschka:
+        - assertion in TCPConnectionUtil.cc line 1056 after reception of SYN duplicate. See bug #121
+        - too early transition from ESTABLISHED to CLOSE_WAIT state
+          when FIN has been received but segments have been lost before. See bug #139
+        - unnecessary delay before sending the last data segment if nagle is enabled
+
+2010-02-16  Rudolf Hornig
+
+    * fixed 'FIN does not get retransmitted' issue with patch submitted by Andras Varga and Thomas Reschka. See bug #123
+
+2010-02-11  Rudolf Hornig
+
+    * fixed assert issue in TCPVirtualDataSendQueue.cc line 60 with patch submitted by Thomas Reschka. See bug #122
+
+2010-02-10  Zoltan Bojthe
+
+    * fixed 'advertised window' issue
+
+2010-02-02  Zoltan Bojthe
+
+    * added checking value of advertisedWindow parameter
+
+2009-11-27  Thomas Reschka
+
+    * implemented TCPNewReno algorithm (RFC 3782):
+        - the implementation is based on the 'default' algorithm specified in section 3 of RFC 3782.
+        - algorithm variants (RFC 3782, sections 4-6) are NOT IMPLEMENTED.
+
+2009-10-27  Rudolf Hornig
+
+    * added ITCP module interface that is implemented by TCP and TCP_old
+
+    * The old TCP (SACK-less) implementation is available as TCP_old
+
+    * TCP (default) and TCP_old can be selected in StandardHost with the new tcpType parameter
+
+2009-10-27  Thomas Reschka
+
+    * implemented SACK TCP:
+      - the basic SACK implementation (RFC 2018 and RFC 2883)
+        is located in TCP main (and not in flavours). This means that all existing
+        TCP algorithm classes may be used with SACK, although currently only TCPReno
+        makes sense.
+      - implemented (SACK)-based Loss Recovery algorithm (RFC 3517)
+        which is a conservative replacement of the fast recovery algorithm (RFC 2581)
+        integrated to TCPReno but not to TCPTahoe, TCPNoCongestionControl and DumbTCP.
+
+    * implemented flow control:
+      - finite receive buffer size (initiated by parameter advertisedWindow).
+        If receive buffer is exhausted (by out-of-order segments) and the
+        payload length of a new received segment is higher than free receiver
+        buffer, the new segment will be dropped. Such drops are recorded in
+        tcpRcvQueueDropsVector.
+      - update receive window.
+        The data receiver updates all receiver queue related variables before
+        sending (ACK/SACK or DATA) and updates the receiver window,
+        thus data receiver is able to advertise a zero window.
+        Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, pages 878-879].
+
+    * implemented some TCP header options:
+      - EOL: End of option list.
+      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
+      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
+        (local parameter) and the value specified in the MSS option
+        received during connection startup. Based on [RFC 2581, page 1].
+      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
+        PERMITTED during connection startup.
+      - SACK: SACK option implemented, based on RFC 2018, RFC 2883 and RFC 3517.
+
+    * implemented Limited Transmit algorithm (RFC 3042):
+      - added new module parameter (limitedTransmitEnabled) to enabled/disabled Limited Transmit algorithm (RFC 3042).
+      - integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
+
+    * implemented changes from RFC 2001 to RFC 2581:
+      - added new module parameter (increasedIWEnabled) to change Initial Window from one segment (RFC 2001)
+        (based on MSS) to maximal four segments (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
+        integrated to TCPBaseAlg (can be used for TCPReno, TCPTahoe and TCPNoCongestionControl but not for DumbTCP).
+      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
+        when the incoming segment fills in all or part of a gap in the sequence space."
+      - Re-starting Idle Connections (TODO - NOT YET IMPLEMENTED)
+        RFC 2581, pages 7 and 8: "When TCP has not received a segment for
+        more than one retransmission timeout, cwnd is reduced to the value
+        of the restart window (RW) before transmission begins.
+        For the purposes of this standard, we define RW = IW."
+
+    * NEW tcp parameters:
+      - bool limitedTransmitEnabled: Limited Transmit algorithm (RFC 3042) enabled/disabled
+      - bool increasedIWEnabled: Increased Initial Window (RFC 3390) enabled/disabled
+      - bool delayedAcksEnabled: delayed ACKs enabled/disabled
+      - bool nagleEnabled: Nagle's algorithm (RFC 896) enabled/disabled
+      - bool sackSupport: SACK support (RFC 2018, 2883, 3517) enabled/disabled (SACK will be enabled for a connection if both endpoints support it)
+
+    * NEW tcp vectors:
+      - pipeVector ("pipe"): current sender's estimate of bytes outstanding in the network
+      - sackedBytesVector ("rcvd sackedBytes"): current number of received sacked bytes
+      - numRtosVector ("numRTOs"): total number of RTOs
+      - rcvAdvVector ("advertised window"): current advertised window
+      - rcvWndVector ("receive window"): current receive window
+      - dupAcksVector ("rcvd dupAcks"): current number of received dupAcks
+      - sndSacksVector ("sent sacks"): total number of sent SACK blocks
+      - rcvSacksVector ("rcvd sacks"): total number of received SACK blocks
+      - rcvOooSegVector ("rcvd oooseg"): total number of received out-of-
+        order segments
+      - tcpRcvQueueBytesVector ("tcpRcvQueueBytes"): current amount of used
+        bytes in tcp receive queue
+      - tcpRcvQueueDropsVector ("tcpRcvQueueDrops"): total number of drops
+        in tcp receive queue
+
+    * NEW tcp examples:
+      - inet/examples/inet/ber
+        To demonstrate SACK's impact on throughput. The ber (bit error rate) of the channel
+        between client and server depends on the selected configuration.
+      - inet/examples/inet/tcpSack
+        The dropsGenerator at client's PPP interface deletes certain DATA
+        packets. On server side a second dropsGenerator deletes certain
+        ACK packets in configs 1-5. For config 6 the node type of the server
+        must be changed to 'StandardHostWithDLDuplicatesGenerator' in ned
+        file to duplicate certain received DATA packets.
+        Different configurations reflect examples from RFC 2018 and RFC 2883
+        to evaluate the implementation of optional selective acknowledgment.
+      - inet/examples/extInterface/extServer
+        In this example the network consists of one client, one router,
+        one internal server and one external (real) server. The client sends
+        100 MB of data to the external server using TCP for uplink traffic.
+        For downlink traffic the external server may send data to the
+        internal server.
+
+    * Other changes:
+      - TCPReno and TCPTahoe use new constant DUPTHRESH (=3) to trigger retransmission (RFC 3517).
+      - implemented PERSIST timer. If data sender is receiving a zero window and
+        the REXMIT timer is not running, the PERSIST timer is started.
+      - sending window probes. If PERSIST timer is expired a window probe is
+        sent to request a window update.
+      - Restart of REXMIT timer on retransmission is not part of RFC 2581,
+        however optional in RFC 3517 if sent during recovery.
+        This has been FIXED in TCPReno and TCPTahoe.
+        REXMIT timer management is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+      - FIXED behavior of TCPReno after RTO. After REXMIT timeout TCP Reno
+        should start slow start with snd_cwnd = snd_mss.
+        If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
+        therefore "sendData();" has been modified and is called to rexmit outstanding data.
+      - new module parameter 'delayedAcksEnabled' added to enable/disable
+        (optional) delayed ACKs.
+      - changed the implementation of delayed ACKs. Full sized segments are
+        counted and ack_now bit is set to generate immediate ACK in certain
+        cases.
+        Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
+      - new module parameter 'nagleEnabled' added to enable/disable (optional)
+        Nagle's algorithm (RFC 896). The Nagle's algorithm is unchanged and is possibly
+        not precisely implemented.
+      - Slightly CHANGED utility function "isSegmentAcceptable" (check
+        that segment entirely falls in receive window).
+        Based on [RFC 793, page 69].
+      - CHANGED data type of some state variables (e.g. snd_wnd, snd_mss)
+        from int/uint to uint32 to simplify use of standard functions
+        (e.g. std::min).
+      - slightly changed the update of window information (snd_wnd, snd_wl1, snd_wl2).
+        Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982].
+
+2009-10-17  Rudolf Hornig
+
+    * fixed assert issue with patch submitted by Kyeong Soo (Joseph) Kim. See bug #110
+
+2009-03-01  Andras Varga
+
+    * fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
+
+2008-06-29  Andras Varga
+
+    * some refactoring: created factory methods for TCPSegment and
+    TCPConnection, to allow customizing them via subclassing
+
+2006-03-22  Andras Varga
+
+    * TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user
+    issues CLOSE, defer transition to FIN_WAIT_1 until all data are sent.
+    (Before this fix the transiton was made immediately, but that was
+    harmless, i.e. it didn't affect TCP's external behaviour.)
+
+2006-03-21  Andras Varga
+
+    * TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
+    carries data [reported by Joachim Meichle]
+
+2005-07-20  Andras Varga
+
+    * some sources moved into subdirs queues/ and flavours/
+
+2005-07-14  Andras Varga
+
+    * TCPMain renamed to TCP
+
+2005-07-12  Andras Varga
+
+    * TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received
+    several active/passive opens with same local port number. Now it raises
+    an error (this is like EADDRINUSE on *nix)
+
+2005-07-06  Andras Varga
+
+    * TCPConnectionRcvSegment.cc: fixed bug which caused closing of a
+    connection to be reported 2MSL (240s) later to the user. Basically,
+    the user has to be notified already when the connection enters the
+    TIME_WAIT state. (TCP stays in TIME_WAIT for 240s or longer, and
+    nothing can happen during that time that's of interest to the user.)

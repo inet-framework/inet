@@ -1,0 +1,30 @@
+TCP
+===
+
+This folder contains the "base part" of TCP, basically the operation
+described in RFC 793. This base algorithm can be extended and customized via
+"flavour" and "queue" classes that implement the TCPAlgorith, TCPSendQueue
+and TCPReceiveQueue classes, and are selected via TCP's NED parameters.
+This implementation supports:
+  - RFC  793 - Transmission Control Protocol
+  - RFC  896 - Congestion Control in IP/TCP Internetworks
+  - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+  - RFC 1323 - TCP Extensions for High Performance
+  - RFC 2018 - TCP Selective Acknowledgment Options
+  - RFC 2581 - TCP Congestion Control
+  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+  - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+  - RFC 3390 - Increasing TCP's Initial Window
+  - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
+               Algorithm for TCP
+  - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+The old version of TCP is deprecated and can be found in the tcp_old directory under
+the tcp_old namespace.
+
+The main class is TCP, which manages a set of TCPConnections. A TCP segment
+is instance of the TCPSegment class. The TCP simple module must implement the ITCP
+module interface allowing to exchange the implementation of TCP in other modules
+for example in StandardHost. Check the StandardHost module and the tcpType parameter
+to configure the TCP implementation in a host. It is possible to use TCP_old in some
+modules while using TCP for others in the same simulation.
+
