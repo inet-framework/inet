@@ -9,6 +9,7 @@
         nedPackages = "
                        inet.transport.tcp_common
                        inet.applications.tcpapp
+                       inet.util.headerserializers.tcp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_COMMON"
@@ -73,6 +74,7 @@
                        inet.networklayer.arp
                        inet.nodes.inet
                        inet.nodes.wireless
+                       inet.util.headerserializers.ipv4
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -133,6 +135,7 @@
         nedPackages = "
                        inet.transport.udp
                        inet.applications.udpapp
+                       inet.util.headerserializers.udp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_UDP"
@@ -177,6 +180,7 @@
         nedPackages = "
                        inet.applications.sctpapp
                        inet.transport.sctp
+                       inet.util.headerserializers.sctp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_SCTP"
