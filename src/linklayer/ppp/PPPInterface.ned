@@ -51,7 +51,7 @@ module PPPInterface like IWiredNic
         ppp: PPP {
             parameters:
                 queueModule = (queueType == "NoQueue" ? "" : "queue");
-                txQueueLimit = 1; // queue sends one packet at a time
+                txQueueLimit = (queueType == "NoQueue" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=98,165");
         }
     connections:
