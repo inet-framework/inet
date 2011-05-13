@@ -352,12 +352,22 @@ void EtherMACBase::refreshConnection(bool connected_par)
 
         if (txQueue.extQueue)
         {
-            txQueue.extQueue->clear();
-            ASSERT(0 == txQueue.extQueue->getNumPendingRequests());
-            txQueue.extQueue->requestPacket();
+            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
+            if (0 == txQueue.extQueue->getNumPendingRequests())
+                txQueue.extQueue->requestPacket();
         }
         else
-            txQueue.innerQueue->queue.clear();
+        {
+            //Clear inner queue
+            while (!txQueue.innerQueue->queue.empty())
+            {
+                cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->queue.pop());
+                EV << "Interface is not connected, dropping packet " << msg << endl;
+                numDroppedIfaceDown++;
+                emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+                delete msg;
+            }
+        }
 
         transmitState = TX_IDLE_STATE;
         receiveState = RX_IDLE_STATE;
