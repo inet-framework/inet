@@ -126,6 +126,36 @@
         linkerFlags = ""
         />
     <feature
+        id="xMIPv6"
+        name="Mobile IPv6 protocol (xMIPv6)"
+        description = "Mobile IPv6 support with Tunneling"
+        initiallyEnabled = "false"
+        requires = "IPv6"
+        labels = "protocols"
+        nedPackages = "
+                       inet.networklayer.ipv6tunneling
+                       inet.networklayer.xmipv6
+                       inet.nodes.xmipv6
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_xMIPv6"
+        linkerFlags = ""
+        />
+    <feature
+        id="xMIPv6_examples"
+        name="xMIPv6 examples"
+        description = "Examples for Mobile IPv6 support (xMIPv6)"
+        initiallyEnabled = "false"
+        requires = "xMIPv6"
+        labels = "protocols examples"
+        nedPackages = "
+                       inet.examples.mobileipv6
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="UDP"
         name="UDP protocol"
         description = "UDP protocol"

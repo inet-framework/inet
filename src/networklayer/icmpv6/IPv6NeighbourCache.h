@@ -21,7 +21,9 @@
 
 #include <map>
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IPv6Address.h"
 #include "MACAddress.h"
 

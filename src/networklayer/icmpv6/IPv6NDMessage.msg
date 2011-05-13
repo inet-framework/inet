@@ -108,6 +108,8 @@ packet IPv6RouterAdvertisement extends IPv6NDMessage
     MACAddress sourceLinkLayerAddress;        //source link layer option
     unsigned int MTU;                //MTU option
     IPv6NDPrefixInformation prefixInformation[];    //Prefix Information Option
+    MIPv6NDAdvertisementInterval advInterval;    //New Advertisement Interval Option (MIPv6)
+    MIPv6HAInformation haInformation;    //New Home Agent Information Option (MIPv6)
 }
 
 //

@@ -24,6 +24,11 @@
 #include "RoutingTable6.h"
 #include "ICMPv6.h"
 #include "IPv6NeighbourDiscovery.h"
+
+#ifdef WITH_xMIPv6
+#include "IPv6Tunneling.h"
+#endif /* WITH_xMIPv6 */
+
 #include "IPv6Datagram.h"
 #include "IPv6FragBuf.h"
 #include "ProtocolMap.h"
@@ -41,6 +46,10 @@ class INET_API IPv6 : public QueueBase
     IPv6NeighbourDiscovery *nd;
     ICMPv6 *icmp;
 
+#ifdef WITH_xMIPv6
+    IPv6Tunneling* tunneling;
+#endif /* WITH_xMIPv6 */
+
     // working vars
     long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
     IPv6FragBuf fragbuf;  // fragmentation reassembly buffer
@@ -53,6 +62,19 @@ class INET_API IPv6 : public QueueBase
     int numDropped;
     int numUnroutable;
     int numForwarded;
+
+#ifdef WITH_xMIPv6
+    // 28.9.07 - CB
+    // datagrams that are supposed to be sent with a tentative IPv6 address
+    // are resscheduled for later resubmission.
+    class ScheduledDatagram : public cPacket
+    {
+      public:
+        IPv6Datagram* datagram;
+        InterfaceEntry* ie;
+        MACAddress macAddr;
+    };
+#endif /* WITH_xMIPv6 */
 
   protected:
     // utility: look up interface from getArrivalGate()
@@ -134,6 +156,22 @@ class INET_API IPv6 : public QueueBase
      * of the queue.
      */
     virtual void endService(cPacket *msg);
+
+#ifdef WITH_xMIPv6
+    /**
+     * Determines the correct interface for the specified destination address.
+     */
+    bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
+            IPv6Datagram* datagram);
+
+    /**
+     * Process the extension headers of the datagram.
+     * Returns true if all have been processed successfully and false if errors occured
+     * and the packet has to be dropped or if the datagram has been forwarded to another
+     * module for further processing.
+     */
+    bool processExtensionHeaders(IPv6Datagram* datagram);
+#endif /* WITH_xMIPv6 */
 };
 
 #endif

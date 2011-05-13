@@ -24,6 +24,7 @@ package inet.base;
 //
 module Nop like IHook
 {
+    @display("i=block/socket;is=vs");
     gates:
         input in;
         output out;

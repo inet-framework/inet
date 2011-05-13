@@ -20,13 +20,13 @@
 
 #include <vector>
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
+
 #include "IPv6Address.h"
-#include "IInterfaceTable.h"
 #include "NotificationBoard.h"
 
+class IInterfaceTable;
+class InterfaceEntry;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
@@ -108,6 +108,12 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
 
     bool isrouter;
 
+#ifdef WITH_xMIPv6
+    bool ishome_agent; //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
+    bool ismobile_node;//added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
+    bool mipv6Support; // 4.9.07 - CB
+#endif /* WITH_xMIPv6 */
+
     // Destination Cache maps dest address to next hop and interfaceId.
     // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
     struct DestCacheEntry
@@ -140,6 +146,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     virtual void assignRequiredNodeAddresses(InterfaceEntry *ie);
     // internal
     virtual void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
+
+#ifdef WITH_xMIPv6
+    // internal
+    virtual void configureTunnelFromXML(cXMLElement* cfg);
+#endif /* WITH_xMIPv6 */
 
   protected:
     // displays summary above the icon
@@ -178,6 +189,30 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * IP forwarding on/off
      */
     virtual bool isRouter() const {return isrouter;}
+
+#ifdef WITH_xMIPv6
+    /**
+     * Determine whether normal Router or Home Agent
+     */
+    bool isHomeAgent() const {return ishome_agent;}
+
+    /**
+     * Define whether normal Router or Home Agent.
+     */
+    void setIsHomeAgent(bool value) {ishome_agent = value;}
+
+    /**
+     * Determine whether a node is a Mobile Node or Correspondent Node:
+     * MN if TRUE or else a CN
+     */
+    bool isMobileNode() const {return ismobile_node;}
+
+    /**
+     * Define whether a node is a Mobile Node or Correspondent Node:
+     * MN if TRUE or else a CN
+     */
+    void setIsMobileNode(bool value) {ismobile_node = value;}
+#endif /* WITH_xMIPv6 */
 
     /** @name Routing functions */
     //@{
@@ -303,6 +338,58 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     virtual IPv6Route *getRoute(int i);
     //@}
 
+#ifdef WITH_xMIPv6
+    //================Added by Zarrar Yousaf ===================================
+
+    const IPv6Address& getDestinationAddress();
+    //void updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
+    //const IPv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
+    //const IPv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
+    const IPv6Address& getHomeAddress(); // NEW, 14.01.08 - CB
+
+    /**
+     * Check whether provided address is a HoA
+     */
+    bool isHomeAddress(const IPv6Address& addr);
+
+    /**
+     * Removes the current default routes for the given interface.
+     */
+    void removeDefaultRoutes(int interfaceID);
+
+    /**
+     * Removes all routes from the routing table.
+     */
+    void removeAllRoutes();
+
+    /**
+     * Removes all prefixes registered for the given interface.
+     */
+    void removePrefixes(int interfaceID);
+
+    /*
+     * Removes all destination cache entries for the specified interface
+     */
+    void purgeDestCacheForInterfaceID(int interfaceId);
+
+    /**
+     * Can be used to check whether this node supports MIPv6 or not
+     * (MN, MR, HA or CN).
+     */
+    bool hasMIPv6Support() { return mipv6Support; }
+
+    /**
+     * This method is used to define whether the node support MIPv6 or
+     * not (MN, MR, HA or CN).
+     */
+    void setMIPv6Support(bool value) { mipv6Support = value; }
+
+    /**
+     * Checks whether the provided address is in an on-link address
+     * with respect to the prefix advertisement list.
+     */
+    bool isOnLinkAddress(const IPv6Address& address); // update 11.9.07 - CB
+#endif /* WITH_xMIPv6 */
 };
 
 #endif

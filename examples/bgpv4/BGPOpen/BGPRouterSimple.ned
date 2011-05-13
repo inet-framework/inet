@@ -37,7 +37,7 @@ module BGPRouterSimple
         @labels(node,ethernet-node);
         @display("i=abstract/router");
         string routingFile;
-        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwip")?"TCP_lwip":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TCP_lwip","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
