@@ -1,5 +1,5 @@
 extendContextMenu {
-   {"INET: Interfaces"             "**"  "**interfaceTable.interfaces"     "*vector*"}
+   {"INET: Interfaces"             "**"  "**interfaceTable.idToInterface"  "*vector*"}
    {"INET: IP Routing Table"       "**"  "**routingTable.routes"           "*vector*"}
    {"INET: IP Multicast Routes"    "**"  "**routingTable.multicastRoutes"  "*vector*"}
    {"INET: IPv6 Routing Table"     "**"  "**routingTable6.routeList"       "*vector*"}
@@ -9,7 +9,7 @@ extendContextMenu {
    {"INET: TED database"           "**"  "**ted.ted"                       "*vector*"}
    {"INET: LIB table"              "**"  "**libTable.lib"                  "*vector*"}
 
-   {"INET: Interfaces"             "**.interfaceTable"  "interfaces"      "*vector*"}
+   {"INET: Interfaces"             "**.interfaceTable"  "idToInterface"   "*vector*"}
    {"INET: IP Routing Table"       "**.routingTable"    "routes"          "*vector*"}
    {"INET: IP Multicast Routes"    "**.routingTable"    "multicastRoutes" "*vector*"}
    {"INET: IPv6 Routing Table"     "**.routingTable6"   "routeList"       "*vector*"}
