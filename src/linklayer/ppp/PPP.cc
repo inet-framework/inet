@@ -204,9 +204,24 @@ void PPP::refreshOutGateConnection(bool connected)
             if (datarateChannel)
                 datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
-        txQueue.clear();
         if (queueModule)
-            queueModule->clear();
+        {
+            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
+            if (0 == queueModule->getNumPendingRequests())
+                queueModule->requestPacket();
+        }
+        else
+        {
+            //Clear inner queue
+            while (!txQueue.empty())
+            {
+                cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
+                EV << "Interface is not connected, dropping packet " << msg << endl;
+                numDroppedIfaceDown++;
+                emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+                delete msg;
+            }
+        }
     }
 
     // if we're connected, get the gate with transmission rate
