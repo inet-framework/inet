@@ -23,7 +23,7 @@
 
 package inet.examples.mobileipv6;
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.xmipv6.WirelessHost6;
 import inet.nodes.xmipv6.HomeAgent6;
 import inet.nodes.xmipv6.CorrespondentNode6;
@@ -52,8 +52,6 @@ network mIPv6Network
     parameters:
         double total_mn;
         double total_cn;
-        double playgroundSizeX;
-        double playgroundSizeY;
 
         @display("bgb=799,698");
     submodules:
@@ -63,8 +61,6 @@ network mIPv6Network
         }
         channelcontrol: ChannelControlExtended {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 numChannels = 5;
                 @display("p=753,123");
         }
