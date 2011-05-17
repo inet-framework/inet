@@ -22,16 +22,11 @@ import inet.networklayer.extras.Dummy;
 // and node failures may thus be simulated by replacing the ~RSVP_LSR
 // with RSVP_FAILED.
 //
-module RSVP_FAILED
+module RSVP_FAILED extends RSVP_ROUTER_BASE
 {
     parameters:
         @labels(node);
         @display("i=abstract/router;i2=status/noentry");
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

@@ -23,18 +23,11 @@ import inet.networklayer.extras.Dummy;
 // and node failures may thus be simulated by replacing the ~RSVP_LSR
 // with LDP_FAILED.
 //
-module LDP_FAILED
+module LDP_FAILED extends LDP_ROUTER_BASE
 {
     parameters:
         @labels(node);
         @display("i=abstract/router;i2=status/noentry");
-        double holdTime @unit("s") = default(15s);
-        double helloInterval @unit("s") = default(5s);
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         dummy: Dummy {
             gates:

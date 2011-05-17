@@ -30,20 +30,10 @@ import inet.base.NotificationBoard;
 //
 // LDP Capable Routers are the main building blocks for an LDP MPLS network.
 //
-module LDP_LSR
+module LDP_LSR extends LDP_ROUTER_BASE
 {
     parameters:
-        @node();
-        @labels(node,mpls-node);
         @display("i=abstract/router");
-        double holdTime @unit("s") = default(15s);
-        double helloInterval @unit("s") = default(5s);
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-        string tcpType = default(firstAvailable("TCP","TCP_lwip","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwip, ~TCP_NSC) or ~TCPSpoof
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

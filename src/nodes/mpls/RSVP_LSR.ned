@@ -31,17 +31,12 @@ import inet.base.NotificationBoard;
 // itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
-module RSVP_LSR
+module RSVP_LSR extends RSVP_ROUTER_BASE
 {
     parameters:
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
