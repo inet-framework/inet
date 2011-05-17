@@ -461,11 +461,11 @@ void SnrEval::changeChannel(int channel)
 
     rs.setChannelNumber(channel);
     cc->updateHostChannel(myHostRef, channel);
-    ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
+    ChannelControlExtended::TransmissionList tl = cc->getOngoingTransmissions(channel);
 
     // pick up ongoing transmissions on the new channel
     EV << "Picking up ongoing transmissions on new channel:\n";
-    for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+    for (ChannelControlExtended::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
     {
         AirFrame *frame = *it;
         // time for the message to reach us

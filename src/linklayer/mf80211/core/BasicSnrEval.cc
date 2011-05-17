@@ -72,11 +72,10 @@ bool BasicSnrEval::processAirFrame(AirFrame *airframe)
 {
 
 	int chnum = airframe->getChannelNumber();
-	AirFrameExtended *airframeext = dynamic_cast<AirFrameExtended *>(airframe);
-	if (ccExt && airframeext)
+	if (cc && airframe)
 	{
-		double perc = ccExt->getPercentage();
-		double fqFrame = airframeext->getCarrierFrequency();
+		double perc = cc->getPercentage();
+		double fqFrame = airframe->getCarrierFrequency();
 		if (fqFrame > 0.0 && carrierFrequency>0.0)
 		{
 			if (chnum == getChannelNumber() && (fabs((fqFrame - carrierFrequency)/carrierFrequency)<=perc))
@@ -169,7 +168,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
  */
 AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
 {
-	AirFrameExtended *frame = createCapsulePkt();
+	AirFrame *frame = createCapsulePkt();
     frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
     frame->setBitLength(headerLength);

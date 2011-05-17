@@ -25,7 +25,9 @@
 #include <set>
 
 #include <omnetpp.h>
-#include "ChannelControl.h"
+#include "Coord.h"
+
+//#include "ChannelControl.h"
 
 
 #define LIGHT_SPEED 3.0E+8
@@ -40,14 +42,14 @@
 
 class ChannelAccess;
 class AbstractRadio;
-class AirFrameExtended;
+class AirFrame;
 
 
-class INET_API ChannelControlExtended : public ChannelControl
+class INET_API ChannelControlExtended : public cSimpleModule
 {
   protected:
-    class HostEntryExtended;
-    typedef std::list<HostEntryExtended> HostList;
+    class HostEntry;
+    typedef std::list<HostEntry> HostList;
 
 
     // JcM add: Radio entry structure
@@ -63,8 +65,9 @@ class INET_API ChannelControlExtended : public ChannelControl
 
   public:
     //typedef std::list<AirFrame*> TransmissionListExt;
-    typedef HostEntryExtended *HostRefExtended; // handle for ChannelControl's clients
-    typedef std::list<AirFrameExtended*> TransmissionList;
+    typedef HostEntry *HostRef; // handle for ChannelControl's clients
+    typedef std::vector<HostRef> HostRefVector;
+    typedef std::list<AirFrame *> TransmissionList;
 
 
     // JcM add: we handle radio list instead of host lists
@@ -80,29 +83,31 @@ class INET_API ChannelControlExtended : public ChannelControl
     typedef std::vector<TransmissionList> ChannelTransmissionLists;
     ChannelTransmissionLists transmissions; // indexed by channel number (size=numChannels)
 
-
-    // JcM Fix: Change the HostEntry in order to support multiple radios
-    //struct HostEntry {
-    //   cModule *host;
-    //   Coord pos; // cached
-    //   std::set<HostRef> neighbors;  // cached neighbour list
-    //   // TODO: use ChannelAccess vector instead
-    //   int channel;
-    //   bool isModuleListValid;  // "neighborModules" is produced from "neighbors" on demand
-    //   ModuleList neighborModules; // derived from "neighbors"
-    //};
-
-    struct HostEntryExtended : public ChannelControl::HostEntry
+    struct HostEntry
     {
-  public:
-        std::set<HostRefExtended> neighbors;  // cached neighbor list
+    public:
+
+        cModule *host;
+        int regCnt; // counter of registration
+        cGate *radioInGate;
+        int channel;
+        Coord pos; // cached
+
+        // we cache neighbors set in an std::vector, because std::set iteration is slow;
+        // std::vector is created and updated on demand
+        HostRefVector neighborList;
+        bool isNeighborListValid;
+        virtual bool getIsModuleListValid(){return isNeighborListValid;}
+// extended
+    	std::set<HostRef> neighbors;  // cached neighbor list
         double maxInterferenceDist;
 
         RadioList radioList;
 
         double carrierFrequency;
         double percentage;
-        HostEntryExtended () {percentage = carrierFrequency = -1;}
+        int numChannles;
+        HostEntry () {percentage = carrierFrequency = -1;}
 
         //radioGatesList getHostGatesOnChannel(int);
         radioGatesList getHostGatesOnChannel(int,double);
@@ -118,22 +123,31 @@ class INET_API ChannelControlExtended : public ChannelControl
 
     HostList hosts;
 
+    /** @brief used to clear the transmission list from time to time */
+    simtime_t lastOngoingTransmissionsUpdate;
+    /** @brief Set debugging for the basic module*/
+    bool coreDebug;
     double carrierFrequency;
     double percentage;
+    double maxInterferenceDistance; // the biggest interference distance in the network
+    int numChannels;  // the number of controlled channels
 
   protected:
     virtual void updateConnections(HostRef h);
 
     /** @brief Calculate interference distance*/
     virtual double calcInterfDistExtended(double);
+    virtual double calcInterfDist();
 
     virtual void initialize();
 
     /** @brief Throws away expired transmissions. */
     virtual void purgeOngoingTransmissions();
+    /** @brief Validate the channel identifier */
+    virtual void checkChannel(const int channel);
 
-    friend std::ostream& operator<<(std::ostream&, const HostEntryExtended&);
-    friend std::ostream& operator<<(std::ostream&, const ChannelControl::TransmissionList&);
+    friend std::ostream& operator<<(std::ostream&, const HostEntry&);
+    friend std::ostream& operator<<(std::ostream&, const TransmissionList&);
 
   public:
     ChannelControlExtended();
@@ -163,6 +177,9 @@ class INET_API ChannelControlExtended : public ChannelControl
     virtual void updateHostChannel(HostRef h, const int channel,cModule* ca,double);
     virtual void updateHostChannel(HostRef h, const int channel);
 
+    /** @brief To be called when the host moved; updates proximity info */
+    virtual void updateHostPosition(HostRef h, const Coord& pos);
+
     /** JcM Add: Get a host reference by its radio **/
     cModule* getHostByRadio(AbstractRadio* r);
 
@@ -175,6 +192,11 @@ class INET_API ChannelControlExtended : public ChannelControl
     /** @brief Returns the host's position */
     const Coord& getHostPosition(HostRef h)  {return h->pos;}
 
+
+    /** @brief Reads init parameters and calculates a maximal interference distance*/
+    virtual double getCommunicationRange(HostRef h) {
+        return maxInterferenceDistance;
+    }
     /** @brief Returns the number of radio channels (frequencies) simulated */
     const int getNumChannels() {return numChannels;}
     const double getPercentage() {return percentage;}

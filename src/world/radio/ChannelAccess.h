@@ -27,7 +27,7 @@
 #include "INETDefs.h"
 
 #include "BasicModule.h"
-#include "ChannelControl.h"
+//#include "ChannelControl.h"
 #include "ChannelControlExtended.h"
 
 // Forward declarations
@@ -53,7 +53,7 @@ class AirFrame;
 class INET_API ChannelAccess : public BasicModule
 {
   public:
-    ChannelAccess() : cc(NULL), ccExt(NULL), myHostRef(NULL),
+    ChannelAccess() : cc(NULL), myHostRef(NULL),
             hostPos(std::numeric_limits<double>::min(), std::numeric_limits<double>::min()),
             posFromDisplayString(true) {}
 
@@ -65,13 +65,13 @@ class INET_API ChannelAccess : public BasicModule
 
   protected:
     /** @brief Pointer to the ChannelControl module*/
-    ChannelControl* cc;
+    ChannelControlExtended* cc;
 
-    /** @brief Pointer to the ChannelControl module*/
-    ChannelControlExtended* ccExt;
+//    /** @brief Pointer to the ChannelControl module*/
+//    ChannelControlExtended* ccExt;
 
     /** @brief Identifies this host in the ChannelControl module*/
-    ChannelControl::HostRef myHostRef;
+    ChannelControlExtended::HostRef myHostRef;
 
     Coord hostPos;
     bool posFromDisplayString;

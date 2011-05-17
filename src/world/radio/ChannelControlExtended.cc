@@ -37,7 +37,7 @@ Define_Module(ChannelControlExtended);
 //}
 
 // New operator to show the HostEntry now showing each radio channel and gate id
-std::ostream& operator<<(std::ostream& os, const ChannelControlExtended::HostEntryExtended& h)
+std::ostream& operator<<(std::ostream& os, const ChannelControlExtended::HostEntry& h)
 {
     os << h.host->getFullPath() << " (x=" << h.pos.x << ",y=" << h.pos.y << "), " << h.neighbors.size() << " neighbor(s)" << endl;
     int count = 0;
@@ -61,7 +61,7 @@ std::ostream& operator<<(std::ostream& os, const ChannelControlExtended::Transmi
 // NEW METHODS TO SUPPORT MULTIPLES RADIOS
 
 /* Check if the host entry has a radio in the given channel */
-bool ChannelControlExtended::HostEntryExtended::isReceivingInChannel(int channel,double freq)
+bool ChannelControlExtended::HostEntry::isReceivingInChannel(int channel,double freq)
 {
     /* if there is some radio on the channel on this host */
     for (ChannelControlExtended::RadioList::const_iterator it = radioList.begin(); it!=radioList.end(); it++)
@@ -75,7 +75,7 @@ bool ChannelControlExtended::HostEntryExtended::isReceivingInChannel(int channel
 }
 
 /* return a std::list with the radioIn host gates that points to radios on the given channel */
-ChannelControlExtended::radioGatesList ChannelControlExtended::HostEntryExtended::getHostGatesOnChannel(int channel,double freq)
+ChannelControlExtended::radioGatesList ChannelControlExtended::HostEntry::getHostGatesOnChannel(int channel,double freq)
 {
 
     ChannelControlExtended::radioGatesList theRadioList;
@@ -109,7 +109,7 @@ ChannelControlExtended::radioGatesList ChannelControlExtended::HostEntryExtended
     return(theRadioList);
 }
 
-void ChannelControlExtended::HostEntryExtended::registerRadio(cModule* ar)
+void ChannelControlExtended::HostEntry::registerRadio(cModule* ar)
 {
     ChannelControlExtended::RadioEntry ra;
     ra.radioModule = ar;
@@ -144,11 +144,11 @@ void ChannelControlExtended::HostEntryExtended::registerRadio(cModule* ar)
         ra.radioInGate = NULL;
     }
 
-    ChannelControlExtended::HostEntryExtended::radioList.push_back(ra);
+    ChannelControlExtended::HostEntry::radioList.push_back(ra);
 }
 
 
-void ChannelControlExtended::HostEntryExtended::unregisterRadio(cModule* ar)
+void ChannelControlExtended::HostEntry::unregisterRadio(cModule* ar)
 {
 
     for (ChannelControlExtended::RadioList::iterator it = radioList.begin(); it!=radioList.end(); it++)
@@ -156,7 +156,7 @@ void ChannelControlExtended::HostEntryExtended::unregisterRadio(cModule* ar)
         ChannelControlExtended::RadioEntry ra = (*it);
         if (ra.radioModule == ar)
         {
-            ChannelControlExtended::HostEntryExtended::radioList.erase(it);
+            ChannelControlExtended::HostEntry::radioList.erase(it);
             return;
         }
     }
@@ -177,7 +177,7 @@ bool ChannelControl::HostEntry::updateRadioChannel(cModule* ar,int ch) {
 }
 */
 
-bool ChannelControlExtended::HostEntryExtended::updateRadioChannel(cModule* ar,int ch,double freq)
+bool ChannelControlExtended::HostEntry::updateRadioChannel(cModule* ar,int ch,double freq)
 {
     EV << "HostEntry " << this->host->getFullPath() << " updating radio channel to " << ar << " ch " << ch  << endl;
     for (ChannelControlExtended::RadioList::iterator it = radioList.begin(); it!=radioList.end(); it++)
@@ -195,7 +195,7 @@ bool ChannelControlExtended::HostEntryExtended::updateRadioChannel(cModule* ar,i
     return(false);
 }
 
-bool ChannelControlExtended::HostEntryExtended::isRadioRegistered(cModule* r)
+bool ChannelControlExtended::HostEntry::isRadioRegistered(cModule* r)
 {
     for (ChannelControlExtended::RadioList::iterator it = radioList.begin(); it!=radioList.end(); it++)
     {
@@ -235,17 +235,14 @@ ChannelControlExtended::~ChannelControlExtended()
 
 ChannelControlExtended *ChannelControlExtended::get()
 {
-    ChannelControl * cc = ChannelControl::get();
+    ChannelControlExtended * cc = dynamic_cast<ChannelControlExtended *>(simulation.getModuleByPath("channelControl"));
     if (!cc)
     {
-        cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrolextended"));
-        if (!cc)
-            cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrolextended"));
+    	cc = dynamic_cast<ChannelControlExtended *>(simulation.getModuleByPath("channelcontrol"));
         if (!cc)
             throw cRuntimeError("Could not find ChannelControl module");
     }
-    ChannelControlExtended *ccExt = dynamic_cast<ChannelControlExtended *>(cc);
-    return ccExt;
+    return cc;
 }
 
 /**
@@ -275,11 +272,10 @@ void ChannelControlExtended::initialize()
     WATCH(maxInterferenceDistance);
     WATCH_LIST(hosts);
     WATCH_VECTOR(transmissions);
-    updateDisplayString(getParentModule());
 }
 
 
-ChannelControl::HostRef ChannelControlExtended::registerHost(cModule * host, const Coord& initialPos,cGate *radioInGate)
+ChannelControlExtended::HostRef ChannelControlExtended::registerHost(cModule * host, const Coord& initialPos,cGate *radioInGate)
 {
     Enter_Method_Silent();
 
@@ -291,7 +287,7 @@ ChannelControl::HostRef ChannelControlExtended::registerHost(cModule * host, con
         return hostRef;
     }
 
-    HostEntryExtended he;
+    HostEntry he;
     he.host = host;
     he.regCnt = 1;
     he.pos = initialPos;
@@ -338,7 +334,7 @@ void ChannelControlExtended::unregisterHost(cModule *host)
     error("unregisterHost failed: no such host");
 }
 
-ChannelControl::HostRef ChannelControlExtended::lookupHost(cModule *host)
+ChannelControlExtended::HostRef ChannelControlExtended::lookupHost(cModule *host)
 {
     Enter_Method_Silent();
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
@@ -348,19 +344,19 @@ ChannelControl::HostRef ChannelControlExtended::lookupHost(cModule *host)
     return 0;
 }
 
-const ChannelControl::HostRefVector& ChannelControlExtended::getNeighbors(HostRef haux)
+const ChannelControlExtended::HostRefVector& ChannelControlExtended::getNeighbors(HostRef haux)
 {
     Enter_Method_Silent();
 
-    HostRefExtended h = dynamic_cast <ChannelControlExtended::HostRefExtended>(haux);
+    HostRef h = haux;
     if (!h)
-        error(" not HostRefExtended");
+        error(" not Hostref");
 
     if (!h->isNeighborListValid)
     {
         h->neighborList.clear();
 
-        for (std::set<HostRefExtended>::const_iterator it = h->neighbors.begin(); it != h->neighbors.end(); it++)
+        for (std::set<HostRef>::const_iterator it = h->neighbors.begin(); it != h->neighbors.end(); it++)
             h->neighborList.push_back(*it);
 
         h->isNeighborListValid = true;
@@ -375,6 +371,19 @@ const ChannelControlExtended::TransmissionList& ChannelControlExtended::getOngoi
     checkChannel(channel);
     purgeOngoingTransmissions();
     return transmissions[channel];
+}
+
+void ChannelControlExtended::checkChannel(const int channel)
+{
+    if (channel >= numChannels || channel < 0)
+        error("Invalid channel, must be between 0 and %d", numChannels);
+}
+
+void ChannelControlExtended::updateHostPosition(HostRef h, const Coord& pos)
+{
+    Enter_Method_Silent();
+    h->pos = pos;
+    updateConnections(h);
 }
 
 void ChannelControlExtended::addOngoingTransmission(HostRef h, AirFrame *frame)
@@ -400,11 +409,11 @@ void ChannelControlExtended::addOngoingTransmission(HostRef h, AirFrame *frame)
     // register ongoing transmission
     take(frame);
     frame->setTimestamp(); // store time of transmission start
-    AirFrameExtended * frameExtended = dynamic_cast<AirFrameExtended*>(frame);
+    AirFrame * frameExtended = frame;
 
     if (!frameExtended)
     {
-        frameExtended = new AirFrameExtended();
+        frameExtended = new AirFrame();
         AirFrame * faux = frameExtended;
         *faux = (*frame);
         delete frame;
@@ -466,10 +475,42 @@ double ChannelControlExtended::calcInterfDistExtended(double freq)
     return interfDistance;
 }
 
-void ChannelControlExtended::updateConnections(HostRef aux)
+/**
+ * Calculation of the interference distance based on the transmitter
+ * power, wavelength, pathloss coefficient and a threshold for the
+ * minimal receive Power
+ *
+ * You may want to overwrite this function in order to do your own
+ * interference calculation
+ */
+double ChannelControlExtended::calcInterfDist()
 {
+    double SPEED_OF_LIGHT = 300000000.0;
+    double interfDistance;
 
-    HostRefExtended h = (HostRefExtended) aux;
+    //the carrier frequency used
+    double carrierFrequency = par("carrierFrequency");
+    //maximum transmission power possible
+    double pMax = par("pMax");
+    //signal attenuation threshold
+    double sat = par("sat");
+    //path loss coefficient
+    double alpha = par("alpha");
+
+    double waveLength = (SPEED_OF_LIGHT / carrierFrequency);
+    //minimum power level to be able to physically receive a signal
+    double minReceivePower = pow(10.0, sat / 10.0);
+
+    interfDistance = pow(waveLength * waveLength * pMax /
+                         (16.0 * M_PI * M_PI * minReceivePower), 1.0 / alpha);
+
+    coreEV << "max interference distance:" << interfDistance << endl;
+
+    return interfDistance;
+}
+
+void ChannelControlExtended::updateConnections(HostRef h)
+{
     if (!h)
         error("ChannelControlExtended::updateConnections");
 
@@ -478,7 +519,7 @@ void ChannelControlExtended::updateConnections(HostRef aux)
 
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); ++it)
     {
-        HostEntryExtended *hi = &(*it);
+        HostEntry *hi = &(*it);
         if (hi == h)
             continue;
 
@@ -508,12 +549,10 @@ void ChannelControlExtended::updateConnections(HostRef aux)
 }
 
 
-void ChannelControlExtended::updateHostChannel(HostRef h, const int channel)
+void ChannelControlExtended::updateHostChannel(HostRef hExt, const int channel)
 {
     Enter_Method_Silent();
     checkChannel(channel);
-    HostRefExtended hExt = (HostRefExtended) h;
-
     if (hExt->radioList.empty())
     {
         cModule *module = hExt->host;
@@ -546,18 +585,18 @@ void ChannelControlExtended::updateHostChannel(HostRef h, const int channel, cMo
 
     checkChannel(channel);
 
-    ((HostRefExtended)h)->updateRadioChannel(ca,channel,freq);
+    h->updateRadioChannel(ca,channel,freq);
 }
 
 void ChannelControlExtended::sendToChannel(cSimpleModule *srcRadioMod, HostRef srcHost, AirFrame *airFrame)
 {
     const HostRefVector& neighbors = getNeighbors(srcHost);
     int n = neighbors.size();
-    AirFrameExtended * msgAux = dynamic_cast<AirFrameExtended*>(airFrame);
+    AirFrame * msgAux = airFrame;
 
     for (int i = 0; i < n; i++)
     {
-        HostRefExtended h = dynamic_cast<HostRefExtended>(neighbors[i]);
+        HostRef h = neighbors[i];
 
         ChannelControlExtended::radioGatesList theRadioList;
 

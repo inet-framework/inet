@@ -73,7 +73,7 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
 
     virtual void handleMessage(cMessage *msg);
 
-    virtual void handleUpperMsg(AirFrameExtended*);
+    virtual void handleUpperMsg(AirFrame*);
 
     virtual void handleSelfMsg(cMessage*);
 
@@ -83,22 +83,22 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
     virtual void handleLowerMsgStart(AirFrame *airframe);
 
     /** @brief Unbuffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgEnd(AirFrameExtended *airframe);
+    virtual void handleLowerMsgEnd(AirFrame *airframe);
 
     /** @brief Buffers message for 'transmission time' */
     virtual void bufferMsg(AirFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time' */
-    virtual AirFrameExtended *unbufferMsg(cMessage *msg);
+    virtual AirFrame *unbufferMsg(cMessage *msg);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(AirFrameExtended *airframe);
+    virtual void sendUp(AirFrame *airframe);
 
     /** Sends a message to the channel */
-    virtual void sendDown(AirFrameExtended *airframe);
+    virtual void sendDown(AirFrame *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
-    virtual AirFrameExtended *encapsulatePacket(cPacket *msg);
+    virtual AirFrame *encapsulatePacket(cPacket *msg);
 
     /** Sets the radio state, and also fires change notification */
     virtual void setRadioState(RadioState::State newState);
@@ -110,7 +110,7 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
     virtual void addNewSnr();
 
     /** Create a new AirFrame */
-    virtual AirFrameExtended *createAirFrame() {return new AirFrameExtended();}
+    virtual AirFrame *createAirFrame() {return new AirFrame();}
 
     /**
      * Change transmitter and receiver to a new channel.

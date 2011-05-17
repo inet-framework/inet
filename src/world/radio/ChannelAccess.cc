@@ -43,12 +43,7 @@ void ChannelAccess::initialize(int stage)
 
     if (stage == 0)
     {
-        ccExt = ChannelControlExtended::get();
-
-        if (ccExt == NULL)
-            cc = ChannelControl::get();
-        else
-            cc = ccExt;
+    	cc = ChannelControlExtended::get();
 
         cModule *hostModule = findHost();
 

@@ -160,8 +160,8 @@ class INET_API BasicSnrEval : public ChannelAccess
     /*@{*/
 
     /** @brief Create a new AirFrame */
-    virtual AirFrameExtended* createCapsulePkt() {
-        return new AirFrameExtended();
+    virtual AirFrame* createCapsulePkt() {
+        return new AirFrame();
     };
     /*@}*/
 

@@ -22,7 +22,7 @@
  ***************************************************************************
  */
 
-#include "ChannelControl.h"
+#include "ChannelControlExtended.h"
 #include "ChannelAccess.h"
 #include "FreeSpaceModel.h"
 
@@ -36,7 +36,7 @@ Register_Class(FreeSpaceModel);
 void FreeSpaceModel::initializeFreeSpace(cModule *radioModule)
 {
 	pathLossAlpha = radioModule->par("pathLossAlpha");
-    cModule *cc = ChannelControl::get();
+    cModule *cc = ChannelControlExtended::get();
     if (pathLossAlpha < (double) (cc->par("alpha")))
         opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
 	Gt = pow(10, radioModule->par("TransmissionAntennaGainIndB").doubleValue()/10);
