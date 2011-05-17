@@ -7,10 +7,10 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.world.ChannelControlExtended;
+import inet.world.radio.ChannelControlExtended;
 import inet.nodes.wireless.AccessPoint;
-import inet.mobility.NullMobility;
-import inet.mobility.CircleMobility;
+import inet.mobility.models.NullMobility;
+import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
@@ -87,7 +87,7 @@ module ThroughputServer
         }
         mobility: NullMobility {
             parameters:
-                x = 350 * (idx+1) / maxSrv;
+                initialX = 350m * (idx+1) / maxSrv;
                 @display("p=50,141");
         }
     connections allowunconnected:
@@ -100,8 +100,6 @@ network Throughput
     parameters:
         int numCli;
         int numSrv;
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
@@ -125,8 +123,6 @@ network Throughput
         }
         channelcontrol: ChannelControlExtended {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
 }
@@ -142,19 +138,17 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 100s
 **.vector-recording = false
 
-*.playgroundSizeX = 400
-*.playgroundSizeY = 400
+**.constraintAreaWidth = 400m
+**.constraintAreaHeight = 400m
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
 **.channelcontrol.numChannels = 1
-**.mobility.x = -1
-**.mobility.y = -1
 
 # positions
-**.mobility.cx = 200
-**.mobility.cy = 200
-**.mobility.r = 100
+**.mobility.cx = 200m
+**.mobility.cy = 200m
+**.mobility.r = 100m
 **.mobility.speed = 1 mps
 **.mobility.updateInterval = 100ms
 
@@ -209,7 +203,7 @@ linecount <- 10 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
 expectedRate <- 23.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
-unbalancedRate <- 20.0 # %
+unbalancedRate <- 25.0 # %
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation
 expectedRateMax <- expectedRate + maxDeviation

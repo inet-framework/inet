@@ -103,8 +103,8 @@ tkenv-plugin-path = ../../../etc/plugins
 #sim-time-limit = 2s+60s
 sim-time-limit = 2s+60s+12s
 
-**.server*.tcpApp[0].type-name = "TCPEchoApp"
-**.client*.tcpApp[0].type-name = "TCPSessionApp"
+**.server*.tcpApp[0].typename = "TCPEchoApp"
+**.client*.tcpApp[0].typename = "TCPSessionApp"
 
 #client app:
 **.client*.tcpApp[0].active = true
