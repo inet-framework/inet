@@ -21,7 +21,7 @@
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
-#include "ChannelControlExtended.h"
+#include "ChannelAccess.h"
 
 //TBD supportedRates!
 //TBD use command msg kinds?
@@ -97,9 +97,8 @@ void Ieee80211MgmtSTA::initialize(int stage)
         nb = NotificationBoardAccess().get();
 
         // determine numChannels (needed when we're told to scan "all" channels)
-        //XXX find a better way than directly accessing channelControl
-        cModule *cc = ChannelControlExtended::get();
-        numChannels = cc->par("numChannels");
+        IChannelControl *cc = ChannelAccess::getChannelControl();
+        numChannels = cc->getNumChannels();
 
         WATCH(isScanning);
         WATCH(isAssociated);

@@ -5,7 +5,7 @@
 package inet.examples.wireless.multiradio;
 
 import ned.DatarateChannel;
-import inet.world.radio.ChannelControlExtended;
+import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.nodes.inet.Router;
@@ -18,7 +18,7 @@ network MultiRadio
         bool useEthernetSwitching = default(true);
         bool useRouting = default(false);
     submodules:
-        channelControl: ChannelControlExtended {
+        channelControl: ChannelControl {
             @display("p=53,32");
         }
         host1: WirelessHost {

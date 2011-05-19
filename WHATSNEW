@@ -1,5 +1,11 @@
 Recent changes in the INET Framework
 ====================================
+- ChannelController now deals only with radios and not hosts. This makes it possible 
+  to have hosts with several radio interfaces. The radios are registered/unregistered 
+  in the ChannelAccess module (previously host registration was done by the Mobility 
+  modules). ChannelControl/ChannelAccess now completely independent of the mobility 
+  framework. This means that if there is no Mobility module present in a host the
+  host's displaystring will be used to set the static positions of the radios.
 
 - Ethernet switch moved under the linklayer/ethernet/switch directory. EtherHostQ is now
   EtherHost. To have no queue in the enthernet host specify queueType="NoQueue".

@@ -27,8 +27,7 @@
 #include "INETDefs.h"
 
 #include "BasicModule.h"
-//#include "ChannelControl.h"
-#include "ChannelControlExtended.h"
+#include "IChannelControl.h"
 
 // Forward declarations
 class AirFrame;
@@ -46,16 +45,21 @@ class AirFrame;
  *
  * Please don't touch this class.
  *
- * @author Marc L�bbers
+ * @author Marc Loebbers
  * @ingroup channelControl
  * @ingroup phyLayer
  */
 class INET_API ChannelAccess : public BasicModule
 {
+  protected:
+	IChannelControl* cc;  // Pointer to the ChannelControl module
+	IChannelControl::RadioRef myRadioRef;  // Identifies this radio in the ChannelControl module
+	cModule *hostModule;    // the host that contains this radio model
+	Coord radioPos;  // the physical position of the radio (derived from display string or from mobility models)
+	bool positionUpdateArrived;
+
   public:
-    ChannelAccess() : cc(NULL), myHostRef(NULL),
-            hostPos(std::numeric_limits<double>::min(), std::numeric_limits<double>::min()),
-            posFromDisplayString(true) {}
+    ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
 
     /**
      * Called by the NotificationBoard whenever a change of a category
@@ -63,31 +67,20 @@ class INET_API ChannelAccess : public BasicModule
      */
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
-  protected:
-    /** @brief Pointer to the ChannelControl module*/
-    ChannelControlExtended* cc;
-
-//    /** @brief Pointer to the ChannelControl module*/
-//    ChannelControlExtended* ccExt;
-
-    /** @brief Identifies this host in the ChannelControl module*/
-    ChannelControlExtended::HostRef myHostRef;
-
-    Coord hostPos;
-    bool posFromDisplayString;
+    /** Finds the channelControl module in the network */
+    static IChannelControl *getChannelControl();
 
   protected:
-    /** @brief Sends a message to all hosts in range*/
+    /** Sends a message to all radios in range */
     virtual void sendToChannel(AirFrame *msg);
 
-    /** @brief Returns the host's position*/
-    const Coord& getMyPosition() {return cc->getHostPosition(myHostRef);}
+    virtual cPar& getChannelControlPar(const char *parName) { return dynamic_cast<cModule *>(cc)->par(parName); }
+    const Coord& getRadioPosition() const { return radioPos; }
+    cModule *getHostModule() const { return hostModule; }
 
-  protected:
-    /** @brief Register with ChannelControl and subscribe to hostPos*/
+    /** Register with ChannelControl and subscribe to hostPos*/
     virtual void initialize(int stage);
-
-    virtual int numInitStages() const {return 3;}
+    virtual int numInitStages() const { return 3; }
 };
 
 #endif

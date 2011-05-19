@@ -58,7 +58,7 @@ void BasicSnrEval::initialize(int stage)
         carrierFrequency = par("carrierFrequency");
 
         // transmitter power CANNOT be greater than in ChannelControl
-        if (transmitterPower > (double) (cc->par("pMax")))
+        if (transmitterPower > (double) (dynamic_cast<cModule *>(cc)->par("pMax")))
             error("transmitterPower cannot be bigger than pMax in ChannelControl!");
     }
 }
@@ -70,26 +70,7 @@ Determine if the packet must be delete or process
 
 bool BasicSnrEval::processAirFrame(AirFrame *airframe)
 {
-
-	int chnum = airframe->getChannelNumber();
-	if (cc && airframe)
-	{
-		double perc = cc->getPercentage();
-		double fqFrame = airframe->getCarrierFrequency();
-		if (fqFrame > 0.0 && carrierFrequency>0.0)
-		{
-			if (chnum == getChannelNumber() && (fabs((fqFrame - carrierFrequency)/carrierFrequency)<=perc))
-				return true;
-			else
-				return false;
-		}
-		else
-			return (chnum == getChannelNumber());
-	}
-	else
-	{
-		return (chnum == getChannelNumber());
-	}
+	return airframe->getChannelNumber() == getChannelNumber();
 }
 
 /**
@@ -175,7 +156,7 @@ AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
     frame->setChannelNumber(getChannelNumber());
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
-    frame->setSenderPos(getMyPosition());
+    frame->setSenderPos(radioPos);
     frame->setCarrierFrequency(carrierFrequency);
     return frame;
 }

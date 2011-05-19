@@ -16,7 +16,7 @@
 // 
 package inet.examples.manetrouting.multiradio;
 
-import inet.world.radio.ChannelControlExtended;
+import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 
@@ -32,7 +32,7 @@ network MultiRadio
     parameters:
         int numHosts;
     submodules:
-        channelcontrol: ChannelControlExtended {
+        channelControl: ChannelControl {
             @display("p=83,15");
         }
         networkConfigurator: NetworkConfigurator {

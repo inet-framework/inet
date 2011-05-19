@@ -41,10 +41,10 @@ void SnrEval::initialize(int stage)
         // read parameters
         rs.setChannelNumber(par("channelNumber"));
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
-        carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
+        carrierFrequency = dynamic_cast<cModule*>(cc)->par("carrierFrequency");  // taken from ChannelControl
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
         pathLossAlpha = par("pathLossAlpha");
-        if (pathLossAlpha < (double) (cc->par("alpha")))
+        if (pathLossAlpha < (double) (dynamic_cast<cModule*>(cc)->par("alpha")))
             error("SnrEval::initialize(): pathLossAlpha can't be smaller than in "
                   "ChannelControl. Please adjust your omnetpp.ini file accordingly");
 
@@ -81,7 +81,7 @@ void SnrEval::initialize(int stage)
     {
         // tell initial channel number to ChannelControl; should be done in
         // stage==2 or later, because base class initializes myHostRef in that stage
-        cc->updateHostChannel(myHostRef, rs.getChannelNumber());
+        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
     }
 }
 
@@ -271,7 +271,7 @@ void SnrEval::handleLowerMsgStart(AirFrame * frame)
     // Calculate the receive power of the message
 
     // calculate distance
-    const Coord& myPos = getMyPosition();
+    const Coord& myPos = radioPos;
     const Coord& framePos = frame->getSenderPos();
     double distance = myPos.distance(framePos);
 
@@ -431,8 +431,6 @@ void SnrEval::changeChannel(int channel)
 {
     if (channel == rs.getChannelNumber())
         return;
-    if (channel < 0 || channel >= cc->getNumChannels())
-        error("changeChannel(): channel number %d is out of range (hint: numChannels is a parameter of ChannelControl)", channel);
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
 
@@ -460,17 +458,17 @@ void SnrEval::changeChannel(int channel)
     EV << "Changing channel to " << channel << "\n";
 
     rs.setChannelNumber(channel);
-    cc->updateHostChannel(myHostRef, channel);
-    ChannelControlExtended::TransmissionList tl = cc->getOngoingTransmissions(channel);
+    cc->setRadioChannel(myRadioRef, channel);
+    IChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
 
     // pick up ongoing transmissions on the new channel
     EV << "Picking up ongoing transmissions on new channel:\n";
-    for (ChannelControlExtended::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+    for (IChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
     {
         AirFrame *frame = *it;
         // time for the message to reach us
-        double distance = myHostRef->pos.distance(frame->getSenderPos());
-        simtime_t propagationDelay = distance / LIGHT_SPEED;
+        double distance = getRadioPosition().distance(frame->getSenderPos());
+        simtime_t propagationDelay = distance / 3.0E+8;
 
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == frame->getChannelNumber())

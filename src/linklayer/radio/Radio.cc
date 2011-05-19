@@ -62,7 +62,7 @@ void Radio::initialize(int stage)
 
         // read parameters
         transmitterPower = par("transmitterPower");
-        if (transmitterPower > (double) (cc->par("pMax")))
+        if (transmitterPower > (double) (getChannelControlPar("pMax")))
             error("transmitterPower cannot be bigger than pMax in ChannelControl!");
         rs.setBitrate(par("bitrate"));
         rs.setChannelNumber(par("channelNumber"));
@@ -101,8 +101,8 @@ void Radio::initialize(int stage)
         if (obstacles) EV << "Found ObstacleControl" << endl;
 
         // this is the parameter of the channel controller (global)
-        std::string propModel =  cc->par("propagationModel").stdstringValue();
-        if (propModel=="")
+        std::string propModel = getChannelControlPar("propagationModel").stdstringValue();
+        if (propModel == "")
             propModel = "FreeSpaceModel";
 
         receptionModel = (IReceptionModel *) createOne(propModel.c_str());
@@ -126,8 +126,8 @@ void Radio::initialize(int stage)
             drawCoverage = par("drawCoverage");
         else
             drawCoverage = false;
-        if (this->hasPar("refresCoverageInterval"))
-        	updateStringInterval = par("refresCoverageInterval");
+        if (this->hasPar("refreshCoverageInterval"))
+        	updateStringInterval = par("refreshCoverageInterval");
         else
         	updateStringInterval = 0;
 
@@ -143,10 +143,8 @@ void Radio::initialize(int stage)
     else if (stage == 2)
     {
         // tell initial channel number to ChannelControl; should be done in
-        // stage==2 or later, because base class initializes myHostRef in that stage
-        // JcM Fix: Register radio considering multiples radio hosts
-    	myHostRef->registerRadio(this);
-    	cc->updateHostChannel(myHostRef, rs.getChannelNumber(),this,carrierFrequency);
+        // stage==2 or later, because base class initializes myRadioRef in that stage
+    	cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
         // statistics
         emit(bitrateSignal, rs.getBitrate());
@@ -177,27 +175,9 @@ Radio::~Radio()
 
 bool Radio::processAirFrame(AirFrame *airframe)
 {
-
-    int chnum = airframe->getChannelNumber();
-    if (cc && airframe)
-    {
-        double perc = cc->getPercentage();
-        double fqFrame = airframe->getCarrierFrequency();
-        if (fqFrame > 0.0 && carrierFrequency>0.0)
-        {
-            if (chnum == getChannelNumber() && (fabs((fqFrame - carrierFrequency)/carrierFrequency)<=perc))
-                return true;
-            else
-                return false;
-        }
-        else
-            return (chnum == getChannelNumber());
-    }
-    else
-    {
-        return (chnum == getChannelNumber());
-    }
+	return airframe->getChannelNumber() == getChannelNumber();
 }
+
 /**
  * The basic handle message function.
  *
@@ -303,7 +283,7 @@ AirFrame *Radio::encapsulatePacket(cPacket *frame)
     airframe->encapsulate(frame);
     airframe->setBitrate(ctrl ? ctrl->getBitrate() : rs.getBitrate());
     airframe->setDuration(radioModel->calculateDuration(airframe));
-    airframe->setSenderPos(getMyPosition());
+    airframe->setSenderPos(getRadioPosition());
     airframe->setCarrierFrequency(carrierFrequency);
     delete ctrl;
 
@@ -440,8 +420,8 @@ void Radio::handleCommand(int msgkind, cPolymorphic *ctrl)
         double newTransmitterPower = phyCtrl->getTransmitterPower();
         if (newTransmitterPower!=-1)
         {
-            if (newTransmitterPower > (double) (cc->par("pMax")))
-                transmitterPower = (double) (cc->par("pMax"));
+            if (newTransmitterPower > (double)getChannelControlPar("pMax"))
+                transmitterPower = (double) getChannelControlPar("pMax");
             else
                 transmitterPower = newTransmitterPower;
         }
@@ -544,24 +524,20 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
     // Calculate the receive power of the message
 
     // calculate distance
-    const Coord& myPos = getMyPosition();
     const Coord& framePos = airframe->getSenderPos();
-    double distance = myPos.distance(framePos);
+    double distance = getRadioPosition().distance(framePos);
 
     // calculate receive power
     double frequency = carrierFrequency;
-    if (airframe)
-    {
-        if (airframe->getCarrierFrequency()>0.0)
-            frequency = airframe->getCarrierFrequency();
-
-    }
+    if (airframe && airframe->getCarrierFrequency()>0.0)
+    	frequency = airframe->getCarrierFrequency();
 
     if (distance<MIN_DISTANCE)
         distance = MIN_DISTANCE;
 
     double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), frequency, distance);
-    if (obstacles && distance > MIN_DISTANCE) rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, myPos, 0);
+    if (obstacles && distance > MIN_DISTANCE)
+    	rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, getRadioPosition(), 0);
     airframe->setPowRec(rcvdPower);
     // store the receive power in the recvBuff
     recvBuff[airframe] = rcvdPower;
@@ -716,8 +692,6 @@ void Radio::changeChannel(int channel)
 {
     if (channel == rs.getChannelNumber())
         return;
-    if (channel < 0 || channel >= cc->getNumChannels())
-        error("changeChannel(): channel number %d is out of range (hint: numChannels is a parameter of ChannelControl)", channel);
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
 
@@ -744,8 +718,7 @@ void Radio::changeChannel(int channel)
     emit(channelNumberSignal, channel);
     rs.setChannelNumber(channel);
 
-    //cc->updateHostChannel(myHostRef, channel);
-    cc->updateHostChannel(myHostRef, rs.getChannelNumber(),this,carrierFrequency);
+    cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
     cModule *myHost = findHost();
 
@@ -757,15 +730,13 @@ void Radio::changeChannel(int channel)
 
     // pick up ongoing transmissions on the new channel
     EV << "Picking up ongoing transmissions on new channel:\n";
-//    if (ccExt)
-//    {
-    ChannelControlExtended::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
-    for (ChannelControlExtended::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
+    IChannelControl::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
+    for (IChannelControl::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
     	AirFrame *airframe = check_and_cast<AirFrame *> (*it);
     	// time for the message to reach us
-    	double distance = myHostRef->pos.distance(airframe->getSenderPos());
-    	simtime_t propagationDelay = distance / LIGHT_SPEED;
+    	double distance = getRadioPosition().distance(airframe->getSenderPos());
+    	simtime_t propagationDelay = distance / 3.0E+8;
 
     	// if this transmission is on our new channel and it would reach us in the future, then schedule it
     	if (channel == airframe->getChannelNumber())
@@ -801,46 +772,6 @@ void Radio::changeChannel(int channel)
     		EV << "in the past\n";
     	}
     }
-//    }
-//    else
-//    {
-//        ChannelControlExtended::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
-//        for (ChannelControlExtended::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
-//        {
-//            AirFrame *airframe = *it;
-//            // time for the message to reach us
-//            double distance = myHostRef->pos.distance(airframe->getSenderPos());
-//            simtime_t propagationDelay = distance / LIGHT_SPEED;
-//
-//            // if this transmission is on our new channel and it would reach us in the future, then schedule it
-//            if (channel == airframe->getChannelNumber())
-//            {
-//                EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
-//                // if there is a message on the air which will reach us in the future
-//                if (airframe->getTimestamp() + propagationDelay >= simTime())
-//                {
-//                    EV << "will arrive in the future, scheduling it\n";
-//                    // we need to send to each radioIn[] gate of this host
-//                    for (int i = 0; i < radioGate->size(); i++)
-//                        sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
-//                }
-//                // if we hear some part of the message
-//                else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
-//                {
-//                    EV << "missed beginning of frame, processing it as noise\n";
-//
-//                    AirFrame *frameDup = airframe->dup();
-//                    frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
-//                    handleLowerMsgStart(frameDup);
-//                    bufferMsg(frameDup);
-//                }
-//                else
-//                {
-//                    EV << "in the past\n";
-//                }
-//            }
-//        }
-//    }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
     nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
@@ -913,13 +844,13 @@ void Radio::updateSensitivity(double rate)
 
 void Radio::disconnectReceiver()
 {
-        myHostRef->unregisterRadio(this);
+        cc->unregisterRadio(myRadioRef);
 }
 
 void Radio::connectReceiver()
 {
-        myHostRef->registerRadio(this);
-        cc->updateHostChannel(myHostRef, rs.getChannelNumber(),this,carrierFrequency);
+        myRadioRef = cc->registerRadio(this);
+        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 }
 
 void Radio::registerBattery()
@@ -948,24 +879,25 @@ void Radio::updateDisplayString() {
 
     if (!ev.isGUI() || !drawCoverage) // nothing to do
         return;
-    if (this->myHostRef!=NULL) {
-        cDisplayString& d = this->myHostRef->host->getDisplayString();
+    if (myRadioRef) {
+    	cDisplayString& d = hostModule->getDisplayString();
 
-        // communication area (up to sensitivity)
-        double sensitivity_limit = cc->getCommunicationRange(myHostRef);
-        d.removeTag("r1");
-        d.insertTag("r1");
-        d.setTagArg("r1",0,(long) sensitivity_limit);
-        d.setTagArg("r1",2,"gray");
-        d.removeTag("r2");
-        d.insertTag("r2");
-        d.setTagArg("r2",0,(long) calcDistFreeSpace());
-        d.setTagArg("r2",2,"blue");
+    	// communication area (up to sensitivity)
+    	// FIXME this overrides the ranges if more than one radio is present is a host
+    	double sensitivity_limit = cc->getInterferenceRange(myRadioRef);
+    	d.removeTag("r1");
+    	d.insertTag("r1");
+    	d.setTagArg("r1",0,(long) sensitivity_limit);
+    	d.setTagArg("r1",2,"gray");
+    	d.removeTag("r2");
+    	d.insertTag("r2");
+    	d.setTagArg("r2",0,(long) calcDistFreeSpace());
+    	d.setTagArg("r2",2,"blue");
     }
     if (updateString==NULL && updateStringInterval>0)
-    	updateString = new cMessage("refress timer");
+    	updateString = new cMessage("refresh timer");
     if (updateStringInterval>0)
-        scheduleAt(simTime()+updateStringInterval,updateString);
+    	scheduleAt(simTime()+updateStringInterval, updateString);
 
 
 }
@@ -983,19 +915,17 @@ void Radio::disablingInitialization() {
 double Radio::calcDistFreeSpace()
 {
     double SPEED_OF_LIGHT = 300000000.0;
-    double interfDistance;
-
     //the carrier frequency used
-    double carrierFrequency = cc->par("carrierFrequency");
+    double carrierFrequency = getChannelControlPar("carrierFrequency");
     //signal attenuation threshold
     //path loss coefficient
-    double alpha = cc->par("alpha");
+    double alpha = getChannelControlPar("alpha");
 
     double waveLength = (SPEED_OF_LIGHT / carrierFrequency);
     //minimum power level to be able to physically receive a signal
     double minReceivePower = sensitivity;
 
-    interfDistance = pow(waveLength * waveLength * transmitterPower /
+    double interfDistance = pow(waveLength * waveLength * transmitterPower /
                          (16.0 * M_PI * M_PI * minReceivePower), 1.0 / alpha);
     return interfDistance;
 }

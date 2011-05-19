@@ -1,7 +1,7 @@
 /***************************************************************************
  * file:        ChannelAccess.cc
  *
- * author:      Marc Loebbers
+ * author:      Marc Loebbers, Rudolf Hornig, Zoltan Bojthe
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -13,13 +13,10 @@
  *              version.
  *              For further information see file COPYING
  *              in the top level directory
- ***************************************************************************
- * part of:     framework implementation developed by tkn
  **************************************************************************/
 
 
 #include "ChannelAccess.h"
-
 
 #define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
 
@@ -43,26 +40,25 @@ void ChannelAccess::initialize(int stage)
 
     if (stage == 0)
     {
-    	cc = ChannelControlExtended::get();
+    	cc = getChannelControl();
+        hostModule = findHost();
 
-        cModule *hostModule = findHost();
-
-        if (*hostModule->getDisplayString().getTagArg("p", 2))
-            error("");
-
-        hostPos.x = parseInt(hostModule->getDisplayString().getTagArg("p", 0), -1);
-        hostPos.y = parseInt(hostModule->getDisplayString().getTagArg("p", 1), -1);
-        posFromDisplayString = true;
-
+        positionUpdateArrived = false;
         // register to get a notification when position changes
         nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
     }
     else if (stage == 2)
     {
-        cModule *hostModule = findHost();
-
-        if (posFromDisplayString)
+        if (!positionUpdateArrived)
         {
+            radioPos.x = parseInt(hostModule->getDisplayString().getTagArg("p", 0), -1);
+            radioPos.y = parseInt(hostModule->getDisplayString().getTagArg("p", 1), -1);
+
+			if (radioPos.x == -1 || radioPos.y == -1)
+				error("The coordinates of '%s' host are invalid. Please set coordinates in "
+						"'@display' attribute, or configure Mobility for this host.",
+						hostModule->getFullPath().c_str());
+
             const char *s = hostModule->getDisplayString().getTagArg("p", 2);
             if (s && *s)
                 error("The coordinates of '%s' host are invalid. Please remove automatic arrangement"
@@ -71,21 +67,20 @@ void ChannelAccess::initialize(int stage)
                         hostModule->getFullPath().c_str());
         }
 
-        if (hostPos.x == -1 || hostPos.y == -1)
-            error("The coordinates of '%s' host are invalid. Please set coordinates in "
-                    "'@display' attribute, or configure Mobility for this host.",
-                    hostModule->getFullPath().c_str());
-
-        myHostRef = cc->registerHost(hostModule, hostPos);
-
-        if (myHostRef == 0)
-            error("host not registered yet in 'channelControl' module");
-
-        double r = cc->getCommunicationRange(myHostRef);
-        myHostRef->host->getDisplayString().setTagArg("r", 0, (long) r);
+        myRadioRef = cc->registerRadio(this);
+        cc->setRadioPosition(myRadioRef, radioPos);
     }
 }
 
+IChannelControl *ChannelAccess::getChannelControl()
+{
+    IChannelControl *cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
+    if (!cc)
+        cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelcontrol"));
+    if (!cc)
+        throw cRuntimeError("Could not find ChannelControl module with name 'channelControl' in the toplevel network.");
+    return cc;
+}
 
 /**
  * This function has to be called whenever a packet is supposed to be
@@ -99,24 +94,18 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
     coreEV << "sendToChannel: sending to gates\n";
 
     // delegate it to ChannelControl
-    cc->sendToChannel(this, myHostRef, msg);
+    cc->sendToChannel(myRadioRef, msg);
 }
 
 void ChannelAccess::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     if (category == NF_HOSTPOSITION_UPDATED)
     {
-        const Coord *pos = check_and_cast<const Coord*>(details);
+        radioPos = *check_and_cast<const Coord*>(details);
+        positionUpdateArrived = true;
 
-        hostPos = *pos;
-        posFromDisplayString = false;
-
-        if (myHostRef)
-        {
-            cc->updateHostPosition(myHostRef, hostPos);
-            double r = cc->getCommunicationRange(myHostRef);
-            myHostRef->host->getDisplayString().setTagArg("r", 0, (long) r);
-        }
+        if (myRadioRef)
+            cc->setRadioPosition(myRadioRef, radioPos);
     }
 
     BasicModule::receiveChangeNotification(category, details);

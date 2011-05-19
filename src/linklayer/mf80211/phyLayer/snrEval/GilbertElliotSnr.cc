@@ -137,7 +137,7 @@ void GilbertElliotSnr::handleLowerMsgStart(AirFrame * frame)
     // Calculate the receive power of the message
 
     // calculate distance
-    const Coord& myPos = getMyPosition();
+    const Coord& myPos = radioPos;
     const Coord& framePos = frame->getSenderPos();
     double distance = myPos.distance(framePos);
 

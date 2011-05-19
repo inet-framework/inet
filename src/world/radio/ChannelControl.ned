@@ -1,8 +1,7 @@
 //***************************************************************************
 // * file:        ChannelControl.ned
 // *
-// * author:      Andras Varga, Steffen Sroka, Daniel Willkomm,
-// *              Juan-Carlos Maureira, Alfonso Ariza
+// * author:      Andras Varga, Steffen Sroka, Daniel Willkomm
 // *
 // * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 // *              Technische Universitaet Berlin, Germany.
@@ -18,28 +17,39 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+
 package inet.world.radio;
 
 //
-// ChannelControlExtended has exactly one instance in every network model that
-// contains mobile or wireless nodes. This module behaves exactly like ChannelControl
-// except this supports multiple radio interfaces per host.
+// ~ChannelControl has exactly one instance in every network model that
+// contains mobile or wireless nodes. This module gets informed about the
+// location and movement of nodes, and determines which nodes are within
+// communication or interference distance. This info is then used by the
+// radio interfaces of nodes at transmissions.
+// Must be named as "channelControl" inside the network.
 //
-// @see IMobility
-// @see ChannelControl
+// // Side effect: updates the containing compound module's display string
+// // according to the given playground size (sets <tt>"p=0,0;b=$playgroundSizeX,
+// // $playgroundSizeY"</tt>).
 //
-simple ChannelControlExtended
+// This ~ChannelControl is a different implementation from the one in
+// Mobility Framework 1.0a5: here we use sendDirect(), while the MF version
+// used normal send() and dynamic connections.
+//
+// @author Andras Varga (based on MF's ChannelControl by Steffen Sroka and Daniel Willkomm)
+// @see ~IMobility
+//
+simple ChannelControl
 {
     parameters:
         bool coreDebug = default(false); // debug switch for core framework
         double pMax @unit("mW") = default(20mW); // maximum sending power used for this network (in mW)
         double sat @unit("dBm") = default(-110dBm); // signal attenuation threshold (in dBm)
         double alpha = default(2); // path loss coefficient
-        double carrierFrequency @unit("Hz") = default(2.4GHz); // carrier frequency of the channel (in Hz)
-        double percentage = default(0.1);
+        double carrierFrequency @unit("Hz") = default(2.4GHz); // base carrier frequency of all the channels (in Hz)
         int numChannels = default(1); // number of radio channels (frequencies)
         string propagationModel @enum("FreeSpaceModel","TwoRayGroundModel","RiceModel","RayleighModel","NakagamiModel","LogNormalShadowingModel") = default("FreeSpaceModel");
-        @display("i=misc/cloud");
+        @display("i=misc/sun");
         @labels(node);
 }
 

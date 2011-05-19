@@ -19,7 +19,7 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.world.radio.ChannelControlExtended;
+import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.models.NullMobility;
 import inet.mobility.models.CircleMobility;
@@ -109,7 +109,7 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelcontrol: ChannelControlExtended {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=61,46");
         }

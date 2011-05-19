@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.ieee80211;
 
-import inet.world.radio.ChannelControlExtended;
+import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.AdhocHost;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
@@ -32,7 +32,7 @@ network Net80211
             parameters:
                 @display("r=,,#707070;p=250,58");
         }
-        channelControl: ChannelControlExtended {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=60,50");
         }

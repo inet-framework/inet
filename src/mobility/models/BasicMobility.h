@@ -26,7 +26,6 @@
 #include <omnetpp.h>
 
 #include "BasicModule.h"
-//#include "ChannelControl.h"
 #include "Coord.h"
 
 

@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.world.radio.ChannelControlExtended;
+import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
@@ -37,7 +37,7 @@ network Lan80211
             @display("p=213,174;r=,,#707070");
             wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelcontrol: ChannelControlExtended {
+        channelControl: ChannelControl {
             numChannels = 2;
             @display("p=61,46");
         }

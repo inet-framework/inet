@@ -57,7 +57,7 @@ simple Radio like IRadio
         double usage_radio_send @unit(mA) = default(-1mA); // disable battery registration
         // misc 
         bool drawCoverage = default(true);  // draw the cverage area in Tkenv
-        int refresCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
+        int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
 
         @statistic[bitrate](title="Bitrate"; record=timeavg,vector; interpolationmode=sample-hold; );
         @statistic[channelNo](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
