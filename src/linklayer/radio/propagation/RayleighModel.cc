@@ -39,8 +39,7 @@ RayleighModel::~RayleighModel() {
 
 double RayleighModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
 	double avg_rx_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
 
     double x = normal(0,1);

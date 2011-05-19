@@ -36,8 +36,7 @@ void RiceModel::initializeFrom(cModule *radioModule)
 
 double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
     double c = 1.0/(2.0*(K+1));
     double x = normal(0, 1);
     double y = normal(0, 1);

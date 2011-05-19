@@ -85,7 +85,6 @@ void ChannelControl::initialize()
  */
 double ChannelControl::calcInterfDist()
 {
-    double SPEED_OF_LIGHT = 300000000.0;
     double interfDistance;
 
     //the carrier frequency used

@@ -48,6 +48,8 @@ typedef unsigned long ulong;
 //
 #define EV ev.isDisabled()?ev:ev
 
+// used at several places as
+#define SPEED_OF_LIGHT 299792458.0
 
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()

@@ -35,8 +35,7 @@ void LogNormalShadowingModel::initializeFrom(cModule *radioModule)
 
 double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
 	double d0 = 1.0;
 
     // Reference Pathloss

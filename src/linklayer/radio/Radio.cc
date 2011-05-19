@@ -914,7 +914,6 @@ void Radio::disablingInitialization() {
 
 double Radio::calcDistFreeSpace()
 {
-    double SPEED_OF_LIGHT = 300000000.0;
     //the carrier frequency used
     double carrierFrequency = getChannelControlPar("carrierFrequency");
     //signal attenuation threshold

@@ -27,7 +27,7 @@
 #include "opp_utils.h"
 
 
-static const double SPEED_OF_LIGHT = 200000000.0;
+static const double SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
 /*
 double      txrate;
@@ -535,7 +535,7 @@ void EtherMACBase::processMsgFromNetwork(EtherTraffic *frame)
                   "maybe cable exceeds maximum allowed length? "
                   "(%lgs corresponds to an approx. %lgm cable)",
                   SIMTIME_STR(simTime() - frame->getSendingTime()),
-                  SIMTIME_STR((simTime() - frame->getSendingTime()) * SPEED_OF_LIGHT));
+                  SIMTIME_STR((simTime() - frame->getSendingTime()) * SPEED_OF_LIGHT_IN_CABLE));
         }
     }
 }

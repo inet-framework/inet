@@ -35,9 +35,8 @@ void NakagamiModel::initializeFrom(cModule *radioModule)
 
 double NakagamiModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const double speedOfLight = 300000000.0;
 	const int rng = 0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
 
 	double avg_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
 	avg_power = avg_power/1000;

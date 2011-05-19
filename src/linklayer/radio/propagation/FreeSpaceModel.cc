@@ -52,8 +52,7 @@ void FreeSpaceModel::initializeFrom(cModule *radioModule)
 
 double FreeSpaceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
 	double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
     if (prec > pSend)
     	prec = pSend;

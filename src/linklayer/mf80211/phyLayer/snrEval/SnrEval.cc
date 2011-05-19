@@ -421,8 +421,7 @@ void SnrEval::addNewSnr()
  */
 double SnrEval::calcRcvdPower(double pSend, double distance)
 {
-    double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
+    double waveLength = SPEED_OF_LIGHT / carrierFrequency;
     return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
 }
 
