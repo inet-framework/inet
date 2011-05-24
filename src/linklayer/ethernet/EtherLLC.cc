@@ -57,7 +57,16 @@ void EtherLLC::handleMessage(cMessage *msg)
     if (msg->arrivedOn("lowerLayerIn"))
     {
         // frame received from lower layer
-        processFrameFromMAC(check_and_cast<EtherFrameWithLLC *>(msg));
+        EtherFrameWithLLC *etherFrameWithLLC = dynamic_cast<EtherFrameWithLLC *>(msg);
+        if (etherFrameWithLLC)
+        {
+            processFrameFromMAC(etherFrameWithLLC);
+        }
+        else
+        {
+            EV << "Drop received " << msg->getClassName() << " msg.\n";
+            delete msg;
+        }
     }
     else
     {
