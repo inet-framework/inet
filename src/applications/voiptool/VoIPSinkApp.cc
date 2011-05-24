@@ -59,11 +59,11 @@ void VoIPSinkApp::initialize()
     // Say Hello to the world
     ev << "VoIPSinkApp initialize()" << endl;
 
-    //read in omnet parameters
+    // read parameters
     localPort = par("localPort");
     resultFile = par("resultFile");
 
-    //initialize avcodec library
+    // initialize avcodec library
     av_register_all();
 
     bindToPort(localPort);
@@ -72,7 +72,7 @@ void VoIPSinkApp::initialize()
 void VoIPSinkApp::handleMessage(cMessage *msg)
 {
     VoIPPacket *vp = dynamic_cast<VoIPPacket *>(msg);
-    if(vp)
+    if (vp)
         handleVoIPMessage(vp);
     else
         delete msg;
@@ -89,11 +89,11 @@ bool VoIPSinkApp::Connection::openAudio(const char *fileName)
     // find the audio encoder
     avcodec = avcodec_find_encoder(c->codec_id);
     if (!avcodec)
-        throw cRuntimeError("codec %d not found\n", c->codec_id);
+        throw cRuntimeError("codec %d not found", c->codec_id);
 
     // open it
     if (avcodec_open(c, avcodec) < 0)
-        throw cRuntimeError("could not open codec %d\n", c->codec_id);
+        throw cRuntimeError("could not open codec %d", c->codec_id);
 */
     return outFile.open(fileName, sampleRate, av_get_bits_per_sample_format(decCtx->sample_fmt));
 }
@@ -108,7 +108,7 @@ void VoIPSinkApp::Connection::writeLostSamples(int sampleCount)
 
 void VoIPSinkApp::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
 {
-   int decBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
+    int decBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
     int16_t *decBuf = new int16_t[decBufSize]; // output is 16bit
     int ret = avcodec_decode_audio2(decCtx, decBuf, &decBufSize, inbuf, inbytes);
     if (ret < 0)
@@ -151,10 +151,10 @@ bool VoIPSinkApp::createConnect(VoIPPacket *vp)
 
     curConn.pCodecDec = avcodec_find_decoder(curConn.codec);
     if (curConn.pCodecDec == NULL)
-        error("Codec %d not found!", curConn.codec);
+        error("Codec %d not found", curConn.codec);
     int ret = avcodec_open(curConn.decCtx, curConn.pCodecDec);
     if (ret < 0)
-        error("could not open decoding codec!");
+        error("could not open decoding codec");
 
     return curConn.openAudio(resultFile);
 }
@@ -209,7 +209,7 @@ void VoIPSinkApp::decodePacket(VoIPPacket *vp)
             break;
 
         default:
-            error("The received VoIPPacket has unknown type:%d!", vp->getType());
+            error("The received VoIPPacket has unknown type %d", vp->getType());
             return;
     }
     uint16_t newSeqNo = vp->getSeqNo();

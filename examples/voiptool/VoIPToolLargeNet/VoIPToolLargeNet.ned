@@ -17,7 +17,7 @@
 //
 
 
-package voiptool.VoIPToolLargeNet;
+package inet.examples.voiptool.VoIPToolLargeNet;
 
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
@@ -32,6 +32,7 @@ channel cable extends DatarateChannel
 {
     parameters:
         delay = 0.1us;
+        datarate = 100Mbps;
 }
 
 
@@ -150,10 +151,10 @@ module VoIPToolLargeLAN
         switch.ethg++ <--> cable <--> hub.ethg++;
 
         for i=0..b-1 {
-            bus.ethg++ <--> bhost[i].ethg;
+            bus.ethg++ <--> cable <--> bhost[i].ethg;
         }
 
-        bus.ethg++ <--> hub.ethg++;
+        bus.ethg++ <--> cable <--> hub.ethg++;
 
 }
 

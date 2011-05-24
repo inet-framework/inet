@@ -35,33 +35,33 @@ void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short i
     /* put sample parameters */
     c->bit_rate = sampleRate * sampleBits;
     c->sample_rate = sampleRate;
+    c->sample_fmt = SAMPLE_FMT_S16;  //FIXME hack!
     c->channels = 1;
     audio_st = st;
 }
 
 bool AudioOutFile::open(const char *resultFile, int sampleRate, short int sampleBits)
 {
-    if (opened)
-        return false;
+    ASSERT(!opened);
 
     opened = true;
 
     // auto detect the output format from the name. default is WAV
-    AVOutputFormat *fmt = guess_format(NULL, resultFile, NULL);
+    AVOutputFormat *fmt = av_guess_format(NULL, resultFile, NULL);
     if (!fmt)
     {
         ev << "Could not deduce output format from file extension: using WAV.\n";
-        fmt = guess_format("wav", NULL, NULL);
+        fmt = av_guess_format("wav", NULL, NULL);
     }
     if (!fmt)
     {
-        throw cRuntimeError("Could not find suitable output format for filename '%s'\n", resultFile);
+        throw cRuntimeError("Could not find suitable output format for filename '%s'", resultFile);
     }
 
     // allocate the output media context
     oc = avformat_alloc_context();
     if (!oc)
-        throw cRuntimeError("Memory error at avformat_alloc_context()\n");
+        throw cRuntimeError("Memory error at avformat_alloc_context()");
 
     oc->oformat = fmt;
     snprintf(oc->filename, sizeof(oc->filename), "%s", resultFile);
@@ -73,7 +73,7 @@ bool AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
 
     // set the output parameters (must be done even if no parameters).
     if (av_set_parameters(oc, NULL) < 0)
-        throw cRuntimeError("Invalid output format parameters\n");
+        throw cRuntimeError("Invalid output format parameters");
 
     dump_format(oc, 0, resultFile, 1);
 
@@ -86,18 +86,18 @@ bool AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
         /* find the audio encoder */
         AVCodec *avcodec = avcodec_find_encoder(c->codec_id);
         if (!avcodec)
-            throw cRuntimeError("codec %d not found\n", c->codec_id);
+            throw cRuntimeError("codec %d not found", c->codec_id);
 
         /* open it */
         if (avcodec_open(c, avcodec) < 0)
-            throw cRuntimeError("could not open codec %d\n", c->codec_id);
+            throw cRuntimeError("could not open codec %d", c->codec_id);
     }
 
     /* open the output file, if needed */
     if (!(fmt->flags & AVFMT_NOFILE))
     {
         if (url_fopen(&oc->pb, resultFile, URL_WRONLY) < 0)
-            throw cRuntimeError("Could not open '%s'\n", resultFile);
+            throw cRuntimeError("Could not open '%s'", resultFile);
     }
 
     // write the stream header
@@ -131,9 +131,9 @@ bool AudioOutFile::write(void *decBuf, int pktBytes)
     pkt.stream_index = audio_st->index;
     pkt.data = outbuf;
 
-    // write the compressed frame in the media file
+    // write the compressed frame into the media file
     if (av_interleaved_write_frame(oc, &pkt) != 0)
-        throw cRuntimeError("Error while writing audio frame\n");
+        throw cRuntimeError("Error while writing audio frame");
     return true;
 }
 

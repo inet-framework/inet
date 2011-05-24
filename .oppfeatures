@@ -525,26 +525,26 @@
     <feature
         id="VOIPTOOL"
         name="VoIPTool"
-        description = "Voice over IP tool"
-        initiallyEnabled = "true"
+        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
+        initiallyEnabled = "false"
         requires = ""
         labels = ""
         nedPackages = "
-                       voiptool.applications.voiptool
+                       inet.applications.voiptool
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_WOIPTOOL"
+        compileFlags = "-DWITH_VOIPTOOL"
         linkerFlags = "-lavcodec -lavformat -lavutil"
         />
     <feature
         id="VOIPTOOL_examples"
-        name="Voice over IP tool"
-        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
-        initiallyEnabled = "true"
+        name="VoIP examples"
+        description = "Example Voice Over IP simulations"
+        initiallyEnabled = "false"
         requires = "VOIPTOOL"
         labels = "examples"
         nedPackages = "
-                       voiptool.examples.voiptool
+                       inet.examples.voiptool
                       "
         extraSourceFolders = ""
         compileFlags = ""

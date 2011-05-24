@@ -11,7 +11,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package voiptool.VoIPToolTest;
+package inet.examples.voiptool.VoIPToolTest;
 
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
@@ -23,12 +23,14 @@ channel line1 extends ned.DatarateChannel
 {
     parameters:
         delay = 100us;
+        datarate = 100Mbps;
 }
 
 channel line2 extends ned.DatarateChannel
 {
     parameters:
         delay = 100us;
+        datarate = 100Mbps;
 }
 
 

@@ -1,3 +1,3 @@
-package voiptool.VoIPToolTrafficTest;
+package inet.examples.voiptool.VoIPToolTrafficTest;
 
 @license(LGPL);

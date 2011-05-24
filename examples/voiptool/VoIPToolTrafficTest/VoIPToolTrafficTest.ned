@@ -11,24 +11,27 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package voiptool.VoIPToolTrafficTest;
+package inet.examples.voiptool.VoIPToolTrafficTest;
 
+import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
-channel line1 extends ned.DatarateChannel
+channel line1 extends DatarateChannel
 {
     parameters:
         delay = 100us;
+        datarate = 100Mbps;
 }
 
-channel line2 extends ned.DatarateChannel
+channel line2 extends DatarateChannel
 {
     parameters:
-        delay = 100us;
+        delay = 10us;
+        datarate = 100Mbps;
 }
 
 
@@ -76,7 +79,7 @@ network VoIPToolTrafficTest
         router1.ethg++ <--> line1 <--> switch.ethg++;
         router1.ethg++ <--> line2 <--> router2.ethg++;
         switch2.ethg++ <--> line2 <--> router2.ethg++;
-        switch2.ethg++ <--> server.ethg++;
-        switch2.ethg++ <--> host2.ethg++;
-        switch.ethg++ <--> host1.ethg++;
+        switch2.ethg++ <--> line1 <--> server.ethg++;
+        switch2.ethg++ <--> line1 <--> host2.ethg++;
+        switch.ethg++ <--> line1 <--> host1.ethg++;
 }

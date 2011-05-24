@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package voiptool.applications.voiptool;
+package inet.applications.voiptool;
 
 import inet.applications.IUDPApp;
 
@@ -45,6 +45,7 @@ simple VoIPSinkApp like IUDPApp
         @statistic[packetHasVoice](title="Voice/Silent"; record=vector,stats);
         @statistic[connState](title="Connection state"; interpolationmode=sample-hold; record=vector,stats);
         @statistic[delay](title="delay"; unit=s; record=vector,stats);
+        @display("i=block/arrival");
     gates:
         input udpIn;
         output udpOut;

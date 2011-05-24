@@ -80,38 +80,41 @@ class INET_API VoIPSourceApp : public UDPAppBase
         void notifyWrote(int length) { writeOffset += length; ASSERT(writeOffset <= bufferSize); }
         void align();
     };
-    AudioOutFile outFile;
+
+    // general parameters
     int localPort;
     int destPort;
     IPvXAddress destAddress;
-    int voipPktSize;                // size of VoIP packets
+
     int voipHeaderSize;
     int voipSilenceThreshold;       // the maximum amplitude of a silence packet
+    int voipSilencePacketSize;      // size of a silence packet
     int sampleRate;                 // samples/sec [Hz]
     const char *codec;
     int compressedBitRate;
     simtime_t packetTimeLength;
     const char *soundFile;          // input audio file name
     int repeatCount;
-    const char *traceFileName;      // how the tracefiles should be named
 
-    int voipSilenceSize;            // size of a silence packet
-    int noWavFiles;                 // number of VoIP wav files available
+    const char *traceFileName;      // name of the output trace file, NULL or empty to turn off recording
+    AudioOutFile outFile;
 
+    // AVCodec parameters
     AVFormatContext *pFormatCtx;
     AVCodecContext *pCodecCtx;
     AVCodec *pCodec;                // input decoder codec
     ReSampleContext *pReSampleCtx;
     AVCodecContext *pEncoderCtx;
     AVCodec *pCodecEncoder;         // output encoder codec
+
+    // state variables
     int streamIndex;
     uint32_t pktID;                 // increasing packet sequence number
-    bool writeTracesToDisk;         // bool value - parameter if VoIP tracefiles should be written to disk
     int samplesPerPacket;
-    Buffer sampleBuffer;
     AVPacket packet;
+    Buffer sampleBuffer;
 
-    cMessage timer;
+    cMessage *timer;
 };
 
 #endif //VOIPTOOL_VOIPSOURCEAPP_H

@@ -30,7 +30,9 @@ extern "C" {
 #include <libavformat/avformat.h>
 };
 
-
+/**
+ * Records audio into a file.
+ */
 class AudioOutFile
 {
   public:
@@ -40,7 +42,7 @@ class AudioOutFile
     bool open(const char *resultFile, int sampleRate, short int sampleBits);
     bool write(void *inbuf, int inbytes);
     bool close();
-    bool isopened() { return opened; }
+    bool isOpen() { return opened; }
 
   protected:
     void addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits);

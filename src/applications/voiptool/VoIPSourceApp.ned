@@ -17,7 +17,7 @@
 //
 
 
-package voiptool.applications.voiptool;
+package inet.applications.voiptool;
 
 import inet.applications.IUDPApp;
 
@@ -36,12 +36,11 @@ import inet.applications.IUDPApp;
 //
 simple VoIPSourceApp like IUDPApp
 {
-    // the traffic parameters
     parameters:
         int localPort;
         int destPort;
         string destAddress;
-        double start @unit(s) = default(0);
+        double startTime @unit(s) = default(0);
 
         int voipHeaderSize @unit(B);
         int voipSilenceThreshold;
@@ -49,10 +48,11 @@ simple VoIPSourceApp like IUDPApp
         string codec = default("g726");         // used by ffmpeg::avcodec_find_encoder_by_name()
         int compressedBitRate @unit(bps) = default(40Kbps);
         double packetTimeLength @unit(s) = default(20ms);
-        string soundFile;                       // filename of input audiofile
+        string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
-        string traceFileName = default("");     // filename to save output stream, OFF when empty
+        string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
 
+        @display("i=block/departure");
     gates:
         input udpIn;
         output udpOut;
