@@ -17,6 +17,7 @@
 
 package inet.nodes.inet;
 
+import inet.util.PcapRecorder;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.mobility.IMobility;
@@ -42,6 +43,7 @@ module NodeBase
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
+        int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default("NullMobility");
         string routingFile = default("");
         bool IPForward = default(true);
@@ -78,6 +80,10 @@ module NodeBase
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=53,386");
+        }
+
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=159,259");
         }
 
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {

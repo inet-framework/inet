@@ -1,16 +1,16 @@
 Recent changes in the INET Framework
 ====================================
-- ChannelController now deals only with radios and not hosts. This makes it possible 
-  to have hosts with several radio interfaces. The radios are registered/unregistered 
-  in the ChannelAccess module (previously host registration was done by the Mobility 
-  modules). ChannelControl/ChannelAccess now completely independent of the mobility 
+- ChannelController now deals only with radios and not hosts. This makes it possible
+  to have hosts with several radio interfaces. The radios are registered/unregistered
+  in the ChannelAccess module (previously host registration was done by the Mobility
+  modules). ChannelControl/ChannelAccess now completely independent of the mobility
   framework. This means that if there is no Mobility module present in a host the
   host's displaystring will be used to set the static positions of the radios.
 
 - Ethernet switch moved under the linklayer/ethernet/switch directory. EtherHostQ is now
   EtherHost. To have no queue in the enthernet host specify queueType="NoQueue".
   In EtherSwitch, EtherHost and inside the EthernetInterface (nic) the csmacdSupported
-  parameter can be used to switch between the full (EtherMAC) and the simplified 
+  parameter can be used to switch between the full (EtherMAC) and the simplified
   (EtherMACFullDuplex) implementation.
 
 - Added a new Ieee802.11 model, merged back from  the INETMANET fork. It supports
@@ -18,37 +18,40 @@ Recent changes in the INET Framework
 
 - renamed routingTableFile to rountingTable in RoutingTable6. Added default parameter
   value. You no longer need to specify **.routingTableFile = xmldoc("empty.xml") and
-  and copy an empty.xml file into the model directory. OMNeT++ 4.2 supports the 
+  and copy an empty.xml file into the model directory. OMNeT++ 4.2 supports the
   xml("<inlinexml/>") syntax so we use that for the default value.
+
+- New PcapRecorder module (in StandardHost) for recording traffic to a pcap file.
+  It is intended as a replacement for the old TCPDump module.
 
 - StandardHost and Router now have a common base (containing Link~ and NetworkLayer)
   Wireless~ and AdhocHost is derived from StandardHost. All of them (including Router)
-  supports multiple wireless, ethernet, ppp and external interfaces. 
+  supports multiple wireless, ethernet, ppp and external interfaces.
   (i.e. multiple wireless radios are supported using different channels)
 
 - Several modules - especially inside StandardHost - turned optional. This reduces
-  the memory footprint of the StandardHost as modules are instanciated ONLY if 
-  they are needed by the simulation (i.e. during runtime TCP is present only 
+  the memory footprint of the StandardHost as modules are instanciated ONLY if
+  they are needed by the simulation (i.e. during runtime TCP is present only
   if there are TCP Applications configured. Likewise for UDP and SCTP.)
 
 - Router and StandardHost have optional mobility support. The mobility module is created
   only if there are wireless cards present in the node (numRadios>0). Of course
   WirelessHost and AdhocHost have mobility by default. You can configure the mobility
-  type using the "mobilityType" parameter. BasicMobility have been renamed to 
+  type using the "mobilityType" parameter. BasicMobility have been renamed to
   NullMobility (resulting stationary nodes). There is a dummy mobility type
-  called NoMobility which does not have any C++ implementation. Nodes that 
+  called NoMobility which does not have any C++ implementation. Nodes that
   do not need mobility support (i.e. no radios) should set their type to NoMobility.
 
-- FailedRouter has been removed (was a trivial node). BurstHost moved to the examle 
-  directory (it was not generic and was used only by a single example). MobileHost 
+- FailedRouter has been removed (was a trivial node). BurstHost moved to the examle
+  directory (it was not generic and was used only by a single example). MobileHost
   is removed. Use AdhocHost instead as a drop in replacement.
 
 - Network Interface Cards (Ieee80211Nic, EthernetInterface and PPPInterface)
-  now supports input and output hook modules that implement the IHook 
+  now supports input and output hook modules that implement the IHook
   interface. The hook support can be turned on for example by the **.wlan[*].inputHooks=X
-  or **.wlan[*].outputHooks=Y parameter. You can install hooks by specifying 
+  or **.wlan[*].outputHooks=Y parameter. You can install hooks by specifying
   **.wlan[*].inputHook[0].type-name="DropsGenerator". If you specify the number of
-  input hooks, the same amount of module types must be specified. As the name suggest 
+  input hooks, the same amount of module types must be specified. As the name suggest
   you can do anything here (simulating packed drops, duplication or measuring thruput).
 
   Installing two hooks in the input path:
@@ -60,11 +63,11 @@ Recent changes in the INET Framework
   DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
   To disable queueing use: **.ppp[*].queueType = "NoQueue"
 
-- PPPInterfaceNoQueue and EthernetInterfaceNoQueue removed. Use the 
+- PPPInterfaceNoQueue and EthernetInterfaceNoQueue removed. Use the
   queueType="NoQueue" parameter in the interfaces.
 
-- EthernetInterfaceFullDuplex removed. By default EthernetInterface is using a 
-  simplified mac that does not support CSMA/CD and works only with point-to-point 
+- EthernetInterfaceFullDuplex removed. By default EthernetInterface is using a
+  simplified mac that does not support CSMA/CD and works only with point-to-point
   links. Use the EthernetInterface with halfDuplexSupported parameter set to "true"
   to turn on the CSMA/CD support.
 
@@ -73,20 +76,20 @@ Recent changes in the INET Framework
   sctpType parameters in the host. You must implement ITCP, IUDP and ISCTP interface
   and the specify the implementing NED type in the parameter. At the moment SCTP
   and UDP have only a single implementation. TCP has: TCP (the default OMNeT++ IMPL.)
-  TCP_NSC (using network simulation cradle) and TCP_lwip (using the LWIp stack's 
+  TCP_NSC (using network simulation cradle) and TCP_lwip (using the LWIp stack's
   implementation)
 
 - AccessPoint is generalized. Supports both (multiple) wireless and ethernet ports.
-  Relaying between ethernet and wireless ports are now supported. RelayUnit is created 
+  Relaying between ethernet and wireless ports are now supported. RelayUnit is created
   only if more than one ports are present on the AccessPoint. i.e. Having a single radio
-  and no ethernet connections will fall back to a single wireless NIC without 
+  and no ethernet connections will fall back to a single wireless NIC without
   relay unit. Having no radio and several ethernet ports connected is practically
   an ethernet switch.
 
-- Wireless NICs now should implement IWirelessNIC. Now we have only a single Ieee80211Nic 
-  implementation instead of the 5 variants we have previously. Management type 
-  (Adhoc, AccessPoint, Station, AccessPointSimplified and StationSimplified) can 
-  be configured using the mgmtType parameter of the NIC (instead of having separate 
+- Wireless NICs now should implement IWirelessNIC. Now we have only a single Ieee80211Nic
+  implementation instead of the 5 variants we have previously. Management type
+  (Adhoc, AccessPoint, Station, AccessPointSimplified and StationSimplified) can
+  be configured using the mgmtType parameter of the NIC (instead of having separate
   NIC types for each.)
 
 - Multiple radios on independent channels are now supported by all nodes. See the
@@ -111,8 +114,8 @@ Recent changes in the INET Framework
   statistics along the source gate of the channel. Specifying "" as display format
   results the same behavior as DatarateChannel (with no performance penalty).
   If you want to gather statistics, you do not need this channel. The DatarateChannel
-  already emits signals "channelBusy", "messageSent" and "messageDiscarded" 
-  that can be used to calculate different statistics. Use "opp_run -h neddecls" 
+  already emits signals "channelBusy", "messageSent" and "messageDiscarded"
+  that can be used to calculate different statistics. Use "opp_run -h neddecls"
   to see what statistics are provided by default. e.g in INI file use
   *.channel.throughput.result-recording-modes=+last
   to store all channel's thoughput values as a scalar.
@@ -281,7 +284,7 @@ currently OBJECT support is missing from TCP_NSC.
 2011-03-25
 ----------
 
-- fixed a bug #199 (missing control info) in UDP module when using IPv6 as a transport 
+- fixed a bug #199 (missing control info) in UDP module when using IPv6 as a transport
 
 INET-20110225
 -------------

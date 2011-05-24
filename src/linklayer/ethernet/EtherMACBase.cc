@@ -106,6 +106,11 @@ simsignal_t EtherMACBase::droppedPkBytesNotForUsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
 
+simsignal_t EtherMACBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
+
 bool EtherMACBase::MacQueue::isEmpty()
 {
     return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
@@ -282,6 +287,11 @@ void EtherMACBase::initializeStatistics()
     droppedPkBytesIfaceDownSignal = registerSignal("droppedPkBytesIfaceDown");
     droppedPkBytesNotForUsSignal = registerSignal("droppedPkBytesNotForUs");
     passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+
+    packetSentToLowerSignal = registerSignal("packetSentToLower");
+    packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+    packetSentToUpperSignal = registerSignal("packetSentToUpper");
+    packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 }
 
 void EtherMACBase::registerInterface()
@@ -459,6 +469,8 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EV << "Received frame from upper layer: " << frame << endl;
 
+    emit(packetReceivedFromUpperSignal, frame);
+
     if (frame->getDest().equals(address))
     {
         error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
@@ -565,6 +577,8 @@ void EtherMACBase::frameReceptionComplete(EtherTraffic *frame)
 
 void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
 {
+    emit(packetReceivedFromLowerSignal, frame);
+
     // bit errors
     if (frame->hasBitError())
     {
@@ -589,6 +603,7 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHL++;
     emit(passedUpPkBytesSignal, curBytes);
 
+    emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
     send(frame, "upperLayerOut");
 }

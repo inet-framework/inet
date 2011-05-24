@@ -25,6 +25,11 @@
 #include "NotificationBoard.h"
 
 
+simsignal_t WirelessMacBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
+simsignal_t WirelessMacBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
+simsignal_t WirelessMacBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
+simsignal_t WirelessMacBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
+
 void WirelessMacBase::initialize(int stage)
 {
     if (stage==0)
@@ -36,6 +41,11 @@ void WirelessMacBase::initialize(int stage)
 
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
+
+        packetSentToLowerSignal = registerSignal("packetSentToLower");
+        packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+        packetSentToUpperSignal = registerSignal("packetSentToUpper");
+        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
     }
 }
 
@@ -47,9 +57,15 @@ void WirelessMacBase::handleMessage(cMessage *msg)
     else if (!msg->isPacket())
         handleCommand(msg);
     else if (msg->getArrivalGateId()==uppergateIn)
+    {
+        emit(packetReceivedFromUpperSignal, msg);
         handleUpperMsg(PK(msg));
+    }
     else
+    {
+        emit(packetReceivedFromLowerSignal, msg);
         handleLowerMsg(PK(msg));
+    }
 }
 
 bool WirelessMacBase::isUpperMsg(cMessage *msg)
@@ -65,12 +81,20 @@ bool WirelessMacBase::isLowerMsg(cMessage *msg)
 void WirelessMacBase::sendDown(cMessage *msg)
 {
     EV << "sending down " << msg << "\n";
+
+    if (msg->isPacket())
+        emit(packetSentToLowerSignal, msg);
+
     send(msg, lowergateOut);
 }
 
 void WirelessMacBase::sendUp(cMessage *msg)
 {
     EV << "sending up " << msg << "\n";
+
+    if (msg->isPacket())
+        emit(packetSentToUpperSignal, msg);
+
     send(msg, uppergateOut);
 }
 

@@ -181,6 +181,11 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     static simsignal_t droppedPkBytesBitErrorSignal;
     static simsignal_t droppedPkBytesIfaceDownSignal;
 
+    static simsignal_t packetSentToLowerSignal;
+    static simsignal_t packetReceivedFromLowerSignal;
+    static simsignal_t packetSentToUpperSignal;
+    static simsignal_t packetReceivedFromUpperSignal;
+
   public:
     EtherMACBase();
     virtual ~EtherMACBase();

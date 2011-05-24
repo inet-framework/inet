@@ -314,6 +314,7 @@ void EtherMAC::startFrameTransmission()
     if (ev.isGUI())
         updateConnectionColor(TRANSMITTING_STATE);
 
+    emit(packetSentToLowerSignal, frame);
     send(frame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
@@ -438,6 +439,7 @@ void EtherMAC::sendJamSignal()
         updateConnectionColor(JAMMING_STATE);
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
+    emit(packetSentToLowerSignal, jam);
     send(jam, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);

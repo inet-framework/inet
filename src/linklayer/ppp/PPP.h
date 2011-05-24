@@ -64,6 +64,10 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
     static simsignal_t droppedPkBytesBitErrorSignal;
     static simsignal_t passedUpPkBytesSignal;
     static simsignal_t rcvdPkBytesFromHLSignal;
+    static simsignal_t packetSentToLowerSignal;
+    static simsignal_t packetReceivedFromLowerSignal;
+    static simsignal_t packetSentToUpperSignal;
+    static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
     virtual InterfaceEntry *registerInterface(double datarate);

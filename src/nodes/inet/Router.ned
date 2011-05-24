@@ -43,4 +43,3 @@ module Router extends NodeBase
         @display("i=abstract/router");
         IPForward = true;
 }
-

@@ -46,6 +46,11 @@ class INET_API WirelessMacBase : public cSimpleModule
     int lowergateOut;
     //@}
 
+    static simsignal_t packetSentToLowerSignal;
+    static simsignal_t packetReceivedFromLowerSignal;
+    static simsignal_t packetSentToUpperSignal;
+    static simsignal_t packetReceivedFromUpperSignal;
+
     /** @brief Cached pointer to the NotificationBoard module*/
     NotificationBoard *nb;
 

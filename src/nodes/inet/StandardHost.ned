@@ -86,7 +86,6 @@ module StandardHost extends NodeBase
             parameters:
                 @display("p=501,230");
         }
-
     connections allowunconnected:
         for i=0..numTcpApps-1 {
             tcpApp[i].tcpOut --> tcp.appIn++;

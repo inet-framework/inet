@@ -37,6 +37,10 @@ simsignal_t PPP::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::passedUpPkBytesSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetSentToLowerSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetSentToUpperSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
 
 PPP::PPP()
 {
@@ -77,6 +81,10 @@ void PPP::initialize(int stage)
         droppedPkBytesBitErrorSignal = registerSignal("droppedPkBytesBitError");
         passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
         rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
+        packetSentToLowerSignal = registerSignal("packetSentToLower");
+        packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+        packetSentToUpperSignal = registerSignal("packetSentToUpper");
+        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
         subscribe(POST_MODEL_CHANGE, this);
 
@@ -272,6 +280,9 @@ void PPP::startTransmitting(cPacket *msg)
 
     // send
     EV << "Starting transmission of " << pppFrame << endl;
+    emit(txStateSignal, 1L);
+    emit(txPkBytesSignal, (long)(msg->getByteLength()));
+    emit(packetSentToLowerSignal, pppFrame);
     send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel()); //FIXME reread datarateChannel when changed
@@ -279,8 +290,6 @@ void PPP::startTransmitting(cPacket *msg)
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
     scheduleAt(endTransmissionTime, endTransmissionEvent);
-    emit(txStateSignal, 1L);
-    emit(txPkBytesSignal, (long)(msg->getByteLength()));
     numSent++;
 }
 
@@ -324,6 +333,8 @@ void PPP::handleMessage(cMessage *msg)
             nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
         }
 
+        emit(packetReceivedFromLowerSignal, msg);
+
         // check for bit errors
         if (PK(msg)->hasBitError())
         {
@@ -340,6 +351,7 @@ void PPP::handleMessage(cMessage *msg)
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
             emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
+            emit(packetSentToUpperSignal, payload);
             send(payload,"netwOut");
         }
     }
@@ -357,6 +369,7 @@ void PPP::handleMessage(cMessage *msg)
         }
         else
         {
+            emit(packetReceivedFromUpperSignal, msg);
             emit(rcvdPkBytesFromHLSignal, (long)(PK(msg)->getByteLength()));
 
             if (endTransmissionEvent->isScheduled())

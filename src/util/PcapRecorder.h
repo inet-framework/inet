@@ -1,8 +1,8 @@
 //
 // Copyright (C) 2005 Michael Tuexen
-//               2008 Irene Ruengeler
-//               2009 Thomas Dreibholz
-//               2011 Zoltan Bojthe
+// Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,37 +18,39 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPDUMP_H
-#define __INET_TCPDUMP_H
+#ifndef __INET_PCAPRECORDER_H
+#define __INET_PCAPRECORDER_H
 
 
 #include "INETDefs.h"
 
-#include "PcapDump.h"
 #include "PacketDump.h"
+#include "PcapDump.h"
 
 
 /**
- * Dumps every packet using the PcapDump class and the
- * PacketDump class.
+ * Dumps every packet using the PcapDump and PacketDump classes
  */
-class INET_API TCPDump : public cSimpleModule
+class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
     protected:
-        PcapDump pcapDump;
-        PacketDump tcpdump;
+        typedef std::map<simsignal_t,bool> SignalList;
+        SignalList signalList;
+        PacketDump packetDumper;
+        PcapDump pcapDumper;
         unsigned int snaplen;
         unsigned long first, last, space;
         bool dumpBadFrames;
-        bool dropBadFrames;
-
     public:
-        TCPDump();
-        ~TCPDump();
-        virtual void handleMessage(cMessage *msg);
+        PcapRecorder();
+        ~PcapRecorder();
+    protected:
         virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
         virtual void finish();
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void recordPacket(cPacket *msg, bool l2r);
 };
 
-#endif // __INET_TCPDUMP_H
+#endif
 
