@@ -549,4 +549,37 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="_802154"
+        name="IEEE 802.15.4"
+        description = "IEEE 802.15.4"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.applications.ieee802154app
+                       inet.linklayer.bmac
+                       inet.linklayer.ieee802154
+                       inet.networklayer.ieee802154
+                       inet.nodes.ieee802154
+                       inet.world.ieee802154
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="_802154_EXAMPLES"
+        name="IEEE 802.15.4 Examples"
+        description = "IEEE 802.15.4"
+        initiallyEnabled = "true"
+        requires = "_802154"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.examples.ieee802154
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>

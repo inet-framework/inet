@@ -1,0 +1,7 @@
+Readme INET/Isabel/Analyses
+
+AnalysisProfiling: Analysis module for Smac. 
+    Calculates and records the sizes of the Smac generated clusters
+
+AnalysisSmac: This class provides analysis methods for the profiling algorithm
+    implemented in ApplProfRobo, i.e. network lifetime calculations.
