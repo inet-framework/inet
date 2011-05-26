@@ -15,17 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPFRAGBUF_H
-#define __INET_IPFRAGBUF_H
+#ifndef __INET_IPv4FRAGBUF_H
+#define __INET_IPv4FRAGBUF_H
+
 
 #include <map>
-#include <vector>
+
 #include "INETDefs.h"
+
+#include "IPv4Address.h"
 #include "ReassemblyBuffer.h"
-#include "IPv4Datagram.h"
 
 
 class ICMP;
+class IPv4Datagram;
 
 
 /**

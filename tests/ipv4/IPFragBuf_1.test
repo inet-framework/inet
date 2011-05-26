@@ -1,10 +1,11 @@
 %description:
-Test the IP fragmentation reassembly buffer (IPFragBuf class)
+Test the IP fragmentation reassembly buffer (IPv4FragBuf class)
+
+%includes:
+#include <vector>
+#include "IPv4FragBuf.h"
 
 %global:
-#include <vector>
-#include "IPFragBuf.h"
-
 struct Frag
 {
     ushort id;
@@ -17,18 +18,18 @@ struct Frag
 
 typedef std::vector<Frag> FragVector;
 
-bool insertFragment(IPFragBuf& fragbuf, Frag& f)
+bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
 {
-    IPDatagram *frag = new IPDatagram();
+    IPv4Datagram *frag = new IPv4Datagram();
     frag->setIdentification(f.id);
-    frag->setSrcAddress(IPAddress(f.src));
-    frag->setDestAddress(IPAddress(f.dest));
+    frag->setSrcAddress(IPv4Address(f.src));
+    frag->setDestAddress(IPv4Address(f.dest));
     frag->setFragmentOffset(f.offset);
     frag->setMoreFragments(!f.islast);
     frag->setHeaderLength(24);
-    frag->setLength(8*(24+f.bytes));
+    frag->setByteLength(24+f.bytes);
 
-    IPDatagram *dgram = fragbuf.addFragment(frag, 0);
+    IPv4Datagram *dgram = fragbuf.addFragment(frag, 0);
     delete dgram;
     return dgram!=NULL;
 }
@@ -64,7 +65,7 @@ for (int j=0; j<v.size(); j++)
 ev << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
-IPFragBuf fragbuf1;
+IPv4FragBuf fragbuf1;
 int i, num;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf1, v[i]))
@@ -72,7 +73,7 @@ for (i=0, num=0; i<v.size(); i++)
 ev << "assembled in original order: " << num << "\n";
 
 // try assemble fragments in reverse order
-IPFragBuf fragbuf2;
+IPv4FragBuf fragbuf2;
 for (i=v.size()-1, num=0; i>=0; i--)
     if (insertFragment(fragbuf2, v[i]))
         num++;
@@ -87,7 +88,7 @@ for (i=0; i<100000; i++)
 }
 
 // try assemble shuffled fragments
-IPFragBuf fragbuf3;
+IPv4FragBuf fragbuf3;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf3, v[i]))
         num++;

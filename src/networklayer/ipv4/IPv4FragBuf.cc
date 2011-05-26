@@ -16,12 +16,13 @@
 //
 
 
-#include <omnetpp.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "IPv4FragBuf.h"
+
 #include "ICMP.h"
+#include "IPv4Datagram.h"
 
 
 IPv4FragBuf::IPv4FragBuf()
@@ -31,12 +32,13 @@ IPv4FragBuf::IPv4FragBuf()
 
 IPv4FragBuf::~IPv4FragBuf()
 {
-	while (!bufs.empty())
-	{
-		if (bufs.begin()->second.datagram)
-			delete bufs.begin()->second.datagram;
-		bufs.erase(bufs.begin());
-	}
+    while (!bufs.empty())
+    {
+        if (bufs.begin()->second.datagram)
+            delete bufs.begin()->second.datagram;
+
+        bufs.erase(bufs.begin());
+    }
 }
 
 void IPv4FragBuf::init(ICMP *icmp)
@@ -55,7 +57,8 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     Buffers::iterator i = bufs.find(key);
 
     DatagramBuffer *buf = NULL;
-    if (i==bufs.end())
+
+    if (i == bufs.end())
     {
         // this is the first fragment of that datagram, create reassembly buffer for it
         buf = &bufs[key];
@@ -76,7 +79,11 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     // store datagram. Only one fragment carries the actual modelled
     // content (getEncapsulatedPacket()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->getEncapsulatedPacket())
+    if (buf->datagram == NULL)
+    {
+        buf->datagram = datagram;
+    }
+    else if (buf->datagram->getEncapsulatedPacket() == NULL && datagram->getEncapsulatedPacket() != NULL)
     {
         delete buf->datagram;
         buf->datagram = datagram;
@@ -112,7 +119,7 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
 
     ASSERT(icmpModule);
 
-    for (Buffers::iterator i=bufs.begin(); i!=bufs.end(); )
+    for (Buffers::iterator i = bufs.begin(); i != bufs.end(); )
     {
         // if too old, remove it
         DatagramBuffer& buf = i->second;
