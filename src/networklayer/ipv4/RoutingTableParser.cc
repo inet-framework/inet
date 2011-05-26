@@ -25,6 +25,8 @@
 #include <ctype.h>
 
 #include "RoutingTableParser.h"
+
+#include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 
 //

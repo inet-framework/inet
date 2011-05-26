@@ -19,20 +19,18 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <algorithm>
 #include <sstream>
 
 #include "RoutingTable.h"
-#include "RoutingTableParser.h"
-#include "IPv4Route.h"
-#include "IPv4InterfaceData.h"
+
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
+#include "IPv4Route.h"
+#include "NotificationBoard.h"
 #include "NotifierConsts.h"
+#include "RoutingTableParser.h"
 
 
 Define_Module(RoutingTable);

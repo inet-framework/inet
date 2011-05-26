@@ -24,10 +24,11 @@
 #define __IPv4INTERFACEDATA_H
 
 #include <vector>
+
 #include "INETDefs.h"
 
-#include "IPv4Address.h"
 #include "InterfaceEntry.h"
+#include "IPv4Address.h"
 
 
 /**

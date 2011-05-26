@@ -15,10 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPROUTE_H
-#define __INET_IPROUTE_H
+#ifndef __INET_IPv4ROUTE_H
+#define __INET_IPv4ROUTE_H
 
-#include <vector>
 
 #include "INETDefs.h"
 
@@ -114,9 +113,9 @@ class INET_API IPv4Route : public cPolymorphic
 
     simtime_t getInstallTime() const {return installtime;}
     void setInstallTime(simtime_t time) {installtime = time;}
-    void setSequencenumber(int i){sequencenumber =i;}
+    void setSequencenumber(int i) {sequencenumber = i;}
     unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
-#endif
+#endif // __INET_IPv4ROUTE_H
 

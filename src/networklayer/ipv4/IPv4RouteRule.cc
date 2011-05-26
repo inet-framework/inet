@@ -18,13 +18,17 @@
 
 #include <stdio.h>
 #include <sstream>
+
 #include "IPv4RouteRule.h"
+
 #include "InterfaceEntry.h"
+
 
 void IPv4RouteRule::setRoule(Rule rule)
 {
-    if (DROP!=rule && NONE!=rule)
+    if (DROP != rule && NONE != rule)
         opp_error("Rule not supported yet");
+
     this->rule = rule;
 }
 
@@ -32,12 +36,12 @@ IPv4RouteRule::IPv4RouteRule()
 {
     interfacePtr = NULL;
     rule = NONE;
-    sPort=dPort=-1;
-    srcAddress=IPv4Address::UNSPECIFIED_ADDRESS;
-    srcNetmask=IPv4Address::UNSPECIFIED_ADDRESS;
-    destAddress=IPv4Address::UNSPECIFIED_ADDRESS;
-    destNetmask=IPv4Address::UNSPECIFIED_ADDRESS;
-    protocol=IP_PROT_NONE;
+    sPort = dPort = -1;
+    srcAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+    srcNetmask = IPv4Address::UNSPECIFIED_ADDRESS;
+    destAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+    destNetmask = IPv4Address::UNSPECIFIED_ADDRESS;
+    protocol = IP_PROT_NONE;
 
 }
 

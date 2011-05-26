@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NETWORKINFO_H_
-#define NETWORKINFO_H_
+#ifndef __INET_NETWORKINFO_H_
+#define __INET_NETWORKINFO_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IScriptable.h"
 
@@ -38,5 +38,5 @@ class INET_API NetworkInfo : public cSimpleModule, public IScriptable
     virtual void dumpRoutingInfo(cModule *target, const char *filename, bool append, bool compat);
 };
 
+#endif // __INET_NETWORKINFO_H_
 
-#endif

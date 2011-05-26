@@ -19,9 +19,10 @@
 #include <algorithm>
 
 #include "NetworkInfo.h"
-#include "IRoutingTable.h"
-#include "IPvXAddressResolver.h"
+
 #include "InterfaceEntry.h"
+#include "IPvXAddressResolver.h"
+#include "IRoutingTable.h"
 
 
 Define_Module(NetworkInfo);

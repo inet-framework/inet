@@ -16,16 +16,19 @@
 //
 
 
-#include <omnetpp.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "IPv4.h"
-#include "IPv4Datagram.h"
-#include "IPv4ControlInfo.h"
-#include "ICMPMessage_m.h"
-#include "IPv4InterfaceData.h"
+
 #include "ARPPacket_m.h"
+#include "ICMPMessage_m.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Datagram.h"
+#include "IPv4InterfaceData.h"
+#include "IRoutingTable.h"
+
 
 Define_Module(IPv4);
 
@@ -257,7 +260,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
         IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
         if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
         {
-            IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4);
+            IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4);class IInterfaceTable;
             rtOpt.setNextAddressPtr(rtOpt.getNextAddressPtr()+4);
             datagram->setSrcAddress(rt->getRouterId());
             datagram->setDestAddress(nextRouteAddress);

@@ -19,11 +19,10 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <omnetpp.h>
 #include "ErrorHandling.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
+
 #include "ICMPMessage.h"
+#include "IPv4Datagram.h"
 
 
 Define_Module(ErrorHandling);

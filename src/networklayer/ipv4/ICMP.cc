@@ -18,12 +18,12 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <omnetpp.h>
 #include <string.h>
+
+#include "ICMP.h"
 
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
-#include "ICMP.h"
 
 Define_Module(ICMP);
 

@@ -29,13 +29,15 @@
 #define __ROUTINGTABLE_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
+#include "INotifiable.h"
 #include "IPv4Address.h"
-#include "IInterfaceTable.h"
-#include "NotificationBoard.h"
 #include "IRoutingTable.h"
 
+class IInterfaceTable;
+class NotificationBoard;
 class RoutingTableParser;
 
 

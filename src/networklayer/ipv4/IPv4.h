@@ -18,15 +18,12 @@
 #ifndef __INET_IP_H
 #define __INET_IP_H
 
-#include "QueueBase.h"
-#include "InterfaceTableAccess.h"
-#include "RoutingTableAccess.h"
-#include "IRoutingTable.h"
+#include "INETDefs.h"
+
 #include "ICMPAccess.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
 #include "IPv4FragBuf.h"
 #include "ProtocolMap.h"
+#include "QueueBase.h"
 
 #ifdef WITH_MANET
 #include "ControlManetRouting_m.h"
@@ -35,6 +32,9 @@
 
 class ARPPacket;
 class ICMPMessage;
+class IInterfaceTable;
+class IPv4Datagram;
+class IRoutingTable;
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
@@ -125,7 +125,7 @@ class INET_API IPv4 : public QueueBase
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL,IPv4Address* nextHopAddrPtr);
+    virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
@@ -155,12 +155,13 @@ class INET_API IPv4 : public QueueBase
     virtual void sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr);
 
 #ifdef WITH_MANET
-    virtual void controlMessageToManetRouting(int,IPv4Datagram *datagram);
+    virtual void controlMessageToManetRouting(int, IPv4Datagram *datagram);
 #endif
-    virtual void dsrFillDestIE(IPv4Datagram *, InterfaceEntry *&destIE,IPv4Address &nextHopAddress);
+
+    virtual void dsrFillDestIE(IPv4Datagram *, InterfaceEntry *&destIE, IPv4Address &nextHopAddress);
 
     const IPv4RouteRule * checkInputRule(const IPv4Datagram*);
-    const IPv4RouteRule * checkOutputRule(const IPv4Datagram*,const InterfaceEntry*);
+    const IPv4RouteRule * checkOutputRule(const IPv4Datagram*, const InterfaceEntry*);
     const IPv4RouteRule * checkOutputRuleMulticast(const IPv4Datagram*);
 
   public:

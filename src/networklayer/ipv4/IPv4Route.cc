@@ -18,7 +18,9 @@
 
 #include <stdio.h>
 #include <sstream>
+
 #include "IPv4Route.h"
+
 #include "InterfaceEntry.h"
 
 
@@ -34,12 +36,14 @@ IPv4Route::IPv4Route()
 std::string IPv4Route::info() const
 {
     std::stringstream out;
+
     out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
     out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "metric:" << metric << " ";
     out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
+
     switch (source)
     {
         case MANUAL:       out << " MANUAL"; break;
@@ -51,6 +55,7 @@ std::string IPv4Route::info() const
         case MANET:        out << " MANET"; break;
         default:           out << " ???"; break;
     }
+
     return out.str();
 }
 

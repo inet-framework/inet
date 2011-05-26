@@ -16,10 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPROUTEROULE_H
-#define __INET_IPROUTEROULE_H
+#ifndef __INET_IPv4ROUTERULE_H
+#define __INET_IPv4ROUTERULE_H
 
-#include <vector>
 #include <map>
 
 #include "INETDefs.h"
@@ -36,11 +35,12 @@ class InterfaceEntry;
  */
 class NatElement : public cPolymorphic
 {
-public:
+  public:
     IPv4Address addr;
     int port;
-private:
-  // copying not supported: following are private and also left undefined
+
+  private:
+    // copying not supported: following are private and also left undefined
     NatElement(const NatElement& obj);
     NatElement& operator=(const NatElement& obj);
 };
@@ -124,5 +124,5 @@ class INET_API IPv4RouteRule : public cPolymorphic
     Rule getRule() const {return rule;}
 };
 
-#endif
+#endif // __INET_IPv4ROUTERULE_H
 

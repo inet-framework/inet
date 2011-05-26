@@ -22,8 +22,10 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include "RoutingTableAccess.h"
+#include "INETDefs.h"
+
 #include "ICMPMessage.h"
+#include "RoutingTableAccess.h"
 
 class IPv4Datagram;
 class IPv4ControlInfo;
