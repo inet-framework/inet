@@ -35,7 +35,7 @@
 #include "IPv6InterfaceData.h"
 #endif
 
-#include "IPControlInfo_m.h"
+#include "IPv4ControlInfo_m.h"
 
 
 void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables* chunk)

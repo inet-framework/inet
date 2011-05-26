@@ -19,10 +19,10 @@
 
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 }}
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 ///**
 // * This class is a super class for classes intended for storing information
@@ -41,7 +41,7 @@ class RTPParticipantInfo extends cNamedObject
     abstract uint32 ssrc;
 
     // Used for storing the ip address of this endsystem.
-    IPAddress address = IPAddress::UNSPECIFIED_ADDRESS;
+    IPv4Address address = IPv4Address::UNSPECIFIED_ADDRESS;
 
     // Used for storing the port for ~RTP by this endsystem.
     int RTPPort = PORT_UNDEF;

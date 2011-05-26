@@ -27,7 +27,7 @@
 
 #include "MACAddress.h"
 #include "ModuleAccess.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 // Forward declarations:
 class ARPPacket;
@@ -42,11 +42,11 @@ class INET_API ARP : public cSimpleModule
 {
   public:
     struct ARPCacheEntry;
-    typedef std::map<IPAddress, ARPCacheEntry*> ARPCache;
+    typedef std::map<IPv4Address, ARPCacheEntry*> ARPCache;
     typedef std::vector<cMessage*> MsgPtrVector;
 
-    // IPAddress -> MACAddress table
-    // TBD should we key it on (IPAddress, InterfaceEntry*)?
+    // IPv4Address -> MACAddress table
+    // TBD should we key it on (IPv4Address, InterfaceEntry*)?
     struct ARPCacheEntry
     {
         InterfaceEntry *ie; // NIC to send the packet to
@@ -90,9 +90,9 @@ class INET_API ARP : public cSimpleModule
     ARP() {}
     virtual ~ARP();
     int numInitStages() const {return 5;}
-    const MACAddress getDirectAddressResolution(const IPAddress &) const;
-    const IPAddress getInverseAddressResolution(const MACAddress &) const;
-    void setChangeAddress(const IPAddress &);
+    const MACAddress getDirectAddressResolution(const IPv4Address &) const;
+    const IPv4Address getInverseAddressResolution(const MACAddress &) const;
+    void setChangeAddress(const IPv4Address &);
 
   protected:
     virtual void initialize(int stage);
@@ -103,9 +103,9 @@ class INET_API ARP : public cSimpleModule
     virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
 
     virtual void initiateARPResolution(ARPCacheEntry *entry);
-    virtual void sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress);
+    virtual void sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
-    virtual bool addressRecognized(IPAddress destAddr, InterfaceEntry *ie);
+    virtual bool addressRecognized(IPv4Address destAddr, InterfaceEntry *ie);
     virtual void processARPPacket(ARPPacket *arp);
     virtual void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 

@@ -340,7 +340,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
     memset(dp, 0, sizeof(dsr_pkt));
     if (p)
     {
-        IPDatagram *dgram = dynamic_cast <IPDatagram *> (p);
+        IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
         cPolymorphic * ctrl = dgram->removeControlInfo();
@@ -352,8 +352,8 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
             delete ctrl;
         }
 
-        // IPAddress dest = dgram->getDestAddress();
-        // IPAddress src = dgram->getSrcAddress();
+        // IPv4Address dest = dgram->getDestAddress();
+        // IPv4Address src = dgram->getSrcAddress();
 
         dp->src.s_addr = dgram->getSrcAddress().getInt();
         dp->dst.s_addr =dgram->getDestAddress().getInt();

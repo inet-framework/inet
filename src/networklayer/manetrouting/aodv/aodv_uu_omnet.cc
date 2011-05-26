@@ -27,7 +27,7 @@
 #include "aodv_uu_omnet.h"
 
 #include "UDPPacket.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "ICMPMessage_m.h"
 #include "ICMPAccess.h"
@@ -35,14 +35,14 @@
 
 
 #include "ProtocolMap.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IPvXAddress.h"
 #include "ControlManetRouting_m.h"
 #include "Ieee802Ctrl_m.h"
 
 
 const int UDP_HEADER_BYTES = 8;
-typedef std::vector<IPAddress> IPAddressVector;
+typedef std::vector<IPv4Address> IPAddressVector;
 
 Define_Module(AODVUU);
 
@@ -130,7 +130,7 @@ void NS_CLASS initialize(int stage)
         if (par("llfeedback"))
             llfeedback = 1;
         internet_gw_mode = (int) par("internet_gw_mode");
-        gateWayAddress = new IPAddress(par("internet_gw_address").stringValue());
+        gateWayAddress = new IPv4Address(par("internet_gw_address").stringValue());
 
         if (llfeedback)
         {
@@ -289,7 +289,7 @@ NS_CLASS ~ AODVUU()
 */
 
 /* Called for packets whose delivery fails at the link layer */
-void NS_CLASS packetFailed(IPDatagram *dgram)
+void NS_CLASS packetFailed(IPv4Datagram *dgram)
 {
     rt_table_t *rt_next_hop, *rt;
     struct in_addr dest_addr, src_addr, next_hop;
@@ -314,7 +314,7 @@ void NS_CLASS packetFailed(IPDatagram *dgram)
     if (seek_list_find(dest_addr))
     {
         DEBUG(LOG_DEBUG, 0, "Ongoing route discovery, buffering packet...");
-        packet_queue_add((IPDatagram *)dgram->dup(), dest_addr);
+        packet_queue_add((IPv4Datagram *)dgram->dup(), dest_addr);
         scheduleNextEvent();
         return;
     }
@@ -341,7 +341,7 @@ void NS_CLASS packetFailed(IPDatagram *dgram)
         /* && ch->num_forwards() > rt->hcnt */
     {
         /* Buffer the current packet */
-        packet_queue_add((IPDatagram *) dgram->dup(), dest_addr);
+        packet_queue_add((IPv4Datagram *) dgram->dup(), dest_addr);
 
         // In omnet++ it's not possible to access to the mac queue
         //  /* Buffer pending packets from interface queue */
@@ -366,7 +366,7 @@ void NS_CLASS packetFailed(IPDatagram *dgram)
 void NS_CLASS handleMessage (cMessage *msg)
 {
     AODV_msg *aodvMsg=NULL;
-    IPDatagram * ipDgram=NULL;
+    IPv4Datagram * ipDgram=NULL;
     UDPPacket * udpPacket=NULL;
 
     cMessage *msg_aux;
@@ -387,7 +387,7 @@ void NS_CLASS handleMessage (cMessage *msg)
         ControlManetRouting * control =  check_and_cast <ControlManetRouting *> (msg);
         if (control->getOptionCode()== MANET_ROUTE_NOROUTE)
         {
-            ipDgram = (IPDatagram*) control->decapsulate();
+            ipDgram = (IPv4Datagram*) control->decapsulate();
             cPolymorphic * ctrl = ipDgram->removeControlInfo();
             unsigned int ifindex = NS_IFINDEX;  /* Always use ns interface */
             if (ctrl)
@@ -443,7 +443,7 @@ void NS_CLASS handleMessage (cMessage *msg)
             aodvMsg = check_and_cast  <AODV_msg *>(msg_aux);
             if (!isInMacLayer())
             {
-                IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(udpPacket->removeControlInfo());
+                IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
                 src_addr.s_addr = controlInfo->getSrcAddr().getInt();
                 aodvMsg->setControlInfo(controlInfo);
             }
@@ -561,16 +561,16 @@ int NS_CLASS startAODVUUAgent()
 
 
 // for use with gateway in the future
-IPDatagram * NS_CLASS pkt_encapsulate(IPDatagram *p, IPAddress gateway)
+IPv4Datagram * NS_CLASS pkt_encapsulate(IPv4Datagram *p, IPv4Address gateway)
 {
-    IPDatagram *datagram = new IPDatagram(p->getName());
+    IPv4Datagram *datagram = new IPv4Datagram(p->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(p);
 
     // set source and destination address
     datagram->setDestAddress(gateway);
 
-    IPAddress src = p->getSrcAddress();
+    IPv4Address src = p->getSrcAddress();
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
@@ -591,12 +591,12 @@ IPDatagram * NS_CLASS pkt_encapsulate(IPDatagram *p, IPAddress gateway)
 
 
 
-IPDatagram *NS_CLASS pkt_decapsulate(IPDatagram *p)
+IPv4Datagram *NS_CLASS pkt_decapsulate(IPv4Datagram *p)
 {
 
     if (p->getTransportProtocol() == IP_PROT_IP)
     {
-        IPDatagram *datagram = check_and_cast  <IPDatagram *>(p->decapsulate());
+        IPv4Datagram *datagram = check_and_cast  <IPv4Datagram *>(p->decapsulate());
         datagram->setTimeToLive(p->getTimeToLive());
         delete p;
         return datagram;
@@ -665,7 +665,7 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
     ttl =  aodv_msg->ttl-1;
     if (!isInMacLayer())
     {
-        IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(msg->getControlInfo());
+        IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
         IPvXAddress srcAddr = ctrl->getSrcAddr();
         IPvXAddress destAddr = ctrl->getDestAddr();
 
@@ -712,7 +712,7 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
 }
 
 
-void NS_CLASS processPacket(IPDatagram * p,unsigned int ifindex)
+void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
 {
     rt_table_t *fwd_rt, *rev_rt;
     struct in_addr dest_addr, src_addr;
@@ -744,7 +744,7 @@ void NS_CLASS processPacket(IPDatagram * p,unsigned int ifindex)
     /* If this is a TCP packet and we don't have a route, we should
        set the gratuituos flag in the RREQ. */
     phops = ie->ipv4Data()->getMulticastGroups();
-    IPAddress mcastAdd;
+    IPv4Address mcastAdd;
     bool isMcast=false;
     for (unsigned int  i=0; i<phops.size(); i++)
     {
@@ -898,12 +898,12 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 
 void NS_CLASS processLinkBreak(const cPolymorphic *details)
 {
-    IPDatagram  *dgram=NULL;
+    IPv4Datagram  *dgram=NULL;
     if (llfeedback)
     {
-        if (dynamic_cast<IPDatagram *>(const_cast<cPolymorphic*> (details)))
+        if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
         {
-            dgram = check_and_cast<IPDatagram *>(details);
+            dgram = check_and_cast<IPv4Datagram *>(details);
             packetFailed(dgram);
             return;
         }

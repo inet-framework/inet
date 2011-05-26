@@ -34,7 +34,7 @@ extern "C" {
 };
 
 #include "AudioOutFile.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "UDPAppBase.h"
 #include "UDPControlInfo_m.h"
 #include "VoIPPacket_m.h"

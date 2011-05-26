@@ -24,7 +24,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 
 
 /**

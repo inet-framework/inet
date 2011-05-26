@@ -20,14 +20,14 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 class IInterfaceTable;
 class IRoutingTable;
 
 
 /**
- * Configures IP addresses and routing tables for a "flat" network,
+ * Configures IPv4 addresses and routing tables for a "flat" network,
  * "flat" meaning that all hosts and routers will have the same
  * network address.
  *
@@ -41,7 +41,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
         bool isIPNode;
         IInterfaceTable *ift;
         IRoutingTable *rt;
-        IPAddress address;
+        IPv4Address address;
         bool usesDefaultRoute;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;

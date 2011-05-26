@@ -23,7 +23,7 @@
 #include "TCPDump.h"
 
 #ifdef WITH_IPv4
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #endif
 
 //----
@@ -62,11 +62,11 @@ void TCPDump::handleMessage(cMessage *msg)
     }
 
 #ifdef WITH_IPv4
-    if (pcapDump.isOpen() && dynamic_cast<IPDatagram *>(msg)
+    if (pcapDump.isOpen() && dynamic_cast<IPv4Datagram *>(msg)
             && (dumpBadFrames || !PK(msg)->hasBitError()))
     {
         const simtime_t stime = simulation.getSimTime();
-        IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
+        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
         pcapDump.writeFrame(stime, ipPacket);
     }
 #endif

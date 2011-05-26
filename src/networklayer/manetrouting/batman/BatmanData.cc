@@ -649,7 +649,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
         }
         else
         {
-            if (next.getIPAddress()!=IPAddress::ALLONES_ADDRESS)
+            if (next.getIPAddress()!=IPv4Address::ALLONES_ADDRESS)
                 add_del_route(orig_node->orig, 32, next, orig_node->batmanIf->if_index,
                       orig_node->batmanIf->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
         }

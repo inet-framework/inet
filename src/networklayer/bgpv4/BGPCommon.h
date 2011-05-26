@@ -18,7 +18,7 @@
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 //#include "TCPSocket.h"
 #include "InterfaceEntry.h"
 
@@ -54,7 +54,7 @@ enum type {
 const unsigned char     AS_SET      = 1;
 const unsigned char     AS_SEQUENCE = 2;
 
-typedef IPAddress       NextHop;
+typedef IPv4Address       NextHop;
 typedef unsigned short  ASID;
 typedef unsigned long   SessionID;
 
@@ -62,8 +62,8 @@ struct SessionInfo{
     SessionID       sessionID;
     type            sessionType;
     ASID            ASValue;
-    IPAddress       routerID;
-    IPAddress       peerAddr;
+    IPv4Address       routerID;
+    IPv4Address       peerAddr;
     InterfaceEntry* linkIntf;
     TCPSocket*      socket;
     TCPSocket*      socketListen;

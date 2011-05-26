@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004-2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,10 +16,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPDATAGRAM_H
-#define __INET_IPDATAGRAM_H
 
-#include "IPDatagram_m.h"
+package inet.applications.generic;
 
-#endif
+//
+// Prototype for modules that generate traffic directly over ~IP.
+//
+// @see ~IPvXTrafGen, ~IPvXTrafSink
+//
+moduleinterface IIPvXTrafficGenerator
+{
+    @display("i=block/app");
+    gates:
+        input ipIn @labels(IPv4ControlInfo/up);
+        input ipv6In @labels(IPv6ControlInfo/up);
+        output ipOut @labels(IPv4ControlInfo/down);
+        output ipv6Out @labels(IPv6ControlInfo/down);
+}
 

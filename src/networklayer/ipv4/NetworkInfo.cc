@@ -20,7 +20,7 @@
 
 #include "NetworkInfo.h"
 #include "IRoutingTable.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "InterfaceEntry.h"
 
 
@@ -60,7 +60,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     if (s.fail())
         error("cannot open `%s' for write", filename);
 
-    if (compat) s << "Kernel IP routing table" << endl;
+    if (compat) s << "Kernel IPv4 routing table" << endl;
     s << "Destination     Gateway         Genmask         ";
     if (compat) s << "Flags ";
     s << "Metric ";
@@ -75,7 +75,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         IRoutingTable *rt = check_and_cast<IRoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++)
         {
-            IPAddress host = rt->getRoute(i)->getHost();
+            IPv4Address host = rt->getRoute(i)->getHost();
 
             if (host.isMulticast())
                 continue;
@@ -83,14 +83,14 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             if (rt->getRoute(i)->getInterface()->isLoopback())
                 continue;
 
-            IPAddress netmask = rt->getRoute(i)->getNetmask();
-            IPAddress gateway = rt->getRoute(i)->getGateway();
+            IPv4Address netmask = rt->getRoute(i)->getNetmask();
+            IPv4Address gateway = rt->getRoute(i)->getGateway();
             int metric = rt->getRoute(i)->getMetric();
 
             std::ostringstream line;
 
             line << std::left;
-            IPAddress dest = compat ? host.doAnd(netmask) : host;
+            IPv4Address dest = compat ? host.doAnd(netmask) : host;
             line.width(16);
             if (dest.isUnspecified()) line << "0.0.0.0"; else line << dest;
 
@@ -105,13 +105,13 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
                 int pad = 3;
                 line << "U"; // routes in INET are always up
                 if (!gateway.isUnspecified()) line << "G"; else ++pad;
-                if (netmask.equals(IPAddress::ALLONES_ADDRESS)) line << "H"; else ++pad;
+                if (netmask.equals(IPv4Address::ALLONES_ADDRESS)) line << "H"; else ++pad;
                 line.width(pad);
                 line << " ";
             }
 
             line.width(7);
-            if (compat && rt->getRoute(i)->getSource() == IPRoute::IFACENETMASK)
+            if (compat && rt->getRoute(i)->getSource() == IPv4Route::IFACENETMASK)
                 metric = 0;
             line << metric;
 

@@ -174,7 +174,7 @@ class INET_API RTP : public cSimpleModule
     /**
      * The destination address.
      */
-    IPAddress _destinationAddress;
+    IPv4Address _destinationAddress;
 
     /**
      * The RTP port.

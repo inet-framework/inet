@@ -126,7 +126,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 #else
 #ifdef OMNETPP
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPAddress((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -182,7 +182,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 #ifdef OMNETPP
     struct in_addr netmask;
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPAddress((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -400,7 +400,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 
     dymoRoutingTable->insert(std::make_pair(dest_addr.s_addr,entry));
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPAddress((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -426,7 +426,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 
     struct in_addr netmask;
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPAddress((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else

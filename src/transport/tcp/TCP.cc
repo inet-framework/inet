@@ -22,7 +22,7 @@
 #include "TCPCommand_m.h"
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "ICMPMessage_m.h"
 #endif
 
@@ -135,9 +135,9 @@ void TCP::handleMessage(cMessage *msg)
             IPvXAddress srcAddr, destAddr;
 
 #ifdef WITH_IPv4
-            if (dynamic_cast<IPControlInfo *>(tcpseg->getControlInfo()) != NULL)
+            if (dynamic_cast<IPv4ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
-                IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
+                IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->getSrcAddr();
                 destAddr = controlInfo->getDestAddr();
                 delete controlInfo;

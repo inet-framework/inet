@@ -18,7 +18,7 @@
 #include <algorithm>
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "NetworkConfigurator.h"
 #include "IPv4InterfaceData.h"
 
@@ -37,7 +37,7 @@ void NetworkConfigurator::initialize(int stage)
         // isIPNode, rt and ift members of nodeInfo[]
         extractTopology(topo, nodeInfo);
 
-        // assign addresses to IP nodes, and also store result in nodeInfo[].address
+        // assign addresses to IPv4 nodes, and also store result in nodeInfo[].address
         assignAddresses(topo, nodeInfo);
 
         // add routes for point-to-point peers
@@ -70,8 +70,8 @@ void NetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeI
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].ift = IPAddressResolver().findInterfaceTableOf(mod);
-        nodeInfo[i].rt = IPAddressResolver().findRoutingTableOf(mod);
+        nodeInfo[i].ift = IPvXAddressResolver().findInterfaceTableOf(mod);
+        nodeInfo[i].rt = IPvXAddressResolver().findRoutingTableOf(mod);
         nodeInfo[i].isIPNode = nodeInfo[i].rt!=NULL;
     }
 }
@@ -96,8 +96,8 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
             {
-                ie->ipv4Data()->setIPAddress(IPAddress(addr | (uint32)k));
-                ie->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
+                ie->ipv4Data()->setIPAddress(IPv4Address(addr | (uint32)k));
+                ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
 
@@ -105,7 +105,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
         IRoutingTable *rt = nodeInfo[i].rt;
         if (rt->getRouterId().isUnspecified())
         {
-            rt->setRouterId(IPAddress(addr | 1U)); // 10.nn.nn.1
+            rt->setRouterId(IPv4Address(addr | 1U)); // 10.nn.nn.1
         }
     }
 }
@@ -138,18 +138,18 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
                     break;
             ASSERT(k<=topo.getNumNodes());
 
-            // if it's not an IP getNode(e.g. an Ethernet switch), then we're not interested
+            // if it's not an IPv4 getNode(e.g. an Ethernet switch), then we're not interested
             if (!nodeInfo[k].isIPNode)
                 continue;
 
             // find out neighbor's routerId
-            IPAddress neighborRouterId = nodeInfo[k].rt->getRouterId();
+            IPv4Address neighborRouterId = nodeInfo[k].rt->getRouterId();
 
-            // find out neighbor's interface IP address
+            // find out neighbor's interface IPv4 address
             int neighborGateId = node->getLinkOut(j)->getRemoteGate()->getId();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->getInterfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
-            IPAddress neighborAddr = neighborIe->ipv4Data()->getIPAddress();
+            IPv4Address neighborAddr = neighborIe->ipv4Data()->getIPAddress();
 
             // find our own interface towards neighbor
             int gateId = node->getLinkOut(j)->getLocalGate()->getId();
@@ -157,7 +157,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             ASSERT(ie);
 
             // add route
-            IPRoute *e = new IPRoute();
+            IPv4Route *e = new IPv4Route();
             if (useRouterIdForRoutes)
             {
                 e->setHost(neighborRouterId);
@@ -167,10 +167,10 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             {
                 e->setHost(neighborAddr); // and no gateway
             }
-            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            e->setNetmask(IPv4Address(255,255,255,255)); // full match needed
             e->setInterface(ie);
-            e->setType(IPRoute::DIRECT);
-            e->setSource(IPRoute::MANUAL);
+            e->setType(IPv4Route::DIRECT);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }
@@ -205,12 +205,12 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
            "interface, adding default route\n";
 
         // add route
-        IPRoute *e = new IPRoute();
-        e->setHost(IPAddress());
-        e->setNetmask(IPAddress());
+        IPv4Route *e = new IPv4Route();
+        e->setHost(IPv4Address());
+        e->setNetmask(IPv4Address());
         e->setInterface(ie);
-        e->setType(IPRoute::REMOTE);
-        e->setSource(IPRoute::MANUAL);
+        e->setType(IPv4Route::REMOTE);
+        e->setSource(IPv4Route::MANUAL);
         //e->setMetric(1);
         rt->addRoute(e);
     }
@@ -266,7 +266,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        IPAddress destAddr = nodeInfo[i].address;
+        IPv4Address destAddr = nodeInfo[i].address;
         std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
@@ -286,7 +286,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
 
-            IPAddress atAddr = nodeInfo[j].address;
+            IPv4Address atAddr = nodeInfo[j].address;
 
             IInterfaceTable *ift = nodeInfo[j].ift;
 
@@ -295,18 +295,18 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             if (!ie)
                 error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPAddress(atAddr);
-            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
+            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
+            EV << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
             IRoutingTable *rt = nodeInfo[j].rt;
-            IPRoute *e = new IPRoute();
+            IPv4Route *e = new IPv4Route();
             e->setHost(destAddr);
             e->gateway = ???
-            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            e->setNetmask(IPv4Address(255,255,255,255)); // full match needed
             e->setInterface(ie);
-            e->setType(IPRoute::REMOTE);
-            e->setSource(IPRoute::MANUAL);
+            e->setType(IPv4Route::REMOTE);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }
@@ -328,7 +328,7 @@ void NetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& node
 
     // update display string
     char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
+    sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
     getDisplayString().setTagArg("t",0,buf);
 }
 

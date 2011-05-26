@@ -22,7 +22,7 @@
  *****************************************************************************/
 #include "dsr-pkt_omnet.h"
 #ifndef MobilityFramework
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 
@@ -71,7 +71,7 @@ DSRPkt::~DSRPkt()
         delete [] costVector;
 }
 
-DSRPkt::DSRPkt(const DSRPkt& m) : IPDatagram()
+DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram()
 {
 
     costVector =NULL;
@@ -89,7 +89,7 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 #ifdef MobilityFramework
     NetwPkt::operator=(m);
 #else
-    IPDatagram::operator=(m);
+    IPv4Datagram::operator=(m);
 #endif
     encap_protocol=m.encap_protocol;
     previous=m.previous;
@@ -127,7 +127,7 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
     return *this;
 }
 // Constructor
-DSRPkt::DSRPkt(struct dsr_pkt *dp,int interface_id) : IPDatagram()
+DSRPkt::DSRPkt(struct dsr_pkt *dp,int interface_id) : IPv4Datagram()
 {
     costVectorSize=0;
     costVector = NULL;
@@ -144,9 +144,9 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp,int interface_id) : IPDatagram()
         setTtl (dp->nh.iph->ttl); // TTL
         setTransportProtocol(IP_PROT_DSR); // Transport protocol
 #else
-        IPAddress destAddress_var((uint32_t)dp->dst.s_addr);
+        IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
         setDestAddress(destAddress_var);
-        IPAddress srcAddress_var((uint32_t)dp->src.s_addr);
+        IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
         setSrcAddress(srcAddress_var);
         setHeaderLength(dp->nh.iph->ihl); // Header length
         setVersion(dp->nh.iph->version); // Ip version
@@ -179,7 +179,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp,int interface_id) : IPDatagram()
 #ifndef MobilityFramework
         if (interface_id>=0)
         {
-            IPControlInfo *ipControlInfo = new IPControlInfo();
+            IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
             //ipControlInfo->setProtocol(IP_PROT_UDP);
             ipControlInfo->setProtocol(IP_PROT_DSR);
             ipControlInfo->setInterfaceId(interface_id); // If broadcast packet send to interface
@@ -209,9 +209,9 @@ void DSRPkt::ModOptions (struct dsr_pkt *dp,int interface_id)
         setTtl (dp->nh.iph->ttl); // TTL
         setTransportProtocol(IP_PROT_DSR); // Transport protocol
 #else
-        IPAddress destAddress_var((uint32_t)dp->dst.s_addr);
+        IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
         setDestAddress(destAddress_var);
-        IPAddress srcAddress_var((uint32_t)dp->src.s_addr);
+        IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
         setSrcAddress(srcAddress_var);
         // ¿como gestionar el MAC
         // dp->mac.raw = p->access(hdr_mac::offset_);
@@ -252,7 +252,7 @@ void DSRPkt::ModOptions (struct dsr_pkt *dp,int interface_id)
 #ifndef MobilityFramework
         if (interface_id>=0)
         {
-            IPControlInfo *ipControlInfo = new IPControlInfo();
+            IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
             //ipControlInfo->setProtocol(IP_PROT_UDP);
             ipControlInfo->setProtocol(IP_PROT_DSR);
 
@@ -301,12 +301,12 @@ std::string DSRPkt::detailedInfo() const
         {
             out << " DSR_OPT_RREQ "  << "\n"; // Khmm...
             dsr_rreq_opt *rreq_opt = (dsr_rreq_opt*)dopt;
-            IPAddress add(rreq_opt->target);
+            IPv4Address add(rreq_opt->target);
             out <<" Target :"<< add << "\n"; // Khmm
             int j = 0;
             for (int m=0; m<DSR_RREQ_ADDRS_LEN(rreq_opt); m+=sizeof(u_int32_t))
             {
-                IPAddress add(rreq_opt->addrs[j]);
+                IPv4Address add(rreq_opt->addrs[j]);
                 out << add << "\n"; // Khmm
                 j++;
             }
@@ -334,7 +334,7 @@ std::string DSRPkt::detailedInfo() const
             int length = srt_opt->length/sizeof(u_int32_t);
             for (int j=0; j<length; j++)
             {
-                IPAddress add(srt_opt->addrs[j]);
+                IPv4Address add(srt_opt->addrs[j]);
                 out << add << "\n"; // Khmm
             }
         }
@@ -482,7 +482,7 @@ void DSRPkt::setCostVectorSize(EtxCost newLinkCost)
 void DSRPkt::setCostVectorSize(u_int32_t addr, double cost)
 {
     EtxCost newLinkCost;
-    IPAddress address(addr);
+    IPv4Address address(addr);
     newLinkCost.address = address;
     newLinkCost.cost = cost;
     setCostVectorSize(newLinkCost);
@@ -495,7 +495,7 @@ void DSRPkt::resetCostVector()
     costVectorSize=0;
 }
 
-DSRPktExt::DSRPktExt(const DSRPktExt& m) : IPDatagram()
+DSRPktExt::DSRPktExt(const DSRPktExt& m) : IPv4Datagram()
 {
     setName(m.getName());
     operator=(m);
@@ -505,7 +505,7 @@ DSRPktExt::DSRPktExt(const DSRPktExt& m) : IPDatagram()
 DSRPktExt& DSRPktExt::operator=(const DSRPktExt& msg)
 {
     if (this==&msg) return *this;
-    IPDatagram::operator=(msg);
+    IPv4Datagram::operator=(msg);
     size=msg.size;
     if (size==0)
     {

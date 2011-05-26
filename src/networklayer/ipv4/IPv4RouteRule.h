@@ -21,10 +21,11 @@
 
 #include <vector>
 #include <map>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "IPProtocolId_m.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 class InterfaceEntry;
 
@@ -36,7 +37,7 @@ class InterfaceEntry;
 class NatElement : public cPolymorphic
 {
 public:
-    IPAddress addr;
+    IPv4Address addr;
     int port;
 private:
   // copying not supported: following are private and also left undefined
@@ -44,7 +45,7 @@ private:
     NatElement& operator=(const NatElement& obj);
 };
 
-class INET_API IPRouteRule : public cPolymorphic
+class INET_API IPv4RouteRule : public cPolymorphic
 {
   public:
     /** Specifies where the route comes from */
@@ -55,27 +56,24 @@ class INET_API IPRouteRule : public cPolymorphic
         NAT,
         NONE
     };
+
   protected:
     class Nat
     {
-    private:
+      private:
         std::map<int,NatElement*> natAddress;
-    public:
+
+      public:
         void addNatAddres(){}
         void delNatAddress(){}
         const NatElement* getNat() const;
-        ~Nat() {
-             while (!natAddress.empty())
-             {
-                delete natAddress.begin()->second;
-                natAddress.erase(natAddress.begin());
-             }
-        };
+        ~Nat();
     };
-    IPAddress srcAddress;     ///< Destination
-    IPAddress srcNetmask;  ///< Route mask
-    IPAddress destAddress;     ///< Destination
-    IPAddress destNetmask;  ///< Route mask
+
+    IPv4Address srcAddress;     ///< Destination
+    IPv4Address srcNetmask;  ///< Route mask
+    IPv4Address destAddress;     ///< Destination
+    IPv4Address destNetmask;  ///< Route mask
     int sPort;  ///
     int dPort;  ///
 
@@ -86,20 +84,20 @@ class INET_API IPRouteRule : public cPolymorphic
 
   private:
     // copying not supported: following are private and also left undefined
-    IPRouteRule(const IPRouteRule& obj);
-    IPRouteRule& operator=(const IPRouteRule& obj);
+    IPv4RouteRule(const IPv4RouteRule& obj);
+    IPv4RouteRule& operator=(const IPv4RouteRule& obj);
 
   public:
-    IPRouteRule();
-    ~IPRouteRule();
+    IPv4RouteRule();
+    ~IPv4RouteRule();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    void setSrcAddress(IPAddress host)  {this->srcAddress = host;}
-    void setSrcNetmask(IPAddress netmask)  {this->srcNetmask = netmask;}
+    void setSrcAddress(IPv4Address host)  {this->srcAddress = host;}
+    void setSrcNetmask(IPv4Address netmask)  {this->srcNetmask = netmask;}
     void setSrcPort(int port)  {this->sPort = sPort;}
-    void setDestAddress(IPAddress host)  {this->destAddress = host;}
-    void setDestNetmask(IPAddress netmask)  {this->destNetmask = netmask;}
+    void setDestAddress(IPv4Address host)  {this->destAddress = host;}
+    void setDestNetmask(IPv4Address netmask)  {this->destNetmask = netmask;}
     void setDestPort(int port)  {this->dPort = dPort;}
 
 
@@ -107,11 +105,11 @@ class INET_API IPRouteRule : public cPolymorphic
     void setRoule(Rule rule);
     void setProtocol(IPProtocolId protocol){this->protocol = protocol;}
 
-    IPAddress getSrcAddress() const {return srcAddress;}
-    IPAddress getSrcNetmask() const {return srcNetmask;}
+    IPv4Address getSrcAddress() const {return srcAddress;}
+    IPv4Address getSrcNetmask() const {return srcNetmask;}
     const int getSrcPort() const {return sPort;}
-    IPAddress getDestAddress() const {return destAddress;}
-    IPAddress getDestNetmask() const {return destNetmask;}
+    IPv4Address getDestAddress() const {return destAddress;}
+    IPv4Address getDestNetmask() const {return destNetmask;}
     const int getDestPort() const {return dPort;}
 
     const IPProtocolId getProtocol() const {return protocol;}
@@ -124,7 +122,6 @@ class INET_API IPRouteRule : public cPolymorphic
 
     /** Route type: Direct or Remote */
     Rule getRule() const {return rule;}
-
 };
 
 #endif

@@ -61,7 +61,7 @@ void RTPInnerPacket::setProfileInitializedPkt(int rtcpPercentage, int port)
     port_var = port;
 }
 
-void RTPInnerPacket::setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port)
+void RTPInnerPacket::setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPv4Address address, int port)
 {
     type_var = RTP_INP_INITIALIZE_RTCP;
     commonName_var = commonName;
@@ -153,7 +153,7 @@ void RTPInnerPacket::setDataOutPkt(RTPPacket *packet)
     encapsulate(packet);
 }
 
-void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPAddress address, int port)
+void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPv4Address address, int port)
 {
     type_var = RTP_INP_DATA_IN;
     address_var = address;

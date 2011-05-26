@@ -34,7 +34,7 @@ class RSVPPacket : public RSVPPacket_Base
     RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
     virtual RSVPPacket *dup() const {return new RSVPPacket(*this);}
 
-    inline IPAddress getDestAddress() {return getSession().DestAddress;}
+    inline IPv4Address getDestAddress() {return getSession().DestAddress;}
     inline int getTunnelId()    {return getSession().Tunnel_Id;}
     inline int getExTunnelId()  {return getSession().Extended_Tunnel_Id;}
     inline int getSetupPri()    {return getSession().setupPri;}

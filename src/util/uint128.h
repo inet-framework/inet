@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <new>
 #include <IPv6Address.h>
-#include <IPAddress.h>
+#include <IPv4Address.h>
 #include <MACAddress.h>
 
 
@@ -104,11 +104,11 @@ class Uint128
     Uint128 & operator= (const double & a) throw ();
     Uint128 & operator= (const long double & a) throw ();
 
-    Uint128 & operator= (const IPAddress &) throw ();
+    Uint128 & operator= (const IPv4Address &) throw ();
     Uint128 & operator= (const MACAddress &) throw ();
     Uint128 & operator= (const IPv6Address &) throw ();
 
-    inline Uint128 (const IPAddress & a) throw ()  {*this=a;}
+    inline Uint128 (const IPv4Address & a) throw ()  {*this=a;}
     inline Uint128 (const MACAddress & a) throw ()  {*this=a;}
     inline Uint128 (const IPv6Address & a) throw ()  {*this=a;}
 
@@ -171,7 +171,7 @@ class Uint128
         return true;
     }
 
-    operator IPAddress() const {IPAddress add(toUint()); return add;}
+    operator IPv4Address() const {IPv4Address add(toUint()); return add;}
     operator MACAddress() const
     {
         MACAddress add;
@@ -195,7 +195,7 @@ class Uint128
         return add;
     }
 
-    IPAddress  getIPAddress () const {IPAddress add(toUint()); return add;}
+    IPv4Address  getIPAddress () const {IPv4Address add(toUint()); return add;}
     MACAddress getMACAddress() const
     {
         MACAddress add;

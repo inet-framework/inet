@@ -22,15 +22,15 @@
 
 #include <omnetpp.h>
 
-#include "IPAddress.h"
-#include "IP.h"
+#include "IPv4Address.h"
+#include "IPv4.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IRoutingTable.h"
 #include "RoutingTableAccess.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPMessage.h"
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 
 #include "ManetRoutingBase.h"
 
@@ -100,13 +100,13 @@ class DYMO : public ManetRoutingBase
     DYMO_RoutingTable* getDYMORoutingTable();
 
     /** @brief guesses which router the given address belongs to, might return 0 */
-    cModule* getRouterByAddress(IPAddress address);
+    cModule* getRouterByAddress(IPv4Address address);
 
 
   private:
     friend class DYMO_RoutingTable;
 
-    void processPacket (const IPDatagram* datagram);
+    void processPacket (const IPv4Datagram* datagram);
     //===============================================================================
     // OPERATIONS
     //===============================================================================
@@ -233,7 +233,7 @@ class DYMO : public ManetRoutingBase
 
     int RESPONSIBLE_ADDRESSES_PREFIX; /**< NED parameter: netmask of network this DYMO router is responsible for, -1 for self only */
     const char* DYMO_INTERFACES; /**< NED parameter: list of interfaces to run DYMO on, separated by a single space character */
-    IPAddress AUTOASSIGN_ADDRESS_BASE; /**< NED parameter: start of address range from which to automatically assign an address to the DYMO_INTERFACES */
+    IPv4Address AUTOASSIGN_ADDRESS_BASE; /**< NED parameter: start of address range from which to automatically assign an address to the DYMO_INTERFACES */
     int ROUTE_AGE_MIN_TIMEOUT;
     int ROUTE_AGE_MAX_TIMEOUT;
     int ROUTE_NEW_TIMEOUT;
@@ -265,7 +265,7 @@ class DYMO : public ManetRoutingBase
     virtual bool getDestAddress(cPacket *,Uint128 &) {return false;};
 
     virtual void processLinkBreak(const cPolymorphic *details);
-    void packetFailed(IPDatagram *dgram);
+    void packetFailed(IPv4Datagram *dgram);
 
 };
 

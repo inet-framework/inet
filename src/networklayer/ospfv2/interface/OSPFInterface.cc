@@ -120,11 +120,11 @@ void OSPF::Interface::reset()
     }
 }
 
-void OSPF::Interface::sendHelloPacket(OSPF::IPv4Address destination, short ttl)
+void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
 {
     OSPFOptions options;
     OSPFHelloPacket* helloPacket = new OSPFHelloPacket();
-    std::vector<OSPF::IPv4Address> neighbors;
+    std::vector<IPv4Address> neighbors;
 
     helloPacket->setRouterID(parentArea->getRouter()->getRouterID());
     helloPacket->setAreaID(parentArea->getAreaID());
@@ -202,9 +202,11 @@ OSPF::Neighbor* OSPF::Interface::getNeighborByID(OSPF::RouterID neighborID)
     }
 }
 
-OSPF::Neighbor* OSPF::Interface::getNeighborByAddress(OSPF::IPv4Address address)
+OSPF::Neighbor* OSPF::Interface::getNeighborByAddress(IPv4Address address)
 {
-    std::map<OSPF::IPv4Address, OSPF::Neighbor*, OSPF::IPv4Address_Less>::iterator neighborIt = neighboringRoutersByAddress.find(address);
+    std::map<IPv4Address, OSPF::Neighbor*, OSPF::IPv4Address_Less>::iterator neighborIt =
+            neighboringRoutersByAddress.find(address);
+
     if (neighborIt != neighboringRoutersByAddress.end()) {
         return (neighborIt->second);
     }

@@ -164,9 +164,9 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
             switch (verdict)
             {
             case PQ_ENC_SEND:
-                if (dynamic_cast <IPDatagram *> (qp->p))
+                if (dynamic_cast <IPv4Datagram *> (qp->p))
                 {
-                    qp->p = pkt_encapsulate(dynamic_cast <IPDatagram *> (qp->p), *gateWayAddress);
+                    qp->p = pkt_encapsulate(dynamic_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
                     // now Ip layer decremented again
                     /* Apparently, the link layer implementation can't handle
                      a burst of packets. So to keep ARP happy, buffered              *                   *

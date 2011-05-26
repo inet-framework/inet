@@ -150,7 +150,7 @@ protected:
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void processLinkBreak(const cPolymorphic *details){};
-    virtual void packetFailed(IPDatagram *dgram) {}
+    virtual void packetFailed(IPv4Datagram *dgram) {}
     virtual void scheduleNextEvent();
 
 public:

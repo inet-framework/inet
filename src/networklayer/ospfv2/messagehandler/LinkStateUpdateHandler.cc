@@ -185,7 +185,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                         OSPFASExternalLSA* externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
                         if (externalLSA->getContents().getExternalRouteTag() == OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP)
                         {
-                            OSPF::IPv4Address externalAddr = ipv4AddressFromULong(currentLSA->getHeader().getLinkStateID());
+                            IPv4Address externalAddr = ipv4AddressFromULong(currentLSA->getHeader().getLinkStateID());
                             int ifName = intf->getIfIndex();
                            router->addExternalRouteInIPTable(externalAddr, externalLSA->getContents(), ifName);
                         }

@@ -23,9 +23,9 @@
 bool IPvXAddress::tryParse(const char *addr)
 {
     // try as IPv4
-    if (IPAddress::isWellFormed(addr))
+    if (IPv4Address::isWellFormed(addr))
     {
-        set(IPAddress(addr));
+        set(IPv4Address(addr));
         return true;
     }
 

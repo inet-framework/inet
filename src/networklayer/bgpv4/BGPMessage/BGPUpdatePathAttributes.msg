@@ -16,11 +16,11 @@
 //
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "BGPASPathSegment_m.h"
 }}
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 class noncobject BGPASPathSegment;
 
 
@@ -75,7 +75,7 @@ class BGPUpdatePathAttributesASPath extends BGPUpdatePathAttributes
 //NEXT_HOP (RFC4271 Section 4.3, Type code 3):
 class BGPUpdatePathAttributesNextHop extends BGPUpdatePathAttributes
 {
-    IPAddress value;
+    IPv4Address value;
 }
 
 //LOCAL_PREF (RFC4271 Section 4.3, Type code 5):

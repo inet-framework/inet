@@ -37,7 +37,7 @@ import inet.applications.ITCPApp;
 // app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 simple TCPEchoApp like ITCPApp
 {

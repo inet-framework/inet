@@ -40,7 +40,7 @@ class TED : public cSimpleModule
      */
     struct vertex_t
     {
-        IPAddress node; // FIXME *** is this the routerID? ***
+        IPv4Address node; // FIXME *** is this the routerID? ***
         int parent;     // index into the same vertex_t vector
         double dist;    // distance to root (???)
     };
@@ -76,14 +76,14 @@ class TED : public cSimpleModule
   public:
     /** @name Public interface to the Traffic Engineering Database */
     //@{
-    virtual IPAddress getInterfaceAddrByPeerAddress(IPAddress peerIP);
-    virtual IPAddress peerRemoteInterface(IPAddress peerIP);
-    virtual IPAddress getPeerByLocalAddress(IPAddress localInf);
-    virtual IPAddress primaryAddress(IPAddress localInf);
-    virtual bool isLocalPeer(IPAddress inetAddr);
-    virtual bool isLocalAddress(IPAddress addr);
-    virtual unsigned int linkIndex(IPAddress localInf);
-    virtual unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
+    virtual IPv4Address getInterfaceAddrByPeerAddress(IPv4Address peerIP);
+    virtual IPv4Address peerRemoteInterface(IPv4Address peerIP);
+    virtual IPv4Address getPeerByLocalAddress(IPv4Address localInf);
+    virtual IPv4Address primaryAddress(IPv4Address localInf);
+    virtual bool isLocalPeer(IPv4Address inetAddr);
+    virtual bool isLocalAddress(IPv4Address addr);
+    virtual unsigned int linkIndex(IPv4Address localInf);
+    virtual unsigned int linkIndex(IPv4Address advrouter, IPv4Address linkid);
     virtual IPAddressVector getLocalAddress();
 
     virtual void rebuildRoutingTable();
@@ -92,7 +92,7 @@ class TED : public cSimpleModule
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
-    IPAddress routerId;
+    IPv4Address routerId;
     NotificationBoard *nb;
 
     IPAddressVector interfaceAddrs; // list of local interface addresses
@@ -100,7 +100,7 @@ class TED : public cSimpleModule
   protected:
     int maxMessageId;
 
-    virtual int assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr);
+    virtual int assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr);
 
     std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
         double req_bandwidth, int priority);

@@ -59,7 +59,7 @@ void BGPUpdateMessage::setPathAttributeList(const BGPUpdatePathAttributeList& pa
 
 void BGPUpdateMessage::setNLRI(const BGPUpdateNLRI& NLRI_var)
 {
-    setByteLength(getByteLength() + 5); //5 = NLRI (length (1) + IPAddress (4))
+    setByteLength(getByteLength() + 5); //5 = NLRI (length (1) + IPv4Address (4))
     BGPUpdateMessage_Base::NLRI_var = NLRI_var;
 }
 

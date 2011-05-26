@@ -25,7 +25,7 @@
 #include "INETDefs.h"
 
 // Foreign declarations:
-class IPDatagram;
+class IPv4Datagram;
 
 
 /**
@@ -67,7 +67,7 @@ class PcapDump
          * Records the given packet into the output file if it is open,
          * and throws an exception otherwise.
          */
-        void writeFrame(simtime_t time, const IPDatagram *ipPacket);
+        void writeFrame(simtime_t time, const IPv4Datagram *ipPacket);
 
         /**
          * Closes the output file if it is open.

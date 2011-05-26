@@ -23,7 +23,7 @@
 #include "headers/defs.h"   // for endian macros
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -295,9 +295,9 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo())!=NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
-        IPControlInfo *controlInfo = (IPControlInfo *)tcpsegP->removeControlInfo();
+        IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpsegP->removeControlInfo();
         inetSockPair.remoteM.ipAddrM = controlInfo->getSrcAddr();
         inetSockPair.localM.ipAddrM = controlInfo->getDestAddr();
         delete controlInfo;
@@ -844,7 +844,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     {
 #ifdef WITH_IPv4
         // send over IPv4
-        IPControlInfo *controlInfo = new IPControlInfo();
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
         controlInfo->setSrcAddr(src.get4());
         controlInfo->setDestAddr(dest.get4());

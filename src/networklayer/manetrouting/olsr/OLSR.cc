@@ -34,7 +34,7 @@
 #include <limits.h>
 
 #include "UDPPacket.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
 #include "RoutingTableAccess.h"
@@ -580,7 +580,7 @@ OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
         delete op;
         return NULL;
     }
-    IPControlInfo* controlInfo = check_and_cast<IPControlInfo*>(msg->removeControlInfo());
+    IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
     src_addr = controlInfo->getSrcAddr().getInt();
     index = -1;
     InterfaceEntry * ie;
@@ -1458,7 +1458,7 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    Uint128 destAdd = IPAddress::ALLONES_ADDRESS;
+    Uint128 destAdd = IPv4Address::ALLONES_ADDRESS;
 
     for (int i = 0; i < num_pkts; i++)
     {
@@ -1890,7 +1890,7 @@ OLSR::populate_mprselset(OLSR_msg& msg)
 /// \param p the packet which couldn't be delivered by the MAC layer.
 ///
 void
-OLSR::mac_failed(IPDatagram* p)
+OLSR::mac_failed(IPv4Datagram* p)
 {
     double now      = CURRENT_TIME;
 
@@ -2404,9 +2404,9 @@ void OLSR:: processLinkBreak(const cPolymorphic *details)
 {
     if (use_mac())
     {
-        if (dynamic_cast<IPDatagram *>(const_cast<cPolymorphic*>(details)))
+        if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details)))
         {
-            IPDatagram * dgram = check_and_cast<IPDatagram *>(details);
+            IPv4Datagram * dgram = check_and_cast<IPv4Datagram *>(details);
             mac_failed(dgram);
             return;
         }

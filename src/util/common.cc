@@ -43,24 +43,24 @@ int getLevel(const IPvXAddress& addr)
     else
     {
         //Addresses usable with SCTP, but not as destination or source address
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("0.0.0.0"), IPAddress("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("224.0.0.0"), IPAddress("240.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("198.18.0.0"), IPAddress("255.255.255.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.88.99.0"), IPAddress("255.255.255.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("0.0.0.0"), IPv4Address("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("224.0.0.0"), IPv4Address("240.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("198.18.0.0"), IPv4Address("255.255.255.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.88.99.0"), IPv4Address("255.255.255.0")))
             return 0;
 
         //Loopback
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("127.0.0.0"), IPAddress("255.0.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("127.0.0.0"), IPv4Address("255.0.0.0")))
         return 1;
 
         //Link-local
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("169.254.0.0"), IPAddress("255.255.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("169.254.0.0"), IPv4Address("255.255.0.0")))
             return 2;
 
         //Private
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("10.0.0.0"), IPAddress("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("172.16.0.0"), IPAddress("255.240.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.168.0.0"), IPAddress("255.255.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("10.0.0.0"), IPv4Address("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("172.16.0.0"), IPv4Address("255.240.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.168.0.0"), IPv4Address("255.255.0.0")))
             return 3;
      }
     //Global

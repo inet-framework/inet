@@ -19,7 +19,7 @@
 
 #include "INETDefs.h"
 
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 /**
  * The class RTPApplication is just a very simple sample for an application
@@ -73,7 +73,7 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * The address of the unicast peer or of the multicast group.
          */
-        IPAddress _destinationAddress;
+        IPv4Address _destinationAddress;
 
         /**
          * One of the udp port used.

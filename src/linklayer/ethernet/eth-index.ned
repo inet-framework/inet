@@ -116,7 +116,7 @@
 // See <a href="appreg.html">Application registration</a> for more info.
 //
 // ~EtherEncap doesn't have the functionality to dispatch to different
-// higher layers because in practice it'll always be used with ~IP.
+// higher layers because in practice it'll always be used with ~IPv4.
 //
 //
 // @page eth-standards.html, Ethernet: Implemented Standards

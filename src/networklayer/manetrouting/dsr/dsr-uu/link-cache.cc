@@ -617,11 +617,11 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
         addr2 = srt->addrs[i];
 #ifdef OMNETPP
 #ifdef MobilityFramework
-        IPAddress ipAddr1 = addr1.s_addr;
-        IPAddress ipAddr2 = addr2.s_addr;
+        IPv4Address ipAddr1 = addr1.s_addr;
+        IPv4Address ipAddr2 = addr2.s_addr;
 #else
-        IPAddress ipAddr1((uint32_t)addr1.s_addr);
-        IPAddress ipAddr2((uint32_t)addr2.s_addr);
+        IPv4Address ipAddr1((uint32_t)addr1.s_addr);
+        IPv4Address ipAddr2((uint32_t)addr2.s_addr);
 #endif
         if (etxActive)
         {
@@ -661,11 +661,11 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
     if (etxActive)
     {
 #ifdef MobilityFramework
-        IPAddress ipAddr1 = addr1.s_addr;
-        IPAddress ipAddr2 = addr2.s_addr;
+        IPv4Address ipAddr1 = addr1.s_addr;
+        IPv4Address ipAddr2 = addr2.s_addr;
 #else
-        IPAddress ipAddr1((uint32_t)addr1.s_addr);
-        IPAddress ipAddr2((uint32_t)addr2.s_addr);
+        IPv4Address ipAddr1((uint32_t)addr1.s_addr);
+        IPv4Address ipAddr2((uint32_t)addr2.s_addr);
 #endif
         if (addr1.s_addr==myaddr.s_addr)
             lc_link_add(addr1, addr2, timeout, 0, (unsigned int)getCost(ipAddr2));
@@ -686,11 +686,11 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
         if (etxActive)
         {
 #ifdef MobilityFramework
-            IPAddress ipAddr1 = addr1.s_addr;
-            IPAddress ipAddr2 = addr2.s_addr;
+            IPv4Address ipAddr1 = addr1.s_addr;
+            IPv4Address ipAddr2 = addr2.s_addr;
 #else
-            IPAddress ipAddr1((uint32_t)addr1.s_addr);
-            IPAddress ipAddr2((uint32_t)addr2.s_addr);
+            IPv4Address ipAddr1((uint32_t)addr1.s_addr);
+            IPv4Address ipAddr2((uint32_t)addr2.s_addr);
 #endif
             if (addr1.s_addr==myaddr.s_addr)
                 lc_link_add(addr2, addr1, timeout, 0, (unsigned int)getCost(ipAddr2));

@@ -17,18 +17,18 @@
 //
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 enum IPProtocolId;
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IPProtocolId_m.h"
 
-// default IP header length: 20 bytes
+// default IPv4 header length: 20 bytes
 const int IP_HEADER_BYTES = 20;
 
-// maximum IP header length (base+options): 60 = 4 * 15 bytes
+// maximum IPv4 header length (base+options): 60 = 4 * 15 bytes
 const int IP_MAX_HEADER_BYTES = 60;
 
 // option entry number
@@ -38,7 +38,7 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 
 //
-// IP options class
+// IPv4 options class
 //
 enum IPOptionClass
 {
@@ -49,7 +49,7 @@ enum IPOptionClass
 };
 
 //
-// IP option numbers
+// IPv4 option numbers
 //
 enum IPOption
 {
@@ -66,7 +66,7 @@ enum IPOption
 
 
 //
-// The timestamp flag uses the same numeric values as the IP Protocol
+// The timestamp flag uses the same numeric values as the IPv4 Protocol
 //
 enum TimestampFlag
 {
@@ -79,16 +79,16 @@ enum TimestampFlag
 //
 // Option structure: Record Route
 //
-class IPRecordRouteOption
+class IPv4RecordRouteOption
 {
-    IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
+    IPv4Address recordAddress[MAX_IPADDR_OPTION_ENTRIES];
     short nextAddressPtr;
 }
 
 //
 // Option structure: Timestamp
 //
-class IPTimestampOption
+class IPv4TimestampOption
 {
     int flag enum(TimestampFlag);
     short overflow;
@@ -96,23 +96,23 @@ class IPTimestampOption
 
     // use either up to 4 addresses with timestamps or
     // only up to 9 timestamps, according to the flag
-    IPAddress recordAddress[MAX_TIMESTAMP_OPTION_ENTRIES];
+    IPv4Address recordAddress[MAX_TIMESTAMP_OPTION_ENTRIES];
     simtime_t recordTimestamp[MAX_IPADDR_OPTION_ENTRIES];
 }
 
 //
 // Option Structure: Source Routing
 //
-class IPSourceRoutingOption
+class IPv4SourceRoutingOption
 {
-    IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
+    IPv4Address recordAddress[MAX_IPADDR_OPTION_ENTRIES];
     short nextAddressPtr;
     short lastAddressPtr;
 }
 
 
 //
-// Represents an IP datagram.
+// Represents an IPv4 datagram.
 //
 // Uses the following cPacket fields:
 //    - getByteLength() / setByteLength() to represent total datagram length
@@ -123,13 +123,13 @@ class IPSourceRoutingOption
 //
 // Only one of the option fields can exist at a time.
 //
-packet IPDatagram
+packet IPv4Datagram
 {
     short version = 4;
     short headerLength = IP_HEADER_BYTES;
 
-    IPAddress srcAddress;
-    IPAddress destAddress;
+    IPv4Address srcAddress;
+    IPv4Address destAddress;
 
     int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
     short timeToLive;
@@ -140,10 +140,10 @@ packet IPDatagram
     unsigned char diffServCodePoint;
 
     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
-                                                         //#FIXME also: the RFC says that more than one IP-Option is allowed
-    IPRecordRouteOption recordRoute;
-    IPTimestampOption timestampOption;
-    IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
+                                                         //#FIXME also: the RFC says that more than one IPv4-Option is allowed
+    IPv4RecordRouteOption recordRoute;
+    IPv4TimestampOption timestampOption;
+    IPv4SourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
     
     // Virtual value, used by the new fragment mechanism
     unsigned int totalPayloadLength;

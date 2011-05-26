@@ -26,7 +26,7 @@ import inet.transport.ITCP;
 // you'll probably have to customize it in C++ according to
 // what you want to send and when you want to send it.
 //
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 simple TCPSpoof like ITCP
 {
@@ -42,11 +42,11 @@ simple TCPSpoof like ITCP
         @statistic[sentPkBytesSignal](title="Sent packet bytes"; record=count,sum,vector);
 
     gates:
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 
         input appIn[] @labels(TCPCommand/down); // Not used!
-        input ipIn @labels(TCPSegment,IPControlInfo/up); // Not used!
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up); // Not used!
         input ipv6In @labels(TCPSegment,IPv6ControlInfo/up); // Not used!
         output appOut[] @labels(TCPCommand/up); // Not used!
 }

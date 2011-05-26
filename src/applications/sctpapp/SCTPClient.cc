@@ -19,7 +19,7 @@
 
 #include "SCTPClient.h"
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 
@@ -140,7 +140,7 @@ void SCTPClient::connect()
     ev << "issuing OPEN command\n";
     setStatusString("connecting");
     ev<<"connect to address "<<connectAddress<<"\n";
-    socket.connect(IPAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
+    socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
     numSessions++;
 }
 

@@ -28,7 +28,7 @@
 #include "dymo_um_omnet.h"
 
 #include "UDPPacket.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "ICMPMessage_m.h"
 #include "ICMPAccess.h"
@@ -38,13 +38,13 @@
 
 
 #include "ProtocolMap.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IPvXAddress.h"
 #include "ControlManetRouting_m.h"
 
 
 const int UDP_HEADER_BYTES = 8;
-typedef std::vector<IPAddress> IPAddressVector;
+typedef std::vector<IPv4Address> IPAddressVector;
 
 Define_Module(DYMOUM);
 
@@ -82,7 +82,7 @@ void DYMOUM::initialize(int stage)
 
         debug = 0;
 
-        gateWayAddress = new IPAddress("0.0.0.0");
+        gateWayAddress = new IPv4Address("0.0.0.0");
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));
         memset(dev_indices, 0, sizeof(unsigned int) * DYMO_MAX_NR_INTERFACES);
@@ -156,7 +156,7 @@ void DYMOUM::initialize(int stage)
         if ((RREQ_TRIES = (int) par("RREQTries"))==-1)
             RREQ_TRIES = 3;
 
-        ipNodeId = new IPAddress(interface80211ptr->ipv4Data()->getIPAddress());
+        ipNodeId = new IPv4Address(interface80211ptr->ipv4Data()->getIPAddress());
 
         rtable_init();
 
@@ -307,7 +307,7 @@ DYMOUM::~ DYMOUM()
 void DYMOUM::handleMessage (cMessage *msg)
 {
     DYMO_element *dymoMsg=NULL;
-    IPDatagram * ipDgram=NULL;
+    IPv4Datagram * ipDgram=NULL;
     UDPPacket * udpPacket=NULL;
     cMessage *msg_aux;
     struct in_addr src_addr;
@@ -353,7 +353,7 @@ void DYMOUM::handleMessage (cMessage *msg)
             }
             else
             {
-                ipDgram = (IPDatagram*) control->decapsulate();
+                ipDgram = (IPv4Datagram*) control->decapsulate();
                 EV << "Dymo rec datagram  " << ipDgram->getName() << " with dest=" << ipDgram->getDestAddress().str() << "\n";
                 processPacket(ipDgram,NS_IFINDEX);  /// Always use ns interface
             }
@@ -395,7 +395,7 @@ void DYMOUM::handleMessage (cMessage *msg)
             dymoMsg = check_and_cast  <DYMO_element *>(msg_aux);
             if (!isInMacLayer())
             {
-                IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(udpPacket->removeControlInfo());
+                IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
                 src_addr.s_addr = controlInfo->getSrcAddr().getInt();
                 dymoMsg->setControlInfo(controlInfo);
             }
@@ -488,16 +488,16 @@ int DYMOUM::startDYMOUMAgent()
 
 
 // for use with gateway in the future
-IPDatagram * DYMOUM::pkt_encapsulate(IPDatagram *p, IPAddress gateway)
+IPv4Datagram * DYMOUM::pkt_encapsulate(IPv4Datagram *p, IPv4Address gateway)
 {
-    IPDatagram *datagram = new IPDatagram(p->getName());
+    IPv4Datagram *datagram = new IPv4Datagram(p->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(p);
 
     // set source and destination address
     datagram->setDestAddress(gateway);
 
-    IPAddress src = p->getSrcAddress();
+    IPv4Address src = p->getSrcAddress();
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
@@ -518,12 +518,12 @@ IPDatagram * DYMOUM::pkt_encapsulate(IPDatagram *p, IPAddress gateway)
 
 
 
-IPDatagram *DYMOUM::pkt_decapsulate(IPDatagram *p)
+IPv4Datagram *DYMOUM::pkt_decapsulate(IPv4Datagram *p)
 {
 
     if (p->getTransportProtocol() == IP_PROT_IP)
     {
-        IPDatagram *datagram = check_and_cast  <IPDatagram *>(p->decapsulate());
+        IPv4Datagram *datagram = check_and_cast  <IPv4Datagram *>(p->decapsulate());
         datagram->setTimeToLive(p->getTimeToLive());
         delete p;
         return datagram;
@@ -575,7 +575,7 @@ const char *DYMOUM::if_indextoname(int ifindex, char *ifname)
 }
 
 
-void DYMOUM::getMacAddress(IPDatagram *dgram)
+void DYMOUM::getMacAddress(IPv4Datagram *dgram)
 {
     if (dgram)
     {
@@ -609,7 +609,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 
     if (!isInMacLayer())
     {
-        IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
+        IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
         IPvXAddress srcAddr = ctrl->getSrcAddr();
         IPvXAddress destAddr = ctrl->getDestAddr();
         src.s_addr = srcAddr.get4().getInt();
@@ -666,7 +666,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 }
 
 
-void DYMOUM::processPacket(IPDatagram * p,unsigned int ifindex )
+void DYMOUM::processPacket(IPv4Datagram * p,unsigned int ifindex )
 {
     struct in_addr dest_addr, src_addr;
     struct ip_data *ipd = NULL;
@@ -685,7 +685,7 @@ void DYMOUM::processPacket(IPDatagram * p,unsigned int ifindex )
     }
     InterfaceEntry *   ie = getInterfaceEntry(ifindex);
     phops = ie->ipv4Data()->getMulticastGroups();
-    IPAddress mcastAdd;
+    IPv4Address mcastAdd;
     bool isMcast=false;
     for (unsigned int  i=0; i<phops.size(); i++)
     {
@@ -890,10 +890,10 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 */
 void DYMOUM::processLinkBreak (const cPolymorphic *details)
 {
-    IPDatagram  *dgram=NULL;
-    if (dynamic_cast<IPDatagram *>(const_cast<cPolymorphic*> (details)))
+    IPv4Datagram  *dgram=NULL;
+    if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
     {
-        dgram = check_and_cast<IPDatagram *>(const_cast<cPolymorphic*>(details));
+        dgram = check_and_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details));
         if (hello_ival<=0)
         {
             packetFailed(dgram);
@@ -916,7 +916,7 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
 {
     Ieee80211DataOrMgmtFrame *frame=NULL;
 
-    IPDatagram * ip_msg=NULL;
+    IPv4Datagram * ip_msg=NULL;
     struct in_addr source;
 
     source.s_addr = (Uint128)0;
@@ -930,10 +930,10 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
         frame  = check_and_cast<Ieee80211DataOrMgmtFrame *>(details);
 #if OMNETPP_VERSION > 0x0400
         if (!isInMacLayer())
-            ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedPacket());
+            ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
 #else
         if (!isInMacLayer())
-            ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedMsg());
+            ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedMsg());
 #endif
         /////////////////////////////////////
         /////////////////////////////////////
@@ -1075,9 +1075,9 @@ void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
             else
             {
 #if OMNETPP_VERSION > 0x0400
-                IPDatagram * ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedPacket());
+                IPv4Datagram * ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
 #else
-                IPDatagram * ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedMsg());
+                IPv4Datagram * ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedMsg());
 #endif
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
                 {
@@ -1111,14 +1111,14 @@ void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
 
         if (!no_path_acc)
         {
-            IPDatagram * ip_msg;
+            IPv4Datagram * ip_msg;
             DYMO_element * dymo_msg;
             if (!isInMacLayer())
             {
 #if OMNETPP_VERSION > 0x0400
-                ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedPacket());
+                ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
 #else
-                ip_msg = dynamic_cast<IPDatagram *>(frame->getEncapsulatedMsg());
+                ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedMsg());
 #endif
                 if (ip_msg)
                 {
@@ -1245,7 +1245,7 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
 }
 
 /* Called for packets whose delivery fails at the link layer */
-void DYMOUM::packetFailed(IPDatagram *dgram)
+void DYMOUM::packetFailed(IPv4Datagram *dgram)
 {
     rtable_entry_t *rt;
     struct in_addr dest_addr, src_addr, next_hop;

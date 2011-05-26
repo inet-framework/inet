@@ -35,7 +35,7 @@
 
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #endif
 
@@ -273,9 +273,9 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
         }
         else {
 #ifdef WITH_IPv4
-            IPControlInfo* controlInfo = new IPControlInfo();
+            IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(IPAddress("0.0.0.0"));
+            controlInfo->setSrcAddr(IPv4Address("0.0.0.0"));
             controlInfo->setDestAddr(dest.get4());
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");

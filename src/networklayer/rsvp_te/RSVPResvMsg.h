@@ -33,8 +33,8 @@ class RSVPResvMsg : public RSVPResvMsg_Base
     RSVPResvMsg& operator=(const RSVPResvMsg& other) {RSVPResvMsg_Base::operator=(other); return *this;}
     virtual RSVPResvMsg *dup() const {return new RSVPResvMsg(*this);}
 
-    inline IPAddress getNHOP() {return getHop().Next_Hop_Address;}
-    inline IPAddress getLIH() {return getHop().Logical_Interface_Handle;}
+    inline IPv4Address getNHOP() {return getHop().Next_Hop_Address;}
+    inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
 };
 
 
@@ -52,8 +52,8 @@ class RSVPResvTear : public RSVPResvTear_Base
     RSVPResvTear& operator=(const RSVPResvTear& other) {RSVPResvTear_Base::operator=(other); return *this;}
     virtual RSVPResvTear *dup() const {return new RSVPResvTear(*this);}
 
-    inline IPAddress getNHOP() {return getHop().Next_Hop_Address;}
-    inline IPAddress getLIH() {return getHop().Logical_Interface_Handle;}
+    inline IPv4Address getNHOP() {return getHop().Next_Hop_Address;}
+    inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
 };
 
 
@@ -71,8 +71,8 @@ class RSVPResvError : public RSVPResvError_Base
     RSVPResvError& operator=(const RSVPResvError& other) {RSVPResvError_Base::operator=(other); return *this;}
     virtual RSVPResvError *dup() const {return new RSVPResvError(*this);}
 
-    inline IPAddress getNHOP() {return getHop().Next_Hop_Address;}
-    inline IPAddress getLIH() {return getHop().Logical_Interface_Handle;}
+    inline IPv4Address getNHOP() {return getHop().Next_Hop_Address;}
+    inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
 };
 
 #endif

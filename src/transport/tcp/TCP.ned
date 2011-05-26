@@ -87,7 +87,7 @@ import inet.transport.ITCP;
 //
 // <b>Communication with the IP layer</b>
 //
-// The TCP model relies on sending and receiving ~IPControlInfo objects
+// The TCP model relies on sending and receiving ~IPv4ControlInfo objects
 // attached to TCP segment objects as control info
 // (see cMessage::setControlInfo()).
 //
@@ -217,9 +217,9 @@ simple TCP like ITCP
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up);
         input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }

@@ -22,7 +22,7 @@
 
 #include "INETDefs.h"
 
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IPv6Address.h"
 
 /**
@@ -49,7 +49,7 @@ class INET_API IPvXAddress
     /**
      * Constructor for IPv4 addresses.
      */
-    IPvXAddress(const IPAddress& addr) {set(addr);}
+    IPvXAddress(const IPv4Address& addr) {set(addr);}
 
     /**
      * Constructor for IPv6 addresses.
@@ -57,7 +57,7 @@ class INET_API IPvXAddress
     IPvXAddress(const IPv6Address& addr) {set(addr);}
 
     /**
-     * Accepts string representations suuported by IPAddress (dotted decimal
+     * Accepts string representations suuported by IPv4Address (dotted decimal
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
@@ -84,12 +84,12 @@ class INET_API IPvXAddress
     /**
      * Get IPv4 address. Throws exception if this is an IPv6 address.
      */
-    IPAddress get4() const
+    IPv4Address get4() const
     {
         if (isv6)
             throw cRuntimeError("IPvXAddress: cannot return IPv6 address %s as IPv4", str().c_str());
 
-        return IPAddress(d[0]);
+        return IPv4Address(d[0]);
     }
 
     /**
@@ -111,7 +111,7 @@ class INET_API IPvXAddress
     /**
      * Set to an IPv4 address.
      */
-    void set(const IPAddress& addr)
+    void set(const IPv4Address& addr)
     {
         isv6 = false;
         d[0] = addr.getInt();
@@ -149,7 +149,7 @@ class INET_API IPvXAddress
     }
 
     /**
-     * Accepts string representations supported by IPAddress (dotted decimal
+     * Accepts string representations supported by IPv4Address (dotted decimal
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
@@ -158,7 +158,7 @@ class INET_API IPvXAddress
     /**
      * Assignment
      */
-    IPvXAddress& operator=(const IPAddress& addr) {set(addr); return *this;}
+    IPvXAddress& operator=(const IPv4Address& addr) {set(addr); return *this;}
 
     /**
      * Assignment
@@ -172,7 +172,7 @@ class INET_API IPvXAddress
 
     /**
      * Parses and assigns the given address and returns true if the string is
-     * recognized by IPAddress or IPv6Address, otherwise just returns false.
+     * recognized by IPv4Address or IPv6Address, otherwise just returns false.
      */
     bool tryParse(const char *addr);
 
@@ -221,7 +221,7 @@ class INET_API IPvXAddress
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPAddress& addr) const {
+    bool equals(const IPv4Address& addr) const {
         return !isv6 && d[0] == addr.getInt();
     }
 
@@ -246,12 +246,12 @@ class INET_API IPvXAddress
     /**
      * Returns equals(addr).
      */
-    bool operator==(const IPAddress& addr) const {return equals(addr);}
+    bool operator==(const IPv4Address& addr) const {return equals(addr);}
 
     /**
      * Returns !equals(addr).
      */
-    bool operator!=(const IPAddress& addr) const {return !equals(addr);}
+    bool operator!=(const IPv4Address& addr) const {return !equals(addr);}
 
     /**
      * Returns equals(addr).
@@ -311,7 +311,7 @@ inline void doUnpacking(cCommBuffer *buf, IPvXAddress& addr)
     }
     else
     {
-        IPAddress tmp;
+        IPv4Address tmp;
         doUnpacking(buf, tmp);
         addr.set(tmp);
     }

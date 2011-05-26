@@ -2,7 +2,7 @@
   */
 #include "ManetRoutingBase.h"
 #include "batman.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "UDPPacket_m.h"
 
 Define_Module (Batman);
@@ -145,7 +145,7 @@ void Batman::initialize(int stage)
         originator_interval = 1;// 1000 msec
 
     const char *preferedGateWay=par("preferedGateWay");
-    IPAddress tmp_ip_holder(preferedGateWay);
+    IPv4Address tmp_ip_holder(preferedGateWay);
     if (!tmp_ip_holder.isUnspecified())
     {
         pref_gateway = tmp_ip_holder.getInt();
@@ -158,7 +158,7 @@ void Batman::initialize(int stage)
         routing_class =0;
 
 /*
-    IPAddress vis = par("visualizationServer");
+    IPv4Address vis = par("visualizationServer");
 
     if (!vis.isUnspecified())
     {
@@ -217,7 +217,7 @@ void Batman::initialize(int stage)
         else
         {
             batman_if->address=(Uint128)iEntry->ipv4Data()->getIPAddress();
-            batman_if->broad=(Uint128)IPAddress::ALLONES_ADDRESS;
+            batman_if->broad=(Uint128)IPv4Address::ALLONES_ADDRESS;
         }
 
         batman_if->if_rp_filter_old = -1;
@@ -289,7 +289,7 @@ void Batman::handleMessage(cMessage *msg)
     //select_timeout = ((int)(((struct forw_node *)forw_list.next)->send_time - curr_time) > 0 ?
     //            ((struct forw_node *)forw_list.next)->send_time - curr_time : 10);
 
-    IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
     IPvXAddress srcAddr = ctrl->getSrcAddr();
     IPvXAddress destAddr = ctrl->getDestAddr();
     neigh = srcAddr.get4().getInt();

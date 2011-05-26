@@ -56,13 +56,13 @@ public:
     BGP::SessionID  getSessionID()                              { return _info.sessionID;}
     BGP::type       getType()                                   { return _info.sessionType;}
     InterfaceEntry* getLinkIntf()                               { return _info.linkIntf;}
-    IPAddress       getPeerAddr()                               { return _info.peerAddr;}
+    IPv4Address       getPeerAddr()                               { return _info.peerAddr;}
     TCPSocket*      getSocket()                                 { return _info.socket;}
     TCPSocket*      getSocketListen()                           { return _info.socketListen;}
     IRoutingTable*  getIPRoutingTable()                         { return _bgpRouting.getIPRoutingTable();}
     std::vector<BGP::RoutingTableEntry*> getBGPRoutingTable()   { return _bgpRouting.getBGPRoutingTable();}
     Macho::Machine<BGPFSM::TopState>&    getFSM()               { return *_fsm;}
-    bool checkExternalRoute(const IPRoute* ospfRoute)           { return _bgpRouting.checkExternalRoute(ospfRoute);}
+    bool checkExternalRoute(const IPv4Route* ospfRoute)           { return _bgpRouting.checkExternalRoute(ospfRoute);}
     void updateSendProcess(BGP::RoutingTableEntry* entry)       { return _bgpRouting.updateSendProcess(BGP::NEW_SESSION_ESTABLISHED, _info.sessionID, entry);}
 
 private:

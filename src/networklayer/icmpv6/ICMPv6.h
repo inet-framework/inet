@@ -53,7 +53,7 @@ class INET_API ICMPv6 : public cSimpleModule
      * in response to a received bogus packet from the transport layer (like UDP).
      * The ICMP error packet needs to include (part of) the original IP datagram,
      * so this function will wrap back the transport packet into the IP datagram
-     * based on its IPControlInfo.
+     * based on its IPv4ControlInfo.
      */
     virtual void sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
 

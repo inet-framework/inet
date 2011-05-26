@@ -18,7 +18,7 @@
 package inet.nodes.inet;
 
 //
-// \IP router supporting wireless, ethernet, ppp and external interfaces.
+// \IPv4 router supporting wireless, ethernet, ppp and external interfaces.
 // by default no wireless and external if is configured. The number of
 // ethernet and ppp ports depend on the external connections.
 // - Can be connected via ethernet interface to other nodes using

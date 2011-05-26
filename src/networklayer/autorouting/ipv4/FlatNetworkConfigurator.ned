@@ -19,7 +19,7 @@
 package inet.networklayer.autorouting.ipv4;
 
 //
-// Configures IP addresses and routing tables for a "flat" network,
+// Configures IPv4 addresses and routing tables for a "flat" network,
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
@@ -28,7 +28,7 @@ package inet.networklayer.autorouting.ipv4;
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#  assign IP addresses to hosts and routers. All hosts and
+//   -#  assign IPv4 addresses to hosts and routers. All hosts and
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
@@ -42,7 +42,7 @@ package inet.networklayer.autorouting.ipv4;
 // picks all modules which have a @node property and their connections,
 // and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
-// IP nodes.
+// IPv4 nodes.
 //
 // It is assumed that the routing table (~RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts

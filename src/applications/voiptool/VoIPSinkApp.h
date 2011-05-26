@@ -33,7 +33,7 @@ extern "C" {
 #include <iostream>
 #include <sys/stat.h>
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "UDPAppBase.h"
 #include "UDPControlInfo_m.h"
 

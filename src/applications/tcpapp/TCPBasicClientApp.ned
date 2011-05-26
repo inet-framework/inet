@@ -24,7 +24,7 @@ import inet.applications.ITCPApp;
 //
 // Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 // The model communicates with the server in sessions. During a session,
 // the client opens a single TCP connection to the server, sends several

@@ -24,7 +24,7 @@
 
 #include <sys/time.h>
 #include "compatibility.h"
-#include "IPDatagram_m.h"
+#include "IPv4Datagram_m.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
 #include "IPv4InterfaceData.h"
@@ -222,7 +222,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
 // Check if the address is local
-    virtual bool isIpLocalAddress (const IPAddress& dest) const;
+    virtual bool isIpLocalAddress (const IPv4Address& dest) const;
     virtual bool isLocalAddress (const Uint128& dest) const;
 // Check if the address is multicast
     virtual bool isMulticastAddress (const Uint128& dest) const;

@@ -21,14 +21,14 @@
 
 #include <omnetpp.h>
 
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IRoutingTable.h"
 #include "RoutingTableAccess.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPMessage.h"
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 
 #include "DYMO_Packet_m.h"
 #include "DYMO_RoutingTable.h"

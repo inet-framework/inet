@@ -20,16 +20,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "IPFragBuf.h"
+#include "IPv4FragBuf.h"
 #include "ICMP.h"
 
 
-IPFragBuf::IPFragBuf()
+IPv4FragBuf::IPv4FragBuf()
 {
     icmpModule = NULL;
 }
 
-IPFragBuf::~IPFragBuf()
+IPv4FragBuf::~IPv4FragBuf()
 {
 	while (!bufs.empty())
 	{
@@ -39,12 +39,12 @@ IPFragBuf::~IPFragBuf()
 	}
 }
 
-void IPFragBuf::init(ICMP *icmp)
+void IPv4FragBuf::init(ICMP *icmp)
 {
     icmpModule = icmp;
 }
 
-IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
+IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
 {
     // find datagram buffer
     Key key;
@@ -90,7 +90,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     if (isComplete)
     {
         // datagram complete: deallocate buffer and return complete datagram
-        IPDatagram *ret = buf->datagram;
+        IPv4Datagram *ret = buf->datagram;
         ret->setByteLength(ret->getHeaderLength()+buf->buf.getTotalLength());
         ret->setFragmentOffset(0);
         ret->setMoreFragments(false);
@@ -105,7 +105,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     }
 }
 
-void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
+void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...

@@ -23,7 +23,7 @@
 #include "lwip/ip.h"
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -137,9 +137,9 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
 
     // get src/dest addresses
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(tcpsegP->getControlInfo()) != NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(tcpsegP->getControlInfo()) != NULL)
     {
-        IPControlInfo *controlInfo = (IPControlInfo *)tcpsegP->removeControlInfo();
+        IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpsegP->removeControlInfo();
         srcAddr = controlInfo->getSrcAddr();
         destAddr = controlInfo->getDestAddr();
         interfaceId = controlInfo->getInterfaceId();
@@ -602,7 +602,7 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
     {
 #ifdef WITH_IPv4
         // send over IPv4
-        IPControlInfo *controlInfo = new IPControlInfo();
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
         controlInfo->setSrcAddr(srcP.get4());
         controlInfo->setDestAddr(destP.get4());

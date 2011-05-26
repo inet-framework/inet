@@ -23,20 +23,20 @@
 
 namespace BGP {
 
-class INET_API RoutingTableEntry : public IPRoute
+class INET_API RoutingTableEntry : public IPv4Route
 {
 
 public:
     typedef unsigned char RoutingPathType;
 
     RoutingTableEntry(void);
-    RoutingTableEntry(const IPRoute* entry);
+    RoutingTableEntry(const IPv4Route* entry);
     virtual ~RoutingTableEntry(void) {}
 
-    void            setDestinationID(IPAddress destID)              { host = destID; }
-    IPAddress       getDestinationID(void) const                    { return host; }
-    void            setAddressMask(IPAddress destMask)              { netmask = destMask; }
-    IPAddress       getAddressMask(void) const                      { return netmask; }
+    void            setDestinationID(IPv4Address destID)              { host = destID; }
+    IPv4Address       getDestinationID(void) const                    { return host; }
+    void            setAddressMask(IPv4Address destMask)              { netmask = destMask; }
+    IPv4Address       getAddressMask(void) const                      { return netmask; }
     void            setNextHop(NextHop hop)                         { _nextHop = hop; }
     NextHop         getNextHop(void) const                          { return _nextHop; }
     void            setPathType(RoutingPathType type)               { _pathType = type; }
@@ -56,14 +56,14 @@ public:
 } // namespace BGP
 
 inline BGP::RoutingTableEntry::RoutingTableEntry (void) :
-    IPRoute(), _pathType (BGP::Incomplete)
+    IPv4Route(), _pathType (BGP::Incomplete)
 {
     netmask = 0xFFFFFFFF;
     metric  = BGP::DEFAULT_COST;
-    source  = IPRoute::BGP;
+    source  = IPv4Route::BGP;
 }
 
-inline BGP::RoutingTableEntry::RoutingTableEntry(const IPRoute* entry)
+inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
 {
     host          = entry->getHost();
     netmask       = entry->getNetmask();
@@ -71,7 +71,7 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(const IPRoute* entry)
     interfacePtr  = entry->getInterface();
     type          = entry->getType();
     metric        = BGP::DEFAULT_COST;
-    source        = IPRoute::BGP;
+    source        = IPv4Route::BGP;
 }
 
 inline std::ostream& operator<< (std::ostream& out, BGP::RoutingTableEntry& entry)

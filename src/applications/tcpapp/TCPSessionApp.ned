@@ -25,7 +25,7 @@ package inet.applications.tcpapp;
 // (time, number of bytes) pairs. May act either as client or as server,
 // and works with TCPVirtualBytesSendQueue/RcvQueue as sendQueue/receiveQueue
 // setting for ~TCP.
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 // <b>Opening the connection</b>
 //

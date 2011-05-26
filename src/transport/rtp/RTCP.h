@@ -20,7 +20,7 @@
 
 
 #include "INETDefs.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 
 //Forward declarations:
@@ -139,19 +139,19 @@ class INET_API RTCP : public cSimpleModule
     /**
      * Extracts information of a received RTPPacket.
      */
-    virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port);
+    virtual void processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int port);
 
     /**
      * Extracts information of a received RTCPCompoundPacket.
      */
-    virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port);
+    virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port);
     void processIncomingRTCPSenderReportPacket(
-            RTCPSenderReportPacket *rtcpSenderReportPacket, IPAddress address, int port);
+            RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port);
     void processIncomingRTCPReceiverReportPacket(
-            RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPAddress address, int port);
+            RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port);
     void processIncomingRTCPSDESPacket(
-            RTCPSDESPacket *rtcpSDESPacket, IPAddress address, int port, simtime_t arrivalTime);
-    void processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPAddress address, int port);
+            RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime);
+    void processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Address address, int port);
 
     /**
      * Returns the RTPParticipantInfo object used for storing information
@@ -185,7 +185,7 @@ class INET_API RTCP : public cSimpleModule
     /**
      * The destination address.
      */
-    IPAddress _destinationAddress;
+    IPv4Address _destinationAddress;
 
     /**
      * The rtcp port.

@@ -51,7 +51,7 @@ class OSPFRouting :  public cSimpleModule
     virtual ~OSPFRouting();
 
     void insertExternalRoute(const std::string& ifName, const OSPF::IPv4AddressRange& netAddr);
-    bool checkExternalRoute(const OSPF::IPv4Address& route);
+    bool checkExternalRoute(const IPv4Address& route);
 
   protected:
     virtual int numInitStages() const  {return 5;}

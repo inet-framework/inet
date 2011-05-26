@@ -16,9 +16,9 @@
 //
 
 #include "OSPFRouting.h"
-#include "IPAddress.h"
-#include "IPAddressResolver.h"
-#include "IPControlInfo.h"
+#include "IPv4Address.h"
+#include "IPvXAddressResolver.h"
+#include "IPv4ControlInfo.h"
 #include "OSPFcommon.h"
 #include "OSPFArea.h"
 #include "OSPFInterface.h"
@@ -101,7 +101,7 @@ void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IP
     OSPFASExternalLSAContents newExternalContents;
     newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
     newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
-    const IPAddress netmask(ulongFromIPv4Address(netAddr.mask));
+    const IPv4Address netmask(ulongFromIPv4Address(netAddr.mask));
     newExternalContents.setNetworkMask(netmask);
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
@@ -110,12 +110,12 @@ void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IP
  * Return true if the route is in OSPF external LSA Table, false else.
  * Used by the BGPRouting module.
  */
-bool OSPFRouting::checkExternalRoute(const OSPF::IPv4Address &route)
+bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
 {
     for (unsigned long i=1; i < ospfRouter->getASExternalLSACount(); i++)
     {
         OSPF::ASExternalLSA* externalLSA = ospfRouter->getASExternalLSA(i);
-        OSPF::IPv4Address externalAddr = ipv4AddressFromULong(externalLSA->getHeader().getLinkStateID());
+        IPv4Address externalAddr = ipv4AddressFromULong(externalLSA->getHeader().getLinkStateID());
         if (externalAddr == route) //FIXME was this meant???
             return true;
     }
@@ -503,7 +503,7 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
 
     // load information on this router
     std::string routerXPath("Router[@id='");
-    IPAddress routerId(ospfRouter->getRouterID());
+    IPv4Address routerId(ospfRouter->getRouterID());
     routerXPath += routerId.str();
     routerXPath += "']";
 

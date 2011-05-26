@@ -23,7 +23,7 @@
 #include "RTPParticipantInfo_m.h"
 
 #include "INETDefs.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "sdes.h"
 
 

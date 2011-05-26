@@ -23,7 +23,7 @@
 #include "PcapRecorder.h"
 
 #ifdef WITH_IPv4
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #endif
 
 
@@ -134,14 +134,14 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         return;
 
     bool hasBitError = false;
-    IPDatagram *ipPacket = NULL;
+    IPv4Datagram *ipPacket = NULL;
 
     while (msg)
     {
         if (msg->hasBitError())
             hasBitError = true;
 
-        if (NULL != (ipPacket = dynamic_cast<IPDatagram *>(msg)))
+        if (NULL != (ipPacket = dynamic_cast<IPv4Datagram *>(msg)))
             break;
 
         msg = msg->getEncapsulatedPacket();

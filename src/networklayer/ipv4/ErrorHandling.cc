@@ -21,8 +21,8 @@
 
 #include <omnetpp.h>
 #include "ErrorHandling.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Datagram.h"
 #include "ICMPMessage.h"
 
 
@@ -40,7 +40,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedPacket());
+    IPv4Datagram *d = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
 
     EV << "Error Handler: ICMP message received:\n";
     EV << " Type: " << (int)icmpMsg->getType()

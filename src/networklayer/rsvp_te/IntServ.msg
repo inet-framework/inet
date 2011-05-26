@@ -19,14 +19,14 @@
 //
 
 cplusplus {{
-#include "IPAddress.h"
-typedef std::vector<IPAddress> IPAddressVector;
+#include "IPv4Address.h"
+typedef std::vector<IPv4Address> IPAddressVector;
 typedef std::vector<struct EroObj_t> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 class noncobject IPAddressVector;
 
@@ -39,7 +39,7 @@ struct SessionObj_t
 {
     int Tunnel_Id;
     int Extended_Tunnel_Id;
-    IPAddress DestAddress;
+    IPv4Address DestAddress;
     int setupPri;
     int holdingPri;
 }
@@ -49,8 +49,8 @@ struct SessionObj_t
 //
 struct RsvpHopObj_t
 {
-    IPAddress Next_Hop_Address;
-    IPAddress Logical_Interface_Handle;
+    IPv4Address Next_Hop_Address;
+    IPv4Address Logical_Interface_Handle;
 }
 
 //
@@ -58,7 +58,7 @@ struct RsvpHopObj_t
 //
 struct SenderTemplateObj_t
 {
-    IPAddress SrcAddress;
+    IPv4Address SrcAddress;
     int Lsp_Id = -1;
 }
 
@@ -109,7 +109,7 @@ struct SenderDescriptor_t
 struct EroObj_t
 {
     bool L = false;
-    IPAddress node;
+    IPv4Address node;
 }
 
 //

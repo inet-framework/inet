@@ -18,7 +18,7 @@
 
 package inet.nodes.inet;
 
-import inet.networklayer.ipv4.IP;
+import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.IGMP;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.ErrorHandling;
@@ -26,7 +26,7 @@ import inet.networklayer.arp.ARP;
 
 
 //
-// Network layer of an IP node.
+// Network layer of an IPv4 node.
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //
@@ -36,25 +36,25 @@ module NetworkLayer
         @display("i=block/fork");
         bool proxyARP = default(true);
     gates:
-        input ifIn[] @labels(IPDatagram);
-        input tcpIn @labels(TCPSegment,IPControlInfo/down);
-        input udpIn @labels(UDPPacket,IPControlInfo/down);
-        input sctpIn @labels(IPControlInfo/down,SCTPPacket);
-        input rsvpIn @labels(IPControlInfo/down);
-        input ospfIn @labels(IPControlInfo/down);
+        input ifIn[] @labels(IPv4Datagram);
+        input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
+        input udpIn @labels(UDPPacket,IPv4ControlInfo/down);
+        input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
+        input rsvpIn @labels(IPv4ControlInfo/down);
+        input ospfIn @labels(IPv4ControlInfo/down);
         input pingIn;
         input manetIn;
         output ifOut[];
-        output tcpOut @labels(TCPSegment,IPControlInfo/up);
-        output udpOut @labels(UDPPacket,IPControlInfo/up);
-        output sctpOut @labels(IPControlInfo/up,SCTPPacket);
-        output rsvpOut @labels(IPControlInfo/up);
-        output ospfOut @labels(IPControlInfo/up);
+        output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
+        output udpOut @labels(UDPPacket,IPv4ControlInfo/up);
+        output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
+        output rsvpOut @labels(IPv4ControlInfo/up);
+        output ospfOut @labels(IPv4ControlInfo/up);
         output pingOut;
         output manetOut;
 
     submodules:
-        ip: IP {
+        ip: IPv4 {
             parameters:
                 protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers
                 @display("p=85,95;q=queue");

@@ -191,7 +191,7 @@ void NS_CLASS rrep_send(RREP * rrep, rt_table_t * rev_rt,
     if (!omnet_exist_rte (rev_rt->next_hop))
     {
         struct in_addr nm;
-        nm.s_addr = IPAddress((uint32_t)rev_rt->next_hop.s_addr).getNetworkMask().getInt();
+        nm.s_addr = IPv4Address((uint32_t)rev_rt->next_hop.s_addr).getNetworkMask().getInt();
         if (useIndex)
             omnet_chg_rte(rev_rt->next_hop,rev_rt->next_hop, nm, 1,false,rev_rt->ifindex);
         else

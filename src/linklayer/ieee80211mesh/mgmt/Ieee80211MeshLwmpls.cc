@@ -27,7 +27,7 @@
 #include "dymo_msg_struct.h"
 #include "aodv_msg_struct.h"
 #include "InterfaceTableAccess.h"
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #include "IPv6Datagram.h"
 #include "LinkStatePacket_m.h"
 #include "MPLSPacket.h"

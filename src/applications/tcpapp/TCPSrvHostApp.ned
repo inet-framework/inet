@@ -76,7 +76,7 @@ import inet.applications.ITCPApp;
 //   -# use "bytestream", which transmit real bytes of messages.
 //      These classes are not implemented yet.
 //
-// Compatible with both IPv4 (IP) and ~IPv6.
+// Compatible with both IPv4 (IPv4) and ~IPv6.
 //
 simple TCPSrvHostApp like ITCPApp
 {

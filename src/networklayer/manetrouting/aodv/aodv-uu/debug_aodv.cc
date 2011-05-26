@@ -491,7 +491,7 @@ char *NS_CLASS ip_to_str(struct in_addr addr)
     addr.s_addr = htonl(addr.s_addr);
 #endif
 #ifdef OMNETPP
-    IPAddress add_aux = addr.s_addr;
+    IPv4Address add_aux = addr.s_addr;
     strcpy(&buf[index],add_aux.str().c_str());
 #else
     strcpy(&buf[index], inet_ntoa(addr));

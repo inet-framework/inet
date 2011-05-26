@@ -21,7 +21,7 @@
 //#include <stdarg.h>
 
 #ifndef MobilityFramework
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #include "InterfaceTableAccess.h"
 #include "RoutingTableAccess.h"
 #include "IRoutingTable.h"
@@ -31,7 +31,7 @@
 #include "NotificationBoard.h"
 #include "ProtocolMap.h"
 #include "ControlManetRouting_m.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #else
 #include "Blackboard.h"
 #include "LinkBreak.h"
@@ -51,11 +51,11 @@
 
 
 #ifdef MobilityFramework
-#ifndef IPAddress
-#define IPAddress int
+#ifndef IPv4Address
+#define IPv4Address int
 #endif
-#ifndef IPDatagram
-#define IPDatagram NetwPkt
+#ifndef IPv4Datagram
+#define IPv4Datagram NetwPkt
 #endif
 #ifndef MACAddress
 #define MACAddress int
@@ -228,24 +228,24 @@ class DSRUU:public cSimpleModule, public INotifiable
     struct ETXEntry;
     int etxNumRetry;
 
-    typedef std::map<IPAddress, ETXEntry*> ETXNeighborTable;
+    typedef std::map<IPv4Address, ETXEntry*> ETXNeighborTable;
     struct ETXEntry
     {
         double deliveryDirect;
         double deliveryReverse;
         std::vector<simtime_t> timeVector;
-        //IPAddress address;
+        //IPv4Address address;
     };
 // In dsr-uu-omnet.cc used for ETX
     ETXNeighborTable etxNeighborTable;
     void EtxMsgSend(unsigned long data);
     void EtxMsgProc(cMessage *msg);
-    double getCost(IPAddress add);
+    double getCost(IPv4Address add);
     void AddCost(struct dsr_pkt *,struct dsr_srt *);
     void ExpandCost(struct dsr_pkt *);
     double PathCost(struct dsr_pkt *dp);
 
-    void linkFailed(IPAddress);
+    void linkFailed(IPv4Address);
 //************++
 
 #ifndef MobilityFramework
@@ -286,7 +286,7 @@ class DSRUU:public cSimpleModule, public INotifiable
     void tap(DSRPkt * p);
     void omnet_xmit(struct dsr_pkt *dp);
     void omnet_deliver(struct dsr_pkt *dp);
-    void packetFailed(IPDatagram *ipDgram);
+    void packetFailed(IPv4Datagram *ipDgram);
     void handleTimer(cMessage*);
     void defaultProcess(cMessage*);
 

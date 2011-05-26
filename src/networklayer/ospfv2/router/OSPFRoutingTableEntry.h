@@ -25,7 +25,7 @@
 
 namespace OSPF {
 
-class RoutingTableEntry : public IPRoute
+class RoutingTableEntry : public IPv4Route
 {
 public:
     enum RoutingPathType {
@@ -44,8 +44,8 @@ public:
 
 private:
     RoutingDestinationType  destinationType;
-    // destinationID is IPRoute::host
-    // addressMask is IPRoute::netmask
+    // destinationID is IPv4Route::host
+    // addressMask is IPv4Route::netmask
     OSPFOptions             optionalCapabilities;
     AreaID                  area;
     RoutingPathType         pathType;
@@ -53,8 +53,8 @@ private:
     Metric                  type2Cost;
     const OSPFLSA*          linkStateOrigin;
     std::vector<NextHop>    nextHops;
-    // IPRoute::interfacePtr comes from nextHops[0].ifIndex
-    // IPRoute::gateway is nextHops[0].hopAddress
+    // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
+    // IPv4Route::gateway is nextHops[0].hopAddress
 
 public:
     RoutingTableEntry();
@@ -66,10 +66,10 @@ public:
 
     void                   setDestinationType(RoutingDestinationType type)  { destinationType = type; }
     RoutingDestinationType getDestinationType() const  { return destinationType; }
-    void                   setDestinationID(IPAddress destID)  { host = destID; }
-    IPAddress              getDestinationID() const  { return host; }
-    void                   setAddressMask(IPAddress destMask)  { netmask = destMask; }
-    IPAddress              getAddressMask() const  { return netmask; }
+    void                   setDestinationID(IPv4Address destID)  { host = destID; }
+    IPv4Address              getDestinationID() const  { return host; }
+    void                   setAddressMask(IPv4Address destMask)  { netmask = destMask; }
+    IPv4Address              getAddressMask() const  { return netmask; }
     void                   setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
     OSPFOptions            getOptionalCapabilities() const  { return optionalCapabilities; }
     void                   setArea(AreaID source)  { area = source; }
@@ -91,7 +91,7 @@ public:
 } // namespace OSPF
 
 inline OSPF::RoutingTableEntry::RoutingTableEntry() :
-    IPRoute(),
+    IPv4Route(),
     destinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION),
     area(OSPF::BACKBONE_AREAID),
     pathType(OSPF::RoutingTableEntry::INTRAAREA),
@@ -99,7 +99,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     linkStateOrigin(NULL)
 {
     netmask = 0xFFFFFFFF;
-    source  = IPRoute::OSPF;
+    source  = IPv4Route::OSPF;
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 

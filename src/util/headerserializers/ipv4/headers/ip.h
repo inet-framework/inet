@@ -83,7 +83,7 @@ struct ip {
 #define IP_MAXPACKET    65535           /* maximum packet size */
 
 /*
- * Definitions for IP type of service (ip_tos)
+ * Definitions for IPv4 type of service (ip_tos)
  */
 #define IPTOS_LOWDELAY          0x10
 #define IPTOS_THROUGHPUT        0x08
@@ -95,7 +95,7 @@ struct ip {
 
 
 /*
- * Definitions for IP precedence (also in ip_tos) (hopefully unused)
+ * Definitions for IPv4 precedence (also in ip_tos) (hopefully unused)
  */
 #define IPTOS_PREC_NETCONTROL           0xe0
 #define IPTOS_PREC_INTERNETCONTROL      0xc0

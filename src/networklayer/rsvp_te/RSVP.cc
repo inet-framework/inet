@@ -13,8 +13,8 @@
 //
 
 #include "RSVP.h"
-#include "IPControlInfo.h"
-#include "IPAddressResolver.h"
+#include "IPv4ControlInfo.h"
+#include "IPvXAddressResolver.h"
 #include "common.h"
 #include "Utils.h"
 #include "XMLUtils.h"
@@ -166,12 +166,12 @@ EroVector RSVP::readTrafficRouteFromXML(const cXMLElement *route)
         if (!strcmp(hop->getTagName(), "node"))
         {
             h.L = false;
-            h.node = IPAddressResolver().resolve(hop->getNodeValue()).get4();
+            h.node = IPvXAddressResolver().resolve(hop->getNodeValue()).get4();
         }
         else if (!strcmp(hop->getTagName(), "lnode"))
         {
             h.L = true;
-            h.node = IPAddressResolver().resolve(hop->getNodeValue()).get4();
+            h.node = IPvXAddressResolver().resolve(hop->getNodeValue()).get4();
         }
         else
         {
@@ -331,7 +331,7 @@ void RSVP::setupHello()
     {
         ASSERT(ift->getInterfaceByName(token));
 
-        IPAddress peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
+        IPv4Address peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
 
         HelloState_t h;
 
@@ -365,7 +365,7 @@ void RSVP::setupHello()
     }
 }
 
-void RSVP::startHello(IPAddress peer, simtime_t delay)
+void RSVP::startHello(IPv4Address peer, simtime_t delay)
 {
     EV << "scheduling hello start in " << delay << " seconds" << endl;
 
@@ -408,7 +408,7 @@ void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const Sender
 
 void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg* msg)
 {
-    IPAddress peer = msg->getPeer();
+    IPv4Address peer = msg->getPeer();
 
     EV << "hello timeout, considering " << peer << " failed" << endl;
 
@@ -440,7 +440,7 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg* msg)
 
 void RSVP::processHELLO_TIMER(HelloTimerMsg* msg)
 {
-    IPAddress peer = msg->getPeer();
+    IPv4Address peer = msg->getPeer();
 
     HelloState_t *h = findHello(peer);
     ASSERT(h);
@@ -531,7 +531,7 @@ void RSVP::processRSB_TIMEOUT(RsbTimeoutMsg* msg)
     removeRSB(rsb);
 }
 
-bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPAddress OI)
+bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPv4Address OI)
 {
     ASSERT(tedmod->isLocalAddress(OI));
 
@@ -563,7 +563,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 {
     EV << "refresh path (PSB " << psbEle->id << ")" << endl;
 
-    IPAddress& OI = psbEle->OutInterface;
+    IPv4Address& OI = psbEle->OutInterface;
     EroVector& ERO = psbEle->ERO;
 
     ASSERT(!OI.isUnspecified());
@@ -587,7 +587,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     pm->setByteLength(length);
 
-    IPAddress nextHop = tedmod->getPeerByLocalAddress(OI);
+    IPv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
     ASSERT(ERO.size() == 0 ||ERO[0].node.equals(nextHop) || ERO[0].L);
 
@@ -622,7 +622,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
     }
 }
 
-void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP)
+void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
 {
     EV << "refresh reservation (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
 
@@ -683,7 +683,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP)
     sendToIP(msg, PHOP);
 }
 
-void RSVP::preempt(IPAddress OI, int priority, double bandwidth)
+void RSVP::preempt(IPv4Address OI, int priority, double bandwidth)
 {
     ASSERT(tedmod->isLocalAddress(OI));
 
@@ -717,7 +717,7 @@ void RSVP::preempt(IPAddress OI, int priority, double bandwidth)
     }
 }
 
-bool RSVP::allocateResource(IPAddress OI, const SessionObj_t& session, double bandwidth)
+bool RSVP::allocateResource(IPv4Address OI, const SessionObj_t& session, double bandwidth)
 {
     if (OI.isUnspecified())
         return true;
@@ -864,7 +864,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         //bool ER = psb->OutInterface.isUnspecified();
         if (!IR)
         {
-            IPAddress localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
+            IPv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
             inInterface = rt->getInterfaceByAddress(localInf)->getName();
         }
         else
@@ -1110,7 +1110,7 @@ void RSVP::removePSB(PathStateBlock_t *psb)
     ASSERT(false);
 }
 
-bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddress& OI)
+bool RSVP::evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4Address& OI)
 {
     if (ERO.size() > 0)
     {
@@ -1134,7 +1134,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
             OI = tedmod->getInterfaceAddrByPeerAddress(ERO[0].node);
         }
 
-        IPAddress peer = tedmod->getPeerByLocalAddress(OI);
+        IPv4Address peer = tedmod->getPeerByLocalAddress(OI);
         HelloState_t *h = findHello(peer);
         if (!h)
             error("Peer %s on interface %s is not an RSVP peer", peer.str().c_str(), OI.str().c_str());
@@ -1164,7 +1164,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
             {
                 // outgoing interface is not LSR, we are egress router
 
-                OI = IPAddress();
+                OI = IPv4Address();
 
                 return true;
             }
@@ -1189,11 +1189,11 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 RSVP::PathStateBlock_t* RSVP::createPSB(RSVPPathMsg *msg)
 {
     const EroVector& ERO = msg->getERO();
-    IPAddress destAddr = msg->getDestAddress();
+    IPv4Address destAddr = msg->getDestAddress();
 
     //
 
-    IPAddress OI;
+    IPv4Address OI;
 
     if (!evalNextHopInterface(destAddr, ERO, OI))
         return NULL;
@@ -1242,7 +1242,7 @@ RSVP::PathStateBlock_t* RSVP::createIngressPSB(const traffic_session_t& session,
         ERO.erase(ERO.begin());
     }
 
-    IPAddress OI;
+    IPv4Address OI;
 
     if (!evalNextHopInterface(session.sobj.DestAddress, ERO, OI))
         return NULL;
@@ -1370,9 +1370,9 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
     EV << "Received RSVP_HELLO" << endl;
     //print(msg);
 
-    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(msg->getControlInfo());
-    IPAddress sender = controlInfo->getSrcAddr();
-    IPAddress peer = tedmod->primaryAddress(sender);
+    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(msg->getControlInfo());
+    IPv4Address sender = controlInfo->getSrcAddr();
+    IPv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();
     bool ack = msg->getAck();
@@ -1638,7 +1638,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
     EV << "Received RESV_MESSAGE" << endl;
     print(msg);
 
-    IPAddress OI = msg->getLIH();
+    IPv4Address OI = msg->getLIH();
 
     // find matching PSB for every flow ****************************************
 
@@ -1698,7 +1698,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
     delete msg;
 }
 
-void RSVP::recoveryEvent(IPAddress peer)
+void RSVP::recoveryEvent(IPv4Address peer)
 {
     // called when peer's operation is restored
 
@@ -1768,7 +1768,7 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
     ASSERT(psb);
     ASSERT(!psb->OutInterface.isUnspecified());
 
-    IPAddress nextHop = tedmod->getPeerByLocalAddress(psb->OutInterface);
+    IPv4Address nextHop = tedmod->getPeerByLocalAddress(psb->OutInterface);
 
     EV << "sending PathTear to " << nextHop << endl;
 
@@ -1948,7 +1948,7 @@ void RSVP::processCommand(const cXMLElement& node)
         ASSERT(false);
 }
 
-void RSVP::sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPAddress LIH, IPAddress NHOP, bool force)
+void RSVP::sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPv4Address LIH, IPv4Address NHOP, bool force)
 {
     RSVPPathTear *msg = new RSVPPathTear("PathTear");
     msg->setSenderTemplate(sender);
@@ -1971,7 +1971,7 @@ void RSVP::sendPathErrorMessage(PathStateBlock_t *psb, int errCode)
     sendPathErrorMessage(psb->Session_Object, psb->Sender_Template_Object, psb->Sender_Tspec_Object, psb->Previous_Hop_Address, errCode);
 }
 
-void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPAddress nextHop, int errCode)
+void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPv4Address nextHop, int errCode)
 {
     RSVPPathError *msg = new RSVPPathError("PathErr");
     msg->setErrorCode(errCode);
@@ -1991,9 +1991,9 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
 }
 
 
-void RSVP::sendToIP(cMessage *msg, IPAddress destAddr)
+void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
 {
-    IPControlInfo *controlInfo = new IPControlInfo();
+    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setDestAddr(destAddr);
     controlInfo->setProtocol(IP_PROT_RSVP);
     msg->setControlInfo(controlInfo);
@@ -2132,7 +2132,7 @@ RSVP::ResvStateBlock_t* RSVP::findRsbById(int id)
     return NULL; // prevent warning
 }
 
-RSVP::HelloState_t* RSVP::findHello(IPAddress peer)
+RSVP::HelloState_t* RSVP::findHello(IPv4Address peer)
 {
     for (HelloVector::iterator it = HelloList.begin(); it != HelloList.end(); it++)
     {

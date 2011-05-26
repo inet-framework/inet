@@ -137,9 +137,9 @@
 // both IPv4 and IPv6. Internally they use the IPvXAddress C++ class, which
 // can represent both IPv4 and IPv6 addresses.
 //
-// Most modules use the IPAddressResolver C++ class to resolve addresses
+// Most modules use the IPvXAddressResolver C++ class to resolve addresses
 // specified in module parameters in omnetpp.ini.
-// IPAddressResolver accepts the following syntax:
+// IPvXAddressResolver accepts the following syntax:
 //
 //    - literal IPv4 address: "186.54.66.2"
 //    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"

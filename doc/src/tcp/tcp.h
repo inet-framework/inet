@@ -83,8 +83,8 @@ window.
 
 <img src="syn-pppframe.png">
 
-You'll find that the message represents the PPP frame. To see the IP
-datagram header, click the "Encapsulated message" button to open the IPDatagram
+You'll find that the message represents the PPP frame. To see the IPv4
+datagram header, click the "Encapsulated message" button to open the IPv4Datagram
 inspector window. To get to the TCP header, you have to click the
 "Encapsulated message" button of the datagram's inspector, and select the
 Fields tab.

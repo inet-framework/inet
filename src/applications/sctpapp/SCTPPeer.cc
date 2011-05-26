@@ -18,7 +18,7 @@
 
 #include "SCTPPeer.h"
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
@@ -154,7 +154,7 @@ void SCTPPeer::connect()
     sctpEV3 << "issuing OPEN command\n";
     sctpEV3<<"Assoc "<<clientSocket.getConnectionId()<<"::connect to address "<<connectAddress<<", port "<<connectPort<<"\n";
     numSessions++;
-    clientSocket.connect(IPAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
+    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
 
 }
 

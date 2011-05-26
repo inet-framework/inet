@@ -17,12 +17,12 @@
 //
 
 
-#include "IPTrafGen.h"
+#include "IPvXTrafGen.h"
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -30,13 +30,13 @@
 #endif
 
 
-Define_Module(IPTrafSink);
+Define_Module(IPvXTrafSink);
 
 
-simsignal_t IPTrafSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t IPTrafSink::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafSink::endToEndDelaySignal = SIMSIGNAL_NULL;
 
-void IPTrafSink::initialize()
+void IPvXTrafSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
@@ -44,7 +44,7 @@ void IPTrafSink::initialize()
     endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
-void IPTrafSink::handleMessage(cMessage *msg)
+void IPvXTrafSink::handleMessage(cMessage *msg)
 {
     processPacket(check_and_cast<cPacket *>(msg));
 
@@ -56,15 +56,15 @@ void IPTrafSink::handleMessage(cMessage *msg)
     }
 }
 
-void IPTrafSink::printPacket(cPacket *msg)
+void IPvXTrafSink::printPacket(cPacket *msg)
 {
     IPvXAddress src, dest;
     int protocol = -1;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo()) != NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
     {
-        IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
+        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
         dest = ctrl->getDestAddr();
         protocol = ctrl->getProtocol();
@@ -90,7 +90,7 @@ void IPTrafSink::printPacket(cPacket *msg)
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
-void IPTrafSink::processPacket(cPacket *msg)
+void IPvXTrafSink::processPacket(cPacket *msg)
 {
     emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     emit(endToEndDelaySignal, simTime()-msg->getCreationTime());
@@ -106,18 +106,18 @@ void IPTrafSink::processPacket(cPacket *msg)
 //===============================================
 
 
-Define_Module(IPTrafGen);
+Define_Module(IPvXTrafGen);
 
-int IPTrafGen::counter;
+int IPvXTrafGen::counter;
 
-void IPTrafGen::initialize(int stage)
+void IPvXTrafGen::initialize(int stage)
 {
-    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage != 3)
         return;
 
-    IPTrafSink::initialize();
+    IPvXTrafSink::initialize();
     sentPkBytesSignal = registerSignal("sentPkBytes");
 
     protocol = par("protocol");
@@ -129,7 +129,7 @@ void IPTrafGen::initialize(int stage)
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPAddressResolver().resolve(token));
+        destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     counter = 0;
 
@@ -146,13 +146,13 @@ void IPTrafGen::initialize(int stage)
     }
 }
 
-IPvXAddress IPTrafGen::chooseDestAddr()
+IPvXAddress IPvXTrafGen::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     return destAddresses[k];
 }
 
-void IPTrafGen::sendPacket()
+void IPvXTrafGen::sendPacket()
 {
     char msgName[32];
     sprintf(msgName,"appData-%d", counter++);
@@ -166,7 +166,7 @@ void IPTrafGen::sendPacket()
     {
 #ifdef WITH_IPv4
         // send to IPv4
-        IPControlInfo *controlInfo = new IPControlInfo();
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
@@ -200,7 +200,7 @@ void IPTrafGen::sendPacket()
     numSent++;
 }
 
-void IPTrafGen::handleMessage(cMessage *msg)
+void IPvXTrafGen::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -225,3 +225,4 @@ void IPTrafGen::handleMessage(cMessage *msg)
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
+

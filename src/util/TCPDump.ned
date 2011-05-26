@@ -29,7 +29,7 @@ package inet.util;
 // can be inserted into compound modules non-intrusively (it receives
 // packet data via signals, so existing modules don't need to be reconnected.)
 //
-// <b>How to use it:</b> The module handles IPv4 packets (IPDatagram class),
+// <b>How to use it:</b> The module handles IPv4 packets (IPv4Datagram class),
 // so it should be placed between the IP module and network interfaces (NICs);
 // see description of gates in comments. Other packets are ignored and let
 // through.

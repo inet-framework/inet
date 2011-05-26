@@ -565,7 +565,7 @@ bool operator || (const Uint128 & a, const Uint128 & b) throw ()
 };
 
 
-Uint128 & Uint128::operator= (const IPAddress &add) throw ()
+Uint128 & Uint128::operator= (const IPv4Address &add) throw ()
 {
     hi=0;
     lo=add.getInt();

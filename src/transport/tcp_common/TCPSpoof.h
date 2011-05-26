@@ -17,7 +17,7 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "TCPSegment.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 /**

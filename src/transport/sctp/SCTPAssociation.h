@@ -22,7 +22,7 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "SCTP.h"
 //#include "RoutingTable.h"
 //#include "RoutingTableAccess.h"
@@ -32,7 +32,7 @@
 #include "SCTPSendStream.h"
 #include "SCTPReceiveStream.h"
 #include "SCTPMessage.h"
-//#include "IPControlInfo.h"
+//#include "IPv4ControlInfo.h"
 #include <list>
 #include <iostream>
 #include <errno.h>

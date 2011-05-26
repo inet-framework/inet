@@ -32,8 +32,8 @@
 #ifdef WITH_IPv4
 #include "ICMPAccess.h"
 #include "ICMPMessage_m.h"
-#include "IPControlInfo.h"
-#include "IPDatagram_m.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Datagram_m.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -253,7 +253,7 @@ void UDP::updateDisplayString()
     getDisplayString().setTagArg("t",0,buf);
 }
 
-bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
+bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv4ControlInfo *ipCtrl)
 {
 #ifdef WITH_IPv4
     // IPv4 version
@@ -304,7 +304,7 @@ bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAd
            (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr);
 }
 
-void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
+void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv4ControlInfo *ipCtrl, SockDesc *sd)
 {
 #ifdef WITH_IPv4
     // send payload with UDPControlInfo up to the application -- IPv4 version
@@ -355,12 +355,12 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
 
     // send back ICMP PORT_UNREACHABLE
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(ctrl) != NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL)
     {
         if (!icmp)
             icmp = ICMPAccess().get();
 
-        IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
+        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
 
         if (!ctrl4->getDestAddr().isMulticast())
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
@@ -399,7 +399,7 @@ void UDP::processICMPError(cPacket *msg)
         type = icmpMsg->getType();
         code = icmpMsg->getCode();
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedPacket());
+        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
         UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
         localAddr = datagram->getSrcAddress();
         remoteAddr = datagram->getDestAddress();
@@ -518,9 +518,9 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     cPacket *payload = udpPacket->getEncapsulatedPacket();
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(ctrl)!=NULL)
     {
-        IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
+        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
 
         for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
         {
@@ -590,7 +590,7 @@ void UDP::processMsgFromApp(cPacket *appData)
 #ifdef WITH_IPv4
         // send to IPv4
         EV << "Sending app packet " << appData->getName() << " over IPv4.\n";
-        IPControlInfo *ipControlInfo = new IPControlInfo();
+        IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpCtrl->getSrcAddr().get4());
         ipControlInfo->setDestAddr(udpCtrl->getDestAddr().get4());

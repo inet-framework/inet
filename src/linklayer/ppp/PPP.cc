@@ -436,8 +436,8 @@ void PPP::updateDisplayString()
         else if (datarate >= 1e3) sprintf(datarateText,"%gK", datarate/1e3);
         else sprintf(datarateText,"%gbps", datarate);
 
-/* TBD find solution for displaying IP address without dependence on IPv6 or IPv6
-        IPAddress addr = interfaceEntry->ipv4Data()->getIPAddress();
+/* TBD find solution for displaying IPv4 address without dependence on IPv6 or IPv6
+        IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
         sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
 */
 

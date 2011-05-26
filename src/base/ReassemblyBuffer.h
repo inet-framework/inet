@@ -26,7 +26,7 @@
 /**
  * Generic reassembly buffer for a fragmented datagram (or a fragmented anything).
  *
- * Currently used in IPFragBuf and IPv6FragBuf.
+ * Currently used in IPv4FragBuf and IPv6FragBuf.
  */
 class INET_API ReassemblyBuffer
 {
@@ -42,7 +42,7 @@ class INET_API ReassemblyBuffer
     typedef std::vector<Region> RegionVector;
 
     //
-    // Thinking of IP/IPv6 fragmentation, 99% of the time fragments
+    // Thinking of IPv4/IPv6 fragmentation, 99% of the time fragments
     // will arrive in order and none gets lost, so we have to
     // handle this case very efficiently. For this purpose
     // we'll store the offset of the first and last+1 byte we have

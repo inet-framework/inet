@@ -21,7 +21,7 @@ package inet.networklayer.arp;
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
 //
-// Expects ~IPRoutingDecision control info objects to be attached to packets
+// Expects ~IPv4RoutingDecision control info objects to be attached to packets
 // coming from higher layers. ARP packets are represented by the ~ARPPacket
 // class. Datagrams to be sent and incoming ARP packets are expected to
 // on gate ipIn.
@@ -37,8 +37,8 @@ package inet.networklayer.arp;
 simple ARP
 {
     parameters:
-        double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an IP address
-        int retryCount = default(3);   // number of times ARP will attempt to resolve an IP address
+        double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an IPv4 address
+        int retryCount = default(3);   // number of times ARP will attempt to resolve an IPv4 address
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool proxyARP = default(true);        // sets proxy \ARP mode (replying to \ARP requests for the addresses for which a routing table entry exists)
         bool globalARP = default(false);
@@ -48,6 +48,6 @@ simple ARP
         @statistic[initiatedResolution](title="ARP initiated resolutions";record=count,vector);
         @statistic[failedResolution](title="failed ARP resolutions sent";record=count,vector);
     gates:
-        input ipIn @labels(ARPPacket,IPDatagram);
+        input ipIn @labels(ARPPacket,IPv4Datagram);
         output nicOut[] @labels(ARPPacket);
 }

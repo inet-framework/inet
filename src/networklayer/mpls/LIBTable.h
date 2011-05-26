@@ -20,8 +20,8 @@
 #include <vector>
 #include <string>
 #include "ConstType.h"
-#include "IPAddress.h"
-#include "IPDatagram.h"
+#include "IPv4Address.h"
+#include "IPv4Datagram.h"
 
 // label operations
 #define PUSH_OPER              0
@@ -58,7 +58,7 @@ class INET_API LIBTable: public cSimpleModule
         };
 
     protected:
-        IPAddress routerId;
+        IPv4Address routerId;
         int maxLabel;
         std::vector<LIBEntry> lib;
 

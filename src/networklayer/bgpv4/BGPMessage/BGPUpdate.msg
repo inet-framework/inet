@@ -18,7 +18,7 @@
 cplusplus {{
 #include "BGPHeader_m.h"
 #include "BGPUpdatePathAttributes_m.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
 }}
@@ -31,18 +31,18 @@ class noncobject BGPUpdatePathAttributesASPath;
 class noncobject BGPUpdatePathAttributesNextHop;
 class noncobject BGPUpdatePathAttributesLocalPref;
 class noncobject BGPUpdatePathAttributesAtomicAggregate;
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 struct BGPUpdateWithdrawnRoutes
 {
     unsigned char length; // 1 octet
-    IPAddress prefix; // 4 octets
+    IPv4Address prefix; // 4 octets
 }
 
 struct BGPUpdateNLRI
 {
     unsigned char length; // 1 octet
-    IPAddress prefix; // 4 octets
+    IPv4Address prefix; // 4 octets
 }
 
 //

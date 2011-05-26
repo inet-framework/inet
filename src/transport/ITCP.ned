@@ -92,7 +92,7 @@ package inet.transport;
 // A TCP segment is represented by the class ~TCPSegment. The payload content
 // of TCPSegment is depends on the selected ~TCPDataTransferMode in ~TCPOpenCommand.
 //
-// The TCP model relies on sending and receiving ~IPControlInfo objects
+// The TCP model relies on sending and receiving ~IPv4ControlInfo objects
 // attached to TCP segment objects as control info
 // (see cMessage::setControlInfo()).
 //
@@ -101,10 +101,10 @@ moduleinterface ITCP
     @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up);
         input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }
 
@@ -115,9 +115,9 @@ simple TCP_None like ITCP
         @class("UnimplementedModule");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up);
         input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }

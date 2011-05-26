@@ -16,7 +16,7 @@
 //
 
 #include "HelloHandler.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "OSPFRouter.h"
 #include "OSPFArea.h"
 #include "OSPFInterface.h"
@@ -56,8 +56,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                IPControlInfo* controlInfo = check_and_cast<IPControlInfo *> (helloPacket->getControlInfo());
-                OSPF::IPv4Address srcAddress = ipv4AddressFromULong(controlInfo->getSrcAddr().getInt());
+                IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (helloPacket->getControlInfo());
+                IPv4Address srcAddress = ipv4AddressFromULong(controlInfo->getSrcAddr().getInt());
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;

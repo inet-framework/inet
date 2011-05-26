@@ -12,7 +12,7 @@
 
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 // base header: version, length, LSR ID, Label space
 #define LDP_BASEHEADER_BYTES  10
@@ -23,7 +23,7 @@ cplusplus {{
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 //
 // LDP message types
@@ -52,7 +52,7 @@ enum LDP_STATUS_TYPES
 
 struct FEC_TLV
 {
-    IPAddress addr;
+    IPv4Address addr;
     int length;
 }
 
@@ -62,8 +62,8 @@ struct FEC_TLV
 packet LDPPacket
 {
     int type;
-    IPAddress senderAddress;
-    IPAddress receiverAddress;
+    IPv4Address senderAddress;
+    IPv4Address receiverAddress;
 }
 
 

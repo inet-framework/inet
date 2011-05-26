@@ -101,7 +101,7 @@ struct vis_data
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 class noncobject BatmanHnaMsg;
 class noncobject Uint128;
 class noncobject vis_data;

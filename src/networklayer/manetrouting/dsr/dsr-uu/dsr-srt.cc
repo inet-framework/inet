@@ -953,7 +953,7 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
 #ifdef MobilityFramework
             ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,(unsigned int)getCost(dp->prv_hop.s_addr));
 #else
-            ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,(unsigned int)getCost(IPAddress((uint32_t)dp->prv_hop.s_addr)));
+            ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,(unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr)));
 #endif
         }
         else
@@ -993,7 +993,7 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
                         ConfValToUsecs(RouteCacheTimeout), 0, (unsigned int)getCost(dp->prv_hop.s_addr));
 #else
             lc_link_add(my_addr(), dp->prv_hop,
-                        ConfValToUsecs(RouteCacheTimeout), 0, (unsigned int)getCost(IPAddress((uint32_t)dp->prv_hop.s_addr)));
+                        ConfValToUsecs(RouteCacheTimeout), 0, (unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr)));
 #endif
         }
         else
@@ -1044,7 +1044,7 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
                 srt_cut->cost[j] = (unsigned int)getCost(dp->prv_hop.s_addr);
 #else
             if (srt_cut->cost_size>j)
-                srt_cut->cost[j] = (unsigned int)getCost(IPAddress((uint32_t)dp->prv_hop.s_addr));
+                srt_cut->cost[j] = (unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr));
 #endif
         }
 #endif
@@ -1104,7 +1104,7 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
 #ifdef MobilityFramework
                     dp->costVector[i].cost = getCost(dp->src.s_addr);
 #else
-                    dp->costVector[i].cost = getCost(IPAddress((uint32_t)dp->src.s_addr));
+                    dp->costVector[i].cost = getCost(IPv4Address((uint32_t)dp->src.s_addr));
 #endif
                 else
                     dp->costVector[i].cost = getCost(dp->costVector[i-1].address);

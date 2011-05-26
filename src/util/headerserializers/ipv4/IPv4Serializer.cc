@@ -30,7 +30,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/ip.h"
 };
 
-#include "IPSerializer.h"
+#include "IPv4Serializer.h"
 
 #include "ICMPSerializer.h"
 #include "IPProtocolId_m.h"
@@ -66,7 +66,7 @@ using namespace INETFw;
 
 
 
-int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
+int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
 {
     int packetLength;
     struct ip *ip = (struct ip *) buf;
@@ -83,7 +83,7 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
     ip->ip_sum        = 0;
 
     if (dgram->getHeaderLength() > IP_HEADER_BYTES)
-        EV << "Serializing an IP packet with options. Dropping the options.\n";
+        EV << "Serializing an IPv4 packet with options. Dropping the options.\n";
 
     packetLength = IP_HEADER_BYTES;
 
@@ -119,7 +119,7 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
 #endif
 
       default:
-        throw cRuntimeError(dgram, "IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
+        throw cRuntimeError(dgram, "IPv4Serializer: cannot serialize protocol %d", dgram->getTransportProtocol());
     }
 
     ip->ip_len = htons(packetLength);
@@ -132,7 +132,7 @@ int IPSerializer::serialize(const IPDatagram *dgram, unsigned char *buf, unsigne
     return packetLength;
 }
 
-void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatagram *dest)
+void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest)
 {
     const struct ip *ip = (const struct ip *) buf;
     unsigned int totalLength, headerLength;
@@ -152,10 +152,10 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
     headerLength = ip->ip_hl << 2;
 
     if (headerLength > (unsigned int)IP_HEADER_BYTES)
-        EV << "Handling an captured IP packet with options. Dropping the options.\n";
+        EV << "Handling an captured IPv4 packet with options. Dropping the options.\n";
 
     if (totalLength > bufsize)
-        EV << "Can not handle IP packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
+        EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
     dest->setByteLength(IP_HEADER_BYTES);
 
@@ -191,7 +191,7 @@ void IPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IPDatag
 #endif
 
       default:
-        throw cRuntimeError("IPSerializer: cannot parse protocol %d", dest->getTransportProtocol());
+        throw cRuntimeError("IPv4Serializer: cannot parse protocol %d", dest->getTransportProtocol());
     }
 
     ASSERT(encapPacket);

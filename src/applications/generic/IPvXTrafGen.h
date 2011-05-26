@@ -30,7 +30,7 @@
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class INET_API IPTrafSink : public cSimpleModule
+class INET_API IPvXTrafSink : public cSimpleModule
 {
   protected:
     int numReceived;
@@ -49,7 +49,7 @@ class INET_API IPTrafSink : public cSimpleModule
 /**
  * IP traffic generator application. See NED for more info.
  */
-class INET_API IPTrafGen : public IPTrafSink
+class INET_API IPvXTrafGen : public IPvXTrafSink
 {
   protected:
     std::string nodeName;

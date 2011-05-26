@@ -23,7 +23,7 @@ package inet.applications.generic;
 // Consumes and prints packets received from the ~IP module.
 // Compatible with both IPv4 and IPv6.
 //
-simple IPTrafSink like IPTrafficGenerator
+simple IPvXTrafSink like IIPvXTrafficGenerator
 {
     parameters:
         @display("i=block/sink");
@@ -31,9 +31,9 @@ simple IPTrafSink like IPTrafficGenerator
         @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
 
     gates:
-        input ipIn @labels(IPControlInfo/up);
+        input ipIn @labels(IPv4ControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);
-        output ipOut @labels(IPControlInfo/down);
+        output ipOut @labels(IPv4ControlInfo/down);
         output ipv6Out @labels(IPv6ControlInfo/down);
 }
 
@@ -44,19 +44,19 @@ simple IPTrafSink like IPTrafficGenerator
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
 // dotted decimal notation (or, for IPv6, in the usual notation with colons),
-// or with the module name. (The IPAddressResolver class is used to resolve
+// or with the module name. (The IPvXAddressResolver class is used to resolve
 // the address.) To disable the model, set destAddresses to "".
 //
-// The peer can be ~IPTrafSink or another ~IPTrafGen (it handles received packets
-// exactly like ~IPTrafSink).
+// The peer can be ~IPvXTrafSink or another ~IPvXTrafGen (it handles received packets
+// exactly like ~IPvXTrafSink).
 //
-simple IPTrafGen like IPTrafficGenerator
+simple IPvXTrafGen like IIPvXTrafficGenerator
 {
     parameters:
         double startTime @unit("s") = default(1s); // the time application generates first packet
         volatile double packetInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
         int numPackets = default(0); // max number of packets to generate
-        int protocol; // value for ~IPDatagram protocol field
+        int protocol; // value for ~IPv4Datagram protocol field
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/source");
@@ -65,8 +65,8 @@ simple IPTrafGen like IPTrafficGenerator
         @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
 
     gates:
-        input ipIn @labels(IPControlInfo/up);
+        input ipIn @labels(IPv4ControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);
-        output ipOut @labels(IPControlInfo/down);
+        output ipOut @labels(IPv4ControlInfo/down);
         output ipv6Out @labels(IPv6ControlInfo/down);
 }

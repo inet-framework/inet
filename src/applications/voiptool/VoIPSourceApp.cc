@@ -61,7 +61,7 @@ void VoIPSourceApp::initialize(int stage)
     pReSampleCtx = NULL;
     localPort = par("localPort");
     destPort = par("destPort");
-    destAddress = IPAddressResolver().resolve(par("destAddress").stringValue());
+    destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
 
     voipHeaderSize = par("voipHeaderSize");
     voipSilenceThreshold = par("voipSilenceThreshold");

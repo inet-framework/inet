@@ -17,7 +17,7 @@
 
 cplusplus {{
 #include "BGPHeader_m.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 const int BGP_OPEN_OCTETS = 10;
 }}
@@ -25,7 +25,7 @@ const int BGP_OPEN_OCTETS = 10;
 
 class BGPHeader;
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 struct BGPParameterValues
 {
@@ -66,7 +66,7 @@ packet BGPOpenMessage extends BGPHeader
     char version = 4;
     unsigned short myAS;
     simtime_t holdTime;
-    IPAddress BGPIdentifier;
+    IPv4Address BGPIdentifier;
     BGPOptionalParameters optionalParameters[];
 }
 

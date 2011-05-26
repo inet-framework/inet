@@ -18,7 +18,7 @@
 
 #include "RTCP.h"
 
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -206,7 +206,7 @@ void RTCP::readRet(cPacket *sifpIn)
     RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(sifpIn->decapsulate());
     emit(rcvdPkBytesSignal, (long)(sifpIn->getByteLength()));
     emit(endToEndDelaySignal, simTime() - sifpIn->getCreationTime());
-    processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
+    processIncomingRTCPPacket(packet, IPv4Address(_destinationAddress), _port);
 }
 
 void RTCP::createSocket()
@@ -217,11 +217,11 @@ void RTCP::createSocket()
     {
         _socketFdIn = UDPSocket::generateSocketId();
         UDPControlInfo *ctrl = new UDPControlInfo();
-        IPAddress ipaddr(_destinationAddress);
+        IPv4Address ipaddr(_destinationAddress);
 
         if (ipaddr.isMulticast())
         {
-            ctrl->setSrcAddr(IPAddress(_destinationAddress));
+            ctrl->setSrcAddr(IPv4Address(_destinationAddress));
             ctrl->setSrcPort(_port);
         }
         else
@@ -362,7 +362,7 @@ void RTCP::processOutgoingRTPPacket(RTPPacket *packet)
     _senderInfo->processRTPPacket(packet, getId(), simTime());
 }
 
-void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port)
+void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int port)
 {
     bool good = false;
     uint32 ssrc = packet->getSsrc();
@@ -402,7 +402,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int po
     }
 }
 
-void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port)
+void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
     cArray &rtcpPackets = packet->getRtcpPackets();
@@ -447,7 +447,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
 }
 
 void RTCP::processIncomingRTCPSenderReportPacket(
-        RTCPSenderReportPacket *rtcpSenderReportPacket, IPAddress address, int port)
+        RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpSenderReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -491,7 +491,7 @@ void RTCP::processIncomingRTCPSenderReportPacket(
 }
 
 void RTCP::processIncomingRTCPReceiverReportPacket(
-        RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPAddress address, int port)
+        RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -533,7 +533,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(
 }
 
 void RTCP::processIncomingRTCPSDESPacket(
-        RTCPSDESPacket *rtcpSDESPacket, IPAddress address, int port, simtime_t arrivalTime)
+        RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
 {
     cArray &sdesChunks = rtcpSDESPacket->getSdesChunks();
 
@@ -563,7 +563,7 @@ void RTCP::processIncomingRTCPSDESPacket(
     }
 }
 
-void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPAddress address, int port)
+void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpByePacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);

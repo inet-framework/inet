@@ -111,7 +111,7 @@ std::string OSPF::Area::detailedInfo() const
     return out.str();
 }
 
-bool OSPF::Area::containsAddress(OSPF::IPv4Address address) const
+bool OSPF::Area::containsAddress(IPv4Address address) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
@@ -170,7 +170,7 @@ OSPF::Interface*  OSPF::Area::getInterface(unsigned char ifIndex)
     return NULL;
 }
 
-OSPF::Interface*  OSPF::Area::getInterface(OSPF::IPv4Address address)
+OSPF::Interface*  OSPF::Area::getInterface(IPv4Address address)
 {
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
@@ -674,7 +674,7 @@ bool OSPF::Area::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighbor* n
     return floodedBackOut;
 }
 
-bool OSPF::Area::isLocalAddress(OSPF::IPv4Address address) const
+bool OSPF::Area::isLocalAddress(IPv4Address address) const
 {
     long interfaceCount = associatedInterfaces.size();
     for (long i = 0; i < interfaceCount; i++) {
@@ -1005,7 +1005,7 @@ OSPF::LinkStateID OSPF::Area::getUniqueLinkStateID(OSPF::IPv4AddressRange destin
     if (foundLSA == NULL) {
         return lsaKey.linkStateID;
     } else {
-        OSPF::IPv4Address existingMask = ipv4AddressFromULong(foundLSA->getNetworkMask().getInt());
+        IPv4Address existingMask = ipv4AddressFromULong(foundLSA->getNetworkMask().getInt());
 
         if (destination.mask == existingMask) {
             return lsaKey.linkStateID;
@@ -1761,7 +1761,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
                 if (distance < entryCost) {
                     //FIXME remove
                     //if(parentRouter->getRouterID() == 0xC0A80302) {
-                    //    EV << "CHEAPER STUB LINK FOUND TO " << IPAddress(destinationID).str() << "\n";
+                    //    EV << "CHEAPER STUB LINK FOUND TO " << IPv4Address(destinationID).str() << "\n";
                     //}
                     entry->setCost(distance);
                     entry->clearNextHops();
@@ -1783,7 +1783,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
             } else {
                 //FIXME remove
                 //if(parentRouter->getRouterID() == 0xC0A80302) {
-                //    EV << "STUB LINK FOUND TO " << IPAddress(destinationID).str() << "\n";
+                //    EV << "STUB LINK FOUND TO " << IPv4Address(destinationID).str() << "\n";
                 //}
                 entry = new OSPF::RoutingTableEntry;
 
@@ -1865,7 +1865,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(OSPFLSA* destination, 
             } else {
                 OSPF::NetworkLSA* destinationNetworkLSA = dynamic_cast<OSPF::NetworkLSA*> (destination);
                 if (destinationNetworkLSA != NULL) {
-                    OSPF::IPv4Address networkDesignatedRouter = ipv4AddressFromULong(destinationNetworkLSA->getHeader().getLinkStateID());
+                    IPv4Address networkDesignatedRouter = ipv4AddressFromULong(destinationNetworkLSA->getHeader().getLinkStateID());
                     unsigned long interfaceNum = associatedInterfaces.size();
                     for (i = 0; i < interfaceNum; i++) {
                         OSPF::Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->getType();
@@ -1959,7 +1959,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
             {
                 OSPF::Neighbor* neighbor = (associatedInterfaces[i]->getNeighborCount() > 0) ? associatedInterfaces[i]->getNeighbor(0) : NULL;
                 if (neighbor != NULL) {
-                    OSPF::IPv4Address neighborAddress = neighbor->getAddress();
+                    IPv4Address neighborAddress = neighbor->getAddress();
                     if (((neighborAddress != OSPF::NULL_IPV4ADDRESS) &&
                          (ulongFromIPv4Address(neighborAddress) == destination.getLinkID().getInt())) ||
                         ((neighborAddress == OSPF::NULL_IPV4ADDRESS) &&

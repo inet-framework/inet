@@ -58,7 +58,7 @@
 #include "Ieee80211Frame_m.h"
 #include "dymoum/dlist.h"
 #include "dymo_msg_struct.h"
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #include "ICMPAccess.h"
 #include <map>
 
@@ -164,7 +164,7 @@ class DYMOUM : public ManetRoutingBase
     ICMPAccess icmpAccess;
 
 
-    IPAddress *ipNodeId;
+    IPv4Address *ipNodeId;
     DYMO_element * send_buf;
     struct host_info this_host;
     u_int32_t dev_indices[DYMO_MAX_NR_INTERFACES];
@@ -214,7 +214,7 @@ class DYMOUM : public ManetRoutingBase
     static bool log_file_fd_init;
     DYMOUM();
     ~DYMOUM();
-    void packetFailed(IPDatagram *);
+    void packetFailed(IPv4Datagram *);
     void packetFailedMac(Ieee80211DataFrame *);
     virtual std::string detailedInfo() const;
 
@@ -239,16 +239,16 @@ class DYMOUM : public ManetRoutingBase
     int startDYMOUMAgent();
     void scheduleNextEvent();
     const char *if_indextoname(int, char *);
-    IPDatagram *pkt_encapsulate(IPDatagram *, IPAddress);
-    IPDatagram *pkt_decapsulate(IPDatagram *);
+    IPv4Datagram *pkt_encapsulate(IPv4Datagram *, IPv4Address);
+    IPv4Datagram *pkt_decapsulate(IPv4Datagram *);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
     int numInitStages() const  {return 5;}
     void initialize(int stage);
     void recvDYMOUMPacket(cMessage * p);
-    void processPacket(IPDatagram *,unsigned int);
+    void processPacket(IPv4Datagram *,unsigned int);
     void processMacPacket(cPacket * p,const Uint128 &,const Uint128 &,int);
-    void getMacAddress(IPDatagram *);
+    void getMacAddress(IPv4Datagram *);
 
     cPacket * get_packet_queue(struct in_addr dest_addr);
 
@@ -257,7 +257,7 @@ class DYMOUM : public ManetRoutingBase
 
     int initialized;
     int  node_id;
-    IPAddress *gateWayAddress;
+    IPv4Address *gateWayAddress;
     int NS_DEV_NR;
     uint32_t NS_IFINDEX;
     // cModule *ipmod;

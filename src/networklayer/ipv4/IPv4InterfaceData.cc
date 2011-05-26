@@ -32,7 +32,7 @@
 
 IPv4InterfaceData::IPv4InterfaceData()
 {
-    static const IPAddress allOnes("255.255.255.255");
+    static const IPv4Address allOnes("255.255.255.255");
     netmask = allOnes;
 
     metric = 0;
@@ -43,7 +43,7 @@ IPv4InterfaceData::IPv4InterfaceData()
 std::string IPv4InterfaceData::info() const
 {
     std::stringstream out;
-    out << "IP:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
+    out << "IPv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
     if (!getMulticastGroups().empty())
     {
         out << " mcastgrps:";
@@ -70,7 +70,7 @@ std::string IPv4InterfaceData::detailedInfo() const
     return out.str();
 }
 
-bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPAddress& multicastAddress) const
+bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const
 {
     int n = getMulticastGroups().size();
     for (int i=0; i<n; i++)

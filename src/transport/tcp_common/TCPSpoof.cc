@@ -15,7 +15,7 @@
 #include "TCPSpoof.h"
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -46,8 +46,8 @@ void TCPSpoof::sendSpoofPacket()
 {
     TCPSegment *tcpseg = new TCPSegment("spoof");
 
-    IPvXAddress srcAddr = IPAddressResolver().resolve(par("srcAddress"));
-    IPvXAddress destAddr = IPAddressResolver().resolve(par("destAddress"));
+    IPvXAddress srcAddr = IPvXAddressResolver().resolve(par("srcAddress"));
+    IPvXAddress destAddr = IPvXAddressResolver().resolve(par("destAddress"));
     int srcPort = par("srcPort");
     int destPort = par("destPort");
     bool isSYN = par("isSYN");
@@ -74,7 +74,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
     {
 #ifdef WITH_IPv4
         // send over IPv4
-        IPControlInfo *controlInfo = new IPControlInfo();
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
         controlInfo->setSrcAddr(src.get4());
         controlInfo->setDestAddr(dest.get4());

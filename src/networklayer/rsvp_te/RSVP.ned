@@ -105,8 +105,8 @@ simple RSVP
         double helloTimeout @unit(s);
         @display("i=block/control");
     gates:
-        input ipIn @labels(IPControlInfo/up);
-        output ipOut @labels(IPControlInfo/down);
+        input ipIn @labels(IPv4ControlInfo/up);
+        output ipOut @labels(IPv4ControlInfo/down);
         input mplsSwitchIn;
         input appIn;
 }

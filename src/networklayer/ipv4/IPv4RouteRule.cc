@@ -18,34 +18,34 @@
 
 #include <stdio.h>
 #include <sstream>
-#include "IPRouteRule.h"
+#include "IPv4RouteRule.h"
 #include "InterfaceEntry.h"
 
-void IPRouteRule::setRoule(Rule rule)
+void IPv4RouteRule::setRoule(Rule rule)
 {
     if (DROP!=rule && NONE!=rule)
         opp_error("Rule not supported yet");
     this->rule = rule;
 }
 
-IPRouteRule::IPRouteRule()
+IPv4RouteRule::IPv4RouteRule()
 {
     interfacePtr = NULL;
     rule = NONE;
     sPort=dPort=-1;
-    srcAddress=IPAddress::UNSPECIFIED_ADDRESS;
-    srcNetmask=IPAddress::UNSPECIFIED_ADDRESS;
-    destAddress=IPAddress::UNSPECIFIED_ADDRESS;
-    destNetmask=IPAddress::UNSPECIFIED_ADDRESS;
+    srcAddress=IPv4Address::UNSPECIFIED_ADDRESS;
+    srcNetmask=IPv4Address::UNSPECIFIED_ADDRESS;
+    destAddress=IPv4Address::UNSPECIFIED_ADDRESS;
+    destNetmask=IPv4Address::UNSPECIFIED_ADDRESS;
     protocol=IP_PROT_NONE;
 
 }
 
-IPRouteRule::~IPRouteRule()
+IPv4RouteRule::~IPv4RouteRule()
 {
 }
 
-std::string IPRouteRule::info() const
+std::string IPv4RouteRule::info() const
 {
     std::stringstream out;
     out << "srcAddr:"; if (srcAddress.isUnspecified()) out << "*  "; else out << srcAddress << "  ";
@@ -55,24 +55,35 @@ std::string IPRouteRule::info() const
     out << "destMask:"; if (destNetmask.isUnspecified()) out << "*  "; else out << destNetmask << "  ";
     out << "destPort:" << dPort << " ";
     out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "  ";
+
     switch (rule)
     {
-        case DROP:       out << " DROP"; break;
+        case DROP:   out << " DROP"; break;
         case ACCEPT: out << " ACCEPT"; break;
-        case NAT:          out << " NAT"; break;
-        case NONE:         out << " NONE"; break;
-        default:           out << " ???"; break;
+        case NAT:    out << " NAT"; break;
+        case NONE:   out << " NONE"; break;
+        default:     out << " ???"; break;
     }
+
     return out.str();
 }
 
-std::string IPRouteRule::detailedInfo() const
+std::string IPv4RouteRule::detailedInfo() const
 {
     return std::string();
 }
 
-const char *IPRouteRule::getInterfaceName() const
+const char *IPv4RouteRule::getInterfaceName() const
 {
     return interfacePtr ? interfacePtr->getName() : "";
+}
+
+IPv4RouteRule::Nat::~Nat()
+{
+    while (!natAddress.empty())
+    {
+       delete natAddress.begin()->second;
+       natAddress.erase(natAddress.begin());
+    }
 }
 

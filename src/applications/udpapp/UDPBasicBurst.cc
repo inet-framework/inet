@@ -21,7 +21,7 @@
 #include <omnetpp.h>
 #include "UDPBasicBurst.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPBasicBurst);
@@ -41,7 +41,7 @@ static bool selectFunction(cModule *mod, void *name)
 
 void UDPBasicBurst::initialize(int stage)
 {
-    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage!=3)
         return;
@@ -112,7 +112,7 @@ void UDPBasicBurst::initialize(int stage)
                     cTopology::Node *node = topo.getNode(i);
                     if (strstr (this->getFullPath().c_str(),node->getModule()->getFullPath().c_str())==NULL)
                     {
-                        destAddresses.push_back(IPAddressResolver().resolve(node->getModule()->getFullPath().c_str()));
+                        destAddresses.push_back(IPvXAddressResolver().resolve(node->getModule()->getFullPath().c_str()));
                     }
                 }
             }
@@ -124,14 +124,14 @@ void UDPBasicBurst::initialize(int stage)
                 {
                     cTopology::Node *node = topo.getNode(i);
                     if (strstr (this->getFullPath().c_str(),node->getModule()->getFullPath().c_str())==NULL)
-                        destAddresses.push_back(IPAddressResolver().resolve(node->getModule()->getFullPath().c_str()));
+                        destAddresses.push_back(IPvXAddressResolver().resolve(node->getModule()->getFullPath().c_str()));
                 }
             }
         }
         else if ( strstr (token,"Broadcast")!=NULL)
-            destAddresses.push_back(IPAddress::ALLONES_ADDRESS);
+            destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
         else
-            destAddresses.push_back(IPAddressResolver().resolve(token));
+            destAddresses.push_back(IPvXAddressResolver().resolve(token));
     }
 
     if (destAddresses.empty())

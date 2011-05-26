@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include <sstream>
-#include "IPRoute.h"
+#include "IPv4Route.h"
 #include "InterfaceEntry.h"
 
 
-IPRoute::IPRoute()
+IPv4Route::IPv4Route()
 {
     interfacePtr = NULL;
 
@@ -31,7 +31,7 @@ IPRoute::IPRoute()
     source = MANUAL;
 }
 
-std::string IPRoute::info() const
+std::string IPv4Route::info() const
 {
     std::stringstream out;
     out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
@@ -54,12 +54,12 @@ std::string IPRoute::info() const
     return out.str();
 }
 
-std::string IPRoute::detailedInfo() const
+std::string IPv4Route::detailedInfo() const
 {
     return std::string();
 }
 
-const char *IPRoute::getInterfaceName() const
+const char *IPv4Route::getInterfaceName() const
 {
     return interfacePtr ? interfacePtr->getName() : "";
 }

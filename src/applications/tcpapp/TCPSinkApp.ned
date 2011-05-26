@@ -59,7 +59,7 @@ import inet.applications.ITCPApp;
 //
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them.
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 simple TCPSinkApp like ITCPApp
 {

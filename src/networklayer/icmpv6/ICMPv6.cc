@@ -197,7 +197,7 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 
 void ICMPv6::sendToIP(ICMPv6Message *msg)
 {
-    // assumes IPControlInfo is already attached
+    // assumes IPv4ControlInfo is already attached
     send(msg,"ipv6Out");
 }
 

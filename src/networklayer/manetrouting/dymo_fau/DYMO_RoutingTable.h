@@ -36,8 +36,8 @@
 class DYMO_RoutingTable : public cObject
 {
   public:
-    DYMO_RoutingTable(cObject* host, const IPAddress& myAddr, const char* DYMO_INTERFACES, const IPAddress& LL_MANET_ROUTERS) {DYMO_RoutingTable(host,myAddr);}
-    DYMO_RoutingTable(cObject* host, const IPAddress& myAddr);
+    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr, const char* DYMO_INTERFACES, const IPv4Address& LL_MANET_ROUTERS) {DYMO_RoutingTable(host,myAddr);}
+    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr);
     virtual ~DYMO_RoutingTable();
 
     /** @brief inherited from cObject */
@@ -63,9 +63,9 @@ class DYMO_RoutingTable : public cObject
     /** @removes invalid routes from the network layer routing table **/
     void maintainAssociatedRoutingTable ();
     /** @searchs an entry (exact match) and gives back a pointer to it, or 0 if none is found **/
-    DYMO_RoutingEntry* getByAddress(IPAddress addr);
+    DYMO_RoutingEntry* getByAddress(IPv4Address addr);
     /** @searchs an entry (longest-prefix match) and gives back a pointer to it, or 0 if none is found **/
-    DYMO_RoutingEntry* getForAddress(IPAddress addr);
+    DYMO_RoutingEntry* getForAddress(IPv4Address addr);
     /** @returns the routing table **/
     std::vector<DYMO_RoutingEntry *> getRoutingTable();
 

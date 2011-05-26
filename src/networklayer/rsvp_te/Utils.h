@@ -40,7 +40,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const IPAddressVector& vec, IPAddress addr); // use TEMPLATE
+bool find(const IPAddressVector& vec, IPv4Address addr); // use TEMPLATE
 
 /**
  * TODO documentation
@@ -50,7 +50,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 /**
  * TODO documentation
  */
-int find(const EroVector& ERO, IPAddress node);
+int find(const EroVector& ERO, IPv4Address node);
 
 /**
  * XXX function appears to be unused

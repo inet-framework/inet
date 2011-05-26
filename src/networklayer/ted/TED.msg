@@ -14,7 +14,7 @@
 
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 #define LINK_STATE_MESSAGE      1
 
@@ -22,17 +22,17 @@ typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 //
 // Represents a link in the ~TED and in ~LinkStateMsg packets.
 //
 struct TELinkStateInfo
 {
-    IPAddress advrouter; // routerId of originator of this link state entry
-    IPAddress linkid;    // identifies link within advrouter; set to peer's address
-    IPAddress local;     // address of local interface of this link
-    IPAddress remote;    // address of "gateway" to peer
+    IPv4Address advrouter; // routerId of originator of this link state entry
+    IPv4Address linkid;    // identifies link within advrouter; set to peer's address
+    IPv4Address local;     // address of local interface of this link
+    IPv4Address remote;    // address of "gateway" to peer
     double metric;       // link metric
     double MaxBandwidth; // maximum bandwidth (bps)
     double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?

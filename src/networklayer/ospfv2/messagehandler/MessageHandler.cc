@@ -166,7 +166,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
 {
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
-        IPControlInfo* controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
+        IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (packet->getControlInfo());
         int interfaceId = controlInfo->getInterfaceId();
         OSPF::AreaID areaID = packet->getAreaID().getInt();
         OSPF::Area* area = router->getArea(areaID);
@@ -271,7 +271,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
 
 void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
-    IPControlInfo *ipControlInfo = new IPControlInfo();
+    IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     ipControlInfo->setProtocol(IP_PROT_OSPF);
     ipControlInfo->setDestAddr(ulongFromIPv4Address(destination));
     ipControlInfo->setTimeToLive(ttl);

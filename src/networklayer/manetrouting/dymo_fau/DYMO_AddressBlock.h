@@ -25,7 +25,7 @@
 class DYMO_AddressBlock
 {
   protected:
-    uint32_t address; /**< The IP address of an additional node that can be reached via the DYMO router adding this information.  Each AdditionalNode.Address must have an associated Node.SeqNum in the address TLV block. */
+    uint32_t address; /**< The IPv4 address of an additional node that can be reached via the DYMO router adding this information.  Each AdditionalNode.Address must have an associated Node.SeqNum in the address TLV block. */
     uint16_t seqNum; /**< The DYMO sequence number associated with this routing information. */
     uint8_t prefix; /**< The Node.Address is a network address with a particular prefix length. */
     uint8_t dist; /**< A metric of the distance to reach the associated Node.Address. This field is incremented by at least one at each intermediate DYMO router, except the TargetNode.AddTLV.Dist.  The TargetNode's distance information is not modified. */

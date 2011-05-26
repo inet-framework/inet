@@ -19,7 +19,7 @@
 
 #include <stdexcept>
 #include "DYMO_OutstandingRREQList.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQ& o)
 {
@@ -74,7 +74,7 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(unsigned int destA
 {
     for (std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
     {
-        if (IPAddress(destAddr).prefixMatches((*iter)->destAddr, prefix)) return *iter;
+        if (IPv4Address(destAddr).prefixMatches((*iter)->destAddr, prefix)) return *iter;
     }
     return 0;
 }

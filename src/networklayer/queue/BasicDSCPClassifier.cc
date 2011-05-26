@@ -20,7 +20,7 @@
 #include "BasicDSCPClassifier.h"
 
 #ifdef WITH_IPv4
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -39,10 +39,10 @@ int BasicDSCPClassifier::getNumQueues()
 int BasicDSCPClassifier::classifyPacket(cMessage *msg)
 {
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPDatagram *>(msg))
+    if (dynamic_cast<IPv4Datagram *>(msg))
     {
         // IPv4 QoS: map DSCP to queue number
-        IPDatagram *datagram = (IPDatagram *)msg;
+        IPv4Datagram *datagram = (IPv4Datagram *)msg;
         int dscp = datagram->getDiffServCodePoint();
         return classifyByDSCP(dscp);
     }

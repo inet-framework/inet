@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <functional>
 
+#include "IPv4Address.h"
+
+
 // global constants
 #define LS_REFRESH_TIME                     1800
 #define MIN_LS_INTERVAL                     5
@@ -67,13 +70,13 @@ struct AuthenticationKeyType {
     char    bytes[8];
 };
 
-//FIXME remove this type, use IPAddress instead
-struct IPv4Address {
-    unsigned char   bytes[4];
-
-
-    unsigned int asInt() { return (bytes[0]<<24) | bytes[1]<<16 | bytes[2]<<8 | bytes[3]; }
-};
+////FIXME remove this type, use IPv4Address instead
+//struct IPv4Address {
+//    unsigned char   bytes[4];
+//
+//
+//    unsigned int asInt() { return (bytes[0]<<24) | bytes[1]<<16 | bytes[2]<<8 | bytes[3]; }
+//};
 
 class IPv4Address_Less : public std::binary_function <IPv4Address, IPv4Address, bool>
 {
@@ -121,64 +124,25 @@ struct DesignatedRouterID {
 const RouterID              NULL_ROUTERID = 0;
 const AreaID                BACKBONE_AREAID = 0;
 const LinkStateID           NULL_LINKSTATEID = 0;
-const IPv4Address           NULL_IPV4ADDRESS = { {0, 0, 0, 0} };
-const IPv4Address           ALL_SPF_ROUTERS = { {224, 0, 0, 5} };
-const IPv4Address           ALL_D_ROUTERS = { {224, 0, 0, 6} };
-const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { { {0, 0, 0, 0} }, { {0, 0, 0, 0} } };
-const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, { {0, 0, 0, 0} } };
+const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
+const IPv4Address           ALL_SPF_ROUTERS(224, 0, 0, 5);
+const IPv4Address           ALL_D_ROUTERS(224, 0, 0, 6);
+const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
+const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, IPv4Address(0, 0, 0, 0)};
 
 } // namespace OSPF
 
-inline bool operator== (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
+inline IPv4Address operator& (IPv4Address address, IPv4Address mask)
 {
-    return (leftAddress.bytes[0] == rightAddress.bytes[0] &&
-            leftAddress.bytes[1] == rightAddress.bytes[1] &&
-            leftAddress.bytes[2] == rightAddress.bytes[2] &&
-            leftAddress.bytes[3] == rightAddress.bytes[3]);
-}
-
-inline bool operator!= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
-{
-    return (!(leftAddress == rightAddress));
-}
-
-inline bool operator< (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
-{
-    return leftAddress.asInt() < rightAddress.asInt();
-}
-
-inline bool operator<= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
-{
-    return ((leftAddress < rightAddress) || (leftAddress == rightAddress));
-}
-
-inline bool operator> (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
-{
-    return (!(leftAddress <= rightAddress));
-}
-
-inline bool operator>= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
-{
-    return (!(leftAddress < rightAddress));
-}
-
-inline OSPF::IPv4Address operator& (OSPF::IPv4Address address, OSPF::IPv4Address mask)
-{
-    OSPF::IPv4Address maskedAddress;
-    maskedAddress.bytes[0] = address.bytes[0] & mask.bytes[0];
-    maskedAddress.bytes[1] = address.bytes[1] & mask.bytes[1];
-    maskedAddress.bytes[2] = address.bytes[2] & mask.bytes[2];
-    maskedAddress.bytes[3] = address.bytes[3] & mask.bytes[3];
+    IPv4Address maskedAddress;
+    maskedAddress.set(address.getInt() & mask.getInt());
     return maskedAddress;
 }
 
-inline OSPF::IPv4Address operator| (OSPF::IPv4Address address, OSPF::IPv4Address match)
+inline IPv4Address operator| (IPv4Address address, IPv4Address match)
 {
-    OSPF::IPv4Address matchAddress;
-    matchAddress.bytes[0] = address.bytes[0] | match.bytes[0];
-    matchAddress.bytes[1] = address.bytes[1] | match.bytes[1];
-    matchAddress.bytes[2] = address.bytes[2] | match.bytes[2];
-    matchAddress.bytes[3] = address.bytes[3] | match.bytes[3];
+    IPv4Address matchAddress;
+    matchAddress.set(address.getInt() | match.getInt());
     return matchAddress;
 }
 
@@ -204,7 +168,7 @@ inline bool operator!= (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterI
     return (!(leftID == rightID));
 }
 
-inline bool OSPF::IPv4Address_Less::operator() (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress) const
+inline bool OSPF::IPv4Address_Less::operator() (IPv4Address leftAddress, IPv4Address rightAddress) const
 {
     return (leftAddress < rightAddress);
 }
@@ -223,66 +187,19 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
              (leftKey.advertisingRouter < rightKey.advertisingRouter)));
 }
 
-inline OSPF::IPv4Address ipv4AddressFromAddressString(const char* charForm)
+inline IPv4Address ipv4AddressFromAddressString(const char* charForm)
 {
-    OSPF::IPv4Address byteForm = OSPF::NULL_IPV4ADDRESS;
-
-    int  lastDot = -1;
-    int  byteCount = 0;
-    for (int i = 0; i < 16; i++) {
-        if (charForm[i] == '\0') {
-            if ((byteCount <= 3) && (i - lastDot - 1 <= 3)) {
-                switch (i - lastDot - 1) {
-                    case 3: byteForm.bytes[byteCount] += (((charForm[i - 3] - '0') < 3) ? (charForm[i - 3] - '0') : 0) * 100;
-                    case 2: byteForm.bytes[byteCount] += (charForm[i - 2] - '0') * 10;
-                    case 1: byteForm.bytes[byteCount] += charForm[i - 1] - '0';
-                    default: break;
-                }
-            }
-            break;
-        }
-        if ((!isdigit(charForm[i])) && (charForm[i] != '.')) {
-            break;
-        }
-        if (charForm[i] == '.') {
-            if (i == 0) {
-                break;
-            }
-            if (i - lastDot - 1 > 3) {
-                break;
-            }
-            switch (i - lastDot - 1) {
-                case 3: byteForm.bytes[byteCount] += (((charForm[i - 3] - '0') < 3) ? (charForm[i - 3] - '0') : 0) * 100;
-                case 2: byteForm.bytes[byteCount] += (charForm[i - 2] - '0') * 10;
-                case 1: byteForm.bytes[byteCount] += charForm[i - 1] - '0';
-                default: break;
-            }
-            byteCount++;
-            lastDot = i;
-            if (byteCount > 3) {
-                break;
-            }
-        }
-    }
-
-    return byteForm;
+    return IPv4Address(charForm);
 }
 
-inline OSPF::IPv4Address ipv4AddressFromULong(unsigned long longForm)
+inline IPv4Address ipv4AddressFromULong(unsigned long longForm)
 {
-
-    OSPF::IPv4Address byteForm;
-
-    byteForm.bytes[0] = (longForm & 0xFF000000) >> 24;
-    byteForm.bytes[1] = (longForm & 0x00FF0000) >> 16;
-    byteForm.bytes[2] = (longForm & 0x0000FF00) >> 8;
-    byteForm.bytes[3] =  longForm & 0x000000FF;
-    return byteForm;
+    return IPv4Address(longForm);
 }
 
-inline unsigned long ulongFromIPv4Address(OSPF::IPv4Address byteForm)
+inline unsigned long ulongFromIPv4Address(IPv4Address byteForm)
 {
-    return ((byteForm.bytes[0] << 24) + (byteForm.bytes[1] << 16) + (byteForm.bytes[2] << 8) + byteForm.bytes[3]);
+    return byteForm.getInt();
 }
 
 inline unsigned long ulongFromAddressString(const char* charForm)
@@ -290,14 +207,13 @@ inline unsigned long ulongFromAddressString(const char* charForm)
     return ulongFromIPv4Address(ipv4AddressFromAddressString(charForm));
 }
 
-inline char* addressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
+inline char* addressStringFromIPv4Address(char* buffer, int bufferLength, IPv4Address byteForm)
 {
-    if (bufferLength < 16) {
+    if (bufferLength < 16)
         buffer = '\0';
-    }
-    else {
-        sprintf(buffer, "%d.%d.%d.%d", byteForm.bytes[0], byteForm.bytes[1], byteForm.bytes[2], byteForm.bytes[3]);
-    }
+    else
+        sprintf(buffer, "%s", byteForm.str().c_str());
+
     return buffer;
 }
 
@@ -350,3 +266,4 @@ inline char hexPairToByte(char upperHex, char lowerHex)
 }
 
 #endif // __COMMON_HPP__
+

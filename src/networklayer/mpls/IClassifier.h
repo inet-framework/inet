@@ -17,13 +17,13 @@
 
 #include <omnetpp.h>
 
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 #include "LIBTable.h"
 
 /**
  * This is an abstract interface for packet classifiers in MPLS ingress routers.
  * The MPLS module holds a pointer to an IClassifier object, and uses it to
- * classify IP datagrams and find the right label-switched path for them.
+ * classify IPv4 datagrams and find the right label-switched path for them.
  *
  * A known sub-interface is IRSVPClassifier.
  *
@@ -40,13 +40,13 @@ class INET_API IClassifier
      * outInterface, color) are output parameters only.
      *
      * In subclasses, this function should be implemented to determine the forwarding
-     * equivalence class for the IP datagram passed, and map it to an outLabel
+     * equivalence class for the IPv4 datagram passed, and map it to an outLabel
      * and outInterface.
      *
      * The color parameter (which can be set to an arbitrary value) will
      * only be used for the NAM trace if one will be recorded.
      */
-     virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
+     virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
 };
 
 #endif

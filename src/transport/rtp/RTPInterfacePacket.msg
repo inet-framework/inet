@@ -19,12 +19,12 @@
 
 cplusplus {{
 #include "INETDefs.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "RTPSenderControlMessage_m.h"
 #include "RTPSenderStatusMessage_m.h"
 }}
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 enum RTPSenderControlMessageCommands;
 
@@ -78,7 +78,7 @@ class RTPCIEnterSession extends RTPControlInfo
     string commonName;
     string profileName;
     int bandwidth;
-    IPAddress destinationAddress;
+    IPv4Address destinationAddress;
     int port;
 };
 

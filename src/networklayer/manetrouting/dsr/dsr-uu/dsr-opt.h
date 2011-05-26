@@ -89,7 +89,7 @@ struct dsr_pad1_opt
 * is not the case in ns-2 */
 #define DSR_OPT_HDR_LEN sizeof(struct dsr_opt_hdr)
 #define DSR_OPT_PAD1_LEN 1
-#define DSR_PKT_MIN_LEN 24  /* IP header + DSR header =  20 + 4 */
+#define DSR_PKT_MIN_LEN 24  /* IPv4 header + DSR header =  20 + 4 */
 
     /* Header types */
 #define DSR_OPT_PADN       0

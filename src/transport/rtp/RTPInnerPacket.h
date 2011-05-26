@@ -62,7 +62,7 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      * information for starting the rtp session.
      */
     virtual void setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth,
-            int rtcpPercentage, IPAddress address, int port);
+            int rtcpPercentage, IPv4Address address, int port);
 
     /**
      * Called by the rtcp module after it has waited for half an rtcp interval
@@ -106,7 +106,7 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void setDataInPkt(RTPPacket *packet, IPAddress address, int port);
+    virtual void setDataInPkt(RTPPacket *packet, IPv4Address address, int port);
 
     /**
      * Returns the maximum transmission unit stored in this RTPInnerPacket.

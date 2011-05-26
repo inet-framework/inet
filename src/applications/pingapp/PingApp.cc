@@ -20,11 +20,11 @@
 
 #include "PingApp.h"
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_IPv4
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -88,9 +88,9 @@ void PingApp::handleMessage(cMessage *msg)
         // on first call we need to initialize
         if (destAddr.isUnspecified())
         {
-            destAddr = IPAddressResolver().resolve(par("destAddr"));
+            destAddr = IPvXAddressResolver().resolve(par("destAddr"));
             ASSERT(!destAddr.isUnspecified());
-            srcAddr = IPAddressResolver().resolve(par("srcAddr"));
+            srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
             EV << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "\n";
         }
 
@@ -141,7 +141,7 @@ void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXA
     {
 #ifdef WITH_IPv4
         // send to IPv4
-        IPControlInfo *ctrl = new IPControlInfo();
+        IPv4ControlInfo *ctrl = new IPv4ControlInfo();
         ctrl->setSrcAddr(srcAddr.get4());
         ctrl->setDestAddr(destAddr.get4());
         ctrl->setTimeToLive(hopLimit);
@@ -174,9 +174,9 @@ void PingApp::processPingResponse(PingPayload *msg)
     int msgHopCount = -1;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo()) != NULL)
+    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
     {
-        IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
+        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
         src = ctrl->getSrcAddr();
         dest = ctrl->getDestAddr();
         msgHopCount = ctrl->getTimeToLive();

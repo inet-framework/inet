@@ -58,7 +58,7 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
   protected:
     TED *tedmod;
     cMessage *announceMsg;
-    IPAddress routerId;
+    IPv4Address routerId;
 
     IPAddressVector peerIfAddrs; // addresses of interfaces towards neighbouring routers
 
@@ -71,14 +71,14 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
     virtual int numInitStages() const  {return 5;}
     virtual void handleMessage(cMessage *msg);
 
-    virtual void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
+    virtual void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address sender);
 
     // INotifiable method
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
-    virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer);
-    virtual void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req);
-    virtual void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
+    virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer);
+    virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo> & list, bool req);
+    virtual void sendToIP(LinkStateMsg *msg, IPv4Address destAddr);
 
 };
 

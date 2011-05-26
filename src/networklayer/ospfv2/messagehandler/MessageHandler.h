@@ -25,7 +25,7 @@
 #include "LinkStateUpdateHandler.h"
 #include "LinkStateAcknowledgementHandler.h"
 #include "OSPFTimer_m.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "OSPFInterface.h"
 //#include "OSPFNeighbor.h"
 

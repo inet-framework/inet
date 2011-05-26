@@ -387,11 +387,11 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
         srt->cost_size=vector_size;
         memcpy(srt->cost,vector_cost,sizeof(unsigned int)*vector_size);
 #ifdef MobilityFramework
-        IPAddress dstAddr = dst.s_addr;
-        IPAddress srtAddr = srt->addrs[0].s_addr;
+        IPv4Address dstAddr = dst.s_addr;
+        IPv4Address srtAddr = srt->addrs[0].s_addr;
 #else
-    IPAddress dstAddr((uint32_t)dst.s_addr);
-    IPAddress srtAddr((uint32_t)srt->addrs[0].s_addr);
+    IPv4Address dstAddr((uint32_t)dst.s_addr);
+    IPv4Address srtAddr((uint32_t)srt->addrs[0].s_addr);
 #endif
 
         if (myAddr.s_addr==src.s_addr)
@@ -474,9 +474,9 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
             if (j<n)
             {
 #ifdef MobilityFramework
-                IPAddress srtAddr = srt->addrs[j].s_addr;
+                IPv4Address srtAddr = srt->addrs[j].s_addr;
 #else
-                IPAddress srtAddr((uint32_t)srt->addrs[j].s_addr);
+                IPv4Address srtAddr((uint32_t)srt->addrs[j].s_addr);
 #endif
                 double cost = getCost(srtAddr);
                 if (cost<0)
@@ -488,9 +488,9 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
             else if (n==0)
             {
 #ifdef MobilityFramework
-                IPAddress srtAddr = srt->dst.s_addr;
+                IPv4Address srtAddr = srt->dst.s_addr;
 #else
-                IPAddress srtAddr((uint32_t)srt->dst.s_addr);
+                IPv4Address srtAddr((uint32_t)srt->dst.s_addr);
 #endif
                 double cost  = getCost(srtAddr);
                 if (cost<0)
@@ -578,9 +578,9 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
             {
 
 #ifdef MobilityFramework
-                IPAddress srtAddr = dsr_aux->addrs[j].s_addr;
+                IPv4Address srtAddr = dsr_aux->addrs[j].s_addr;
 #else
-                IPAddress srtAddr((uint32_t)dsr_aux->addrs[j].s_addr);
+                IPv4Address srtAddr((uint32_t)dsr_aux->addrs[j].s_addr);
 #endif
                 double cost = getCost(srtAddr);
                 if (cost<0)

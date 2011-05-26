@@ -20,13 +20,13 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 
 #ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
 #endif
 
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 
 #ifdef WITH_UDP
 #include "UDPControlInfo_m.h"
@@ -204,8 +204,8 @@ void SCTP::handleMessage(cMessage *msg)
             }
             else
             {
-            	IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
-                IPDatagram *datagram = controlInfo->removeOrigDatagram();
+            	IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
+                IPv4Datagram *datagram = controlInfo->removeOrigDatagram();
                 delete datagram;
                 sctpEV3<<"controlInfo srcAddr="<<controlInfo->getSrcAddr()<<"   destAddr="<<controlInfo->getDestAddr()<<"\n";
                 srcAddr = controlInfo->getSrcAddr();
@@ -382,7 +382,7 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddr
     }
     else
     {
-        IPControlInfo *controlInfo = new IPControlInfo();
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_SCTP);
         controlInfo->setSrcAddr(srcAddr.get4());
         controlInfo->setDestAddr(destAddr.get4());
@@ -409,7 +409,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAdd
 
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH*8);
     msg->addChunk(scChunk);
-    IPControlInfo *controlInfo = new IPControlInfo();
+    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_SCTP);
     controlInfo->setSrcAddr(srcAddr.get4());
     controlInfo->setDestAddr(destAddr.get4());

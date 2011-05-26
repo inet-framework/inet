@@ -19,14 +19,14 @@
 package inet.networklayer.autorouting.ipv4;
 
 //
-// Configures IP addresses and routing tables for a network.
+// Configures IPv4 addresses and routing tables for a network.
 //
 // This module does't connect to any other modules (it has no gates),
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#  assign IP addresses to hosts and routers.
+//   -#  assign IPv4 addresses to hosts and routers.
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest

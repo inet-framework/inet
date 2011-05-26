@@ -15,7 +15,7 @@
 #include "TCPGenericCliAppBase.h"
 
 #include "GenericAppMsg_m.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 simsignal_t TCPGenericCliAppBase::connectSignal = SIMSIGNAL_NULL;
@@ -73,7 +73,7 @@ void TCPGenericCliAppBase::connect()
     EV << "issuing OPEN command\n";
     setStatusString("connecting");
 
-    socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
+    socket.connect(IPvXAddressResolver().resolve(connectAddress), connectPort);
 
     numSessions++;
     emit(connectSignal, 1L);

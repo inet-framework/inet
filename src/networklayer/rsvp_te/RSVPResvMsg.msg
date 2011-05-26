@@ -23,7 +23,7 @@ cplusplus {{
 struct RsvpHopObj_t;
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 class noncobject FlowDescriptorVector;
 
@@ -59,7 +59,7 @@ packet RSVPResvError extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
-    IPAddress errorNode;
+    IPv4Address errorNode;
     int errorCode;
     int rsvpKind = RERROR_MESSAGE;
 }

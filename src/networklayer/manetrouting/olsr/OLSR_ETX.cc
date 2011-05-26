@@ -37,7 +37,7 @@
 
 #include <omnetpp.h>
 #include "UDPPacket.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
 
@@ -1621,7 +1621,7 @@ OLSR_ETX::send_pkt()
         return;
 
     Uint128 destAdd;
-    destAdd = IPAddress::ALLONES_ADDRESS;
+    destAdd = IPv4Address::ALLONES_ADDRESS;
     // Calculates the number of needed packets
     int num_pkts = (num_msgs % OLSR_ETX_MAX_MSGS == 0) ? num_msgs / OLSR_ETX_MAX_MSGS :
                    (num_msgs / OLSR_ETX_MAX_MSGS + 1);
@@ -2281,7 +2281,7 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
 ///
 /// \param p the packet which couldn't be delivered by the MAC layer.
 ///
-// void OLSR::mac_failed(IPDatagram* p) from OLSR
+// void OLSR::mac_failed(IPv4Datagram* p) from OLSR
 
 ///
 /// \brief Schedule the timer used for sending HELLO messages.

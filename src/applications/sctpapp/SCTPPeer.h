@@ -74,7 +74,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         struct pathStatus {
             bool active;
             bool primaryPath;
-            IPAddress  pid;
+            IPv4Address  pid;
         };
         typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
         SCTPPathStatus sctpPathStatus;

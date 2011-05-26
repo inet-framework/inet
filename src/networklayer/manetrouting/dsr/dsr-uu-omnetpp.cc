@@ -25,7 +25,7 @@
 //#include <iostream>
 #include "dsr-uu-omnetpp.h"
 #ifndef MobilityFramework
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "Ieee802Ctrl_m.h"
 #include "Ieee80211Frame_m.h"
 #else
@@ -132,8 +132,8 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
         p->setNextAddress(dp->nxt_hop.s_addr);
         p->setControlInfo(new MacControlInfo(macAddr));
 #else
-        IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(p->getControlInfo());
-        IPAddress nextIp((uint32_t)dp->nxt_hop.s_addr);
+        IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
+        IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
         controlInfo->setNextHopAddr(nextIp);
         p->setNextAddress(nextIp);
 #endif
@@ -155,7 +155,7 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
 #ifdef MobilityFramework
     int prev = myaddr_.s_addr;
 #else
-    IPAddress prev((uint32_t)myaddr_.s_addr);
+    IPv4Address prev((uint32_t)myaddr_.s_addr);
 #endif
     p->setPrevAddress(prev);
     if (jitter)
@@ -193,11 +193,11 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     int macAddr = arp->getMacAddr(dp->dst.s_addr);
     dgram->setControlInfo(new MacControlInfo(macAddr));
 #else
-    IPDatagram *dgram;
-    dgram = new IPDatagram;
-    IPAddress destAddress_var((uint32_t)dp->dst.s_addr);
+    IPv4Datagram *dgram;
+    dgram = new IPv4Datagram;
+    IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
     dgram->setDestAddress(destAddress_var);
-    IPAddress srcAddress_var((uint32_t)dp->src.s_addr);
+    IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
     dgram->setSrcAddress(srcAddress_var);
     dgram->setHeaderLength(dp->nh.iph->ihl); // Header length
     dgram->setVersion(dp->nh.iph->version); // Ip version
@@ -437,7 +437,7 @@ void DSRUU::initialize (int stage)
         bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
         if (manetPurgeRoutingTables)
         {
-            const IPRoute *entry;
+            const IPv4Route *entry;
             // clean the route table wlan interface entry
             for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
             {
@@ -633,10 +633,10 @@ void DSRUU::handleMessage(cMessage* msg)
     }
 
 #ifndef MobilityFramework
-    IPDatagram * ipDgram=NULL;
-    if (dynamic_cast<IPDatagram *>(msg))
+    IPv4Datagram * ipDgram=NULL;
+    if (dynamic_cast<IPv4Datagram *>(msg))
     {
-        ipDgram=dynamic_cast<IPDatagram *>(msg);
+        ipDgram=dynamic_cast<IPv4Datagram *>(msg);
     }
     else
     {
@@ -749,7 +749,7 @@ void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId
 
 void DSRUU::receiveChangeNotification(int category, const cPolymorphic *details)
 {
-    IPDatagram  *dgram=NULL;
+    IPv4Datagram  *dgram=NULL;
     //current_time = simTime();
 
     if (details==NULL)
@@ -760,13 +760,13 @@ void DSRUU::receiveChangeNotification(int category, const cPolymorphic *details)
         Enter_Method("Dsr Link Break");
         Ieee80211DataFrame *frame  = check_and_cast<Ieee80211DataFrame *>(details);
 #if OMNETPP_VERSION > 0x0400
-        if (dynamic_cast<IPDatagram *>(frame->getEncapsulatedPacket()))
-            dgram = check_and_cast<IPDatagram *>(frame->getEncapsulatedPacket());
+        if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
+            dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
         else
             return;
 #else
-if (dynamic_cast<IPDatagram *>(frame->getEncapsulatedMsg()))
-    dgram = check_and_cast<IPDatagram *>(frame->getEncapsulatedMsg());
+if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedMsg()))
+    dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedMsg());
 else
     return;
 #endif
@@ -817,7 +817,7 @@ DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedMsg());
 #ifdef MobilityFramework
 void DSRUU::packetFailed(NetwPkt * ipDgram)
 #else
-void DSRUU::packetFailed(IPDatagram *ipDgram)
+void DSRUU::packetFailed(IPv4Datagram *ipDgram)
 #endif
 {
     struct dsr_pkt *dp;
@@ -897,7 +897,7 @@ void DSRUU::packetFailed(IPDatagram *ipDgram)
 }
 
 
-void DSRUU::linkFailed(IPAddress ipAdd)
+void DSRUU::linkFailed(IPv4Address ipAdd)
 {
 
     struct in_addr nxt_hop;
@@ -994,13 +994,13 @@ void DSRUU::EtxMsgSend(unsigned long data)
     EtxList neigh[15];
     DSRPktExt* msg = new DSRPktExt();
 #ifndef MobilityFramework
-    IPAddress destAddress_var(DSR_BROADCAST);
+    IPv4Address destAddress_var(DSR_BROADCAST);
     msg->setDestAddress(destAddress_var);
-    IPAddress srcAddress_var((uint32_t)myaddr_.s_addr);
+    IPv4Address srcAddress_var((uint32_t)myaddr_.s_addr);
     msg->setSrcAddress(srcAddress_var);
     msg->setTimeToLive (1); // TTL
     msg->setTransportProtocol(IP_PROT_DSR); // Transport protocol
-    IPControlInfo *ipControlInfo = new IPControlInfo();
+    IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     ipControlInfo->setProtocol(IP_PROT_DSR);
     ipControlInfo->setInterfaceId(interfaceId); // If broadcast packet send to interface
     ipControlInfo->setSrcAddr(srcAddress_var);
@@ -1084,11 +1084,11 @@ void DSRUU::EtxMsgProc(cMessage *m)
     int size = msg->getSizeExtension();
 
 #ifndef MobilityFramework
-    IPAddress myAddress ((uint32_t)myaddr_.s_addr);
-    IPAddress srcAddress (msg->getSrcAddress());
+    IPv4Address myAddress ((uint32_t)myaddr_.s_addr);
+    IPv4Address srcAddress (msg->getSrcAddress());
 #else
-    IPAddress myAddress = myaddr_.s_addr;
-    IPAddress srcAddress = msg->getSrcAddr();
+    IPv4Address myAddress = myaddr_.s_addr;
+    IPv4Address srcAddress = msg->getSrcAddr();
 #endif
 
     for (int i = 0; i<size; i++)
@@ -1132,7 +1132,7 @@ void DSRUU::EtxMsgProc(cMessage *m)
     delete m;
 }
 
-double DSRUU::getCost(IPAddress add)
+double DSRUU::getCost(IPv4Address add)
 {
     ETXNeighborTable::iterator it = etxNeighborTable.find(add);
     if (it==etxNeighborTable.end())
@@ -1159,9 +1159,9 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
     }
     myAddr = my_addr();
 #ifndef MobilityFramework
-    IPAddress myAddress((uint32_t)myAddr.s_addr);
+    IPv4Address myAddress((uint32_t)myAddr.s_addr);
 #else
-    IPAddress myAddress =myAddr.s_addr;
+    IPv4Address myAddress =myAddr.s_addr;
 #endif
 
     if (dp->costVectorSize==0 && dp->src.s_addr!=myAddr.s_addr)
@@ -1170,7 +1170,7 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
         dp->costVector = new EtxCost[1];
         dp->costVector[0].address=myAddress;
 #ifndef MobilityFramework
-        double cost = getCost (IPAddress((uint32_t)dp->src.s_addr));
+        double cost = getCost (IPv4Address((uint32_t)dp->src.s_addr));
 #else
         double cost = getCost (dp->src.s_addr);
 #endif
@@ -1247,14 +1247,14 @@ void DSRUU::AddCost(struct dsr_pkt *dp,struct dsr_srt *srt)
     {
         add =srt->addrs[i];
 #ifndef MobilityFramework
-        dp->costVector[i].address = IPAddress((uint32_t)add.s_addr);
+        dp->costVector[i].address = IPv4Address((uint32_t)add.s_addr);
 #else
         dp->costVector[i].address= add.s_addr;
 #endif
         dp->costVector[i].cost=srt->cost[i];
     }
 #ifndef MobilityFramework
-    dp->costVector[srt->cost_size-1].address=IPAddress((uint32_t)srt->dst.s_addr);
+    dp->costVector[srt->cost_size-1].address=IPv4Address((uint32_t)srt->dst.s_addr);
 #else
     dp->costVector[srt->cost_size-1].address=srt->dst.s_addr;
 #endif

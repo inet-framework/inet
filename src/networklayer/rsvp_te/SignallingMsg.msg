@@ -14,7 +14,7 @@
 //
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IntServ.h"
 
 #define MSG_PSB_TIMER               1
@@ -37,7 +37,7 @@ cplusplus {{
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 class noncobject SessionObj_t;
 
@@ -106,7 +106,7 @@ message RsbTimeoutMsg extends SignallingMsg
 //
 message HelloTimerMsg extends SignallingMsg
 {
-    IPAddress peer;
+    IPv4Address peer;
 
     int command = MSG_HELLO_TIMER;
 }
@@ -116,7 +116,7 @@ message HelloTimerMsg extends SignallingMsg
 //
 message HelloTimeoutMsg extends SignallingMsg
 {
-    IPAddress peer;
+    IPv4Address peer;
 
     int command = MSG_HELLO_TIMEOUT;
 }

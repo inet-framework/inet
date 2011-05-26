@@ -20,8 +20,8 @@
 #include "DYMO_DataQueue.h"
 #include "IPv4InterfaceData.h"
 #include "Ieee802Ctrl_m.h"
-#include "IPControlInfo.h"
-#include "IP.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4.h"
 
 std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o)
 {
@@ -75,12 +75,12 @@ std::string DYMO_DataQueue::detailedInfo() const
 }
 
 
-void DYMO_DataQueue::queuePacket(const IPDatagram* datagram)
+void DYMO_DataQueue::queuePacket(const IPv4Datagram* datagram)
 {
-    IPAddress destAddr = datagram->getDestAddress();
+    IPv4Address destAddr = datagram->getDestAddress();
 
     ev << "Queueing data packet to " << destAddr << endl;
-    dataQueue.push_back(DYMO_QueuedData(const_cast<IPDatagram *> (datagram), destAddr));
+    dataQueue.push_back(DYMO_QueuedData(const_cast<IPv4Datagram *> (datagram), destAddr));
     dataQueueByteSize += datagram->getByteLength();
 
     // if buffer is full, force dequeueing of old packets
@@ -89,14 +89,14 @@ void DYMO_DataQueue::queuePacket(const IPDatagram* datagram)
         DYMO_QueuedData qd = dataQueue.front();
         dataQueue.pop_front();
         dataQueueByteSize -= qd.datagram->getByteLength();
-        IPAddress destAddr = qd.destAddr;
+        IPv4Address destAddr = qd.destAddr;
         delete qd.datagram;
         ev << "Forced dropping of data packet to " << destAddr << endl;
-        //  ipLayer->reinjectDatagram(qd.datagram, IP::Hook::DROP);
+        //  ipLayer->reinjectDatagram(qd.datagram, IPv4::Hook::DROP);
     }
 }
 
-void DYMO_DataQueue::reinjectDatagramsTo(IPAddress destAddr, int prefix, Result verdict,std::list<IPDatagram*> *datagrams)
+void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict,std::list<IPv4Datagram*> *datagrams)
 {
     bool tryAgain = true;
     double delay = 0;
@@ -128,12 +128,12 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPAddress destAddr, int prefix, Result 
     }
 }
 
-void DYMO_DataQueue::dequeuePacketsTo(IPAddress destAddr, int prefix)
+void DYMO_DataQueue::dequeuePacketsTo(IPv4Address destAddr, int prefix)
 {
     reinjectDatagramsTo(destAddr, prefix, ACCEPT);
 }
 
-void DYMO_DataQueue::dropPacketsTo(IPAddress destAddr, int prefix,std::list<IPDatagram*>* datagrams)
+void DYMO_DataQueue::dropPacketsTo(IPv4Address destAddr, int prefix,std::list<IPv4Datagram*>* datagrams)
 {
     reinjectDatagramsTo(destAddr, prefix, DROP,datagrams);
 }

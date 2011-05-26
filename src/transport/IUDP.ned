@@ -41,9 +41,9 @@ package inet.transport;
 // If there is only one app which doesn't bind to any port, it will
 // receive all packets.
 //
-// <b>Communication with the IP (IPv4/IPv6) layer</b>
+// <b>Communication with the IPv4 (IPv4/IPv6) layer</b>
 //
-// The ~UDP model relies on sending and receiving ~IPControlInfo/~IPv6ControlInfo
+// The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
 // objects attached to ~UDPPacket objects as control info
 // (see cMessage::setControlInfo()).
 //
@@ -56,10 +56,10 @@ moduleinterface IUDP
 
     gates:
         input appIn[] @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPControlInfo/up);
+        input ipIn @labels(UDPPacket,IPv4ControlInfo/up);
         input ipv6In @labels(UDPPacket,IPv6ControlInfo/up);
         output appOut[] @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPControlInfo/down);
+        output ipOut @labels(UDPPacket,IPv4ControlInfo/down);
         output ipv6Out @labels(UDPPacket,IPv6ControlInfo/down);
 }
 
@@ -70,9 +70,9 @@ simple UDP_None like IUDP
         @class("UnimplementedModule");
     gates:
         input appIn[] @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPControlInfo/up);
+        input ipIn @labels(UDPPacket,IPv4ControlInfo/up);
         input ipv6In @labels(UDPPacket,IPv6ControlInfo/up);
         output appOut[] @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPControlInfo/down);
+        output ipOut @labels(UDPPacket,IPv4ControlInfo/down);
         output ipv6Out @labels(UDPPacket,IPv6ControlInfo/down);
 }

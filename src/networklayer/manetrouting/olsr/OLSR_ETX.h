@@ -238,7 +238,7 @@ class OLSR_ETX : public OLSR
     int numInitStages() const  {return 5;}
     void initialize(int stage);
     // virtual void receiveChangeNotification(int category, cPolymorphic *details);
-    // void mac_failed(IPDatagram*);
+    // void mac_failed(IPv4Datagram*);
     void    recv(cMessage *p) {};
     // virtual void handleMessage(cMessage *msg);
     virtual void finish();

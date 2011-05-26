@@ -25,7 +25,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/ip.h"
 #include "headers/ip_icmp.h"
 };
-#include "IPSerializer.h"
+#include "IPv4Serializer.h"
 #include "ICMPSerializer.h"
 #include "PingPayload_m.h"
 #include "TCPIPchecksum.h"
@@ -79,18 +79,18 @@ int ICMPSerializer::serialize(const ICMPMessage *pkt, unsigned char *buf, unsign
         }
         case ICMP_DESTINATION_UNREACHABLE:
         {
-            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->getEncapsulatedPacket());
+            IPv4Datagram *ip = check_and_cast<IPv4Datagram* >(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_UNREACH;
             icmp->icmp_code = pkt->getCode();
-            packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
+            packetLength += IPv4Serializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
             break;
         }
         case ICMP_TIME_EXCEEDED:
         {
-            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->getEncapsulatedPacket());
+            IPv4Datagram *ip = check_and_cast<IPv4Datagram* >(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_TIMXCEED;
             icmp->icmp_code = ICMP_TIMXCEED_INTRANS;
-            packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
+            packetLength += IPv4Serializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
             break;
         }
         default:

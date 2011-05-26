@@ -1,9 +1,2 @@
 examples
 src
--inet.applications.voiptool
--inet.nodes.xmipv6
--inet.examples.voiptool
--inet.networklayer.xmipv6
--inet.networklayer.ipv6tunneling
--inet.transport.tcp_nsc
--inet.examples.mobileipv6

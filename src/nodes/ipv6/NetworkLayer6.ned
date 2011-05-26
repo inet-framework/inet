@@ -42,8 +42,8 @@ module NetworkLayer6
     gates:
         input ifIn[] @labels(IPv6Datagram);
         output ifOut[] @labels(IPv6Datagram);
-        input sctpIn @labels(IPControlInfo/down,SCTPPacket);
-        output sctpOut @labels(IPControlInfo/up,SCTPPacket);
+        input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
+        output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
         input tcpIn @labels(TCPSegment,IPv6ControlInfo/down);
         output tcpOut @labels(TCPSegment,IPv6ControlInfo/up);
         input udpIn @labels(UDPPacket,IPv6ControlInfo/down);

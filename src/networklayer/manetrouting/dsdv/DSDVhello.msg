@@ -13,18 +13,18 @@ cplusplus {{
  * INET and OMNET++ works(more specifically INET 20061020 and omnet++ 3.3).
  * Also we hope it will help in the developing of routing protocols using INET.
 */
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 packet DSDV_HelloMessage
 {
-    IPAddress srcIPAddress; //terminal que gerou o pacote
+    IPv4Address srcIPAddress; //terminal que gerou o pacote
     unsigned int sequencenumber;//sequence number created by the source node(node's ID = srcIPAddress) of the hello msg and associated with that node
-    IPAddress nextIPAddress; //terminal que re-/transmite o pacote
+    IPv4Address nextIPAddress; //terminal que re-/transmite o pacote
     int hopdistance; //distancia em hops/custo
 }
 

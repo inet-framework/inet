@@ -33,7 +33,7 @@ package inet.applications.tcpapp;
 // back the same message object. The reply can be delayed by a constant time
 // (replyDelay parameter).
 //
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //

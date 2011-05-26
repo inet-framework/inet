@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <new>
-#include <IPAddress.h>
+#include <IPv4Address.h>
 
 // CLASS
 
@@ -151,7 +151,7 @@ class int128
 
     operator double() { return toDouble(); }
     operator int() { return toInt();}
-    operator IPAddress() { IPAddress add(toInt()); return add;}
+    operator IPv4Address() { IPv4Address add(toInt()); return add;}
     static const int128 INT128_MAX;
     static const int128 INT128_MIN;
 }

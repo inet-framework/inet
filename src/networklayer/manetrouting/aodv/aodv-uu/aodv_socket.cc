@@ -578,13 +578,13 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         ch->addr_type() = NS_AF_NONE;
         sendPacket(p, dst, 0.0);
 #else
-//       IPAddress   desAddIp4(dst.s_addr);
+//       IPv4Address   desAddIp4(dst.s_addr);
 //       IPvXAddress destAdd(desAddIp4);
 // In the floading proccess the random delay prevent collision for the synchronization between the nodes.
         Uint128 destAdd;
         if (dst.s_addr == AODV_BROADCAST)
         {
-            destAdd = IPAddress::ALLONES_ADDRESS;
+            destAdd = IPv4Address::ALLONES_ADDRESS;
         }
         else
         {
@@ -631,12 +631,12 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         else
             sendPacket(p, dst, 0.0);
 #else
-        // IPAddress   desAddIp4(dst.s_addr);
+        // IPv4Address   desAddIp4(dst.s_addr);
         // IPvXAddress destAdd(desAddIp4);
         Uint128 destAdd;
         if (dst.s_addr == AODV_BROADCAST)
         {
-            destAdd = IPAddress::ALLONES_ADDRESS;
+            destAdd = IPv4Address::ALLONES_ADDRESS;
             if (delay>0)
             {
                 if (useIndex)

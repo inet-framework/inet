@@ -46,11 +46,11 @@ class NotificationBoard;
  *      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
  *    - routerId: "router1/routerId", "R1/routerId"
  */
-class INET_API IPAddressResolver
+class INET_API IPvXAddressResolver
 {
   protected:
     // internal
-    virtual IPAddress getIPv4AddressFrom(IInterfaceTable *ift);
+    virtual IPv4Address getIPv4AddressFrom(IInterfaceTable *ift);
     // internal
     virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift);
     // internal
@@ -67,8 +67,8 @@ class INET_API IPAddressResolver
     };
 
   public:
-    IPAddressResolver() {}
-    virtual ~IPAddressResolver() {}
+    IPvXAddressResolver() {}
+    virtual ~IPvXAddressResolver() {}
 
     /**
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
@@ -106,7 +106,7 @@ class INET_API IPAddressResolver
      * Returns the router Id of the given router. Router Id is obtained from
      * the getRouterId() method of the IRoutingTable submodule.
      */
-    virtual IPAddress routerIdOf(cModule *host);
+    virtual IPv4Address routerIdOf(cModule *host);
 
     /**
      * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable

@@ -23,7 +23,7 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
-import inet.applications.generic.IPTrafficGenerator;
+import inet.applications.generic.IIPvXTrafficGenerator;
 
 
 //
@@ -57,7 +57,7 @@ module BurstHost
                 routingFile = routingFile;
                 @display("p=83,206");
         }
-        trafGen: <trafGenType> like IPTrafficGenerator {
+        trafGen: <trafGenType> like IIPvXTrafficGenerator {
             parameters:
                 @display("p=198,86");
         }

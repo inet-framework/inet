@@ -70,8 +70,8 @@ class UDPControlInfo
 {
     int sockId = -1;   // uniquely identifies the UDP socket
     int userId = -1;   // id than can be freely used by the app
-    IPvXAddress srcAddr;  // source IP or IPv6 address, or local address with BIND
-    IPvXAddress destAddr; // destination IP or IPv6 address
+    IPvXAddress srcAddr;  // source IPv4 or IPv6 address, or local address with BIND
+    IPvXAddress destAddr; // destination IPv4 or IPv6 address
     int srcPort;   // UDP source port in packet, or local port with BIND
     int destPort;  // UDP destination port in packet
     int interfaceId = -1; // interface on which pk was received/should be sent (see ~InterfaceTable)

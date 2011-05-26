@@ -382,24 +382,24 @@ void Established::entry()
 
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
-    const IPRoute*          rtEntry;
+    const IPv4Route*          rtEntry;
     BGP::RoutingTableEntry* BGPEntry;
     IRoutingTable*          IPRoutingTable = session.getIPRoutingTable();
 
     for (int i=1; i<IPRoutingTable->getNumRoutes(); i++)
     {
         rtEntry = IPRoutingTable->getRoute(i);
-        if (rtEntry->getNetmask() == IPAddress::ALLONES_ADDRESS ||
-            rtEntry->getSource()  == IPRoute::IFACENETMASK      ||
-            rtEntry->getSource()  == IPRoute::MANUAL            ||
-            rtEntry->getSource()  == IPRoute::BGP)
+        if (rtEntry->getNetmask() == IPv4Address::ALLONES_ADDRESS ||
+            rtEntry->getSource()  == IPv4Route::IFACENETMASK      ||
+            rtEntry->getSource()  == IPv4Route::MANUAL            ||
+            rtEntry->getSource()  == IPv4Route::BGP)
         {
             continue;
         }
 
         if (session.getType() == BGP::EGP)
         {
-            if (rtEntry->getSource() == IPRoute::OSPF && session.checkExternalRoute(rtEntry))
+            if (rtEntry->getSource() == IPv4Route::OSPF && session.checkExternalRoute(rtEntry))
             {
                 continue;
             }

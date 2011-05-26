@@ -25,7 +25,7 @@
 #include "INETDefs.h"
 
 // Foreign declarations:
-class IPDatagram;
+class IPv4Datagram;
 class IPv6Datagram;
 class SCTPMessage;
 class TCPSegment;
@@ -90,7 +90,7 @@ class PacketDump
          * Dumps info about the given IPv4 datagram. The l2r parameter denotes the
          * direction of the packet.
          */
-        void dumpIPv4(bool l2r, const char *label, IPDatagram *dgram, const char *comment = NULL);
+        void dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment = NULL);
 
         /**
          * Dumps info about the given IPv6 datagram. The l2r parameter denotes

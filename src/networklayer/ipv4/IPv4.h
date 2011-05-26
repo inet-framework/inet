@@ -23,9 +23,9 @@
 #include "RoutingTableAccess.h"
 #include "IRoutingTable.h"
 #include "ICMPAccess.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
-#include "IPFragBuf.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Datagram.h"
+#include "IPv4FragBuf.h"
 #include "ProtocolMap.h"
 
 #ifdef WITH_MANET
@@ -41,9 +41,9 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
 
 /**
- * Implements the IP protocol.
+ * Implements the IPv4 protocol.
  */
-class INET_API IP : public QueueBase
+class INET_API IPv4 : public QueueBase
 {
   protected:
     IRoutingTable *rt;
@@ -60,7 +60,7 @@ class INET_API IP : public QueueBase
 
     // working vars
     long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
-    IPFragBuf fragbuf;  // fragmentation reassembly buffer
+    IPv4FragBuf fragbuf;  // fragmentation reassembly buffer
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
     ProtocolMapping mapping; // where to send packets after decapsulation
 
@@ -80,31 +80,31 @@ class INET_API IP : public QueueBase
     virtual void updateDisplayString();
 
     /**
-     * Encapsulate packet coming from higher layers into IPDatagram, using
+     * Encapsulate packet coming from higher layers into IPv4Datagram, using
      * the control info attached to the packet.
      */
-    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
+    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
 
     /**
-     * Encapsulate packet coming from higher layers into IPDatagram, using
+     * Encapsulate packet coming from higher layers into IPv4Datagram, using
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
-    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo);
+    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPv4ControlInfo *controlInfo);
 
     /**
-     * Creates a blank IP datagram. Override when subclassing IPDatagram is needed
+     * Creates a blank IPv4 datagram. Override when subclassing IPv4Datagram is needed
      */
-    virtual IPDatagram *createIPDatagram(const char *name);
+    virtual IPv4Datagram *createIPv4Datagram(const char *name);
 
     /**
-     * Handle IPDatagram messages arriving from lower layer.
+     * Handle IPv4Datagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
-    virtual void handlePacketFromNetwork(IPDatagram *datagram);
+    virtual void handlePacketFromNetwork(IPv4Datagram *datagram);
 
     /**
-     * Handle messages (typically packets to be send in IP) from transport or ICMP.
+     * Handle messages (typically packets to be send in IPv4) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cPacket *msg);
@@ -125,46 +125,46 @@ class INET_API IP : public QueueBase
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL,IPAddress* nextHopAddrPtr);
+    virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL,IPv4Address* nextHopAddrPtr);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
+    virtual void routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void reassembleAndDeliver(IPDatagram *datagram);
+    virtual void reassembleAndDeliver(IPv4Datagram *datagram);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching IPControlInfo.
+     * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
      */
-    virtual cPacket *decapsulateIP(IPDatagram *datagram);
+    virtual cPacket *decapsulateIP(IPv4Datagram *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr);
+    virtual void fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr);
 
     /**
      * Last TTL check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr);
+    virtual void sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr);
 
 #ifdef WITH_MANET
-    virtual void controlMessageToManetRouting(int,IPDatagram *datagram);
+    virtual void controlMessageToManetRouting(int,IPv4Datagram *datagram);
 #endif
-    virtual void dsrFillDestIE(IPDatagram *, InterfaceEntry *&destIE,IPAddress &nextHopAddress);
+    virtual void dsrFillDestIE(IPv4Datagram *, InterfaceEntry *&destIE,IPv4Address &nextHopAddress);
 
-    const IPRouteRule * checkInputRule(const IPDatagram*);
-    const IPRouteRule * checkOutputRule(const IPDatagram*,const InterfaceEntry*);
-    const IPRouteRule * checkOutputRuleMulticast(const IPDatagram*);
+    const IPv4RouteRule * checkInputRule(const IPv4Datagram*);
+    const IPv4RouteRule * checkOutputRule(const IPv4Datagram*,const InterfaceEntry*);
+    const IPv4RouteRule * checkOutputRuleMulticast(const IPv4Datagram*);
 
   public:
-    IP() {}
+    IPv4() {}
 
   protected:
     /**
@@ -173,7 +173,7 @@ class INET_API IP : public QueueBase
     virtual void initialize();
 
     /**
-     * Processing of IP datagrams. Called when a datagram reaches the front
+     * Processing of IPv4 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
     virtual void endService(cPacket *msg);

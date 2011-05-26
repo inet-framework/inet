@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include "UDPBasicApp.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 
@@ -31,7 +31,7 @@ simsignal_t UDPBasicApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
 void UDPBasicApp::initialize(int stage)
 {
-    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage != 3)
         return;
@@ -51,7 +51,7 @@ void UDPBasicApp::initialize(int stage)
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(IPAddressResolver().resolve(token));
+        destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     if (destAddresses.empty())
         return;

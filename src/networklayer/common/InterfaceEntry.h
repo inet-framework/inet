@@ -93,7 +93,7 @@ class INET_API InterfaceEntry : public cNamedObject
     MACAddress macAddr;   ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for IPv6 stateless autoconfig (RFC 1971)
 
-    IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IP address, etc)
+    IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IPv4 address, etc)
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     InterfaceProtocolData *protocol3data; ///< extension point: data for a 3rd network-layer protocol
     InterfaceProtocolData *protocol4data; ///< extension point: data for a 4th network-layer protocol

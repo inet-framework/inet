@@ -329,7 +329,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     Uint128 destAdd;
     if (dest_addr.s_addr == DYMO_BROADCAST)
     {
-        destAdd = IPAddress::ALLONES_ADDRESS;
+        destAdd = IPv4Address::ALLONES_ADDRESS;
         if (delay>0)
         {
             if (useIndex)

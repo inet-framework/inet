@@ -16,11 +16,11 @@
 //
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 enum OSPFPacketType
 {
@@ -53,8 +53,8 @@ packet OSPFPacket
     char type enum(OSPFPacketType) = HELLO_PACKET;
     short packetLength = 0;
 
-    IPAddress routerID;
-    IPAddress areaID;
+    IPv4Address routerID;
+    IPv4Address areaID;
 
     short checksum = 0;
     short authenticationType = 0;
@@ -66,7 +66,7 @@ packet OSPFPacket
 //
 packet OSPFHelloPacket extends OSPFPacket
 {
-    IPAddress networkMask;
+    IPv4Address networkMask;
 
     short helloInterval = 5;
 
@@ -75,9 +75,9 @@ packet OSPFHelloPacket extends OSPFPacket
     char routerPriority = 0;
     long routerDeadInterval = 0;
 
-    IPAddress designatedRouter;
-    IPAddress backupDesignatedRouter;
-    IPAddress neighbor[];
+    IPv4Address designatedRouter;
+    IPv4Address backupDesignatedRouter;
+    IPv4Address neighbor[];
 }
 
 
@@ -99,7 +99,7 @@ class OSPFLSAHeader
     OSPFOptions lsOptions;
     char lsType enum(LSAType) = ROUTERLSA_TYPE;
     unsigned long linkStateID;
-    IPAddress advertisingRouter;
+    IPv4Address advertisingRouter;
     long lsSequenceNumber = 0;
     short lsChecksum = 0;
     unsigned short lsaLength = 0;
@@ -129,7 +129,7 @@ struct TOSData
 
 class Link
 {
-    IPAddress linkID;
+    IPv4Address linkID;
     unsigned long linkData = 0;
     unsigned char type enum(LinkType) = POINTTOPOINT_LINK;
     unsigned char numberOfTOS = 0;
@@ -154,8 +154,8 @@ class OSPFRouterLSA extends OSPFLSA
 //
 class OSPFNetworkLSA extends OSPFLSA
 {
-    IPAddress networkMask;
-    IPAddress attachedRouters[];
+    IPv4Address networkMask;
+    IPv4Address attachedRouters[];
 }
 
 //
@@ -163,7 +163,7 @@ class OSPFNetworkLSA extends OSPFLSA
 //
 class OSPFSummaryLSA extends OSPFLSA
 {
-    IPAddress networkMask;
+    IPv4Address networkMask;
     unsigned long routeCost = 1;
     TOSData tosData[];
 }
@@ -172,7 +172,7 @@ struct ExternalTOSInfo
 {
     TOSData tosData;
     bool E_ExternalMetricType;
-    IPAddress forwardingAddress;
+    IPv4Address forwardingAddress;
     long externalRouteTag;
 }
 
@@ -181,10 +181,10 @@ struct ExternalTOSInfo
 //
 class OSPFASExternalLSAContents
 {
-    IPAddress networkMask;
+    IPv4Address networkMask;
     bool E_ExternalMetricType = false;
     unsigned long routeCost = 1;
-    IPAddress forwardingAddress;
+    IPv4Address forwardingAddress;
     long externalRouteTag = 0;
     ExternalTOSInfo externalTOSInfo[];
 }
@@ -227,7 +227,7 @@ struct LSARequest
 {
     unsigned long lsType;
     unsigned long linkStateID;
-    IPAddress advertisingRouter;
+    IPv4Address advertisingRouter;
 }
 
 //

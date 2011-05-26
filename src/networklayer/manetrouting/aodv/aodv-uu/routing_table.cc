@@ -183,7 +183,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 #else
 #ifdef OMNETPP
         /* Add route to omnet inet routing table ... */
-        nm.s_addr = IPAddress((uint32_t)next.s_addr).getNetworkMask().getInt();
+        nm.s_addr = IPv4Address((uint32_t)next.s_addr).getNetworkMask().getInt();
         if (useIndex)
             omnet_chg_rte(dest_addr, next, nm, hops,false,ifindex);
         else
@@ -252,7 +252,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 #else
 #ifdef OMNETPP
         /* Add route to omnet inet routing table ... */
-        nm.s_addr = IPAddress((uint32_t)next.s_addr).getNetworkMask().getInt();
+        nm.s_addr = IPv4Address((uint32_t)next.s_addr).getNetworkMask().getInt();
         if (useIndex)
             omnet_chg_rte(rt->dest_addr, next, nm, hops,false,rt->ifindex);
         else
@@ -273,7 +273,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 #else
 #ifdef OMNETPP
         /* change route to omnet inet routing table ... */
-        nm.s_addr = IPAddress((uint32_t)next.s_addr).getNetworkMask().getInt();
+        nm.s_addr = IPv4Address((uint32_t)next.s_addr).getNetworkMask().getInt();
         if (useIndex)
             omnet_chg_rte(rt->dest_addr, next, nm, hops,false,rt->ifindex);
         else

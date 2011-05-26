@@ -29,7 +29,7 @@ struct LabelRequestObj_t;
 struct SenderDescriptor_t;
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 class noncobject EroVector;
 
@@ -70,7 +70,7 @@ packet RSVPPathTear extends RSVPPacket
 packet RSVPPathError extends RSVPPacket
 {
     @customize(true);
-    IPAddress errorNode;
+    IPv4Address errorNode;
     int errorCode;
     SenderDescriptor_t sender_descriptor;
 

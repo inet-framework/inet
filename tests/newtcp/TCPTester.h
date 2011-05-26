@@ -20,8 +20,8 @@
 #define __TCPTESTER_H
 
 #include <omnetpp.h>
-#include "IPAddress.h"
-#include "IPDatagram_m.h"
+#include "IPv4Address.h"
+#include "IPv4Datagram_m.h"
 #include "TCPSegment.h"
 #include "TCPDump.h"
 

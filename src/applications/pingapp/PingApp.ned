@@ -41,8 +41,8 @@ package inet.applications.pingapp;
 simple PingApp
 {
     parameters:
-        string destAddr = default(""); // destination IP or IPv6 address
-        string srcAddr = default(""); // source IP or IPv6 address (useful with multi-homing)
+        string destAddr = default(""); // destination IPv4 or IPv6 address
+        string srcAddr = default(""); // source IPv4 or IPv6 address (useful with multi-homing)
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double interval @unit("s") = default(1s); // time to wait between pings (can be random)
         double hopLimit = default(32); // TTL or hopLimit for IP packets

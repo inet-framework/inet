@@ -24,7 +24,7 @@
 #include <string.h>
 #include <sstream>
 
-#include <IPAddress.h>
+#include <IPv4Address.h>
 #include <InterfaceTable.h>
 #include "RoutingTable.h"
 #include "DYMO_Timer.h"
@@ -44,9 +44,9 @@ class DYMO_RoutingEntry
      * @name DYMO Mandatory Fields
      */
     /*@{*/
-    IPAddress routeAddress; /**< The IP destination address of the getNode(s) associated with the routing table entry. */
+    IPv4Address routeAddress; /**< The IPv4 destination address of the getNode(s) associated with the routing table entry. */
     unsigned int routeSeqNum; /**< The DYMO SeqNum associated with this routing information. */
-    IPAddress routeNextHopAddress; /**< The IP address of the next DYMO router on the path toward the Route.Address. */
+    IPv4Address routeNextHopAddress; /**< The IPv4 address of the next DYMO router on the path toward the Route.Address. */
     InterfaceEntry* routeNextHopInterface; /**< The interface used to send packets toward the Route.Address. */
     bool routeBroken; /**< A flag indicating whether this Route is broken.  This flag is set if the next hop becomes unreachable or in response to processing a RERR (see Section 5.5.4). */
     /*@}*/
@@ -71,7 +71,7 @@ class DYMO_RoutingEntry
     DYMO_Timer routeDelete; /**< After the ROUTE_DELETE timeout, the routing table entry should be deleted. */
     /*@}*/
 
-    IPRoute* routingEntry; /**< Forwarding Route (entry in standard OMNeT++ routingTable) */
+    IPv4Route* routingEntry; /**< Forwarding Route (entry in standard OMNeT++ routingTable) */
 
   protected:
     DYMO* dymo; /**< DYMO module */

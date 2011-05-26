@@ -87,7 +87,7 @@ void removeDuplicates(std::vector<int>& vec)
     }
 }
 
-int find(const EroVector& ERO, IPAddress node)
+int find(const EroVector& ERO, IPv4Address node)
 {
     for (unsigned int i = 0; i < ERO.size(); i++)
         if (ERO[i].node == node)
@@ -104,7 +104,7 @@ bool find(std::vector<int>& vec, int value)
     return false;
 }
 
-bool find(const IPAddressVector& vec, IPAddress addr)
+bool find(const IPAddressVector& vec, IPv4Address addr)
 {
     for (unsigned int i = 0; i < vec.size(); i++)
         if (vec[i] == addr)

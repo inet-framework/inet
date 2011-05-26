@@ -20,7 +20,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 class IInterfaceTable;
 class IRoutingTable;

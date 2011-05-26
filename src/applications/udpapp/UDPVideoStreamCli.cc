@@ -21,7 +21,7 @@
 //
 
 #include "UDPVideoStreamCli.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPVideoStreamCli);
@@ -63,7 +63,7 @@ void UDPVideoStreamCli::requestStream()
     int svrPort = par("serverPort");
     int localPort = par("localPort");
     const char *address = par("serverAddress");
-    IPvXAddress svrAddr = IPAddressResolver().resolve(address);
+    IPvXAddress svrAddr = IPvXAddressResolver().resolve(address);
     if (svrAddr.isUnspecified())
     {
         EV << "Server address is unspecified, skip sending video stream request\n";

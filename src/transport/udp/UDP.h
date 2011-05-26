@@ -29,7 +29,7 @@
 #include <list>
 #include "UDPControlInfo_m.h"
 
-class IPControlInfo;
+class IPv4ControlInfo;
 class IPv6ControlInfo;
 class ICMP;
 class ICMPv6;
@@ -101,10 +101,10 @@ class INET_API UDP : public cSimpleModule
     // ephemeral port
     virtual ushort getEphemeralPort();
 
-    virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
+    virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv4ControlInfo *ctrl);
     virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
     virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);
-    virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
+    virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv4ControlInfo *ctrl, SockDesc *sd);
     virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
     virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);

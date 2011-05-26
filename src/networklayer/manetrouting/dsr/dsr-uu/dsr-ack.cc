@@ -157,13 +157,13 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
     if (dp->payload)
     {
         p = new DSRPkt();
-        IPDatagram *dgram;
+        IPv4Datagram *dgram;
         dgram = p;
 
 #ifndef MobilityFramework
-        IPAddress destAddress_var((uint32_t)dp->dst.s_addr);
+        IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
         dgram->setDestAddress(destAddress_var);
-        IPAddress srcAddress_var((uint32_t)dp->src.s_addr);
+        IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
         dgram->setSrcAddress(srcAddress_var);
         dgram->setHeaderLength(dp->nh.iph->ihl); // Header length
         dgram->setVersion(dp->nh.iph->version); // Ip version
@@ -232,22 +232,22 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
         p->setNextAddress(dp->nxt_hop.s_addr);
         p->setControlInfo(new MacControlInfo(macAddr));
 #else
-        IPControlInfo *controlInfo=NULL;
+        IPv4ControlInfo *controlInfo=NULL;
         if (p->getControlInfo())
         {
-            if (dynamic_cast<IPControlInfo*>(p->getControlInfo()))
-                controlInfo = check_and_cast<IPControlInfo*>(p->getControlInfo());
+            if (dynamic_cast<IPv4ControlInfo*>(p->getControlInfo()))
+                controlInfo = check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
             else
                 delete p->removeControlInfo();
         }
 
         if (controlInfo==NULL)
         {
-            controlInfo = new IPControlInfo();
+            controlInfo = new IPv4ControlInfo();
             p->setControlInfo(controlInfo);
         }
 
-        IPAddress nextIp((uint32_t)dp->nxt_hop.s_addr);
+        IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
         controlInfo->setNextHopAddr(nextIp);
 
         controlInfo->setProtocol(IP_PROT_DSR);
@@ -276,7 +276,7 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
 #ifdef MobilityFramework
     int prev = myaddr_.s_addr;
 #else
-    IPAddress prev((uint32_t)myaddr_.s_addr);
+    IPv4Address prev((uint32_t)myaddr_.s_addr);
 #endif
     p->setPrevAddress(prev);
     if (jitter)

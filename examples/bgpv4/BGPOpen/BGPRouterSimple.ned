@@ -28,7 +28,7 @@ import inet.base.NotificationBoard;
 
 
 //
-// Example IP router with BGPv4 support.
+// Example IPv4 router with BGPv4 support.
 //
 module BGPRouterSimple
 {

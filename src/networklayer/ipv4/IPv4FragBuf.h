@@ -22,16 +22,16 @@
 #include <vector>
 #include "INETDefs.h"
 #include "ReassemblyBuffer.h"
-#include "IPDatagram.h"
+#include "IPv4Datagram.h"
 
 
 class ICMP;
 
 
 /**
- * Reassembly buffer for fragmented IP datagrams.
+ * Reassembly buffer for fragmented IPv4 datagrams.
  */
-class INET_API IPFragBuf
+class INET_API IPv4FragBuf
 {
   protected:
     //
@@ -40,8 +40,8 @@ class INET_API IPFragBuf
     struct Key
     {
         ushort id;
-        IPAddress src;
-        IPAddress dest;
+        IPv4Address src;
+        IPv4Address dest;
 
         inline bool operator<(const Key& b) const {
             return (id!=b.id) ? (id<b.id) : (src!=b.src) ? (src<b.src) : (dest<b.dest);
@@ -54,7 +54,7 @@ class INET_API IPFragBuf
     struct DatagramBuffer
     {
         ReassemblyBuffer buf;  // reassembly buffer
-        IPDatagram *datagram;  // the actual datagram
+        IPv4Datagram *datagram;  // the actual datagram
         simtime_t lastupdate;  // last time a new fragment arrived
     };
 
@@ -71,12 +71,12 @@ class INET_API IPFragBuf
     /**
      * Ctor.
      */
-    IPFragBuf();
+    IPv4FragBuf();
 
     /**
      * Dtor.
      */
-    ~IPFragBuf();
+    ~IPv4FragBuf();
 
     /**
      * Initialize fragmentation buffer. ICMP module is needed for sending
@@ -89,7 +89,7 @@ class INET_API IPFragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise NULL.
      */
-    IPDatagram *addFragment(IPDatagram *datagram, simtime_t now);
+    IPv4Datagram *addFragment(IPv4Datagram *datagram, simtime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their

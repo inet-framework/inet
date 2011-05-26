@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include "UDPSink.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPSink);

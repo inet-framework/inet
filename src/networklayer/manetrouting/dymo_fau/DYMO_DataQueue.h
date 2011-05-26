@@ -24,14 +24,14 @@
 #include <list>
 #include <map>
 #include <omnetpp.h>
-#include "IPAddress.h"
-#include "IPControlInfo_m.h"
-#include "IPDatagram.h"
+#include "IPv4Address.h"
+#include "IPv4ControlInfo_m.h"
+#include "IPv4Datagram.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "RoutingTable.h"
 #include "RoutingTableAccess.h"
-#include "IP.h"
+#include "IPv4.h"
 
 class DYMO;
 enum Result {DROP, ACCEPT};
@@ -40,10 +40,10 @@ enum Result {DROP, ACCEPT};
 class DYMO_QueuedData
 {
   public:
-    DYMO_QueuedData(IPDatagram* dgram, IPAddress destAddr) : destAddr(destAddr) {datagram =dgram;}
+    DYMO_QueuedData(IPv4Datagram* dgram, IPv4Address destAddr) : destAddr(destAddr) {datagram =dgram;}
 
-    IPDatagram* datagram;
-    IPAddress destAddr;
+    IPv4Datagram* datagram;
+    IPv4Address destAddr;
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o);
@@ -67,10 +67,10 @@ class DYMO_DataQueue : public cObject
     /** @brief inherited from cObject */
     virtual std::string detailedInfo() const;
 
-    void queuePacket(const IPDatagram* datagram);
+    void queuePacket(const IPv4Datagram* datagram);
 
-    void dequeuePacketsTo(IPAddress destAddr, int prefix);
-    void dropPacketsTo(IPAddress destAddr, int prefix,std::list<IPDatagram*>* datagrams=NULL);
+    void dequeuePacketsTo(IPv4Address destAddr, int prefix);
+    void dropPacketsTo(IPv4Address destAddr, int prefix,std::list<IPv4Datagram*>* datagrams=NULL);
 
   protected:
     cSimpleModule *moduleOwner;
@@ -80,7 +80,7 @@ class DYMO_DataQueue : public cObject
     int BUFFER_SIZE_PACKETS; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
     int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
-    void reinjectDatagramsTo(IPAddress destAddr, int prefix, Result verdict,std::list<IPDatagram*> *datagrams=NULL);
+    void reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict,std::list<IPv4Datagram*> *datagrams=NULL);
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o);

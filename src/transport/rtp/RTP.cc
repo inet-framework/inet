@@ -19,7 +19,7 @@
 #include "RTP.h"
 
 #include "InterfaceEntry.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
@@ -366,7 +366,7 @@ void RTP::readRet(cMessage *sifp)
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
-         rinp1->setDataInPkt(new RTPPacket(*msg), IPAddress(_destinationAddress), _port);
+         rinp1->setDataInPkt(new RTPPacket(*msg), IPv4Address(_destinationAddress), _port);
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
          send(rinp2, "rtcpOut");
          send(rinp1, "profileOut");
@@ -422,11 +422,11 @@ void RTP::createSocket()
 
         UDPControlInfo *ctrl = new UDPControlInfo();
 
-        IPAddress ipaddr(_destinationAddress);
+        IPv4Address ipaddr(_destinationAddress);
 
         if (ipaddr.isMulticast())
         {
-            ctrl->setSrcAddr(IPAddress(_destinationAddress));
+            ctrl->setSrcAddr(IPv4Address(_destinationAddress));
             ctrl->setSrcPort(_port);
         }
         else

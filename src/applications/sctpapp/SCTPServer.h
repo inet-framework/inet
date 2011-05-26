@@ -83,7 +83,7 @@ class INET_API SCTPServer : public cSimpleModule
         struct pathStatus {
             bool active;
             bool primaryPath;
-            IPAddress  pid;
+            IPv4Address  pid;
         };
 
         void initialize();
