@@ -100,6 +100,7 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
+#ifdef WITH_IPv4
     uint8 buf[MAXBUFLENGTH];
     memset((void*)&buf, 0, sizeof(buf));
 
@@ -116,6 +117,9 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     fwrite(&ph, sizeof(ph), 1, dumpfile);
     fwrite(&hdr, sizeof(uint32), 1, dumpfile);
     fwrite(buf, ph.incl_len - sizeof(uint32), 1, dumpfile);
+#else
+    throw cRuntimeError("Cannot write frame: INET compiled without IPv4 feature");
+#endif
 }
 
 void PcapDump::closePcap()

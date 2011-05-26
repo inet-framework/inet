@@ -527,7 +527,7 @@
         name="VoIPTool"
         description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
         initiallyEnabled = "false"
-        requires = ""
+        requires = "UDP"
         labels = ""
         nedPackages = "
                        inet.applications.voiptool
