@@ -1,8 +1,10 @@
 %description:
 test IPv6Address prefix mask generation
 
-%global:
+%includes:
 #include "IPv6Address.h"
+
+%global:
 
 %activity:
 for (int i=0; i<=128; i++)

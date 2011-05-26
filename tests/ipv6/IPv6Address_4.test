@@ -1,8 +1,10 @@
 %description:
 test IPv6Address constants
 
-%global:
+%includes:
 #include "IPv6Address.h"
+
+%global:
 
 %activity:
 #define P(X)  ev << #X << "  " << X << "\n";

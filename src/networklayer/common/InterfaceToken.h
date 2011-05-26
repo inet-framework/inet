@@ -18,9 +18,8 @@
 #ifndef __INET_INTERFACETOKEN_H
 #define __INET_INTERFACETOKEN_H
 
-#include <vector>
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 
 /**
  * An "interface token" as defined in RFC 1971 (IPv6 Stateless Autoconfiguration).
@@ -43,5 +42,5 @@ class INET_API InterfaceToken
     uint32 normal() const {return _normal;}
 };
 
-#endif
+#endif // __INET_INTERFACETOKEN_H
 

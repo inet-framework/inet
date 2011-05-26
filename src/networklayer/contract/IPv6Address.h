@@ -20,10 +20,11 @@
 #ifndef __IPv6ADDRESS_H
 #define __IPv6ADDRESS_H
 
-#include <omnetpp.h>
 #include <iostream>
 #include <string>
+
 #include "INETDefs.h"
+
 
 class InterfaceToken;
 

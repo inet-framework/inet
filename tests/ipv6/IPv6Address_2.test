@@ -1,7 +1,7 @@
 %description:
 a misc IPv6Address test
 
-%global:
+%includes:
 #include "IPv6Address.h"
 
 %activity:
@@ -14,27 +14,27 @@ IPv6Address loopback;
 ev << "This is a link local address." << endl;
 linkLocalAddr.set("fe80:1111:2222:3300:fe44:a555:6666:7777");
 ev << linkLocalAddr.str() << endl;
-ev << linkLocalAddr.scope() << endl;
+ev << linkLocalAddr.getScope() << endl;
 
 ev << "This is a site local address." << endl;
 siteLocalAddr.set("fec0:1111:2222:3300:fe44:a555:6666:7777");
 ev << siteLocalAddr.str() << endl;
-ev << siteLocalAddr.scope() << endl;
+ev << siteLocalAddr.getScope() << endl;
 
 ev << "This is a multicast address." << endl;
 multicast.set("ff00:1111:2222:3300:fe44:a555:6666:7777");
 ev << multicast.str() << endl;
-ev << multicast.scope() << endl;
+ev << multicast.getScope() << endl;
 
 ev << "This is an unspecified address." << endl;
 unspecified.set("0:0:0:0:0:0:0:0");
 ev << unspecified.str() << endl;
-ev << unspecified.scope() << endl;
+ev << unspecified.getScope() << endl;
 
 ev << "This is a loopback address." << endl;
 loopback.set("0:0:0:0:0:0:0:1");
 ev << loopback.str() << endl;
-ev << loopback.scope() << endl;
+ev << loopback.getScope() << endl;
 
 %contains: stdout
 This is a link local address.

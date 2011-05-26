@@ -1,9 +1,10 @@
 %description:
 Test parsing IPv6 addresses with prefix
 
-%global:
+%includes:
 #include "IPv6Address.h"
 
+%global:
 static void parseAddr(const char *s)
 {
     IPv6Address a;
