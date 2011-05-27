@@ -3,7 +3,7 @@
  * Copyright (c) 2005,2006 INRIA
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as 
+ * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -24,12 +24,12 @@
 YansErrorRateModel::YansErrorRateModel ()
 {}
 
-double 
+double
 YansErrorRateModel::Log2 (double val) const
 {
   return log(val) / log(2.0);
 }
-double 
+double
 YansErrorRateModel::GetBpskBer (double snr, uint32_t signalSpread, uint32_t phyRate) const
 {
   double EbNo = snr * signalSpread / phyRate;
@@ -38,7 +38,7 @@ YansErrorRateModel::GetBpskBer (double snr, uint32_t signalSpread, uint32_t phyR
   EV << "bpsk snr="<<snr<<" ber="<<ber << endl;
   return ber;
 }
-double 
+double
 YansErrorRateModel::GetQamBer (double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const
 {
   double EbNo = snr * signalSpread / phyRate;
@@ -53,20 +53,20 @@ uint32_t
 YansErrorRateModel::Factorial (uint32_t k) const
 {
   uint32_t fact = 1;
-  while (k > 0) 
+  while (k > 0)
     {
       fact *= k;
       k--;
     }
   return fact;
 }
-double 
+double
 YansErrorRateModel::Binomial (uint32_t k, double p, uint32_t n) const
 {
   double retval = Factorial (n) / (Factorial (k) * Factorial (n-k)) * pow (p, (int)k) * pow (1-p, (int)(n-k));
   return retval;
 }
-double 
+double
 YansErrorRateModel::CalculatePdOdd (double ber, unsigned int d) const
 {
   ASSERT ((d % 2) == 1);
@@ -74,13 +74,13 @@ YansErrorRateModel::CalculatePdOdd (double ber, unsigned int d) const
   unsigned int dend = d;
   double pd = 0;
 
-  for (unsigned int i = dstart; i < dend; i++) 
+  for (unsigned int i = dstart; i < dend; i++)
     {
       pd += Binomial (i, ber, d);
     }
   return pd;
 }
-double 
+double
 YansErrorRateModel::CalculatePdEven (double ber, unsigned int d) const
 {
   ASSERT ((d % 2) == 0);
@@ -97,15 +97,15 @@ YansErrorRateModel::CalculatePdEven (double ber, unsigned int d) const
   return pd;
 }
 
-double 
+double
 YansErrorRateModel::CalculatePd (double ber, unsigned int d) const
 {
   double pd;
-  if ((d % 2) == 0) 
+  if ((d % 2) == 0)
     {
       pd = CalculatePdEven (ber, d);
-    } 
-  else 
+    }
+  else
     {
       pd = CalculatePdOdd (ber, d);
     }
@@ -113,12 +113,12 @@ YansErrorRateModel::CalculatePd (double ber, unsigned int d) const
 }
 
 double
-YansErrorRateModel::GetFecBpskBer (double snr, double nbits, 
+YansErrorRateModel::GetFecBpskBer (double snr, double nbits,
                          uint32_t signalSpread, uint32_t phyRate,
                          uint32_t dFree, uint32_t adFree) const
 {
   double ber = GetBpskBer (snr, signalSpread, phyRate);
-  if (ber == 0.0) 
+  if (ber == 0.0)
     {
       return 1.0;
     }
@@ -130,14 +130,14 @@ YansErrorRateModel::GetFecBpskBer (double snr, double nbits,
 }
 
 double
-YansErrorRateModel::GetFecQamBer (double snr, uint32_t nbits, 
+YansErrorRateModel::GetFecQamBer (double snr, uint32_t nbits,
                        uint32_t signalSpread,
                        uint32_t phyRate,
                        uint32_t m, uint32_t dFree,
                        uint32_t adFree, uint32_t adFreePlusOne) const
 {
   double ber = GetQamBer (snr, m, signalSpread, phyRate);
-  if (ber == 0.0) 
+  if (ber == 0.0)
     {
       return 1.0;
     }
@@ -156,7 +156,7 @@ YansErrorRateModel::GetFecQamBer (double snr, uint32_t nbits,
 //
 // This method return the probability of NO ERROR
 //
-double 
+double
 YansErrorRateModel::GetChunkSuccessRate (ModulationType mode, double snr, uint32_t nbits) const
 {
   if (mode.getModulationClass () == MOD_CLASS_ERP_OFDM ||

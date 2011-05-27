@@ -3,7 +3,7 @@
  * Copyright (c) 2010 The Boeing Company
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as 
+ * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -22,36 +22,36 @@
 #include <math.h>
 
 #ifndef ENABLE_GSL
-const double DsssErrorRateModel::WLAN_SIR_PERFECT = 10.0; 
-const double DsssErrorRateModel::WLAN_SIR_IMPOSSIBLE = 0.1; 
+const double DsssErrorRateModel::WLAN_SIR_PERFECT = 10.0;
+const double DsssErrorRateModel::WLAN_SIR_IMPOSSIBLE = 0.1;
 #endif
 
-double 
-DsssErrorRateModel::DqpskFunction (double x) 
+double
+DsssErrorRateModel::DqpskFunction (double x)
 {
   return ((sqrt (2.0) + 1.0) / sqrt (8.0*3.1415926*sqrt (2.0)))
          *(1.0/sqrt (x))
          *exp ( -(2.0 - sqrt (2.0)) * x);
 }
 
-double 
-DsssErrorRateModel::GetDsssDbpskSuccessRate (double sinr, uint32_t nbits) 
+double
+DsssErrorRateModel::GetDsssDbpskSuccessRate (double sinr, uint32_t nbits)
 {
   double EbN0 = sinr * 22000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
   double ber = 0.5 * exp (-EbN0);
   return pow ((1.0 - ber), (int)nbits);
 }
 
-double 
-DsssErrorRateModel::GetDsssDqpskSuccessRate (double sinr,uint32_t nbits) 
+double
+DsssErrorRateModel::GetDsssDqpskSuccessRate (double sinr,uint32_t nbits)
 {
   double EbN0 = sinr * 22000000.0 / 1000000.0 / 2.0; // 2 bits per symbol, 1 MSPS
   double ber = DqpskFunction (EbN0);
   return pow ((1.0 - ber), (int)nbits);
 }
 
-double 
-DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits) 
+double
+DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits)
 {
 #ifdef ENABLE_GSL
   // symbol error probability
@@ -61,7 +61,7 @@ DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits)
 #else
   EV << "Running a 802.11b CCK Matlab model less accurate than GSL model" << endl;
   // The matlab model
-  double ber; 
+  double ber;
   if (sinr > WLAN_SIR_PERFECT)
     {
       ber = 0.0;
@@ -82,8 +82,8 @@ DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits)
 #endif
 }
 
-double 
-DsssErrorRateModel::GetDsssDqpskCck11SuccessRate (double sinr,uint32_t nbits) 
+double
+DsssErrorRateModel::GetDsssDqpskCck11SuccessRate (double sinr,uint32_t nbits)
 {
 #ifdef ENABLE_GSL
   // symbol error probability
@@ -93,7 +93,7 @@ DsssErrorRateModel::GetDsssDqpskCck11SuccessRate (double sinr,uint32_t nbits)
 #else
   EV << "Running a 802.11b CCK Matlab model less accurate than GSL model" << endl;
   // The matlab model
-  double ber; 
+  double ber;
   if (sinr > WLAN_SIR_PERFECT)
     {
       ber = 0.0;
@@ -117,35 +117,35 @@ DsssErrorRateModel::GetDsssDqpskCck11SuccessRate (double sinr,uint32_t nbits)
 }
 
 #ifdef ENABLE_GSL
-double 
+double
 IntegralFunction (double x, void *params)
 {
   double beta = ((FunctionParameters *) params)->beta;
   double n = ((FunctionParameters *) params)->n;
-  double IntegralFunction = pow (2*gsl_cdf_ugaussian_P (x+ beta) - 1, n-1) 
+  double IntegralFunction = pow (2*gsl_cdf_ugaussian_P (x+ beta) - 1, n-1)
     * exp (-x*x/2.0) / sqrt (2.0 * M_PI);
   return IntegralFunction;
 }
 
-double 
-DsssErrorRateModel::SymbolErrorProb16Cck (double e2) 
+double
+DsssErrorRateModel::SymbolErrorProb16Cck (double e2)
 {
   double sep;
   double error;
- 
+
   FunctionParameters params;
   params.beta = sqrt (2.0*e2);
   params.n = 8.0;
 
-  gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000); 
- 
+  gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+
   gsl_function F;
   F.function = &IntegralFunction;
   F.params = &params;
 
   gsl_integration_qagiu (&F,-params.beta, 0, 1e-7, 1000, w, &sep, &error);
   gsl_integration_workspace_free (w);
-  if (error == 0.0) 
+  if (error == 0.0)
     {
       sep = 1.0;
     }
@@ -153,7 +153,7 @@ DsssErrorRateModel::SymbolErrorProb16Cck (double e2)
   return 1.0 - sep;
 }
 
-double DsssErrorRateModel::SymbolErrorProb256Cck (double e1) 
+double DsssErrorRateModel::SymbolErrorProb256Cck (double e1)
 {
   return 1.0 - pow (1.0 - SymbolErrorProb16Cck (e1/2.0), 2);
 }

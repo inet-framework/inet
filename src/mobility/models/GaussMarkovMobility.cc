@@ -39,7 +39,7 @@ void GaussMarkovMobility::initialize(int stage)
         //constrain m_alpha to [0.0;1.0]
         m_alpha = fmax(0.0, m_alpha);
         m_alpha = fmin(1.0, m_alpha);
-        
+
         m_speed = m_speedMean;
         m_angle = m_angleMean;
 
@@ -110,7 +110,7 @@ void GaussMarkovMobility::move()
     // do something if we reach the wall
     Coord dummy;
     handleIfOutside(REFLECT, dummy, dummy, m_angle);
-    
+
     // calculate new speed and direction based on the model
     m_speed = m_alpha * m_speed +
                 (1.0 - m_alpha) * m_speedMean +

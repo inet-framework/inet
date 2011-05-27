@@ -46,7 +46,7 @@ void ChiangMobility::initialize(int stage)
 
             cMessage* movMsg = new cMessage("move");
             movMsg->setKind(MoveMessageKind);
-            
+
             scheduleAt(simTime() + uniform(0, m_updateInterval), movMsg);
             scheduleAt(simTime() + uniform(0, m_stateTransInterval), stMsg);
         }
@@ -71,7 +71,7 @@ void ChiangMobility::handleSelfMsg(cMessage * msg)
         case StateUpMessageKind:
             recalculateState();
             if (!m_stationary)
-                scheduleAt(simTime() + m_stateTransInterval, msg);            
+                scheduleAt(simTime() + m_stateTransInterval, msg);
             break;
         default:
             EV << " got self message of unknown kind, ignoring " << endl;
@@ -92,7 +92,7 @@ int ChiangMobility::getNextStateIndex(int currentState, double rvalue)
     //we assume that the sum in each row is 1
     double sum = 0;
     for (int i = 0; i < 3; ++i)
-    {        
+    {
         if (0 != stateMatrix[currentState][i])
         {
             sum += stateMatrix[currentState][i];
@@ -121,7 +121,7 @@ void ChiangMobility::recalculateState()
  */
 void ChiangMobility::move()
 {
-    int dx, dy;    
+    int dx, dy;
 
     //calculate movement based on state
     dx = m_states[0] - 1;
@@ -142,9 +142,9 @@ void ChiangMobility::move()
 
     //update position
     pos += Coord(dx, dy);
-    
+
     // do something if we reach the wall
-    {       
+    {
       Coord step = Coord(m_states[0] - 1, m_states[1] - 1);
       Coord target = pos;
       double angle = 0;

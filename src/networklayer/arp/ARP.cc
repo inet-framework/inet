@@ -56,7 +56,7 @@ Define_Module (ARP);
 
 void ARP::initialize(int stage)
 {
-    if (stage==0) 
+    if (stage==0)
     {
         globalArpCache.clear();
 

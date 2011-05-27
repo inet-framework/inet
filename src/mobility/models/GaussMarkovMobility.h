@@ -26,7 +26,7 @@ class INET_API GaussMarkovMobility : public BasicMobility
   private:
     /** @brief If the host is too close to the border it is repelled */
     void preventBorderHugging();
-    
+
   protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);

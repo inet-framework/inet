@@ -633,7 +633,7 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
                 lc_link_add(addr1, addr2, timeout, 0, srt->cost[i]);
         }
         else
-#else // ETx inactive 
+#else // ETx inactive
         lc_link_add(addr1, addr2, timeout, 0, 1);
 #endif
             links++;

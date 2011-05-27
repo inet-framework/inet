@@ -16,7 +16,7 @@ class INET_API ChiangMobility : public BasicMobility
   private:
     static const short MoveMessageKind = 1;
     static const short StateUpMessageKind = 2;
-    
+
   protected:
     double m_speed;              ///< speed of the host
     double m_updateInterval;     ///< time interval to update the hosts position
@@ -26,8 +26,8 @@ class INET_API ChiangMobility : public BasicMobility
 
   private:
     /** @brief gets the next state in the FSM*/
-    int getNextStateIndex(int currentState, double rvalue);    
-    
+    int getNextStateIndex(int currentState, double rvalue);
+
   protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);

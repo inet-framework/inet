@@ -107,7 +107,7 @@ class INET_API BindingUpdateList : public cSimpleModule
     };
 
     friend std::ostream& operator<<(std::ostream& os, const BindingUpdateListEntry& bul);
-    typedef std::map<IPv6Address,BindingUpdateListEntry> BindingUpdateList6; 
+    typedef std::map<IPv6Address,BindingUpdateListEntry> BindingUpdateList6;
     BindingUpdateList6 bindingUpdateList;
 
   public:
@@ -139,7 +139,7 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Initializes the values of a BUL entry to initial values.
      * Called by addOrUpdateBUL() if new entry is created.
      */
-    virtual void initializeBUValues(BindingUpdateListEntry& entry); // 28.08.07 - CB 
+    virtual void initializeBUValues(BindingUpdateListEntry& entry); // 28.08.07 - CB
 
     /**
      * Sets HoTI and/or CoTI values (transmission time, etc.) for the BUL entry.
