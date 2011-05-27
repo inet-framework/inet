@@ -4,6 +4,7 @@
 src/Makefile
 /doc/doxy/
 /doc/neddoc/
+/examples/*/*/results/
 
 # ignore binary files
 out/
