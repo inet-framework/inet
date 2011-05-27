@@ -53,6 +53,7 @@ PPP::~PPP()
     // kludgy way to check that nb is not deleted yet
     if (nb && nb == findModuleWhereverInNode("notificationBoard", this))
         nb->unsubscribe(this, NF_SUBSCRIBERLIST_CHANGED);
+
     cancelAndDelete(endTransmissionEvent);
 }
 
@@ -193,6 +194,12 @@ void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
         if (physOutGate == gcobj->pathStartGate)
             refreshOutGateConnection(false);
     }
+    else if (datarateChannel && dynamic_cast<cPostParameterChangeNotification *>(obj))
+    {
+        cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
+        if (datarateChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
+            refreshOutGateConnection(true);
+    }
 }
 
 void PPP::refreshOutGateConnection(bool connected)
@@ -212,6 +219,7 @@ void PPP::refreshOutGateConnection(bool connected)
             if (datarateChannel)
                 datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
+
         if (queueModule)
         {
             // Clear external queue: send a request, and received packet will be deleted in handleMessage()
@@ -232,21 +240,26 @@ void PPP::refreshOutGateConnection(bool connected)
         }
     }
 
+    cChannel* oldChannel = datarateChannel;
     // if we're connected, get the gate with transmission rate
     datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
+
+    if (datarateChannel && !oldChannel)
+        datarateChannel->subscribe(POST_MODEL_CHANGE, this);
 
     if (ev.isGUI())
     {
         if (connected)
         {
-            oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
+            if (!oldChannel)
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
         }
         else
         {
             // we are not connected: gray out our icon
-            getDisplayString().setTagArg("i",1,"#707070");
-            getDisplayString().setTagArg("i",2,"100");
+            getDisplayString().setTagArg("i", 1, "#707070");
+            getDisplayString().setTagArg("i", 2, "100");
         }
     }
 
@@ -428,15 +441,15 @@ void PPP::updateDisplayString()
     }
     else if (datarateChannel != NULL)
     {
-        double datarate = datarateChannel->par("datarate").doubleValue();
         char datarateText[40];
 
-        if (datarate >= 1e9) sprintf(datarateText,"%gG", datarate/1e9);
-        else if (datarate >= 1e6) sprintf(datarateText,"%gM", datarate/1e6);
-        else if (datarate >= 1e3) sprintf(datarateText,"%gK", datarate/1e3);
-        else sprintf(datarateText,"%gbps", datarate);
+        double datarate = datarateChannel->getNominalDatarate();
+        if (datarate >= 1e9) sprintf(datarateText, "%gGbps", datarate / 1e9);
+        else if (datarate >= 1e6) sprintf(datarateText, "%gMbps", datarate / 1e6);
+        else if (datarate >= 1e3) sprintf(datarateText, "%gKbps", datarate / 1e3);
+        else sprintf(datarateText, "%gbps", datarate);
 
-/* TBD find solution for displaying IPv4 address without dependence on IPv6 or IPv6
+/* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
         IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
         sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
 */
