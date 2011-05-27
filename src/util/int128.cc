@@ -72,7 +72,7 @@ int128::int128 (const char * sz) throw ()
     for (; i < strlen (sz); ++i)
     {
         uint32_t n = 0;
-        if (sz [i] >= '0' && sz [i] <= (('0' + (int) radix) < '9'))
+        if (sz [i] >= '0' && sz [i] <= '9' && sz [i] < '0' + (int) radix)
             n = sz [i] - '0';
         else if (sz [i] >= 'a' && sz [i] <= 'a' + (int) radix - 10)
             n = sz [i] - 'a' + 10;
