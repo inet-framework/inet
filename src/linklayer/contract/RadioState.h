@@ -74,7 +74,7 @@ class INET_API RadioState : public cPolymorphic
     /** id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
 
-	void setRadioId(int state) { radioId = state; } //AM 6 Dezember nachträglich eingefügt
+    void setRadioId(int state) { radioId = state; } //AM 6 Dezember nachträglich eingefügt
 
     /** Returns radio state */
     State getState() const { return state; }

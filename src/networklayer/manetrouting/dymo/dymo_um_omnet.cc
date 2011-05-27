@@ -68,8 +68,8 @@ void DYMOUM::initialize(int stage)
 {
     if (stage==4)
     {
-    	macToIpAdress = new MacToIpAddress;
-    	sendMessageEvent = new cMessage();
+        macToIpAdress = new MacToIpAddress;
+        sendMessageEvent = new cMessage();
 
         //sendMessageEvent = new cMessage();
         PromiscOperation = true;
@@ -188,15 +188,15 @@ void DYMOUM::initialize(int stage)
 DYMOUM::DYMOUM()
 {
     attachPacket=false;
-	is_init =false;
-	log_file_fd_init=false;
-	ipNodeId=NULL;
-	gateWayAddress=NULL;
-	numInterfacesActive=0;
-	timer_elem=0;
-	sendMessageEvent =NULL;/*&messageEvent;*/
-	macToIpAdress = NULL;
-	mapSeqNum.clear();
+    is_init =false;
+    log_file_fd_init=false;
+    ipNodeId=NULL;
+    gateWayAddress=NULL;
+    numInterfacesActive=0;
+    timer_elem=0;
+    sendMessageEvent =NULL;/*&messageEvent;*/
+    macToIpAdress = NULL;
+    mapSeqNum.clear();
 #ifdef MAPROUTINGTABLE
     dymoRoutingTable = new DymoRoutingTable;
     dymoPendingRreq = new DymoPendingRreq;
@@ -1567,16 +1567,16 @@ int  DYMOUM::getRouteGroup(const Uint128& dest,std::vector<Uint128> &add,Uint128
 
 bool DYMOUM::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint128& gw)
 {
-	int distance = 1000;
+    int distance = 1000;
     for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
     {
         struct in_addr destAddr;
         destAddr.s_addr = *it;
         rtable_entry_t * fwd_rt = rtable_find(destAddr);
         if (!fwd_rt)
-        	continue;
+            continue;
         if (fwd_rt->rt_state != RT_VALID)
-        	continue;
+            continue;
         if (distance<fwd_rt->rt_hopcnt ||(distance==fwd_rt->rt_hopcnt && intrand(1)))
             continue;
         distance=fwd_rt->rt_hopcnt;
@@ -1592,22 +1592,22 @@ bool DYMOUM::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint
 
 bool DYMOUM::getNextHopGroup(const Uint128& dest,Uint128 &next,int &iface,Uint128& gw ,bool &isGroup,int group)
 {
-	AddressGroup gr;
-	bool find=false;
+    AddressGroup gr;
+    bool find=false;
     if (findInAddressGroup(dest,group))
     {
-    	getAddressGroup(gr,group);
-    	find= getNextHopGroup(gr,next,iface,gw);
-    	isGroup=true;
+        getAddressGroup(gr,group);
+        find= getNextHopGroup(gr,next,iface,gw);
+        isGroup=true;
 
      }
     else
     {
         double cost;
-    	find= getNextHop(dest,next,iface,cost);
-    	isGroup=false;
+        find= getNextHop(dest,next,iface,cost);
+        isGroup=false;
     }
-	return find;
+    return find;
 }
 
 

@@ -394,13 +394,13 @@ void Batman::handleMessage(cMessage *msg)
                 std::vector<TYPE_OF_WORD>vectorAux;
                 for (unsigned int i=0;i<num_words;i++)
                 {
-                	vectorAux.push_back(orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]);
+                    vectorAux.push_back(orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]);
                 }
                 bit_mark(vectorAux, 0);
                 orig_neigh_node->bcast_own_sum[if_incoming->if_num] = bit_packet_count(vectorAux);
                 for (unsigned int i=0;i<num_words;i++)
                 {
-                	orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]= vectorAux[i];
+                    orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]= vectorAux[i];
                 }
                 EV<< "count own bcast (is_my_orig): old = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num]<<endl;
             }
@@ -525,27 +525,27 @@ void Batman::scheduleNextEvent()
 uint32_t Batman::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
 {
 
-	OrigMap::iterator it = origMap.find(dest);
-	if (it != origMap.end())
-	{
-		OrigNode * node =it->second;
-		add.resize(0);
-		add.push_back(node->router->addr);
-		return -1;
-	}
-	return 0;
+    OrigMap::iterator it = origMap.find(dest);
+    if (it != origMap.end())
+    {
+        OrigNode * node =it->second;
+        add.resize(0);
+        add.push_back(node->router->addr);
+        return -1;
+    }
+    return 0;
 }
 
 bool Batman::getNextHop(const Uint128 &dest,Uint128 &add,int &iface, double &val)
 {
-	OrigMap::iterator it = origMap.find(dest);
-	if (it != origMap.end())
-	{
-		OrigNode * node =it->second;
-		add=node->router->addr;
-		return true;
-	}
-	return false;
+    OrigMap::iterator it = origMap.find(dest);
+    if (it != origMap.end())
+    {
+        OrigNode * node =it->second;
+        add=node->router->addr;
+        return true;
+    }
+    return false;
 }
 
 

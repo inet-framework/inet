@@ -196,7 +196,7 @@ void IPvXTrafGen::sendPacket()
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
-	}
+    }
     numSent++;
 }
 

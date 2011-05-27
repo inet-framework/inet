@@ -3,7 +3,7 @@
  *
  * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -29,7 +29,7 @@
 Register_Class(RayleighModel);
 void RayleighModel::initializeFrom(cModule *radioModule)
 {
-	initializeFreeSpace(radioModule);
+    initializeFreeSpace(radioModule);
 }
 
 RayleighModel::~RayleighModel() {
@@ -40,13 +40,13 @@ RayleighModel::~RayleighModel() {
 double RayleighModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
-	double avg_rx_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
+    double avg_rx_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
 
     double x = normal(0,1);
     double y = normal(0,1);
     double prec = avg_rx_power * 0.5 * (x*x + y*y);
     if (prec > pSend)
-    	prec = pSend;
+        prec = pSend;
     return prec;
 
 }

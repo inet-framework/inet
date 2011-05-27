@@ -3,7 +3,7 @@
  *
  * author:      Andreas Kuntz
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -27,8 +27,8 @@
 Register_Class(LogNormalShadowingModel);
 void LogNormalShadowingModel::initializeFrom(cModule *radioModule)
 {
-	initializeFreeSpace(radioModule);
-	sigma =  radioModule->par("sigma");
+    initializeFreeSpace(radioModule);
+    sigma =  radioModule->par("sigma");
 }
 
 
@@ -36,11 +36,11 @@ void LogNormalShadowingModel::initializeFrom(cModule *radioModule)
 double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
-	double d0 = 1.0;
+    double d0 = 1.0;
 
     // Reference Pathloss
 
-	double PL_d0 = freeSpace(Gt,Gr,L,pSend,waveLength,d0,pathLossAlpha);
+    double PL_d0 = freeSpace(Gt,Gr,L,pSend,waveLength,d0,pathLossAlpha);
     double PL_d0_db = 10.0 * log10(pSend / PL_d0);
 
     // Pathloss at distance d + normal distribution
@@ -55,7 +55,7 @@ double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carr
     // convert dBm to mW
     double prec = pow(10, Prx_db/10.0);
     if (prec > pSend)
-    	prec = pSend;
+        prec = pSend;
     return prec;
 }
 

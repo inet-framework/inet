@@ -321,7 +321,7 @@ void NS_CLASS rtable_init()
 {
     while (!dymoRoutingTable->empty())
     {
-    	if (dymoRoutingTable->begin()->second)
+        if (dymoRoutingTable->begin()->second)
         {
             timer_remove(&dymoRoutingTable->begin()->second->rt_deltimer);
             timer_remove(&dymoRoutingTable->begin()->second->rt_validtimer);

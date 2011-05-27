@@ -1281,17 +1281,17 @@ OLSR_ETX::rtable_dijkstra_computation()
     std::multimap<int,nsaddr_t> processed_nodes;
     for (Dijkstra::DijkstraMap::iterator it = dijkstra->dijkstraMap.begin();it != dijkstra->dijkstraMap.end(); it++)
     {
-    	// store the nodes in hop order, the multimap order the values in function of number of hops
+        // store the nodes in hop order, the multimap order the values in function of number of hops
         processed_nodes.insert(std::pair<int,nsaddr_t>(it->second.hop_count(),it->first));
     }
     while (!processed_nodes.empty())
     {
 
-    	std::multimap<int,nsaddr_t>::iterator it=processed_nodes.begin();
-    	Dijkstra::DijkstraMap::iterator itDij = dijkstra->dijkstraMap.find(it->second);
-    	if (itDij==dijkstra->dijkstraMap.end())
-    	    opp_error("node not found in DijkstraMap");
-    	int hopCount =it->first;
+        std::multimap<int,nsaddr_t>::iterator it=processed_nodes.begin();
+        Dijkstra::DijkstraMap::iterator itDij = dijkstra->dijkstraMap.find(it->second);
+        if (itDij==dijkstra->dijkstraMap.end())
+            opp_error("node not found in DijkstraMap");
+        int hopCount =it->first;
         if (hopCount == 1)
         {
             // add route...

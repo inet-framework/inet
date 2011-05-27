@@ -54,11 +54,11 @@ enum LwmplsType
 //
 packet LWMPLSPacket
 {
-     int label;// 20 bits 
+     int label;// 20 bits
      int labelReturn;
      int type enum(LwmplsType); // 4 bits
      bool nextHeader=false; //1 bit
-			 // 7 bits route long
+             // 7 bits route long
      unsigned int counter;
      byteLength = 6;
      MACAddress source; // This fields are in the 4 address I'm include here for simplicity

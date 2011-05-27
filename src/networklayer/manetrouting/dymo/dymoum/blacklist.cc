@@ -64,8 +64,8 @@ int NS_CLASS blacklist_remove(blacklist_t *entry)
     {
         if ((*it).second==entry)
         {
-        	timer_remove(&entry->timer);
-        	dymoBlackList->erase(it);
+            timer_remove(&entry->timer);
+            dymoBlackList->erase(it);
         }
     }
     delete entry;

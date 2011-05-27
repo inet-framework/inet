@@ -70,7 +70,7 @@ int NS_CLASS pending_rreq_remove(pending_rreq_t *entry)
     {
         if ((*it).second == entry)
         {
-        	dymoPendingRreq->erase(it);
+            dymoPendingRreq->erase(it);
         }
         else
             opp_error("Error in dymoPendingRreq table");

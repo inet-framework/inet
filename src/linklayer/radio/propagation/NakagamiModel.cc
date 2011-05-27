@@ -3,7 +3,7 @@
  *
  * author:      Andreas Kuntz
  *
- * copyright:	(c) 2009 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2009 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -28,20 +28,20 @@ Register_Class(NakagamiModel);
 
 void NakagamiModel::initializeFrom(cModule *radioModule)
 {
-	initializeFreeSpace(radioModule);
-	m = radioModule->par("nak_m");
+    initializeFreeSpace(radioModule);
+    m = radioModule->par("nak_m");
 }
 
 
 double NakagamiModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-	const int rng = 0;
+    const int rng = 0;
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
 
-	double avg_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
-	avg_power = avg_power/1000;
+    double avg_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
+    avg_power = avg_power/1000;
     double prec = gamma_d(m, avg_power / m, rng) * 1000.0;
      if (prec > pSend)
-     	prec = pSend;
+        prec = pSend;
      return prec;
 }

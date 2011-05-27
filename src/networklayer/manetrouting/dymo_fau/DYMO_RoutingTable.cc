@@ -44,8 +44,8 @@ DYMO_RoutingTable::~DYMO_RoutingTable()
 {
     while (!routeVector.empty())
     {
-    	delete routeVector.back();
-    	routeVector.pop_back();
+        delete routeVector.back();
+        routeVector.pop_back();
     }
 }
 

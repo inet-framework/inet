@@ -57,8 +57,8 @@ enum
 
     NF_LINK_BREAK, // Used for manet link layer feedback
     NF_LINK_PROMISCUOUS, // Used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
-	NF_LINK_FULL_PROMISCUOUS, // Used for manet promiscuous mode, all packets are promiscuous
-    NF_LINK_REFRESH,     // Used for refresh a neigbourd adjacency 
+    NF_LINK_FULL_PROMISCUOUS, // Used for manet promiscuous mode, all packets are promiscuous
+    NF_LINK_REFRESH,     // Used for refresh a neigbourd adjacency
 
 
     // - layer 3 (network)

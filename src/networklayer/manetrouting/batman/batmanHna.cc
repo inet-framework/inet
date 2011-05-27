@@ -3,14 +3,14 @@
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action)
 {
-	Hna_task *hna_task;
+    Hna_task *hna_task;
 
-	hna_task = new Hna_task;
+    hna_task = new Hna_task;
 
-	hna_task->addr = ip_addr;
-	hna_task->netmask = netmask;
-	hna_task->route_action = route_action;
-	hna_chg_list.push_back(hna_task);
+    hna_task->addr = ip_addr;
+    hna_task->netmask = netmask;
+    hna_task->route_action = route_action;
+    hna_chg_list.push_back(hna_task);
 }
 
 

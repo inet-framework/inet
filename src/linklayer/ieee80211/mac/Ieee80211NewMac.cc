@@ -142,11 +142,11 @@ void Ieee80211NewMac::initialize(int stage)
         PHY_HEADER_LENGTH=par("PHY_HEADER_LENGTH");//26us
 
         if (strcmp("SHORT",par("WifiPreambleMode").stringValue())==0)
-        	wifiPreambleType =WIFI_PREAMBLE_SHORT;
+            wifiPreambleType =WIFI_PREAMBLE_SHORT;
         else if (strcmp("LONG",par("WifiPreambleMode").stringValue())==0)
-        	wifiPreambleType =WIFI_PREAMBLE_LONG;
+            wifiPreambleType =WIFI_PREAMBLE_LONG;
         else
-        	wifiPreambleType =WIFI_PREAMBLE_LONG;
+            wifiPreambleType =WIFI_PREAMBLE_LONG;
 
         EV<<"Operating mode: 802.11"<<opMode;
         maxQueueSize = par("maxQueueSize");
@@ -639,8 +639,8 @@ void Ieee80211NewMac::handleSelfMsg(cMessage *msg)
 {
     if (msg==throughputTimer)
     {
-    	throughputLastPeriod = recBytesOverPeriod/SIMTIME_DBL(throughputTimePeriod);
-    	recBytesOverPeriod=0;
+        throughputLastPeriod = recBytesOverPeriod/SIMTIME_DBL(throughputTimePeriod);
+        recBytesOverPeriod=0;
         scheduleAt(simTime()+throughputTimePeriod,throughputTimer);
         return;
     }
@@ -1198,7 +1198,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   cancelBackoffPeriod();
                                  );
             FSMA_Event_Transition(Backoff-Idle,
-            		              isBakoffMsg(msg) && transmissionQueueEmpty(),
+                                  isBakoffMsg(msg) && transmissionQueueEmpty(),
                                   IDLE,
                                   resetStateVariables();
                                   );
@@ -1518,7 +1518,7 @@ simtime_t Ieee80211NewMac::getHeaderTime(double bitrate)
     else if (opMode=='p')
         modType = WifyModulationType::getMode80211p(bitrate);
     else
-    	opp_error("mode not supported");
+        opp_error("mode not supported");
     return WifyModulationType::getPreambleAndHeader(modType,wifiPreambleType);
 }
 
@@ -1637,12 +1637,12 @@ void Ieee80211NewMac::scheduleAIFSPeriod()
 
         }
         if (endAIFS(i)->isScheduled())
-        	schedule=true;
+            schedule=true;
     }
     if (!schedule && !endDIFS->isScheduled())
     {
         // schedule default DIFS
-    	currentAC=numCategories()-1;
+        currentAC=numCategories()-1;
         scheduleDIFSPeriod();
     }
 }
@@ -2009,9 +2009,9 @@ void Ieee80211NewMac::retryCurrentTransmission()
 {
     ASSERT(retryCounter() < transmissionLimit - 1);
     getCurrentTransmission()->setRetry(true);
-    if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF) 
+    if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF)
         reportDataFailed();
-    else 
+    else
         retryCounter() ++;
     numRetry()++;
     backoff() = true;
@@ -2043,9 +2043,9 @@ void Ieee80211NewMac::setMode(Mode mode)
 void Ieee80211NewMac::resetStateVariables()
 {
     backoffPeriod() = 0;
-    if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF) 
+    if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF)
         reportDataOk ();
-    else 
+    else
         retryCounter() = 0;
 
     if (!transmissionQueue()->empty())
@@ -2163,7 +2163,7 @@ double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
 #else
     if (PHY_HEADER_LENGTH<0)
     {
-    	ModulationType modType;
+        ModulationType modType;
         if (opMode=='g' || (opMode=='b'))
             modType = WifyModulationType::getMode80211g(bitrate);
         else if (opMode=='a')
@@ -2524,12 +2524,12 @@ cMessage * Ieee80211NewMac::endBackoff(int i)
 
 const bool Ieee80211NewMac::isBakoffMsg(cMessage *msg)
 {
-	for(unsigned int i=0;i<edcCAF.size();i++)
-	{
-	    if (msg==edcCAF[i].endBackoff)
-	       return true;
-	}
-	return false;
+    for(unsigned int i=0;i<edcCAF.size();i++)
+    {
+        if (msg==edcCAF[i].endBackoff)
+           return true;
+    }
+    return false;
 }
 
 // Statistics
@@ -2680,18 +2680,18 @@ Ieee80211NewMac::getControlAnswerMode (ModulationType reqMode)
    * TODO: Note that we're ignoring the last sentence for now, because
    * there is not yet any manipulation here of PHY options.
    */
-	bool found = false;
-	ModulationType mode;
+    bool found = false;
+    ModulationType mode;
     for (uint32_t idx = 0; idx < (uint32_t)getMaxBitrate(); idx++)
     {
-	    ModulationType thismode;
-	    if (opMode=='b')
+        ModulationType thismode;
+        if (opMode=='b')
             thismode = WifyModulationType::getMode80211b(BITRATES_80211b[idx]);
-	    else if (opMode=='g')
+        else if (opMode=='g')
             thismode = WifyModulationType::getMode80211g(BITRATES_80211g[idx]);
-	    else if (opMode=='a')
+        else if (opMode=='a')
             thismode = WifyModulationType::getMode80211a(BITRATES_80211a[idx]);
-	    else if (opMode=='a')
+        else if (opMode=='a')
             thismode = WifyModulationType::getMode80211p(BITRATES_80211p[idx]);
 
       /* If the rate:

@@ -3,7 +3,7 @@
  *
  * author:      Andreas Kuntz
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -28,7 +28,7 @@
 class INET_API TwoRayGroundModel : public FreeSpaceModel {
 
     public:
-	~TwoRayGroundModel();
+    ~TwoRayGroundModel();
      virtual void initializeFrom(cModule *radioModule);
     /**
      * To be redefined to calculate the received power of a transmission.
@@ -36,7 +36,7 @@ class INET_API TwoRayGroundModel : public FreeSpaceModel {
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
 
     private:
-	double ht, hr;
+    double ht, hr;
 };
 
 #endif /* __TWO_RAY_GROUND_H__ */

@@ -31,7 +31,7 @@ network MobileGrid
     submodules:
         host[numHosts]: AdhocHost {
             parameters:
-                //	nodeId = index;
+                //  nodeId = index;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
         channelControl: ChannelControl {

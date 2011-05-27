@@ -41,7 +41,7 @@ class PhyControlInfo
     int channelNumber = -1; // with PHY_C_CONFIGURERADIO: the channel to switch to
     double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
     bool  adativeSensitivity=false;
-    double transmitterPower=-1; // With PHY_C_CHANGETRANSMITTERPOWER : the power transmission swith to 
+    double transmitterPower=-1; // With PHY_C_CHANGETRANSMITTERPOWER : the power transmission swith to
 }
 
 //
@@ -50,6 +50,6 @@ class PhyControlInfo
 // NOTE: make sure it does not conflict with _802_11frameType in Consts80211.h
 enum PhyIndication
 {
-	BITERROR = -1; // the phy has recognized a bit error in the packet
-	COLLISION = 9; // packet lost due to collision
+    BITERROR = -1; // the phy has recognized a bit error in the packet
+    COLLISION = 9; // packet lost due to collision
 }

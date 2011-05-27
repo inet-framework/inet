@@ -88,7 +88,7 @@ nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
     DymoNbList::iterator it;
     for (it =dymoNbList->begin();it !=dymoNbList->end();it++)
     {
-    	nb_t *nb = *it;
+        nb_t *nb = *it;
         if (*it==nb)
         {
             if (nb->nb_addr.s_addr == nb_addr.s_addr &&

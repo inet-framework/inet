@@ -24,7 +24,7 @@
 #include "batman.h"
 
 
-OrigNode::OrigNode() 
+OrigNode::OrigNode()
 {
     clear();
 }
@@ -57,11 +57,11 @@ std::string OrigNode::info() const
     if (bcast_own[0])
       out << "bcast_own:" << bcast_own[0]<< "  ";
     else
-    	out << "bcast_own: *  ";
+        out << "bcast_own: *  ";
     if (bcast_own_sum[0])
       out << "bcast_own_sum:" << bcast_own_sum[0]<< "  ";
     else
-    	out << "bcast_own_sum: * ";
+        out << "bcast_own_sum: * ";
 
     out << "tq_own:" << (int)tq_own<< "  ";
     out << "tq_asym_penalty:" <<  (int)tq_asym_penalty<< "  ";
@@ -72,19 +72,19 @@ std::string OrigNode::info() const
     NeighNode *neigh_node=NULL;
     for (unsigned int i = 0; i< neigh_list.size();i++)
     {
-    	NeighNode * tmp_neigh_node = neigh_list[i];
+        NeighNode * tmp_neigh_node = neigh_list[i];
         if (tmp_neigh_node->addr == orig )
             neigh_node = tmp_neigh_node;
 
     }
     if (!neigh_node)
-    	out << "*";
+        out << "*";
     else
-    	out << neigh_node->info();
+        out << neigh_node->info();
 
     for (unsigned int i = 0; i< neigh_list.size();i++)
     {
-       	out << "list neig :" << neigh_list[i]->addr.getIPAddress() << " ";
+        out << "list neig :" << neigh_list[i]->addr.getIPAddress() << " ";
     }
 
     out << "\n router info:"; if (router==NULL) out << "*  "; else out << router->info() << "  ";
@@ -125,7 +125,7 @@ OrigNode::OrigNode(const OrigNode &other)
 }
 */
 
-OrigNode::~OrigNode() 
+OrigNode::~OrigNode()
 {
     router=NULL;
     batmanIf=NULL;
@@ -640,12 +640,12 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
     // Sanity check
     if (!isInMacLayer())
     {
-    	Uint128 next = omnet_exist_rte (orig_node->orig);
+        Uint128 next = omnet_exist_rte (orig_node->orig);
         if(orig_node->router)
         {
             if (next!=orig_node->router->addr)
                 add_del_route(orig_node->orig, 32, orig_node->router->addr,
-            		 orig_node->router->if_incoming->if_index, orig_node->router->if_incoming->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
+                     orig_node->router->if_incoming->if_index, orig_node->router->if_incoming->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
         }
         else
         {
@@ -1034,13 +1034,13 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
         std::vector<TYPE_OF_WORD>vectorAux;
         for (unsigned int i=0;i<num_words;i++)
         {
-        	vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
+            vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
         }
         bit_get_packet(vectorAux, 1, 0 );
         orig_node->bcast_own_sum[batman_if->if_num] = bit_packet_count(vectorAux);
         for (unsigned int i=0;i<num_words;i++)
         {
-        	orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
+            orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
         }
         vectorAux.clear();
         //debug_output( 4, "new = %i \n", orig_node->bcast_own_sum[batman_if->if_num] );
@@ -1473,10 +1473,10 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
          *
          * our desired output would be: 9876 5432 1000 0000
          * */
-    	seq_bits[i]=
-    			(seq_bits[i - word_num] << word_offset) +
-    					/* take the lower port from the left half, shift it left to its final position */
-    			(seq_bits[i - word_num - 1] >>	(WORD_BIT_SIZE-word_offset));
+        seq_bits[i]=
+                (seq_bits[i - word_num] << word_offset) +
+                        /* take the lower port from the left half, shift it left to its final position */
+                (seq_bits[i - word_num - 1] >>  (WORD_BIT_SIZE-word_offset));
 
         /* for our example that would be: word[0] = 9800 + 0076 = 9876 */
     }
@@ -1487,8 +1487,8 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
 
     /* pad the rest with 0, if there is anything */
     i--;
-	for (; i>=0; i--)
-		seq_bits[i]= 0;
+    for (; i>=0; i--)
+        seq_bits[i]= 0;
 /*    bit_print( seq_bits ); */
 }
 
@@ -1626,22 +1626,22 @@ void Batman::check_active_interfaces(void)
 
 BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
 {
-	std::string str="BatmanPkt:"+batman_if->address.getIPAddress().str();
-	BatmanPacket * pkt=new BatmanPacket(str.c_str());
+    std::string str="BatmanPkt:"+batman_if->address.getIPAddress().str();
+    BatmanPacket * pkt=new BatmanPacket(str.c_str());
 
-	pkt->setVersion (0);
-	pkt->setFlags (0x00);
-	pkt->setTtl ((batman_if->if_num > 0 ? 2 : TTL));
-	pkt->setGatewayFlags (batman_if->if_num > 0 ? 0 : gateway_class);
-	pkt->setSeqNumber (batman_if->seqno);
-	pkt->setGatewayPort (GW_PORT);
-	pkt->setTq (TQ_MAX_VALUE);
+    pkt->setVersion (0);
+    pkt->setFlags (0x00);
+    pkt->setTtl ((batman_if->if_num > 0 ? 2 : TTL));
+    pkt->setGatewayFlags (batman_if->if_num > 0 ? 0 : gateway_class);
+    pkt->setSeqNumber (batman_if->seqno);
+    pkt->setGatewayPort (GW_PORT);
+    pkt->setTq (TQ_MAX_VALUE);
     if (batman_if->if_active)
     {
-	   pkt->setOrig(batman_if->address);
-	   pkt->setPrevSender(batman_if->address);
+       pkt->setOrig(batman_if->address);
+       pkt->setPrevSender(batman_if->address);
     }
-	return pkt;
+    return pkt;
 }
 
 

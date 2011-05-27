@@ -127,9 +127,9 @@ void Radio::initialize(int stage)
         else
             drawCoverage = false;
         if (this->hasPar("refreshCoverageInterval"))
-        	updateStringInterval = par("refreshCoverageInterval");
+            updateStringInterval = par("refreshCoverageInterval");
         else
-        	updateStringInterval = 0;
+            updateStringInterval = 0;
 
     }
     else if (stage == 1)
@@ -144,14 +144,14 @@ void Radio::initialize(int stage)
     {
         // tell initial channel number to ChannelControl; should be done in
         // stage==2 or later, because base class initializes myRadioRef in that stage
-    	cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
         // statistics
         emit(bitrateSignal, rs.getBitrate());
         emit(radioStateSignal, rs.getState());
         emit(channelNumberSignal, rs.getChannelNumber());
 
-    	// draw the interference distance
+        // draw the interference distance
         this->updateDisplayString();
     }
 }
@@ -175,7 +175,7 @@ Radio::~Radio()
 
 bool Radio::processAirFrame(AirFrame *airframe)
 {
-	return airframe->getChannelNumber() == getChannelNumber();
+    return airframe->getChannelNumber() == getChannelNumber();
 }
 
 /**
@@ -217,12 +217,12 @@ void Radio::handleMessage(cMessage *msg)
         {
             AirFrame *airframe = encapsulatePacket(PK(msg));
             handleUpperMsg(airframe);
-        } 
-        else 
+        }
+        else
         {
             EV << "Radio disabled. ignoring frame" << endl;
             delete msg;
-    	}
+        }
     }
     else if (msg->isSelfMessage())
     {
@@ -230,14 +230,14 @@ void Radio::handleMessage(cMessage *msg)
     }
     else if (processAirFrame (check_and_cast<AirFrame*>(msg)))
     {
-        if (this->isEnabled()) 
+        if (this->isEnabled())
         {
         // must be an AirFrame
             AirFrame *airframe = (AirFrame *) msg;
             handleLowerMsgStart(airframe);
             bufferMsg(airframe);
         }
-        else 
+        else
         {
             EV << "Radio disabled. ignoring airframe" << endl;
             delete msg;
@@ -530,14 +530,14 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
     // calculate receive power
     double frequency = carrierFrequency;
     if (airframe && airframe->getCarrierFrequency()>0.0)
-    	frequency = airframe->getCarrierFrequency();
+        frequency = airframe->getCarrierFrequency();
 
     if (distance<MIN_DISTANCE)
         distance = MIN_DISTANCE;
 
     double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), frequency, distance);
     if (obstacles && distance > MIN_DISTANCE)
-    	rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, getRadioPosition(), 0);
+        rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, getRadioPosition(), 0);
     airframe->setPowRec(rcvdPower);
     // store the receive power in the recvBuff
     recvBuff[airframe] = rcvdPower;
@@ -733,44 +733,44 @@ void Radio::changeChannel(int channel)
     IChannelControl::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
     for (IChannelControl::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
-    	AirFrame *airframe = check_and_cast<AirFrame *> (*it);
-    	// time for the message to reach us
-    	double distance = getRadioPosition().distance(airframe->getSenderPos());
-    	simtime_t propagationDelay = distance / 3.0E+8;
+        AirFrame *airframe = check_and_cast<AirFrame *> (*it);
+        // time for the message to reach us
+        double distance = getRadioPosition().distance(airframe->getSenderPos());
+        simtime_t propagationDelay = distance / 3.0E+8;
 
-    	// if this transmission is on our new channel and it would reach us in the future, then schedule it
-    	if (channel == airframe->getChannelNumber())
-    	{
-    		EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
-    	}
+        // if this transmission is on our new channel and it would reach us in the future, then schedule it
+        if (channel == airframe->getChannelNumber())
+        {
+            EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
+        }
 
-    	// if there is a message on the air which will reach us in the future
-    	if (airframe->getTimestamp() + propagationDelay >= simTime())
-    	{
-    		EV << "will arrive in the future, scheduling it\n";
+        // if there is a message on the air which will reach us in the future
+        if (airframe->getTimestamp() + propagationDelay >= simTime())
+        {
+            EV << "will arrive in the future, scheduling it\n";
 
-    		// we need to send to each radioIn[] gate of this host
-    		//for (int i = 0; i < radioGate->size(); i++)
-    		//    sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
+            // we need to send to each radioIn[] gate of this host
+            //for (int i = 0; i < radioGate->size(); i++)
+            //    sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
 
-    		// JcM Fix: we need to this radio only. no need to send the packet to each radioIn
-    		// since other radios might be not in the same channel
-    		sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() );
-    	}
-    	// if we hear some part of the message
-    	else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
-    	{
-    		EV << "missed beginning of frame, processing it as noise\n";
+            // JcM Fix: we need to this radio only. no need to send the packet to each radioIn
+            // since other radios might be not in the same channel
+            sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() );
+        }
+        // if we hear some part of the message
+        else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
+        {
+            EV << "missed beginning of frame, processing it as noise\n";
 
-    		AirFrame *frameDup = airframe->dup();
-    		frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
-    		handleLowerMsgStart(frameDup);
-    		bufferMsg(frameDup);
-    	}
-    	else
-    	{
-    		EV << "in the past\n";
-    	}
+            AirFrame *frameDup = airframe->dup();
+            frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
+            handleLowerMsgStart(frameDup);
+            bufferMsg(frameDup);
+        }
+        else
+        {
+            EV << "in the past\n";
+        }
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
@@ -880,24 +880,24 @@ void Radio::updateDisplayString() {
     if (!ev.isGUI() || !drawCoverage) // nothing to do
         return;
     if (myRadioRef) {
-    	cDisplayString& d = hostModule->getDisplayString();
+        cDisplayString& d = hostModule->getDisplayString();
 
-    	// communication area (up to sensitivity)
-    	// FIXME this overrides the ranges if more than one radio is present is a host
-    	double sensitivity_limit = cc->getInterferenceRange(myRadioRef);
-    	d.removeTag("r1");
-    	d.insertTag("r1");
-    	d.setTagArg("r1",0,(long) sensitivity_limit);
-    	d.setTagArg("r1",2,"gray");
-    	d.removeTag("r2");
-    	d.insertTag("r2");
-    	d.setTagArg("r2",0,(long) calcDistFreeSpace());
-    	d.setTagArg("r2",2,"blue");
+        // communication area (up to sensitivity)
+        // FIXME this overrides the ranges if more than one radio is present is a host
+        double sensitivity_limit = cc->getInterferenceRange(myRadioRef);
+        d.removeTag("r1");
+        d.insertTag("r1");
+        d.setTagArg("r1",0,(long) sensitivity_limit);
+        d.setTagArg("r1",2,"gray");
+        d.removeTag("r2");
+        d.insertTag("r2");
+        d.setTagArg("r2",0,(long) calcDistFreeSpace());
+        d.setTagArg("r2",2,"blue");
     }
     if (updateString==NULL && updateStringInterval>0)
-    	updateString = new cMessage("refresh timer");
+        updateString = new cMessage("refresh timer");
     if (updateStringInterval>0)
-    	scheduleAt(simTime()+updateStringInterval, updateString);
+        scheduleAt(simTime()+updateStringInterval, updateString);
 
 
 }

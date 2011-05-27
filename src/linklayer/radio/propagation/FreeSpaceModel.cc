@@ -3,7 +3,7 @@
  *
  * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -35,27 +35,27 @@ Register_Class(FreeSpaceModel);
 
 void FreeSpaceModel::initializeFreeSpace(cModule *radioModule)
 {
-	pathLossAlpha = radioModule->par("pathLossAlpha");
+    pathLossAlpha = radioModule->par("pathLossAlpha");
     IChannelControl *cc = ChannelAccess::getChannelControl();
     if (pathLossAlpha < (double) (dynamic_cast<cModule*>(cc)->par("alpha")))
         opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
-	Gt = pow(10, radioModule->par("TransmissionAntennaGainIndB").doubleValue()/10);
-	Gr = pow(10, radioModule->par("ReceiveAntennaGainIndB").doubleValue()/10);
-	L = pow(10, radioModule->par("SystemLossFactor").doubleValue()/10);
+    Gt = pow(10, radioModule->par("TransmissionAntennaGainIndB").doubleValue()/10);
+    Gr = pow(10, radioModule->par("ReceiveAntennaGainIndB").doubleValue()/10);
+    L = pow(10, radioModule->par("SystemLossFactor").doubleValue()/10);
 }
 
 void FreeSpaceModel::initializeFrom(cModule *radioModule)
 {
-	initializeFreeSpace(radioModule);
+    initializeFreeSpace(radioModule);
 }
 
 
 double FreeSpaceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
-	double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
+    double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
     if (prec > pSend)
-    	prec = pSend;
+        prec = pSend;
     return prec;
 }
 

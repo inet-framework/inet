@@ -3,7 +3,7 @@
  *
  * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -45,15 +45,15 @@ using namespace std;
 class INET_API RiceModel : public FreeSpaceModel {
 
     public:
-	~RiceModel(){};
-	 virtual void initializeFrom(cModule *);
+    ~RiceModel(){};
+     virtual void initializeFrom(cModule *);
     /**
      * To be redefined to calculate the received power of a transmission.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
     private:
-	/** @brief  Ricean K Factor */
-	double K;
+    /** @brief  Ricean K Factor */
+    double K;
 };
 
 

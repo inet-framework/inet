@@ -39,86 +39,86 @@
  */
 class INET_API ObstacleControl : public cSimpleModule
 {
-	public:
-		~ObstacleControl();
-		void initialize(int stage);
-		int numInitStages() const { return 2; }
-		void finish();
-		void handleMessage(cMessage *msg);
-		void handleSelfMsg(cMessage *msg);
+    public:
+        ~ObstacleControl();
+        void initialize(int stage);
+        int numInitStages() const { return 2; }
+        void finish();
+        void handleMessage(cMessage *msg);
+        void handleSelfMsg(cMessage *msg);
 
-		void addFromXml(cXMLElement* xml);
-		void add(Obstacle obstacle);
-		void erase(const Obstacle* obstacle);
+        void addFromXml(cXMLElement* xml);
+        void add(Obstacle obstacle);
+        void erase(const Obstacle* obstacle);
 
-		/**
-		 * calculate additional attenuation by obstacles, return signal strength
-		 */
-		double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const;
+        /**
+         * calculate additional attenuation by obstacles, return signal strength
+         */
+        double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const;
 
-	protected:
-		struct CacheKey {
-			const double pSend;
-			const double carrierFrequency;
-			const Coord senderPos;
-			const double senderAngle;
-			const Coord receiverPos;
-			const double receiverAngle;
+    protected:
+        struct CacheKey {
+            const double pSend;
+            const double carrierFrequency;
+            const Coord senderPos;
+            const double senderAngle;
+            const Coord receiverPos;
+            const double receiverAngle;
 
-			CacheKey(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) :
-				pSend(pSend),
-				carrierFrequency(carrierFrequency),
-				senderPos(senderPos),
-				senderAngle(senderAngle),
-				receiverPos(receiverPos),
-				receiverAngle(receiverAngle) {
-			}
-			bool operator<(const CacheKey& o) const {
-				if (senderPos.x < o.senderPos.x) return true;
-				if (senderPos.x > o.senderPos.x) return false;
-				if (senderPos.y < o.senderPos.y) return true;
-				if (senderPos.y > o.senderPos.y) return false;
-				if (receiverPos.x < o.receiverPos.x) return true;
-				if (receiverPos.x > o.receiverPos.x) return false;
-				if (receiverPos.y < o.receiverPos.y) return true;
-				if (receiverPos.y > o.receiverPos.y) return false;
-				if (pSend < o.pSend) return true;
-				if (pSend > o.pSend) return false;
-				if (senderAngle < o.senderAngle) return true;
-				if (senderAngle > o.senderAngle) return false;
-				if (receiverAngle < o.receiverAngle) return true;
-				if (receiverAngle > o.receiverAngle) return false;
-				if (carrierFrequency < o.carrierFrequency) return true;
-				if (carrierFrequency > o.carrierFrequency) return false;
-				return false;
-			}
-		};
+            CacheKey(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) :
+                pSend(pSend),
+                carrierFrequency(carrierFrequency),
+                senderPos(senderPos),
+                senderAngle(senderAngle),
+                receiverPos(receiverPos),
+                receiverAngle(receiverAngle) {
+            }
+            bool operator<(const CacheKey& o) const {
+                if (senderPos.x < o.senderPos.x) return true;
+                if (senderPos.x > o.senderPos.x) return false;
+                if (senderPos.y < o.senderPos.y) return true;
+                if (senderPos.y > o.senderPos.y) return false;
+                if (receiverPos.x < o.receiverPos.x) return true;
+                if (receiverPos.x > o.receiverPos.x) return false;
+                if (receiverPos.y < o.receiverPos.y) return true;
+                if (receiverPos.y > o.receiverPos.y) return false;
+                if (pSend < o.pSend) return true;
+                if (pSend > o.pSend) return false;
+                if (senderAngle < o.senderAngle) return true;
+                if (senderAngle > o.senderAngle) return false;
+                if (receiverAngle < o.receiverAngle) return true;
+                if (receiverAngle > o.receiverAngle) return false;
+                if (carrierFrequency < o.carrierFrequency) return true;
+                if (carrierFrequency > o.carrierFrequency) return false;
+                return false;
+            }
+        };
 
-		enum { GRIDCELL_SIZE = 1024 };
+        enum { GRIDCELL_SIZE = 1024 };
 
-		typedef std::list<Obstacle*> ObstacleGridCell;
-		typedef std::vector<ObstacleGridCell> ObstacleGridRow;
-		typedef std::vector<ObstacleGridRow> Obstacles;
-		typedef std::map<CacheKey, double> CacheEntries;
+        typedef std::list<Obstacle*> ObstacleGridCell;
+        typedef std::vector<ObstacleGridCell> ObstacleGridRow;
+        typedef std::vector<ObstacleGridRow> Obstacles;
+        typedef std::map<CacheKey, double> CacheEntries;
 
-		bool debug; /**< whether to emit debug messages */
-		cXMLElement* obstaclesXml; /**< obstacles to add at startup */
+        bool debug; /**< whether to emit debug messages */
+        cXMLElement* obstaclesXml; /**< obstacles to add at startup */
 
-		Obstacles obstacles;
-		AnnotationManager* annotations;
-		AnnotationManager::Group* annotationGroup;
-		mutable CacheEntries cacheEntries;
+        Obstacles obstacles;
+        AnnotationManager* annotations;
+        AnnotationManager::Group* annotationGroup;
+        mutable CacheEntries cacheEntries;
 };
 
 class ObstacleControlAccess
 {
-	public:
-		ObstacleControlAccess() {
-		}
+    public:
+        ObstacleControlAccess() {
+        }
 
-		ObstacleControl* getIfExists() {
-			return dynamic_cast<ObstacleControl*>(simulation.getModuleByPath("obstacles"));
-		}
+        ObstacleControl* getIfExists() {
+            return dynamic_cast<ObstacleControl*>(simulation.getModuleByPath("obstacles"));
+        }
 };
 
 #endif

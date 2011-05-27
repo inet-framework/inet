@@ -222,7 +222,7 @@ class INET_API IPv4Address
     /**
       * Returns the broadcast address for the given netmask
       */
-	IPv4Address getBroadcastAddress(IPv4Address netmask);
+    IPv4Address getBroadcastAddress(IPv4Address netmask);
 
     /**
      * Returns equals(addr).

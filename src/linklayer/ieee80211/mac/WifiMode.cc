@@ -3,7 +3,7 @@
  * Copyright (c) 2005,2006 INRIA
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as 
+ * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -37,7 +37,7 @@ WifyModulationType::GetDsssRate1Mbps ()
 ModulationType
 WifyModulationType::GetDsssRate2Mbps ()
 {
-  
+
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_DSSS);
    mode.setBandwidth(22000000);
@@ -507,55 +507,55 @@ ModulationType
 WifyModulationType:: getMode80211a(double bitrate)
 {
    if (bitrate== BITRATES_80211a[7])
-	   return GetOfdmRate54Mbps();
+       return GetOfdmRate54Mbps();
    else if (bitrate== BITRATES_80211a[6])
-	   return GetOfdmRate48Mbps();
+       return GetOfdmRate48Mbps();
    else if (bitrate== BITRATES_80211a[5])
-	   return GetOfdmRate36Mbps();
+       return GetOfdmRate36Mbps();
    else if (bitrate== BITRATES_80211a[4])
-	   return GetOfdmRate24Mbps();
+       return GetOfdmRate24Mbps();
    else if (bitrate== BITRATES_80211a[3])
-	   return GetOfdmRate18Mbps();
+       return GetOfdmRate18Mbps();
    else if (bitrate== BITRATES_80211a[2])
-	   return GetOfdmRate12Mbps();
+       return GetOfdmRate12Mbps();
    else if (bitrate== BITRATES_80211a[1])
-	   return GetOfdmRate9Mbps();
+       return GetOfdmRate9Mbps();
    else if (bitrate== BITRATES_80211a[0])
-	   return GetOfdmRate6Mbps();
+       return GetOfdmRate6Mbps();
    else
-	   opp_error("mode not valid");
+       opp_error("mode not valid");
    return ModulationType();
 }
 
 ModulationType
 WifyModulationType:: getMode80211g(double bitrate)
 {
-   if (bitrate== BITRATES_80211g[11]) 
-	   return GetErpOfdmRate54Mbps();
+   if (bitrate== BITRATES_80211g[11])
+       return GetErpOfdmRate54Mbps();
    else if (bitrate== BITRATES_80211g[10])
-	   return GetErpOfdmRate48Mbps();
-   else if (bitrate== BITRATES_80211g[9]) 
-	   return GetErpOfdmRate36Mbps();
-   else if (bitrate== BITRATES_80211g[8]) 
-	   return GetErpOfdmRate24Mbps();
+       return GetErpOfdmRate48Mbps();
+   else if (bitrate== BITRATES_80211g[9])
+       return GetErpOfdmRate36Mbps();
+   else if (bitrate== BITRATES_80211g[8])
+       return GetErpOfdmRate24Mbps();
    else if (bitrate== BITRATES_80211g[7])
-	   return GetErpOfdmRate18Mbps();
-   else if (bitrate== BITRATES_80211g[6]) 
-	   return GetErpOfdmRate12Mbps();
-   else if (bitrate== BITRATES_80211g[5]) 
-	   return GetDsssRate11Mbps();
-   else if (bitrate== BITRATES_80211g[4]) 
-	   return GetErpOfdmRate9Mbps();
-   else if (bitrate== BITRATES_80211g[3]) 
-	   return GetErpOfdmRate6Mbps();
-   else if (bitrate== BITRATES_80211g[2]) 
-	   return GetDsssRate5_5Mbps();
-   else if (bitrate== BITRATES_80211g[1]) 
-	   return GetDsssRate2Mbps();
-   else if (bitrate== BITRATES_80211g[0]) 
-	   return GetDsssRate1Mbps();
+       return GetErpOfdmRate18Mbps();
+   else if (bitrate== BITRATES_80211g[6])
+       return GetErpOfdmRate12Mbps();
+   else if (bitrate== BITRATES_80211g[5])
+       return GetDsssRate11Mbps();
+   else if (bitrate== BITRATES_80211g[4])
+       return GetErpOfdmRate9Mbps();
+   else if (bitrate== BITRATES_80211g[3])
+       return GetErpOfdmRate6Mbps();
+   else if (bitrate== BITRATES_80211g[2])
+       return GetDsssRate5_5Mbps();
+   else if (bitrate== BITRATES_80211g[1])
+       return GetDsssRate2Mbps();
+   else if (bitrate== BITRATES_80211g[0])
+       return GetDsssRate1Mbps();
    else
-	   opp_error("mode not valid");
+       opp_error("mode not valid");
    return ModulationType();
 }
 
@@ -564,15 +564,15 @@ ModulationType
 WifyModulationType:: getMode80211b(double bitrate)
 {
    if (bitrate== BITRATES_80211b[3])
-	   return GetDsssRate11Mbps();
-   else if (bitrate== BITRATES_80211b[2]) 
-	   return GetDsssRate5_5Mbps();
-   else if (bitrate== BITRATES_80211b[1]) 
-	   return GetDsssRate2Mbps();
-   else if (bitrate== BITRATES_80211b[0]) 
-	   return GetDsssRate1Mbps();
+       return GetDsssRate11Mbps();
+   else if (bitrate== BITRATES_80211b[2])
+       return GetDsssRate5_5Mbps();
+   else if (bitrate== BITRATES_80211b[1])
+       return GetDsssRate2Mbps();
+   else if (bitrate== BITRATES_80211b[0])
+       return GetDsssRate1Mbps();
    else
-	   opp_error("mode not valid");
+       opp_error("mode not valid");
    return ModulationType();
 }
 
@@ -580,24 +580,24 @@ WifyModulationType:: getMode80211b(double bitrate)
 ModulationType
 WifyModulationType::getMode80211p (double bitrate)
 {
-   if (bitrate== BITRATES_80211p[7]) 
+   if (bitrate== BITRATES_80211p[7])
        return GetOfdmRate27MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[6]) 
-	   return GetOfdmRate24MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[5]) 
-	   return GetOfdmRate18MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[4]) 
-	   return GetOfdmRate12MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[3]) 
-	   return GetOfdmRate9MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[2]) 
-	   return GetOfdmRate6MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[1]) 
-	   return GetOfdmRate4_5MbpsBW10MHz();
-   else if (bitrate== BITRATES_80211p[0]) 
-	   return GetOfdmRate3MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[6])
+       return GetOfdmRate24MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[5])
+       return GetOfdmRate18MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[4])
+       return GetOfdmRate12MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[3])
+       return GetOfdmRate9MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[2])
+       return GetOfdmRate6MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[1])
+       return GetOfdmRate4_5MbpsBW10MHz();
+   else if (bitrate== BITRATES_80211p[0])
+       return GetOfdmRate3MbpsBW10MHz();
    else
-	   opp_error("mode not valid");
+       opp_error("mode not valid");
    return ModulationType();
 }
 
@@ -755,7 +755,7 @@ WifyModulationType::getPayloadDuration (uint64_t size, ModulationType payloadMod
 simtime_t
 WifyModulationType::getPreambleAndHeader (ModulationType payloadMode, WifiPreamble preamble)
 {
-	return (getPlcpPreambleDuration (payloadMode,preamble)+ getPlcpHeaderDuration(payloadMode,preamble));
+    return (getPlcpPreambleDuration (payloadMode,preamble)+ getPlcpHeaderDuration(payloadMode,preamble));
 }
 
 simtime_t

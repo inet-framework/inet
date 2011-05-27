@@ -70,7 +70,7 @@ Determine if the packet must be delete or process
 
 bool BasicSnrEval::processAirFrame(AirFrame *airframe)
 {
-	return airframe->getChannelNumber() == getChannelNumber();
+    return airframe->getChannelNumber() == getChannelNumber();
 }
 
 /**
@@ -149,7 +149,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
  */
 AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
 {
-	AirFrame *frame = createCapsulePkt();
+    AirFrame *frame = createCapsulePkt();
     frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
     frame->setBitLength(headerLength);

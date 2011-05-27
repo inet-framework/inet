@@ -3,18 +3,18 @@
 // *
 // * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
 // *
-// * copyright:	  (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+// * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
 // *
 // * author:      Alfonso Ariza
 // *
-// * copyright:	  (c) 2009 Universidad de M�laga
+// * copyright:   (c) 2009 Universidad de M�laga
 // *
-// *              This program is free software; you can redistribute it 
-// *              and/or modify it under the terms of the GNU General Public 
+// *              This program is free software; you can redistribute it
+// *              and/or modify it under the terms of the GNU General Public
 // *              License as published by the Free Software Foundation; either
-// *              version 2 of the License, or (at your option) any later 
+// *              version 2 of the License, or (at your option) any later
 // *              version.
-// *              For further information see file COPYING 
+// *              For further information see file COPYING
 // *              in the top level directory
 // ***************************************************************************
 // ***************************************************************************
@@ -27,7 +27,7 @@ package inet.linklayer.radio;
 simple Radio like IRadio
 {
     parameters:
-        int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211 
+        int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211
         double carrierFrequency @unit("Hz") = default(2.4GHz);
         double bitrate @unit("bps");
         double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)
@@ -37,25 +37,25 @@ simple Radio like IRadio
 
         // generic FreeSpace model parameters
         double pathLossAlpha = default(2); // used by the path loss calculation
-        double TransmissionAntennaGainIndB @unit("dB") = default(0dB);  // Transmission Antenna Gain 
+        double TransmissionAntennaGainIndB @unit("dB") = default(0dB);  // Transmission Antenna Gain
         double ReceiveAntennaGainIndB @unit("dB") = default(0dB);       // Receive Antenna Gain
-        double SystemLossFactor @unit("dB") = default(0dB);             // System Loss of Hardware 
+        double SystemLossFactor @unit("dB") = default(0dB);             // System Loss of Hardware
         // two ray model paramaeters
-        double TransmiterAntennaHigh @unit("m") = default(1m);   // Transmitter Antenna High 
+        double TransmiterAntennaHigh @unit("m") = default(1m);   // Transmitter Antenna High
         double ReceiverAntennaHigh @unit("m") = default(1m);   // Receiver Antenna High
         // LogNormalShadowingModel
         double sigma = default(1);
         // NakagamiModel
         double nak_m = default(1);
-        // RiceModel 
+        // RiceModel
         double K @unit("dB") = default(8dB);
 
         // battery module parameters (if any of them is negative, the battery module is disabled)
         double usage_radio_idle @unit(mA) = default(-1mA); // disable battery registration
         double usage_radio_recv @unit(mA) = default(-1mA); // disable battery registration
-        double usage_radio_sleep @unit(mA) = default(-1mA); // disable battery registration 
+        double usage_radio_sleep @unit(mA) = default(-1mA); // disable battery registration
         double usage_radio_send @unit(mA) = default(-1mA); // disable battery registration
-        // misc 
+        // misc
         bool drawCoverage = default(true);  // draw the cverage area in Tkenv
         int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
 

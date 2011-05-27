@@ -52,11 +52,11 @@ class AirFrame;
 class INET_API ChannelAccess : public BasicModule
 {
   protected:
-	IChannelControl* cc;  // Pointer to the ChannelControl module
-	IChannelControl::RadioRef myRadioRef;  // Identifies this radio in the ChannelControl module
-	cModule *hostModule;    // the host that contains this radio model
-	Coord radioPos;  // the physical position of the radio (derived from display string or from mobility models)
-	bool positionUpdateArrived;
+    IChannelControl* cc;  // Pointer to the ChannelControl module
+    IChannelControl::RadioRef myRadioRef;  // Identifies this radio in the ChannelControl module
+    cModule *hostModule;    // the host that contains this radio model
+    Coord radioPos;  // the physical position of the radio (derived from display string or from mobility models)
+    bool positionUpdateArrived;
 
   public:
     ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}

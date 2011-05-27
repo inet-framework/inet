@@ -686,17 +686,17 @@ int RoutingTable::getNumRules(bool output)
 
 const IPv4RouteRule * RoutingTable::findRule(bool output,int prot,int sPort,const IPv4Address &srcAddr,int dPort,const IPv4Address &destAddr,const InterfaceEntry *iface) const
 {
-	std::vector<IPv4RouteRule *>::const_iterator it;
-	std::vector<IPv4RouteRule *>::const_iterator endIt;
+    std::vector<IPv4RouteRule *>::const_iterator it;
+    std::vector<IPv4RouteRule *>::const_iterator endIt;
     if (output)
     {
-    	it = outputRules.begin();
-    	endIt = outputRules.end();
+        it = outputRules.begin();
+        endIt = outputRules.end();
     }
     else
     {
-    	it = inputRules.begin();
-    	endIt = inputRules.end();
+        it = inputRules.begin();
+        endIt = inputRules.end();
     }
 
     while (it!=endIt)

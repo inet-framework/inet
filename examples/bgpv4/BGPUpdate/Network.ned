@@ -12,7 +12,7 @@ network BGPTest
             parameters:
                 delay = 0;
                 datarate = 100Mbps;
-				thruputDisplayFormat = "#N";
+                thruputDisplayFormat = "#N";
         }
     submodules:
         A: BGPRouter {

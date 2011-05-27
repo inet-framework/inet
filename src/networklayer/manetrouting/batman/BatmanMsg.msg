@@ -40,62 +40,62 @@ class BatmanHnaMsg
            netmask=m.netmask;
            return *this;
     }
-	bool operator < (BatmanHnaMsg const &o) const
-	{
-		if (addr < o.addr)
-			return true;
-		else if (addr == o.addr)
-		{
-			if (netmask < o.netmask)
-				return true;
-			else
-				return false;
-		}
-		else
-			return false;	
-	}
-	
-	bool operator > (BatmanHnaMsg const &o) const
-	{
-		if (addr > o.addr)
-			return true;
-		else if (addr == o.addr)
-		{
-			if (netmask > o.netmask)
-				return true;
-			else
-				return false;
-		}
-		else
-			return false;
-	}
-	bool operator == (BatmanHnaMsg const &o) const
-	{
-		if (addr == o.addr && netmask == o.netmask)
-			return true;
-		else
-			return false;
-	}
-	bool operator != (BatmanHnaMsg const &o) const
-	{
-		if (addr == o.addr && netmask == o.netmask)
-			return false;
-		else
-			return true;
-	}
-	BatmanHnaMsg * dup()
-	{
-	    BatmanHnaMsg *aux = new BatmanHnaMsg;
-	    *aux=*this;
-	    return aux;
-	}
+    bool operator < (BatmanHnaMsg const &o) const
+    {
+        if (addr < o.addr)
+            return true;
+        else if (addr == o.addr)
+        {
+            if (netmask < o.netmask)
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    bool operator > (BatmanHnaMsg const &o) const
+    {
+        if (addr > o.addr)
+            return true;
+        else if (addr == o.addr)
+        {
+            if (netmask > o.netmask)
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+    bool operator == (BatmanHnaMsg const &o) const
+    {
+        if (addr == o.addr && netmask == o.netmask)
+            return true;
+        else
+            return false;
+    }
+    bool operator != (BatmanHnaMsg const &o) const
+    {
+        if (addr == o.addr && netmask == o.netmask)
+            return false;
+        else
+            return true;
+    }
+    BatmanHnaMsg * dup()
+    {
+        BatmanHnaMsg *aux = new BatmanHnaMsg;
+        *aux=*this;
+        return aux;
+    }
 };
 
-struct vis_data 
+struct vis_data
 {
-	unsigned char type;
-	unsigned char data;
-	Uint128 ip;
+    unsigned char type;
+    unsigned char data;
+    Uint128 ip;
 };
 
 }}
@@ -108,29 +108,29 @@ class noncobject vis_data;
 
 packet BatmanPacket
 {
-	byteLength = BatPacketSize;
-	unsigned char  version;  // batman version field 
-	unsigned char  flags;    // 0x80: UNIDIRECTIONAL link, 0x40: DIRECTLINK flag, ... 
-	unsigned char  ttl;
-	unsigned char  gatewayFlags;  // flags related to gateway functions: gateway class 
-	unsigned short seqNumber;
-	unsigned short gatewayPort;
-	Uint128        orig;
-	Uint128        prevSender;
-	unsigned char  tq;           // Quality 
-	unsigned char  hops;
-	unsigned char  hnaLen;
-	BatmanHnaMsg   hnaMsg[];	///< Packet body.
+    byteLength = BatPacketSize;
+    unsigned char  version;  // batman version field
+    unsigned char  flags;    // 0x80: UNIDIRECTIONAL link, 0x40: DIRECTLINK flag, ...
+    unsigned char  ttl;
+    unsigned char  gatewayFlags;  // flags related to gateway functions: gateway class
+    unsigned short seqNumber;
+    unsigned short gatewayPort;
+    Uint128        orig;
+    Uint128        prevSender;
+    unsigned char  tq;           // Quality
+    unsigned char  hops;
+    unsigned char  hnaLen;
+    BatmanHnaMsg   hnaMsg[];    ///< Packet body.
 }
 
 
 
 packet visPacket {
-	Uint128 senderIp;
-	unsigned char version;
-	unsigned char gwClass;
-	unsigned char tqMax;
-	vis_data visData[];
+    Uint128 senderIp;
+    unsigned char version;
+    unsigned char gwClass;
+    unsigned char tqMax;
+    vis_data visData[];
 }
 
 

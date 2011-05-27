@@ -3,7 +3,7 @@
  *
  * author:      Andreas Kuntz
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -30,15 +30,15 @@
 class INET_API NakagamiModel : public FreeSpaceModel {
 
     public:
-	~NakagamiModel(){};
-	virtual void initializeFrom(cModule *radioModule);
+    ~NakagamiModel(){};
+    virtual void initializeFrom(cModule *radioModule);
     /**
      * To be redefined to calculate the received power of a transmission.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
 
     protected:
-	double m;
+    double m;
     private:
 
 };

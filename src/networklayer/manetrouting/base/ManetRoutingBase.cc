@@ -658,7 +658,7 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
     }
     else if (createInternalStore && routesVector)
     {
-    	RouteMap::iterator it = routesVector->find(dst);
+        RouteMap::iterator it = routesVector->find(dst);
         if (it !=routesVector->end())
             routesVector->erase(it);
         if (!del_entry)
@@ -1150,19 +1150,19 @@ void ManetRoutingBase::setInternalStore(bool i)
     }
     else
     {
-    	if (routesVector==NULL)
-    		routesVector = new RouteMap;
+        if (routesVector==NULL)
+            routesVector = new RouteMap;
     }
 }
 
 
 Uint128 ManetRoutingBase::getNextHopInternal(const Uint128 &dest)
 {
-	if (routesVector==NULL)
+    if (routesVector==NULL)
         return 0;
-	if (routesVector->empty())
+    if (routesVector->empty())
         return 0;
-	RouteMap::iterator it = routesVector->find(dest);
+    RouteMap::iterator it = routesVector->find(dest);
     if (it!=routesVector->end())
         return it->second;;
     return 0;

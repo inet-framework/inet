@@ -26,7 +26,7 @@ cplusplus
 class noncobject MACAddress;
 class ControlInfoBreakLink
 {
-	  MACAddress dest;   //
+      MACAddress dest;   //
 }
 
 

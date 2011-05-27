@@ -81,7 +81,7 @@ class INET_API BasicSnrEval : public ChannelAccess
 
   protected:
 
-	virtual bool processAirFrame(AirFrame *);
+    virtual bool processAirFrame(AirFrame *);
     /**
      * @name Handle Messages
      * @brief Functions to redefine by the programmer

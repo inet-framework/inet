@@ -16,7 +16,7 @@ network Backbone
         {
             delay = 0.1us;
             datarate = 100Mbps;
-			thruputDisplayFormat = "#N";
+            thruputDisplayFormat = "#N";
         }
     submodules:
         R1: OSPFRouter {

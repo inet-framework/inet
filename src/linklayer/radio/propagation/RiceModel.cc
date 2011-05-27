@@ -3,7 +3,7 @@
  *
  * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -30,8 +30,8 @@
 Register_Class(RiceModel);
 void RiceModel::initializeFrom(cModule *radioModule)
 {
-	initializeFreeSpace(radioModule);
-	K =  pow(10, radioModule->par("K").doubleValue()/10);
+    initializeFreeSpace(radioModule);
+    K =  pow(10, radioModule->par("K").doubleValue()/10);
 }
 
 double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
@@ -43,7 +43,7 @@ double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, 
     double rr = c*( (x + sqrt(2*K))*(x + sqrt(2*K)) + y*y);
     double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha) * rr;
     if (prec > pSend)
-    	prec = pSend;
+        prec = pSend;
     return prec;
 
 

@@ -185,11 +185,11 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      */
     virtual bool isLocalAddress(const IPv4Address& dest) const;
     /** @name Routing functions (query the route table) */
-	//@{
-	/**
-	 * Checks if the address is a local broadcast one, i.e. 192.168.0.255/24
-	 */
-	virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const;
+    //@{
+    /**
+     * Checks if the address is a local broadcast one, i.e. 192.168.0.255/24
+     */
+    virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const;
 
     /**
      * The routing function.

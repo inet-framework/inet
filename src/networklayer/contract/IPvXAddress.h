@@ -181,18 +181,18 @@ class INET_API IPvXAddress
      */
     std::string str() const
     {
-    	if (isv6)
-    	{
-    		return get6().str();
-    	}
-    	else if (d[0] == 0)
-    	{
-			return std::string("<unspec>");
-    	}
-    	else
-    	{
-			return get4().str();
-    	}
+        if (isv6)
+        {
+            return get6().str();
+        }
+        else if (d[0] == 0)
+        {
+            return std::string("<unspec>");
+        }
+        else
+        {
+            return get4().str();
+        }
     }
     //@}
 

@@ -5,15 +5,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "IPowerControl.h"
 #include "PowerControlManager.h"
@@ -180,11 +180,11 @@ void PowerControlManager::handleMessage(cMessage *msg)
             this->handleEnableModuleMessage(dynamic_cast<EnableModuleMessage*>(msg));
         else if (dynamic_cast<DisableModuleMessage*>(msg))
             this->handleDisableModuleMessage(dynamic_cast<DisableModuleMessage*>(msg));
-	    else
-	        EV << "Unknown type of Power control Message: it should be defined in the handleMessage method at the PowerControlManager" << endl;
+        else
+            EV << "Unknown type of Power control Message: it should be defined in the handleMessage method at the PowerControlManager" << endl;
     }
     else
-       	EV << "Ignoring external messages" << endl;
+        EV << "Ignoring external messages" << endl;
 
     delete(msg);
 }
@@ -227,21 +227,21 @@ void PowerControlManager::enableModule(cModule* mod)
             IPowerControl* ipcm = dynamic_cast<IPowerControl*>(mod);
             if (!ipcm->isEnabled())
             {
-            	EV << "Enabling " << mod->getFullName() << endl;
-            	cMethodCallContextSwitcher __ctx(mod); __ctx.methodCall("enableModule()");
-            	ipcm->enableModule();
+                EV << "Enabling " << mod->getFullName() << endl;
+                cMethodCallContextSwitcher __ctx(mod); __ctx.methodCall("enableModule()");
+                ipcm->enableModule();
             }
         }
         else
-			EV << "Module " << mod->getFullName() << " does not allow power control. skipping"  << endl;
+            EV << "Module " << mod->getFullName() << " does not allow power control. skipping"  << endl;
     }
     else
     {
         // compound. iterate on its components
        for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++)
        {
-    	   cModule* sm = iter();
-    	   this->enableModule(sm);
+           cModule* sm = iter();
+           this->enableModule(sm);
        }
     }
 }
@@ -260,7 +260,7 @@ void PowerControlManager::disableModule(cModule* mod)
                 cMethodCallContextSwitcher __ctx(mod); __ctx.methodCall("disableModule()");
                 ipcm->disableModule();
             }
-		}
+        }
         else
             EV << "Module " << mod->getFullName() << " does not allow power control. skipping"  << endl;
     }

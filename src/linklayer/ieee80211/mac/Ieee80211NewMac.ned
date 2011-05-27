@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente Meszaros and Lukáš Hlůže 
-// Copyright (C) 2011 Alfonso Ariza  
+// Copyright (C) 2006 Andras Varga and Levente Meszaros and Lukáš Hlůže
+// Copyright (C) 2011 Alfonso Ariza
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ simple Ieee80211NewMac
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.   
+                                          // a generated MAC address in init stage 0.
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize = default(50); // max queue length in frames; only used if queueModule==""
         int defaultAC = default(0); // what is default AC category
@@ -73,11 +73,11 @@ simple Ieee80211NewMac
         double TXOP3 @unit(s)= default(1.504ms);    //1.504ms
         string classifierClass =default("Ieee80211eClassifier");
         bool EDCA = default(true);
-	        
+
         double bitrate @unit("bps");
         string opMode@enum ("b","g","a","p") = default("g");
         string WifiPreambleMode @enum ("LONG","SHORT") = default("LONG"); // Wifi preambre mode Ieee 2007, 19.3.2
-        
+
         double basicBitrate @unit("bps")= default(2e6bps);
         int mtu = default(1500);
         double slotTime @unit("s")= default(9us);
@@ -87,12 +87,12 @@ simple Ieee80211NewMac
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
         bool fixFSM = default(false);
-// If -1 The mac compute the  PHY_HEADER_LENGTH in function of the modulation type      
+// If -1 The mac compute the  PHY_HEADER_LENGTH in function of the modulation type
         double PHY_HEADER_LENGTH = default(-1);// if negative the code use 26 usec
         bool ForceBitRate = default(false); // if true the mac force the bitrate to the physical layer
-// autobitrate algorithm by default is disabled  
+// autobitrate algorithm by default is disabled
         int autoBitrate @enum(0,1,2)= default(0);// 0 Contant Bit rate, 1 ARF Rate, 2 AARF Rate
-// parameters used by the autobitrate        
+// parameters used by the autobitrate
         int minSuccessThreshold =default(10);
         int minTimerTimeout=default(15);
         int timerTimeout=default(15);
@@ -102,7 +102,7 @@ simple Ieee80211NewMac
         double timerCoeff = double(2.0);
         // period of time usef byt the throughput measure
         double throughputTimePeriod @unit("s")=default(0);
-        
+
         @display("i=block/layer");
     gates:
         input uppergateIn @labels(Ieee80211Frame);

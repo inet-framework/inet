@@ -2503,13 +2503,13 @@ OLSR::~OLSR()
 
 uint32_t OLSR::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
 {
-	add.clear();
+    add.clear();
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
         return 0;
     for (int i=0; i<(int)rt_entry->route.size(); i++)
-    	add.push_back(rt_entry->route[i]);
-	add.push_back(dest);
+        add.push_back(rt_entry->route[i]);
+    add.push_back(dest);
     OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
     if (rt_entry_aux->next_addr()!= add[0])
         opp_error("OLSR Data base error");
@@ -2579,8 +2579,8 @@ void OLSR::scheduleNextEvent()
 int OLSR::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &add)
 {
 
-	int distance = 1000;
-	add.clear();
+    int distance = 1000;
+    add.clear();
     for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
     {
         Uint128 dest = *it;
@@ -2592,13 +2592,13 @@ int OLSR::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &add)
         distance=rt_entry->dist();
         add.clear();
         for (int i=0; i<(int)rt_entry->route.size(); i++)
-        	add.push_back(rt_entry->route[i]);
-    	add.push_back(dest);
+            add.push_back(rt_entry->route[i]);
+        add.push_back(dest);
 
         add[rt_entry->route.size()]=dest;
         OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
         if (rt_entry_aux->next_addr()!= add[0])
-        	opp_error("OLSR Data base error");
+            opp_error("OLSR Data base error");
     }
     if (distance==1000)
         return 0;
@@ -2608,7 +2608,7 @@ int OLSR::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &add)
 bool OLSR::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint128 &gw)
 {
 
-	int distance = 1000;
+    int distance = 1000;
     for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
     {
         Uint128 dest = *it;
@@ -2640,8 +2640,8 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint12
 
 int  OLSR::getRouteGroup(const Uint128& dest,std::vector<Uint128> &add,Uint128& gateway,bool &isGroup,int group)
 {
-	AddressGroup gr;
-	int distance = 0;
+    AddressGroup gr;
+    int distance = 0;
     if (findInAddressGroup(dest,group))
     {
         getAddressGroup(gr,group);
@@ -2652,29 +2652,29 @@ int  OLSR::getRouteGroup(const Uint128& dest,std::vector<Uint128> &add,Uint128& 
      }
     else
     {
-    	distance = getRoute(dest,add);
-    	isGroup=false;
+        distance = getRoute(dest,add);
+        isGroup=false;
     }
-	return distance;
+    return distance;
 }
 
 bool OLSR::getNextHopGroup(const Uint128& dest,Uint128 &next,int &iface,Uint128& gw ,bool &isGroup,int group)
 {
-	AddressGroup gr;
-	bool find=false;
+    AddressGroup gr;
+    bool find=false;
     if (findInAddressGroup(dest,group))
     {
-    	getAddressGroup(gr,group);
-    	find= getNextHopGroup(gr,next,iface,gw);
-    	isGroup=true;
+        getAddressGroup(gr,group);
+        find= getNextHopGroup(gr,next,iface,gw);
+        isGroup=true;
 
      }
     else
     {
         double cost;
-    	find= getNextHop(dest,next,iface,cost);
-    	isGroup=false;
+        find= getNextHop(dest,next,iface,cost);
+        isGroup=false;
     }
-	return find;
+    return find;
 }
 

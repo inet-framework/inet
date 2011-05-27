@@ -3,7 +3,7 @@
  *
  * author:      Andreas Kuntz
  *
- * copyright:	(c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+ * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
  *
  * author:      Alfonso Ariza
  *              Malaga university
@@ -30,15 +30,15 @@
 class INET_API LogNormalShadowingModel : public FreeSpaceModel {
 
     public:
-	~LogNormalShadowingModel(){};
-	virtual void initializeFrom(cModule *radioModule);
+    ~LogNormalShadowingModel(){};
+    virtual void initializeFrom(cModule *radioModule);
     /**
      * To be redefined to calculate the received power of a transmission.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
 
     private:
-	double sigma;
+    double sigma;
 
 };
 

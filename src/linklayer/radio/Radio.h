@@ -147,10 +147,10 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
     virtual void updateDisplayString();
 
     // Power Control methods
-	virtual void enablingInitialization();
-	virtual void disablingInitialization();
-	//
-	double calcDistFreeSpace();
+    virtual void enablingInitialization();
+    virtual void disablingInitialization();
+    //
+    double calcDistFreeSpace();
 
   protected:
     cMessage *updateString;

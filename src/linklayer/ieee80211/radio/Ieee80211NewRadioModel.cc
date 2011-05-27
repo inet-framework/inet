@@ -113,7 +113,7 @@ double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
     }
     else
         opp_error("Radio model not supported yet, must be a,b,g or p");
-   	airframe->setModulationType(modeBody);
+    airframe->setModulationType(modeBody);
 #endif
     EV<<"Radio:frameDuration="<<duration*1e6<<"us("<<airframe->getBitLength()<<"bits)"<<endl;
     return duration;

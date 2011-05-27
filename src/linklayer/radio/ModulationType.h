@@ -3,7 +3,7 @@
  * Copyright (c) 2005,2006,2007 INRIA
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as 
+ * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -139,12 +139,12 @@ class ModulationType
   bool getIsMandatory(){return isMandatory;}
   ModulationType ()
   {
-	  isMandatory=false;
-	  bandwidth=0;
-	  codeRate=CODE_RATE_UNDEFINED;
-	  dataRate=0;
-	  phyRate=0;
-	  constellationSize=0;
+      isMandatory=false;
+      bandwidth=0;
+      codeRate=CODE_RATE_UNDEFINED;
+      dataRate=0;
+      phyRate=0;
+      constellationSize=0;
   }
 private:
   bool isMandatory;
@@ -159,4 +159,4 @@ private:
 bool operator == (const ModulationType &a, const ModulationType &b);
 
 
-#endif 
+#endif

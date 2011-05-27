@@ -87,11 +87,11 @@ class INET_API IRoutingTable
     virtual bool isLocalAddress(const IPv4Address& dest) const = 0;
 
     /** @name Routing functions (query the route table) */
-	//@{
-	/**
-	 * Checks if the address is a local broadcast one, i.e. one 192.168.0.255/24
-	 */
-	virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const = 0;
+    //@{
+    /**
+     * Checks if the address is a local broadcast one, i.e. one 192.168.0.255/24
+     */
+    virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const = 0;
 
     /**
      * The routing function.

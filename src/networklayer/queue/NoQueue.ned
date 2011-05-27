@@ -19,7 +19,7 @@
 package inet.networklayer.queue;
 
 //
-// Empty, pass-through implementation for queue inteface. 
+// Empty, pass-through implementation for queue inteface.
 // Conforms to the ~IOutputQueue interface.
 //
 module NoQueue like IOutputQueue
@@ -30,5 +30,5 @@ module NoQueue like IOutputQueue
         input in;
         output out;
     connections:
-		in --> out;            
+        in --> out;
 }
