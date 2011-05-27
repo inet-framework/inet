@@ -20,7 +20,6 @@
 #define __INET_UDPECHOAPP_H
 
 #include <vector>
-#include <omnetpp.h>
 
 #include "UDPBasicApp.h"
 
@@ -42,5 +41,4 @@ class UDPEchoApp : public UDPBasicApp
 };
 
 #endif
-
 

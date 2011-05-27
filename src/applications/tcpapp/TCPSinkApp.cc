@@ -13,8 +13,8 @@
 
 
 #include "TCPSinkApp.h"
+
 #include "TCPSocket.h"
-#include "TCPCommand_m.h"
 
 
 Define_Module(TCPSinkApp);
@@ -40,13 +40,13 @@ void TCPSinkApp::initialize()
 
 void TCPSinkApp::handleMessage(cMessage *msg)
 {
-    if (msg->getKind()==TCP_I_PEER_CLOSED)
+    if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we close too
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
         long packetLength = PK(msg)->getByteLength();
         bytesRcvd += packetLength;
@@ -57,7 +57,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         {
             char buf[32];
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
-            getDisplayString().setTagArg("t",0,buf);
+            getDisplayString().setTagArg("t", 0, buf);
         }
     }
     else

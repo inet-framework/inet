@@ -23,7 +23,6 @@
 #ifndef __INET_UDPVIDEOSTREAM_H
 #define __INET_UDPVIDEOSTREAM_H
 
-#include <omnetpp.h>
 #include "UDPAppBase.h"
 
 /**
@@ -53,3 +52,4 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
 };
 
 #endif
+

@@ -71,7 +71,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         if (delay == 0)
             sendDown(msg);
         else
-            scheduleAt(simTime()+delay, msg); // send after a delay
+            scheduleAt(simTime() + delay, msg); // send after a delay
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
@@ -109,8 +109,8 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 ByteArray indata = outdata;
                 outdata.setDataArraySize(byteLen);
 
-                for (long i=0; i < byteLen; i++)
-                    outdata.setData(i, indata.getData(i/echoFactor));
+                for (long i = 0; i < byteLen; i++)
+                    outdata.setData(i, indata.getData(i / echoFactor));
             }
 
             if (delay == 0)
@@ -138,3 +138,4 @@ void TCPEchoApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+

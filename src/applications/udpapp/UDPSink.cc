@@ -16,10 +16,7 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPSink.h"
-#include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPSink);
@@ -46,9 +43,8 @@ void UDPSink::handleMessage(cMessage *msg)
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
-
 }
 
 void UDPSink::finish()

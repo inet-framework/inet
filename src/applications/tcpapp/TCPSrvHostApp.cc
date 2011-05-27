@@ -33,7 +33,8 @@ void TCPSrvHostApp::initialize()
 
 void TCPSrvHostApp::updateDisplay()
 {
-    if (!ev.isGUI()) return;
+    if (!ev.isGUI())
+        return;
 
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
@@ -50,6 +51,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
     else
     {
         TCPSocket *socket = socketMap.findSocketFor(msg);
+
         if (!socket)
         {
             // new connection -- create new socket object and server process
@@ -57,7 +59,8 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
             socket->setOutputGate(gate("tcpOut"));
 
             const char *serverThreadClass = par("serverThreadClass");
-            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
+            TCPServerThreadBase *proc =
+                    check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
 
             socket->setCallbackObject(proc);
             proc->init(this, socket);
@@ -66,6 +69,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
 
             updateDisplay();
         }
+
         socket->processMessage(msg);
     }
 }
@@ -84,5 +88,4 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     updateDisplay();
 }
-
 

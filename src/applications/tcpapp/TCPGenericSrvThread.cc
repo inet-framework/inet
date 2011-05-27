@@ -13,8 +13,8 @@
 
 
 #include "TCPGenericSrvThread.h"
-#include "GenericAppMsg_m.h"
 
+#include "GenericAppMsg_m.h"
 
 
 Register_Class(TCPGenericSrvThread);
@@ -28,6 +28,7 @@ void TCPGenericSrvThread::established()
 void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 {
     GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
+
     if (!appmsg)
         throw cRuntimeError(this, "Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
@@ -35,7 +36,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
                   "(try \"object\")",
                   msg->getClassName(), msg->getName());
 
-    if (appmsg->getReplyDelay()>0)
+    if (appmsg->getReplyDelay() > 0)
         throw cRuntimeError(this, "Cannot process (%s)%s: %s class doesn't support replyDelay field"
                   " of GenericAppMsg, try to use TCPGenericSrvApp instead",
                   msg->getClassName(), msg->getName(), getClassName());
@@ -45,7 +46,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     long requestedBytes = appmsg->getExpectedReplyLength();
     bool doClose = appmsg->getServerClose();
 
-    if (requestedBytes==0)
+    if (requestedBytes == 0)
     {
         delete appmsg;
     }
@@ -57,14 +58,11 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     }
 
     if (doClose)
-    {
         getSocket()->close();
-    }
 }
 
 void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }
-
 

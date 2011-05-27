@@ -21,6 +21,7 @@
 //
 
 #include "UDPVideoStreamCli.h"
+
 #include "IPvXAddressResolver.h"
 
 
@@ -37,7 +38,7 @@ void UDPVideoStreamCli::initialize()
 
     simtime_t startTime = par("startTime");
 
-    if (startTime>=0)
+    if (startTime >= 0)
         scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
 }
 
@@ -64,6 +65,7 @@ void UDPVideoStreamCli::requestStream()
     int localPort = par("localPort");
     const char *address = par("serverAddress");
     IPvXAddress svrAddr = IPvXAddressResolver().resolve(address);
+
     if (svrAddr.isUnspecified())
     {
         EV << "Server address is unspecified, skip sending video stream request\n";
@@ -86,3 +88,4 @@ void UDPVideoStreamCli::receiveStream(cPacket *msg)
     emit(endToEndDelaySignal, (simTime() - msg->getCreationTime()));
     delete msg;
 }
+

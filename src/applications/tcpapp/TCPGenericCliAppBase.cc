@@ -89,7 +89,8 @@ void TCPGenericCliAppBase::close()
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
 {
-    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << (serverClose ? ", and server should close afterwards\n" : "\n");
+    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes
+       << (serverClose ? ", and server should close afterwards\n" : "\n");
 
     GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setByteLength(numBytes);
@@ -105,7 +106,8 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (ev.isGUI())
+        getDisplayString().setTagArg("t", 0, s);
 }
 
 void TCPGenericCliAppBase::socketEstablished(int, void *)
@@ -153,9 +155,12 @@ void TCPGenericCliAppBase::socketFailure(int, void *, int code)
 
 void TCPGenericCliAppBase::finish()
 {
-    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
-    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    std::string modulePath = getFullPath();
+
+    EV << modulePath << ": opened " << numSessions << " sessions\n";
+    EV << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 
     recordScalar("number of sessions", numSessions);
 }
+

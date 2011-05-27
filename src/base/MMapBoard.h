@@ -19,17 +19,14 @@
 #ifndef __MMAPBOARD_H
 #define __MMAPBOARD_H
 
-#include <omnetpp.h>
 #include <map>
+
 #include "ModuleAccess.h"
 
 
 /**
  * This class include posix like mmap
- *
- * @author Alfonso Ariza
  */
-
 class INET_API MMapBoard : public cSimpleModule
 {
   public:
@@ -37,11 +34,12 @@ class INET_API MMapBoard : public cSimpleModule
     {
         unsigned int numProcAsociated;
         unsigned int size;
-        void *  commonPtr;
-        MemoryMap() {numProcAsociated=size=0; commonPtr=NULL;}
+        void *commonPtr;
+        MemoryMap() {numProcAsociated = size = 0; commonPtr = NULL;}
     };
     typedef std::map<std::string, MemoryMap*> ClientMemoryMap;
     ClientMemoryMap clientMemoryMap;
+
   protected:
     /**
      * Initialize.
@@ -51,12 +49,11 @@ class INET_API MMapBoard : public cSimpleModule
      * Does nothing.
      */
     virtual void handleMessage(cMessage *msg);
+
   public:
-    //@}
-    const void * mmap(std::string name,int *size,int flags = 0, int *status =NULL);
+    const void * mmap(std::string name, int *size, int flags = 0, int *status = NULL);
     void munmap(std::string name);
     ~MMapBoard();
-
 };
 
 /**
@@ -69,7 +66,4 @@ class INET_API MMapBoardAccess : public ModuleAccess<MMapBoard>
 };
 
 #endif
-
-
-
 

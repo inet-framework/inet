@@ -16,8 +16,8 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPEchoApp.h"
+
 #include "UDPEchoAppMsg_m.h"
 #include "UDPControlInfo_m.h"
 
@@ -32,7 +32,7 @@ void UDPEchoApp::initialize(int stage)
 
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     roundTripTimeSignal = registerSignal("roundTripTime");
@@ -89,3 +89,4 @@ void UDPEchoApp::processPacket(cPacket *msg)
     }
     numReceived++;
 }
+

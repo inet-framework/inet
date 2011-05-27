@@ -52,4 +52,3 @@ class INET_API UDPAppBase : public cSimpleModule
 
 #endif
 
-

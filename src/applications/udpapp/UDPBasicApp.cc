@@ -16,11 +16,9 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPBasicApp.h"
-#include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
 
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPBasicApp);
@@ -50,7 +48,8 @@ void UDPBasicApp::initialize(int stage)
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
+
+    while ((token = tokenizer.nextToken()) != NULL)
         destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     if (destAddresses.empty())
@@ -114,7 +113,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 
@@ -128,3 +127,4 @@ void UDPBasicApp::processPacket(cPacket *msg)
 
     numReceived++;
 }
+

@@ -34,39 +34,47 @@ void TCPSessionApp::parseScript(const char *script)
         Command cmd;
 
         // parse time
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
 
-        if (!*s || *s==';') break;
+        if (!*s || *s == ';')
+            break;
 
         const char *s0 = s;
-        cmd.tSend = strtod(s,&const_cast<char *&>(s));
+        cmd.tSend = strtod(s, &const_cast<char *&>(s));
 
-        if (s==s0)
+        if (s == s0)
             throw cRuntimeError("syntax error in script: simulation time expected");
 
         // parse number of bytes
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
 
         if (!isdigit(*s))
             throw cRuntimeError("syntax error in script: number of bytes expected");
+
         cmd.numBytes = atoi(s);
 
-        while (isdigit(*s)) s++;
+        while (isdigit(*s))
+            s++;
 
         // add command
         commands.push_back(cmd);
 
         // skip delimiter
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
 
-        if (!*s) break;
+        if (!*s)
+            break;
 
         if (*s!=';')
             throw cRuntimeError("syntax error in script: separator ';' missing");
 
         s++;
 
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
     }
 }
 
@@ -74,7 +82,7 @@ void TCPSessionApp::count(cMessage *msg)
 {
     if(msg->isPacket())
     {
-        if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+        if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
         {
             packetsRcvd++;
             cPacket *packet = PK(msg);
@@ -83,7 +91,8 @@ void TCPSessionApp::count(cMessage *msg)
         }
         else
         {
-            EV << "TCPSessionApp received unknown message (kind:" << msg->getKind() << ", name:" << msg->getName() << ")\n";
+            EV << "TCPSessionApp received unknown message (kind:" << msg->getKind()
+               << ", name:" << msg->getName() << ")\n";
         }
     }
     else
@@ -100,9 +109,9 @@ void TCPSessionApp::waitUntil(simtime_t t)
 
     cMessage *timeoutMsg = new cMessage("timeout");
     scheduleAt(t, timeoutMsg);
-    cMessage *msg=NULL;
+    cMessage *msg = NULL;
 
-    while ((msg=receive())!=timeoutMsg)
+    while ((msg = receive()) != timeoutMsg)
     {
         count(msg);
         socket.processMessage(msg);
@@ -169,7 +178,7 @@ void TCPSessionApp::activity()
     const char *script = par("sendScript");
     parseScript(script);
 
-    if (sendBytes>0 && commands.size()>0)
+    if (sendBytes > 0 && commands.size() > 0)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
     socket.setOutputGate(gate("tcpOut"));
@@ -182,7 +191,8 @@ void TCPSessionApp::activity()
 
     EV << "issuing OPEN command\n";
 
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0, active?"connecting":"listening");
+    if (ev.isGUI())
+        getDisplayString().setTagArg("t", 0, active ? "connecting" : "listening");
 
     if (active)
         socket.connect(IPvXAddressResolver().resolve(connectAddress), connectPort);
@@ -190,16 +200,17 @@ void TCPSessionApp::activity()
         socket.listenOnce();
 
     // wait until connection gets established
-    while (socket.getState()!=TCPSocket::CONNECTED)
+    while (socket.getState() != TCPSocket::CONNECTED)
     {
         socket.processMessage(receive());
 
-        if (socket.getState()==TCPSocket::SOCKERROR)
+        if (socket.getState() == TCPSocket::SOCKERROR)
             return;
     }
 
     EV << "connection established, starting sending\n";
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
+    if (ev.isGUI())
+        getDisplayString().setTagArg("t", 0, "connected");
 
     // send
     if (sendBytes > 0)
@@ -212,7 +223,7 @@ void TCPSessionApp::activity()
         socket.send(msg);
     }
 
-    for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
+    for (CommandVector::iterator i = commands.begin(); i != commands.end(); ++i)
     {
         waitUntil(i->tSend);
         EV << "sending " << i->numBytes << " bytes\n";
@@ -224,11 +235,14 @@ void TCPSessionApp::activity()
     }
 
     // close
-    if (tClose>=0)
+    if (tClose >= 0)
     {
         waitUntil(tClose);
         EV << "issuing CLOSE command\n";
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,"closing");
+
+        if (ev.isGUI())
+            getDisplayString().setTagArg("t", 0, "closing");
+
         socket.close();
     }
 

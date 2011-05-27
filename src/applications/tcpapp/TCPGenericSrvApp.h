@@ -14,9 +14,7 @@
 #ifndef __INET_TCPGENERICSRVAPP_H
 #define __INET_TCPGENERICSRVAPP_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-
 
 
 /**

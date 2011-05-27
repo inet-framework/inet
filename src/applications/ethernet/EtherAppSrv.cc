@@ -74,7 +74,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
     while (replyBytes > 0)
     {
-        int l = replyBytes>MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
+        int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
 
         sprintf(s,"%d", k);
@@ -88,7 +88,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
         k++;
     }
-
 }
 
 void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr)
@@ -118,3 +117,4 @@ void EtherAppSrv::registerDSAP(int dsap)
 void EtherAppSrv::finish()
 {
 }
+

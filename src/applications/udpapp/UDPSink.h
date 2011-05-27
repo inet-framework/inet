@@ -20,7 +20,6 @@
 #ifndef __INET_UDPSINK_H
 #define __INET_UDPSINK_H
 
-#include <omnetpp.h>
 #include "UDPAppBase.h"
 
 
@@ -42,7 +41,5 @@ class INET_API UDPSink : public UDPAppBase
     virtual void finish();
 };
 
-
 #endif
-
 

@@ -15,7 +15,8 @@
 #define __INET_TCPSESSIONAPP_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "TCPSocket.h"
 
@@ -60,5 +61,4 @@ class INET_API TCPSessionApp : public cSimpleModule
 };
 
 #endif
-
 

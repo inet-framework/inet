@@ -23,10 +23,14 @@
 
 #include <vector>
 #include <map>
+
 #include "INETDefs.h"
+
 #include "IPvXAddress.h"
 #include "UDPAppBase.h"
-#include "MMapBoard.h"
+
+class MMapBoard;
+
 
 /**
  * UDP application. See NED for more info.
@@ -58,7 +62,6 @@ class INET_API UDPBasicBurst : public UDPAppBase
     MMapBoard *mmap;
     int * numShare;
 
-
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
@@ -72,18 +75,19 @@ class INET_API UDPBasicBurst : public UDPAppBase
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();
 
-    virtual void sendToUDPDelayed(cPacket *, int srcPort, const IPvXAddress& destAddr, int destPort,double delay);
+    virtual void sendToUDPDelayed(cPacket *, int srcPort,
+                                  const IPvXAddress& destAddr, int destPort, double delay);
 
   protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
   public:
-    UDPBasicBurst() {pktDelay = new cStdDev("burst pkt delay"); numShare=NULL;}
-    ~UDPBasicBurst() {if (pktDelay) delete pktDelay; if (timerNext.isScheduled()) cancelEvent(&timerNext);}
+    UDPBasicBurst() {pktDelay = new cStdDev("burst pkt delay"); numShare = NULL;}
+    ~UDPBasicBurst();
 };
 
 #endif
-
 

@@ -17,6 +17,7 @@
 
 cplusplus {{
 #include "INETDefs.h"
+
 #define ETHERAPP_CLI_SAP  0xf0
 #define ETHERAPP_SRV_SAP  0xf1
 }}

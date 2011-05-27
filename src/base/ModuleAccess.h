@@ -18,7 +18,6 @@
 #ifndef __INET_MODULEACCESS_H
 #define __INET_MODULEACCESS_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 

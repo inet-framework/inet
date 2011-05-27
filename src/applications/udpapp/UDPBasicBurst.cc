@@ -18,10 +18,11 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPBasicBurst.h"
+
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
+#include "MMapBoard.h"
 
 
 Define_Module(UDPBasicBurst);
@@ -39,11 +40,20 @@ static bool selectFunction(cModule *mod, void *name)
 }
 
 
+UDPBasicBurst::~UDPBasicBurst()
+{
+    if (pktDelay)
+        delete pktDelay;
+
+    if (timerNext.isScheduled())
+        cancelEvent(&timerNext);
+}
+
 void UDPBasicBurst::initialize(int stage)
 {
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     counter = 0;
@@ -79,16 +89,17 @@ void UDPBasicBurst::initialize(int stage)
 
 
     double msgFrec = (double)par("messageFreq");
-    if (msgFrec==-1)
+    if (msgFrec == -1)
         isSink=true;
     else
         isSink=false;
 
     offDisable=false;
-    if ((double)par("time_off")==0)
-        offDisable=true;
 
-    while ((token = tokenizer.nextToken())!=NULL)
+    if ((double) par("time_off") == 0)
+        offDisable = true;
+
+    while ((token = tokenizer.nextToken()) != NULL)
     {
         if ((random_add= strstr (token,"random"))!=NULL)
         {
@@ -361,3 +372,4 @@ void UDPBasicBurst::finish()
     delete pktDelay;
     pktDelay = NULL;
 }
+

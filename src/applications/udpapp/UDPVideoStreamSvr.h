@@ -20,15 +20,15 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
-#ifndef UDPVIDEOSTREAMSVR_H
-#define UDPVIDEOSTREAMSVR_H
+#ifndef __INET_UDPVIDEOSTREAMSVR_H
+#define __INET_UDPVIDEOSTREAMSVR_H
+
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "UDPAppBase.h"
 
 #include "IPvXAddress.h"
-#include "UDPAppBase.h"
 
 
 /**
@@ -90,3 +90,4 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
 };
 
 #endif
+

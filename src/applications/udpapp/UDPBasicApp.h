@@ -21,7 +21,7 @@
 #define __INET_UDPBASICAPP_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "UDPAppBase.h"
 
 
@@ -58,3 +58,4 @@ class INET_API UDPBasicApp : public UDPAppBase
 };
 
 #endif
+

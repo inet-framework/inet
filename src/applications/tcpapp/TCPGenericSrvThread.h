@@ -14,7 +14,8 @@
 #ifndef __INET_TCPGENERICSRVTHREAD_H
 #define __INET_TCPGENERICSRVTHREAD_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPSrvHostApp.h"
 
 
@@ -31,7 +32,5 @@ class INET_API TCPGenericSrvThread : public TCPServerThreadBase
     virtual void timerExpired(cMessage *timer);
 };
 
-
 #endif
-
 
