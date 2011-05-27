@@ -65,7 +65,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
         else if (msg == endPauseMsg)
             handleEndPausePeriod();
         else
-            error("Unknown self message received!");
+            throw cRuntimeError(this, "Unknown self message received!");
     }
     else
     {
@@ -78,7 +78,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
         else if (msg->getArrivalGate() == gate("phys$i"))
             processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
         else
-            error("Message received from unknown gate!");
+            throw cRuntimeError(this, "Message received from unknown gate!");
     }
 
     if (ev.isGUI())
@@ -124,6 +124,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
         frameReceptionComplete(msg);
         return;
     }
+
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
     totalSuccessfulRxTime += frame->getDuration();
@@ -169,8 +170,8 @@ void EtherMACFullDuplex::finish()
 
     simtime_t t = simTime();
     simtime_t totalChannelIdleTime = t - totalSuccessfulRxTime;
-    recordScalar("rx channel idle (%)", 100*(totalChannelIdleTime/t));
-    recordScalar("rx channel utilization (%)", 100*(totalSuccessfulRxTime/t));
+    recordScalar("rx channel idle (%)", 100 * (totalChannelIdleTime / t));
+    recordScalar("rx channel utilization (%)", 100 * (totalSuccessfulRxTime / t));
 }
 
 void EtherMACFullDuplex::updateHasSubcribers()

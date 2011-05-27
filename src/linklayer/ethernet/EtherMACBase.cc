@@ -338,6 +338,12 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection(false);
     }
+    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj))
+    {
+        cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
+        if (transmissionChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
+            refreshConnection(true);
+    }
 }
 
 void EtherMACBase::refreshConnection(bool connected_par)
@@ -425,28 +431,43 @@ void EtherMACBase::calculateParameters()
         return;
     }
 
+    if (outTrChannel && !transmissionChannel)
+        outTrChannel->subscribe(POST_MODEL_CHANGE, this);
+
     transmissionChannel = outTrChannel;
     carrierExtension = false; // FIXME
-    double txrate = transmissionChannel->getNominalDatarate();
-    double drate = inTrChannel->getNominalDatarate();
+    double txRate = transmissionChannel->getNominalDatarate();
+    double rxRate = inTrChannel->getNominalDatarate();
 
-    if (txrate != drate)
-        throw cRuntimeError(this, "The input/output datarates are differs (%f / %f)", drate, txrate);
+    if (txRate != rxRate)
+    {
+        if (!initialized())
+        {
+            throw cRuntimeError(this, "The input/output datarates are differs (%g / %g bps)",
+                                rxRate, txRate);
+        }
+        else
+        {
+            ev << "The input/output datarates are differs (" << rxRate << " / " << txRate
+                    << " bps), input rate changed to " << txRate << "bps.\n";
+            inTrChannel->par("datarate").setDoubleValue(txRate);
+        }
+    }
 
     // Check valid speeds
     for(int i = 0; i < NUM_OF_ETHERDESCRS; i++)
     {
-        if (txrate == etherDescrs[i].txrate)
+        if (txRate == etherDescrs[i].txrate)
         {
             curEtherDescr = &etherDescrs[i];
             interfaceEntry->setDown(false);
-            interfaceEntry->setDatarate(txrate);
+            interfaceEntry->setDatarate(txRate);
             return;
         }
     }
 
-    error("Invalid transmission rate %e on channel %s at %s modul",
-            txrate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+    throw cRuntimeError(this, "Invalid transmission rate %g on channel %s at %s modul",
+                        txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
 }
 
 void EtherMACBase::printParameters()

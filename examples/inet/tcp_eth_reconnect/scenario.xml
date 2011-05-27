@@ -1,4 +1,4 @@
-<!-- NOT a mobility trace. This file is used by the ScenarioManager. -->
+<!-- This file is used by the ScenarioManager. -->
 <scenario>
     <at t="0.5">
         <disconnect src-module="server" src-gate="ethg$o[0]" />
@@ -12,6 +12,7 @@
             <param name="delay" value="0.1us" />
         </connect>
     </at>
+    <set-channel-attr t="2" src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
     <at t="3.3">
         <disconnect src-module="server" src-gate="ethg$o[0]" />
     </at>
