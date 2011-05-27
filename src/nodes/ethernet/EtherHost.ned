@@ -35,8 +35,8 @@ import inet.applications.ethernet.EtherAppCli;
 module EtherHost
 {
     parameters:
-        bool csmacdSupported = default(true);  // by default use CSMA/CD 
-        string macType = default(csmacdSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        bool csmacdSupport = default(true);  // by default use CSMA/CD 
+        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("NoQueue"); // DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
         @node();
         @labels(node,ethernet-node);

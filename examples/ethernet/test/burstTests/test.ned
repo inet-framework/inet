@@ -40,12 +40,12 @@ network BurstTests
         }
         host_2_F_A: EtherHost {
             parameters:
-                csmacdSupported = false;
+                csmacdSupport = false;
                 @display("p=70,280");
         }
         host_2_F_B: EtherHost {
             parameters:
-                csmacdSupported = false;
+                csmacdSupport = false;
                 @display("p=210,280");
         }
 

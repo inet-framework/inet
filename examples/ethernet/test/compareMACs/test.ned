@@ -36,23 +36,23 @@ network CompareMACs
         host_iq_2_F_A: EtherHost {
             parameters:
                 @display("p=70,210");
-                csmacdSupported = false;
+                csmacdSupport = false;
         }
         host_iq_2_F_B: EtherHost {
             parameters:
                 @display("p=210,210");
-                csmacdSupported = false;
+                csmacdSupport = false;
         }
         host_eq_2_F_A: EtherHost {
             parameters:
                 @display("p=70,280");
-                csmacdSupported = false;
+                csmacdSupport = false;
                 queueType = "DropTailQueue";
         }
         host_eq_2_F_B: EtherHost {
             parameters:
                 @display("p=210,280");
-                csmacdSupported = false;
+                csmacdSupport = false;
                 queueType = "DropTailQueue";
         }
 

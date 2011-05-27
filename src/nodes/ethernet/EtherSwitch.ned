@@ -37,8 +37,8 @@ module EtherSwitch
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        bool csmacdSupported = default(true);  // by default use CSMA/CD 
-        string macType = default(csmacdSupported ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        bool csmacdSupport = default(true);  // by default use CSMA/CD 
+        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
                                                           // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:

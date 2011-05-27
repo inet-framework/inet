@@ -8,7 +8,7 @@ import inet.nodes.ethernet.EtherHost;
 module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
-		csmacdSupported = false;
+		csmacdSupport = false;
         queueType = "DropTailQueue";
 }
 

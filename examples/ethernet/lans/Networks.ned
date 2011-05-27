@@ -277,13 +277,13 @@ network SwitchedDuplexLAN
         module EtherHostFullDuplex extends EtherHost
         {
             parameters:
-                csmacdSupported = false;
+                csmacdSupport = false;
         }
         
         module EtherSwitchFullDuplex extends EtherSwitch
         {
             parameters:
-                csmacdSupported = false;
+                csmacdSupport = false;
         }
     submodules:
         hostA: EtherHostFullDuplex {
