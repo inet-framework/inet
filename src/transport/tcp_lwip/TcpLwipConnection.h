@@ -28,7 +28,7 @@
 #include "TCPCommand_m.h"
 
 // forward declarations:
-class TCP_lwip;
+class TCP_lwIP;
 class TCPConnectInfo;
 class TcpLwipReceiveQueue;
 class TcpLwipSendQueue;
@@ -78,7 +78,7 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP,
+    TcpLwipConnection(TCP_lwIP &tcpLwipP, int connIdP, int gateIndexP,
             TCPDataTransferMode dataTransferModeP);
 
     TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP,
@@ -121,7 +121,7 @@ class INET_API TcpLwipConnection
     LwipTcpLayer::tcp_pcb *pcbM;
     TcpLwipSendQueue *sendQueueM;
     TcpLwipReceiveQueue *receiveQueueM;
-    TCP_lwip &tcpLwipM;
+    TCP_lwIP &tcpLwipM;
 
   protected:
     long int totalSentM;

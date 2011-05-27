@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __TCP_lwip_H
-#define __TCP_lwip_H
+#ifndef __INET_TCP_LWIP_H
+#define __INET_TCP_LWIP_H
 
 #include <map>
 
@@ -43,11 +43,11 @@ class TcpLwipSendQueue;
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
 
-class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
+class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf
 {
   public:
-    TCP_lwip();
-    virtual ~TCP_lwip();
+    TCP_lwIP();
+    virtual ~TCP_lwIP();
 
   protected:
     // called by the OMNeT++ simulation kernel:
@@ -154,5 +154,5 @@ class INET_API TCP_lwip : public cSimpleModule, public LwipTcpStackIf
     TCPSegment *pCurTcpSegM;
 };
 
-#endif
+#endif // __INET_TCP_LWIP_H
 

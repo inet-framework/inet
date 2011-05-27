@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "TCP_lwip.h"
+#include "TCP_lwIP.h"
 
 //#include "headers/defs.h"   // for endian macros
 //#include "headers/in_systm.h"
@@ -42,18 +42,18 @@
 #include "TCPSerializer.h"
 
 
-Define_Module(TCP_lwip);
+Define_Module(TCP_lwIP);
 
-bool TCP_lwip::testingS;
-bool TCP_lwip::logverboseS;
+bool TCP_lwIP::testingS;
+bool TCP_lwIP::logverboseS;
 
 #ifdef tcpEV
 #undef tcpEV
 #endif
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.disable_tracing) || (TCP_lwip::testingS)) ? ev : ev
+#define tcpEV ((ev.disable_tracing) || (TCP_lwIP::testingS)) ? ev : ev
 
-TCP_lwip::TCP_lwip()
+TCP_lwIP::TCP_lwIP()
   :
     pLwipFastTimerM(NULL),
     pLwipTcpLayerM(NULL),
@@ -75,7 +75,7 @@ TCP_lwip::TCP_lwip()
     netIf.state = NULL;
 }
 
-void TCP_lwip::initialize()
+void TCP_lwIP::initialize()
 {
     tcpEV << this << ": initialize\n";
 
@@ -100,12 +100,12 @@ void TCP_lwip::initialize()
 
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
 
-    tcpEV << "TCP_lwip " << this << " has stack " << pLwipTcpLayerM << "\n";
+    tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
 
     isAliveM = true;
 }
 
-TCP_lwip::~TCP_lwip()
+TCP_lwIP::~TCP_lwIP()
 {
     tcpEV << this << ": destructor\n";
     isAliveM = false;
@@ -125,12 +125,12 @@ TCP_lwip::~TCP_lwip()
 }
 
 // send a TCP_I_ESTABLISHED msg to Application Layer
-void TCP_lwip::sendEstablishedMsg(TcpLwipConnection &connP)
+void TCP_lwIP::sendEstablishedMsg(TcpLwipConnection &connP)
 {
     connP.sendEstablishedMsg();
 }
 
-void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
+void TCP_lwIP::handleIpInputMessage(TCPSegment* tcpsegP)
 {
     IPvXAddress srcAddr, destAddr;
     int interfaceId = -1;
@@ -229,7 +229,7 @@ void TCP_lwip::handleIpInputMessage(TCPSegment* tcpsegP)
     delete tcpsegP;
 }
 
-void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
         const void *dataptr, int len)
 {
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
@@ -246,7 +246,7 @@ void TCP_lwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     }
 }
 
-void TCP_lwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb)
+void TCP_lwIP::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)(pcb->callback_arg);
     if (conn != NULL)
@@ -259,7 +259,7 @@ void TCP_lwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb)
     }
 }
 
-err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
+err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
          LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)arg;
@@ -304,7 +304,7 @@ err_t TCP_lwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
     return err;
 }
 
-err_t TCP_lwip::tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
+err_t TCP_lwIP::tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
 {
     int newConnId = ev.getUniqueNumber();
     TcpLwipConnection *newConn = new TcpLwipConnection(conn, newConnId, pcb);
@@ -313,18 +313,18 @@ err_t TCP_lwip::tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb 
 
     newConn->sendEstablishedMsg();
 
-    tcpEV << this << ": TCP_lwip: got accept!\n";
+    tcpEV << this << ": TCP_lwIP: got accept!\n";
     conn.do_SEND();
     return err;
 }
 
-err_t TCP_lwip::tcp_event_sent(TcpLwipConnection &conn, u16_t size)
+err_t TCP_lwIP::tcp_event_sent(TcpLwipConnection &conn, u16_t size)
 {
     conn.do_SEND();
     return ERR_OK;
 }
 
-err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t err)
+err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t err)
 {
     if (p == NULL)
     {
@@ -362,14 +362,14 @@ err_t TCP_lwip::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
     return err;
 }
 
-err_t TCP_lwip::tcp_event_conn(TcpLwipConnection &conn, err_t err)
+err_t TCP_lwIP::tcp_event_conn(TcpLwipConnection &conn, err_t err)
 {
     conn.sendEstablishedMsg();
     conn.do_SEND();
     return err;
 }
 
-void TCP_lwip::removeConnection(TcpLwipConnection &conn)
+void TCP_lwIP::removeConnection(TcpLwipConnection &conn)
 {
     conn.pcbM->callback_arg = NULL;
     conn.pcbM = NULL;
@@ -377,7 +377,7 @@ void TCP_lwip::removeConnection(TcpLwipConnection &conn)
     delete &conn;
 }
 
-err_t TCP_lwip::tcp_event_err(TcpLwipConnection &conn, err_t err)
+err_t TCP_lwIP::tcp_event_err(TcpLwipConnection &conn, err_t err)
 {
     tcpEV << this << ": tcp_event_err: " << err << " , conn Id: " << conn.connIdM << "\n";
 
@@ -400,18 +400,18 @@ err_t TCP_lwip::tcp_event_err(TcpLwipConnection &conn, err_t err)
     return err;
 }
 
-err_t TCP_lwip::tcp_event_poll(TcpLwipConnection &conn)
+err_t TCP_lwIP::tcp_event_poll(TcpLwipConnection &conn)
 {
     conn.do_SEND();
     return ERR_OK;
 }
 
-struct netif * TCP_lwip::ip_route(IPvXAddress const & ipAddr)
+struct netif * TCP_lwIP::ip_route(IPvXAddress const & ipAddr)
 {
     return &netIf;
 }
 
-void TCP_lwip::handleAppMessage(cMessage *msgP)
+void TCP_lwIP::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
     int connId = controlInfo->getConnId();
@@ -443,7 +443,7 @@ simtime_t roundTime(const simtime_t &timeP, int secSlicesP)
     return ret;
 }
 
-void TCP_lwip::handleMessage(cMessage *msgP)
+void TCP_lwIP::handleMessage(cMessage *msgP)
 {
     if (msgP->isSelfMessage())
     {
@@ -495,7 +495,7 @@ void TCP_lwip::handleMessage(cMessage *msgP)
         updateDisplayString();
 }
 
-void TCP_lwip::updateDisplayString()
+void TCP_lwIP::updateDisplayString()
 {
     if (ev.isDisabled())
     {
@@ -556,23 +556,23 @@ void TCP_lwip::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TcpLwipConnection *TCP_lwip::findAppConn(int connIdP)
+TcpLwipConnection *TCP_lwIP::findAppConn(int connIdP)
 {
     TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
     return i == tcpAppConnMapM.end() ? NULL : (i->second);
 }
 
-void TCP_lwip::finish()
+void TCP_lwIP::finish()
 {
     isAliveM = false;
 }
 
-void TCP_lwip::printConnBrief(TcpLwipConnection& connP)
+void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
 {
     tcpEV << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM;
 }
 
-void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
+void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
         IPvXAddress const& destP, void *dataP, int lenP)
 {
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
@@ -638,7 +638,7 @@ void TCP_lwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, IPvXAddress const& srcP,
     send(tcpseg, output);
 }
 
-void TCP_lwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
+void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
 {
     printConnBrief(connP);
 
@@ -677,7 +677,7 @@ void TCP_lwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
     }
 }
 
-void TCP_lwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
+void TCP_lwIP::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
         cMessage *msgP)
 {
 
@@ -697,7 +697,7 @@ void TCP_lwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
     delete msgP;
 }
 
-void TCP_lwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
+void TCP_lwIP::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
         cMessage *msgP)
 {
     ASSERT(pLwipTcpLayerM);
@@ -720,14 +720,14 @@ void TCP_lwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tc
     delete msgP;
 }
 
-void TCP_lwip::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommandP, cPacket *msgP)
+void TCP_lwIP::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommandP, cPacket *msgP)
 {
     delete tcpCommandP;
 
     connP.send(msgP);
 }
 
-void TCP_lwip::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TCP_lwIP::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
     tcpEV << this << ": process_CLOSE()\n";
 
@@ -737,7 +737,7 @@ void TCP_lwip::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     connP.close();
 }
 
-void TCP_lwip::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TCP_lwIP::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
     tcpEV << this << ": process_ABORT()\n";
 
@@ -747,7 +747,7 @@ void TCP_lwip::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     connP.abort();
 }
 
-void TCP_lwip::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
     delete tcpCommandP; // but we'll reuse msg for reply
 
@@ -757,7 +757,7 @@ void TCP_lwip::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     send(msgP, "appOut", connP.appGateIndexM);
 }
 
-TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPDataTransferMode transferModeP)
+TcpLwipSendQueue* TCP_lwIP::createSendQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {
@@ -768,7 +768,7 @@ TcpLwipSendQueue* TCP_lwip::createSendQueue(TCPDataTransferMode transferModeP)
     }
 }
 
-TcpLwipReceiveQueue* TCP_lwip::createReceiveQueue(TCPDataTransferMode transferModeP)
+TcpLwipReceiveQueue* TCP_lwIP::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP)
     {

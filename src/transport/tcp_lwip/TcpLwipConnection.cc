@@ -22,7 +22,7 @@
 #include "headers/defs.h"   // for endian macros
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
-#include "TCP_lwip.h"
+#include "TCP_lwIP.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TcpLwipQueues.h"
@@ -31,7 +31,7 @@
 
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.disable_tracing)||(TCP_lwip::testingS)) ? ev : ev
+#define tcpEV ((ev.disable_tracing)||(TCP_lwIP::testingS)) ? ev : ev
 
 
 TcpLwipConnection::Stats::Stats()
@@ -82,7 +82,7 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
 }
 
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwip &tcpLwipP, int connIdP, int gateIndexP,
+TcpLwipConnection::TcpLwipConnection(TCP_lwIP &tcpLwipP, int connIdP, int gateIndexP,
         TCPDataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
@@ -340,7 +340,7 @@ void TcpLwipConnection::do_SEND()
         }
         else
         {
-            tcpEV << "TCP_lwip connection: " << connIdM << ": Error do sending, err is "
+            tcpEV << "TCP_lwIP connection: " << connIdM << ": Error do sending, err is "
                   << sent << endl;
             break;
         }

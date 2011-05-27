@@ -23,7 +23,7 @@ class IPvXAddress;
 struct pbuf;
 
 /**
- * Interface class between TCP_lwip and LwipTcpLayer
+ * Interface class between TCP_lwIP and LwipTcpLayer
  */
 class LwipTcpStackIf
 {

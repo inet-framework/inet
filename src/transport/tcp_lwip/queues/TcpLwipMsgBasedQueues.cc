@@ -22,7 +22,7 @@
 #include "TCPCommand_m.h"
 #include "TcpLwipConnection.h"
 #include "TCPSerializer.h"
-#include "TCP_lwip.h"
+#include "TCP_lwIP.h"
 
 
 Register_Class(TcpLwipMsgBasedSendQueue);

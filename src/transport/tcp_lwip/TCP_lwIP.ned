@@ -28,7 +28,7 @@ import inet.transport.ITCP;
 //
 // See ~ITCP for general TCP layer informations.
 //
-simple TCP_lwip like ITCP
+simple TCP_lwIP like ITCP
 {
     parameters:
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
