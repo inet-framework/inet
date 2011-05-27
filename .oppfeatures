@@ -1,6 +1,6 @@
 <features cppSourceRoots="src">
     <feature
-        id="TCP_COMMON"
+        id="TCP_common"
         name="TCP Common"
         description = "The common part of TCP implementations"
         initiallyEnabled = "true"
@@ -20,7 +20,7 @@
         name="TCP (INET)"
         description = "TCP implementation (original INET implementation)"
         initiallyEnabled = "true"
-        requires = "TCP_COMMON"
+        requires = "TCP_common"
         labels = ""
         nedPackages = "
                        inet.transport.tcp
@@ -30,11 +30,11 @@
         linkerFlags = ""
         />
     <feature
-        id="TCP_LWIP"
+        id="TCP_lwIP"
         name="TCP (lwIP)"
         description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)"
         initiallyEnabled = "true"
-        requires = "TCP_COMMON"
+        requires = "TCP_common"
         labels = ""
         nedPackages = "
                        inet.transport.tcp_lwip
@@ -52,7 +52,7 @@
                        NSC must be downloaded and installed separately; read
                        inet/3rdparty/README for more information."
         initiallyEnabled = "false"
-        requires = "TCP_COMMON"
+        requires = "TCP_common"
         labels = ""
         nedPackages = "
                        inet.transport.tcp_nsc
@@ -231,7 +231,7 @@
         linkerFlags = ""
         />
     <feature
-        id="ETHERNET"
+        id="Ethernet"
         name="Ethernet"
         description = "IEEE 802.3 models (MAC, LLC, Encap) with support for classic
                        Ethernet (10Mbps), Fast Ethernet (100Mbps) and Gigabit Ethernet (1Gbps).
@@ -250,10 +250,10 @@
         linkerFlags = ""
         />
     <feature
-        id="ETHERNET_examples"
+        id="Ethernet_examples"
         name="Ethernet examples"
         description = "Examples for Ethernet"
-        requires = "ETHERNET IPv4"
+        requires = "Ethernet IPv4"
         labels = "protocols"
         nedPackages = "
                        inet.examples.ethernet
@@ -296,7 +296,7 @@
         name="Network emulation examples"
         description = "Examples for network emulation"
         initiallyEnabled = "true"
-        requires = "ExternalInterface ETHERNET"
+        requires = "ExternalInterface Ethernet"
         labels = "nic"
         nedPackages = "
                        inet.examples.emulation
@@ -309,7 +309,7 @@
         id="MPLS"
         name="MPLS support (incl. LDP and RSVP-TE)"
         description = "MPLS support"
-        requires = "TCP_COMMON UDP IPv4"
+        requires = "TCP_common UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.mpls inet.nodes.mpls
@@ -355,7 +355,7 @@
         name="OSPFv2 examples"
         description = "Examples for OSPFv2"
         initiallyEnabled = "true"
-        requires = "OSPFv2 ETHERNET"
+        requires = "OSPFv2 Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.ospfv2
@@ -369,7 +369,7 @@
         name="BGPv4"
         description = "BGP support"
         initiallyEnabled = "true"
-        requires = "IPv4 OSPFv2 TCP_COMMON"
+        requires = "IPv4 OSPFv2 TCP_common"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.bgpv4
@@ -382,9 +382,9 @@
     <feature
         id="BGPv4_examples"
         name="BGPv4 examples"
-        description = "Examples for BGPv4 ETHERNET"
+        description = "Examples for BGPv4"
         initiallyEnabled = "true"
-        requires = "BGPv4 ETHERNET"
+        requires = "BGPv4 Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.bgpv4
@@ -398,7 +398,7 @@
         name="MANET routing"
         description = "AdHoc MANET routing support (AODV, BATMAN, DSR, DSDV, DYMO, DYMO_FAU, OLSR)"
         initiallyEnabled = "true"
-        requires = "IPv4 IPv6 UDP _80211"
+        requires = "IPv4 IPv6 UDP Ieee80211"
         labels = "routing manet"
         nedPackages = "
                        inet.networklayer.manetrouting
@@ -410,7 +410,7 @@
     <feature
         id="MANET_examples"
         name="MANET routing examples"
-        description = "Eyamples for the MANET routing protocols"
+        description = "Examples for the MANET routing protocols"
         initiallyEnabled = "true"
         requires = "MANET"
         labels = "routing manet examples"
@@ -465,7 +465,7 @@
         linkerFlags = ""
         />
     <feature
-        id="mf80211"
+        id="MF80211"
         name="802.11b (Mobility Framework)"
         description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
         initiallyEnabled = "true"
@@ -480,7 +480,7 @@
         linkerFlags = ""
         />
     <feature
-        id="_80211"
+        id="Ieee80211"
         name="802.11a/b/g/e (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11a/b/g/e ad-hoc and infrastucture mode NIC"
         initiallyEnabled = "true"
@@ -494,11 +494,11 @@
         linkerFlags = ""
         />
     <feature
-        id="_80211_mesh"
+        id="Ieee80211_mesh"
         name="802.11a/b/g/e (mesh networking mode)"
         description = "IEEE 802.11a/b/g/e NIC supporting mesh networking"
         initiallyEnabled = "true"
-        requires = "mobility radio TCP_COMMON MANET OSPFv2 MPLS UDP IPv4 IPv6"
+        requires = "mobility radio TCP_common MANET OSPFv2 MPLS UDP IPv4 IPv6"
         labels = "nic wireless mesh"
         nedPackages = "
                        inet.linklayer.ieee80211mesh
@@ -508,11 +508,11 @@
         linkerFlags = ""
         />
     <feature
-        id="WIRELESS_examples"
+        id="wireless_examples"
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "IPv4 ETHERNET _80211 mf80211"
+        requires = "IPv4 Ethernet Ieee80211 MF80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
@@ -523,7 +523,7 @@
         linkerFlags = ""
         />
     <feature
-        id="VOIPTOOL"
+        id="VoIPTool"
         name="VoIPTool"
         description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
         initiallyEnabled = "false"
@@ -537,11 +537,11 @@
         linkerFlags = "-lavcodec -lavformat -lavutil"
         />
     <feature
-        id="VOIPTOOL_examples"
+        id="VoIPTool_examples"
         name="VoIP examples"
-        description = "Example Voice Over IP simulations"
+        description = "Example VoIP simulations"
         initiallyEnabled = "false"
-        requires = "VOIPTOOL"
+        requires = "VoIPTool"
         labels = "examples"
         nedPackages = "
                        inet.examples.voiptool
