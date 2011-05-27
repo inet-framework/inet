@@ -41,13 +41,6 @@ class int128
     inline int128 () throw () {};
     inline int128 (const int128 & a) throw () : lo (a.lo), hi (a.hi) {};
 
-#ifndef __GNUC__
-    inline int128 (const unsigned int & a) throw () : lo (a), hi (0ll) {};
-    inline int128 (const signed int & a) throw () : lo (a), hi (0ll)
-    {
-        if (a < 0) this->hi = -1ll;
-    };
-#endif
     inline int128 (const uint32_t & a) throw () : lo (a), hi (0ll) {};
     inline int128 (const int32_t & a) throw () : lo (a), hi (0ll)
     {
@@ -70,10 +63,6 @@ class int128
     //       the need of intermediate objects during assignments.
 
     int128 & operator = (const int128 &other) {if (this==&other) return *this; lo = other.lo; hi = other.hi; return *this;}
-#ifndef __GNUC__
-    int128 & operator = (const int &a) {lo = a; hi = 0; if (a < 0) this->hi = -1ll; return *this;}
-    int128 & operator = (const unsigned int &a) {lo = a; hi = 0; return *this;}
-#endif
     int128 & operator = (const int32_t &a) {lo = a; hi = 0; return *this;}
     int128 & operator = (const uint32_t &a) {lo = a; hi = 0; return *this;}
 
