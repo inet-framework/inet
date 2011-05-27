@@ -21,7 +21,6 @@
 #define VOIPTOOL_VOIPSINKAPP_H
 
 #define __STDC_CONSTANT_MACROS
-#include <stdint.h>
 
 #include <omnetpp.h>
 
