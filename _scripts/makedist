@@ -22,6 +22,7 @@ git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error c
 # copying documentation
 cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME

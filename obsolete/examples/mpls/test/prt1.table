@@ -1,9 +1,0 @@
-#prt table for MPLS network simulation test
-#prt1.table for LSR1 - this is an edge router
-
-PRT TABLE:
-Prefix			Pointer
-
-
-
-

@@ -22,7 +22,7 @@
 					<folderInfo id="org.omnetpp.cdt.gnu.config.debug.200906710." name="/" resourcePath="">
 						<toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.691128580" name="GCC for OMNEST" superClass="org.omnetpp.cdt.gnu.toolchain.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.1326710610" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.debug.1196086938" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="5" superClass="org.omnetpp.cdt.gnu.builder.debug">
+							<builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.debug.1196086938" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="2" superClass="org.omnetpp.cdt.gnu.builder.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 								</outputEntries>
@@ -32,7 +32,6 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1410248613" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -45,6 +44,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -52,7 +52,6 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.448247205" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -65,6 +64,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.457889982" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -89,7 +89,6 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1984401806" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -102,6 +101,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1060570561" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -109,7 +109,6 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.818385795" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -122,6 +121,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1468408523" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -133,7 +133,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="applications/voiptool|nodes/xmipv6|networklayer/xmipv6|networklayer/ipv6tunneling|transport/tcp_nsc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="transport/tcp_lwip|applications/voiptool|transport/tcp_nsc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -523,7 +523,6 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.2116255418" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -536,6 +535,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.924398200" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -543,7 +543,6 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1246772635" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -556,6 +555,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.583770053" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -579,7 +579,6 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.454128587" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -592,6 +591,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1677016430" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -599,7 +599,6 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1577305508" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_LWIP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
 									<listOptionValue builtIn="false" value="WITH_UDP"/>
@@ -612,6 +611,7 @@
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.641178598" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -623,7 +623,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="applications/voiptool|nodes/xmipv6|networklayer/xmipv6|networklayer/ipv6tunneling|transport/tcp_nsc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="transport/tcp_lwip|applications/voiptool|transport/tcp_nsc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
