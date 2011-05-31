@@ -28,7 +28,7 @@ import inet.networklayer.bgpv4.BGPRouting;
 module BGPRouter extends OSPFRouter
 {
     parameters:
-        string tcpType = default(haveClass("TCP")?"TCP":haveClass("TCP_lwIP")?"TCP_lwIP":haveClass("TCP_NSC")?"TCP_NSC":"TCP_None");  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
     submodules:
         bgp: BGPRouting {
             parameters:
