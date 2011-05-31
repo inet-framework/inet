@@ -9,7 +9,9 @@ ifconfigend.
 
 route:
 
-#default:        172.0.0.1       0.0.0.0         H   0   eth0
-default:	*	0.0.0.0	H	0	eth0
+#Destination	Gateway		Genmask			Flags	Metric	Iface
+#default:		172.0.0.1	0.0.0.0			H		0		eth0
+172.0.0.0		*			255.255.255.0	H		0		eth0
+default:		*			0.0.0.0			H		0		eth0
 
 routeend.

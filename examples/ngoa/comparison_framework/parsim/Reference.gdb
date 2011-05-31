@@ -1,8 +1,8 @@
 set breakpoint pending on
 exec-file /home/kks/omnetpp/bin/opp_run
-set args -l /home/kks/inet-hnrl/src/inet -n /home/kks/inet-hnrl/examples:/home/kks/inet-hnrl/src -f ./Reference.ini -u Cmdenv -c Parsim_N2 -r 0
+set args --parsim-communications-class=cMPICommunications -l /home/kks/tools/omnetpp/inet-hnrl/src/inet -n /home/kks/tools/omnetpp/inet-hnrl/examples:/home/kks/tools/omnetpp/inet-hnrl/src -f ./Reference.ini -u Cmdenv -c Parsim_N2 -r 0
 tbreak main
-tbreak SimTime::overflowAdding
+#tbreak SimTime::overflowAdding
 tbreak IPAddressResolver::interfaceTableOf
 #display state->snd_nxt
 #display state->snd_una
