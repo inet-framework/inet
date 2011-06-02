@@ -35,7 +35,7 @@ network Net80211
             parameters:
                 @display("r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=60,50");
         }

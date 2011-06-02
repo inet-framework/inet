@@ -40,7 +40,7 @@ void ChannelAccess::initialize(int stage)
 
     if (stage == 0)
     {
-    	cc = getChannelControl();
+        cc = getChannelControl();
         hostModule = findHost();
 
         positionUpdateArrived = false;
@@ -54,10 +54,10 @@ void ChannelAccess::initialize(int stage)
             radioPos.x = parseInt(hostModule->getDisplayString().getTagArg("p", 0), -1);
             radioPos.y = parseInt(hostModule->getDisplayString().getTagArg("p", 1), -1);
 
-			if (radioPos.x == -1 || radioPos.y == -1)
-				error("The coordinates of '%s' host are invalid. Please set coordinates in "
-						"'@display' attribute, or configure Mobility for this host.",
-						hostModule->getFullPath().c_str());
+            if (radioPos.x == -1 || radioPos.y == -1)
+                error("The coordinates of '%s' host are invalid. Please set coordinates in "
+                        "'@display' attribute, or configure Mobility for this host.",
+                        hostModule->getFullPath().c_str());
 
             const char *s = hostModule->getDisplayString().getTagArg("p", 2);
             if (s && *s)
@@ -75,8 +75,6 @@ void ChannelAccess::initialize(int stage)
 IChannelControl *ChannelAccess::getChannelControl()
 {
     IChannelControl *cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
-    if (!cc)
-        cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelcontrol"));
     if (!cc)
         throw cRuntimeError("Could not find ChannelControl module with name 'channelControl' in the toplevel network.");
     return cc;

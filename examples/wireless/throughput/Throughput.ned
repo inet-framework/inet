@@ -71,7 +71,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=61,46");
         }

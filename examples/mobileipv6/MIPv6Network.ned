@@ -59,7 +59,7 @@ network mIPv6Network
             parameters:
                 @display("p=763,53");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 numChannels = 5;
                 @display("p=753,123");
