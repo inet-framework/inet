@@ -52,7 +52,7 @@ class INET_API UDPBasicBurst : public UDPAppBase
 
     typedef std::map<int,int> SourceSequence;
     SourceSequence sourceSequence;
-    simtime_t limitDelay;
+    simtime_t delayLimit;
     cMessage *timerNext;
     simtime_t stopTime;
     simtime_t nextPkt;

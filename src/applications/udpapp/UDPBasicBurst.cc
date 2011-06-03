@@ -70,7 +70,7 @@ void UDPBasicBurst::initialize(int stage)
     numDeleted = 0;
     numDuplicated = 0;
 
-    limitDelay = par("limitDelay");
+    delayLimit = par("delayLimit");
     simtime_t startTime = par("startTime");
     stopTime = par("stopTime");
 
@@ -85,7 +85,7 @@ void UDPBasicBurst::initialize(int stage)
     destAddrRNG = par("destAddrRNG");
     const char *addrModeStr = par("chooseDestAddrMode").stringValue();
     int addrMode = cEnum::get("ChooseDestAddrMode")->lookup(addrModeStr);
-    if (-1 == addrMode)
+    if (addrMode == -1)
         throw cRuntimeError(this, "Invalid chooseDestAddrMode: '%s'", addrModeStr);
     chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
 
@@ -175,10 +175,10 @@ void UDPBasicBurst::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        if ((stopTime == 0) || (simTime() < stopTime))
+        if (stopTime <= 0 || simTime() < stopTime)
         {
             // send and reschedule next sending
-            if (!isSink) //if the node is sink it don't generate messages
+            if (!isSink) // if the node is a sink, don't generate messages
                 generateBurst();
         }
     }
@@ -209,11 +209,10 @@ void UDPBasicBurst::processPacket(cPacket *msg)
         // duplicate control
         int moduleId = (int)msg->par("sourceId");
         int msgId = (int)msg->par("msgId");
-        SourceSequence::iterator i;
-        i = sourceSequence.find(moduleId);
-        if (i != sourceSequence.end())
+        SourceSequence::iterator it = sourceSequence.find(moduleId);
+        if (it != sourceSequence.end())
         {
-            if (i->second >= msgId)
+            if (it->second >= msgId)
             {
                 EV << "Duplicated packet: ";
                 printPacket(msg);
@@ -223,15 +222,15 @@ void UDPBasicBurst::processPacket(cPacket *msg)
                 return;
             }
             else
-                i->second = msgId;
+                it->second = msgId;
         }
         else
             sourceSequence[moduleId] = msgId;
     }
 
-    if (limitDelay >= 0)
+    if (delayLimit >= 0)
     {
-        if (simTime() - msg->getTimestamp() > limitDelay)
+        if (simTime() - msg->getTimestamp() > delayLimit)
         {
             EV << "Old packet: ";
             printPacket(msg);
@@ -291,8 +290,5 @@ void UDPBasicBurst::finish()
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
     recordScalar("Total deleted", numDeleted);
-
-    cancelAndDelete(timerNext);
-    timerNext = NULL;
 }
 

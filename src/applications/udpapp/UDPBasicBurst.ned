@@ -25,39 +25,77 @@ package inet.applications.udpapp;
 import inet.applications.IUDPApp;
 
 //
-// Sends \UDP packets to the given \IP address at the given interval.
-// Compatible with both IPv4 and IPv6.
+// Sends UDP packets to the given IP address(es) in bursts, or acts as a
+// packet sink. Compatible with both IPv4 and IPv6.
 //
-// The interval can be a constant or a random value (e.g. exponential(1)).
-// If the dest_addresses parameter contains more than one address, one
-// of them is randomly chosen for each packet. An address may be given in the
-// dotted decimal notation, or with the module name. (The IPvXAddressResolver
-// class is used to resolve the address.) To disable the model, set
-// dest_addresses to "".
+// <b>Addressing:</b>
 //
-// The peer can be UDPSink or another UDPBasicApp (it handles received packets
-// exactly like UDPSink).
+// The destAddresses parameter can contain zero, one or more destination 
+// addresses, separated by spaces. If there is no destination address given,
+// the module will act as packet sink. If there are more than one addresses, 
+// one of them is randomly chosen, either for the whole simulation run,
+// or for each burst, or for each packet, depending on the value of the
+// chooseDestAddrMode parameter. The destAddrRNG parameter controls which 
+// (local) RNG is used for randomized address selection. 
 //
-// TODO: this is a copy-paste comment, revise !!!
+// TODO: "broadcast" string mint address -- leirni!!!
+// TODO: sink uzemmod -- ha kuld, akkor nem is tud fogadni??
+// TODO: mit jelent a localPort == -1 ??
 // 
+// An address may be given in the dotted decimal notation, or with the module 
+// name. (The IPvXAddressResolver class is used to resolve the address.)
+// INET also defines several NED functions that can be useful: 
+//    - moduleListByPath(): TODO: leirni mit csinal, pelda
+//    - moduleListByNedType(): TODO: leirni mit csinal, pelda
+//
+// The peer can be UDPSink or another UDPBasicBurst.
+//
+// <b>Bursts:</b>
+//
+// The first burst starts at startTime. Bursts start by immediately sending 
+// a packet; subsequent packets are sent at messageFreq intervals. The 
+// messageFreq parameter can be a random value, e.g. exponential(10ms).
+// A constant interval with jitter can be specified as 1s+uniform(-0.01s,0.01s)
+// or uniform(0.99s,1.01s). The length of the burst is controlled by the
+// burstDuration parameter. (Note that if messageFreq is greater than 
+// burstDuration, the burst will consist of one packet only.) The time between
+// burst is the sleepDuration parameter; this can be zero (zero is not
+// allowed for burstDuration and messageFreq.)
+//
+// TODO: ellenorizni a kodban, hogy tenyleg igy legyen: nulla burstDuration es
+// messageFreq azonnal generaljon hibat, igy garantalhato hogy haladjon az ido.
+// sleep az lehet 0 is.
+//
+// <b>Packets</b>
+//
+// Packet length is controlled by the messageLength parameter.
+//
+// TODO: dokumentalni, hogy msgId es sourceId-t rak a packetekre, es melyik micsoda!!! 
+//
+// <b>Operation as sink; statistics</b>
+//
+// Statistics are collected on incoming packets (i.e. only when the app is 
+// a sink.)  
+// TODO: is that true?
+//
+// TODO: delayLimit parameter: mikor el, mit csinal! miert nincs defaultja? (0s, azaz no limit)
+// TODO: mit csinal sink-kent?? lasd pl: std::map<int,int> SourceSequence member
+//
 simple UDPBasicBurst like IUDPApp
 {
     parameters:
-        int localPort;
-        int destPort;
-        volatile int messageLength @unit("B"); //  length of messages to generate, in bytes
-        volatile double burstDuration @unit("s");  // burst duration time
-        volatile double sleepDuration @unit("s");  // time without transmision
-        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1s)+uniform(-0.001s,0.001s)
-        string destAddresses; // list of \IP addresses or node paths separated by spaces, if empty, the application is a sink.
-                              // Use moduleListByPath(), moduleListByNedType() NED functions, if need
-        int destAddrRNG = default(0);// random generator ID for select current dest address
-
-        string chooseDestAddrMode @enum("once","perBurst","perSend"); // When change the destination address
-
-        double startTime @unit("s");// begin transmission time
-        double stopTime @unit("s"); // time of the last transmission packet 
-        double limitDelay @unit("s"); // maximum delay for a packet, every packet with bigger delay is delete and lost ==>delayLimit
+        string destAddresses; // space-separated list of destination IP addresses, can be empty; see module description for possibilities
+        string chooseDestAddrMode @enum("once","perBurst","perSend"); // when to change the destination address
+        int destAddrRNG = default(0); // random generator ID for selecting a destination address
+        int localPort; // local UDP port number
+        int destPort; // remote UDP port number
+        double startTime @unit("s") = default(0s); // application start time (start of the first burst)
+        double stopTime @unit("s") = default(-1s); // application stop time (no packets are sent after this time); a negative or zero value means no limit
+        volatile int messageLength @unit("B"); // length of messages to generate, in bytes
+        volatile double burstDuration @unit("s"); // burst duration time (zero not allowed)
+        volatile double sleepDuration @unit("s"); // time between bursts (zero allowed)
+        volatile double messageFreq @unit("s"); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
+        double delayLimit @unit("s"); // maximum accepted delay for a packet; packets with a bigger delay are discarded
         @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[recvPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; record=count,"vector(count)"; interpolationmode=none);
