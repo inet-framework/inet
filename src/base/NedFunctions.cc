@@ -30,3 +30,62 @@ Define_NED_Function2(nedf_haveClass,
         "string",
         "Returns true if the given C++ class exists"
 );
+
+Value nedf_moduleListByPath(cComponent *context, Value argv[], int argc)
+{
+    std::string modulenames;
+    cTopology topo;
+    std::vector<std::string> paths;
+    int i;
+    for (i = 0; i < argc; i++)
+        paths.push_back(argv[i].s);
+
+    topo.extractByModulePath(paths);
+
+    for (i = 0; i < topo.getNumNodes(); i++)
+    {
+        std::string path = topo.getNode(i)->getModule()->getFullPath();
+        if (modulenames.length() > 0)
+            modulenames = modulenames + " " + path;
+        else
+            modulenames = path;
+    }
+    return modulenames;
+}
+
+Define_NED_Function2(nedf_moduleListByPath,
+        "string moduleListByPath(string modulePath,...)",
+        "string",
+        "Returns a space-separated list of the modules at the given path(s). "
+        "See cTopology::extractByModulePath()."
+);
+
+Value nedf_moduleListByNedType(cComponent *context, Value argv[], int argc)
+{
+    std::string modulenames;
+    cTopology topo;
+    std::vector<std::string> paths;
+    int i;
+    for (i = 0; i < argc; i++)
+        paths.push_back(argv[i].s);
+
+    topo.extractByNedTypeName(paths);
+
+    for (i = 0; i < topo.getNumNodes(); i++)
+    {
+        std::string path = topo.getNode(i)->getModule()->getFullPath();
+        if (modulenames.length() > 0)
+            modulenames = modulenames + " " + path;
+        else
+            modulenames = path;
+    }
+    return modulenames;
+}
+
+Define_NED_Function2(nedf_moduleListByNedType,
+        "string moduleListByNedType(string nedTypeName,...)",
+        "string",
+        "Returns a space-separated list of the modules with the given NED type(s). "
+        "See cTopology::extractByNedTypeName()."
+);
+

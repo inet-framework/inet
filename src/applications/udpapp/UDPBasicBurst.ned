@@ -19,6 +19,11 @@
 //
 
 
+package inet.applications.udpapp;
+
+
+import inet.applications.IUDPApp;
+
 //
 // Sends \UDP packets to the given \IP address at the given interval.
 // Compatible with both IPv4 and IPv6.
@@ -33,31 +38,34 @@
 // The peer can be UDPSink or another UDPBasicApp (it handles received packets
 // exactly like UDPSink).
 //
-
-package inet.applications.udpapp;
-
-
-import inet.applications.IUDPApp;
-
+// TODO: this is a copy-paste comment, revise !!!
+// 
 simple UDPBasicBurst like IUDPApp
 {
     parameters:
         int localPort;
         int destPort;
         volatile int messageLength @unit("B"); //  length of messages to generate, in bytes
-        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1), if -1 the application is a sink
-        volatile double message_freq_jitter @unit("s"); // should usually be a random value, e.g. uniform(-0.001,0.001)
-        string destAddresses; // list of \IP addresses, separated by spaces, it's admit the macros radom("node type") and random_name("node name")
-        volatile double time_off @unit("s");  // time without transmision
         volatile double burstDuration @unit("s");  // burst duration time
-        bool activeBurst; // if false the address is selected in the begining and never change
-        double time_end @unit("s"); // time of the last transmision packet 
-        double time_begin @unit("s");// begin transmission time
-        int rand_generator;// ID random generator
-        double limitDelay @unit("s"); // maximun delay for a packet, every packet with bigger delay is delete and lost
-        bool fixedDestination = default(false);  // if true the destination address is selected at the begining and never change
+        volatile double sleepDuration @unit("s");  // time without transmision
+        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1s)+uniform(-0.001s,0.001s)
+        string destAddresses; // list of \IP addresses or node paths separated by spaces, if empty, the application is a sink.
+                              // Use moduleListByPath(), moduleListByNedType() NED functions, if need
+        int destAddrRNG = default(0);// random generator ID for select current dest address
+
+        string chooseDestAddrMode @enum("once","perBurst","perSend"); // When change the destination address
+
+        double startTime @unit("s");// begin transmission time
+        double stopTime @unit("s"); // time of the last transmission packet 
+        double limitDelay @unit("s"); // maximum delay for a packet, every packet with bigger delay is delete and lost ==>delayLimit
+        @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[recvPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[duplPk](title="packets duplicated"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[endToEndDelay](title="delay";record=histogram,stats,vector);
 
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
+
