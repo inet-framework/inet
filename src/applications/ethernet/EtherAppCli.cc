@@ -25,7 +25,7 @@
 #include "Ieee802Ctrl_m.h"
 
 
-Define_Module (EtherAppCli);
+Define_Module(EtherAppCli);
 
 simsignal_t EtherAppCli::endToEndDelaySignal = SIMSIGNAL_NULL;
 simsignal_t EtherAppCli::sentPkBytesSignal = SIMSIGNAL_NULL;

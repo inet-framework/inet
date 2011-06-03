@@ -80,7 +80,7 @@ void TCPSessionApp::parseScript(const char *script)
 
 void TCPSessionApp::count(cMessage *msg)
 {
-    if(msg->isPacket())
+    if (msg->isPacket())
     {
         if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
         {

@@ -39,22 +39,22 @@ class INET_API Coord : public cPolymorphic
 {
  public:
   /** @brief x and y coordinates of the position*/
-  double x,y;
+  double x, y;
 
   /** Initializes coordinates.*/
-  Coord(double _x=0, double _y=0) : x(_x), y(_y) {};
+  Coord(double _x = 0, double _y = 0) : x(_x), y(_y) {};
 
 
   /** Initializes coordinates.*/
   Coord(const Coord& pos) {
-        x=pos.x;
-        y=pos.y;
+        x = pos.x;
+        y = pos.y;
   }
 
   /** Initializes coordinates.*/
   Coord(const Coord* pos) {
-        x=pos->x;
-        y=pos->y;
+        x = pos->x;
+        y = pos->y;
   }
 
   std::string info() const {
@@ -85,22 +85,22 @@ class INET_API Coord : public cPolymorphic
 
   /** Adds coordinate vector b to a.*/
   const Coord& operator+=(const Coord& a) {
-        x+=a.x;
-        y+=a.y;
+        x += a.x;
+        y += a.y;
         return *this;
   }
 
   /** Assigns a this.*/
   const Coord& operator=(const Coord& a) {
-        x=a.x;
-        y=a.y;
+        x = a.x;
+        y = a.y;
         return *this;
   }
 
   /** Subtracts coordinate vector b from a.*/
   const Coord& operator-=(const Coord& a) {
-        x-=a.x;
-        y-=a.y;
+        x -= a.x;
+        y -= a.y;
         return *this;
   }
 
@@ -110,7 +110,7 @@ class INET_API Coord : public cPolymorphic
    * FWMath::close function.
    */
   friend bool operator==(const Coord& a, const Coord& b) {
-        return FWMath::close(a.x,b.x) && FWMath::close(a.y,b.y);
+        return FWMath::close(a.x, b.x) && FWMath::close(a.y, b.y);
   }
 
   /**
@@ -132,8 +132,8 @@ class INET_API Coord : public cPolymorphic
    * Returns distance^2 to Coord a (omits square root).
    */
   double sqrdist(const Coord& a) const {
-        double dx=x-a.x;
-        double dy=y-a.y;
+        double dx = x-a.x;
+        double dy = y-a.y;
         return dx*dx + dy*dy;
   }
 

@@ -26,15 +26,15 @@
 #include "OSPFRouter.h"
 
 /**
- * OMNeT++ module class acting as a facade for the OSPF datastructure.
- * Handles the configuration loading and forwards the OMNeT++ messages(OSPF packets).
+ * OMNeT++ module class acting as a facade for the OSPF data structure.
+ * Handles the configuration loading and forwards the OMNeT++ messages (OSPF packets).
  */
 class OSPFRouting :  public cSimpleModule
 {
   private:
     IInterfaceTable* ift;        ///< Provides access to the interface table.
     IRoutingTable*   rt;         ///< Provides access to the IP routing table.
-    OSPF::Router*    ospfRouter; ///< Root object of the OSPF datastructure.
+    OSPF::Router*    ospfRouter; ///< Root object of the OSPF data structure.
 
     int   resolveInterfaceName(const std::string& name) const;
     void  getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;

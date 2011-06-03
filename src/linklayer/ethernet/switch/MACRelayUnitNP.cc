@@ -67,7 +67,7 @@ void MACRelayUnitNP::initialize()
 
     numCPUs = par("numCPUs");
 
-    processingTime    = par("processingTime");
+    processingTime = par("processingTime");
     bufferSize = par("bufferSize");
     highWatermark = par("highWatermark");
     pauseUnits = par("pauseUnits");
@@ -87,7 +87,7 @@ void MACRelayUnitNP::initialize()
     {
         char msgname[20];
         sprintf(msgname, "endProcessing-cpu%d", i);
-        endProcEvents[i] = new cMessage(msgname,i);
+        endProcEvents[i] = new cMessage(msgname, i);
     }
 
     EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";

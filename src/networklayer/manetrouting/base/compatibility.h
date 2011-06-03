@@ -53,9 +53,9 @@ struct In_addr
     Uint128 S_addr;
 #undef s_addr
 #define s_addr S_addr
-    In_addr(const In_addr & addr) {S_addr= addr.S_addr;}
-    In_addr() {S_addr= (Uint128) 0;}
-    In_addr & operator = (const In_addr &other) {if (this==&other) return *this; S_addr = other.S_addr; return *this;}
+    In_addr(const In_addr & addr) {S_addr = addr.S_addr;}
+    In_addr() {S_addr = (Uint128) 0;}
+    In_addr & operator=(const In_addr &other) {if (this==&other) return *this; S_addr = other.S_addr; return *this;}
 };
 
 struct Sockaddr

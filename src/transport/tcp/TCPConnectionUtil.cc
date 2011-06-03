@@ -245,7 +245,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg,"ipOut");
+        tcpMain->send(tcpseg, "ipOut");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
@@ -260,7 +260,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg,"ipv6Out");
+        tcpMain->send(tcpseg, "ipv6Out");
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
@@ -282,7 +282,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipOut");
+        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
@@ -297,7 +297,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipv6Out");
+        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipv6Out");
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
@@ -904,7 +904,7 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
 
         tcpEV << "Option type " << kind << " (" << optionName(kind) << "), length " << length << "\n";
 
-        switch(kind)
+        switch (kind)
         {
             case TCPOPTION_END_OF_OPTION_LIST: // EOL=0
             case TCPOPTION_NO_OPERATION: // NOP=1

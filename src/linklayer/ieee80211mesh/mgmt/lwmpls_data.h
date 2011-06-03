@@ -52,10 +52,10 @@ typedef struct LWMPLSKey
             return mac_addr<b.mac_addr;
     }
 
-    inline LWMPLSKey & operator = (const LWMPLSKey& b)
+    inline LWMPLSKey & operator=(const LWMPLSKey& b)
     {
-        label=b.label;
-        mac_addr=b.mac_addr;
+        label = b.label;
+        mac_addr = b.mac_addr;
         return *this;
     }
 
@@ -86,22 +86,22 @@ typedef struct   LWmpls_Forwarding_Structure : public cOwnedObject
     LWMPLSKey     return_key_output;
     simtime_t     label_life_limit;
     RouteVector path;
-    void keyOutput(int label, uint64_t mac_add) { key_output.label = label; key_output.mac_addr= mac_add;}
-    void reverseKeyOutput (int label, uint64_t mac_add) { return_key_output.label = label; return_key_output.mac_addr= mac_add;}
+    void keyOutput(int label, uint64_t mac_add) { key_output.label = label; key_output.mac_addr = mac_add;}
+    void reverseKeyOutput(int label, uint64_t mac_add) { return_key_output.label = label; return_key_output.mac_addr = mac_add;}
     LWmpls_Forwarding_Structure()
     {
-        mac_address=0;
-        input_mac_address=0;
-        last_use=-1;
-        order=-1;
-        output_label=0;
-        input_label=0;
-        return_label_input=0; // Acumular
-        return_label_output=0;
-        key_output.label=-1;
-        key_output.mac_addr=0;
-        return_key_output.label=-1;
-        return_key_output.mac_addr=0;
+        mac_address = 0;
+        input_mac_address = 0;
+        last_use = -1;
+        order = -1;
+        output_label = 0;
+        input_label = 0;
+        return_label_input = 0; // Acumular
+        return_label_output = 0;
+        key_output.label = -1;
+        key_output.mac_addr = 0;
+        return_key_output.label = -1;
+        return_key_output.mac_addr = 0;
         path.clear();
 
     }
@@ -125,15 +125,15 @@ class LWmpls_Interface_Structure : public cOwnedObject
   public:
     LWmpls_Interface_Structure()
     {
-        mac_address=0;
-        last_use=0;
-        num_rtr=0;
-        num_labels=0;
+        mac_address = 0;
+        last_use = 0;
+        num_rtr = 0;
+        num_labels = 0;
     }
     uint64_t  &   macAddress() {return mac_address;}
     simtime_t  & lastUse() {return last_use;}
-    int     & numRtr () {return num_rtr;}
-    unsigned int & numLabels () {return num_labels;}
+    int     & numRtr() {return num_rtr;}
+    unsigned int & numLabels() {return num_labels;}
 
 };
 
@@ -143,13 +143,13 @@ typedef struct LWmpls_label_list : public cOwnedObject
     bool in_use;
     simtime_t capture_time;
     LWmpls_Forwarding_Structure* data_f_ptr;
-    inline  LWmpls_label_list & operator = (const  LWmpls_label_list& b)
+    inline  LWmpls_label_list & operator=(const  LWmpls_label_list& b)
     {
-        time=b.time;
-        in_use=b.in_use;
-        time=b.time;
-        capture_time=b.capture_time;
-        data_f_ptr=b.data_f_ptr;
+        time = b.time;
+        in_use = b.in_use;
+        time = b.time;
+        capture_time = b.capture_time;
+        data_f_ptr = b.data_f_ptr;
         return *this;
     }
 } LWmpls_label_list;
@@ -179,24 +179,24 @@ class   LWMPLSDataStructure : public cOwnedObject
         {
             if (srcAddr!=b.srcAddr)
                 return srcAddr<b.srcAddr;
-            else if (destAddr !=b.destAddr)
+            else if (destAddr != b.destAddr)
                 return destAddr<b.destAddr;
-            else if (prevAddr !=b.prevAddr)
+            else if (prevAddr != b.prevAddr)
                 return prevAddr<b.prevAddr;
             else
                 return label<b.label;
         }
-        inline LWMPSMACAddressKey & operator = (const LWMPSMACAddressKey& b)
+        inline LWMPSMACAddressKey & operator=(const LWMPSMACAddressKey& b)
         {
-            srcAddr=b.srcAddr;
-            destAddr=b.destAddr;
-            prevAddr=b.prevAddr;
+            srcAddr = b.srcAddr;
+            destAddr = b.destAddr;
+            prevAddr = b.prevAddr;
             label = b.label;
             return *this;
         }
         inline bool operator==(const LWMPSMACAddressKey& b) const
         {
-            if ((srcAddr==b.srcAddr) && (destAddr==b.destAddr) &&(prevAddr==b.prevAddr) && (label==b.label))
+            if ((srcAddr==b.srcAddr) && (destAddr==b.destAddr) && (prevAddr==b.prevAddr) && (label==b.label))
                 return true;
             else
                 return false;
@@ -240,9 +240,9 @@ class   LWMPLSDataStructure : public cOwnedObject
     simtime_t & mplsMaxCaptureLimit() {return LWMPLS_MAX_TIME_CAPTURE_LABEL;}
     /* Limits for break path */
     /* Number of reintent before break */
-    int &   mplsMaxMacRetry () {return LWMPLS_MAX_RTR;}
+    int &   mplsMaxMacRetry() {return LWMPLS_MAX_RTR;}
 
-    LWmpls_Forwarding_Structure * lwmpls_forwarding_data(int,int,uint64_t );
+    LWmpls_Forwarding_Structure * lwmpls_forwarding_data(int, int, uint64_t );
     LWmpls_Interface_Structure * lwmpls_interface_structure(uint64_t);
 
 
@@ -250,33 +250,33 @@ class   LWMPLSDataStructure : public cOwnedObject
     int    getLWMPLSLabel();
     void   delLWMPLSLabel(int);
 
-    void   lwmpls_init_interface(LWmpls_Interface_Structure** ,int,uint64_t, int );
-    void   lwmpls_forwarding_input_data_add(int,LWmpls_Forwarding_Structure *);
-    bool   lwmpls_forwarding_output_data_add(int ,uint64_t ,LWmpls_Forwarding_Structure *,bool);
+    void   lwmpls_init_interface(LWmpls_Interface_Structure**, int, uint64_t, int );
+    void   lwmpls_forwarding_input_data_add(int, LWmpls_Forwarding_Structure *);
+    bool   lwmpls_forwarding_output_data_add(int, uint64_t, LWmpls_Forwarding_Structure *, bool);
     LWmpls_Forwarding_Structure * lwmpls_interface_delete_label(int);
 
     void   lwmpls_interface_delete_old_path();
 
     bool   lwmpls_label_in_use(int );
-    bool   lwmpls_mac_last_access (simtime_t &,uint64_t);
-    void   lwmpls_refresh_mac (uint64_t ,simtime_t);
-    int    lwmpls_nun_labels_in_use ();
-    double lwmpls_label_last_use (int); // Return, in double format the time of use
-    int    lwmpls_label_status (int label);
-    void   lwmpls_check_label (int label,const char * message);
-    void   registerRoute(uint64_t destination,int label);
+    bool   lwmpls_mac_last_access(simtime_t &, uint64_t);
+    void   lwmpls_refresh_mac(uint64_t, simtime_t);
+    int    lwmpls_nun_labels_in_use();
+    double lwmpls_label_last_use(int); // Return, in double format the time of use
+    int    lwmpls_label_status(int label);
+    void   lwmpls_check_label(int label, const char * message);
+    void   registerRoute(uint64_t destination, int label);
     int    getRegisterRoute(uint64_t destination);
     void   deleteRegisterRoute(uint64_t dest);
     void   deleteRegisterLabel(int dest);
 
-    bool   getBroadCastCounter(uint64_t dest,uint32_t &counter);
-    void   setBroadCastCounter(uint64_t dest,uint32_t counter);
+    bool   getBroadCastCounter(uint64_t dest, uint32_t &counter);
+    void   setBroadCastCounter(uint64_t dest, uint32_t counter);
     bool   getBroadCastCounter(uint32_t &counter) {counter = broadCastCounter; return true;}
     void   setBroadCastCounter(uint32_t counter) {broadCastCounter = counter;}
 // Use the mac address like a label access methods
-    void setForwardingMacKey(uint64_t,uint64_t,uint64_t,uint64_t,int32_t=-1);
-    uint64_t getForwardingMacKey(uint64_t,uint64_t,uint64_t,int32_t=-1);
-    bool delForwardingMacKey(uint64_t,uint64_t,uint64_t,int32_t=-1);
+    void setForwardingMacKey(uint64_t, uint64_t, uint64_t, uint64_t, int32_t = -1);
+    uint64_t getForwardingMacKey(uint64_t, uint64_t, uint64_t, int32_t = -1);
+    bool delForwardingMacKey(uint64_t, uint64_t, uint64_t, int32_t = -1);
 };
 
 

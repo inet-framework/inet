@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
     os << e.macAddress;
     if (e.isRouter) os << " ROUTER";
     if (e.isDefaultRouter) os << "DefaultRtr";
-    if(e.isHomeAgent) os <<" Home Agent";
+    if (e.isHomeAgent) os <<" Home Agent";
     os << " " << IPv6NeighbourCache::stateName(e.reachabilityState);
     os << " reachabilityExp:"  << e.reachabilityExpires;
     if (e.numProbesSent) os << " probesSent:" << e.numProbesSent;
@@ -63,7 +63,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Addres
     ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
-    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
+    nbor.nceKey = lookupKeyAddr(key); //a ptr that links to the key.-WEI for convenience.
     nbor.isRouter = false;
     nbor.isDefaultRouter = false;
     nbor.isHomeAgent = false;         //Zarrar 09.03.07
@@ -83,7 +83,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(
     ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
-    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
+    nbor.nceKey = lookupKeyAddr(key); //a ptr that links to the key.-WEI for convenience.
     nbor.macAddress = macAddress;
     nbor.isRouter = false;
     nbor.isDefaultRouter = false;
@@ -108,9 +108,9 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(
     ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
-    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
+    nbor.nceKey = lookupKeyAddr(key); //a ptr that links to the key.-WEI for convenience.
     nbor.isRouter = true;
-    nbor.isDefaultRouter = true;//FIXME: a router may advertise itself it self as a router but not as a default one.-WEI
+    nbor.isDefaultRouter = true; //FIXME: a router may advertise itself it self as a router but not as a default one.-WEI
     nbor.isHomeAgent = isHomeAgent; //Zarrar 09.03.07 --- FIXME: NOT EVERY ROUTER IS A HOME AGENT // update 3.9.07 - CB
     nbor.reachabilityState = INCOMPLETE;
     nbor.reachabilityExpires = 0;
@@ -132,7 +132,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
-    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
+    nbor.nceKey = lookupKeyAddr(key); //a ptr that links to the key.-WEI for convenience.
     nbor.macAddress = macAddress;
     nbor.isRouter = true;
     nbor.isDefaultRouter = true;

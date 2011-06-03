@@ -42,20 +42,20 @@ void FailureManager::processCommand(const cXMLElement& node)
 
     if (!strcmp(node.getTagName(), "shutdown"))
     {
-        target->getDisplayString().setTagArg("i2",0,"status/cross");
-        if(!strcmp(target->getModuleType()->getName(), "RSVP_LSR"))
+        target->getDisplayString().setTagArg("i2", 0, "status/cross");
+        if (!strcmp(target->getModuleType()->getName(), "RSVP_LSR"))
             replaceNode(target, "inet.nodes.mpls.RSVP_FAILED");
-        else if(!strcmp(target->getModuleType()->getName(), "LDP_LSR"))
+        else if (!strcmp(target->getModuleType()->getName(), "LDP_LSR"))
             replaceNode(target, "inet.nodes.mpls.LDP_FAILED");
         else
             ASSERT(false);
     }
-    else if(!strcmp(node.getTagName(), "startup"))
+    else if (!strcmp(node.getTagName(), "startup"))
     {
         target->getDisplayString().removeTag("i2");
-        if(!strcmp(target->getModuleType()->getName(), "RSVP_FAILED"))
+        if (!strcmp(target->getModuleType()->getName(), "RSVP_FAILED"))
             replaceNode(target, "inet.nodes.mpls.RSVP_LSR");
-        else if(!strcmp(target->getModuleType()->getName(), "LDP_FAILED"))
+        else if (!strcmp(target->getModuleType()->getName(), "LDP_FAILED"))
             replaceNode(target, "inet.nodes.mpls.LDP_LSR");
         else
             ASSERT(false);
@@ -134,7 +134,7 @@ void FailureManager::reconnectGate(cGate *oldGate, cGate *newGate)
     cGate::Type gateType = oldGate->getType();
     if (gateType == cGate::OUTPUT)
     {
-        if(oldGate->isConnected())
+        if (oldGate->isConnected())
         {
             cGate *to = oldGate->getNextGate();
             cChannel *ch = copyChannel(oldGate->getChannel());
@@ -171,7 +171,7 @@ cChannel *FailureManager::copyChannel(cChannel *channel)
 
 void FailureManager::copyParams(cComponent *from, cComponent *to)
 {
-    for(int i = 0; i < from->getNumParams(); i++)
+    for (int i = 0; i < from->getNumParams(); i++)
         to->par(i) = from->par(i);
 }
 

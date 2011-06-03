@@ -135,7 +135,7 @@ class INET_API NotificationBoard : public cSimpleModule
      * information about the change (e.g. exact location, specific attribute
      * that changed, old value, new value, etc).
      */
-    virtual void fireChangeNotification(int category, const cPolymorphic *details=NULL);
+    virtual void fireChangeNotification(int category, const cPolymorphic *details = NULL);
     //@}
 };
 

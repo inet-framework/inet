@@ -29,7 +29,7 @@
 class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
   public:
-    RTCPSenderReportPacket(const char *name=NULL, int kind=0);
+    RTCPSenderReportPacket(const char *name = NULL, int kind = 0);
     RTCPSenderReportPacket(const RTCPSenderReportPacket& other) : RTCPSenderReportPacket_Base(other.getName()) {operator=(other);}
     RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) {RTCPSenderReportPacket_Base::operator=(other); return *this;}
     virtual RTCPSenderReportPacket *dup() const {return new RTCPSenderReportPacket(*this);}

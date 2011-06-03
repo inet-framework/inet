@@ -75,7 +75,7 @@ void InetSimpleBattery::initialize(int stage)
             scheduleAt(simTime() + publishTime, publish);
         }
 
-        mCurrEnergy=NULL;
+        mCurrEnergy = NULL;
         if (par("ConsumedVector"))
             mCurrEnergy = new cOutVector("Consumed");
         // DISable by default (use BatteryStats for data collection)
@@ -94,9 +94,9 @@ void InetSimpleBattery::initialize(int stage)
 
 
 
-int InetSimpleBattery::registerDevice(cObject *id,int numAccts)
+int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
 {
-    for (unsigned int i =0; i<deviceEntryVector.size(); i++)
+    for (unsigned int i = 0; i<deviceEntryVector.size(); i++)
         if (deviceEntryVector[i]->owner == id)
             error("device already registered!");
     if (numAccts < 1)
@@ -123,7 +123,7 @@ int InetSimpleBattery::registerDevice(cObject *id,int numAccts)
     return deviceEntryVector.size()-1;
 }
 
-void InetSimpleBattery::registerWirelessDevice(int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)
+void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
 {
     Enter_Method_Silent();
     if (deviceEntryMap.find(id)!=deviceEntryMap.end())
@@ -145,10 +145,10 @@ void InetSimpleBattery::registerWirelessDevice(int id,double mUsageRadioIdle,dou
         error("Battery and RadioState problem");
     if (RadioState::SLEEP>=4)
         error("Battery and RadioState problem");
-    device->radioUsageCurrent[RadioState::IDLE]=mUsageRadioIdle;
-    device->radioUsageCurrent[RadioState::RECV]=mUsageRadioRecv;
-    device->radioUsageCurrent[RadioState::TRANSMIT]=mUsageRadioSend;
-    device->radioUsageCurrent[RadioState::SLEEP]=mUsageRadioSleep;
+    device->radioUsageCurrent[RadioState::IDLE] = mUsageRadioIdle;
+    device->radioUsageCurrent[RadioState::RECV] = mUsageRadioRecv;
+    device->radioUsageCurrent[RadioState::TRANSMIT] = mUsageRadioSend;
+    device->radioUsageCurrent[RadioState::SLEEP] = mUsageRadioSleep;
 
     for (int i = 0; i < 4; i++)
     {
@@ -159,11 +159,11 @@ void InetSimpleBattery::registerWirelessDevice(int id,double mUsageRadioIdle,dou
         device->times[i] = 0.0;
     }
 
-    deviceEntryMap.insert(std::pair<int,DeviceEntry*>(id,device));
+    deviceEntryMap.insert(std::pair<int,DeviceEntry*>(id, device));
     if (mustSubscribe)
     {
         mpNb->subscribe(this, NF_RADIOSTATE_CHANGED);
-        mustSubscribe=false;
+        mustSubscribe = false;
     }
 }
 
@@ -208,7 +208,7 @@ void InetSimpleBattery::finish()
     deviceEntryVector.clear();
 }
 
-void InetSimpleBattery::receiveChangeNotification (int aCategory, const cPolymorphic* aDetails)
+void InetSimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic* aDetails)
 {
     Enter_Method_Silent();
     //EV << "[Battery]: receiveChangeNotification" << endl;
@@ -263,7 +263,7 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
     else if (amount.getType() == DrawAmount::ENERGY)
     {
         double energy = amount.getValue();
-        if (!(activity >=0 && activity < deviceEntryVector[deviceID]->numAccts))
+        if (!(activity >= 0 && activity < deviceEntryVector[deviceID]->numAccts))
         {
             error("invalid activity specified");
         }

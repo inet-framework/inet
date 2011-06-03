@@ -294,7 +294,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
         // Chances are that datalen is too large to fit in the send
         // buffer. If it is really large (larger than a typical MSS,
         // say), we should try segmenting the data ourselves.
-        while(1)
+        while (1)
         {
             u16_t snd_buf = pcbM->snd_buf;
             if (0 == snd_buf)
@@ -329,7 +329,7 @@ void TcpLwipConnection::do_SEND()
     int bytes;
     int allsent = 0;
 
-    while(0 != (bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer))))
+    while (0 != (bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer))))
     {
         int sent = send_data(buffer, bytes);
 

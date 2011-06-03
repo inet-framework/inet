@@ -30,7 +30,7 @@ SCTPSocket::SCTPSocket(bool type)
     cb = NULL;
     yourPtr = NULL;
     gateToSctp = NULL;
-    lastStream=-1;
+    lastStream = -1;
     oneToOne = type;
     if (oneToOne)
         assocId = SCTP::getNewConnId();
@@ -217,7 +217,7 @@ void SCTPSocket::send(cPacket *msg, bool last, bool primary)
         cmd->setSendUnordered(COMPLETE_MESG_ORDERED);
     else
         cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
-    lastStream=(lastStream+1)%outboundStreams;
+    lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     cmd->setLast(last);
     cmd->setPrimary(primary);
@@ -292,7 +292,7 @@ void SCTPSocket::requestStatus()
 
 bool SCTPSocket::belongsToSocket(cPacket *msg)
 {
-    bool ret= dynamic_cast<SCTPCommand *>(msg->getControlInfo()) &&
+    bool ret = dynamic_cast<SCTPCommand *>(msg->getControlInfo()) &&
            ((SCTPCommand *)(msg->getControlInfo()))->getAssocId()==assocId;
     sctpEV3<<"assoc="<<((SCTPCommand *)(msg->getControlInfo()))->getAssocId()<<"\n";
     return ret;

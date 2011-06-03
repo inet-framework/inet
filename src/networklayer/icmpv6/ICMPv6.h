@@ -65,7 +65,7 @@ class INET_API ICMPv6 : public cSimpleModule
     virtual ICMPv6Message *createDestUnreachableMsg(int code);
     virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
     virtual ICMPv6Message *createTimeExceededMsg(int code);
-    virtual ICMPv6Message *createParamProblemMsg(int code);//TODO:Section 3.4 describes a pointer. What is it?
+    virtual ICMPv6Message *createParamProblemMsg(int code); //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**

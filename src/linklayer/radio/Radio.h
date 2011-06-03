@@ -137,8 +137,8 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
      * Routines to connect or disconnect the transmission and reception  of packets
      */
 
-    virtual void disconnectTransceiver() {transceiverConnect=false;}
-    virtual void connectTransceiver() {transceiverConnect=true;}
+    virtual void disconnectTransceiver() {transceiverConnect = false;}
+    virtual void connectTransceiver() {transceiverConnect = true;}
     virtual void disconnectReceiver();
     virtual void connectReceiver();
 

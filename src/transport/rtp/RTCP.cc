@@ -94,7 +94,7 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
     // distinguish by type
-    switch(rinp->getType())
+    switch (rinp->getType())
     {
     case RTP_INP_INITIALIZE_RTCP:
         handleInitializeRTCP(rinp);
@@ -232,7 +232,7 @@ void RTCP::createSocket()
         ctrl->setSockId((int)_socketFdIn);
         cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
         msg->setControlInfo(ctrl);
-        send(msg,"udpOut");
+        send(msg, "udpOut");
 
         connectRet();
     }

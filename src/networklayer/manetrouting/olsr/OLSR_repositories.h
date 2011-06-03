@@ -63,20 +63,20 @@ typedef struct OLSR_rt_entry : public cObject
     inline nsaddr_t & iface_addr()  { return iface_addr_; }
 
 
-    void    setDest_addr(const nsaddr_t &dest_addr) {  dest_addr_=dest_addr; }
-    void    setNext_addr(const nsaddr_t &next_addr) {  next_addr_=next_addr; }
-    void    setIface_addr(const nsaddr_t    &iface_addr)    {  iface_addr_=iface_addr; }
+    void    setDest_addr(const nsaddr_t &dest_addr) {  dest_addr_ = dest_addr; }
+    void    setNext_addr(const nsaddr_t &next_addr) {  next_addr_ = next_addr; }
+    void    setIface_addr(const nsaddr_t    &iface_addr)    {  iface_addr_ = iface_addr; }
 
     inline uint32_t&    dist()      { return dist_; }
-    OLSR_rt_entry () {}
-    OLSR_rt_entry (OLSR_rt_entry * e)
+    OLSR_rt_entry() {}
+    OLSR_rt_entry(OLSR_rt_entry * e)
     {
-        dest_addr_= e->dest_addr_;  ///< Address of the destination node.
-        next_addr_=e->next_addr_;   ///< Address of the next hop.
-        iface_addr_=e->iface_addr_; ///< Address of the local interface.
-        dist_=e->dist_;     ///< Distance in hops to the destination.
-        route=e->route;
-        index=e->index;
+        dest_addr_ = e->dest_addr_;  ///< Address of the destination node.
+        next_addr_ = e->next_addr_;   ///< Address of the next hop.
+        iface_addr_ = e->iface_addr_; ///< Address of the local interface.
+        dist_ = e->dist_;     ///< Distance in hops to the destination.
+        route = e->route;
+        index = e->index;
     }
     virtual OLSR_rt_entry *dup() {return new OLSR_rt_entry(this);}
 
@@ -101,14 +101,14 @@ typedef struct OLSR_iface_assoc_tuple : public cObject
     inline nsaddr_t & main_addr()   { return main_addr_; }
 
 
-    void    setIface_addr(const nsaddr_t &a)    { iface_addr_=a; }
-    void    setMain_addr(const nsaddr_t &a) {  main_addr_=a; }
+    void    setIface_addr(const nsaddr_t &a)    { iface_addr_ = a; }
+    void    setMain_addr(const nsaddr_t &a) {  main_addr_ = a; }
 
     inline double&      time()      { return time_; }
-    OLSR_iface_assoc_tuple () {asocTimer = NULL;}
-    OLSR_iface_assoc_tuple (OLSR_iface_assoc_tuple * e)
+    OLSR_iface_assoc_tuple() {asocTimer = NULL;}
+    OLSR_iface_assoc_tuple(OLSR_iface_assoc_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_iface_assoc_tuple));
+        memcpy(this, e, sizeof(OLSR_iface_assoc_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_iface_assoc_tuple *dup() {return new OLSR_iface_assoc_tuple(this);}
@@ -139,18 +139,18 @@ typedef struct OLSR_link_tuple : public cObject
     inline int & local_iface_index() {return index;}
 
 
-    void    setLocal_iface_addr(const nsaddr_t &a)  {local_iface_addr_=a; }
-    void    setNb_iface_addr(const nsaddr_t &a) {nb_iface_addr_=a; }
+    void    setLocal_iface_addr(const nsaddr_t &a)  {local_iface_addr_ = a; }
+    void    setNb_iface_addr(const nsaddr_t &a) {nb_iface_addr_ = a; }
 
     inline double&      sym_time()      { return sym_time_; }
     inline double&      asym_time()     { return asym_time_; }
     inline double&      lost_time()     { return lost_time_; }
     inline double&      time()          { return time_; }
 
-    OLSR_link_tuple () {asocTimer = NULL;}
-    OLSR_link_tuple (OLSR_link_tuple * e)
+    OLSR_link_tuple() {asocTimer = NULL;}
+    OLSR_link_tuple(OLSR_link_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_link_tuple));
+        memcpy(this, e, sizeof(OLSR_link_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_link_tuple *dup() {return new OLSR_link_tuple(this);}
@@ -170,21 +170,21 @@ typedef struct OLSR_nb_tuple : public cObject
     cObject *asocTimer;
 
     inline nsaddr_t & nb_main_addr()    { return nb_main_addr_; }
-    void    setNb_main_addr(const nsaddr_t &a)  { nb_main_addr_=a; }
+    void    setNb_main_addr(const nsaddr_t &a)  { nb_main_addr_ = a; }
 
     inline uint8_t& getStatus() { return status_; }
     inline uint8_t& willingness()   { return willingness_; }
 
-    OLSR_nb_tuple () {asocTimer = NULL;}
-    OLSR_nb_tuple (OLSR_nb_tuple * e)
+    OLSR_nb_tuple() {asocTimer = NULL;}
+    OLSR_nb_tuple(OLSR_nb_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_nb_tuple));
+        memcpy(this, e, sizeof(OLSR_nb_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_nb_tuple *dup() {return new OLSR_nb_tuple(this);}
     ~OLSR_nb_tuple()
     {
-        status_=0;
+        status_ = 0;
     }
 } OLSR_nb_tuple;
 
@@ -202,15 +202,15 @@ typedef struct OLSR_nb2hop_tuple : public cObject
 
     inline nsaddr_t & nb_main_addr()    { return nb_main_addr_; }
     inline nsaddr_t & nb2hop_addr() { return nb2hop_addr_; }
-    void    setNb_main_addr(const nsaddr_t &a)  { nb_main_addr_=a; }
-    void    setNb2hop_addr(const nsaddr_t &a)   { nb2hop_addr_=a; }
+    void    setNb_main_addr(const nsaddr_t &a)  { nb_main_addr_ = a; }
+    void    setNb2hop_addr(const nsaddr_t &a)   { nb2hop_addr_ = a; }
 
     inline double&      time()      { return time_; }
 
     OLSR_nb2hop_tuple() {asocTimer = NULL;}
-    OLSR_nb2hop_tuple (OLSR_nb2hop_tuple * e)
+    OLSR_nb2hop_tuple(OLSR_nb2hop_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_nb2hop_tuple));
+        memcpy(this, e, sizeof(OLSR_nb2hop_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_nb2hop_tuple *dup() {return new OLSR_nb2hop_tuple(this);}
@@ -228,13 +228,13 @@ typedef struct OLSR_mprsel_tuple : public cObject
     cObject *asocTimer;
 
     inline nsaddr_t & main_addr()   { return main_addr_; }
-    void    setMain_addr(const nsaddr_t &a) {main_addr_=a; }
+    void    setMain_addr(const nsaddr_t &a) {main_addr_ = a; }
     inline double&      time()      { return time_; }
 
     OLSR_mprsel_tuple() {asocTimer = NULL;}
-    OLSR_mprsel_tuple (OLSR_mprsel_tuple * e)
+    OLSR_mprsel_tuple(OLSR_mprsel_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_mprsel_tuple));
+        memcpy(this, e, sizeof(OLSR_mprsel_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_mprsel_tuple *dup() {return new OLSR_mprsel_tuple(this);}
@@ -262,7 +262,7 @@ typedef struct OLSR_dup_tuple : public cObject
     cObject *asocTimer;
 
     inline nsaddr_t & getAddr()     { return addr_; }
-    void    setAddr(const nsaddr_t &a)  {addr_=a; }
+    void    setAddr(const nsaddr_t &a)  {addr_ = a; }
 
     inline uint16_t&    seq_num()   { return seq_num_; }
     inline bool&        retransmitted() { return retransmitted_; }
@@ -270,9 +270,9 @@ typedef struct OLSR_dup_tuple : public cObject
     inline double&      time()      { return time_; }
 
     OLSR_dup_tuple() {asocTimer = NULL;}
-    OLSR_dup_tuple (OLSR_dup_tuple * e)
+    OLSR_dup_tuple(OLSR_dup_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_dup_tuple));
+        memcpy(this, e, sizeof(OLSR_dup_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_dup_tuple *dup() {return new OLSR_dup_tuple(this);}
@@ -298,14 +298,14 @@ typedef struct OLSR_topology_tuple : public cObject
 
     inline nsaddr_t & dest_addr()   { return dest_addr_; }
     inline nsaddr_t & last_addr()   { return last_addr_; }
-    inline void setDest_addr(const nsaddr_t &a) {dest_addr_=a; }
-    inline void setLast_addr(const nsaddr_t &a) {last_addr_=a; }
+    inline void setDest_addr(const nsaddr_t &a) {dest_addr_ = a; }
+    inline void setLast_addr(const nsaddr_t &a) {last_addr_ = a; }
     inline uint16_t&    seq()       { return seq_; }
     inline double&      time()      { return time_; }
     inline int & local_iface_index() {return index;}
 
     OLSR_topology_tuple() {asocTimer = NULL;}
-    OLSR_topology_tuple (OLSR_topology_tuple * e)
+    OLSR_topology_tuple(OLSR_topology_tuple * e)
     {
         dest_addr_ = e->dest_addr_;
         last_addr_ = e->last_addr_;
@@ -326,6 +326,6 @@ typedef std::vector<OLSR_nb_tuple*>     nbset_t;    ///< Neighbor Set type.
 typedef std::vector<OLSR_nb2hop_tuple*>     nb2hopset_t;    ///< 2-hop Neighbor Set type.
 typedef std::vector<OLSR_topology_tuple*>   topologyset_t;  ///< Topology Set type.
 typedef std::vector<OLSR_dup_tuple*>        dupset_t;   ///< Duplicate Set type.
-typedef std::vector<OLSR_iface_assoc_tuple*>    ifaceassocset_t;///< Interface Association Set type.
+typedef std::vector<OLSR_iface_assoc_tuple*>    ifaceassocset_t; ///< Interface Association Set type.
 
 #endif

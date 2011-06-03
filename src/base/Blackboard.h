@@ -217,9 +217,9 @@ class INET_API Blackboard : public cSimpleModule
         iterator(ContentsMap::iterator it0) {it==it0;}
         BBItemRef operator*()  {return (*it).second;}
         iterator& operator++()  {++it; return *this;}
-        iterator operator++(int)  {iterator x=iterator(it); ++it; return x;}
+        iterator operator++(int)  {iterator x = iterator(it); ++it; return x;}
         iterator& operator--()  {--it; return *this;}
-        iterator operator--(int)  {iterator x=iterator(it); --it; return x;}
+        iterator operator--(int)  {iterator x = iterator(it); --it; return x;}
         bool operator==(const iterator& i2)  {return it==i2.it;}
         bool operator!=(const iterator& i2)  {return it!=i2.it;}
     };
@@ -257,7 +257,7 @@ class INET_API Blackboard : public cSimpleModule
      * When item pointer is omitted, it is assumed that the item object
      * was updated "in place" (as opposed to being replaced by another object).
      */
-    virtual void changed(BBItemRef bbItem, cPolymorphic *item=NULL);
+    virtual void changed(BBItemRef bbItem, cPolymorphic *item = NULL);
     //@}
 
     /** @name Methods for subscribers */
@@ -328,7 +328,7 @@ class INET_API BlackboardAccess
     Blackboard *bb;
 
   public:
-    BlackboardAccess() {bb=NULL;}
+    BlackboardAccess() {bb = NULL;}
     virtual ~BlackboardAccess() {}
 
     /** Returns a pointer to the Blackboard*/

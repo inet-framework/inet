@@ -141,7 +141,7 @@ private:
 
 } // namespace OSPF
 
-inline std::ostream& operator<< (std::ostream& ostr, OSPF::Area& area)
+inline std::ostream& operator<<(std::ostream& ostr, OSPF::Area& area)
 {
     ostr << area.detailedInfo();
     return ostr;

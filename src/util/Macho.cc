@@ -131,7 +131,7 @@ _StateInstance::_StateInstance(_MachineBase & machine, _StateInstance * parent)
 _StateInstance::~_StateInstance()
 {
     if (myBoxPlace)
-        ::operator delete(myBoxPlace);
+        ::operator delete (myBoxPlace);
 
     delete mySpecification;
 }
@@ -234,7 +234,7 @@ _MachineBase::~_MachineBase()
 {
     assert(!myPendingInit);
 
-    delete[] myInstances;
+    delete [] myInstances;
     delete myPendingEvent;
 }
 

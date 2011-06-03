@@ -52,7 +52,7 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msgP);
     int64 bytes = msg->getByteLength();
 
-    ASSERT (bytes == msg->getByteArray().getDataArraySize());
+    ASSERT(bytes == msg->getByteArray().getDataArraySize());
 
     byteArrayBufferM.push(msg->getByteArray());
     delete msgP;

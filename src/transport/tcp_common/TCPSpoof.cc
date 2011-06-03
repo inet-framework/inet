@@ -81,7 +81,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
-        send(tcpseg,"ipv4Out");
+        send(tcpseg, "ipv4Out");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
@@ -97,7 +97,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
-        send(tcpseg,"ipv6Out");
+        send(tcpseg, "ipv6Out");
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif

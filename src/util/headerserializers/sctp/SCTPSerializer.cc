@@ -66,11 +66,11 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 
     // SCTP chunks:
     int32 noChunks = msg->getChunksArraySize();
-        for(int32 cc = 0; cc < noChunks; cc++)
+        for (int32 cc = 0; cc < noChunks; cc++)
         {
             const SCTPChunk *chunk = check_and_cast<SCTPChunk *>(((SCTPMessage *)msg)->getChunks(cc));
             unsigned char chunkType = chunk->getChunkType();
-            switch(chunkType)
+            switch (chunkType)
             {
                 case DATA:
                 {
@@ -98,7 +98,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(dataChunk->getEncapsulatedPacket());
                         // T.D. 09.02.2010: Only copy data when there is something to copy!
                         const uint32 datalen = smsg->getDataLen();
-                        if( smsg->getDataArraySize() >= datalen) {
+                        if ( smsg->getDataArraySize() >= datalen) {
                             for (uint32 i = 0; i < datalen; i++) {
                                 dc->user_data[i] = smsg->getData(i);
                             }
@@ -132,7 +132,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sup_addr->address_type = htons(INIT_PARAM_IPV4);
                     parPtr += 8;
                     int32 numaddr = initChunk->getAddressesArraySize();
-                    for(int32 i=0; i<numaddr; i++)
+                    for (int32 i=0; i<numaddr; i++)
                     {
                             struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)ic) + size_init_chunk + parPtr);
                             ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -160,7 +160,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     iac->mis = htons(initAckChunk->getNoInStreams());
                     iac->initial_tsn = htonl(initAckChunk->getInitTSN());
                     // Var.-Len. Parameters
-                    int32 parPtr=0;
+                    int32 parPtr = 0;
 
                     struct supported_address_types_parameter* sup_addr = (struct supported_address_types_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
                     sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
@@ -170,7 +170,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 
 
                     int32 numaddr = initAckChunk->getAddressesArraySize();
-                    for(int32 i=0; i<numaddr; i++)
+                    for (int32 i=0; i<numaddr; i++)
                     {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -182,8 +182,8 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     if (uLen>0)
                     {
                         //sctpEV3<<"uLen="<<uLen<<"\n";
-                        int32 k=0;
-                        uint32 pLen=0;
+                        int32 k = 0;
+                        uint32 pLen = 0;
                         while (uLen>0)
                         {
                             struct tlv* unknown = (struct tlv*) (((unsigned char *)iac) + size_init_chunk + parPtr);
@@ -191,10 +191,10 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             pLen = initAckChunk->getUnrecognizedParameters(k+2)*16+initAckChunk->getUnrecognizedParameters(k+3);
                             unknown->length = htons(pLen+4);
                             //sctpEV3<<"unknown->length="<<pLen<<"\n";
-                            for (uint32 i=0; i<ADD_PADDING(pLen); i++,k++)
+                            for (uint32 i=0; i<ADD_PADDING(pLen); i++, k++)
                                 unknown->value[i] = initAckChunk->getUnrecognizedParameters(k);
                             parPtr += ADD_PADDING(pLen+4);
-                            uLen-=ADD_PADDING(pLen);
+                            uLen -= ADD_PADDING(pLen);
                         }
                     }
 
@@ -218,7 +218,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         cookie->creationTime = htonl((uint32)stateCookie->getCreationTime().dbl());
                         cookie->localTag = htonl(stateCookie->getLocalTag());
                         cookie->peerTag = htonl(stateCookie->getPeerTag());
-                        for(int32 i=0; i<32; i++)
+                        for (int32 i=0; i<32; i++)
                         {
                             cookie->localTieTag[i] = stateCookie->getLocalTieTag(i);
                             cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
@@ -230,7 +230,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         struct tlv *cookie = (struct tlv*) (((unsigned char *)iac) + size_init_chunk + parPtr);
                         cookie->type = htons(INIT_PARAM_COOKIE);
                         cookie->length = htons(cookielen+4);
-                        for(int32 i=0; i<cookielen; i++)
+                        for (int32 i=0; i<cookielen; i++)
                             cookie->value[i] = initAckChunk->getCookie(i);
                         parPtr += cookielen + 4;
                     }
@@ -259,13 +259,13 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     // GAPs and Dup. TSNs:
                     int32 numgaps = sackChunk->getNumGaps();
                     int32 numdups = sackChunk->getNumDupTsns();
-                    for(int32 i=0; i<numgaps; i++)
+                    for (int32 i=0; i<numgaps; i++)
                     {
                         struct sack_gap *gap = (struct sack_gap*) (((unsigned char *)sac) + size_sack_chunk + i*sizeof(struct sack_gap));
                         gap->start = htons(sackChunk->getGapStart(i) - cumtsnack);
                         gap->stop = htons(sackChunk->getGapStop(i) - cumtsnack);
                     }
-                    for(int32 i=0; i<numdups; i++)
+                    for (int32 i=0; i<numdups; i++)
                     {
                         struct sack_duptsn *dup = (struct sack_duptsn*) (((unsigned char *)sac) + size_sack_chunk + numgaps*sizeof(struct sack_gap) + i*sizeof(sack_duptsn));
                         dup->tsn = htonl(sackChunk->getDupTsns(i));
@@ -318,7 +318,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     if (infolen > 0)
                     {
                         hbi->length = htons(infolen+4);
-                        for(int32 i=0; i<infolen; i++)
+                        for (int32 i=0; i<infolen; i++)
                         {
                             HBI_INFO(hbi)[i] = heartbeatAckChunk->getInfo(i);
                         }
@@ -348,7 +348,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     // fill buffer with data from SCTP init ack chunk structure
                     ac->type = abortChunk->getChunkType();
                     unsigned char flags = 0;
-                    if(abortChunk->getT_Bit())
+                    if (abortChunk->getT_Bit())
                         flags |= T_BIT;
                     ac->flags = flags;
                     ac->length = htons(abortChunk->getBitLength() / 8);
@@ -367,7 +367,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     int32 cookielen = cookieChunk->getCookieArraySize();
                     if (cookielen>0)
                     {
-                        for(int32 i=0; i<cookielen; i++)
+                        for (int32 i=0; i<cookielen; i++)
                             cec->state_cookie[i] = cookieChunk->getCookie(i);
                     }
                     else
@@ -377,7 +377,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         cookie->creationTime = htonl((uint32)stateCookie->getCreationTime().dbl());
                         cookie->localTag = htonl(stateCookie->getLocalTag());
                         cookie->peerTag = htonl(stateCookie->getPeerTag());
-                        for(int32 i=0; i<32; i++)
+                        for (int32 i=0; i<32; i++)
                         {
                             cookie->localTieTag[i] = stateCookie->getLocalTieTag(i);
                             cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
@@ -392,8 +392,8 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         struct error_chunk* error = (struct error_chunk*)(buf + writtenbytes);
                         error->type = ERRORTYPE;
                         error->flags = 0;
-                        int32 k=0;
-                        uint32 pLen=0;
+                        int32 k = 0;
+                        uint32 pLen = 0;
                         uint32 ecLen = SCTP_ERROR_CHUNK_LENGTH;
                         uint32 ecParPtr = 0;
                         while (uLen>0)
@@ -404,11 +404,11 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             unknown->length = htons(pLen+4);
                             ecLen += pLen+4;
                             //sctpEV3<<"plength="<<pLen<<" ecLen="<<ecLen<<"\n";
-                            for (uint32 i=0; i<ADD_PADDING(pLen); i++,k++)
+                            for (uint32 i=0; i<ADD_PADDING(pLen); i++, k++)
                                 unknown->value[i] = cookieChunk->getUnrecognizedParameters(k);
                             ecParPtr += ADD_PADDING(pLen+4);
                             //sctpEV3<<"ecParPtr="<<ecParPtr<<"\n";
-                            uLen-=ADD_PADDING(pLen);
+                            uLen -= ADD_PADDING(pLen);
                         }
                         error->length = htons(ecLen);
                         writtenbytes += SCTP_ERROR_CHUNK_LENGTH+ecParPtr;
@@ -467,7 +467,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sac->type = shutdownCompleteChunk->getChunkType();
                     sac->length = htons(shutdownCompleteChunk->getBitLength() / 8);
                     unsigned char flags = 0;
-                    if(shutdownCompleteChunk->getTBit())
+                    if (shutdownCompleteChunk->getTBit())
                         flags |= T_BIT;
                     sac->flags = flags;
                     break;
@@ -515,11 +515,11 @@ uint32 SCTPSerializer::checksum(const uint8_t *buf, register uint32 len)
     register uint32 res = (~0L);
     for (i = 0; i < len; i++)
       CRC32C(res, buf[i]);
-    h      = ~res;
-    byte0  = h & 0xff;
-    byte1  = (h>>8) & 0xff;
-    byte2  = (h>>16) & 0xff;
-    byte3  = (h>>24) & 0xff;
+    h = ~res;
+    byte0 = h & 0xff;
+    byte1 = (h>>8) & 0xff;
+    byte2 = (h>>16) & 0xff;
+    byte3 = (h>>24) & 0xff;
     crc32c = ((byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3);
     return htonl(crc32c);
 }
@@ -558,7 +558,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     uint32 chunkPtr = 0;
 
     // catch ALL chunks - when a chunk is taken, the chunkPtr is set to the next chunk
-    while(chunkPtr < (bufsize - size_common_header))
+    while (chunkPtr < (bufsize - size_common_header))
     {
         const struct chunk * chunk = (struct chunk*)(chunks + chunkPtr);
         int32 chunkType = chunk->type;
@@ -566,14 +566,14 @@ sctpEV3<<"chunkType="<<chunkType<<"\n";
         woPadding = ntohs(chunk->length);
 sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
         cLen = ADD_PADDING(woPadding);
-        switch(chunkType)
+        switch (chunkType)
         {
             case DATA:
             {
                 ev<<"Data received\n";
                 const struct data_chunk *dc = (struct data_chunk*) (chunks + chunkPtr);
                 sctpEV3<<"cLen="<<cLen<<"\n";
-                if(cLen == 0)
+                if (cLen == 0)
                     throw new cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
                 SCTPDataChunk *chunk = new SCTPDataChunk("DATA");
                 chunk->setChunkType(chunkType);
@@ -586,14 +586,14 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 chunk->setPpid(ntohl(dc->ppi));
                 chunk->setBitLength(SCTP_DATA_CHUNK_LENGTH*8);
                 sctpEV3<<"parse data: woPadding="<<woPadding<<" size_data_chunk="<<size_data_chunk<<"\n";
-                if(woPadding > size_data_chunk)
+                if (woPadding > size_data_chunk)
                 {
-                    SCTPSimpleMessage* msg=new SCTPSimpleMessage("data");
+                    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
                     int32 datalen = (woPadding - size_data_chunk);
                     msg->setBitLength(datalen*8);
                     msg->setDataLen(datalen);
                     msg->setDataArraySize(datalen);
-                    for(int32 i=0; i<datalen; i++)
+                    for (int32 i=0; i<datalen; i++)
                         msg->setData(i, dc->user_data[i]);
 
                     chunk->encapsulate(msg);
@@ -618,12 +618,12 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 chunk->setAddressesArraySize(0);
                 chunk->setUnrecognizedParametersArraySize(0);
                 //sctpEV3<<"INIT arrived from wire\n";
-                if(cLen > size_init_chunk)
+                if (cLen > size_init_chunk)
                 {
                     int32 parcounter = 0, addrcounter = 0;
                     parptr = 0;
                     bool stopProcessing = false;
-                    while(cLen > size_init_chunk+parptr && !stopProcessing)
+                    while (cLen > size_init_chunk+parptr && !stopProcessing)
                     {
                         sctpEV3<<"Process INIT parameters\n";
                         const struct tlv *parameter = (struct tlv*)(((unsigned char*)init_chunk) + size_init_chunk + parptr);
@@ -676,12 +676,12 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 {
                                     const struct tlv *unknown;
                                     unknown = (struct tlv*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
-                                    uint32 unknownLen=chunk->getUnrecognizedParametersArraySize();
+                                    uint32 unknownLen = chunk->getUnrecognizedParametersArraySize();
                                     chunk->setUnrecognizedParametersArraySize(unknownLen+ADD_PADDING(ntohs(unknown->length)));
                                     struct data_vector* dv = (struct data_vector*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
 
                                     for (uint32 i=unknownLen; i<unknownLen+ADD_PADDING(ntohs(unknown->length)); i++)
-                                        chunk->setUnrecognizedParameters(i,dv->data[i-unknownLen]);
+                                        chunk->setUnrecognizedParameters(i, dv->data[i-unknownLen]);
                                 }
                                 sctpEV3<<"stopProcessing="<<stopProcessing<<" report="<<report<<"\n";
                                 break;
@@ -710,13 +710,13 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 chunk->setNoInStreams(ntohs(iac->mis));
                 chunk->setInitTSN(ntohl(iac->initial_tsn));
                 chunk->setUnrecognizedParametersArraySize(0);
-                if(cLen > size_init_ack_chunk)
+                if (cLen > size_init_ack_chunk)
                 {
                     int32 parcounter = 0, addrcounter = 0;
                     parptr = 0;
                     bool stopProcessing = false;
                     //sctpEV3<<"cLen="<<cLen<<"\n";
-                    while(cLen > size_init_ack_chunk+parptr && !stopProcessing)
+                    while (cLen > size_init_ack_chunk+parptr && !stopProcessing)
                     {
                         const struct tlv *parameter = (struct tlv*)(((unsigned char*)iac) + size_init_ack_chunk + parptr);
                         paramType = ntohs(parameter->type);
@@ -763,9 +763,9 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 int32 cookieLen = ntohs(cookie->length) - 4;
                                 // put cookie data into chunk (char array cookie)
                                 chunk->setCookieArraySize(cookieLen);
-                                for(int32 i=0; i<cookieLen; i++)
+                                for (int32 i=0; i<cookieLen; i++)
                                     chunk->setCookie(i, cookie->value[i]);
-                                chunklen+=cookieLen+4;
+                                chunklen += cookieLen+4;
                                 break;
                             }
                             default:
@@ -779,12 +779,12 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 {
                                     const struct tlv *unknown;
                                     unknown = (struct tlv*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
-                                    uint32 unknownLen=chunk->getUnrecognizedParametersArraySize();
+                                    uint32 unknownLen = chunk->getUnrecognizedParametersArraySize();
                                     chunk->setUnrecognizedParametersArraySize(unknownLen+ADD_PADDING(ntohs(unknown->length)));
                                     struct data_vector* dv = (struct data_vector*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
 
                                     for (uint32 i=unknownLen; i<unknownLen+ADD_PADDING(ntohs(unknown->length)); i++)
-                                        chunk->setUnrecognizedParameters(i,dv->data[i-unknownLen]);
+                                        chunk->setUnrecognizedParameters(i, dv->data[i-unknownLen]);
                                 }
                                 sctpEV3<<"stopProcessing="<<stopProcessing<<"  report="<<report<<"\n";
 
@@ -819,13 +819,13 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 chunk->setGapStopArraySize(ngaps);
                 chunk->setDupTsnsArraySize(ndups);
 
-                for(int32 i=0; i<ngaps; i++)
+                for (int32 i=0; i<ngaps; i++)
                 {
                     const struct sack_gap *gap = (struct sack_gap*) (((unsigned char*)sac) + size_sack_chunk + i*sizeof(sack_gap));
                     chunk->setGapStart(i, ntohs(gap->start) + cumtsnack);
                     chunk->setGapStop(i, ntohs(gap->stop) + cumtsnack);
                 }
-                for(int32 i=0; i<ndups; i++)
+                for (int32 i=0; i<ndups; i++)
                 {
                     const struct sack_duptsn *dup = (struct sack_duptsn*) (((unsigned char*)sac) + size_sack_chunk + ngaps*sizeof(sack_gap) + i*sizeof(sack_duptsn));
                     chunk->setDupTsns(i, ntohl(dup->tsn));
@@ -841,23 +841,23 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 const struct heartbeat_chunk *hbc = (struct heartbeat_chunk*) (chunks + chunkPtr);
                 SCTPHeartbeatChunk *chunk = new SCTPHeartbeatChunk("HEARTBEAT");
                 chunk->setChunkType(chunkType);
-                if(cLen > size_heartbeat_chunk)
+                if (cLen > size_heartbeat_chunk)
                 {
                     int32 parcounter = 0;
                     parptr = 0;
-                    while(cLen > size_heartbeat_chunk+parptr)
+                    while (cLen > size_heartbeat_chunk+parptr)
                     {
                         // we supppose type 1 here
                         //sctpEV3<<"HB-chunk+parptr="<<size_heartbeat_chunk+parptr<<"\n";
                         const struct heartbeat_info *hbi = (struct heartbeat_info*) (((unsigned char*)hbc) + size_heartbeat_chunk + parptr);
-                        if(ntohs(hbi->type) == 1) // sender specific hb info
+                        if (ntohs(hbi->type) == 1) // sender specific hb info
                         {
                             //sctpEV3<<"HBInfo\n";
                             int32 infoLen = ntohs(hbi->length) - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
                             chunk->setInfoArraySize(infoLen);
-                            for(int32 i=0; i<infoLen; i++)
+                            for (int32 i=0; i<infoLen; i++)
                                 chunk->setInfo(i, HBI_INFO(hbi)[i]);
                         }
                         else
@@ -878,15 +878,15 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 const struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk*) (chunks + chunkPtr);
                 SCTPHeartbeatAckChunk *chunk = new SCTPHeartbeatAckChunk("HEARTBEAT_ACK");
                 chunk->setChunkType(chunkType);
-                if(cLen>size_heartbeat_ack_chunk)
+                if (cLen>size_heartbeat_ack_chunk)
                 {
                     int32 parcounter = 0;
                     parptr = 0;
-                    while(cLen > size_heartbeat_ack_chunk+parptr)
+                    while (cLen > size_heartbeat_ack_chunk+parptr)
                     {
                         // we supppose type 1 here, the same provided in heartbeat chunks
                         const struct heartbeat_info *hbi = (struct heartbeat_info*) (((unsigned char*)hbac) + size_heartbeat_ack_chunk + parptr);
-                        if(ntohs(hbi->type) == 1) // sender specific hb info
+                        if (ntohs(hbi->type) == 1) // sender specific hb info
                         {
                             parptr += sizeof(struct heartbeat_info);
                             parcounter++;
@@ -914,7 +914,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 SCTPAbortChunk *chunk = new SCTPAbortChunk("ABORT");
                 chunk->setChunkType(chunkType);
                 chunk->setT_Bit(ac->flags & T_BIT);
-                if(cLen>size_abort_chunk)
+                if (cLen>size_abort_chunk)
                 {
                     // TODO: handle attached error causes
                 }
@@ -927,7 +927,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 SCTPCookieEchoChunk *chunk = new SCTPCookieEchoChunk("COOKIE_ECHO");
                 chunk->setChunkType(chunkType);
                 sctpEV3<<"Parse Cookie-Echo\n";
-                if(cLen>size_cookie_echo_chunk)
+                if (cLen>size_cookie_echo_chunk)
                 {
                     int32 cookieSize = woPadding-size_cookie_echo_chunk;
                     sctpEV3<<"cookieSize="<<cookieSize<<"\n";
@@ -938,7 +938,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                     stateCookie->setPeerTag(ntohl(cookie->peerTag));
                     stateCookie->setLocalTieTagArraySize(32);
                     stateCookie->setPeerTieTagArraySize(32);
-                    for(int32 i=0; i<32; i++)
+                    for (int32 i=0; i<32; i++)
                     {
                         stateCookie->setLocalTieTag(i, cookie->localTieTag[i]);
                         stateCookie->setPeerTieTag(i, cookie->peerTieTag[i]);

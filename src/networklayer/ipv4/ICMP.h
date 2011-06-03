@@ -41,8 +41,8 @@ class INET_API ICMP : public cSimpleModule
 
     virtual void processICMPMessage(ICMPMessage *);
     virtual void errorOut(ICMPMessage *);
-    virtual void processEchoRequest (ICMPMessage *);
-    virtual void processEchoReply (ICMPMessage *);
+    virtual void processEchoRequest(ICMPMessage *);
+    virtual void processEchoReply(ICMPMessage *);
     virtual void sendEchoRequest(cPacket *);
     virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
     virtual void sendToIP(ICMPMessage *msg);

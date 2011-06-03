@@ -41,7 +41,7 @@ OSPFRouting::OSPFRouting()
 
 /**
  * Destructor.
- * Deletes the whole OSPF datastructure.
+ * Deletes the whole OSPF data structure.
  */
 OSPFRouting::~OSPFRouting()
 {
@@ -79,7 +79,7 @@ void OSPFRouting::initialize(int stage)
 
 
 /**
- * Forwards OSPF messages to the message handler object of the OSPF datastructure.
+ * Forwards OSPF messages to the message handler object of the OSPF data structure.
  * @param msg [in] The OSPF message.
  */
 void OSPFRouting::handleMessage(cMessage *msg)
@@ -162,7 +162,7 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
  * Loads basic configuration information for a given area from the config XML.
  * Reads the configured address ranges, and whether this Area should be handled as a stub Area.
  * @param asConfig [in] XML node describing the configuration of the whole Autonomous System.
- * @param areaID   [in] The Area to be added to the OSPF datastructure.
+ * @param areaID   [in] The Area to be added to the OSPF data structure.
  */
 void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID)
 {
@@ -339,7 +339,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
         std::string nodeName = (*exElemIt)->getTagName();
         if (nodeName == "AdvertisedExternalNetwork") {
             networkAddress.address = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Address")[0]->getNodeValue());
-            networkAddress.mask    = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
+            networkAddress.mask = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
             asExternalRoute.setNetworkMask(ulongFromIPv4Address(networkAddress.mask));
         }
         if (nodeName == "ExternalInterfaceOutputParameters") {
@@ -374,7 +374,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
             asExternalRoute.setExternalRouteTag((externalRouteTagValue[0] << 24) + (externalRouteTagValue[1] << 16) + (externalRouteTagValue[2] << 8) + externalRouteTagValue[3]);
         }
     }
-    // add the external route to the OSPF datastructure
+    // add the external route to the OSPF data structure
     ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
 }
 
@@ -406,7 +406,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
             hostParameters.linkCost = atoi((*hostElemIt)->getNodeValue());
         }
     }
-    // add the host route to the OSPF datastructure.
+    // add the host route to the OSPF data structure.
     OSPF::Area* area = ospfRouter->getArea(hostArea);
     if (area != NULL) {
         area->addHostRoute(hostParameters);
@@ -475,7 +475,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         }
     }
 
-    // add the virtual link to the OSPF datastructure.
+    // add the virtual link to the OSPF data structure.
     OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());
     OSPF::Area* backbone = ospfRouter->getArea(OSPF::BACKBONE_AREAID);
 
@@ -489,7 +489,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
 
 /**
- * Loads the configuration of the OSPF datastructure from the config XML.
+ * Loads the configuration of the OSPF data structure from the config XML.
  * @param filename [in] The path of the XML config file.
  * @return True if the configuration was succesfully loaded.
  * @throws an getError() otherwise.

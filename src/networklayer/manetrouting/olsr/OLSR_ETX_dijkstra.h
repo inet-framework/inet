@@ -71,7 +71,7 @@ class Dijkstra : public cOwnedObject
     int highest_hop_;
 
     NodesSet::iterator best_cost();
-    edge* get_edge (const nsaddr_t &, const nsaddr_t &);
+    edge* get_edge(const nsaddr_t &, const nsaddr_t &);
     OLSR_ETX_parameter *parameter;
 
   public:
@@ -86,7 +86,7 @@ class Dijkstra : public cOwnedObject
     Dijkstra();
     ~Dijkstra();
 
-    void add_edge (const nsaddr_t &, const nsaddr_t &, double, double, bool);
+    void add_edge(const nsaddr_t &, const nsaddr_t &, double, double, bool);
     void run();
     void clear();
 

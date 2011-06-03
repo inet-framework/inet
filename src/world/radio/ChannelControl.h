@@ -114,7 +114,7 @@ class INET_API ChannelControl : public cSimpleModule, public IChannelControl
     virtual ~ChannelControl();
 
     /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
-    virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate=NULL);
+    virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate = NULL);
 
     /** Unregisters the given radio */
     virtual void unregisterRadio(RadioRef r);

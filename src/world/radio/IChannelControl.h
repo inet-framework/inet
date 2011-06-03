@@ -41,7 +41,7 @@ class INET_API IChannelControl
   public:
 
     /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
-    virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate=NULL) = 0;
+    virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate = NULL) = 0;
 
     /** Unregisters the given radio */
     virtual void unregisterRadio(RadioRef r) = 0;

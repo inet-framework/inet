@@ -248,9 +248,9 @@ void UDP::updateDisplayString()
     if (numDroppedWrongPort>0)
     {
         sprintf(buf+strlen(buf), "\ndropped (no app): %d pks", numDroppedWrongPort);
-        getDisplayString().setTagArg("i",1,"red");
+        getDisplayString().setTagArg("i", 1, "red");
     }
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv4ControlInfo *ipCtrl)
@@ -599,7 +599,7 @@ void UDP::processMsgFromApp(cPacket *appData)
         delete udpCtrl;
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket,"ipOut");
+        send(udpPacket, "ipOut");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
@@ -618,7 +618,7 @@ void UDP::processMsgFromApp(cPacket *appData)
         delete udpCtrl;
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket,"ipv6Out");
+        send(udpPacket, "ipv6Out");
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif

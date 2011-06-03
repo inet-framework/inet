@@ -51,7 +51,7 @@ void TCPDataStreamSendQueue::enqueueAppData(cPacket *msg)
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     ByteArrayMessage *bamsg = check_and_cast<ByteArrayMessage *>(msg);
     int64 bytes = bamsg->getByteLength();
-    ASSERT (bytes == bamsg->getByteArray().getDataArraySize());
+    ASSERT(bytes == bamsg->getByteArray().getDataArraySize());
     dataBuffer.push(bamsg->getByteArray());
     end += bytes;
     delete msg;
@@ -94,7 +94,7 @@ TCPSegment *TCPDataStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong
 void TCPDataStreamSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
-    ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
     dataBuffer.drop(seqNum - begin);
     begin = seqNum;
 }

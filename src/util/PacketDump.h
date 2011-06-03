@@ -102,13 +102,13 @@ class PacketDump
          * Dumps info about the given SCTP message.
          */
         void sctpDump(const char *label, SCTPMessage *sctpmsg, const std::string& srcAddr,
-                const std::string& destAddr, const char *comment=NULL);
+                const std::string& destAddr, const char *comment = NULL);
 
         /**
          * Dumps info about the given TCP segment.
          */
         void tcpDump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr,
-                const std::string& destAddr, const char *comment=NULL);
+                const std::string& destAddr, const char *comment = NULL);
 
         /**
          * Dumps info about the given UDP packet.

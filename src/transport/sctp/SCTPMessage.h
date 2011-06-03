@@ -33,7 +33,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base
         std::list<cPacket*> chunkList;
 
     public:
-        SCTPMessage(const char *name=NULL, int32 kind=0) : SCTPMessage_Base(name,kind) {}
+        SCTPMessage(const char *name = NULL, int32 kind = 0) : SCTPMessage_Base(name, kind) {}
         SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other.getName()) {operator=(other);}
         ~SCTPMessage();
         SCTPMessage& operator=(const SCTPMessage& other);
@@ -101,7 +101,7 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
         std::list<cPacket*> parameterList;
 
     public:
-            SCTPErrorChunk(const char *name=NULL, int32 kind=0) : SCTPErrorChunk_Base(name, kind) {};
+            SCTPErrorChunk(const char *name = NULL, int32 kind = 0) : SCTPErrorChunk_Base(name, kind) {};
             SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.getName()) {operator=(other);};
         SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
 

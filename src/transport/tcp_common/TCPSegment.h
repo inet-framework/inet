@@ -60,7 +60,7 @@ class INET_API TCPSegment : public TCPSegment_Base
     PayloadList payloadList;
 
   public:
-    TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
+    TCPSegment(const char *name = NULL, int kind = 0) : TCPSegment_Base(name, kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);

@@ -78,7 +78,7 @@ void SCTPMessage::addChunk(cPacket* msg)
     if (this->chunkList.size()<9)
     {
         strcpy(str, this->getName());
-        snprintf(str, sizeof(str), "%s %s",this->getName(), msg->getName());
+        snprintf(str, sizeof(str), "%s %s", this->getName(), msg->getName());
         this->setName(str);
     }
     this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()/8)*8);

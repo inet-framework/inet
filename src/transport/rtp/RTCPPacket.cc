@@ -22,7 +22,7 @@ void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket)
 Register_Class(RTCPReceiverReportPacket);
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name, int kind)
-  : RTCPReceiverReportPacket_Base(name,kind)
+  : RTCPReceiverReportPacket_Base(name, kind)
 {
     receptionReports_var.setName("ReceptionReports");
     // an empty rtcp receiver report packet is 4 bytes

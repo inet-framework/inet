@@ -240,9 +240,9 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
             this->gate(ssrcGate->getGateId())->connectTo(receiverModule->gate("profileIn"));
             receiverModule->gate("profileOut")->connectTo(this->gate(ssrcGate->getGateId() -
-                    findGate("payloadReceiverOut",0) + findGate("payloadReceiverIn",0)));
+                    findGate("payloadReceiverOut", 0) + findGate("payloadReceiverIn", 0)));
 
-            for(int i=0; receiverModule->callInitialize(i); i++)
+            for (int i=0; receiverModule->callInitialize(i); i++)
                 ;
 
             receiverModule->scheduleStart(simTime());
@@ -293,7 +293,7 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
 {
     SSRCGate *ssrcGate = new SSRCGate(ssrc);
     bool assigned = false;
-    int receiverGateId = findGate("payloadReceiverOut",0);
+    int receiverGateId = findGate("payloadReceiverOut", 0);
     for (int i = receiverGateId; i < receiverGateId + _maxReceivers && !assigned; i++)
     {
         if (!gate(i)->isConnected())

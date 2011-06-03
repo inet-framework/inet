@@ -39,7 +39,7 @@ void EtherLLC::initialize()
     dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
 
     dsapSignal = registerSignal("dsap");
-    rcvdPkBytesFromHLSignal =  registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
     rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
     passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
     droppedPkBytesUnknownDSAPSignal = registerSignal("droppedPkBytesUnknownDSAP");
@@ -112,7 +112,7 @@ void EtherLLC::updateDisplayString()
         sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %ld", droppedUnknownDSAP);
     }
 
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void EtherLLC::processPacketFromHigherLayer(cPacket *msg)

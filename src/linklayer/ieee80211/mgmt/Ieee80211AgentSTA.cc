@@ -54,7 +54,7 @@ void Ieee80211AgentSTA::initialize(int stage)
         dropConfirmSignal = registerSignal("dropConfirm");
 
         // start up: send scan request
-        scheduleAt(simTime()+uniform(0,maxChannelTime), new cMessage("startUp", MK_STARTUP));
+        scheduleAt(simTime()+uniform(0, maxChannelTime), new cMessage("startUp", MK_STARTUP));
     }
 }
 

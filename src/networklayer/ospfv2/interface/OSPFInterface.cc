@@ -318,7 +318,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                     if (lsa->getHeader() < (*requestLSAHeader)) {
                         continue;
                     }
-                    if (operator== (lsa->getHeader(), (*requestLSAHeader))) {
+                    if (operator==(lsa->getHeader(), (*requestLSAHeader))) {
                         neighboringRouters[i]->removeFromRequestList(lsaKey);
                         continue;
                     }

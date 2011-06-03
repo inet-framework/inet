@@ -81,7 +81,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
         int64       frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
         const_simtime_t   halfBitTime;          // transmission time of a half bit
         const_simtime_t   slotTime;             // slot time
-        const_simtime_t   shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+        const_simtime_t   shortestFrameDuration; // precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
     };
 
     class InnerQueue
@@ -90,7 +90,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
         cQueue queue;
         int queueLimit;               // max queue length
 
-        InnerQueue(const char* name=NULL, int limit=0) : queue(name), queueLimit(limit) {}
+        InnerQueue(const char* name = NULL, int limit = 0) : queue(name), queueLimit(limit) {}
     };
 
     class MacQueue
@@ -108,7 +108,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
         void setExternalQueue(IPassiveQueue *_extQueue)
                 { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
 
-        void setInternalQueue(const char* name=NULL, int limit=0)
+        void setInternalQueue(const char* name = NULL, int limit = 0)
                 { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
     };
 

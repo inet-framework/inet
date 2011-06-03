@@ -172,9 +172,9 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 
 TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 {
-    ASSERT(seqLE(seq,rcv_nxt));
+    ASSERT(seqLE(seq, rcv_nxt));
 
-    if(regionList.empty())
+    if (regionList.empty())
         return NULL;
 
     Region *reg = regionList.front();
@@ -194,7 +194,7 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 
 uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
 {
-    uint32 bytes=0;
+    uint32 bytes = 0;
 
     for (RegionList::iterator i = regionList.begin(); i != regionList.end(); i++)
         bytes += (*i)->getLength();

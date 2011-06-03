@@ -28,7 +28,7 @@ Register_Class(LogNormalShadowingModel);
 void LogNormalShadowingModel::initializeFrom(cModule *radioModule)
 {
     initializeFreeSpace(radioModule);
-    sigma =  radioModule->par("sigma");
+    sigma = radioModule->par("sigma");
 }
 
 
@@ -40,7 +40,7 @@ double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carr
 
     // Reference Pathloss
 
-    double PL_d0 = freeSpace(Gt,Gr,L,pSend,waveLength,d0,pathLossAlpha);
+    double PL_d0 = freeSpace(Gt, Gr, L, pSend, waveLength, d0, pathLossAlpha);
     double PL_d0_db = 10.0 * log10(pSend / PL_d0);
 
     // Pathloss at distance d + normal distribution

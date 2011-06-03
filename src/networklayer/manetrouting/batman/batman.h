@@ -85,7 +85,7 @@ private:
     OrigNode  * getOrigNode(const Uint128 &addr);
     NeighNode * create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
     OrigNode * get_orig_node(const Uint128 &addr );
-    void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh,BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
+    void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
     void purge_orig(const simtime_t &curr_time);
     void choose_gw(void);
     void update_routes(OrigNode *orig_node, NeighNode *, BatmanHnaMsg * hna_recv_buff, int16_t hna_buff_len);
@@ -96,9 +96,9 @@ private:
     uint8_t count_real_packets(BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming);
     void schedule_own_packet(BatmanIf *batman_if);
     void schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time);
-    void appendPacket(cPacket *oldPacket,cPacket * packetToAppend);
+    void appendPacket(cPacket *oldPacket, cPacket * packetToAppend);
     void send_outstanding_packets(const simtime_t &);
-    int8_t send_udp_packet(cPacket *, int32_t , const Uint128 &, int32_t send_sock, BatmanIf *batman_if);
+    int8_t send_udp_packet(cPacket *, int32_t, const Uint128 &, int32_t send_sock, BatmanIf *batman_if);
     void hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action);
     void hna_local_buffer_fill(void);
     void hna_local_task_exec(void);
@@ -156,9 +156,9 @@ protected:
 public:
     Batman();
     ~Batman();
-    virtual uint32_t getRoute(const Uint128 &,std::vector<Uint128> &add);
-    virtual bool getNextHop(const Uint128 &,Uint128 &add,int &iface, double &val);
-    virtual void setRefreshRoute(const Uint128 &, const Uint128 &,const Uint128&,const Uint128&) {};
+    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &add);
+    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &val);
+    virtual void setRefreshRoute(const Uint128 &, const Uint128 &, const Uint128&, const Uint128&) {};
     virtual bool isProactive() {return true;};
     virtual bool isOurType(cPacket * msg)
     {
@@ -169,7 +169,7 @@ public:
         else
             return false;
     };
-    virtual bool getDestAddress(cPacket *,Uint128 &) {return false;};
+    virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
 };
 
 

@@ -51,15 +51,15 @@ void BerParseFile::setPhyOpMode(char p)
 
 
 
-int BerParseFile::getTablePosition (double speed)
+int BerParseFile::getTablePosition(double speed)
 {
     if (phyOpMode=='b')
     {
         if (speed<1)
             return 0;
-        else if (speed<=2&& speed<5)
+        else if (speed<=2 && speed<5)
             return 1;
-        else if (speed<=5&& speed<11)
+        else if (speed<=5 && speed<11)
             return 2;
         else
             return 3;
@@ -68,17 +68,17 @@ int BerParseFile::getTablePosition (double speed)
     {
         if (speed<9)
             return 0;
-        else if (speed<=9&& speed<12)
+        else if (speed<=9 && speed<12)
             return 1;
-        else if (speed<=12&& speed<18)
+        else if (speed<=12 && speed<18)
             return 2;
-        else if (speed<=18&& speed<24)
+        else if (speed<=18 && speed<24)
             return 3;
-        else if (speed<=24&& speed<36)
+        else if (speed<=24 && speed<36)
             return 4;
-        else if (speed<=36&& speed<48)
+        else if (speed<=36 && speed<48)
             return 5;
-        else if (speed<=48&& speed<54)
+        else if (speed<=48 && speed<54)
             return 6;
         else
             return 7;
@@ -95,7 +95,7 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
     for (j=0; j<berlist->size(); j++)
     {
         pos = *(berlist->begin()+j);
-        if (pos->longpkt >=tlen)
+        if (pos->longpkt >= tlen)
         {
             break;
         }
@@ -113,10 +113,10 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
     SnrBer snrdata2;
     SnrBer snrdata3;
     SnrBer snrdata4;
-    snrdata3.snr=-1;
-    snrdata3.ber=-1;
-    snrdata4.snr=-1;
-    snrdata4.ber=-1;
+    snrdata3.snr = -1;
+    snrdata3.ber = -1;
+    snrdata4.snr = -1;
+    snrdata4.ber = -1;
 
     if (tsnr>pos->snrlist[pos->snrlist.size()-1].snr)
     {
@@ -133,8 +133,8 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
         }
         if (j==0)
         {
-            snrdata2.snr=-1;
-            snrdata2.ber=-1;
+            snrdata2.snr = -1;
+            snrdata2.ber = -1;
         }
         else
         {
@@ -171,24 +171,24 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
     }
     if (snrdata2.snr==-1)
     {
-        snrdata2.snr=snrdata1.snr;
-        snrdata2.ber=snrdata1.ber;
+        snrdata2.snr = snrdata1.snr;
+        snrdata2.ber = snrdata1.ber;
     }
     if (snrdata4.snr==-1)
     {
-        snrdata4.snr=snrdata3.snr;
-        snrdata4.ber=snrdata3.ber;
+        snrdata4.snr = snrdata3.snr;
+        snrdata4.ber = snrdata3.ber;
     }
-    double per1,per2,per;
+    double per1, per2, per;
     per1 = snrdata1.ber;
     per2 = snrdata3.ber;
 
-    if (tsnr<= snrdata1.snr)
+    if (tsnr <= snrdata1.snr)
     {
         if (snrdata2.snr!=snrdata1.snr)
             per1 = snrdata1.ber +  (snrdata2.ber-snrdata1.ber)/(snrdata2.snr-snrdata1.snr)*(tsnr- snrdata1.snr);
     }
-    if (tsnr<= snrdata3.snr)
+    if (tsnr <= snrdata3.snr)
     {
         if (snrdata3.snr!=snrdata4.snr)
             per2 = snrdata3.ber +  (snrdata4.ber-snrdata3.ber)/(snrdata4.snr-snrdata3.snr)*(tsnr- snrdata3.snr);
@@ -226,67 +226,67 @@ void BerParseFile::parseFile(const char *filename)
 {
     std::ifstream in(filename, std::ios::in);
     if (in.fail())
-        opp_error("Cannot open file '%s'",filename);
+        opp_error("Cannot open file '%s'", filename);
     std::string line;
     std::string subline;
 
     while (std::getline(in, line))
     {
         // '#' line
-        std::string::size_type found=line.find('#');
+        std::string::size_type found = line.find('#');
         if (found == 0)
             continue;
         if (found != std::string::npos)
             subline = line;
         else
-            subline = line.substr(0,found);
-        found=subline.find("$self");
+            subline = line.substr(0, found);
+        found = subline.find("$self");
         if (found == std::string::npos)
             continue;
         // Node Id
         found = subline.find("add");
-        if (found== std::string::npos)
+        if (found == std::string::npos)
             continue;
         // Initial position
 
         std::string::size_type pos1 = subline.find("Mode");
         std::string::size_type pos2 = subline.find("Mb");
         BerList *berlist;
-        std::string  substr = subline.substr(pos1+4,pos2-(pos1+4));
+        std::string  substr = subline.substr(pos1+4, pos2-(pos1+4));
 //                int speed = std::atof (subline.substr(pos1+4,pos2).c_str());
 
-        int position=-1;
+        int position = -1;
         if (phyOpMode=='b')
         {
-            if (!strcmp(substr.c_str(),"1"))
-                position =0;
-            else if (!strcmp(substr.c_str(),"2"))
-                position =1;
-            else if (!strcmp(substr.c_str(),"5_5"))
-                position =2;
-            else if (!strcmp(substr.c_str(),"11"))
-                position =3;
+            if (!strcmp(substr.c_str(), "1"))
+                position = 0;
+            else if (!strcmp(substr.c_str(), "2"))
+                position = 1;
+            else if (!strcmp(substr.c_str(), "5_5"))
+                position = 2;
+            else if (!strcmp(substr.c_str(), "11"))
+                position = 3;
             else
                 continue;
         }
         else
         {
-            if (!strcmp(substr.c_str(),"6"))
-                position =0;
-            else if (!strcmp(substr.c_str(),"9"))
-                position =1;
-            else if (!strcmp(substr.c_str(),"12"))
-                position =2;
-            else if (!strcmp(substr.c_str(),"18"))
-                position =3;
-            else if (!strcmp(substr.c_str(),"24"))
-                position =4;
-            else if (!strcmp(substr.c_str(),"36"))
-                position =5;
-            else if (!strcmp(substr.c_str(),"48"))
-                position =6;
-            else if (!strcmp(substr.c_str(),"54"))
-                position =7;
+            if (!strcmp(substr.c_str(), "6"))
+                position = 0;
+            else if (!strcmp(substr.c_str(), "9"))
+                position = 1;
+            else if (!strcmp(substr.c_str(), "12"))
+                position = 2;
+            else if (!strcmp(substr.c_str(), "18"))
+                position = 3;
+            else if (!strcmp(substr.c_str(), "24"))
+                position = 4;
+            else if (!strcmp(substr.c_str(), "36"))
+                position = 5;
+            else if (!strcmp(substr.c_str(), "48"))
+                position = 6;
+            else if (!strcmp(substr.c_str(), "54"))
+                position = 7;
             else
                 continue;
         }
@@ -296,7 +296,7 @@ void BerParseFile::parseFile(const char *filename)
 
         berlist = &berTable[position];
 
-        std::string parameters = subline.substr (pos2+3,std::string::npos);
+        std::string parameters = subline.substr(pos2+3, std::string::npos);
         std::stringstream linestream(parameters);
         int pkSize;
         double snr;
@@ -304,19 +304,19 @@ void BerParseFile::parseFile(const char *filename)
         linestream >> pkSize;
         linestream >> snr;
         linestream >> ber;
-        snr =  dB2fraction(snr);
+        snr = dB2fraction(snr);
         if (pkSize<128)
-            pkSize=128;
+            pkSize = 128;
         else if (128<=pkSize && pkSize<256)
-            pkSize=128;
-        else if (256<=pkSize&& pkSize<512)
-            pkSize=256;
-        else if (512<=pkSize&& pkSize<1024)
-            pkSize=512;
+            pkSize = 128;
+        else if (256<=pkSize && pkSize<512)
+            pkSize = 256;
+        else if (512<=pkSize && pkSize<1024)
+            pkSize = 512;
         else if (1024<=pkSize && pkSize<1500)
-            pkSize=1024;
+            pkSize = 1024;
         else
-            pkSize=1500;
+            pkSize = 1500;
         if (berlist->size()==0)
         {
             LongBer * l = new LongBer;
@@ -330,7 +330,7 @@ void BerParseFile::parseFile(const char *filename)
             l = *(berlist->begin()+j);
             if (l->longpkt==pkSize)
             {
-                inList=true;
+                inList = true;
                 break;
             }
         }
@@ -340,7 +340,7 @@ void BerParseFile::parseFile(const char *filename)
             l->longpkt = pkSize;
 
             unsigned int position = 0;
-            for (position =0; position<berlist->size(); position++)
+            for (position = 0; position<berlist->size(); position++)
             {
                 LongBer *aux = *(berlist->begin()+position);
 
@@ -350,13 +350,13 @@ void BerParseFile::parseFile(const char *filename)
             if (position==berlist->size())
                 berlist->push_back(l);
             else
-                berlist->insert(berlist->begin()+position,l);
+                berlist->insert(berlist->begin()+position, l);
         }
         SnrBer snrdata;
-        snrdata.snr=snr;
-        snrdata.ber=ber;
+        snrdata.snr = snr;
+        snrdata.ber = ber;
         l->snrlist.push_back(snrdata);
-        std::sort (l->snrlist.begin (),l->snrlist.end (), std::less<SnrBer> ());
+        std::sort(l->snrlist.begin(), l->snrlist.end(), std::less<SnrBer> ());
     }
     in.close();
 

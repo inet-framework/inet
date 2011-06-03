@@ -45,8 +45,8 @@ IPv6InterfaceData::IPv6InterfaceData()
     hostConstants.maxRtrSolicitations = IPv6_MAX_RTR_SOLICITATIONS;
 
 #ifdef WITH_xMIPv6
-    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT;//MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT;//MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT; //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT; //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
     hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST; //MIPv6: 12.9.07 - CB
     hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME; // 14.9.07 - CB
     hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME; // 14.9.07 - CB
@@ -67,7 +67,7 @@ IPv6InterfaceData::IPv6InterfaceData()
     nodeVars.dupAddrDetectTransmits = IPv6_DEFAULT_DUPADDRDETECTTRANSMITS;
 
     hostVars.linkMTU = IPv6_MIN_MTU;
-    hostVars.curHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;//value specified in RFC 1700-can't find it
+    hostVars.curHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT; //value specified in RFC 1700-can't find it
     hostVars.baseReachableTime = IPv6_REACHABLE_TIME;
     hostVars.reachableTime = generateReachableTime(_getMinRandomFactor(),
         _getMaxRandomFactor(), getBaseReachableTime());
@@ -210,7 +210,7 @@ void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& pref
 {
     for (AddressDataVector::iterator it=addresses.begin(); it!=addresses.end(); it++)
     {
-        if (it->address.matches(prefix,length))
+        if (it->address.matches(prefix, length))
         {
             it->expiryTime = expiryTime;
             it->prefExpiryTime = prefExpiryTime;
@@ -415,7 +415,7 @@ void IPv6InterfaceData::autoConfRouterGlobalScopeAddress(AdvPrefix &p)
 
 void IPv6InterfaceData::deduceAdvPrefix()
 {
-    for (int i=0; i< getNumAdvPrefixes();i++)
+    for (int i=0; i < getNumAdvPrefixes(); i++)
     {
         IPv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
         /*IPv6Address globalAddr = */

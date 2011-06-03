@@ -114,7 +114,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
             qp = (struct q_pkt *)PQ.head.next;
 
             dlist_del(PQ.head.next);
-            dgram =qp->p;
+            dgram = qp->p;
             sendICMP(dgram);
             //drop(dgram);
             //icmpAccess.get()->sendErrorMessage(dgram, ICMP_DESTINATION_UNREACHABLE, ICMP_AODV_QUEUE_FULL);
@@ -127,8 +127,8 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     if (qp == NULL)
     {
-        opp_error ("Dymo packet queue, Malloc failed!\n");
-        exit (-1);
+        opp_error("Dymo packet queue, Malloc failed!\n");
+        exit(-1);
     }
 
     qp->p = p;
@@ -153,7 +153,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 #define ARP_DELAY 0.005
     if (verdict == PQ_ENC_SEND)
     {
-        gw_addr.s_addr =   gateWayAddress->getInt();
+        gw_addr.s_addr = gateWayAddress->getInt();
         rt = rtable_find(gw_addr);
     }
     else
@@ -182,7 +182,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     qp->p = pkt_encapsulate(dynamic_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
                     // now Ip layer decremented again
                     // sendDelayed(qp->p, delay, "to_ip_from_network");
-                    sendDelayed (qp->p,delay,"to_ip");
+                    sendDelayed(qp->p, delay, "to_ip");
                     delay += ARP_DELAY;
                 }
                 else
@@ -212,7 +212,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                         Uint128 nextHop;
                         int iface;
                         double cost;
-                        getNextHop(dest_addr.s_addr,nextHop,iface,cost);
+                        getNextHop(dest_addr.s_addr, nextHop, iface, cost);
                         ctrl->setDest(nextHop.getMACAddress());
                         qp->p->setControlInfo(ctrl);
                     }

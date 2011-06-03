@@ -72,7 +72,7 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
         {
             RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
             delete rinpIn;
-            switch(rscm->getCommand())
+            switch (rscm->getCommand())
             {
             case RTP_CONTROL_PLAY:
                 play();

@@ -29,9 +29,9 @@ void MacBase::initialize(int stage)
 {
     if (stage==0)
     {
-        uppergateIn  = findGate("uppergateIn");
+        uppergateIn = findGate("uppergateIn");
         uppergateOut = findGate("uppergateOut");
-        lowergateIn  = findGate("lowergateIn");
+        lowergateIn = findGate("lowergateIn");
         lowergateOut = findGate("lowergateOut");
 
         // get a pointer to the NotificationBoard module

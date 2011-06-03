@@ -126,7 +126,7 @@ bool AudioOutFile::write(void *decBuf, int pktBytes)
     int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
     pkt.size = avcodec_encode_audio(c, outbuf, buf_size, (short int*)decBuf);
     if (c->coded_frame->pts != AV_NOPTS_VALUE)
-        pkt.pts= av_rescale_q(c->coded_frame->pts, c->time_base, audio_st->time_base);
+        pkt.pts = av_rescale_q(c->coded_frame->pts, c->time_base, audio_st->time_base);
     pkt.flags |= PKT_FLAG_KEY;
     pkt.stream_index = audio_st->index;
     pkt.data = outbuf;
@@ -155,7 +155,7 @@ bool AudioOutFile::close()
         avcodec_close(audio_st->codec);
 
     /* free the streams */
-    for(unsigned int i = 0; i < oc->nb_streams; i++)
+    for (unsigned int i = 0; i < oc->nb_streams; i++)
     {
         av_freep(&oc->streams[i]->codec);
         av_freep(&oc->streams[i]);

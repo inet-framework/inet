@@ -32,9 +32,9 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base
   protected:
     IPv4Datagram *dgram;
   public:
-    IPv4ControlInfo() : IPv4ControlInfo_Base() {dgram=NULL;}
+    IPv4ControlInfo() : IPv4ControlInfo_Base() {dgram = NULL;}
     virtual ~IPv4ControlInfo();
-    IPv4ControlInfo(const IPv4ControlInfo& other) : IPv4ControlInfo_Base() {dgram=NULL; operator=(other);}
+    IPv4ControlInfo(const IPv4ControlInfo& other) : IPv4ControlInfo_Base() {dgram = NULL; operator=(other);}
     IPv4ControlInfo& operator=(const IPv4ControlInfo& other) {IPv4ControlInfo_Base::operator=(other); return *this;}
 
     virtual void setOrigDatagram(IPv4Datagram *d);

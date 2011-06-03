@@ -100,7 +100,7 @@ void AnnotationManager::handleParameterChange(const char *parname)
 void AnnotationManager::addFromXml(cXMLElement* xml)
 {
     std::string rootTag = xml->getTagName();
-    ASSERT (rootTag == "annotations");
+    ASSERT(rootTag == "annotations");
 
     cXMLElementList list = xml->getChildren();
     for (cXMLElementList::const_iterator i = list.begin(); i != list.end(); ++i)

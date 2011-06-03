@@ -51,7 +51,7 @@ class INET_API RTPProfile : public cSimpleModule
         uint32 ssrc;
         int gateId;
       public:
-        SSRCGate(uint32 ssrc=0) {this->ssrc = ssrc; gateId = 0;}
+        SSRCGate(uint32 ssrc = 0) {this->ssrc = ssrc; gateId = 0;}
         uint32 getSsrc() {return ssrc;}
         void setSSRC(uint32 ssrc) {this->ssrc = ssrc;}
         int getGateId() {return gateId;}

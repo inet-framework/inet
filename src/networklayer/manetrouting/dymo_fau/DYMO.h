@@ -106,7 +106,7 @@ class DYMO : public ManetRoutingBase
   private:
     friend class DYMO_RoutingTable;
 
-    void processPacket (const IPv4Datagram* datagram);
+    void processPacket(const IPv4Datagram* datagram);
     //===============================================================================
     // OPERATIONS
     //===============================================================================
@@ -249,9 +249,9 @@ class DYMO : public ManetRoutingBase
     int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
 
-    virtual uint32_t getRoute(const Uint128 &,std::vector<Uint128> &add) {return 0;};
-    virtual bool getNextHop(const Uint128 &,Uint128 &add,int &iface, double &val) {return false;};
-    virtual void setRefreshRoute(const Uint128 &, const Uint128 &,const Uint128&,const Uint128&) {};
+    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &add) {return 0;};
+    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &val) {return false;};
+    virtual void setRefreshRoute(const Uint128 &, const Uint128 &, const Uint128&, const Uint128&) {};
     virtual bool isProactive() {return false;};
     virtual bool isOurType(cPacket * msg)
     {
@@ -262,7 +262,7 @@ class DYMO : public ManetRoutingBase
         else
             return false;
     };
-    virtual bool getDestAddress(cPacket *,Uint128 &) {return false;};
+    virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
 
     virtual void processLinkBreak(const cPolymorphic *details);
     void packetFailed(IPv4Datagram *dgram);

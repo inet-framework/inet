@@ -160,9 +160,9 @@ class INET_API MACAddress
      */
     static MACAddress generateAutoAddress();
 
-    bool operator<(const MACAddress& addr) const {return compare (addr)<0;}
+    bool operator<(const MACAddress& addr) const {return compare(addr)<0;}
 
-    bool operator>(const MACAddress& addr) const {return compare (addr)>0;}
+    bool operator>(const MACAddress& addr) const {return compare(addr)>0;}
 
     /**
      * Compares two MAC addresses.

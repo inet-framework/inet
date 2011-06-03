@@ -62,7 +62,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 
   public:
     ~Ns2MotionMobility();
-    Ns2MotionMobility() {ns2File=NULL;}
+    Ns2MotionMobility() {ns2File = NULL;}
   protected:
     void parseFile(const char *filename);
 

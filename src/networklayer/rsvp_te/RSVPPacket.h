@@ -29,7 +29,7 @@
 class RSVPPacket : public RSVPPacket_Base
 {
   public:
-    RSVPPacket(const char *name=NULL, int kind=0) : RSVPPacket_Base(name,RSVP_TRAFFIC) { this->rsvpKind_var = kind; }
+    RSVPPacket(const char *name = NULL, int kind = 0) : RSVPPacket_Base(name, RSVP_TRAFFIC) { this->rsvpKind_var = kind; }
     RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other.getName()) {operator=(other);}
     RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
     virtual RSVPPacket *dup() const {return new RSVPPacket(*this);}

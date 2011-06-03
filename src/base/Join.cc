@@ -37,7 +37,7 @@ void Join::initialize()
 
 void Join::handleMessage(cMessage *msg)
 {
-    send(msg,outg);
+    send(msg, outg);
 }
 
 

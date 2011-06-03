@@ -51,7 +51,7 @@ class INET_API RoutingTableParser
     /**
      * Read Routing Table file; return 0 on success, -1 on error
      */
-    virtual int readRoutingTableFromFile (const char *filename);
+    virtual int readRoutingTableFromFile(const char *filename);
 
   protected:
     // Parsing functions
@@ -59,7 +59,7 @@ class INET_API RoutingTableParser
 
     // Used to create specific "files" char arrays without comments or blanks
     // from original file.
-    virtual char *createFilteredFile (char *file,
+    virtual char *createFilteredFile(char *file,
                               int &charpointer,
                               const char *endtoken);
 
@@ -72,24 +72,24 @@ class INET_API RoutingTableParser
     // write them into the routing table.
     virtual void parseRouting(char *routeFile);
 
-    virtual char *parseEntry (char *ifconfigFile,
+    virtual char *parseEntry(char *ifconfigFile,
                       const char *tokenStr,
                       int &charpointer,
                       char* destStr);
 
     // Convert string separated by ':' into dynamic string array.
-    virtual void parseMulticastGroups (char *groupStr, InterfaceEntry*);
+    virtual void parseMulticastGroups(char *groupStr, InterfaceEntry*);
 
     // Return 1 if beginning of str1 and str2 is equal up to str2-len,
     // otherwise 0.
     static int streq(const char *str1, const char *str2);
 
     // Skip blanks in string
-    static void skipBlanks (char *str, int &charptr);
+    static void skipBlanks(char *str, int &charptr);
 
     // Copies the first word of src up to a space-char into dest
     // and appends \0, returns position of next space-char in src
-    static int strcpyword (char *dest, const char *src);
+    static int strcpyword(char *dest, const char *src);
 
     // policies methods
     virtual void parseRules(char *);

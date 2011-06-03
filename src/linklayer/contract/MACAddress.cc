@@ -30,7 +30,7 @@ unsigned int MACAddress::autoAddressCtr;
 //
 static int hextobin(const char *hexstr, unsigned char *destbuf, int size)
 {
-    int k=0;
+    int k = 0;
     const char *s = hexstr;
     for (int pos=0; pos<size; pos++)
     {
@@ -41,13 +41,13 @@ static int hextobin(const char *hexstr, unsigned char *destbuf, int size)
         else
         {
             while (*s && !isxdigit(*s)) s++;
-            if (!*s) {destbuf[pos]=0; continue;}
+            if (!*s) {destbuf[pos] = 0; continue;}
             unsigned char d = isdigit(*s) ? (*s-'0') : islower(*s) ? (*s-'a'+10) : (*s-'A'+10);
             d = d<<4;
             s++;
 
             while (*s && !isxdigit(*s)) s++;
-            if (!*s) {destbuf[pos]=0; continue;}
+            if (!*s) {destbuf[pos] = 0; continue;}
             d += isdigit(*s) ? (*s-'0') : islower(*s) ? (*s-'a'+10) : (*s-'A'+10);
             s++;
 
@@ -63,7 +63,7 @@ const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 
 MACAddress::MACAddress()
 {
-    address[0]=address[1]=address[2]=address[3]=address[4]=address[5]=0;
+    address[0] = address[1] = address[2] = address[3] = address[4] = address[5] = 0;
 }
 
 MACAddress::MACAddress(const char *hexstr)
@@ -128,7 +128,7 @@ void MACAddress::setAddressBytes(unsigned char *addrbytes)
 
 void MACAddress::setBroadcast()
 {
-    address[0]=address[1]=address[2]=address[3]=address[4]=address[5]=0xff;
+    address[0] = address[1] = address[2] = address[3] = address[4] = address[5] = 0xff;
 }
 
 bool MACAddress::isBroadcast() const
@@ -145,9 +145,9 @@ std::string MACAddress::str() const
 {
     char buf[20];
     char *s = buf;
-    for (int i=0; i<MAC_ADDRESS_BYTES; i++, s+=3)
-        sprintf(s,"%2.2X-",address[i]);
-    *(s-1)='\0';
+    for (int i=0; i<MAC_ADDRESS_BYTES; i++, s += 3)
+        sprintf(s, "%2.2X-", address[i]);
+    *(s-1) = '\0';
     return std::string(buf);
 }
 
@@ -165,7 +165,7 @@ InterfaceToken MACAddress::formInterfaceIdentifier() const
 {
     const unsigned char *b = address;
     uint32 high = (b[0]<<24) | (b[1]<<16) | (b[2]<<8) | 0xff;
-    uint32 low =  (0xfe<<24) | (b[3]<<16) | (b[4]<<8) | b[5];
+    uint32 low = (0xfe<<24) | (b[3]<<16) | (b[4]<<8) | b[5];
     return InterfaceToken(low, high, 64);
 }
 

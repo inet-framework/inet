@@ -201,7 +201,7 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
         bool backoff;
         simtime_t backoffPeriod;
         int retryCounter;
-        int AIFSN;// Arbitration interframe space number. The duration edcCAF[AC].AIFSis a duration derived from the value AIFSN[AC] by the relation
+        int AIFSN; // Arbitration interframe space number. The duration edcCAF[AC].AIFSis a duration derived from the value AIFSN[AC] by the relation
         int cwMax;
         int cwMin;
         // queue
@@ -233,32 +233,32 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     // methods for access to the current AC data
     //
     // methods for access to specific AC data
-    virtual bool & backoff(int i=-1);
-    virtual simtime_t & TXOP(int i=-1);
-    virtual simtime_t & backoffPeriod(int i=-1);
-    virtual int & retryCounter(int i=-1);
-    virtual int & AIFSN(int i=-1);
-    virtual int & cwMax(int i=-1);
-    virtual int & cwMin(int i=-1);
-    virtual cMessage * endAIFS(int i=-1);
-    virtual cMessage * endBackoff(int i=-1);
-    virtual Ieee80211DataOrMgmtFrameList * transmissionQueue(int i=-1);
-    virtual void setEndAIFS(int i, cMessage *msg){edcCAF[i].endAIFS=msg;}
-    virtual void setEndBackoff(int i, cMessage *msg){edcCAF[i].endBackoff=msg;}
+    virtual bool & backoff(int i = -1);
+    virtual simtime_t & TXOP(int i = -1);
+    virtual simtime_t & backoffPeriod(int i = -1);
+    virtual int & retryCounter(int i = -1);
+    virtual int & AIFSN(int i = -1);
+    virtual int & cwMax(int i = -1);
+    virtual int & cwMin(int i = -1);
+    virtual cMessage * endAIFS(int i = -1);
+    virtual cMessage * endBackoff(int i = -1);
+    virtual Ieee80211DataOrMgmtFrameList * transmissionQueue(int i = -1);
+    virtual void setEndAIFS(int i, cMessage *msg){edcCAF[i].endAIFS = msg;}
+    virtual void setEndBackoff(int i, cMessage *msg){edcCAF[i].endBackoff = msg;}
 
     // Statistics
-    virtual long & numRetry(int i=-1);
-    virtual long & numSentWithoutRetry(int i=-1);
-    virtual long & numGivenUp(int i=-1);
-    virtual long & numSent(int i=-1);
-    virtual long & numDropped(int i=-1);
-    virtual long & bites(int i=-1);
-    virtual simtime_t & minjitter(int i=-1);
-    virtual simtime_t & maxjitter(int i=-1);
+    virtual long & numRetry(int i = -1);
+    virtual long & numSentWithoutRetry(int i = -1);
+    virtual long & numGivenUp(int i = -1);
+    virtual long & numSent(int i = -1);
+    virtual long & numDropped(int i = -1);
+    virtual long & bites(int i = -1);
+    virtual simtime_t & minjitter(int i = -1);
+    virtual simtime_t & maxjitter(int i = -1);
 // out vectors
-    virtual cOutVector * jitter(int i=-1);
-    virtual cOutVector * macDelay(int i=-1);
-    virtual cOutVector * throughput(int i=-1);
+    virtual cOutVector * jitter(int i = -1);
+    virtual cOutVector * macDelay(int i = -1);
+    virtual cOutVector * throughput(int i = -1);
     inline const int numCategories(){return edcCAF.size();}
     virtual const bool isBakoffMsg(cMessage *msg);
 
@@ -464,7 +464,7 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     //@{
     virtual simtime_t getSIFS();
     virtual simtime_t getSlotTime();
-    virtual simtime_t getDIFS(int category=-1);
+    virtual simtime_t getDIFS(int category = -1);
     virtual simtime_t getAIFS(int AccessCategory);
     virtual simtime_t getEIFS();
     virtual simtime_t getPIFS();
@@ -611,42 +611,42 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     virtual int getMinBitrate(void);
 
     virtual void reportDataOk(void);
-    virtual void reportDataFailed (void);
+    virtual void reportDataFailed(void);
 
-    virtual int getMinTimerTimeout (void);
-    virtual int getMinSuccessThreshold (void);
+    virtual int getMinTimerTimeout(void);
+    virtual int getMinSuccessThreshold(void);
 
-    virtual int getTimerTimeout (void);
-    virtual int getSuccessThreshold (void);
+    virtual int getTimerTimeout(void);
+    virtual int getSuccessThreshold(void);
 
-    virtual void setTimerTimeout (int timer_timeout);
-    virtual void setSuccessThreshold (int success_threshold);
+    virtual void setTimerTimeout(int timer_timeout);
+    virtual void setSuccessThreshold(int success_threshold);
 
-    virtual void reportRecoveryFailure (void);
-    virtual void reportFailure (void);
+    virtual void reportRecoveryFailure(void);
+    virtual void reportFailure(void);
 
-    virtual bool needRecoveryFallback (void);
-    virtual bool needNormalFallback (void);
+    virtual bool needRecoveryFallback(void);
+    virtual bool needNormalFallback(void);
 
     virtual double getBitrate();
     virtual void setBitrate(double b_rate);
 
     virtual void resetCurrentBackOff()
     {
-        backoff()=true;
-        backoffPeriod()=-1;
+        backoff() = true;
+        backoffPeriod() = -1;
     }
 
     virtual bool isBackoffPending()
     {
-        for (unsigned int i =0;i<edcCAF.size();i++)
+        for (unsigned int i = 0; i<edcCAF.size(); i++)
         {
             if (edcCAF[i].backoff)
                 return true;
         }
         return false;
     }
-    ModulationType getControlAnswerMode (ModulationType reqMode);
+    ModulationType getControlAnswerMode(ModulationType reqMode);
     //@}
 };
 

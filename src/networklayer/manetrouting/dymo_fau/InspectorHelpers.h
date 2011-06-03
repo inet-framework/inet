@@ -27,7 +27,7 @@
 #include "DYMO_RM_m.h"
 #include "DYMO_RERR_m.h"
 
-std::ostream& operator<< (std::ostream& os, const std::vector<DYMO_AddressBlock>& abs);
-std::ostream& operator<< (std::ostream& os, const DYMO_AddressBlock& ab);
+std::ostream& operator<<(std::ostream& os, const std::vector<DYMO_AddressBlock>& abs);
+std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab);
 
 #endif

@@ -34,7 +34,7 @@ class INET_API NetworkConfigurator : public cSimpleModule
 {
   protected:
     struct NodeInfo {
-        NodeInfo() {isIPNode=false;ift=NULL;rt=NULL;}
+        NodeInfo() {isIPNode = false; ift = NULL; rt = NULL;}
         bool isIPNode;
         IInterfaceTable *ift;
         IRoutingTable *rt;

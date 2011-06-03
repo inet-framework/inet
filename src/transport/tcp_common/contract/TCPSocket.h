@@ -382,7 +382,7 @@ class INET_API TCPSocket
      * in that case you don't have to look it up by connId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr = NULL);
 
     /**
      * Examines the message (which should have arrived from TCP),

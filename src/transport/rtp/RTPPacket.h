@@ -32,7 +32,7 @@
 class RTPPacket : public RTPPacket_Base
 {
   public:
-    RTPPacket(const char *name=NULL, int kind=0) : RTPPacket_Base(name,kind) {}
+    RTPPacket(const char *name = NULL, int kind = 0) : RTPPacket_Base(name, kind) {}
     RTPPacket(const RTPPacket& other) : RTPPacket_Base(other.getName()) {operator=(other);}
     RTPPacket& operator=(const RTPPacket& other) {RTPPacket_Base::operator=(other); return *this;}
     virtual RTPPacket *dup() const {return new RTPPacket(*this);}

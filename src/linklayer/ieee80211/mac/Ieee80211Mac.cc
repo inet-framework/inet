@@ -75,7 +75,7 @@ Ieee80211Mac::~Ieee80211Mac()
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
 
-    while(!transmissionQueue.empty())
+    while (!transmissionQueue.empty())
     {
         Ieee80211Frame *temp = transmissionQueue.front();
         transmissionQueue.pop_front();
@@ -364,7 +364,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     if (frame && isLowerMsg(frame))
     {
-        lastReceiveFailed =(msgKind == COLLISION || msgKind == BITERROR);
+        lastReceiveFailed = (msgKind == COLLISION || msgKind == BITERROR);
         scheduleReservePeriod(frame);
     }
 

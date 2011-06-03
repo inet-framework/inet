@@ -1308,7 +1308,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 
 void TCPConnection::process_TIMEOUT_CONN_ESTAB()
 {
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
@@ -1334,7 +1334,7 @@ void TCPConnection::process_TIMEOUT_2MSL()
     // If the time-wait timeout expires on a connection delete the TCB,
     // enter the CLOSED state and return.
     //"
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_TIME_WAIT:
             // Nothing to do here. The TIMEOUT_2MSL event will automatically take
@@ -1353,7 +1353,7 @@ void TCPConnection::process_TIMEOUT_2MSL()
 
 void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
 {
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_FIN_WAIT_2:
             // Nothing to do here. The TIMEOUT_FIN_WAIT_2 event will automatically take
@@ -1392,7 +1392,7 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
     tcpEV << "Performing retransmission #" << state->syn_rexmit_count << "\n";
 
     // resend what's needed
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_SYN_SENT: sendSyn(); break;
         case TCP_S_SYN_RCVD: sendSynAck(); break;

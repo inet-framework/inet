@@ -22,7 +22,7 @@
 
 using namespace std;
 
-ostream& operator<< (ostream& os, const std::vector<DYMO_AddressBlock>& abs)
+ostream& operator<<(ostream& os, const std::vector<DYMO_AddressBlock>& abs)
 {
     os << "{" << std::endl;
     for (std::vector<DYMO_AddressBlock>::const_iterator i = abs.begin(); i != abs.end(); i++)
@@ -34,7 +34,7 @@ ostream& operator<< (ostream& os, const std::vector<DYMO_AddressBlock>& abs)
     return os;
 }
 
-std::ostream& operator<< (std::ostream& os, const DYMO_AddressBlock& ab)
+std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab)
 {
     os << "{";
 

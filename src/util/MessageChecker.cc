@@ -217,11 +217,11 @@ void MessageChecker::forwardMessage(cMessage* msg)
     cGate* gateOut = gate("out");
     cChannel* channel = gateOut->getChannel();
     simtime_t now = simTime();
-    simtime_t endTransmissionTime =  channel->getTransmissionFinishTime();
+    simtime_t endTransmissionTime = channel->getTransmissionFinishTime();
     simtime_t delayToWait = 0;
     if (endTransmissionTime>now)
         delayToWait = endTransmissionTime - now;
-    sendDelayed(msg,delayToWait,"out");
+    sendDelayed(msg, delayToWait, "out");
 }
 
 void MessageChecker::finish()

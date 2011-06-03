@@ -47,7 +47,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
             lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter().getInt();
 
             if ((lsaOnRetransmissionList = neighbor->findOnRetransmissionList(lsaKey)) != NULL) {
-                if (operator== (lsaHeader, lsaOnRetransmissionList->getHeader())) {
+                if (operator==(lsaHeader, lsaOnRetransmissionList->getHeader())) {
                     neighbor->removeFromRetransmissionList(lsaKey);
                 } else {
                     EV << "Got an Acknowledgement packet for an unsent Update packet.\n";

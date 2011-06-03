@@ -56,9 +56,9 @@ class MacEtxNeighbor
   public:
     std::vector<simtime_t> timeVector;
     std::vector<simtime_t> timeETT;
-    std::vector<SNRDataTime> signalToNoiseAndSignal;// S/N received
+    std::vector<SNRDataTime> signalToNoiseAndSignal; // S/N received
   public:
-    MacEtxNeighbor() {packets = 0; time=0; numFailures=0;}
+    MacEtxNeighbor() {packets = 0; time = 0; numFailures = 0;}
     ~MacEtxNeighbor()
     {
         timeVector.clear();
@@ -78,7 +78,7 @@ class MacEtxNeighbor
     void setEtt2Time(const simtime_t &t) {ett2Time = t;}
     simtime_t getEtt2Time() const {return ett2Time;}
 
-    void setNumFailures(int num) {numFailures=num;}
+    void setNumFailures(int num) {numFailures = num;}
     int getNumFailures() {return numFailures;}
 
     void setPackets(const int &p) {packets = p;}
@@ -87,7 +87,7 @@ class MacEtxNeighbor
 
 typedef std::map<MACAddress,MacEtxNeighbor*> NeighborsMap;
 
-class INET_API Ieee80211Etx : public cSimpleModule,public MacEstimateCostProcess, public INotifiable
+class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProcess, public INotifiable
 {
   protected:
     MACAddress myAddress;
@@ -131,7 +131,7 @@ class INET_API Ieee80211Etx : public cSimpleModule,public MacEstimateCostProcess
   public:
     Ieee80211Etx() {};
     void setAddress(const MACAddress &add) {myAddress = add;}
-    virtual double getCost(int i,MACAddress &add)
+    virtual double getCost(int i, MACAddress &add)
     {
         switch (i)
         {
@@ -157,10 +157,10 @@ class INET_API Ieee80211Etx : public cSimpleModule,public MacEstimateCostProcess
     virtual int getNumNeighbors() {return neighbors.size();}
     virtual int getNeighbors(MACAddress add[])
     {
-        int i=0;
-        for (NeighborsMap::iterator it= neighbors.begin(); it!= neighbors.end(); it++)
+        int i = 0;
+        for (NeighborsMap::iterator it = neighbors.begin(); it != neighbors.end(); it++)
         {
-            add[i]=it->second->getAddress();
+            add[i] = it->second->getAddress();
             i++;
         }
         return i;

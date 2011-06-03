@@ -109,7 +109,7 @@ void BasicSnrEval::handleMessage(cMessage *msg)
         else
             handleSelfMsg(msg);
     }
-    else if (processAirFrame (check_and_cast<AirFrame *>(msg)))
+    else if (processAirFrame(check_and_cast<AirFrame *>(msg)))
     {
         // must be an AirFrame
         AirFrame *frame = (AirFrame *) msg;

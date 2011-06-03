@@ -107,7 +107,7 @@ TCPStateVariables::TCPStateVariables()
     rcv_oooseg = 0;
     rcv_naseg = 0;
 
-    maxRcvBuffer  = 0;  // will be set from configureStateVariables()
+    maxRcvBuffer = 0;  // will be set from configureStateVariables()
     usedRcvBuffer = 0;
     freeRcvBuffer = 0;
     tcpRcvQueueDrops = 0;
@@ -426,7 +426,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_SEND:        FSM_Goto(fsm, TCP_S_SYN_SENT); break;
                 case TCP_E_CLOSE:       FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_ABORT:       FSM_Goto(fsm, TCP_S_CLOSED); break;
-                case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD);break;
+                case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD); break;
                 default:;
             }
             break;

@@ -96,7 +96,7 @@ class INET_API RadioState : public cPolymorphic
 
     /** Returns the name of the radio state in a readable form */
     static const char *stateName(State state) {
-        switch(state) {
+        switch (state) {
             case IDLE: return "IDLE";
             case RECV: return "RECV";
             case TRANSMIT: return "TRANSMIT";

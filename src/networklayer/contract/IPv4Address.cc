@@ -56,15 +56,15 @@ bool IPv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
     if (!text)
         return false;
 
-    if (!strcmp(text,"<unspec>"))
+    if (!strcmp(text, "<unspec>"))
     {
         tobytes[0] = tobytes[1] = tobytes[2] = tobytes[3] = 0;
         return true;
     }
 
     const char *s = text;
-    int i=0;
-    while(true)
+    int i = 0;
+    while (true)
     {
         if (*s<'0' || *s>'9')
             return false;  // missing number
@@ -240,7 +240,7 @@ bool IPv4Address::isWellFormed(const char *text)
 }
 
 
-IPv4Address IPv4Address::getBroadcastAddress (IPv4Address netmask)
+IPv4Address IPv4Address::getBroadcastAddress(IPv4Address netmask)
 {
    IPv4Address br(getInt() | ~(netmask.getInt()));
    return br;

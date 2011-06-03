@@ -58,7 +58,7 @@ class INET_API IPv6NeighbourCache
     {
         IPv6Address address;
         int interfaceID;
-        Key(IPv6Address addr, int ifaceID) {address=addr; interfaceID=ifaceID;}
+        Key(IPv6Address addr, int ifaceID) {address = addr; interfaceID = ifaceID;}
         bool operator<(const Key& b) const {
             return interfaceID==b.interfaceID ? address<b.address : interfaceID<b.interfaceID;
         }
@@ -68,7 +68,7 @@ class INET_API IPv6NeighbourCache
     struct Neighbour
     {
         // Neighbour info
-        const Key *nceKey;//store a pointer back to the key that links to this NCE.-WEI
+        const Key *nceKey; //store a pointer back to the key that links to this NCE.-WEI
         MACAddress macAddress;
         bool isRouter;
         bool isDefaultRouter; // is it on the Default Router List?
@@ -85,9 +85,9 @@ class INET_API IPv6NeighbourCache
         //cleaner solution. if reachability state is INCOMPLETE, it means that
         //addr resolution is being performed for this NCE.
         unsigned int numOfARNSSent;
-        cMessage *arTimer;//Address Resolution self-message timer
+        cMessage *arTimer; //Address Resolution self-message timer
         MsgPtrVector pendingPackets; //ptrs to queued packets associated with this NCE
-        IPv6Address nsSrcAddr;//the src addr that was used to send the previous NS
+        IPv6Address nsSrcAddr; //the src addr that was used to send the previous NS
 
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement

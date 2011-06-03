@@ -70,7 +70,7 @@ class ModuleAccess
     const char *name;
     T *p;
   public:
-    ModuleAccess(const char *n) {name = n; p=NULL;}
+    ModuleAccess(const char *n) {name = n; p = NULL;}
     virtual ~ModuleAccess() {}
 
     virtual T *get()
@@ -78,7 +78,7 @@ class ModuleAccess
         if (!p)
         {
             cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
-            if (!m) opp_error("Module (%s)%s not found",opp_typename(typeid(T)),name);
+            if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
             p = check_and_cast<T*>(m);
         }
         return p;

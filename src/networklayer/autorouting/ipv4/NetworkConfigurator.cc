@@ -167,7 +167,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             {
                 e->setHost(neighborAddr); // and no gateway
             }
-            e->setNetmask(IPv4Address(255,255,255,255)); // full match needed
+            e->setNetmask(IPv4Address(255, 255, 255, 255)); // full match needed
             e->setInterface(ie);
             e->setType(IPv4Route::DIRECT);
             e->setSource(IPv4Route::MANUAL);
@@ -329,7 +329,7 @@ void NetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& node
     // update display string
     char buf[80];
     sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 

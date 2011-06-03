@@ -49,8 +49,8 @@ class INET_API SCTPAlgorithm : public cPolymorphic
     virtual ~SCTPAlgorithm() {}
 
     inline void setAssociation(SCTPAssociation* _assoc)  {
-        assoc           = _assoc;
-        transmissionQ   = assoc->getTransmissionQueue();
+        assoc = _assoc;
+        transmissionQ = assoc->getTransmissionQueue();
         retransmissionQ = assoc->getRetransmissionQueue();
     }
 

@@ -23,7 +23,7 @@
 
 simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = SIMSIGNAL_NULL;
 
-static std::ostream& operator<< (std::ostream& out, cMessage *msg)
+static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
@@ -183,7 +183,7 @@ void Ieee80211MgmtBase::sendUp(cMessage *msg)
 
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    switch(frame->getType())
+    switch (frame->getType())
     {
       case ST_DATA:
         numDataFramesReceived++;

@@ -121,7 +121,7 @@ class INET_API xMIPv6 : public cSimpleModule
 
         Key(IPv6Address _dest, int _interfaceID, int _type)
         {
-            dest=_dest; interfaceID=_interfaceID; type=_type;
+            dest = _dest; interfaceID = _interfaceID; type = _type;
         }
 
         bool operator<(const Key& b) const
@@ -149,10 +149,10 @@ class INET_API xMIPv6 : public cSimpleModule
     class BUTransmitIfEntry : public TimerIfEntry
     {
       public:
-        uint buSequenceNumber ; // sequence number of the BU sent
+        uint buSequenceNumber; // sequence number of the BU sent
         uint lifeTime; // lifetime of the BU sent, 4.9.07 - CB
         //Time variable related to the time at which BU was sent
-        simtime_t presentSentTimeBU;//stores the present time at which BU is/was sent
+        simtime_t presentSentTimeBU; //stores the present time at which BU is/was sent
         bool homeRegistration; // indicates whether this goes to HA or CN; Added by CB
     };
 
@@ -220,7 +220,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * by an appropriate BA. This routine also "intialises" the necessary variables in a struct BUTransmitIfEntry that is created to
      * keep these variables for access.
      */
-    void createBUTimer(const IPv6Address& buDest,InterfaceEntry* ie); //05.06.07, update 28.08.07 - CB, 14.9.07 - CB
+    void createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie); //05.06.07, update 28.08.07 - CB, 14.9.07 - CB
 
     /**
      * This method is called when the timer created in createBUTimer() has fired.
@@ -231,7 +231,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Method for creating and sending a BU by a MN.
      */
-    void createAndSendBUMessage(const IPv6Address& dest,InterfaceEntry* ie, const uint buSeq,
+    void createAndSendBUMessage(const IPv6Address& dest, InterfaceEntry* ie, const uint buSeq,
             const uint lifeTime, const int bindAuthData = 0);
 
     /**

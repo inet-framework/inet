@@ -82,9 +82,9 @@ void TCPDump::handleMessage(cMessage *msg)
     int32 id;
 
     if (msg->getArrivalGate()->isName("ifIn"))
-        id = findGate("hlOut",index);
+        id = findGate("hlOut", index);
     else
-        id = findGate("ifOut",index);
+        id = findGate("ifOut", index);
 
     send(msg, id);
 }

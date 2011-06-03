@@ -47,7 +47,7 @@ void SCTPServer::initialize()
     // parameters
     finishEndsSimulation = (bool)par("finishEndsSimulation");
     const char* address = par("address");
-    token = strtok((char*)address,",");
+    token = strtok((char*)address, ",");
     while (token != NULL)
     {
         addresses.push_back(IPvXAddress(token));
@@ -59,9 +59,9 @@ void SCTPServer::initialize()
     delayFirstRead = par("delayFirstRead");
     delT = &par("readingInterval");
     if (delT->isNumeric() && (double)*delT==0)
-        readInt=false;
+        readInt = false;
     else
-        readInt=true;
+        readInt = true;
     int32 messagesToPush = par("messagesToPush");
     inboundStreams = par("inboundStreams");
     outboundStreams = par("outboundStreams");
@@ -79,7 +79,7 @@ void SCTPServer::initialize()
     socket->setOutputGate(gate("sctpOut"));
     socket->setInboundStreams(inboundStreams);
     socket->setOutboundStreams(outboundStreams);
-    if (strcmp(address,"")==0)
+    if (strcmp(address, "")==0)
         socket->bind(port);
     else
     {
@@ -124,7 +124,7 @@ uint32 numBytes;
         cmd->setSendUnordered(COMPLETE_MESG_ORDERED);
     else
         cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
-    lastStream=(lastStream+1)%outboundStreams;
+    lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
@@ -133,7 +133,7 @@ uint32 numBytes;
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
     packetsSent++;
-    bytesSent+=msg->getBitLength()/8;
+    bytesSent += msg->getBitLength()/8;
     sendOrSchedule(cmsg);
 }
 
@@ -226,24 +226,24 @@ void SCTPServer::handleMessage(cMessage *msg)
         }
         case SCTP_I_ESTABLISHED:
         {
-            count=0;
+            count = 0;
             SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
             numSessions++;
             assocId = connectInfo->getAssocId();
             inboundStreams = connectInfo->getInboundStreams();
             outboundStreams = connectInfo->getOutboundStreams();
-            serverAssocStatMap[assocId].rcvdPackets= (long) par("numPacketsToReceivePerClient");
-            serverAssocStatMap[assocId].sentPackets= (long) par("numPacketsToSendPerClient");
-            serverAssocStatMap[assocId].rcvdBytes=0;
-            serverAssocStatMap[assocId].start=0;
-            serverAssocStatMap[assocId].stop=0;
-            serverAssocStatMap[assocId].lifeTime=0;
-            serverAssocStatMap[assocId].abortSent=false;
+            serverAssocStatMap[assocId].rcvdPackets = (long) par("numPacketsToReceivePerClient");
+            serverAssocStatMap[assocId].sentPackets = (long) par("numPacketsToSendPerClient");
+            serverAssocStatMap[assocId].rcvdBytes = 0;
+            serverAssocStatMap[assocId].start = 0;
+            serverAssocStatMap[assocId].stop = 0;
+            serverAssocStatMap[assocId].lifeTime = 0;
+            serverAssocStatMap[assocId].abortSent = false;
             serverAssocStatMap[assocId].peerClosed = false;
             char text[30];
-            sprintf(text, "App: Received Bytes of assoc %d",assocId);
+            sprintf(text, "App: Received Bytes of assoc %d", assocId);
             bytesPerAssoc[assocId] = new cOutVector(text);
-            sprintf(text, "App: EndToEndDelay of assoc %d",assocId);
+            sprintf(text, "App: EndToEndDelay of assoc %d", assocId);
             endToEndDelay[assocId] = new cOutVector(text);
 
             delete connectInfo;
@@ -288,11 +288,11 @@ void SCTPServer::handleMessage(cMessage *msg)
                         cmsg->setControlInfo(qinfo);
                         sendOrSchedule(cmsg);
                     }
-                    ServerAssocStatMap::iterator j=serverAssocStatMap.find(assocId);
+                    ServerAssocStatMap::iterator j = serverAssocStatMap.find(assocId);
                     if (j->second.rcvdPackets == 0 && (simtime_t)par("waitToClose")>0)
                     {
                         char as[5];
-                        sprintf(as, "%d",assocId);
+                        sprintf(as, "%d", assocId);
                         cPacket* abortMsg = new cPacket(as);
                         abortMsg->setKind(SCTP_I_ABORT);
                         scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), abortMsg);
@@ -321,20 +321,20 @@ void SCTPServer::handleMessage(cMessage *msg)
                 if (delayFirstRead>0 && !delayFirstReadTimer->isScheduled())
                 {
 
-                    cmsg=makeReceiveRequest(PK(msg));
+                    cmsg = makeReceiveRequest(PK(msg));
                     scheduleAt(simulation.getSimTime()+delayFirstRead, cmsg);
                     scheduleAt(simulation.getSimTime()+delayFirstRead, delayFirstReadTimer);
                 }
                 else if (readInt && firstData)
                 {
-                    firstData=false;
-                    cmsg=makeReceiveRequest(PK(msg));
+                    firstData = false;
+                    cmsg = makeReceiveRequest(PK(msg));
                     scheduleAt(simulation.getSimTime()+(simtime_t)par("readingInterval"), delayTimer);
                     sendOrSchedule(cmsg);
                 }
                 else if (delayFirstRead==0 && readInt==false)
                 {
-                    cmsg=makeReceiveRequest(PK(msg));
+                    cmsg = makeReceiveRequest(PK(msg));
                     sendOrSchedule(cmsg);
                 }
 
@@ -342,7 +342,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             else
             {
                 sctpEV3<<simulation.getSimTime()<<" makeReceiveRequest\n";
-                cmsg=makeReceiveRequest(PK(msg));
+                cmsg = makeReceiveRequest(PK(msg));
                 sendOrSchedule(cmsg);
             }
             delete msg;
@@ -355,12 +355,12 @@ void SCTPServer::handleMessage(cMessage *msg)
             sctpEV3<<simulation.getSimTime()<<" server: data arrived. "<<packetsRcvd<<" Packets received now\n";
             SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
             id = ind->getAssocId();
-            ServerAssocStatMap::iterator j=serverAssocStatMap.find(id);
-            BytesPerAssoc::iterator k=bytesPerAssoc.find(id);
+            ServerAssocStatMap::iterator j = serverAssocStatMap.find(id);
+            BytesPerAssoc::iterator k = bytesPerAssoc.find(id);
             if (j->second.rcvdBytes == 0)
                 j->second.start = simulation.getSimTime();
 
-            j->second.rcvdBytes+= PK(msg)->getByteLength();
+            j->second.rcvdBytes += PK(msg)->getByteLength();
             k->second->record(j->second.rcvdBytes);
 
             if (echoFactor==0)
@@ -368,8 +368,8 @@ void SCTPServer::handleMessage(cMessage *msg)
                 if ((uint32)par("numPacketsToReceivePerClient")>0)
                 {
                     j->second.rcvdPackets--;
-                    SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg);
-                    EndToEndDelay::iterator m=endToEndDelay.find(id);
+                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
+                    EndToEndDelay::iterator m = endToEndDelay.find(id);
                     m->second->record(simulation.getSimTime()-smsg->getCreationTime());
                     sctpEV3<<"server: Data received. Left packets to receive="<<j->second.rcvdPackets<<"\n";
 
@@ -402,13 +402,13 @@ void SCTPServer::handleMessage(cMessage *msg)
             {
                 SCTPSendCommand *cmd = new SCTPSendCommand("Send6");
                 cmd->setAssocId(id);
-                SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
-                EndToEndDelay::iterator n=endToEndDelay.find(id);
+                SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
+                EndToEndDelay::iterator n = endToEndDelay.find(id);
                 n->second->record(simulation.getSimTime()-smsg->getCreationTime());
                 cPacket* cmsg = new cPacket("SVData");
-                bytesSent+=smsg->getBitLength()/8;
+                bytesSent += smsg->getBitLength()/8;
                 cmd->setSendUnordered(cmd->getSendUnordered());
-                lastStream=(lastStream+1)%outboundStreams;
+                lastStream = (lastStream+1)%outboundStreams;
                 cmd->setSid(lastStream);
                 cmd->setLast(true);
                 cmsg->encapsulate(smsg);
@@ -426,7 +426,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             id = command->getAssocId();
             sctpEV3<<"server: SCTP_I_SHUTDOWN_RECEIVED for assoc "<<id<<"\n";
-            ServerAssocStatMap::iterator i=serverAssocStatMap.find(id);
+            ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
             if (i->second.sentPackets == 0 || (long) par("numPacketsToSendPerClient")==0)
             {
                 cPacket* cmsg = new cPacket("Request");
@@ -465,7 +465,7 @@ void SCTPServer::handleTimer(cMessage *msg)
 
     if (msg==delayTimer)
     {
-        ServerAssocStatMap::iterator i=serverAssocStatMap.find(assocId);
+        ServerAssocStatMap::iterator i = serverAssocStatMap.find(assocId);
         sctpEV3<<simulation.getSimTime()<<" delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
         scheduleAt(simulation.getSimTime()+(double)par("readingInterval"), delayTimer);
@@ -546,13 +546,13 @@ void SCTPServer::finish()
     ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
 
     BytesPerAssoc::iterator j;
-    while ((j = bytesPerAssoc.begin())!= bytesPerAssoc.end())
+    while ((j = bytesPerAssoc.begin()) != bytesPerAssoc.end())
     {
         delete j->second;
         bytesPerAssoc.erase(j);
     }
     EndToEndDelay::iterator k;
-    while ((k = endToEndDelay.begin())!= endToEndDelay.end())
+    while ((k = endToEndDelay.begin()) != endToEndDelay.end())
     {
         delete k->second;
         endToEndDelay.erase(k);

@@ -31,7 +31,7 @@
 
 Define_Module(Ieee80211MgmtAP);
 
-static std::ostream& operator<< (std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
+static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
 {
     os << "state:" << sta.status;
     return os;
@@ -64,7 +64,7 @@ void Ieee80211MgmtAP::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
-        scheduleAt(simTime()+uniform(0,beaconInterval), beaconTimer);
+        scheduleAt(simTime()+uniform(0, beaconInterval), beaconTimer);
     }
 }
 
@@ -396,7 +396,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
     EV << "Processing ProbeRequest frame\n";
 
-    if (strcmp(frame->getBody().getSSID(),"")!=0 && strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
+    if (strcmp(frame->getBody().getSSID(), "")!=0 && strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
     {
         EV << "SSID `" << frame->getBody().getSSID() << "' does not match, ignoring frame\n";
         dropManagementFrame(frame);

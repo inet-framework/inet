@@ -35,8 +35,8 @@ void Ns2MotionMobility::parseFile(const char *filename)
     std::ifstream in(filename, std::ios::in);
 
     if (in.fail())
-        throw cRuntimeError("Cannot open file '%s'",filename);
-    ns2File->initial[0]=ns2File->initial[1]=ns2File->initial[2]=-1;
+        throw cRuntimeError("Cannot open file '%s'", filename);
+    ns2File->initial[0] = ns2File->initial[1] = ns2File->initial[2] = -1;
     std::string line;
     std::string subline;
 
@@ -44,21 +44,21 @@ void Ns2MotionMobility::parseFile(const char *filename)
     {
         // '#' line
         int num_node;
-        std::string::size_type found=line.find('#');
+        std::string::size_type found = line.find('#');
         if (found == 0)
             continue;
         if (found != std::string::npos)
             subline = line;
         else
-            subline = line.substr(0,found);
-        found=subline.find("$node_");
+            subline = line.substr(0, found);
+        found = subline.find("$node_");
         if (found == std::string::npos)
             continue;
         // Node Id
         std::string::size_type pos1 = subline.find('(');
         std::string::size_type pos2 = subline.find(')');
         if (pos2-pos1>1)
-            num_node = std::atoi (subline.substr(pos1+1,pos2-1).c_str());
+            num_node = std::atoi(subline.substr(pos1+1, pos2-1).c_str());
         if (num_node!=nodeId)
             continue;
         // Initial position
@@ -69,18 +69,18 @@ void Ns2MotionMobility::parseFile(const char *filename)
             found = subline.find("X_");
             if (found!=std::string::npos)
             {
-                ns2File->initial[0]= std::atof (subline.substr(found+3,std::string::npos).c_str());
+                ns2File->initial[0] = std::atof(subline.substr(found+3, std::string::npos).c_str());
             }
             found = subline.find("Y_");
             if (found!=std::string::npos)
             {
-                ns2File->initial[1]=std::atof (subline.substr(found+3,std::string::npos).c_str());
+                ns2File->initial[1] = std::atof(subline.substr(found+3, std::string::npos).c_str());
             }
 
             found = subline.find("Z_");
             if (found!=std::string::npos)
             {
-                ns2File->initial[2]=std::atof (subline.substr(found+3,std::string::npos).c_str());
+                ns2File->initial[2] = std::atof(subline.substr(found+3, std::string::npos).c_str());
             }
         }
         found = subline.find("setdest");
@@ -90,9 +90,9 @@ void Ns2MotionMobility::parseFile(const char *filename)
             Ns2MotionFile::Line& vec = ns2File->lines.back();
             // initial time
             found = subline.find("at");
-            vec.push_back (std::atof (subline.substr(found+3).c_str()));
+            vec.push_back(std::atof(subline.substr(found+3).c_str()));
 
-            std::string parameters = subline.substr (subline.find ("setdest ")+8,std::string::npos);
+            std::string parameters = subline.substr(subline.find("setdest ")+8, std::string::npos);
 
             std::stringstream linestream(parameters);
             double d;
@@ -103,7 +103,7 @@ void Ns2MotionMobility::parseFile(const char *filename)
     in.close();
     // exist data?
     if (ns2File->initial[0]==-1 || ns2File->initial[1]==-1 || ns2File->initial[2]==-1)
-        throw cRuntimeError("node '%d' Error ns2 motion file '%s'",nodeId,filename);
+        throw cRuntimeError("node '%d' Error ns2 motion file '%s'", nodeId, filename);
 
 }
 
@@ -170,7 +170,7 @@ void Ns2MotionMobility::setTargetPosition()
     simtime_t now = simTime();
     if ((time-now)>updateInterval)
     {
-        targetTime=time;
+        targetTime = time;
     }
     else
     {

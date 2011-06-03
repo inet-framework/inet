@@ -141,13 +141,13 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         if (bpAttr)
         {
-            if (!strcmp(bpAttr,"reflect"))
+            if (!strcmp(bpAttr, "reflect"))
                 borderPolicy = REFLECT;
-            else if (!strcmp(bpAttr,"wrap"))
+            else if (!strcmp(bpAttr, "wrap"))
                 borderPolicy = WRAP;
-            else if (!strcmp(bpAttr,"placerandomly"))
+            else if (!strcmp(bpAttr, "placerandomly"))
                 borderPolicy = PLACERANDOMLY;
-            else if (!strcmp(bpAttr,"error"))
+            else if (!strcmp(bpAttr, "error"))
                 borderPolicy = RAISEERROR;
             else
                 throw cRuntimeError("<set>: value for attribute borderPolicy is invalid, should be "
@@ -155,7 +155,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
                       stmt->getSourceLocation());
         }
     }
-    else if (!strcmp(tag,"forward"))
+    else if (!strcmp(tag, "forward"))
     {
         const char *dAttr = stmt->getAttribute("d");
         const char *tAttr = stmt->getAttribute("t");
@@ -218,7 +218,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         targetTime += t;  // targetPos is unchanged
     }
-    else if (!strcmp(tag,"moveto"))
+    else if (!strcmp(tag, "moveto"))
     {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
@@ -239,7 +239,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         targetTime += t;
     }
-    else if (!strcmp(tag,"moveby"))
+    else if (!strcmp(tag, "moveby"))
     {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
@@ -266,7 +266,7 @@ double TurtleMobility::getValue(const char *s)
 {
     // first, textually replace $MAXX and $MAXY with their actual values
     std::string str;
-    if (strchr(s,'$'))
+    if (strchr(s, '$'))
     {
         char strMinX[32], strMinY[32];
         char strMaxX[32], strMaxY[32];

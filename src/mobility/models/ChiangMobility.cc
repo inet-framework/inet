@@ -110,7 +110,7 @@ int ChiangMobility::getNextStateIndex(int currentState, double rvalue)
  */
 void ChiangMobility::recalculateState()
 {
-    for(int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; ++i)
     {
         m_states[i] = getNextStateIndex(m_states[i], uniform(0.0, 1.0));
     }

@@ -76,7 +76,7 @@ class SIM_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Constructor.
      */
-    explicit ThruputMeteringChannel(const char *name=NULL);
+    explicit ThruputMeteringChannel(const char *name = NULL);
 
     /**
      * Copy constructor.

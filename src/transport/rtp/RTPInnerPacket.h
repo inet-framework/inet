@@ -28,7 +28,7 @@
 class RTPInnerPacket : public RTPInnerPacket_Base
 {
   public:
-    RTPInnerPacket(const char *name=NULL, int kind=0) : RTPInnerPacket_Base(name,kind) {}
+    RTPInnerPacket(const char *name = NULL, int kind = 0) : RTPInnerPacket_Base(name, kind) {}
     RTPInnerPacket(const RTPInnerPacket& other) : RTPInnerPacket_Base(other.getName()) {operator=(other);}
     RTPInnerPacket& operator=(const RTPInnerPacket& other) {RTPInnerPacket_Base::operator=(other); return *this;}
     virtual RTPInnerPacket *dup() const {return new RTPInnerPacket(*this);}

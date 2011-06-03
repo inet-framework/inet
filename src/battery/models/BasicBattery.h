@@ -85,11 +85,11 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     virtual void initialize(int);
     virtual void finish();
 
-    virtual int registerDevice(cObject *id,int numAccts)
+    virtual int registerDevice(cObject *id, int numAccts)
     {
         error("BasicBattery::registerDevice not overloaded"); return 0;
     }
-    virtual void registerWirelessDevice(int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)
+    virtual void registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
     {
         error("BasicBattery::registerWirelessDevice not overloaded");
     }
@@ -98,7 +98,7 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     {
         error("BasicBattery::draw not overloaded");
     }
-    double GetEnergy () {return residualCapacity;}
+    double GetEnergy() {return residualCapacity;}
 
 
     // OPERATIONS
@@ -139,7 +139,7 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     // OPERATIONS
     // void         handleMessage(cMessage *msg);
 
-    virtual void receiveChangeNotification (int, const cPolymorphic*);
+    virtual void receiveChangeNotification(int, const cPolymorphic*);
 
 };
 

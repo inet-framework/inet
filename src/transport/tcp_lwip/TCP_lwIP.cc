@@ -265,7 +265,7 @@ err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
     TcpLwipConnection *conn = (TcpLwipConnection *)arg;
     ASSERT(conn != NULL);
 
-    switch(event)
+    switch (event)
     {
     case LwipTcpLayer::LWIP_EVENT_ACCEPT:
         err = tcp_event_accept(*conn, pcb, err);

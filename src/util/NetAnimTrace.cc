@@ -37,7 +37,7 @@ void NetAnimTrace::initialize()
 
     dump();
 
-    messageSentSignal  = registerSignal("messageSent");
+    messageSentSignal = registerSignal("messageSent");
     simulation.getSystemModule()->subscribe(POST_MODEL_CHANGE, this);
     simulation.getSystemModule()->subscribe(messageSentSignal, this);
 }
@@ -156,48 +156,48 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
     // the following code is based on Tkenv (modinsp.cc, getSubmoduleCoords())
 
     // read x,y coordinates from "p" tag
-    x = toDouble(ds.getTagArg("p",0), x);
-    y = toDouble(ds.getTagArg("p",1), y);
+    x = toDouble(ds.getTagArg("p", 0), x);
+    y = toDouble(ds.getTagArg("p", 1), y);
 
     double sx = 20;
     double sy = 20;
 
-    const char *layout = ds.getTagArg("p",2); // matrix, row, column, ring, exact etc.
+    const char *layout = ds.getTagArg("p", 2); // matrix, row, column, ring, exact etc.
 
     // modify x,y using predefined layouts
     if (!layout || !*layout)
     {
         // we're happy
     }
-    else if (!strcmp(layout,"e") || !strcmp(layout,"x") || !strcmp(layout,"exact"))
+    else if (!strcmp(layout, "e") || !strcmp(layout, "x") || !strcmp(layout, "exact"))
     {
-        int dx = toDouble(ds.getTagArg("p",3), 0);
-        int dy = toDouble(ds.getTagArg("p",4), 0);
+        int dx = toDouble(ds.getTagArg("p", 3), 0);
+        int dy = toDouble(ds.getTagArg("p", 4), 0);
         x += dx;
         y += dy;
     }
-    else if (!strcmp(layout,"r") || !strcmp(layout,"row"))
+    else if (!strcmp(layout, "r") || !strcmp(layout, "row"))
     {
-        int dx = toDouble(ds.getTagArg("p",3), 2*sx);
+        int dx = toDouble(ds.getTagArg("p", 3), 2*sx);
         x += submod->getIndex()*dx;
     }
-    else if (!strcmp(layout,"c") || !strcmp(layout,"col") || !strcmp(layout,"column"))
+    else if (!strcmp(layout, "c") || !strcmp(layout, "col") || !strcmp(layout, "column"))
     {
-        int dy = toDouble(ds.getTagArg("p",3), 2*sy);
+        int dy = toDouble(ds.getTagArg("p", 3), 2*sy);
         y += submod->getIndex()*dy;
     }
-    else if (!strcmp(layout,"m") || !strcmp(layout,"matrix"))
+    else if (!strcmp(layout, "m") || !strcmp(layout, "matrix"))
     {
-        int columns = toDouble(ds.getTagArg("p",3), 5);
-        int dx = toDouble(ds.getTagArg("p",4), 2*sx);
-        int dy = toDouble(ds.getTagArg("p",5), 2*sy);
+        int columns = toDouble(ds.getTagArg("p", 3), 5);
+        int dx = toDouble(ds.getTagArg("p", 4), 2*sx);
+        int dy = toDouble(ds.getTagArg("p", 5), 2*sy);
         x += (submod->getIndex() % columns)*dx;
         y += (submod->getIndex() / columns)*dy;
     }
-    else if (!strcmp(layout,"i") || !strcmp(layout,"ri") || !strcmp(layout,"ring"))
+    else if (!strcmp(layout, "i") || !strcmp(layout, "ri") || !strcmp(layout, "ring"))
     {
-        int rx = toDouble(ds.getTagArg("p",3), (sx+sy)*submod->size()/4);
-        int ry = toDouble(ds.getTagArg("p",4), rx);
+        int rx = toDouble(ds.getTagArg("p", 3), (sx+sy)*submod->size()/4);
+        int ry = toDouble(ds.getTagArg("p", 4), rx);
 
         x += (int) floor(rx - rx*sin(submod->getIndex()*2*PI/submod->size()));
         y += (int) floor(ry - ry*cos(submod->getIndex()*2*PI/submod->size()));

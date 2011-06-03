@@ -77,7 +77,7 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
 cPacket *UDPBasicApp::createPacket()
 {
     char msgName[32];
-    sprintf(msgName,"UDPBasicAppData-%d", counter++);
+    sprintf(msgName, "UDPBasicAppData-%d", counter++);
 
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(par("messageLength").longValue());

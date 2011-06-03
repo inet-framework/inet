@@ -279,7 +279,7 @@ class INET_API UDPSocket
      * in that case you don't have to look it up by sockId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr = NULL);
 
     /**
      * Examines the message (which should have arrived from UDP),

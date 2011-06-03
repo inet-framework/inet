@@ -21,11 +21,11 @@ void Batman::hna_local_buffer_fill(void)
     if (hna_list.empty())
         return;
 
-    for (unsigned int i=0;i< hna_list.size();i++)
+    for (unsigned int i=0; i < hna_list.size(); i++)
     {
         BatmanHnaMsg aux;
-        aux.addr=hna_list[i].addr;
-        aux.netmask=hna_list[i].netmask;
+        aux.addr = hna_list[i].addr;
+        aux.netmask = hna_list[i].netmask;
         hna_buff_local.push_back(aux);
     }
 }
@@ -44,11 +44,11 @@ void Batman::hna_local_task_exec(void)
         hna_local_entry = NULL;
         bool found = false;
 
-        for (HnaLocalEntryList::iterator it=hna_list.begin();it!=hna_list.end();it++)
+        for (HnaLocalEntryList::iterator it=hna_list.begin(); it!=hna_list.end(); it++)
         {
             hna_local_entry = &(*it);
             if ((hna_task->addr == hna_local_entry->addr) && (hna_task->netmask == hna_local_entry->netmask)) {
-                found=true;
+                found = true;
                 if (hna_task->route_action == ROUTE_DEL) {
                     // EV << "Deleting HNA from announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
                     hna_local_update_routes(hna_local_entry, ROUTE_DEL);
@@ -133,23 +133,23 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
     {
-        hna_global_entry=new Hna_global_entry;
-        hna_global_entry->addr=hna_element->addr;
-        hna_global_entry->netmask=hna_element->netmask;
-        hna_global_entry->curr_orig_node=NULL;
-        hnaMap.insert(std::pair<BatmanHnaMsg,Hna_global_entry*>(*hna_element,hna_global_entry));
+        hna_global_entry = new Hna_global_entry;
+        hna_global_entry->addr = hna_element->addr;
+        hna_global_entry->netmask = hna_element->netmask;
+        hna_global_entry->curr_orig_node = NULL;
+        hnaMap.insert(std::pair<BatmanHnaMsg,Hna_global_entry*>(*hna_element, hna_global_entry));
     }
 
     /* the given orig_node already is the current orig node for this HNA */
     if (hna_global_entry->curr_orig_node == orig_node)
         return;
 
-    bool notFound=false;
-    for (unsigned int i=0;i<hna_global_entry->orig_list.size();i++)
+    bool notFound = false;
+    for (unsigned int i=0; i<hna_global_entry->orig_list.size(); i++)
     {
         if (hna_global_entry->orig_list[i] == orig_node)
         {
-            notFound=true;
+            notFound = true;
             break;
         }
 
@@ -199,8 +199,8 @@ void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
         return;
-    hna_global_entry=it->second;
-    for (unsigned int i=0 ;i<hna_global_entry->orig_list.size();)
+    hna_global_entry = it->second;
+    for (unsigned int i=0; i<hna_global_entry->orig_list.size();)
     {
         orig_ptr = hna_global_entry->orig_list[i];
         /* delete old entry in orig list */
@@ -277,7 +277,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     }
 
     /* add new routes */
-    num_elements =  new_hna_len;
+    num_elements = new_hna_len;
     //debug_output(4, "HNA information received (%i HNA network%s): \n", num_elements, (num_elements > 1 ? "s": ""));
     for (i = 0; i < num_elements; i++) {
         e = new_hna[i].dup();
@@ -343,7 +343,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
             /* add the hna node if it does not exist */
             if (it == hnaMap.end())
                 return;
-            hna_global_entry=it->second;
+            hna_global_entry = it->second;
 
 
             if (!hna_global_entry)
@@ -373,14 +373,14 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
      * NOTE: no NULL pointer checking here because memcmp() just returns if n == 0
      */
 
-    bool change=false;
-    if ((int)orig_node->hna_buff.size()!= new_hna_len)
+    bool change = false;
+    if ((int)orig_node->hna_buff.size() != new_hna_len)
         change = true;
     else
     {
-        for (unsigned int i=0;i<orig_node->hna_buff.size();i++)
+        for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
         {
-            if (*(orig_node->hna_buff[i])!= new_hna[i])
+            if (*(orig_node->hna_buff[i]) != new_hna[i])
             {
                 change = true;
                 break;
@@ -454,7 +454,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
         if (it==hnaMap.end())
             continue;
 
-        hna_global_entry=it->second;
+        hna_global_entry = it->second;
         /* if the given orig node is not in use no routes need to change */
         if (hna_global_entry->curr_orig_node == orig_node)
             continue;

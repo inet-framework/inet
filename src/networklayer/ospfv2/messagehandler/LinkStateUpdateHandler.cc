@@ -157,7 +157,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                 if (!ackFlags.noLSAInstanceInDatabase) {
                     // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
                     ackFlags.lsaIsNewer = (lsaInDatabase->getHeader() < currentLSA->getHeader());
-                    ackFlags.lsaIsDuplicate = (operator== (lsaInDatabase->getHeader(), currentLSA->getHeader()));
+                    ackFlags.lsaIsDuplicate = (operator==(lsaInDatabase->getHeader(), currentLSA->getHeader()));
                 }
                 if ((ackFlags.noLSAInstanceInDatabase) || (ackFlags.lsaIsNewer)) {
                     LSATrackingInfo* info = (!ackFlags.noLSAInstanceInDatabase) ? dynamic_cast<LSATrackingInfo*> (lsaInDatabase) : NULL;

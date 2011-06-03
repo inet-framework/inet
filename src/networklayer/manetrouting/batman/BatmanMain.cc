@@ -5,7 +5,7 @@
 #include "IPv4ControlInfo.h"
 #include "UDPPacket_m.h"
 
-Define_Module (Batman);
+Define_Module(Batman);
 
 std::ostream& operator<<(std::ostream& os, const OrigNode& e)
 {
@@ -22,25 +22,25 @@ std::ostream& operator<<(std::ostream& os, const NeighNode& e)
 
 Batman::Batman()
 {
-    debug_level=0;
-    debug_level_max=4;
-    gateway_class=0;
-    routing_class=0;
-    originator_interval=1;
-    debug_timeout=0;
-    pref_gateway=0;
+    debug_level = 0;
+    debug_level_max = 4;
+    gateway_class = 0;
+    routing_class = 0;
+    originator_interval = 1;
+    debug_timeout = 0;
+    pref_gateway = 0;
 
-    nat_tool_avail=0;
-    disable_client_nat=0;
+    nat_tool_avail = 0;
+    disable_client_nat = 0;
 
-    curr_gateway=NULL;
+    curr_gateway = NULL;
 
-    found_ifs=0;
-    active_ifs=0;
-    receive_max_sock=0;
+    found_ifs = 0;
+    active_ifs = 0;
+    receive_max_sock = 0;
 
-    unix_client=0;
-    log_facility_active=0;
+    unix_client = 0;
+    log_facility_active = 0;
 
     origMap.clear();
 
@@ -50,7 +50,7 @@ Batman::Batman()
     // struct vis_if vis_if;
 
 
-    tunnel_running=0;
+    tunnel_running = 0;
 
     hop_penalty = TQ_HOP_PENALTY;
     purge_timeout = PURGE_TIMEOUT;
@@ -60,7 +60,7 @@ Batman::Batman()
     local_win_size = TQ_LOCAL_WINDOW_SIZE;
     num_words = (TQ_LOCAL_WINDOW_SIZE / WORD_BIT_SIZE);
     aggregation_enabled = 1;
-    timer=NULL;
+    timer = NULL;
 
     hna_list.clear();
     hna_chg_list.clear();
@@ -115,14 +115,14 @@ void Batman::initialize(int stage)
 
 
     int32_t download_speed = 0, upload_speed = 0;
-    char routing_class_opt=0, pref_gw_opt = 0;
+    char routing_class_opt = 0, pref_gw_opt = 0;
     char purge_timeout_opt = 0;
-    found_ifs =0;
+    found_ifs = 0;
 
     registerRoutingModule();
     //createTimerQueue();
 
-    debug_level =par ("debugLevel");
+    debug_level = par("debugLevel");
     if ( debug_level > debug_level_max ) {
             opp_error( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
     }
@@ -142,20 +142,20 @@ void Batman::initialize(int stage)
         originator_interval = originator_i;
     }
     else
-        originator_interval = 1;// 1000 msec
+        originator_interval = 1; // 1000 msec
 
-    const char *preferedGateWay=par("preferedGateWay");
+    const char *preferedGateWay = par("preferedGateWay");
     IPv4Address tmp_ip_holder(preferedGateWay);
     if (!tmp_ip_holder.isUnspecified())
     {
         pref_gateway = tmp_ip_holder.getInt();
         pref_gw_opt = 1;
     }
-    routing_class = par ("routingClass");
+    routing_class = par("routingClass");
     if (routing_class > 0)
         routing_class_opt = 1;
     else
-        routing_class =0;
+        routing_class = 0;
 
 /*
     IPv4Address vis = par("visualizationServer");
@@ -171,9 +171,9 @@ void Batman::initialize(int stage)
         aggregation_enabled = 0;
     disable_client_nat = 1;
 
-    download_speed = par ("GWClass_download_speed");
-    upload_speed = par ("GWClass_upload_speed");
-    MAX_AGGREGATION_BYTES=par("MAX_AGGREGATION_BYTES");
+    download_speed = par("GWClass_download_speed");
+    upload_speed = par("GWClass_upload_speed");
+    MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
 
     if ( ( download_speed > 0 ) && ( upload_speed == 0 ) )
         upload_speed = download_speed / 5;
@@ -184,11 +184,11 @@ void Batman::initialize(int stage)
     }
 
     if ( ( gateway_class != 0 ) && ( routing_class != 0 ) ) {
-        opp_error ("Error - routing class can't be set while gateway class is in use !\n");
+        opp_error("Error - routing class can't be set while gateway class is in use !\n");
     }
 
     if ( ( gateway_class != 0 ) && ( pref_gateway != 0 ) ) {
-        opp_error ("Error - preferred gateway can't be set while gateway class is in use !\n" );
+        opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
     }
 
     /* use routing class 1 if none specified */
@@ -198,26 +198,26 @@ void Batman::initialize(int stage)
     //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
     //    opp_error("");
 
-    for (int i = 0;i<getNumWlanInterfaces();i++) {
+    for (int i = 0; i<getNumWlanInterfaces(); i++) {
         InterfaceEntry * iEntry = getWlanInterfaceEntry(i);
 
         BatmanIf *batman_if;
         batman_if = new BatmanIf();
         batman_if->dev = iEntry;
         batman_if->if_num = found_ifs;
-        batman_if->seqno=1;
+        batman_if->seqno = 1;
 
-        batman_if->wifi_if=true;
+        batman_if->wifi_if = true;
         batman_if->if_active = true;
         if (isInMacLayer())
         {
-            batman_if->address=(Uint128)iEntry->getMacAddress();
-            batman_if->broad=(Uint128)MACAddress::BROADCAST_ADDRESS;
+            batman_if->address = (Uint128)iEntry->getMacAddress();
+            batman_if->broad = (Uint128)MACAddress::BROADCAST_ADDRESS;
         }
         else
         {
-            batman_if->address=(Uint128)iEntry->ipv4Data()->getIPAddress();
-            batman_if->broad=(Uint128)IPv4Address::ALLONES_ADDRESS;
+            batman_if->address = (Uint128)iEntry->ipv4Data()->getIPAddress();
+            batman_if->broad = (Uint128)IPv4Address::ALLONES_ADDRESS;
         }
 
         batman_if->if_rp_filter_old = -1;
@@ -244,7 +244,7 @@ void Batman::initialize(int stage)
     //if (gateway_class != 0)
     //    init_interface_gw();
 
-    for (unsigned int i = 0;i< if_list.size();i++)
+    for (unsigned int i = 0; i < if_list.size(); i++)
     {
         BatmanIf * batman_if = if_list[i];
         schedule_own_packet(batman_if);
@@ -252,12 +252,12 @@ void Batman::initialize(int stage)
 
 
     timer = new cMessage();
-    WATCH_PTRMAP (origMap);
+    WATCH_PTRMAP(origMap);
 
     //simtime_t curr_time = simTime();
     //simtime_t select_timeout = (forw_list[0]->send_time - curr_time) > 0 ?forw_list[0]->send_time - curr_time : 10;
     simtime_t select_timeout = forw_list[0]->send_time > 0 ?forw_list[0]->send_time : 10;
-    scheduleAt(select_timeout,timer);
+    scheduleAt(select_timeout, timer);
 
 }
 
@@ -280,7 +280,7 @@ void Batman::handleMessage(cMessage *msg)
     if (timer == msg)
     {
         sendPackets(curr_time);
-        numOrig=origMap.size();
+        numOrig = origMap.size();
         return;
     }
 
@@ -293,11 +293,11 @@ void Batman::handleMessage(cMessage *msg)
     IPvXAddress srcAddr = ctrl->getSrcAddr();
     IPvXAddress destAddr = ctrl->getDestAddr();
     neigh = srcAddr.get4().getInt();
-    for (unsigned int i=0;i<if_list.size();i++)
+    for (unsigned int i=0; i<if_list.size(); i++)
     {
         if (if_list[i]->dev->getInterfaceId()==ctrl->getInterfaceId())
         {
-            if_incoming=if_list[i];
+            if_incoming = if_list[i];
             break;
         }
     }
@@ -308,23 +308,23 @@ void Batman::handleMessage(cMessage *msg)
     curr_packet_len = 0;
 
     BatmanPacket * bat_packet = NULL;
-    UDPPacket * udpPacket=dynamic_cast<UDPPacket*>(msg);
+    UDPPacket * udpPacket = dynamic_cast<UDPPacket*>(msg);
     if (udpPacket)
     {
-        if (udpPacket->getDestinationPort()!= BATMAN_PORT)
+        if (udpPacket->getDestinationPort() != BATMAN_PORT)
         {
             delete  msg;
             sendPackets(curr_time);
             return;
         }
-        cMessage* msg_aux  = udpPacket->decapsulate();
+        cMessage* msg_aux = udpPacket->decapsulate();
         bat_packet = dynamic_cast <BatmanPacket*>(msg_aux);
         if (!bat_packet)
         {
             delete msg;
             delete msg_aux;
             sendPackets(curr_time);
-            numOrig=origMap.size();
+            numOrig = origMap.size();
             return;
         }
         delete msg;
@@ -347,7 +347,7 @@ void Batman::handleMessage(cMessage *msg)
         hna_buff_len = bat_packet->getHnaLen() * 5;
 
 
-        unsigned char  hnaLen =  bat_packet->getHnaMsgArraySize();
+        unsigned char  hnaLen = bat_packet->getHnaMsgArraySize();
         if (hnaLen!=0)
             hna_recv_buff = &bat_packet->getHnaMsg(0);
         else
@@ -385,22 +385,22 @@ void Batman::handleMessage(cMessage *msg)
 
         if (is_my_orig) {
             orig_neigh_node = get_orig_node(neigh);
-            bool sameIf =false;
+            bool sameIf = false;
             if (if_incoming->dev->ipv4Data()->getIPAddress().getInt() == bat_packet->getOrig().getIPAddress().getInt())
-                sameIf=true;
+                sameIf = true;
 
             if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0))
             {
                 std::vector<TYPE_OF_WORD>vectorAux;
-                for (unsigned int i=0;i<num_words;i++)
+                for (unsigned int i=0; i<num_words; i++)
                 {
                     vectorAux.push_back(orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]);
                 }
                 bit_mark(vectorAux, 0);
                 orig_neigh_node->bcast_own_sum[if_incoming->if_num] = bit_packet_count(vectorAux);
-                for (unsigned int i=0;i<num_words;i++)
+                for (unsigned int i=0; i<num_words; i++)
                 {
-                    orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]= vectorAux[i];
+                    orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i] = vectorAux[i];
                 }
                 EV<< "count own bcast (is_my_orig): old = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num]<<endl;
             }
@@ -470,16 +470,16 @@ void Batman::handleMessage(cMessage *msg)
 
         BatmanPacket * bat_packetAux = bat_packet;
         bat_packet = (BatmanPacket*) bat_packet->decapsulate();
-        schedule_forward_packet(orig_node,bat_packetAux, neigh, 0, hna_buff_len, if_incoming, curr_time);
+        schedule_forward_packet(orig_node, bat_packetAux, neigh, 0, hna_buff_len, if_incoming, curr_time);
     }
     sendPackets(curr_time);
-    numOrig=origMap.size();
+    numOrig = origMap.size();
 }
 
 void Batman::sendPackets(const simtime_t &curr_time)
 {
     send_outstanding_packets(curr_time);
-    if (curr_time - debug_timeout  > 1) {
+    if (curr_time - debug_timeout > 1) {
 
         debug_timeout = curr_time;
         purge_orig( curr_time );
@@ -508,27 +508,27 @@ void Batman::scheduleNextEvent()
          {
              cancelEvent(timer);
              if (select_timeout>simTime())
-                 scheduleAt(select_timeout,timer);
+                 scheduleAt(select_timeout, timer);
              else
-                 scheduleAt(simTime(),timer);
+                 scheduleAt(simTime(), timer);
          }
      }
      else
      {
          if (select_timeout>simTime())
-             scheduleAt(select_timeout,timer);
+             scheduleAt(select_timeout, timer);
          else
-             scheduleAt(simTime(),timer);
+             scheduleAt(simTime(), timer);
      }
 }
 
-uint32_t Batman::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
+uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 {
 
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
     {
-        OrigNode * node =it->second;
+        OrigNode * node = it->second;
         add.resize(0);
         add.push_back(node->router->addr);
         return -1;
@@ -536,13 +536,13 @@ uint32_t Batman::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
     return 0;
 }
 
-bool Batman::getNextHop(const Uint128 &dest,Uint128 &add,int &iface, double &val)
+bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &val)
 {
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
     {
-        OrigNode * node =it->second;
-        add=node->router->addr;
+        OrigNode * node = it->second;
+        add = node->router->addr;
         return true;
     }
     return false;

@@ -28,7 +28,7 @@
 class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 {
   public:
-    RTCPReceiverReportPacket(const char *name=NULL, int kind=0);
+    RTCPReceiverReportPacket(const char *name = NULL, int kind = 0);
     RTCPReceiverReportPacket(const RTCPReceiverReportPacket& other) : RTCPReceiverReportPacket_Base(other.getName()) {operator=(other);}
     RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& other) {RTCPReceiverReportPacket_Base::operator=(other); return *this;}
     virtual RTCPReceiverReportPacket *dup() const {return new RTCPReceiverReportPacket(*this);}
@@ -42,7 +42,7 @@ class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 class RTCPSDESPacket : public RTCPSDESPacket_Base
 {
   public:
-    RTCPSDESPacket(const char *name=NULL, int kind=0);
+    RTCPSDESPacket(const char *name = NULL, int kind = 0);
     RTCPSDESPacket(const RTCPSDESPacket& other) : RTCPSDESPacket_Base(other.getName()) {operator=(other);}
     RTCPSDESPacket& operator=(const RTCPSDESPacket& other) {RTCPSDESPacket_Base::operator=(other); return *this;}
     virtual RTCPSDESPacket *dup() const {return new RTCPSDESPacket(*this);}
@@ -53,7 +53,7 @@ class RTCPSDESPacket : public RTCPSDESPacket_Base
 class RTCPByePacket : public RTCPByePacket_Base
 {
   public:
-    RTCPByePacket(const char *name=NULL, int kind=0);
+    RTCPByePacket(const char *name = NULL, int kind = 0);
     RTCPByePacket(const RTCPByePacket& other) : RTCPByePacket_Base(other.getName()) {operator=(other);}
     RTCPByePacket& operator=(const RTCPByePacket& other) {RTCPByePacket_Base::operator=(other); return *this;}
     virtual RTCPByePacket *dup() const {return new RTCPByePacket(*this);}

@@ -33,21 +33,21 @@ DYMO_element& DYMO_element::operator=(const DYMO_element& msg)
     ttl = msg.ttl;
     i = msg.i;
     res = msg.res;
-    notify_addr=msg.notify_addr;
-    target_addr=msg.target_addr;
-    blockAddressGroup=msg.blockAddressGroup;
+    notify_addr = msg.notify_addr;
+    target_addr = msg.target_addr;
+    blockAddressGroup = msg.blockAddressGroup;
     extensionsize = msg.extensionsize;
 #ifdef  STATIC_BLOCK
-    memset(extension,0,STATIC_BLOCK_SIZE);
+    memset(extension, 0, STATIC_BLOCK_SIZE);
 #else
     if (extensionsize==0)
     {
-        extension =   NULL;
+        extension = NULL;
         return *this;
     }
-    extension =   new char[extensionsize];
+    extension = new char[extensionsize];
 #endif
-    memcpy(extension,msg.extension,extensionsize);
+    memcpy(extension, msg.extension, extensionsize);
     return *this;
 }
 
@@ -58,11 +58,11 @@ void DYMO_element:: clearExtension()
         return;
     }
 #ifdef  STATIC_BLOCK
-    memset(extension,0,STATIC_BLOCK_SIZE);
+    memset(extension, 0, STATIC_BLOCK_SIZE);
 #else
     delete [] extension;
 #endif
-    extensionsize=0;
+    extensionsize = 0;
 }
 
 DYMO_element::~DYMO_element()
@@ -80,12 +80,12 @@ char * DYMO_element::addExtension(int len)
         return NULL;
     }
 #ifndef STATIC_BLOCK
-    extension_aux =   new char [extensionsize+len];
-    memcpy(extension_aux,extension,extensionsize);
+    extension_aux = new char [extensionsize+len];
+    memcpy(extension_aux, extension, extensionsize);
     delete [] extension;
-    extension =  extension_aux;
+    extension = extension_aux;
 #endif
-    extensionsize+=len;
+    extensionsize += len;
     //setBitLength(getBitLength ()+(len*8));
     return extension;
 }
@@ -98,10 +98,10 @@ char * DYMO_element::delExtension(int len)
         return NULL;
     }
 #ifndef STATIC_BLOCK
-    extension_aux =   new char [extensionsize-len];
-    memcpy(extension_aux,extension,extensionsize-len);
+    extension_aux = new char [extensionsize-len];
+    memcpy(extension_aux, extension, extensionsize-len);
     delete [] extension;
-    extension =  extension_aux;
+    extension = extension_aux;
 #endif
     extensionsize -= len;
     // setBitLength(getBitLength ()-(len*8));
@@ -111,7 +111,7 @@ char * DYMO_element::delExtension(int len)
 //=== registration
 Register_Class(Dymo_RE);
 
-Dymo_RE::Dymo_RE (const char *name) : DYMO_element (name)
+Dymo_RE::Dymo_RE(const char *name) : DYMO_element(name)
 {
     //int bs = RE_BASIC_SIZE;
     // int size = bs*8;
@@ -136,10 +136,10 @@ Dymo_RE& Dymo_RE::operator=(const Dymo_RE& msg)
     thopcnt = msg.thopcnt;
     a = msg.a;
     s = msg.s;
-    res1= msg.res1;
-    res2= msg.res2;
+    res1 = msg.res1;
+    res2 = msg.res2;
     re_blocks = (struct re_block *)extension;
-    setBitLength(msg.getBitLength ());
+    setBitLength(msg.getBitLength());
     return *this;
 }
 
@@ -152,7 +152,7 @@ void Dymo_RE::newBocks(int n)
         new_add_size = (int)((MAX_RERR_BLOCKS - ceil((double)extensionsize/(double)sizeof(struct re_block)))*sizeof(struct re_block));
     else
         new_add_size = n*sizeof(struct re_block);
-    re_blocks = (struct re_block *) addExtension (new_add_size);
+    re_blocks = (struct re_block *) addExtension(new_add_size);
 }
 
 void Dymo_RE::delBocks(int n)
@@ -164,7 +164,7 @@ void Dymo_RE::delBocks(int n)
         del_blk = extensionsize;
     else
         del_blk = n*sizeof(struct re_block);
-    re_blocks = (struct re_block *) delExtension (del_blk);
+    re_blocks = (struct re_block *) delExtension(del_blk);
 }
 
 void Dymo_RE::delBlockI(int blockIndex)
@@ -180,10 +180,10 @@ void Dymo_RE::delBlockI(int blockIndex)
         new_add_size = extensionsize-sizeof(struct re_block);
 #ifdef  STATIC_BLOCK
         char extensionAux[STATIC_BLOCK_SIZE];
-        memcpy(extensionAux,extension,STATIC_BLOCK_SIZE);
+        memcpy(extensionAux, extension, STATIC_BLOCK_SIZE);
 #else
         char *extensionAux = new char[new_add_size];
-        memcpy(extensionAux,extension,new_add_size);
+        memcpy(extensionAux, extension, new_add_size);
 #endif
         struct re_block *re_blocksAux = (struct re_block *) extensionAux;
         int numBloks;
@@ -198,12 +198,12 @@ void Dymo_RE::delBlockI(int blockIndex)
         memmove(&re_blocksAux[blockIndex], &re_blocks[blockIndex+1],
                 n * sizeof(struct re_block));
 #ifdef  STATIC_BLOCK
-        memset(extension,0,STATIC_BLOCK_SIZE);
-        memcpy(extension,extensionAux,new_add_size);
+        memset(extension, 0, STATIC_BLOCK_SIZE);
+        memcpy(extension, extensionAux, new_add_size);
 #else
         delete [] extension;
         extension = extensionAux;
-        re_blocks =(struct re_block *)  extension;
+        re_blocks = (struct re_block *)  extension;
 
 #endif
         extensionsize = new_add_size;
@@ -226,9 +226,9 @@ Dymo_UERR& Dymo_UERR::operator=(const Dymo_UERR& msg)
     DYMO_element::operator=(msg);
 
     uelem_target_addr = msg.uelem_target_addr;
-    uerr_node_addr=msg.uerr_node_addr;
-    uelem_type=msg.uelem_type;
-    setBitLength(msg.getBitLength ());
+    uerr_node_addr = msg.uerr_node_addr;
+    uelem_type = msg.uelem_type;
+    setBitLength(msg.getBitLength());
     return *this;
 }
 
@@ -248,7 +248,7 @@ Dymo_RERR& Dymo_RERR::operator=(const Dymo_RERR& msg)
     if (this==&msg) return *this;
     DYMO_element::operator=(msg);
     rerr_blocks = (struct rerr_block *)extension;
-    setBitLength(msg.getBitLength ());
+    setBitLength(msg.getBitLength());
     return *this;
 }
 
@@ -261,7 +261,7 @@ void Dymo_RERR::newBocks(int n)
         new_add_size = (int)((MAX_RERR_BLOCKS - ceil((double)extensionsize/(double)sizeof(struct rerr_block)))*sizeof(struct rerr_block));
     else
         new_add_size = n*sizeof(struct rerr_block);
-    rerr_blocks = (struct rerr_block *) addExtension (new_add_size);
+    rerr_blocks = (struct rerr_block *) addExtension(new_add_size);
 }
 
 void Dymo_RERR::delBocks(int n)
@@ -274,7 +274,7 @@ void Dymo_RERR::delBocks(int n)
     else
         del_blk = n*sizeof(struct rerr_block);
 
-    rerr_blocks = (struct rerr_block *) delExtension (del_blk);
+    rerr_blocks = (struct rerr_block *) delExtension(del_blk);
 }
 
 
@@ -283,10 +283,10 @@ std::string DYMO_element::detailedInfo() const
     std::stringstream out;
 
 
-    Dymo_RE *re_type =NULL;
-    Dymo_UERR *uerr_type=NULL;
-    Dymo_RERR *rerr_type=NULL;
-    Dymo_HELLO *hello_type=NULL;
+    Dymo_RE *re_type = NULL;
+    Dymo_UERR *uerr_type = NULL;
+    Dymo_RERR *rerr_type = NULL;
+    Dymo_HELLO *hello_type = NULL;
     switch (type)
     {
     case DYMO_RE_TYPE:
@@ -313,27 +313,27 @@ std::string DYMO_element::detailedInfo() const
 
     if (re_type)
     {
-        IPv4Address addr = re_type->target_addr.getIPAddress ();
+        IPv4Address addr = re_type->target_addr.getIPAddress();
         out << " target :" << addr <<"  " << addr.getInt() <<"\n";
-        for (int i = 0; i <re_type->numBlocks(); i++)
+        for (int i = 0; i < re_type->numBlocks(); i++)
         {
             out << " --------------- block : " <<  i << "------------------ \n";
             out << "g : " << re_type->re_blocks[i].g << "\n";
             out << "prefix : " <<re_type->re_blocks[i].prefix<< "\n";
             out << "res : " <<re_type->re_blocks[i].res<< "\n";
             out << "re_hopcnt : " <<re_type->re_blocks[i].re_hopcnt<< "\n";
-            IPv4Address addr = re_type->re_blocks[i].re_node_addr.getIPAddress ();
+            IPv4Address addr = re_type->re_blocks[i].re_node_addr.getIPAddress();
             out << "re_node_addr : " << addr << "  " << addr.getInt() << "\n";
             out << "re_node_seqnum : " << re_type->re_blocks[i].re_node_seqnum << "\n";
         }
     }
     else if (rerr_type)
     {
-        IPv4Address naddr ((uint32_t) notify_addr);
+        IPv4Address naddr((uint32_t) notify_addr);
         out << " Notify address " << naddr << "\n"; // Khmm
         for (int i = 0; i < rerr_type->numBlocks(); i++)
         {
-            IPv4Address addr = rerr_type->rerr_blocks[i].unode_addr.getIPAddress ();
+            IPv4Address addr = rerr_type->rerr_blocks[i].unode_addr.getIPAddress();
             out << "unode_addr : " <<addr << "\n";
             out << "unode_seqnum : " << rerr_type->rerr_blocks[i].unode_seqnum << "\n";
         }

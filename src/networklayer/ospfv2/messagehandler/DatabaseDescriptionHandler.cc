@@ -52,8 +52,8 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                     {
                         if (neighbor->getNeighborID() > router->getRouterID()) {
                             OSPF::Neighbor::DDPacketID packetID;
-                            packetID.ddOptions      = ddOptions;
-                            packetID.options        = ddPacket->getOptions();
+                            packetID.ddOptions = ddOptions;
+                            packetID.options = ddPacket->getOptions();
                             packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
                             neighbor->setOptions(packetID.options);
@@ -82,8 +82,8 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
                         (neighbor->getNeighborID() < router->getRouterID()))
                     {
                         OSPF::Neighbor::DDPacketID packetID;
-                        packetID.ddOptions      = ddOptions;
-                        packetID.options        = ddPacket->getOptions();
+                        packetID.ddOptions = ddOptions;
+                        packetID.options = ddPacket->getOptions();
                         packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
                         neighbor->setOptions(packetID.options);
@@ -108,8 +108,8 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
             case OSPF::Neighbor::EXCHANGE_STATE:
                 {
                     OSPF::Neighbor::DDPacketID packetID;
-                    packetID.ddOptions      = ddPacket->getDdOptions();
-                    packetID.options        = ddPacket->getOptions();
+                    packetID.ddOptions = ddPacket->getDdOptions();
+                    packetID.options = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
                     if (packetID != neighbor->getLastReceivedDDPacket()) {
@@ -153,8 +153,8 @@ void OSPF::DatabaseDescriptionHandler::processPacket(OSPFPacket* packet, OSPF::I
             case OSPF::Neighbor::FULL_STATE:
                 {
                     OSPF::Neighbor::DDPacketID packetID;
-                    packetID.ddOptions      = ddPacket->getDdOptions();
-                    packetID.options        = ddPacket->getOptions();
+                    packetID.ddOptions = ddPacket->getDdOptions();
+                    packetID.options = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
 
                     if ((packetID != neighbor->getLastReceivedDDPacket()) ||

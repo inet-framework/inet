@@ -36,7 +36,7 @@ VoIPSourceApp::Buffer::Buffer() :
 
 VoIPSourceApp::Buffer::~Buffer()
 {
-    delete[] samples;
+    delete [] samples;
 }
 
 void VoIPSourceApp::Buffer::clear(int framesize)
@@ -52,7 +52,7 @@ void VoIPSourceApp::initialize(int stage)
 {
     UDPAppBase::initialize(stage);
 
-    if(stage != 3)  //wait until stage 3 - The Address resolver does not work before that!
+    if (stage != 3)  //wait until stage 3 - The Address resolver does not work before that!
         return;
 
     // say HELLO to the world
@@ -111,7 +111,7 @@ void VoIPSourceApp::handleMessage(cMessage *msg)
         {
             packet = generatePacket();
 
-            if(!packet)
+            if (!packet)
             {
                 if (repeatCount > 1)
                 {
@@ -186,9 +186,9 @@ void VoIPSourceApp::openSoundFile(const char *name)
 
     //get stream number
     streamIndex = -1;
-    for(unsigned int j = 0; j < pFormatCtx->nb_streams; j++)
+    for (unsigned int j = 0; j < pFormatCtx->nb_streams; j++)
     {
-        if(pFormatCtx->streams[j]->codec->codec_type == CODEC_TYPE_AUDIO)
+        if (pFormatCtx->streams[j]->codec->codec_type == CODEC_TYPE_AUDIO)
         {
             streamIndex = j;
             break;
@@ -225,7 +225,7 @@ void VoIPSourceApp::openSoundFile(const char *name)
 
     pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
 
-    if(pCodecCtx->sample_rate != sampleRate
+    if (pCodecCtx->sample_rate != sampleRate
             || pEncoderCtx->sample_fmt != pCodecCtx->sample_fmt
             || pCodecCtx->channels != 1)
     {
@@ -238,8 +238,8 @@ void VoIPSourceApp::openSoundFile(const char *name)
         short int *outb = new short int[sec * sampleRate * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / (8 * sizeof(short int))+16];
         int decoded = audio_resample(pReSampleCtx, outb, inb, sec * pCodecCtx->sample_rate);
         EV << "decoded:" <<decoded << endl;
-        delete[] inb;
-        delete[] outb;
+        delete [] inb;
+        delete [] outb;
         // end HACK
     }
     else
@@ -331,7 +331,7 @@ bool VoIPSourceApp::checkSilence(enum SampleFormat sampleFormat, void* _buf, int
     int max = 0;
     int i;
 
-    switch(sampleFormat)
+    switch (sampleFormat)
     {
     case SAMPLE_FMT_U8:
         {
@@ -399,12 +399,12 @@ void VoIPSourceApp::readFrame()
 
     char *tmpSamples = NULL;
 
-    if(pReSampleCtx)
+    if (pReSampleCtx)
     {
         tmpSamples = new char[Buffer::BUFSIZE];
     }
 
-    while(sampleBuffer.length() < samplesPerPacket * inBytesPerSample)
+    while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample)
     {
         //read one frame
         int err = av_read_frame(pFormatCtx, &packet);
@@ -456,7 +456,7 @@ void VoIPSourceApp::readFrame()
         }
     }
 
-    if(pReSampleCtx)
-        delete[] tmpSamples;
+    if (pReSampleCtx)
+        delete [] tmpSamples;
 }
 

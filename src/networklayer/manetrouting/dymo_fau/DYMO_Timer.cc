@@ -101,7 +101,7 @@ simtime_t DYMO_Timer::getInterval() const
     return interval;
 }
 
-std::ostream& operator<< (std::ostream& os, const DYMO_Timer& o)
+std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o)
 {
     os << o.info();
     return os;

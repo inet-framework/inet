@@ -64,7 +64,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;
         void sendOrSchedule(cPacket *msg);
-        void sendRequest(bool last=true);
+        void sendRequest(bool last = true);
         int32 ssn;
         static simsignal_t sentPkBytesSignal;
         static simsignal_t sentEchoedPkBytesSignal;
@@ -107,7 +107,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         /** Redefine to handle incoming SCTPStatusInfo. */
         void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
         //@}
-        void setPrimaryPath ();
+        void setPrimaryPath();
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int32 connId);

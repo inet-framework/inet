@@ -36,7 +36,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
     IPvXAddress localAddr, remoteAddr;
     int localPort, remotePort;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -82,7 +82,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     IPvXAddress localAddr;
     int localPort;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -115,7 +115,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");
@@ -162,7 +162,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     delete tcpCommand;
     delete msg;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
@@ -230,7 +230,7 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     // state, flush queues etc -- no need to do it here. Also, we don't need to
     // send notification to the user, they know what's going on.
     //
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             throw cRuntimeError("Error processing command ABORT: connection not open");

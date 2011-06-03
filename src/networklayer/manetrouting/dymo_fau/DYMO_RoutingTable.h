@@ -36,7 +36,7 @@
 class DYMO_RoutingTable : public cObject
 {
   public:
-    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr, const char* DYMO_INTERFACES, const IPv4Address& LL_MANET_ROUTERS) {DYMO_RoutingTable(host,myAddr);}
+    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr, const char* DYMO_INTERFACES, const IPv4Address& LL_MANET_ROUTERS) {DYMO_RoutingTable(host, myAddr);}
     DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr);
     virtual ~DYMO_RoutingTable();
 
@@ -59,9 +59,9 @@ class DYMO_RoutingTable : public cObject
     /** @adds a new entry to the table **/
     void addRoute(DYMO_RoutingEntry *entry);
     /** @deletes an entry from the table **/
-    void deleteRoute (DYMO_RoutingEntry *entry);
+    void deleteRoute(DYMO_RoutingEntry *entry);
     /** @removes invalid routes from the network layer routing table **/
-    void maintainAssociatedRoutingTable ();
+    void maintainAssociatedRoutingTable();
     /** @searchs an entry (exact match) and gives back a pointer to it, or 0 if none is found **/
     DYMO_RoutingEntry* getByAddress(IPv4Address addr);
     /** @searchs an entry (longest-prefix match) and gives back a pointer to it, or 0 if none is found **/

@@ -34,7 +34,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
     ExtensionHeaders extensionHeaders;
 
   public:
-    IPv6Datagram(const char *name=NULL, int kind=0) : IPv6Datagram_Base(name,kind) {}
+    IPv6Datagram(const char *name = NULL, int kind = 0) : IPv6Datagram_Base(name, kind) {}
     IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other.getName()) {operator=(other);}
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();
@@ -60,7 +60,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
      * Adds an extension header to the datagram, at the given position.
      * The default (atPos==-1) is to add the header at the end.
      */
-    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos=-1);
+    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
 
     /**
      * Calculates the length of the IPv6 header plus the extension

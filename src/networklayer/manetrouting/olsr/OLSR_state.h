@@ -65,7 +65,7 @@ class OLSR_state : public cObject
     void            erase_nb_tuple(const nsaddr_t &);
     void            insert_nb_tuple(OLSR_nb_tuple*);
 
-    OLSR_nb2hop_tuple*  find_nb2hop_tuple(const nsaddr_t &,const nsaddr_t &);
+    OLSR_nb2hop_tuple*  find_nb2hop_tuple(const nsaddr_t &, const nsaddr_t &);
     void            erase_nb2hop_tuple(OLSR_nb2hop_tuple*);
     void            erase_nb2hop_tuples(const nsaddr_t &);
     void            erase_nb2hop_tuples(const nsaddr_t &, const nsaddr_t &);
@@ -84,7 +84,7 @@ class OLSR_state : public cObject
     void            erase_link_tuple(OLSR_link_tuple*);
     void            insert_link_tuple(OLSR_link_tuple*);
 
-    OLSR_topology_tuple*    find_topology_tuple(const nsaddr_t &,const  nsaddr_t &);
+    OLSR_topology_tuple*    find_topology_tuple(const nsaddr_t &, const  nsaddr_t &);
     OLSR_topology_tuple*    find_newer_topology_tuple(const nsaddr_t &, uint16_t);
     void            erase_topology_tuple(OLSR_topology_tuple*);
     void            erase_older_topology_tuples(const nsaddr_t &, uint16_t);

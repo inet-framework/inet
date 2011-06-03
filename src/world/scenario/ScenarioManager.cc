@@ -64,17 +64,17 @@ void ScenarioManager::processCommand(cXMLElement *node)
     const char *tag = node->getTagName();
     EV << "processing <" << tag << "> command...\n";
 
-    if (!strcmp(tag,"at"))
+    if (!strcmp(tag, "at"))
         processAtCommand(node);
-    else if (!strcmp(tag,"set-param"))
+    else if (!strcmp(tag, "set-param"))
         processSetParamCommand(node);
-    else if (!strcmp(tag,"set-channel-attr"))
+    else if (!strcmp(tag, "set-channel-attr"))
         processSetChannelAttrCommand(node);
     // else if (!strcmp(tag,"create-module"))
     //    processCreateModuleCommand(node);
-     else if (!strcmp(tag,"connect"))
+     else if (!strcmp(tag, "connect"))
         processConnectCommand(node);
-     else if (!strcmp(tag,"disconnect"))
+     else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
     else
         processModuleSpecificCommand(node);
@@ -84,7 +84,7 @@ void ScenarioManager::processCommand(cXMLElement *node)
 static bool parseIndexedName(const char *s, std::string& name, int& index)
 {
     const char *b;
-    if ((b=strchr(s,'['))==NULL || s[strlen(s)-1]!=']')
+    if ((b = strchr(s, '['))==NULL || s[strlen(s)-1]!=']')
     {
         name = s;
         index = -1;

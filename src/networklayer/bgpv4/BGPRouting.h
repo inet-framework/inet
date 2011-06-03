@@ -139,11 +139,11 @@ private:
     std::vector<BGP::ASID>                  _ASListOUT;
     std::map<BGP::SessionID, BGPSession*>   _BGPSessions;
 
-    static const int  BGP_TCP_CONNECT_VALID     = 71;
-    static const int  BGP_TCP_CONNECT_CONFIRM   = 72;
-    static const int  BGP_TCP_CONNECT_FAILED    = 73;
-    static const int  BGP_TCP_CONNECT_OPEN_RCV  = 74;
-    static const int  BGP_TCP_KEEP_ALIVE_RCV    = 75;
+    static const int  BGP_TCP_CONNECT_VALID = 71;
+    static const int  BGP_TCP_CONNECT_CONFIRM = 72;
+    static const int  BGP_TCP_CONNECT_FAILED = 73;
+    static const int  BGP_TCP_CONNECT_OPEN_RCV = 74;
+    static const int  BGP_TCP_KEEP_ALIVE_RCV = 75;
 };
 
 #endif

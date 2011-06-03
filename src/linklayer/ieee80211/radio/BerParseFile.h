@@ -37,11 +37,11 @@ class BerParseFile
         double ber;
         inline SnrBer& operator=(const SnrBer& m)
         {
-            snr=m.snr;
-            ber=m.ber;
+            snr = m.snr;
+            ber = m.ber;
             return *this;
         }
-        bool operator < (SnrBer const &o) const
+        bool operator<(SnrBer const &o) const
         {
             return (snr < o.snr)?true:false;
         }
@@ -60,7 +60,7 @@ class BerParseFile
     char phyOpMode;
     bool fileBer;
 
-    int getTablePosition (double speed);
+    int getTablePosition(double speed);
     void clearBerTable();
     double dB2fraction(double dB)
     {

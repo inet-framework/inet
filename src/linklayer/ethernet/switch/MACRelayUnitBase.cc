@@ -32,7 +32,7 @@ static std::ostream& operator<< (std::ostream& os, cMessage *msg)
 }
 */
 
-static std::ostream& operator<< (std::ostream& os, const MACRelayUnitBase::AddressEntry& e)
+static std::ostream& operator<<(std::ostream& os, const MACRelayUnitBase::AddressEntry& e)
 {
     os << "port=" << e.portno << " insTime=" << e.insertionTime;
     return os;
@@ -45,18 +45,18 @@ static std::ostream& operator<< (std::ostream& os, const MACRelayUnitBase::Addre
  * also note that if on a line containing useful data that EOF occurs, then
  * that line will not be read in, hence must terminate file with unused line.
  */
-static char *fgetline (FILE *fp)
+static char *fgetline(FILE *fp)
 {
     // alloc buffer and read a line
     char *line = new char[MAX_LINE];
-    if (fgets(line,MAX_LINE,fp)==NULL)
+    if (fgets(line, MAX_LINE, fp)==NULL)
         return NULL;
 
     // chop CR/LF
     line[MAX_LINE-1] = '\0';
     int len = strlen(line);
     while (len>0 && (line[len-1]=='\n' || line[len-1]=='\r'))
-        line[--len]='\0';
+        line[--len] = '\0';
 
     return line;
 }
@@ -64,8 +64,8 @@ static char *fgetline (FILE *fp)
 void MACRelayUnitBase::initialize()
 {
     // number of ports
-    numPorts = gate("lowerLayerOut",0)->size();
-    if (gate("lowerLayerIn",0)->size()!=numPorts)
+    numPorts = gate("lowerLayerOut", 0)->size();
+    if (gate("lowerLayerIn", 0)->size()!=numPorts)
         error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
 
     // other parameters

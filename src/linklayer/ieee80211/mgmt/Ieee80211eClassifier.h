@@ -36,7 +36,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
      */
     Ieee80211eClassifier();
     virtual int getNumQueues();
-    virtual void setDefaultClass(int i=0){defaultAC=0;}
+    virtual void setDefaultClass(int i = 0){defaultAC = 0;}
     virtual int getDefaultClass(){return defaultAC;}
 
     /**

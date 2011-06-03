@@ -53,7 +53,7 @@ void BasicBattery::finish()
 
 
 
-void BasicBattery::receiveChangeNotification (
+void BasicBattery::receiveChangeNotification(
     int aCategory,
     const cPolymorphic* aDetails)
 {

@@ -66,8 +66,8 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
 
         APInfo() {
-            channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
-            isAuthenticated=false; authTimeoutMsg=NULL;
+            channel = -1; beaconInterval = rxPower = 0; authSeqExpected = -1;
+            isAuthenticated = false; authTimeoutMsg = NULL;
         }
     };
 
@@ -79,7 +79,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         int receiveSequence;
         cMessage *beaconTimeoutMsg;
 
-        AssociatedAPInfo() : APInfo() {receiveSequence=0; beaconTimeoutMsg=NULL;}
+        AssociatedAPInfo() : APInfo() {receiveSequence = 0; beaconTimeoutMsg = NULL;}
     };
 
   protected:

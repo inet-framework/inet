@@ -96,7 +96,7 @@ class INET_API IPv6Address
          *  0:0:0:0:0:0:0:0
          */
         IPv6Address()  {
-            d[0]=d[1]=d[2]=d[3]=0;
+            d[0] = d[1] = d[2] = d[3] = 0;
         }
 
         /**
@@ -165,7 +165,7 @@ class INET_API IPv6Address
          * Set the address to the given four 32-bit integers.
          */
         void set(uint32 d0, uint32 d1, uint32 d2, uint32 d3) {
-            d[0]=d0; d[1]=d1; d[2]=d2; d[3]=d3;
+            d[0] = d0; d[1] = d1; d[2] = d2; d[3] = d3;
         }
 
         /**

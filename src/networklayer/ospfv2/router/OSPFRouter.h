@@ -32,7 +32,7 @@
 namespace OSPF {
 
 /**
- * Represents the full OSPF datastructure as laid out in RFC2328.
+ * Represents the full OSPF data structure as laid out in RFC2328.
  */
 class Router {
 private:

@@ -50,7 +50,7 @@ void ANSimMobility::initialize(int stage)
 
         // get script: param should point to <simulation> element
         cXMLElement *rootElem = par("ansimTrace");
-        if (strcmp(rootElem->getTagName(),"simulation")!=0)
+        if (strcmp(rootElem->getTagName(), "simulation")!=0)
             throw cRuntimeError("ansimTrace: <simulation> is expected as root element not <%s> at %s",
                   rootElem->getTagName(), rootElem->getSourceLocation());
         nextPosChange = rootElem->getElementByPath("mobility/position_change");

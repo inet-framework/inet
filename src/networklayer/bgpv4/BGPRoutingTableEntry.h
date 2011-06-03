@@ -42,7 +42,7 @@ public:
     void            setPathType(RoutingPathType type)               { _pathType = type; }
     RoutingPathType getPathType(void) const                         { return _pathType; }
     void            addAS(ASID newAS)                               { _ASList.push_back(newAS); }
-    unsigned int    getASCount(void) const                          { return _ASList.size (); }
+    unsigned int    getASCount(void) const                          { return _ASList.size(); }
     ASID            getAS(unsigned int index) const                 { return _ASList[index]; }
 
     private:
@@ -55,33 +55,33 @@ public:
 
 } // namespace BGP
 
-inline BGP::RoutingTableEntry::RoutingTableEntry (void) :
-    IPv4Route(), _pathType (BGP::Incomplete)
+inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
+    IPv4Route(), _pathType(BGP::Incomplete)
 {
     netmask = 0xFFFFFFFF;
-    metric  = BGP::DEFAULT_COST;
-    source  = IPv4Route::BGP;
+    metric = BGP::DEFAULT_COST;
+    source = IPv4Route::BGP;
 }
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
 {
-    host          = entry->getHost();
-    netmask       = entry->getNetmask();
-    gateway       = entry->getGateway();
-    interfacePtr  = entry->getInterface();
-    type          = entry->getType();
-    metric        = BGP::DEFAULT_COST;
-    source        = IPv4Route::BGP;
+    host = entry->getHost();
+    netmask = entry->getNetmask();
+    gateway = entry->getGateway();
+    interfacePtr = entry->getInterface();
+    type = entry->getType();
+    metric = BGP::DEFAULT_COST;
+    source = IPv4Route::BGP;
 }
 
-inline std::ostream& operator<< (std::ostream& out, BGP::RoutingTableEntry& entry)
+inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry)
 {
     out << "BGP - Destination: "
         << entry.getDestinationID().str()
         << '/'
         << entry.getAddressMask().str()
         << " , PathType: ";
-    switch (entry.getPathType ()) {
+    switch (entry.getPathType()) {
         case BGP::EGP:          out << "EGP";           break;
         case BGP::IGP:          out << "IGP";           break;
         case BGP::Incomplete:   out << "Incomplete";    break;

@@ -22,7 +22,7 @@ Define_Module(EtherHub);
 
 simsignal_t EtherHub::pkBytesSignal = SIMSIGNAL_NULL;
 
-static cEnvir& operator<< (cEnvir& out, cMessage *msg)
+static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 {
     out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
     return out;
@@ -80,13 +80,13 @@ void EtherHub::handleMessage(cMessage *msg)
             bool isLast = (arrivalPort == ports-1) ? (i == ports-2) : (i == ports-1);
             cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
             // stop current transmission
-            gate("ethg$o",i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
+            gate("ethg$o", i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
             send(msg2, "ethg$o", i);
         }
     }
 }
 
-void EtherHub::finish ()
+void EtherHub::finish()
 {
     simtime_t t = simTime();
     recordScalar("simulated time", t);

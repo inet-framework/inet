@@ -109,15 +109,15 @@ void SCTP::initialize()
     cModule *netw = simulation.getSystemModule();
 
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
-    if(testing) {
+    if (testing) {
     }
     if (netw->hasPar("testTimeout"))
     {
         testTimeout = (simtime_t)netw->par("testTimeout");
     }
     numPacketsReceived = 0;
-    numPacketsDropped    = 0;
-    sizeConnMap          = 0;
+    numPacketsDropped = 0;
+    sizeConnMap = 0;
     if ((bool)par("udpEncapsEnabled"))
         bindPortForUDP();
 }
@@ -233,9 +233,9 @@ void SCTP::handleMessage(cMessage *msg)
             if (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()==INIT || ((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()==INIT_ACK )
                 findListen = true;
 
-            SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(),sctpmsg->getDestPort(), findListen);
+            SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
             if (!assoc && sctpConnMap.size()>0)
-                assoc = findAssocWithVTag(sctpmsg->getTag(),sctpmsg->getSrcPort(), sctpmsg->getDestPort());
+                assoc = findAssocWithVTag(sctpmsg->getTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
             if (!assoc)
             {
                 sctpEV3<<"no assoc found msg="<<sctpmsg->getName()<<"\n";
@@ -246,7 +246,7 @@ void SCTP::handleMessage(cMessage *msg)
                 }
                 if (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()==SHUTDOWN_ACK)
                     sendShutdownCompleteFromMain(sctpmsg, destAddr, srcAddr);
-                else if (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()!=ABORT  &&
+                else if (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()!=ABORT &&
                     ((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()!=SHUTDOWN_COMPLETE)
                 {
                     sendAbortFromMain(sctpmsg, destAddr, srcAddr);
@@ -291,7 +291,7 @@ void SCTP::handleMessage(cMessage *msg)
         {
             sctpEV3 << "no assoc found. msg="<<msg->getName()<<" number of assocs = "<<assocList.size()<<"\n";
 
-            if (strcmp(msg->getName(),"PassiveOPEN")==0 || strcmp(msg->getName(),"Associate")==0)
+            if (strcmp(msg->getName(), "PassiveOPEN")==0 || strcmp(msg->getName(), "Associate")==0)
             {
                 if (assocList.size()>0)
                 {
@@ -310,7 +310,7 @@ void SCTP::handleMessage(cMessage *msg)
                 }
                 if (assoc==NULL)
                 {
-                    assoc = new SCTPAssociation(this,appGateIndex,assocId);
+                    assoc = new SCTPAssociation(this, appGateIndex, assocId);
 
                     AppConnKey key;
                     key.appGateIndex = appGateIndex;
@@ -388,7 +388,7 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddr
         controlInfo->setDestAddr(destAddr.get4());
         msg->setControlInfo(controlInfo);
     }
-    send(msg,"to_ip");
+    send(msg, "to_ip");
 }
 
 void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr)
@@ -414,7 +414,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAdd
     controlInfo->setSrcAddr(srcAddr.get4());
     controlInfo->setDestAddr(destAddr.get4());
     msg->setControlInfo(controlInfo);
-    send(msg,"to_ip");
+    send(msg, "to_ip");
 }
 
 
@@ -424,7 +424,7 @@ void SCTP::updateDisplayString()
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t", 0, "");
         return;
     }
 
@@ -438,7 +438,7 @@ SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uin
     printInfoConnMap();
 
     // try with fully qualified SockPair
-    for (SctpVTagMap::iterator i=sctpVTagMap.begin(); i!=sctpVTagMap.end();i++)
+    for (SctpVTagMap::iterator i=sctpVTagMap.begin(); i!=sctpVTagMap.end(); i++)
     {
         if ((i->second.peerVTag==peerVTag && i->second.localPort==localPort
             && i->second.remotePort==remotePort)
@@ -765,9 +765,9 @@ void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAsso
 
 void SCTP::removeAssociation(SCTPAssociation *conn)
 {
-    bool            ok    = false;
+    bool            ok = false;
     bool            find = false;
-    const int32 id    = conn->assocId;
+    const int32 id = conn->assocId;
 
     sctpEV3 << "Deleting SCTP connection " << conn << " id= "<< id << endl;
 
@@ -775,8 +775,8 @@ void SCTP::removeAssociation(SCTPAssociation *conn)
     if (sizeConnMap > 0) {
         AssocStatMap::iterator assocStatMapIterator = assocStatMap.find(conn->assocId);
         if (assocStatMapIterator != assocStatMap.end()) {
-            assocStatMapIterator->second.stop        = simulation.getSimTime();
-            assocStatMapIterator->second.lifeTime    = assocStatMapIterator->second.stop - assocStatMapIterator->second.start;
+            assocStatMapIterator->second.stop = simulation.getSimTime();
+            assocStatMapIterator->second.lifeTime = assocStatMapIterator->second.stop - assocStatMapIterator->second.start;
             assocStatMapIterator->second.throughput = assocStatMapIterator->second.ackedBytes*8 / assocStatMapIterator->second.lifeTime.dbl();
         }
         while (!ok) {
@@ -853,7 +853,7 @@ void SCTP::removeAssociation(SCTPAssociation *conn)
     for (SCTPQueue::PayloadQueue::iterator i = conn->getRetransmissionQueue()->payloadQueue.begin();
           i != conn->getRetransmissionQueue()->payloadQueue.end(); i++) {
         SCTPQueue::PayloadQueue::iterator j = conn->getTransmissionQueue()->payloadQueue.find(i->second->tsn);
-        if(j != conn->getTransmissionQueue()->payloadQueue.end()) {
+        if (j != conn->getTransmissionQueue()->payloadQueue.end()) {
             conn->getTransmissionQueue()->payloadQueue.erase(j);
         }
     }
@@ -863,7 +863,7 @@ void SCTP::removeAssociation(SCTPAssociation *conn)
 
     AppConnKey key;
     key.appGateIndex = conn->appGateIndex;
-    key.assocId       = conn->assocId;
+    key.assocId = conn->assocId;
     sctpAppConnMap.erase(key);
     assocList.remove(conn);
     delete conn;

@@ -29,8 +29,8 @@ class RoutingTableEntry : public IPv4Route
 {
 public:
     enum RoutingPathType {
-        INTRAAREA     = 0,
-        INTERAREA     = 1,
+        INTRAAREA = 0,
+        INTERAREA = 1,
         TYPE1_EXTERNAL = 2,
         TYPE2_EXTERNAL = 3
     };
@@ -61,8 +61,8 @@ public:
     RoutingTableEntry(const RoutingTableEntry& entry);
     virtual ~RoutingTableEntry() {}
 
-    bool operator== (const RoutingTableEntry& entry) const;
-    bool operator!= (const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
+    bool operator==(const RoutingTableEntry& entry) const;
+    bool operator!=(const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
 
     void                   setDestinationType(RoutingDestinationType type)  { destinationType = type; }
     RoutingDestinationType getDestinationType() const  { return destinationType; }
@@ -99,7 +99,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     linkStateOrigin(NULL)
 {
     netmask = 0xFFFFFFFF;
-    source  = IPv4Route::OSPF;
+    source = IPv4Route::OSPF;
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 
@@ -113,13 +113,13 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     linkStateOrigin(entry.linkStateOrigin),
     nextHops(entry.nextHops)
 {
-    host          = entry.host;
-    netmask       = entry.netmask;
-    gateway       = entry.gateway;
-    interfacePtr  = entry.interfacePtr;
-    type          = entry.type;
-    source        = entry.source;
-    metric        = entry.metric;
+    host = entry.host;
+    netmask = entry.netmask;
+    gateway = entry.gateway;
+    interfacePtr = entry.interfacePtr;
+    type = entry.type;
+    source = entry.source;
+    metric = entry.metric;
 }
 
 inline void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
@@ -166,10 +166,10 @@ inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
     nextHops.push_back(hop);
 }
 
-inline bool OSPF::RoutingTableEntry::operator== (const RoutingTableEntry& entry) const
+inline bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) const
 {
     unsigned int hopCount = nextHops.size();
-    unsigned int i        = 0;
+    unsigned int i = 0;
 
     if (hopCount != entry.nextHops.size()) {
         return false;
@@ -181,18 +181,18 @@ inline bool OSPF::RoutingTableEntry::operator== (const RoutingTableEntry& entry)
         }
     }
 
-    return ((destinationType      == entry.destinationType)      &&
-            (host                 == entry.host)                 &&
-            (netmask              == entry.netmask)              &&
+    return ((destinationType == entry.destinationType) &&
+            (host == entry.host) &&
+            (netmask == entry.netmask) &&
             (optionalCapabilities == entry.optionalCapabilities) &&
-            (area                 == entry.area)                 &&
-            (pathType             == entry.pathType)             &&
-            (cost                 == entry.cost)                 &&
-            (type2Cost            == entry.type2Cost)            &&
-            (linkStateOrigin      == entry.linkStateOrigin));
+            (area == entry.area) &&
+            (pathType == entry.pathType) &&
+            (cost == entry.cost) &&
+            (type2Cost == entry.type2Cost) &&
+            (linkStateOrigin == entry.linkStateOrigin));
 }
 
-inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntry& entry)
+inline std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry)
 {
     out << "Destination: "
         << entry.getDestinationID().str()

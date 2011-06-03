@@ -45,14 +45,14 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
         {
             SCTPReceiveStream* rcvStream = new SCTPReceiveStream();
 
-            this->receiveStreams[i]=rcvStream;
+            this->receiveStreams[i] = rcvStream;
             rcvStream->setStreamId(i);
-            this->state->numMsgsReq[i]=0;
+            this->state->numMsgsReq[i] = 0;
         }
         for (i=0; i<outStreams; i++)
         {
             SCTPSendStream* sendStream = new SCTPSendStream(i);
-            this->sendStreams[i]=sendStream;
+            this->sendStreams[i] = sendStream;
             sendStream->setStreamId(i);
         }
     }
@@ -105,7 +105,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 
 int32 SCTPAssociation::numUsableStreams(void)
 {
-    int32 count=0;
+    int32 count = 0;
 
     for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); iter++)
         if (iter->second->getStreamQ()->length()>0 || iter->second->getUnorderedStreamQ()->length()>0)

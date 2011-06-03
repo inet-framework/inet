@@ -38,7 +38,7 @@ class INET_API FailureManager : public cSimpleModule, public IScriptable
     virtual void replaceNode(cModule *mod, const char *newNodeType);
     virtual void reconnectNode(cModule *old, cModule *n);
     virtual void reconnectAllGates(cModule *old, cModule *n);
-    virtual void reconnectGates(cModule *old, cModule *n, const char *gateName, int gateIndex=-1);
+    virtual void reconnectGates(cModule *old, cModule *n, const char *gateName, int gateIndex = -1);
     virtual void reconnectGate(cGate *oldGate, cGate *newGate);
     virtual cModule* getTargetNode(const char *target);
   private:

@@ -22,7 +22,7 @@ class Energy : public cPolymorphic
 {
   public:
     // LIFECYCLE
-    Energy(double e=250) : cPolymorphic(), mEnergy(e) {};
+    Energy(double e = 250) : cPolymorphic(), mEnergy(e) {};
 
     // OPERATIONS
     double  GetEnergy() const        { return mEnergy; }

@@ -77,7 +77,7 @@ class INET_API IPvXAddressResolver
      * looked up using <tt>simulation.getModuleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
-    virtual IPvXAddress resolve(const char *str, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress resolve(const char *str, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Similar to resolve(), but returns false (instead of throwing an error)
@@ -85,7 +85,7 @@ class INET_API IPvXAddressResolver
      * doesn't have an address assigned yet. (It still throws an error
      * on any other error condition).
      */
-    virtual bool tryResolve(const char *str, IPvXAddress& result, int addrType=ADDR_PREFER_IPv6);
+    virtual bool tryResolve(const char *str, IPvXAddress& result, int addrType = ADDR_PREFER_IPv6);
 
     /** @name Utility functions supporting resolve() */
     //@{
@@ -95,12 +95,12 @@ class INET_API IPvXAddressResolver
      * This function uses routingTableOf() to find the IRoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
-    virtual IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress addressOf(cModule *host, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Similar to addressOf(), but only looks at the given interface
      */
-    virtual IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress addressOf(cModule *host, const char *ifname, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
@@ -112,12 +112,12 @@ class INET_API IPvXAddressResolver
      * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
      * module. For IPv4, the first usable interface address is chosen.
      */
-    virtual IPvXAddress getAddressFrom(IInterfaceTable *ift, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress getAddressFrom(IInterfaceTable *ift, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
      */
-    virtual IPvXAddress getAddressFrom(InterfaceEntry *ie, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress getAddressFrom(InterfaceEntry *ie, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * The function tries to look up the IInterfaceTable module as submodule

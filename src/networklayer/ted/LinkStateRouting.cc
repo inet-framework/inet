@@ -133,13 +133,13 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address 
         TELinkStateInfo *match;
 
         // process link if we haven't seen this already and timestamp is newer
-        if(tedmod->checkLinkValidity(link, match))
+        if (tedmod->checkLinkValidity(link, match))
         {
             ASSERT(link.sourceId == link.advrouter.getInt());
 
             EV << "new information found" << endl;
 
-            if(!match)
+            if (!match)
             {
                 // and we have no info on this link so far, store it as it is
                 tedmod->ted.push_back(link);
@@ -148,7 +148,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address 
             else
             {
                 // copy over the information from it
-                if(match->state != link.state)
+                if (match->state != link.state)
                 {
                     match->state = link.state;
                     change = true;
@@ -156,7 +156,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address 
                 match->messageId = link.messageId;
                 match->sourceId = link.sourceId;
                 match->timestamp = link.timestamp;
-                for(int i = 0; i < 8; i++)
+                for (int i = 0; i < 8; i++)
                     match->UnResvBandwidth[i] = link.UnResvBandwidth[i];
                 match->MaxBandwidth = link.MaxBandwidth;
                 match->metric = link.metric;
@@ -166,15 +166,15 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address 
         }
     }
 
-    if(change)
+    if (change)
         tedmod->rebuildRoutingTable();
 
-    if(msg->getRequest())
+    if (msg->getRequest())
     {
         sendToPeer(sender, tedmod->ted, false);
     }
 
-    if(forward.size() > 0)
+    if (forward.size() > 0)
     {
         sendToPeers(forward, false, sender);
     }
@@ -189,16 +189,16 @@ void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, boo
     // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
     for (unsigned int i = 0; i < tedmod->ted.size(); i++)
     {
-        if(tedmod->ted[i].advrouter != routerId)
+        if (tedmod->ted[i].advrouter != routerId)
             continue;
 
-        if(tedmod->ted[i].linkid == exceptPeer)
+        if (tedmod->ted[i].linkid == exceptPeer)
             continue;
 
-        if(!tedmod->ted[i].state)
+        if (!tedmod->ted[i].state)
             continue;
 
-        if(find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
+        if (find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
             continue;
 
         // send a copy

@@ -80,7 +80,7 @@ TCP_NSC_Connection::TCP_NSC_Connection()
 // create a TCP_I_ESTABLISHED msg
 cMessage* TCP_NSC_Connection::createEstablishedMsg()
 {
-    if(sentEstablishedM)
+    if (sentEstablishedM)
         return NULL;
 
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
@@ -118,7 +118,7 @@ void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, Soc
     pNscSocketM->connect(nscSockPairM.remoteM.ipAddrM.str().c_str(), nscSockPairM.remoteM.portM);
 
     struct sockaddr_in sockAddr;
-    size_t sockAddrLen=sizeof(sockAddr);
+    size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
     nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
@@ -151,7 +151,7 @@ void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, Sock
     pNscSocketM->listen(nscSockPairP.localM.portM);
 
     struct sockaddr_in sockAddr;
-    size_t sockAddrLen=sizeof(sockAddr);
+    size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
 
     nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
@@ -168,23 +168,23 @@ void TCP_NSC_Connection::send(cPacket *msgP)
 
 void TCP_NSC_Connection::do_SEND()
 {
-    if(pNscSocketM)
+    if (pNscSocketM)
     {
         ASSERT(sendQueueM);
 
         char buffer[4096];
         int allsent = 0;
 
-        while(1)
+        while (1)
         {
             int bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer));
 
-            if(0 == bytes)
+            if (0 == bytes)
                 break;
 
             int sent = pNscSocketM->send_data(buffer, bytes);
 
-            if(sent > 0)
+            if (sent > 0)
             {
                 sendQueueM->dequeueTcpLayerMsg(sent);
                 allsent += sent;

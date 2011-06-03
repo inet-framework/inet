@@ -45,7 +45,7 @@ void UDPEchoApp::finish()
 cPacket *UDPEchoApp::createPacket()
 {
     char msgName[32];
-    sprintf(msgName,"UDPEcho-%d", counter++);
+    sprintf(msgName, "UDPEcho-%d", counter++);
 
     UDPEchoAppMsg *message = new UDPEchoAppMsg(msgName);
     message->setByteLength(par("messageLength").longValue());

@@ -487,7 +487,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         tcpEV << "ERROR: Failed to addSacks - at least 10 free bytes needed for SACK - used_options_len=" << used_options_len << endl;
 
         //reset flags:
-        state->snd_sack  = false;
+        state->snd_sack = false;
         state->snd_dsack = false;
         state->start_seqno = 0;
         state->end_seqno = 0;
@@ -561,7 +561,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         if (dsack_inserted)
             it++;
 
-        for ( ; it != state->sacks_array.end(); it++)
+        for (; it != state->sacks_array.end(); it++)
         {
             ASSERT(!it->empty());
 
@@ -593,7 +593,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
             state->sacks_array.pop_front(); // delete DSACK entry
 
         // reset flags:
-        state->snd_sack  = false;
+        state->snd_sack = false;
         state->snd_dsack = false;
         state->start_seqno = 0;
         state->end_seqno = 0;
@@ -689,7 +689,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         state->sacks_array.pop_front(); // delete DSACK entry
 
     // reset flags:
-    state->snd_sack  = false;
+    state->snd_sack = false;
     state->snd_dsack = false;
     state->start_seqno = 0;
     state->end_seqno = 0;

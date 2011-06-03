@@ -155,7 +155,7 @@ std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info)
 int TED::assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr)
 {
     // find node in vertices[] whose IPv4 address is nodeAddr
-    for (unsigned int i = 0 ; i < vertices.size(); i++)
+    for (unsigned int i = 0; i < vertices.size(); i++)
         if (vertices[i].node == nodeAddr)
             return i;
 

@@ -89,7 +89,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
     for (ptr = description; *ptr == ' '; ptr++)
         ;
-    switch(*ptr)
+    switch (*ptr)
     {
         case 'I': pictureType = 1; break;
         case 'P': pictureType = 2; break;

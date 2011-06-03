@@ -27,7 +27,7 @@
 
 
 
-static std::ostream& operator<< (std::ostream& out, cMessage *msg)
+static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
@@ -246,7 +246,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         if (dynamic_cast<EtherJam*>(msg) != NULL)
         {
             if (numConcurrentTransmissions <= 0)
-                error("numConcurrentTransmissions=%d on jam arrival (stray jam?)",numConcurrentTransmissions);
+                error("numConcurrentTransmissions=%d on jam arrival (stray jam?)", numConcurrentTransmissions);
 
             numConcurrentTransmissions--;
             EV << "Jam signal received, this marks end of one transmission\n";
@@ -468,7 +468,7 @@ void EtherMAC::handleRetransmission()
 
     EV << "Executing backoff procedure\n";
     int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
-    int slotNumber = intuniform(0,backoffrange-1);
+    int slotNumber = intuniform(0, backoffrange-1);
     simtime_t backofftime = slotNumber * curEtherDescr->slotTime;
 
     scheduleAt(simTime() + backofftime, endBackoffMsg);

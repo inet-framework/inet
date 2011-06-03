@@ -61,9 +61,9 @@ namespace OSPF {
 typedef unsigned long Metric;
 
 enum AuthenticationType {
-    NULL_TYPE           = 0,
+    NULL_TYPE = 0,
     SIMPLE_PASSWORD_TYPE = 1,
-    CRYTOGRAPHIC_TYPE   = 2
+    CRYTOGRAPHIC_TYPE = 2
 };
 
 struct AuthenticationKeyType {
@@ -132,38 +132,38 @@ const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, IPv4Address(0, 0, 0, 
 
 } // namespace OSPF
 
-inline IPv4Address operator& (IPv4Address address, IPv4Address mask)
+inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
 {
     IPv4Address maskedAddress;
     maskedAddress.set(address.getInt() & mask.getInt());
     return maskedAddress;
 }
 
-inline IPv4Address operator| (IPv4Address address, IPv4Address match)
+inline IPv4Address operator|(IPv4Address address, IPv4Address match)
 {
     IPv4Address matchAddress;
     matchAddress.set(address.getInt() | match.getInt());
     return matchAddress;
 }
 
-inline bool operator== (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
+inline bool operator==(OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
 {
     return (leftAddressRange.address == rightAddressRange.address &&
-            leftAddressRange.mask    == rightAddressRange.mask);
+            leftAddressRange.mask == rightAddressRange.mask);
 }
 
-inline bool operator!= (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
+inline bool operator!=(OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
 {
     return (!(leftAddressRange == rightAddressRange));
 }
 
-inline bool operator== (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (leftID.routerID == rightID.routerID &&
             leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
 }
 
-inline bool operator!= (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (!(leftID == rightID));
 }

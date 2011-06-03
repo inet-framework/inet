@@ -460,7 +460,7 @@ bool TCPBaseAlg::sendData()
         {
             // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
             if (state->increased_IW_enabled)
-                state->snd_cwnd = std::min (std::min (4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
+                state->snd_cwnd = std::min(std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
             else
                 state->snd_cwnd = state->snd_mss;
 

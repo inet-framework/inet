@@ -69,7 +69,7 @@ void ObstacleControl::handleSelfMsg(cMessage *msg) {
 
 void ObstacleControl::addFromXml(cXMLElement* xml) {
     std::string rootTag = xml->getTagName();
-    ASSERT (rootTag == "obstacles");
+    ASSERT(rootTag == "obstacles");
 
     cXMLElementList list = xml->getChildren();
     for (cXMLElementList::const_iterator i = list.begin(); i != list.end(); ++i) {

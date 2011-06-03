@@ -50,18 +50,18 @@ Define_Module(DYMOUM);
 
 /* Constructor for the DYMOUM routing agent */
 
-bool DYMOUM::log_file_fd_init=false;
+bool DYMOUM::log_file_fd_init = false;
 int DYMOUM::log_file_fd = -1;
 bool DYMOUM::iswrite = false;
-int DYMOUM::totalSend=0;
-int DYMOUM::totalRreqSend=0;
-int DYMOUM::totalRreqRec=0;
-int DYMOUM::totalRrepSend=0;
-int DYMOUM::totalRrepRec=0;
-int DYMOUM::totalRrepAckSend=0;
-int DYMOUM::totalRrepAckRec=0;
-int DYMOUM::totalRerrSend=0;
-int DYMOUM::totalRerrRec=0;
+int DYMOUM::totalSend = 0;
+int DYMOUM::totalRreqSend = 0;
+int DYMOUM::totalRreqRec = 0;
+int DYMOUM::totalRrepSend = 0;
+int DYMOUM::totalRrepRec = 0;
+int DYMOUM::totalRrepAckSend = 0;
+int DYMOUM::totalRrepAckRec = 0;
+int DYMOUM::totalRerrSend = 0;
+int DYMOUM::totalRerrRec = 0;
 std::map<Uint128,u_int32_t *> DYMOUM::mapSeqNum;
 
 void DYMOUM::initialize(int stage)
@@ -86,10 +86,10 @@ void DYMOUM::initialize(int stage)
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));
         memset(dev_indices, 0, sizeof(unsigned int) * DYMO_MAX_NR_INTERFACES);
-        this_host.seqnum    = 1;
-        this_host.nif       = 1;
-        this_host.prefix    = 0;
-        this_host.is_gw     = 0;
+        this_host.seqnum = 1;
+        this_host.nif = 1;
+        this_host.prefix = 0;
+        this_host.is_gw = 0;
 
         /* Search the 80211 interface */
 
@@ -99,11 +99,11 @@ void DYMOUM::initialize(int stage)
 
         for (int i = 0; i < DYMO_MAX_NR_INTERFACES; i++)
         {
-            DEV_NR(i).enabled=0;
+            DEV_NR(i).enabled = 0;
         }
 
-        numInterfacesActive=0;
-        for (int i = 0; i <getNumInterfaces(); i++)
+        numInterfacesActive = 0;
+        for (int i = 0; i < getNumInterfaces(); i++)
         {
             DEV_NR(i).ifindex = i;
             dev_indices[getWlanInterfaceIndex(i)] = i;
@@ -114,7 +114,7 @@ void DYMOUM::initialize(int stage)
                 DEV_NR(i).ipaddr.s_addr = getInterfaceEntry(i)->ipv4Data()->getIPAddress().getInt();
             if (isInMacLayer())
             {
-                mapSeqNum[DEV_NR(i).ipaddr.s_addr]=&this_host.seqnum;
+                mapSeqNum[DEV_NR(i).ipaddr.s_addr] = &this_host.seqnum;
             }
         }
         /* Set network interface parameters */
@@ -143,7 +143,7 @@ void DYMOUM::initialize(int stage)
         if ((DYMO_RATELIMIT = (int) par("MaxPktSec"))==-1)
             DYMO_RATELIMIT = 10;
         if (DYMO_RATELIMIT>50)
-            DYMO_RATELIMIT=50;
+            DYMO_RATELIMIT = 50;
         if ((NET_DIAMETER = (int) par("NetDiameter"))==-1)
             NET_DIAMETER = 10;
         if ((ROUTE_TIMEOUT = (long) par("RouteTimeOut"))==-1)
@@ -174,10 +174,10 @@ void DYMOUM::initialize(int stage)
         norouteBehaviour = par("noRouteBehaviour");
         useIndex = par("UseIndex");
 
-        strcpy(nodeName,getParentModule()->getParentModule()->getFullName());
+        strcpy(nodeName, getParentModule()->getParentModule()->getFullName());
         dymo_socket_init();
         startDYMOUMAgent();
-        is_init=true;
+        is_init = true;
         // Initialize the timer
         scheduleNextEvent();
         ev << "Dymo active" << "\n";
@@ -187,14 +187,14 @@ void DYMOUM::initialize(int stage)
 
 DYMOUM::DYMOUM()
 {
-    attachPacket=false;
-    is_init =false;
-    log_file_fd_init=false;
-    ipNodeId=NULL;
-    gateWayAddress=NULL;
-    numInterfacesActive=0;
-    timer_elem=0;
-    sendMessageEvent =NULL;/*&messageEvent;*/
+    attachPacket = false;
+    is_init = false;
+    log_file_fd_init = false;
+    ipNodeId = NULL;
+    gateWayAddress = NULL;
+    numInterfacesActive = 0;
+    timer_elem = 0;
+    sendMessageEvent = NULL; /*&messageEvent;*/
     macToIpAdress = NULL;
     mapSeqNum.clear();
 #ifdef MAPROUTINGTABLE
@@ -304,17 +304,17 @@ DYMOUM::~ DYMOUM()
 
 
 /* Entry-level packet reception */
-void DYMOUM::handleMessage (cMessage *msg)
+void DYMOUM::handleMessage(cMessage *msg)
 {
-    DYMO_element *dymoMsg=NULL;
-    IPv4Datagram * ipDgram=NULL;
-    UDPPacket * udpPacket=NULL;
+    DYMO_element *dymoMsg = NULL;
+    IPv4Datagram * ipDgram = NULL;
+    UDPPacket * udpPacket = NULL;
     cMessage *msg_aux;
     struct in_addr src_addr;
     struct in_addr dest_addr;
 
     if (is_init==false)
-        opp_error ("Dymo-UM has not been initialized ");
+        opp_error("Dymo-UM has not been initialized ");
     if (msg==sendMessageEvent)
     {
         // timer event
@@ -326,8 +326,8 @@ void DYMOUM::handleMessage (cMessage *msg)
 
     if (dynamic_cast<ControlManetRouting *>(msg))
     {
-        ControlManetRouting * control =  check_and_cast <ControlManetRouting *> (msg);
-        if (control->getOptionCode()== MANET_ROUTE_NOROUTE)
+        ControlManetRouting * control = check_and_cast <ControlManetRouting *> (msg);
+        if (control->getOptionCode() == MANET_ROUTE_NOROUTE)
         {
             if (isInMacLayer())
             {
@@ -339,14 +339,14 @@ void DYMOUM::handleMessage (cMessage *msg)
                 cMessage* msgAux = control->decapsulate();
 
                 if (msgAux)
-                    processMacPacket(PK(msgAux),control->getDestAddress(),control->getSrcAddress(),NS_IFINDEX);
+                    processMacPacket(PK(msgAux), control->getDestAddress(), control->getSrcAddress(), NS_IFINDEX);
                 else
                 {
                     if (!isLocalAddress(control->getSrcAddress()))
                     {
                         struct in_addr dest_addr;
                         dest_addr.s_addr = control->getDestAddress();
-                        rtable_entry_t *entry   = rtable_find(dest_addr);
+                        rtable_entry_t *entry = rtable_find(dest_addr);
                         rerr_send(dest_addr, NET_DIAMETER, entry);
                     }
                 }
@@ -355,15 +355,15 @@ void DYMOUM::handleMessage (cMessage *msg)
             {
                 ipDgram = (IPv4Datagram*) control->decapsulate();
                 EV << "Dymo rec datagram  " << ipDgram->getName() << " with dest=" << ipDgram->getDestAddress().str() << "\n";
-                processPacket(ipDgram,NS_IFINDEX);  /// Always use ns interface
+                processPacket(ipDgram, NS_IFINDEX);  /// Always use ns interface
             }
         }
-        else if (control->getOptionCode()== MANET_ROUTE_UPDATE)
+        else if (control->getOptionCode() == MANET_ROUTE_UPDATE)
         {
-            src_addr.s_addr =control->getSrcAddress();
+            src_addr.s_addr = control->getSrcAddress();
             dest_addr.s_addr = control->getDestAddress();
-            rtable_entry_t *src_entry   = rtable_find(src_addr);
-            rtable_entry_t *dest_entry  = rtable_find(dest_addr);
+            rtable_entry_t *src_entry = rtable_find(src_addr);
+            rtable_entry_t *dest_entry = rtable_find(dest_addr);
             rtable_update_timeout(src_entry);
             rtable_update_timeout(dest_entry);
         }
@@ -379,16 +379,16 @@ void DYMOUM::handleMessage (cMessage *msg)
         if (!isInMacLayer())
         {
             udpPacket = check_and_cast<UDPPacket*>(msg);
-            if (udpPacket->getDestinationPort()!= DYMO_PORT)
+            if (udpPacket->getDestinationPort() != DYMO_PORT)
             {
                 delete  msg;
                 scheduleNextEvent();
                 return;
             }
-            msg_aux  = udpPacket->decapsulate();
+            msg_aux = udpPacket->decapsulate();
         }
         else
-            msg_aux=msg;
+            msg_aux = msg;
 
         if (dynamic_cast<DYMO_element  *>(msg_aux))
         {
@@ -429,7 +429,7 @@ void DYMOUM::handleMessage (cMessage *msg)
     if (isLocalAddress(src_addr.s_addr))
     {
         delete dymoMsg;
-        dymoMsg=NULL;
+        dymoMsg = NULL;
         scheduleNextEvent();
         return;
     }
@@ -505,7 +505,7 @@ IPv4Datagram * DYMOUM::pkt_encapsulate(IPv4Datagram *p, IPv4Address gateway)
     datagram->setDiffServCodePoint(p->getDiffServCodePoint());
     datagram->setIdentification(p->getIdentification());
     datagram->setMoreFragments(false);
-    datagram->setDontFragment (p->getDontFragment());
+    datagram->setDontFragment(p->getDontFragment());
     datagram->setFragmentOffset(0);
     datagram->setTimeToLive(
         p->getTimeToLive() > 0 ?
@@ -546,7 +546,7 @@ void DYMOUM::scheduleNextEvent()
     timeout = timer_age_queue();
     if (timeout)
     {
-        delay  = (double)(((double)timeout->tv_usec/(double)1000000.0) +(double)timeout->tv_sec);
+        delay = (double)(((double)timeout->tv_usec/(double)1000000.0) +(double)timeout->tv_sec);
         timer = simTime()+delay;
         if (sendMessageEvent->isScheduled())
         {
@@ -585,14 +585,14 @@ void DYMOUM::getMacAddress(IPv4Datagram *dgram)
         if (ctrl!=NULL)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-            memcpy (macAddressConv.address,ctrlmac->getSrc().getAddressBytes(),6);  /* destination eth addr */
+            memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
             // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
             delete ctrl;
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it==macToIpAdress->end())
             {
                 unsigned int ip_src = dgram->getSrcAddress().getInt();
-                macToIpAdress->insert(std::make_pair(macAddressConv,ip_src));
+                macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
             }
         }
         delete dgram;
@@ -605,7 +605,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
     int interfaceId;
 
     DYMO_element  *dymo_msg = check_and_cast<DYMO_element *> (msg);
-    int ifIndex=NS_IFINDEX;
+    int ifIndex = NS_IFINDEX;
 
     if (!isInMacLayer())
     {
@@ -613,11 +613,11 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         IPvXAddress srcAddr = ctrl->getSrcAddr();
         IPvXAddress destAddr = ctrl->getDestAddr();
         src.s_addr = srcAddr.get4().getInt();
-        dst.s_addr =  destAddr.get4().getInt();
+        dst.s_addr = destAddr.get4().getInt();
         interfaceId = ctrl->getInterfaceId();
         if (ctrl)
         {
-            getMacAddress (ctrl->removeOrigDatagram());
+            getMacAddress(ctrl->removeOrigDatagram());
             delete ctrl;
         }
     }
@@ -629,13 +629,13 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         {
             Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
             src.s_addr = ctrl->getSrc();
-            dst.s_addr =  ctrl->getDest();
+            dst.s_addr = ctrl->getDest();
         }
         else
         {
             Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
             src.s_addr = ctrl->getSrc();
-            dst.s_addr =  ctrl->getDest();
+            dst.s_addr = ctrl->getDest();
             if (ctrl)
                 delete ctrl;
 
@@ -652,57 +652,57 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 
     if (!isInMacLayer())
     {
-        for (int i = 0; i <getNumWlanInterfaces(); i++)
+        for (int i = 0; i < getNumWlanInterfaces(); i++)
         {
             ie = getWlanInterfaceEntry(i);
-            if (interfaceId ==ie->getInterfaceId())
+            if (interfaceId == ie->getInterfaceId())
             {
-                ifIndex=getWlanInterfaceIndex(i);
+                ifIndex = getWlanInterfaceIndex(i);
                 break;
             }
         }
     }
-    recv_dymoum_pkt(dymo_msg,src,ifIndex);
+    recv_dymoum_pkt(dymo_msg, src, ifIndex);
 }
 
 
-void DYMOUM::processPacket(IPv4Datagram * p,unsigned int ifindex )
+void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 {
     struct in_addr dest_addr, src_addr;
     struct ip_data *ipd = NULL;
 
     ipd = NULL;         /* No ICMP messaging */
-    bool isLocal=false;
+    bool isLocal = false;
     IPAddressVector phops;
 
     src_addr.s_addr = p->getSrcAddress().getInt();
     dest_addr.s_addr = p->getDestAddress().getInt();
-    isLocal=true;
+    isLocal = true;
     if (!p->getSrcAddress().isUnspecified())
     {
-        isLocal=isLocalAddress(src_addr.s_addr);
+        isLocal = isLocalAddress(src_addr.s_addr);
 
     }
     InterfaceEntry *   ie = getInterfaceEntry(ifindex);
     phops = ie->ipv4Data()->getMulticastGroups();
     IPv4Address mcastAdd;
-    bool isMcast=false;
+    bool isMcast = false;
     for (unsigned int  i=0; i<phops.size(); i++)
     {
         mcastAdd = phops[i];
         if (dest_addr.s_addr == mcastAdd.getInt())
-            isMcast=true;
+            isMcast = true;
     }
 
     /* If the packet is not interesting we just let it go through... */
-    if (dest_addr.s_addr == DYMO_BROADCAST ||isMcast)
+    if (dest_addr.s_addr == DYMO_BROADCAST || isMcast)
     {
         if (p->getControlInfo())
             delete p->removeControlInfo();
-        send(p,"to_ip");
+        send(p, "to_ip");
         return;
     }
-    rtable_entry_t *entry   = rtable_find(dest_addr);
+    rtable_entry_t *entry = rtable_find(dest_addr);
     if (!entry || entry->rt_state == RT_INVALID)
     {
         // If I am the originating node, then a route discovery
@@ -737,14 +737,14 @@ void DYMOUM::processPacket(IPv4Datagram * p,unsigned int ifindex )
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
                     {
-                        memcpy (macAddressConv.address,ctrlmac->getSrc().getAddressBytes(),6);  /* destination eth addr */
+                        memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
                         // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
                         delete ctrl;
                         MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
                         if (it!=macToIpAdress->end())
                         {
                             addr.s_addr = (*it).second;
-                            rerr_send(dest_addr, 1, entry,addr);
+                            rerr_send(dest_addr, 1, entry, addr);
                         }
                     }
                 }
@@ -767,7 +767,7 @@ void DYMOUM::processPacket(IPv4Datagram * p,unsigned int ifindex )
         /* DEBUG(LOG_DEBUG, 0, "Sending pkt uid=%d", ch->uid()); */
         if (p->getControlInfo())
             delete p->removeControlInfo();
-        send(p,"to_ip");
+        send(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         //gettimeofday(&this_host.fwd_time, NULL);
         hello_init();
@@ -775,20 +775,20 @@ void DYMOUM::processPacket(IPv4Datagram * p,unsigned int ifindex )
 }
 
 
-void DYMOUM::processMacPacket(cPacket * p,const Uint128 &dest,const Uint128 &src,int ifindex)
+void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &src, int ifindex)
 {
     struct in_addr dest_addr, src_addr;
     struct ip_data *ipd = NULL;
 
 
     ipd = NULL;         /* No ICMP messaging */
-    bool isLocal=false;
+    bool isLocal = false;
     dest_addr.s_addr = dest;
     src_addr.s_addr = src;
 
     //InterfaceEntry *   ie = getInterfaceEntry(ifindex);
     isLocal = isLocalAddress(src);
-    rtable_entry_t *entry   = rtable_find(dest_addr);
+    rtable_entry_t *entry = rtable_find(dest_addr);
     if (!entry || entry->rt_state == RT_INVALID)
     {
         // If I am the originating node, then a route discovery
@@ -823,10 +823,10 @@ void DYMOUM::processMacPacket(cPacket * p,const Uint128 &dest,const Uint128 &src
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
                     {
-                        memcpy (macAddressConv.address,ctrlmac->getSrc().getAddressBytes(),6);  /* destination eth addr */
+                        memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
                         // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
                         delete ctrl;
-                        rerr_send(dest_addr, 1, entry,addr);
+                        rerr_send(dest_addr, 1, entry, addr);
                     }
                 }
                 sendICMP(p);
@@ -856,7 +856,7 @@ void DYMOUM::processMacPacket(cPacket * p,const Uint128 &dest,const Uint128 &src
             p->setControlInfo(ctrl);
         }
 
-        send(p,"to_ip");
+        send(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         //gettimeofday(&this_host.fwd_time, NULL);
         hello_init();
@@ -888,9 +888,9 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
   return -1;
 }
 */
-void DYMOUM::processLinkBreak (const cPolymorphic *details)
+void DYMOUM::processLinkBreak(const cPolymorphic *details)
 {
-    IPv4Datagram  *dgram=NULL;
+    IPv4Datagram  *dgram = NULL;
     if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
     {
         dgram = check_and_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details));
@@ -914,9 +914,9 @@ void DYMOUM::processLinkBreak (const cPolymorphic *details)
 
 void DYMOUM::processPromiscuous(const cPolymorphic *details)
 {
-    Ieee80211DataOrMgmtFrame *frame=NULL;
+    Ieee80211DataOrMgmtFrame *frame = NULL;
 
-    IPv4Datagram * ip_msg=NULL;
+    IPv4Datagram * ip_msg = NULL;
     struct in_addr source;
 
     source.s_addr = (Uint128)0;
@@ -927,7 +927,7 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
         struct in_addr addr;
         struct in_addr gatewayAddr;
 
-        frame  = check_and_cast<Ieee80211DataOrMgmtFrame *>(details);
+        frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(details);
 #if OMNETPP_VERSION > 0x0400
         if (!isInMacLayer())
             ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
@@ -950,7 +950,7 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
         rtable_entry_t *entry = NULL;
         if (!isInMacLayer())
         {
-            memcpy (macAddressConv.address,frame->getTransmitterAddress().getAddressBytes(),6);
+            memcpy(macAddressConv.address, frame->getTransmitterAddress().getAddressBytes(), 6);
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
 
             if (ip_msg)
@@ -965,7 +965,7 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
                 {
                     unsigned int ip_src = ip_msg->getSrcAddress().getInt();
-                    macToIpAdress->insert(std::make_pair(macAddressConv,ip_src));
+                    macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
                     gatewayAddr.s_addr = ip_msg->getSrcAddress().getInt();
                 }
                 else
@@ -1045,8 +1045,8 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
                 if ((dymo_msg->type==DYMO_RE_TYPE) && (((RE *) dymo_msg)->a==0))
                 {
                     //  proccess RREP
-                    addr.s_addr =ip_msg->getSrcAddress().getInt();
-                    promiscuous_rrep((RE*)dymo_msg,addr);
+                    addr.s_addr = ip_msg->getSrcAddress().getInt();
+                    promiscuous_rrep((RE*)dymo_msg, addr);
                 } // end if promiscuous
                 //else if (dymo_msg->type==DYMO_RERR_TYPE)
                 //{
@@ -1058,17 +1058,17 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
 
 void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
 {
-    Ieee80211DataOrMgmtFrame *frame=NULL;
+    Ieee80211DataOrMgmtFrame *frame = NULL;
     rtable_entry_t *entry;
     Ieee80211TwoAddressFrame *twoAddressFrame;
     if (dynamic_cast<Ieee80211TwoAddressFrame *>(const_cast<cPolymorphic*> (details)))
     {
         mac_address macAddressConv;
         struct in_addr addr;
-        twoAddressFrame  = check_and_cast<Ieee80211TwoAddressFrame *>(details);
+        twoAddressFrame = check_and_cast<Ieee80211TwoAddressFrame *>(details);
         if (!isInMacLayer())
         {
-            memcpy (macAddressConv.address,frame->getTransmitterAddress().getAddressBytes(),6);
+            memcpy(macAddressConv.address, frame->getTransmitterAddress().getAddressBytes(), 6);
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it!=macToIpAdress->end())
                 addr.s_addr = (*it).second;
@@ -1082,7 +1082,7 @@ void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
                 {
                     unsigned int ip_src = ip_msg->getSrcAddress().getInt();
-                    macToIpAdress->insert(std::make_pair(macAddressConv,ip_src));
+                    macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
                     //  gatewayAddr.s_addr = ip_msg->getSrcAddress().getInt();
                 }
                 else
@@ -1146,8 +1146,8 @@ void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
                 if ((dymo_msg->type==DYMO_RE_TYPE) && (((RE *) dymo_msg)->a==0))
                 {
                     //  proccess RREP
-                    addr.s_addr =ip_msg->getSrcAddress().getInt();
-                    promiscuous_rrep((RE*)dymo_msg,addr);
+                    addr.s_addr = ip_msg->getSrcAddress().getInt();
+                    promiscuous_rrep((RE*)dymo_msg, addr);
                 } // end if promiscuous
                 //else if (dymo_msg->type==DYMO_RERR_TYPE)
                 //{
@@ -1159,7 +1159,7 @@ void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
 
 
 
-void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
+void DYMOUM::promiscuous_rrep(RE * dymo_re, struct in_addr ip_src)
 {
     struct in_addr node_addr;
     rtable_entry_t *entry;
@@ -1170,7 +1170,7 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
 
     for (int i=0; i<num_blk; i++)
     {
-        if (isLocalAddress (dymo_re->re_blocks[i].re_node_addr))
+        if (isLocalAddress(dymo_re->re_blocks[i].re_node_addr))
             return;
     }
 
@@ -1178,12 +1178,12 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
     {
         //if (dymo_re->re_blocks[i].re_hopcnt+1>2)
         //  continue;
-        node_addr.s_addr    = dymo_re->re_blocks[i].re_node_addr;
-        entry           = rtable_find(node_addr);
-        uint32_t seqnum     = ntohl(dymo_re->re_blocks[i].re_node_seqnum);
+        node_addr.s_addr = dymo_re->re_blocks[i].re_node_addr;
+        entry = rtable_find(node_addr);
+        uint32_t seqnum = ntohl(dymo_re->re_blocks[i].re_node_seqnum);
         struct re_block b;
-        memcpy (&b,&dymo_re->re_blocks[i],sizeof(struct re_block));
-        b.re_hopcnt+=1;
+        memcpy(&b, &dymo_re->re_blocks[i], sizeof(struct re_block));
+        b.re_hopcnt += 1;
         int rb_state;
         if (isInMacLayer())
         {
@@ -1193,14 +1193,14 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
                 rb_state = RB_FRESH;
             else if (seqnum == entry->rt_seqnum && b.re_hopcnt < entry->rt_hopcnt)
                 rb_state = RB_FRESH;
-            else if (seqnum ==0)
+            else if (seqnum == 0)
                 rb_state = RB_FRESH; // Asume Olsr update
             else
                 rb_state = RB_STALE;
         }
         else
         {
-            rb_state = re_info_type(&b, entry,0);
+            rb_state = re_info_type(&b, entry, 0);
         }
 
 
@@ -1214,7 +1214,7 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re,struct in_addr ip_src)
                 update = true;
             else if (seqnum == entry->rt_seqnum && b.re_hopcnt < entry->rt_hopcnt)
                 update = true;
-            else if (isInMacLayer() && seqnum ==0)
+            else if (isInMacLayer() && seqnum == 0)
                 update = true;
 
             if (update)
@@ -1300,7 +1300,7 @@ void DYMOUM::packetFailed(IPv4Datagram *dgram)
 #endif
     }
     else
-        omnet_chg_rte(dest_addr,dest_addr, dest_addr,0,true);
+        omnet_chg_rte(dest_addr, dest_addr, dest_addr, 0, true);
     scheduleNextEvent();
 }
 
@@ -1367,7 +1367,7 @@ void DYMOUM::finish()
     if (iswrite)
         return;
 
-    iswrite=true;
+    iswrite = true;
 
     recordScalar("simulated time", t);
     recordScalar("Dymo totalSend ", totalSend);
@@ -1397,13 +1397,13 @@ std::string DYMOUM::detailedInfo() const
 }
 
 
-uint32_t DYMOUM::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
+uint32_t DYMOUM::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 {
     return 0;
 }
 
 
-bool  DYMOUM::getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &cost)
+bool  DYMOUM::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
 {
     struct in_addr destAddr;
     destAddr.s_addr = dest;
@@ -1413,7 +1413,7 @@ bool  DYMOUM::getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &co
     if (fwd_rt->rt_state != RT_VALID)
         return false;
     add = fwd_rt->rt_nxthop_addr.s_addr;
-    InterfaceEntry * ie = getInterfaceEntry (fwd_rt->rt_ifindex);
+    InterfaceEntry * ie = getInterfaceEntry(fwd_rt->rt_ifindex);
     iface = ie->getInterfaceId();
     cost = fwd_rt->rt_hopcnt;
     return true;
@@ -1424,7 +1424,7 @@ bool DYMOUM::isProactive()
     return false;
 }
 
-void DYMOUM::setRefreshRoute(const Uint128 &src,const Uint128 &dest,const Uint128 &gtw,const Uint128& prev)
+void DYMOUM::setRefreshRoute(const Uint128 &src, const Uint128 &dest, const Uint128 &gtw, const Uint128& prev)
 {
     struct in_addr dest_addr, src_addr, next_hop, prev_hop;
     src_addr.s_addr = src;
@@ -1440,14 +1440,14 @@ void DYMOUM::setRefreshRoute(const Uint128 &src,const Uint128 &dest,const Uint12
 
     bool change = false;
     if (src!=(Uint128)0)
-        rev_rt  = rtable_find(src_addr);
+        rev_rt = rtable_find(src_addr);
     if (dest!=(Uint128)0)
-        fwd_rt  = rtable_find(dest_addr);
+        fwd_rt = rtable_find(dest_addr);
 
     if (gtw!=(Uint128)0)
-        fwd_pre_rt  = rtable_find(next_hop);
+        fwd_pre_rt = rtable_find(next_hop);
     if (prev!=(Uint128)0)
-        rev_pre_rt  = rtable_find(prev_hop);
+        rev_pre_rt = rtable_find(prev_hop);
 
     if (fwd_rt)
     {
@@ -1540,7 +1540,7 @@ bool DYMOUM::isOurType(cPacket * msg)
     return false;
 }
 
-bool DYMOUM::getDestAddress(cPacket *msg,Uint128 &dest)
+bool DYMOUM::getDestAddress(cPacket *msg, Uint128 &dest)
 {
     RE *re = dynamic_cast <RE *>(msg);
     if (!re)
@@ -1555,20 +1555,20 @@ bool DYMOUM::getDestAddress(cPacket *msg,Uint128 &dest)
 }
 
 // Group methods, allow the anycast procedure
-int DYMOUM::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &addr)
+int DYMOUM::getRouteGroup(const AddressGroup &gr, std::vector<Uint128> &addr)
 {
     return 0;
 }
 
-int  DYMOUM::getRouteGroup(const Uint128& dest,std::vector<Uint128> &add,Uint128& gateway,bool &isGroup,int group)
+int  DYMOUM::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128& gateway, bool &isGroup, int group)
 {
     return 0;
 }
 
-bool DYMOUM::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint128& gw)
+bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128& gw)
 {
     int distance = 1000;
-    for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
+    for (AddressGroupIterator it = gr.begin(); it!=gr.end(); it++)
     {
         struct in_addr destAddr;
         destAddr.s_addr = *it;
@@ -1577,35 +1577,35 @@ bool DYMOUM::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint
             continue;
         if (fwd_rt->rt_state != RT_VALID)
             continue;
-        if (distance<fwd_rt->rt_hopcnt ||(distance==fwd_rt->rt_hopcnt && intrand(1)))
+        if (distance<fwd_rt->rt_hopcnt || (distance==fwd_rt->rt_hopcnt && intrand(1)))
             continue;
-        distance=fwd_rt->rt_hopcnt;
+        distance = fwd_rt->rt_hopcnt;
         add = fwd_rt->rt_nxthop_addr.s_addr;
-        InterfaceEntry * ie = getInterfaceEntry (fwd_rt->rt_ifindex);
+        InterfaceEntry * ie = getInterfaceEntry(fwd_rt->rt_ifindex);
         iface = ie->getInterfaceId();
-        gw=*it;
+        gw = *it;
     }
     if (distance==1000)
         return false;
     return true;
 }
 
-bool DYMOUM::getNextHopGroup(const Uint128& dest,Uint128 &next,int &iface,Uint128& gw ,bool &isGroup,int group)
+bool DYMOUM::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint128& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
-    bool find=false;
-    if (findInAddressGroup(dest,group))
+    bool find = false;
+    if (findInAddressGroup(dest, group))
     {
-        getAddressGroup(gr,group);
-        find= getNextHopGroup(gr,next,iface,gw);
-        isGroup=true;
+        getAddressGroup(gr, group);
+        find = getNextHopGroup(gr, next, iface, gw);
+        isGroup = true;
 
      }
     else
     {
         double cost;
-        find= getNextHop(dest,next,iface,cost);
-        isGroup=false;
+        find = getNextHop(dest, next, iface, cost);
+        isGroup = false;
     }
     return find;
 }

@@ -24,10 +24,10 @@ std::string vectorToString(IPAddressVector vec)
 std::string vectorToString(IPAddressVector vec, const char *delim)
 {
   std::ostringstream stream;
-  for(unsigned int i = 0; i < vec.size(); i++)
+  for (unsigned int i = 0; i < vec.size(); i++)
   {
       stream << vec[i];
-      if(i < vec.size() - 1)
+      if (i < vec.size() - 1)
         stream << delim;
   }
   stream << std::flush;
@@ -43,11 +43,11 @@ std::string vectorToString(EroVector vec)
 std::string vectorToString(EroVector vec, const char *delim)
 {
     std::ostringstream stream;
-    for(unsigned int i = 0; i < vec.size(); i++)
+    for (unsigned int i = 0; i < vec.size(); i++)
     {
         stream << vec[i].node;
 
-        if(i < vec.size() - 1)
+        if (i < vec.size() - 1)
             stream << delim;
     }
     stream << std::flush;
@@ -59,7 +59,7 @@ EroVector routeToEro(IPAddressVector rro)
 {
     EroVector ero;
 
-    for(unsigned int i = 0; i < rro.size(); i++)
+    for (unsigned int i = 0; i < rro.size(); i++)
     {
         EroObj_t hop;
         hop.L = false;
@@ -120,7 +120,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src)
 
 cModule *getPayloadOwner(cPacket *msg)
 {
-    while(msg->getEncapsulatedPacket())
+    while (msg->getEncapsulatedPacket())
         msg = msg->getEncapsulatedPacket();
 
     if (msg->hasPar("owner"))

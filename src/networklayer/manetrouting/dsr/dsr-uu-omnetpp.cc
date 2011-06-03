@@ -58,7 +58,7 @@ struct iphdr *DSRUU::dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
     }
     else
     {
-        iph->version = 4;//IPVERSION;
+        iph->version = 4; //IPVERSION;
         iph->ihl = 5;
         iph->tos = 0;
         iph->id = 0;
@@ -85,12 +85,12 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
         maint_buf_add(dp);
     if (dp->ip_pkt)
     {
-        p=dp->ip_pkt;
-        dp->ip_pkt=NULL;
-        p->ModOptions(dp,interfaceId);
+        p = dp->ip_pkt;
+        dp->ip_pkt = NULL;
+        p->ModOptions(dp, interfaceId);
     }
     else
-        p = new DSRPkt(dp,interfaceId);
+        p = new DSRPkt(dp, interfaceId);
 
     if (!p)
     {
@@ -159,11 +159,11 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
 #endif
     p->setPrevAddress(prev);
     if (jitter)
-        sendDelayed(p,jitter, "to_ip");
+        sendDelayed(p, jitter, "to_ip");
     else if (dp->dst.s_addr != DSR_BROADCAST)
-        sendDelayed(p,par("uniCastDelay"),"to_ip");
+        sendDelayed(p, par("uniCastDelay"), "to_ip");
     else
-        sendDelayed(p,par ("broadCastDelay"), "to_ip");
+        sendDelayed(p, par("broadCastDelay"), "to_ip");
     dp->payload = NULL;
     dsr_pkt_free(dp);
 }
@@ -180,13 +180,13 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
         if (dp->payload)
         {
             sendUp(dp->payload);
-            dp->payload=NULL;
+            dp->payload = NULL;
         }
         dsr_pkt_free(dp);
         return;
     }
 
-    NetwPkt * dgram= new NetwPkt();
+    NetwPkt * dgram = new NetwPkt();
     dgram->setDestAddr(dp->dst.s_addr);
     dgram->setSrcAddr(dp->src.s_addr);
     dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
@@ -204,15 +204,15 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     dgram->setDiffServCodePoint(dp->nh.iph->tos); // ToS
     dgram->setIdentification(dp->nh.iph->id); // Identification
     dgram->setMoreFragments(dp->nh.iph->tos & 0x2000);
-    dgram->setDontFragment (dp->nh.iph->frag_off & 0x4000);
-    dgram->setTimeToLive (dp->nh.iph->ttl); // TTL
+    dgram->setDontFragment(dp->nh.iph->frag_off & 0x4000);
+    dgram->setTimeToLive(dp->nh.iph->ttl); // TTL
     dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
 #endif
     if (dp->payload)
         dgram->encapsulate(dp->payload);
     dp->payload = NULL;
     dsr_pkt_free(dp);
-    send(dgram,"to_ip");
+    send(dgram, "to_ip");
 }
 
 
@@ -229,7 +229,7 @@ void DSRUUTimer::cancel()
         a_->cancelEvent(&msgtimer);
 }
 
-void DSRUU::initialize (int stage)
+void DSRUU::initialize(int stage)
 {
     //current_time =simTime();
     if (!is_init)
@@ -249,51 +249,51 @@ void DSRUU::initialize (int stage)
         confvals[UseNetworkLayerAck] = 0;
 
         if (par("PrintDebug"))
-            confvals[PrintDebug]= 1;
+            confvals[PrintDebug] = 1;
         if (par("FlushLinkCache"))
-            confvals[FlushLinkCache] =  1;
+            confvals[FlushLinkCache] = 1;
         if (par("PromiscOperation"))
             confvals[PromiscOperation] = 1;
         if (par("UseNetworkLayerAck"))
             confvals[UseNetworkLayerAck] = 1;
         int aux_var;
-        aux_var=par("BroadCastJitter");
+        aux_var = par("BroadCastJitter");
         if (aux_var!=-1)
-            confvals[BroadCastJitter]= aux_var;
-        aux_var=par("RouteCacheTimeout");
+            confvals[BroadCastJitter] = aux_var;
+        aux_var = par("RouteCacheTimeout");
         if (aux_var!=-1)
             confvals[RouteCacheTimeout] = par("RouteCacheTimeout");
-        aux_var=par("SendBufferTimeout");
+        aux_var = par("SendBufferTimeout");
         if (aux_var!=-1)
-            confvals[SendBufferTimeout]= par("SendBufferTimeout");
-        aux_var=par("SendBufferSize");
+            confvals[SendBufferTimeout] = par("SendBufferTimeout");
+        aux_var = par("SendBufferSize");
         if (aux_var!=-1)
             confvals[SendBufferSize] = par("SendBufferSize");
-        aux_var=par("RequestTableSize");
+        aux_var = par("RequestTableSize");
         if (aux_var!=-1)
             confvals[RequestTableSize] = par("RequestTableSize");
-        aux_var=par("RequestTableIds");
+        aux_var = par("RequestTableIds");
         if (aux_var!=-1)
             confvals[RequestTableIds] = par("RequestTableIds");
-        aux_var=par("MaxRequestRexmt");
+        aux_var = par("MaxRequestRexmt");
         if (aux_var!=-1)
             confvals[MaxRequestRexmt] = par("MaxRequestRexmt");
-        aux_var=par("MaxRequestPeriod");
+        aux_var = par("MaxRequestPeriod");
         if (aux_var!=-1)
             confvals[MaxRequestPeriod] = par("MaxRequestPeriod");
-        aux_var=par("RequestPeriod");
+        aux_var = par("RequestPeriod");
         if (aux_var!=-1)
             confvals[RequestPeriod] = par("RequestPeriod");
-        aux_var=par("NonpropRequestTimeout");
+        aux_var = par("NonpropRequestTimeout");
         if (aux_var!=-1)
             confvals[NonpropRequestTimeout] = par("NonpropRequestTimeout");
-        aux_var=par("RexmtBufferSize");
+        aux_var = par("RexmtBufferSize");
         if (aux_var!=-1)
             confvals[RexmtBufferSize] = par("RexmtBufferSize");
-        aux_var=par("MaintHoldoffTime");
+        aux_var = par("MaintHoldoffTime");
         if (aux_var!=-1)
             confvals[MaintHoldoffTime] = par("MaintHoldoffTime");
-        aux_var=par("MaxMaintRexmt");
+        aux_var = par("MaxMaintRexmt");
         if (aux_var!=-1)
             confvals[MaxMaintRexmt] = par("MaxMaintRexmt");
 
@@ -302,18 +302,18 @@ void DSRUU::initialize (int stage)
         else
             confvals[TryPassiveAcks] = 0;
 
-        aux_var=par("PassiveAckTimeout");
+        aux_var = par("PassiveAckTimeout");
         if (aux_var!=-1)
-            confvals[PassiveAckTimeout]= par("PassiveAckTimeout");
-        aux_var=par("GratReplyHoldOff");
+            confvals[PassiveAckTimeout] = par("PassiveAckTimeout");
+        aux_var = par("GratReplyHoldOff");
         if (aux_var!=-1)
             confvals[GratReplyHoldOff] = par("GratReplyHoldOff");
-        aux_var=par("MAX_SALVAGE_COUNT");
+        aux_var = par("MAX_SALVAGE_COUNT");
 
         if (aux_var!=-1)
             confvals[MAX_SALVAGE_COUNT] = par("MAX_SALVAGE_COUNT");
 
-        lifo_token=par("LifoSize");
+        lifo_token = par("LifoSize");
         if (par("PathCache"))
             confvals[PathCache] = 1;
         else
@@ -324,7 +324,7 @@ void DSRUU::initialize (int stage)
         else
             confvals[RetryPacket] = 0;
 
-        aux_var=par("RREQMaxVisit");
+        aux_var = par("RREQMaxVisit");
 
         if (aux_var!=-1)
             confvals[RREQMaxVisit] = par("RREQMaxVisit");
@@ -347,7 +347,7 @@ void DSRUU::initialize (int stage)
         lc_timer.setOwer(this);
         ack_timer.setOwer(this);
         etx_timer.setOwer(this);
-        is_init=true;
+        is_init = true;
     }
 
 
@@ -374,10 +374,10 @@ void DSRUU::initialize (int stage)
     {
         /* Search the 80211 interface */
 #ifndef MobilityFramework
-        inet_rt = RoutingTableAccess ().get();
-        inet_ift = InterfaceTableAccess ().get();
+        inet_rt = RoutingTableAccess().get();
+        inet_ift = InterfaceTableAccess().get();
 
-        int  num_80211=0;
+        int  num_80211 = 0;
         InterfaceEntry *   ie;
         InterfaceEntry *   i_face;
         const char *name;
@@ -385,18 +385,18 @@ void DSRUU::initialize (int stage)
         {
             ie = inet_ift->getInterface(i);
             name = ie->getName();
-            if (strstr (name,"wlan")!=NULL)
+            if (strstr(name, "wlan")!=NULL)
             {
                 i_face = ie;
                 num_80211++;
-                interfaceId=ie->getInterfaceId();
+                interfaceId = ie->getInterfaceId();
             }
         }
         // One enabled network interface (in total)
         if (num_80211==1)
-            interface80211ptr=i_face;
+            interface80211ptr = i_face;
         else
-            opp_error ("DSR has found %i 80211 interfaces",num_80211);
+            opp_error("DSR has found %i 80211 interfaces", num_80211);
 #endif
 
 
@@ -408,19 +408,19 @@ void DSRUU::initialize (int stage)
         maint_buf_init();
         send_buf_init();
         path_cache_init();
-        etxNumRetry=-1;
-        etxActive=par("ETX_Active");
+        etxNumRetry = -1;
+        etxActive = par("ETX_Active");
         if (etxActive)
         {
-            etxTime=par("ETXHelloInterval");
+            etxTime = par("ETXHelloInterval");
             etxNumRetry = par("ETXRetryBeforeFail");
-            etxWindowSize=etxTime*(unsigned int)par("ETXWindowNumHello");
-            extJitter=0.1;
-            etx_timer.init(&DSRUU::EtxMsgSend,0);
+            etxWindowSize = etxTime*(unsigned int)par("ETXWindowNumHello");
+            extJitter = 0.1;
+            etx_timer.init(&DSRUU::EtxMsgSend, 0);
             set_timer(&etx_timer, 0.0);
             //set_timer(&etx_timer, etxTime);
-            etxWindow=0;
-            etxSize=100; // Minimun length
+            etxWindow = 0;
+            etxSize = 100; // Minimun length
         }
 #ifndef MobilityFramework
         myaddr_.s_addr = interface80211ptr->ipv4Data()->getIPAddress().getInt();
@@ -441,23 +441,23 @@ void DSRUU::initialize (int stage)
             // clean the route table wlan interface entry
             for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
             {
-                entry= inet_rt->getRoute(i);
+                entry = inet_rt->getRoute(i);
                 const InterfaceEntry *ie = entry->getInterface();
-                if (strstr (ie->getName(),"wlan")!=NULL)
+                if (strstr(ie->getName(), "wlan")!=NULL)
                 {
                     inet_rt->deleteRoute(entry);
                 }
             }
         }
 
-        is_init=true;
+        is_init = true;
         ev << "Dsr active" << "\n";
     }
 
     return;
 }
 
-void DSRUU::finish ()
+void DSRUU::finish()
 {
     lc_cleanup();
     path_cache_cleanup();
@@ -469,20 +469,20 @@ void DSRUU::finish ()
 
 }
 #ifdef MobilityFramework
-DSRUU::DSRUU():cSimpleModule(),ImNotifiable()
+DSRUU::DSRUU():cSimpleModule(), ImNotifiable()
 #else
-DSRUU::DSRUU():cSimpleModule(),INotifiable()
+DSRUU::DSRUU():cSimpleModule(), INotifiable()
 #endif
 {
-    lifoDsrPkt=NULL;
-    lifo_token=0;
+    lifoDsrPkt = NULL;
+    lifo_token = 0;
     grat_rrep_tbl_timer_ptr = new DSRUUTimer(this);
     send_buf_timer_ptr = new DSRUUTimer(this);
     neigh_tbl_timer_ptr = new DSRUUTimer(this);
     lc_timer_ptr = new DSRUUTimer(this);
     ack_timer_ptr = new DSRUUTimer(this);
     etx_timer_ptr = new DSRUUTimer(this);
-    is_init=false;
+    is_init = false;
 }
 
 DSRUU::~DSRUU()
@@ -514,7 +514,7 @@ DSRUU::~DSRUU()
 // Clean the Lifo queue
     while (pkt!=NULL)
     {
-        lifoDsrPkt=pkt->next;
+        lifoDsrPkt = pkt->next;
         delete pkt;
         pkt = DSRUU::lifoDsrPkt;
         lifo_token++;
@@ -542,7 +542,7 @@ void DSRUU::handleTimer(cMessage* msg)
     }
 }
 
-void DSRUU::defaultProcess (cMessage *ipDgram)
+void DSRUU::defaultProcess(cMessage *ipDgram)
 {
     struct dsr_pkt *dp;
     dp = dsr_pkt_alloc(PK(ipDgram)); // crear estructura dsr
@@ -582,7 +582,7 @@ void DSRUU::defaultProcess (cMessage *ipDgram)
 void DSRUU::handleMessage(cMessage* msg)
 {
     if (is_init==false)
-        opp_error ("Dsr has not been initialized ");
+        opp_error("Dsr has not been initialized ");
 
     //current_time =simTime();
     if (msg->isSelfMessage())
@@ -594,8 +594,8 @@ void DSRUU::handleMessage(cMessage* msg)
     /* Control Message decapsulate */
     if (dynamic_cast<ControlManetRouting *>(msg))
     {
-        ControlManetRouting * control =  check_and_cast <ControlManetRouting *> (msg);
-        if (control->getOptionCode()== MANET_ROUTE_NOROUTE)
+        ControlManetRouting * control = check_and_cast <ControlManetRouting *> (msg);
+        if (control->getOptionCode() == MANET_ROUTE_NOROUTE)
         {
             cMessage *msg_aux = control->decapsulate();
             EV << "Dsr rec msg " << msg_aux->getName() << "\n";
@@ -610,7 +610,7 @@ void DSRUU::handleMessage(cMessage* msg)
     }
 #else
 
-    if (msg->arrivedOn ("fromControl"))
+    if (msg->arrivedOn("fromControl"))
     {
         if (dynamic_cast<DSRPkt *>(msg->getEncapsulatedMsg()))
         {
@@ -633,27 +633,27 @@ void DSRUU::handleMessage(cMessage* msg)
     }
 
 #ifndef MobilityFramework
-    IPv4Datagram * ipDgram=NULL;
+    IPv4Datagram * ipDgram = NULL;
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
-        ipDgram=dynamic_cast<IPv4Datagram *>(msg);
+        ipDgram = dynamic_cast<IPv4Datagram *>(msg);
     }
     else
     {
-        opp_error ("DSR has recived not supported packet");
+        opp_error("DSR has recived not supported packet");
     }
     DEBUG("##########\n");
     if (ipDgram->getSrcAddress().isUnspecified())
         ipDgram->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
 #else
-    NetwPkt * ipDgram=NULL;
+    NetwPkt * ipDgram = NULL;
 
     if (dynamic_cast<NetwPkt *>(msg))
     {
-        ipDgram=dynamic_cast<NetwPkt *>(msg);
+        ipDgram = dynamic_cast<NetwPkt *>(msg);
         int ttl = ipDgram->getTtl()-1;
 // Check Ttl (Dsr is network layer
-        bool forUs = ((unsigned)ipDgram->getDestAddr() == my_addr().s_addr ||  (ipDgram->getDestAddr() ==L3BROADCAST));
+        bool forUs = ((unsigned)ipDgram->getDestAddr() == my_addr().s_addr || (ipDgram->getDestAddr() == L3BROADCAST));
         if (ttl<=0 )
         {
             if (!forUs)
@@ -691,18 +691,18 @@ void DSRUU::handleMessage(cMessage* msg)
         ipDgram = new NetwPkt();
         ipDgram->setSrcAddr(my_addr().s_addr);
         ipDgram->setDestAddr(netwAddr);
-        ipDgram->encapsulate (msg);
+        ipDgram->encapsulate(msg);
         ipDgram->setTtl(IPDEFTTL);
         if (netwAddr==L3BROADCAST)
         {
 
             ipDgram->setControlInfo(new MacControlInfo(L3BROADCAST));
-            sendDelayed(ipDgram,par ("broadCastDelay"), "to_ip");
+            sendDelayed(ipDgram, par("broadCastDelay"), "to_ip");
             return;
         }
     }
 // This node is the destination or is broadcast and not the source send up
-    bool forUs  = ((unsigned)ipDgram->getDestAddr()== my_addr().s_addr) ||
+    bool forUs = ((unsigned)ipDgram->getDestAddr() == my_addr().s_addr) ||
                   ((unsigned) ipDgram->getSrcAddr() != my_addr().s_addr && ipDgram->getDestAddr()==L3BROADCAST);
     if (forUs && ipDgram->getTransportProtocol()!=IP_PROT_DSR)
     {
@@ -733,7 +733,7 @@ void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId
             {
                 DSRPkt *paux = check_and_cast <DSRPkt *> (msg);
                 DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
-                take (p);
+                take(p);
                 /*
                 Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                 ctrl->setSrc(frame->getTransmitterAddress());
@@ -749,7 +749,7 @@ void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId
 
 void DSRUU::receiveChangeNotification(int category, const cPolymorphic *details)
 {
-    IPv4Datagram  *dgram=NULL;
+    IPv4Datagram  *dgram = NULL;
     //current_time = simTime();
 
     if (details==NULL)
@@ -758,7 +758,7 @@ void DSRUU::receiveChangeNotification(int category, const cPolymorphic *details)
     if (category == NF_LINK_BREAK)
     {
         Enter_Method("Dsr Link Break");
-        Ieee80211DataFrame *frame  = check_and_cast<Ieee80211DataFrame *>(details);
+        Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
 #if OMNETPP_VERSION > 0x0400
         if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
             dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
@@ -783,7 +783,7 @@ else
 
             if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details)))
             {
-                Ieee80211DataFrame *frame  = check_and_cast<Ieee80211DataFrame *>(details);
+                Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
 #if OMNETPP_VERSION > 0x0400
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
 #else
@@ -798,7 +798,7 @@ DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedMsg());
 #endif
 
                     DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
-                    take (p);
+                    take(p);
                     EV << "####################################################\n";
                     EV << "Dsr procotocol received promiscuos packet from " << p->getSrcAddress() << "\n";
                     EV << "#####################################################\n";
@@ -841,7 +841,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
     }
 #endif
 
-    DSRPkt *p =NULL;
+    DSRPkt *p = NULL;
 
     if (dynamic_cast<DSRPkt *>(ipDgram))
     {
@@ -855,7 +855,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
         dst.s_addr = p->getDestAddress().getInt();
         nxt_hop.s_addr = p->nextAddress().getInt();
 #endif
-        DEBUG("Xmit failure for %s nxt_hop=%s\n",print_ip(dst), print_ip(nxt_hop));
+        DEBUG("Xmit failure for %s nxt_hop=%s\n", print_ip(dst), print_ip(nxt_hop));
 
         if (ConfVal(PathCache))
             ph_srt_delete_link(my_addr(), nxt_hop);
@@ -904,9 +904,9 @@ void DSRUU::linkFailed(IPv4Address ipAdd)
 
     /* Cast the packet so that we can touch it */
 #ifndef MobilityFramework
-    nxt_hop.s_addr=ipAdd.getInt();
+    nxt_hop.s_addr = ipAdd.getInt();
 #else
-    nxt_hop.s_addr=ipAdd;
+    nxt_hop.s_addr = ipAdd;
 #endif
     if (ConfVal(PathCache))
         ph_srt_delete_link(my_addr(), nxt_hop);
@@ -970,23 +970,23 @@ void DSRUU::tap(DSRPkt *p)
 struct dsr_srt *DSRUU:: RouteFind(struct in_addr src, struct in_addr dst)
 {
     if (ConfVal(PathCache))
-        return ph_srt_find(src,dst,0,ConfValToUsecs(RouteCacheTimeout));
+        return ph_srt_find(src, dst, 0, ConfValToUsecs(RouteCacheTimeout));
     else
-        return lc_srt_find(src,dst);
+        return lc_srt_find(src, dst);
 
 }
 
-int DSRUU::RouteAdd(struct dsr_srt *srt, unsigned long timeout,unsigned short flags)
+int DSRUU::RouteAdd(struct dsr_srt *srt, unsigned long timeout, unsigned short flags)
 {
 
 
     if (ConfVal(PathCache))
     {
-        ph_srt_add(srt,timeout,flags);
+        ph_srt_add(srt, timeout, flags);
         return 0;
     }
     else
-        return lc_srt_add(srt,timeout,flags);
+        return lc_srt_add(srt, timeout, flags);
 }
 
 void DSRUU::EtxMsgSend(unsigned long data)
@@ -998,7 +998,7 @@ void DSRUU::EtxMsgSend(unsigned long data)
     msg->setDestAddress(destAddress_var);
     IPv4Address srcAddress_var((uint32_t)myaddr_.s_addr);
     msg->setSrcAddress(srcAddress_var);
-    msg->setTimeToLive (1); // TTL
+    msg->setTimeToLive(1); // TTL
     msg->setTransportProtocol(IP_PROT_DSR); // Transport protocol
     IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     ipControlInfo->setProtocol(IP_PROT_DSR);
@@ -1012,15 +1012,15 @@ void DSRUU::EtxMsgSend(unsigned long data)
     msg->setSrcAddr(myaddr_.s_addr);
     int macAddr = L2BROADCAST;
     msg->setControlInfo(new MacControlInfo(macAddr));
-    msg->setTtl (1); // TTL
+    msg->setTtl(1); // TTL
 #endif
-    int numNeighbor=0;
+    int numNeighbor = 0;
     for (ETXNeighborTable::iterator iter = etxNeighborTable.begin(); iter!=etxNeighborTable.end();)
     {
         // remove old data
         ETXEntry *entry = (*iter).second;
         while (simTime()-entry->timeVector.front()>etxWindowSize)
-            entry->timeVector.erase (entry->timeVector.begin());
+            entry->timeVector.erase(entry->timeVector.begin());
         if (entry->timeVector.size()==0)
         {
             linkFailed((*iter).first);
@@ -1032,31 +1032,31 @@ void DSRUU::EtxMsgSend(unsigned long data)
         double delivery;
         delivery = entry->timeVector.size()/(etxWindowSize/etxTime);
         if (delivery>0.99)
-            delivery=1;
-        entry->deliveryDirect=delivery;
+            delivery = 1;
+        entry->deliveryDirect = delivery;
 
         if (numNeighbor<15)
         {
-            neigh[numNeighbor].address=(*iter).first;
+            neigh[numNeighbor].address = (*iter).first;
             neigh[numNeighbor].delivery = delivery; //(uint32_t)(delivery*0xFFFF); // scale
             numNeighbor++;
-            if (neigh[numNeighbor-1].delivery <=0)
+            if (neigh[numNeighbor-1].delivery <= 0)
                 printf("\n recojones");
         }
         else
         {
             // delete
-            int aux=0;
+            int aux = 0;
             for (int i=1; i<15; i++)
             {
                 if (neigh[i].delivery<neigh[aux].delivery)
-                    aux=i;
+                    aux = i;
             }
-            if (neigh[aux].delivery< delivery) // (uint32_t) (delivery*0xFFFF))
+            if (neigh[aux].delivery < delivery) // (uint32_t) (delivery*0xFFFF))
             {
-                neigh[aux].delivery = delivery;//(uint32_t) (delivery*0xFFFF);
-                neigh[aux].address=(*iter).first;
-                if (neigh[aux].delivery <=0)
+                neigh[aux].delivery = delivery; //(uint32_t) (delivery*0xFFFF);
+                neigh[aux].address = (*iter).first;
+                if (neigh[aux].delivery <= 0)
                     printf("\recojones");
             }
         }
@@ -1064,28 +1064,28 @@ void DSRUU::EtxMsgSend(unsigned long data)
     }
 
     EtxList *list = msg->addExtension(numNeighbor);
-    memcpy (list,neigh,sizeof(EtxList)*numNeighbor);
+    memcpy(list, neigh, sizeof(EtxList)*numNeighbor);
 
     if (msg->getByteLength()<etxSize)
         msg->setByteLength(etxSize);
 
-    sendDelayed(msg,uniform(0,extJitter), "to_ip");
+    sendDelayed(msg, uniform(0, extJitter), "to_ip");
 
-    etxWindow+=etxTime;
-    set_timer(&etx_timer,etxTime+ SIMTIME_DBL(simTime()));
+    etxWindow += etxTime;
+    set_timer(&etx_timer, etxTime+ SIMTIME_DBL(simTime()));
 }
 
 void DSRUU::EtxMsgProc(cMessage *m)
 {
     DSRPktExt *msg;
-    int pos=-1;
-    msg=dynamic_cast<DSRPktExt*>(m);
+    int pos = -1;
+    msg = dynamic_cast<DSRPktExt*>(m);
     EtxList *list = msg->getExtension();
     int size = msg->getSizeExtension();
 
 #ifndef MobilityFramework
-    IPv4Address myAddress ((uint32_t)myaddr_.s_addr);
-    IPv4Address srcAddress (msg->getSrcAddress());
+    IPv4Address myAddress((uint32_t)myaddr_.s_addr);
+    IPv4Address srcAddress(msg->getSrcAddress());
 #else
     IPv4Address myAddress = myaddr_.s_addr;
     IPv4Address srcAddress = msg->getSrcAddr();
@@ -1095,32 +1095,32 @@ void DSRUU::EtxMsgProc(cMessage *m)
     {
         if (list[i].address==myAddress)
         {
-            pos=i;
+            pos = i;
             break;
         }
     }
     ETXNeighborTable::iterator it = etxNeighborTable.find(srcAddress);
-    ETXEntry *entry=NULL;
+    ETXEntry *entry = NULL;
     if (it==etxNeighborTable.end())
     {
         // add
         entry = new ETXEntry();
         //entry->address=msg->getSrcAddress();
-        etxNeighborTable.insert(std::make_pair(srcAddress,entry));
+        etxNeighborTable.insert(std::make_pair(srcAddress, entry));
 
     }
     else
     {
         entry = (*it).second;
         while (simTime()-entry->timeVector.front()>etxWindowSize)
-            entry->timeVector.erase (entry->timeVector.begin());
+            entry->timeVector.erase(entry->timeVector.begin());
     }
     double delivery;
     entry->timeVector.push_back(simTime());
     delivery = entry->timeVector.size()/(etxWindowSize/etxTime);
     if (delivery>0.99)
-        delivery=1;
-    entry->deliveryDirect=delivery;
+        delivery = 1;
+    entry->deliveryDirect = delivery;
     if (pos!=-1)
     {
         //unsigned int cost = (unsigned int) list[pos].delivery;
@@ -1153,26 +1153,26 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
         if (dp->costVectorSize>0)
             delete [] dp->costVector;
 
-        dp->costVector=NULL;
-        dp->costVectorSize=0;
+        dp->costVector = NULL;
+        dp->costVectorSize = 0;
         return;
     }
     myAddr = my_addr();
 #ifndef MobilityFramework
     IPv4Address myAddress((uint32_t)myAddr.s_addr);
 #else
-    IPv4Address myAddress =myAddr.s_addr;
+    IPv4Address myAddress = myAddr.s_addr;
 #endif
 
     if (dp->costVectorSize==0 && dp->src.s_addr!=myAddr.s_addr)
     {
         dp->costVectorSize++;
         dp->costVector = new EtxCost[1];
-        dp->costVector[0].address=myAddress;
+        dp->costVector[0].address = myAddress;
 #ifndef MobilityFramework
-        double cost = getCost (IPv4Address((uint32_t)dp->src.s_addr));
+        double cost = getCost(IPv4Address((uint32_t)dp->src.s_addr));
 #else
-        double cost = getCost (dp->src.s_addr);
+        double cost = getCost(dp->src.s_addr);
 #endif
         if (cost<0)
             dp->costVector[0].cost = 1e100;
@@ -1182,9 +1182,9 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
     else if (dp->costVectorSize>0)
     {
         costVector = new EtxCost[dp->costVectorSize+1];
-        memcpy(costVector,dp->costVector,dp->costVectorSize*sizeof(EtxCost));
-        costVector[dp->costVectorSize].address=myAddress;
-        double cost = getCost (dp->costVector[dp->costVectorSize-1].address);
+        memcpy(costVector, dp->costVector, dp->costVectorSize*sizeof(EtxCost));
+        costVector[dp->costVectorSize].address = myAddress;
+        double cost = getCost(dp->costVector[dp->costVectorSize-1].address);
         if (cost<0)
             costVector[dp->costVectorSize].cost = 1e100;
         else
@@ -1192,7 +1192,7 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
 
         delete [] dp->costVector;
         dp->costVectorSize++;
-        dp->costVector =costVector;
+        dp->costVector = costVector;
     }
     /*
     for (int i=0;i<dp->costVectorSize;i++)
@@ -1206,7 +1206,7 @@ double DSRUU::PathCost(struct dsr_pkt *dp)
     if (!etxActive)
     {
         totalCost = (double)(DSR_RREQ_ADDRS_LEN(dp->rreq_opt)/sizeof(struct in_addr));
-        totalCost +=1;
+        totalCost += 1;
         return totalCost;
     }
     totalCost = 0;
@@ -1216,10 +1216,10 @@ double DSRUU::PathCost(struct dsr_pkt *dp)
     }
     double cost;
     if (dp->costVectorSize>0)
-        cost = getCost (dp->costVector[dp->costVectorSize-1].address);
+        cost = getCost(dp->costVector[dp->costVectorSize-1].address);
     else
     {
-        cost = getCost (dp->src.s_addr);
+        cost = getCost(dp->src.s_addr);
     }
 
     if (cost<0)
@@ -1229,34 +1229,34 @@ double DSRUU::PathCost(struct dsr_pkt *dp)
 }
 
 
-void DSRUU::AddCost(struct dsr_pkt *dp,struct dsr_srt *srt)
+void DSRUU::AddCost(struct dsr_pkt *dp, struct dsr_srt *srt)
 {
     struct in_addr add;
 
     if (dp->costVectorSize>0)
         delete [] dp->costVector;
-    dp->costVector=NULL;
-    dp->costVectorSize=0;
+    dp->costVector = NULL;
+    dp->costVectorSize = 0;
     if (!etxActive)
         return;
 
     int sizeAddress = srt->laddrs/ sizeof(struct in_addr);
     dp->costVector = new EtxCost[srt->cost_size];
-    dp->costVectorSize=srt->cost_size;
+    dp->costVectorSize = srt->cost_size;
     for (int i=0; i<sizeAddress; i++)
     {
-        add =srt->addrs[i];
+        add = srt->addrs[i];
 #ifndef MobilityFramework
         dp->costVector[i].address = IPv4Address((uint32_t)add.s_addr);
 #else
-        dp->costVector[i].address= add.s_addr;
+        dp->costVector[i].address = add.s_addr;
 #endif
-        dp->costVector[i].cost=srt->cost[i];
+        dp->costVector[i].cost = srt->cost[i];
     }
 #ifndef MobilityFramework
-    dp->costVector[srt->cost_size-1].address=IPv4Address((uint32_t)srt->dst.s_addr);
+    dp->costVector[srt->cost_size-1].address = IPv4Address((uint32_t)srt->dst.s_addr);
 #else
-    dp->costVector[srt->cost_size-1].address=srt->dst.s_addr;
+    dp->costVector[srt->cost_size-1].address = srt->dst.s_addr;
 #endif
-    dp->costVector[srt->cost_size-1].cost=srt->cost[srt->cost_size-1];
+    dp->costVector[srt->cost_size-1].cost = srt->cost[srt->cost_size-1];
 }

@@ -83,7 +83,7 @@ void IPv6::updateDisplayString()
     if (numMulticast>0) sprintf(buf+strlen(buf), "mcast:%d ", numMulticast);
     if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
     if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void IPv6::endService(cPacket *msg)
@@ -154,7 +154,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     // check for header biterror
     if (datagram->hasBitError())
     {
-        EV << "bit error\n";return; // revise!
+        EV << "bit error\n"; return; // revise!
 /*FIXME revise
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)

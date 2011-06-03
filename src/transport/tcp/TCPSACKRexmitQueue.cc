@@ -185,7 +185,7 @@ bool TCPSACKRexmitQueue::checkQueue() const
 
     f = f && (b == end);
 
-    if(!f)
+    if (!f)
     {
         EV << "Invalid Queue\nThe Queue is:\n";
         info();
@@ -257,7 +257,7 @@ bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum) const
 
     RexmitQueue::const_iterator i = rexmitQueue.begin();
 
-    if(end == seqNum)
+    if (end == seqNum)
         return false;
 
     while (i != rexmitQueue.end() && seqLE(i->endSeqNum, seqNum))
@@ -347,7 +347,7 @@ uint32 TCPSACKRexmitQueue::getAmountOfSackedBytes(uint32 fromSeqNum) const
     uint32 bytes = 0;
     RexmitQueue::const_reverse_iterator i = rexmitQueue.rbegin();
 
-    for ( ; i != rexmitQueue.rend() && seqLE(fromSeqNum, i->beginSeqNum); i++)
+    for (; i != rexmitQueue.rend() && seqLE(fromSeqNum, i->beginSeqNum); i++)
     {
         if (i->sacked)
             bytes += (i->endSeqNum - i->beginSeqNum);

@@ -31,21 +31,21 @@ OrigNode::OrigNode()
 
 void OrigNode::clear()
 {
-    router=NULL;
-    batmanIf=NULL;
-    totalRec=0;
-    for (unsigned int i=0;i<bcast_own.size();i++)
-       bcast_own[i]=0;
-    for (unsigned int i=0;i<bcast_own_sum.size();i++)
-       bcast_own_sum[i]=0;
-    tq_own=0;
-    tq_asym_penalty=0;
-    last_valid=0;        /* when last packet from this node was received */
-    gwflags=0;      /* flags related to gateway functions: gateway class */
+    router = NULL;
+    batmanIf = NULL;
+    totalRec = 0;
+    for (unsigned int i=0; i<bcast_own.size(); i++)
+       bcast_own[i] = 0;
+    for (unsigned int i=0; i<bcast_own_sum.size(); i++)
+       bcast_own_sum[i] = 0;
+    tq_own = 0;
+    tq_asym_penalty = 0;
+    last_valid = 0;        /* when last packet from this node was received */
+    gwflags = 0;      /* flags related to gateway functions: gateway class */
     hna_buff.clear();
-    last_real_seqno=0;   /* last and best known squence number */
-    last_ttl=0;         /* ttl of last received packet */
-    num_hops =MAX_HOPS;
+    last_real_seqno = 0;   /* last and best known squence number */
+    last_ttl = 0;         /* ttl of last received packet */
+    num_hops = MAX_HOPS;
     neigh_list.clear();
 }
 
@@ -67,10 +67,10 @@ std::string OrigNode::info() const
     out << "tq_asym_penalty:" <<  (int)tq_asym_penalty<< "  ";
     out << "last_valid:" << last_valid;        /* when last packet from this node was received */
     out << "num_hops:" << num_hops;
-    out << " \n neig info: \n" ;
+    out << " \n neig info: \n";
 
-    NeighNode *neigh_node=NULL;
-    for (unsigned int i = 0; i< neigh_list.size();i++)
+    NeighNode *neigh_node = NULL;
+    for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
         NeighNode * tmp_neigh_node = neigh_list[i];
         if (tmp_neigh_node->addr == orig )
@@ -82,7 +82,7 @@ std::string OrigNode::info() const
     else
         out << neigh_node->info();
 
-    for (unsigned int i = 0; i< neigh_list.size();i++)
+    for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
         out << "list neig :" << neigh_list[i]->addr.getIPAddress() << " ";
     }
@@ -127,8 +127,8 @@ OrigNode::OrigNode(const OrigNode &other)
 
 OrigNode::~OrigNode()
 {
-    router=NULL;
-    batmanIf=NULL;
+    router = NULL;
+    batmanIf = NULL;
     bcast_own.clear();
     bcast_own_sum.clear();
     hna_buff.clear();
@@ -137,12 +137,12 @@ OrigNode::~OrigNode()
     {
         NeighNode *node = neigh_list.back();
         neigh_list.pop_back();
-        node->owner_node=NULL;
+        node->owner_node = NULL;
         delete node;
     }
     while (!hna_buff.empty())
     {
-        BatmanHnaMsg * aux=hna_buff.back();
+        BatmanHnaMsg * aux = hna_buff.back();
         hna_buff.pop_back();
         delete aux;
     }
@@ -150,20 +150,20 @@ OrigNode::~OrigNode()
 
 void NeighNode::clear()
 {
-    addr=(Uint128)0;
-    real_packet_count=0;
-    for (unsigned int i=0;i<tq_recv.size();i++)
-         tq_recv[i]=0;
-    tq_index=0;
-    tq_avg=0;
-    last_ttl=0;
-    num_hops =MAX_HOPS;
-    last_valid=0;            /* when last packet via this neighbour was received */
-    for (unsigned int i=0;i<real_bits.size();i++)
-        real_bits[i]=0;
-    orig_node=NULL;
-    owner_node=NULL;
-    if_incoming=NULL;
+    addr = (Uint128)0;
+    real_packet_count = 0;
+    for (unsigned int i=0; i<tq_recv.size(); i++)
+         tq_recv[i] = 0;
+    tq_index = 0;
+    tq_avg = 0;
+    last_ttl = 0;
+    num_hops = MAX_HOPS;
+    last_valid = 0;            /* when last packet via this neighbour was received */
+    for (unsigned int i=0; i<real_bits.size(); i++)
+        real_bits[i] = 0;
+    orig_node = NULL;
+    owner_node = NULL;
+    if_incoming = NULL;
 }
 
 
@@ -185,7 +185,7 @@ NeighNode::~NeighNode()
 }
 
 
-NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf* ifIncoming,const uint32_t &num_words, const uint32_t &global_win_size)
+NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf* ifIncoming, const uint32_t &num_words, const uint32_t &global_win_size)
 {
     tq_recv.resize(sizeof(uint16_t) * global_win_size);
     real_bits.resize(num_words);
@@ -193,7 +193,7 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint12
     this->addr = neigh;
     this->orig_node = orig_neigh_node;
     this->if_incoming = ifIncoming;
-    this->owner_node=origNode;
+    this->owner_node = origNode;
     origNode->neigh_list.push_back(this);
 }
 
@@ -212,14 +212,14 @@ OrigNode  * Batman::getOrigNode(const Uint128 &addr)
     orig_node->bcast_own.resize(found_ifs * num_words);
     orig_node->bcast_own_sum.resize(found_ifs);
     orig_node->clear();
-    orig_node->orig=addr;
-    origMap.insert(std::pair<Uint128, OrigNode *>(addr,orig_node));
+    orig_node->orig = addr;
+    origMap.insert(std::pair<Uint128, OrigNode *>(addr, orig_node));
     return orig_node;
 }
 
 NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf* if_incoming)
 {
-    return new NeighNode(orig_node,orig_neigh_node,neigh,if_incoming,num_words,global_win_size);
+    return new NeighNode(orig_node, orig_neigh_node, neigh, if_incoming, num_words, global_win_size);
 }
 
 OrigNode * Batman::get_orig_node(const Uint128 &addr )
@@ -237,7 +237,7 @@ uint8_t Batman::ring_buffer_avg(std::vector<uint8_t> &tq_recv)
 {
     uint16_t count = 0;
     uint32_t sum = 0;
-    for (unsigned int i=0;i < tq_recv.size();i++)
+    for (unsigned int i=0; i < tq_recv.size(); i++)
     {
         if (tq_recv[i] != 0) {
             count++;
@@ -250,14 +250,14 @@ uint8_t Batman::ring_buffer_avg(std::vector<uint8_t> &tq_recv)
 }
 
 
-void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh,BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time )
+void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time )
 {
     GwNode *gw_node;
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
     uint8_t max_bcast_own = 0, max_tq = 0;
 
 
-    for (unsigned int i=0;i<orig_node->neigh_list.size();i++)
+    for (unsigned int i=0; i<orig_node->neigh_list.size(); i++)
     {
         tmp_neigh_node = orig_node->neigh_list[i];
         if ( ( tmp_neigh_node->addr == neigh ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
@@ -283,7 +283,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
 
     if ( neigh_node == NULL ) {
 
-        neigh_node = new NeighNode(orig_node, get_orig_node(neigh), neigh, if_incoming,num_words,global_win_size);
+        neigh_node = new NeighNode(orig_node, get_orig_node(neigh), neigh, if_incoming, num_words, global_win_size);
     }
 
     neigh_node->last_valid = curr_time;
@@ -327,7 +327,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
             /* it is our preferred gateway or we have fast switching or the tq is $routing_class better than our old tq */
             if ((pref_gateway == orig_node->orig) || (routing_class == 3) || (orig_node->router->tq_avg - curr_gateway->orig_node->router->tq_avg >= routing_class)) {
                 gw_node = NULL;
-                for (unsigned int i = 0;i<gw_list.size();i++)
+                for (unsigned int i = 0; i<gw_list.size(); i++)
                 {
                     if (gw_list[i]->orig_node == orig_node)
                     {
@@ -360,7 +360,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
     OrigMap::iterator it;
     OrigMap::iterator itAux;
 
-    for (it = origMap.begin();it != origMap.end();)
+    for (it = origMap.begin(); it != origMap.end();)
     {
         orig_node = it->second;
         if (curr_time > (orig_node->last_valid + (2 * purge_timeout)))
@@ -382,11 +382,11 @@ void Batman::purge_orig(const simtime_t &curr_time)
             {
                 NeighNode *node = orig_node->neigh_list.back();
                 orig_node->neigh_list.pop_back();
-                node->owner_node=NULL;
+                node->owner_node = NULL;
                 delete node;
             }
 
-            for (unsigned int i =0;i<gw_list.size();i++)
+            for (unsigned int i = 0; i<gw_list.size(); i++)
             {
                 gw_node = gw_list[i];
                 if (gw_node->deleted.raw())
@@ -407,7 +407,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
         {
             best_neigh_node = NULL;
             max_tq = neigh_purged = 0;
-            for (unsigned int j = 0;j< orig_node->neigh_list.size();)
+            for (unsigned int j = 0; j < orig_node->neigh_list.size();)
             {
                 neigh_node = orig_node->neigh_list[j];
                 if (curr_time > (neigh_node->last_valid + purge_timeout)) {
@@ -421,7 +421,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
                             del_default_route();
                         orig_node->router = NULL;
                     }
-                    neigh_node->owner_node=NULL;
+                    neigh_node->owner_node = NULL;
                     orig_node->neigh_list.erase(orig_node->neigh_list.begin()+j);
                     delete neigh_node;
                 } else {
@@ -436,8 +436,8 @@ void Batman::purge_orig(const simtime_t &curr_time)
             if ((neigh_purged) && ((best_neigh_node == NULL) || (orig_node->router == NULL) || (max_tq > orig_node->router->tq_avg)))
             {
                 BatmanHnaMsg * buffer = new BatmanHnaMsg[orig_node->hna_buff.size()];
-                for (unsigned int i=0;i<orig_node->hna_buff.size();i++)
-                    buffer[i]= *(orig_node->hna_buff[i]);
+                for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
+                    buffer[i] = *(orig_node->hna_buff[i]);
                 update_routes(orig_node, best_neigh_node, buffer, orig_node->hna_buff.size());
                 delete [] buffer;
             }
@@ -445,7 +445,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
         it++;
     }
 
-    for (unsigned int i =0;i<gw_list.size();)
+    for (unsigned int i = 0; i<gw_list.size();)
     {
         gw_node = gw_list[i];
         if ((gw_node->deleted>0) && (curr_time > (gw_node->deleted + (2 * purge_timeout))))
@@ -483,7 +483,7 @@ void Batman::choose_gw(void)
         return;
     }
 
-    for (unsigned int i = 0; i<gw_list.size();i++ )
+    for (unsigned int i = 0; i<gw_list.size(); i++ )
     {
         gw_node = gw_list[i];
 
@@ -497,7 +497,7 @@ void Batman::choose_gw(void)
         if ( gw_node->orig_node->router == NULL )
             continue;
 
-        if ( gw_node->deleted >0)
+        if ( gw_node->deleted > 0)
             continue;
         switch ( routing_class ) {
             case 1: /* fast connection */
@@ -602,18 +602,18 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
         }
         else
         {
-            bool Change=true;
+            bool Change = true;
 #ifdef __USE_MINHOP__
             if (orig_node->router->num_hops<neigh_node->num_hops)
             {
                  // evaluate
                  if (neigh_node->tq_avg<=orig_node->router->tq_avg+1)
-                    Change=false;
+                    Change = false;
             }
             else if (orig_node->router->num_hops==neigh_node->num_hops)
             {
                 if (neigh_node->tq_avg==orig_node->router->tq_avg+1)
-                   Change=false;
+                   Change = false;
             }
 #endif
             /* add new route */
@@ -640,8 +640,8 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
     // Sanity check
     if (!isInMacLayer())
     {
-        Uint128 next = omnet_exist_rte (orig_node->orig);
-        if(orig_node->router)
+        Uint128 next = omnet_exist_rte(orig_node->orig);
+        if (orig_node->router)
         {
             if (next!=orig_node->router->addr)
                 add_del_route(orig_node->orig, 32, orig_node->router->addr,
@@ -661,7 +661,7 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
 {
     GwNode *gw_node;
 
-    for (unsigned int i = 0; i<gw_list.size();i++ )
+    for (unsigned int i = 0; i<gw_list.size(); i++ )
     {
         gw_node = gw_list[i];
         if ( gw_node->orig_node == orig_node )
@@ -762,7 +762,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
 
     if ( orig_node == orig_neigh_node )
     {
-        for (unsigned int i = 0; i< orig_node->neigh_list.size();i++ )
+        for (unsigned int i = 0; i < orig_node->neigh_list.size(); i++ )
         {
             tmp_neigh_node = orig_node->neigh_list[i];
             if ( ( tmp_neigh_node->addr == orig_neigh_node->orig ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
@@ -779,7 +779,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
     {
 
         /* find packet count of corresponding one hop neighbor */
-        for (unsigned int i = 0; i< orig_neigh_node->neigh_list.size();i++)
+        for (unsigned int i = 0; i < orig_neigh_node->neigh_list.size(); i++)
         {
             tmp_neigh_node = orig_neigh_node->neigh_list[i];
             if ( ( tmp_neigh_node->addr == orig_neigh_node->orig ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
@@ -821,7 +821,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
             (local_win_size - neigh_node->real_packet_count)) /
             (local_win_size * local_win_size * local_win_size);
 
-    in->setTq ((in->getTq() * orig_neigh_node->tq_own * orig_neigh_node->tq_asym_penalty) / (TQ_MAX_VALUE *  TQ_MAX_VALUE));
+    in->setTq((in->getTq() * orig_neigh_node->tq_own * orig_neigh_node->tq_asym_penalty) / (TQ_MAX_VALUE *  TQ_MAX_VALUE));
 /*
     addr_to_string( orig_node->orig, orig_str, ADDR_STR_LEN );
     addr_to_string( orig_neigh_node->orig, neigh_str, ADDR_STR_LEN );
@@ -937,7 +937,7 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
 
     debug_output( 3, "count_real_packets: orig = %s, neigh = %s, seq = %i, last seq = %i\n", orig_str, neigh_str, in->seqno, orig_node->last_real_seqno );*/
 
-    for (unsigned int i= 0;i<orig_node->neigh_list.size();i++)
+    for (unsigned int i = 0; i<orig_node->neigh_list.size(); i++)
     {
         tmp_neigh_node = orig_node->neigh_list[i];
         if ( !is_duplicate )
@@ -961,7 +961,7 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
     if ( !is_duplicate )
     {
 
-        EV << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n" ;
+        EV << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n";
         orig_node->last_real_seqno = in->getSeqNumber();
 
     }
@@ -970,7 +970,7 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
 
 void Batman::schedule_own_packet(BatmanIf *batman_if)
 {
-    ForwNode *forw_node_new=NULL;
+    ForwNode *forw_node_new = NULL;
     OrigNode *orig_node;
 
     forw_node_new = new ForwNode;
@@ -978,7 +978,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     do
     {
        forw_node_new->send_time = getTime() + originator_interval + par("jitter2");
-    } while (forw_node_new->send_time < simTime());// avoid schedule in the past
+    } while (forw_node_new->send_time < simTime()); // avoid schedule in the past
 
     EV << "Send own packet in "<< forw_node_new->send_time <<endl;
 
@@ -996,13 +996,13 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
         forw_node_new->pack_buff->setHnaLen(hna_buff_local.size());
         forw_node_new->pack_buff->setByteLength(forw_node_new->pack_buff->getByteLength()+(hna_buff_local.size() * 5));
         forw_node_new->pack_buff->setHnaLen(hna_buff_local.size());
-        for (unsigned int i = 0;i<hna_buff_local.size();i++)
+        for (unsigned int i = 0; i<hna_buff_local.size(); i++)
         {
             BatmanHnaMsg aux;
-            aux.addr=hna_buff_local[i].addr;
-            aux.netmask=hna_buff_local[i].netmask;
+            aux.addr = hna_buff_local[i].addr;
+            aux.netmask = hna_buff_local[i].netmask;
 
-            forw_node_new->pack_buff->setHnaMsg(i,aux);
+            forw_node_new->pack_buff->setHnaMsg(i, aux);
 
         }
     }
@@ -1010,12 +1010,12 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     /* change sequence number to network order */
 
     Forwlist::iterator forwListIt;
-    for (forwListIt = forw_list.begin();forwListIt != forw_list.end();forwListIt++)
+    for (forwListIt = forw_list.begin(); forwListIt != forw_list.end(); forwListIt++)
     {
         ForwNode *forw_packet_tmp = *forwListIt;
         if (forw_packet_tmp->send_time > forw_node_new->send_time)
         {
-            forw_list.insert(forwListIt,forw_node_new);
+            forw_list.insert(forwListIt, forw_node_new);
             break;
         }
     }
@@ -1026,19 +1026,19 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     }
 
     batman_if->seqno++;
-    for (OrigMap::iterator it = origMap.begin();it!=origMap.end();it++)
+    for (OrigMap::iterator it = origMap.begin(); it!=origMap.end(); it++)
     {
         orig_node = it->second;
         //debug_output( 4, "count own bcast (schedule_own_packet): old = %i, ", orig_node->bcast_own_sum[batman_if->if_num] );
 
         std::vector<TYPE_OF_WORD>vectorAux;
-        for (unsigned int i=0;i<num_words;i++)
+        for (unsigned int i=0; i<num_words; i++)
         {
             vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
         }
         bit_get_packet(vectorAux, 1, 0 );
         orig_node->bcast_own_sum[batman_if->if_num] = bit_packet_count(vectorAux);
-        for (unsigned int i=0;i<num_words;i++)
+        for (unsigned int i=0; i<num_words; i++)
         {
             orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
         }
@@ -1076,7 +1076,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
 
 
     Forwlist::iterator  it;
-    for (it=forw_list.begin();it!=forw_list.end();it++)
+    for (it=forw_list.begin(); it!=forw_list.end(); it++)
     {
         forw_node_pos = *it;
         if (aggregation_enabled) {
@@ -1089,8 +1089,8 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
              * - the send time is within our MAX_AGGREGATION_MS time
              * - the resulting packet wont be bigger than MAX_AGGREGATION_BYTES
              */
-            if ((forw_node_pos->send_time < send_time)  &&
-                (forw_node_pos->pack_buff->getByteLength() + in->getByteLength()  <= MAX_AGGREGATION_BYTES)) {
+            if ((forw_node_pos->send_time < send_time) &&
+                (forw_node_pos->pack_buff->getByteLength() + in->getByteLength() <= MAX_AGGREGATION_BYTES)) {
 
                 bat_packet = forw_node_pos->pack_buff;
 
@@ -1140,7 +1140,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     else
     {
         // It's necessary decapsulate and recapsulate the packets
-        appendPacket(forw_node_aggregate->pack_buff,in);
+        appendPacket(forw_node_aggregate->pack_buff, in);
         forw_node_aggregate->num_packets++;
         forw_node_new = forw_node_aggregate;
 
@@ -1160,8 +1160,8 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         /* rebroadcast ogm of best ranking neighbor as is */
         if (orig_node->router->addr != neigh) {
 
-            bat_packet->setTq (orig_node->router->tq_avg);
-            bat_packet->setTtl (orig_node->router->last_ttl - 1);
+            bat_packet->setTq(orig_node->router->tq_avg);
+            bat_packet->setTtl(orig_node->router->last_ttl - 1);
             bat_packet->setHops(orig_node->router->num_hops+1);
         }
 
@@ -1170,21 +1170,21 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     }
 
     /* apply hop penalty */
-    bat_packet->setTq (bat_packet->getTq() * (TQ_MAX_VALUE - hop_penalty) / (TQ_MAX_VALUE));
+    bat_packet->setTq(bat_packet->getTq() * (TQ_MAX_VALUE - hop_penalty) / (TQ_MAX_VALUE));
 
     //debug_output(4, "forwarding: tq_orig: %i, tq_avg: %i, tq_forw: %i, ttl_orig: %i, ttl_forw: %i \n", in->tq, tq_avg, bat_packet->tq, in->ttl - 1, bat_packet->ttl);
 
     if (directlink)
-        bat_packet->setFlags (bat_packet->getFlags()|DIRECTLINK);
+        bat_packet->setFlags(bat_packet->getFlags()|DIRECTLINK);
     else
-        bat_packet->setFlags (bat_packet->getFlags()&(~DIRECTLINK));
+        bat_packet->setFlags(bat_packet->getFlags()&(~DIRECTLINK));
 
     /* if the packet was not aggregated */
     if (forw_node_aggregate == NULL) {
 
         /* if the packet should go somewhere in the queue */
         if (it!=forw_list.end())
-            forw_list.insert(it,forw_node_new);
+            forw_list.insert(it, forw_node_new);
         /* if the packet is the last packet in the queue */
         else
             forw_list.push_back(forw_node_new);
@@ -1192,7 +1192,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     EV << "Fordward packet " << bat_packet << "at :" <<forw_node_new->send_time<< endl;
 }
 
-void Batman::appendPacket(cPacket *oldPacket,cPacket * packetToAppend)
+void Batman::appendPacket(cPacket *oldPacket, cPacket * packetToAppend)
 {
     if (oldPacket->getEncapsulatedPacket()==NULL)
     {
@@ -1209,9 +1209,9 @@ void Batman::appendPacket(cPacket *oldPacket,cPacket * packetToAppend)
     pkt = packetToAppend;
     while (!vectorPacket.empty())
     {
-          cPacket *pktAux=vectorPacket.back();
+          cPacket *pktAux = vectorPacket.back();
           pktAux->encapsulate(pkt);
-          pkt=pktAux;
+          pkt = pktAux;
           vectorPacket.pop_back();
     }
     oldPacket->encapsulate(pkt);
@@ -1219,7 +1219,7 @@ void Batman::appendPacket(cPacket *oldPacket,cPacket * packetToAppend)
 
 void Batman::send_outstanding_packets(const simtime_t &curr_time)
 {
-    ForwNode *forw_node= NULL;
+    ForwNode *forw_node = NULL;
     BatmanIf *batman_if;
     BatmanPacket *bat_packet;
     uint8_t directlink, curr_packet_num;
@@ -1228,7 +1228,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
     //prof_start(PROF_send_outstanding_packets);
 
 
-    while  (true)
+    while (true)
     {
         forw_node = forw_list.front();
 
@@ -1261,12 +1261,12 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
         }
         else
         {
-           for (unsigned int i =0;i<if_list.size();i++)
+           for (unsigned int i = 0; i<if_list.size(); i++)
            {
-               batman_if =if_list[i];
+               batman_if = if_list[i];
                curr_packet_num = curr_packet_len = 0;
                bat_packet = forw_node->pack_buff->dup();
-               BatmanPacket *bat_packetAux=bat_packet;
+               BatmanPacket *bat_packetAux = bat_packet;
                while (bat_packetAux!=NULL)
                {
                    if ((forw_node->direct_link_flags & (1 << curr_packet_num)) && (forw_node->if_incoming == batman_if))
@@ -1282,7 +1282,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
                  * add extra penalty (own packets are to be ignored)
                  */
                    if ((batman_if->wifi_if) && (!forw_node->own) && (forw_node->if_incoming == batman_if))
-                       bat_packetAux->setTq ((bat_packetAux->getTq() * (TQ_MAX_VALUE - (2 * hop_penalty))) / (TQ_MAX_VALUE));
+                       bat_packetAux->setTq((bat_packetAux->getTq() * (TQ_MAX_VALUE - (2 * hop_penalty))) / (TQ_MAX_VALUE));
 
 //                   debug_output(4, "%s %spacket (originator %s, seqno %d, TQ %d, TTL %d, IDF %s) on interface %s\n", (curr_packet_num > 0 ? "Forwarding" : (forw_node->own ? "Sending own" : "Forwarding")), (curr_packet_num > 0 ? "aggregated " : ""), orig_str, ntohs(bat_packet->seqno), bat_packet->tq, bat_packet->ttl, (bat_packet->flags & DIRECTLINK ? "on" : "off"), batman_if->dev);
 
@@ -1308,9 +1308,9 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
         return 0;
     }
     if (batman_if)
-        sendToIp (packet_buff, BATMAN_PORT,destAdd,BATMAN_PORT,1,par("broadCastDelay"),batman_if->dev->ipv4Data()->getIPAddress());
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadCastDelay"), batman_if->dev->ipv4Data()->getIPAddress());
     else
-        sendToIp (packet_buff,BATMAN_PORT,destAdd,BATMAN_PORT,1,par("broadCastDelay"),(Uint128)0);
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadCastDelay"), (Uint128)0);
     return 0;
 }
 
@@ -1318,9 +1318,9 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
 BatmanIf * Batman::is_batman_if(InterfaceEntry * dev)
 {
 
-    for (unsigned int i=0;i<if_list.size();i++)
+    for (unsigned int i=0; i<if_list.size(); i++)
     {
-        if(if_list[i]->dev==dev)
+        if (if_list[i]->dev==dev)
             return if_list[i];
     }
     return NULL;
@@ -1337,20 +1337,20 @@ void Batman::add_del_route(const Uint128  & dest, uint8_t netmask, const Uint128
         return;
     if (route_action==ROUTE_DEL)
     {
-       setRoute(dest,0,0,0,0);
+       setRoute(dest, 0, 0, 0, 0);
        return;
     }
-    int index=-1;
-    for (int i=0;i<getNumInterfaces();i++)
+    int index = -1;
+    for (int i=0; i<getNumInterfaces(); i++)
     {
         if (dev == this->getInterfaceEntry(i))
         {
-            index=i;
+            index = i;
             break;
         }
     }
     if (index>=0)
-       setRoute(dest,router,index,-1,Uint128::UINT128_MAX);
+       setRoute(dest, router, index, -1, Uint128::UINT128_MAX);
 }
 
 int Batman::add_del_interface_rules(int8_t rule_action)
@@ -1358,12 +1358,12 @@ int Batman::add_del_interface_rules(int8_t rule_action)
 
     if (isInMacLayer())
         return 1;
-    int if_count=1;
-    for (int i=0;i<getNumInterfaces();i++)
+    int if_count = 1;
+    for (int i=0; i<getNumInterfaces(); i++)
     {
-        InterfaceEntry *ifr = getInterfaceEntry (i);
+        InterfaceEntry *ifr = getInterfaceEntry(i);
 
-        if (ifr->ipv4Data ()==NULL) // no ipv4
+        if (ifr->ipv4Data()==NULL) // no ipv4
             continue;
 
             continue;
@@ -1372,8 +1372,8 @@ int Batman::add_del_interface_rules(int8_t rule_action)
 
         Uint128 addr = ifr->ipv4Data()->getIPAddress().getInt();
         Uint128 netmask = ifr->ipv4Data()->getNetmask().getInt();
-        uint8_t mask=0;
-        for (unsigned int i=0;i<128;i++)
+        uint8_t mask = 0;
+        for (unsigned int i=0; i<128; i++)
         {
            if (netmask.bit(i))
                mask++;
@@ -1382,7 +1382,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         }
 
 
-        Uint128 netaddr =  addr&netmask;
+        Uint128 netaddr = addr&netmask;
         BatmanIf *batman_if;
 
 
@@ -1412,22 +1412,22 @@ void Batman::add_del_rule(uint32_t network, uint8_t netmask, int8_t rt_table, ui
 /* clear the bits */
 void Batman::bit_init( std::vector<TYPE_OF_WORD> &seq_bits )
 {
-    for (int i = 0 ; i < (int)num_words; i++)
+    for (int i = 0; i < (int)num_words; i++)
     {
-        seq_bits[i]= 0;
+        seq_bits[i] = 0;
     }
 }
 
 /* returns true if corresponding bit in given seq_bits indicates so and curr_seqno is within range of last_seqno */
 uint8_t Batman::get_bit_status( std::vector<TYPE_OF_WORD> &seq_bits, uint16_t last_seqno, uint16_t curr_seqno ) {
     int16_t diff, word_offset, word_num;
-    diff= last_seqno- curr_seqno;
+    diff = last_seqno- curr_seqno;
     if (diff < 0 || diff >= local_win_size)
         return 0;
     else
     {
-        word_offset= ( last_seqno - curr_seqno ) % WORD_BIT_SIZE;    /* which position in the selected word */
-        word_num   = ( last_seqno - curr_seqno ) / WORD_BIT_SIZE;    /* which word */
+        word_offset = ( last_seqno - curr_seqno ) % WORD_BIT_SIZE;    /* which position in the selected word */
+        word_num = ( last_seqno - curr_seqno ) / WORD_BIT_SIZE;    /* which word */
 
         if ( seq_bits[word_num] & 1<<word_offset )   /* get position status */
             return 1;
@@ -1439,15 +1439,15 @@ uint8_t Batman::get_bit_status( std::vector<TYPE_OF_WORD> &seq_bits, uint16_t la
 /* turn corresponding bit on, so we can remember that we got the packet */
 void Batman::bit_mark( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n )
 {
-    int32_t word_offset,word_num;
+    int32_t word_offset, word_num;
     if (n<0 || n >= local_win_size) {            /* if too old, just drop it */
         return;
     }
 
-    word_offset= n%WORD_BIT_SIZE;    /* which position in the selected word */
-    word_num   = n/WORD_BIT_SIZE;    /* which word */
+    word_offset = n%WORD_BIT_SIZE;    /* which position in the selected word */
+    word_num = n/WORD_BIT_SIZE;    /* which word */
 
-    seq_bits[word_num]|= 1<<word_offset;    /* turn the position on */
+    seq_bits[word_num] |= 1<<word_offset;    /* turn the position on */
 }
 
 /* shift the packet array p by n places. */
@@ -1456,11 +1456,11 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
     int32_t i;
 
 /*    bit_print( seq_bits );*/
-    if( n<=0 )
+    if ( n<=0 )
         return;
 
-    word_offset= n%WORD_BIT_SIZE;    /* shift how much inside each word */
-    word_num   = n/WORD_BIT_SIZE;    /* shift over how much (full) words */
+    word_offset = n%WORD_BIT_SIZE;    /* shift how much inside each word */
+    word_num = n/WORD_BIT_SIZE;    /* shift over how much (full) words */
 
     for (i=num_words-1; i>word_num; i-- )
     {
@@ -1473,7 +1473,7 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
          *
          * our desired output would be: 9876 5432 1000 0000
          * */
-        seq_bits[i]=
+        seq_bits[i] =
                 (seq_bits[i - word_num] << word_offset) +
                         /* take the lower port from the left half, shift it left to its final position */
                 (seq_bits[i - word_num - 1] >>  (WORD_BIT_SIZE-word_offset));
@@ -1483,12 +1483,12 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
     /* now for our last word, i==word_num, we only have the it's "left" half. that's the 1000 word in
      * our example.*/
 
-    seq_bits[i]= (seq_bits[i - word_num] << word_offset);
+    seq_bits[i] = (seq_bits[i - word_num] << word_offset);
 
     /* pad the rest with 0, if there is anything */
     i--;
     for (; i>=0; i--)
-        seq_bits[i]= 0;
+        seq_bits[i] = 0;
 /*    bit_print( seq_bits ); */
 }
 
@@ -1515,7 +1515,7 @@ char Batman::bit_get_packet( std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_nu
 //            debug_output(4, "Other host probably restarted !\n");
 
         for (i=0; i<num_words; i++)
-            seq_bits[i]= 0;
+            seq_bits[i] = 0;
 
         if ( set_mark )
             seq_bits[0] = 1;  /* we only have the latest packet */
@@ -1544,7 +1544,7 @@ int Batman::bit_packet_count( std::vector<TYPE_OF_WORD> &seq_bits )
             hamming++;
         }
     }
-    return(hamming);
+    return (hamming);
 }
 
 uint8_t Batman::bit_count( int32_t to_count )
@@ -1556,18 +1556,18 @@ uint8_t Batman::bit_count( int32_t to_count )
         to_count &= to_count-1;   /* see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan */
         hamming++;
     }
-    return(hamming);
+    return (hamming);
 }
 
 void Batman::deactivate_interface(BatmanIf *iface)
 {
-    iface->if_active=false;
+    iface->if_active = false;
     //iface->dev->setDown(true);
 }
 
 void Batman::activate_interface(BatmanIf *iface)
 {
-    iface->if_active=true;
+    iface->if_active = true;
 
     //iface->dev->setDown(true);
 }
@@ -1575,7 +1575,7 @@ void Batman::activate_interface(BatmanIf *iface)
 void Batman::check_active_inactive_interfaces(void)
 {
     /* all available interfaces are deactive */
-    for (unsigned int i=0;i<if_list.size();i++){
+    for (unsigned int i=0; i<if_list.size(); i++){
         BatmanIf* batman_if = if_list[i];
         if ((batman_if->if_active) && (batman_if->dev->isDown()))
         {
@@ -1597,7 +1597,7 @@ void Batman::check_inactive_interfaces(void)
     if (found_ifs == active_ifs)
         return;
 
-    for (unsigned int i=0;i<if_list.size();i++){
+    for (unsigned int i=0; i<if_list.size(); i++){
         BatmanIf* batman_if = if_list[i];
 
         if ((!batman_if->if_active) && (!batman_if->dev->isDown()))
@@ -1613,7 +1613,7 @@ void Batman::check_active_interfaces(void)
     /* all available interfaces are deactive */
     if (active_ifs == 0)
         return;
-    for (unsigned int i=0;i<if_list.size();i++)
+    for (unsigned int i=0; i<if_list.size(); i++)
     {
         BatmanIf* batman_if = if_list[i];
         if ((batman_if->if_active) && (batman_if->dev->isDown()))
@@ -1626,16 +1626,16 @@ void Batman::check_active_interfaces(void)
 
 BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
 {
-    std::string str="BatmanPkt:"+batman_if->address.getIPAddress().str();
-    BatmanPacket * pkt=new BatmanPacket(str.c_str());
+    std::string str = "BatmanPkt:"+batman_if->address.getIPAddress().str();
+    BatmanPacket * pkt = new BatmanPacket(str.c_str());
 
-    pkt->setVersion (0);
-    pkt->setFlags (0x00);
-    pkt->setTtl ((batman_if->if_num > 0 ? 2 : TTL));
-    pkt->setGatewayFlags (batman_if->if_num > 0 ? 0 : gateway_class);
-    pkt->setSeqNumber (batman_if->seqno);
-    pkt->setGatewayPort (GW_PORT);
-    pkt->setTq (TQ_MAX_VALUE);
+    pkt->setVersion(0);
+    pkt->setFlags(0x00);
+    pkt->setTtl((batman_if->if_num > 0 ? 2 : TTL));
+    pkt->setGatewayFlags(batman_if->if_num > 0 ? 0 : gateway_class);
+    pkt->setSeqNumber(batman_if->seqno);
+    pkt->setGatewayPort(GW_PORT);
+    pkt->setTq(TQ_MAX_VALUE);
     if (batman_if->if_active)
     {
        pkt->setOrig(batman_if->address);

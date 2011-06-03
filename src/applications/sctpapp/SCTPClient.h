@@ -65,7 +65,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         cMessage* stopTimer;
         cMessage* primaryChangeTimer;
         /** Utility: sends a request to the server */
-        void sendRequest(bool last=true);
+        void sendRequest(bool last = true);
     public:
         struct pathStatus
         {
@@ -127,7 +127,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
         //@}
         void setAssociation(SCTPAssociation *_assoc) {assoc = _assoc;};
-        void setPrimaryPath (const char* addr);
+        void setPrimaryPath(const char* addr);
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int32 connId);

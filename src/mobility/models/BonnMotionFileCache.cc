@@ -63,7 +63,7 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
 {
     std::ifstream in(filename, std::ios::in);
     if (in.fail())
-        throw cRuntimeError("Cannot open file '%s'",filename);
+        throw cRuntimeError("Cannot open file '%s'", filename);
 
     std::string line;
     while (std::getline(in, line))

@@ -128,7 +128,7 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Sets entry in the Binding Update List with provided values. If entry does not yet exist, a new one is created.
      */
     virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa,
-           const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);//,const simtime_t& nextBUSentTime );
+           const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime); //,const simtime_t& nextBUSentTime );
 
     /**
      * Creates a new entry in the BUL for the provided address.

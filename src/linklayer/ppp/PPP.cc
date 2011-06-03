@@ -130,8 +130,8 @@ void PPP::initialize(int stage)
             else
             {
                 // we are not connected: gray out our icon
-                getDisplayString().setTagArg("i",1,"#707070");
-                getDisplayString().setTagArg("i",2,"100");
+                getDisplayString().setTagArg("i", 1, "#707070");
+                getDisplayString().setTagArg("i", 2, "100");
             }
         }
 
@@ -365,7 +365,7 @@ void PPP::handleMessage(cMessage *msg)
             numRcvdOK++;
             emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
             emit(packetSentToUpperSignal, payload);
-            send(payload,"netwOut");
+            send(payload, "netwOut");
         }
     }
     else // arrived on gate "netwIn"

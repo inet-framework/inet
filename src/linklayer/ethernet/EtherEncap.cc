@@ -36,7 +36,7 @@ void EtherEncap::initialize()
 
     totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
 
-    rcvdPkBytesFromHLSignal =  registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
     rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
     sentPauseSignal = registerSignal("sentPause");
 
@@ -54,7 +54,7 @@ void EtherEncap::handleMessage(cMessage *msg)
     else
     {
         // from higher layer
-        switch(msg->getKind())
+        switch (msg->getKind())
         {
             case IEEE802CTRL_DATA:
             case 0: // default message kind (0) is also accepted
@@ -79,7 +79,7 @@ void EtherEncap::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void EtherEncap::processPacketFromHigherLayer(cPacket *msg)

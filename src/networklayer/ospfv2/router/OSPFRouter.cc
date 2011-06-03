@@ -246,7 +246,7 @@ bool OSPF::Router::installASExternalLSA(OSPFASExternalLSA* lsa)
         reachable &&
         (lsaIt->second->getContents().getE_ExternalMetricType() == lsa->getContents().getE_ExternalMetricType()) &&
         (lsaIt->second->getContents().getRouteCost() == lsa->getContents().getRouteCost()) &&
-        (lsa->getContents().getForwardingAddress().getInt() != 0) &&   // forwarding address != 0.0.0.0
+        (lsa->getContents().getForwardingAddress().getInt() != 0) && // forwarding address != 0.0.0.0
         (lsaIt->second->getContents().getForwardingAddress() == lsa->getContents().getForwardingAddress()))
     {
         if (routerID > advertisingRouter) {
@@ -414,7 +414,7 @@ void OSPF::Router::ageDatabase()
         if (lsAge == MAX_AGE) {
             OSPF::LSAKeyType lsaKey;
 
-            lsaKey.linkStateID       = lsa->getHeader().getLinkStateID();
+            lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
             if (!isOnAnyRetransmissionList(lsaKey) &&
@@ -782,7 +782,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPv4Address destination, std::vect
             if ((entryAddress & entryMask) == (dest & entryMask)) {
                 if ((dest & entryMask) > longestMatch) {
                     longestMatch = (dest & entryMask);
-                    bestMatch    = entry;
+                    bestMatch = entry;
                 }
             }
         }
@@ -894,7 +894,7 @@ void OSPF::Router::rebuildRoutingTable()
 
     routeCount = oldTable.size();
     for (i = 0; i < routeCount; i++) {
-        delete(oldTable[i]);
+        delete (oldTable[i]);
     }
 
     EV << "Routing table was rebuilt.\n"
@@ -1359,7 +1359,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 //                        floodLSA(lsaToReoriginate, OSPF::BACKBONE_AREAID);
                         floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
-                        lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
+                        lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = routerID;
                         originatedLSAMap[lsaKey] = true;
 
@@ -1370,7 +1370,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 //                    floodLSA(newLSA, OSPF::BACKBONE_AREAID);
                     floodLSA(newLSA, areas[i]->getAreaID());
 
-                    lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
+                    lsaKey.linkStateID = newLSA->getHeader().getLinkStateID();
                     lsaKey.advertisingRouter = routerID;
                     originatedLSAMap[lsaKey] = true;
 
@@ -1387,7 +1387,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 //                            floodLSA(lsaToReoriginate, OSPF::BACKBONE_AREAID);
                             floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
-                            lsaKey.linkStateID       = lsaToReoriginate->getHeader().getLinkStateID();
+                            lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
                             lsaKey.advertisingRouter = routerID;
                             originatedLSAMap[lsaKey] = true;
 
@@ -1398,7 +1398,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 //                        floodLSA(newLSA, OSPF::BACKBONE_AREAID);
                         floodLSA(newLSA, areas[i]->getAreaID());
 
-                        lsaKey.linkStateID       = newLSA->getHeader().getLinkStateID();
+                        lsaKey.linkStateID = newLSA->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = routerID;
                         originatedLSAMap[lsaKey] = true;
 
@@ -1429,13 +1429,13 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                                  ulongFromIPv4Address(destinationAddressRange.address & destinationAddressRange.mask)) &&
                                 (routingTable[k]->getCost() > maxRangeCost))
                             {
-                                oneLessCost  = maxRangeCost;
+                                oneLessCost = maxRangeCost;
                                 maxRangeCost = routingTable[k]->getCost();
                             }
                         }
 
                         if (maxRangeCost == routingTable[j]->getCost()) {  // this entry gives the range's cost
-                            lsaKey.linkStateID       = ulongFromIPv4Address(destinationAddressRange.address);
+                            lsaKey.linkStateID = ulongFromIPv4Address(destinationAddressRange.address);
                             lsaKey.advertisingRouter = routerID;
 
                             OSPF::SummaryLSA* summaryLSA = areas[i]->findSummaryLSA(lsaKey);
@@ -1454,7 +1454,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 //                                        floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
                                         floodLSA(summaryLSA, areas[i]->getAreaID());
 
-                                        deletedLSAMap[lsaKey]    = true;
+                                        deletedLSAMap[lsaKey] = true;
                                     }
                                 }
                             }
@@ -1499,7 +1499,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                 }
 
                 if (maxRangeCost < oldRoutingTable[j]->getCost()) {  // the range's cost will change
-                    lsaKey.linkStateID       = ulongFromIPv4Address(destinationAddressRange.address);
+                    lsaKey.linkStateID = ulongFromIPv4Address(destinationAddressRange.address);
                     lsaKey.advertisingRouter = routerID;
 
                     OSPF::SummaryLSA* summaryLSA = areas[i]->findSummaryLSA(lsaKey);
@@ -1516,7 +1516,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                                 summaryLSA->getHeader().setLsAge(MAX_AGE);
                                 floodLSA(summaryLSA, OSPF::BACKBONE_AREAID);
 
-                                deletedLSAMap[lsaKey]    = true;
+                                deletedLSAMap[lsaKey] = true;
                             }
                         }
                     }

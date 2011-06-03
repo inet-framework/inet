@@ -55,7 +55,7 @@ class INET_API Mac80211 : public MacBase, public INotifiable
       WFDATA = 0, // waiting for data packet
       QUIET = 1,  // waiting for the communication between two other nodes to end
       IDLE = 2,   // no packet to send, no packet receiving
-      CONTEND = 3,// contention state (battle for the channel)
+      CONTEND = 3, // contention state (battle for the channel)
       WFCTS = 4,  // RTS sent, waiting for CTS
       WFACK = 5,  // DATA packet sent, waiting for ACK
       BUSY = 6    // during transmission of an ACK or a BROADCAST packet

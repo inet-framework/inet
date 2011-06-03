@@ -70,33 +70,33 @@ private:
 
 // LWMPLS methods
     cPacket * decapsulateMpls(LWMPLSPacket *frame);
-    Ieee80211DataFrame *encapsulate(cPacket *msg,MACAddress dest);
+    Ieee80211DataFrame *encapsulate(cPacket *msg, MACAddress dest);
     virtual void mplsSendAck(int label);
-    virtual void mplsCreateNewPath(int label,LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsBreakPath(int label,LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsNotFoundPath(int label,LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsForwardData(int label,LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr,LWmpls_Forwarding_Structure *forwarding_data);
-    virtual void mplsBasicSend (LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsAckPath(int label,LWMPLSPacket *mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsDataProcess(LWMPLSPacket * mpls_pk_ptr,MACAddress sta_addr);
-    virtual void mplsBreakMacLink (MACAddress mac_id);
-    void mplsCheckRouteTime ();
+    virtual void mplsCreateNewPath(int label, LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsBreakPath(int label, LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsNotFoundPath(int label, LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsForwardData(int label, LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr, LWmpls_Forwarding_Structure *forwarding_data);
+    virtual void mplsBasicSend(LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsAckPath(int label, LWMPLSPacket *mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsDataProcess(LWMPLSPacket * mpls_pk_ptr, MACAddress sta_addr);
+    virtual void mplsBreakMacLink(MACAddress mac_id);
+    void mplsCheckRouteTime();
     virtual void mplsInitializeCheckMac();
-    virtual void mplsPurge (LWmpls_Forwarding_Structure *forwarding_ptr,bool purge_break);
-    virtual bool forwardMessage (Ieee80211DataFrame *);
-    virtual bool macLabelBasedSend (Ieee80211DataFrame *);
-    virtual void actualizeReactive(cPacket *pkt,bool out);
+    virtual void mplsPurge(LWmpls_Forwarding_Structure *forwarding_ptr, bool purge_break);
+    virtual bool forwardMessage(Ieee80211DataFrame *);
+    virtual bool macLabelBasedSend(Ieee80211DataFrame *);
+    virtual void actualizeReactive(cPacket *pkt, bool out);
 
 
     static uint64_t MacToUint64(const MACAddress &add)
     {
         uint64_t aux;
-        uint64_t lo=0;
+        uint64_t lo = 0;
         for (int i=0; i<MAC_ADDRESS_BYTES; i++)
         {
-            aux  = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
+            aux = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
             aux <<= 8*i;
-            lo  |= aux ;
+            lo |= aux;
         }
         return lo;
     }

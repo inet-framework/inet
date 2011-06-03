@@ -196,16 +196,16 @@ public:
 
 } // namespace OSPF
 
-inline bool operator== (OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
+inline bool operator==(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
 {
-    return ((leftID.ddOptions.I_Init         == rightID.ddOptions.I_Init) &&
-            (leftID.ddOptions.M_More         == rightID.ddOptions.M_More) &&
+    return ((leftID.ddOptions.I_Init == rightID.ddOptions.I_Init) &&
+            (leftID.ddOptions.M_More == rightID.ddOptions.M_More) &&
             (leftID.ddOptions.MS_MasterSlave == rightID.ddOptions.MS_MasterSlave) &&
-            (leftID.options                  == rightID.options) &&
-            (leftID.sequenceNumber           == rightID.sequenceNumber));
+            (leftID.options == rightID.options) &&
+            (leftID.sequenceNumber == rightID.sequenceNumber));
 }
 
-inline bool operator!= (OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
+inline bool operator!=(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
 {
     return (!(leftID == rightID));
 }

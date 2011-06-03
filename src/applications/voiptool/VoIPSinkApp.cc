@@ -45,7 +45,7 @@ void VoIPSinkApp::initSignals()
     receivedBytesSignal = registerSignal("receivedBytes");
     lostSamplesSignal = registerSignal("lostSamples");
     lostPacketsSignal = registerSignal("lostPackets");
-    droppedBytesSignal  = registerSignal("droppedBytes");
+    droppedBytesSignal = registerSignal("droppedBytes");
     packetHasVoiceSignal = registerSignal("packetHasVoice");
     connStateSignal = registerSignal("connState");
     delaySignal = registerSignal("delay");
@@ -116,7 +116,7 @@ void VoIPSinkApp::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
 
     lastPacketFinish += simtime_t(1.0) * (decBufSize * 8 / av_get_bits_per_sample_format(decCtx->sample_fmt)) / sampleRate;
     outFile.write(decBuf, decBufSize);
-    delete[] decBuf;
+    delete [] decBuf;
 }
 
 void VoIPSinkApp::Connection::closeAudio()
@@ -161,7 +161,7 @@ bool VoIPSinkApp::createConnect(VoIPPacket *vp)
 
 bool VoIPSinkApp::checkConnect(VoIPPacket *vp)
 {
-    return  (!curConn.offline)
+    return (!curConn.offline)
             && vp->getSsrc() == curConn.ssrc
             && vp->getCodec() == curConn.codec
             && vp->getSampleBits() == curConn.sampleBits
@@ -198,7 +198,7 @@ void VoIPSinkApp::handleVoIPMessage(VoIPPacket *vp)
 
 void VoIPSinkApp::decodePacket(VoIPPacket *vp)
 {
-    switch(vp->getType())
+    switch (vp->getType())
     {
         case VOICE:
             emit(packetHasVoiceSignal, 1);

@@ -62,17 +62,17 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
 
     // set flags
     unsigned char flags = 0;
-    if(tcpseg->getFinBit())
+    if (tcpseg->getFinBit())
         flags |= TH_FIN;
-    if(tcpseg->getSynBit())
+    if (tcpseg->getSynBit())
         flags |= TH_SYN;
-    if(tcpseg->getRstBit())
+    if (tcpseg->getRstBit())
         flags |= TH_RST;
-    if(tcpseg->getPshBit())
+    if (tcpseg->getPshBit())
         flags |= TH_PUSH;
-    if(tcpseg->getAckBit())
+    if (tcpseg->getAckBit())
         flags |= TH_ACK;
-    if(tcpseg->getUrgBit())
+    if (tcpseg->getUrgBit())
         flags |= TH_URG;
     tcp->th_flags = (TH_FLAGS & flags);
     tcp->th_win = htons(tcpseg->getWindow());
@@ -97,12 +97,12 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
             ASSERT(lengthCounter <= maxOptLength);
 
             options[0] = kind;
-            if(length>1)
+            if (length>1)
             {
                 options[1] = length;
             }
             unsigned int optlen = option.getValuesArraySize();
-            for(unsigned int k=0; k<optlen; k++)
+            for (unsigned int k=0; k<optlen; k++)
             {
                 unsigned int value = option.getValues(k);
                 unsigned int p0 = 2 + 4*k;
@@ -161,7 +161,7 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
     tcpseg->setDestPort(ntohs(tcp->th_dport));
     tcpseg->setSequenceNo(ntohl(tcp->th_seq));
     tcpseg->setAckNo(ntohl(tcp->th_ack));
-    unsigned short hdrLength =tcp->th_offs * 4;
+    unsigned short hdrLength = tcp->th_offs * 4;
     tcpseg->setHeaderLength(hdrLength);
 
     // set flags
@@ -183,14 +183,14 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
         unsigned short optionsCounter = 0; // index for tcpseg->setOptions[]
 
         unsigned short length = 0;
-        for (unsigned short j=0; j<optionBytes; j+=length)
+        for (unsigned short j=0; j<optionBytes; j += length)
         {
             unsigned char * options = ((unsigned char * )tcp->th_options)+j;
             unsigned short kind = options[0];
             length = options[1];
 
             TCPOption tmpOption;
-            switch(kind)
+            switch (kind)
             {
                 case TCPOPTION_END_OF_OPTION_LIST: // EOL
                 case TCPOPTION_NO_OPERATION: // NOP
@@ -219,7 +219,7 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
             }
             // write option to tcp header
             tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize()+1);
-            tcpseg->setOptions(optionsCounter,tmpOption);
+            tcpseg->setOptions(optionsCounter, tmpOption);
             optionsCounter++;
         } // for j
     } // if options present
@@ -227,7 +227,7 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
     tcpseg->setByteLength(bufsize);
     tcpseg->setPayloadLength(bufsize - hdrLength);
 
-    if(withBytes)
+    if (withBytes)
     {
         // parse data
         tcpseg->getByteArray().setDataFromBuffer(buf + hdrLength, bufsize - hdrLength);

@@ -38,7 +38,7 @@ void StaticGridMobility::initialize(int aStage)
         marginX = par("marginX");
         marginY = par("marginY");
 
-        int size = (int)ceil (sqrt((double)mNumHosts));
+        int size = (int)ceil(sqrt((double)mNumHosts));
         double row = ceil((hostPtr->getIndex()) / (double)size);
         int col = (hostPtr->getIndex()) % size;
 

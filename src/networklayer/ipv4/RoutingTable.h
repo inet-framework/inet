@@ -283,9 +283,9 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // IPv4 tables rules
     virtual void addRule(bool output, IPv4RouteRule *entry);
     virtual void delRule(IPv4RouteRule *entry);
-    virtual const IPv4RouteRule * getRule(bool output,int index) const;
+    virtual const IPv4RouteRule * getRule(bool output, int index) const;
     virtual int getNumRules(bool output);
-    virtual const IPv4RouteRule * findRule(bool output,int prot,int sPort,const IPv4Address &srcAddr,int dPort,const IPv4Address &destAddr,const InterfaceEntry *) const;
+    virtual const IPv4RouteRule * findRule(bool output, int prot, int sPort, const IPv4Address &srcAddr, int dPort, const IPv4Address &destAddr, const InterfaceEntry *) const;
 
 };
 

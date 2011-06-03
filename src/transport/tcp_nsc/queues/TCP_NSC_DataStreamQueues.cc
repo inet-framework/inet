@@ -51,7 +51,7 @@ void TCP_NSC_DataStreamSendQueue::enqueueAppData(cPacket *msgP)
 
     ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msgP);
     int64 bytes = msg->getByteLength();
-    ASSERT (bytes == msg->getByteArray().getDataArraySize());
+    ASSERT(bytes == msg->getByteArray().getDataArraySize());
     byteArrayBufferM.push(msg->getByteArray());
     delete msgP;
 }
@@ -136,7 +136,7 @@ cPacket* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
     ByteArrayMessage *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
-    if(bytesInQueue)
+    if (bytesInQueue)
     {
         dataMsg = new ByteArrayMessage("DATA");
         dataMsg->setKind(TCP_I_DATA);

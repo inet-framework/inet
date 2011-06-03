@@ -60,7 +60,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
     }
     else
     {
-        for (int i = _highestSequenceNumber+1; i< rtpPacket->getSequenceNumber(); i++ )
+        for (int i = _highestSequenceNumber+1; i < rtpPacket->getSequenceNumber(); i++ )
         {
             //char line[100];
             //sprintf(line, "%i", i);
@@ -69,7 +69,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
     }
 
     if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) ||
-            (rtpPacket->getSequenceNumber()<= _highestSequenceNumber))
+            (rtpPacket->getSequenceNumber() <= _highestSequenceNumber))
     {
         delete rtpPacket;
     }
@@ -130,7 +130,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                 char line[100];
                 // what picture type is it
                 char picture;
-                switch(pictureType)
+                switch (pictureType)
                 {
                     case 1: picture = 'I'; break;
                     case 2: picture = 'P'; break;

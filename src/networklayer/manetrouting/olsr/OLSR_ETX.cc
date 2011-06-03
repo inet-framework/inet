@@ -76,7 +76,7 @@ void OLSR_ETX_LinkQualityTimer::expire()
     OLSR_ETX *agentaux = check_and_cast<OLSR_ETX *>(agent_);
     agentaux->OLSR_ETX::link_quality();
     // agentaux->scheduleAt(simTime()+agentaux->hello_ival_,this);
-    agentaux->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agentaux->hello_ival_,this));
+    agentaux->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agentaux->hello_ival_, this));
 }
 
 
@@ -91,11 +91,11 @@ OLSR_ETX::initialize(int stage)
 
         //
         // Do some initializations
-        willingness_=par("Willingness");
-        hello_ival_=par("Hello_ival");
-        tc_ival_=par("Tc_ival");
-        mid_ival_=par("Mid_ival");
-        use_mac_=par("use_mac");
+        willingness_ = par("Willingness");
+        hello_ival_ = par("Hello_ival");
+        tc_ival_ = par("Tc_ival");
+        mid_ival_ = par("Mid_ival");
+        use_mac_ = par("use_mac");
 
 
 
@@ -135,9 +135,9 @@ OLSR_ETX::initialize(int stage)
 
         /// Link delay extension
         cap_sn_ = 0;
-        pkt_seq_    = OLSR_MAX_SEQ_NUM;
-        msg_seq_    = OLSR_MAX_SEQ_NUM;
-        ansn_       = OLSR_MAX_SEQ_NUM;
+        pkt_seq_ = OLSR_MAX_SEQ_NUM;
+        msg_seq_ = OLSR_MAX_SEQ_NUM;
+        ansn_ = OLSR_MAX_SEQ_NUM;
 
         registerRoutingModule();
         ra_addr_ = getAddress();
@@ -163,7 +163,7 @@ OLSR_ETX::initialize(int stage)
         {
             linkLayerFeeback();
         }
-        state_ptr=state_etx_ptr=new OLSR_ETX_state();
+        state_ptr = state_etx_ptr = new OLSR_ETX_state();
         scheduleNextEvent();
 
     }
@@ -197,7 +197,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
     // so we check it.
 
 // Extract information and delete the cantainer without more use
-    op = check_packet(PK(msg),src_addr,index);
+    op = check_packet(PK(msg), src_addr, index);
     if (op==NULL)
         return;
 
@@ -222,7 +222,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         // the receiver is the same as the originator,
         // the message must be silently dropped
         // if (msg.ttl() <= 0 || msg.orig_addr() == ra_addr())
-        if (msg.ttl() <= 0 || isLocalAddress (msg.orig_addr()))
+        if (msg.ttl() <= 0 || isLocalAddress(msg.orig_addr()))
             continue;
 
         // If the message has been processed it must not be
@@ -233,11 +233,11 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG)
-                process_hello(msg, ra_addr(), src_addr, op->pkt_seq_num(),index);
+                process_hello(msg, ra_addr(), src_addr, op->pkt_seq_num(), index);
             else if (msg.msg_type() == OLSR_TC_MSG)
-                process_tc(msg, src_addr,index);
+                process_tc(msg, src_addr, index);
             else if (msg.msg_type() == OLSR_MID_MSG)
-                process_mid(msg, src_addr,index);
+                process_mid(msg, src_addr, index);
             else
             {
                 debug("%f: Node %d can not process OLSR packet because does not "
@@ -269,7 +269,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
             // TC and MID messages are forwarded using the default algorithm.
             // Remaining messages are also forwarded using the default algorithm.
             if (msg.msg_type() != OLSR_HELLO_MSG)
-                forward_default(msg, duplicated, ra_addr(),src_addr);
+                forward_default(msg, duplicated, ra_addr(), src_addr);
         }
 
     }
@@ -277,7 +277,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
     if (parameter_.link_delay() && op->sn() > 0)
     {
         OLSR_ETX_link_tuple *link_tuple = NULL;
-        OLSR_link_tuple *link_aux = state_.find_link_tuple (src_addr);
+        OLSR_link_tuple *link_aux = state_.find_link_tuple(src_addr);
         if (link_aux)
         {
             link_tuple = dynamic_cast<OLSR_ETX_link_tuple*> (link_aux);
@@ -354,7 +354,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
 
 
         bool ok = true;
-        OLSR_ETX_nb_tuple* nb_tuple =state_.find_sym_nb_tuple(nb2hop_tuple->nb_main_addr());
+        OLSR_ETX_nb_tuple* nb_tuple = state_.find_sym_nb_tuple(nb2hop_tuple->nb_main_addr());
         if (nb_tuple == NULL)
             ok = false;
         else
@@ -548,17 +548,17 @@ OLSR_ETX::olsr_r1_mpr_computation()
                         }
                         else if (r == max_r)
                         {
-                            OLSR_ETX_link_tuple *nb_link_tuple=NULL, *max_link_tuple=NULL;
+                            OLSR_ETX_link_tuple *nb_link_tuple = NULL, *max_link_tuple = NULL;
                             OLSR_link_tuple * link_tuple_aux;
                             double now = CURRENT_TIME;
-                            link_tuple_aux = state_.find_sym_link_tuple (nb_tuple->nb_main_addr(), now);
+                            link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now);
                             if (link_tuple_aux)
                             {
                                 nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
                                 if (!nb_link_tuple)
                                     opp_error("\n Error conversion link tuple");
                             }
-                            link_tuple_aux = state_.find_sym_link_tuple (max->nb_main_addr(), now);
+                            link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now);
                             if (link_tuple_aux)
                             {
                                 max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
@@ -745,18 +745,18 @@ OLSR_ETX::olsr_r2_mpr_computation()
                     }
                     else
                     {
-                        OLSR_ETX_link_tuple *nb_link_tuple=NULL, *max_link_tuple=NULL;
+                        OLSR_ETX_link_tuple *nb_link_tuple = NULL, *max_link_tuple = NULL;
                         OLSR_link_tuple *link_tuple_aux;
                         double now = CURRENT_TIME;
 
-                        link_tuple_aux = state_.find_sym_link_tuple (nb_tuple->nb_main_addr(), now);
+                        link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
                             nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
                             if (!nb_link_tuple)
                                 opp_error("\n Error conversion link tuple");
                         }
-                        link_tuple_aux = state_.find_sym_link_tuple (max->nb_main_addr(), now);
+                        link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
                             max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
@@ -780,7 +780,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
                                     max = nb_tuple;
                                     max_r = r;
                                 }
-                                else if (r == max_r && degree(nb_tuple) > degree (max))
+                                else if (r == max_r && degree(nb_tuple) > degree(max))
                                 {
                                     max = nb_tuple;
                                     max_r = r;
@@ -800,7 +800,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
                                     max = nb_tuple;
                                     max_r = r;
                                 }
-                                else if (r == max_r && degree(nb_tuple) > degree (max))
+                                else if (r == max_r && degree(nb_tuple) > degree(max))
                                 {
                                     max = nb_tuple;
                                     max_r = r;
@@ -814,7 +814,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
                                 max = nb_tuple;
                                 max_r = r;
                             }
-                            else if (r == max_r && degree(nb_tuple) > degree (max))
+                            else if (r == max_r && degree(nb_tuple) > degree(max))
                             {
                                 max = nb_tuple;
                                 max_r = r;
@@ -940,7 +940,7 @@ OLSR_ETX::qolsr_mpr_computation()
         }
         // Select a node z from N2
         OLSR_nb2hop_tuple* t_aux = *(N2.begin());
-        OLSR_ETX_nb2hop_tuple* z =NULL;
+        OLSR_ETX_nb2hop_tuple* z = NULL;
         if (t_aux)
         {
             z = dynamic_cast<OLSR_ETX_nb2hop_tuple*> (t_aux);
@@ -986,18 +986,18 @@ OLSR_ETX::qolsr_mpr_computation()
                         }
                         else
                         {
-                            OLSR_ETX_link_tuple *nb_link_tuple=NULL, *max_link_tuple=NULL;
+                            OLSR_ETX_link_tuple *nb_link_tuple = NULL, *max_link_tuple = NULL;
                             double now = CURRENT_TIME;
 
 
-                            OLSR_link_tuple *link_tuple_aux = state_.find_sym_link_tuple (nb_tuple->nb_main_addr(), now); /* bug */
+                            OLSR_link_tuple *link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
                                 nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
                                 if (!nb_link_tuple)
                                     opp_error("\n Error conversion link tuple");
                             }
-                            link_tuple_aux = state_.find_sym_link_tuple (max->nb_main_addr(), now); /* bug */
+                            link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
                                 max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
@@ -1024,7 +1024,7 @@ OLSR_ETX::qolsr_mpr_computation()
                                         max = nb_tuple;
                                         max_r = r;
                                     }
-                                    else if (r == max_r && degree(nb_tuple) > degree (max))
+                                    else if (r == max_r && degree(nb_tuple) > degree(max))
                                     {
                                         max = nb_tuple;
                                         max_r = r;
@@ -1047,7 +1047,7 @@ OLSR_ETX::qolsr_mpr_computation()
                                         max = nb_tuple;
                                         max_r = r;
                                     }
-                                    else if (r == max_r && degree(nb_tuple) > degree (max))
+                                    else if (r == max_r && degree(nb_tuple) > degree(max))
                                     {
                                         max = nb_tuple;
                                         max_r = r;
@@ -1061,7 +1061,7 @@ OLSR_ETX::qolsr_mpr_computation()
                                     max = nb_tuple;
                                     max_r = r;
                                 }
-                                else if (r == max_r && degree(nb_tuple) > degree (max))
+                                else if (r == max_r && degree(nb_tuple) > degree(max))
                                 {
                                     max = nb_tuple;
                                     max_r = r;
@@ -1156,13 +1156,13 @@ void
 OLSR_ETX::rtable_dijkstra_computation()
 {
     // Declare a class that will run the dijkstra algorithm
-    Dijkstra *dijkstra=new Dijkstra ();
+    Dijkstra *dijkstra = new Dijkstra();
 
     // All the entries from the routing table are removed.
     rtable_.clear();
     omnet_clean_rte();
 
-    debug ("Current node %d:\n", (uint32_t)ra_addr());
+    debug("Current node %d:\n", (uint32_t)ra_addr());
     // Iterate through all out 1 hop neighbors
     for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
     {
@@ -1170,13 +1170,13 @@ OLSR_ETX::rtable_dijkstra_computation()
 
         // Get the best link we have to the current neighbor..
         OLSR_ETX_link_tuple* best_link =
-            state_.find_best_sym_link_tuple (nb_tuple->nb_main_addr(), CURRENT_TIME);
+            state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
         // Add this edge to the graph we are building
         if (best_link)
         {
-            debug ("nb_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)best_link->local_iface_addr(),
+            debug("nb_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)best_link->local_iface_addr(),
                    (uint32_t)nb_tuple->nb_main_addr(), best_link->nb_link_delay(), best_link->etx());
-            dijkstra->add_edge (nb_tuple->nb_main_addr(), best_link->local_iface_addr(),
+            dijkstra->add_edge(nb_tuple->nb_main_addr(), best_link->local_iface_addr(),
                                 best_link->nb_link_delay(), best_link->etx(), true);
         }
     }
@@ -1245,9 +1245,9 @@ OLSR_ETX::rtable_dijkstra_computation()
             // Add this edge to the graph we are building. The last hop is our 1 hop
             // neighbor that has the best link to the current two hop neighbor. And
             // nb2hop_addr is not directly connected to this node
-            debug ("nb2hop_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)nb_main_addr,
+            debug("nb2hop_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)nb_main_addr,
                    (uint32_t)nb2hop_tuple->nb2hop_addr(), nb2hop_tuple->nb_link_delay(), nb2hop_tuple->etx());
-            dijkstra->add_edge (nb2hop_tuple->nb2hop_addr(), nb_main_addr,
+            dijkstra->add_edge(nb2hop_tuple->nb2hop_addr(), nb_main_addr,
                                 nb2hop_tuple->nb_link_delay(), nb2hop_tuple->etx(), false);
         }
     }
@@ -1267,9 +1267,9 @@ OLSR_ETX::rtable_dijkstra_computation()
         // Add this edge to the graph we are building. The last hop is our 1 hop
         // neighbor that has the best link to the current two hop. And dest_addr
         // is not directly connected to this node
-        debug ("topology_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)topology_tuple->last_addr(),
+        debug("topology_tuple: %d (local) ==> %d , delay %lf, quality %lf\n", (uint32_t)topology_tuple->last_addr(),
                (uint32_t)topology_tuple->dest_addr(), topology_tuple->nb_link_delay(), topology_tuple->etx());
-        dijkstra->add_edge (topology_tuple->dest_addr(), topology_tuple->last_addr(),
+        dijkstra->add_edge(topology_tuple->dest_addr(), topology_tuple->last_addr(),
                             topology_tuple->nb_link_delay(), topology_tuple->etx(), false);
     }
 
@@ -1279,24 +1279,24 @@ OLSR_ETX::rtable_dijkstra_computation()
     // Now all we have to do is inserting routes according to hop count
 #if 1
     std::multimap<int,nsaddr_t> processed_nodes;
-    for (Dijkstra::DijkstraMap::iterator it = dijkstra->dijkstraMap.begin();it != dijkstra->dijkstraMap.end(); it++)
+    for (Dijkstra::DijkstraMap::iterator it = dijkstra->dijkstraMap.begin(); it != dijkstra->dijkstraMap.end(); it++)
     {
         // store the nodes in hop order, the multimap order the values in function of number of hops
-        processed_nodes.insert(std::pair<int,nsaddr_t>(it->second.hop_count(),it->first));
+        processed_nodes.insert(std::pair<int,nsaddr_t>(it->second.hop_count(), it->first));
     }
     while (!processed_nodes.empty())
     {
 
-        std::multimap<int,nsaddr_t>::iterator it=processed_nodes.begin();
+        std::multimap<int,nsaddr_t>::iterator it = processed_nodes.begin();
         Dijkstra::DijkstraMap::iterator itDij = dijkstra->dijkstraMap.find(it->second);
         if (itDij==dijkstra->dijkstraMap.end())
             opp_error("node not found in DijkstraMap");
-        int hopCount =it->first;
+        int hopCount = it->first;
         if (hopCount == 1)
         {
             // add route...
-            rtable_.add_entry(it->second, it->second, itDij->second.link().last_node(), 1,-1);
-            omnet_chg_rte (it->second,it->second,0,hopCount,false,itDij->second.link().last_node());
+            rtable_.add_entry(it->second, it->second, itDij->second.link().last_node(), 1, -1);
+            omnet_chg_rte(it->second, it->second, 0, hopCount, false, itDij->second.link().last_node());
         }
         else if (it->first > 1)
         {
@@ -1304,8 +1304,8 @@ OLSR_ETX::rtable_dijkstra_computation()
             OLSR_ETX_rt_entry* entry = rtable_.lookup(itDij->second.link().last_node());
             if (entry==NULL)
                 opp_error("entry not found");
-            rtable_.add_entry(it->second, entry->next_addr(), entry->iface_addr(), hopCount,entry->local_iface_index());
-            omnet_chg_rte (it->second, entry->next_addr(),0,hopCount,false,entry->iface_addr());
+            rtable_.add_entry(it->second, entry->next_addr(), entry->iface_addr(), hopCount, entry->local_iface_index());
+            omnet_chg_rte(it->second, entry->next_addr(), 0, hopCount, false, entry->iface_addr());
         }
         processed_nodes.erase(processed_nodes.begin());
         dijkstra->dijkstraMap.erase(itDij);
@@ -1313,28 +1313,28 @@ OLSR_ETX::rtable_dijkstra_computation()
     dijkstra->dijkstraMap.clear();
 #else
     std::set<nsaddr_t> processed_nodes;
-    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin();it != dijkstra->all_nodes()->end(); it++)
+    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
     {
         if (dijkstra->D(*it).hop_count() == 1)
         {
             // add route...
-            rtable_.add_entry(*it, *it, dijkstra->D(*it).link().last_node(), 1,-1);
-            omnet_chg_rte (*it, *it,0,1,false,dijkstra->D(*it).link().last_node());
+            rtable_.add_entry(*it, *it, dijkstra->D(*it).link().last_node(), 1, -1);
+            omnet_chg_rte(*it, *it, 0, 1, false, dijkstra->D(*it).link().last_node());
             processed_nodes.insert(*it);
         }
     }
     for (std::set<nsaddr_t>::iterator it = processed_nodes.begin(); it != processed_nodes.end(); it++)
         dijkstra->all_nodes()->erase(*it);
     processed_nodes.clear();
-    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin();it != dijkstra->all_nodes()->end(); it++)
+    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
     {
         if (dijkstra->D(*it).hop_count() == 2)
         {
             // add route...
             OLSR_ETX_rt_entry* entry = rtable_.lookup(dijkstra->D(*it).link().last_node());
             assert(entry != NULL);
-            rtable_.add_entry(*it, dijkstra->D(*it).link().last_node(), entry->iface_addr(), 2,entry->local_iface_index());
-            omnet_chg_rte (*it, dijkstra->D(*it).link().last_node(),0,2,false,entry->iface_addr());
+            rtable_.add_entry(*it, dijkstra->D(*it).link().last_node(), entry->iface_addr(), 2, entry->local_iface_index());
+            omnet_chg_rte(*it, dijkstra->D(*it).link().last_node(), 0, 2, false, entry->iface_addr());
             processed_nodes.insert(*it);
         }
     }
@@ -1343,15 +1343,15 @@ OLSR_ETX::rtable_dijkstra_computation()
     processed_nodes.clear();
     for (int i = 3; i <= dijkstra->highest_hop(); i++)
     {
-        for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin();it != dijkstra->all_nodes()->end(); it++)
+        for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
         {
             if (dijkstra->D(*it).hop_count() == i)
             {
                 // add route...
                 OLSR_ETX_rt_entry* entry = rtable_.lookup(dijkstra->D(*it).link().last_node());
                 assert(entry != NULL);
-                rtable_.add_entry(*it, entry->next_addr(), entry->iface_addr(), i,entry->local_iface_index());
-                omnet_chg_rte (*it, entry->next_addr(),0,i,false,entry->iface_addr());
+                rtable_.add_entry(*it, entry->next_addr(), entry->iface_addr(), i, entry->local_iface_index());
+                omnet_chg_rte(*it, entry->next_addr(), 0, i, false, entry->iface_addr());
                 processed_nodes.insert(*it);
             }
         }
@@ -1374,8 +1374,8 @@ OLSR_ETX::rtable_dijkstra_computation()
         if (entry1 != NULL && entry2 == NULL)
         {
             rtable_.add_entry(tuple->iface_addr(),
-                              entry1->next_addr(), entry1->iface_addr(), entry1->dist(),entry1->local_iface_index());
-            omnet_chg_rte (tuple->iface_addr(),entry1->next_addr(),0,entry1->dist(),false,entry1->iface_addr());
+                              entry1->next_addr(), entry1->iface_addr(), entry1->dist(), entry1->local_iface_index());
+            omnet_chg_rte(tuple->iface_addr(), entry1->next_addr(), 0, entry1->dist(), false, entry1->iface_addr());
 
         }
     }
@@ -1396,10 +1396,10 @@ OLSR_ETX::rtable_dijkstra_computation()
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 void
-OLSR_ETX::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface,uint16_t pkt_seq_num,const int &index)
+OLSR_ETX::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, uint16_t pkt_seq_num, const int &index)
 {
     assert(msg.msg_type() == OLSR_ETX_HELLO_MSG);
-    link_sensing(msg, receiver_iface, sender_iface, pkt_seq_num,index);
+    link_sensing(msg, receiver_iface, sender_iface, pkt_seq_num, index);
     populate_nbset(msg);
     populate_nb2hopset(msg);
     switch (parameter_.mpr_algorithm())
@@ -1434,7 +1434,7 @@ OLSR_ETX::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsa
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 void
-OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
+OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_ETX_TC_MSG);
     double now = CURRENT_TIME;
@@ -1551,8 +1551,8 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &inde
 void
 OLSR::forward_data(Packet* p)
 {
-    struct hdr_cmn* ch  = HDR_CMN(p);
-    struct hdr_ip* ih   = HDR_IP(p);
+    struct hdr_cmn* ch = HDR_CMN(p);
+    struct hdr_ip* ih = HDR_IP(p);
 
     if (ch->direction() == hdr_cmn::UP &&
             ((uint32_t)ih->daddr() == IP_BROADCAST || ih->daddr() == ra_addr()))
@@ -1565,7 +1565,7 @@ OLSR::forward_data(Packet* p)
         ch->direction() = hdr_cmn::DOWN;
         ch->addr_type() = NS_AF_INET;
         if ((uint32_t)ih->daddr() == IP_BROADCAST)
-            ch->next_hop()  = IP_BROADCAST;
+            ch->next_hop() = IP_BROADCAST;
         else
         {
             OLSR_rt_entry* entry = rtable_.lookup(ih->daddr());
@@ -1585,8 +1585,8 @@ OLSR::forward_data(Packet* p)
                 ch->next_hop() = entry->next_addr();
                 if (use_mac())
                 {
-                    ch->xmit_failure_   = olsr_mac_failed_callback;
-                    ch->xmit_failure_data_  = (void*)this;
+                    ch->xmit_failure_ = olsr_mac_failed_callback;
+                    ch->xmit_failure_data_ = (void*)this;
                 }
             }
         }
@@ -1633,7 +1633,7 @@ OLSR_ETX::send_pkt()
         {
             // We are going to use link delay extension
             // to define routes to be selected
-            OLSR_pkt* op1   = new OLSR_pkt;
+            OLSR_pkt* op1 = new OLSR_pkt;
             op1->setName("OLSR_ETX pkt");
             // Duplicated packet...
             OLSR_pkt* op2;
@@ -1664,14 +1664,14 @@ OLSR_ETX::send_pkt()
                 if (j == OLSR_ETX_MAX_MSGS)
                     break;
                 op1->setMsgArraySize(j+1);
-                op1->setMsg(j++,*it);
+                op1->setMsg(j++, *it);
 
                 if (i != 0)
                     op1->setByteLength(op1->getByteLength()+(*it).size());
                 else /* if (i == 0) */
                 {
                     op2->setMsgArraySize(j+1);
-                    op2->setMsg(j++,*it);
+                    op2->setMsg(j++, *it);
                 }
                 it = msgs_.erase(it);
             }
@@ -1682,13 +1682,13 @@ OLSR_ETX::send_pkt()
             if (i == 0)
                 op2->setSend_time(op1->send_time());
             // Sending packet pair
-            sendToIp (op1, RT_PORT,destAdd, RT_PORT,IP_DEF_TTL,(nsaddr_t)0);
+            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
             if (i == 0)
-                sendToIp (op2, RT_PORT,destAdd, RT_PORT,IP_DEF_TTL,(nsaddr_t)0);
+                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
         }
         else
         {
-            OLSR_pkt* op    = new OLSR_pkt;
+            OLSR_pkt* op = new OLSR_pkt;
 
             op->setByteLength( OLSR_ETX_PKT_HDR_SIZE );
             op->setPkt_seq_num( pkt_seq());
@@ -1699,12 +1699,12 @@ OLSR_ETX::send_pkt()
                     break;
 
                 op->setMsgArraySize(j+1);
-                op->setMsg(j++,*it);
+                op->setMsg(j++, *it);
                 op->setByteLength(op->getByteLength()+(*it).size());
 
                 it = msgs_.erase(it);
             }
-            sendToIp (op, RT_PORT,destAdd, RT_PORT,IP_DEF_TTL,(nsaddr_t)0);
+            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
 
         }
     }
@@ -1717,18 +1717,18 @@ void
 OLSR_ETX::send_hello()
 {
     OLSR_msg msg;
-    double now      = CURRENT_TIME;
-    msg.msg_type()      = OLSR_HELLO_MSG;
-    msg.vtime()     = OLSR::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
-    msg.orig_addr()     = ra_addr();
-    msg.ttl()       = 1;
-    msg.hop_count()     = 0;
-    msg.msg_seq_num()   = msg_seq();
+    double now = CURRENT_TIME;
+    msg.msg_type() = OLSR_HELLO_MSG;
+    msg.vtime() = OLSR::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
+    msg.orig_addr() = ra_addr();
+    msg.ttl() = 1;
+    msg.hop_count() = 0;
+    msg.msg_seq_num() = msg_seq();
 
-    msg.hello().reserved()      = 0;
-    msg.hello().htime()     = OLSR::seconds_to_emf(hello_ival());
-    msg.hello().willingness()   = willingness();
-    msg.hello().count       = 0;
+    msg.hello().reserved() = 0;
+    msg.hello().htime() = OLSR::seconds_to_emf(hello_ival());
+    msg.hello().willingness() = willingness();
+    msg.hello().count = 0;
 
 
     std::map<uint8_t, int> linkcodes_count;
@@ -1862,10 +1862,10 @@ OLSR_ETX::send_tc()
         msg.ttl() = 255;
     }
     msg.hop_count() = 0;
-    msg.msg_seq_num()  = msg_seq();
+    msg.msg_seq_num() = msg_seq();
 
     msg.tc().ansn() = ansn_;
-    msg.tc().reserved()  = 0;
+    msg.tc().reserved() = 0;
     msg.tc().count = 0;
     msg.tc().set_qos_behaviour(parameter_.link_quality());
 
@@ -1888,7 +1888,7 @@ OLSR_ETX::send_tc()
                 assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
                 // Report link quality and neighbor link quality of the best link that we have
                 // to this node.
-                link_tuple = state_.find_best_sym_link_tuple (nb_tuple->nb_main_addr(), CURRENT_TIME);
+                link_tuple = state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
                 if (link_tuple != NULL)
                 {
                     msg.tc().nb_etx_main_addr(count).iface_address() = nb_tuple->nb_main_addr();
@@ -1920,7 +1920,7 @@ OLSR_ETX::send_tc()
                 assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
                 // Report link quality and neighbor link quality of the best link that we have
                 // to this node.
-                link_tuple = state_.find_best_sym_link_tuple (mprsel_tuple->main_addr(), CURRENT_TIME);
+                link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
                 if (link_tuple != NULL)
                 {
                     msg.tc().nb_etx_main_addr(count).iface_address() = mprsel_tuple->main_addr();
@@ -1938,7 +1938,7 @@ OLSR_ETX::send_tc()
 
         //  if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SET) {
         // Reported by Mohamed Belhassen
-        if ((parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY)||(parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY))
+        if ((parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY) || (parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY))
         {
             // Also report our MPR set
             for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
@@ -1950,7 +1950,7 @@ OLSR_ETX::send_tc()
                 assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
                 // Report link quality and neighbor link quality of the best link that we have
                 // to this node.
-                link_tuple = state_.find_best_sym_link_tuple (mpr_addr, CURRENT_TIME);
+                link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
                 if (link_tuple != NULL)
                 {
                     msg.tc().nb_etx_main_addr(count).iface_address() = mpr_addr;
@@ -1989,9 +1989,9 @@ OLSR_ETX::send_tc()
 void
 OLSR_ETX::link_sensing
 (OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface,
- uint16_t pkt_seq_num,const int & index)
+ uint16_t pkt_seq_num, const int & index)
 {
-    OLSR_hello& hello  = msg.hello();
+    OLSR_hello& hello = msg.hello();
     double now = CURRENT_TIME;
     bool updated = false;
     bool created = false;
@@ -2009,7 +2009,7 @@ OLSR_ETX::link_sensing
     if (link_tuple_aux)
     {
         link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(link_tuple_aux);
-        if (link_tuple== NULL)
+        if (link_tuple == NULL)
             opp_error("\n Error conversion link tuple");
     }
     if (link_tuple == NULL)
@@ -2020,15 +2020,15 @@ OLSR_ETX::link_sensing
         link_tuple->set_qos_behaviour(parameter_);
         link_tuple->set_owner(this);
 //
-        link_tuple->nb_iface_addr()  = sender_iface;
-        link_tuple->local_iface_addr()  = receiver_iface;
+        link_tuple->nb_iface_addr() = sender_iface;
+        link_tuple->local_iface_addr() = receiver_iface;
         link_tuple->sym_time() = now - 1;
         link_tuple->lost_time() = 0.0;
         link_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
         // Init link quality information struct for this link tuple
-        link_tuple->link_quality_init (pkt_seq_num, DEFAULT_LOSS_WINDOW_SIZE);
+        link_tuple->link_quality_init(pkt_seq_num, DEFAULT_LOSS_WINDOW_SIZE);
         /// Link delay extension
-        link_tuple->link_delay_init ();
+        link_tuple->link_delay_init();
         // This call will be also in charge of creating a new tuple in
         // the neighbor set
         add_link_tuple(link_tuple, hello.willingness());
@@ -2038,7 +2038,7 @@ OLSR_ETX::link_sensing
         updated = true;
 
     // Account link quality information for this link
-    link_tuple->receive (pkt_seq_num, OLSR::emf_to_seconds(hello.htime()));
+    link_tuple->receive(pkt_seq_num, OLSR::emf_to_seconds(hello.htime()));
 
     // 2    The tuple (existing or new) with:
     //           L_neighbor_iface_addr == Source Address
@@ -2088,8 +2088,8 @@ OLSR_ETX::link_sensing
                     updated = true;
                 }
                 // Update our neighbor's idea of link quality and link delay
-                link_tuple->update_link_quality (hello_msg.nb_etx_iface_addr(j).link_quality());
-                link_tuple->update_link_delay (hello_msg.nb_etx_iface_addr(j).link_delay());
+                link_tuple->update_link_quality(hello_msg.nb_etx_iface_addr(j).link_quality());
+                link_tuple->update_link_delay(hello_msg.nb_etx_iface_addr(j).link_delay());
 
                 break;
             }
@@ -2129,7 +2129,7 @@ OLSR_ETX::link_sensing
 void
 OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
 {
-    OLSR_hello& hello  = msg.hello();
+    OLSR_hello& hello = msg.hello();
     double now = CURRENT_TIME;
 
     // Upon receiving a HELLO message, the "validity time" MUST be computed
@@ -2482,15 +2482,15 @@ void OLSR_ETX::finish()
     rtable_.clear();
     msgs_.clear();
     delete state_etx_ptr;
-    state_ptr = state_etx_ptr=NULL;
+    state_ptr = state_etx_ptr = NULL;
     //cancelAndDelete(&hello_timer_);
     //cancelAndDelete(&tc_timer_);
     //cancelAndDelete(&mid_timer_);
     //cancelAndDelete(&link_quality_timer_);
-    helloTimer= NULL;   ///< Timer for sending HELLO messages.
-    tcTimer= NULL;  ///< Timer for sending TC messages.
+    helloTimer = NULL;   ///< Timer for sending HELLO messages.
+    tcTimer = NULL;  ///< Timer for sending TC messages.
     midTimer = NULL;    ///< Timer for sending MID messages.
-    linkQualityTimer=NULL;
+    linkQualityTimer = NULL;
 }
 
 OLSR_ETX::~OLSR_ETX()
@@ -2501,7 +2501,7 @@ OLSR_ETX::~OLSR_ETX()
     if (state_etx_ptr)
     {
         delete state_etx_ptr;
-        state_ptr=state_etx_ptr = NULL;
+        state_ptr = state_etx_ptr = NULL;
     }
 
     /*
@@ -2527,7 +2527,7 @@ OLSR_ETX::~OLSR_ETX()
     if (timerMessage)
     {
         cancelAndDelete(timerMessage);
-        timerMessage=NULL;
+        timerMessage = NULL;
     }
 
     while (timerQueuePtr && timerQueuePtr->size()>0)
@@ -2536,35 +2536,35 @@ OLSR_ETX::~OLSR_ETX()
         timerQueuePtr->erase(timerQueuePtr->begin());
         timer->setTuple(NULL);
         if (helloTimer==timer)
-            helloTimer=NULL;
+            helloTimer = NULL;
         else if (tcTimer==timer)
-            tcTimer=NULL;
+            tcTimer = NULL;
         else if (midTimer==timer)
-            midTimer=NULL;
+            midTimer = NULL;
         else if (linkQualityTimer==timer)
-            linkQualityTimer=NULL;
+            linkQualityTimer = NULL;
         delete timer;
     }
 
     if (helloTimer)
     {
         delete helloTimer;
-        helloTimer=NULL;
+        helloTimer = NULL;
     }
     if (tcTimer)
     {
         delete tcTimer;
-        tcTimer=NULL;
+        tcTimer = NULL;
     }
     if (midTimer)
     {
         delete midTimer;
-        midTimer=NULL;
+        midTimer = NULL;
     }
     if (linkQualityTimer)
     {
         delete linkQualityTimer;
-        linkQualityTimer=NULL;
+        linkQualityTimer = NULL;
     }
     if (timerQueuePtr)
     {
@@ -2578,7 +2578,7 @@ OLSR_ETX::~OLSR_ETX()
 /// \brief Verify if a link tuple has reached a timeout in the expected time to receive a new packet
 ///
 void
-OLSR_ETX::link_quality ()
+OLSR_ETX::link_quality()
 {
     double now = CURRENT_TIME;
     for (linkset_t::iterator it = state_.linkset_.begin(); it != state_.linkset_.end(); it++)

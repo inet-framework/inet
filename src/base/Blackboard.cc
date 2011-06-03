@@ -48,7 +48,7 @@ Blackboard::~Blackboard()
 
 void Blackboard::initialize()
 {
-  if(hasPar("coreDebug"))
+  if (hasPar("coreDebug"))
     coreDebug = par("coreDebug").boolValue();
   else
     coreDebug = false;

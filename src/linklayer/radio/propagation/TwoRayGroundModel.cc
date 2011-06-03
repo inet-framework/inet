@@ -53,7 +53,7 @@ double TwoRayGroundModel::calculateReceivedPower(double pSend, double carrierFre
      *           lambda
      **/
 
-    double dc =  (4 * M_PI * ht * hr ) / waveLength;
+    double dc = (4 * M_PI * ht * hr ) / waveLength;
 
     if (distance < dc )
     {
@@ -64,7 +64,7 @@ double TwoRayGroundModel::calculateReceivedPower(double pSend, double carrierFre
          *   P = --------------------------
          *       (4 * pi)^2 * d^2 * L
          */
-        return freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
+        return freeSpace(Gt, Gr, L, pSend, waveLength, distance, pathLossAlpha);
     }
     else
     {

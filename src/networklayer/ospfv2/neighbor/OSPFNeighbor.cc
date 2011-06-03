@@ -105,18 +105,18 @@ void OSPF::Neighbor::reset()
          retIt != linkStateRetransmissionList.end();
          retIt++)
     {
-        delete(*retIt);
+        delete (*retIt);
     }
     linkStateRetransmissionList.clear();
 
     std::list<OSPFLSAHeader*>::iterator it;
     for (it = databaseSummaryList.begin(); it != databaseSummaryList.end(); it++) {
-        delete(*it);
+        delete (*it);
     }
     databaseSummaryList.clear();
     for (it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++)
     {
-        delete(*it);
+        delete (*it);
     }
     linkStateRequestList.clear();
 
@@ -422,7 +422,7 @@ void OSPF::Neighbor::addToRetransmissionList(OSPFLSA* lsa)
     }
 
     if (it != linkStateRetransmissionList.end()) {
-        delete(*it);
+        delete (*it);
         *it = static_cast<OSPFLSA*> (lsaCopy);
     } else {
         linkStateRetransmissionList.push_back(static_cast<OSPFLSA*> (lsaCopy));
@@ -436,7 +436,7 @@ void OSPF::Neighbor::removeFromRetransmissionList(OSPF::LSAKeyType lsaKey)
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getHeader().getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
         {
-            delete(*it);
+            delete (*it);
             it = linkStateRetransmissionList.erase(it);
         } else {
             it++;
@@ -495,7 +495,7 @@ void OSPF::Neighbor::removeFromRequestList(OSPF::LSAKeyType lsaKey)
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
         {
-            delete(*it);
+            delete (*it);
             it = linkStateRequestList.erase(it);
         } else {
             it++;

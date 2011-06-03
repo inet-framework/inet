@@ -105,7 +105,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
         {
             qp = (struct q_pkt *)PQ.head.next;
             list_detach(PQ.head.next);
-            dgram =qp->p;
+            dgram = qp->p;
             // drop (dgram);
             sendICMP(dgram);
 //  icmpAccess.get()->sendErrorMessage(dgram, ICMP_DESTINATION_UNREACHABLE, ICMP_AODV_QUEUE_FULL);
@@ -147,7 +147,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 
     if (verdict == PQ_ENC_SEND)
     {
-        gw_addr.s_addr =   gateWayAddress->getInt();
+        gw_addr.s_addr = gateWayAddress->getInt();
         rt = rt_table_find(gw_addr);
     }
     else
@@ -171,7 +171,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     /* Apparently, the link layer implementation can't handle
                      a burst of packets. So to keep ARP happy, buffered              *                   *
                      packets are sent with ARP_DELAY seconds between sends. */
-                    sendDelayed (qp->p,delay,"to_ip");
+                    sendDelayed(qp->p, delay, "to_ip");
                     delay += ARP_DELAY;
                 }
                 else

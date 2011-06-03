@@ -36,9 +36,9 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     ExtensionHeaders extensionHeaders;
 
   public:
-    IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram=NULL;}
+    IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram = NULL;}
     virtual ~IPv6ControlInfo();
-    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram=NULL; operator=(other);}
+    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram = NULL; operator=(other);}
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
 
     virtual void setOrigDatagram(IPv6Datagram *d);
@@ -65,7 +65,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
      * Adds an extension header to the datagram, at the given position.
      * The default (atPos==-1) is to add the header at the end.
      */
-    virtual void addExtensionHeader(IPv6ExtensionHeader* eh, int atPos=-1);
+    virtual void addExtensionHeader(IPv6ExtensionHeader* eh, int atPos = -1);
 
     /**
      * Remove the first extension header and return it.

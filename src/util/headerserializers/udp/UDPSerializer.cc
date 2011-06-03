@@ -47,8 +47,8 @@ int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned 
     packetLength = pkt->getByteLength();
     udphdr->uh_sport = htons(pkt->getSourcePort());
     udphdr->uh_dport = htons(pkt->getDestinationPort());
-    udphdr->uh_ulen  = htons(packetLength);
-    udphdr->uh_sum   = TCPIPchecksum::checksum(buf, packetLength);
+    udphdr->uh_ulen = htons(packetLength);
+    udphdr->uh_sum = TCPIPchecksum::checksum(buf, packetLength);
     return packetLength;
 }
 

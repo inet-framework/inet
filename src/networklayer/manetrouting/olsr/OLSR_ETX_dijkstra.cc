@@ -41,7 +41,7 @@ Dijkstra::Dijkstra()
     parameter = &(dynamic_cast<OLSR_ETX*>(getOwner())->parameter_);
 }
 
-void Dijkstra::add_edge (const nsaddr_t & dest_node, const nsaddr_t & last_node, double delay,
+void Dijkstra::add_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node, double delay,
                          double quality, bool direct_connected)
 {
     edge *link = new edge;
@@ -55,7 +55,7 @@ void Dijkstra::add_edge (const nsaddr_t & dest_node, const nsaddr_t & last_node,
     if (it==link_array_->end())
     {
         std::vector<edge*> val;
-        link_array_->insert(std::pair<nsaddr_t,std::vector<edge*> >(dest_node,val));
+        link_array_->insert(std::pair<nsaddr_t,std::vector<edge*> >(dest_node, val));
         it = link_array_->find(dest_node);
     }
 
@@ -86,14 +86,14 @@ void Dijkstra::add_edge (const nsaddr_t & dest_node, const nsaddr_t & last_node,
     nonprocessed_nodes_->insert(dest_node);
 }
 
-Dijkstra::NodesSet::iterator Dijkstra::best_cost ()
+Dijkstra::NodesSet::iterator Dijkstra::best_cost()
 {
     NodesSet::iterator best = nonprocessed_nodes_->end();
 
     // Search for a node that was not processed yet and that has
     // the best cost to be reached from the node running dijkstra...
     NodesSet::iterator it;
-    for (it = nonprocessed_nodes_->begin();it != nonprocessed_nodes_->end(); it++)
+    for (it = nonprocessed_nodes_->begin(); it != nonprocessed_nodes_->end(); it++)
     {
         DijkstraMap::iterator itDij = dijkstraMap.find(*it);
         if (itDij==dijkstraMap.end())
@@ -138,13 +138,13 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost ()
     return best;
 }
 
-edge* Dijkstra::get_edge (const nsaddr_t & dest_node, const nsaddr_t & last_node)
+edge* Dijkstra::get_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node)
 {
     // Find the edge that connects dest_node and last_node
     LinkArray::iterator itLink = link_array_->find(dest_node);
     if (itLink==link_array_->end())
         opp_error("link_array_ error");
-    for (std::vector<edge*>::iterator it = itLink->second.begin();it != itLink->second.end(); it++)
+    for (std::vector<edge*>::iterator it = itLink->second.begin(); it != itLink->second.end(); it++)
     {
         edge* current_edge = *it;
         if (current_edge->last_node() == last_node)
@@ -167,7 +167,7 @@ void Dijkstra::run()
             break;
 
         // for each node in all_nodes...
-        for (NodesSet::iterator dest_node = all_nodes_->begin();dest_node != all_nodes_->end(); dest_node++)
+        for (NodesSet::iterator dest_node = all_nodes_->begin(); dest_node != all_nodes_->end(); dest_node++)
         {
             // ... not processed yet...
             if (nonprocessed_nodes_->find(*dest_node) == nonprocessed_nodes_->end())
@@ -184,8 +184,8 @@ void Dijkstra::run()
             DijkstraMap::iterator itCurrent = dijkstraMap.find(*current_node);
             if (itCurrent==dijkstraMap.end())
                 opp_error("dijkstraMap error node not found");
-            hop destHop =itDest->second;
-            hop currentHop =itCurrent->second;
+            hop destHop = itDest->second;
+            hop currentHop = itCurrent->second;
             if (itDest->second.hop_count() == -1)   // there is not a link to dest_node yet...
             {
                 switch (parameter->link_quality())
@@ -316,12 +316,12 @@ void Dijkstra::clear()
 
     nonprocessed_nodes_->clear();
     delete nonprocessed_nodes_;
-    all_nodes_->clear ();
+    all_nodes_->clear();
     delete all_nodes_;
 
     link_array_ = NULL;
     nonprocessed_nodes_ = NULL;
-    all_nodes_=NULL;
+    all_nodes_ = NULL;
 }
 
 Dijkstra::~Dijkstra()

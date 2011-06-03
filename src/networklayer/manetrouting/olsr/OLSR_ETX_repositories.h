@@ -45,10 +45,10 @@
 
 
 /// An %OLSR_ETX's routing table entry.
-typedef OLSR_rt_entry OLSR_ETX_rt_entry ;
+typedef OLSR_rt_entry OLSR_ETX_rt_entry;
 
 /// An Interface Association Tuple.
-typedef OLSR_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple ;
+typedef OLSR_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple;
 
 #define DEFAULT_LOSS_WINDOW_SIZE   10
 
@@ -79,13 +79,13 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
 
     OLSR_ETX_parameter parameter_;
 
-    inline void set_qos_behaviour(OLSR_ETX_parameter parameter) {parameter_=parameter;}
+    inline void set_qos_behaviour(OLSR_ETX_parameter parameter) {parameter_ = parameter;}
     /// Link Quality extension Methods
-    inline void link_quality_init (uint16_t seqno, int loss_window_size)
+    inline void link_quality_init(uint16_t seqno, int loss_window_size)
     {
-        assert (loss_window_size > 0);
+        assert(loss_window_size > 0);
 
-        memset (loss_bitmap_, 0, sizeof (loss_bitmap_));
+        memset(loss_bitmap_, 0, sizeof(loss_bitmap_));
         loss_window_size_ = loss_window_size;
         loss_seqno_ = seqno;
 
@@ -100,7 +100,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     }
 
 #if 0
-    inline double link_quality ()
+    inline double link_quality()
     {
         // calculate the new link quality
         //
@@ -112,7 +112,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     }
 #endif
 
-    inline double link_quality () { return link_quality_; }
+    inline double link_quality() { return link_quality_; }
     inline double nb_link_quality() { return nb_link_quality_; }
     inline double etx() { return etx_; }
 #if 0
@@ -137,7 +137,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     }
 #endif
 
-    inline void update_link_quality (double nb_link_quality)
+    inline void update_link_quality(double nb_link_quality)
     {
         // update link quality information
         nb_link_quality_ = nb_link_quality;
@@ -162,11 +162,11 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     }
 
 
-    inline double& next_hello () { return next_hello_; }
+    inline double& next_hello() { return next_hello_; }
 
-    inline double& hello_ival () { return hello_ival_; }
+    inline double& hello_ival() { return hello_ival_; }
 #if 0
-    inline void process_packet (bool received, double htime)
+    inline void process_packet(bool received, double htime)
     {
         // Code extracted from olsrd implementation
         unsigned char mask = 1 << (loss_index_ & 7);
@@ -205,7 +205,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
 
 #endif
 
-    inline void process_packet (bool received, double htime)
+    inline void process_packet(bool received, double htime)
     {
         // Code extracted from olsrd implementation
         unsigned char mask = 1 << (loss_index_ & 7);
@@ -266,13 +266,13 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
         }
     }
 
-    inline void receive (uint16_t seqno, double htime)
+    inline void receive(uint16_t seqno, double htime)
     {
         while (seqno != loss_seqno_)
         {
             // have already considered all lost HELLO messages?
             if (loss_missed_hellos_ == 0)
-                process_packet (false, htime);
+                process_packet(false, htime);
             else
                 // if not, then decrement the number of lost HELLOs
                 loss_missed_hellos_--;
@@ -281,15 +281,15 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
         }
         // we have received a packet, otherwise this function would not
         // have been called
-        process_packet (true, htime);
+        process_packet(true, htime);
         // (re-)initialize
         loss_missed_hellos_ = 0;
         loss_seqno_ = (seqno + 1) % (OLSR_ETX_MAX_SEQ_NUM + 1);
     }
 
-    inline void packet_timeout ()
+    inline void packet_timeout()
     {
-        process_packet (false, 0.0);
+        process_packet(false, 0.0);
         // memorize that we've counted the packet, so that we do not
         // count it a second time later
         loss_missed_hellos_++;
@@ -303,7 +303,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     double recv1_ [CAPPROBE_MAX_ARRAY];
     double recv2_ [CAPPROBE_MAX_ARRAY];
 
-    inline void link_delay_init ()
+    inline void link_delay_init()
     {
 
         link_delay_ = 4;
@@ -312,7 +312,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
             recv1_ [i] = recv2_ [i] = -1;
     }
 
-    inline void link_delay_computation (OLSR_pkt* pkt)
+    inline void link_delay_computation(OLSR_pkt* pkt)
     {
         double c_alpha = parameter_.c_alpha();
         int i;
@@ -348,15 +348,15 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     inline double link_delay() { return link_delay_; }
     inline double nb_link_delay() { return nb_link_delay_; }
 
-    inline void update_link_delay (double nb_link_delay)
+    inline void update_link_delay(double nb_link_delay)
     {
         nb_link_delay_ = nb_link_delay;
     }
 
-    inline void mac_failed ()
+    inline void mac_failed()
     {
         /// Link quality extension
-        memset (loss_bitmap_, 0, sizeof (loss_bitmap_));
+        memset(loss_bitmap_, 0, sizeof(loss_bitmap_));
 
         total_packets_ = 0;
         lost_packets_ = 0;
@@ -370,9 +370,9 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
             recv1_ [i] = recv2_ [i] = -1;
     }
     OLSR_ETX_link_tuple() {asocTimer = NULL;}
-    OLSR_ETX_link_tuple (OLSR_ETX_link_tuple * e)
+    OLSR_ETX_link_tuple(OLSR_ETX_link_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_ETX_link_tuple));
+        memcpy(this, e, sizeof(OLSR_ETX_link_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_ETX_link_tuple *dup() {return new OLSR_ETX_link_tuple(this);}
@@ -380,7 +380,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
 } OLSR_ETX_link_tuple;
 
 /// A Neighbor Tuple.
-typedef OLSR_nb_tuple OLSR_ETX_nb_tuple ;
+typedef OLSR_nb_tuple OLSR_ETX_nb_tuple;
 
 /// A 2-hop Tuple.
 typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
@@ -395,7 +395,7 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
     inline double  etx() { return etx_; }
     int parameter_qos_;
 
-    inline void set_qos_behaviour(int bh) {parameter_qos_=bh;}
+    inline void set_qos_behaviour(int bh) {parameter_qos_ = bh;}
     /*
         inline double  etx()  {
             double mult = link_quality() * nb_link_quality();
@@ -416,7 +416,7 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
         }
     */
 
-    inline void update_link_quality (double link_quality, double nb_link_quality)
+    inline void update_link_quality(double link_quality, double nb_link_quality)
     {
         // update link quality information
         link_quality_ = link_quality;
@@ -446,7 +446,7 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
     inline double  link_delay() { return link_delay_; }
     inline double  nb_link_delay() {return nb_link_delay_;}
 
-    inline void update_link_delay (double link_delay, double nb_link_delay)
+    inline void update_link_delay(double link_delay, double nb_link_delay)
     {
         link_delay_ = link_delay;
         nb_link_delay_ = nb_link_delay;
@@ -454,9 +454,9 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
     inline double&  time()    { return time_; }
 
     OLSR_ETX_nb2hop_tuple() {asocTimer = NULL;}
-    OLSR_ETX_nb2hop_tuple (OLSR_ETX_nb2hop_tuple * e)
+    OLSR_ETX_nb2hop_tuple(OLSR_ETX_nb2hop_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_ETX_nb2hop_tuple));
+        memcpy(this, e, sizeof(OLSR_ETX_nb2hop_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_ETX_nb2hop_tuple *dup() {return new OLSR_ETX_nb2hop_tuple(this);}
@@ -464,10 +464,10 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
 } OLSR_ETX_nb2hop_tuple;
 
 /// An MPR-Selector Tuple.
-typedef OLSR_mprsel_tuple OLSR_ETX_mprsel_tuple  ;
+typedef OLSR_mprsel_tuple OLSR_ETX_mprsel_tuple;
 
 /// A Duplicate Tuple
-typedef OLSR_dup_tuple OLSR_ETX_dup_tuple ;
+typedef OLSR_dup_tuple OLSR_ETX_dup_tuple;
 
 /// A Topology Tuple
 typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
@@ -479,7 +479,7 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
 
     int parameter_qos_;
 
-    inline void set_qos_behaviour(int bh) {parameter_qos_=bh;}
+    inline void set_qos_behaviour(int bh) {parameter_qos_ = bh;}
 #if 0
     inline double  etx()
     {
@@ -506,7 +506,7 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
     inline double  nb_link_quality() { return nb_link_quality_; }
     inline double  etx() { return etx_; }
 
-    inline void update_link_quality (double link_quality, double nb_link_quality)
+    inline void update_link_quality(double link_quality, double nb_link_quality)
     {
         // update link quality information
         link_quality_ = link_quality;
@@ -538,7 +538,7 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
     inline double  link_delay() { return link_delay_; }
     inline double  nb_link_delay() { return nb_link_delay_; }
 
-    inline void update_link_delay (double link_delay, double nb_link_delay)
+    inline void update_link_delay(double link_delay, double nb_link_delay)
     {
         link_delay_ = link_delay;
         nb_link_delay_ = nb_link_delay;
@@ -548,9 +548,9 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
     inline double&    time()    { return time_; }
 
     OLSR_ETX_topology_tuple() {asocTimer = NULL;}
-    OLSR_ETX_topology_tuple (OLSR_ETX_topology_tuple * e)
+    OLSR_ETX_topology_tuple(OLSR_ETX_topology_tuple * e)
     {
-        memcpy(this,e,sizeof(OLSR_ETX_topology_tuple));
+        memcpy(this, e, sizeof(OLSR_ETX_topology_tuple));
         asocTimer = NULL;
     }
     virtual OLSR_ETX_topology_tuple *dup() {return new OLSR_ETX_topology_tuple(this);}

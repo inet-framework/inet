@@ -52,7 +52,7 @@ IPv6ExtensionHeaderPtr& IPv6Datagram::getExtensionHeader(unsigned int k)
 {
     static IPv6ExtensionHeaderPtr null;
     if (k>=extensionHeaders.size())
-        return (null=NULL);
+        return (null = NULL);
     return extensionHeaders[k];
 }
 
@@ -85,7 +85,7 @@ IPv6ExtensionHeaderPtr IPv6Datagram::removeFirstExtensionHeader()
 {
     static IPv6ExtensionHeaderPtr null;
     if ( extensionHeaders.size() == 0)
-        return (null=NULL);
+        return (null = NULL);
     IPv6ExtensionHeaderPtr eh = extensionHeaders.front();
     extensionHeaders.erase( extensionHeaders.begin() );
     return eh;

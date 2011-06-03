@@ -40,7 +40,7 @@ class TxNotifDetails : public cPolymorphic
     InterfaceEntry *ie;
 
   public:
-    TxNotifDetails() {msg=NULL; ie=NULL;}
+    TxNotifDetails() {msg = NULL; ie = NULL;}
 
     cPacket *getPacket() const {return msg;}
     InterfaceEntry *getInterfaceEntry() const {return ie;}

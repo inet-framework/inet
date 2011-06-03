@@ -61,7 +61,7 @@ public:
         double Gr, Gt, L;
         double pathLossAlpha;
         virtual void initializeFreeSpace(cModule *);
-        virtual double freeSpace(double Gt, double Gr, double L,double Pt, double lambda, double distance, double pathLossAlpha);
+        virtual double freeSpace(double Gt, double Gr, double L, double Pt, double lambda, double distance, double pathLossAlpha);
 };
 
 

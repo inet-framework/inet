@@ -257,7 +257,7 @@ class INET_API IPv4Address
      * Typical usage is when the length of an IPv4 prefix is done and to check
      * the address ends with the right number of 0.
      */
-    void keepFirstBits (unsigned int n);
+    void keepFirstBits(unsigned int n);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)

@@ -192,7 +192,7 @@ void xMIPv6::handleMessage(cMessage *msg)
             handleTokenExpiry(msg);
         }
         else
-            error("Unrecognized Timer");//stops sim w/ error msg.
+            error("Unrecognized Timer"); //stops sim w/ error msg.
     }
     // Zarrar Yousaf @ CNI Dortmund Uni on 29.05.07
     // if its a MIPv6 related mobility message
@@ -328,7 +328,7 @@ void xMIPv6::returningHome(const IPv6Address& CoA, InterfaceEntry* ie)
     // destroy tunnel to HA
     tunneling->destroyTunnel(CoA, HA);
     // unregister binding from HA..
-    createDeregisterBUTimer(HA , ie);
+    createDeregisterBUTimer(HA, ie);
     bul->setMobilityState(HA, BindingUpdateList::DEREGISTER);
 
     // ...and then the messages for CNs
@@ -433,7 +433,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie, const 
       InitialBindackTimeoutFirstReg (see Section 13) as a value for the
       initial retransmission timer.*/
     if (!bul->isInBindingUpdateList(buDest))
-        buIfEntry->ackTimeout = ie->ipv6Data()->_getInitialBindAckTimeoutFirst();//the backoff constant gets initialised here
+        buIfEntry->ackTimeout = ie->ipv6Data()->_getInitialBindAckTimeoutFirst(); //the backoff constant gets initialised here
     /*Otherwise, the mobile node should use the specified value of
       INITIAL_BINDACK_TIMEOUT for the initial retransmission timer.*/
     else
@@ -503,7 +503,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     else*/
     if (!(buIfEntry->ackTimeout < ie->ipv6Data()->_getMaxBindAckTimeout()))
     {
-        ev << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl;//buIfEntry->nextBindAckTimeout << " ++++++\n";
+        ev << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl; //buIfEntry->nextBindAckTimeout << " ++++++\n";
         //ev << "\n++++Present Sent Time: " << buIfEntry->presentSentTimeBU << " Present TimeOut: " << buIfEntry->ackTimeout << endl;
         //buIfEntry->nextScheduledTime = buIfEntry->presentSentTimeBU + buIfEntry->maxBindAckTimeout;
         buIfEntry->ackTimeout = ie->ipv6Data()->_getMaxBindAckTimeout();
@@ -513,7 +513,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     }
 
     EV << "Present Sent Time: " << buIfEntry->presentSentTimeBU << ", Present TimeOut: " << buIfEntry->ackTimeout << endl;
-    EV << "Next Sent Time: " << buIfEntry->nextScheduledTime << endl;// << " Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
+    EV << "Next Sent Time: " << buIfEntry->nextScheduledTime << endl; // << " Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
     scheduleAt(buIfEntry->nextScheduledTime, msg);
 }
 
@@ -590,7 +590,7 @@ void xMIPv6::createAndSendBUMessage(const IPv6Address& dest, InterfaceEntry* ie,
     // As every IPv6 Datagram sending the BU has to have the Home Address Option, I have
     // made this field a part of BU message to ease my task of simulation...
     // this can be accessed from the InterfaceTable of the MN.
-    bu->setHomeAddressMN(HoA) ;//HoA of MN
+    bu->setHomeAddressMN(HoA); //HoA of MN
 
 
     /*11.7.2
@@ -660,7 +660,7 @@ void xMIPv6::updateBUL(BindingUpdate* bu, const IPv6Address& dest, const IPv6Add
     //simtime_t nextSentTime = buIfEntry->nextScheduledTime;
 
     //ASSERT(bul);
-    bul->addOrUpdateBUL(dest, HoA, CoA, buLife, buSeq, sendTime);//, nextSentTime); //updates the binding Update List
+    bul->addOrUpdateBUL(dest, HoA, CoA, buLife, buSeq, sendTime); //, nextSentTime); //updates the binding Update List
     //EV << "#### Updated BUL with lifetime=" << buLife << "and sentTime=" << sentTime << endl;
 }
 
@@ -705,7 +705,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
     if (sendTime > 0)
         sendDelayed(msg, sendTime, "toIPv6");
     else
-        send(msg,"toIPv6");
+        send(msg, "toIPv6");
 }
 
 /*
@@ -977,7 +977,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
             else // condition: ! bu->getAckFlag()
             {
                 EV << "BU Validated as OK: ACK FLAG NOT SET" << endl;
-                bubble ("!!!BU VALID --- ACK FLAG = False !!!");
+                bubble("!!!BU VALID --- ACK FLAG = False !!!");
             }
 
             if (rt6->isHomeAgent()) // establish tunnel to MN - CB
@@ -1040,7 +1040,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
 
     IPv6Address& src = ctrlInfo->getSrcAddr();
     IPv6Address homeAddress = bu->getHomeAddressMN(); //confirm whether it is getHomeAddressMN() or simply homeAddress()
-    uint seqNumber = bu->getSequence();//The seq Number of the recieved BU
+    uint seqNumber = bu->getSequence(); //The seq Number of the recieved BU
     uint bcSeqNumber = bc->readBCSequenceNumber(homeAddress); //The seq Number of the last recieved BU in the Binding cache
 
     // restructured the following and removed "delete bu" - CB
@@ -1135,7 +1135,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     EV << "BU validation passed" << endl;
 
     if (ev.isGUI())
-        bubble ("BU Validated");
+        bubble("BU Validated");
 
     return true; //result;
 }
@@ -2847,7 +2847,7 @@ void xMIPv6::handleTokenExpiry(cMessage* msg)
     }
     else if (tokenExpIfEntry->tokenType == KEY_HTOKEN_EXP)
     {
-        EV << "Home keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired" ;
+        EV << "Home keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";
         bul->resetHomeToken(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry->ipv6Data()->getMNHomeAddress());
     }
     else

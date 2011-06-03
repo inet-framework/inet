@@ -64,7 +64,7 @@ void PacketDump::sctpDump(const char *label, SCTPMessage *sctpmsg,
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
     out << buf;
 
 #ifndef WITH_SCTP
@@ -374,7 +374,7 @@ void PacketDump::dump(const char *label, const char *msg)
     // seq and time (not part of the tcpdump format)
     char buf[30];
 
-    sprintf(buf,"[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
     out << buf << msg << endl;
 }
 
@@ -448,7 +448,7 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPPacket* udppkt,
     std::ostream& out = *outp;
 
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
     out << buf;
 
 #ifndef WITH_UDP
@@ -478,7 +478,7 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPPacket* udppkt,
     {
         if (dynamic_cast<SCTPMessage *>(udppkt->getEncapsulatedPacket()))
             sctpDump("", (SCTPMessage *)(udppkt->getEncapsulatedPacket()),
-                    std::string(l2r?"A":"B"),std::string(l2r?"B" : "A"));
+                    std::string(l2r?"A":"B"), std::string(l2r?"B" : "A"));
     }
 #endif
 #endif
@@ -528,7 +528,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
     {
          // some other packet, dump what we can
          // seq and time (not part of the tcpdump format)
-         sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+         sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
          out << buf;
 
          // packet class and name
@@ -541,7 +541,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
          out << endl;
     }
 #else
-    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+    sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf << "[IPv4]";
 
     // comment
@@ -572,7 +572,7 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, cons
     {
          // some other packet, dump what we can
          // seq and time (not part of the tcpdump format)
-         sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+         sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
          out << buf;
 
          // packet class and name
@@ -585,7 +585,7 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, cons
          out << endl;
     }
 #else
-    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+    sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf << "[IPv4]";
 
     // comment
@@ -603,7 +603,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+    sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf;
 
 #ifndef WITH_TCP_COMMON
@@ -626,12 +626,12 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
 
     // flags
     bool flags = false;
-    if (tcpseg->getUrgBit()) {flags=true; out << "U ";}
-    if (tcpseg->getAckBit()) {flags=true; out << "A ";}
-    if (tcpseg->getPshBit()) {flags=true; out << "P ";}
-    if (tcpseg->getRstBit()) {flags=true; out << "R ";}
-    if (tcpseg->getSynBit()) {flags=true; out << "S ";}
-    if (tcpseg->getFinBit()) {flags=true; out << "F ";}
+    if (tcpseg->getUrgBit()) {flags = true; out << "U ";}
+    if (tcpseg->getAckBit()) {flags = true; out << "A ";}
+    if (tcpseg->getPshBit()) {flags = true; out << "P ";}
+    if (tcpseg->getRstBit()) {flags = true; out << "R ";}
+    if (tcpseg->getSynBit()) {flags = true; out << "S ";}
+    if (tcpseg->getFinBit()) {flags = true; out << "F ";}
     if (!flags) {out << ". ";}
 
     // data-seqno

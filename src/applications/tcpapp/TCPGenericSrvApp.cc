@@ -88,7 +88,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         // pending to be sent back in this connection
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
-        sendOrSchedule(msg,delay+maxMsgDelay);
+        sendOrSchedule(msg, delay+maxMsgDelay);
     }
     else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
@@ -151,7 +151,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         char buf[64];
         sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 

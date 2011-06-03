@@ -37,7 +37,7 @@ SCTPStateVariables *SCTPAlg::createStateVariables()
 {
     ASSERT(state == NULL);
     state = new SCTPAlgStateVariables();
-    return(state);
+    return (state);
 }
 
 void SCTPAlg::established(bool active)

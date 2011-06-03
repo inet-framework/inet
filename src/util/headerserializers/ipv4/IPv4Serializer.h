@@ -36,7 +36,7 @@ class IPv4Serializer
          * When hasCalcChkSum is true, then calculating checksum.
          * Returns the length of data written into buffer.
          */
-        int serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum=false);
+        int serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum = false);
 
         /**
          * Puts a packet sniffed from the wire into an IPv4Datagram. Does NOT

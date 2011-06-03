@@ -73,7 +73,7 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     virtual void close();
 
     /** Sends a GenericAppMsg of the given length */
-    virtual void sendPacket(int numBytes, int expectedReplyBytes, bool serverClose=false);
+    virtual void sendPacket(int numBytes, int expectedReplyBytes, bool serverClose = false);
 
     /** When running under GUI, it displays the given string next to the icon */
     virtual void setStatusString(const char *s);

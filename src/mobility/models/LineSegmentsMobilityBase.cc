@@ -58,7 +58,7 @@ void LineSegmentsMobilityBase::beginNextMove(cMessage *msg)
     {
         // no movement, just wait
         step.x = step.y = 0;
-        scheduleAt(std::max(targetTime,simTime()), msg);
+        scheduleAt(std::max(targetTime, simTime()), msg);
     }
     else
     {

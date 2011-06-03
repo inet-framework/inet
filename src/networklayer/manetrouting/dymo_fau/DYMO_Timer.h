@@ -76,11 +76,11 @@ class DYMO_Timer : public cObject
     bool active; /**< false if this DYMO_Timer is not currently active */
 
   public:
-    friend std::ostream& operator<< (std::ostream& os, const DYMO_Timer& o);
+    friend std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
 
 };
 
-std::ostream& operator<< (std::ostream& os, const DYMO_Timer& o);
+std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
 
 #endif
 

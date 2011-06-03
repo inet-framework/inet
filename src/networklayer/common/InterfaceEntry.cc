@@ -57,7 +57,7 @@ InterfaceEntry::InterfaceEntry()
     down = false;
     broadcast = false;
     multicast = false;
-    pointToPoint= false;
+    pointToPoint = false;
     loopback = false;
     datarate = 0;
 
@@ -160,21 +160,21 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #endif
 }
 
-bool InterfaceEntry::setEstimateCostProcess(int position,MacEstimateCostProcess *p)
+bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
 {
-    if(estimateCostProcessArray.size()<=position)
+    if (estimateCostProcessArray.size()<=position)
     {
-        estimateCostProcessArray.resize(position+1,NULL);
+        estimateCostProcessArray.resize(position+1, NULL);
     }
     if (estimateCostProcessArray[position]!=NULL)
         return false;
-    estimateCostProcessArray[position]=p;
+    estimateCostProcessArray[position] = p;
     return true;
 }
 
 MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
 {
-    if(position <estimateCostProcessArray.size())
+    if (position < estimateCostProcessArray.size())
     {
         return estimateCostProcessArray[position];
     }

@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o)
     return os;
 }
 
-DYMO_DataQueue::DYMO_DataQueue(cSimpleModule *owner,int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES) : dataQueueByteSize(0), BUFFER_SIZE_PACKETS(BUFFER_SIZE_PACKETS), BUFFER_SIZE_BYTES(BUFFER_SIZE_BYTES)
+DYMO_DataQueue::DYMO_DataQueue(cSimpleModule *owner, int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES) : dataQueueByteSize(0), BUFFER_SIZE_PACKETS(BUFFER_SIZE_PACKETS), BUFFER_SIZE_BYTES(BUFFER_SIZE_BYTES)
 {
     moduleOwner = owner;
 }
@@ -96,7 +96,7 @@ void DYMO_DataQueue::queuePacket(const IPv4Datagram* datagram)
     }
 }
 
-void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict,std::list<IPv4Datagram*> *datagrams)
+void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict, std::list<IPv4Datagram*> *datagrams)
 {
     bool tryAgain = true;
     double delay = 0;
@@ -114,7 +114,7 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Resul
                 dataQueue.erase(iter);
                 if (verdict==ACCEPT)
                 {
-                    moduleOwner->send(qd.datagram,"to_ip");
+                    moduleOwner->send(qd.datagram, "to_ip");
                     delay += ARP_DELAY;
                 }
                 else if (verdict==DROP && datagrams != NULL)
@@ -133,9 +133,9 @@ void DYMO_DataQueue::dequeuePacketsTo(IPv4Address destAddr, int prefix)
     reinjectDatagramsTo(destAddr, prefix, ACCEPT);
 }
 
-void DYMO_DataQueue::dropPacketsTo(IPv4Address destAddr, int prefix,std::list<IPv4Datagram*>* datagrams)
+void DYMO_DataQueue::dropPacketsTo(IPv4Address destAddr, int prefix, std::list<IPv4Datagram*>* datagrams)
 {
-    reinjectDatagramsTo(destAddr, prefix, DROP,datagrams);
+    reinjectDatagramsTo(destAddr, prefix, DROP, datagrams);
 }
 
 

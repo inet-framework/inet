@@ -301,7 +301,7 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     if (echoFactor > 0)
     {
-        SCTPSimpleMessage *smsg=check_and_cast<SCTPSimpleMessage*>(msg->dup());
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
         echoedBytesSent += smsg->getByteLength();
         emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
@@ -337,10 +337,10 @@ void SCTPClient::sendRequest(bool last)
     sendBytes = par("requestLength");
 
     if (sendBytes < 1)
-        sendBytes=1;
+        sendBytes = 1;
 
     cPacket* cmsg = new cPacket("AppData");
-    SCTPSimpleMessage* msg=new SCTPSimpleMessage("data");
+    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
 
@@ -366,7 +366,7 @@ void SCTPClient::sendRequest(bool last)
         last = true;
 
     socket.send(cmsg, last);
-    bytesSent+=sendBytes;
+    bytesSent += sendBytes;
     emit(sentPkBytesSignal, (long)sendBytes);
 }
 
@@ -425,7 +425,7 @@ void SCTPClient::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_STOP:
-            numRequestsToSend=0;
+            numRequestsToSend = 0;
             sendAllowed = false;
             socket.abort();
             socket.close();
@@ -518,18 +518,18 @@ void SCTPClient::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInf
     if (i != sctpPathStatus.end())
     {
         ps = i->second;
-        ps.active=status->getActive();
+        ps.active = status->getActive();
     }
     else
     {
         ps.active = status->getActive();
         ps.pid = status->getPathId();
         ps.primaryPath = false;
-        sctpPathStatus[ps.pid]=ps;
+        sctpPathStatus[ps.pid] = ps;
     }
 }
 
-void SCTPClient::setPrimaryPath (const char* str)
+void SCTPClient::setPrimaryPath(const char* str)
 {
 
     cPacket* cmsg = new cPacket("CMSG-SetPrimary");

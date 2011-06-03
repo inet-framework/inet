@@ -129,7 +129,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             //
             // option (1): set cwnd to min (ssthresh, FlightSize + SMSS)
             uint32 flight_size = state->snd_max - state->snd_una;
-            state->snd_cwnd = std::min (state->ssthresh, flight_size + state->snd_mss);
+            state->snd_cwnd = std::min(state->ssthresh, flight_size + state->snd_mss);
             tcpEV << "Fast Recovery - Full ACK received: Exit Fast Recovery, setting cwnd to " << state->snd_cwnd << "\n";
             // option (2): set cwnd to ssthresh
             // state->snd_cwnd = state->ssthresh;

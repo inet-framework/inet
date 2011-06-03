@@ -41,7 +41,7 @@ simsignal_t RTP::endToEndDelaySignal = SIMSIGNAL_NULL;
 
 void RTP::initialize()
 {
-    _socketFdIn = -1;//UDPSocket::generateSocketId();
+    _socketFdIn = -1; //UDPSocket::generateSocketId();
     _socketFdOut = -1;
     _leaveSession = false;
     appInGate = findGate("appIn");
@@ -85,7 +85,7 @@ void RTP::handleMessageFromApp(cMessage *msg)
     RTPControlInfo * ci = check_and_cast<RTPControlInfo *>(msg->removeControlInfo());
     delete msg;
 
-    switch(ci->getType())
+    switch (ci->getType())
     {
     case RTP_IFP_ENTER_SESSION:
         enterSession(check_and_cast<RTPCIEnterSession *>(ci));
@@ -116,7 +116,7 @@ void RTP::handleMessageFromProfile(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
-    switch(rinp->getType())
+    switch (rinp->getType())
     {
     case RTP_INP_PROFILE_INITIALIZED:
         profileInitialized(rinp);
@@ -154,7 +154,7 @@ void RTP::handleMessageFromRTCP(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
 
-    switch(rinp->getType())
+    switch (rinp->getType())
     {
     case RTP_INP_RTCP_INITIALIZED:
         rtcpInitialized(rinp);
@@ -207,7 +207,7 @@ void RTP::leaveSession(RTPCILeaveSession *rifp)
         profileModule->deleteModule();
         RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
         rinp->setLeaveSessionPkt();
-        send(rinp,"rtcpOut");
+        send(rinp, "rtcpOut");
     }
     delete rifp;
 }
@@ -383,7 +383,7 @@ int RTP::resolveMTU()
     RoutingTableAccess routingTableAccess;
     const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(_destinationAddress);
 
-    if(rtie == NULL)
+    if (rtie == NULL)
     {
         throw cRuntimeError(this, "No interface for remote address %s found!",
                 _destinationAddress.str().c_str());
@@ -437,7 +437,7 @@ void RTP::createSocket()
         ctrl->setSockId((int)_socketFdIn);
         cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
         msg->setControlInfo(ctrl);
-        send(msg,"udpOut");
+        send(msg, "udpOut");
 
         connectRet();
     }

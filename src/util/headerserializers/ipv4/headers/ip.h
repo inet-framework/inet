@@ -70,7 +70,7 @@ struct ip {
         u_char  ip_ttl;                 /* time to live */
         u_char  ip_p;                   /* protocol */
         u_short ip_sum;                 /* checksum */
-        struct  in_addr ip_src,ip_dst;  /* source and dest address */
+        struct  in_addr ip_src, ip_dst;  /* source and dest address */
 };
 
 #ifdef _IP_VHL

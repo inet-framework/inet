@@ -390,9 +390,9 @@ void Established::entry()
     {
         rtEntry = IPRoutingTable->getRoute(i);
         if (rtEntry->getNetmask() == IPv4Address::ALLONES_ADDRESS ||
-            rtEntry->getSource()  == IPv4Route::IFACENETMASK      ||
-            rtEntry->getSource()  == IPv4Route::MANUAL            ||
-            rtEntry->getSource()  == IPv4Route::BGP)
+            rtEntry->getSource() == IPv4Route::IFACENETMASK ||
+            rtEntry->getSource() == IPv4Route::MANUAL ||
+            rtEntry->getSource() == IPv4Route::BGP)
         {
             continue;
         }
@@ -412,7 +412,7 @@ void Established::entry()
     }
 
     std::vector<BGP::RoutingTableEntry*> BGPRoutingTable = session.getBGPRoutingTable();
-    for (std::vector<BGP::RoutingTableEntry*>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end (); it++)
+    for (std::vector<BGP::RoutingTableEntry*>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++)
     {
         session.updateSendProcess((*it));
     }

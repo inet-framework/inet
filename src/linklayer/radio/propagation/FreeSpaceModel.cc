@@ -53,14 +53,14 @@ void FreeSpaceModel::initializeFrom(cModule *radioModule)
 double FreeSpaceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
-    double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
+    double prec = freeSpace(Gt, Gr, L, pSend, waveLength, distance, pathLossAlpha);
     if (prec > pSend)
         prec = pSend;
     return prec;
 }
 
 /** @brief calculates the power with the deterministic free space propagation model */
-double FreeSpaceModel::freeSpace(double Gt,double Gr,double L,double Pt, double lambda, double distance, double alpha)
+double FreeSpaceModel::freeSpace(double Gt, double Gr, double L, double Pt, double lambda, double distance, double alpha)
 {
   /** @brief
      * Friis free space equation:

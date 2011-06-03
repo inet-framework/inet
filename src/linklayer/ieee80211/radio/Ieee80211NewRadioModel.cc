@@ -38,41 +38,41 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
 
 
-    if (strcmp("SHORT",radioModule->par("WifiPreambleMode").stringValue())==0)
-        wifiPreamble =WIFI_PREAMBLE_SHORT;
-    else if (strcmp("LONG",radioModule->par("WifiPreambleMode").stringValue())==0)
-        wifiPreamble =WIFI_PREAMBLE_LONG;
+    if (strcmp("SHORT", radioModule->par("WifiPreambleMode").stringValue())==0)
+        wifiPreamble = WIFI_PREAMBLE_SHORT;
+    else if (strcmp("LONG", radioModule->par("WifiPreambleMode").stringValue())==0)
+        wifiPreamble = WIFI_PREAMBLE_LONG;
     else
-        wifiPreamble =WIFI_PREAMBLE_LONG;
+        wifiPreamble = WIFI_PREAMBLE_LONG;
 
-    if (strcmp("b",radioModule->par("phyOpMode").stringValue())==0)
-        phyOpMode='b';
-    else if (strcmp("g",radioModule->par("phyOpMode").stringValue())==0)
-        phyOpMode='g';
-    else if (strcmp("a",radioModule->par("phyOpMode").stringValue())==0)
-        phyOpMode='a';
-    else if (strcmp("p",radioModule->par("phyOpMode").stringValue())==0)
-        phyOpMode='p';
+    if (strcmp("b", radioModule->par("phyOpMode").stringValue())==0)
+        phyOpMode = 'b';
+    else if (strcmp("g", radioModule->par("phyOpMode").stringValue())==0)
+        phyOpMode = 'g';
+    else if (strcmp("a", radioModule->par("phyOpMode").stringValue())==0)
+        phyOpMode = 'a';
+    else if (strcmp("p", radioModule->par("phyOpMode").stringValue())==0)
+        phyOpMode = 'p';
     else
-        phyOpMode='g';
+        phyOpMode = 'g';
 
     autoHeaderSize = radioModule->par("AutoHeaderSize");
 
     parseTable = NULL;
-    PHY_HEADER_LENGTH=26e-6;
+    PHY_HEADER_LENGTH = 26e-6;
 
     snirVector.setName("snirVector");
-    i=0;
+    i = 0;
     const char *fname = radioModule->par("berTableFile");
-    std::string name (fname);
+    std::string name(fname);
     if (!name.empty())
     {
         parseTable = new BerParseFile(phyOpMode);
         parseTable->parseFile(fname);
-        fileBer=true;
+        fileBer = true;
     }
     else
-        fileBer=false;
+        fileBer = false;
 }
 
 
@@ -82,34 +82,34 @@ double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
     double duration;
 #ifndef NS3CALMODE
     if (phyOpMode=='g')
-        duration=4*ceil((16+airframe->getBitLength()+6)/(airframe->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
+        duration = 4*ceil((16+airframe->getBitLength()+6)/(airframe->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
     else
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-        duration=airframe->getBitLength()/airframe->getBitrate() + 192/BITRATE_HEADER;
+        duration = airframe->getBitLength()/airframe->getBitrate() + 192/BITRATE_HEADER;
 #else
     ModulationType modeBody;
     if (phyOpMode=='g')
     {
         modeBody = WifyModulationType::getMode80211g(airframe->getBitrate());
-        duration=SIMTIME_DBL(WifyModulationType::calculateTxDuration (airframe->getBitLength(),modeBody, wifiPreamble));
+        duration = SIMTIME_DBL(WifyModulationType::calculateTxDuration(airframe->getBitLength(), modeBody, wifiPreamble));
     }
     else if (phyOpMode=='b')
     {
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
         modeBody = WifyModulationType::getMode80211b(airframe->getBitrate());
-        duration=SIMTIME_DBL(WifyModulationType::calculateTxDuration (airframe->getBitLength(),modeBody,wifiPreamble));
+        duration = SIMTIME_DBL(WifyModulationType::calculateTxDuration(airframe->getBitLength(), modeBody, wifiPreamble));
     }
     else if (phyOpMode=='a')
     {
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
         modeBody = WifyModulationType::getMode80211a(airframe->getBitrate());
-        duration=SIMTIME_DBL(WifyModulationType::calculateTxDuration (airframe->getBitLength(),modeBody,wifiPreamble));
+        duration = SIMTIME_DBL(WifyModulationType::calculateTxDuration(airframe->getBitLength(), modeBody, wifiPreamble));
     }
     else if (phyOpMode=='p')
     {
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
         modeBody = WifyModulationType::getMode80211p(airframe->getBitrate());
-        duration=SIMTIME_DBL(WifyModulationType::calculateTxDuration (airframe->getBitLength(),modeBody,wifiPreamble));
+        duration = SIMTIME_DBL(WifyModulationType::calculateTxDuration(airframe->getBitLength(), modeBody, wifiPreamble));
     }
     else
         opp_error("Radio model not supported yet, must be a,b,g or p");
@@ -134,7 +134,7 @@ bool Ieee80211NewRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrLi
     if (i%1000==0)
     {
         snirVector.record(10*log10(snirMin));
-        i=0;
+        i = 0;
     }
     i++;
 
@@ -173,47 +173,47 @@ bool Ieee80211NewRadioModel::isPacketOK(double snirMin, int lengthMPDU, double b
 
     if (phyOpMode=='g')
     {
-        modeBody =WifyModulationType::getMode80211g(bitrate);
-        modeHeader = WifyModulationType::getPlcpHeaderMode (modeBody, preambleUsed);
+        modeBody = WifyModulationType::getMode80211g(bitrate);
+        modeHeader = WifyModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
         if (autoHeaderSize)
         {
-           ModulationType modeBodyA =WifyModulationType::getMode80211a(bitrate);
-           headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration (modeBodyA, preambleUsed))*modeHeader.getDataRate());
+           ModulationType modeBodyA = WifyModulationType::getMode80211a(bitrate);
+           headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed))*modeHeader.getDataRate());
         }
     }
     else if (phyOpMode=='b')
     {
-        modeBody =WifyModulationType::getMode80211b(bitrate);
-        modeHeader = WifyModulationType::getPlcpHeaderMode (modeBody,preambleUsed);
+        modeBody = WifyModulationType::getMode80211b(bitrate);
+        modeHeader = WifyModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
         if (autoHeaderSize)
-            headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))*modeHeader.getDataRate());
+            headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration(modeBody, preambleUsed))*modeHeader.getDataRate());
     }
     else if (phyOpMode=='a')
     {
-        modeBody =WifyModulationType::getMode80211a(bitrate);
-        modeHeader = WifyModulationType::getPlcpHeaderMode (modeBody, preambleUsed);
+        modeBody = WifyModulationType::getMode80211a(bitrate);
+        modeHeader = WifyModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
         if (autoHeaderSize)
-             headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))*modeHeader.getDataRate());
+             headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration(modeBody, preambleUsed))*modeHeader.getDataRate());
     }
     else if (phyOpMode=='p')
     {
-        modeBody =WifyModulationType::getMode80211p(bitrate);
-        modeHeader = WifyModulationType::getPlcpHeaderMode (modeBody, preambleUsed);
+        modeBody = WifyModulationType::getMode80211p(bitrate);
+        modeHeader = WifyModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
         if (autoHeaderSize)
-             headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))*modeHeader.getDataRate());
+             headerSize = ceil(SIMTIME_DBL(WifyModulationType::getPlcpHeaderDuration(modeBody, preambleUsed))*modeHeader.getDataRate());
     }
     else
     {
         opp_error("Radio model not supported yet, must be a,b,g or p");
     }
 
-    headerNoError = yansModel.GetChunkSuccessRate(modeHeader,snirMin,headerSize);
+    headerNoError = yansModel.GetChunkSuccessRate(modeHeader, snirMin, headerSize);
     // probability of no bit error in the MPDU
     double MpduNoError;
     if (fileBer)
-        MpduNoError=1-parseTable->getPer(bitrate,snirMin,lengthMPDU/8);
+        MpduNoError = 1-parseTable->getPer(bitrate, snirMin, lengthMPDU/8);
     else
-        MpduNoError = yansModel.GetChunkSuccessRate(modeHeader,snirMin,lengthMPDU);
+        MpduNoError = yansModel.GetChunkSuccessRate(modeHeader, snirMin, lengthMPDU);
 
     EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" lengthMPDU: "<<lengthMPDU<<" PER: "<<1-MpduNoError<<endl;
     if (MpduNoError>=1 && headerNoError>=1)

@@ -14,53 +14,53 @@
 #include <cmath>
 
 // IMPLEMENTATION
-const Uint128 Uint128::UINT128_MAX(UINT64_MAX,UINT64_MAX);
-const Uint128 Uint128::UINT128_MIN(0,0);
+const Uint128 Uint128::UINT128_MAX(UINT64_MAX, UINT64_MAX);
+const Uint128 Uint128::UINT128_MIN(0, 0);
 
-Uint128::Uint128 () throw ()
+Uint128::Uint128() throw ()
 {
     lo = 0ull;
     hi = 0ull;
 }
 
-Uint128::Uint128 (const Uint128 & a) throw ()
+Uint128::Uint128(const Uint128 & a) throw ()
 {
     lo = a.lo;
     hi = a.hi;
 }
 
-Uint128::Uint128  (const int32_t & a) throw ()
+Uint128::Uint128(const int32_t & a) throw ()
 {
     lo = a;
-    hi =0ull;
+    hi = 0ull;
 }
 
-Uint128::Uint128 (const uint32_t & a) throw ()
+Uint128::Uint128(const uint32_t & a) throw ()
 {
     lo = a;
-    hi =0ull;
+    hi = 0ull;
 }
 
-Uint128::Uint128 (const int64_t & a) throw ()
+Uint128::Uint128(const int64_t & a) throw ()
 {
-    lo =a;
-    hi =0ull;
+    lo = a;
+    hi = 0ull;
 }
 
-Uint128::Uint128 (const uint64_t & a) throw ()
+Uint128::Uint128(const uint64_t & a) throw ()
 {
-    lo =a ;
-    hi =0ull;
+    lo = a;
+    hi = 0ull;
 }
 
 
-const char * Uint128::toString (unsigned int radix) const throw ()
+const char * Uint128::toString(unsigned int radix) const throw ()
 {
     if (!*this) return "0";
     if (radix < 2 || radix > 37) return "(invalid radix)";
 
     static char sz [256];
-    memset (sz, 0, 256);
+    memset(sz, 0, 256);
 
     Uint128 r;
     Uint128 ii = *this;
@@ -69,18 +69,18 @@ const char * Uint128::toString (unsigned int radix) const throw ()
 
     while (!!ii && i)
     {
-        ii = ii.div (aux, r);
-        sz [--i] = r.toUint () + ((r.toUint () > 9) ? 'A' - 10 : '0');
+        ii = ii.div(aux, r);
+        sz [--i] = r.toUint() + ((r.toUint() > 9) ? 'A' - 10 : '0');
     };
 
     return &sz [i];
 }
 
-Uint128 & Uint128::operator= (const char * sz) throw ()
+Uint128 & Uint128::operator=(const char * sz) throw ()
 {
 
-    hi=0;
-    lo=0;
+    hi = 0;
+    lo = 0;
 
     if (!sz) return *this;
     if (!sz [0]) return *this;
@@ -106,7 +106,7 @@ Uint128 & Uint128::operator= (const char * sz) throw ()
         };
     };
 
-    for (; i < strlen (sz); ++i)
+    for (; i < strlen(sz); ++i)
     {
         unsigned int n = 0;
         if ((sz [i] >= '0') && (sz [i] <= '9'))
@@ -127,13 +127,13 @@ Uint128 & Uint128::operator= (const char * sz) throw ()
 
     if (minus)
     {
-        *this = Uint128 (0) - *this;
+        *this = Uint128(0) - *this;
     }
     return *this;
 }
 
-Uint128::Uint128 (const char * sz) throw ()
-        : lo (0u), hi (0u)
+Uint128::Uint128(const char * sz) throw ()
+        : lo(0u), hi(0u)
 {
 
     if (!sz) return;
@@ -160,7 +160,7 @@ Uint128::Uint128 (const char * sz) throw ()
         };
     };
 
-    for (; i < strlen (sz); ++i)
+    for (; i < strlen(sz); ++i)
     {
         unsigned int n = 0;
         if ((sz [i] >= '0') && (sz [i] <= '9'))
@@ -188,74 +188,74 @@ Uint128::Uint128 (const char * sz) throw ()
 };
 
 
-Uint128 & Uint128::operator= (const float &a) throw ()
+Uint128 & Uint128::operator=(const float &a) throw ()
 {
-    lo = ((uint64_t) fmodf (a, 18446744073709551616.0f));
+    lo = ((uint64_t) fmodf(a, 18446744073709551616.0f));
     hi = ((uint64_t) (a / 18446744073709551616.0f));
     return *this;
 }
 
-Uint128 & Uint128::operator= (const double & a) throw ()
+Uint128 & Uint128::operator=(const double & a) throw ()
 {
-    lo = ((uint64_t) fmod (a, 18446744073709551616.0));
+    lo = ((uint64_t) fmod(a, 18446744073709551616.0));
     hi = ((uint64_t) (a / 18446744073709551616.0));
     return *this;
 }
 
-Uint128 & Uint128::operator= (const long double & a) throw ()
+Uint128 & Uint128::operator=(const long double & a) throw ()
 {
-    lo = ((uint64_t) fmodl (a, 18446744073709551616.0l));
+    lo = ((uint64_t) fmodl(a, 18446744073709551616.0l));
     hi = ((uint64_t) (a / 18446744073709551616.0l));
     return *this;
 }
 
 
-Uint128::Uint128 (const float a) throw ()
-        : lo ((uint64_t) fmodf (a, 18446744073709551616.0f)),
-        hi ((uint64_t) (a / 18446744073709551616.0f)) {};
+Uint128::Uint128(const float a) throw ()
+        : lo((uint64_t) fmodf(a, 18446744073709551616.0f)),
+        hi((uint64_t) (a / 18446744073709551616.0f)) {};
 
-Uint128::Uint128 (const double & a) throw ()
-        : lo ((uint64_t) fmod (a, 18446744073709551616.0)),
-        hi ((uint64_t) (a / 18446744073709551616.0)) {};
+Uint128::Uint128(const double & a) throw ()
+        : lo((uint64_t) fmod(a, 18446744073709551616.0)),
+        hi((uint64_t) (a / 18446744073709551616.0)) {};
 
-Uint128::Uint128 (const long double & a) throw ()
-        : lo ((uint64_t) fmodl (a, 18446744073709551616.0l)),
-        hi ((uint64_t) (a / 18446744073709551616.0l)) {};
+Uint128::Uint128(const long double & a) throw ()
+        : lo((uint64_t) fmodl(a, 18446744073709551616.0l)),
+        hi((uint64_t) (a / 18446744073709551616.0l)) {};
 
-float Uint128::toFloat () const throw ()
+float Uint128::toFloat() const throw ()
 {
     return (float) this->hi * 18446744073709551616.0f
            + (float) this->lo;
 };
 
-double Uint128::toDouble () const throw ()
+double Uint128::toDouble() const throw ()
 {
     return (double) this->hi * 18446744073709551616.0
            + (double) this->lo;
 };
 
-long double Uint128::toLongDouble () const throw ()
+long double Uint128::toLongDouble() const throw ()
 {
     return (long double) this->hi * 18446744073709551616.0l
            + (long double) this->lo;
 };
 
-Uint128 Uint128::operator - () const throw ()
+Uint128 Uint128::operator-() const throw ()
 {
     if (!this->hi && !this->lo)
         // number is 0, just return 0
         return *this;
     else
         // non 0 number
-        return Uint128 (-this->lo, ~this->hi);
+        return Uint128(-this->lo, ~this->hi);
 };
 
 Uint128 Uint128::operator ~ () const throw ()
 {
-    return Uint128 (~this->lo, ~this->hi);
+    return Uint128(~this->lo, ~this->hi);
 };
 
-Uint128 & Uint128::operator ++ ()
+Uint128 & Uint128::operator++()
 {
     ++this->lo;
     if (!this->lo)
@@ -264,7 +264,7 @@ Uint128 & Uint128::operator ++ ()
     return *this;
 };
 
-Uint128 & Uint128::operator -- ()
+Uint128 & Uint128::operator--()
 {
     if (!this->lo)
         --this->hi;
@@ -273,7 +273,7 @@ Uint128 & Uint128::operator -- ()
     return *this;
 };
 
-Uint128 Uint128::operator ++ (int)
+Uint128 Uint128::operator++(int)
 {
     Uint128 b = *this;
     ++ *this;
@@ -281,7 +281,7 @@ Uint128 Uint128::operator ++ (int)
     return b;
 };
 
-Uint128 Uint128::operator -- (int)
+Uint128 Uint128::operator--(int)
 {
     Uint128 b = *this;
     -- *this;
@@ -289,7 +289,7 @@ Uint128 Uint128::operator -- (int)
     return b;
 };
 
-Uint128 & Uint128::operator += (const Uint128 & b) throw ()
+Uint128 & Uint128::operator+=(const Uint128 & b) throw ()
 {
     uint64_t old_lo = this->lo;
 
@@ -299,7 +299,7 @@ Uint128 & Uint128::operator += (const Uint128 & b) throw ()
     return *this;
 };
 
-Uint128 & Uint128::operator *= (const Uint128 & b) throw ()
+Uint128 & Uint128::operator*=(const Uint128 & b) throw ()
 {
     if (!b)
         return *this = 0u;
@@ -324,7 +324,7 @@ Uint128 & Uint128::operator *= (const Uint128 & b) throw ()
 };
 
 
-Uint128 Uint128::div (const Uint128 & ds, Uint128 & remainder) const throw ()
+Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const throw ()
 {
     if (!ds)
         return 1u / (unsigned int) ds.lo;
@@ -346,7 +346,7 @@ Uint128 Uint128::div (const Uint128 & ds, Uint128 & remainder) const throw ()
     while (r < ds)
     {
         r <<= 1;
-        if (dd.bit (b--))
+        if (dd.bit(b--))
             r.lo |= 1;
     };
     ++b;
@@ -357,21 +357,21 @@ Uint128 Uint128::div (const Uint128 & ds, Uint128 & remainder) const throw ()
             if (!(b--)) break;
 
             r <<= 1;
-            if (dd.bit (b))
+            if (dd.bit(b))
                 r.lo |= 1;
 
         }
         else
         {
             r -= ds;
-            q.bit (b, true);
+            q.bit(b, true);
         };
 
     remainder = r;
     return q;
 };
 
-bool Uint128::bit (unsigned int n) const throw ()
+bool Uint128::bit(unsigned int n) const throw ()
 {
     n &= 0x7F;
 
@@ -381,7 +381,7 @@ bool Uint128::bit (unsigned int n) const throw ()
         return this->hi & (1ull << (n - 64));
 };
 
-void Uint128::bit (unsigned int n, bool val) throw ()
+void Uint128::bit(unsigned int n, bool val) throw ()
 {
     n &= 0x7F;
 
@@ -398,7 +398,7 @@ void Uint128::bit (unsigned int n, bool val) throw ()
 };
 
 
-Uint128 & Uint128::operator >>= (unsigned int n) throw ()
+Uint128 & Uint128::operator>>=(unsigned int n) throw ()
 {
     n &= 0x7F;
 
@@ -428,7 +428,7 @@ Uint128 & Uint128::operator >>= (unsigned int n) throw ()
     return *this;
 };
 
-Uint128 & Uint128::operator <<= (unsigned int n) throw ()
+Uint128 & Uint128::operator<<=(unsigned int n) throw ()
 {
     n &= 0x7F;
 
@@ -458,12 +458,12 @@ Uint128 & Uint128::operator <<= (unsigned int n) throw ()
     return *this;
 };
 
-bool Uint128::operator ! () const throw ()
+bool Uint128::operator!() const throw ()
 {
     return !(this->hi || this->lo);
 };
 
-Uint128 & Uint128::operator |= (const Uint128 & b) throw ()
+Uint128 & Uint128::operator|=(const Uint128 & b) throw ()
 {
     this->hi |= b.hi;
     this->lo |= b.lo;
@@ -471,7 +471,7 @@ Uint128 & Uint128::operator |= (const Uint128 & b) throw ()
     return *this;
 };
 
-Uint128 & Uint128::operator &= (const Uint128 & b) throw ()
+Uint128 & Uint128::operator&=(const Uint128 & b) throw ()
 {
     this->hi &= b.hi;
     this->lo &= b.lo;
@@ -479,7 +479,7 @@ Uint128 & Uint128::operator &= (const Uint128 & b) throw ()
     return *this;
 };
 
-Uint128 & Uint128::operator ^= (const Uint128 & b) throw ()
+Uint128 & Uint128::operator^=(const Uint128 & b) throw ()
 {
     this->hi ^= b.hi;
     this->lo ^= b.lo;
@@ -487,46 +487,46 @@ Uint128 & Uint128::operator ^= (const Uint128 & b) throw ()
     return *this;
 };
 
-bool operator <  (const Uint128 & a, const Uint128 & b) throw ()
+bool operator<(const Uint128 & a, const Uint128 & b) throw ()
 {
     return (a.hi == b.hi) ? (a.lo < b.lo) : (a.hi < b.hi);
 };
 
-bool operator == (const Uint128 & a, const uint32_t & b) throw ()
+bool operator==(const Uint128 & a, const uint32_t & b) throw ()
 {
     if (a.hi != 0) return false;
     uint64_t aux = b;
     return  a.lo == aux;
 };
 
-bool operator == (const uint32_t & b, const Uint128 & a) throw ()
+bool operator==(const uint32_t & b, const Uint128 & a) throw ()
 {
     if (a.hi != 0) return false;
     uint64_t aux = b;
     return  a.lo == aux;
 };
 
-bool operator == (const Uint128 & a, const uint64_t & b) throw ()
+bool operator==(const Uint128 & a, const uint64_t & b) throw ()
 {
     if (a.hi != 0) return false;
     return  a.lo == b;
 };
 
-bool operator == (const uint64_t & b, const Uint128 & a) throw ()
+bool operator==(const uint64_t & b, const Uint128 & a) throw ()
 {
     if (a.hi != 0) return false;
     return  a.lo == b;
 };
 
 
-bool operator == (const Uint128 & a, const int32_t & b) throw ()
+bool operator==(const Uint128 & a, const int32_t & b) throw ()
 {
     if (a.hi != 0) return false;
     int64_t aux = b;
     return  a.lo == (uint64_t)aux;
 };
 
-bool operator == (const int32_t & b, const Uint128 & a) throw ()
+bool operator==(const int32_t & b, const Uint128 & a) throw ()
 {
     if (a.hi != 0) return false;
     int64_t aux = b;
@@ -534,66 +534,66 @@ bool operator == (const int32_t & b, const Uint128 & a) throw ()
     return  a.lo == (uint64_t) aux;
 };
 
-bool operator == (const Uint128 & a, const int64_t & b) throw ()
+bool operator==(const Uint128 & a, const int64_t & b) throw ()
 {
     if (a.hi != 0) return false;
     if (b < 0) return false;
     return  a.lo == (uint64_t)b;
 };
 
-bool operator == (const int64_t & b, const Uint128 & a) throw ()
+bool operator==(const int64_t & b, const Uint128 & a) throw ()
 {
     if (a.hi != 0) return false;
     if (b < 0) return false;
     return  a.lo == (uint64_t) b;
 };
 
-bool operator == (const Uint128 & a, const Uint128 & b) throw ()
+bool operator==(const Uint128 & a, const Uint128 & b) throw ()
 {
     return a.hi == b.hi && a.lo == b.lo;
 };
 
 
-bool operator && (const Uint128 & a, const Uint128 & b) throw ()
+bool operator&&(const Uint128 & a, const Uint128 & b) throw ()
 {
     return (a.hi || a.lo) && (b.hi || b.lo);
 };
 
-bool operator || (const Uint128 & a, const Uint128 & b) throw ()
+bool operator||(const Uint128 & a, const Uint128 & b) throw ()
 {
     return (a.hi || a.lo) || (b.hi || b.lo);
 };
 
 
-Uint128 & Uint128::operator= (const IPv4Address &add) throw ()
+Uint128 & Uint128::operator=(const IPv4Address &add) throw ()
 {
-    hi=0;
-    lo=add.getInt();
+    hi = 0;
+    lo = add.getInt();
     return *this;
 }
 
-Uint128 & Uint128::operator= (const MACAddress &add) throw ()
+Uint128 & Uint128::operator=(const MACAddress &add) throw ()
 {
-    hi=0;
-    lo=0;
+    hi = 0;
+    lo = 0;
     uint64_t aux;
     for (int i=0; i<MAC_ADDRESS_BYTES; i++)
     {
-        aux  = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
+        aux = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
         aux <<= 8*i;
-        lo  |= aux ;
+        lo |= aux;
     }
     return *this;
 }
 
-Uint128 & Uint128::operator= (const IPv6Address &add) throw ()
+Uint128 & Uint128::operator=(const IPv6Address &add) throw ()
 {
     uint32 *w = const_cast<IPv6Address&>(add).words();
     uint64_t aux[4];
-    aux[0]=w[0];
-    aux[1]=w[1];
-    aux[2]=w[2];
-    aux[3]=w[3];
+    aux[0] = w[0];
+    aux[1] = w[1];
+    aux[2] = w[2];
+    aux[3] = w[3];
 
     lo = aux[0]&(aux[1]<<32);
     hi = aux[2]&(aux[3]<<32);
@@ -601,43 +601,43 @@ Uint128 & Uint128::operator= (const IPv6Address &add) throw ()
 }
 
 
-bool operator != (const Uint128 & a, const uint32_t & b) throw ()
+bool operator!=(const Uint128 & a, const uint32_t & b) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const uint32_t & b, const Uint128 & a) throw ()
+bool operator!=(const uint32_t & b, const Uint128 & a) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const Uint128 & a, const uint64_t & b) throw ()
+bool operator!=(const Uint128 & a, const uint64_t & b) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const uint64_t & b, const Uint128 & a) throw ()
+bool operator!=(const uint64_t & b, const Uint128 & a) throw ()
 {
     return  !(a == b);
 }
 
 
-bool operator != (const Uint128 & a, const int32_t & b) throw ()
+bool operator!=(const Uint128 & a, const int32_t & b) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const int32_t & b, const Uint128 & a) throw ()
+bool operator!=(const int32_t & b, const Uint128 & a) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const Uint128 & a, const int64_t & b) throw ()
+bool operator!=(const Uint128 & a, const int64_t & b) throw ()
 {
     return  !(a == b);
 }
 
-bool operator != (const int64_t & b, const Uint128 & a) throw ()
+bool operator!=(const int64_t & b, const Uint128 & a) throw ()
 {
     return  !(a == b);
 }

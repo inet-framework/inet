@@ -67,7 +67,7 @@ class INET_API FWMath {
   static double div(double dividend, double divisor) {
       double i;
       double f;
-      f=modf(dividend/divisor, &i);
+      f = modf(dividend/divisor, &i);
       return i;
   }
 
@@ -84,7 +84,7 @@ class INET_API FWMath {
    * @return 0 if i is close to 0, 1 if i is positive greater epsilon,
    * -1 if it is negative smaller epsilon.
    */
-  static int stepfunction(double i) { return (i>EPSILON) ? 1 : close(i,0) ? 0 :-1; };
+  static int stepfunction(double i) { return (i>EPSILON) ? 1 : close(i, 0) ? 0 :-1; };
 
 
   /**

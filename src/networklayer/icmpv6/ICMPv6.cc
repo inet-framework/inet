@@ -94,7 +94,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 
     // TBD check what to do if dest was multicast etc?
     IPv6ControlInfo *ctrl
-        = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
+ = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
     //set Msg's source addr as the dest addr of request msg.
@@ -192,13 +192,13 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
     ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
 
-    send(msg,"ipv6Out");
+    send(msg, "ipv6Out");
 }
 
 void ICMPv6::sendToIP(ICMPv6Message *msg)
 {
     // assumes IPv4ControlInfo is already attached
-    send(msg,"ipv6Out");
+    send(msg, "ipv6Out");
 }
 
 ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
@@ -213,7 +213,7 @@ ICMPv6Message *ICMPv6::createPacketTooBigMsg(int mtu)
 {
     ICMPv6PacketTooBigMsg *errorMsg = new ICMPv6PacketTooBigMsg("Packet Too Big");
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
-    errorMsg->setCode(0);//Set to 0 by sender and ignored by receiver.
+    errorMsg->setCode(0); //Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
     return errorMsg;
 }

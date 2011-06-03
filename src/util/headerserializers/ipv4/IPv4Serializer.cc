@@ -71,16 +71,16 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
     int packetLength;
     struct ip *ip = (struct ip *) buf;
 
-    ip->ip_hl         = IP_HEADER_BYTES >> 2;
-    ip->ip_v          = dgram->getVersion();
-    ip->ip_tos        = dgram->getDiffServCodePoint();
-    ip->ip_id         = htons(dgram->getIdentification());
-    ip->ip_off        = htons(dgram->getFragmentOffset());
-    ip->ip_ttl        = dgram->getTimeToLive();
-    ip->ip_p          = dgram->getTransportProtocol();
+    ip->ip_hl = IP_HEADER_BYTES >> 2;
+    ip->ip_v = dgram->getVersion();
+    ip->ip_tos = dgram->getDiffServCodePoint();
+    ip->ip_id = htons(dgram->getIdentification());
+    ip->ip_off = htons(dgram->getFragmentOffset());
+    ip->ip_ttl = dgram->getTimeToLive();
+    ip->ip_p = dgram->getTransportProtocol();
     ip->ip_src.s_addr = htonl(dgram->getSrcAddress().getInt());
     ip->ip_dst.s_addr = htonl(dgram->getDestAddress().getInt());
-    ip->ip_sum        = 0;
+    ip->ip_sum = 0;
 
     if (dgram->getHeaderLength() > IP_HEADER_BYTES)
         EV << "Serializing an IPv4 packet with options. Dropping the options.\n";
@@ -124,7 +124,7 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
 
     ip->ip_len = htons(packetLength);
 
-    if(hasCalcChkSum)
+    if (hasCalcChkSum)
     {
         ip->ip_sum = TCPIPchecksum::checksum(buf, IP_HEADER_BYTES);
     }

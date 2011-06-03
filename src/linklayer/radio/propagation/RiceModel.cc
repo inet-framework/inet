@@ -31,7 +31,7 @@ Register_Class(RiceModel);
 void RiceModel::initializeFrom(cModule *radioModule)
 {
     initializeFreeSpace(radioModule);
-    K =  pow(10, radioModule->par("K").doubleValue()/10);
+    K = pow(10, radioModule->par("K").doubleValue()/10);
 }
 
 double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
@@ -41,7 +41,7 @@ double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, 
     double x = normal(0, 1);
     double y = normal(0, 1);
     double rr = c*( (x + sqrt(2*K))*(x + sqrt(2*K)) + y*y);
-    double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha) * rr;
+    double prec = freeSpace(Gt, Gr, L, pSend, waveLength, distance, pathLossAlpha) * rr;
     if (prec > pSend)
         prec = pSend;
     return prec;

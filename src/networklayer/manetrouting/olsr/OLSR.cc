@@ -75,7 +75,7 @@ void OLSR_Timer::removeTimer()
 OLSR_Timer::OLSR_Timer(OLSR* agent) : cOwnedObject("OLSR_Timer")
 {
     agent_ = agent;
-    tuple_=NULL;
+    tuple_ = NULL;
 }
 
 OLSR_Timer::~OLSR_Timer()
@@ -87,14 +87,14 @@ OLSR_Timer::OLSR_Timer() : cOwnedObject("OLSR_Timer")
 {
     agent_ = dynamic_cast <OLSR*> (this->getOwner());
     if (agent_==NULL)
-        opp_error ("timer ower is bad");
-    tuple_=NULL;
+        opp_error("timer ower is bad");
+    tuple_ = NULL;
 }
 
 void OLSR_Timer::removeQueueTimer()
 {
     TimerQueue::iterator it;
-    for (it=agent_->timerQueuePtr->begin() ; it != agent_->timerQueuePtr->end(); it++ )
+    for (it=agent_->timerQueuePtr->begin(); it != agent_->timerQueuePtr->end(); it++ )
     {
         if (it->second==this)
         {
@@ -107,7 +107,7 @@ void OLSR_Timer::removeQueueTimer()
 void OLSR_Timer::resched(double time)
 {
     removeQueueTimer();
-    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+time,this));
+    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+time, this));
     //if (this->isScheduled())
     //  agent_->cancelEvent(this);
     // agent_->scheduleAt (simTime()+time,this);
@@ -123,7 +123,7 @@ OLSR_HelloTimer::expire()
 {
     agent_->send_hello();
     // agent_->scheduleAt(simTime()+agent_->hello_ival_- JITTER,this);
-    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->hello_ival_- JITTER,this));
+    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->hello_ival_- JITTER, this));
 }
 
 ///
@@ -136,7 +136,7 @@ OLSR_TcTimer::expire()
     if (agent_->mprselset().size() > 0)
         agent_->send_tc();
     // agent_->scheduleAt(simTime()+agent_->tc_ival_- JITTER,this);
-    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->tc_ival_- JITTER,this));
+    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->tc_ival_- JITTER, this));
 
 }
 
@@ -151,7 +151,7 @@ OLSR_MidTimer::expire()
 #ifdef MULTIPLE_IFACES_SUPPORT
     agent_->send_mid();
 //  agent_->scheduleAt(simTime()+agent_->mid_ival_- JITTER,this);
-    agent_->timerQueue.insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->mid_ival_- JITTER,this));
+    agent_->timerQueue.insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->mid_ival_- JITTER, this));
 #endif
 }
 
@@ -165,7 +165,7 @@ OLSR_MidTimer::expire()
 
 
 void
-OLSR_DupTupleTimer::expire ()
+OLSR_DupTupleTimer::expire()
 {
     OLSR_dup_tuple* tuple = dynamic_cast<OLSR_dup_tuple*> (tuple_);
     double time = tuple->time();
@@ -177,17 +177,17 @@ OLSR_DupTupleTimer::expire ()
     else
     {
         // agent_->scheduleAt (simTime()+DELAY_T(time),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time), this));
     }
 }
 
-OLSR_DupTupleTimer::~OLSR_DupTupleTimer ()
+OLSR_DupTupleTimer::~OLSR_DupTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_dup_tuple* tuple = dynamic_cast<OLSR_dup_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_dup_tuple(tuple);
@@ -208,13 +208,13 @@ OLSR_DupTupleTimer::~OLSR_DupTupleTimer ()
 
 OLSR_LinkTupleTimer::OLSR_LinkTupleTimer(OLSR* agent, OLSR_link_tuple* tuple) : OLSR_Timer(agent)
 {
-    tuple_      = tuple;
+    tuple_ = tuple;
     tuple->asocTimer = this;
     first_time_ = true;
 }
 
 void
-OLSR_LinkTupleTimer::expire ()
+OLSR_LinkTupleTimer::expire()
 {
     double now;
     now = SIMTIME_DBL(simTime());
@@ -231,22 +231,22 @@ OLSR_LinkTupleTimer::expire ()
         else
             agent_->nb_loss(tuple);
         // agent_->scheduleAt (simTime()+DELAY_T(tuple_->time()),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(tuple->time()),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(tuple->time()), this));
     }
     else
     {
         // agent_->scheduleAt (simTime()+DELAY_T(MIN(tuple_->time(), tuple_->sym_time())),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(MIN(tuple->time(), tuple->sym_time())),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(MIN(tuple->time(), tuple->sym_time())), this));
     }
 }
 
-OLSR_LinkTupleTimer::~OLSR_LinkTupleTimer ()
+OLSR_LinkTupleTimer::~OLSR_LinkTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_link_tuple* tuple = dynamic_cast<OLSR_link_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_link_tuple(tuple);
@@ -262,10 +262,10 @@ OLSR_LinkTupleTimer::~OLSR_LinkTupleTimer ()
 ///
 
 void
-OLSR_Nb2hopTupleTimer::expire ()
+OLSR_Nb2hopTupleTimer::expire()
 {
     OLSR_nb2hop_tuple* tuple = dynamic_cast<OLSR_nb2hop_tuple*> (tuple_);
-    double time =tuple->time();
+    double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
         removeTimer();
@@ -274,17 +274,17 @@ OLSR_Nb2hopTupleTimer::expire ()
     else
     {
         // agent_->scheduleAt (simTime()+DELAY_T(time),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time), this));
     }
 }
 
-OLSR_Nb2hopTupleTimer::~OLSR_Nb2hopTupleTimer ()
+OLSR_Nb2hopTupleTimer::~OLSR_Nb2hopTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_nb2hop_tuple* tuple = dynamic_cast<OLSR_nb2hop_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_nb2hop_tuple(tuple);
@@ -302,10 +302,10 @@ OLSR_Nb2hopTupleTimer::~OLSR_Nb2hopTupleTimer ()
 
 
 void
-OLSR_MprSelTupleTimer::expire ()
+OLSR_MprSelTupleTimer::expire()
 {
     OLSR_mprsel_tuple* tuple = dynamic_cast<OLSR_mprsel_tuple*> (tuple_);
-    double time =tuple->time();
+    double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
         removeTimer();
@@ -314,17 +314,17 @@ OLSR_MprSelTupleTimer::expire ()
     else
     {
 //      agent_->scheduleAt (simTime()+DELAY_T(time),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time), this));
     }
 }
 
-OLSR_MprSelTupleTimer::~OLSR_MprSelTupleTimer ()
+OLSR_MprSelTupleTimer::~OLSR_MprSelTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_mprsel_tuple* tuple = dynamic_cast<OLSR_mprsel_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_mprsel_tuple(tuple);
@@ -342,10 +342,10 @@ OLSR_MprSelTupleTimer::~OLSR_MprSelTupleTimer ()
 ///
 
 void
-OLSR_TopologyTupleTimer::expire ()
+OLSR_TopologyTupleTimer::expire()
 {
     OLSR_topology_tuple* tuple = dynamic_cast<OLSR_topology_tuple*> (tuple_);
-    double time =tuple->time();
+    double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
         removeTimer();
@@ -354,17 +354,17 @@ OLSR_TopologyTupleTimer::expire ()
     else
     {
 //      agent_->scheduleAt (simTime()+DELAY_T(time),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time), this));
     }
 }
 
-OLSR_TopologyTupleTimer::~OLSR_TopologyTupleTimer ()
+OLSR_TopologyTupleTimer::~OLSR_TopologyTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_topology_tuple* tuple = dynamic_cast<OLSR_topology_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_topology_tuple(tuple);
@@ -378,10 +378,10 @@ OLSR_TopologyTupleTimer::~OLSR_TopologyTupleTimer ()
 /// \param e The event which has expired.
 ///
 
-void OLSR_IfaceAssocTupleTimer::expire ()
+void OLSR_IfaceAssocTupleTimer::expire()
 {
     OLSR_iface_assoc_tuple* tuple = dynamic_cast<OLSR_iface_assoc_tuple*> (tuple_);
-    double time =tuple->time();
+    double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
         removeTimer();
@@ -390,17 +390,17 @@ void OLSR_IfaceAssocTupleTimer::expire ()
     else
     {
         //  agent_->scheduleAt (simTime()+DELAY_T(time),this);
-        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time),this));
+        agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+DELAY_T(time), this));
     }
 }
 
-OLSR_IfaceAssocTupleTimer::~OLSR_IfaceAssocTupleTimer ()
+OLSR_IfaceAssocTupleTimer::~OLSR_IfaceAssocTupleTimer()
 {
     removeTimer();
     if (!tuple_)
         return;
     OLSR_iface_assoc_tuple* tuple = dynamic_cast<OLSR_iface_assoc_tuple*> (tuple_);
-    tuple->asocTimer= NULL;
+    tuple->asocTimer = NULL;
     if (agent_->state_ptr==NULL)
         return;
     agent_->rm_ifaceassoc_tuple(tuple);
@@ -438,20 +438,20 @@ OLSR::initialize(int stage)
 
         //
         // Do some initializations
-        willingness_=par("Willingness");
-        hello_ival_=par("Hello_ival");
-        tc_ival_=par("Tc_ival");
-        mid_ival_=par("Mid_ival");
-        use_mac_=par("use_mac");
+        willingness_ = par("Willingness");
+        hello_ival_ = par("Hello_ival");
+        tc_ival_ = par("Tc_ival");
+        mid_ival_ = par("Mid_ival");
+        use_mac_ = par("use_mac");
 
         if (par("reduceFuncionality"))
             EV << "reduceFuncionality true" << endl;
         else
             EV << "reduceFuncionality false" << endl;
 
-        pkt_seq_    = OLSR_MAX_SEQ_NUM;
-        msg_seq_    = OLSR_MAX_SEQ_NUM;
-        ansn_       = OLSR_MAX_SEQ_NUM;
+        pkt_seq_ = OLSR_MAX_SEQ_NUM;
+        msg_seq_ = OLSR_MAX_SEQ_NUM;
+        ansn_ = OLSR_MAX_SEQ_NUM;
 
         registerRoutingModule();
         ra_addr_ = getAddress();
@@ -493,16 +493,16 @@ OLSR::initialize(int stage)
 /// \param  h a handler (not used).
 ///
 
-void OLSR::handleMessage (cMessage *msg)
+void OLSR::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
         //OLSR_Timer *timer=dynamic_cast<OLSR_Timer*>(msg);
         while (timerQueuePtr->begin()->first<=simTime())
         {
-            OLSR_Timer *timer= timerQueuePtr->begin()->second;
+            OLSR_Timer *timer = timerQueuePtr->begin()->second;
             if (timer==NULL)
-                opp_error ("timer ower is bad");
+                opp_error("timer ower is bad");
             else
             {
                 timerQueuePtr->erase(timerQueuePtr->begin());
@@ -522,9 +522,9 @@ void OLSR::handleMessage (cMessage *msg)
 ///
 
 OLSR_pkt *
-OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
+OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
 {
-    cPacket *msg_aux=NULL;
+    cPacket *msg_aux = NULL;
     OLSR_pkt *op;
     index = getWlanInterfaceIndex(0);
     if (isInMacLayer())
@@ -536,7 +536,7 @@ OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
         }
         else
         {
-            op =  check_and_cast<OLSR_pkt  *>(msg);
+            op = check_and_cast<OLSR_pkt  *>(msg);
             if (op->reduceFuncionality() && par("reduceFuncionality").boolValue())
             {
                 delete msg;
@@ -553,7 +553,7 @@ OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
     if (dynamic_cast<UDPPacket *>(msg)) // Check is Udp packet
     {
         UDPPacket * udpPacket = check_and_cast<UDPPacket*>(msg);
-        if (udpPacket->getDestinationPort()!= RT_PORT) // Check port
+        if (udpPacket->getDestinationPort() != RT_PORT) // Check port
         {
             delete  msg;
             return NULL;
@@ -573,7 +573,7 @@ OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
         return NULL;
     }
 // Extract information and delete the cantainer without more use
-    op =  check_and_cast<OLSR_pkt  *>(msg_aux);
+    op = check_and_cast<OLSR_pkt  *>(msg_aux);
     if (op->reduceFuncionality() && par("reduceFuncionality"))
     {
         delete msg;
@@ -587,10 +587,10 @@ OLSR::check_packet(cPacket* msg,nsaddr_t &src_addr,int &index)
 
     for (int i=0; i<getNumWlanInterfaces(); i++)
     {
-        ie = getWlanInterfaceEntry (i);
+        ie = getWlanInterfaceEntry(i);
         if (ie->getInterfaceId() == controlInfo->getInterfaceId())
         {
-            index=getWlanInterfaceIndex(i);
+            index = getWlanInterfaceIndex(i);
             break;
         }
     }
@@ -614,7 +614,7 @@ OLSR::recv_olsr(cMessage* msg)
     // All routing messages are sent from and to port RT_PORT,
     // so we check it.
 
-    op = check_packet(PK(msg),src_addr,index);
+    op = check_packet(PK(msg), src_addr, index);
     if (op==NULL)
         return;
 
@@ -638,7 +638,7 @@ OLSR::recv_olsr(cMessage* msg)
         // the receiver is the same as the originator,
         // the message must be silently dropped
         // if (msg.ttl() <= 0 || msg.orig_addr() == ra_addr())
-        if (msg.ttl() <= 0 || isLocalAddress (msg.orig_addr()))
+        if (msg.ttl() <= 0 || isLocalAddress(msg.orig_addr()))
             continue;
 
         // If the message has been processed it must not be
@@ -649,11 +649,11 @@ OLSR::recv_olsr(cMessage* msg)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG)
-                process_hello(msg, ra_addr(), src_addr,index);
+                process_hello(msg, ra_addr(), src_addr, index);
             else if (msg.msg_type() == OLSR_TC_MSG)
-                process_tc(msg, src_addr,index);
+                process_tc(msg, src_addr, index);
             else if (msg.msg_type() == OLSR_MID_MSG)
-                process_mid(msg, src_addr,index);
+                process_mid(msg, src_addr, index);
             else
             {
                 debug("%f: Node %d can not process OLSR packet because does not "
@@ -685,7 +685,7 @@ OLSR::recv_olsr(cMessage* msg)
             // TC and MID messages are forwarded using the default algorithm.
             // Remaining messages are also forwarded using the default algorithm.
             if (msg.msg_type() != OLSR_HELLO_MSG)
-                forward_default(msg, duplicated, ra_addr(),src_addr);
+                forward_default(msg, duplicated, ra_addr(), src_addr);
         }
 
     }
@@ -977,17 +977,17 @@ OLSR::rtable_computation()
                     rtable_.add_entry(link_tuple->nb_iface_addr(),
                                       link_tuple->nb_iface_addr(),
                                       link_tuple->local_iface_addr(),
-                                      1,link_tuple->local_iface_index());
+                                      1, link_tuple->local_iface_index());
                     if (!useIndex)
-                        omnet_chg_rte (link_tuple->nb_iface_addr(),
+                        omnet_chg_rte(link_tuple->nb_iface_addr(),
                                        link_tuple->nb_iface_addr(),
                                        0,
-                                       1,false,link_tuple->local_iface_addr());
+                                       1, false, link_tuple->local_iface_addr());
                     else
-                        omnet_chg_rte (link_tuple->nb_iface_addr(),
+                        omnet_chg_rte(link_tuple->nb_iface_addr(),
                                        link_tuple->nb_iface_addr(),
                                        0,
-                                       1,false,link_tuple->local_iface_index());
+                                       1, false, link_tuple->local_iface_index());
 
                     if (link_tuple->nb_iface_addr() == nb_tuple->nb_main_addr())
                         nb_main_addr = true;
@@ -998,19 +998,19 @@ OLSR::rtable_computation()
                 rtable_.add_entry(nb_tuple->nb_main_addr(),
                                   lt->nb_iface_addr(),
                                   lt->local_iface_addr(),
-                                  1,lt->local_iface_index());
+                                  1, lt->local_iface_index());
 
                 if (!useIndex)
-                    omnet_chg_rte (nb_tuple->nb_main_addr(),
+                    omnet_chg_rte(nb_tuple->nb_main_addr(),
                                    lt->nb_iface_addr(),
-                                   0,// Default mask
-                                   1,false,lt->local_iface_addr());
+                                   0, // Default mask
+                                   1, false, lt->local_iface_addr());
 
                 else
-                    omnet_chg_rte (nb_tuple->nb_main_addr(),
+                    omnet_chg_rte(nb_tuple->nb_main_addr(),
                                    lt->nb_iface_addr(),
-                                   0,// Default mask
-                                   1,false,lt->local_iface_index());
+                                   0, // Default mask
+                                   1, false, lt->local_iface_index());
             }
         }
     }
@@ -1048,23 +1048,23 @@ OLSR::rtable_computation()
             rtable_.add_entry(nb2hop_tuple->nb2hop_addr(),
                               entry->next_addr(),
                               entry->iface_addr(),
-                              2,entry->local_iface_index());
+                              2, entry->local_iface_index());
             if (!useIndex)
-                omnet_chg_rte (nb2hop_tuple->nb2hop_addr(),
+                omnet_chg_rte(nb2hop_tuple->nb2hop_addr(),
                                entry->next_addr(),
                                0,
-                               2,false,entry->iface_addr());
+                               2, false, entry->iface_addr());
 
             else
-                omnet_chg_rte (nb2hop_tuple->nb2hop_addr(),
+                omnet_chg_rte(nb2hop_tuple->nb2hop_addr(),
                                entry->next_addr(),
                                0,
-                               2,false,entry->local_iface_index());
+                               2, false, entry->local_iface_index());
 
         }
     }
 
-    for (uint32_t h = 2; ; h++)
+    for (uint32_t h = 2;; h++)
     {
         bool added = false;
 
@@ -1086,19 +1086,19 @@ OLSR::rtable_computation()
                 rtable_.add_entry(topology_tuple->dest_addr(),
                                   entry2->next_addr(),
                                   entry2->iface_addr(),
-                                  h+1,entry2->local_iface_index(),entry2);
+                                  h+1, entry2->local_iface_index(), entry2);
 
                 if (!useIndex)
-                    omnet_chg_rte (topology_tuple->dest_addr(),
+                    omnet_chg_rte(topology_tuple->dest_addr(),
                                    entry2->next_addr(),
                                    0,
-                                   h+1,false,entry2->iface_addr());
+                                   h+1, false, entry2->iface_addr());
 
                 else
-                    omnet_chg_rte (topology_tuple->dest_addr(),
+                    omnet_chg_rte(topology_tuple->dest_addr(),
                                    entry2->next_addr(),
                                    0,
-                                   h+1,false,entry2->local_iface_index());
+                                   h+1, false, entry2->local_iface_index());
 
                 added = true;
             }
@@ -1122,19 +1122,19 @@ OLSR::rtable_computation()
                 rtable_.add_entry(tuple->iface_addr(),
                                   entry1->next_addr(),
                                   entry1->iface_addr(),
-                                  entry1->dist(),entry1->local_iface_index(),entry1);
+                                  entry1->dist(), entry1->local_iface_index(), entry1);
 
                 if (!useIndex)
-                    omnet_chg_rte (tuple->iface_addr(),
+                    omnet_chg_rte(tuple->iface_addr(),
                                    entry1->next_addr(),
                                    0,
-                                   entry1->dist(),false,entry1->iface_addr());
+                                   entry1->dist(), false, entry1->iface_addr());
 
                 else
-                    omnet_chg_rte (tuple->iface_addr(),
+                    omnet_chg_rte(tuple->iface_addr(),
                                    entry1->next_addr(),
                                    0,
-                                   entry1->dist(),false,entry1->local_iface_index());
+                                   entry1->dist(), false, entry1->local_iface_index());
                 added = true;
             }
         }
@@ -1159,7 +1159,7 @@ OLSR::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_
 {
     assert(msg.msg_type() == OLSR_HELLO_MSG);
 
-    link_sensing(msg, receiver_iface, sender_iface,index);
+    link_sensing(msg, receiver_iface, sender_iface, index);
     populate_nbset(msg);
     populate_nb2hopset(msg);
     mpr_computation();
@@ -1176,10 +1176,10 @@ OLSR::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 void
-OLSR::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
+OLSR::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_TC_MSG);
-    double now  = CURRENT_TIME;
+    double now = CURRENT_TIME;
     OLSR_tc& tc = msg.tc();
 
     // 1. If the sender interface of this message is not in the symmetric
@@ -1230,9 +1230,9 @@ OLSR::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
             OLSR_topology_tuple* topology_tuple = new OLSR_topology_tuple;
             topology_tuple->dest_addr() = addr;
             topology_tuple->last_addr() = msg.orig_addr();
-            topology_tuple->seq()       = tc.ansn();
-            topology_tuple->time()      = now + OLSR::emf_to_seconds(msg.vtime());
-            topology_tuple->local_iface_index()=index;
+            topology_tuple->seq() = tc.ansn();
+            topology_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+            topology_tuple->local_iface_index() = index;
             add_topology_tuple(topology_tuple);
             // Schedules topology tuple deletion
             OLSR_TopologyTupleTimer* topology_timer =
@@ -1252,11 +1252,11 @@ OLSR::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 void
-OLSR::process_mid(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
+OLSR::process_mid(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_MID_MSG);
-    double now  = CURRENT_TIME;
-    OLSR_mid& mid   = msg.mid();
+    double now = CURRENT_TIME;
+    OLSR_mid& mid = msg.mid();
 
     // 1. If the sender interface of this message is not in the symmetric
     // 1-hop neighborhood of this node, the message MUST be discarded.
@@ -1276,17 +1276,17 @@ OLSR::process_mid(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
             if (tuple->iface_addr() == mid.iface_addr(i)
                     && tuple->main_addr() == msg.orig_addr())
             {
-                tuple->time()   = now + OLSR::emf_to_seconds(msg.vtime());
-                updated     = true;
+                tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+                updated = true;
             }
         }
         if (!updated)
         {
-            OLSR_iface_assoc_tuple* tuple   = new OLSR_iface_assoc_tuple;
-            tuple->iface_addr()     = msg.mid().iface_addr(i);
-            tuple->main_addr()      = msg.orig_addr();
-            tuple->time()           = now + OLSR::emf_to_seconds(msg.vtime());
-            tuple->local_iface_index()=index;
+            OLSR_iface_assoc_tuple* tuple = new OLSR_iface_assoc_tuple;
+            tuple->iface_addr() = msg.mid().iface_addr(i);
+            tuple->main_addr() = msg.orig_addr();
+            tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+            tuple->local_iface_index() = index;
             add_ifaceassoc_tuple(tuple);
             // Schedules iface association tuple deletion
             OLSR_IfaceAssocTupleTimer* ifaceassoc_timer =
@@ -1310,7 +1310,7 @@ OLSR::process_mid(OLSR_msg& msg, const nsaddr_t &sender_iface,const int &index)
 void
 OLSR::forward_default(OLSR_msg& msg, OLSR_dup_tuple* dup_tuple, const nsaddr_t &local_iface, const nsaddr_t &src_addr)
 {
-    double now      = CURRENT_TIME;
+    double now = CURRENT_TIME;
 
     // If the sender interface address is not in the symmetric
     // 1-hop neighborhood the message must not be forwarded
@@ -1355,18 +1355,18 @@ OLSR::forward_default(OLSR_msg& msg, OLSR_dup_tuple* dup_tuple, const nsaddr_t &
     // Update duplicate tuple...
     if (dup_tuple != NULL)
     {
-        dup_tuple->time()       = now + OLSR_DUP_HOLD_TIME;
-        dup_tuple->retransmitted()  = retransmitted;
+        dup_tuple->time() = now + OLSR_DUP_HOLD_TIME;
+        dup_tuple->retransmitted() = retransmitted;
         dup_tuple->iface_list().push_back(local_iface);
     }
     // ...or create a new one
     else
     {
         OLSR_dup_tuple* new_dup = new OLSR_dup_tuple;
-        new_dup->getAddr()          = msg.orig_addr();
-        new_dup->seq_num()      = msg.msg_seq_num();
-        new_dup->time()         = now + OLSR_DUP_HOLD_TIME;
-        new_dup->retransmitted()    = retransmitted;
+        new_dup->getAddr() = msg.orig_addr();
+        new_dup->seq_num() = msg.msg_seq_num();
+        new_dup->time() = now + OLSR_DUP_HOLD_TIME;
+        new_dup->retransmitted() = retransmitted;
         new_dup->iface_list().push_back(local_iface);
         add_dup_tuple(new_dup);
         // Schedules dup tuple deletion
@@ -1385,8 +1385,8 @@ OLSR::forward_default(OLSR_msg& msg, OLSR_dup_tuple* dup_tuple, const nsaddr_t &
 void
 OLSR::forward_data(cMessage* p, nsaddr_t addr)
 {
-    struct hdr_cmn* ch  = HDR_CMN(p);
-    struct hdr_ip* ih   = HDR_IP(p);
+    struct hdr_cmn* ch = HDR_CMN(p);
+    struct hdr_ip* ih = HDR_IP(p);
 
     if (ch->direction() == hdr_cmn::UP &&
             ((uint32_t)ih->daddr() == IP_BROADCAST || ih->daddr() == ra_addr()))
@@ -1462,7 +1462,7 @@ OLSR::send_pkt()
 
     for (int i = 0; i < num_pkts; i++)
     {
-        OLSR_pkt* op        = new OLSR_pkt;
+        OLSR_pkt* op = new OLSR_pkt;
         op->setName("OLSR Pkt");
 
         op->setByteLength( OLSR_PKT_HDR_SIZE );
@@ -1476,13 +1476,13 @@ OLSR::send_pkt()
                 break;
 
             op->setMsgArraySize(j+1);
-            op->setMsg(j++,*it);
+            op->setMsg(j++, *it);
             op->setByteLength(op->getByteLength()+(*it).size());
 
             it = msgs_.erase(it);
         }
 
-        sendToIp (op, RT_PORT,destAdd, RT_PORT,IP_DEF_TTL,(nsaddr_t)0);
+        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
     }
 }
 
@@ -1493,18 +1493,18 @@ void
 OLSR::send_hello()
 {
     OLSR_msg msg;
-    double now      = CURRENT_TIME;
-    msg.msg_type()      = OLSR_HELLO_MSG;
-    msg.vtime()     = OLSR::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
-    msg.orig_addr()     = ra_addr();
-    msg.ttl()       = 1;
-    msg.hop_count()     = 0;
-    msg.msg_seq_num()   = msg_seq();
+    double now = CURRENT_TIME;
+    msg.msg_type() = OLSR_HELLO_MSG;
+    msg.vtime() = OLSR::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
+    msg.orig_addr() = ra_addr();
+    msg.ttl() = 1;
+    msg.hop_count() = 0;
+    msg.msg_seq_num() = msg_seq();
 
-    msg.hello().reserved()      = 0;
-    msg.hello().htime()     = OLSR::seconds_to_emf(hello_ival());
-    msg.hello().willingness()   = willingness();
-    msg.hello().count       = 0;
+    msg.hello().reserved() = 0;
+    msg.hello().htime() = OLSR::seconds_to_emf(hello_ival());
+    msg.hello().willingness() = willingness();
+    msg.hello().count = 0;
 
     std::map<uint8_t, int> linkcodes_count;
     for (linkset_t::iterator it = linkset().begin(); it != linkset().end(); it++)
@@ -1597,16 +1597,16 @@ void
 OLSR::send_tc()
 {
     OLSR_msg msg;
-    msg.msg_type()      = OLSR_TC_MSG;
-    msg.vtime()     = OLSR::seconds_to_emf(OLSR_TOP_HOLD_TIME);
-    msg.orig_addr()     = ra_addr();
-    msg.ttl()       = 255;
-    msg.hop_count()     = 0;
-    msg.msg_seq_num()   = msg_seq();
+    msg.msg_type() = OLSR_TC_MSG;
+    msg.vtime() = OLSR::seconds_to_emf(OLSR_TOP_HOLD_TIME);
+    msg.orig_addr() = ra_addr();
+    msg.ttl() = 255;
+    msg.hop_count() = 0;
+    msg.msg_seq_num() = msg_seq();
 
-    msg.tc().ansn()     = ansn_;
+    msg.tc().ansn() = ansn_;
     msg.tc().reserved() = 0;
-    msg.tc().count      = 0;
+    msg.tc().count = 0;
 
     for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
     {
@@ -1618,7 +1618,7 @@ OLSR::send_tc()
         msg.tc().count++;
     }
 
-    msg.msg_size()      = msg.size();
+    msg.msg_size() = msg.size();
 
     enque_msg(msg, JITTER);
 }
@@ -1631,20 +1631,20 @@ void
 OLSR::send_mid()
 {
     OLSR_msg msg;
-    msg.msg_type()      = OLSR_MID_MSG;
-    msg.vtime()     = OLSR::seconds_to_emf(OLSR_MID_HOLD_TIME);
-    msg.orig_addr()     = ra_addr();
-    msg.ttl()       = 255;
-    msg.hop_count()     = 0;
-    msg.msg_seq_num()   = msg_seq();
+    msg.msg_type() = OLSR_MID_MSG;
+    msg.vtime() = OLSR::seconds_to_emf(OLSR_MID_HOLD_TIME);
+    msg.orig_addr() = ra_addr();
+    msg.ttl() = 255;
+    msg.hop_count() = 0;
+    msg.msg_seq_num() = msg_seq();
 
-    msg.mid().count     = 0;
+    msg.mid().count = 0;
     //foreach iface in this_node do
     //  msg.mid().iface_addr(i) = iface
     //  msg.mid().count++
     //done
 
-    msg.msg_size()      = msg.size();
+    msg.msg_size() = msg.size();
 
     enque_msg(msg, JITTER);
 }
@@ -1658,12 +1658,12 @@ OLSR::send_mid()
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 void
-OLSR::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface,const int &index)
+OLSR::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, const int &index)
 {
-    OLSR_hello& hello   = msg.hello();
-    double now      = CURRENT_TIME;
-    bool updated        = false;
-    bool created        = false;
+    OLSR_hello& hello = msg.hello();
+    double now = CURRENT_TIME;
+    bool updated = false;
+    bool created = false;
 
     OLSR_link_tuple* link_tuple = state_.find_link_tuple(sender_iface);
     if (link_tuple == NULL)
@@ -1671,11 +1671,11 @@ OLSR::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t
         // We have to create a new tuple
         link_tuple = new OLSR_link_tuple;
         link_tuple->nb_iface_addr() = sender_iface;
-        link_tuple->local_iface_addr()  = receiver_iface;
-        link_tuple->local_iface_index()=index;
-        link_tuple->sym_time()      = now - 1;
-        link_tuple->lost_time()     = 0.0;
-        link_tuple->time()      = now + OLSR::emf_to_seconds(msg.vtime());
+        link_tuple->local_iface_addr() = receiver_iface;
+        link_tuple->local_iface_index() = index;
+        link_tuple->sym_time() = now - 1;
+        link_tuple->lost_time() = 0.0;
+        link_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
         add_link_tuple(link_tuple, hello.willingness());
         created = true;
     }
@@ -1708,9 +1708,9 @@ OLSR::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t
                 }
                 else if (lt == OLSR_SYM_LINK || lt == OLSR_ASYM_LINK)
                 {
-                    link_tuple->sym_time()  =
+                    link_tuple->sym_time() =
                         now + OLSR::emf_to_seconds(msg.vtime());
-                    link_tuple->time()  =
+                    link_tuple->time() =
                         link_tuple->sym_time() + OLSR_NEIGHB_HOLD_TIME;
                     link_tuple->lost_time() = 0.0;
                     updated = true;
@@ -1759,8 +1759,8 @@ OLSR::populate_nbset(OLSR_msg& msg)
 void
 OLSR::populate_nb2hopset(OLSR_msg& msg)
 {
-    double now      = CURRENT_TIME;
-    OLSR_hello& hello   = msg.hello();
+    double now = CURRENT_TIME;
+    OLSR_hello& hello = msg.hello();
 
     for (linkset_t::iterator it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
@@ -1843,8 +1843,8 @@ OLSR::populate_nb2hopset(OLSR_msg& msg)
 void
 OLSR::populate_mprselset(OLSR_msg& msg)
 {
-    double now      = CURRENT_TIME;
-    OLSR_hello& hello   = msg.hello();
+    double now = CURRENT_TIME;
+    OLSR_hello& hello = msg.hello();
 
     assert(hello.count >= 0 && hello.count <= OLSR_MAX_HELLOS);
     for (int i = 0; i < hello.count; i++)
@@ -1892,7 +1892,7 @@ OLSR::populate_mprselset(OLSR_msg& msg)
 void
 OLSR::mac_failed(IPv4Datagram* p)
 {
-    double now      = CURRENT_TIME;
+    double now = CURRENT_TIME;
 
 
     nsaddr_t dest_addr = p->getDestAddress().getInt();
@@ -1912,7 +1912,7 @@ OLSR::mac_failed(IPv4Datagram* p)
         if (link_tuple != NULL)
         {
             link_tuple->lost_time() = now + OLSR_NEIGHB_HOLD_TIME;
-            link_tuple->time()  = now + OLSR_NEIGHB_HOLD_TIME;
+            link_tuple->time() = now + OLSR_NEIGHB_HOLD_TIME;
             nb_loss(link_tuple);
         }
     }
@@ -2021,9 +2021,9 @@ OLSR::add_link_tuple(OLSR_link_tuple* tuple, uint8_t  willingness)
 
     state_.insert_link_tuple(tuple);
     // Creates associated neighbor tuple
-    OLSR_nb_tuple* nb_tuple     = new OLSR_nb_tuple;
-    nb_tuple->nb_main_addr()    = get_main_addr(tuple->nb_iface_addr());
-    nb_tuple->willingness()     = willingness;
+    OLSR_nb_tuple* nb_tuple = new OLSR_nb_tuple;
+    nb_tuple->nb_main_addr() = get_main_addr(tuple->nb_iface_addr());
+    nb_tuple->willingness() = willingness;
     if (tuple->sym_time() >= now)
         nb_tuple->getStatus() = OLSR_STATUS_SYM;
     else
@@ -2039,8 +2039,8 @@ OLSR::add_link_tuple(OLSR_link_tuple* tuple, uint8_t  willingness)
 void
 OLSR::rm_link_tuple(OLSR_link_tuple* tuple)
 {
-    nsaddr_t nb_addr    = get_main_addr(tuple->nb_iface_addr());
-    double now      = CURRENT_TIME;
+    nsaddr_t nb_addr = get_main_addr(tuple->nb_iface_addr());
+    double now = CURRENT_TIME;
 
     debug("%f: Node %d removes link tuple: nb_addr = %d\n",
           now,
@@ -2374,7 +2374,7 @@ OLSR::emf_to_seconds(uint8_t olsr_format)
     // licensed under the GNU Public License (GPL)
     int a = olsr_format >> 4;
     int b = olsr_format - a*16;
-    return (double)(OLSR_C*(1+(double)a/16)*(double)pow((double)2,b));
+    return (double)(OLSR_C*(1+(double)a/16)*(double)pow((double)2, b));
 }
 
 ///
@@ -2437,7 +2437,7 @@ OLSR::~OLSR()
     if (state_ptr)
     {
         delete state_ptr;
-        state_ptr=NULL;
+        state_ptr = NULL;
     }
     /*
         mprset().clear();
@@ -2460,7 +2460,7 @@ OLSR::~OLSR()
     if (timerMessage)
     {
         cancelAndDelete(timerMessage);
-        timerMessage=NULL;
+        timerMessage = NULL;
     }
 
     while (timerQueuePtr && timerQueuePtr->size()>0)
@@ -2469,28 +2469,28 @@ OLSR::~OLSR()
         timerQueuePtr->erase(timerQueuePtr->begin());
         timer->setTuple(NULL);
         if (helloTimer==timer)
-            helloTimer=NULL;
+            helloTimer = NULL;
         else if (tcTimer==timer)
-            tcTimer=NULL;
+            tcTimer = NULL;
         else if (midTimer==timer)
-            midTimer=NULL;
+            midTimer = NULL;
         delete timer;
     }
 
     if (helloTimer)
     {
         delete helloTimer;
-        helloTimer=NULL;
+        helloTimer = NULL;
     }
     if (tcTimer)
     {
         delete tcTimer;
-        tcTimer=NULL;
+        tcTimer = NULL;
     }
     if (midTimer)
     {
         delete midTimer;
-        midTimer=NULL;
+        midTimer = NULL;
     }
 
     if (timerQueuePtr)
@@ -2501,7 +2501,7 @@ OLSR::~OLSR()
 }
 
 
-uint32_t OLSR::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
+uint32_t OLSR::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 {
     add.clear();
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
@@ -2511,13 +2511,13 @@ uint32_t OLSR::getRoute(const Uint128 &dest,std::vector<Uint128> &add)
         add.push_back(rt_entry->route[i]);
     add.push_back(dest);
     OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
-    if (rt_entry_aux->next_addr()!= add[0])
+    if (rt_entry_aux->next_addr() != add[0])
         opp_error("OLSR Data base error");
     return rt_entry->dist();
 }
 
 
-bool OLSR::getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &cost)
+bool OLSR::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
 {
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
@@ -2527,10 +2527,10 @@ bool OLSR::getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &cost)
     else
         add = rt_entry->next_addr();
     OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
-    if (rt_entry_aux->next_addr()!= add)
+    if (rt_entry_aux->next_addr() != add)
         opp_error("OLSR Data base error");
 
-    InterfaceEntry * ie = getInterfaceWlanByAddress (rt_entry->iface_addr());
+    InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
     iface = ie->getInterfaceId();
     cost = rt_entry->route.size();
     return true;
@@ -2550,7 +2550,7 @@ bool OLSR::isOurType(cPacket * msg)
     return false;
 }
 
-bool OLSR::getDestAddress(cPacket *msg,Uint128 &dest)
+bool OLSR::getDestAddress(cPacket *msg, Uint128 &dest)
 {
     return false;
 }
@@ -2560,44 +2560,44 @@ void OLSR::scheduleNextEvent()
     TimerQueue::iterator e = timerQueuePtr->begin();
     if (timerMessage->isScheduled())
     {
-        if (e->first <timerMessage->getArrivalTime())
+        if (e->first < timerMessage->getArrivalTime())
         {
             cancelEvent(timerMessage);
-            scheduleAt(e->first,timerMessage);
+            scheduleAt(e->first, timerMessage);
         }
         else if (e->first>timerMessage->getArrivalTime())
             error("OLSR timer Queue problem");
     }
     else
     {
-        scheduleAt(e->first,timerMessage);
+        scheduleAt(e->first, timerMessage);
     }
 }
 
 
 // Group methods, allow the anycast procedure
-int OLSR::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &add)
+int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<Uint128> &add)
 {
 
     int distance = 1000;
     add.clear();
-    for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
+    for (AddressGroupIterator it = gr.begin(); it!=gr.end(); it++)
     {
         Uint128 dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
-        if (distance<(int)rt_entry->dist()||(distance==(int)rt_entry->dist() && intrand(1)))
+        if (distance<(int)rt_entry->dist() || (distance==(int)rt_entry->dist() && intrand(1)))
             continue;
-        distance=rt_entry->dist();
+        distance = rt_entry->dist();
         add.clear();
         for (int i=0; i<(int)rt_entry->route.size(); i++)
             add.push_back(rt_entry->route[i]);
         add.push_back(dest);
 
-        add[rt_entry->route.size()]=dest;
+        add[rt_entry->route.size()] = dest;
         OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
-        if (rt_entry_aux->next_addr()!= add[0])
+        if (rt_entry_aux->next_addr() != add[0])
             opp_error("OLSR Data base error");
     }
     if (distance==1000)
@@ -2605,29 +2605,29 @@ int OLSR::getRouteGroup(const AddressGroup &gr,std::vector<Uint128> &add)
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint128 &gw)
+bool OLSR::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128 &gw)
 {
 
     int distance = 1000;
-    for (AddressGroupIterator it= gr.begin();it!=gr.end();it++)
+    for (AddressGroupIterator it = gr.begin(); it!=gr.end(); it++)
     {
         Uint128 dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
-        if (distance<(int)rt_entry->dist()||(distance==(int)rt_entry->dist() && intrand(1)))
+        if (distance<(int)rt_entry->dist() || (distance==(int)rt_entry->dist() && intrand(1)))
             continue;
-        distance=rt_entry->dist();
+        distance = rt_entry->dist();
         if (rt_entry->route.size())
             add = rt_entry->route[0];
         else
             add = rt_entry->next_addr();
         OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
-        if (rt_entry_aux->next_addr()!= add)
+        if (rt_entry_aux->next_addr() != add)
             opp_error("OLSR Data base error");
-        InterfaceEntry * ie = getInterfaceWlanByAddress (rt_entry->iface_addr());
+        InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
         iface = ie->getInterfaceId();
-        gw=dest;
+        gw = dest;
     }
     if (distance==1000)
         return false;
@@ -2638,42 +2638,42 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint12
 
 
 
-int  OLSR::getRouteGroup(const Uint128& dest,std::vector<Uint128> &add,Uint128& gateway,bool &isGroup,int group)
+int  OLSR::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128& gateway, bool &isGroup, int group)
 {
     AddressGroup gr;
     int distance = 0;
-    if (findInAddressGroup(dest,group))
+    if (findInAddressGroup(dest, group))
     {
-        getAddressGroup(gr,group);
-        distance = getRouteGroup(gr,add);
+        getAddressGroup(gr, group);
+        distance = getRouteGroup(gr, add);
         gateway = add.back();
-        isGroup=true;
+        isGroup = true;
 
      }
     else
     {
-        distance = getRoute(dest,add);
-        isGroup=false;
+        distance = getRoute(dest, add);
+        isGroup = false;
     }
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const Uint128& dest,Uint128 &next,int &iface,Uint128& gw ,bool &isGroup,int group)
+bool OLSR::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint128& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
-    bool find=false;
-    if (findInAddressGroup(dest,group))
+    bool find = false;
+    if (findInAddressGroup(dest, group))
     {
-        getAddressGroup(gr,group);
-        find= getNextHopGroup(gr,next,iface,gw);
-        isGroup=true;
+        getAddressGroup(gr, group);
+        find = getNextHopGroup(gr, next, iface, gw);
+        isGroup = true;
 
      }
     else
     {
         double cost;
-        find= getNextHop(dest,next,iface,cost);
-        isGroup=false;
+        find = getNextHop(dest, next, iface, cost);
+        isGroup = false;
     }
     return find;
 }

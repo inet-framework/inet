@@ -79,7 +79,7 @@ void InterfaceTable::updateDisplayString()
 
     char buf[80];
     sprintf(buf, "%d interfaces", getNumInterfaces());
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void InterfaceTable::handleMessage(cMessage *msg)
@@ -167,7 +167,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
         throw cRuntimeError(this, "addInterface(): specified module is not in this host/router");
 
     // find gates connected to host / network layer
-    cGate *nwlayerInGate=NULL, *nwlayerOutGate=NULL;
+    cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL;
     for (GateIterator i(ifmod); !i.end(); i++)
     {
         cGate *g = i();
@@ -211,7 +211,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 void InterfaceTable::invalidateTmpInterfaceList()
 {
     tmpNumInterfaces = -1;
-    delete[] tmpInterfaceList;
+    delete [] tmpInterfaceList;
     tmpInterfaceList = NULL;
 }
 

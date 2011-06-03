@@ -42,10 +42,10 @@ int RTPPacket::getHeaderLength() const
 {
     // fixed header is 12 bytes long,
     // add 4 bytes for every csrc identifier
-    return(RTPPACKET_FIX_HEADERLENGTH + 4 * getCsrcArraySize());
+    return (RTPPACKET_FIX_HEADERLENGTH + 4 * getCsrcArraySize());
 }
 
 int RTPPacket::getPayloadLength() const
 {
-    return(getByteLength() - getHeaderLength());
+    return (getByteLength() - getHeaderLength());
 }

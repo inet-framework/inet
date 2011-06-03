@@ -397,7 +397,7 @@ namespace Macho
         if (!place)
             place = ::operator new(sizeof(B));
 
-        new (place) B;
+        new(place) B;
 
         void * box = place;
         place = 0;
@@ -443,7 +443,7 @@ namespace Macho
     struct _KeyData
     {
         typedef _StateInstance & (*Generator)(_MachineBase & machine);
-        typedef bool (*Predicate)(Key);
+        typedef bool(*Predicate)(Key);
         typedef const char * (*NameFn)();
 
         // Get StateInstance object from key.
@@ -786,7 +786,7 @@ namespace Macho
             if (myBoxPlace)
             {
                 // Free cached memory of previously used box.
-                ::operator delete(myBoxPlace);
+                ::operator delete (myBoxPlace);
                 myBoxPlace = 0;
             }
 
@@ -969,7 +969,7 @@ namespace Macho
     template<class TOP, class R, class P1, class P2, class P3, class P4, class P5, class P6>
     class _Event6 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1, P2, P3, P4, P5, P6);
+        typedef R(TOP::*Signature)(P1, P2, P3, P4, P5, P6);
 
     public:
         _Event6(Signature handler, const typename DR<P1>::T & p1, const typename DR<P2>::T & p2, const typename DR<P3>::T & p3, const typename DR<P4>::T & p4, const typename DR<P5>::T & p5, const typename DR<P6>::T & p6)
@@ -1003,7 +1003,7 @@ namespace Macho
     template<class TOP, class R, class P1, class P2, class P3, class P4, class P5>
     class _Event5 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1, P2, P3, P4, P5);
+        typedef R(TOP::*Signature)(P1, P2, P3, P4, P5);
 
     public:
         _Event5(Signature handler, const typename DR<P1>::T & p1, const typename DR<P2>::T & p2, const typename DR<P3>::T & p3, const typename DR<P4>::T & p4, const typename DR<P5>::T & p5)
@@ -1035,7 +1035,7 @@ namespace Macho
     template<class TOP, class R, class P1, class P2, class P3, class P4>
     class _Event4 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1, P2, P3, P4);
+        typedef R(TOP::*Signature)(P1, P2, P3, P4);
 
     public:
         _Event4(Signature handler, const typename DR<P1>::T & p1, const typename DR<P2>::T & p2, const typename DR<P3>::T & p3, const typename DR<P4>::T & p4)
@@ -1065,7 +1065,7 @@ namespace Macho
     template<class TOP, class R, class P1, class P2, class P3>
     class _Event3 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1, P2, P3);
+        typedef R(TOP::*Signature)(P1, P2, P3);
 
     public:
         _Event3(Signature handler, const typename DR<P1>::T & p1, const typename DR<P2>::T & p2, const typename DR<P3>::T & p3)
@@ -1093,7 +1093,7 @@ namespace Macho
     template<class TOP, class R, class P1, class P2>
     class _Event2 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1, P2);
+        typedef R(TOP::*Signature)(P1, P2);
 
     public:
         _Event2(Signature handler, const typename DR<P1>::T & p1, const typename DR<P2>::T & p2)
@@ -1119,7 +1119,7 @@ namespace Macho
     template<class TOP, class R, class P1>
     class _Event1 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)(P1);
+        typedef R(TOP::*Signature)(P1);
 
     public:
         _Event1(Signature handler, const typename DR<P1>::T & p1)
@@ -1143,7 +1143,7 @@ namespace Macho
     template<class TOP, class R>
     class _Event0 : public IEvent<TOP>
     {
-        typedef R (TOP::*Signature)();
+        typedef R(TOP::*Signature)();
 
     public:
         _Event0(Signature handler)
@@ -1163,7 +1163,7 @@ namespace Macho
 
     // Event creating functions using type inference
     template<class P1, class P2, class P3, class P4, class P5, class P6, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1, P2, P3, P4, P5, P6),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1, P2, P3, P4, P5, P6),
             const typename DR<P1>::T & p1, const typename DR<P2>::T & p2,
             const typename DR<P3>::T & p3, const typename DR<P4>::T & p4,
             const typename DR<P5>::T & p5, const typename DR<P6>::T & p6)
@@ -1173,7 +1173,7 @@ namespace Macho
 
     // Event creating functions using type inference
     template<class P1, class P2, class P3, class P4, class P5, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1, P2, P3, P4, P5),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1, P2, P3, P4, P5),
             const typename DR<P1>::T & p1, const typename DR<P2>::T & p2,
             const typename DR<P3>::T & p3, const typename DR<P4>::T & p4,
             const typename DR<P5>::T & p5)
@@ -1183,7 +1183,7 @@ namespace Macho
 
     // Event creating functions using type inference
     template<class P1, class P2, class P3, class P4, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1, P2, P3, P4),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1, P2, P3, P4),
             const typename DR<P1>::T & p1, const typename DR<P2>::T & p2,
             const typename DR<P3>::T & p3, const typename DR<P4>::T & p4)
     {
@@ -1191,7 +1191,7 @@ namespace Macho
     }
 
     template<class P1, class P2, class P3, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1, P2, P3),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1, P2, P3),
             const typename DR<P1>::T & p1, const typename DR<P2>::T & p2,
             const typename DR<P3>::T & p3)
     {
@@ -1199,21 +1199,21 @@ namespace Macho
     }
 
     template<class P1, class P2, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1, P2),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1, P2),
             const typename DR<P1>::T & p1, const typename DR<P2>::T & p2)
     {
         return new _Event2<TOP, R, P1, P2>(handler, p1, p2);
     }
 
     template<class P1, class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)(P1),
+    inline IEvent<TOP> * Event(R(TOP::*handler)(P1),
             const typename DR<P1>::T & p1)
     {
         return new _Event1<TOP, R, P1>(handler, p1);
     }
 
     template<class R, class TOP>
-    inline IEvent<TOP> * Event(R (TOP::*handler)())
+    inline IEvent<TOP> * Event(R(TOP::*handler)())
     {
         return new _Event0<TOP, R>(handler);
     }

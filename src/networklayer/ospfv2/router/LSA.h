@@ -155,23 +155,23 @@ public:
 /**
  * Returns true if leftLSA is older than rightLSA.
  */
-inline bool operator< (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
+inline bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
-    long leftSequenceNumber  = leftLSA.getLsSequenceNumber();
+    long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
 
     if (leftSequenceNumber < rightSequenceNumber) {
         return true;
     }
     if (leftSequenceNumber == rightSequenceNumber) {
-        unsigned short leftChecksum  = leftLSA.getLsChecksum();
+        unsigned short leftChecksum = leftLSA.getLsChecksum();
         unsigned short rightChecksum = rightLSA.getLsChecksum();
 
         if (leftChecksum < rightChecksum) {
             return true;
         }
         if (leftChecksum == rightChecksum) {
-            unsigned short leftAge  = leftLSA.getLsAge();
+            unsigned short leftAge = leftLSA.getLsAge();
             unsigned short rightAge = rightLSA.getLsAge();
 
             if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
@@ -188,14 +188,14 @@ inline bool operator< (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightL
 /**
  * Returns true if leftLSA is the same age as rightLSA.
  */
-inline bool operator== (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
+inline bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
-    long           leftSequenceNumber  = leftLSA.getLsSequenceNumber();
+    long           leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long           rightSequenceNumber = rightLSA.getLsSequenceNumber();
-    unsigned short leftChecksum        = leftLSA.getLsChecksum();
-    unsigned short rightChecksum       = rightLSA.getLsChecksum();
-    unsigned short leftAge             = leftLSA.getLsAge();
-    unsigned short rightAge            = rightLSA.getLsAge();
+    unsigned short leftChecksum = leftLSA.getLsChecksum();
+    unsigned short rightChecksum = rightLSA.getLsChecksum();
+    unsigned short leftAge = leftLSA.getLsAge();
+    unsigned short rightAge = rightLSA.getLsAge();
 
     if ((leftSequenceNumber == rightSequenceNumber) &&
         (leftChecksum == rightChecksum) &&
@@ -210,28 +210,28 @@ inline bool operator== (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& right
     }
 }
 
-inline bool operator== (const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
+inline bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
 {
     return ((leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
-            (leftOptions.MC_MulticastForwarding      == rightOptions.MC_MulticastForwarding) &&
-            (leftOptions.NP_Type7LSA                 == rightOptions.NP_Type7LSA) &&
-            (leftOptions.EA_ForwardExternalLSAs      == rightOptions.EA_ForwardExternalLSAs) &&
-            (leftOptions.DC_DemandCircuits           == rightOptions.DC_DemandCircuits));
+            (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
+            (leftOptions.NP_Type7LSA == rightOptions.NP_Type7LSA) &&
+            (leftOptions.EA_ForwardExternalLSAs == rightOptions.EA_ForwardExternalLSAs) &&
+            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits));
 }
 
-inline bool operator!= (const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
+inline bool operator!=(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
 {
     return (!(leftOptions == rightOptions));
 }
 
-inline bool operator== (const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
+inline bool operator==(const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
 {
-    return ((leftHop.ifIndex           == rightHop.ifIndex) &&
-            (leftHop.hopAddress        == rightHop.hopAddress) &&
+    return ((leftHop.ifIndex == rightHop.ifIndex) &&
+            (leftHop.hopAddress == rightHop.hopAddress) &&
             (leftHop.advertisingRouter == rightHop.advertisingRouter));
 }
 
-inline bool operator!= (const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
+inline bool operator!=(const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
 {
     return (!(leftHop == rightHop));
 }
@@ -289,7 +289,7 @@ inline void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output)
     output << endl;
 }
 
-inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
+inline std::ostream& operator<<(std::ostream& ostr, OSPFLSA& lsa)
 {
     printLSAHeader(lsa.getHeader(), ostr);
     return ostr;

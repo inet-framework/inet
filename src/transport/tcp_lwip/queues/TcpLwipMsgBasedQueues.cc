@@ -286,7 +286,7 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     uint32 lastSeqNo = firstSeqNo + bytesInQueueM;
 
     // remove old messages
-    while( (! payloadListM.empty()) && seqLE(payloadListM.begin()->first, firstSeqNo))
+    while ( (! payloadListM.empty()) && seqLE(payloadListM.begin()->first, firstSeqNo))
     {
         EV << "Remove old payload MSG: seqno=" << payloadListM.begin()->first
            << ", len=" << payloadListM.begin()->second->getByteLength() << endl;

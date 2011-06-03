@@ -38,7 +38,7 @@ std::string dtostr(double d)
 double atod(const char *s)
 {
     char *e;
-    double d = ::strtod(s,&e);
+    double d = ::strtod(s, &e);
     if (*e)
         throw cRuntimeError("invalid cast: '%s' cannot be interpreted as a double", s);
     return d;
@@ -47,7 +47,7 @@ double atod(const char *s)
 unsigned long atoul(const char *s)
 {
     char *e;
-    unsigned long d = ::strtoul(s,&e,10);
+    unsigned long d = ::strtoul(s, &e, 10);
     if (*e)
         throw cRuntimeError("invalid cast: '%s' cannot be interpreted as an unsigned long", s);
     return d;

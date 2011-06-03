@@ -23,7 +23,7 @@
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl_m.h"
 
-Define_Module (EtherAppSrv);
+Define_Module(EtherAppSrv);
 
 simsignal_t EtherAppSrv::endToEndDelaySignal = SIMSIGNAL_NULL;
 simsignal_t EtherAppSrv::sentPkBytesSignal = SIMSIGNAL_NULL;
@@ -77,7 +77,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
 
-        sprintf(s,"%d", k);
+        sprintf(s, "%d", k);
 
         EV << "Generating packet `" << msgname << "'\n";
 

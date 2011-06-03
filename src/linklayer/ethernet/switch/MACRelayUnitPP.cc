@@ -79,7 +79,7 @@ void MACRelayUnitPP::initialize()
         buffer[i].cpuBusy = false;
 
         char qname[20];
-        sprintf(qname,"portQueue%d",i);
+        sprintf(qname, "portQueue%d", i);
         buffer[i].queue.setName(qname);
     }
 

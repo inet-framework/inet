@@ -111,7 +111,7 @@ class INET_API IPv6 : public QueueBase
      * the datagram to be sent out on a specific interface, bypassing
      * the routing table.
      */
-    virtual void fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE=NULL);
+    virtual void fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE = NULL);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to

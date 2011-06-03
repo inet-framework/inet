@@ -35,7 +35,7 @@ void GaussMarkovMobility::initialize(int stage)
         m_alpha = par("alpha");
         m_margin = par("margin");
         m_variance = par("variance");
-        m_angle = fmod(m_angle,360);
+        m_angle = fmod(m_angle, 360);
         //constrain m_alpha to [0.0;1.0]
         m_alpha = fmax(0.0, m_alpha);
         m_alpha = fmin(1.0, m_alpha);

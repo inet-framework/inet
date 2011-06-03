@@ -25,7 +25,7 @@ class BGPUpdateMessage : public BGPUpdateMessage_Base
 protected:
     unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);
 public:
-    BGPUpdateMessage(const char *name=NULL, int kind=0) : BGPUpdateMessage_Base(name,kind) {}
+    BGPUpdateMessage(const char *name = NULL, int kind = 0) : BGPUpdateMessage_Base(name, kind) {}
     virtual BGPUpdateMessage *dup() const {return new BGPUpdateMessage(*this);}
     void setWithdrawnRoutesArraySize(unsigned int size);
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);

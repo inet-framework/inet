@@ -36,7 +36,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 
     ev<<"SCTPAssociationEventProc:process_ASSOCIATE\n";
 
-    switch(fsm->getState())
+    switch (fsm->getState())
     {
         case SCTP_S_CLOSED:
         initAssociation(openCmd);
@@ -65,7 +65,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
         sctpMain->updateSockPair(this, lAddr, rAddr, localPort, remotePort);
         state->localRwnd = (long)sctpMain->par("arwnd");
         sendInit();
-        startTimer(T1_InitTimer,state->initRexmitTimeout);
+        startTimer(T1_InitTimer, state->initRexmitTimeout);
         break;
 
     default:
@@ -83,7 +83,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 
     sctpEV3<<"SCTPAssociationEventProc:process_OPEN_PASSIVE\n";
 
-    switch(fsm->getState())
+    switch (fsm->getState())
     {
         case SCTP_S_CLOSED:
             initAssociation(openCmd);
@@ -115,7 +115,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
 {
     SCTPSendCommand* sendCommand = check_and_cast<SCTPSendCommand*>(sctpCommand);
 
-    if(fsm->getState() != SCTP_S_ESTABLISHED) {
+    if (fsm->getState() != SCTP_S_ESTABLISHED) {
         // TD 12.03.2009: since SCTP_S_ESTABLISHED is the only case, the
         // switch(...)-block has been removed for enhanced readability.
         sctpEV3 << "process_SEND: state is not SCTP_S_ESTABLISHED -> returning" << endl;
@@ -136,9 +136,9 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     iter->second.sentBytes += smsg->getBitLength() / 8;
 
   // ------ Prepare SCTPDataMsg -----------------------------------------
-  const uint32 streamId       = sendCommand->getSid();
+  const uint32 streamId = sendCommand->getSid();
   const uint32 sendUnordered = sendCommand->getSendUnordered();
-  const uint32 ppid           = sendCommand->getPpid();
+  const uint32 ppid = sendCommand->getPpid();
   SCTPSendStream* stream = NULL;
   SCTPSendStreamMap::iterator associter = sendStreams.find(streamId);
   if (associter != sendStreams.end()) {
@@ -188,7 +188,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
      datMsg->setOrdered(true);
      stream->getStreamQ()->insert(datMsg);
 
-     if ((state->appSendAllowed)        &&
+     if ((state->appSendAllowed) &&
           (state->sendQueueLimit > 0) &&
           ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
         sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
@@ -224,7 +224,7 @@ void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand 
     {
         sctpEV3<<"Application tries to read from invalid stream id....\n";
     }
-    state->numMsgsReq[sendCommand->getSid()]+= sendCommand->getNumMsgs();
+    state->numMsgsReq[sendCommand->getSid()] += sendCommand->getNumMsgs();
     pushUlp();
 }
 
@@ -251,7 +251,7 @@ void SCTPAssociation::process_QUEUE_BYTES_LIMIT(const SCTPCommand* sctpCommand)
 void SCTPAssociation::process_CLOSE(SCTPEventCode& event)
 {
     sctpEV3 << "SCTPAssociationEventProc:process_CLOSE; assoc=" << assocId << endl;
-    switch(fsm->getState()) {
+    switch (fsm->getState()) {
         case SCTP_S_ESTABLISHED:
             sendOnAllPaths(state->getPrimaryPath());
             sendShutdown();
@@ -267,7 +267,7 @@ void SCTPAssociation::process_CLOSE(SCTPEventCode& event)
 void SCTPAssociation::process_ABORT(SCTPEventCode& event)
 {
     sctpEV3 << "SCTPAssociationEventProc:process_ABORT; assoc=" << assocId << endl;
-    switch(fsm->getState()) {
+    switch (fsm->getState()) {
         case SCTP_S_ESTABLISHED:
             sendOnAllPaths(state->getPrimaryPath());
             sendAbort();

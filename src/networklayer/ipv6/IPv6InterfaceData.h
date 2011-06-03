@@ -329,7 +329,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: FALSE
          */
-        bool advOtherConfigFlag;// also false as not disseminating other config info from routers
+        bool advOtherConfigFlag; // also false as not disseminating other config info from routers
 
 #ifdef WITH_xMIPv6
         /**
@@ -338,7 +338,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: FALSE
          */
-        bool advHomeAgentFlag;// also false as not disseminating other config info from routers
+        bool advHomeAgentFlag; // also false as not disseminating other config info from routers
 #endif /* WITH_xMIPv6 */
 
         /**
@@ -435,7 +435,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      * in Router Advertisements. Zero expiry time means infinity.
      */
     virtual void updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
-                                     simtime_t expiryTime=0, simtime_t prefExpiryTime=0);
+                                     simtime_t expiryTime = 0, simtime_t prefExpiryTime = 0);
 
     /**
      * Returns the number of addresses the interface has.

@@ -38,10 +38,10 @@ class IPv6InterfaceData;
 class INET_API MacEstimateCostProcess
 {
 public:
-    virtual double getCost(int,MACAddress &)=0;
-    virtual double getNumCost()=0;
-    virtual int getNumNeighbors()=0;
-    virtual int getNeighbors(MACAddress [])=0;
+    virtual double getCost(int, MACAddress &) = 0;
+    virtual double getNumCost() = 0;
+    virtual int getNumNeighbors() = 0;
+    virtual int getNeighbors(MACAddress []) = 0;
 };
 
 /**
@@ -178,7 +178,7 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name access to the cost process estimation  */
     //@{
-    virtual bool setEstimateCostProcess(int,MacEstimateCostProcess *p);
+    virtual bool setEstimateCostProcess(int, MacEstimateCostProcess *p);
     virtual MacEstimateCostProcess* getEstimateCostProcess(int);
     //@}
 };

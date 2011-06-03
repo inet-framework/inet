@@ -589,7 +589,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     IPv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
-    ASSERT(ERO.size() == 0 ||ERO[0].node.equals(nextHop) || ERO[0].L);
+    ASSERT(ERO.size() == 0 || ERO[0].node.equals(nextHop) || ERO[0].L);
 
     sendToIP(pm, nextHop);
 }
@@ -770,7 +770,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
 
     EV << "currently allocated: " << rsb->Flowspec_Object << endl;
 
-    while(true)
+    while (true)
     {
         // remove RSB if empty
 
@@ -1236,7 +1236,7 @@ RSVP::PathStateBlock_t* RSVP::createIngressPSB(const traffic_session_t& session,
 {
     EroVector ERO = path.ERO;
 
-    while(ERO.size() > 0 && ERO[0].node == routerId)
+    while (ERO.size() > 0 && ERO[0].node == routerId)
     {
         // remove ourselves from the beginning of the hop list
         ERO.erase(ERO.begin());
@@ -1338,7 +1338,7 @@ void RSVP::handleMessage(cMessage *msg)
 void RSVP::processRSVPMessage(RSVPMessage *msg)
 {
     int kind = msg->getRsvpKind();
-    switch(kind)
+    switch (kind)
     {
         case PATH_MESSAGE:
             processPathMsg(check_and_cast<RSVPPathMsg*>(msg));
@@ -1485,7 +1485,7 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
     {
         EV << "error reached ingress router" << endl;
 
-        switch(errCode)
+        switch (errCode)
         {
             case PATH_ERR_PREEMPTED:
                 sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_PREEMPTED, 0.0);
@@ -1577,7 +1577,7 @@ void RSVP::processPathMsg(RSVPPathMsg *msg)
 
     EroVector ERO = msg->getERO();
 
-    while(ERO.size() > 0 && ERO[0].node == routerId)
+    while (ERO.size() > 0 && ERO[0].node == routerId)
     {
         ERO.erase(ERO.begin());
     }
@@ -1724,7 +1724,7 @@ void RSVP::recoveryEvent(IPv4Address peer)
 void RSVP::processSignallingMessage(SignallingMsg *msg)
 {
     int command = msg->getCommand();
-    switch(command)
+    switch (command)
     {
         case MSG_PSB_TIMER:
             processPSB_TIMER(check_and_cast<PsbTimerMsg*>(msg));
@@ -1810,7 +1810,7 @@ void RSVP::processPATH_NOTIFY(PathNotifyMsg* msg)
 {
     PathStateBlock_t *psb;
 
-    switch(msg->getStatus())
+    switch (msg->getStatus())
     {
         case PATH_RETRY:
             createPath(msg->getSession(), msg->getSender());

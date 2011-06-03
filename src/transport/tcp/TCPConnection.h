@@ -57,18 +57,18 @@ class TCPAlgorithm;
 //
 enum TcpState
 {
-    TCP_S_INIT        = 0,
-    TCP_S_CLOSED      = FSM_Steady(1),
-    TCP_S_LISTEN      = FSM_Steady(2),
-    TCP_S_SYN_SENT    = FSM_Steady(3),
-    TCP_S_SYN_RCVD    = FSM_Steady(4),
+    TCP_S_INIT = 0,
+    TCP_S_CLOSED = FSM_Steady(1),
+    TCP_S_LISTEN = FSM_Steady(2),
+    TCP_S_SYN_SENT = FSM_Steady(3),
+    TCP_S_SYN_RCVD = FSM_Steady(4),
     TCP_S_ESTABLISHED = FSM_Steady(5),
-    TCP_S_CLOSE_WAIT  = FSM_Steady(6),
-    TCP_S_LAST_ACK    = FSM_Steady(7),
-    TCP_S_FIN_WAIT_1  = FSM_Steady(8),
-    TCP_S_FIN_WAIT_2  = FSM_Steady(9),
-    TCP_S_CLOSING     = FSM_Steady(10),
-    TCP_S_TIME_WAIT   = FSM_Steady(11)
+    TCP_S_CLOSE_WAIT = FSM_Steady(6),
+    TCP_S_LAST_ACK = FSM_Steady(7),
+    TCP_S_FIN_WAIT_1 = FSM_Steady(8),
+    TCP_S_FIN_WAIT_2 = FSM_Steady(9),
+    TCP_S_CLOSING = FSM_Steady(10),
+    TCP_S_TIME_WAIT = FSM_Steady(11)
 };
 
 

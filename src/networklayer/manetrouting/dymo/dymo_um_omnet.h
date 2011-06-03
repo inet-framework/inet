@@ -177,7 +177,7 @@ class DYMOUM : public ManetRoutingBase
         return -1;
     }
 
-    void promiscuous_rrep(RE *,struct in_addr);
+    void promiscuous_rrep(RE *, struct in_addr);
     int numInterfacesActive;
     // Configuration parameters
     int norouteBehaviour;
@@ -191,8 +191,8 @@ class DYMOUM : public ManetRoutingBase
     long ROUTE_TIMEOUT;     //3000
     long ROUTE_DELETE_TIMEOUT;  //(5 * ROUTE_TIMEOUT)
     // from dymo_re.h
-    long RREQ_WAIT_TIME;//  1000
-    int  RREQ_TRIES;//  3
+    long RREQ_WAIT_TIME; //  1000
+    int  RREQ_TRIES; //  3
 
     // from main.c
     int no_path_acc;
@@ -206,7 +206,7 @@ class DYMOUM : public ManetRoutingBase
 
 
     virtual void processLinkBreak(const cPolymorphic *details);
-    virtual void processPromiscuous (const cPolymorphic *details);
+    virtual void processPromiscuous(const cPolymorphic *details);
     virtual void processFullPromiscuous(const cPolymorphic *details);
 
   public:
@@ -219,19 +219,19 @@ class DYMOUM : public ManetRoutingBase
     virtual std::string detailedInfo() const;
 
     // Routing information access
-    virtual uint32_t getRoute(const Uint128 &,std::vector<Uint128> &);
-    virtual bool getNextHop(const Uint128 &,Uint128 &add,int &iface,double &);
+    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &);
+    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &,const Uint128 &,const Uint128 &,const Uint128&);
+    virtual void setRefreshRoute(const Uint128 &, const Uint128 &, const Uint128 &, const Uint128&);
     virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *,Uint128 &);
-    virtual int getRouteGroup(const AddressGroup &gr,std::vector<Uint128>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr,Uint128 &add,int &iface,Uint128&);
-    virtual int  getRouteGroup(const Uint128&,std::vector<Uint128> &,Uint128&,bool &,int group=0);
-    virtual bool getNextHopGroup(const Uint128&,Uint128 &add,int &iface,Uint128&,bool &,int group=0);
+    virtual bool getDestAddress(cPacket *, Uint128 &);
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<Uint128>&);
+    virtual bool getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128&);
+    virtual int  getRouteGroup(const Uint128&, std::vector<Uint128> &, Uint128&, bool &, int group = 0);
+    virtual bool getNextHopGroup(const Uint128&, Uint128 &add, int &iface, Uint128&, bool &, int group = 0);
 
   protected:
-    void drop (cPacket *p,int cause = 0)
+    void drop(cPacket *p, int cause = 0)
     {
         delete p;
         // icmpAccess.get()->sendErrorMessage(p, ICMP_DESTINATION_UNREACHABLE, cause);
@@ -246,8 +246,8 @@ class DYMOUM : public ManetRoutingBase
     int numInitStages() const  {return 5;}
     void initialize(int stage);
     void recvDYMOUMPacket(cMessage * p);
-    void processPacket(IPv4Datagram *,unsigned int);
-    void processMacPacket(cPacket * p,const Uint128 &,const Uint128 &,int);
+    void processPacket(IPv4Datagram *, unsigned int);
+    void processMacPacket(cPacket * p, const Uint128 &, const Uint128 &, int);
     void getMacAddress(IPv4Datagram *);
 
     cPacket * get_packet_queue(struct in_addr dest_addr);

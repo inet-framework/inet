@@ -165,7 +165,7 @@ void RoutingTable::updateDisplayString()
         sprintf(buf, "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
     else
         sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), (int)routes.size(), (int)multicastRoutes.size());
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void RoutingTable::handleMessage(cMessage *msg)
@@ -414,7 +414,7 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
         IPv4Route *e = *i;
         if (testValidity(e))
         {
-            if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) &&  // match
+            if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) && // match
                 (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
             {
                 bestRoute = e;
@@ -425,14 +425,14 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
 
     if (bestRoute && bestRoute->getSource()==IPv4Route::MANET && bestRoute->getHost()!=dest)
     {
-        bestRoute=NULL;
+        bestRoute = NULL;
         /* in this case we must find the mask must be 255.255.255.255 route */
         for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
         {
            IPv4Route *e = *i;
            if (testValidity(e))
            {
-              if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), IPv4Address::ALLONES_ADDRESS) &&  // match
+              if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), IPv4Address::ALLONES_ADDRESS) && // match
                (!bestRoute || e->getNetmask().getInt()>longestNetmask))  // longest so far
               {
                  bestRoute = e;
@@ -628,7 +628,7 @@ void RoutingTable::updateNetmaskRoutes()
 
 
 
-void RoutingTable::addRule(bool output,IPv4RouteRule *entry)
+void RoutingTable::addRule(bool output, IPv4RouteRule *entry)
 {
 // first, find the rule if exist
     delRule(entry);
@@ -644,13 +644,13 @@ void RoutingTable::addRule(bool output,IPv4RouteRule *entry)
 
 void RoutingTable::delRule(IPv4RouteRule *entry)
 {
-    for (unsigned int i;i<outputRules.size();i++)
+    for (unsigned int i; i<outputRules.size(); i++)
     {
        if (outputRules[i]==entry)
            outputRules.erase(outputRules.begin()+i);
 
     }
-    for (unsigned int i;i<inputRules.size();i++)
+    for (unsigned int i; i<inputRules.size(); i++)
     {
         if (inputRules[i]==entry)
             inputRules.erase(inputRules.begin()+i);
@@ -658,7 +658,7 @@ void RoutingTable::delRule(IPv4RouteRule *entry)
     }
 }
 
-const IPv4RouteRule * RoutingTable::getRule(bool output,int index) const
+const IPv4RouteRule * RoutingTable::getRule(bool output, int index) const
 {
     if (output)
     {
@@ -684,7 +684,7 @@ int RoutingTable::getNumRules(bool output)
         return inputRules.size();
 }
 
-const IPv4RouteRule * RoutingTable::findRule(bool output,int prot,int sPort,const IPv4Address &srcAddr,int dPort,const IPv4Address &destAddr,const InterfaceEntry *iface) const
+const IPv4RouteRule * RoutingTable::findRule(bool output, int prot, int sPort, const IPv4Address &srcAddr, int dPort, const IPv4Address &destAddr, const InterfaceEntry *iface) const
 {
     std::vector<IPv4RouteRule *>::const_iterator it;
     std::vector<IPv4RouteRule *>::const_iterator endIt;
@@ -704,7 +704,7 @@ const IPv4RouteRule * RoutingTable::findRule(bool output,int prot,int sPort,cons
        IPv4RouteRule *e = (*it);
        if (!srcAddr.isUnspecified() && !e->getSrcAddress().isUnspecified())
        {
-           if (!IPv4Address::maskedAddrAreEqual(srcAddr,e->getSrcAddress(),e->getSrcNetmask()))
+           if (!IPv4Address::maskedAddrAreEqual(srcAddr, e->getSrcAddress(), e->getSrcNetmask()))
            {
                it++;
                continue;
@@ -712,7 +712,7 @@ const IPv4RouteRule * RoutingTable::findRule(bool output,int prot,int sPort,cons
        }
        if (!destAddr.isUnspecified() && !e->getDestAddress().isUnspecified())
        {
-           if (!IPv4Address::maskedAddrAreEqual(destAddr,e->getDestAddress(),e->getDestNetmask()))
+           if (!IPv4Address::maskedAddrAreEqual(destAddr, e->getDestAddress(), e->getDestNetmask()))
            {
                it++;
                continue;

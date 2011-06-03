@@ -199,7 +199,7 @@ void EtherMACBase::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
-    if (!strcmp(addrstr,"auto"))
+    if (!strcmp(addrstr, "auto"))
     {
         // assign automatic address
         address = MACAddress::generateAutoAddress();
@@ -455,7 +455,7 @@ void EtherMACBase::calculateParameters()
     }
 
     // Check valid speeds
-    for(int i = 0; i < NUM_OF_ETHERDESCRS; i++)
+    for (int i = 0; i < NUM_OF_ETHERDESCRS; i++)
     {
         if (txRate == etherDescrs[i].txrate)
         {
@@ -516,7 +516,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
         emit(rxPkBytesFromHLSignal, (long)(frame->getByteLength()));
     }
 
-    if(txQueue.extQueue)
+    if (txQueue.extQueue)
     {
         ASSERT(curTxFrame == NULL);
         curTxFrame = frame;
@@ -550,7 +550,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
                 txQueue.innerQueue->queue.insert(frame);
         }
 
-        if(NULL == curTxFrame && !txQueue.innerQueue->queue.empty())
+        if (NULL == curTxFrame && !txQueue.innerQueue->queue.empty())
             curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
     }
 }
@@ -901,7 +901,7 @@ void EtherMACBase::updateDisplayString()
 
     getDisplayString().setTagArg("i", 1, color);
 
-    if (!strcmp(getParentModule()->getClassName(),"EthernetInterface"))
+    if (!strcmp(getParentModule()->getClassName(), "EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
 
     // connection coloring
@@ -913,13 +913,13 @@ void EtherMACBase::updateDisplayString()
 
     switch (transmitState)
     {
-        case TX_IDLE_STATE:      txStateName="IDLE"; break;
-        case WAIT_IFG_STATE:     txStateName="WAIT_IFG"; break;
-        case SEND_IFG_STATE:     txStateName="SEND_IFG"; break;
-        case TRANSMITTING_STATE: txStateName="TX"; break;
-        case JAMMING_STATE:      txStateName="JAM"; break;
-        case BACKOFF_STATE:      txStateName="BACKOFF"; break;
-        case PAUSE_STATE:        txStateName="PAUSE"; break;
+        case TX_IDLE_STATE:      txStateName = "IDLE"; break;
+        case WAIT_IFG_STATE:     txStateName = "WAIT_IFG"; break;
+        case SEND_IFG_STATE:     txStateName = "SEND_IFG"; break;
+        case TRANSMITTING_STATE: txStateName = "TX"; break;
+        case JAMMING_STATE:      txStateName = "JAM"; break;
+        case BACKOFF_STATE:      txStateName = "BACKOFF"; break;
+        case PAUSE_STATE:        txStateName = "PAUSE"; break;
         default: error("wrong tx state");
     }
 
@@ -927,9 +927,9 @@ void EtherMACBase::updateDisplayString()
 
     switch (receiveState)
     {
-        case RX_IDLE_STATE:      rxStateName="IDLE"; break;
-        case RECEIVING_STATE:    rxStateName="RX"; break;
-        case RX_COLLISION_STATE: rxStateName="COLL"; break;
+        case RX_IDLE_STATE:      rxStateName = "IDLE"; break;
+        case RECEIVING_STATE:    rxStateName = "RX"; break;
+        case RX_COLLISION_STATE: rxStateName = "COLL"; break;
         default: error("wrong rx state");
     }
 
@@ -961,8 +961,8 @@ void EtherMACBase::updateConnectionColor(int txState)
         else
         {
             // we are not connected: gray out our icon
-            getDisplayString().setTagArg("i",1,"#707070");
-            getDisplayString().setTagArg("i",2,"100");
+            getDisplayString().setTagArg("i", 1, "#707070");
+            getDisplayString().setTagArg("i", 2, "100");
         }
     }
 }

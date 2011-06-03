@@ -45,8 +45,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         uint32 end;
 
       public:
-        enum CompareStatus {BEFORE=1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
-        Region(uint32 _begin, uint32 _end) : begin(_begin),end(_end) {};
+        enum CompareStatus {BEFORE = 1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
+        Region(uint32 _begin, uint32 _end) : begin(_begin), end(_end) {};
         virtual ~Region() {};
         uint32 getBegin() const {return begin;}
         uint32 getEnd() const {return end;}

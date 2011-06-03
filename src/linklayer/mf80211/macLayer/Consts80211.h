@@ -5,15 +5,15 @@
 enum _802_11frameType {
 
   //between MAC layers of two nodes
-  DATA = 1,//data
-  BROADCAST = 2,//broadcast
-  RTS = 3,//request to send
-  CTS = 4,//clear to send
-  ACK = 5,//acknowledgement
-  ACKRTS = 6,//cut through packet
+  DATA = 1, //data
+  BROADCAST = 2, //broadcast
+  RTS = 3, //request to send
+  CTS = 4, //clear to send
+  ACK = 5, //acknowledgement
+  ACKRTS = 6, //cut through packet
 
   //between the PHY and the MAC layer of one node
-  BEGIN_RECEPTION = 7,//carrier sensing from the phy to the mac :
+  BEGIN_RECEPTION = 7, //carrier sensing from the phy to the mac :
   //beginning of reception
 
 };
@@ -37,10 +37,10 @@ const int CW_MIN = 7;
 /** Maximum size of contention window*/
 const int CW_MAX = 255;
 
-const int PHY_HEADER_LENGTH=192;
-const int HEADER_WITHOUT_PREAMBLE=48;
-const double BITRATE_HEADER=1E+6;
-const double BANDWIDTH=2E+6;
+const int PHY_HEADER_LENGTH = 192;
+const int HEADER_WITHOUT_PREAMBLE = 48;
+const double BITRATE_HEADER = 1E+6;
+const double BANDWIDTH = 2E+6;
 
 
 const int MAC_GENERATOR = 5;

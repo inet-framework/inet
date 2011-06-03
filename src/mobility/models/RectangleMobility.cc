@@ -51,7 +51,7 @@ void RectangleMobility::initialize(int stage)
 
         // determine start position
         double startPos = par("startPos");
-        startPos = fmod(startPos,4);
+        startPos = fmod(startPos, 4);
 
         if (startPos < 1)
             d = startPos * dx; // top side

@@ -318,7 +318,7 @@ void LDP::rebuildFecList()
 
     // our own addresses (XXX is it needed?)
 
-    for (int i = 0; i< ift->getNumInterfaces(); ++i)
+    for (int i = 0; i < ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->getNetworkLayerGateIndex() < 0)
@@ -882,7 +882,7 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
         EV << "notification received from=" << srcAddr << " fec=" << fec << " status=" << status << endl;
     }
 
-    switch(status)
+    switch (status)
     {
         case NO_ROUTE:
         {

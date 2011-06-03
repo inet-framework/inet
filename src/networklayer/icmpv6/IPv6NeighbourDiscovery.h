@@ -51,7 +51,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
 {
     public:
         typedef std::vector<cMessage*> MsgPtrVector;
-        typedef IPv6NeighbourCache::Key Key;//for convenience
+        typedef IPv6NeighbourCache::Key Key; //for convenience
         typedef IPv6NeighbourCache::Neighbour Neighbour;  // for convenience
 
     public:
@@ -110,10 +110,10 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         // stores information about a pending Duplicate Address Detection for
         // an interface
         struct DADEntry {
-            int interfaceId;// interface on which DAD is performed
-            IPv6Address address;// link-local address subject to DAD
-            int numNSSent;// number of DAD solicitations sent since start of sim
-            cMessage *timeoutMsg;// the message to cancel when NA is received
+            int interfaceId; // interface on which DAD is performed
+            IPv6Address address; // link-local address subject to DAD
+            int numNSSent; // number of DAD solicitations sent since start of sim
+            cMessage *timeoutMsg; // the message to cancel when NA is received
         };
         typedef std::set<DADEntry*> DADList; //FIXME why ptrs are stored?
 
@@ -128,9 +128,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         //An entry that stores information for an Advertising Interface
         struct AdvIfEntry {
             int interfaceId;
-            unsigned int numRASent;//number of Router Advertisements sent since start of sim
-            simtime_t nextScheduledRATime;//stores time when next RA will be sent.
-            cMessage *raTimeoutMsg;//the message to cancel when resetting RA timer
+            unsigned int numRASent; //number of Router Advertisements sent since start of sim
+            simtime_t nextScheduledRATime; //stores time when next RA will be sent.
+            cMessage *raTimeoutMsg; //the message to cancel when resetting RA timer
         };
         typedef std::set<AdvIfEntry*> AdvIfList; //FIXME why ptrs are stored?
 

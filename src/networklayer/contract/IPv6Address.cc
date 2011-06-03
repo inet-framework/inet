@@ -51,7 +51,7 @@ static int parseOctals(const char *&s, int *octals)
     while (1)
     {
         char *e;
-        octals[k] = strtoul(s,&e,16);
+        octals[k] = strtoul(s, &e, 16);
         if (s==e) { // no hex digit converted
             if (k!=0) s--;  // "unskip" preceding ':'
             return k;
@@ -69,7 +69,7 @@ static int parseOctals(const char *&s, int *octals)
 
 bool IPv6Address::doTryParse(const char *&addr)
 {
-    if (!strcmp(addr,"<unspec>"))
+    if (!strcmp(addr, "<unspec>"))
     {
         addr += 8;
         d[0] = d[1] = d[2] = d[3] = 0;
@@ -130,7 +130,7 @@ bool IPv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
 
     // parse prefix
     char *e;
-    prefixLen = strtoul(addr,&e,10);
+    prefixLen = strtoul(addr, &e, 10);
     if (addr==e)
         return false; // no number after '/'
     if (*e!=0)
@@ -306,7 +306,7 @@ IPv6Address IPv6Address::getPrefix(int prefixLength) const
     constructMask(prefixLength, mask);
 
     // Now we mask each IPv6 address segment and create a new IPv6 Address!
-    return IPv6Address(d[0]&mask[0],d[1]&mask[1],d[2]&mask[2],d[3]&mask[3] );
+    return IPv6Address(d[0]&mask[0], d[1]&mask[1], d[2]&mask[2], d[3]&mask[3] );
 }
 
 IPv6Address IPv6Address::getSuffix(int prefixLength) const
@@ -317,7 +317,7 @@ IPv6Address IPv6Address::getSuffix(int prefixLength) const
 
     // Now we mask each IPv6 address segment, inverse it
     // and create a new IPv6 Address!
-    return IPv6Address(d[0]&~mask[0],d[1]&~mask[1],d[2]&~mask[2],d[3]&~mask[3] );
+    return IPv6Address(d[0]&~mask[0], d[1]&~mask[1], d[2]&~mask[2], d[3]&~mask[3] );
 }
 
 const IPv6Address& IPv6Address::setPrefix(const IPv6Address& fromAddr, int prefixLength)

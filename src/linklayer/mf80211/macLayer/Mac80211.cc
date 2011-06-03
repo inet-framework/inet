@@ -531,7 +531,7 @@ void Mac80211::handleEndContentionTimer()
         // removes the packet from the queue without waiting for an acknowledgement
         Mac80211Pkt *temp = fromUpperLayer.front();
         fromUpperLayer.pop_front();
-        delete(temp);
+        delete (temp);
     }
 }
 
@@ -897,7 +897,7 @@ void Mac80211::testMaxAttempts()
         // delete the frame to transmit
         Mac80211Pkt *temp = fromUpperLayer.front();
         fromUpperLayer.pop_front();
-        delete(temp);
+        delete (temp);
     }
 }
 

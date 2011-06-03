@@ -53,9 +53,9 @@ bool IPvXAddressResolver::tryResolve(const char *s, IPvXAddress& result, int add
 
     // must be "modulename/interfacename(protocol)" syntax then,
     // "/interfacename" and "(protocol)" being optional
-    const char *slashp = strchr(s,'/');
-    const char *leftparenp = strchr(s,'(');
-    const char *rightparenp = strchr(s,')');
+    const char *slashp = strchr(s, '/');
+    const char *leftparenp = strchr(s, '(');
+    const char *rightparenp = strchr(s, ')');
     const char *endp = s+strlen(s);
 
     // rudimentary syntax check
