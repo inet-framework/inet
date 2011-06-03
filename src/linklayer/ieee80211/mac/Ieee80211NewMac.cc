@@ -1512,14 +1512,14 @@ simtime_t Ieee80211NewMac::getHeaderTime(double bitrate)
 {
     ModulationType modType;
     if ((opMode=='b') || (opMode=='g'))
-        modType = WifyModulationType::getMode80211g(bitrate);
+        modType = WifiModulationType::getMode80211g(bitrate);
     else if (opMode=='a')
-        modType = WifyModulationType::getMode80211a(bitrate);
+        modType = WifiModulationType::getMode80211a(bitrate);
     else if (opMode=='p')
-        modType = WifyModulationType::getMode80211p(bitrate);
+        modType = WifiModulationType::getMode80211p(bitrate);
     else
         opp_error("mode not supported");
-    return WifyModulationType::getPreambleAndHeader(modType, wifiPreambleType);
+    return WifiModulationType::getPreambleAndHeader(modType, wifiPreambleType);
 }
 
 simtime_t Ieee80211NewMac::getAIFS(int AccessCategory)
@@ -2165,14 +2165,14 @@ double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
     {
         ModulationType modType;
         if (opMode=='g' || (opMode=='b'))
-            modType = WifyModulationType::getMode80211g(bitrate);
+            modType = WifiModulationType::getMode80211g(bitrate);
         else if (opMode=='a')
-            modType = WifyModulationType::getMode80211a(bitrate);
+            modType = WifiModulationType::getMode80211a(bitrate);
         else if (opMode=='p')
-            modType = WifyModulationType::getMode80211p(bitrate);
+            modType = WifiModulationType::getMode80211p(bitrate);
         else
             opp_error("Opmode not supported");
-        duration = SIMTIME_DBL(WifyModulationType::calculateTxDuration(bits, modType, wifiPreambleType));
+        duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(bits, modType, wifiPreambleType));
     }
     else
     {
@@ -2686,13 +2686,13 @@ Ieee80211NewMac::getControlAnswerMode(ModulationType reqMode)
     {
         ModulationType thismode;
         if (opMode=='b')
-            thismode = WifyModulationType::getMode80211b(BITRATES_80211b[idx]);
+            thismode = WifiModulationType::getMode80211b(BITRATES_80211b[idx]);
         else if (opMode=='g')
-            thismode = WifyModulationType::getMode80211g(BITRATES_80211g[idx]);
+            thismode = WifiModulationType::getMode80211g(BITRATES_80211g[idx]);
         else if (opMode=='a')
-            thismode = WifyModulationType::getMode80211a(BITRATES_80211a[idx]);
+            thismode = WifiModulationType::getMode80211a(BITRATES_80211a[idx]);
         else if (opMode=='a')
-            thismode = WifyModulationType::getMode80211p(BITRATES_80211p[idx]);
+            thismode = WifiModulationType::getMode80211p(BITRATES_80211p[idx]);
 
       /* If the rate:
        *

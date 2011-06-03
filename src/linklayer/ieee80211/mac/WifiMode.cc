@@ -22,7 +22,7 @@
 
 
 ModulationType
-WifyModulationType::GetDsssRate1Mbps()
+WifiModulationType::GetDsssRate1Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_DSSS);
@@ -35,7 +35,7 @@ WifyModulationType::GetDsssRate1Mbps()
 }
 
 ModulationType
-WifyModulationType::GetDsssRate2Mbps()
+WifiModulationType::GetDsssRate2Mbps()
 {
 
    ModulationType mode;
@@ -52,7 +52,7 @@ WifyModulationType::GetDsssRate2Mbps()
  * Clause 18 rates (HR/DSSS)
  */
 ModulationType
-WifyModulationType::GetDsssRate5_5Mbps()
+WifiModulationType::GetDsssRate5_5Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_DSSS);
@@ -65,7 +65,7 @@ WifyModulationType::GetDsssRate5_5Mbps()
 }
 
 ModulationType
-WifyModulationType::GetDsssRate11Mbps()
+WifiModulationType::GetDsssRate11Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_DSSS);
@@ -82,7 +82,7 @@ WifyModulationType::GetDsssRate11Mbps()
  * Clause 19.5 rates (ERP-OFDM)
  */
 ModulationType
-WifyModulationType::GetErpOfdmRate6Mbps()
+WifiModulationType::GetErpOfdmRate6Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -95,7 +95,7 @@ WifyModulationType::GetErpOfdmRate6Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate9Mbps()
+WifiModulationType::GetErpOfdmRate9Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -108,7 +108,7 @@ WifyModulationType::GetErpOfdmRate9Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate12Mbps()
+WifiModulationType::GetErpOfdmRate12Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -121,7 +121,7 @@ WifyModulationType::GetErpOfdmRate12Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate18Mbps()
+WifiModulationType::GetErpOfdmRate18Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -134,7 +134,7 @@ WifyModulationType::GetErpOfdmRate18Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate24Mbps()
+WifiModulationType::GetErpOfdmRate24Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -147,7 +147,7 @@ WifyModulationType::GetErpOfdmRate24Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate36Mbps()
+WifiModulationType::GetErpOfdmRate36Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -160,7 +160,7 @@ WifyModulationType::GetErpOfdmRate36Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate48Mbps()
+WifiModulationType::GetErpOfdmRate48Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -173,7 +173,7 @@ WifyModulationType::GetErpOfdmRate48Mbps()
 }
 
 ModulationType
-WifyModulationType::GetErpOfdmRate54Mbps()
+WifiModulationType::GetErpOfdmRate54Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -190,7 +190,7 @@ WifyModulationType::GetErpOfdmRate54Mbps()
  * Clause 17 rates (OFDM)
  */
 ModulationType
-WifyModulationType::GetOfdmRate6Mbps()
+WifiModulationType::GetOfdmRate6Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -203,7 +203,7 @@ WifyModulationType::GetOfdmRate6Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate9Mbps()
+WifiModulationType::GetOfdmRate9Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -216,7 +216,7 @@ WifyModulationType::GetOfdmRate9Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate12Mbps()
+WifiModulationType::GetOfdmRate12Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -229,7 +229,7 @@ WifyModulationType::GetOfdmRate12Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate18Mbps()
+WifiModulationType::GetOfdmRate18Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -242,7 +242,7 @@ WifyModulationType::GetOfdmRate18Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate24Mbps()
+WifiModulationType::GetOfdmRate24Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -255,7 +255,7 @@ WifyModulationType::GetOfdmRate24Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate36Mbps()
+WifiModulationType::GetOfdmRate36Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -268,7 +268,7 @@ WifyModulationType::GetOfdmRate36Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate48Mbps()
+WifiModulationType::GetOfdmRate48Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -281,7 +281,7 @@ WifyModulationType::GetOfdmRate48Mbps()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate54Mbps()
+WifiModulationType::GetOfdmRate54Mbps()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -295,7 +295,7 @@ WifyModulationType::GetOfdmRate54Mbps()
 
 /* 10 MHz channel rates */
 ModulationType
-WifyModulationType::GetOfdmRate3MbpsBW10MHz()
+WifiModulationType::GetOfdmRate3MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -308,7 +308,7 @@ WifyModulationType::GetOfdmRate3MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate4_5MbpsBW10MHz()
+WifiModulationType::GetOfdmRate4_5MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -321,7 +321,7 @@ WifyModulationType::GetOfdmRate4_5MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate6MbpsBW10MHz()
+WifiModulationType::GetOfdmRate6MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -334,7 +334,7 @@ WifyModulationType::GetOfdmRate6MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate9MbpsBW10MHz()
+WifiModulationType::GetOfdmRate9MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -347,7 +347,7 @@ WifyModulationType::GetOfdmRate9MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate12MbpsBW10MHz()
+WifiModulationType::GetOfdmRate12MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -360,7 +360,7 @@ WifyModulationType::GetOfdmRate12MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate18MbpsBW10MHz()
+WifiModulationType::GetOfdmRate18MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -373,7 +373,7 @@ WifyModulationType::GetOfdmRate18MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate24MbpsBW10MHz()
+WifiModulationType::GetOfdmRate24MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -386,7 +386,7 @@ WifyModulationType::GetOfdmRate24MbpsBW10MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate27MbpsBW10MHz()
+WifiModulationType::GetOfdmRate27MbpsBW10MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -400,7 +400,7 @@ WifyModulationType::GetOfdmRate27MbpsBW10MHz()
 
 /* 5 MHz channel rates */
 ModulationType
-WifyModulationType::GetOfdmRate1_5MbpsBW5MHz()
+WifiModulationType::GetOfdmRate1_5MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -413,7 +413,7 @@ WifyModulationType::GetOfdmRate1_5MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate2_25MbpsBW5MHz()
+WifiModulationType::GetOfdmRate2_25MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -426,7 +426,7 @@ WifyModulationType::GetOfdmRate2_25MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate3MbpsBW5MHz()
+WifiModulationType::GetOfdmRate3MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -439,7 +439,7 @@ WifyModulationType::GetOfdmRate3MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate4_5MbpsBW5MHz()
+WifiModulationType::GetOfdmRate4_5MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -452,7 +452,7 @@ WifyModulationType::GetOfdmRate4_5MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate6MbpsBW5MHz()
+WifiModulationType::GetOfdmRate6MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -465,7 +465,7 @@ WifyModulationType::GetOfdmRate6MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate9MbpsBW5MHz()
+WifiModulationType::GetOfdmRate9MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -478,7 +478,7 @@ WifyModulationType::GetOfdmRate9MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate12MbpsBW5MHz()
+WifiModulationType::GetOfdmRate12MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -491,7 +491,7 @@ WifyModulationType::GetOfdmRate12MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType::GetOfdmRate13_5MbpsBW5MHz()
+WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
 {
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_OFDM);
@@ -504,7 +504,7 @@ WifyModulationType::GetOfdmRate13_5MbpsBW5MHz()
 }
 
 ModulationType
-WifyModulationType:: getMode80211a(double bitrate)
+WifiModulationType:: getMode80211a(double bitrate)
 {
    if (bitrate == BITRATES_80211a[7])
        return GetOfdmRate54Mbps();
@@ -528,7 +528,7 @@ WifyModulationType:: getMode80211a(double bitrate)
 }
 
 ModulationType
-WifyModulationType:: getMode80211g(double bitrate)
+WifiModulationType:: getMode80211g(double bitrate)
 {
    if (bitrate == BITRATES_80211g[11])
        return GetErpOfdmRate54Mbps();
@@ -561,7 +561,7 @@ WifyModulationType:: getMode80211g(double bitrate)
 
 
 ModulationType
-WifyModulationType:: getMode80211b(double bitrate)
+WifiModulationType:: getMode80211b(double bitrate)
 {
    if (bitrate == BITRATES_80211b[3])
        return GetDsssRate11Mbps();
@@ -578,7 +578,7 @@ WifyModulationType:: getMode80211b(double bitrate)
 
 
 ModulationType
-WifyModulationType::getMode80211p(double bitrate)
+WifiModulationType::getMode80211p(double bitrate)
 {
    if (bitrate == BITRATES_80211p[7])
        return GetOfdmRate27MbpsBW10MHz();
@@ -602,7 +602,7 @@ WifyModulationType::getMode80211p(double bitrate)
 }
 
 simtime_t
-WifyModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble)
+WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble)
 {
   switch (payloadMode.getModulationClass())
     {
@@ -649,7 +649,7 @@ WifyModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamb
 }
 
 simtime_t
-WifyModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble)
+WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble)
 {
   switch (payloadMode.getModulationClass())
     {
@@ -696,7 +696,7 @@ WifyModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPrea
 // Compute the Payload duration in function of the modulation type
 //
 simtime_t
-WifyModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode)
+WifiModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode)
 {
   simtime_t val;
   switch (payloadMode.getModulationClass())
@@ -753,13 +753,13 @@ WifyModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode
 // Return the physical header duration, useful for the mac
 //
 simtime_t
-WifyModulationType::getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble)
+WifiModulationType::getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble)
 {
     return (getPlcpPreambleDuration(payloadMode, preamble)+ getPlcpHeaderDuration(payloadMode, preamble));
 }
 
 simtime_t
-WifyModulationType::calculateTxDuration(uint64_t size, ModulationType payloadMode, WifiPreamble preamble)
+WifiModulationType::calculateTxDuration(uint64_t size, ModulationType payloadMode, WifiPreamble preamble)
 {
   simtime_t duration = getPlcpPreambleDuration(payloadMode, preamble)
                       + getPlcpHeaderDuration(payloadMode, preamble)
@@ -768,7 +768,7 @@ WifyModulationType::calculateTxDuration(uint64_t size, ModulationType payloadMod
 }
 
 ModulationType
-WifyModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble)
+WifiModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble)
 {
   switch (payloadMode.getModulationClass())
      {
@@ -776,31 +776,31 @@ WifyModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble p
        {
          switch (payloadMode.getBandwidth()) {
          case 5000000:
-           return WifyModulationType::GetOfdmRate1_5MbpsBW5MHz();
+           return WifiModulationType::GetOfdmRate1_5MbpsBW5MHz();
          case 10000000:
-           return WifyModulationType::GetOfdmRate3MbpsBW10MHz();
+           return WifiModulationType::GetOfdmRate3MbpsBW10MHz();
          default:
            // IEEE Std 802.11-2007, 17.3.2
            // actually this is only the first part of the PlcpHeader,
            // because the last 16 bits of the PlcpHeader are using the
            // same mode of the payload
-           return WifyModulationType::GetOfdmRate6Mbps();
+           return WifiModulationType::GetOfdmRate6Mbps();
          }
        }
 
      case MOD_CLASS_ERP_OFDM:
-       return WifyModulationType::GetErpOfdmRate6Mbps();
+       return WifiModulationType::GetErpOfdmRate6Mbps();
 
      case MOD_CLASS_DSSS:
        if (preamble == WIFI_PREAMBLE_LONG)
          {
            // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
-           return WifyModulationType::GetDsssRate1Mbps();
+           return WifiModulationType::GetDsssRate1Mbps();
          }
        else //  WIFI_PREAMBLE_SHORT
          {
            // IEEE Std 802.11-2007, section 18.2.2.2
-           return WifyModulationType::GetDsssRate2Mbps();
+           return WifiModulationType::GetDsssRate2Mbps();
          }
 
      default:

@@ -23,7 +23,7 @@
 #include "WifiPreambleType.h"
 #include "ModulationType.h"
 
-class WifyModulationType
+class WifiModulationType
 {
 public:
   static ModulationType GetDsssRate1Mbps();
