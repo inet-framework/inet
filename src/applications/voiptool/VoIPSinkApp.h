@@ -20,6 +20,11 @@
 #ifndef VOIPTOOL_VOIPSINKAPP_H
 #define VOIPTOOL_VOIPSINKAPP_H
 
+#ifndef HAVE_FFMPEG
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature
+#endif
+
+
 #define __STDC_CONSTANT_MACROS
 
 #include <omnetpp.h>

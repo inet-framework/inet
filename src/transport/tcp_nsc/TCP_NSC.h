@@ -21,6 +21,11 @@
 #ifndef __TCP_NSC_H
 #define __TCP_NSC_H
 
+#ifndef HAVE_NSC
+#error Please install NSC or disable 'TCP_NSC' feature
+#endif
+
+
 #include <map>
 
 #include "INETDefs.h"

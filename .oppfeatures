@@ -525,7 +525,7 @@
     <feature
         id="VoIPTool"
         name="VoIPTool"
-        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat"
+        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat libavutil"
         initiallyEnabled = "false"
         requires = "UDP"
         labels = ""
@@ -534,7 +534,7 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_VOIPTOOL"
-        linkerFlags = "-lavcodec -lavformat -lavutil"
+        linkerFlags = ""
         />
     <feature
         id="VoIPTool_examples"

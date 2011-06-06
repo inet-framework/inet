@@ -20,6 +20,10 @@
 #ifndef VOIPTOOL_VOIPSOURCEAPP_H
 #define VOIPTOOL_VOIPSOURCEAPP_H
 
+#ifndef HAVE_FFMPEG
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature
+#endif
+
 #include <fnmatch.h>
 #include <vector>
 

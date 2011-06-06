@@ -17,6 +17,10 @@
 //
 
 cplusplus {{
+#ifndef HAVE_FFMPEG
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature.
+#endif
+
 #include "ByteArrayMessage.h"
 }};
 
