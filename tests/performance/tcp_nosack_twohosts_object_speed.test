@@ -57,7 +57,7 @@ module STest
         clients_LWIP: SubTest {
             parameters:
                 srvTcpType = srvTcpType;
-                cliTcpType = "TCP_lwip";
+                cliTcpType = "TCP_lwIP";
         }
 }
 
@@ -74,7 +74,7 @@ network TcpSpeedTest
 //      }
         server_LWIP: STest {
             parameters:
-                srvTcpType = "TCP_lwip";
+                srvTcpType = "TCP_lwIP";
         }
         configurator: FlatNetworkConfigurator {
             @display("p=70,40");
