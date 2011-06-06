@@ -59,7 +59,7 @@ class INET_API UDPBasicBurst : public UDPAppBase
     simtime_t nextBurst;
     simtime_t nextSleep;
     bool activeBurst;
-    bool isSink;
+    bool isSource;
     bool haveSleepDuration;
 
     static int counter; // counter for generating a global number for each packet
@@ -78,14 +78,13 @@ class INET_API UDPBasicBurst : public UDPAppBase
     //statistics:
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
-    static simsignal_t duplPkSignal;
+    static simsignal_t outOfOrderPkSignal;
     static simsignal_t dropPkSignal;
     static simsignal_t endToEndDelaySignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
     virtual cPacket *createPacket();
-    virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();
 

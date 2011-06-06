@@ -39,7 +39,7 @@ int UDPBasicBurst::counter;
 
 simsignal_t UDPBasicBurst::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::duplPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicBurst::outOfOrderPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::dropPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::endToEndDelaySignal = SIMSIGNAL_NULL;
 
@@ -97,15 +97,12 @@ void UDPBasicBurst::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
 
-    if (localPort != -1)
-        bindToPort(localPort);
+    bindToPort(localPort);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-    const char * random_add;
 
-    isSink = false;
 
     IPvXAddress myAddr = IPvXAddressResolver().resolve(this->getParentModule()->getFullPath().c_str());
     while ((token = tokenizer.nextToken()) != NULL)
@@ -120,23 +117,22 @@ void UDPBasicBurst::initialize(int stage)
         }
     }
 
-    if (destAddresses.empty())
+    isSource = !destAddresses.empty();
+
+    if (isSource)
     {
-        isSink = true;
-        return;
+        if (chooseDestAddrMode == ONCE)
+            destAddr = chooseDestAddr();
+
+        activeBurst = true;
+
+        timerNext = new cMessage("UDPBasicBurstTimer");
+        scheduleAt(startTime, timerNext);
     }
-
-    destAddr = IPvXAddress(); // clear destAddr
-
-    if (chooseDestAddrMode == ONCE)
-        destAddr = chooseDestAddr();
-
-    timerNext = new cMessage("UDPBasicBurstTimer");
-    scheduleAt(startTime, timerNext);
 
     sentPkSignal = registerSignal("sentPk");
     rcvdPkSignal = registerSignal("rcvdPk");
-    duplPkSignal = registerSignal("duplPk");
+    outOfOrderPkSignal = registerSignal("outOfOrderPk");
     dropPkSignal = registerSignal("dropPk");
     endToEndDelaySignal = registerSignal("endToEndDelay");
 }
@@ -163,14 +159,6 @@ cPacket *UDPBasicBurst::createPacket()
     return payload;
 }
 
-void UDPBasicBurst::sendPacket()
-{
-    cPacket *payload = createPacket();
-    emit(sentPkSignal, payload);
-    sendToUDP(payload, localPort, destAddr, destPort);
-    numSent++;
-}
-
 void UDPBasicBurst::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
@@ -178,7 +166,7 @@ void UDPBasicBurst::handleMessage(cMessage *msg)
         if (stopTime <= 0 || simTime() < stopTime)
         {
             // send and reschedule next sending
-            if (!isSink) // if the node is a sink, don't generate messages
+            if (isSource) // if the node is a sink, don't generate messages
                 generateBurst();
         }
     }
@@ -204,7 +192,7 @@ void UDPBasicBurst::processPacket(cPacket *msg)
         return;
     }
 
-    if (msg->hasPar("sourceId"))
+    if (msg->hasPar("sourceId") && msg->hasPar("msgId"))
     {
         // duplicate control
         int moduleId = (int)msg->par("sourceId");
@@ -214,9 +202,9 @@ void UDPBasicBurst::processPacket(cPacket *msg)
         {
             if (it->second >= msgId)
             {
-                EV << "Duplicated packet: ";
+                EV << "Out of order packet: ";
                 printPacket(msg);
-                emit(duplPkSignal, msg);
+                emit(outOfOrderPkSignal, msg);
                 delete msg;
                 numDuplicated++;
                 return;
@@ -228,7 +216,7 @@ void UDPBasicBurst::processPacket(cPacket *msg)
             sourceSequence[moduleId] = msgId;
     }
 
-    if (delayLimit >= 0)
+    if (delayLimit > 0)
     {
         if (simTime() - msg->getTimestamp() > delayLimit)
         {
@@ -256,14 +244,27 @@ void UDPBasicBurst::generateBurst()
     if (nextPkt < now)
         nextPkt = now;
 
-    nextPkt += messageFreqPar->doubleValue();
+    double messageFreq = messageFreqPar->doubleValue();
+    if (messageFreq <= 0.0)
+        throw cRuntimeError(this, "The messageFreq parameter must be bigger than 0");
+    nextPkt += messageFreq;
 
-    if (nextBurst <= now) // new burst
+    if (activeBurst && nextBurst <= now) // new burst
     {
-        nextSleep = now + burstDurationPar->doubleValue();
-        nextBurst = nextSleep + sleepDurationPar->doubleValue();
-        if (nextBurst <= now || nextBurst <= nextPkt)
-            nextBurst = nextPkt;
+        double burstDuration = burstDurationPar->doubleValue();
+        if (burstDuration < 0.0)
+            throw cRuntimeError(this, "The burstDuration parameter mustn't be smaller than 0");
+        double sleepDuration = sleepDurationPar->doubleValue();
+
+        if (burstDuration == 0.0)
+            activeBurst = false;
+        else
+        {
+            if (sleepDuration < 0.0)
+                throw cRuntimeError(this, "The sleepDuration parameter mustn't be smaller than 0");
+            nextSleep = now + burstDuration;
+            nextBurst = nextSleep + sleepDuration;
+        }
 
         if (chooseDestAddrMode == PER_BURST)
             destAddr = chooseDestAddr();
@@ -279,7 +280,7 @@ void UDPBasicBurst::generateBurst()
     numSent++;
 
     // Next timer
-    if (nextPkt >= nextSleep)
+    if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
     scheduleAt(nextPkt, timerNext);
