@@ -1,3 +1,7 @@
+2011-06-04  Thomas Reschka
+
+    * added check for lost FIN (without user data) in retransmitOneSegment() to fix bug #212.
+
 2011-02-15  Zoltan Bojthe
 
     * added some improvements:
