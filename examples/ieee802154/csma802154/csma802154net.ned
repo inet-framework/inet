@@ -36,7 +36,7 @@ network csma802154net
                 x = ((index%floor(sqrt(numFixHosts)))*nodeSeparation)+(nodeSeparation);
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
