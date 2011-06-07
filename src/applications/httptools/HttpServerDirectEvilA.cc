@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -34,30 +35,30 @@ Define_Module(HttpServerDirectEvilA);
 
 void HttpServerDirectEvilA::initialize()
 {
-	HttpServerDirect::initialize();
+    HttpServerDirect::initialize();
 
-	badLow  = par("minBadRequests");
-	badHigh = par("maxBadRequests");
+    badLow = par("minBadRequests");
+    badHigh = par("maxBadRequests");
 
-	EV_INFO << "Badguy " << wwwName << " was initialized to launch an attack on www.good.com" << endl;
-	EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
+    EV_INFO << "Badguy " << wwwName << " was initialized to launch an attack on www.good.com" << endl;
+    EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
 }
 
 std::string HttpServerDirectEvilA::generateBody()
 {
-	int numImages = badLow+(int)uniform(0,badHigh-badLow);
-	double rndDelay;
-	string result;
+    int numImages = badLow+(int)uniform(0, badHigh-badLow);
+    double rndDelay;
+    string result;
 
-	char tempBuf[128];
-	for( int i=0; i<numImages; i++ )
-	{		
-		rndDelay = 10.0+uniform(0,2.0);
-		sprintf(tempBuf, "IMG%.4d.jpg;%s;%f\n", i, "www.good.com", rndDelay);
-		result.append(tempBuf);
-	}
+    char tempBuf[128];
+    for ( int i=0; i<numImages; i++ )
+    {
+        rndDelay = 10.0+uniform(0, 2.0);
+        sprintf(tempBuf, "IMG%.4d.jpg;%s;%f\n", i, "www.good.com", rndDelay);
+        result.append(tempBuf);
+    }
 
-	return result;
+    return result;
 }
 
 

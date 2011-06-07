@@ -2,7 +2,8 @@
 // ***************************************************************************
 //
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
 // behaviour in a high-fidelity manner along with a highly configurable
@@ -34,9 +35,9 @@ Define_Module(HttpServer);
 
 void HttpServer::initialize()
 {
-	HttpServerBase::initialize();
+    HttpServerBase::initialize();
 
-	EV_DEBUG << "Initializing server component (sockets version)" << endl;
+    EV_DEBUG << "Initializing server component (sockets version)" << endl;
 
     int port = par("port");
 
@@ -44,92 +45,92 @@ void HttpServer::initialize()
     listensocket.setOutputGate(gate("tcpOut"));
     listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
     listensocket.bind(port);
-	listensocket.setCallbackObject(this);
+    listensocket.setCallbackObject(this);
     listensocket.listen();
 
-	numBroken=0;
-	socketsOpened=0;
+    numBroken = 0;
+    socketsOpened = 0;
 
-	WATCH(numBroken);
-	WATCH(socketsOpened);
+    WATCH(numBroken);
+    WATCH(socketsOpened);
 }
 
 void HttpServer::finish()
 {
-	HttpServerBase::finish();
+    HttpServerBase::finish();
 
-	EV_SUMMARY << "Sockets opened: " << socketsOpened << endl;
-	EV_SUMMARY << "Broken connections: " << numBroken << endl;
+    EV_SUMMARY << "Sockets opened: " << socketsOpened << endl;
+    EV_SUMMARY << "Broken connections: " << numBroken << endl;
 
-	recordScalar("sock.opened", socketsOpened);
-	recordScalar("sock.broken", numBroken);
+    recordScalar("sock.opened", socketsOpened);
+    recordScalar("sock.broken", numBroken);
 
-	// Clean up sockets and datastructures
-	sockCollection.deleteSockets();
+    // Clean up sockets and datastructures
+    sockCollection.deleteSockets();
 }
 
 void HttpServer::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
-	{
-		// Self messages not used at the moment
-	}
-	else
-	{
-		EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-		TCPSocket *socket = sockCollection.findSocketFor(msg);
-		if (!socket)
-		{
-			EV_DEBUG << "No socket found for the message. Create a new one" << endl;
-			// new connection -- create new socket object and server process
-			socket = new TCPSocket(msg);
-			socket->setOutputGate(gate("tcpOut"));
-		    socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-			socket->setCallbackObject(this,socket);
-			sockCollection.addSocket(socket);
-		}
-		EV_DEBUG << "Process the message " << msg->getName() << endl;
-		socket->processMessage(msg);
-	}
-	HttpServerBase::handleMessage(msg);
+    {
+        // Self messages not used at the moment
+    }
+    else
+    {
+        EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
+        TCPSocket *socket = sockCollection.findSocketFor(msg);
+        if (!socket)
+        {
+            EV_DEBUG << "No socket found for the message. Create a new one" << endl;
+            // new connection -- create new socket object and server process
+            socket = new TCPSocket(msg);
+            socket->setOutputGate(gate("tcpOut"));
+            socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
+            socket->setCallbackObject(this, socket);
+            sockCollection.addSocket(socket);
+        }
+        EV_DEBUG << "Process the message " << msg->getName() << endl;
+        socket->processMessage(msg);
+    }
+    HttpServerBase::handleMessage(msg);
 }
 
 void HttpServer::socketEstablished(int connId, void *yourPtr)
 {
     EV_INFO << "connected socket with id=" << connId << endl;
-	socketsOpened++;
+    socketsOpened++;
 }
 
 void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
-	if ( yourPtr==NULL )
-	{
-		EV_ERROR << "Socket establish failure. Null pointer" << endl;
-		return;
-	}
-	TCPSocket *socket = (TCPSocket*)yourPtr;
+    if ( yourPtr==NULL )
+    {
+        EV_ERROR << "Socket establish failure. Null pointer" << endl;
+        return;
+    }
+    TCPSocket *socket = (TCPSocket*)yourPtr;
 
-	// Should be a HttpReplyMessage
-	EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
+    // Should be a HttpReplyMessage
+    EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
-	// call the message handler to process the message.
-	cMessage *reply = handleReceivedMessage(msg);
-	cPacket *pckt = check_and_cast<cPacket *>(msg);
-	if ( reply!=NULL )
-	{
-		socket->send(reply); // Send to socket if the reply is non-zero.
-	}
-	delete msg; // Delete the received message here. Must not be deleted in the handler!
+    // call the message handler to process the message.
+    cMessage *reply = handleReceivedMessage(msg);
+    cPacket *pckt = check_and_cast<cPacket *>(msg);
+    if ( reply!=NULL )
+    {
+        socket->send(reply); // Send to socket if the reply is non-zero.
+    }
+    delete msg; // Delete the received message here. Must not be deleted in the handler!
 }
 
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)
 {
-	if ( yourPtr==NULL )
-	{
-		EV_ERROR << "Socket establish failure. Null pointer" << endl;
-		return;
-	}
-	TCPSocket *socket = (TCPSocket*)yourPtr;
+    if ( yourPtr==NULL )
+    {
+        EV_ERROR << "Socket establish failure. Null pointer" << endl;
+        return;
+    }
+    TCPSocket *socket = (TCPSocket*)yourPtr;
 
     // close the connection (if not already closed)
     if (socket->getState()==TCPSocket::PEER_CLOSED)
@@ -143,15 +144,15 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-	if ( yourPtr==NULL )
-	{
-		EV_ERROR << "Socket establish failure. Null pointer" << endl;
-		return;
-	}
-	// Cleanup
-	TCPSocket *socket = (TCPSocket*)yourPtr;
-	sockCollection.removeSocket(socket);
-	delete socket;
+    if ( yourPtr==NULL )
+    {
+        EV_ERROR << "Socket establish failure. Null pointer" << endl;
+        return;
+    }
+    // Cleanup
+    TCPSocket *socket = (TCPSocket*)yourPtr;
+    sockCollection.removeSocket(socket);
+    delete socket;
 }
 
 void HttpServer::socketFailure(int connId, void *yourPtr, int code)
@@ -161,21 +162,21 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-	if ( yourPtr==NULL )
-	{
-		EV_ERROR << "Socket establish failure. Null pointer" << endl;
-		return;
-	}
-	TCPSocket *socket = (TCPSocket*)yourPtr;
+    if ( yourPtr==NULL )
+    {
+        EV_ERROR << "Socket establish failure. Null pointer" << endl;
+        return;
+    }
+    TCPSocket *socket = (TCPSocket*)yourPtr;
 
-	if (code==TCP_I_CONNECTION_RESET)
-		EV_WARNING << "Connection reset!\\n";
-	else if (code==TCP_I_CONNECTION_REFUSED)
-		EV_WARNING << "Connection refused!\\n";
+    if (code==TCP_I_CONNECTION_RESET)
+        EV_WARNING << "Connection reset!\\n";
+    else if (code==TCP_I_CONNECTION_REFUSED)
+        EV_WARNING << "Connection refused!\\n";
 
-	// Cleanup
-	sockCollection.removeSocket(socket);
-	delete socket;
+    // Cleanup
+    sockCollection.removeSocket(socket);
+    delete socket;
 }
 
 

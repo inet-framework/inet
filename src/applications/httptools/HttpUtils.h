@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -45,7 +46,7 @@
 
 
 /** @brief type of returned content. Used in http responses. */
-enum CONTENT_TYPE_ENUM {rt_unknown,rt_html_page,rt_image,rt_text};
+enum CONTENT_TYPE_ENUM {rt_unknown, rt_html_page, rt_image, rt_text};
 
 using namespace std;
 
@@ -56,14 +57,14 @@ string trimRight( string str, string delim );
 string trim( string str );
 string extractServerName( const char *path );
 string extractResourceName( const char *path );
-std::string getDelimited(string str, string ldelim, string rdelim="");
+std::string getDelimited(string str, string ldelim, string rdelim = "");
 std::vector<std::string> parseResourceName(string resource);
 CONTENT_TYPE_ENUM getResourceCategory(vector<std::string> res);
 CONTENT_TYPE_ENUM getResourceCategory(string resourceExt);
 string htmlErrFromCode(int code);
-double safeatof(const char* strval, double defaultVal=0.0);
-int safeatoi(const char* strval, int defaultVal=0);
-int safeatobool(const char* strval, bool defaultVal=false);
+double safeatof(const char* strval, double defaultVal = 0.0);
+int safeatoi(const char* strval, int defaultVal = 0);
+int safeatobool(const char* strval, bool defaultVal = false);
 std::vector<std::string> splitFile(string fileName);
 bool fileExists( const char *file );
 

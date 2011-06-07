@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -34,44 +35,44 @@ Define_Module(HttpServerDirect);
 
 void HttpServerDirect::initialize()
 {
-	HttpServerBase::initialize();
+    HttpServerBase::initialize();
 
-	EV_DEBUG << "Initializing direct server component\n";
+    EV_DEBUG << "Initializing direct server component\n";
 
-	// Set the linkspeed
-	linkSpeed = par("linkSpeed");
+    // Set the linkspeed
+    linkSpeed = par("linkSpeed");
 }
 
 void HttpServerDirect::finish()
 {
-	HttpServerBase::finish();
+    HttpServerBase::finish();
 }
 
 void HttpServerDirect::handleMessage(cMessage *msg)
 {
-	EV_DEBUG << "Handling received message " << msg->getName() << endl;
+    EV_DEBUG << "Handling received message " << msg->getName() << endl;
     if (msg->isSelfMessage())
     {
-		// Self messages are not used at the present
+        // Self messages are not used at the present
     }
-	else
-	{
-		HttpNodeBase *senderModule = dynamic_cast<HttpNodeBase*>(msg->getSenderModule());
-		if ( senderModule == NULL )
-		{
-			EV_ERROR << "Unspecified sender module in received message " << msg->getName() << endl;
-			delete msg;
-		}
+    else
+    {
+        HttpNodeBase *senderModule = dynamic_cast<HttpNodeBase*>(msg->getSenderModule());
+        if ( senderModule == NULL )
+        {
+            EV_ERROR << "Unspecified sender module in received message " << msg->getName() << endl;
+            delete msg;
+        }
 
-		EV_DEBUG << "Sender is " << senderModule->getFullName() 
-				 << " in host " << senderModule->getParentModule()->getFullName() << endl;
-		cMessage* reply = handleReceivedMessage(msg);
-		// Echo back to the requester
-		if ( reply!=NULL )
-			sendDirectToModule(senderModule,reply,0.0,rdReplyDelay);
-		delete msg;
-	}
-	HttpServerBase::handleMessage(msg);
+        EV_DEBUG << "Sender is " << senderModule->getFullName()
+                 << " in host " << senderModule->getParentModule()->getFullName() << endl;
+        cMessage* reply = handleReceivedMessage(msg);
+        // Echo back to the requester
+        if ( reply!=NULL )
+            sendDirectToModule(senderModule, reply, 0.0, rdReplyDelay);
+        delete msg;
+    }
+    HttpServerBase::handleMessage(msg);
 }
 
 
