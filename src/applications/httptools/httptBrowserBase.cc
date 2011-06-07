@@ -31,9 +31,8 @@
 #include "httptBrowserBase.h"
 
 httptBrowserBase::httptBrowserBase()
+: httptNodeBase()
 {
-	httptNodeBase::httptNodeBase();
-
 	m_bDisplayMessage = true;
 	m_bDisplayResponseContent = true;
     eventTimer = NULL;

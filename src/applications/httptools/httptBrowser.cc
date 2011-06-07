@@ -308,6 +308,7 @@ void httptBrowser::submitToSocket( const char* moduleName, int connectPort, MESS
 
 	// Create and initialize the socket
 	TCPSocket *socket = new TCPSocket();
+    socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
 	socket->setOutputGate(gate("tcpOut"));
 	sockCollection.addSocket(socket);
 
@@ -319,7 +320,7 @@ void httptBrowser::submitToSocket( const char* moduleName, int connectPort, MESS
 	socket->setCallbackObject(this,sockdata);
 
 	// Issue a connect to the socket for the specified module and port.
-    socket->connect(IPAddressResolver().resolve(moduleName), connectPort);
+    socket->connect(IPvXAddressResolver().resolve(moduleName), connectPort);
 }
 
 

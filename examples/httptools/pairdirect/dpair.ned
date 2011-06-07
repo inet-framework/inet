@@ -38,7 +38,7 @@ import inet.httptools.httptController;
 //
 // Simple scenario with a pair of nodes. Direct message passing used.
 //
-module httptDirectPair
+network httptDirectPair
 {
     parameters:
         @display("bgb=474,374");

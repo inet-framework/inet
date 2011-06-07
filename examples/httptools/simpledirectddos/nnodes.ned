@@ -52,7 +52,7 @@ channel ethernetline extends ned.DatarateChannel
 // The scenario consists of a number of clients and servers connected to two routers. The routers are connected
 // with a single link.
 //
-module httptNnodes
+network httptNnodes
 {
     parameters:
         double numservers @prompt("Number of servers") = default(10);

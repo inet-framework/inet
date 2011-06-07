@@ -12,17 +12,17 @@ import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 
 
-channel gigabitline extends ned.DatarateChannel
-{
-    parameters:
-        delay = 0.1us;
-        datarate = 1000*1000000;
-}
-
-module httptSockPair
+network httptSockPair
 {
     parameters:
         @display("bgb=474,374");
+    types:
+        channel gigabitline extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 0.1us;
+                datarate = 1000Mbps;
+        }
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:

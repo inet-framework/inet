@@ -36,12 +36,10 @@ void httptServerDirect::initialize()
 {
 	httptServerBase::initialize();
 
-	EV_DEBUG << "Initializiing direct server component\n";
+	EV_DEBUG << "Initializing direct server component\n";
 
 	// Set the linkspeed
 	linkSpeed = par("linkSpeed");
-	if ( linkSpeed == 0 ) linkSpeed = 1024*1024; // Default is 1 MBit/s
-	// @todo Use the new units feature in the ini file and skip scaling here
 }
 
 void httptServerDirect::finish()

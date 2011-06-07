@@ -56,7 +56,7 @@ double httptNodeBase::transmissionDelay( cMessage *msg )
 {
 	cPacket *pckt = check_and_cast<cPacket *>(msg);
 	if ( linkSpeed==0 ) return 0.0; // No delay if linkspeed unspecified
-	return pckt->getByteLength()/((double)linkSpeed/8);  // The linkspeed is in bits/s
+	return pckt->getBitLength()/((double)linkSpeed);  // The linkspeed is in bits/s
 }
 
 void httptNodeBase::logRequest( const httptRequestMessage* httpRequest )

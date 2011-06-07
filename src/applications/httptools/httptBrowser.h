@@ -34,7 +34,7 @@
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "httptBrowserBase.h"
 
 /**

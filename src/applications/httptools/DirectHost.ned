@@ -54,9 +54,8 @@ module DirectHost
 {
     parameters:
         double numTcpApps = default(0);		// The number of tcpApps in the array
-        string tcpAppType = default("");				// The type of contained tcpApps
     submodules:
-        tcpApp[numTcpApps]: <tcpAppType> like ITCPApp {
+        tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
                 @display("p=163,67;i=block/app");
         }

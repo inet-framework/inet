@@ -31,6 +31,9 @@
 
 package inet.httptools;
 
+import inet.applications.ITCPApp;
+
+
 //
 // httptServerEvilB
 //
@@ -47,7 +50,7 @@ package inet.httptools;
 // @version 0.9 
 // @author  Kristjan V. Jonsson
 //
-simple httptServerEvilB
+simple httptServerEvilB like ITCPApp
 {
     parameters:
         string www;				// The WWW name of the server

@@ -42,7 +42,7 @@ import inet.httptools.httptController;
 // a flashcrowd. Direct message passing. This scenario is similar to the 10servers
 // scenario used to demonstrate the sockets components.
 //
-module httptDirectFlash
+network httptDirectFlash
 {
     parameters:
         double num_browsers @prompt("Number of browsers") = default(2);

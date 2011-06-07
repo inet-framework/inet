@@ -37,10 +37,8 @@ void httptBrowserDirect::initialize(int stage)
 	httptBrowserBase::initialize(stage);
 	EV_DEBUG << "Initializing HTTP direct browser component\n";
 
-	// linkSpeed is used to model transmission delay. By default, 1 Mbit/s.
+	// linkSpeed is used to model transmission delay.
 	linkSpeed = par("linkSpeed");
-	if ( linkSpeed == 0 ) linkSpeed = 1024*1024;
-	else linkSpeed *= 1024*1024; // @todo: use the units convention for the ini file rather than multiplying to MBit/s
 }
 
 void httptBrowserDirect::finish()

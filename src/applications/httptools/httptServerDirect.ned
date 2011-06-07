@@ -60,7 +60,7 @@ simple httptServerDirect like ITCPApp
         string logFile = default("");						// Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition = default("");				// The site script file. Blank to disable.
         double activationTime @unit(s) = default(0s);		// The initial activation delay. Zero to disable.
-        double linkSpeed @unit(Mbits) = default(11Mbits);	// Used to model transmission delays.
+        double linkSpeed @unit(bps) = default(11Mbps);	// Used to model transmission delays.
         xml config;											// The XML configuration file for random sites        
     gates:
         input tcpIn;

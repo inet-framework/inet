@@ -61,7 +61,7 @@ simple httptBrowserDirect like ITCPApp
         string logFile = default("");							// Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
         string scriptFile = default("");						// The browsing script file. Blank to disable.
         double activationTime @unit(s) = default(0s);			// The initial activation delay. Zero to disable (seconds).
-        double linkSpeed @unit(Mbits) = default(11Mbits);		// Used to model transmission delays (MBit/s)
+        double linkSpeed @unit(bps) = default(11Mbps);		// Used to model transmission delays (Bit/s)
         xml config;												// The XML configuration file for the browser
     gates:
         input tcpIn;

@@ -42,6 +42,7 @@ void httptServer::initialize()
 
     TCPSocket listensocket;
     listensocket.setOutputGate(gate("tcpOut"));
+    listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
     listensocket.bind(port);
 	listensocket.setCallbackObject(this);
     listensocket.listen();
@@ -83,6 +84,7 @@ void httptServer::handleMessage(cMessage *msg)
 			// new connection -- create new socket object and server process
 			socket = new TCPSocket(msg);
 			socket->setOutputGate(gate("tcpOut"));
+		    socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
 			socket->setCallbackObject(this,socket);
 			sockCollection.addSocket(socket);
 		}
