@@ -1,0 +1,6 @@
+#!/bin/bash
+find -name "*.sca" -delete
+find -name "*.vec" -delete
+find -name "*.log" -delete
+find -name "*.*~" -delete
+find -name ".tkenvrc" -delete

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sample server parameters specification for HttpTools. -->
+<!-- The parameters describe the parameters of the servers. See also the specification files for the browsers. -->
+<root>
+	<!-- Use the server-profile categories to create profiles for server behaviour. 
+		 The profile can be selected per server at run-time by using the XPath argument in the initialization file.
+		 The following parameters are required:
+
+		 A random distribution is used for each of the parameters. normal, uniform, exponential and histogram random
+		 distributions are supported. See the documentation for more details.
+	-->
+    <server-profile id="normal">
+		<htmlPageSize type='exponential' mean='2000' min='1000' />
+		<replyDelay type='normal' mean='0.05' sd='0.01' nonNegative='true' min='0.01' />    
+		<textResourceSize type='exponential' mean='10000' min='1000' max='100000' />
+		<imageResourceSize type='exponential' mean='20000' min='1000' max='500000' />
+		<numResources type='uniform' beginning='0' end='20' />
+		<textImageResourceRatio type='uniform' beginning='0.2' end='0.8' />
+		<errorMessageSize type="constant" value="1024" />
+	</server-profile>
+</root>

@@ -1,0 +1,13 @@
+
+#
+# www_single_org_cross.def page definiton file for the pairs scenario
+#
+# Defines a page with several resource references to the site www.good.com
+#
+
+# Load some images
+images/imageA.jpg;www.good.com
+images/imageB.jpg;www.good.com
+images/imageC.jpg;www.good.com
+images/imageD.jpg;www.good.com
+
