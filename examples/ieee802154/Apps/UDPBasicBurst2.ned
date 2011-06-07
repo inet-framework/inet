@@ -36,7 +36,7 @@
 //#FIXME change message length to BYTES
 //
 
-package inet.applications.udpapp;
+package inet.examples.ieee802154.Apps;
 
 
 import inet.applications.IUDPApp;

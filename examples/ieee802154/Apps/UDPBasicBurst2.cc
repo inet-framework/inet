@@ -46,7 +46,6 @@ double UDPBasicBurst2::totalDelayFtoM;
 bool UDPBasicBurst2::isResultWrite;
 
 
-
 static bool selectFunctionName(cModule *mod, void *name)
 {
     return strcmp(mod->getName(), (char *)name) == 0;
@@ -56,7 +55,6 @@ static bool selectFunction(cModule *mod, void *name)
 {
     return strstr(mod->getName(), (char *)name) != NULL;
 }
-
 
 void UDPBasicBurst2::initialize(int stage)
 {
