@@ -64,6 +64,7 @@ class INET_API PingApp : public cSimpleModule
     cOutVector dropVector;
     long dropCount;
     long outOfOrderArrivalCount;
+    long numPongs;
 };
 
 
