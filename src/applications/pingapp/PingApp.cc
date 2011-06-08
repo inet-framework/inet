@@ -69,9 +69,10 @@ void PingApp::initialize()
     pingTxSignal = registerSignal("pingTx");
     pingRxSignal = registerSignal("pingRx");
 
-    dropCount = outOfOrderArrivalCount = 0;
+    dropCount = outOfOrderArrivalCount = numPongs = 0;
     WATCH(dropCount);
     WATCH(outOfOrderArrivalCount);
+    WATCH(numPongs);
 
     // schedule first ping (use empty destAddr or stopTime<=startTime to disable)
     if (par("destAddr").stringValue()[0] && (stopTime==0 || stopTime>=startTime))
@@ -216,6 +217,8 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
     emit(pingRxSignal, seqNo);
 
+	numPongs++;
+
     delayStat.collect(rtt);
     emit(endToEndDelaySignal, rtt);
 
@@ -249,7 +252,9 @@ void PingApp::finish()
 {
     if (sendSeqNo==0)
     {
-        EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+        if (printPing)
+        	EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+        recordScalar("Pings sent", sendSeqNo);
         return;
     }
 
@@ -260,17 +265,20 @@ void PingApp::finish()
     recordScalar("Ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
 
     // print it to stdout as well
-    cout << "--------------------------------------------------------" << endl;
-    cout << "\t" << getFullPath() << endl;
-    cout << "--------------------------------------------------------" << endl;
+    if (printPing)
+    {
+    	cout << "--------------------------------------------------------" << endl;
+    	cout << "\t" << getFullPath() << endl;
+    	cout << "--------------------------------------------------------" << endl;
 
-    cout << "sent: " << sendSeqNo
-         << "   drop rate (%): " << (100 * dropCount / (double)sendSeqNo) << endl;
-    cout << "round-trip min/avg/max (ms): "
-         << (delayStat.getMin()*1000.0) << "/"
-         << (delayStat.getMean()*1000.0) << "/"
-         << (delayStat.getMax()*1000.0) << endl;
-    cout << "stddev (ms): "<< (delayStat.getStddev()*1000.0)
-         << "   variance:" << delayStat.getVariance() << endl;
-    cout <<"--------------------------------------------------------" << endl;
+    	cout << "sent: " << sendSeqNo
+    			<< "   drop rate (%): " << (100 * dropCount / (double)sendSeqNo) << endl;
+    	cout << "round-trip min/avg/max (ms): "
+    			<< (delayStat.getMin()*1000.0) << "/"
+    			<< (delayStat.getMean()*1000.0) << "/"
+    			<< (delayStat.getMax()*1000.0) << endl;
+    	cout << "stddev (ms): "<< (delayStat.getStddev()*1000.0)
+        		 << "   variance:" << delayStat.getVariance() << endl;
+    	cout <<"--------------------------------------------------------" << endl;
+    }
 }

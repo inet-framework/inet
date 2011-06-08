@@ -69,6 +69,7 @@ class INET_API PingApp : public cSimpleModule
     static simsignal_t pingRxSignal;
     long dropCount;
     long outOfOrderArrivalCount;
+    long numPongs;
 };
 
 
