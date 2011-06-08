@@ -116,7 +116,7 @@ class INET_API MACAddress
     /**
      * Returns true this is a multicast logical address (starts with bit 1).
      */
-    bool isMulticast() const  {return address[0]&0x80;};
+    bool isMulticast() const  { return address[0] & 0x01; };
 
     /**
      * Returns true if all address bytes are zero.
