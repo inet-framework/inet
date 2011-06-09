@@ -96,7 +96,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
     const MACAddress& macAddr = frame->getReceiverAddress();
 #endif
 
-    if (!macAddr.isBroadcast())
+    if (!macAddr.isMulticast())
     {
         STAList::iterator it = staList.find(macAddr);
         if (it==staList.end() || it->second.status!=ASSOCIATED)
@@ -172,10 +172,10 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         return;
     }
 
-    // handle broadcast frames
-    if (frame->getAddress3().isBroadcast())
+    // handle broadcast/multicast frames
+    if (frame->getAddress3().isMulticast())
     {
-        EV << "Handling broadcast frame\n";
+        EV << "Handling multicast frame\n";
 
         if (hasRelayUnit)
         {

@@ -107,8 +107,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** Minimum contention window. */
     int cwMinData;
 
-    /** Contention window size for broadcast messages. */
-    int cwMinBroadcast;
+    /** Contention window size for multicast messages. */
+    int cwMinMulticast;
 
     /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
     static const int fragmentationThreshold = 2346;
@@ -128,7 +128,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
         WAITDIFS,
         BACKOFF,
         WAITACK,
-        WAITBROADCAST,
+        WAITMULTICAST,
         WAITCTS,
         WAITSIFS,
         RECEIVE,
@@ -224,8 +224,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     long numCollision;
     long numSent;
     long numReceived;
-    long numSentBroadcast;
-    long numReceivedBroadcast;
+    long numSentMulticast;
+    long numReceivedMulticast;
     static simsignal_t stateSignal;
     static simsignal_t radioStateSignal;
     //@}
@@ -302,7 +302,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual void cancelDIFSPeriod();
 
     virtual void scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
-    virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    virtual void scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
     virtual void cancelTimeoutPeriod();
 
     virtual void scheduleCTSTimeoutPeriod();
@@ -331,7 +331,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
     virtual void sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend);
     virtual void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    virtual void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
   protected:
@@ -343,7 +343,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
     virtual Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     virtual Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
-    virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual Ieee80211DataOrMgmtFrame *buildMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
     /**
@@ -380,8 +380,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
     virtual bool isMediumFree() const;
 
-    /** @brief Returns true if message is a broadcast message */
-    virtual bool isBroadcast(Ieee80211Frame *msg) const;
+    /** @brief Returns true if message is a multicast message */
+    virtual bool isMulticast(Ieee80211Frame *msg) const;
 
     /** @brief Returns true if message destination address is ours */
     virtual bool isForUs(Ieee80211Frame *msg) const;

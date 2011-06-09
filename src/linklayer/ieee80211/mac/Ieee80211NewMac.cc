@@ -36,7 +36,7 @@ Register_Enum(Ieee80211NewMac,
                Ieee80211NewMac::WAITAIFS,
                Ieee80211NewMac::BACKOFF,
                Ieee80211NewMac::WAITACK,
-               Ieee80211NewMac::WAITBROADCAST,
+               Ieee80211NewMac::WAITMULTICAST,
                Ieee80211NewMac::WAITCTS,
                Ieee80211NewMac::WAITSIFS,
                Ieee80211NewMac::RECEIVE));
@@ -168,10 +168,10 @@ void Ieee80211NewMac::initialize(int stage)
         if (cwMaxData == -1) cwMaxData = CW_MAX;
         ASSERT(cwMaxData >= 0 && cwMaxData <= 32767);
 
-        cwMinBroadcast = par("cwMinBroadcast");
-        if (cwMinBroadcast == -1) cwMinBroadcast = 31;
-        ASSERT(cwMinBroadcast >= 0);
-        EV<<" cwMinBroadcast="<<cwMinBroadcast;
+        cwMinMulticast = par("cwMinMulticast");
+        if (cwMinMulticast == -1) cwMinMulticast = 31;
+        ASSERT(cwMinMulticast >= 0);
+        EV<<" cwMinMulticast="<<cwMinMulticast;
 
         defaultAC = par("defaultAC");
         if (classifier && dynamic_cast<Ieee80211eClassifier*>(classifier))
@@ -424,8 +424,8 @@ void Ieee80211NewMac::initialize(int stage)
         numCollision = 0;
         numInternalCollision = 0;
         numReceived = 0;
-        numSentBroadcast = -1; //sorin
-        numReceivedBroadcast = 0;
+        numSentMulticast = -1; //sorin
+        numReceivedMulticast = 0;
         numBites = 0;
         numSentTXOP = 0;
         numReceivedOther = 0;
@@ -500,8 +500,8 @@ void Ieee80211NewMac::initWatches()
      WATCH(numBites);
      WATCH(numSentTXOP);
      WATCH(numReceived);
-     WATCH(numSentBroadcast);
-     WATCH(numReceivedBroadcast);
+     WATCH(numSentMulticast);
+     WATCH(numReceivedMulticast);
      for (int i=0; i<numCategories(); i++)
          WATCH(edcCAF[i].numDropped);
      if (throughputTimer)
@@ -1045,22 +1045,22 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   ASSERT(0==1);
                                   ;);
             FSMA_Event_Transition(Immediate-Transmit-RTS,
-                                  isMsgAIFS(msg) && !transmissionQueue()->empty() && !isBroadcast(getCurrentTransmission())
+                                  isMsgAIFS(msg) && !transmissionQueue()->empty() && !isMulticast(getCurrentTransmission())
                                   && getCurrentTransmission()->getByteLength() >= rtsThreshold && !backoff(),
                                   WAITCTS,
                                   sendRTSFrame(getCurrentTransmission());
                                   oldcurrentAC = currentAC;
                                   cancelAIFSPeriod();
                                  );
-            FSMA_Event_Transition(Immediate-Transmit-Broadcast,
-                                  isMsgAIFS(msg) && isBroadcast(getCurrentTransmission()) && !backoff(),
-                                  WAITBROADCAST,
-                                  sendBroadcastFrame(getCurrentTransmission());
+            FSMA_Event_Transition(Immediate-Transmit-Multicast,
+                                  isMsgAIFS(msg) && isMulticast(getCurrentTransmission()) && !backoff(),
+                                  WAITMULTICAST,
+                                  sendMulticastFrame(getCurrentTransmission());
                                   oldcurrentAC = currentAC;
                                   cancelAIFSPeriod();
                                  );
             FSMA_Event_Transition(Immediate-Transmit-Data,
-                                  isMsgAIFS(msg) && !isBroadcast(getCurrentTransmission()) && !backoff(),
+                                  isMsgAIFS(msg) && !isMulticast(getCurrentTransmission()) && !backoff(),
                                   WAITACK,
                                   sendDataFrame(getCurrentTransmission());
                                   oldcurrentAC = currentAC;
@@ -1135,7 +1135,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
             if (getCurrentTransmission())
             {
                 FSMA_Event_Transition(Transmit-RTS,
-                                      msg == endBackoff() && !isBroadcast(getCurrentTransmission())
+                                      msg == endBackoff() && !isMulticast(getCurrentTransmission())
                                       && getCurrentTransmission()->getByteLength() >= rtsThreshold,
                                       WAITCTS,
                                       sendRTSFrame(getCurrentTransmission());
@@ -1144,17 +1144,17 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                       decreaseBackoffPeriod();
                                       cancelBackoffPeriod();
                                      );
-                FSMA_Event_Transition(Transmit-Broadcast,
-                                      msg == endBackoff() && isBroadcast(getCurrentTransmission()),
-                                      WAITBROADCAST,
-                                      sendBroadcastFrame(getCurrentTransmission());
+                FSMA_Event_Transition(Transmit-Multicast,
+                                      msg == endBackoff() && isMulticast(getCurrentTransmission()),
+                                      WAITMULTICAST,
+                                      sendMulticastFrame(getCurrentTransmission());
                                       oldcurrentAC = currentAC;
                                       cancelAIFSPeriod();
                                       decreaseBackoffPeriod();
                                       cancelBackoffPeriod();
                                      );
                 FSMA_Event_Transition(Transmit-Data,
-                                      msg == endBackoff() && !isBroadcast(getCurrentTransmission()),
+                                      msg == endBackoff() && !isMulticast(getCurrentTransmission()),
                                       WAITACK,
                                       sendDataFrame(getCurrentTransmission());
                                       oldcurrentAC = currentAC;
@@ -1170,7 +1170,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   generateBackoffPeriod();
                                  );
             FSMA_Event_Transition(AIFS-Immediate-Transmit-RTS,
-                                  isMsgAIFS(msg) && !transmissionQueue()->empty() && !isBroadcast(getCurrentTransmission())
+                                  isMsgAIFS(msg) && !transmissionQueue()->empty() && !isMulticast(getCurrentTransmission())
                                   && getCurrentTransmission()->getByteLength() >= rtsThreshold && !backoff(),
                                   WAITCTS,
                                   sendRTSFrame(getCurrentTransmission());
@@ -1179,17 +1179,17 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   decreaseBackoffPeriod();
                                   cancelBackoffPeriod();
                                  );
-            FSMA_Event_Transition(AIFS-Immediate-Transmit-Broadcast,
-                                  isMsgAIFS(msg) && isBroadcast(getCurrentTransmission()) && !backoff(),
-                                  WAITBROADCAST,
-                                  sendBroadcastFrame(getCurrentTransmission());
+            FSMA_Event_Transition(AIFS-Immediate-Transmit-Multicast,
+                                  isMsgAIFS(msg) && isMulticast(getCurrentTransmission()) && !backoff(),
+                                  WAITMULTICAST,
+                                  sendMulticastFrame(getCurrentTransmission());
                                   oldcurrentAC = currentAC;
                                   cancelAIFSPeriod();
                                   decreaseBackoffPeriod();
                                   cancelBackoffPeriod();
                                  );
             FSMA_Event_Transition(AIFS-Immediate-Transmit-Data,
-                                  isMsgAIFS(msg) && !isBroadcast(getCurrentTransmission()) && !backoff(),
+                                  isMsgAIFS(msg) && !isMulticast(getCurrentTransmission()) && !backoff(),
                                   WAITACK,
                                   sendDataFrame(getCurrentTransmission());
                                   oldcurrentAC = currentAC;
@@ -1295,21 +1295,21 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                  );
         }
-        // wait until broadcast is sent
-        FSMA_State(WAITBROADCAST)
+        // wait until multicast is sent
+        FSMA_State(WAITMULTICAST)
         {
-            FSMA_Enter(scheduleBroadcastTimeoutPeriod(getCurrentTransmission()));
+            FSMA_Enter(scheduleMulticastTimeoutPeriod(getCurrentTransmission()));
             /*
-                        FSMA_Event_Transition(Transmit-Broadcast,
+                        FSMA_Event_Transition(Transmit-Multicast,
                                               msg == endTimeout,
                                               IDLE,
                             currentAC=oldcurrentAC;
                             finishCurrentTransmission();
-                            numSentBroadcast++;
+                            numSentMulticast++;
                         );
             */
             ///changed
-            FSMA_Event_Transition(Transmit-Broadcast,
+            FSMA_Event_Transition(Transmit-Multicast,
                                   msg == endTimeout,
                                   DEFER,
                                   currentAC = oldcurrentAC;
@@ -1317,7 +1317,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   numBites += fr->getBitLength();
                                   bites() += fr->getBitLength();
                                   finishCurrentTransmission();
-                                  numSentBroadcast++;
+                                  numSentMulticast++;
                                   resetCurrentBackOff();
                                  );
         }
@@ -1393,11 +1393,11 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                      else
                                          resetStateVariables();
                                      );
-            FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
-                                     isLowerMsg(msg) && isBroadcast(frame) && !isSentByUs(frame) && isDataOrMgmtFrame(frame),
+            FSMA_No_Event_Transition(Immediate-Receive-Multicast,
+                                     isLowerMsg(msg) && isMulticast(frame) && !isSentByUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
                                      sendUp(frame);
-                                     numReceivedBroadcast++;
+                                     numReceivedMulticast++;
                                      if (fixFSM)
                                          finishReception();
                                      else
@@ -1567,8 +1567,8 @@ simtime_t Ieee80211NewMac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
     int cw;
 
     EV << "generating backoff slot number for retry: " << r << endl;
-    if (msg && isBroadcast(msg))
-        cw = cwMinBroadcast;
+    if (msg && isMulticast(msg))
+        cw = cwMinMulticast;
     else
     {
         ASSERT(0 <= r && r < transmissionLimit);
@@ -1680,11 +1680,11 @@ void Ieee80211NewMac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameT
     }
 }
 
-void Ieee80211NewMac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211NewMac::scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     if (!endTimeout->isScheduled())
     {
-        EV << "scheduling broadcast timeout period\n";
+        EV << "scheduling multicast timeout period\n";
         scheduleAt(simTime() + computeFrameDuration(frameToSend), endTimeout);
     }
 }
@@ -1856,9 +1856,9 @@ void Ieee80211NewMac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
 }
 
-void Ieee80211NewMac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211NewMac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
-    EV << "sending Broadcast frame\n";
+    EV << "sending Multicast frame\n";
     sendDown(setBitrateFrame(buildDataFrame(frameToSend)));
 }
 
@@ -1883,7 +1883,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildDataFrame(Ieee80211DataOrMgmtFra
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
-    if (isBroadcast(frameToSend))
+    if (isMulticast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
     {
@@ -1942,7 +1942,7 @@ Ieee80211CTSFrame *Ieee80211NewMac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
     return frame;
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
@@ -2069,10 +2069,9 @@ bool Ieee80211NewMac::isMediumFree()
     return radioState == RadioState::IDLE && !endReserve->isScheduled();
 }
 
-bool Ieee80211NewMac::isBroadcast(Ieee80211Frame *frame)
+bool Ieee80211NewMac::isMulticast(Ieee80211Frame *frame)
 {
-    return ( frame && frame->getReceiverAddress().isBroadcast() ) ||
-           ( frame && frame->getReceiverAddress().isMulticast() );
+    return frame && frame->getReceiverAddress().isMulticast();
 }
 
 bool Ieee80211NewMac::isForUs(Ieee80211Frame *frame)

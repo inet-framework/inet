@@ -85,7 +85,7 @@ simple Ieee80211NewMac
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
+        int cwMinMulticast = default(-1); // contention window for multicast messages, -1 means default
         bool fixFSM = default(false);
 // If -1 The mac compute the  PHY_HEADER_LENGTH in function of the modulation type
         double PHY_HEADER_LENGTH = default(-1);// if negative the code use 26 usec
