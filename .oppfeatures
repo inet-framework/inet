@@ -73,7 +73,6 @@
                        inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp
                        inet.nodes.inet
-                       inet.nodes.wireless
                        inet.util.headerserializers.ipv4
                       "
         extraSourceFolders = ""
@@ -146,7 +145,7 @@
         name="xMIPv6 examples"
         description = "Examples for Mobile IPv6 support (xMIPv6)"
         initiallyEnabled = "true"
-        requires = "xMIPv6"
+        requires = "xMIPv6 radio Ethernet"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.mobileipv6
@@ -541,7 +540,7 @@
         name="VoIP examples"
         description = "Example VoIP simulations"
         initiallyEnabled = "false"
-        requires = "VoIPTool"
+        requires = "VoIPTool IPv4 Ethernet"
         labels = "examples"
         nedPackages = "
                        inet.examples.voiptool

@@ -15,9 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.wireless;
-
-import inet.nodes.inet.StandardHost;
+package inet.nodes.inet;
 
 //
 // Models a host with one wireless (802.11) card in infrastructure mode.

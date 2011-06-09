@@ -17,9 +17,10 @@
 //
 
 package inet.examples.manetrouting.fg80211;
-import inet.world.radio.ChannelControl;
-import inet.nodes.wireless.AdhocHost;
+
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.AdhocHost;
+import inet.world.radio.ChannelControl;
 
 
 network Fg80211Net

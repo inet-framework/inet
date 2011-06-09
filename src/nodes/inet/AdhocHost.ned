@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.nodes.wireless;
+package inet.nodes.inet;
 
 import inet.networklayer.IManetRouting;
 
@@ -38,7 +38,7 @@ module AdhocHost extends WirelessHost
     string routingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman") = default("");  // used mobile routing protocol. see: inet.networklayer.manetrouting
     submodules:
         manetrouting: <routingProtocol> like IManetRouting if routingProtocol != "" {
-            @display("p=159,287");
+            @display("p=522,307");
         }
     connections:
         networkLayer.manetOut --> manetrouting.from_ip if routingProtocol != "";
