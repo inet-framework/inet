@@ -124,14 +124,10 @@ void BasicMobility::handleMessage(cMessage * msg)
 
 void BasicMobility::positionUpdated()
 {
-//    cc->updateHostPosition(myHostRef, pos);
-
     if (ev.isGUI())
     {
         hostPtr->getDisplayString().setTagArg("p", 0, (long)pos.x);
         hostPtr->getDisplayString().setTagArg("p", 1, (long)pos.y);
-//        double r = cc->getCommunicationRange(myHostRef);
-//        hostPtr->getDisplayString().setTagArg("r", 0, (long) r);
     }
 
     nb->fireChangeNotification(NF_HOSTPOSITION_UPDATED, &pos);

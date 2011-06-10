@@ -68,15 +68,16 @@ void IPv4::initialize()
     // check if there is a protocol -> gate mapping
     int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
     if (gateSize("transportOut")-1<gateindex)
-           return;
+        return;
 
     // check if that gate is connected at all
     cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
     if (manetgate==NULL)
-           return;
+        return;
+
     cModule *destmod = manetgate->getOwnerModule();
     if (destmod==NULL)
-           return;
+        return;
 
     // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
     // this prevents performance loss with other protocols that use pro active routing and do not need
@@ -515,6 +516,7 @@ void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, 
         delete datagram;
     }
 }
+
 #ifndef NEWFRAGMENT
 void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 {
@@ -573,15 +575,19 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         // discard the packet
         int gateindex = mapping.getOutputGateForProtocol(protocol);
 
-        if (gate("transportOut", gateindex)->isPathOK()) {
-        send(packet, "transportOut", gateindex);
-        } else {
+        if (gate("transportOut", gateindex)->isPathOK())
+        {
+            send(packet, "transportOut", gateindex);
+        }
+        else
+        {
             EV << "L3 Protocol not connected. discarding packet" << endl;
             delete (packet);
+        }
     }
 }
-}
 #endif
+
 cPacket *IPv4::decapsulateIP(IPv4Datagram *datagram)
 {
     // decapsulate transport packet
@@ -792,7 +798,6 @@ void IPv4::controlMessageToManetRouting(int code, IPv4Datagram *datagram)
         return; // Dsr don't use update code, the Dsr datagram is the update.
     }
 
-
     control = new ControlManetRouting();
     control->setOptionCode(code);
 
@@ -887,9 +892,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
 
 void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 {
-
     // reassemble the packet (if fragmented)
-
 
     int headerLength;
     if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
