@@ -54,8 +54,6 @@ class INET_API MACRelayUnitBase : public cSimpleModule
 
     // Parameters controlling how the switch operates
     int numPorts;               // Number of ports of the switch
-    int numWirelessPorts;       // Number of ports attached to wireless interfaces
-                                // The wireless IFs must be the first ports followed by the eth IFs
     int addressTableSize;       // Maximum size of the Address Table
     simtime_t agingTime;        // Determines when Ethernet entries are to be removed
 

@@ -47,7 +47,6 @@ package inet.linklayer;
 moduleinterface IMACRelayUnit
 {
     parameters:
-        int numWirelessPorts; // how many wireless NICs are connected. They MUST be connected from 0..numWirelessIntarfaces-1. Ethernet NICs should come afterwards.
         string addressTableFile;  // set to empty string if not used
         int addressTableSize; // max size of address table
         double agingTime @unit("s"); // max idle time for address table entries
@@ -61,7 +60,6 @@ moduleinterface IMACRelayUnit
 simple MACRelayUnit_None like IMACRelayUnit
 {
     parameters:
-        int numWirelessPorts = default(0); // see ~IMACRelayUnit
         string addressTableFile = default("");  // see ~IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit

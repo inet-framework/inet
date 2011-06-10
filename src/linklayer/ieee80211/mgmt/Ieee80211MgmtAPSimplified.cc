@@ -79,16 +79,14 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
         // if the frame needs to be distributed onto the wireless LAN too,
         // then relayUnit will send a copy back to us.
 #ifdef WITH_ETHERNET
-        send(convertToEtherFrame(frame), "uppergateOut");
+        send(convertToEtherFrame(frame->dup()), "uppergateOut");
 #else
-        send(frame, "uppergateOut");
+        send(frame->dup(), "uppergateOut");
 #endif
     }
-    else
-    {
-        // send it out to the destination STA
-        distributeReceivedDataFrame(frame);
-    }
+
+    // send it out to the destination STA
+    distributeReceivedDataFrame(frame);
 }
 
 void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

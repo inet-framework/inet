@@ -53,7 +53,6 @@ module AccessPoint
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:
                 @display("p=151,121");
-                numWirelessPorts = numRadios;
         }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:

@@ -180,7 +180,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         if (hasRelayUnit)
         {
 #ifdef WITH_ETHERNET
-            send(convertToEtherFrame((Ieee80211DataFrame *)frame->dup()), "uppergateOut");
+            send(convertToEtherFrame(frame->dup()), "uppergateOut");
 #else
             send(frame->dup(), "uppergateOut");
 #endif

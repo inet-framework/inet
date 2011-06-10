@@ -37,7 +37,6 @@ import inet.linklayer.IMACRelayUnit;
 simple MACRelayUnitPP like IMACRelayUnit
 {
     parameters:
-        int numWirelessPorts = default(0); // see ~IMACRelayUnit
         string addressTableFile = default("");  // see ~IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit

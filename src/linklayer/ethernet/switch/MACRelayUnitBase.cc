@@ -69,7 +69,6 @@ void MACRelayUnitBase::initialize()
         error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
 
     // other parameters
-    numWirelessPorts = par("numWirelessPorts");
     addressTableSize = par("addressTableSize");
     addressTableSize = addressTableSize >= 0 ? addressTableSize : 0;
 
@@ -104,14 +103,14 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     int outputport = getPortForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
-    if (inputport==outputport && outputport>=numWirelessPorts)
+    if (inputport == outputport)
     {
         EV << "Output port is same as input port, " << frame->getFullName() <<
               " dest " << frame->getDest() << ", discarding frame\n";
         delete frame;
         return;
     }
-    if (outputport>=0)
+    if (outputport >= 0)
     {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
         send(frame, "lowerLayerOut", outputport);
@@ -126,7 +125,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
 void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 {
     for (int i=0; i<numPorts; ++i)
-        if (i!=inputport || i<numWirelessPorts)  // we always send out on a wireless port even if we received it from the same port
+        if (i != inputport)
             send((EtherFrame*)frame->dup(), "lowerLayerOut", i);
     delete frame;
 }
