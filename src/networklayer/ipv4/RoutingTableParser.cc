@@ -41,9 +41,7 @@ const int MAX_ENTRY_STRING_SIZE = 500;
 const char  *IFCONFIG_START_TOKEN = "ifconfig:",
             *IFCONFIG_END_TOKEN = "ifconfigend.",
             *ROUTE_START_TOKEN = "route:",
-            *ROUTE_END_TOKEN = "routeend.",
-            *RULES_START_TOKEN = "rules:",
-            *RULES_END_TOKEN = "rulesend.";
+            *ROUTE_END_TOKEN = "routeend.";
 
 RoutingTableParser::RoutingTableParser(IInterfaceTable *i, IRoutingTable *r)
 {
@@ -80,7 +78,6 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     char *file = new char[MAX_FILESIZE];
     char *ifconfigFile = NULL;
     char *routeFile = NULL;
-    char *rulesFile = NULL;
 
     fp = fopen(filename, "r");
     if (fp == NULL)
@@ -120,13 +117,6 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
                                                ROUTE_END_TOKEN);
                 //PRINTF("Filtered File 2 created:\n%s\n", routeFile);
             }
-            // copy into rules filtered chararray
-            if (streq(file + charpointer, RULES_START_TOKEN)) {
-                rulesFile = createFilteredFile(file,
-                                               charpointer,
-                                               RULES_END_TOKEN);
-                //PRINTF("Filtered File 2 created:\n%s\n", routeFile);
-            }
         }
     }
 
@@ -137,8 +127,6 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
         parseInterfaces(ifconfigFile);
     if (routeFile)
         parseRouting(routeFile);
-    if (rulesFile)
-        parseRules(rulesFile);
 
     delete ifconfigFile;
     delete routeFile;
@@ -392,171 +380,5 @@ void RoutingTableParser::parseRouting(char *routeFile)
 
         // add entry
         rt->addRoute(e);
-    }
-}
-
-
-void RoutingTableParser::parseRules(char *rulesFile)
-{
-    char *str = new char[MAX_ENTRY_STRING_SIZE];
-
-    int pos = strlen(RULES_START_TOKEN);
-    skipBlanks(rulesFile, pos);
-
-
-    while (rulesFile[pos] != '\0')
-    {
-        // 1st entry: Host
-        pos += strcpyword(str, rulesFile + pos);
-        skipBlanks(rulesFile, pos);
-        if (!strcmp(str, "iptables"))
-        {
-             opp_error("Syntax error in routing file: `%s' on 1st column should be `DROP' now is the only rule accepted", str);
-        }
-        int position = -1;
-        IPv4RouteRule *e = new IPv4RouteRule();
-        while (rulesFile[pos] != '\0')
-        {
-              pos += strcpyword(str, rulesFile + pos);
-              skipBlanks(rulesFile, pos);
-              if (!strcmp(str, "-A"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   if (!strcmp(str, "INPUT"))
-                       position = 1;
-                   else if (!strcmp(str, "OUTPUT"))
-                       position = 0;
-                   else
-                       opp_error("Syntax error in routing file: `%s' should be INPUT or OUTPUT", str);
-                   continue;
-              }
-              if (!strcmp(str, "-s"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   // find mask
-                   IPv4Address mask("255.255.255.255");
-                   char * p = strstr(str, "/");
-                   if (p!=NULL)
-                   {
-                       char strAux[30];
-                       strcpy(strAux, p+1);
-                       int size = atoi(strAux);
-                       unsigned int m = 1;
-                       for (int i=0; i<size; i++)
-                       {
-                           m = (m<<1)|m;
-                       }
-                       IPv4Address aux(m);
-                       mask = aux;
-                       *p = '\0';
-                   }
-
-                   if (!IPv4Address::isWellFormed(str))
-                       opp_error("Syntax error in routing file: `%s' should be a valid IPv4 address", str);
-                   e->setSrcAddress(IPv4Address(str));
-                   e->setSrcNetmask(mask);
-                   continue;
-              }
-              if (!strcmp(str, "-d"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   IPv4Address mask("255.255.255.255");
-                   char * p = strstr(str, "/");
-                   if (p!=NULL)
-                   {
-                       char strAux[30];
-                       strcpy(strAux, p+1);
-                       int size = atoi(strAux);
-                       unsigned int m = 1;
-                       for (int i=0; i<size; i++)
-                       {
-                           m = (m<<1)|m;
-                       }
-                       IPv4Address aux(m);
-                       mask = aux;
-                       *p = '\0';
-                   }
-                   if (!IPv4Address::isWellFormed(str))
-                       opp_error("Syntax error in routing file: `%s' should be a valid IPv4 address", str);
-                   e->setDestAddress(IPv4Address(str));
-                   e->setDestNetmask(mask);
-                   continue;
-               }
-              if (!strcmp(str, "-p"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   if (!strcmp(str, "tcp"))
-                       e->setProtocol(IP_PROT_TCP);
-                   else if (!strcmp(str, "udp"))
-                       e->setProtocol(IP_PROT_UDP);
-                   else
-                       opp_error("Syntax error in routing file: `%s' should be tcp or udp", str);
-                   continue;
-              }
-              if (!strcmp(str, "-j"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   if (strcmp(str, "DROP"))
-                       opp_error("Only DROP supported");
-                   else
-                       e->setRoule(IPv4RouteRule::DROP);
-                   continue;
-              }
-              if (!strcmp(str, "-sport"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   int port = atoi(str);
-                   e->setSrcPort(port);
-                   continue;
-              }
-              if (!strcmp(str, "-dport"))
-              {
-                   pos += strcpyword(str, rulesFile + pos);
-                   skipBlanks(rulesFile, pos);
-                   int port = atoi(str);
-                   e->setDestPort(port);
-                   continue;
-              }
-              if (!strcmp(str, "-i"))
-              {
-                  pos += strcpyword(str, rulesFile + pos);
-                  skipBlanks(rulesFile, pos);
-                  InterfaceEntry *ie = ift->getInterfaceByName(str);
-                  if (ie==NULL)
-                       opp_error("Syntax error in routing file: `%s' should be a valid interface name", str);
-                  else
-                       e->setInterface(ie);
-                  continue;
-              }
-              if (!strcmp(str, "iptables"))
-              {
-                  if (position==0)
-                      rt->addRule(true, e);
-                  else if (position==1)
-                      rt->addRule(false, e);
-                  else
-                     opp_error("table rule not valid, must indicate input or output");
-                  if (e->getRule()!=IPv4RouteRule::DROP)
-                     opp_error("table rule not valid, must indicate input or output");
-
-                  position = -1;
-                  e = new IPv4RouteRule();
-                  continue;
-              }
-         }
-         if (position==0)
-             rt->addRule(true, e);
-         else if (position==1)
-             rt->addRule(false, e);
-         else
-            opp_error("table rule not valid, must indicate input or output");
-         if (e->getRule()!=IPv4RouteRule::DROP)
-            opp_error("table rule not valid, must indicate input or output");
     }
 }

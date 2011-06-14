@@ -160,10 +160,6 @@ class INET_API IPv4 : public QueueBase
 
     virtual void dsrFillDestIE(IPv4Datagram *, InterfaceEntry *&destIE, IPv4Address &nextHopAddress);
 
-    const IPv4RouteRule * checkInputRule(const IPv4Datagram*);
-    const IPv4RouteRule * checkOutputRule(const IPv4Datagram*, const InterfaceEntry*);
-    const IPv4RouteRule * checkOutputRuleMulticast(const IPv4Datagram*);
-
   public:
     IPv4() {}
 

@@ -93,11 +93,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     typedef std::map<IPv4Address, const IPv4Route *> RoutingCache;
     mutable RoutingCache routingCache;
 
-    typedef std::vector<IPv4RouteRule *> RoutingRule;
-    RoutingRule outputRules;
-    RoutingRule inputRules;
-
-
     // local addresses cache (to speed up isLocalAddress())
     typedef std::set<IPv4Address> AddressSet;
     mutable AddressSet localAddresses;
@@ -279,13 +274,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // Dsdv time to live test entry
     virtual void dsdvTestAndDelete();
     virtual const bool testValidity(const IPv4Route *entry) const;
-
-    // IPv4 tables rules
-    virtual void addRule(bool output, IPv4RouteRule *entry);
-    virtual void delRule(IPv4RouteRule *entry);
-    virtual const IPv4RouteRule * getRule(bool output, int index) const;
-    virtual int getNumRules(bool output);
-    virtual const IPv4RouteRule * findRule(bool output, int prot, int sPort, const IPv4Address &srcAddr, int dPort, const IPv4Address &destAddr, const InterfaceEntry *) const;
 
 };
 

@@ -24,8 +24,6 @@
 
 #include "IPv4Address.h"
 #include "IPv4Route.h"  // not strictly required, but most clients will need it anyway
-#include "IPv4RouteRule.h"
-
 
 /** Returned by IRoutingTable as the result of multicast routing */
 struct MulticastRoute
@@ -181,14 +179,6 @@ class INET_API IRoutingTable
     virtual simtime_t getTimeToLiveRoutingEntry() = 0;
     virtual void dsdvTestAndDelete() = 0;
     virtual const bool testValidity(const IPv4Route *entry) const = 0;
-    // Rules (similar to linux iptables)
-    virtual void addRule(bool output, IPv4RouteRule *entry) = 0;
-    virtual void delRule(IPv4RouteRule *entry) = 0;
-    virtual const IPv4RouteRule * getRule(bool output, int index) const = 0;
-    virtual int getNumRules(bool output) = 0;
-    virtual const IPv4RouteRule * findRule(bool output, int prot, int sPort,
-                                     const IPv4Address &srcAddr, int dPort,
-                                     const IPv4Address &destAddr, const InterfaceEntry *) const = 0;
 };
 
 #endif
