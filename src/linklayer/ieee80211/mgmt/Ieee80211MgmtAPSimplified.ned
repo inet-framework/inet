@@ -37,6 +37,12 @@ package inet.linklayer.ieee80211.mgmt;
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
 //
+// This module checks if there is an other module connected above the management
+// module (e.g. RelayUnit) and sends a copy of the frame there and at the same time
+// sends the frame back to the wirless interface. The relay unit will send it out
+// on the interface which is towards the destination or will broadcast it on all
+// interfaces (except on which it was received).
+//
 // @author Andras Varga
 //
 simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt

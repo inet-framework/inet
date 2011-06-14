@@ -31,6 +31,12 @@ package inet.linklayer.ieee80211.mgmt;
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
 //
+// This module checks if there is an other module connected above the management
+// module (e.g. RelayUnit) and sends the frame there if the frame's destination
+// is not on the associated station's list. Multicast frames are broadcasted on
+// the wireless card and a copy sent also up to the relay unit so it can broadcast 
+// it on other interfaces.
+//
 // @author Andras Varga
 //
 simple Ieee80211MgmtAP like IIeee80211Mgmt
