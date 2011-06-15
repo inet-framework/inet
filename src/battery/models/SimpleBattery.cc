@@ -20,88 +20,125 @@
  * summary information to Battery Stats module.
  */
 
-#include <omnetpp.h>
-#include "RadioState.h"
-#include "InetSimpleBattery.h"
+#include "INETDefs.h"
+
+#include "SimpleBattery.h"
+
 #include "Energy.h"
+#include "RadioState.h"
 
-Define_Module(InetSimpleBattery);
+Define_Module(SimpleBattery);
 
 
-void InetSimpleBattery::initialize(int stage)
+simsignal_t SimpleBattery::currCapacitySignal = SIMSIGNAL_NULL;
+simsignal_t SimpleBattery::consumedEnergySignal = SIMSIGNAL_NULL;
+
+SimpleBattery::DeviceEntry::DeviceEntry()
 {
+    currentState = 0;
+    numAccts = 0;
+    currentActivity = -1;
+    accts = NULL;
+    times = NULL;
+    owner = NULL;
+    radioUsageCurrent = NULL;
+}
 
-    BasicBattery::initialize(stage); //DO NOT DELETE!!
+SimpleBattery::DeviceEntry::~DeviceEntry()
+{
+    delete [] accts;
+    delete [] times;
+    delete [] radioUsageCurrent;
+}
+
+SimpleBattery::SimpleBattery()
+{
+    timeout = NULL;
+    publish = NULL;
+    mpNb = NULL;
+}
+
+SimpleBattery::~SimpleBattery()
+{
+    while (!deviceEntryMap.empty())
+    {
+        delete deviceEntryMap.begin()->second;
+        deviceEntryMap.erase(deviceEntryMap.begin());
+    }
+
+    while (!deviceEntryVector.empty())
+    {
+        delete deviceEntryVector.back();
+        deviceEntryVector.pop_back();
+    }
+    cancelAndDelete(publish);
+    cancelAndDelete(timeout);
+}
+
+void SimpleBattery::initialize(int stage)
+{
+    IBattery::initialize(stage); //DO NOT DELETE!!
+
     if (stage == 0)
     {
+        mustSubscribe = true;
+        mpNb = NotificationBoardAccess().get();
+
         voltage = par("voltage");
-        nominalCapmAh = par("nominal");
-        if (nominalCapmAh <= 0)
-        {
-            error("invalid nominal capacity value");
-        }
-        capmAh = par("capacity");
+        double nominalCapmAh = par("nominal");
+        double capmAh = par("capacity");
+        if (nominalCapmAh <= 0 || nominalCapmAh < capmAh)
+            error("Invalid nominal capacity value:%g mAh (capacity=%g mAh)", nominalCapmAh, capmAh);
 
         // Publish capacity to BatteryStats every publishTime (if > 0) and
         // whenever capacity has changed by publishDelta (if < 100%).
-        publishTime = 0;
-
-        publishDelta = 1;
+        publishTime = par("publishTime");
         publishDelta = par("publishDelta");
         if (publishDelta < 0 || publishDelta > 1)
-        {
-            error("invalid publishDelta value");
-        }
+            error("invalid publishDelta value: %g", publishDelta);
 
         resolution = par("resolution");
-        EV<< "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh <<
-        ") at " << voltage << "V" << endl;
-        EV << "publishDelta = " << publishDelta * 100 << "%, publishTime = "
-        << publishTime << "s, resolution = " << resolution << "sec"
-        << endl;
 
-        capacity = capmAh * 60 * 60 * voltage; // use mW-sec internally
+        EV << "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh
+           << ") at " << voltage << "V" << endl;
+        EV << "publishDelta = " << publishDelta * 100 << "%, publishTime = "
+           << publishTime << "s, resolution = " << resolution << "sec"
+           << endl;
+
+        double capacity = capmAh * 60 * 60 * voltage; // use mW-sec internally
         nominalCapacity = nominalCapmAh * 60 * 60 * voltage;
+        lastUpdateTime = simTime();
 
         residualCapacity = lastPublishCapacity = capacity;
-        lifetime = -1; // -1 means not dead
 
-        publishTime = par("publishTime");
         if (publishTime > 0)
         {
-            lastUpdateTime = simTime();
             publish = new cMessage("publish", PUBLISH);
             publish->setSchedulingPriority(2000);
             scheduleAt(simTime() + publishTime, publish);
         }
 
-        mCurrEnergy = NULL;
-        if (par("ConsumedVector"))
-            mCurrEnergy = new cOutVector("Consumed");
-        // DISable by default (use BatteryStats for data collection)
-        residualVec.disable();
-
-        residualVec.setName("residualCapacity");
-        residualVec.record(residualCapacity);
+        currCapacitySignal = registerSignal("currCapacity");
+        consumedEnergySignal = registerSignal("consumedEnergy");
 
         timeout = new cMessage("auto-update", AUTO_UPDATE);
         timeout->setSchedulingPriority(500);
         scheduleAt(simTime() + resolution, timeout);
-        lastUpdateTime = simTime();
         WATCH(lastPublishCapacity);
+
+        publishCapacity();
     }
 }
 
-
-
-int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
+int SimpleBattery::registerDevice(cObject *id, int numAccts)
 {
-    for (unsigned int i = 0; i<deviceEntryVector.size(); i++)
+    for (unsigned int i = 0; i < deviceEntryVector.size(); i++)
         if (deviceEntryVector[i]->owner == id)
             error("device already registered!");
+
     if (numAccts < 1)
     {
-        error("number of activities must be at least 1");
+        error("Number of activities must be at least 1");
     }
 
     DeviceEntry *device = new DeviceEntry();
@@ -112,66 +149,55 @@ int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
     for (int i = 0; i < numAccts; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < numAccts; i++)
-    {
-        device->times[i] = 0.0;
+        device->times[i] = SIMTIME_ZERO;
     }
 
-    EV<< "initialized device "  << deviceEntryVector.size() << " with " << numAccts << " accounts" << endl;
+    EV << "Initialized device "  << deviceEntryVector.size() << " with "
+       << numAccts << " accounts" << endl;
     deviceEntryVector.push_back(device);
     return deviceEntryVector.size()-1;
 }
 
-void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
+void SimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle,
+        double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
 {
     Enter_Method_Silent();
-    if (deviceEntryMap.find(id)!=deviceEntryMap.end())
+
+    if (deviceEntryMap.find(id) != deviceEntryMap.end())
     {
-        EV << "This device is register \n";
+        EV << "This wireless device (id=" << id << ") already registered\n";
         return;
     }
 
     DeviceEntry *device = new DeviceEntry();
-    device->numAccts = 4;
-    device->accts = new double[4];
-    device->times = new simtime_t[4];
+    device->numAccts = RadioState::NUMBER_OF_ELEMENTS;
+    device->accts = new double[RadioState::NUMBER_OF_ELEMENTS];
+    device->times = new simtime_t[RadioState::NUMBER_OF_ELEMENTS];
 
-    if (RadioState::IDLE>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::RECV>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::TRANSMIT>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::SLEEP>=4)
-        error("Battery and RadioState problem");
+    device->radioUsageCurrent = new double[RadioState::NUMBER_OF_ELEMENTS];
     device->radioUsageCurrent[RadioState::IDLE] = mUsageRadioIdle;
     device->radioUsageCurrent[RadioState::RECV] = mUsageRadioRecv;
     device->radioUsageCurrent[RadioState::TRANSMIT] = mUsageRadioSend;
     device->radioUsageCurrent[RadioState::SLEEP] = mUsageRadioSleep;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < RadioState::NUMBER_OF_ELEMENTS; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < 4; i++)
-    {
-        device->times[i] = 0.0;
+        device->times[i] = SIMTIME_ZERO;
     }
 
     deviceEntryMap.insert(std::pair<int,DeviceEntry*>(id, device));
     if (mustSubscribe)
     {
-        mpNb->subscribe(this, NF_RADIOSTATE_CHANGED);
         mustSubscribe = false;
+        mpNb->subscribe(this, NF_RADIOSTATE_CHANGED);
     }
 }
 
-void InetSimpleBattery::handleMessage(cMessage *msg)
+void SimpleBattery::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-
         switch (msg->getKind())
         {
         case AUTO_UPDATE:
@@ -182,8 +208,7 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
 
         case PUBLISH:
             // publish the state to the BatteryStats module
-            lastPublishCapacity = residualCapacity;
-            scheduleAt(simTime() + publishTime, publish);
+            publishCapacity();
             break;
 
         default:
@@ -198,38 +223,42 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
     }
 }
 
-
-
-void InetSimpleBattery::finish()
+void SimpleBattery::finish()
 {
     // do a final update of battery capacity
-    deductAndCheck();
+    deductAndCheck(true);
+
     deviceEntryMap.clear();
     deviceEntryVector.clear();
+    cancelAndDelete(publish);
+    publish = NULL;
+    cancelAndDelete(timeout);
+    timeout = NULL;
 }
 
-void InetSimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic* aDetails)
+void SimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic* aDetails)
 {
     Enter_Method_Silent();
+
     //EV << "[Battery]: receiveChangeNotification" << endl;
     if (aCategory == NF_RADIOSTATE_CHANGED)
     {
         RadioState *rs = check_and_cast <RadioState *>(aDetails);
 
         DeviceEntryMap::iterator it = deviceEntryMap.find(rs->getRadioId());
-        if (it==deviceEntryMap.end())
+        if (it == deviceEntryMap.end())
             return;
 
-        if (rs->getState()>=it->second->numAccts)
+        // update the residual capacity (finish previous current draw)
+        deductAndCheck();
+
+        if (rs->getState() >= it->second->numAccts)
             opp_error("Error in battery states");
 
         double current = it->second->radioUsageCurrent[rs->getState()];
 
-        EV << simTime() << " wireless device " << rs->getRadioId() << " draw current " << current <<
-        "mA, new state = " << rs->getState() << "\n";
-
-        // update the residual capacity (finish previous current draw)
-        deductAndCheck();
+        EV << simTime() << " wireless device " << rs->getRadioId() << " draw current " << current
+           << "mA, new state = " << rs->getState() << "\n";
 
         // set the new current draw in the device vector
         it->second->draw = current;
@@ -237,20 +266,16 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cPolymorp
     }
 }
 
-
-
-void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
+void SimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 {
     if (amount.getType() == DrawAmount::CURRENT)
     {
-
         double current = amount.getValue();
         if (activity < 0 && current != 0)
             error("invalid CURRENT message");
 
-        EV << simTime() << " device " << deviceID <<
-        " draw current " << current <<
-        "mA, activity = " << activity << endl;
+        EV << simTime() << " device " << deviceID << " draw current " << current
+           << "mA, activity = " << activity << endl;
 
         // update the residual capacity (finish previous current draw)
         deductAndCheck();
@@ -259,7 +284,6 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
         deviceEntryVector[deviceID]->draw = current;
         deviceEntryVector[deviceID]->currentActivity = activity;
     }
-
     else if (amount.getType() == DrawAmount::ENERGY)
     {
         double energy = amount.getValue();
@@ -268,8 +292,8 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
             error("invalid activity specified");
         }
 
-        EV << simTime() << " device " << deviceID <<  " deduct " << energy <<
-        " mW-s, activity = " << activity << endl;
+        EV << simTime() << " device " << deviceID <<  " deduct " << energy
+           << " mW-s, activity = " << activity << endl;
 
         // deduct a fixed energy cost
         deviceEntryVector[deviceID]->accts[activity] += energy;
@@ -286,35 +310,15 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 }
 
 /**
- *  Function to update the display string with the remaining energy
+ *  Function to calculate consumed energy and update the remaining capacity,
+ *  and publish these, when need.
  */
-
-InetSimpleBattery::~InetSimpleBattery()
-{
-    while (!deviceEntryMap.empty())
-    {
-        delete deviceEntryMap.begin()->second;
-        deviceEntryMap.erase(deviceEntryMap.begin());
-    }
-
-    while (!deviceEntryVector.empty())
-    {
-        delete deviceEntryVector.back();
-        deviceEntryVector.pop_back();
-    }
-    if (mCurrEnergy)
-        delete mCurrEnergy;
-}
-
-
-void InetSimpleBattery::deductAndCheck()
+void SimpleBattery::deductAndCheck(bool mustPublish)
 {
     // already depleted, devices should have stopped sending drawMsg,
     // but we catch any leftover messages in queue
-    if (residualCapacity <= 0)
-    {
+    if (residualCapacity <= 0.0)
         return;
-    }
 
     simtime_t now = simTime();
 
@@ -323,6 +327,8 @@ void InetSimpleBattery::deductAndCheck()
     // still -1.  If the device is not drawing current at the moment,
     // draw has been reset to 0, so energy is also 0.  (It might perhaps
     // be wise to guard more carefully against fp issues later.)
+
+    double consumedEnergy = 0.0;
 
     for (unsigned int i = 0; i < deviceEntryVector.size(); i++)
     {
@@ -334,7 +340,7 @@ void InetSimpleBattery::deductAndCheck()
             {
                 deviceEntryVector[i]->accts[currentActivity] += energy;
                 deviceEntryVector[i]->times[currentActivity] += (now - lastUpdateTime);
-                residualCapacity -= energy;
+                consumedEnergy += energy;
             }
         }
     }
@@ -349,45 +355,63 @@ void InetSimpleBattery::deductAndCheck()
             {
                 it->second->accts[currentActivity] += energy;
                 it->second->times[currentActivity] += (now - lastUpdateTime);
-                residualCapacity -= energy;
+                consumedEnergy += energy;
             }
         }
     }
 
-
     lastUpdateTime = now;
+    residualCapacity -= consumedEnergy;
+    emit(currCapacitySignal, residualCapacity);
+    emit(consumedEnergySignal, consumedEnergy);
 
+    if (mustPublish
+            || residualCapacity <= 0.0
+            || (lastPublishCapacity - residualCapacity) / nominalCapacity >= publishDelta)
+        publishCapacity();
+}
+
+/**
+ *  Function to update the display string with the remaining energy
+ */
+void SimpleBattery::publishCapacity()
+{
     EV << "residual capacity = " << residualCapacity << "\n";
 
-    cDisplayString* display_string = &getParentModule()->getDisplayString();
+    int capacityPercent = 0;
 
-    // battery is depleted
-    if (residualCapacity <= 0.0 )
+    if (residualCapacity <= 0.0)   //TODO suggest: use minimal capacity parameter instead 0.0
     {
-
-        EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted, stop simulation" << "\n";
-        display_string->setTagArg("i", 1, "#ff0000");
-        endSimulation();
+        lastPublishCapacity = residualCapacity;
+        // battery is depleted
+        EV << "[BATTERY]: " << getParentModule()->getFullName()
+           <<" 's battery exhausted, stop simulation" << "\n";
+        endSimulation();    //FIXME why can stop the simulation?
     }
-
-    // battery is not depleted, continue
     else
     {
-        // publish the battery capacity if it changed by more than delta
-        if ((lastPublishCapacity - residualCapacity)/capacity >= publishDelta)
-        {
-            lastPublishCapacity = residualCapacity;
-            Energy* p_ene = new Energy(residualCapacity);
-            mpNb->fireChangeNotification(NF_BATTERY_CHANGED, p_ene);
-            delete p_ene;
+        lastPublishCapacity = residualCapacity;
+        capacityPercent = lastPublishCapacity * 100.0 / nominalCapacity;
+        Energy* p_ene = new Energy(residualCapacity);
+        mpNb->fireChangeNotification(NF_BATTERY_CHANGED, p_ene);
+        delete p_ene;
 
-            display_string->setTagArg("i", 1, "#000000"); // black coloring
-            EV << "[BATTERY]: " << getParentModule()->getFullName() << " 's battery energy left: " << lastPublishCapacity  << "%" << "\n";
-            //char buf[3];
-
-        }
+        EV << "[BATTERY]: " << getParentModule()->getFullName() << " 's battery energy left: "
+           << capacityPercent << "%" << "\n";
     }
-    residualVec.record(residualCapacity);
-    if (mCurrEnergy)
-        mCurrEnergy->record(capacity-residualCapacity);
+
+    if (ev.isGUI())
+    {
+        char buf[20];
+        sprintf(buf, " %d%%", capacityPercent);
+        getDisplayString().setTagArg("t", 0, buf);
+    }
+
+    if (publish)
+    {
+        if (publish->isScheduled())
+            cancelEvent(publish);
+        scheduleAt(simTime() + publishTime, publish);
+    }
 }
+

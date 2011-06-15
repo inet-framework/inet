@@ -15,64 +15,61 @@
 #ifndef INET_SIMPLE_BATTERY_H
 #define INET_SIMPLE_BATTERY_H
 
-#include <omnetpp.h>
 #include <vector>
 #include <map>
-#include "BasicBattery.h"
+
+#include "INETDefs.h"
+
+#include "IBattery.h"
 
 /**
- * @brief Base class for any power source.
+ * Simple battery module
  *
- * See "SimpleBattery" for an example implementation.
- *
- * @ingroup baseModules
- * @ingroup power
- * @see SimpleBattery
+ * generate an error, when discharged.
  */
-
-
-
-class INET_API InetSimpleBattery : public BasicBattery
+class INET_API SimpleBattery : public IBattery
 {
   protected:
     class DeviceEntry
     {
       public:
+        DeviceEntry();
+        ~DeviceEntry();
         int currentState;
-        cObject * owner;
-        double radioUsageCurrent[4];
+        cObject *owner;
+        double *radioUsageCurrent;
         double  draw;
         int     currentActivity;
         int     numAccts;
         double  *accts;
         simtime_t   *times;
-        DeviceEntry()
-        {
-            currentState = 0;
-            numAccts = 0;
-            currentActivity = -1;
-            accts = NULL;
-            times = NULL;
-            owner = NULL;
-            for (int i=0; i<4; i++)
-                radioUsageCurrent[i] = 0.0;
-        }
-        ~DeviceEntry()
-        {
-            delete [] accts;
-            delete [] times;
-        }
     };
+
     typedef std::map<int,DeviceEntry*>  DeviceEntryMap;
     typedef std::vector<DeviceEntry*>  DeviceEntryVector;
     DeviceEntryMap deviceEntryMap;
     DeviceEntryVector deviceEntryVector;
 
   public:
-    virtual void    initialize(int);
-    virtual int numInitStages() const {return 2;}
-    virtual void    finish();
+    SimpleBattery();
+    ~SimpleBattery();
+
+  protected:
+    virtual void initialize(int);
+    virtual int numInitStages() const {return 1;}
+    virtual void finish();
     virtual void handleMessage(cMessage *msg);
+
+    // update capacity and publish when need
+    virtual void deductAndCheck(bool mustPublish = false);
+
+    // publish capacity and restart publish timer
+    virtual void publishCapacity();
+
+    // implements INotifiable:
+    virtual void receiveChangeNotification(int aCategory, const cPolymorphic* aDetails);
+
+  public:
     /**
      * @brief Registers a power draining device with this battery.
      *
@@ -85,7 +82,9 @@ class INET_API InetSimpleBattery : public BasicBattery
      * Has to be implemented by actual battery implementations.
      */
     virtual int registerDevice(cObject *id, int numAccts);
-    virtual void registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep);
+
+    virtual void registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv,
+            double mUsageRadioSend, double mUsageRadioSleep);
 
     /**
      * @brief Draws power from the battery.
@@ -97,32 +96,48 @@ class INET_API InetSimpleBattery : public BasicBattery
      * "Account" identifies the account the power is drawn from.
      */
     virtual void draw(int drainID, DrawAmount& amount, int account);
-    ~InetSimpleBattery();
-    InetSimpleBattery() {mustSubscribe = true;}
-    double getVoltage();
+
+    virtual double getVoltage() const { return voltage; }
+
     /** @brief current state of charge of the battery, relative to its
      * rated nominal capacity [0..1]
      */
-    double estimateResidualRelative();
+    virtual double getEstimateResidualRelative() const { return residualCapacity / nominalCapacity; }
+
     /** @brief current state of charge of the battery (mW-s) */
-    double estimateResidualAbs();
+    double getEstimateResidualAbs() const { return residualCapacity; }
 
   protected:
-
-    cOutVector residualVec;
-    cOutVector* mCurrEnergy;
-
     enum msgType
     {
         AUTO_UPDATE, PUBLISH,
     };
 
     cMessage *publish;
+    cMessage *timeout;
+
+    // battery parameters
+    double voltage;
+
+    bool mustSubscribe;
+    // debit battery at least once every resolution seconds
+    simtime_t resolution;
+    double publishDelta;
+    simtime_t publishTime;
     simtime_t lastUpdateTime;
 
-    virtual void deductAndCheck();
-    void receiveChangeNotification(int aCategory, const cPolymorphic* aDetails);
+    // INTERNAL state
+    double nominalCapacity;
+    double residualCapacity;
+    double lastPublishCapacity;
 
+    // pointer to the notification board
+    NotificationBoard*  mpNb;
+
+    //statistics:
+    static simsignal_t currCapacitySignal;
+    static simsignal_t consumedEnergySignal;
 };
+
 #endif
 

@@ -18,11 +18,11 @@
  * @author Isabel Dietrich
 */
 
-#ifndef BASIC_BATTERY_H
-#define BASIC_BATTERY_H
+#ifndef __INET_BASIC_BATTERY_H
+#define __INET_BASIC_BATTERY_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 // INCLUDES for access to the Notification board (publish energy)
 #include "NotifierConsts.h"
@@ -40,7 +40,6 @@
  * time (type=CURRENT).
  *
  * Can be sub-classed for more complex power draws.
- *
  */
 class DrawAmount
 {
@@ -60,10 +59,7 @@ class DrawAmount
     double value;
 
   public:
-    DrawAmount(int type = CURRENT, int value = 0):
-            type(type),
-            value(value)
-    {}
+    DrawAmount(int type = CURRENT, int value = 0) : type(type), value(value) {}
 
     /** @brief Returns the type of power drawn as PowerType. */
     virtual int getType() { return type; }
@@ -77,79 +73,48 @@ class DrawAmount
 };
 
 
-class INET_API BasicBattery : public cSimpleModule, public INotifiable
+class INET_API IBattery : public cSimpleModule, public INotifiable
 {
   public:
-    // LIFECYCLE
+    /**
+     * @brief Registers a power draining device with this battery.
+     *
+     * Takes the name of the device as well as a number of accounts
+     * the devices draws power for (like rx, tx, idle for a radio device).
+     *
+     * Returns an ID by which the device can identify itself to the
+     * battery.
+     *
+     * Has to be implemented by actual battery implementations.
+     */
+    virtual int registerDevice(cObject *id, int numAccts) = 0;
 
-    virtual void initialize(int);
-    virtual void finish();
+    virtual void registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv,
+            double mUsageRadioSend, double mUsageRadioSleep) = 0;
 
-    virtual int registerDevice(cObject *id, int numAccts)
-    {
-        error("BasicBattery::registerDevice not overloaded"); return 0;
-    }
-    virtual void registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
-    {
-        error("BasicBattery::registerWirelessDevice not overloaded");
-    }
+    /**
+     * @brief Draws power from the battery.
+     *
+     * The actual amount and type of power drawn is defined by the passed
+     * DrawAmount parameter. Can be an fixed single amount or an amount
+     * drawn over time.
+     * The drainID identifies the device which drains the power.
+     * "Account" identifies the account the power is drawn from.
+     */
+    virtual void draw(int drainID, DrawAmount& amount, int account) = 0;
 
-    virtual void draw(int drainID, DrawAmount& amount, int account)
-    {
-        error("BasicBattery::draw not overloaded");
-    }
-    double GetEnergy() {return residualCapacity;}
-
-
-    // OPERATIONS
-
-
-    simtime_t   GetLifetime() {return lifetime;}
-
-  protected:
-    // battery parameters
-    double capmAh;
-    double nominalCapmAh;
-    double voltage;
-
-    bool mustSubscribe;
-    // debit battery at least once every resolution seconds
-    simtime_t resolution;
-    cMessage *timeout;
-    double publishDelta;
-    simtime_t publishTime;
-    simtime_t lastUpdateTime;
-
-    // INTERNAL state
-    double capacity;
-    double nominalCapacity;
-    double residualCapacity;
-    double lastPublishCapacity;
-    simtime_t lifetime;
-
+//    virtual double getEnergy() {return residualCapacity;}
 
     // OPERATIONS
-    void HandleSelfMsg(cMessage*);
 
-
-    // pointer to the notification board
-    NotificationBoard*  mpNb;
-
-  private:
-    // OPERATIONS
-    // void         handleMessage(cMessage *msg);
-
-    virtual void receiveChangeNotification(int, const cPolymorphic*);
-
+//    simtime_t GetLifetime() {return lifetime;}
 };
 
-
-class INET_API BatteryAccess : public ModuleAccess<BasicBattery>
+class INET_API IBatteryAccess : public ModuleAccess<IBattery>
 {
   public:
-    BatteryAccess() : ModuleAccess<BasicBattery>("battery") {}
+    IBatteryAccess() : ModuleAccess<IBattery>("battery") {}
 };
-
 
 #endif
 

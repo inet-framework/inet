@@ -21,7 +21,7 @@
 #ifndef RADIOSTATE_H
 #define RADIOSTATE_H
 
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 /**
@@ -33,7 +33,7 @@
  *  - TRANSMIT: the radio is transmitting
  *  - SLEEP: the radio is sleeping
  *
- * @author Andreas Köpke, Andras Varga
+ * @author Andreas Kï¿½pke, Andras Varga
  * @see NotificationBoard
  */
 class INET_API RadioState : public cPolymorphic
@@ -45,7 +45,9 @@ class INET_API RadioState : public cPolymorphic
       IDLE,
       RECV,
       TRANSMIT,
-      SLEEP
+      SLEEP,
+
+      NUMBER_OF_ELEMENTS   // number of states, stay in last position!
     };
 
     //XXX consider adding the following:
@@ -74,7 +76,7 @@ class INET_API RadioState : public cPolymorphic
     /** id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
 
-    void setRadioId(int state) { radioId = state; } //AM 6 Dezember nachträglich eingefügt
+    void setRadioId(int state) { radioId = state; } //AM 6 Dezember nachtrï¿½glich eingefï¿½gt
 
     /** Returns radio state */
     State getState() const { return state; }

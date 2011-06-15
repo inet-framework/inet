@@ -12,8 +12,8 @@
  * @short Class to hold the current energy level of the node.
 */
 
-#ifndef ENERGY_H
-#define ENERGY_H
+#ifndef __INET_ENERGY_H
+#define __INET_ENERGY_H
 
 // SYSTEM INCLUDES
 #include <omnetpp.h>
@@ -29,11 +29,10 @@ class Energy : public cPolymorphic
     void    SetEnergy(double e)      { mEnergy = e; }
     void    SubtractEnergy(double e) { mEnergy -= e; }
 
-
   private:
     // MEMBER VARIABLES
     double mEnergy;
-
 };
 
 #endif
+

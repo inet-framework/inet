@@ -24,7 +24,7 @@
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
-#include "BasicBattery.h"
+#include "IBattery.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -855,7 +855,7 @@ void Radio::connectReceiver()
 
 void Radio::registerBattery()
 {
-    BasicBattery *bat = BatteryAccess().getIfExists();
+    IBattery *bat = IBatteryAccess().getIfExists();
     if (bat)
     {
         //int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;
