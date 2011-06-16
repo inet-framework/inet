@@ -19,20 +19,28 @@
 
 #include <sstream>
 
-#include "world/annotations/AnnotationManager.h"
+#include "AnnotationManager.h"
 
 
 Define_Module(AnnotationManager);
 
 AnnotationManager::~AnnotationManager()
 {
+    while (annotations.begin() != annotations.end())
+    {
+        delete *annotations.begin();
+        annotations.erase(annotations.begin());
+    }
 
+    while (groups.begin() != groups.end())
+    {
+        delete *groups.begin();
+        groups.erase(groups.begin());
+    }
 }
 
 void AnnotationManager::initialize()
 {
-    debug = par("debug");
-
     annotations.clear();
     groups.clear();
 
@@ -49,14 +57,12 @@ void AnnotationManager::finish()
         delete *annotations.begin();
         annotations.erase(annotations.begin());
     }
-    annotations.clear();
 
     while (groups.begin() != groups.end())
     {
         delete *groups.begin();
         groups.erase(groups.begin());
     }
-    groups.clear();
 }
 
 void AnnotationManager::handleMessage(cMessage *msg)
@@ -79,24 +85,12 @@ void AnnotationManager::handleParameterChange(const char *parname)
     if (parname && (std::string(parname) == "draw"))
     {
         if (ev.isGUI() && par("draw"))
-        {
             showAll();
-        }
         else
-        {
             hideAll();
-        }
     }
 }
 
-/**
- * adds Annotations from an XML document; example below.
- *
- * <annotations>
- *   <line color="#F00" shape="16,0 8,13.8564" />
- *   <poly color="#0F0" shape="16,64 8,77.8564 -8,77.8564 -16,64 -8,50.1436 8,50.1436" />
- * </annotations>
- */
 void AnnotationManager::addFromXml(cXMLElement* xml)
 {
     std::string rootTag = xml->getTagName();
@@ -134,7 +128,7 @@ void AnnotationManager::addFromXml(cXMLElement* xml)
             std::vector<std::string> points = cStringTokenizer(shape.c_str(), " ").asVector();
             ASSERT(points.size() >= 2);
 
-            std::vector<Coord> coords;
+            CoordVector coords;
             for (std::vector<std::string>::const_iterator i = points.begin(); i != points.end(); ++i)
             {
                 std::vector<double> pa = cStringTokenizer(i->c_str(), ",").asDoubleVector();
@@ -149,7 +143,6 @@ void AnnotationManager::addFromXml(cXMLElement* xml)
             error("while reading annotations xml: expected 'line' or 'poly', but got '%s'", tag.c_str());
         }
     }
-
 }
 
 AnnotationManager::Group* AnnotationManager::createGroup(std::string title)
@@ -172,7 +165,7 @@ AnnotationManager::Line* AnnotationManager::drawLine(Coord p1, Coord p2, std::st
     return l;
 }
 
-AnnotationManager::Polygon* AnnotationManager::drawPolygon(std::list<Coord> coords, std::string color, Group* group)
+AnnotationManager::Polygon* AnnotationManager::drawPolygon(CoordList coords, std::string color, Group* group)
 {
     Polygon* p = new Polygon(coords, color);
     p->group = group;
@@ -184,9 +177,9 @@ AnnotationManager::Polygon* AnnotationManager::drawPolygon(std::list<Coord> coor
     return p;
 }
 
-AnnotationManager::Polygon* AnnotationManager::drawPolygon(std::vector<Coord> coords, std::string color, Group* group)
+AnnotationManager::Polygon* AnnotationManager::drawPolygon(CoordVector coords, std::string color, Group* group)
 {
-    return drawPolygon(std::list<Coord>(coords.begin(), coords.end()), color, group);
+    return drawPolygon(CoordList(coords.begin(), coords.end()), color, group);
 }
 
 void AnnotationManager::drawBubble(Coord p1, std::string text)
@@ -220,11 +213,12 @@ cModule* AnnotationManager::createDummyModule(std::string displayString)
     cModule* parentmod = getParentModule();
     if (!parentmod) error("Parent Module not found");
 
-    cModuleType* nodeType = cModuleType::get("inet.world.annotations.AnnotationDummy");
+    cModuleType* nodeType = cModuleType::get("inet.base.UnimplementedModule");
 
     //TODO: this trashes the vectsize member of the cModule, although nobody seems to use it
     nodeVectorIndex++;
-    cModule* mod = nodeType->create("annotation", parentmod, nodeVectorIndex, nodeVectorIndex);
+//    cModule* mod = nodeType->create("annotation", parentmod, nodeVectorIndex, nodeVectorIndex);
+    cModule* mod = nodeType->create("", parentmod);
     mod->finalizeParameters();
     mod->getDisplayString().parse(displayString.c_str());
     mod->buildInside();
@@ -235,28 +229,10 @@ cModule* AnnotationManager::createDummyModule(std::string displayString)
 
 cModule* AnnotationManager::createDummyModuleLine(Coord p1, Coord p2, std::string color)
 {
-    int w = abs(int(p2.x) - int(p1.x));
-    int h = abs(int(p2.y) - int(p1.y));
-    int px = 0;
-    if (p1.x <= p2.x)
-    {
-        px = p1.x + 0.5 * w;
-    }
-    else
-    {
-        px = p2.x + 0.5 * w;
-        w = -w;
-    }
-    int py = 0;
-    if (p1.y <= p2.y)
-    {
-        py = p1.y + 0.5 * h;
-    }
-    else
-    {
-        py = p2.y + 0.5 * h;
-        h = -h;
-    }
+    int w = int(p2.x - p1.x);
+    int h = int(p2.y - p1.y);
+    int px = (p1.x + p2.x) / 2.0;
+    int py = (p1.y + p2.y) / 2.0;
 
     std::stringstream ss;
     ss << "p=" << px << "," << py << ";b=" << w << ", " << h << ",polygon," << color << "," << color << ",1";
@@ -265,16 +241,14 @@ cModule* AnnotationManager::createDummyModuleLine(Coord p1, Coord p2, std::strin
     return createDummyModule(displayString);
 }
 
-
 void AnnotationManager::show(const Annotation* annotation)
 {
-
-    if (annotation->dummyObjects.size() > 0) return;
+    if (annotation->dummyObjects.size() > 0)
+        return;
 
     if (const Line* l = dynamic_cast<const Line*>(annotation))
     {
         cModule* mod = createDummyModuleLine(l->p1, l->p2, l->color);
-
         annotation->dummyObjects.push_back(mod);
     }
     else if (const Polygon* p = dynamic_cast<const Polygon*>(annotation))
@@ -282,7 +256,7 @@ void AnnotationManager::show(const Annotation* annotation)
 
         ASSERT(p->coords.size() >= 2);
         Coord lastCoords = *p->coords.rbegin();
-        for (std::list<Coord>::const_iterator i = p->coords.begin(); i != p->coords.end(); ++i)
+        for (CoordList::const_iterator i = p->coords.begin(); i != p->coords.end(); ++i)
         {
             Coord c1 = *i;
             Coord c2 = lastCoords;
@@ -291,13 +265,11 @@ void AnnotationManager::show(const Annotation* annotation)
             cModule* mod = createDummyModuleLine(c1, c2, p->color);
             annotation->dummyObjects.push_back(mod);
         }
-
     }
     else
     {
         error("unknown Annotation type");
     }
-
 }
 
 void AnnotationManager::hide(const Annotation* annotation)
@@ -314,7 +286,8 @@ void AnnotationManager::showAll(Group* group)
 {
     for (Annotations::const_iterator i = annotations.begin(); i != annotations.end(); ++i)
     {
-        if ((!group) || ((*i)->group == group)) show(*i);
+        if ((!group) || ((*i)->group == group))
+            show(*i);
     }
 }
 
@@ -322,6 +295,7 @@ void AnnotationManager::hideAll(Group* group)
 {
     for (Annotations::const_iterator i = annotations.begin(); i != annotations.end(); ++i)
     {
-        if ((!group) || ((*i)->group == group)) hide(*i);
+        if ((!group) || ((*i)->group == group))
+            hide(*i);
     }
 }

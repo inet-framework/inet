@@ -22,8 +22,8 @@
 #define WORLD_ANNOTATION_ANNOTATIONCONTROL_H
 
 #include <list>
+#include <vector>
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 #include "ModuleAccess.h"
 #include "Coord.h"
@@ -35,6 +35,8 @@ class INET_API AnnotationManager : public cSimpleModule
 {
   public:
     class Group;
+    typedef std::list<Coord> CoordList;
+    typedef std::vector<Coord> CoordVector;
 
     class Annotation
     {
@@ -66,13 +68,13 @@ class INET_API AnnotationManager : public cSimpleModule
     class Polygon : public Annotation
     {
       public:
-        Polygon(std::list<Coord> coords, std::string color) : coords(coords), color(color) {}
+        Polygon(CoordList coords, std::string color) : coords(coords), color(color) {}
         virtual ~Polygon() {}
 
       protected:
         friend class AnnotationManager;
 
-        std::list<Coord> coords;
+        CoordList coords;
         std::string color;
     };
 
@@ -89,22 +91,22 @@ class INET_API AnnotationManager : public cSimpleModule
     };
 
     ~AnnotationManager();
-    void initialize();
-    void finish();
-    void handleMessage(cMessage *msg);
-    void handleSelfMsg(cMessage *msg);
-    void handleParameterChange(const char *parname);
 
+    /**
+     * adds Annotations from an XML document; example below.
+     *
+     * <annotations>
+     *   <line color="#F00" shape="16,0 8,13.8564" />
+     *   <poly color="#0F0" shape="16,64 8,77.8564 -8,77.8564 -16,64 -8,50.1436 8,50.1436" />
+     * </annotations>
+     */
     void addFromXml(cXMLElement* xml);
     Group* createGroup(std::string title = "untitled");
     Line* drawLine(Coord p1, Coord p2, std::string color, Group* group = 0);
-    Polygon* drawPolygon(std::list<Coord> coords, std::string color, Group* group = 0);
-    Polygon* drawPolygon(std::vector<Coord> coords, std::string color, Group* group = 0);
+    Polygon* drawPolygon(CoordList coords, std::string color, Group* group = 0);
+    Polygon* drawPolygon(CoordVector coords, std::string color, Group* group = 0);
     void drawBubble(Coord p1, std::string text);
     void erase(const Annotation* annotation);
-
-    cModule* createDummyModule(std::string displayString);
-    cModule* createDummyModuleLine(Coord p1, Coord p2, std::string color);
 
     void show(const Annotation* annotation);
     void hide(const Annotation* annotation);
@@ -112,12 +114,19 @@ class INET_API AnnotationManager : public cSimpleModule
     void hideAll(Group* group = 0);
 
   protected:
+    void initialize();
+    void finish();
+    void handleMessage(cMessage *msg);
+    void handleSelfMsg(cMessage *msg);
+    void handleParameterChange(const char *parname);
+    cModule* createDummyModule(std::string displayString);
+    cModule* createDummyModuleLine(Coord p1, Coord p2, std::string color);
+
+  protected:
     typedef std::list<Annotation*> Annotations;
     typedef std::list<Group*> Groups;
 
-    bool debug; /**< whether to emit debug messages */
     cXMLElement* annotationsXml; /**< annotations to add at startup */
-
     Annotations annotations;
     Groups groups;
 };
@@ -125,9 +134,7 @@ class INET_API AnnotationManager : public cSimpleModule
 class AnnotationManagerAccess
 {
   public:
-    AnnotationManagerAccess()
-    {
-    }
+    AnnotationManagerAccess() {}
 
     AnnotationManager* getIfExists()
     {
