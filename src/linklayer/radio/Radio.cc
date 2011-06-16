@@ -855,7 +855,7 @@ void Radio::connectReceiver()
 
 void Radio::registerBattery()
 {
-    IBattery *bat = IBatteryAccess().getIfExists();
+    IBattery *bat = BatteryAccess().getIfExists();
     if (bat)
     {
         //int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;

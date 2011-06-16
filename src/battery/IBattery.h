@@ -110,10 +110,10 @@ class INET_API IBattery : public cSimpleModule, public INotifiable
 //    simtime_t GetLifetime() {return lifetime;}
 };
 
-class INET_API IBatteryAccess : public ModuleAccess<IBattery>
+class INET_API BatteryAccess : public ModuleAccess<IBattery>
 {
   public:
-    IBatteryAccess() : ModuleAccess<IBattery>("battery") {}
+    BatteryAccess() : ModuleAccess<IBattery>("battery") {}
 };
 
 #endif
