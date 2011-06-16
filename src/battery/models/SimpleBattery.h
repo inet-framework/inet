@@ -60,8 +60,12 @@ class INET_API SimpleBattery : public IBattery
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
 
-    // update capacity and publish when need
-    virtual void deductAndCheck(bool mustPublish = false);
+    /**
+     *  update capacity and publish when need
+     *    @param mustPublish: if true, always publish capacity
+     *    @param consumedEnergy: initial value of consumed energy (used in draw() function)
+     */
+    virtual void deductAndCheck(bool mustPublish = false, double consumedEnergy = 0.0);
 
     // publish capacity and restart publish timer
     virtual void publishCapacity();
@@ -117,7 +121,7 @@ class INET_API SimpleBattery : public IBattery
     cMessage *timeout;
 
     // battery parameters
-    double voltage;
+    double voltage;  // [V]
 
     bool mustSubscribe;
     // debit battery at least once every resolution seconds
@@ -127,9 +131,9 @@ class INET_API SimpleBattery : public IBattery
     simtime_t lastUpdateTime;
 
     // INTERNAL state
-    double nominalCapacity;
-    double residualCapacity;
-    double lastPublishCapacity;
+    double nominalCapacity;  // [mA * sec * V]
+    double residualCapacity;  // [mA * sec * V]
+    double lastPublishCapacity;  // [mA * sec * V]
 
     // pointer to the notification board
     NotificationBoard*  mpNb;

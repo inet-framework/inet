@@ -105,8 +105,8 @@ void SimpleBattery::initialize(int stage)
            << publishTime << "s, resolution = " << resolution << "sec"
            << endl;
 
-        double capacity = capmAh * 60 * 60 * voltage; // use mW-sec internally
-        nominalCapacity = nominalCapmAh * 60 * 60 * voltage;
+        double capacity = capmAh * 3600.0 * voltage; // use mW-sec internally
+        nominalCapacity = nominalCapmAh * 3600.0 * voltage;
         lastUpdateTime = simTime();
 
         residualCapacity = lastPublishCapacity = capacity;
@@ -297,11 +297,10 @@ void SimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 
         // deduct a fixed energy cost
         deviceEntryVector[deviceID]->accts[activity] += energy;
-        residualCapacity -= energy;
 
         // update the residual capacity (ongoing current draw), mostly
         // to check whether to publish (or perish)
-        deductAndCheck();
+        deductAndCheck(false, energy);
     }
     else
     {
@@ -313,8 +312,10 @@ void SimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
  *  Function to calculate consumed energy and update the remaining capacity,
  *  and publish these, when need.
  */
-void SimpleBattery::deductAndCheck(bool mustPublish)
+void SimpleBattery::deductAndCheck(bool mustPublish, double consumedEnergy)
 {
+    ASSERT(consumedEnergy >= 0.0);
+
     // already depleted, devices should have stopped sending drawMsg,
     // but we catch any leftover messages in queue
     if (residualCapacity <= 0.0)
@@ -328,43 +329,43 @@ void SimpleBattery::deductAndCheck(bool mustPublish)
     // draw has been reset to 0, so energy is also 0.  (It might perhaps
     // be wise to guard more carefully against fp issues later.)
 
-    double consumedEnergy = 0.0;
-
-    for (unsigned int i = 0; i < deviceEntryVector.size(); i++)
+    if (now != lastUpdateTime)
     {
-        int currentActivity = deviceEntryVector[i]->currentActivity;
-        if (currentActivity > -1)
+        for (unsigned int i = 0; i < deviceEntryVector.size(); i++)
         {
-            double energy = deviceEntryVector[i]->draw * voltage * (now - lastUpdateTime).dbl();
-            if (energy > 0)
+            int currentActivity = deviceEntryVector[i]->currentActivity;
+            if (currentActivity > -1)
             {
-                deviceEntryVector[i]->accts[currentActivity] += energy;
-                deviceEntryVector[i]->times[currentActivity] += (now - lastUpdateTime);
-                consumedEnergy += energy;
+                double energy = deviceEntryVector[i]->draw * voltage * (now - lastUpdateTime).dbl();
+                if (energy > 0)
+                {
+                    deviceEntryVector[i]->accts[currentActivity] += energy;
+                    deviceEntryVector[i]->times[currentActivity] += (now - lastUpdateTime);
+                    consumedEnergy += energy;
+                }
             }
         }
-    }
 
-    for (DeviceEntryMap::iterator it = deviceEntryMap.begin(); it!=deviceEntryMap.end(); it++)
-    {
-        int currentActivity = it->second->currentActivity;
-        if (currentActivity > -1)
+        for (DeviceEntryMap::iterator it = deviceEntryMap.begin(); it!=deviceEntryMap.end(); it++)
         {
-            double energy = it->second->draw * voltage * (now - lastUpdateTime).dbl();
-            if (energy > 0)
+            int currentActivity = it->second->currentActivity;
+            if (currentActivity > -1)
             {
-                it->second->accts[currentActivity] += energy;
-                it->second->times[currentActivity] += (now - lastUpdateTime);
-                consumedEnergy += energy;
+                double energy = it->second->draw * voltage * (now - lastUpdateTime).dbl();
+                if (energy > 0)
+                {
+                    it->second->accts[currentActivity] += energy;
+                    it->second->times[currentActivity] += (now - lastUpdateTime);
+                    consumedEnergy += energy;
+                }
             }
         }
+
+        lastUpdateTime = now;
+        residualCapacity -= consumedEnergy;
+        emit(currCapacitySignal, residualCapacity *100.0 / nominalCapacity);
+        emit(consumedEnergySignal, consumedEnergy);
     }
-
-    lastUpdateTime = now;
-    residualCapacity -= consumedEnergy;
-    emit(currCapacitySignal, residualCapacity);
-    emit(consumedEnergySignal, consumedEnergy);
-
     if (mustPublish
             || residualCapacity <= 0.0
             || (lastPublishCapacity - residualCapacity) / nominalCapacity >= publishDelta)
