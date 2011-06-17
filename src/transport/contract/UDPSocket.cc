@@ -49,7 +49,8 @@ const char *UDPSocket::stateName(int state)
 
 int UDPSocket::generateSocketId()
 {
-    return ev.getUniqueNumber();
+//    return ev.getUniqueNumber();
+    return int(ev.getUniqueNumber() & INT_MAX);
 }
 
 void UDPSocket::sendToUDP(cMessage *msg)

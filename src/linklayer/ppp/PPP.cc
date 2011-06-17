@@ -92,7 +92,7 @@ void PPP::initialize(int stage)
         if (ev.isGUI())
         {
             if (connected) {
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("o",0);
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
             }
             else {
                 // we are not connected: gray out our icon
@@ -135,7 +135,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setDatarate(datarate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    // InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    InterfaceToken token(0, uint32(simulation.getUniqueNumber() & UINT_MAX), 64);
     e->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
@@ -267,15 +268,15 @@ void PPP::handleMessage(cMessage *msg)
 void PPP::displayBusy()
 {
     getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    datarateChannel->getDisplayString().setTagArg("o",0,"yellow");
-    datarateChannel->getDisplayString().setTagArg("o",1,"3");
+    datarateChannel->getDisplayString().setTagArg("ls",0,"yellow");
+    datarateChannel->getDisplayString().setTagArg("ls",1,"3");
 }
 
 void PPP::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
-    datarateChannel->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
-    datarateChannel->getDisplayString().setTagArg("o",1,"1");
+    datarateChannel->getDisplayString().setTagArg("ls",0,oldConnColor.c_str());
+    datarateChannel->getDisplayString().setTagArg("ls",1,"1");
 }
 
 void PPP::updateDisplayString()

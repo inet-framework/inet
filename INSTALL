@@ -65,6 +65,9 @@ Note:
   in the "src" directory. To use the shared library you can use the "opp_run"
   command to load it dynamically. Open the "src/run_inet" script to see how
   to do it.
+- To create a single executable (i.e., inet) when OMNeT++ was compiled
+  with static library option, remove "-make-so" from the top-level
+  'Makefile'.
 - If you add/remove files/directories later in the src directory, you MUST
   re-create your makefile. Run "make makefiles" again if you are building
   from the command line. (The IDE does it for you automatically)

@@ -36,20 +36,18 @@ void TCPMsgBasedRcvQueue::init(uint32 startSeq)
 
 std::string TCPMsgBasedRcvQueue::info() const
 {
-    std::string res;
-    char buf[32];
-    sprintf(buf, "rcv_nxt=%u ", rcv_nxt);
-    res = buf;
+    std::stringstream os;
 
-    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
+    os << "rcv_nxt=" << rcv_nxt;
+
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i)
     {
-        sprintf(buf, "[%u..%u) ", i->begin, i->end);
-        res+=buf;
+        os << " [" << i->begin << ".." << i->end << ")";
     }
-    sprintf(buf, "%u msgs", payloadList.size());
-    res+=buf;
 
-    return res;
+    os << " " << payloadList.size() << " msgs";
+
+    return os.str();
 }
 
 uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
