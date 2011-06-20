@@ -18,11 +18,16 @@
 
 #include "INETDefs.h"
 
-typedef cDynamicExpression::Value Value;  // abbreviation for local use
+// compatibility for pre-4.2b3 omnetpp
+#ifndef Define_NED_Math_Function
+#define cNEDValue  cDynamicExpression::Value
+#define stringValue()  s.c_str()
+#define stdstringValue()  s
+#endif
 
-Value nedf_haveClass(cComponent *context, Value argv[], int argc)
+cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
-    return (NULL != classes.getInstance()->lookup(argv[0].s.c_str()));
+    return classes.getInstance()->lookup(argv[0].stringValue()) != NULL;
 }
 
 Define_NED_Function2(nedf_haveClass,
@@ -31,18 +36,17 @@ Define_NED_Function2(nedf_haveClass,
         "Returns true if the given C++ class exists"
 );
 
-Value nedf_moduleListByPath(cComponent *context, Value argv[], int argc)
+cNEDValue nedf_moduleListByPath(cComponent *context, cNEDValue argv[], int argc)
 {
     std::string modulenames;
     cTopology topo;
     std::vector<std::string> paths;
-    int i;
-    for (i = 0; i < argc; i++)
-        paths.push_back(argv[i].s);
+    for (int i = 0; i < argc; i++)
+        paths.push_back(argv[i].stdstringValue());
 
     topo.extractByModulePath(paths);
 
-    for (i = 0; i < topo.getNumNodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
     {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
         if (modulenames.length() > 0)
@@ -60,18 +64,17 @@ Define_NED_Function2(nedf_moduleListByPath,
         "See cTopology::extractByModulePath()."
 );
 
-Value nedf_moduleListByNedType(cComponent *context, Value argv[], int argc)
+cNEDValue nedf_moduleListByNedType(cComponent *context, cNEDValue argv[], int argc)
 {
     std::string modulenames;
     cTopology topo;
     std::vector<std::string> paths;
-    int i;
-    for (i = 0; i < argc; i++)
-        paths.push_back(argv[i].s);
+    for (int i = 0; i < argc; i++)
+        paths.push_back(argv[i].stdstringValue());
 
     topo.extractByNedTypeName(paths);
 
-    for (i = 0; i < topo.getNumNodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
     {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
         if (modulenames.length() > 0)
