@@ -273,6 +273,8 @@ void MACRelayUnitBase::readAddressTable(const char* fileName)
         AddressEntry entry;
         entry.insertionTime = 0;
         entry.portno = atoi(portno);
+        if (addresstable.size() >= (unsigned int)addressTableSize)
+            error("Too many entries in address table file '%s'", fileName);
         addresstable[MACAddress(hexaddress)] = entry;
 
         // Garbage collection before next iteration
