@@ -24,9 +24,6 @@ package inet.linklayer.ethernet;
 // ethg[i] gates represent ports. Messages arriving on a port are broadcast
 // to every other port.
 //
-// The connections should have data rate set to zero. Cable lengths
-// should be reflected in the delays of the connections.
-//
 // Messages are not interpreted by the hub model in any way, thus the hub
 // model is not specific to Ethernet in any way. Messages may
 // represent anything, from the beginning of a frame transmission to
