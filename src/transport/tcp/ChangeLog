@@ -1,3 +1,8 @@
+2011-07-02  Thomas Reschka
+
+    * added check for received SACK below total cumulative ACK (=snd_una) in processSACKOption() to avoid ASSERT in setSackedBit().
+    * updated TCP Option Numbers in TCPSegment.msg. Based on [http://www.iana.org/assignments/tcp-parameters/].
+
 2011-06-04  Thomas Reschka
 
     * added check for lost FIN (without user data) in retransmitOneSegment() to fix bug #212.

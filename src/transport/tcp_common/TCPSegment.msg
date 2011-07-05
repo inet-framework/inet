@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2009-2011 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -55,7 +55,7 @@ struct TCPPayloadMessage
 //
 // TCP Option Numbers
 // Reference: http://www.iana.org/assignments/tcp-parameters/
-// Date: 2010-07-04
+// Date: 2011-07-02
 //
 // Note: Options not yet implemented should stay commented out
 //
@@ -67,27 +67,27 @@ enum TCPOptionNumbers
     TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes
     TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes
     TCPOPTION_SACK = 5;                                 // RFC 2018, LENGTH: N (max. N = 4) 8 * n + 2 Bytes  => 32 + 2 + 2 * NOP = 36 Bytes; If TIMESTAMP option is used with SACK: max. n = 3 => 12 Bytes (for Timestamp) + 28 Bytes (for SACK) = 40 Bytes
-//    TCPOPTION_ECHO = 6;                              // (obsoleted by option 8) RFC 1072, LENGTH: 6 Bytes
-//    TCPOPTION_ECHO_REPLY = 7;                        // (obsoleted by option 8) RFC 1072, LENGTH: 6 Bytes
+//    TCPOPTION_ECHO = 6;                               // (obsoleted by option 8) RFC 1072 & RFC 6247, LENGTH: 6 Bytes
+//    TCPOPTION_ECHO_REPLY = 7;                         // (obsoleted by option 8) RFC 1072 & RFC 6247, LENGTH: 6 Bytes
     TCPOPTION_TIMESTAMP = 8;                            // RFC 1323, LENGTH: 10 Bytes
-//  TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9;   // RFC 1693, LENGTH: 2 Bytes
-//  TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;       // RFC 1693, LENGTH: 3 Bytes
-//  TCPOPTION_CC = 11;                                  // RFC 1644, LENGTH: -
-//  TCPOPTION_CC_NEW = 12;                              // RFC 1644, LENGTH: -
-//  TCPOPTION_CC_ECHO = 13;                             // RFC 1644, LENGTH: -
-//  TCPOPTION_TCP_ALTERNATE_CHECKSUM_REQUEST = 14;      // RFC 1146, LENGTH: 3 Bytes
-//  TCPOPTION_TCP_ALTERNATE_CHECKSUM_DATA = 15;         // RFC 1146, LENGTH: N
+//    TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9; // (obsolete) RFC 1693 & RFC 6247, LENGTH: 2 Bytes
+//    TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;     // (obsolete) RFC 1693 & RFC 6247, LENGTH: 3 Bytes
+//    TCPOPTION_CC = 11;                                // (obsolete) RFC 1644 & RFC 6247, LENGTH: -
+//    TCPOPTION_CC_NEW = 12;                            // (obsolete) RFC 1644 & RFC 6247, LENGTH: -
+//    TCPOPTION_CC_ECHO = 13;                           // (obsolete) RFC 1644 & RFC 6247, LENGTH: -
+//    TCPOPTION_TCP_ALTERNATE_CHECKSUM_REQUEST = 14;    // (obsolete) RFC 1146 & RFC 6247, LENGTH: 3 Bytes
+//    TCPOPTION_TCP_ALTERNATE_CHECKSUM_DATA = 15;       // (obsolete) RFC 1146 & RFC 6247, LENGTH: N
 //  TCPOPTION_SKEETER = 16;                             // [Knowles], LENGTH: -
 //  TCPOPTION_BUBBA = 17;                               // [Knowles], LENGTH: -
 //  TCPOPTION_TRAILER_CHECKSUM_OPTION = 18;             // [Subbu & Monroe], LENGTH: 3Bytes
-//     TCPOPTION_MD5_SIGNATURE_OPTION = 19;             // (obsoleted by option 29) RFC 2385, LENGTH: 18 Bytes
+//    TCPOPTION_MD5_SIGNATURE_OPTION = 19;              // (obsoleted by option 29) RFC 2385, LENGTH: 18 Bytes
 //  TCPOPTION_SCPS_CAPABILITIES = 20;                   // [Scott], LENGTH: -
 //  TCPOPTION_SELECTIVE_NEGATIVE_ACKNOWLEDGEMENTS = 21; // [Scott], LENGTH: -
 //  TCPOPTION_RECORD_BOUNDARIES = 22;                   // [Scott], LENGTH: -
 //  TCPOPTION_CORRUPTION_EXPERIENCED = 23;              // [Scott], LENGTH: -
-//  TCPOPTION_SANP = 24;                                // [Sukonnik], LENGTH: -
+//  TCPOPTION_SNAP = 24;                                // [Sukonnik], LENGTH: -
 //  TCPOPTION_UNASSIGNED = 25;                          // released 2000-12-18 [-], LENGTH: -
-//  TCPOPTION_TCP_COMPESSION_FILTER = 26;               // [Bellovin], LENGTH: -
+//  TCPOPTION_TCP_COMPRESSION_FILTER = 26;              // [Bellovin], LENGTH: -
 //  TCPOPTION_QUICK_START_RESPONSE = 27;                // RFC 4782, LENGTH: 8 Bytes
 //  TCPOPTION_USER_TIMEOUT_OPTION = 28;                 // RFC 5482, LENGTH: 4 Bytes
 //  TCPOPTION_AUTHENTICATION_OPTION = 29;               // RFC 5925, LENGTH: -

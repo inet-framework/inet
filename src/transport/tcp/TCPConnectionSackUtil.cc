@@ -117,8 +117,10 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
                 }
             }
 
-            if (seqGreater(tmp.getEnd(), tcpseg->getAckNo()))
+            if (seqGreater(tmp.getEnd(), tcpseg->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una))
                 rexmitQueue->setSackedBit(tmp.getStart(), tmp.getEnd());
+            else
+                tcpEV << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
         }
         state->rcv_sacks += n; // total counter, no current number
 
