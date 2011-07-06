@@ -261,7 +261,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
         IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
         if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
         {
-            IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4); class IInterfaceTable;
+            IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4);
             rtOpt.setNextAddressPtr(rtOpt.getNextAddressPtr()+4);
             datagram->setSrcAddress(rt->getRouterId());
             datagram->setDestAddress(nextRouteAddress);
