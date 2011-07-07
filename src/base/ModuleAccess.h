@@ -73,22 +73,22 @@ class ModuleAccess
     ModuleAccess(const char *n) {name = n; p = NULL;}
     virtual ~ModuleAccess() {}
 
-    virtual T *get()
+    virtual T *get(cModule *from = simulation.getContextModule())
     {
         if (!p)
         {
-            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
+            cModule *m = findModuleWhereverInNode(name, from);
             if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
             p = check_and_cast<T*>(m);
         }
         return p;
     }
 
-    virtual T *getIfExists()
+    virtual T *getIfExists(cModule *from = simulation.getContextModule())
     {
         if (!p)
         {
-            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
+            cModule *m = findModuleWhereverInNode(name, from);
             p = dynamic_cast<T*>(m);
         }
         return p;
