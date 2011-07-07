@@ -30,29 +30,30 @@ import inet.applications.IUDPApp;
 //
 // <b>Addressing:</b>
 //
-// The destAddresses parameter can contain zero, one or more destination 
+// The destAddresses parameter can contain zero, one or more destination
 // addresses, separated by spaces. If there is no destination address given,
-// the module will act as packet sink. If there are more than one addresses, 
+// the module will act as packet sink. If there are more than one addresses,
 // one of them is randomly chosen, either for the whole simulation run,
 // or for each burst, or for each packet, depending on the value of the
-// chooseDestAddrMode parameter. The destAddrRNG parameter controls which 
-// (local) RNG is used for randomized address selection. 
-// TODO: forditani:
-// A sajat magara mutato cimet kihagyja a felsoroltak kozul, mintha bele se irtak volna.
+// chooseDestAddrMode parameter. The destAddrRNG parameter controls which
+// (local) RNG is used for randomized address selection.
+// The own addresses will be ignored.
 // 
 // An address may be given in the dotted decimal notation, or with the module 
 // name. (The IPvXAddressResolver class is used to resolve the address.)
-// TODO: forditani:
-// Hasznalhato a "Broadcast" string is, ez esetben broadcast uzeneteket kuld.
+// You can use the "Broadcast" string as address for sending broadcast messages.
 //
 // INET also defines several NED functions that can be useful: 
-//    - moduleListByPath(): TODO: forditani:
-//          visszaadja egy stringben szokozokkel elvalasztva a a parameterekre match-elo modulok neveit.
+//    - moduleListByPath("pattern",...):
+//          Returns a space-separated list of the modulenames.
+//          All modules whole getFullPath() matches one of the pattern parameters will get included.
+//          The patterns may contain wilcards in the same syntax as in ini files.
 //          See cTopology::extractByModulePath() function
 //          example: destaddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
-//    - moduleListByNedType(): TODO: forditani: 
-//          visszaadja egy stringben szokozokkel elvalasztva a modulok neveit.
-//          The type name is fully qualified.
+//    - moduleListByNedType("fully.qualified.ned.type",...): 
+//          Returns a space-separated list of the modulenames with the given NED type(s).
+//          All modules whose getNedTypeName() is listed in the given parameters will get included.
+//          The NED type name is fully qualified.
 //          See cTopology::extractByNedTypeName() function
 //          example: destaddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
 //
@@ -77,14 +78,14 @@ import inet.applications.IUDPApp;
 //
 // Packet length is controlled by the messageLength parameter.
 //
-// TODO: forditani
-// A modul kuldeskor sourceID = source modul ID, es msgId parametereket rak a packetekre,
-// fogadaskor ezek alapjan ellenorzi, hogy helyes sorrendben erkeznek-e a csomagok.
-// Az msgId minden kuldeskor novekszik 1-gyel, fuggetlenul a destaddress-tol.
+// The module adds two parameters to packets before sending:
+//  - sourceID: source module ID
+//  - msgId: incremented by 1 after send any packet.
+// When received packet has this parameters, the module checks the order of received packets.
 //
 // <b>Operation as sink</b>
 //
-// When destAddresses parameter is empty, the module receives packets and makes statistics only. 
+// When destAddresses parameter is empty, the module receives packets and makes statistics only.
 //
 // <b>Statistics</b>
 //
@@ -92,17 +93,14 @@ import inet.applications.IUDPApp;
 //  - sentPk: packet object
 // 
 // Statistics are collected on incoming packets:
-// TODO: forditani
-//  - outOfOrderPk: a nem megfelelo sorrendben erkezett csomagok statisztikaja
-//        (a csomag akkor jott rossz sorrendben, ha van msgId es sourceId parameter rakaksztva,
-//        es mar erkezett azonos sourceID-rol nagyobb vagy azonos msgId-vel uzenet)
-//  - dropPk: a jo sorrendben/ellenorizhetetlen sorrendben erkezett csomagok kozul a delayLimit 
-//        parameternel nagyobb delay-jel erkezett csomagok statisztikaja
-//        delayLimit = 0 eseten nincs limit
-//  - rcvdPk: a jo sorrendben/ellenorizhetetlen sorrendben, megfelelo delay-jel erkezett csomagok
-//        statisztikaja
-//  - endToEndDelay: a jo sorrendben/ellenorizhetetlen sorrendben, megfelelo delay-jel erkezett
-//        csomagok end to end delay statisztikaja
+//  - outOfOrderPk: statistics of out of order packets.
+//        The packet is out of order, when has msgId and sourceId parameters and module
+//        received bigger msgId from same sourceID.
+//  - dropPk: statistics of dropped packets. 
+//        The packet is dropped when not out-of-order packet and delay time is larger than
+//        delayLimit parameter. The delayLimit=0 is infinity.
+//  - rcvdPk: statistics of not dropped, not out-of-order packets.
+//  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
 //
 simple UDPBasicBurst like IUDPApp
 {
