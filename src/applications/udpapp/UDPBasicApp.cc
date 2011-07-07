@@ -58,7 +58,7 @@ void UDPBasicApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("messageFreq"), timer);
+    scheduleAt(par("startTime").doubleValue(), timer);
 }
 
 void UDPBasicApp::finish()
@@ -72,7 +72,6 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
     int k = intrand(destAddresses.size());
     return destAddresses[k];
 }
-
 
 cPacket *UDPBasicApp::createPacket()
 {
@@ -91,7 +90,6 @@ void UDPBasicApp::sendPacket()
 
     emit(sentPkBytesSignal, (long)(payload->getByteLength()));
     sendToUDP(payload, localPort, destAddr, destPort);
-
     numSent++;
 }
 
@@ -101,7 +99,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("messageFreq"), msg);
+        scheduleAt(simTime()+par("messageFreq").doubleValue(), msg);
     }
     else
     {
@@ -117,14 +115,12 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     }
 }
 
-
 void UDPBasicApp::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
     printPacket(msg);
     emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     delete msg;
-
     numReceived++;
 }
 
