@@ -6,9 +6,7 @@ package inet.examples.inet.ber;
 
 import inet.nodes.inet.StandardHost;
 
-
-network ber
-{
+network ber {
     parameters:
         double n;
         @display("bgb=400,200");

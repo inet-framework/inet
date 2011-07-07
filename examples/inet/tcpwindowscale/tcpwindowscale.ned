@@ -7,9 +7,7 @@ package inet.examples.inet.tcpwindowscale;
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 
-
-network tcpwindowscale
-{
+network tcpwindowscale {
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -25,12 +23,11 @@ network tcpwindowscale
             gates:
                 pppg[1];
         }
-    connections allowunconnected:
+    connections:
         client.pppg[0] <--> LFNPath <--> server.pppg[0];
 }
 
-channel LFNPath extends DatarateChannel
-{
+channel LFNPath extends DatarateChannel {
     parameters:
         datarate = 1Gbps;
         delay = 565ms;

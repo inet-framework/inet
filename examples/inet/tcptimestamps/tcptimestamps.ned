@@ -7,9 +7,7 @@ package inet.examples.inet.tcptimestamps;
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 
-
-network tcptimestamps
-{
+network tcptimestamps {
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -25,12 +23,11 @@ network tcptimestamps
             gates:
                 pppg[1];
         }
-    connections allowunconnected:
+    connections:
         client.pppg[0] <--> NormalPath <--> server.pppg[0];
 }
 
-channel NormalPath extends DatarateChannel
-{
+channel NormalPath extends DatarateChannel {
     parameters:
         datarate = 100Mbps;
         delay = 0.5ms;
