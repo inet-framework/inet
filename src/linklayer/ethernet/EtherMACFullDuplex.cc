@@ -243,15 +243,17 @@ void EtherMACFullDuplex::handleEndTxPeriod()
     if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
 
-    unsigned long curBytes = curTxFrame->getByteLength();
-    numFramesSent++;
-    numBytesSent += curBytes;
-    emit(txPkBytesSignal, curBytes);
-
     if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, ((EtherPauseFrame*)curTxFrame)->getPauseTime());
+    }
+    else
+    {
+        unsigned long curBytes = curTxFrame->getByteLength();
+        numFramesSent++;
+        numBytesSent += curBytes;
+        emit(txPkBytesSignal, curBytes);
     }
 
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
@@ -294,7 +296,7 @@ void EtherMACFullDuplex::updateHasSubcribers()
 void EtherMACFullDuplex::processMessageWhenNotConnected(cMessage *msg)
 {
     EV << "Interface is not connected -- dropping packet " << msg << endl;
-    emit(droppedPkBytesIfaceDownSignal, (long)(PK(msg)->getByteLength()));
+    emit(dropPkIfaceDownSignal, msg);
     numDroppedIfaceDown++;
     delete msg;
 
@@ -334,7 +336,7 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     if (frame->hasBitError())
     {
         numDroppedBitError++;
-        emit(droppedPkBytesBitErrorSignal, (long)(frame->getByteLength()));
+        emit(dropPkBitErrorSignal, frame);
         delete frame;
         return;
     }

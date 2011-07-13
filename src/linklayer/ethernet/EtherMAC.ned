@@ -143,19 +143,36 @@ simple EtherMAC like IEtherMAC
         bool carrierExtension = default(true);  // enable/disable carrier extension on half duplex Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
-        @statistic[txPkBytes](title="TX bytes"; record=sum,count,vector);
-        @statistic[rxPkBytesOk](title="RX bytes"; record=sum,count,vector);
-        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector);
-        @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector);
-        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector);
-        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; record=sum,count,vector);
-        @statistic[collision](title="Collision"; record=count,vector);
-        @statistic[backoff](title="Backoff"; record=count,vector);
-        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; record=sum,count,vector);
-        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; record=sum,count,vector);
-        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us"; record=sum,count,vector);
+
+        @signal[txPkBytes](type=long; unit=B);
+        @signal[rxPkBytesOk](type=long; unit=B);
+        @signal[txPausePkUnits](type=long; unit=B);
+        @signal[rxPausePkUnits](type=long; unit=B);
+        @signal[rxPkBytesFromHL](type=long; unit=B);
+        @signal[dropPkNotForUs](type=cPacket);
+        @signal[dropPkBitError](type=cPacket);
+        @signal[dropPkIfaceDown](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[collision](type=long; interpolationmode=none);
+        @signal[backoff](type=long; interpolationmode=none);
+
+        @statistic[txPkBytes](title="TX bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[rxPkBytesOk](title="RX bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector; interpolationmode=none);
+        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector; interpolationmode=none);
+        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[collision](title="Collision"; record=count,vector; interpolationmode=none);
+        @statistic[backoff](title="Backoff"; record=count,vector; interpolationmode=none);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; source="packetBytes(dropPkBitError)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us"; source="packetBytes(dropPkNotForUs)"; unit=B; record=sum,count,vector; interpolationmode=none);
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
+

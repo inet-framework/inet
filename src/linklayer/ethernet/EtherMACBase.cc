@@ -94,13 +94,12 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
 
 simsignal_t EtherMACBase::txPkBytesSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::rxPkBytesOkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::passedUpPkBytesSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::txPausePkUnitsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::rxPausePkUnitsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::rxPkBytesFromHLSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::droppedPkBytesNotForUsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::dropPkNotForUsSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::dropPkBitErrorSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
 
 simsignal_t EtherMACBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
@@ -269,10 +268,9 @@ void EtherMACBase::initializeStatistics()
     txPausePkUnitsSignal = registerSignal("txPausePkUnits");
     rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
     rxPkBytesFromHLSignal = registerSignal("rxPkBytesFromHL");
-    droppedPkBytesBitErrorSignal = registerSignal("droppedPkBytesBitError");
-    droppedPkBytesIfaceDownSignal = registerSignal("droppedPkBytesIfaceDown");
-    droppedPkBytesNotForUsSignal = registerSignal("droppedPkBytesNotForUs");
-    passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+    dropPkBitErrorSignal = registerSignal("dropPkBitError");
+    dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+    dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
     packetSentToLowerSignal = registerSignal("packetSentToLower");
     packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
@@ -360,7 +358,7 @@ void EtherMACBase::ifDown()
             cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
             EV << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
-            emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+            emit(dropPkIfaceDownSignal, msg);
             delete msg;
         }
     }
@@ -389,7 +387,7 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
 
     EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
     numDroppedNotForUs++;
-    emit(droppedPkBytesNotForUsSignal, (long)(frame->getByteLength()));
+    emit(dropPkNotForUsSignal, frame);
     delete frame;
     return false;
 }

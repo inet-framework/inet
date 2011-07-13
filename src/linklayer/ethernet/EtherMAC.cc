@@ -519,15 +519,17 @@ void EtherMAC::handleEndTxPeriod()
     if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
 
-    unsigned long curBytes = curTxFrame->getByteLength();
-    numFramesSent++;
-    numBytesSent += curBytes;
-    emit(txPkBytesSignal, curBytes);
-
     if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, ((EtherPauseFrame*)curTxFrame)->getPauseTime());
+    }
+    else
+    {
+        unsigned long curBytes = curTxFrame->getByteLength();
+        numFramesSent++;
+        numBytesSent += curBytes;
+        emit(txPkBytesSignal, curBytes);
     }
 
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
@@ -716,7 +718,7 @@ void EtherMAC::updateHasSubcribers()
 void EtherMAC::processMessageWhenNotConnected(cMessage *msg)
 {
     EV << "Interface is not connected -- dropping packet " << msg << endl;
-    emit(droppedPkBytesIfaceDownSignal, (long)(PK(msg)->getByteLength()));
+    emit(dropPkIfaceDownSignal, msg);
     numDroppedIfaceDown++;
     delete msg;
 
@@ -728,6 +730,7 @@ void EtherMAC::processMessageWhenNotConnected(cMessage *msg)
 void EtherMAC::processMessageWhenDisabled(cMessage *msg)
 {
     EV << "MAC is disabled -- dropping message " << msg << endl;
+    emit(dropPkIfaceDownSignal, msg);
     delete msg;
 
     if (txQueue.extQueue)
@@ -761,7 +764,7 @@ void EtherMAC::frameReceptionComplete()
     if (frame->hasBitError())
     {
         numDroppedBitError++;
-        emit(droppedPkBytesBitErrorSignal, (long)(frame->getByteLength()));
+        emit(dropPkBitErrorSignal, frame);
         delete frame;
         return;
     }

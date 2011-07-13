@@ -177,13 +177,12 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     static simsignal_t txPkBytesSignal;
     static simsignal_t rxPkBytesOkSignal;
-    static simsignal_t passedUpPkBytesSignal;
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
     static simsignal_t rxPkBytesFromHLSignal;
-    static simsignal_t droppedPkBytesNotForUsSignal;
-    static simsignal_t droppedPkBytesBitErrorSignal;
-    static simsignal_t droppedPkBytesIfaceDownSignal;
+    static simsignal_t dropPkNotForUsSignal;
+    static simsignal_t dropPkBitErrorSignal;
+    static simsignal_t dropPkIfaceDownSignal;
 
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;
