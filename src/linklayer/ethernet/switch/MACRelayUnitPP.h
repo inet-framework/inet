@@ -48,12 +48,10 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
     int bufferSize;             // Max size of the buffer
     long highWatermark;         // if buffer goes above this level, send PAUSE frames
     int pauseUnits;             // "units" field in PAUSE frames
-    simtime_t pauseInterval;    // min time between sending PAUSE frames
 
     // Other variables
     int bufferUsed;             // Amount of buffer used to store payload
     PortBuffer *buffer;         // Buffers containing Ethernet payloads
-    simtime_t pauseLastSent;
 
     // Parameters for statistics collection
     long numProcessedFrames;
@@ -93,5 +91,4 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
 };
 
 #endif
-
 

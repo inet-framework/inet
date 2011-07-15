@@ -60,6 +60,11 @@ class INET_API MACRelayUnitBase : public cSimpleModule
     AddressTable addresstable;  // Address Lookup Table
 
     int seqNum;                 // counter for PAUSE frames
+    simtime_t *pauseFinished;   // finish time of last PAUSE (array of numPorts element)
+
+  public:
+    MACRelayUnitBase() { pauseFinished = NULL; }
+    ~MACRelayUnitBase() { delete [] pauseFinished; }
 
   protected:
     /**
@@ -118,8 +123,12 @@ class INET_API MACRelayUnitBase : public cSimpleModule
      */
     virtual void sendPauseFrame(int portno, int pauseUnits);
 
+    /**
+     * Utility function (for use by subclasses) to send flow control
+     * PAUSE frame on the ports, which previous PAUSE time is terminated.
+     */
+    virtual void sendPauseFramesIfNeeded(int pauseUnits);
 };
 
 #endif
-
 

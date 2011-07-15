@@ -192,6 +192,9 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     virtual MACAddress getMACAddress() {return address;}
 
+    double getTxRate() { return curEtherDescr->txrate; }
+    bool isActive() { return connected && !disabled; }
+
   protected:
     //  initialization
     virtual void initialize();

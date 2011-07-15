@@ -43,12 +43,10 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
     int bufferSize;             // Max size of the buffer
     long highWatermark;         // if buffer goes above this level, send PAUSE frames
     int pauseUnits;             // "units" field in PAUSE frames
-    simtime_t pauseInterval;    // min time between sending PAUSE frames
 
     // Other variables
     int bufferUsed;             // Amount of buffer used to store frames
     cMessage **endProcEvents;   // self-messages, one for each processor
-    simtime_t pauseLastSent;
 
     // Parameters for statistics collection
     long numProcessedFrames;
@@ -86,6 +84,4 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
 };
 
 #endif
-
-
 

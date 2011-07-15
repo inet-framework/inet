@@ -18,6 +18,7 @@
 #include "MACRelayUnitBase.h"
 #include "MACAddress.h"
 #include "EtherFrame_m.h"
+#include "EtherMACBase.h"
 #include "Ethernet.h"
 
 
@@ -82,6 +83,14 @@ void MACRelayUnitBase::initialize()
     const char *addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)
         readAddressTable(addressTableFile);
+
+    pauseFinished = new simtime_t[numPorts];
+#ifdef USE_DOUBLE_SIMTIME
+    for (int i=0; i<numPorts; i++)
+        pauseFinished[i] = SIMTIME_ZERO;
+#else
+    // simtime_t constructor already initialize by SIMTIME_ZERO
+#endif
 
     seqNum = 0;
 
@@ -291,17 +300,40 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 {
     EV << "Creating and sending PAUSE frame on port " << portno << " with duration=" << pauseUnits << " units\n";
 
-    // create Ethernet frame
-    char framename[40];
-    sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    EtherPauseFrame *frame = new EtherPauseFrame(framename);
-    frame->setDest(MACAddress::MULTICAST_PAUSE_ADDRESS);
-    frame->setPauseTime(pauseUnits);
+    cGate* gate = this->gate("lowerLayerOut", portno);
+    EtherMACBase *destModule = check_and_cast<EtherMACBase*>(gate->getPathEndGate()->getOwnerModule());
 
-    frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
-        frame->setByteLength(MIN_ETHERNET_FRAME);
+    if (destModule->isActive())
+    {
+        // create Ethernet frame
+        char framename[40];
+        sprintf(framename, "pause-%d-%d", getId(), seqNum++);
+        EtherPauseFrame *frame = new EtherPauseFrame(framename);
+        frame->setDest(MACAddress::MULTICAST_PAUSE_ADDRESS);
+        frame->setPauseTime(pauseUnits);
 
-    send(frame, "lowerLayerOut", portno);
+        frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
+        if (frame->getByteLength() < MIN_ETHERNET_FRAME)
+            frame->setByteLength(MIN_ETHERNET_FRAME);
+
+        send(frame, gate);
+        pauseFinished[portno] = simTime() + 512.0 * pauseUnits / destModule->getTxRate();
+    }
+    else //disconnected or disabled
+    {
+        pauseFinished[portno] = SIMTIME_ZERO;
+    }
+}
+
+void MACRelayUnitBase::sendPauseFramesIfNeeded(int pauseUnits)
+{
+    simtime_t now = simTime();
+
+    // send PAUSE on all ports, when need
+    for (int i=0; i < numPorts; ++i)
+    {
+        if (pauseFinished[i] <= now)
+            sendPauseFrame(i, pauseUnits);
+    }
 }
 
