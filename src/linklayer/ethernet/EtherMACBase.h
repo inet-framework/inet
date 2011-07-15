@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 #include "INotifiable.h"
+#include "IPassiveQueue.h"
 #include "MACAddress.h"
 #include "TxNotifDetails.h"
 
@@ -29,7 +30,6 @@
 class EtherFrame;
 class EtherTraffic;
 class InterfaceEntry;
-class IPassiveQueue;
 class NotificationBoard;
 
 /**
@@ -83,11 +83,21 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     class InnerQueue
     {
-      public:
+      protected:
         cQueue queue;
         int queueLimit;               // max queue length
 
-        InnerQueue(const char* name = NULL, int limit = 0) : queue(name), queueLimit(limit) {}
+      protected:
+        static int packetCompare(cObject *a, cObject *b);  // PAUSE frames have higher priority
+
+      public:
+        InnerQueue(const char* name = NULL, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
+        void insertFrame(cObject *obj) { queue.insert(obj); }
+        cObject *pop() { return queue.pop(); }
+        bool empty() const { return queue.empty(); }
+        int getQueueLimit() const { return queueLimit; }
+        bool isFull() const { return queueLimit != 0 && queue.length() > queueLimit; }
+        int length() const { return queue.length(); }
     };
 
     class MacQueue
@@ -96,15 +106,12 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
         InnerQueue * innerQueue;
         IPassiveQueue *extQueue;
 
+      public:
         MacQueue() : innerQueue(NULL), extQueue(NULL) {};
-
         ~MacQueue() { delete innerQueue; };
-
-        bool isEmpty();
-
+        bool isEmpty() { return innerQueue ? innerQueue->empty() : extQueue->isEmpty(); }
         void setExternalQueue(IPassiveQueue *_extQueue)
                 { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
-
         void setInternalQueue(const char* name = NULL, int limit = 0)
                 { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
     };

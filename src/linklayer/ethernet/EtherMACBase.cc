@@ -107,10 +107,6 @@ simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
 
-bool EtherMACBase::MacQueue::isEmpty()
-{
-    return innerQueue ? innerQueue->queue.empty() : extQueue->isEmpty();
-}
 
 EtherMACBase::EtherMACBase()
 {
@@ -359,9 +355,9 @@ void EtherMACBase::ifDown()
     else
     {
         //Clear inner queue
-        while (!txQueue.innerQueue->queue.empty())
+        while (!txQueue.innerQueue->empty())
         {
-            cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->queue.pop());
+            cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
             EV << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
             emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
@@ -485,8 +481,8 @@ void EtherMACBase::getNextFrameFromQueue()
     }
     else
     {
-        if (!txQueue.innerQueue->queue.empty())
-            curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
+        if (!txQueue.innerQueue->empty())
+            curTxFrame = (EtherFrame*)txQueue.innerQueue->pop();
     }
 }
 
@@ -609,5 +605,13 @@ void EtherMACBase::receiveChangeNotification(int category, const cObject *)
 {
     if (category == NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();
+}
+
+
+int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)
+{
+    int ap = (dynamic_cast<EtherPauseFrame*>(a) == NULL) ? 1 : 0;
+    int bp = (dynamic_cast<EtherPauseFrame*>(b) == NULL) ? 1 : 0;
+    return ap - bp;
 }
 
