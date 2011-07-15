@@ -394,13 +394,14 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
 {
     // If not set to promiscuous = on, then checks if received frame contains destination MAC address
     // matching port's MAC address, also checks if broadcast bit is set
-    if (!promiscuous && !frame->getDest().isBroadcast() && !frame->getDest().equals(address))
+    //TODO: multicast dest address?
+    if (!promiscuous && !frame->getDest().isBroadcast() && !frame->getDest().equals(address)
+            && !frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
     {
         EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
         numDroppedNotForUs++;
         emit(droppedPkBytesNotForUsSignal, (long)(frame->getByteLength()));
         delete frame;
-
         return false;
     }
 

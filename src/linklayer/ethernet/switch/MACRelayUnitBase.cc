@@ -295,6 +295,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
     char framename[40];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename);
+    frame->setDest(MACAddress::MULTICAST_PAUSE_ADDRESS);
     frame->setPauseTime(pauseUnits);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);

@@ -45,6 +45,9 @@ class INET_API MACAddress
     /** Returns the broadcast (ff:ff:ff:ff:ff:ff) MAC address */
     static const MACAddress BROADCAST_ADDRESS;
 
+    /** Returns the special multicast pause (01:80:C2:00:00:01) MAC address */
+    static const MACAddress MULTICAST_PAUSE_ADDRESS;
+
     /**
      * Default constructor initializes address bytes to zero.
      */

@@ -149,6 +149,10 @@ void EtherEncap::handleSendPause(cMessage *msg)
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
+    MACAddress dest = etherctrl->getDest();
+    if (dest.isUnspecified())
+        dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
+    frame->setDest(dest);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
     if (frame->getByteLength() < MIN_ETHERNET_FRAME)
