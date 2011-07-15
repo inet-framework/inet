@@ -51,7 +51,7 @@ run() {
   cd $INETROOT/`dirname $1`
   echo "
 ========================================================
-Running: $1  $2
+<!!> Running: $1  $2
 --------------------------------------------------------
 "
   $INETROOT/src/run_inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
