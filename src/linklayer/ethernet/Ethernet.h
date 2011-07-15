@@ -34,8 +34,6 @@
 #define FAST_GIGABIT_ETHERNET_TXRATE 10000000000.0 /* 10 Gbit/sec (in bit/s) */
 #define FOURTY_GIGABIT_ETHERNET_TXRATE    40000000000.0  /* 40 Gbit/sec (in bit/s) */
 #define HUNDRED_GIGABIT_ETHERNET_TXRATE  100000000000.0  /* 100 Gbit/sec (in bit/s) */
-#define SLOT_TIME                    (512.0/ETHERNET_TXRATE)  /* for Ethernet & Fast Ethernet, in seconds */
-#define GIGABIT_SLOT_TIME            (4096.0/GIGABIT_ETHERNET_TXRATE) /* seconds */
 #define MAX_ATTEMPTS                 16
 #define BACKOFF_RANGE_LIMIT          10
 #define JAM_SIGNAL_BYTES             4
