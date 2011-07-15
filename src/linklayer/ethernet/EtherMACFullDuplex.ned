@@ -146,11 +146,11 @@ simple EtherMACFullDuplex like IEtherMAC
         int mtu = default(1500);
         @display("i=block/rxtx");
 
-        @signal[txPkBytes](type=long; unit=B);
-        @signal[rxPkBytesOk](type=long; unit=B);
-        @signal[txPausePkUnits](type=long; unit=B);
-        @signal[rxPausePkUnits](type=long; unit=B);
-        @signal[rxPkBytesFromHL](type=long; unit=B);
+        @signal[txPk](type=cPacket);
+        @signal[rxPkOk](type=cPacket);
+        @signal[txPausePkUnits](type=long);
+        @signal[rxPausePkUnits](type=long);
+        @signal[rxPkFromHL](type=cPacket);
         @signal[dropPkNotForUs](type=cPacket);
         @signal[dropPkBitError](type=cPacket);
         @signal[dropPkIfaceDown](type=cPacket);
@@ -159,12 +159,12 @@ simple EtherMACFullDuplex like IEtherMAC
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
 
-        @statistic[txPkBytes](title="Sent bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[rxPkBytesOk](title="Received bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[passedUpPkBytes](title="Passed bytes to higher layer"; source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector; interpolationmode=none);
+        @statistic[txPkBytes](title="TX bytes"; source="packetBytes(txPk)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[rxPkBytesOk](title="RX bytes"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector; interpolationmode=none);
-        @statistic[rxPkBytesFromHL](title="Received bytes from higher layer"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector; interpolationmode=none);
+        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; source="packetBytes(rxPkFromHL)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; source="packetBytes(dropPkBitError)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us"; source="packetBytes(dropPkNotForUs)"; unit=B; record=sum,count,vector; interpolationmode=none);

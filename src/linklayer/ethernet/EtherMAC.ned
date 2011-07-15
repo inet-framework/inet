@@ -144,11 +144,11 @@ simple EtherMAC like IEtherMAC
         int mtu = default(1500);
         @display("i=block/rxtx");
 
-        @signal[txPkBytes](type=long; unit=B);
-        @signal[rxPkBytesOk](type=long; unit=B);
-        @signal[txPausePkUnits](type=long; unit=B);
-        @signal[rxPausePkUnits](type=long; unit=B);
-        @signal[rxPkBytesFromHL](type=long; unit=B);
+        @signal[txPk](type=cPacket);
+        @signal[rxPkOk](type=cPacket);
+        @signal[txPausePkUnits](type=long);
+        @signal[rxPausePkUnits](type=long);
+        @signal[rxPkFromHL](type=cPacket);
         @signal[dropPkNotForUs](type=cPacket);
         @signal[dropPkBitError](type=cPacket);
         @signal[dropPkIfaceDown](type=cPacket);
@@ -159,12 +159,12 @@ simple EtherMAC like IEtherMAC
         @signal[collision](type=long; interpolationmode=none);
         @signal[backoff](type=long; interpolationmode=none);
 
-        @statistic[txPkBytes](title="TX bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[rxPkBytesOk](title="RX bytes"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[txPkBytes](title="TX bytes"; source="packetBytes(txPk)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[rxPkBytesOk](title="RX bytes"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector; interpolationmode=none);
         @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector; interpolationmode=none);
-        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; source="packetBytes(rxPkFromHL)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[collision](title="Collision"; record=count,vector; interpolationmode=none);
         @statistic[backoff](title="Backoff"; record=count,vector; interpolationmode=none);
         @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector; interpolationmode=none);

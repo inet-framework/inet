@@ -142,7 +142,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     if (!isPauseFrame)
     {
         numFramesFromHL++;
-        emit(rxPkBytesFromHLSignal, (long)(frame->getByteLength()));
+        emit(rxPkFromHLSignal, frame);
     }
 
     if (txQueue.extQueue)
@@ -233,7 +233,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
         unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
-        emit(txPkBytesSignal, curBytes);
+        emit(txPkSignal, curTxFrame);
     }
 
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
@@ -321,7 +321,7 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
-    emit(rxPkBytesOkSignal, curBytes);
+    emit(rxPkOkSignal, frame);
 
     if (!checkDestinationAddress(frame))
         return;

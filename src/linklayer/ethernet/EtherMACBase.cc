@@ -92,11 +92,11 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     }
 };
 
-simsignal_t EtherMACBase::txPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkBytesOkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::txPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::rxPkOkSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::txPausePkUnitsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::rxPausePkUnitsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::rxPkFromHLSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkNotForUsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
@@ -248,11 +248,11 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
 
-    txPkBytesSignal = registerSignal("txPkBytes");
-    rxPkBytesOkSignal = registerSignal("rxPkBytesOk");
+    txPkSignal = registerSignal("txPk");
+    rxPkOkSignal = registerSignal("rxPkOk");
     txPausePkUnitsSignal = registerSignal("txPausePkUnits");
     rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-    rxPkBytesFromHLSignal = registerSignal("rxPkBytesFromHL");
+    rxPkFromHLSignal = registerSignal("rxPkFromHL");
     dropPkBitErrorSignal = registerSignal("dropPkBitError");
     dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
     dropPkNotForUsSignal = registerSignal("dropPkNotForUs");

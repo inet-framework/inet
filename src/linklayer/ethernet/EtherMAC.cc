@@ -231,7 +231,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     if (!isPauseFrame)
     {
         numFramesFromHL++;
-        emit(rxPkBytesFromHLSignal, (long)(frame->getByteLength()));
+        emit(rxPkFromHLSignal, frame);
     }
 
     if (txQueue.extQueue)
@@ -530,7 +530,7 @@ void EtherMAC::handleEndTxPeriod()
         unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
-        emit(txPkBytesSignal, curBytes);
+        emit(txPkSignal, curTxFrame);
     }
 
     EV << "Transmission of " << curTxFrame << " successfully completed\n";
@@ -788,7 +788,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
-    emit(rxPkBytesOkSignal, curBytes);
+    emit(rxPkOkSignal, frame);
 
     if (!checkDestinationAddress(frame))
         return;

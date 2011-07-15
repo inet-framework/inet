@@ -169,11 +169,11 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     unsigned long numPauseFramesRcvd;  // PAUSE frames received from network
     unsigned long numPauseFramesSent;  // PAUSE frames sent
 
-    static simsignal_t txPkBytesSignal;
-    static simsignal_t rxPkBytesOkSignal;
+    static simsignal_t txPkSignal;
+    static simsignal_t rxPkOkSignal;
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
-    static simsignal_t rxPkBytesFromHLSignal;
+    static simsignal_t rxPkFromHLSignal;
     static simsignal_t dropPkNotForUsSignal;
     static simsignal_t dropPkBitErrorSignal;
     static simsignal_t dropPkIfaceDownSignal;
