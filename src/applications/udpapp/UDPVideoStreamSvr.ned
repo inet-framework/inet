@@ -35,6 +35,11 @@ import inet.applications.IUDPApp;
 //
 // The server can serve several clients, and several streams per client.
 //
+// Statistics:
+//
+// reqStreamBytes: statistic of bytelength of requested video streams.
+// sentPkBytes: statistic of sent packets and sent bytes.
+//
 // @see ~UDPVideoStreamCli
 //
 simple UDPVideoStreamSvr like IUDPApp
@@ -45,8 +50,10 @@ simple UDPVideoStreamSvr like IUDPApp
         volatile int videoSize @unit("B");
         int localPort; // port to listen on
         @display("i=block/app");
-        @statistic[reqStreamBytes](title="Requested stream bytes"; record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @signal[sentPk](type=cPacket);
+        @signal[reqStreamBytes](type=long);
+        @statistic[reqStreamBytes](title="Requested stream bytes"; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

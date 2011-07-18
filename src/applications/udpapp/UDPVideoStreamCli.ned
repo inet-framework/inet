@@ -24,6 +24,14 @@ import inet.applications.IUDPApp;
 //
 // Video streaming client.
 //
+// This module sends one "video streaming request" to serverAddress:serverPort at time startTime
+// and receives stream from ~UDPVideoStreamSvr server.
+//
+// Statistics:
+//
+// rcvdPkBytes: statistic of received packets and received bytes.
+// endToEndDelay: statistic of delays of incoming packets.
+//
 // @see ~UDPVideoStreamSvr
 //
 simple UDPVideoStreamCli like IUDPApp
@@ -34,8 +42,9 @@ simple UDPVideoStreamCli like IUDPApp
         int serverPort;
         double startTime @unit("s") = default(1s);
         @display("i=block/app");
-        @statistic[endToEndDelay](title="End-to-end delay"; record=histogram,stats,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @signal[rcvdPk](type=cPacket);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="End-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

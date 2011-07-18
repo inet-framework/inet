@@ -34,9 +34,9 @@ class INET_API DuplicatesGenerator : public cSimpleModule
     unsigned int numDuplicated;
     bool generateFurtherDuplicates;
 
-    static simsignal_t rcvdPkBytesSignal;
-    static simsignal_t sentPkBytesSignal;
-    static simsignal_t duplPkBytesSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
+    static simsignal_t duplPkSignal;
 
     std::vector<unsigned int> duplicatesVector;
 

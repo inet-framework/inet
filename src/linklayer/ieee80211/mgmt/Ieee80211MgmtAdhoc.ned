@@ -36,6 +36,13 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
     parameters:
         int frameCapacity = default(100);
         @display("i=block/cogwheel");
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[dataQueueLen](type=long; interpolationmode=sample-hold);  // number of stored packets
+        @statistic[dataQueueLen](title="Data queue len"; record=histogram,vector; interpolationmode=sample-hold);
+        @statistic[droppedPkBytesByQueue](title="Dropped packet bytes by queue"; source="packetBytes(dropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
         input uppergateIn;
         output uppergateOut;

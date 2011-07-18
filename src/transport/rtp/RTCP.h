@@ -242,8 +242,7 @@ class INET_API RTCP : public cSimpleModule
 //  cOutVector *_rtcpIntervalOutVector;
 
     //statistics
-    static simsignal_t rcvdPkBytesSignal;
-    static simsignal_t endToEndDelaySignal;
+    static simsignal_t rcvdPkSignal;
 };
 
 #endif

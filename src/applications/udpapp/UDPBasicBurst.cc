@@ -41,7 +41,6 @@ simsignal_t UDPBasicBurst::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::outOfOrderPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicBurst::dropPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::endToEndDelaySignal = SIMSIGNAL_NULL;
 
 UDPBasicBurst::UDPBasicBurst()
 {
@@ -134,7 +133,6 @@ void UDPBasicBurst::initialize(int stage)
     rcvdPkSignal = registerSignal("rcvdPk");
     outOfOrderPkSignal = registerSignal("outOfOrderPk");
     dropPkSignal = registerSignal("dropPk");
-    endToEndDelaySignal = registerSignal("endToEndDelay");
 }
 
 IPvXAddress UDPBasicBurst::chooseDestAddr()
@@ -231,7 +229,6 @@ void UDPBasicBurst::processPacket(cPacket *msg)
 
     EV << "Received packet: ";
     printPacket(msg);
-    emit(endToEndDelaySignal, simTime() - msg->getTimestamp());
     emit(rcvdPkSignal, msg);
     numReceived++;
     delete msg;

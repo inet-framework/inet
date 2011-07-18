@@ -27,9 +27,8 @@
 
 Define_Module(EtherAppCli);
 
-simsignal_t EtherAppCli::endToEndDelaySignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppCli::sentPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppCli::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::rcvdPkSignal = SIMSIGNAL_NULL;
 
 EtherAppCli::EtherAppCli()
 {
@@ -58,9 +57,8 @@ void EtherAppCli::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        endToEndDelaySignal = registerSignal("endToEndDelay");
-        sentPkBytesSignal = registerSignal("sentPkBytes");
-        rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
@@ -158,9 +156,9 @@ void EtherAppCli::sendPacket()
     etherctrl->setDest(destMACAddress);
     datapacket->setControlInfo(etherctrl);
 
+    emit(sentPkSignal, datapacket);
     send(datapacket, "out");
     packetsSent++;
-    emit(sentPkBytesSignal, len);
 }
 
 void EtherAppCli::receivePacket(cPacket *msg)
@@ -168,10 +166,7 @@ void EtherAppCli::receivePacket(cPacket *msg)
     EV << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
-    simtime_t lastEED = simTime() - msg->getCreationTime();
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-    emit(endToEndDelaySignal, lastEED);
-
+    emit(rcvdPkSignal, msg);
     delete msg;
 }
 

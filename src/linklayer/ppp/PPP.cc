@@ -31,12 +31,9 @@
 Define_Module(PPP);
 
 simsignal_t PPP::txStateSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::txPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::rxPkBytesOkSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::droppedPkBytesIfaceDownSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::droppedPkBytesBitErrorSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::passedUpPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::rxPkOkSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::dropPkBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::packetSentToLowerSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
 simsignal_t PPP::packetSentToUpperSignal = SIMSIGNAL_NULL;
@@ -75,13 +72,10 @@ void PPP::initialize(int stage)
         WATCH(numBitErr);
         WATCH(numDroppedIfaceDown);
 
-        txPkBytesSignal = registerSignal("txPkBytes");
-        rxPkBytesOkSignal = registerSignal("rxPkBytesOk");
-        droppedPkBytesIfaceDownSignal = registerSignal("droppedPkBytesIfaceDown");
+        rxPkOkSignal = registerSignal("rxPkOk");
+        dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
         txStateSignal = registerSignal("txState");
-        droppedPkBytesBitErrorSignal = registerSignal("droppedPkBytesBitError");
-        passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
-        rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
+        dropPkBitErrorSignal = registerSignal("dropPkBitError");
         packetSentToLowerSignal = registerSignal("packetSentToLower");
         packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
         packetSentToUpperSignal = registerSignal("packetSentToUpper");
@@ -166,7 +160,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    e->setMtu(par("mtu").longValue());
 
     // capabilities
     e->setMulticast(true);
@@ -234,7 +228,7 @@ void PPP::refreshOutGateConnection(bool connected)
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
                 EV << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedIfaceDown++;
-                emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+                emit(dropPkIfaceDownSignal, msg);
                 delete msg;
             }
         }
@@ -294,7 +288,6 @@ void PPP::startTransmitting(cPacket *msg)
     // send
     EV << "Starting transmission of " << pppFrame << endl;
     emit(txStateSignal, 1L);
-    emit(txPkBytesSignal, (long)(msg->getByteLength()));
     emit(packetSentToLowerSignal, pppFrame);
     send(pppFrame, physOutGate);
 
@@ -352,7 +345,7 @@ void PPP::handleMessage(cMessage *msg)
         if (PK(msg)->hasBitError())
         {
             EV << "Bit error in " << msg << endl;
-            emit(droppedPkBytesBitErrorSignal, (long)(((cPacket*)msg)->getByteLength()));
+            emit(dropPkBitErrorSignal, msg);
             numBitErr++;
             delete msg;
         }
@@ -360,10 +353,9 @@ void PPP::handleMessage(cMessage *msg)
         {
             // pass up payload
             PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
-            emit(rxPkBytesOkSignal, (long)(pppFrame->getByteLength()));
+            emit(rxPkOkSignal, pppFrame);
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
-            emit(passedUpPkBytesSignal, (long)(payload->getByteLength()));
             emit(packetSentToUpperSignal, payload);
             send(payload, "netwOut");
         }
@@ -374,7 +366,7 @@ void PPP::handleMessage(cMessage *msg)
         {
             EV << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
-            emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+            emit(dropPkIfaceDownSignal, msg);
             delete msg;
 
             if (queueModule && 0 == queueModule->getNumPendingRequests())
@@ -383,7 +375,6 @@ void PPP::handleMessage(cMessage *msg)
         else
         {
             emit(packetReceivedFromUpperSignal, msg);
-            emit(rcvdPkBytesFromHLSignal, (long)(PK(msg)->getByteLength()));
 
             if (endTransmissionEvent->isScheduled())
             {

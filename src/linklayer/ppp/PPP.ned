@@ -50,16 +50,27 @@ simple PPP
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
         int mtu = default(4470);
         @display("i=block/rxtx");
+
+        @signal[txState](type=long);    // 1:transmit, 0:idle
+        @signal[rxPkOk](type=PPPFrame);
+        @signal[dropPkIfaceDown](type=cMessage);
+        @signal[dropPkBitError](type=cMessage);
+        @signal[packetSentToLower](type=PPPFrame);
+        @signal[packetReceivedFromLower](type=cMessage);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cMessage);
+
         @statistic[txState](title="TX State"; record=timeavg,vector; interpolationmode=sample-hold);
-        @statistic[txPkBytes](title="TX packet bytes"; record=sum,count,vector);
-        @statistic[rxPkBytesOk](title="RX packet bytes OK"; record=sum,count,vector);
-        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; record=sum,count,vector);
-        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; record=sum,count,vector);
-        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; record=sum,count,vector);
-        @statistic[passedUpPkBytes](title="Passed packet bytes to higher layer"; record=sum,count,vector);
+        @statistic[txPkBytes](title="TX packet bytes"; source="packetBytes(packetSentToLower)"; unit=B; record=sum,count,vector);
+        @statistic[rxPkBytesOk](title="RX packet bytes OK"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; source="packetBytes(dropPkBitError)"; unit=B; record=sum,count,vector);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector);
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; source="packetBytes(packetReceivedFromUpper)"; unit=B; record=sum,count,vector);
+        @statistic[passedUpPkBytes](title="Passed packet bytes to higher layer"; source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector);
 
     gates:
         input netwIn;
         output netwOut;
         inout phys @labels(PPPFrame);
 }
+

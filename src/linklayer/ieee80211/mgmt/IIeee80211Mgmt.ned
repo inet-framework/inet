@@ -27,8 +27,6 @@ moduleinterface IIeee80211Mgmt
 {
     parameters:
         @display("i=block/cogwheel");
-        @statistic[dataQueueLen](title="Data queue len"; record=histogram,vector);
-        @statistic[droppedPacket](title="Dropped packet"; record=histogram,vector);
     gates:
         input uppergateIn;
         output uppergateOut;

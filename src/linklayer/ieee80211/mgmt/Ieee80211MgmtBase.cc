@@ -38,6 +38,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         dataQueue.setName("wlanDataQueue");
         mgmtQueue.setName("wlanMgmtQueue");
         dataQueueLenSignal = registerSignal("dataQueueLen");
+        emit(dataQueueLenSignal, dataQueue.length());
 
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;

@@ -46,9 +46,8 @@ class INET_API EtherAppCli : public cSimpleModule
     // receive statistics
     long packetsSent;
     long packetsReceived;
-    static simsignal_t endToEndDelaySignal;
-    static simsignal_t sentPkBytesSignal;
-    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
 
   public:
     EtherAppCli();

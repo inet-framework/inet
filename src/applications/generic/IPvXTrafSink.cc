@@ -33,15 +33,13 @@
 Define_Module(IPvXTrafSink);
 
 
-simsignal_t IPvXTrafSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t IPvXTrafSink::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void IPvXTrafSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    endToEndDelaySignal = registerSignal("endToEndDelay");
+    rcvdPkSignal = registerSignal("rcvdPk");
 }
 
 void IPvXTrafSink::handleMessage(cMessage *msg)
@@ -92,12 +90,10 @@ void IPvXTrafSink::printPacket(cPacket *msg)
 
 void IPvXTrafSink::processPacket(cPacket *msg)
 {
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-    emit(endToEndDelaySignal, simTime()-msg->getCreationTime());
+    emit(rcvdPkSignal, msg);
     EV << "Received packet: ";
     printPacket(msg);
     delete msg;
-
     numReceived++;
 }
 

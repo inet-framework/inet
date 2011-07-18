@@ -27,14 +27,12 @@
 
 Define_Module(UDPVideoStreamCli);
 
-simsignal_t UDPVideoStreamCli::endToEndDelaySignal = SIMSIGNAL_NULL;
-simsignal_t UDPVideoStreamCli::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamCli::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPVideoStreamCli::initialize()
 {
     //statistics
-    endToEndDelaySignal = registerSignal("endToEndDelay");
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     simtime_t startTime = par("startTime");
 
@@ -84,8 +82,7 @@ void UDPVideoStreamCli::receiveStream(cPacket *msg)
 {
     EV << "Video stream packet:\n";
     printPacket(msg);
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-    emit(endToEndDelaySignal, (simTime() - msg->getCreationTime()));
+    emit(rcvdPkSignal, msg);
     delete msg;
 }
 

@@ -80,7 +80,6 @@ class INET_API UDPBasicBurst : public UDPAppBase
     static simsignal_t rcvdPkSignal;
     static simsignal_t outOfOrderPkSignal;
     static simsignal_t dropPkSignal;
-    static simsignal_t endToEndDelaySignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();

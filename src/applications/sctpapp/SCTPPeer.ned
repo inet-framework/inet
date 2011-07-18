@@ -23,7 +23,7 @@ import inet.applications.ISCTPApp;
 simple SCTPPeer like ISCTPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
+        string address = default(""); // comma separated list of addresses
         int port = default(0); // port number to listen on
         bool echo = default(false);  // echoes received packages when true
         double echoDelay @unit(s) = default(0s);
@@ -42,10 +42,12 @@ simple SCTPPeer like ISCTPApp
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
         @display("i=block/app");
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentEchoedPkBytes](title="Sent echoed packet bytes"; record=count,sum,vector);
-
+        @signal[sentPk](type=SCTPSimpleMessage);
+        @signal[sentEchoedPk](type=SCTPSimpleMessage);
+        @signal[rcvdPk](type=cPacket);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentEchoedPkBytes](title="Sent packet bytes"; source="packetBytes(sentEchoedPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
         input sctpIn @labels(SCTPCommand/up);
         output sctpOut @labels(SCTPCommand/down);

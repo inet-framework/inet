@@ -62,7 +62,7 @@ void UDPEchoApp::processPacket(cPacket *msg)
     }
 
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(rcvdPkSignal, packet);
 
     if (packet->getIsRequest())
     {
@@ -77,7 +77,7 @@ void UDPEchoApp::processPacket(cPacket *msg)
         controlInfo->setDestPort(srcPort);
 
         packet->setIsRequest(false);
-        emit(sentPkBytesSignal, (long)(packet->getByteLength()));
+        emit(sentPkSignal, packet);
         send(packet, "udpOut");
     }
     else

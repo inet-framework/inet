@@ -29,9 +29,10 @@
 Define_Module(UDPVideoStreamSvr);
 
 simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = SIMSIGNAL_NULL;
-simsignal_t UDPVideoStreamSvr::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamSvr::sentPkSignal = SIMSIGNAL_NULL;
 
-inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d) {
+inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d)
+{
     out << "client=" << d.clientAddr << ":" << d.clientPort
         << "  size=" << d.videoSize << "  pksent=" << d.numPkSent << "  bytesleft=" << d.bytesLeft;
     return out;
@@ -60,7 +61,7 @@ void UDPVideoStreamSvr::initialize()
     numStreams = 0;
     numPkSent = 0;
     reqStreamBytesSignal = registerSignal("reqStreamBytes");
-    sentPkBytesSignal = registerSignal("sentPkBytes");
+    sentPkSignal = registerSignal("sentPk");
 
     WATCH_PTRVECTOR(streamVector);
 
@@ -84,7 +85,6 @@ void UDPVideoStreamSvr::handleMessage(cMessage *msg)
         processStreamRequest(msg);
     }
 }
-
 
 void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 {
@@ -121,15 +121,15 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
         pktLen = d->bytesLeft;
 
     pkt->setByteLength(pktLen);
-    sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
+    emit(sentPkSignal, pkt);
+    sendToUDP(pkt, localPort, d->clientAddr, d->clientPort);
 
     d->bytesLeft -= pktLen;
     d->numPkSent++;
     numPkSent++;
-    emit(sentPkBytesSignal, pktLen);
 
     // reschedule timer if there's bytes left to send
-    if (d->bytesLeft!=0)
+    if (d->bytesLeft != 0)
     {
         simtime_t interval = (*sendInterval);
         scheduleAt(simTime()+interval, timer);
@@ -140,3 +140,4 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
         // TBD find VideoStreamData in streamVector and delete it
     }
 }
+

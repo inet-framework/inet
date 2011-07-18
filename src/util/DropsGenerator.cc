@@ -19,9 +19,9 @@
 
 Define_Module(DropsGenerator);
 
-simsignal_t DropsGenerator::rcvdPkBytesSignal;
-simsignal_t DropsGenerator::sentPkBytesSignal;
-simsignal_t DropsGenerator::droppedPkBytesSignal;
+simsignal_t DropsGenerator::rcvdPkSignal;
+simsignal_t DropsGenerator::sentPkSignal;
+simsignal_t DropsGenerator::dropPkSignal;
 
 void DropsGenerator::initialize()
 {
@@ -34,9 +34,9 @@ void DropsGenerator::initialize()
     WATCH(generateFurtherDrops);
 
     //statistics
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    sentPkBytesSignal = registerSignal("sentPkBytes");
-    droppedPkBytesSignal = registerSignal("droppedPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
+    sentPkSignal = registerSignal("sentPk");
+    dropPkSignal = registerSignal("dropPk");
 
     const char *vector = par("dropsVector");
     parseVector(vector);
@@ -53,29 +53,26 @@ void DropsGenerator::initialize()
 void DropsGenerator::handleMessage(cMessage *msg)
 {
     numPackets++;
-    cPacket *packet = PK(msg);
-    long curBytes = (long)(packet->getByteLength());
-    emit(rcvdPkBytesSignal, curBytes);
+    emit(rcvdPkSignal, msg);
 
     if (generateFurtherDrops)
     {
         if (numPackets==dropsVector[0])
         {
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
+            emit(dropPkSignal, msg);
             delete msg;
             numDropped++;
-            emit(droppedPkBytesSignal, curBytes);
             dropsVector.erase(dropsVector.begin());
-            if (dropsVector.size()==0)
+            if (dropsVector.size() == 0)
             {
                 EV << "DropsGenerator: End of dropsVector reached." << endl;
                 generateFurtherDrops = false;
             }
             return; // drop message
-
         }
     }
-    emit(sentPkBytesSignal, curBytes);
+    emit(sentPkSignal, msg);
     send(msg, "out");
 }
 

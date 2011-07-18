@@ -32,8 +32,7 @@
 
 Define_Module(RTP);
 
-simsignal_t RTP::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t RTP::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 
 //
 // methods inherited from cSimpleModule
@@ -49,8 +48,7 @@ void RTP::initialize()
     rtcpInGate = findGate("rtcpIn");
     udpInGate = findGate("udpIn");
 
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    endToEndDelaySignal = registerSignal("endToEndDelay");
+    rcvdPkSignal = registerSignal("rcvdPk");
 }
 
 void RTP::handleMessage(cMessage *msg)
@@ -361,8 +359,7 @@ void RTP::readRet(cMessage *sifp)
     {
          RTPPacket *msg = check_and_cast<RTPPacket *>(sifp);
 
-         emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-         emit(endToEndDelaySignal, simTime()-msg->getCreationTime());
+         emit(rcvdPkSignal, msg);
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");

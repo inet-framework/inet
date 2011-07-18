@@ -42,10 +42,11 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/source");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
-
+        @signal[sentPk](type=cPacket);
+        @signal[rcvdPk](type=cPacket);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input ipIn @labels(IPv4ControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);

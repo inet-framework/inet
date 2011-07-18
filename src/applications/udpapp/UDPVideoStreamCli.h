@@ -35,8 +35,7 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
 {
   protected:
     // statistics
-    static simsignal_t endToEndDelaySignal;
-    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t rcvdPkSignal;
 
   protected:
     ///@name Overridden cSimpleModule functions

@@ -42,15 +42,16 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
 
     //statistics:
     static simsignal_t connectSignal;
-    static simsignal_t rcvdPkBytesSignal;
-    static simsignal_t sentPkBytesSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
 
   protected:
     /**
      * Initialization. Should be redefined to perform or schedule a connect().
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
 
+    virtual int numInitStages() const { return 4; }
     /**
      * For self-messages it invokes handleTimer(); messages arriving from TCP
      * will get dispatched to the socketXXX() functions.

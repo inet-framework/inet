@@ -20,11 +20,12 @@ package inet.applications.sctpapp;
 
 import inet.applications.ISCTPApp;
 
-
+// Client app for SCTP-based request-reply protocols.
+// Handles a single session (and SCTP connection) at a time.
 simple SCTPClient like ISCTPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
+        string address = default(""); // comma separated list of addresses
         int port = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
@@ -44,9 +45,12 @@ simple SCTPClient like ISCTPApp
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
         bool finishEndsSimulation = default(false);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentEchoedPkBytes](title="Sent echoed packet bytes"; record=count,sum,vector);
+        @signal[sentPk](type=SCTPSimpleMessage);
+        @signal[sentEchoedPk](type=SCTPSimpleMessage);
+        @signal[rcvdPk](type=cPacket);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentEchoedPkBytes](title="Sent packet bytes"; source="packetBytes(sentEchoedPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
 
     gates:
         input sctpIn;

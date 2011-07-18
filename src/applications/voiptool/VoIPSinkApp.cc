@@ -24,10 +24,10 @@
 
 Define_Module(VoIPSinkApp);
 
-simsignal_t VoIPSinkApp::receivedBytesSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t VoIPSinkApp::lostSamplesSignal = SIMSIGNAL_NULL;
 simsignal_t VoIPSinkApp::lostPacketsSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::droppedBytesSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPSinkApp::dropPkSignal = SIMSIGNAL_NULL;
 simsignal_t VoIPSinkApp::packetHasVoiceSignal = SIMSIGNAL_NULL;
 simsignal_t VoIPSinkApp::connStateSignal = SIMSIGNAL_NULL;
 simsignal_t VoIPSinkApp::delaySignal = SIMSIGNAL_NULL;
@@ -39,13 +39,10 @@ VoIPSinkApp::~VoIPSinkApp()
 
 void VoIPSinkApp::initSignals()
 {
-    if (receivedBytesSignal != SIMSIGNAL_NULL)
-        return;
-
-    receivedBytesSignal = registerSignal("receivedBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
     lostSamplesSignal = registerSignal("lostSamples");
     lostPacketsSignal = registerSignal("lostPackets");
-    droppedBytesSignal = registerSignal("droppedBytes");
+    dropPkSignal = registerSignal("dropPk");
     packetHasVoiceSignal = registerSignal("packetHasVoice");
     connStateSignal = registerSignal("connState");
     delaySignal = registerSignal("delay");
@@ -124,7 +121,6 @@ void VoIPSinkApp::Connection::closeAudio()
     outFile.close();
 }
 
-
 bool VoIPSinkApp::createConnect(VoIPPacket *vp)
 {
     if (!curConn.offline)
@@ -186,9 +182,8 @@ void VoIPSinkApp::closeConnection()
 
 void VoIPSinkApp::handleVoIPMessage(VoIPPacket *vp)
 {
-    long int bytes = (long int)vp->getByteLength();
     bool ok = (curConn.offline) ? createConnect(vp) : checkConnect(vp);
-    emit(ok ? receivedBytesSignal : droppedBytesSignal, bytes);
+    emit(ok ? rcvdPkSignal : dropPkSignal, vp);
 
     if (ok)
         decodePacket(vp);
@@ -236,3 +231,4 @@ void VoIPSinkApp::finish()
     ev << "Sink finish()" << endl;
     closeConnection();
 }
+

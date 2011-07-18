@@ -33,9 +33,9 @@
 
 Define_Module(SCTPClient);
 
-simsignal_t SCTPClient::sentPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::sentEchoedPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::sentEchoedPkSignal = SIMSIGNAL_NULL;
 
 void SCTPClient::initialize()
 {
@@ -50,9 +50,9 @@ void SCTPClient::initialize()
     WATCH(bytesSent);
     WATCH(bytesRcvd);
 
-    sentPkBytesSignal = registerSignal("sentPkBytes");
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    sentEchoedPkBytesSignal = registerSignal("sentEchoedPkBytes");
+    sentPkSignal = registerSignal("sentPk");
+    rcvdPkSignal = registerSignal("rcvdPk");
+    sentEchoedPkSignal = registerSignal("sentEchoedPk");
 
     // parameters
     address = par("address");
@@ -265,10 +265,7 @@ void SCTPClient::sendRequestArrived()
 
     while (((!timer && numRequestsToSend > 0) || timer) && count++ < queueSize && sendAllowed)
     {
-        if (count == queueSize)
-            sendRequest();
-        else
-            sendRequest(false);
+        sendRequest(count == queueSize);
 
         if (!timer)
             numRequestsToSend--;
@@ -282,9 +279,7 @@ void SCTPClient::sendRequestArrived()
                 cancelEvent(timeMsg);
 
             if (finishEndsSimulation)
-            {
                 endSimulation();
-            }
         }
     }
 }
@@ -295,34 +290,28 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     sctpEV3<<"Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
     SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->removeControlInfo());
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo)
     {
+        // FIXME why do it: msg->dup(); delete msg;
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
+        delete msg;
         cPacket* cmsg = new cPacket("SVData");
         echoedBytesSent += smsg->getByteLength();
-        emit(sentEchoedPkBytesSignal, (long)(smsg->getByteLength()));
+        emit(sentEchoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
-
-        if (ind->getSendUnordered())
-            cmsg->setKind(SCTP_C_SEND_UNORDERED);
-        else
-            cmsg->setKind(SCTP_C_SEND_ORDERED);
-
+        cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        delete msg;
         socket.send(cmsg, 1);
     }
 
-    if ((long)par("numPacketsToReceive")>0)
+    if (par("numPacketsToReceive").longValue() > 0)
     {
         numPacketsToReceive--;
         if (numPacketsToReceive == 0)
-        {
             close();
-        }
     }
 
     delete ind;
@@ -343,18 +332,13 @@ void SCTPClient::sendRequest(bool last)
     msg->setDataArraySize(sendBytes);
 
     for (i=0; i < sendBytes; i++)
-    {
         msg->setData(i, 'a');
-    }
+
     msg->setDataLen(sendBytes);
     msg->setByteLength(sendBytes);
     msg->setCreationTime(simulation.getSimTime());
     cmsg->encapsulate(msg);
-
-    if (ordered)
-        cmsg->setKind(SCTP_C_SEND_ORDERED);
-    else
-        cmsg->setKind(SCTP_C_SEND_UNORDERED);
+    cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
     // send SCTPMessage with SCTPSimpleMessage enclosed
     sctpEV3 << "Sending request ..." << endl;
@@ -363,9 +347,9 @@ void SCTPClient::sendRequest(bool last)
     if (bufferSize < 0)
         last = true;
 
+    emit(sentPkSignal, msg);
     socket.send(cmsg, last);
     bytesSent += sendBytes;
-    emit(sentPkBytesSignal, (long)sendBytes);
 }
 
 void SCTPClient::handleTimer(cMessage *msg)

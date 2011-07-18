@@ -37,9 +37,8 @@ class INET_API EtherAppSrv : public cSimpleModule
     // statistics
     long packetsSent;
     long packetsReceived;
-    static simsignal_t endToEndDelaySignal;
-    static simsignal_t sentPkBytesSignal;
-    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void initialize();

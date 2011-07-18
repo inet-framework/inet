@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,33 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#ifndef __INET_IPTRAFSINK_H
-#define __INET_IPTRAFSINK_H
-
-#include <vector>
+#ifndef __INET_RESULTFILTERS_H
+#define __INET_RESULTFILTERS_H
 
 #include "INETDefs.h"
 
-#include "IPvXAddress.h"
+/**
+ * Filter that expects a cMessage and outputs its age in seconds
+ * (t - msg->getCreationTime()).
+ */
+class INET_API MessageAgeFilter : public cObjectResultFilter
+{
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
 
 
 /**
- * Consumes and prints packets received from the IP module. See NED for more info.
+ * Filter that expects a cMessage and outputs its age from the timestamp field
+ * in seconds (t - msg->getTimestamp()).
  */
-class INET_API IPvXTrafSink : public cSimpleModule
+class INET_API MessageTSAgeFilter : public cObjectResultFilter
 {
-  protected:
-    int numReceived;
-    static simsignal_t rcvdPkSignal;
-
-    virtual void printPacket(cPacket *msg);
-    virtual void processPacket(cPacket *msg);
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
 #endif
-

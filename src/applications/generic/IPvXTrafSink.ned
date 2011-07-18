@@ -27,9 +27,9 @@ simple IPvXTrafSink like IIPvXTrafficGenerator
 {
     parameters:
         @display("i=block/sink");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
-
+        @signal[rcvdPk](type=cPacket);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input ipIn @labels(IPv4ControlInfo/up);
         input ipv6In @labels(IPv6ControlInfo/up);

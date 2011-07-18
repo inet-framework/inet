@@ -32,9 +32,12 @@ simple DuplicatesGenerator like IHook
         string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/busy");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[duplPkBytes](title="Duplicated packet bytes"; record=count,sum,vector);
+        @signal[rcvdPk](type=cMessage);
+        @signal[sentPk](type=cMessage);
+        @signal[duplPk](type=cMessage);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[duplPkBytes](title="Duplicated packet bytes"; source="packetBytes(duplPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
         input in;
         output out;

@@ -116,10 +116,15 @@ simple TCPBasicClientApp like ITCPApp
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
-        @statistic[connect](title="Connections"; record=sum,timeavg,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
+        @signal[sentPk](type=cPacket);
+        @signal[rcvdPk](type=cPacket);
+        @signal[connect](type=long);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
+        @statistic[connect](title="Connections"; record=sum,timeavg,vector; interpolationmode=sample-hold;);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
+

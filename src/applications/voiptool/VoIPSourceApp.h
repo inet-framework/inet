@@ -118,6 +118,9 @@ class INET_API VoIPSourceApp : public UDPAppBase
     Buffer sampleBuffer;
 
     cMessage *timer;
+
+    // statistics:
+    static simsignal_t sentPkSignal;
 };
 
 #endif //VOIPTOOL_VOIPSOURCEAPP_H

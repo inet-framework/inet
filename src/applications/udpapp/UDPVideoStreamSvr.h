@@ -67,7 +67,7 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     unsigned int numStreams;  // number of video streams served
     unsigned long numPkSent;  // total number of packets sent
     static simsignal_t reqStreamBytesSignal;  // length of video streams served
-    static simsignal_t sentPkBytesSignal;
+    static simsignal_t sentPkSignal;
 
   protected:
     // process stream request from client

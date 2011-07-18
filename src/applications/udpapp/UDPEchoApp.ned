@@ -35,9 +35,12 @@ simple UDPEchoApp like IUDPApp
         double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
         volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
         @display("i=block/app");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
-        @statistic[roundTripTime](title="Round trip delay time"; record=histogram,stats,vector);
+        @signal[sentPk](type=cPacket);
+        @signal[rcvdPk](type=cPacket);
+        @signal[roundTripTime](type=simtime_t);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[roundTripTime](title="Round trip delay time"; unit=s; record=histogram,stats,vector);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

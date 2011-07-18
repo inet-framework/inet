@@ -33,7 +33,7 @@
 Define_Module(IPvXTrafGen);
 
 int IPvXTrafGen::counter;
-simsignal_t IPvXTrafGen::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
 
 void IPvXTrafGen::initialize(int stage)
 {
@@ -43,7 +43,7 @@ void IPvXTrafGen::initialize(int stage)
         return;
 
     IPvXTrafSink::initialize();
-    sentPkBytesSignal = registerSignal("sentPkBytes");
+    sentPkSignal = registerSignal("sentPk");
 
     protocol = par("protocol");
     msgByteLength = par("packetLength");
@@ -89,6 +89,7 @@ void IPvXTrafGen::sendPacket()
     payload->setByteLength(msgByteLength);
 
     IPvXAddress destAddr = chooseDestAddr();
+    char *gate;
 
     if (!destAddr.isIPv6())
     {
@@ -98,12 +99,8 @@ void IPvXTrafGen::sendPacket()
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
+        gate = "ipOut";
 
-        EV << "Sending packet: ";
-        printPacket(payload);
-
-        emit(sentPkBytesSignal, (long)(payload->getByteLength()));
-        send(payload, "ipOut");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
@@ -116,15 +113,15 @@ void IPvXTrafGen::sendPacket()
         controlInfo->setDestAddr(destAddr.get6());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
-
-        EV << "Sending packet: ";
-        printPacket(payload);
-
-        send(payload, "ipv6Out");
+        gate = "ipv6Out";
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
     }
+    EV << "Sending packet: ";
+    printPacket(payload);
+    emit(sentPkSignal, payload);
+    send(payload, gate);
     numSent++;
 }
 

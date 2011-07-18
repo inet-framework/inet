@@ -24,11 +24,11 @@
 
 Define_Module(TCPSpoof);
 
-simsignal_t TCPSpoof::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSpoof::sentPkSignal = SIMSIGNAL_NULL;
 
 void TCPSpoof::initialize()
 {
-    sentPkBytesSignal = registerSignal("sentPkBytes");
+    sentPkSignal = registerSignal("sentPk");
     simtime_t t = par("t").doubleValue();
     scheduleAt(t, new cMessage("timer"));
 }
@@ -80,7 +80,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         controlInfo->setDestAddr(dest.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
+        emit(sentPkSignal, tcpseg);
         send(tcpseg, "ipv4Out");
 #else
         throw cRuntimeError("INET compiled without IPv4 features!");
@@ -96,7 +96,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         controlInfo->setDestAddr(dest.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        emit(sentPkBytesSignal, (long)(tcpseg->getByteLength()));
+        emit(sentPkSignal, tcpseg);
         send(tcpseg, "ipv6Out");
 #else
         throw cRuntimeError("INET compiled without IPv6 features!");

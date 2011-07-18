@@ -19,7 +19,7 @@
 
 Define_Module(TCPSinkApp);
 
-simsignal_t TCPSinkApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void TCPSinkApp::initialize()
 {
@@ -29,7 +29,7 @@ void TCPSinkApp::initialize()
 
     bytesRcvd = 0;
     WATCH(bytesRcvd);
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
@@ -48,9 +48,10 @@ void TCPSinkApp::handleMessage(cMessage *msg)
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
-        long packetLength = PK(msg)->getByteLength();
+        cPacket *pk = PK(msg);
+        long packetLength = pk->getByteLength();
         bytesRcvd += packetLength;
-        emit(rcvdPkBytesSignal, packetLength);
+        emit(rcvdPkSignal, pk);
         delete msg;
 
         if (ev.isGUI())

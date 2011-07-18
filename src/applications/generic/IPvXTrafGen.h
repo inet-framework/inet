@@ -44,7 +44,7 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
-    static simsignal_t sentPkBytesSignal;
+    static simsignal_t sentPkSignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();

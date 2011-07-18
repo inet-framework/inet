@@ -24,7 +24,7 @@ Define_Module(REDQueue);
 
 simsignal_t REDQueue::queueLengthSignal = SIMSIGNAL_NULL;
 simsignal_t REDQueue::avgQueueLengthSignal = SIMSIGNAL_NULL;
-simsignal_t REDQueue::earlyDropPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t REDQueue::earlyDropPkByQueueSignal = SIMSIGNAL_NULL;
 
 void REDQueue::initialize()
 {
@@ -34,7 +34,7 @@ void REDQueue::initialize()
     //statistics
     queueLengthSignal = registerSignal("queueLength");
     avgQueueLengthSignal = registerSignal("avgQueueLength");
-    earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
+    earlyDropPkByQueueSignal = registerSignal("earlyDropPkByQueue");
 
     emit(queueLengthSignal, queue.length());
 
@@ -113,7 +113,7 @@ cMessage *REDQueue::enqueue(cMessage *msg)
             mark = true;
             count = 0;
             numEarlyDrops++;
-            emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
+            emit(earlyDropPkByQueueSignal, msg);
         }
     }
     else if (maxth <= avg)

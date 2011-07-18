@@ -98,10 +98,10 @@ class VoIPSinkApp : public UDPAppBase
 
     Connection curConn;
 
-    static simsignal_t receivedBytesSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t dropPkSignal;
     static simsignal_t lostSamplesSignal;
     static simsignal_t lostPacketsSignal;
-    static simsignal_t droppedBytesSignal;
     static simsignal_t packetHasVoiceSignal;
     static simsignal_t connStateSignal;
     static simsignal_t delaySignal;

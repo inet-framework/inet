@@ -27,8 +27,14 @@ simple DropTailQueue like IOutputQueue
     parameters:
         int frameCapacity = default(100);
         @display("i=block/queue");
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[queueLength](type=long; interpolationmode=sample-hold);
         @statistic[queueLength](title="Used queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;
 }
+

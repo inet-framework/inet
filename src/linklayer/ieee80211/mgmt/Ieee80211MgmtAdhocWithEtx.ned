@@ -39,3 +39,4 @@ simple Ieee80211MgmtAdhocWithEtx extends Ieee80211MgmtAdhoc
         input ETXProcIn;
         output ETXProcOut;
 }
+

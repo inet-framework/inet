@@ -33,9 +33,9 @@ class INET_API DropsGenerator : public cSimpleModule
     unsigned int numPackets;
     unsigned int numDropped;
 
-    static simsignal_t rcvdPkBytesSignal;
-    static simsignal_t sentPkBytesSignal;
-    static simsignal_t droppedPkBytesSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
+    static simsignal_t dropPkSignal;
 
     bool generateFurtherDrops;
     std::vector<unsigned int> dropsVector;

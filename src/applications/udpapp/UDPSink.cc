@@ -21,13 +21,13 @@
 
 Define_Module(UDPSink);
 
-simsignal_t UDPSink::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     int port = par("localPort");
 
@@ -55,7 +55,7 @@ void UDPSink::finish()
 void UDPSink::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
+    emit(rcvdPkSignal, msg);
     printPacket(msg);
     delete msg;
 

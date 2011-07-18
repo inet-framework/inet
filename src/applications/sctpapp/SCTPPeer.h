@@ -66,9 +66,9 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void sendOrSchedule(cPacket *msg);
         void sendRequest(bool last = true);
         int32 ssn;
-        static simsignal_t sentPkBytesSignal;
-        static simsignal_t sentEchoedPkBytesSignal;
-        static simsignal_t rcvdPkBytesSignal;
+        static simsignal_t sentPkSignal;
+        static simsignal_t sentEchoedPkSignal;
+        static simsignal_t rcvdPkSignal;
 
     public:
         struct pathStatus {

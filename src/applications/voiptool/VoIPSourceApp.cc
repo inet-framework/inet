@@ -21,6 +21,8 @@
 Define_Module(VoIPSourceApp);
 
 
+simsignal_t VoIPSourceApp::sentPkSignal = SIMSIGNAL_NULL;
+
 VoIPSourceApp::~VoIPSourceApp()
 {
     cancelAndDelete(timer);
@@ -98,15 +100,17 @@ void VoIPSourceApp::initialize(int stage)
 
     // initialize the sequence number
     pktID = 1;
+
+    // statistics:
+    sentPkSignal = registerSignal("sentPk");
 }
 
 void VoIPSourceApp::handleMessage(cMessage *msg)
 {
-    // create an IP message
-    VoIPPacket *packet;
-
     if (msg->isSelfMessage())
     {
+        VoIPPacket *packet;
+
         if (msg == timer)
         {
             packet = generatePacket();
@@ -130,7 +134,9 @@ void VoIPSourceApp::handleMessage(cMessage *msg)
         }
         else
         {
-            sendToUDP(PK(msg), localPort, destAddress, destPort);
+            packet = check_and_cast<VoIPPacket *>(msg);
+            emit(sentPkSignal, packet);
+            sendToUDP(packet, localPort, destAddress, destPort);
         }
     }
     else
@@ -372,7 +378,7 @@ bool VoIPSourceApp::checkSilence(enum SampleFormat sampleFormat, void* _buf, int
         break;
 
     default:
-        error("invalid sampleFormat:%d", sampleFormat);
+        throw cRuntimeError(this, "invalid sampleFormat:%d", sampleFormat);
     }
 
     return max < voipSilenceThreshold;
@@ -400,9 +406,7 @@ void VoIPSourceApp::readFrame()
     char *tmpSamples = NULL;
 
     if (pReSampleCtx)
-    {
         tmpSamples = new char[Buffer::BUFSIZE];
-    }
 
     while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample)
     {
@@ -448,9 +452,7 @@ void VoIPSourceApp::readFrame()
             ASSERT(frame_size == decoded * inBytesPerSample * pCodecCtx->channels);
 
             if (pReSampleCtx)
-            {
                 decoded = audio_resample(pReSampleCtx, nbuf, rbuf, decoded);
-            }
 
             sampleBuffer.notifyWrote(decoded * inBytesPerSample);
         }

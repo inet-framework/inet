@@ -24,8 +24,8 @@
 Define_Module(UDPBasicApp);
 
 int UDPBasicApp::counter;
-simsignal_t UDPBasicApp::sentPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPBasicApp::initialize(int stage)
 {
@@ -39,8 +39,8 @@ void UDPBasicApp::initialize(int stage)
     numReceived = 0;
     WATCH(numSent);
     WATCH(numReceived);
-    sentPkBytesSignal = registerSignal("sentPkBytes");
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
+    sentPkSignal = registerSignal("sentPk");
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     localPort = par("localPort");
     destPort = par("destPort");
@@ -93,7 +93,7 @@ void UDPBasicApp::sendPacket()
     cPacket *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr();
 
-    emit(sentPkBytesSignal, (long)(payload->getByteLength()));
+    emit(sentPkSignal, payload);
     sendToUDP(payload, localPort, destAddr, destPort);
     numSent++;
 }
@@ -126,9 +126,9 @@ void UDPBasicApp::handleMessage(cMessage *msg)
 
 void UDPBasicApp::processPacket(cPacket *msg)
 {
+    emit(rcvdPkSignal, msg);
     EV << "Received packet: ";
     printPacket(msg);
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     delete msg;
     numReceived++;
 }

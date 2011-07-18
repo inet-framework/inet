@@ -18,6 +18,10 @@
 
 package inet.applications.tcpapp;
 
+
+import inet.applications.ITCPApp;
+
+
 //
 // Generic server application for modelling TCP-based request-reply style
 // protocols or applications.
@@ -33,14 +37,10 @@ package inet.applications.tcpapp;
 // back the same message object. The reply can be delayed by a constant time
 // (replyDelay parameter).
 //
-// Compatible with both IPv4 (~IPv4) and ~IPv6.
+// Compatible with both ~IPv4 and ~IPv6.
 //
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-
-import inet.applications.ITCPApp;
-
-
 simple TCPGenericSrvApp like ITCPApp
 {
     parameters:
@@ -48,9 +48,13 @@ simple TCPGenericSrvApp like ITCPApp
         int localPort = default(1000);     // localPort number to listen on
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);
+        @signal[sentPk](type=GenericAppMsg);
+        @signal[rcvdPk](type=GenericAppMsg);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
+

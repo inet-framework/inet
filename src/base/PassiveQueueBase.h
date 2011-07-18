@@ -21,7 +21,8 @@
 
 #include <map>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPassiveQueue.h"
 
 
@@ -45,11 +46,11 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int numQueueDropped;
 
     /** Signal with size (or 0 if unknown) of packet when received it */
-    static simsignal_t rcvdPkBytesSignal;
+    static simsignal_t enqueuePkSignal;
     /** Signal with size (or 0 if unknown) of packet when sent out it */
-    static simsignal_t sentPkBytesSignal;
+    static simsignal_t dequeuePkSignal;
     /** Signal with size (or 0 if unknown) of packet when dropped it */
-    static simsignal_t droppedPkBytesSignal;
+    static simsignal_t dropPkByQueueSignal;
     /** Signal with value of delaying time when sent out a packet. */
     static simsignal_t queueingTimeSignal;
 

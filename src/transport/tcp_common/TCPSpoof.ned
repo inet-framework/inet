@@ -39,7 +39,8 @@ simple TCPSpoof like ITCP
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");
-        @statistic[sentPkBytesSignal](title="Sent packet bytes"; record=count,sum,vector);
+        @signal[sentPk](type=cPacket);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
 
     gates:
         output ipOut @labels(TCPSegment,IPv4ControlInfo/down);

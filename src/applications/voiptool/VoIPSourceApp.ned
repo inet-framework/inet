@@ -41,7 +41,6 @@ simple VoIPSourceApp like IUDPApp
         int destPort;
         string destAddress;
         double startTime @unit(s) = default(0);
-
         int voipHeaderSize @unit(B);
         int voipSilenceThreshold;
         int sampleRate @unit(Hz) = default(8000Hz);
@@ -51,7 +50,8 @@ simple VoIPSourceApp like IUDPApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
-
+        @signal[sentPk](type=VoIPPacket);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
         @display("i=block/departure");
     gates:
         input udpIn;

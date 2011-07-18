@@ -118,11 +118,15 @@ simple UDPBasicBurst like IUDPApp
         volatile double sleepDuration @unit("s"); // time between bursts (zero allowed)
         volatile double sendInterval @unit("s"); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
         double delayLimit @unit("s") = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
-        @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[rcvdPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[outOfOrderPk](title="packets received out of order"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="delay";record=histogram,stats,vector);
+        @signal[sentPk](type=cPacket);
+        @signal[rcvdPk](type=cPacket);
+        @signal[dropPk](type=cPacket);
+        @signal[outOfOrderPk](type=cPacket);
+        @statistic[sentPkBytes](title="packets sent"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[rcvdPkBytes](title="packets received"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[dropPkBytes](title="packets dropped"; source="packetBytes(dropPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[outOfOrderPkBytes](title="packets received out of order"; source="packetBytes(outOfOrderPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
 
     gates:
         input udpIn @labels(UDPControlInfo/up);

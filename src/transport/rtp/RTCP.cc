@@ -30,8 +30,7 @@
 
 Define_Module(RTCP);
 
-simsignal_t RTCP::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t RTCP::endToEndDelaySignal = SIMSIGNAL_NULL;
+simsignal_t RTCP::rcvdPkSignal = SIMSIGNAL_NULL;
 
 RTCP::RTCP()
 {
@@ -51,8 +50,7 @@ void RTCP::initialize()
 
     _participantInfos.setName("ParticipantInfos");
 
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    endToEndDelaySignal = registerSignal("endToEndDelay");
+    rcvdPkSignal = registerSignal("rcvdPk");
 }
 
 RTCP::~RTCP()
@@ -203,9 +201,8 @@ void RTCP::connectRet()
 
 void RTCP::readRet(cPacket *sifpIn)
 {
+    emit(rcvdPkSignal, sifpIn);
     RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(sifpIn->decapsulate());
-    emit(rcvdPkBytesSignal, (long)(sifpIn->getByteLength()));
-    emit(endToEndDelaySignal, simTime() - sifpIn->getCreationTime());
     processIncomingRTCPPacket(packet, IPv4Address(_destinationAddress), _port);
 }
 

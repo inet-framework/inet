@@ -19,18 +19,21 @@
 
 
 simsignal_t TCPGenericCliAppBase::connectSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericCliAppBase::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericCliAppBase::sentPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericCliAppBase::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericCliAppBase::sentPkSignal = SIMSIGNAL_NULL;
 
-void TCPGenericCliAppBase::initialize()
+void TCPGenericCliAppBase::initialize(int stage)
 {
-    cSimpleModule::initialize();
+    cSimpleModule::initialize(stage);
+    if (stage != 3)
+        return;
+
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
 
     //statistics
     connectSignal = registerSignal("connect");
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    sentPkBytesSignal = registerSignal("sentPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
+    sentPkSignal = registerSignal("sentPk");
 
     emit(connectSignal, 0L);
 
@@ -97,11 +100,11 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     msg->setExpectedReplyLength(expectedReplyBytes);
     msg->setServerClose(serverClose);
 
+    emit(sentPkSignal, msg);
     socket.send(msg);
 
     packetsSent++;
     bytesSent += numBytes;
-    emit(sentPkBytesSignal, numBytes);
 }
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
@@ -122,8 +125,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
     bytesRcvd += msg->getByteLength();
-    emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
-
+    emit(rcvdPkSignal, msg);
     delete msg;
 }
 

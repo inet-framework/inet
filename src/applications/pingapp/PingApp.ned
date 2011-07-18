@@ -51,12 +51,16 @@ simple PingApp
         double stopTime @unit("s") = default(0s); // time of finish sending, 0 means forever
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
-        @statistic[endToEndDelay](title="delay";record=histogram,stats,vector);
-        @statistic[drop](title="dropped packets";record=count,vector);
-        @statistic[sentPacket](title="sent packets";record=count,vector);
-        @statistic[outOfOrderArrival](title="Out of order arrival packets";record=count,vector);
-        @statistic[pingTx](title="sent ping seq.no.";record=count,vector);
-        @statistic[pingRx](title="received ping seq.no.";record=count,vector);
+        @signal[endToEndDelay](type=simtime_t; unit=s);
+        @signal[drop];
+        @signal[outOfOrderArrival];
+        @signal[pingTx];
+        @signal[pingRx];
+        @statistic[endToEndDelay](title="delay"; unit=s; record=histogram,stats,vector; interpolationmode=none);
+        @statistic[drop](title="dropped packets";record=count,vector; interpolationmode=none);
+        @statistic[outOfOrderArrival](title="Out of order arrival packets";record=count,vector; interpolationmode=none);
+        @statistic[pingTx](title="sent ping seq.no.";record=count,vector; interpolationmode=none);
+        @statistic[pingRx](title="received ping seq.no.";record=count,vector; interpolationmode=none);
     gates:
         input pingIn;
         output pingOut;

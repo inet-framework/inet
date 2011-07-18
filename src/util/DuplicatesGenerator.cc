@@ -19,9 +19,9 @@
 
 Define_Module(DuplicatesGenerator);
 
-simsignal_t DuplicatesGenerator::rcvdPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t DuplicatesGenerator::sentPkBytesSignal = SIMSIGNAL_NULL;
-simsignal_t DuplicatesGenerator::duplPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t DuplicatesGenerator::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t DuplicatesGenerator::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t DuplicatesGenerator::duplPkSignal = SIMSIGNAL_NULL;
 
 void DuplicatesGenerator::initialize()
 {
@@ -34,9 +34,9 @@ void DuplicatesGenerator::initialize()
     WATCH(generateFurtherDuplicates);
 
     //statistics
-    rcvdPkBytesSignal = registerSignal("rcvdPkBytes");
-    sentPkBytesSignal = registerSignal("sentPkBytes");
-    duplPkBytesSignal = registerSignal("duplPkBytes");
+    rcvdPkSignal = registerSignal("rcvdPk");
+    sentPkSignal = registerSignal("sentPk");
+    duplPkSignal = registerSignal("duplPk");
 
     const char *vector = par("duplicatesVector");
     parseVector(vector);
@@ -53,21 +53,19 @@ void DuplicatesGenerator::initialize()
 void DuplicatesGenerator::handleMessage(cMessage *msg)
 {
     numPackets++;
-    cPacket *packet = PK(msg);
-    long curBytes = (long)(packet->getByteLength());
 
-    emit(rcvdPkBytesSignal, curBytes);
+    emit(rcvdPkSignal, msg);
 
     if (generateFurtherDuplicates)
     {
         if (numPackets==duplicatesVector[0])
         {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
-            cMessage *dupmsg = (cMessage*) msg->dup();
+            cMessage *dupmsg = msg->dup();
             send(dupmsg, "out");
             numDuplicated++;
-            emit(duplPkBytesSignal, curBytes);
-            emit(sentPkBytesSignal, curBytes);
+            emit(duplPkSignal, dupmsg);
+            emit(sentPkSignal, dupmsg);
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size()==0)
             {
@@ -76,8 +74,8 @@ void DuplicatesGenerator::handleMessage(cMessage *msg)
             }
         }
     }
+    emit(sentPkSignal, msg);
     send(msg, "out");
-    emit(sentPkBytesSignal, curBytes);
 }
 
 void DuplicatesGenerator::parseVector(const char *vector)

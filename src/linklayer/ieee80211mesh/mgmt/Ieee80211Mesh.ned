@@ -44,6 +44,11 @@ simple Ieee80211Mesh like IIeee80211Mgmt
     //       int Tc_ival = default(5); // sec
     //       int Mid_ival = default(5); // sec
     //       int use_mac = default(0);
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[dataQueueLen](type=long; interpolationmode=sample-hold);  // number of stored packets
     gates:
         input ETXProcIn;
         output ETXProcOut;

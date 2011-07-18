@@ -44,7 +44,7 @@
  * PROBLEM: display only gets updated if there's traffic! (For example, a
  * high pk/sec value might stay displayed even when the link becomes idle!)
  */
-class SIM_API ThruputMeteringChannel : public cDatarateChannel
+class INET_API ThruputMeteringChannel : public cDatarateChannel
 {
   protected:
     // configuration
