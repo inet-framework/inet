@@ -31,7 +31,6 @@
 class INET_API UDPBasicApp : public UDPAppBase
 {
   protected:
-    std::string nodeName;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
     simtime_t stopTime;

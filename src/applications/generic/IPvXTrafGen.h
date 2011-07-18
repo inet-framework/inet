@@ -34,7 +34,6 @@
 class INET_API IPvXTrafGen : public IPvXTrafSink
 {
   protected:
-    std::string nodeName;
     int protocol;
     int msgByteLength;
     int numPackets;
