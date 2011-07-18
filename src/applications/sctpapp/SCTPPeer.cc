@@ -65,7 +65,7 @@ void SCTPPeer::initialize()
         token = strtok(NULL, ",");
     }
     int32 port = par("port");
-    echoFactor = par("echoFactor");
+    echo = par("echo");
     delay = par("echoDelay");
     outboundStreams = par("outboundStreams");
     ordered = (bool)par("ordered");
@@ -318,7 +318,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 k->second->record(j->second);
                 packetsRcvd++;
 
-                if (echoFactor==0)
+                if (!echo)
                 {
                     if ((long)par("numPacketsToReceivePerClient")>0)
                     {
@@ -676,7 +676,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     bytesRcvd += msg->getByteLength();
 
-    if (echoFactor > 0)
+    if (echo)
     {
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");

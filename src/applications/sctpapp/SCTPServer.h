@@ -31,12 +31,12 @@ class INET_API SCTPServer : public cSimpleModule
         int32 assocId;
         SCTPSocket *socket;
         double delay;
-        double echoFactor;
         double delayFirstRead;
         bool readInt;
         bool schedule;
         bool firstData;
         bool shutdownReceived;
+        bool echo;
         uint64 bytesSent;
         uint64 packetsSent;
         uint64 packetsRcvd;

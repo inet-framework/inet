@@ -48,7 +48,6 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         uint64 numPacketsToReceive;
         uint32 numBytes;
         int64 bufferSize;
-        int32 echoFactor;
         int32 queueSize;
         uint32 inStreams;
         uint32 outStreams;
@@ -61,6 +60,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         bool sendAllowed;
         bool timer;
         bool finishEndsSimulation;
+        bool echo;
         cMessage* timeMsg;
         cMessage* stopTimer;
         cMessage* primaryChangeTimer;

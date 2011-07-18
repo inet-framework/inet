@@ -54,7 +54,7 @@ void SCTPServer::initialize()
         token = strtok(NULL, ",");
     }
     int32 port = par("port");
-    echoFactor = par("echoFactor");
+    echo = par("echo");
     delay = par("echoDelay");
     delayFirstRead = par("delayFirstRead");
     delT = &par("readingInterval");
@@ -565,3 +565,4 @@ SCTPServer::~SCTPServer()
 {
     delete socket;
 }
+

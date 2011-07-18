@@ -65,9 +65,8 @@ void SCTPClient::initialize()
     }
 
     int32 port = par("port");
-    echoFactor = par("echoFactor");
-    if (!echoFactor) echoFactor = false;
-    ordered = (bool)par("ordered");
+    echo = par("echo").boolValue();
+    ordered = par("ordered").boolValue();
     finishEndsSimulation = (bool)par("finishEndsSimulation");
 
     if (address[0] == 0)
@@ -299,7 +298,7 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
     emit(rcvdPkBytesSignal, (long)(msg->getByteLength()));
     bytesRcvd += msg->getByteLength();
 
-    if (echoFactor > 0)
+    if (echo)
     {
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
@@ -328,7 +327,6 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     delete ind;
 }
-
 
 void SCTPClient::sendRequest(bool last)
 {

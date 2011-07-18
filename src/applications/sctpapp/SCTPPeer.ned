@@ -25,7 +25,7 @@ simple SCTPPeer like ISCTPApp
     parameters:
         string address = default(""); // may be left empty ("")
         int port = default(0); // port number to listen on
-        int echoFactor = default(0);
+        bool echo = default(false);  // echoes received packages when true
         double echoDelay @unit(s) = default(0s);
         double delayFirstRead @unit(s) = default(0s);
         int numPacketsToSendPerClient = default(0); // number of requests sent per session

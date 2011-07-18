@@ -32,7 +32,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 clientAssocId;
         SCTPSocket clientSocket;
         double delay;
-        double echoFactor;
+        bool echo;
         bool schedule;
         bool shutdownReceived;
         long bytesSent;

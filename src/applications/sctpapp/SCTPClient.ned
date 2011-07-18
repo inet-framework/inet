@@ -37,7 +37,7 @@ simple SCTPClient like ISCTPApp
         double reconnectInterval @unit(s) = default(0);  // if connection breaks, waits this much before trying to reconnect
         int inboundStreams = default(17);
         int outboundStreams = default(1);
-        int echoFactor = default(0);
+        bool echo = default(false);  // echoes received packages when true
         bool ordered = default(true);
         int queueSize = default(0);
         double stopTime @unit(s) = default(0s);
