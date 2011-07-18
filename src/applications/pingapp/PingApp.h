@@ -64,7 +64,6 @@ class INET_API PingApp : public cSimpleModule
     cStdDev delayStat;
     static simsignal_t endToEndDelaySignal;
     static simsignal_t dropSignal;
-    static simsignal_t sentPacketSignal;
     static simsignal_t outOfOrderArrivalSignal;
     static simsignal_t pingTxSignal;
     static simsignal_t pingRxSignal;

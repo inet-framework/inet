@@ -22,8 +22,11 @@ package inet.applications.pingapp;
 // Generates ping requests and calculates the packet loss and round trip
 // parameters of the replies.
 //
-// Start/stop time, interval etc can be specified via parameters. To disable,
-// specify empty destAddr or stopTime<=startTime.
+// Start/stop time, sendInterval etc. can be specified via parameters. An address
+// may be given in the dotted decimal notation (or, for IPv6, in the usual
+// notation with colons), or with the module name.
+// (The ~IPvXAddressResolver class is used to resolve the address.)
+// To disable send, specify empty destAddr.
 //
 // Every ping request is sent out with a sequence number, and replies are
 // expected to arrive in the same order. Whenever there's a jump in the
@@ -41,8 +44,8 @@ package inet.applications.pingapp;
 simple PingApp
 {
     parameters:
-        string destAddr = default(""); // destination IPv4 or IPv6 address
-        string srcAddr = default(""); // source IPv4 or IPv6 address (useful with multi-homing)
+        string destAddr = default(""); // destination address
+        string srcAddr = default(""); // source address (useful with multi-homing)
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
         double hopLimit = default(32); // TTL or hopLimit for IP packets
