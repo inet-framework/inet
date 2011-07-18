@@ -82,7 +82,7 @@ int BasicDSCPClassifier::classifyByDSCP(int dscp)
         return BEST_EFFORT;
 
     // from here on, we deal with non-zero standardized DSCP values only
-    int upper3bits = (dscp & 0x3c) >> 3;
+    int upper3bits = (dscp & 0x38) >> 3;
     //int lower3bits = (dscp & 0x07);  -- we'll ignore this
 
     // rfc 2474, section 4.2.2: at least two independently forwarded classes of traffic have to be created
