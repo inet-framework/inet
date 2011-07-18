@@ -20,25 +20,6 @@
 package inet.applications.generic;
 
 //
-// Consumes and prints packets received from the ~IP module.
-// Compatible with both IPv4 and IPv6.
-//
-simple IPvXTrafSink like IIPvXTrafficGenerator
-{
-    parameters:
-        @display("i=block/sink");
-        @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
-        @statistic[endToEndDelay](title="End to end delay"; record=stats,histogram,vector);
-
-    gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        input ipv6In @labels(IPv6ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
-        output ipv6Out @labels(IPv6ControlInfo/down);
-}
-
-
-//
 // Sends IP or IPv6 datagrams to the given address at the given interval.
 // The interval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
