@@ -24,8 +24,8 @@ simsignal_t TCPSinkApp::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 void TCPSinkApp::initialize()
 {
     cSimpleModule::initialize();
-    const char *address = par("address");
-    int port = par("port");
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
 
     bytesRcvd = 0;
     WATCH(bytesRcvd);
@@ -34,7 +34,7 @@ void TCPSinkApp::initialize()
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
     socket.readDataTransferModePar(*this);
-    socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     socket.listen();
 }
 

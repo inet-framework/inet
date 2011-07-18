@@ -509,7 +509,7 @@ class OLSR : public ManetRoutingBase
     int     degree(OLSR_nb_tuple*);
 
     static bool seq_num_bigger_than(uint16_t, uint16_t);
-    int numInitStages() const  {return 5;}
+    virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void    mac_failed(IPv4Datagram*);
     virtual void    recv(cMessage *p) {}

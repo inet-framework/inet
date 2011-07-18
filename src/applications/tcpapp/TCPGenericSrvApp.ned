@@ -44,9 +44,9 @@ import inet.applications.ITCPApp;
 simple TCPGenericSrvApp like ITCPApp
 {
     parameters:
-        string address = default(""); // local address; may be left empty ("")
-        int port = default(1000);     // port number to listen on
-        double replyDelay @unit("s") = default(0s);
+        string localAddress = default(""); // local address; may be left empty ("")
+        int localPort = default(1000);     // localPort number to listen on
+        double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

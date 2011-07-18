@@ -94,8 +94,8 @@ std::string TcpTestClient::makeMsgName()
 void TcpTestClient::activity()
 {
     // parameters
-    const char *address = par("address");
-    int port = par("port");
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
 
@@ -119,7 +119,7 @@ void TcpTestClient::activity()
     // open
     waitAndEnqueue(tOpen-simTime(), &queue);
 
-    socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
 
     if (active)
         socket.connect(IPvXAddress(connectAddress), connectPort);

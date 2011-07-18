@@ -97,8 +97,8 @@ import inet.applications.ITCPApp;
 simple TCPSessionApp like ITCPApp
 {
     parameters:
-        string address = default("");
-        int port;   // FIXME change to listenPort = default(1000)
+        string localAddress = default("");
+        int localPort;  // local port
         bool active = default(true);
         string connectAddress;
         int connectPort = default(1000);

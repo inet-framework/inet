@@ -71,8 +71,8 @@ import inet.applications.ITCPApp;
 simple TelnetApp like ITCPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
-        int port; // port number to listen on FIXME change it to listenPort = default(1000)
+        string localAddress = default(""); // local address or empty ("")
+        int localPort; // local port number
         string connectAddress;  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         string dataTransferMode = default("bytecount");

@@ -58,7 +58,7 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     VideoStreamVector streamVector;
 
     // module parameters
-    int serverPort;
+    int localPort;
     cPar *sendInterval;
     cPar *packetLen;
     cPar *videoSize;

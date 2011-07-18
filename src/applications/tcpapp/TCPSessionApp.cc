@@ -164,8 +164,8 @@ void TCPSessionApp::activity()
     rcvdIndicationsSignal = registerSignal("rcvdIndications");
 
     // parameters
-    const char *address = par("address");
-    int port = par("port");
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
 

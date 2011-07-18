@@ -40,10 +40,10 @@ import inet.applications.IUDPApp;
 simple UDPVideoStreamSvr like IUDPApp
 {
     parameters:
-        int serverPort; // port to listen on
         volatile double sendInterval @unit("s"); // interval between sending video stream packets
         volatile int packetLen @unit("B");
         volatile int videoSize @unit("B");
+        int localPort; // port to listen on
         @display("i=block/app");
         @statistic[reqStreamBytes](title="Requested stream bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

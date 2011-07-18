@@ -54,7 +54,7 @@ void UDPVideoStreamSvr::initialize()
     sendInterval = &par("sendInterval");
     packetLen = &par("packetLen");
     videoSize = &par("videoSize");
-    serverPort = par("serverPort");
+    localPort = par("localPort");
 
     // statistics
     numStreams = 0;
@@ -64,7 +64,7 @@ void UDPVideoStreamSvr::initialize()
 
     WATCH_PTRVECTOR(streamVector);
 
-    bindToPort(serverPort);
+    bindToPort(localPort);
 }
 
 void UDPVideoStreamSvr::finish()

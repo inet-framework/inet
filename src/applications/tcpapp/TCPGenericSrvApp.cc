@@ -25,8 +25,8 @@ simsignal_t TCPGenericSrvApp::sentPkBytesSignal = SIMSIGNAL_NULL;
 
 void TCPGenericSrvApp::initialize()
 {
-    const char *address = par("address");
-    int port = par("port");
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
     delay = par("replyDelay");
     maxMsgDelay = 0;
 
@@ -44,7 +44,7 @@ void TCPGenericSrvApp::initialize()
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
     socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-    socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     socket.listen();
 }
 

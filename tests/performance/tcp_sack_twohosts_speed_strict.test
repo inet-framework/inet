@@ -100,7 +100,7 @@ sim-time-limit = 2s+20s
 
 #client app:
 **.client*.tcpApp[0].active = true
-**.client*.tcpApp[0].port = -1
+**.client*.tcpApp[0].localPort = -1
 **.client*.tcpApp[0].connectPort = 1000
 **.client*.tcpApp[0].tOpen = 1s
 **.client*.tcpApp[0].tSend = 2s
@@ -109,7 +109,7 @@ sim-time-limit = 2s+20s
 **.client*.tcpApp[0].tClose = 100s
 
 #server app:
-**.server*.tcpApp[0].port = 1000
+**.server*.tcpApp[0].localPort = 1000
 **.server*.tcpApp[0].echoFactor = 2.0
 **.server*.tcpApp[0].echoDelay = 0
 

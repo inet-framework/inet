@@ -22,12 +22,12 @@ void TCPSrvHostApp::initialize()
 {
     cSimpleModule::initialize();
 
-    const char *address = par("address");
-    int port = par("port");
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
 
     serverSocket.setOutputGate(gate("tcpOut"));
     serverSocket.readDataTransferModePar(*this);
-    serverSocket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     serverSocket.listen();
 }
 

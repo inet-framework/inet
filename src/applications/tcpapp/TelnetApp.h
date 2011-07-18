@@ -33,8 +33,8 @@ class INET_API TelnetApp : public TCPGenericCliAppBase
     virtual ~TelnetApp();
 
   protected:
-    /** Redefined to schedule a connect(). */
-    virtual void initialize();
+    /** Redefined initialize(int stage). Number of stages used from TCPgenericCliAppBase. */
+    virtual void initialize(int stage);
 
     /** Redefined. */
     virtual void handleTimer(cMessage *msg);

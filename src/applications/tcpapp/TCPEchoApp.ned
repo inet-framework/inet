@@ -42,8 +42,8 @@ import inet.applications.ITCPApp;
 simple TCPEchoApp like ITCPApp
 {
     parameters:
-        string address = default(""); // local address; may be left empty ("")
-        int port; // port number to listen on
+        string localAddress = default(""); // local address; may be left empty ("")
+        int localPort; // port number to listen on
         double echoFactor = default(1);
         double echoDelay @unit("s") = default(0s);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");

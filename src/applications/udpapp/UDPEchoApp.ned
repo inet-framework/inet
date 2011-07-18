@@ -27,13 +27,13 @@ import inet.applications.IUDPApp;
 simple UDPEchoApp like IUDPApp
 {
     parameters:
-        int localPort;
-        int destPort;
-        volatile int messageLength @unit("B"); // length of messages to generate, int bytes
-        double startTime @unit("s") = default(1s); // application start time (start of the first packet)
-        double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
-        volatile double sendInterval @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of IP addresses, separated by spaces
+        int localPort;  // local port
+        string destAddresses = default(""); // list of destination IP addresses, separated by spaces
+        int destPort;  // destination port 
+        volatile int messageLength @unit(B); // length of messages to generate, int bytes
+        double startTime @unit(s) = default(1s); // application start time (start of the first packet)
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
+        volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
         @statistic[sentPkBytes](title="Sent packet bytes"; record=count,sum,vector);

@@ -23,7 +23,7 @@
  * Base class for clients app for TCP-based request-reply protocols or apps.
  * Handles a single session (and TCP connection) at a time.
  *
- * It needs the following NED parameters: address, port, connectAddress, connectPort.
+ * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  *
  * Generally used together with GenericAppMsg and TCPGenericSrvApp.
  */
@@ -108,5 +108,4 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
 };
 
 #endif
-
 

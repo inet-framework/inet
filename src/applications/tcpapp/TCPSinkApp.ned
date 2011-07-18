@@ -64,8 +64,8 @@ import inet.applications.ITCPApp;
 simple TCPSinkApp like ITCPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
-        int port = default(1000); // port number to listen on
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(1000); // port number to listen on
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/sink");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=sum,count,vector);
