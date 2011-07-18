@@ -110,7 +110,7 @@ network Throughput
                 wlan.mac.address = "20:00:00:00:00:0"+string(index);
                 @display("p=350,350;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=61,46");
         }
@@ -132,7 +132,7 @@ sim-time-limit = 100s
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
-**.channelcontrol.numChannels = 1
+**.channelControl.numChannels = 1
 
 # positions
 **.mobility.cx = 200m
@@ -142,10 +142,10 @@ sim-time-limit = 100s
 **.mobility.updateInterval = 100ms
 
 # channel physical parameters
-*.channelcontrol.carrierFrequency = 2.4GHz
-*.channelcontrol.pMax = 20mW
-*.channelcontrol.sat = -110dBm
-*.channelcontrol.alpha = 2
+*.channelControl.carrierFrequency = 2.4GHz
+*.channelControl.pMax = 20mW
+*.channelControl.sat = -110dBm
+*.channelControl.alpha = 2
 
 # access point
 
