@@ -38,8 +38,8 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     virtual ~TCPBasicClientApp();
 
   protected:
-    /** Redefined to schedule a connect(). */
-    virtual void initialize();
+    /** Redefined . */
+    virtual void initialize(int stage);
 
     /** Redefined. */
     virtual void handleTimer(cMessage *msg);

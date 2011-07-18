@@ -39,11 +39,12 @@ int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
     return 0;
 }
 
-void TelnetApp::initialize()
+void TelnetApp::initialize(int stage)
 {
-    TCPGenericCliAppBase::initialize();
+    TCPGenericCliAppBase::initialize(stage);
+    if (stage != 3)
+        return;
 
-    timeoutMsg = new cMessage("timer");
 
     numCharsToType = numLinesToType = 0;
     WATCH(numCharsToType);
@@ -54,6 +55,7 @@ void TelnetApp::initialize()
     if (stopTime != 0 && stopTime <= startTime)
         error("Invalid startTime/stopTime parameters");
 
+    timeoutMsg = new cMessage("timer");
     timeoutMsg->setKind(MSGKIND_CONNECT);
     scheduleAt(startTime, timeoutMsg);
 }

@@ -37,14 +37,14 @@ class INET_API SCTPServer : public cSimpleModule
         bool firstData;
         bool shutdownReceived;
         bool echo;
-        uint64 bytesSent;
-        uint64 packetsSent;
-        uint64 packetsRcvd;
-        int32 numSessions;
-        uint64 numRequestsToSend; // requests to send in this session
         bool finishEndsSimulation;
         bool ordered;
         bool abortSent;
+        uint64 bytesSent;
+        uint64 packetsSent;
+        uint64 packetsRcvd;
+        uint64 numRequestsToSend; // requests to send in this session
+        int32 numSessions;
         int32 queueSize;
         int32 count;
         cMessage *timeoutMsg;
@@ -79,7 +79,7 @@ class INET_API SCTPServer : public cSimpleModule
         cPacket* makeDefaultReceive();
         int32 ssn;
     public:
-        ~SCTPServer();
+        virtual ~SCTPServer();
         struct pathStatus {
             bool active;
             bool primaryPath;

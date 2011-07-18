@@ -37,10 +37,10 @@ import inet.applications.IUDPApp;
 simple UDPVideoStreamCli like IUDPApp
 {
     parameters:
-        int localPort;
-        string serverAddress;
-        int serverPort;
-        double startTime @unit("s") = default(1s);
+        int localPort;  // local port
+        string serverAddress;  // server address
+        int serverPort;  // server port
+        double startTime @unit(s) = default(1s);
         @display("i=block/app");
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);

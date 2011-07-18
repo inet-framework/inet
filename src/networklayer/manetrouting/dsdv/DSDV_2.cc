@@ -61,7 +61,7 @@ void DSDV_2::initialize(int stage)
         // schedules a random periodic event: the hello message broadcast from DSDV module
         forwardList = new list<forwardHello*>;
         event = new cMessage("event");
-        scheduleAt( uniform(0, par("MaxVariance_DSDV"), par("RNGseed_DSDV") ), event);
+        scheduleAt( uniform(0, par("MaxVariance_DSDV").doubleValue(), par("RNGseed_DSDV").doubleValue()), event);
 
     }
 }
@@ -97,7 +97,7 @@ DSDV_2::~DSDV_2()
         forwardHello *fh = forwardList->front();
         if (fh->event)
             cancelAndDelete(fh->event);
-        if (fh->event)
+        if (fh->hello)
             cancelAndDelete(fh->hello);
         fh->event = NULL;
         fh->hello = NULL;

@@ -29,15 +29,39 @@ import inet.applications.ITCPApp;
 // delayed by a constant time (echoDelay parameter).
 //
 // When ~TCPEchoApp receives data packets from ~TCP (and such, when they can be
-// echoed) depends on the sendQueue/receiveQueue setting of ~TCP.
-// With TCPVirtualBytesSendQueue/RcvQueue, ~TCP passes up data to us
+// echoed) depends on the dataTransferMode setting.
+// With "bytecount" and "bytestream", ~TCP passes up data to us
 // as soon as a segment arrives, so it can be echoed immediately.
-// With TCPMsgBasedSendQueue/RcvQueue, our local ~TCP reproduces the same
+// With "object" mode, our local ~TCP reproduces the same
 // messages that the sender app passed down to its ~TCP -- so if the sender
 // app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
-// Compatible with both IPv4 (~IPv4) and ~IPv6.
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
+// Currently you have three choices:
+//
+//   -# set them to "bytecount".
+//      This mode manages "virtual bytes", that is, only byte counts are
+//      transmitted over the TCP connection and no actual data. cMessage
+//      contents, and even message boundaries are not preserved with these
+//      classes: for example, if the client sends a single cMessage with
+//      length = 1 megabyte over TCP, the receiver-side client will see a
+//      sequence of MSS-sized messages.
+//
+//   -# use "object", which transmits
+//      cMessage objects (and subclasses) over a TCP connection. The same
+//      message object sequence that was sent by the client to the
+//      sender-side TCP entity will be reproduced on the receiver side.
+//      If a client sends a cMessage with length = 1 megabyte, the
+//      receiver-side client will receive the same message object (or a clone)
+//      after the TCP entities have completed simulating the transmission
+//      of 1 megabyte over the connection. This is a different behaviour
+//      from TCPVirtualDataSendQueue/RcvQueue.
+//      This mode is not implemented in ~TCP_NSC yet.
+//
+//   -# use "bytestream", which transmits real bytes of messages.
+//
+// Compatible with both ~IPv4 and ~IPv6.
 //
 simple TCPEchoApp like ITCPApp
 {
@@ -45,7 +69,7 @@ simple TCPEchoApp like ITCPApp
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort; // port number to listen on
         double echoFactor = default(1);
-        double echoDelay @unit("s") = default(0s);
+        double echoDelay @unit(s) = default(0s);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
@@ -57,3 +81,4 @@ simple TCPEchoApp like ITCPApp
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
 }
+

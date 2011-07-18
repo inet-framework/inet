@@ -18,6 +18,10 @@
 
 package inet.applications.tcpapp;
 
+
+import inet.applications.ITCPApp;
+
+
 //
 // Single-connection TCP application: it opens a connection, sends
 // the given number of bytes, and closes. Sending may be one-off,
@@ -31,10 +35,10 @@ package inet.applications.tcpapp;
 //
 // Regarding the type of opening the connection, the application may
 // be either a client or a server. When active=false, the application
-// will listen on the given local port, and wait for an incoming connection.
-// When active=true, the application will bind to given local address:port,
+// will listen on the given local localPort, and wait for an incoming connection.
+// When active=true, the application will bind to given local localAddress:localPort,
 // and connect to the connectAddress:connectPort. To use an ephemeral port
-// as local port, set the port parameter to -1.
+// as local port, set the localPort parameter to -1.
 //
 // Even when in server mode (active=false), the application will only
 // serve one incoming connection. Further connect attempts will be
@@ -57,26 +61,18 @@ package inet.applications.tcpapp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in TCP layer.
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
-//      These classes manage "virtual bytes", that is, only byte counts are
+//      This mode manages "virtual bytes", that is, only byte counts are
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
 //      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "object", which transmit
+//   -# use "object", which transmits
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
@@ -85,15 +81,10 @@ package inet.applications.tcpapp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes are not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TCP_NSC yet.
 //
-//   -# use "bytestream", which transmit real bytes of messages.
-//      These classes are not implemented yet.
+//   -# use "bytestream", which transmits real bytes of messages.
 //
-
-import inet.applications.ITCPApp;
-
-
 simple TCPSessionApp like ITCPApp
 {
     parameters:
@@ -103,11 +94,11 @@ simple TCPSessionApp like ITCPApp
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
-        double tOpen @unit("s") = default(1s);
-        double tSend @unit("s") = default(1s);
-        int sendBytes @unit("B") = default(1MB);
+        double tOpen @unit(s) = default(1s);
+        double tSend @unit(s) = default(1s);
+        int sendBytes @unit(B) = default(1MB);
         string sendScript = default("");
-        double tClose @unit("s") = default(2s);
+        double tClose @unit(s) = default(2s);
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

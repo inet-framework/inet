@@ -18,6 +18,10 @@
 
 package inet.applications.tcpapp;
 
+
+import inet.applications.ITCPApp;
+
+
 //
 // Models Telnet sessions with a specific user behaviour.
 // The server app should be ~TCPGenericSrvApp.
@@ -31,26 +35,18 @@ package inet.applications.tcpapp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in TCP layer.
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
-//      These classes manage "virtual bytes", that is, only byte counts are
+//      This mode manages "virtual bytes", that is, only byte counts are
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
 //      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "object", which transmit
+//   -# use "object", which transmits
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
@@ -59,15 +55,10 @@ package inet.applications.tcpapp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes are not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TCP_NSC yet.
 //
-//   -# use "bytestream", which transmit real bytes of messages.
-//      These classes are not implemented yet.
+//   -# use "bytestream", which transmits real bytes of messages.
 //
-
-import inet.applications.ITCPApp;
-
-
 simple TelnetApp like ITCPApp
 {
     parameters:
@@ -76,15 +67,15 @@ simple TelnetApp like ITCPApp
         string connectAddress;  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         string dataTransferMode = default("bytecount");
-        double startTime @unit("s") = default(1s); // time first session begins
-        double stopTime @unit("s") = default(0);  // time of finish sending, 0 is infinity
+        double startTime @unit(s) = default(1s); // time first session begins
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means infinity
         volatile int numCommands = default(exponential(10)); // user types this many commands in a session
-        volatile int commandLength @unit("B") = default(10B); // commands are this many characters (plus Enter)
-        volatile double keyPressDelay @unit("s") = default(exponential(0.1s)); // delay between keypresses
-        volatile int commandOutputLength @unit("B") = default(exponential(1000B)); // commands produce this much output
-        volatile double thinkTime @unit("s") = default(exponential(10s)); // user waits this much before starting to type new command
-        volatile double idleInterval @unit("s") = default(exponential(300s)); // time gap between sessions
-        volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, user waits this much before trying to reconnect
+        volatile int commandLength @unit(B) = default(10B); // commands are this many characters (plus Enter)
+        volatile double keyPressDelay @unit(s) = default(exponential(0.1s)); // delay between keypresses
+        volatile int commandOutputLength @unit(B) = default(exponential(1000B)); // commands produce this much output
+        volatile double thinkTime @unit(s) = default(exponential(10s)); // user waits this much before starting to type new command
+        volatile double idleInterval @unit(s) = default(exponential(300s)); // time gap between sessions
+        volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, user waits this much before trying to reconnect
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

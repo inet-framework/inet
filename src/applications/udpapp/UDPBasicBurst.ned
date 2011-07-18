@@ -111,13 +111,13 @@ simple UDPBasicBurst like IUDPApp
         int destAddrRNG = default(0); // random generator ID for selecting a destination address
         int localPort; // local UDP port number
         int destPort; // remote UDP port number
-        double startTime @unit("s") = default(1s); // application start time (start of the first burst)
-        double stopTime @unit("s") = default(-1s); // application stop time (no packets are sent after this time); a negative or zero value means no limit
-        volatile int messageLength @unit("B"); // length of messages to generate, in bytes
-        volatile double burstDuration @unit("s"); // burst duration time (zero not allowed)
-        volatile double sleepDuration @unit("s"); // time between bursts (zero allowed)
-        volatile double sendInterval @unit("s"); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
-        double delayLimit @unit("s") = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
+        double startTime @unit(s) = default(1s); // application start time (start of the first burst)
+        double stopTime @unit(s) = default(-1s); // application stop time (no packets are sent after this time); a negative or zero value means no limit
+        volatile int messageLength @unit(B); // length of messages to generate, in bytes
+        volatile double burstDuration @unit(s); // burst duration time (zero not allowed)
+        volatile double sleepDuration @unit(s); // time between bursts (zero allowed)
+        volatile double sendInterval @unit(s); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
+        double delayLimit @unit(s) = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
         @signal[dropPk](type=cPacket);

@@ -35,12 +35,13 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         bool echo;
         bool schedule;
         bool shutdownReceived;
+        bool ordered;
+        bool sendAllowed;
         long bytesSent;
         int32 packetsSent;
         int32 packetsRcvd;
         int32 numSessions;
         int32 numRequestsToSend; // requests to send in this session
-        bool ordered;
         int32 queueSize;
         cMessage *timeoutMsg;
         int32 outboundStreams;
@@ -49,7 +50,6 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 bytesRcvd;
         int32 echoedBytesSent;
         int32 lastStream;
-        bool sendAllowed;
         int32 numPacketsToReceive;
         typedef std::map<int32,long> RcvdPacketsPerAssoc;
         RcvdPacketsPerAssoc rcvdPacketsPerAssoc;

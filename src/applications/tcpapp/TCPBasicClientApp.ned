@@ -64,26 +64,18 @@ import inet.applications.ITCPApp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in TCP layer.
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
-//      These classes manage "virtual bytes", that is, only byte counts are
+//      This mode manages "virtual bytes", that is, only byte counts are
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
 //      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "object", which transmit
+//   -# use "object", which transmits
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
@@ -92,29 +84,28 @@ import inet.applications.ITCPApp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes are not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TCP_NSC yet.
 //
-//   -# use "bytestream", which transmit real bytes of messages.
-//      These classes are not implemented yet.
+//   -# use "bytestream", which transmits real bytes of messages.
 //
 // @see ~TCPGenericSrvApp, ~GenericAppMsg, ~TelnetApp
 //
 simple TCPBasicClientApp like ITCPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
-        int port = default(-1); // port number to listen on
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
-        double startTime @unit("s") = default(1s); // time first session begins
-        double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
+        double startTime @unit(s) = default(1s); // time first session begins
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means infinity
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
-        volatile int replyLength @unit("B") = default(1MB); // length of a reply
-        volatile double thinkTime @unit("s"); // time gap between requests
+        volatile int replyLength @unit(B) = default(1MB); // length of a reply
+        volatile double thinkTime @unit(s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
-        volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
+        volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

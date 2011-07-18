@@ -20,12 +20,12 @@
 package inet.applications.generic;
 
 //
-// Sends IP or IPv6 datagrams to the given address at the given interval.
-// The interval can be a constant or a random value (e.g. exponential(1)).
+// Sends IP or IPv6 datagrams to the given address at the given sendInterval.
+// The sendInterval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
 // dotted decimal notation (or, for IPv6, in the usual notation with colons),
-// or with the module name. (The IPvXAddressResolver class is used to resolve
+// or with the module name. (The ~IPvXAddressResolver class is used to resolve
 // the address.) To disable the model, set destAddresses to "".
 //
 // The peer can be ~IPvXTrafSink or another ~IPvXTrafGen (it handles received packets
@@ -37,10 +37,10 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         double startTime @unit("s") = default(1s); // time of sending the first packet
         double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
         volatile double sendInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
-        int numPackets = default(0); // max number of packets to generate
-        int protocol; // value for ~IPv4Datagram protocol field
-        volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
-        string destAddresses = default(""); // list of IP addresses, separated by spaces
+        int numPackets = default(0); // max number of packets to generate, 0 means forever
+        int protocol; // value for ~IPv4ControlInfo / ~IPv6ControlInfo protocol field
+        volatile int packetLength @unit("B"); // packet length in bytes
+        string destAddresses = default(""); // list of destination addresses, separated by spaces
         @display("i=block/source");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

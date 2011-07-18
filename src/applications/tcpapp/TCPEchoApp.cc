@@ -93,7 +93,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             pkt->setControlInfo(cmd);
             delete ind;
 
-            long byteLen = pkt->getByteLength()*echoFactor;
+            long byteLen = pkt->getByteLength() * echoFactor;
 
             if (byteLen < 1)
                 byteLen = 1;

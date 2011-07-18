@@ -43,26 +43,18 @@ import inet.applications.ITCPApp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the names of
-// classes that manage the actual send and receive queues in TCP layer.
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
 // Currently you have three choices:
 //
 //   -# set them to "bytecount".
-//      These classes manage "virtual bytes", that is, only byte counts are
+//      This mode manages "virtual bytes", that is, only byte counts are
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
 //      classes: for example, if the client sends a single cMessage with
 //      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, ~TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while ~TCPEchoApp or ~TCPSinkApp can work with any (but ~TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "object", which transmit
+//   -# use "object", which transmits
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
@@ -71,12 +63,11 @@ import inet.applications.ITCPApp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      These classes are not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TCP_NSC yet.
 //
-//   -# use "bytestream", which transmit real bytes of messages.
-//      These classes are not implemented yet.
+//   -# use "bytestream", which transmits real bytes of messages.
 //
-// Compatible with both IPv4 (IPv4) and ~IPv6.
+// Compatible with both ~IPv4 and ~IPv6.
 //
 simple TCPSrvHostApp like ITCPApp
 {
