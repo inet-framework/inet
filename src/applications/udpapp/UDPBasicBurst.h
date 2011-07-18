@@ -73,7 +73,7 @@ class INET_API UDPBasicBurst : public UDPAppBase
     cPar *messageLengthPar;
     cPar *burstDurationPar;
     cPar *sleepDurationPar;
-    cPar *messageFreqPar;
+    cPar *sendIntervalPar;
 
     //statistics:
     static simsignal_t sentPkSignal;

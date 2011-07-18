@@ -31,7 +31,8 @@ simple UDPEchoApp like IUDPApp
         int destPort;
         volatile int messageLength @unit("B"); // length of messages to generate, int bytes
         double startTime @unit("s") = default(1s); // application start time (start of the first packet)
-        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
+        double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
+        volatile double sendInterval @unit("s"); // should usually be a random value, e.g. exponential(1)
         string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/app");
         @statistic[rcvdPkBytes](title="Received packet bytes"; record=count,sum,vector);
@@ -41,6 +42,3 @@ simple UDPEchoApp like IUDPApp
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
-
-
-

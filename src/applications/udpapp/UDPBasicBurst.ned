@@ -62,16 +62,16 @@ import inet.applications.IUDPApp;
 // <b>Bursts:</b>
 //
 // The first burst starts at startTime. Bursts start by immediately sending 
-// a packet; subsequent packets are sent at messageFreq intervals. The 
-// messageFreq parameter can be a random value, e.g. exponential(10ms).
+// a packet; subsequent packets are sent at sendInterval intervals. The 
+// sendInterval parameter can be a random value, e.g. exponential(10ms).
 // A constant interval with jitter can be specified as 1s+uniform(-0.01s,0.01s)
 // or uniform(0.99s,1.01s). The length of the burst is controlled by the
-// burstDuration parameter. (Note that if messageFreq is greater than 
+// burstDuration parameter. (Note that if sendInterval is greater than 
 // burstDuration, the burst will consist of one packet only.) The time between
 // burst is the sleepDuration parameter; this can be zero (zero is not
-// allowed for messageFreq.) The zero burstDuration is implemented as infinity.
+// allowed for sendInterval.) The zero burstDuration is implemented as infinity.
 //
-// The zero value in burstDuration or messageFreq parameters generates a runtime error.
+// The zero value in burstDuration or sendInterval parameters generates a runtime error.
 // The sleepDuration parameter accepts zero value.
 //
 // <b>Packets</b>
@@ -116,7 +116,7 @@ simple UDPBasicBurst like IUDPApp
         volatile int messageLength @unit("B"); // length of messages to generate, in bytes
         volatile double burstDuration @unit("s"); // burst duration time (zero not allowed)
         volatile double sleepDuration @unit("s"); // time between bursts (zero allowed)
-        volatile double messageFreq @unit("s"); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
+        volatile double sendInterval @unit("s"); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
         double delayLimit @unit("s") = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
         @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[rcvdPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);

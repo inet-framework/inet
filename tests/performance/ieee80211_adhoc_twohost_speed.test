@@ -173,7 +173,7 @@ sim-time-limit = 100s
 description = "1 host to 1 host on adhoc"
 Throughput.numCli = 1
 Throughput.numSrv = 1
-**.cli.waitTime = 1ms
+**.cli.sendInterval = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

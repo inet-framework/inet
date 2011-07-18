@@ -173,7 +173,7 @@ sim-time-limit = 100s
 description = "10 host to 10 host on adhoc"
 Throughput.numCli = 10
 Throughput.numSrv = 10
-**.cli.waitTime = 1ms
+**.cli.sendInterval = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

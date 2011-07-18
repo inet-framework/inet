@@ -31,6 +31,15 @@ simsignal_t EtherAppCli::endToEndDelaySignal = SIMSIGNAL_NULL;
 simsignal_t EtherAppCli::sentPkBytesSignal = SIMSIGNAL_NULL;
 simsignal_t EtherAppCli::rcvdPkBytesSignal = SIMSIGNAL_NULL;
 
+EtherAppCli::EtherAppCli()
+{
+    timerMsg = NULL;
+}
+EtherAppCli::~EtherAppCli()
+{
+    cancelAndDelete(timerMsg);
+}
+
 void EtherAppCli::initialize(int stage)
 {
     // we can only initialize in the 2nd stage (stage==1), because
@@ -39,7 +48,7 @@ void EtherAppCli::initialize(int stage)
     {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
-        waitTime = &par("waitTime");
+        sendInterval = &par("sendInterval");
 
         localSAP = ETHERAPP_CLI_SAP;
         remoteSAP = ETHERAPP_SRV_SAP;
@@ -65,9 +74,13 @@ void EtherAppCli::initialize(int stage)
         if (registerSAP)
             registerDSAP(localSAP);
 
-        cMessage *timermsg = new cMessage("generateNextPacket");
-        simtime_t d = par("startTime").doubleValue();
-        scheduleAt(simTime()+d, timermsg);
+        simtime_t startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime != 0 && stopTime <= startTime)
+            error("Invalid startTime/stopTime parameters");
+
+        timerMsg = new cMessage("generateNextPacket");
+        scheduleAt(startTime, timerMsg);
     }
 }
 
@@ -99,8 +112,9 @@ void EtherAppCli::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         sendPacket();
-        simtime_t d = waitTime->doubleValue();
-        scheduleAt(simTime()+d, msg);
+        simtime_t d = simTime() + sendInterval->doubleValue();
+        if (stopTime == 0 || d < stopTime)
+            scheduleAt(d, msg);
     }
     else
     {
@@ -163,4 +177,7 @@ void EtherAppCli::receivePacket(cPacket *msg)
 
 void EtherAppCli::finish()
 {
+    cancelAndDelete(timerMsg);
+    timerMsg = NULL;
 }
+

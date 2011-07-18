@@ -57,8 +57,13 @@ void UDPBasicApp::initialize(int stage)
 
     bindToPort(localPort);
 
-    cMessage *timer = new cMessage("sendTimer");
-    scheduleAt(par("startTime").doubleValue(), timer);
+    stopTime = par("stopTime").doubleValue();
+    simtime_t startTime = par("startTime").doubleValue();
+    if (stopTime != 0 && stopTime <= startTime)
+        error("Invalid startTime/stopTime parameters");
+
+    cMessage *timerMsg = new cMessage("sendTimer");
+    scheduleAt(startTime, timerMsg);
 }
 
 void UDPBasicApp::finish()
@@ -99,7 +104,11 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+par("messageFreq").doubleValue(), msg);
+        simtime_t d = simTime() + par("sendInterval").doubleValue();
+        if (stopTime == 0 || d < stopTime)
+            scheduleAt(d, msg);
+        else
+            delete msg;
     }
     else
     {

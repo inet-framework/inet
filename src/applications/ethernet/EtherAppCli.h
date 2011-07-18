@@ -33,11 +33,15 @@ class INET_API EtherAppCli : public cSimpleModule
     long seqNum;
     cPar *reqLength;
     cPar *respLength;
-    cPar *waitTime;
+    cPar *sendInterval;
 
     int localSAP;
     int remoteSAP;
     MACAddress destMACAddress;
+
+    // self messages
+    cMessage *timerMsg;
+    simtime_t stopTime;
 
     // receive statistics
     long packetsSent;
@@ -45,6 +49,10 @@ class INET_API EtherAppCli : public cSimpleModule
     static simsignal_t endToEndDelaySignal;
     static simsignal_t sentPkBytesSignal;
     static simsignal_t rcvdPkBytesSignal;
+
+  public:
+    EtherAppCli();
+    ~EtherAppCli();
 
   protected:
     virtual void initialize(int stage);

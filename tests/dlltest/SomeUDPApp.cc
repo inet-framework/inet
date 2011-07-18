@@ -57,7 +57,7 @@ void SomeUDPApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("messageFreq"), timer);
+    scheduleAt((double)par("sendInterval"), timer);
 }
 
 IPvXAddress SomeUDPApp::chooseDestAddr()
@@ -86,7 +86,7 @@ void SomeUDPApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("messageFreq"), msg);
+        scheduleAt(simTime()+(double)par("sendInterval"), msg);
     }
     else
     {

@@ -109,6 +109,7 @@ void IPvXTrafSink::processPacket(cPacket *msg)
 Define_Module(IPvXTrafGen);
 
 int IPvXTrafGen::counter;
+simsignal_t IPvXTrafGen::sentPkBytesSignal = SIMSIGNAL_NULL;
 
 void IPvXTrafGen::initialize(int stage)
 {
@@ -124,6 +125,9 @@ void IPvXTrafGen::initialize(int stage)
     msgByteLength = par("packetLength");
     numPackets = par("numPackets");
     simtime_t startTime = par("startTime");
+    stopTime = par("stopTime");
+    if (stopTime != 0 && stopTime <= startTime)
+        error("Invalid startTime/stopTime parameters");
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -207,8 +211,9 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
         // send, then reschedule next sending
         sendPacket();
 
-        if (!numPackets || numSent<numPackets)
-            scheduleAt(simTime()+(double)par("packetInterval"), msg);
+        simtime_t d = simTime()+(double)par("sendInterval");
+        if ((!numPackets || numSent<numPackets) && (stopTime == 0 || stopTime > d))
+            scheduleAt(d, msg);
         else
             delete msg;
     }

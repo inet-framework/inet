@@ -39,15 +39,19 @@ void TCPBasicClientApp::initialize()
 {
     TCPGenericCliAppBase::initialize();
 
-    timeoutMsg = new cMessage("timer");
-
     numRequestsToSend = 0;
     earlySend = false;  // TBD make it parameter
     WATCH(numRequestsToSend);
     WATCH(earlySend);
 
+    simtime_t startTime = par("startTime");
+    stopTime = par("stopTime");
+    if (stopTime != 0 && stopTime <= startTime)
+        error("Invalid startTime/stopTime parameters");
+
+    timeoutMsg = new cMessage("timer");
     timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt((simtime_t)par("startTime"), timeoutMsg);
+    scheduleAt(startTime, timeoutMsg);
 }
 
 void TCPBasicClientApp::sendRequest()
@@ -109,8 +113,23 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, b
     if (numRequestsToSend > 0)
     {
         EV << "reply arrived\n";
-        timeoutMsg->setKind(MSGKIND_SEND);
-        scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+
+        if (timeoutMsg)
+        {
+            ASSERT(timeoutMsg->isScheduled());
+
+            simtime_t d = simTime() + (simtime_t) par("thinkTime");
+            if (stopTime == 0 || stopTime > d)
+            {
+                timeoutMsg->setKind(MSGKIND_SEND);
+                scheduleAt(d, timeoutMsg);
+            }
+            else
+            {
+                delete timeoutMsg;
+                timeoutMsg = NULL;
+            }
+        }
     }
     else
     {
@@ -124,8 +143,22 @@ void TCPBasicClientApp::socketClosed(int connId, void *ptr)
     TCPGenericCliAppBase::socketClosed(connId, ptr);
 
     // start another session after a delay
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime()+(simtime_t)par("idleInterval"), timeoutMsg);
+    if (timeoutMsg)
+    {
+        ASSERT(timeoutMsg->isScheduled());
+
+        simtime_t d = simTime() + (simtime_t) par("idleInterval");
+        if (stopTime == 0 || stopTime > d)
+        {
+            timeoutMsg->setKind(MSGKIND_CONNECT);
+            scheduleAt(d, timeoutMsg);
+        }
+        else
+        {
+            delete timeoutMsg;
+            timeoutMsg = NULL;
+        }
+    }
 }
 
 void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
@@ -133,7 +166,21 @@ void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
     TCPGenericCliAppBase::socketFailure(connId, ptr, code);
 
     // reconnect after a delay
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime()+(simtime_t)par("reconnectInterval"), timeoutMsg);
+    if (timeoutMsg)
+    {
+        ASSERT(timeoutMsg->isScheduled());
+
+        simtime_t d = simTime() + (simtime_t) par("reconnectInterval");
+        if (stopTime == 0 || stopTime > d)
+        {
+            timeoutMsg->setKind(MSGKIND_CONNECT);
+            scheduleAt(d, timeoutMsg);
+        }
+        else
+        {
+            delete timeoutMsg;
+            timeoutMsg = NULL;
+        }
+    }
 }
 

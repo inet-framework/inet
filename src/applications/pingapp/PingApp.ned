@@ -44,11 +44,11 @@ simple PingApp
         string destAddr = default(""); // destination IPv4 or IPv6 address
         string srcAddr = default(""); // source IPv4 or IPv6 address (useful with multi-homing)
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
-        volatile double interval @unit("s") = default(1s); // time to wait between pings (can be random)
+        volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
         double hopLimit = default(32); // TTL or hopLimit for IP packets
         double count = default(0); // stop after count ping requests, 0 means continuously
-        double startTime @unit("s") = default(uniform(0s,this.interval)); // send first ping at startTime
-        double stopTime @unit("s") = default(0s); // send no pings after stopTime, 0 means forever
+        double startTime @unit("s") = default(uniform(0s,this.sendInterval)); // send first ping at startTime
+        double stopTime @unit("s") = default(0s); // time of finish sending, 0 means forever
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
         @statistic[endToEndDelay](title="delay";record=histogram,stats,vector);
@@ -63,3 +63,4 @@ simple PingApp
         input pingv6In;
         output pingv6Out;
 }
+

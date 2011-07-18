@@ -59,7 +59,7 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
 
     // module parameters
     int serverPort;
-    cPar *waitInterval;
+    cPar *sendInterval;
     cPar *packetLen;
     cPar *videoSize;
 

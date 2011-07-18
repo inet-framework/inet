@@ -48,11 +48,13 @@ void PingApp::initialize()
     // (defer reading srcAddr/destAddr to when ping starts, maybe
     // addresses will be assigned later by some protocol)
     packetSize = par("packetSize");
-    intervalp = & par("interval");
+    sendIntervalp = & par("sendInterval");
     hopLimit = par("hopLimit");
     count = par("count");
     startTime = par("startTime");
     stopTime = par("stopTime");
+    if (stopTime != 0 && stopTime <= startTime)
+        error("Invalid startTime/stopTime parameters");
     printPing = (bool)par("printPing");
 
     // state

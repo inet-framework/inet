@@ -108,6 +108,7 @@ simple TCPBasicClientApp like ITCPApp
         int connectPort = default(1000); // port number to connect to
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double startTime @unit("s") = default(1s); // time first session begins
+        double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
         volatile int replyLength @unit("B") = default(1MB); // length of a reply

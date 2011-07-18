@@ -34,6 +34,7 @@ class INET_API UDPBasicApp : public UDPAppBase
     std::string nodeName;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
+    simtime_t stopTime;
 
     static int counter; // counter for generating a global number for each packet
 

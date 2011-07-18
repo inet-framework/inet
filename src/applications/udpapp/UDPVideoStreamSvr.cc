@@ -51,7 +51,7 @@ void UDPVideoStreamSvr::initialize()
 {
     this->UDPAppBase::initialize();
 
-    waitInterval = &par("waitInterval");
+    sendInterval = &par("sendInterval");
     packetLen = &par("packetLen");
     videoSize = &par("videoSize");
     serverPort = par("serverPort");
@@ -131,7 +131,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     // reschedule timer if there's bytes left to send
     if (d->bytesLeft!=0)
     {
-        simtime_t interval = (*waitInterval);
+        simtime_t interval = (*sendInterval);
         scheduleAt(simTime()+interval, timer);
     }
     else

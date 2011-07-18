@@ -53,8 +53,9 @@ simple IPvXTrafSink like IIPvXTrafficGenerator
 simple IPvXTrafGen like IIPvXTrafficGenerator
 {
     parameters:
-        double startTime @unit("s") = default(1s); // the time application generates first packet
-        volatile double packetInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
+        double startTime @unit("s") = default(1s); // time of sending the first packet
+        double stopTime @unit("s") = default(0);  // time of finish sending, 0 means forever
+        volatile double sendInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
         int numPackets = default(0); // max number of packets to generate
         int protocol; // value for ~IPv4Datagram protocol field
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
@@ -70,3 +71,4 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         output ipOut @labels(IPv4ControlInfo/down);
         output ipv6Out @labels(IPv6ControlInfo/down);
 }
+

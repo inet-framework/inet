@@ -40,3 +40,4 @@ simple UDPVideoStreamCli like IUDPApp
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
+

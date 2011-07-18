@@ -32,7 +32,8 @@ class PingPayload;
 class INET_API PingApp : public cSimpleModule
 {
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 4; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -48,7 +49,7 @@ class INET_API PingApp : public cSimpleModule
     IPvXAddress destAddr;
     IPvXAddress srcAddr;
     int packetSize;
-    cPar *intervalp;
+    cPar *sendIntervalp;
     int hopLimit;
     int count;
     simtime_t startTime;

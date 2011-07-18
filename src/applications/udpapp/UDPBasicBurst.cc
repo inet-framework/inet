@@ -48,7 +48,7 @@ UDPBasicBurst::UDPBasicBurst()
     messageLengthPar = NULL;
     burstDurationPar = NULL;
     sleepDurationPar = NULL;
-    messageFreqPar = NULL;
+    sendIntervalPar = NULL;
     timerNext = NULL;
 }
 
@@ -77,7 +77,7 @@ void UDPBasicBurst::initialize(int stage)
     messageLengthPar = &par("messageLength");
     burstDurationPar = &par("burstDuration");
     sleepDurationPar = &par("sleepDuration");
-    messageFreqPar = &par("messageFreq");
+    sendIntervalPar = &par("sendInterval");
     nextSleep = startTime;
     nextBurst = startTime;
     nextPkt = startTime;
@@ -244,10 +244,10 @@ void UDPBasicBurst::generateBurst()
     if (nextPkt < now)
         nextPkt = now;
 
-    double messageFreq = messageFreqPar->doubleValue();
-    if (messageFreq <= 0.0)
-        throw cRuntimeError(this, "The messageFreq parameter must be bigger than 0");
-    nextPkt += messageFreq;
+    double sendInterval = sendIntervalPar->doubleValue();
+    if (sendInterval <= 0.0)
+        throw cRuntimeError(this, "The sendInterval parameter must be bigger than 0");
+    nextPkt += sendInterval;
 
     if (activeBurst && nextBurst <= now) // new burst
     {

@@ -26,6 +26,7 @@ class INET_API TelnetApp : public TCPGenericCliAppBase
     cMessage *timeoutMsg;
     int numLinesToType; // lines (commands) the user will type in this session
     int numCharsToType; // characters the user will type for current line (command)
+    simtime_t stopTime;
 
   public:
     TelnetApp();
@@ -49,8 +50,10 @@ class INET_API TelnetApp : public TCPGenericCliAppBase
 
     /** Redefined to reconnect after a delay. */
     virtual void socketFailure(int connId, void *yourPtr, int code);
+
+    /** schedules msg only if t < stopTime */
+    virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
 };
 
 #endif
-
 

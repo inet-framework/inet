@@ -27,8 +27,9 @@ simple EtherAppCli
 {
     parameters:
         string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        double startTime @unit("s") = default(this.waitTime);  // time of sending the first request
-        volatile double waitTime @unit("s") = default(uniform(0s,1s));  // interval between sending requests
+        double startTime @unit(s) = default(this.sendInterval);  // time of sending the first request
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
+        volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
         volatile int respLength @unit(B) = default(1KB);  // length of response packets
         bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
@@ -40,3 +41,4 @@ simple EtherAppCli
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
+

@@ -56,12 +56,13 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     int protocol;
     int msgByteLength;
     int numPackets;
+    simtime_t stopTime;
     std::vector<IPvXAddress> destAddresses;
 
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
-    simsignal_t sentPkBytesSignal;
+    static simsignal_t sentPkBytesSignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
@@ -74,5 +75,4 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
 };
 
 #endif
-
 
