@@ -1,3 +1,7 @@
+TODO: MACAddress to use int64 (code becomes a lot simpler)
+TODO: make copyright headers uniform....
+
+
 TODO: set up nightly builds: 
    - should report build errors/warnings;
    - should run etc/runallexamples and report the results (runtime errors, fingerprint mismatches, etc)

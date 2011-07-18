@@ -59,16 +59,14 @@ cSocketRTScheduler::~cSocketRTScheduler()
 
 void cSocketRTScheduler::startRun()
 {
-#ifdef HAVE_PCAP
-    const int32 on = 1;
-
-#endif
     gettimeofday(&baseTime, NULL);
+
 #ifdef HAVE_PCAP
     // Enabling sending makes no sense when we can't receive...
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler: Root priviledges needed");
+        throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
+    const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 #endif
@@ -77,16 +75,13 @@ void cSocketRTScheduler::startRun()
 
 void cSocketRTScheduler::endRun()
 {
-#ifdef HAVE_PCAP
-    pcap_stat ps;
-
-#endif
     close(fd);
     fd = INVALID_SOCKET;
-#ifdef HAVE_PCAP
 
+#ifdef HAVE_PCAP
     for (uint16 i=0; i<pds.size(); i++)
     {
+        pcap_stat ps;
         if (pcap_stats(pds.at(i), &ps) < 0)
             throw cRuntimeError("cSocketRTScheduler::endRun(): Can not get pcap statistics: %s", pcap_geterr(pds.at(i)));
         else
