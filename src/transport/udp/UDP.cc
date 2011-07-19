@@ -118,8 +118,6 @@ void UDP::initialize()
 
 void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
 {
-    // XXX checks could be added, of when the bind should be allowed to proceed
-
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc();
     sd->sockId = ctrl->getSockId();
@@ -142,6 +140,16 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
                              sd->interfaceId==-1;
 
     EV << "Binding socket: " << *sd << "\n";
+
+    // do not allow two apps to bind to the same UDP port (or address/port combination)
+    SocketsByPortMap::iterator it = socketsByPortMap.find(sd->localPort);
+    if (it != socketsByPortMap.end())
+    {
+        SockDescList& list = it->second;
+        for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+            if ((*it)->localAddr == sd->localAddr)
+                error("bind: local address/port %s:%u already taken", sd->localAddr.str().c_str(), sd->localPort);
+    }
 
     // add to socketsByIdMap
     ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
