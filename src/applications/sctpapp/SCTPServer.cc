@@ -27,9 +27,6 @@
 #include "SCTPMessage_m.h"
 #include "SCTPSocket.h"
 
-#define MSGKIND_CONNECT  0
-#define MSGKIND_SEND         1
-#define MSGKIND_      2
 
 Define_Module(SCTPServer);
 
@@ -88,7 +85,7 @@ void SCTPServer::initialize()
         socket->bindx(addresses, port);
     }
     socket->listen(true, par("numPacketsToSendPerClient").longValue(), messagesToPush);
-    sctpEV3<<"SCTPServer::initialized listen port="<<port<<"\n";
+    sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
     schedule = false;
     shutdownReceived = false;
 }
@@ -103,13 +100,11 @@ void SCTPServer::sendOrSchedule(cPacket *msg)
 
 void SCTPServer::generateAndSend()
 {
-uint32 numBytes;
-
     cPacket* cmsg = new cPacket("CMSG");
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
-    numBytes = (uint32)par("requestLength");
+    int numBytes = (int)par("requestLength");
     msg->setDataArraySize(numBytes);
-    for (uint32 i=0; i<numBytes; i++)
+    for (int i=0; i<numBytes; i++)
         msg->setData(i, 's');
 
     msg->setDataLen(numBytes);
@@ -168,7 +163,6 @@ cPacket* SCTPServer::makeAbortNotification(SCTPCommand* msg)
     cmd->setNumMsgs(ind->getNumMsgs());
     cmsg->setControlInfo(cmd);
     delete ind;
-    //delete msg;
     cmsg->setKind(SCTP_C_ABORT);
     return cmsg;
 }
@@ -292,7 +286,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                         }
                         else
                         {
-                            sctpEV3<<"no more packets to send, call shutdown for assoc "<<assocId<<"\n";
+                            sctpEV3 << "no more packets to send, call shutdown for assoc " << assocId << "\n";
                             cPacket* cmsg = new cPacket("ShutdownRequest");
                             SCTPCommand* cmd = new SCTPCommand("Send5");
                             cmsg->setKind(SCTP_C_SHUTDOWN);
@@ -331,7 +325,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 }
                 else
                 {
-                    sctpEV3<<simulation.getSimTime()<<" makeReceiveRequest\n";
+                    sctpEV3 << simulation.getSimTime() << " makeReceiveRequest\n";
                     cmsg = makeReceiveRequest(PK(msg));
                     sendOrSchedule(cmsg);
                 }
@@ -342,7 +336,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             {
                 notifications--;
                 packetsRcvd++;
-                sctpEV3<<simulation.getSimTime()<<" server: data arrived. "<<packetsRcvd<<" Packets received now\n";
+                sctpEV3 << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
                 id = ind->getAssocId();
                 ServerAssocStatMap::iterator j = serverAssocStatMap.find(id);
@@ -361,7 +355,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
                         EndToEndDelay::iterator m = endToEndDelay.find(id);
                         m->second->record(simulation.getSimTime()-smsg->getCreationTime());
-                        sctpEV3<<"server: Data received. Left packets to receive="<<j->second.rcvdPackets<<"\n";
+                        sctpEV3 << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
                         if (j->second.rcvdPackets == 0)
                         {
@@ -415,7 +409,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             {
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 id = command->getAssocId();
-                sctpEV3<<"server: SCTP_I_SHUTDOWN_RECEIVED for assoc "<<id<<"\n";
+                sctpEV3 << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
                 if (i->second.sentPackets == 0 || (long) par("numPacketsToSendPerClient")==0)
                 {
@@ -457,7 +451,7 @@ void SCTPServer::handleTimer(cMessage *msg)
     if (msg==delayTimer)
     {
         ServerAssocStatMap::iterator i = serverAssocStatMap.find(assocId);
-        sctpEV3<<simulation.getSimTime()<<" delayTimer expired\n";
+        sctpEV3 << simulation.getSimTime() << " delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
         scheduleAt(simulation.getSimTime()+(double)par("readingInterval"), delayTimer);
         return;
@@ -495,7 +489,7 @@ void SCTPServer::handleTimer(cMessage *msg)
         sendOrSchedule(cmsg);
         break;
     case SCTP_C_RECEIVE:
-        sctpEV3<<simulation.getSimTime()<<" SCTPServer:SCTP_C_RECEIVE\n";
+        sctpEV3 << simulation.getSimTime() << " SCTPServer:SCTP_C_RECEIVE\n";
         if (readInt || delayFirstRead > 0)
             schedule = false;
         else
@@ -503,7 +497,7 @@ void SCTPServer::handleTimer(cMessage *msg)
         sendOrSchedule(PK(msg));
         break;
     default:
-        sctpEV3<<"MsgKind ="<<msg->getKind()<<" unknown\n";
+        sctpEV3 << "MsgKind =" << msg->getKind() << " unknown\n";
         break;
     }
 }
@@ -520,12 +514,12 @@ void SCTPServer::finish()
     ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); l++)
     {
-        ev << getFullPath() << " Assoc: "<<l->first<<"\n";
-        ev << "\tstart time: "<<l->second.start <<"\n";
-        ev << "\tstop time: "<<l->second.stop <<"\n";
-        ev << "\tlife time: "<<l->second.lifeTime <<"\n";
+        ev << getFullPath() << " Assoc: " << l->first << "\n";
+        ev << "\tstart time: " << l->second.start << "\n";
+        ev << "\tstop time: " << l->second.stop << "\n";
+        ev << "\tlife time: " << l->second.lifeTime << "\n";
         ev << "\treceived bytes:" << l->second.rcvdBytes << "\n";
-        ev << "\tthroughput: "<<(l->second.rcvdBytes / l->second.lifeTime.dbl())*8 <<" bit/sec\n";
+        ev << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
         recordScalar("bytes rcvd", l->second.rcvdBytes);
         recordScalar("throughput", (l->second.rcvdBytes / l->second.lifeTime.dbl())*8);
     }
@@ -545,7 +539,7 @@ void SCTPServer::finish()
         endToEndDelay.erase(k);
     }
     serverAssocStatMap.clear();
-    sctpEV3<<"Server finished\n";
+    sctpEV3 << "Server finished\n";
 }
 
 SCTPServer::~SCTPServer()

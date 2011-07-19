@@ -41,7 +41,6 @@ simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void SCTPPeer::initialize()
 {
-    char * token;
     AddressVector addresses;
 
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
@@ -58,7 +57,7 @@ void SCTPPeer::initialize()
     // parameters
     const char* address = par("address");
 
-    token = strtok((char*)address, ",");
+    char *token = strtok((char*)address, ",");
     while (token != NULL)
     {
         addresses.push_back(IPvXAddress(token));
@@ -86,7 +85,7 @@ void SCTPPeer::initialize()
         clientSocket.bindx(addresses, port);
     }
     socket->listen(true, par("numPacketsToSendPerClient").longValue());
-    sctpEV3<<"SCTPPeer::initialized listen port="<<port<<"\n";
+    sctpEV3 << "SCTPPeer::initialized listen port=" << port << "\n";
     clientSocket.setCallbackObject(this);
     clientSocket.setOutputGate(gate("sctpOut"));
 
@@ -152,7 +151,7 @@ void SCTPPeer::connect()
     clientSocket.setOutboundStreams(outStreams);
 
     sctpEV3 << "issuing OPEN command\n";
-    sctpEV3<<"Assoc "<<clientSocket.getConnectionId()<<"::connect to address "<<connectAddress<<", port "<<connectPort<<"\n";
+    sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
 
@@ -254,7 +253,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                             sendOrSchedule(cmsg);
                         }
 
-                        sctpEV3<<"!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
+                        sctpEV3 << "!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
 
                         RcvdPacketsPerAssoc::iterator j = rcvdPacketsPerAssoc.find(serverAssocId);
                         if (j->second == 0 && (simtime_t)par("waitToClose")>0)
@@ -267,7 +266,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         }
                         else
                         {
-                            sctpEV3<<"no more packets to send, call shutdown for assoc "<<serverAssocId<<"\n";
+                            sctpEV3 << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
                             cPacket* cmsg = new cPacket("ShutdownRequest");
                             SCTPCommand* cmd = new SCTPCommand();
                             cmsg->setKind(SCTP_C_SHUTDOWN);
@@ -375,7 +374,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
         {
             SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             id = command->getAssocId();
-            sctpEV3<<"server: SCTP_I_SHUTDOWN_RECEIVED for assoc "<<id<<"\n";
+            sctpEV3 << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
             RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
 
             if (i==rcvdPacketsPerAssoc.end() && (clientSocket.getState()==SCTPSocket::CONNECTED))
@@ -419,7 +418,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
     SCTPCommand* cmd;
     int32 id;
 
-    sctpEV3<<"SCTPPeer::handleTimer\n";
+    sctpEV3 << "SCTPPeer::handleTimer\n";
 
     SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->getControlInfo());
 
@@ -561,7 +560,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 {
     int32 count = 0;
      // *redefine* to perform or schedule first sending
-    ev<<"SCTPClient: connected\n";
+    ev << "SCTPClient: connected\n";
     setStatusString("connected");
     // determine number of requests in this session
     numRequestsToSend = (long) par("numRequestsPerSession");
@@ -615,7 +614,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 
             if (numRequestsToSend == 0 && (simtime_t)par("waitToClose") == 0)
             {
-                sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
+                sctpEV3 << "socketEstablished:no more packets to send, call shutdown\n";
                 clientSocket.shutdown();
             }
         }
@@ -637,7 +636,7 @@ void SCTPPeer::sendRequestArrived()
 {
     int32 count = 0;
 
-    sctpEV3<<"sendRequestArrived numRequestsToSend="<<numRequestsToSend<<"\n";
+    sctpEV3 << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
 
     while (numRequestsToSend > 0 && count++ < queueSize && sendAllowed)
     {
@@ -656,7 +655,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
 
-    sctpEV3 << "Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
+    sctpEV3 << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
 
     SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->getControlInfo());
 
@@ -715,7 +714,7 @@ void SCTPPeer::finish()
 
     for (RcvdBytesPerAssoc::iterator l=rcvdBytesPerAssoc.begin(); l!=rcvdBytesPerAssoc.end(); l++)
     {
-        ev << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first<< "\n";
+        ev << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
     }
 
     ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";

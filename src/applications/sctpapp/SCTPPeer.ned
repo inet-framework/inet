@@ -23,8 +23,8 @@ import inet.applications.ISCTPApp;
 simple SCTPPeer like ISCTPApp
 {
     parameters:
-        string address = default(""); // comma separated list of addresses
-        int port = default(0); // port number to listen on
+        string address = default(""); //FIXME localAddress? comma separated list of addresses
+        int port = default(0); //FIXME localPort? port number to listen on
         bool echo = default(false);  // echoes received packages when true
         double echoDelay @unit(s) = default(0s);
         double delayFirstRead @unit(s) = default(0s);

@@ -24,6 +24,9 @@
 
 class SCTPConnectInfo;
 
+/**
+ * Implements the SCTPPeer simple module. See the NED file for more info.
+ */
 class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
 {
     protected:
@@ -51,18 +54,27 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 echoedBytesSent;
         int32 lastStream;
         int32 numPacketsToReceive;
+
+        // statistics
         typedef std::map<int32,long> RcvdPacketsPerAssoc;
         RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
+
         typedef std::map<int32,long> SentPacketsPerAssoc;
         SentPacketsPerAssoc sentPacketsPerAssoc;
+
         typedef std::map<int32,long> RcvdBytesPerAssoc;
         RcvdBytesPerAssoc rcvdBytesPerAssoc;
+
         typedef std::map<int32,cOutVector*> BytesPerAssoc;
         BytesPerAssoc bytesPerAssoc;
+
         typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
         HistEndToEndDelay histEndToEndDelay;
+
         typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;
+
+    protected:
         void sendOrSchedule(cPacket *msg);
         void sendRequest(bool last = true);
         int32 ssn;

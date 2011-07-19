@@ -25,10 +25,10 @@
 
 
 #define MSGKIND_CONNECT  0
-#define MSGKIND_SEND         1
+#define MSGKIND_SEND     1
 #define MSGKIND_ABORT    2
 #define MSGKIND_PRIMARY  3
-#define MSGKIND_STOP         5
+#define MSGKIND_STOP     5
 
 
 Define_Module(SCTPClient);
@@ -41,7 +41,7 @@ void SCTPClient::initialize()
 {
     const char * address;
     AddressVector addresses;
-    sctpEV3<<"initialize SCTP Client\n";
+    sctpEV3 << "initialize SCTP Client\n";
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = echoedBytesSent = bytesRcvd = 0;
     WATCH(numSessions);
     WATCH(numBroken);
@@ -138,7 +138,7 @@ void SCTPClient::connect()
     socket.setOutboundStreams(outStreams);
     ev << "issuing OPEN command\n";
     setStatusString("connecting");
-    ev<<"connect to address "<<connectAddress<<"\n";
+    ev << "connect to address " << connectAddress << "\n";
     socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
     numSessions++;
 }
@@ -158,7 +158,7 @@ void SCTPClient::setStatusString(const char *s)
 void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
 {
       int32 count = 0;
-     ev<<"SCTPClient: connected\n";
+     ev << "SCTPClient: connected\n";
     setStatusString("connected");
     bufferSize = buffer;
     // determine number of requests in this session
@@ -231,7 +231,7 @@ void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
 
         if ((!timer && numRequestsToSend == 0) && (simtime_t)par("waitToClose")==0)
         {
-            sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
+            sctpEV3 << "socketEstablished:no more packets to send, call shutdown\n";
             socket.shutdown();
 
             if (timeMsg->isScheduled())
@@ -288,7 +288,7 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 {
     packetsRcvd++;
 
-    sctpEV3<<"Client received packet Nr "<<packetsRcvd<<" from SCTP\n";
+    sctpEV3 << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
     SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->removeControlInfo());
     emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
@@ -425,7 +425,7 @@ void SCTPClient::handleTimer(cMessage *msg)
             break;
 
         default:
-            ev<<"MsgKind ="<<msg->getKind()<<" unknown\n";
+            ev << "MsgKind =" << msg->getKind() << " unknown\n";
             break;
     }
 }
@@ -563,7 +563,7 @@ void SCTPClient::sendqueueAbatedArrived(int32 assocId, uint64 buffer)
 
     if ((!timer && numRequestsToSend == 0) && (simtime_t) par("waitToClose") == 0)
     {
-        sctpEV3<<"socketEstablished:no more packets to send, call shutdown\n";
+        sctpEV3 << "socketEstablished:no more packets to send, call shutdown\n";
         socket.shutdown();
 
         if (timeMsg->isScheduled())
@@ -603,6 +603,6 @@ void SCTPClient::finish()
     ev << getFullPath() << ": opened " << numSessions << " sessions\n";
     ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     ev << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
-    sctpEV3<<"Client finished\n";
+    sctpEV3 << "Client finished\n";
 }
 
