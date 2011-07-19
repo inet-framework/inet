@@ -1816,7 +1816,7 @@ void Ieee80211NewMac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSe
 void Ieee80211NewMac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     simtime_t t = 0, time = 0;
-    int count;
+    int count = 0;
     std::list<Ieee80211DataOrMgmtFrame*>::iterator frame;
 
     frame = transmissionQueue()->begin();
