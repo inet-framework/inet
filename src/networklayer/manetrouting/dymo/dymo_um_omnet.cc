@@ -888,20 +888,20 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
   return -1;
 }
 */
-void DYMOUM::processLinkBreak(const cPolymorphic *details)
+void DYMOUM::processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
-    if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
+    if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details)))
     {
-        dgram = check_and_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details));
+        dgram = check_and_cast<IPv4Datagram *>(const_cast<cObject*>(details));
         if (hello_ival<=0)
         {
             packetFailed(dgram);
         }
     }
-    else if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*> (details)))
+    else if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*> (details)))
     {
-        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details));
+        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details));
         if (hello_ival<=0)
         {
             packetFailedMac(frame);
@@ -912,7 +912,7 @@ void DYMOUM::processLinkBreak(const cPolymorphic *details)
 
 }
 
-void DYMOUM::processPromiscuous(const cPolymorphic *details)
+void DYMOUM::processPromiscuous(const cObject *details)
 {
     Ieee80211DataOrMgmtFrame *frame = NULL;
 
@@ -921,7 +921,7 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
 
     source.s_addr = (Uint128)0;
 
-    if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cPolymorphic*> (details)))
+    if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cObject*> (details)))
     {
         mac_address macAddressConv;
         struct in_addr addr;
@@ -1056,12 +1056,12 @@ void DYMOUM::processPromiscuous(const cPolymorphic *details)
     }
 }
 
-void DYMOUM::processFullPromiscuous(const cPolymorphic *details)
+void DYMOUM::processFullPromiscuous(const cObject *details)
 {
     Ieee80211DataOrMgmtFrame *frame = NULL;
     rtable_entry_t *entry;
     Ieee80211TwoAddressFrame *twoAddressFrame;
-    if (dynamic_cast<Ieee80211TwoAddressFrame *>(const_cast<cPolymorphic*> (details)))
+    if (dynamic_cast<Ieee80211TwoAddressFrame *>(const_cast<cObject*> (details)))
     {
         mac_address macAddressConv;
         struct in_addr addr;

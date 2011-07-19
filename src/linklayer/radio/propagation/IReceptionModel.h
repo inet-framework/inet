@@ -26,7 +26,7 @@
  * radio transmission. The calculation may include the effects of
  * path loss, antenna gain, etc.
  */
-class INET_API IReceptionModel : public cPolymorphic
+class INET_API IReceptionModel : public cObject
 {
   public:
     /**

@@ -908,7 +908,7 @@ void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
     EV<<"Leave handleLowerMsg...\n";
 }
 
-void Ieee80211NewMac::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211NewMac::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

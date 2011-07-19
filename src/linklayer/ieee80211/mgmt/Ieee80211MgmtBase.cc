@@ -80,7 +80,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         // process command from agent
         EV << "Command arrived from agent: " << msg << "\n";
         int msgkind = msg->getKind();
-        cPolymorphic *ctrl = msg->removeControlInfo();
+        cObject *ctrl = msg->removeControlInfo();
         delete msg;
 
         handleCommand(msgkind, ctrl);

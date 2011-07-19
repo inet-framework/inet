@@ -35,7 +35,7 @@
  * @ingroup support
  * @author Christian Frank
  */
-class INET_API Coord : public cPolymorphic
+class INET_API Coord : public cObject
 {
  public:
   /** @brief x and y coordinates of the position*/

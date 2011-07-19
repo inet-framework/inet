@@ -388,7 +388,7 @@ void NS_CLASS handleMessage(cMessage *msg)
         if (control->getOptionCode() == MANET_ROUTE_NOROUTE)
         {
             ipDgram = (IPv4Datagram*) control->decapsulate();
-            cPolymorphic * ctrl = ipDgram->removeControlInfo();
+            cObject * ctrl = ipDgram->removeControlInfo();
             unsigned int ifindex = NS_IFINDEX;  /* Always use ns interface */
             if (ctrl)
             {
@@ -896,12 +896,12 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 }
 
 
-void NS_CLASS processLinkBreak(const cPolymorphic *details)
+void NS_CLASS processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
     if (llfeedback)
     {
-        if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
+        if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details)))
         {
             dgram = check_and_cast<IPv4Datagram *>(details);
             packetFailed(dgram);

@@ -29,7 +29,7 @@ namespace OSPF {
 
 class Router;
 
-class Area : public cPolymorphic {
+class Area : public cObject {
 private:
     AreaID                                                  areaID;
     std::map<IPv4AddressRange, bool, IPv4AddressRange_Less> advertiseAddressRanges;

@@ -134,7 +134,7 @@ void MessageChecker::checkFieldObject(void* object, cClassDescriptor* descriptor
 
     // get the client object associated to the field, and its descriptor class
     cClassDescriptor* descr = descriptor->getFieldIsCObject(object, field) ?
-        cClassDescriptor::getDescriptorFor((cPolymorphic*)obj) :
+        cClassDescriptor::getDescriptorFor((cObject*)obj) :
         cClassDescriptor::getDescriptorFor(descriptor->getFieldStructName(object, field));
 
     checkFields(obj, descr, pattern.getChildren());
@@ -188,7 +188,7 @@ void MessageChecker::checkFieldType(void* object, cClassDescriptor* descriptor, 
     std::string type;
 
     if (descriptor->getFieldIsCObject(object, field))
-        type = ((cPolymorphic*)descriptor->getFieldStructPointer(object, field, i))->getClassName();
+        type = ((cObject*)descriptor->getFieldStructPointer(object, field, i))->getClassName();
     else
         type = descriptor->getFieldTypeString(object, field);
 

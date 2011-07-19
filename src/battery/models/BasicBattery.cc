@@ -55,7 +55,7 @@ void BasicBattery::finish()
 
 void BasicBattery::receiveChangeNotification(
     int aCategory,
-    const cPolymorphic* aDetails)
+    const cObject* aDetails)
 {
     ev << "this text should not appear. error in BasicBattery.cc" << endl;
 }

@@ -336,9 +336,9 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAd
     sendToIp(msg, srcPort, destAddr, destPort, ttl, 0, interface);
 }
 
-void ManetRoutingBase::processLinkBreak(const cPolymorphic *details) {return;}
-void ManetRoutingBase::processPromiscuous(const cPolymorphic *details) {return;}
-void ManetRoutingBase::processFullPromiscuous(const cPolymorphic *details) {return;}
+void ManetRoutingBase::processLinkBreak(const cObject *details) {return;}
+void ManetRoutingBase::processPromiscuous(const cObject *details) {return;}
+void ManetRoutingBase::processFullPromiscuous(const cObject *details) {return;}
 
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAddr, int destPort, int ttl, double delay, const Uint128 &iface)
 {
@@ -887,7 +887,7 @@ void ManetRoutingBase::omnet_clean_rte()
 //
 // generic receiveChangeNotification, the protocols must implemet processLinkBreak and processPromiscuous only
 //
-void ManetRoutingBase::receiveChangeNotification(int category, const cPolymorphic *details)
+void ManetRoutingBase::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("Manet llf");
     if (!isRegistered)

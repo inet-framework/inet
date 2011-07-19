@@ -104,7 +104,7 @@ const char *notificationCategoryName(int category);
 /**
  * Utility function
  */
-void printNotificationBanner(int category, const cPolymorphic *details);
+void printNotificationBanner(int category, const cObject *details);
 
 #endif
 

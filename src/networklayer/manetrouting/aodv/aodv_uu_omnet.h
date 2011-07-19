@@ -287,9 +287,9 @@ class AODVUU : public ManetRoutingBase
     int totalRerrRec;
 #endif
 // used for break link notification
-    //virtual void processPromiscuous(const cPolymorphic *details){};
-    virtual void processLinkBreak(const cPolymorphic *details);
-    //virtual void processFullPromiscuous(const cPolymorphic *details){}
+    //virtual void processPromiscuous(const cObject *details){};
+    virtual void processLinkBreak(const cObject *details);
+    //virtual void processFullPromiscuous(const cObject *details){}
     virtual bool isOurType(cPacket *);
     virtual bool getDestAddress(cPacket *,Uint128 &);
 

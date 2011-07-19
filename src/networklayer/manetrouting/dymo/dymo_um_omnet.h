@@ -205,9 +205,9 @@ class DYMOUM : public ManetRoutingBase
     bool useIndex;
 
 
-    virtual void processLinkBreak(const cPolymorphic *details);
-    virtual void processPromiscuous(const cPolymorphic *details);
-    virtual void processFullPromiscuous(const cPolymorphic *details);
+    virtual void processLinkBreak(const cObject *details);
+    virtual void processPromiscuous(const cObject *details);
+    virtual void processFullPromiscuous(const cObject *details);
 
   public:
     static int  log_file_fd;

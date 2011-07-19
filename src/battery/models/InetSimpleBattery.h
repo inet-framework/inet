@@ -121,7 +121,7 @@ class INET_API InetSimpleBattery : public BasicBattery
     simtime_t lastUpdateTime;
 
     virtual void deductAndCheck();
-    void receiveChangeNotification(int aCategory, const cPolymorphic* aDetails);
+    void receiveChangeNotification(int aCategory, const cObject* aDetails);
 
 };
 #endif

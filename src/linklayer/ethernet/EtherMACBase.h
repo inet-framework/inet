@@ -238,7 +238,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     // notifications
     virtual void updateHasSubcribers() = 0;
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);

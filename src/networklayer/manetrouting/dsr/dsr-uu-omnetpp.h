@@ -273,7 +273,7 @@ class DSRUU:public cSimpleModule, public INotifiable
     void sendUp(cMessage *msg) {send(msg,"toUp");}
 #else
     NotificationBoard *nb;
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 #endif
 
   protected:

@@ -36,7 +36,7 @@
  * @author Andreas Köpke, Andras Varga
  * @see NotificationBoard
  */
-class INET_API RadioState : public cPolymorphic
+class INET_API RadioState : public cObject
 {
   public:
     /** Possible states of the radio */
@@ -67,7 +67,7 @@ class INET_API RadioState : public cPolymorphic
 
   public:
     /** Constructor */
-    RadioState(int radioModuleId) : cPolymorphic() {
+    RadioState(int radioModuleId) : cObject() {
         radioId = radioModuleId; state = IDLE; channelNumber = -1; bitrate = -1;
     }
 

@@ -78,7 +78,7 @@ class TCPSegment;
  * @see TcpLwipReceiveQueue
  */
 
-class INET_API TcpLwipSendQueue : public cPolymorphic
+class INET_API TcpLwipSendQueue : public cObject
 {
   public:
     /**
@@ -141,7 +141,7 @@ class INET_API TcpLwipSendQueue : public cPolymorphic
     TcpLwipConnection *connM;
 };
 
-class INET_API TcpLwipReceiveQueue : public cPolymorphic
+class INET_API TcpLwipReceiveQueue : public cObject
 {
   public:
     /**

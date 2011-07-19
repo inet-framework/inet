@@ -208,7 +208,7 @@ void InetSimpleBattery::finish()
     deviceEntryVector.clear();
 }
 
-void InetSimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic* aDetails)
+void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* aDetails)
 {
     Enter_Method_Silent();
     //EV << "[Battery]: receiveChangeNotification" << endl;

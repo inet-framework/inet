@@ -65,7 +65,7 @@ class INET_API ChannelAccess : public BasicModule
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     /** Finds the channelControl module in the network */
     static IChannelControl *getChannelControl();

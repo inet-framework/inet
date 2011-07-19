@@ -237,7 +237,7 @@ class OLSR_ETX : public OLSR
     NotificationBoard *nb;
     int numInitStages() const  {return 5;}
     void initialize(int stage);
-    // virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    // virtual void receiveChangeNotification(int category, cObject *details);
     // void mac_failed(IPv4Datagram*);
     void    recv(cMessage *p) {};
     // virtual void handleMessage(cMessage *msg);

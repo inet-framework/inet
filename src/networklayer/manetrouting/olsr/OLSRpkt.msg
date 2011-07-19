@@ -188,7 +188,7 @@ typedef struct OLSR_hello_msg {
 
 /// %OLSR HELLO message.
 
-typedef struct OLSR_hello :cPolymorphic {
+typedef struct OLSR_hello :cObject {
 
     /// Reserved.
     uint16_t    reserved_;
@@ -216,7 +216,7 @@ typedef struct OLSR_hello :cPolymorphic {
 
 
 /// %OLSR TC message.
-typedef struct OLSR_tc :cPolymorphic{
+typedef struct OLSR_tc :cObject{
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
@@ -237,7 +237,7 @@ typedef struct OLSR_tc :cPolymorphic{
 
 #if 0
 /// %OLSR TC message.
-typedef struct OLSR_tc :cPolymorphic{
+typedef struct OLSR_tc :cObject{
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
@@ -258,7 +258,7 @@ typedef struct OLSR_tc :cPolymorphic{
 #endif
 
 /// %OLSR MID message.
-typedef struct OLSR_mid :cPolymorphic{
+typedef struct OLSR_mid :cObject{
 
     /// List of interface addresses.
     nsaddr_t    iface_addrs_[OLSR_MAX_ADDRS];

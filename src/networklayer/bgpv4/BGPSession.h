@@ -25,7 +25,7 @@
 #include "BGPRouting.h"
 #include "BGPFSM.h"
 
-class  INET_API BGPSession : public cPolymorphic
+class  INET_API BGPSession : public cObject
 {
 public:
     BGPSession(BGPRouting& _bgpRouting);

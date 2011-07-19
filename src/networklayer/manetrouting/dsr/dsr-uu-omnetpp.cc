@@ -747,7 +747,7 @@ void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId
 }
 #else
 
-void DSRUU::receiveChangeNotification(int category, const cPolymorphic *details)
+void DSRUU::receiveChangeNotification(int category, const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
     //current_time = simTime();
@@ -781,7 +781,7 @@ else
         {
             Enter_Method("Dsr promisc");
 
-            if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details)))
+            if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details)))
             {
                 Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
 #if OMNETPP_VERSION > 0x0400

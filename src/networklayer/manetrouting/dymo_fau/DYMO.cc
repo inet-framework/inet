@@ -1208,10 +1208,10 @@ void DYMO::packetFailed(IPv4Datagram *dgram)
 }
 
 
-void DYMO::processLinkBreak(const cPolymorphic *details)
+void DYMO::processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
-    if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
+    if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details)))
         dgram = check_and_cast<IPv4Datagram *>(details);
     else
         return;

@@ -468,7 +468,7 @@ void PPP::updateHasSubcribers()
                      nb->hasSubscribers(NF_PP_RX_END);
 }
 
-void PPP::receiveChangeNotification(int category, const cPolymorphic *)
+void PPP::receiveChangeNotification(int category, const cObject *)
 {
     if (category == NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();

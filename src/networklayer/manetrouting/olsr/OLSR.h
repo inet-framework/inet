@@ -516,8 +516,8 @@ class OLSR : public ManetRoutingBase
 
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-    //virtual void processPromiscuous(const cPolymorphic *details){};
-    virtual void processLinkBreak(const cPolymorphic *details);
+    //virtual void processPromiscuous(const cObject *details){};
+    virtual void processLinkBreak(const cObject *details);
     virtual void scheduleNextEvent();
 
   public:

@@ -2400,11 +2400,11 @@ OLSR::node_id(const nsaddr_t &addr)
 
 
 // Interfaces with other Inet
-void OLSR:: processLinkBreak(const cPolymorphic *details)
+void OLSR:: processLinkBreak(const cObject *details)
 {
     if (use_mac())
     {
-        if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details)))
+        if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*>(details)))
         {
             IPv4Datagram * dgram = check_and_cast<IPv4Datagram *>(details);
             mac_failed(dgram);

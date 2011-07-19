@@ -140,7 +140,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
   public:
     /**

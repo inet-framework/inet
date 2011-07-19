@@ -103,7 +103,7 @@ class INET_API BasicModule: public cSimpleModule, public INotifiable
      * @brief Called by the NotificationBoard whenever a change of a category occurs
      * to which we have subscribed. Redefined from INotifiable.
      */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details) {}
+    virtual void receiveChangeNotification(int category, const cObject *details) {}
 };
 
 #endif

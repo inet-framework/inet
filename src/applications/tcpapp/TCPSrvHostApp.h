@@ -51,7 +51,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule
  *
  * @see TCPSrvHostApp
  */
-class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInterface
+class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSrvHostApp *hostmod;

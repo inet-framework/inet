@@ -408,12 +408,12 @@ void Ieee80211Etx::getNeighbors(std::vector<MACAddress> & add)
     return;
 }
 
-void Ieee80211Etx::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211Etx::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("Ieee80211Etx llf");
     if (details==NULL)
         return;
-    Ieee80211TwoAddressFrame *frame = dynamic_cast<Ieee80211TwoAddressFrame *>(const_cast<cPolymorphic*> (details));
+    Ieee80211TwoAddressFrame *frame = dynamic_cast<Ieee80211TwoAddressFrame *>(const_cast<cObject*> (details));
     if (frame==NULL)
         return;
     MACAddress add = frame->getTransmitterAddress();

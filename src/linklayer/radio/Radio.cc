@@ -203,7 +203,7 @@ void Radio::handleMessage(cMessage *msg)
     }
     if (msg->getArrivalGateId()==uppergateIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
     {
-        cPolymorphic *ctrl = msg->removeControlInfo();
+        cObject *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)
             error("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->getName());
         handleCommand(msg->getKind(), ctrl);
@@ -373,7 +373,7 @@ void Radio::handleUpperMsg(AirFrame *airframe)
     sendDown(airframe);
 }
 
-void Radio::handleCommand(int msgkind, cPolymorphic *ctrl)
+void Radio::handleCommand(int msgkind, cObject *ctrl)
 {
     if (msgkind==PHY_C_CONFIGURERADIO)
     {

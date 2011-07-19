@@ -343,7 +343,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
-        cPolymorphic * ctrl = dgram->removeControlInfo();
+        cObject * ctrl = dgram->removeControlInfo();
         if (ctrl!=NULL)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);

@@ -208,7 +208,7 @@ void Ieee80211Mesh::handleMessage(cMessage *msg)
         // process command from agent
         EV << "Command arrived from agent: " << msg << "\n";
         int msgkind = msg->getKind();
-        cPolymorphic *ctrl = msg->removeControlInfo();
+        cObject *ctrl = msg->removeControlInfo();
         delete msg;
         handleCommand(msgkind, ctrl);
     }
@@ -270,7 +270,7 @@ void Ieee80211Mesh::handleUpperMessage(cPacket *msg)
         sendOrEnqueue(frame);
 }
 
-void Ieee80211Mesh::handleCommand(int msgkind, cPolymorphic *ctrl)
+void Ieee80211Mesh::handleCommand(int msgkind, cObject *ctrl)
 {
     error("handleCommand(): no commands supported");
 }
@@ -530,7 +530,7 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg, MACAddress dest)
 }
 
 
-void Ieee80211Mesh::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211Mesh::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

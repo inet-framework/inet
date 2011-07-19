@@ -163,7 +163,7 @@ void RoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError(this, "This module doesn't process messages");
 }
 
-void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *details)
+void RoutingTable::receiveChangeNotification(int category, const cObject *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize

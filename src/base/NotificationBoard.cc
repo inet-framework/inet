@@ -33,9 +33,9 @@ std::ostream& operator<<(std::ostream& os, const NotificationBoard::NotifiableVe
             cModule *mod = dynamic_cast<cModule*>(v[i]);
             os << "mod (" << mod->getClassName() << ")" << mod->getFullName() << " id=" << mod->getId();
         }
-        else if (dynamic_cast<cPolymorphic*>(v[i]))
+        else if (dynamic_cast<cObject*>(v[i]))
         {
-            cPolymorphic *obj = dynamic_cast<cPolymorphic*>(v[i]);
+            cObject *obj = dynamic_cast<cObject*>(v[i]);
             os << "a " << obj->getClassName();
         }
         else
@@ -93,7 +93,7 @@ bool NotificationBoard::hasSubscribers(int category)
     return it!=clientMap.end() && !it->second.empty();
 }
 
-void NotificationBoard::fireChangeNotification(int category, const cPolymorphic *details)
+void NotificationBoard::fireChangeNotification(int category, const cObject *details)
 {
     Enter_Method("fireChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

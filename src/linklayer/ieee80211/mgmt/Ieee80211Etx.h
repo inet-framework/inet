@@ -118,7 +118,7 @@ class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProces
     virtual void handleTimer(cMessage *msg);
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleBwMessage(MACBwPacket *);
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
   public:
     virtual double getEtt(const MACAddress &add);
     virtual double getEtx(const MACAddress &add);

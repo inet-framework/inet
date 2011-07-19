@@ -101,7 +101,7 @@ void SnrEval::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGateId()==uppergateIn && !msg->isPacket())
     {
-        cPolymorphic *ctrl = msg->removeControlInfo();
+        cObject *ctrl = msg->removeControlInfo();
         handleCommand(msg->getKind(), ctrl);
         delete msg;
     }
@@ -160,7 +160,7 @@ void SnrEval::handleUpperMsg(AirFrame *frame)
     sendDown(frame);
 }
 
-void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
+void SnrEval::handleCommand(int msgkind, cObject *ctrl)
 {
     if (msgkind==PHY_C_CONFIGURERADIO)
     {

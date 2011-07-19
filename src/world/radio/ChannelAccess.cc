@@ -95,7 +95,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
     cc->sendToChannel(myRadioRef, msg);
 }
 
-void ChannelAccess::receiveChangeNotification(int category, const cPolymorphic *details)
+void ChannelAccess::receiveChangeNotification(int category, const cObject *details)
 {
     if (category == NF_HOSTPOSITION_UPDATED)
     {
