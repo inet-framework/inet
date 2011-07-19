@@ -20,8 +20,6 @@
 
 package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
-
 
 //
 // Controls all movement related things of a host
@@ -30,26 +28,21 @@ import inet.mobility.MobilityBase;
 // The user can define a velocity for each Host and an update interval. If
 // the velocity is greater than zero (i.e. the Host is not stationary) the
 // ~ConstSpeedMobility module calculates a random target position for the Host.
-// Depending to the update interval and the velocity it calculates the number of
-// steps to reach the destination and the step-size. Every update interval
-// ~ConstSpeedMobility calculates the new position on its way to the target
-// position and updates the display. Once the target position is reached
-// ~ConstSpeedMobility calculates a new target position.
+// Every update interval ~ConstSpeedMobility calculates the new position on its
+// way to the target position and updates the display. Once the target position
+// is reached ~ConstSpeedMobility calculates a new target position.
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see ~ChannelControl
 // @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
 //
-simple ConstSpeedMobility extends MobilityBase
+simple ConstSpeedMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
-        double vHost @unit("mps") = default(2mps); // speed of the host (in m/s)
-        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
-        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        @display("i=block/cogwheel_s");
         @class(ConstSpeedMobility);
 }

@@ -16,17 +16,13 @@
 //
 
 
-#include "NullMobility.h"
+#include "StationaryMobility.h"
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
+Define_Module(StationaryMobility);
 
-Define_Module(NullMobility);
 
-void NullMobility::handleSelfMsg(cMessage *msg)
+void StationaryMobility::handleSelfMessage(cMessage *msg)
 {
     ASSERT(false);
 }
-
-
-

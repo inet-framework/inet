@@ -22,82 +22,45 @@
 #include "FWMath.h"
 
 
-#define MK_UPDATE_POS 100
-#define MK_CHANGE_DIR 101
-
 Define_Module(MassMobility);
 
 
-/**
- * Reads the updateInterval and the velocity
- *
- * If the host is not stationary it calculates a random position and
- * schedules a timer to trigger the first movement
- */
+MassMobility::MassMobility()
+{
+    changeIntervalParameter = NULL;
+    changeAngleByParameter = NULL;
+    speedParameter = NULL;
+    angle = 0;
+}
+
 void MassMobility::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing MassMobility stage " << stage << endl;
-
     if (stage == 0)
     {
-        updateInterval = par("updateInterval");
-
-        changeInterval = &par("changeInterval");
-        changeAngleBy = &par("changeAngleBy");
-        speed = &par("speed");
-
-        // initial speed and angle
-        currentSpeed = speed->doubleValue();
-        currentAngle = par("angle");
-        step.x = currentSpeed * cos(PI * currentAngle / 180.0) * updateInterval;
-        step.y = currentSpeed * sin(PI * currentAngle / 180.0) * updateInterval;
-
-        scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move", MK_UPDATE_POS));
-        scheduleAt(simTime() + uniform(0, changeInterval->doubleValue()), new cMessage("turn", MK_CHANGE_DIR));
+        changeIntervalParameter = &par("changeInterval");
+        changeAngleByParameter = &par("changeAngleBy");
+        speedParameter = &par("speed");
     }
 }
 
-
-/**
- * The only self message possible is to indicate a new movement.
- */
-void MassMobility::handleSelfMsg(cMessage * msg)
+void MassMobility::setTargetPosition()
 {
-    switch (msg->getKind())
-    {
-    case MK_UPDATE_POS:
-        move();
-        positionUpdated();
-        scheduleAt(simTime() + updateInterval, msg);
-        break;
-    case MK_CHANGE_DIR:
-        currentAngle += changeAngleBy->doubleValue();
-        currentSpeed = speed->doubleValue();
-        step.x = currentSpeed * cos(PI * currentAngle / 180.0) * updateInterval;
-        step.y = currentSpeed * sin(PI * currentAngle / 180.0) * updateInterval;
-        scheduleAt(simTime() + changeInterval->doubleValue(), msg);
-        break;
-    default:
-        throw cRuntimeError(this, "Unknown self message kind in MassMobility class");
-        break;
-    }
-
+    angle += changeAngleByParameter->doubleValue();
+    EV << "angle: " << angle << endl;
+    double rad = PI * angle / 180.0;
+    Coord direction(cos(rad), sin(rad));
+    lastSpeed = direction * speedParameter->doubleValue();
+    simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
+    EV << "interval: " << nextChangeInterval << endl;
+    targetPosition = lastPosition + lastSpeed * nextChangeInterval.dbl();
+    nextChange = simTime() + nextChangeInterval;
 }
 
-/**
- * Move the host if the destination is not reached yet. Otherwise
- * calculate a new random position
- */
 void MassMobility::move()
 {
-    pos += step;
-
-    // do something if we reach the wall
+    LineSegmentsMobilityBase::move();
     Coord dummy;
-    handleIfOutside(REFLECT, dummy, step, currentAngle);
-
-    EV << " xpos= " << pos.x << " ypos=" << pos.y << " speed=" << currentSpeed << endl;
+    handleIfOutside(REFLECT, dummy, lastSpeed, angle);
 }
-

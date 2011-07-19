@@ -16,24 +16,21 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
 // Places all nodes in a rectangular grid.
 //
-// @see ChannelControl
+// @see ~ChannelControl
 // @author Isabel Dietrich
 //
 simple StaticGridMobility extends MobilityBase
 {
     parameters:
-        int marginX @unit("m");
-        int marginY @unit("m");
-        bool debug = default(false); // debug switch
+        int marginX @unit(m);
+        int marginY @unit(m);
         int numHosts;
         @class(StaticGridMobility);
 }
-

@@ -18,17 +18,16 @@
 
 package inet.mobility.models;
 
+import inet.mobility.IMobility;
+
 
 //
-// Uses the <position_change> elements of the ANSim tool's
-// trace file.
+// Abstract base module for mobility models.
 //
 // @author Andras Varga
 //
-simple ANSimMobility extends MovingMobilityBase
+simple MovingMobilityBase extends MobilityBase
 {
     parameters:
-        xml ansimTrace; // the ANSim trace file in XML
-        int nodeId; // <position_change> elements to match; -1 gets substituted to parent module's index
-        @class(ANSimMobility);
+        double updateInterval @unit(s) = default(0.1s); // the simulation time interval used to regularly signal mobility state changes
 }

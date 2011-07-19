@@ -1,1 +1,1 @@
-..\..\..\src\run_inet %*
+..\..\src\run_inet %*

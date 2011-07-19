@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "RectangleMobility.h"
 #include "FWMath.h"
 
@@ -22,28 +23,25 @@
 Define_Module(RectangleMobility);
 
 
-/**
- * Reads the parameters.
- * If the host is not stationary it calculates a random position and
- * schedules a timer to trigger the first movement
- */
+RectangleMobility::RectangleMobility()
+{
+    speed = 0;
+    d = 0;
+    corner1 = corner2 = corner3 = corner4 = 0;
+}
+
 void RectangleMobility::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    MovingMobilityBase::initialize(stage);
     EV << "initializing RectangleMobility stage " << stage << endl;
-
-    if (stage == 1)
+    if (stage == 0)
     {
-        updateInterval = par("updateInterval");
         speed = par("speed");
-
-        // if the initial speed is lower than 0, the node is stationary
         stationary = (speed == 0);
 
-        // calculate helper vars
-        double dx = areaBottomRight.x - areaTopLeft.x;
-        double dy = areaBottomRight.y - areaTopLeft.y;
+        // calculate helper variables
+        double dx = constraintAreaMax.x - constraintAreaMin.x;
+        double dy = constraintAreaMax.y - constraintAreaMin.y;
         corner1 = dx;
         corner2 = corner1 + dy;
         corner3 = corner2 + dx;
@@ -52,7 +50,6 @@ void RectangleMobility::initialize(int stage)
         // determine start position
         double startPos = par("startPos");
         startPos = fmod(startPos, 4);
-
         if (startPos < 1)
             d = startPos * dx; // top side
         else if (startPos < 2)
@@ -61,32 +58,19 @@ void RectangleMobility::initialize(int stage)
             d = corner2 + (startPos - 2) * dx; // bottom side
         else
             d = corner3 + (startPos - 3) * dy; // left side
-
-        calculateXY();
         WATCH(d);
-        positionUpdated();
-
-        // host moves the first time after some random delay to avoid synchronized movements
-        if (!stationary)
-            scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
     }
 }
 
-
-/**
- * The only self message possible is to indicate a new movement. If
- * host is stationary this function is never called.
- */
-void RectangleMobility::handleSelfMsg(cMessage * msg)
+void RectangleMobility::initializePosition()
 {
     move();
-    positionUpdated();
-    scheduleAt(simTime() + updateInterval, msg);
 }
 
 void RectangleMobility::move()
 {
-    d += speed * updateInterval;
+    double elapsedTime = (simTime() - lastUpdate).dbl();
+    d += speed * elapsedTime;
 
     while (d < 0)
         d += corner4;
@@ -94,34 +78,30 @@ void RectangleMobility::move()
     while (d >= corner4)
         d -= corner4;
 
-    calculateXY();
-    EV << " xpos= " << pos.x << " ypos=" << pos.y << " speed=" << speed << endl;
-}
-
-void RectangleMobility::calculateXY()
-{
     if (d < corner1)
     {
         // top side
-        pos.x = areaTopLeft.x + d;
-        pos.y = areaTopLeft.y;
+        lastPosition.x = constraintAreaMin.x + d;
+        lastPosition.y = constraintAreaMin.y;
     }
     else if (d < corner2)
     {
         // right side
-        pos.x = areaBottomRight.x;
-        pos.y = areaTopLeft.y + d - corner1;
+        lastPosition.x = constraintAreaMax.x;
+        lastPosition.y = constraintAreaMin.y + d - corner1;
     }
     else if (d < corner3)
     {
         // bottom side
-        pos.x = areaBottomRight.x - d + corner2;
-        pos.y = areaBottomRight.y;
+        lastPosition.x = constraintAreaMax.x - d + corner2;
+        lastPosition.y = constraintAreaMax.y;
     }
     else
     {
         // left side
-        pos.x = areaTopLeft.x;
-        pos.y = areaBottomRight.y - d + corner3;
+        lastPosition.x = constraintAreaMin.x;
+        lastPosition.y = constraintAreaMax.y - d + corner3;
     }
+
+    EV << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << " speed=" << speed << endl;
 }

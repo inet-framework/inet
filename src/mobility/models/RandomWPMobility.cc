@@ -16,21 +16,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "RandomWPMobility.h"
 
 
 Define_Module(RandomWPMobility);
 
 
+RandomWPMobility::RandomWPMobility()
+{
+    nextMoveIsWait = false;
+}
+
 void RandomWPMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-
     if (stage == 0)
-    {
         stationary = (par("speed").getType()=='L' || par("speed").getType()=='D') && (double)par("speed") == 0;
-        nextMoveIsWait = false;
-    }
 }
 
 void RandomWPMobility::setTargetPosition()
@@ -38,22 +40,21 @@ void RandomWPMobility::setTargetPosition()
     if (nextMoveIsWait)
     {
         simtime_t waitTime = par("waitTime");
-        targetTime += waitTime;
+        nextChange += waitTime;
     }
     else
     {
-        targetPos = getRandomPosition();
+        targetPosition = getRandomPosition();
         double speed = par("speed");
-        double distance = pos.distance(targetPos);
+        double distance = lastPosition.distance(targetPosition);
         simtime_t travelTime = distance / speed;
-        targetTime += travelTime;
+        nextChange += travelTime;
     }
-
     nextMoveIsWait = !nextMoveIsWait;
 }
 
-void RandomWPMobility::fixIfHostGetsOutside()
+void RandomWPMobility::move()
 {
+    LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
-

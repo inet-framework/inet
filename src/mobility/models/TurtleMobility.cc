@@ -15,17 +15,37 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TurtleMobility.h"
 
+#include "TurtleMobility.h"
 #include "FWMath.h"
 
 
 Define_Module(TurtleMobility);
 
 
-void TurtleMobility::initPos()
+TurtleMobility::TurtleMobility()
 {
-    LineSegmentsMobilityBase::initPos();
+    turtleScript = NULL;
+    nextStatement = NULL;
+    speed = 0;
+    angle = 0;
+}
+
+void TurtleMobility::initialize(int stage)
+{
+    LineSegmentsMobilityBase::initialize(stage);
+    EV << "initializing TurtleMobility stage " << stage << endl;
+    if (stage == 1)
+    {
+        WATCH(speed);
+        WATCH(angle);
+        WATCH(borderPolicy);
+    }
+}
+
+void TurtleMobility::initializePosition()
+{
+    LineSegmentsMobilityBase::initializePosition();
 
     turtleScript = par("turtleScript");
     nextStatement = turtleScript->getFirstChild();
@@ -37,31 +57,12 @@ void TurtleMobility::initPos()
     // a dirty trick to extract starting position out of the script
     // (start doing it, but then rewind to the beginning)
     resumeScript();
-    targetPos = pos;
-    targetTime = simTime();
+    targetPosition = lastPosition;
+    nextChange = simTime();
     nextStatement = turtleScript->getFirstChild();
 
     while (!loopVars.empty())
         loopVars.pop();
-}
-
-/**
- * Reads the parameters.
- * If the host is not stationary it calculates a random position and
- * schedules a timer to trigger the first movement
- */
-void TurtleMobility::initialize(int stage)
-{
-    LineSegmentsMobilityBase::initialize(stage);
-
-    EV << "initializing TurtleMobility stage " << stage << endl;
-
-    if (stage == 1)
-    {
-        WATCH(speed);
-        WATCH(angle);
-        //WATCH(borderPolicy);
-    }
 }
 
 void TurtleMobility::setTargetPosition()
@@ -69,13 +70,15 @@ void TurtleMobility::setTargetPosition()
     resumeScript();
 }
 
-void TurtleMobility::fixIfHostGetsOutside()
+void TurtleMobility::move()
 {
-    handleIfOutside(borderPolicy, targetPos, step, angle);
+    LineSegmentsMobilityBase::move();
+    Coord dummy;
+    handleIfOutside(borderPolicy, targetPosition, dummy, angle);
 }
 
 /**
- * Will set a new targetTime and targetPos
+ * Will set a new nextChange and targetPosition.
  */
 void TurtleMobility::resumeScript()
 {
@@ -85,10 +88,10 @@ void TurtleMobility::resumeScript()
         return;
     }
 
-    simtime_t now = targetTime;
+    simtime_t now = nextChange;
 
     // interpret statement
-    while (nextStatement && targetTime == now)
+    while (nextStatement && nextChange == now)
     {
         executeStatement(nextStatement);
         gotoNextStatement();
@@ -131,10 +134,10 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             angle = getValue(angleAttr);
 
         if (xAttr)
-            targetPos.x = pos.x = getValue(xAttr);
+            targetPosition.x = lastPosition.x = getValue(xAttr);
 
         if (yAttr)
-            targetPos.y = pos.y = getValue(yAttr);
+            targetPosition.y = lastPosition.y = getValue(yAttr);
 
         if (speed <= 0)
             throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
@@ -191,9 +194,9 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
 
         // FIXME handle zeros properly...
-        targetPos.x += d * cos(PI * angle / 180);
-        targetPos.y += d * sin(PI * angle / 180);
-        targetTime += t;
+        targetPosition.x += d * cos(PI * angle / 180);
+        targetPosition.y += d * sin(PI * angle / 180);
+        nextChange += t;
     }
     else if (!strcmp(tag, "turn"))
     {
@@ -216,7 +219,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
 
-        targetTime += t;  // targetPos is unchanged
+        nextChange += t;  // targetPosition is unchanged
     }
     else if (!strcmp(tag, "moveto"))
     {
@@ -225,19 +228,19 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *tAttr = stmt->getAttribute("t");
 
         if (xAttr)
-            targetPos.x = getValue(xAttr);
+            targetPosition.x = getValue(xAttr);
 
         if (yAttr)
-            targetPos.y = getValue(yAttr);
+            targetPosition.y = getValue(yAttr);
 
-        // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos) / speed;
+        // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
+        double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
 
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
                     stmt->getSourceLocation());
 
-        targetTime += t;
+        nextChange += t;
     }
     else if (!strcmp(tag, "moveby"))
     {
@@ -246,19 +249,19 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *tAttr = stmt->getAttribute("t");
 
         if (xAttr)
-            targetPos.x += getValue(xAttr);
+            targetPosition.x += getValue(xAttr);
 
         if (yAttr)
-            targetPos.y += getValue(yAttr);
+            targetPosition.y += getValue(yAttr);
 
-        // travel to targetPos at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : pos.distance(targetPos) / speed;
+        // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
+        double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
 
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
                     stmt->getSourceLocation());
 
-        targetTime += t;
+        nextChange += t;
     }
 }
 
@@ -270,10 +273,10 @@ double TurtleMobility::getValue(const char *s)
     {
         char strMinX[32], strMinY[32];
         char strMaxX[32], strMaxY[32];
-        sprintf(strMinX, "%g", areaTopLeft.x);
-        sprintf(strMinY, "%g", areaTopLeft.y);
-        sprintf(strMaxX, "%g", areaBottomRight.x);
-        sprintf(strMaxY, "%g", areaBottomRight.y);
+        sprintf(strMinX, "%g", constraintAreaMin.x);
+        sprintf(strMinY, "%g", constraintAreaMin.y);
+        sprintf(strMaxX, "%g", constraintAreaMax.x);
+        sprintf(strMaxY, "%g", constraintAreaMax.y);
 
         str = s;
         std::string::size_type pos;
@@ -352,4 +355,3 @@ void TurtleMobility::gotoNextStatement()
         nextStatement = nextStatement->getNextSibling();
     }
 }
-

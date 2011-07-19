@@ -15,13 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BONNMOTIONFILECACHE_H
-#define BONNMOTIONFILECACHE_H
+
+#ifndef BONN_MOTION_FILE_CACHE_H
+#define BONN_MOTION_FILE_CACHE_H
 
 #include <list>
 #include <vector>
+
 #include <omnetpp.h>
-#include "BasicMobility.h"
+
+#include "INETDefs.h"
+
 
 class BonnMotionFileCache;
 
@@ -78,4 +82,3 @@ class INET_API BonnMotionFileCache
 };
 
 #endif
-

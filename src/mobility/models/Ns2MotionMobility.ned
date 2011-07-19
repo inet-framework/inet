@@ -16,9 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
@@ -35,19 +34,12 @@ import inet.mobility.MobilityBase;
 //
 // @author Andras Varga
 //
-simple Ns2MotionMobility extends MobilityBase
+simple Ns2MotionMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
         string traceFile; // the BonnMotion trace file
         int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
-        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-        double scrollX @unit("m") = default(0m);
-        double scrollY @unit("m") = default(0m);
-        @display("i=block/cogwheel_s");
+        double scrollX @unit(m) = default(0m);
+        double scrollY @unit(m) = default(0m);
         @class(Ns2MotionMobility);
 }
-
-
-
-

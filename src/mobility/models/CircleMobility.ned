@@ -15,28 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
 // Moves the node around a circle.
 //
-// @see ~ChannelControl
 // @author Andras Varga
 //
-simple CircleMobility extends MobilityBase
+simple CircleMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
-        double cx @unit("m") = default(100m); // x coord of the center of the circle
-        double cy @unit("m") = default(100m); // y coord of the center of the circle
-        double r @unit("m") = default(100m); // radius of the circle
-        double speed @unit("mps") = default(2mps); // speed of the host (in m/s)
-        double startAngle @unit("deg") = default(0); // starting angle (degreees)
-        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-        @display("i=block/cogwheel_s");
+        double cx @unit(m) = default(100m); // x coord of the center of the circle
+        double cy @unit(m) = default(100m); // y coord of the center of the circle
+        double r @unit(m) = default(100m); // radius of the circle
+        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
+        double startAngle @unit(deg) = default(0); // starting angle (degreees)
         @class(CircleMobility);
 }
-

@@ -15,10 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #ifndef TURTLE_MOBILITY_H
 #define TURTLE_MOBILITY_H
 
 #include <stack>
+
+#include <omnetpp.h>
 
 #include "LineSegmentsMobilityBase.h"
 
@@ -45,17 +48,17 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
 
   protected:
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    virtual void initialize(int stage);
 
-    virtual void initPos();
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
 
     /** @brief Overridden from LineSegmentsMobilityBase. Invokes resumeScript().*/
     virtual void setTargetPosition();
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void fixIfHostGetsOutside();
+    virtual void move();
 
-  protected:
     /** @brief Process next statements from script */
     virtual void resumeScript();
 
@@ -67,7 +70,9 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
 
     /** @brief Advance nextStatement pointer */
     virtual void gotoNextStatement();
+
+  public:
+    TurtleMobility();
 };
 
 #endif
-

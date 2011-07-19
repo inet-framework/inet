@@ -15,92 +15,41 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>   // min,max
+
 #include "LineSegmentsMobilityBase.h"
 #include "FWMath.h"
 
 
+LineSegmentsMobilityBase::LineSegmentsMobilityBase()
+{
+    targetPosition = Coord::ZERO;
+}
+
 void LineSegmentsMobilityBase::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    MovingMobilityBase::initialize(stage);
+    EV << "initializing LineSegmentsMobilityBase stage " << stage << endl;
     if (stage == 1)
     {
-        updateInterval = par("updateInterval");
-        stationary = false;
-        targetPos = pos;
-        targetTime = simTime();
-
-        // host moves the first time after some random delay to avoid synchronized movements
-        scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
+        if (!stationary) {
+            setTargetPosition();
+            lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
+        }
     }
 }
 
-void LineSegmentsMobilityBase::beginNextMove(cMessage *msg)
+void LineSegmentsMobilityBase::move()
 {
-    // go to exact position where previous statement was supposed to finish
-    pos = targetPos;
-    simtime_t now = targetTime;
-
-    // choose new targetTime and targetPos
-    setTargetPosition();
-
-    if (targetTime<now)
-        throw cRuntimeError("LineSegmentsMobilityBase: targetTime<now was set in %s's beginNextMove()", getClassName());
-
-    if (stationary)
-    {
-        // end of movement
-        step.x = step.y = 0;
-        delete msg;
+    simtime_t now = simTime();
+    if (now == nextChange) {
+        lastPosition = targetPosition;
+        EV << "destination reached. xpos= " << lastPosition.x << " ypos=" << lastPosition.y << endl;
+        setTargetPosition();
+        lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
     }
-    else if (targetPos==pos)
-    {
-        // no movement, just wait
-        step.x = step.y = 0;
-        scheduleAt(std::max(targetTime, simTime()), msg);
-    }
-    else
-    {
-        // keep moving
-        double numIntervals = SIMTIME_DBL(targetTime-now) / updateInterval;
-        // int numSteps = floor(numIntervals); -- currently unused,
-        // although we could use step counting instead of comparing
-        // simTime() to targetTime each step.
-
-        // Note: step = speed*updateInterval = distance/time*updateInterval =
-        //        = (targetPos-pos) / (targetTime-now) * updateInterval =
-        //        = (targetPos-pos) / numIntervals
-        step = (targetPos - pos) / numIntervals;
-        scheduleAt(simTime() + updateInterval, msg);
+    else if (now > lastUpdate) {
+        ASSERT(nextChange == -1 || now < nextChange);
+        lastPosition += lastSpeed * (now - lastUpdate).dbl();
+        EV << "going forward. xpos= " << lastPosition.x << " ypos=" << lastPosition. y << endl;
     }
 }
-
-void LineSegmentsMobilityBase::handleSelfMsg(cMessage *msg)
-{
-    if (stationary)
-    {
-        delete msg;
-        return;
-    }
-    else if (simTime()+updateInterval >= targetTime)
-    {
-        beginNextMove(msg);
-    }
-    else
-    {
-        scheduleAt(simTime() + updateInterval, msg);
-    }
-
-    // update position
-    pos += step;
-
-    // do something if we reach the wall
-    fixIfHostGetsOutside();
-
-    //EV << " xpos=" << pos.x << " ypos=" << pos.y << endl;
-
-    positionUpdated();
-}
-
-

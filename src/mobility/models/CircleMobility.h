@@ -15,11 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #ifndef CIRCLE_MOBILITY_H
 #define CIRCLE_MOBILITY_H
 
 #include <omnetpp.h>
-#include "BasicMobility.h"
+
+#include "MovingMobilityBase.h"
 
 
 /**
@@ -28,36 +30,32 @@
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API CircleMobility : public BasicMobility
+class INET_API CircleMobility : public MovingMobilityBase
 {
   protected:
-    // configuration
     double cx;
     double cy;
     double r;
-    double omega;          ///< angular velocity [rad/s], derived from speed and radius
-    double updateInterval; ///< time interval to update the hosts position
-    bool stationary;       ///< if true, the host doesn't move
+    double startAngle;
+    double speed;
+    /** @brief angular velocity [rad/s], derived from speed and radius. */
+    double omega;
 
-    // state
-    double angle;  ///< direction from the centre of the circle
+    /** @brief Direction from the center of the circle. */
+    double angle;
 
   protected:
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    virtual void initialize(int stage);
 
-  protected:
-    /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg);
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
 
-    virtual void initPos();
-
-    /** @brief Move the host*/
+    /** @brief Move the host according to the current simulation time. */
     virtual void move();
 
-  private:
-    void setPos();
+  public:
+    CircleMobility();
 };
 
 #endif
-

@@ -62,7 +62,7 @@ INET_API cModule *findContainingNode(cModule *from);
  * Uses findModuleWhereverInNode(). See usage e.g. at RoutingTableAccess.
  */
 template<typename T>
-class ModuleAccess
+class INET_API ModuleAccess
 {
      // Note: MSVC 6.0 doesn't like const char *N as template parameter,
      // so we have to pass it via the ctor...

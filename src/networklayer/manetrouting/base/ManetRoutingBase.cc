@@ -32,8 +32,11 @@
 #include "ControlInfoBreakLink_m.h"
 #include "Ieee80211Frame_m.h"
 #include "ICMPAccess.h"
+#include "IMobility.h"
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
+
+simsignal_t ManetRoutingBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
 void ManetTimer::removeTimer()
 {
@@ -328,7 +331,8 @@ void ManetRoutingBase::registerPosition()
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
     regPosition = true;
-    nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
+    mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+    getParentModule()->subscribe(mobilityStateChangedSignal, this);
 }
 
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAddr, int destPort, int ttl, const Uint128 &interface)
@@ -923,14 +927,19 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
     {
         processFullPromiscuous(details);
     }
-    else if (category == NF_HOSTPOSITION_UPDATED)
+}
+
+void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    if (signalID == mobilityStateChangedSignal)
     {
-        Coord *pos = check_and_cast<Coord*>(details);
+        IMobility *mobility = check_and_cast<IMobility*>(obj);
+        Coord pos = mobility->getCurrentPosition();
         xPositionPrev = xPosition;
         yPositionPrev = yPosition;
         posTimerPrev = posTimer;
-        xPosition = pos->x;
-        yPosition = pos->y;
+        xPosition = pos.x;
+        yPosition = pos.y;
         posTimer = simTime();
     }
 }

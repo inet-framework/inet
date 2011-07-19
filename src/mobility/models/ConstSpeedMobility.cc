@@ -19,95 +19,34 @@
 
 
 #include "ConstSpeedMobility.h"
-
 #include "FWMath.h"
 
 
 Define_Module(ConstSpeedMobility);
 
 
-/**
- * Reads the updateInterval and the velocity
- *
- * If the host is not stationary it calculates a random position and
- * schedules a timer to trigger the first movement
- */
+ConstSpeedMobility::ConstSpeedMobility()
+{
+    speed = 0;
+}
+
 void ConstSpeedMobility::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing ConstSpeedMobility stage " << stage << endl;
-
     if (stage == 0)
     {
-        updateInterval = par("updateInterval");
-        vHost = par("vHost");
-
-        // if the initial speed is lower than 0, the node is stationary
-        stationary = (vHost <= 0);
-
-        //calculate the target position of the host if the host moves
-        if (!stationary)
-        {
-            setTargetPosition();
-            //host moves the first time after some random delay to avoid synchronized movements
-            scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
-        }
+        speed = par("speed");
+        stationary = speed == 0;
     }
 }
 
-
-/**
- * The only self message possible is to indicate a new movement. If
- * host is stationary this function is never called.
- */
-void ConstSpeedMobility::handleSelfMsg(cMessage * msg)
-{
-    move();
-    positionUpdated();
-    scheduleAt(simTime() + updateInterval, msg);
-}
-
-
-/**
- * Calculate a new random position and the number of steps the host
- * needs to reach this position
- */
 void ConstSpeedMobility::setTargetPosition()
 {
-    targetPos = getRandomPosition();
-    double distance = pos.distance(targetPos);
-    double totalTime = distance / vHost;
-    numSteps = FWMath::round(totalTime / updateInterval);
-
-    stepSize = (targetPos - pos) / numSteps;
-
-    step = 0;
-
-    EV << "distance=" << distance << " xpos= " << targetPos.x << " ypos=" << targetPos.y
-        << "totalTime=" << totalTime << " numSteps=" << numSteps << " vHost=" << vHost << endl;
-}
-
-
-/**
- * Move the host if the destination is not reached yet. Otherwise
- * calculate a new random position
- */
-void ConstSpeedMobility::move()
-{
-    step++;
-
-    if (step <= numSteps)
-    {
-        EV << "stepping forward. step #=" << step << " xpos= " << pos.x << " ypos=" << pos.
-            y << endl;
-
-        pos += stepSize;
-    }
-    else
-    {
-        EV << "destination reached.\n xpos= " << pos.x << " ypos=" << pos.y << endl;
-
-        setTargetPosition();
-    }
+    targetPosition = getRandomPosition();
+    Coord positionDelta = targetPosition - lastPosition;
+    double distance = positionDelta.length();
+    nextChange = simTime() + distance / speed;
+    lastSpeed = positionDelta / distance * speed;
+    EV << "new target set. distance=" << distance << " xpos= " << targetPosition.x << " ypos=" << targetPosition.y << " nextChange=" << nextChange;
 }

@@ -16,12 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MOBILITY_STATICGRIDMOBILITY_H
-#define MOBILITY_STATICGRIDMOBILITY_H
 
-// SYSTEM INCLUDES
+#ifndef STATIC_GRID_MOBILITY_H
+#define STATIC_GRID_MOBILITY_H
+
 #include <omnetpp.h>
-#include "BasicMobility.h"
+
+#include "StationaryMobility.h"
+
 
 /**
  * @brief Mobility model which places all hosts at constant distances
@@ -30,21 +32,25 @@
  * @ingroup mobility
  * @author Isabel Dietrich
  */
-class INET_API StaticGridMobility : public BasicMobility
+class INET_API StaticGridMobility : public StationaryMobility
 {
-  public:
-    // LIFECYCLE
-    virtual void initialize(int);
-    virtual void finish();
-
-    /** @brief Called upon arrival of a self messages */
-    virtual void handleSelfMsg(cMessage *msg) {}
-
-  private:
-    // MEMBER VARIABLES
+  protected:
     double marginX;
     double marginY;
-    int mNumHosts;
+    int numHosts;
+
+  protected:
+    /** @brief Initializes mobility model parameters.*/
+    virtual void initialize(int stage);
+
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
+
+    /** @brief Save the host position. */
+    virtual void finish();
+
+  public:
+    StaticGridMobility();
 };
 
 #endif

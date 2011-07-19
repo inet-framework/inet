@@ -17,19 +17,22 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+
 package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
 
-
-simple GaussMarkovMobility extends MobilityBase
+//
+// Uses a Gauss-Markov model to control the randomness in the movement.
+// Totally random walk (Brownian motion) is obtained by setting alpha=0,
+// while alpha=1 results a linear motion.
+//
+simple GaussMarkovMobility extends MovingMobilityBase
 {
     parameters:
-        double updateInterval @unit("s") = default(0.1s);
         double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
-        double speed @unit("mps") = default(10mps); // meter/sec
-        double angle @unit("deg") = default(0deg);
+        double speed @unit(mps) = default(10mps);
+        double angle @unit(deg) = default(0deg);
         double variance = default(40);
-        int margin @unit("m") = default(30m);
+        int margin @unit(m) = default(30m);
         @class(GaussMarkovMobility);
 }

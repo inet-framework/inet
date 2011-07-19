@@ -15,9 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
@@ -86,11 +85,11 @@ import inet.mobility.MobilityBase;
 // d is distance in meters (speed is m/s).
 //
 // borderPolicy controls what happens when a node reaches the edge of the
-// playground, and can take one of the values "reflect", "wrap",
+// constraint area, and can take one of the values "reflect", "wrap",
 // "placerandomly". In the first case, the node reflects off the wall;
 // with "wrap", it'll come in on the other side (torus); and with
 // "placerandomly", it will be placed at a random position on the
-// playground.
+// constraint area.
 //
 // In addition to the node position, the module maintains two interval variables,
 // 'speed' and 'angle', which can be adjusted by <set> and <turn>.
@@ -111,13 +110,9 @@ import inet.mobility.MobilityBase;
 // @see ~ChannelControl
 // @author Andras Varga
 //
-simple TurtleMobility extends MobilityBase
+simple TurtleMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
         xml turtleScript; // describes the movement
-        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
-        @display("i=block/cogwheel_s");
         @class(TurtleMobility);
 }
-

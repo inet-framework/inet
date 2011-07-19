@@ -31,7 +31,7 @@ module PlainMobilityHost
     parameters:
         @node();
         @labels(node);
-        string mobilityType;
+        string mobilityType = default("StationaryMobility");
         @display("i=device/pocketpc_s");
     gates:
         input radioIn @directIn;

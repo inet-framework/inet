@@ -32,10 +32,9 @@
  * "Notification Broker".
  *
  * Notification events are grouped into "categories." Examples of categories
- * are: NF_HOSTPOSITION_UPDATED, NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN,
- * NF_PP_TX_END, NF_IPv4_ROUTE_ADDED, NF_BEACON_LOST
- * NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is identified by
- * an integer (right now it's assigned in the source code via an enum,
+ * are: NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN, NF_PP_TX_END, NF_IPv4_ROUTE_ADDED,
+ * NF_BEACON_LOST, NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is
+ * identified by an integer (right now it's assigned in the source code via an enum,
  * in the future we'll convert to dynamic category registration).
  *
  * To trigger a notification, the client must obtain a pointer to the

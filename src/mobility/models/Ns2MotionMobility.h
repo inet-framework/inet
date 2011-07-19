@@ -17,14 +17,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef NS2MOTION_MOBILITY_H
-#define NS2MOTION_MOBILITY_H
+
+#ifndef NS2_MOTION_MOBILITY_H
+#define NS2_MOTION_MOBILITY_H
 
 #include <omnetpp.h>
+
 #include "LineSegmentsMobilityBase.h"
 
+
 /**
- * @brief Uses the BonnMotion native file format. See NED file for more info.
+ * @brief Uses the ns2 motion native file format. See NED file for more info.
  *
  * @ingroup mobility
  * @author Alfonso Ariza
@@ -33,8 +36,7 @@
 class Ns2MotionMobility;
 
 /**
- * Represents a BonnMotion file's contents.
- * @see BonnMotionFileCache, BonnMotionMobility
+ * Represents a ns2 motion file's contents.
  */
 class INET_API Ns2MotionFile
 {
@@ -45,10 +47,7 @@ class INET_API Ns2MotionFile
     friend class Ns2MotionMobility;
     typedef std::vector<Line> LineList;
     LineList lines;
-
 };
-
-
 
 class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 {
@@ -60,21 +59,25 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     double scrollX;
     double scrollY;
 
-  public:
-    ~Ns2MotionMobility();
-    Ns2MotionMobility() {ns2File = NULL;}
   protected:
     void parseFile(const char *filename);
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    virtual void initialize(int stage);
+
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void setTargetPosition();
-
+    
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void fixIfHostGetsOutside();
+    virtual void move();
+
+  public:
+    Ns2MotionMobility();
+
+    virtual ~Ns2MotionMobility();
 };
 
 #endif
-

@@ -20,8 +20,6 @@
 
 package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
-
 
 //
 // This is a random mobility model for a mobile host with a mass. It is the
@@ -49,22 +47,18 @@ import inet.mobility.MobilityBase;
 //    - changeAngleBy = normal(0, 30)
 //    - speed = normal(avgSpeed, 0.01)
 //
-// @see ~ChannelControl
 // @author Emin Ilker Cetinbas, Andras Varga
 //
-simple MassMobility extends MobilityBase
+simple MassMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
-        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         double angle = default(uniform(0,360)); // start angel in degrees
         bool initFromDisplayString = default(true);
-        volatile double changeInterval @unit("s"); // frequency of changing speed and angle (can be random) [s]
-        volatile double changeAngleBy @unit("deg"); // change angle by this much (can be random) [deg]
-        volatile double speed @unit("mps") = default(2mps); // speed (can be random, updated every changeInterval) [m/s]
-        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-        @display("i=block/cogwheel_s");
+        volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random) [s]
+        volatile double changeAngleBy @unit(deg); // change angle by this much (can be random) [deg]
+        volatile double speed @unit(mps) = default(2mps); // speed (can be random, updated every changeInterval) [m/s]
         @class(MassMobility);
 }
-

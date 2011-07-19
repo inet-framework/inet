@@ -1,0 +1,45 @@
+2008-07-07  Levente Mészáros
+
+    * Added IMobility that defines the public C++ interface (and only that) for
+      mobility modules.
+
+    * Renamed BasicMobility (because it is not a mobility by itself) to
+      MobilityBase.
+
+    * Changed notification mechanism from the NotificationBoard to the OMNeT++
+      signalling mechanism. The signal name is 'mobilityStateChanged' and its
+      argument is the mobility module itself.
+
+    * Removed the now obsolete NF_HOSTPOSITION_UPDATED notification from the
+      NotificationBoard.
+
+    * Updated ManetRoutingBase and ChannelAccess to subscribe to the new signal.
+
+    * Added new base class called MovingMobilityBase that handles updateInterval
+      in a general way. Updated subclasses to avoid repeating this code.
+
+    * Properly implement reflectIfOutside and wrapIfOutside when the position
+      is further from the constraint area than the area's size. (without loops)
+
+    * Properly implement linear interpolation in LineSegmentsMobilityBase so
+      that the current position can be provided at any simulation time.
+
+    * Refactored all mobility models for the new super classes and to support
+      providing the current position and speed at the current simulation time.
+
+    * Deleted NoMobility and changed mobility modules to be optional in the hosts.
+
+    * Renamed NullMobility to StationaryMobility to better express its intended
+      usage.
+
+    * Copied over and updated TractorMobility from MiXiM.
+
+    * Updated all modules that use mobility and all examples including NED files
+      and ini files to work with the new model.
+
+    * Added a couple of new examples to the mobility examples package to be able
+      to test all existing models.
+
+    * Added a MobilityAccess class to get a mobility module pointer easily.
+
+    * Fixed relative path in the run scripts for mobility examples.

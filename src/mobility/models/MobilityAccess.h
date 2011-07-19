@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,19 +17,22 @@
 //
 
 
-package inet.mobility.models;
+#ifndef MOBILITY_ACCESS_H
+#define MOBILITY_ACCESS_H
+
+#include <omnetpp.h>
+
+#include "ModuleAccess.h"
+#include "IMobility.h"
 
 
-//
-// Moves the node around a rectangle.
-//
-// @see ~ChannelControl
-// @author Andras Varga
-//
-simple RectangleMobility extends MovingMobilityBase
+/**
+ * Gives access to the IMobility submodule.
+ */
+class INET_API MobilityAccess : public ModuleAccess<IMobility>
 {
-    parameters:
-        double startPos; // in range [0.0,4.0): topleft=0, topright=1, bottomright=2, bottomleft=3
-        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
-        @class(RectangleMobility);
-}
+    public:
+        MobilityAccess() : ModuleAccess<IMobility>("mobility") {}
+};
+
+#endif

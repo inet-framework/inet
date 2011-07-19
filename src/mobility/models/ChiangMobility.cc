@@ -17,143 +17,74 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 #include "ChiangMobility.h"
+
 
 Define_Module(ChiangMobility);
 
-void ChiangMobility::initialize(int stage)
-{
-    BasicMobility::initialize(stage);
-
-    EV << "initializing ChiangMobility stage " << stage << endl;
-
-    if (stage == 0)
-    {
-        m_updateInterval = par("updateInterval");
-        m_stateTransInterval = par("stateTransitionUpdateInterval");
-        m_speed = par("speed");
-        m_states[0] = 0;
-        m_states[1] = 1;
-
-        // if the initial speed is lower than 0, the node is stationary
-        m_stationary = (m_speed == 0);
-
-        // host moves the first time after some random delay to avoid synchronized movements
-        if (!m_stationary)
-        {
-            cMessage* stMsg = new cMessage("stUp");
-            stMsg->setKind(StateUpMessageKind);
-
-            cMessage* movMsg = new cMessage("move");
-            movMsg->setKind(MoveMessageKind);
-
-            scheduleAt(simTime() + uniform(0, m_updateInterval), movMsg);
-            scheduleAt(simTime() + uniform(0, m_stateTransInterval), stMsg);
-        }
-    }
-}
-
-
-/**
- * The only self message possible is to indicate a new movement. If
- * host is stationary this function is never called.
- */
-void ChiangMobility::handleSelfMsg(cMessage * msg)
-{
-    switch (msg->getKind())
-    {
-        case MoveMessageKind:
-            move();
-            positionUpdated();
-            if (!m_stationary)
-                scheduleAt(simTime() + m_updateInterval, msg);
-            break;
-        case StateUpMessageKind:
-            recalculateState();
-            if (!m_stationary)
-                scheduleAt(simTime() + m_stateTransInterval, msg);
-            break;
-        default:
-            EV << " got self message of unknown kind, ignoring " << endl;
-    }
-}
-
 
 static const double stateMatrix[3][3] = {
-    {0.5, 0.0, 0.5},
     {0.7, 0.3, 0.0},
+    {0.5, 0.0, 0.5},
     {0.0, 0.3, 0.7}
-    //states are {<prev location>, <current location>, <next location>}
 };
 
-//gets the next state based on the current state and a random value in [0,1]
-int ChiangMobility::getNextStateIndex(int currentState, double rvalue)
+ChiangMobility::ChiangMobility()
+{
+    speed = 0;
+    stateTransitionUpdateInterval = 0;
+    xState = 0;
+    yState = 0;
+}
+
+void ChiangMobility::initialize(int stage)
+{
+    LineSegmentsMobilityBase::initialize(stage);
+    EV << "initializing ChiangMobility stage " << stage << endl;
+    if (stage == 0)
+    {
+        stateTransitionUpdateInterval = par("stateTransitionUpdateInterval");
+        speed = par("speed");
+        stationary = (speed == 0);
+        xState = 1;
+        yState = 1;
+    }
+}
+
+int ChiangMobility::getNextStateIndex(int currentState)
 {
     //we assume that the sum in each row is 1
     double sum = 0;
-    for (int i = 0; i < 3; ++i)
+    double randomValue = uniform(0.0, 1.0);
+    for (int i = 0; i < 3; i++)
     {
-        if (0 != stateMatrix[currentState][i])
-        {
-            sum += stateMatrix[currentState][i];
-            if (sum >= rvalue)
-                return i;
-        }
+        sum += stateMatrix[currentState][i];
+        if (sum >= randomValue)
+            return i;
     }
-    EV << " getNextStateIndex error! cstate= " << currentState
-       << " value= " << rvalue << endl;
+    EV << " getNextStateIndex error! currentState= " << currentState << " value= " << randomValue << endl;
     return currentState;
 }
 
-/**
- * Recalculate the state
- */
-void ChiangMobility::recalculateState()
+void ChiangMobility::setTargetPosition()
 {
-    for (int i = 0; i < 2; ++i)
-    {
-        m_states[i] = getNextStateIndex(m_states[i], uniform(0.0, 1.0));
-    }
+    xState = getNextStateIndex(xState);
+    yState = getNextStateIndex(yState);
+    nextChange = simTime() + stateTransitionUpdateInterval;
+    Coord direction(xState - 1, yState - 1);
+    double length = direction.length();
+    if (length)
+        lastSpeed = direction / length * speed;
+    else
+        lastSpeed = Coord::ZERO;
+    targetPosition = lastPosition - lastSpeed * stateTransitionUpdateInterval;
 }
 
-/**
- * Move the host
- */
 void ChiangMobility::move()
 {
-    int dx, dy;
-
-    //calculate movement based on state
-    dx = m_states[0] - 1;
-    dy = m_states[1] - 1;
-
-    if (0 != dx && 0 != dy)
-    {
-        //distribute speed evenly
-        dx *= (m_speed * m_updateInterval) / sqrt(2.0);
-        dy *= (m_speed * m_updateInterval) / sqrt(2.0);
-    }
-    else
-    {
-        //remember one of these is 0
-        dx *= (m_speed * m_updateInterval);
-        dy *= (m_speed * m_updateInterval);
-    }
-
-    //update position
-    pos += Coord(dx, dy);
-
-    // do something if we reach the wall
-    {
-      Coord step = Coord(m_states[0] - 1, m_states[1] - 1);
-      Coord target = pos;
-      double angle = 0;
-      handleIfOutside(REFLECT, target, step, angle);
-      m_states[0] = (int)step.x + 1;
-      m_states[1] = (int)step.y + 1;
-      //EV << " step.x=" << step.x << " step.y= " << step.y << endl;
-      //EV << " m_states[0]= " << m_states[0] << " m_states[1]= " << m_states[1] << endl;
-    }
-
-    EV << " xpos= " << pos.x << " ypos=" << pos.y << endl;
+    LineSegmentsMobilityBase::move();
+    double dummyAngle;
+    Coord dummyPosition;
+    handleIfOutside(REFLECT, dummyPosition, lastSpeed, dummyAngle);
 }

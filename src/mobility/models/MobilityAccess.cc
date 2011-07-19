@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,27 +16,4 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#ifndef NULL_MOBILITY_H
-#define NULL_MOBILITY_H
-
-#include <omnetpp.h>
-
-#include "BasicMobility.h"
-
-
-/**
- * This mobility module does nothing; it can be used for stationary nodes.
- *
- * @ingroup mobility
- * @author Andras Varga
- */
-class INET_API NullMobility : public BasicMobility
-{
-  protected:
-    /** This implementation does nothing. */
-    virtual void handleSelfMsg(cMessage *msg);
-};
-
-#endif
-
+#include "MobilityAccess.h"

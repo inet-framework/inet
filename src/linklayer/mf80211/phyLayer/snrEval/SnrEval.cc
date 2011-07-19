@@ -87,7 +87,7 @@ void SnrEval::initialize(int stage)
 
 void SnrEval::finish()
 {
-    BasicSnrEval::finish();
+    cComponent::finish();
 }
 
 SnrEval::~SnrEval()

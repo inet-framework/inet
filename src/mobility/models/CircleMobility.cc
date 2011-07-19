@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "CircleMobility.h"
 #include "FWMath.h"
 
@@ -22,59 +23,48 @@
 Define_Module(CircleMobility);
 
 
-void CircleMobility::initPos()
+CircleMobility::CircleMobility()
 {
-    cx = par("cx");
-    cy = par("cy");
-    r = par("r");
-    ASSERT(r > 0);
-    angle = par("startAngle").doubleValue() / 180.0 * PI;
-    updateInterval = par("updateInterval");
-    double speed = par("speed");
-    omega = speed / r;
-
-    // calculate initial position
-    setPos();
-}
-
-void CircleMobility::setPos()
-{
-    pos.x = cx + r * cos(angle);
-    pos.y = cy + r * sin(angle);
-    // do something if we reach the wall
-    Coord dummyCoord; double dummyAngle;
-    handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
+    cx = 0;
+    cy = 0;
+    r = -1;
+    startAngle = 0;
+    speed = 0;
+    omega = 0;
+    angle = 0;
 }
 
 void CircleMobility::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    MovingMobilityBase::initialize(stage);
     EV << "initializing CircleMobility stage " << stage << endl;
-
-    if (stage == 1)
+    if (stage == 0)
     {
-        // if the initial speed is 0, the node is stationary
+        cx = par("cx");
+        cy = par("cy");
+        r = par("r");
+        ASSERT(r > 0);
+        startAngle = par("startAngle").doubleValue() / 180.0 * PI;
+        speed = par("speed");
+        omega = speed / r;
         stationary = (omega == 0);
-
-        // host moves the first time after some random delay to avoid synchronized movements
-        if (!stationary)
-            scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
     }
 }
 
-
-void CircleMobility::handleSelfMsg(cMessage * msg)
+void CircleMobility::initializePosition()
 {
     move();
-    positionUpdated();
-    scheduleAt(simTime() + updateInterval, msg);
 }
 
 void CircleMobility::move()
 {
-    angle += omega * updateInterval;
-    setPos();
-
-    EV << " xpos= " << pos.x << " ypos=" << pos.y << endl;
+    angle = startAngle + omega * simTime().dbl();
+    lastPosition.x = cx + r * cos(angle);
+    lastPosition.y = cy + r * sin(angle);
+    lastSpeed.x = sin(angle) * speed;
+    lastSpeed.y = -cos(angle) * speed;
+    // do something if we reach the wall
+    Coord dummyCoord; double dummyAngle;
+    handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
+    EV << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << endl;
 }

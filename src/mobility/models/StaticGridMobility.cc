@@ -16,52 +16,52 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+
 #include "StaticGridMobility.h"
+
 
 Define_Module(StaticGridMobility);
 
-/////////////////////////////// PUBLIC ///////////////////////////////////////
 
-//============================= LIFECYCLE ===================================
-/**
- * Initialization routine
- */
-void StaticGridMobility::initialize(int aStage)
+StaticGridMobility::StaticGridMobility()
 {
-    BasicMobility::initialize(aStage);
+    marginX = 0;
+    marginY = 0;
+    numHosts = 0;
+}
 
-    EV << "initializing StaticGridMobility stage " << aStage << endl;
-
-    if (1 == aStage)
+void StaticGridMobility::initialize(int stage)
+{
+    MobilityBase::initialize(stage);
+    EV << "initializing StaticGridMobility stage " << stage << endl;
+    if (stage == 0)
     {
-        mNumHosts = par("numHosts");
+        numHosts = par("numHosts");
         marginX = par("marginX");
         marginY = par("marginY");
-
-        int size = (int)ceil(sqrt((double)mNumHosts));
-        double row = ceil((hostPtr->getIndex()) / (double)size);
-        int col = (hostPtr->getIndex()) % size;
-
-        pos.x = areaTopLeft.x + marginX
-                + col * ((areaBottomRight.x - areaTopLeft.x) - 2 * marginX) / (size - 1);
-
-        if (pos.x >= areaBottomRight.x)
-            pos.x -= 1;
-
-        pos.y = areaTopLeft.y + marginY
-                + row * ((areaBottomRight.y - areaTopLeft.y) - 2 * marginY) / (size - 1);
-
-        if (pos.y >= areaBottomRight.y)
-            pos.y -= 1;
-
-        positionUpdated();
     }
+}
 
+void StaticGridMobility::initializePosition()
+{
+    int index = hostModule->getIndex();
+    int size = (int)ceil(sqrt((double)numHosts));
+    int row = (int)floor((double)index / (double)size);
+    int col = index % size;
+    lastPosition.x = constraintAreaMin.x + marginX
+            + col * ((constraintAreaMax.x - constraintAreaMin.x) - 2 * marginX) / (size - 1);
+    if (lastPosition.x >= constraintAreaMax.x)
+        lastPosition.x -= 1;
+    lastPosition.y = constraintAreaMin.y + marginY
+            + row * ((constraintAreaMax.y - constraintAreaMin.y) - 2 * marginY) / (size - 1);
+    if (lastPosition.y >= constraintAreaMax.y)
+        lastPosition.y -= 1;
+    lastPosition.z = 0;
 }
 
 void StaticGridMobility::finish()
 {
-    BasicMobility::finish();
-    recordScalar("x", pos.x);
-    recordScalar("y", pos.y);
+    MobilityBase::finish();
+    recordScalar("x", lastPosition.x);
+    recordScalar("y", lastPosition.y);
 }

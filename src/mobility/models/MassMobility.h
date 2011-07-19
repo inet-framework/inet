@@ -23,7 +23,7 @@
 
 #include <omnetpp.h>
 
-#include "BasicMobility.h"
+#include "LineSegmentsMobilityBase.h"
 
 
 /**
@@ -33,30 +33,29 @@
  * @ingroup mobility
  * @author Emin Ilker Cetinbas, Andras Varga
  */
-class INET_API MassMobility : public BasicMobility
+class INET_API MassMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config (see NED file for explanation)
-    cPar *changeInterval;
-    cPar *changeAngleBy;
-    cPar *speed;
+    cPar *changeIntervalParameter;
+    cPar *changeAngleByParameter;
+    cPar *speedParameter;
 
     // current state
-    double currentSpeed;   ///< speed of the host
-    double currentAngle;   ///< angle of linear motion
-    double updateInterval; ///< time interval to update the hosts position
-    Coord step;            ///< calculated from speed, angle and updateInterval
+    double angle;   ///< angle of linear motion
 
   protected:
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage);
 
-   protected:
-    /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg);
-
-    /** @brief Move the host*/
+    /** @brief Move the host according to the current simulation time. */
     virtual void move();
+
+    /** @brief Calculate a new target position to move to. */
+    virtual void setTargetPosition();
+
+  public:
+    MassMobility();
 };
 
 #endif

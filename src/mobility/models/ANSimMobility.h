@@ -15,10 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ANSIM_MOBILITY_H
-#define ANSIM_MOBILITY_H
+
+#ifndef AN_SIM_MOBILITY_H
+#define AN_SIM_MOBILITY_H
 
 #include <omnetpp.h>
+
 #include "LineSegmentsMobilityBase.h"
 
 
@@ -29,29 +31,35 @@
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API ANSimMobility : public LineSegmentsMobilityBase
+class ANSimMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config
     int nodeId; ///< we'll have to compare this to the \<node_id> elements
-
     // state
-    cXMLElement *nextPosChange; ///< points to the next \<position_change> element
+    cXMLElement *nextPositionChange; ///< points to the next \<position_change> element
 
   protected:
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage);
 
-  protected:
-    /** @brief Overridden from LineSegmentsMobilityBase.*/
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
+
+    /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void setTargetPosition();
 
-    /** @brief Utility: extract data from given \<position_update> element*/
+    /** @brief Overridden from LineSegmentsMobilityBase. */
+    virtual void move();
+
+    /** @brief Finds the next \<position_change> element. */
+    virtual cXMLElement *findNextPositionChange(cXMLElement *positionChange);
+
+    /** @brief Utility: extract data from given \<position_update> element. */
     virtual void extractDataFrom(cXMLElement *node);
 
-    /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void fixIfHostGetsOutside();
+  public:
+    ANSimMobility();
 };
 
 #endif
-

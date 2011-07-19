@@ -15,60 +15,48 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINESEGMENTS_MOBILITY_BASE_H
-#define LINESEGMENTS_MOBILITY_BASE_H
+
+#ifndef LINE_SEGMENTS_MOBILITY_BASE_H
+#define LINE_SEGMENTS_MOBILITY_BASE_H
 
 #include <omnetpp.h>
 
-#include "BasicMobility.h"
+#include "MovingMobilityBase.h"
 
 
 /**
  * @brief Base class for mobility models where movement consists of
  * a sequence of linear movements of constant speed.
  *
- * Subclasses must redefine setTargetPosition() which is suppsed to set
- * a new target position and target time once the previous one is reached.
+ * Subclasses must redefine setTargetPosition() which is supposed to set
+ * a new targetPosition and nextChange once the previous target is reached.
  *
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API LineSegmentsMobilityBase : public BasicMobility
+class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
 {
   protected:
-    // config
-    double updateInterval; ///< time interval to update the host's position
-
-    // state
-    simtime_t targetTime;  ///< end time of current linear movement
-    Coord targetPos;       ///< end position of current linear movement
-    Coord step;            ///< step size (added to pos every updateInterval)
-    bool stationary;       ///< if set to true, host won't move
+    /** @brief End position of current linear movement. */
+    Coord targetPosition;
 
   protected:
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage);
 
-    /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg);
-
-    /** @brief Begin new line segment after previous one finished */
-    virtual void beginNextMove(cMessage *msg);
+    /** @brief Move the host according to the current simulation time. */
+    virtual void move();
 
     /**
      * @brief Should be redefined in subclasses. This method gets called
-     * when targetPos and targetTime has been reached, and its task is
-     * to set a new targetPos and targetTime. At the end of the movement
-     * sequence, it should set targetTime=0.
+     * when targetPosition and nextChange has been reached, and its task is
+     * to set a new targetPosition and nextChange. At the end of the movement
+     * sequence, it should set nextChange to -1.
      */
     virtual void setTargetPosition() = 0;
 
-    /**
-     * @brief Should be redefined in subclasses. Should invoke handleIfOutside(),
-     * or directly one of the methods it relies on.
-     */
-    virtual void fixIfHostGetsOutside() = 0;
+  public:
+    LineSegmentsMobilityBase();
 };
 
 #endif
-

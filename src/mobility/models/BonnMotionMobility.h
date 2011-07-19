@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BONNMOTION_MOBILITY_H
-#define BONNMOTION_MOBILITY_H
+#ifndef BONN_MOTION_MOBILITY_H
+#define BONN_MOTION_MOBILITY_H
 
 #include <omnetpp.h>
+
 #include "LineSegmentsMobilityBase.h"
 #include "BonnMotionFileCache.h"
 
@@ -33,21 +34,26 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 {
   protected:
     // state
-    const BonnMotionFile::Line *vecp;
-    int vecpos;
+    const BonnMotionFile::Line *lines;
+    int currentLine;
 
   protected:
-    virtual ~BonnMotionMobility();
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage);
 
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
 
-    /** @brief Overridden from LineSegmentsMobilityBase.*/
+    /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void setTargetPosition();
+    
+    /** @brief Overridden from LineSegmentsMobilityBase. */
+    virtual void move();
 
-    /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void fixIfHostGetsOutside();
+  public:
+    BonnMotionMobility();
+
+    virtual ~BonnMotionMobility();
 };
 
 #endif
-

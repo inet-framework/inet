@@ -16,9 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
@@ -26,21 +25,17 @@ import inet.mobility.MobilityBase;
 // Angle only changes when the mobile node hits a wall: then it reflects
 // off the wall at the same angle.
 //
-// @see ~ChannelControl
 // @author Emin Ilker Cetinbas
 //
-simple LinearMobility extends MobilityBase
+simple LinearMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
-        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        double speed @unit("mps") = default(2mps); // speed of the host (in m/s)
-        double angle @unit("deg") = default(0); // angle of linear motion (degreees)
+        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
+        double angle @unit(deg) = default(0); // angle of linear motion (degreees)
         double acceleration = default(0); // acceleration of linear motion (m/s2)
-        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-        @display("i=block/cogwheel_s");
         @class(LinearMobility);
 }
-

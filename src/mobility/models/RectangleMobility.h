@@ -15,11 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #ifndef RECTANGLE_MOBILITY_H
 #define RECTANGLE_MOBILITY_H
 
 #include <omnetpp.h>
-#include "BasicMobility.h"
+
+#include "MovingMobilityBase.h"
 
 
 /**
@@ -28,31 +30,31 @@
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API RectangleMobility : public BasicMobility
+class INET_API RectangleMobility : public MovingMobilityBase
 {
   protected:
     // configuration
     double speed;          ///< speed of the host
-    double updateInterval; ///< time interval to update the hosts position
-    bool stationary;       ///< if true, the host doesn't move
 
     // state
     double d;  ///< distance from (x1,y1), measured clockwise on the perimeter
     double corner1, corner2, corner3, corner4;
 
   protected:
-    /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int);
+    /** @brief Initializes mobility model parameters.
+     *
+     * If the host is not stationary it calculates a random position on the rectangle.
+     */
+    virtual void initialize(int stage);
 
-    /** @brief Called upon arrival of a self messages */
-    virtual void handleSelfMsg(cMessage *msg);
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void initializePosition();
 
     /** @brief Move the host */
     virtual void move();
 
-    /** @brief Maps d to (x,y) coordinates */
-    virtual void calculateXY();
+  public:
+    RectangleMobility();
 };
 
 #endif
-

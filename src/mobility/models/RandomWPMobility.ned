@@ -15,16 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
+package inet.mobility.models;
 
 
 //
 // Random Waypoint mobility model.
 //
 // The node moves in line segments. For each line segment, a random destination
-// position (distributed uniformly over the playground) and a random speed
+// position (distributed uniformly over the constraint area) and a random speed
 // is chosen. You can define a speed as a variate from which a new value
 // will be drawn for each line segment; it is customary to specify it as
 // uniform(minSpeed, maxSpeed). When the node reaches the target position,
@@ -40,16 +39,14 @@ import inet.mobility.MobilityBase;
 //
 // @author Georg Lutz
 //
-simple RandomWPMobility extends MobilityBase
+simple RandomWPMobility extends MovingMobilityBase
 {
     parameters:
-        bool debug = default(false); // debug switch
-        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        double updateInterval @unit("s") = default(0.1s);
-        volatile double speed @unit("mps") = default(2mps); // use uniform(minSpeed, maxSpeed) or another distribution
-        volatile double waitTime @unit("s"); // wait time between reaching a target and choosing a new one
-        @display("i=block/cogwheel_s");
+        volatile double speed @unit(mps) = default(2mps); // use uniform(minSpeed, maxSpeed) or another distribution
+        volatile double waitTime @unit(s); // wait time between reaching a target and choosing a new one
         @class(RandomWPMobility);
 }

@@ -16,11 +16,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
+
+
 #include <fstream>
 #include <sstream>
 #include <string>
+
 #include "Ns2MotionMobility.h"
 #include "FWMath.h"
+
 #ifndef atoi
 #include <cstdlib>
 #endif
@@ -28,6 +32,21 @@
 
 Define_Module(Ns2MotionMobility);
 
+
+Ns2MotionMobility::Ns2MotionMobility()
+{
+    vecpos = 0;
+    ns2File = NULL;
+    nodeId = 0;
+    scrollX = 0;
+    scrollY = 0;
+}
+
+Ns2MotionMobility::~Ns2MotionMobility()
+{
+    if (ns2File)
+        delete ns2File;
+}
 
 void Ns2MotionMobility::parseFile(const char *filename)
 {
@@ -107,40 +126,29 @@ void Ns2MotionMobility::parseFile(const char *filename)
 
 }
 
-
-
 void Ns2MotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-
     EV << "initializing Ns2MotionMobility stage " << stage << endl;
-
-    if (stage == 1)
+    if (stage == 0)
     {
         scrollX = par("scrollX");
         scrollY = par("scrollY");
         nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getParentModule()->getIndex();
-
         const char *fname = par("traceFile");
         ns2File = new Ns2MotionFile;
         parseFile(fname);
-
-        // obtain initial position
-        pos.x = ns2File->initial[0]+scrollX;
-        pos.y = ns2File->initial[1]+scrollY;
-        targetPos = pos;
-        positionUpdated();
         vecpos = 0;
         WATCH(nodeId);
     }
 }
 
-Ns2MotionMobility::~Ns2MotionMobility()
+void Ns2MotionMobility::initializePosition()
 {
-    if (ns2File)
-        delete ns2File;
+    lastPosition.x = ns2File->initial[0]+scrollX;
+    lastPosition.y = ns2File->initial[1]+scrollY;
 }
 
 void Ns2MotionMobility::setTargetPosition()
@@ -170,23 +178,23 @@ void Ns2MotionMobility::setTargetPosition()
     simtime_t now = simTime();
     if ((time-now)>updateInterval)
     {
-        targetTime = time;
+        nextChange = time;
     }
     else
     {
-        targetPos.x = vec[1]+scrollX;
-        targetPos.y = vec[2]+scrollY;
+        targetPosition.x = vec[1]+scrollX;
+        targetPosition.y = vec[2]+scrollY;
         double speed = vec[3];
-        double distance = pos.distance(targetPos);
+        double distance = lastPosition.distance(targetPosition);
         double travelTime = distance / speed;
-        targetTime += travelTime;
-        vecpos ++;
+        nextChange += travelTime;
+        vecpos++;
     }
-    EV << "TARGET: t=" << targetTime << " (" << targetPos.x << "," << targetPos.y << ")\n";
+    EV << "TARGET: t=" << nextChange << " (" << targetPosition.x << "," << targetPosition.y << ")\n";
 }
 
-void Ns2MotionMobility::fixIfHostGetsOutside()
+void Ns2MotionMobility::move()
 {
+    LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
-

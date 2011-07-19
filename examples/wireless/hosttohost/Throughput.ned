@@ -21,7 +21,7 @@ package inet.examples.wireless.hosttohost;
 
 import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.AccessPoint;
-import inet.mobility.models.NullMobility;
+import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
@@ -81,7 +81,7 @@ module ThroughputServer
                 @display("p=120,158;q=queue");
                 mgmtType = "Ieee80211MgmtSTASimplified";
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 @display("p=50,141");
         }

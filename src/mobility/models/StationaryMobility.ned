@@ -18,23 +18,18 @@
 
 package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
-
 
 //
 // This mobility module does nothing; it can be used for stationary nodes.
 //
 // @author Andras Varga
 //
-simple NullMobility extends MobilityBase
+simple StationaryMobility extends MobilityBase
 {
     parameters:
-        double initialX @unit("m") = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit("m") = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        @display("i=block/cogwheel_s");
-        @class(NullMobility);
+        @class(StationaryMobility);
 }
-
-
-

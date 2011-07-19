@@ -20,7 +20,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.mobility.models.NullMobility;
+import inet.mobility.models.StationaryMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
 import inet.base.NotificationBoard;
@@ -51,7 +51,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=78,60");
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 @display("p=71,121");
         }

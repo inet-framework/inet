@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "LinearMobility.h"
 #include "FWMath.h"
 
@@ -23,63 +24,44 @@
 Define_Module(LinearMobility);
 
 
+LinearMobility::LinearMobility()
+{
+    speed = 0;
+    angle = 0;
+    acceleration = 0;
+}
+
 void LinearMobility::initialize(int stage)
 {
-    BasicMobility::initialize(stage);
-
+    MovingMobilityBase::initialize(stage);
     EV << "initializing LinearMobility stage " << stage << endl;
-
     if (stage == 0)
     {
-        updateInterval = par("updateInterval");
         speed = par("speed");
-        angle = par("angle");
+        angle = fmod((double)par("angle"), 360);
         acceleration = par("acceleration");
-        angle = fmod(angle, 360);
-
-        // if the initial speed is lower than 0, the node is stationary
         stationary = (speed == 0);
-
-        // host moves the first time after some random delay to avoid synchronized movements
-        if (!stationary)
-            scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
     }
 }
 
-
-/**
- * The only self message possible is to indicate a new movement. If
- * host is stationary this function is never called.
- */
-void LinearMobility::handleSelfMsg(cMessage * msg)
-{
-    move();
-    positionUpdated();
-
-    if (!stationary)
-        scheduleAt(simTime() + updateInterval, msg);
-}
-
-/**
- * Move the host if the destination is not reached yet. Otherwise
- * calculate a new random position
- */
 void LinearMobility::move()
 {
-    pos.x += speed * cos(PI * angle / 180) * updateInterval;
-    pos.y += speed * sin(PI * angle / 180) * updateInterval;
+    double rad = PI * angle / 180;
+    Coord direction(cos(rad), sin(rad));
+    lastSpeed = direction * speed;
+    double elapsedTime = (simTime() - lastUpdate).dbl();
+    lastPosition += lastSpeed * elapsedTime;
 
     // do something if we reach the wall
     Coord dummy;
     handleIfOutside(REFLECT, dummy, dummy, angle);
 
     // accelerate
-    speed += acceleration * updateInterval;
+    speed += acceleration * elapsedTime;
     if (speed <= 0)
     {
         speed = 0;
         stationary = true;
     }
-
-    EV << " xpos= " << pos.x << " ypos=" << pos.y << " speed=" << speed << endl;
+    EV << " t= " << SIMTIME_STR(simTime()) << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << " speed=" << speed << endl;
 }

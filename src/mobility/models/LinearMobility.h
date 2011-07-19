@@ -16,12 +16,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #ifndef LINEAR_MOBILITY_H
 #define LINEAR_MOBILITY_H
 
-#include "INETDefs.h"
+#include <omnetpp.h>
 
-#include "BasicMobility.h"
+#include "INETDefs.h"
+#include "MovingMobilityBase.h"
 
 
 /**
@@ -30,26 +32,22 @@
  * @ingroup mobility
  * @author Emin Ilker Cetinbas
  */
-class INET_API LinearMobility : public BasicMobility
+class INET_API LinearMobility : public MovingMobilityBase
 {
   protected:
     double speed;          ///< speed of the host
     double angle;          ///< angle of linear motion
     double acceleration;   ///< acceleration of linear motion
-    double updateInterval; ///< time interval to update the hosts position
-    bool stationary;       ///< if true, the host doesn't move
 
   protected:
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
-
-  protected:
-    /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg);
+    virtual void initialize(int stage);
 
     /** @brief Move the host*/
     virtual void move();
+
+  public:
+    LinearMobility();
 };
 
 #endif
-

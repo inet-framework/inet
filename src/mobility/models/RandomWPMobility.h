@@ -16,10 +16,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef RANDOMWP_MOBILITY_H
-#define RANDOMWP_MOBILITY_H
+
+#ifndef RANDOM_WP_MOBILITY_H
+#define RANDOM_WP_MOBILITY_H
+
+#include <omnetpp.h>
 
 #include "LineSegmentsMobilityBase.h"
+
 
 /**
  * Random Waypoint mobility model. See NED file for more info.
@@ -35,14 +39,16 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
 
   protected:
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    virtual void initialize(int stage);
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void setTargetPosition();
-
+    
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void fixIfHostGetsOutside();
+    virtual void move();
+
+  public:
+    RandomWPMobility();
 };
 
 #endif
-

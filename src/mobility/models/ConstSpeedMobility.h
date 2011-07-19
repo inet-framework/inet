@@ -23,53 +23,31 @@
 
 #include <omnetpp.h>
 
-#include "BasicMobility.h"
+#include "LineSegmentsMobilityBase.h"
 
 
 /**
- * @brief Controls all movement related things of a host
- *
- * Parameters to be specified in omnetpp.ini
- *  - vHost : Speed of a host [m/s]
- *  - updateInterval : Time interval to update the hosts position
- *  - x, y : Starting position of the host, -1 = random
+ * @brief Moves along a line with constant speed to a randomly chosen target.
+ * When the target is reached it selects randomly a new one.
  *
  * @ingroup mobility
  * @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
- * @sa ChannelControl
  */
-class INET_API ConstSpeedMobility : public BasicMobility
+class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
 {
   protected:
-    /** @brief Velocity of the host*/
-    double vHost;
-
-    /** @brief Time interval to update the hosts position*/
-    double updateInterval;
-
-    /** @brief If true, the host doesn't move*/
-    bool stationary;
-
-    /** @brief parameters to handle the movement of the host*/
-    /*@{*/
-    Coord targetPos;
-    Coord stepSize;
-    int numSteps;
-    int step;
-    /*@}*/
+    /** @brief Speed parameter. */
+    double speed;
 
   protected:
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int);
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage);
 
-    /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg);
-
-    /** @brief Calculate the target position to move to*/
+    /** @brief Calculate a new target position to move to. */
     virtual void setTargetPosition();
 
-    /** @brief Move the host*/
-    virtual void move();
+  public:
+    ConstSpeedMobility();
 };
 
 #endif

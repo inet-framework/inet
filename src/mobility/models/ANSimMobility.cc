@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "ANSimMobility.h"
 #include "FWMath.h"
 
@@ -35,14 +36,17 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
     return child;
 }
 
+ANSimMobility::ANSimMobility()
+{
+    nodeId = -1;
+    nextPositionChange = NULL;
+}
 
 void ANSimMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-
     EV << "initializing ANSimMobility stage " << stage << endl;
-
-    if (stage == 1)
+    if (stage == 0)
     {
         nodeId = par("nodeId");
         if (nodeId == -1)
@@ -53,46 +57,53 @@ void ANSimMobility::initialize(int stage)
         if (strcmp(rootElem->getTagName(), "simulation")!=0)
             throw cRuntimeError("ansimTrace: <simulation> is expected as root element not <%s> at %s",
                   rootElem->getTagName(), rootElem->getSourceLocation());
-        nextPosChange = rootElem->getElementByPath("mobility/position_change");
-        if (!nextPosChange)
+        nextPositionChange = rootElem->getElementByPath("mobility/position_change");
+        if (!nextPositionChange)
             throw cRuntimeError("element doesn't have <mobility> child or <position_change> grandchild at %s",
                   rootElem->getSourceLocation());
-
-        // set initial position;
-        setTargetPosition();
-        pos = targetPos;
-        positionUpdated();
     }
 }
 
+void ANSimMobility::initializePosition()
+{
+    cXMLElement *firstPositionChange = findNextPositionChange(nextPositionChange);
+    if (firstPositionChange)
+        extractDataFrom(firstPositionChange);
+    lastPosition = targetPosition;
+}
+
+cXMLElement *ANSimMobility::findNextPositionChange(cXMLElement *positionChange)
+{
+    // find next <position_change> element with matching <node_id> tag (current one also OK)
+    while(positionChange){
+        const char *nodeIdStr = firstChildWithTag(positionChange, "node_id")->getNodeValue();
+        if(nodeIdStr && atoi(nodeIdStr) == nodeId)
+            break;
+
+        positionChange = positionChange->getNextSibling();
+    }
+    return positionChange;
+}
 
 void ANSimMobility::setTargetPosition()
 {
-    // find next <position_update> element with matching <node_id> tag (current one also OK)
-    while (nextPosChange)
-    {
-        const char *nodeIdStr = firstChildWithTag(nextPosChange, "node_id")->getNodeValue();
-        if (nodeIdStr && atoi(nodeIdStr)==nodeId)
-            break;
-        nextPosChange = nextPosChange->getNextSibling();
-    }
-
-    if (!nextPosChange)
+    nextPositionChange = findNextPositionChange(nextPositionChange);
+    if (!nextPositionChange)
     {
         stationary = true;
         return;
     }
 
     // extract data from it
-    extractDataFrom(nextPosChange);
+    extractDataFrom(nextPositionChange);
 
     // skip this one
-    nextPosChange = nextPosChange->getNextSibling();
+    nextPositionChange = nextPositionChange->getNextSibling();
 }
 
 void ANSimMobility::extractDataFrom(cXMLElement *node)
 {
-    // extract data from <position_update> element
+    // extract data from <position_change> element
     // FIXME start_time has to be taken into account too! as pause from prev element's end_time
     const char *startTimeStr = firstChildWithTag(node, "start_time")->getNodeValue();
     const char *endTimeStr = firstChildWithTag(node, "end_time")->getNodeValue();
@@ -103,13 +114,13 @@ void ANSimMobility::extractDataFrom(cXMLElement *node)
     if (!endTimeStr || !xStr || !yStr)
         throw cRuntimeError("no content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
 
-    targetTime = atof(endTimeStr);
-    targetPos.x = atof(xStr);
-    targetPos.y = atof(yStr);
+    nextChange = atof(endTimeStr);
+    targetPosition.x = atof(xStr);
+    targetPosition.y = atof(yStr);
 }
 
-void ANSimMobility::fixIfHostGetsOutside()
+void ANSimMobility::move()
 {
+    LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
-

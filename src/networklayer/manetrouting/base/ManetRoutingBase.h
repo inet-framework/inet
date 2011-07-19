@@ -59,9 +59,10 @@ class ManetTimer :  public cOwnedObject
 typedef std::multimap <simtime_t, ManetTimer *> TimerMultiMap;
 typedef std::set<Uint128> AddressGroup;
 typedef std::set<Uint128>::iterator AddressGroupIterator;
-class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
+class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener
 {
   private:
+    static simsignal_t mobilityStateChangedSignal;
     typedef std::map<Uint128,Uint128> RouteMap;
     RouteMap *routesVector;
     bool createInternalStore;
@@ -190,10 +191,17 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 //
 // Link layer feedback routines
 //
+    /**
+     * @brief Called by the signalling mechanism to inform of changes.
+     *
+     * ManetRoutingBase is subscribed to position changes.
+     */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     virtual void receiveChangeNotification(int category, const cObject *details);
     virtual void processLinkBreak(const cObject *details);
     virtual void processPromiscuous(const cObject *details);
     virtual void processFullPromiscuous(const cObject *details);
+
 //
 //  Replacement for gettimeofday(), used for timers.
 //  The timeval should only be interpreted as number of seconds and

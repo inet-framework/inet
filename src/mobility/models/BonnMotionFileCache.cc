@@ -15,8 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include <fstream>
 #include <sstream>
+
 #include "BonnMotionFileCache.h"
 
 
@@ -78,6 +80,3 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
     }
     in.close();
 }
-
-
-

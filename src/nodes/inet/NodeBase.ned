@@ -44,7 +44,7 @@ module NodeBase
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
-        string mobilityType = default("NullMobility");
+        string mobilityType = default("StationaryMobility");
         string routingFile = default("");
         bool IPForward = default(true);
     gates:
@@ -58,7 +58,7 @@ module NodeBase
         }
 
         // optional mobility module. Required only if wireless cards are present
-        mobility: <mobilityType> like IMobility if numRadios>0 {
+        mobility: <mobilityType> like IMobility if mobilityType != "" && numRadios > 0 {
             parameters:
                 @display("p=53,121");
         }

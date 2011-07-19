@@ -42,7 +42,7 @@ module NodeBase6
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string mobilityType = default("NullMobility");
+        string mobilityType = default("StationaryMobility");
         xml routingTable = default(xml("<routingTable/>"));
         bool IPForward = default(true);
     gates:
@@ -56,7 +56,7 @@ module NodeBase6
         }
 
         // optional mobility module. Required only if wireless cards are present
-        mobility: <mobilityType> like IMobility if numRadios>0 {
+        mobility: <mobilityType> like IMobility if mobilityType != "" && numRadios > 0 {
             parameters:
                 @display("p=53,121");
         }

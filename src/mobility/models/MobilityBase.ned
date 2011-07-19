@@ -18,17 +18,22 @@
 
 package inet.mobility.models;
 
+import inet.mobility.IMobility;
+
 
 //
-// Uses the <position_change> elements of the ANSim tool's
-// trace file.
+// Abstract base module for mobility models.
 //
 // @author Andras Varga
 //
-simple ANSimMobility extends MovingMobilityBase
+simple MobilityBase like IMobility
 {
     parameters:
-        xml ansimTrace; // the ANSim trace file in XML
-        int nodeId; // <position_change> elements to match; -1 gets substituted to parent module's index
-        @class(ANSimMobility);
+        bool debug = default(false);
+        double constraintAreaX @unit("m") = default(0m); // min x position of the constraint area
+        double constraintAreaY @unit("m") = default(0m); // min y position of the constraint area
+        double constraintAreaZ @unit("m") = default(0m); // min z position of the constraint area
+        double constraintAreaWidth @unit("m") = default(600m); // x size of the constraint area
+        double constraintAreaHeight @unit("m") = default(400m); // y size of the constraint area
+        double constraintAreaDepth @unit("m") = default(0m); // z size of the constraint area
 }

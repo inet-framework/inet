@@ -51,7 +51,7 @@ module MFMobileHost
         // string udpAppType = default(""); // Obsolete
         bool IPForward = default(false);
         string routingFile = default("");
-        string mobilityType = default("NullMobility");
+        string mobilityType = default("StationaryMobility");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         @display("i=device/pocketpc_s");
     gates:

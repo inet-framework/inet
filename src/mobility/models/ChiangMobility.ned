@@ -17,17 +17,21 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+
 package inet.mobility.models;
 
-import inet.mobility.MobilityBase;
 
-
-simple ChiangMobility extends MobilityBase
+//
+// Uses a probabilistic transition matrix to change the state of motion.
+// In this model, the state of the mobile node in each direction (x and y) can be:
+//  - the node stays in its current position
+//  - the node moves forward
+//  - the node moves backward
+//
+simple ChiangMobility extends MovingMobilityBase
 {
     parameters:
-        double updateInterval @unit("s") = default(0.1s);
-        double stateTransitionUpdateInterval @unit("s") = default(3s);
-        double speed @unit("mps") = default(10mps); // in meter/sec
+        double stateTransitionUpdateInterval @unit(s) = default(3s);
+        double speed @unit(mps) = default(10mps); // in meter/sec
         @class(ChiangMobility);
 }
-

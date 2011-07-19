@@ -17,8 +17,11 @@
 
 
 #include "ChannelAccess.h"
+#include "IMobility.h"
 
 #define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
+
+simsignal_t ChannelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
 static int parseInt(const char *s, int defaultValue)
 {
@@ -45,7 +48,8 @@ void ChannelAccess::initialize(int stage)
 
         positionUpdateArrived = false;
         // register to get a notification when position changes
-        nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
+        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+        hostModule->subscribe(mobilityStateChangedSignal, this);
     }
     else if (stage == 2)
     {
@@ -95,17 +99,16 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
     cc->sendToChannel(myRadioRef, msg);
 }
 
-void ChannelAccess::receiveChangeNotification(int category, const cObject *details)
+void ChannelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (category == NF_HOSTPOSITION_UPDATED)
+    if (signalID == mobilityStateChangedSignal)
     {
-        radioPos = *check_and_cast<const Coord*>(details);
+        IMobility *mobility = check_and_cast<IMobility*>(obj);
+        radioPos = mobility->getCurrentPosition();
         positionUpdateArrived = true;
 
         if (myRadioRef)
             cc->setRadioPosition(myRadioRef, radioPos);
     }
-
-    BasicModule::receiveChangeNotification(category, details);
 }
 
