@@ -34,7 +34,6 @@ Define_Module(SCTPServer);
 void SCTPServer::initialize()
 {
     cPar *delT;
-    socket = NULL;
     sctpEV3 << "initialize SCTP Server\n";
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     WATCH(numSessions);
@@ -69,7 +68,7 @@ void SCTPServer::initialize()
     delayTimer->setContextPointer(this);
     delayFirstReadTimer = new cMessage("delayFirstReadTimer");
     firstData = true;
-    SCTPSocket *socket = new SCTPSocket();
+    socket = new SCTPSocket();
     socket->setOutputGate(gate("sctpOut"));
     socket->setInboundStreams(inboundStreams);
     socket->setOutboundStreams(outboundStreams);
