@@ -135,7 +135,7 @@ void UDPSocket::connect(IPvXAddress addr, int port)
     sendToUDP(msg);
 }
 
-void UDPSocket::sendTo(cMessage *msg, IPvXAddress destAddr, int destPort)
+void UDPSocket::sendTo(cPacket *msg, IPvXAddress destAddr, int destPort)
 {
     msg->setKind(UDP_C_DATA);
     UDPControlInfo *ctrl = new UDPControlInfo();
@@ -149,7 +149,7 @@ void UDPSocket::sendTo(cMessage *msg, IPvXAddress destAddr, int destPort)
     sendToUDP(msg);
 }
 
-void UDPSocket::send(cMessage *msg)
+void UDPSocket::send(cPacket *msg)
 {
     if (remoteAddr.isUnspecified() || remotePrt==0)
         throw cRuntimeError("UDPSocket::send(): must call connect() before using send()");

@@ -228,13 +228,13 @@ class INET_API UDPSocket
     /**
      * Sends a data packet to the given address and port.
      */
-    void sendTo(cMessage *msg, IPvXAddress destAddr, int destPort);
+    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort);
 
     /**
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    void send(cMessage *msg);
+    void send(cPacket *msg);
 
     /**
      * Unbinds the socket. There is no need for renewSocket() as with TCPSocket.
