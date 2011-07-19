@@ -268,7 +268,8 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv4ControlInfo *ipCtrl)
     if (sd->remotePort != 0 && sd->remotePort != udp->getSourcePort())
         return false;
 
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4() != ipCtrl->getDestAddr())
+    // limitation: we are supposed to accept subnet-broadcast addresses as well (all-ones 'host' part), but we don't know how long the netmask is
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4() != ipCtrl->getDestAddr() && !ipCtrl->getDestAddr().isMulticast() && ipCtrl->getDestAddr() != IPv4Address::ALLONES_ADDRESS)
         return false;
 
     if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4() != ipCtrl->getSrcAddr())
@@ -290,7 +291,7 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
     if (sd->remotePort != 0 && sd->remotePort != udp->getSourcePort())
         return false;
 
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6() != ipCtrl->getDestAddr())
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6() != ipCtrl->getDestAddr() && !ipCtrl->getDestAddr().isMulticast())
         return false;
 
     if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6() != ipCtrl->getSrcAddr())
