@@ -174,14 +174,7 @@ class Uint128
     operator IPv4Address() const {IPv4Address add(toUint()); return add;}
     operator MACAddress() const
     {
-        MACAddress add;
-        add.setAddressByte(0, (lo>>40)&0xff);
-        add.setAddressByte(1, (lo>>32)&0xff);
-        add.setAddressByte(2, (lo>>24)&0xff);
-        add.setAddressByte(3, (lo>>16)&0xff);
-        add.setAddressByte(4, (lo>>8)&0xff);
-        add.setAddressByte(5, lo&0xff);
-        return add;
+        return MACAddress(lo);
     }
 
     operator IPv6Address() const
@@ -198,14 +191,7 @@ class Uint128
     IPv4Address  getIPAddress() const {IPv4Address add(toUint()); return add;}
     MACAddress getMACAddress() const
     {
-        MACAddress add;
-        add.setAddressByte(0, (lo>>40)&0xff);
-        add.setAddressByte(1, (lo>>32)&0xff);
-        add.setAddressByte(2, (lo>>24)&0xff);
-        add.setAddressByte(3, (lo>>16)&0xff);
-        add.setAddressByte(4, (lo>>8)&0xff);
-        add.setAddressByte(5, lo&0xff);
-        return add;
+        return MACAddress(lo);
     }
 
     IPv6Address getIPv6Address() const

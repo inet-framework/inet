@@ -15,6 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #ifndef MACADDRESS_H_
 #define MACADDRESS_H_
 
@@ -22,11 +23,11 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
+#define MAC_ADDRESS_SIZE 6
+#define MAC_ADDRESS_MASK 0xffffffffffffL
 
-#define MAC_ADDRESS_BYTES 6
 
 class InterfaceToken;
-
 
 /**
  * Stores an IEEE 802 MAC address (6 octets = 48 bits).
@@ -34,7 +35,7 @@ class InterfaceToken;
 class INET_API MACAddress
 {
   private:
-    unsigned char address[6];   // 6*8=48 bit address
+    uint64 address;   // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
     static unsigned int autoAddressCtr; // global counter for generateAutoAddress()
 
   public:
@@ -48,6 +49,11 @@ class INET_API MACAddress
      * Default constructor initializes address bytes to zero.
      */
     MACAddress();
+
+    /**
+     * Initializes the address from a 48 bits integer
+     */
+    MACAddress(uint64 bits);
 
     /**
      * Constructor which accepts a hex string (12 hex digits, may also
@@ -93,10 +99,9 @@ class INET_API MACAddress
     void setAddress(const char *hexstr);
 
     /**
-     * Returns pointer to internal binary representation of address
-     * (array of 6 unsigned chars).
+     * Copies the address to the given pointer (array of 6 unsigned chars).
      */
-    unsigned char *getAddressBytes() {return address;}
+    void getAddressBytes(unsigned char *addrbytes) const;
 
     /**
      * Sets address bytes. The argument should point to an array of 6 unsigned chars.
@@ -109,14 +114,14 @@ class INET_API MACAddress
     void setBroadcast();
 
     /**
-     * Returns true this is the broadcast address (hex ff:ff:ff:ff:ff:ff).
+     * Returns true if this is the broadcast address (hex ff:ff:ff:ff:ff:ff).
      */
     bool isBroadcast() const;
 
     /**
      * Returns true if this is a multicast logical address (first byte's lsb is 1).
      */
-    bool isMulticast() const  { return address[0] & 0x01; };
+    bool isMulticast() const  { return getAddressByte(0) & 0x01; };
 
     /**
      * Returns true if all address bytes are zero.
@@ -127,6 +132,11 @@ class INET_API MACAddress
      * Converts address to a hex string.
      */
     std::string str() const;
+
+    /**
+     * Converts address to 48 bits integer.
+     */
+    uint64 getInt() const;
 
     /**
      * Returns true if the two addresses are equal.
@@ -168,16 +178,7 @@ class INET_API MACAddress
      * Compares two MAC addresses.
      * Returns -1, 0 or 1.
      */
-    int compare(const MACAddress& addr) const
-    {
-        return address[0] < addr.address[0] ? -1 : address[0] > addr.address[0] ? 1 :
-               address[1] < addr.address[1] ? -1 : address[1] > addr.address[1] ? 1 :
-               address[2] < addr.address[2] ? -1 : address[2] > addr.address[2] ? 1 :
-               address[3] < addr.address[3] ? -1 : address[3] > addr.address[3] ? 1 :
-               address[4] < addr.address[4] ? -1 : address[4] > addr.address[4] ? 1 :
-               address[5] < addr.address[5] ? -1 : address[5] > addr.address[5] ? 1 : 0;
-    }
-
+    int compare(const MACAddress& other) const { return address - other.address; }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
@@ -186,5 +187,3 @@ inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
 }
 
 #endif
-
-

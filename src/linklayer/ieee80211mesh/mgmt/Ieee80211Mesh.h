@@ -87,33 +87,6 @@ private:
     virtual bool macLabelBasedSend(Ieee80211DataFrame *);
     virtual void actualizeReactive(cPacket *pkt, bool out);
 
-
-    static uint64_t MacToUint64(const MACAddress &add)
-    {
-        uint64_t aux;
-        uint64_t lo = 0;
-        for (int i=0; i<MAC_ADDRESS_BYTES; i++)
-        {
-            aux = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
-            aux <<= 8*i;
-            lo |= aux;
-        }
-        return lo;
-    }
-
-    static MACAddress Uint64ToMac(uint64_t lo)
-    {
-        MACAddress add;
-        add.setAddressByte(0, (lo>>40)&0xff);
-        add.setAddressByte(1, (lo>>32)&0xff);
-        add.setAddressByte(2, (lo>>24)&0xff);
-        add.setAddressByte(3, (lo>>16)&0xff);
-        add.setAddressByte(4, (lo>>8)&0xff);
-        add.setAddressByte(5, lo&0xff);
-        return add;
-    }
-
-
   public:
     Ieee80211Mesh();
     ~Ieee80211Mesh();

@@ -575,14 +575,7 @@ Uint128 & Uint128::operator=(const IPv4Address &add) throw ()
 Uint128 & Uint128::operator=(const MACAddress &add) throw ()
 {
     hi = 0;
-    lo = 0;
-    uint64_t aux;
-    for (int i=0; i<MAC_ADDRESS_BYTES; i++)
-    {
-        aux = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
-        aux <<= 8*i;
-        lo |= aux;
-    }
+    lo = add.getInt();
     return *this;
 }
 

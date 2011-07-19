@@ -316,13 +316,13 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
     //
     // Search in the data base
     //
-    int label = mplsData->getRegisterRoute(MacToUint64(dest));
+    int label = mplsData->getRegisterRoute(dest.getInt());
 
     if (label!=-1)
     {
         forwarding_ptr = mplsData->lwmpls_forwarding_data(label, -1, 0);
         if (!forwarding_ptr)
-            mplsData->deleteRegisterRoute(MacToUint64(dest));
+            mplsData->deleteRegisterRoute(dest.getInt());
 
     }
     if (forwarding_ptr)
@@ -340,12 +340,12 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 lwmplspk->setType(WMPLS_NORMAL);
                 if (forwarding_ptr->return_label_input==label && forwarding_ptr->output_label>0)
                 {
-                    next = Uint64ToMac(forwarding_ptr->mac_address);
+                    next = MacAddress(forwarding_ptr->mac_address);
                     lwmplspk->setLabel(forwarding_ptr->output_label);
                 }
                 else if (forwarding_ptr->input_label==label && forwarding_ptr->return_label_output>0)
                 {
-                    next = Uint64ToMac(forwarding_ptr->input_mac_address);
+                    next = MacAddress(forwarding_ptr->input_mac_address);
                     lwmplspk->setLabel(forwarding_ptr->return_label_output);
                 }
                 else
@@ -360,10 +360,10 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 int dist = forwarding_ptr->path.size()-2;
                 lwmplspk->setVectorAddressArraySize(dist);
                 //lwmplspk->setDist(dist);
-                next = Uint64ToMac(forwarding_ptr->path[1]);
+                next = MacAddress(forwarding_ptr->path[1]);
 
                 for (int i=0; i<dist; i++)
-                    lwmplspk->setVectorAddress(i, Uint64ToMac(forwarding_ptr->path[i+1]));
+                    lwmplspk->setVectorAddress(i, MacAddress(forwarding_ptr->path[i+1]));
                 lwmplspk->setLabel(forwarding_ptr->return_label_input);
             }
         }
@@ -372,12 +372,12 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
             lwmplspk->setType(WMPLS_NORMAL);
             if (forwarding_ptr->input_label==label && forwarding_ptr->output_label>0)
             {
-                next = Uint64ToMac(forwarding_ptr->mac_address);
+                next = MacAddress(forwarding_ptr->mac_address);
                 lwmplspk->setLabel(forwarding_ptr->output_label);
             }
             else if (forwarding_ptr->return_label_input==label && forwarding_ptr->return_label_output>0)
             {
-                next = Uint64ToMac(forwarding_ptr->input_mac_address);
+                next = MacAddress(forwarding_ptr->input_mac_address);
                 lwmplspk->setLabel(forwarding_ptr->return_label_output);
             }
             else
@@ -467,20 +467,20 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
             forwarding_ptr->return_label_input = label_in;
             forwarding_ptr->return_label_output = -1;
             forwarding_ptr->order = LWMPLS_EXTRACT;
-            forwarding_ptr->mac_address = MacToUint64(next);
+            forwarding_ptr->mac_address = next.getInt();
             forwarding_ptr->label_life_limit = mplsData->mplsMaxTime();
             forwarding_ptr->last_use = simTime();
 
-            forwarding_ptr->path.push_back(MacToUint64(myAddress));
+            forwarding_ptr->path.push_back(myAddress.getInt());
             for (int i=0; i<dist-1; i++)
-                forwarding_ptr->path.push_back(MacToUint64(add[i]));
-            forwarding_ptr->path.push_back(MacToUint64(dest));
+                forwarding_ptr->path.push_back(add[i].getInt());
+            forwarding_ptr->path.push_back(dest.getInt());
 
             mplsData->lwmpls_forwarding_input_data_add(label_in, forwarding_ptr);
             // lwmpls_forwarding_output_data_add(label_out,sta_addr,forwarding_ptr,true);
             /*lwmpls_label_fw_relations (lwmpls_data_ptr,label_in,forwarding_ptr);*/
             lwmplspk->setLabel(label_in);
-            mplsData->registerRoute(MacToUint64(dest), label_in);
+            mplsData->registerRoute(dest.getInt(), label_in);
         }
     }
 
@@ -550,7 +550,7 @@ void Ieee80211Mesh::receiveChangeNotification(int category, const cPolymorphic *
     {
         Ieee80211TwoAddressFrame *frame = check_and_cast<Ieee80211TwoAddressFrame *>(details);
         if (frame)
-            mplsData->lwmpls_refresh_mac(MacToUint64(frame->getTransmitterAddress()), simTime());
+            mplsData->lwmpls_refresh_mac(frame->getTransmitterAddress().getInt(), simTime());
     }
 }
 
@@ -587,7 +587,7 @@ void Ieee80211Mesh::handleDataFrame(Ieee80211DataFrame *frame)
     }
 
     LWMPLSPacket *lwmplspk = dynamic_cast<LWMPLSPacket*> (msg);
-    mplsData->lwmpls_refresh_mac(MacToUint64(source), simTime());
+    mplsData->lwmpls_refresh_mac(source.getInt(), simTime());
 
     if (!lwmplspk)
     {
@@ -741,9 +741,9 @@ bool Ieee80211Mesh::macLabelBasedSend(Ieee80211DataFrame *frame)
     if (frame->getAddress4()==myAddress || frame->getAddress4().isUnspecified())
         return false;
 
-    uint64_t dest = MacToUint64(frame->getAddress4());
-    uint64_t src = MacToUint64(frame->getAddress3());
-    uint64_t prev = MacToUint64(frame->getTransmitterAddress());
+    uint64_t dest = frame->getAddress4().getInt();
+    uint64_t src = frame->getAddress3().getInt();
+    uint64_t prev = frame->getTransmitterAddress().getInt();
     uint64_t next = mplsData->getForwardingMacKey(src, dest, prev);
     Ieee80211MeshFrame *frame2 = dynamic_cast<Ieee80211MeshFrame *>(frame);
 
@@ -756,7 +756,7 @@ bool Ieee80211Mesh::macLabelBasedSend(Ieee80211DataFrame *frame)
 
     if (next)
     {
-        frame->setReceiverAddress(Uint64ToMac(next));
+        frame->setReceiverAddress(MacAddress(next));
     }
     else
     {
