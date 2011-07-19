@@ -25,8 +25,8 @@ import inet.applications.ISCTPApp;
 simple SCTPServer like ISCTPApp
 {
     parameters:
-        string address = default(""); // comma separated list of addresses
-        int port = default(0); // port number to listen on
+        string localAddress = default(""); // comma separated list of addresses
+        int localPort = default(0); // port number to listen on
         bool echo = default(false);  // echoes received packages when true
         volatile double echoDelay @unit(s) = default(0s);
         double delayFirstRead @unit(s) = default(0s);

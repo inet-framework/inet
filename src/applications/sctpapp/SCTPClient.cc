@@ -55,7 +55,7 @@ void SCTPClient::initialize()
     sentEchoedPkSignal = registerSignal("sentEchoedPk");
 
     // parameters
-    address = par("address");
+    address = par("localAddress");
 
     cStringTokenizer tok(address, ",");
 
@@ -64,7 +64,7 @@ void SCTPClient::initialize()
         addresses.push_back(IPvXAddress(tok.nextToken()));
     }
 
-    int32 port = par("port");
+    int32 port = par("localPort");
     echo = par("echo").boolValue();
     ordered = par("ordered").boolValue();
     finishEndsSimulation = (bool)par("finishEndsSimulation");

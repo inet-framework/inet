@@ -55,7 +55,7 @@ void SCTPPeer::initialize()
     rcvdPkSignal = registerSignal("rcvdPk");
 
     // parameters
-    const char* address = par("address");
+    const char* address = par("localAddress");
 
     char *token = strtok((char*)address, ",");
     while (token != NULL)
@@ -63,7 +63,7 @@ void SCTPPeer::initialize()
         addresses.push_back(IPvXAddress(token));
         token = strtok(NULL, ",");
     }
-    int32 port = par("port");
+    int32 port = par("localPort");
     echo = par("echo");
     delay = par("echoDelay");
     outboundStreams = par("outboundStreams");

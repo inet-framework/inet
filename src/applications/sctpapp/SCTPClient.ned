@@ -25,8 +25,8 @@ import inet.applications.ISCTPApp;
 simple SCTPClient like ISCTPApp
 {
     parameters:
-        string address = default(""); // comma separated list of addresses
-        int port = default(0); // port number to listen on
+        string localAddress = default(""); // comma separated list of addresses
+        int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
         double startTime @unit(s) = default(1s); // time first session begins

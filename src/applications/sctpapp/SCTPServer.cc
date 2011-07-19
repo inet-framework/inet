@@ -32,7 +32,6 @@ Define_Module(SCTPServer);
 
 void SCTPServer::initialize()
 {
-    char *token;
     cPar *delT;
     AddressVector addresses;
     socket = NULL;
@@ -45,14 +44,14 @@ void SCTPServer::initialize()
     WATCH(numRequestsToSend);
     // parameters
     finishEndsSimulation = (bool)par("finishEndsSimulation");
-    const char *address = par("address");
-    token = strtok((char*)address, ",");
+    const char *address = par("localAddress");
+    char *token = strtok((char*)address, ",");
     while (token != NULL)
     {
         addresses.push_back(IPvXAddress(token));
         token = strtok(NULL, ",");
     }
-    int32 port = par("port");
+    int32 port = par("localPort");
     echo = par("echo");
     delay = par("echoDelay");
     delayFirstRead = par("delayFirstRead");
