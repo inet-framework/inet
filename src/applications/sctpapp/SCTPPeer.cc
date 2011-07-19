@@ -41,8 +41,6 @@ simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void SCTPPeer::initialize()
 {
-    AddressVector addresses;
-
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     WATCH(numSessions);
     WATCH(packetsSent);
@@ -55,14 +53,8 @@ void SCTPPeer::initialize()
     rcvdPkSignal = registerSignal("rcvdPk");
 
     // parameters
-    const char* address = par("localAddress");
-
-    char *token = strtok((char*)address, ",");
-    while (token != NULL)
-    {
-        addresses.push_back(IPvXAddress(token));
-        token = strtok(NULL, ",");
-    }
+    const char *addressesString = par("localAddress");
+    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
     echo = par("echo");
     delay = par("echoDelay");
@@ -74,7 +66,8 @@ void SCTPPeer::initialize()
     SCTPSocket* socket = new SCTPSocket();
     socket->setOutputGate(gate("sctpOut"));
     socket->setOutboundStreams(outboundStreams);
-    if (strcmp(address, "")==0)
+
+    if (addresses.size() == 0)
     {
         socket->bind(port);
         clientSocket.bind(port);

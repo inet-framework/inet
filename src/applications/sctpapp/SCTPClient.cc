@@ -39,8 +39,6 @@ simsignal_t SCTPClient::sentEchoedPkSignal = SIMSIGNAL_NULL;
 
 void SCTPClient::initialize()
 {
-    const char * address;
-    AddressVector addresses;
     sctpEV3 << "initialize SCTP Client\n";
     numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = echoedBytesSent = bytesRcvd = 0;
     WATCH(numSessions);
@@ -55,28 +53,17 @@ void SCTPClient::initialize()
     sentEchoedPkSignal = registerSignal("sentEchoedPk");
 
     // parameters
-    address = par("localAddress");
-
-    cStringTokenizer tok(address, ",");
-
-    while (tok.hasMoreTokens())
-    {
-        addresses.push_back(IPvXAddress(tok.nextToken()));
-    }
-
+    const char *addressesString = par("localAddress");
+    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
     echo = par("echo").boolValue();
     ordered = par("ordered").boolValue();
     finishEndsSimulation = (bool)par("finishEndsSimulation");
 
-    if (address[0] == 0)
-    {
+    if (addresses.size() == 0)
         socket.bind(port);
-    }
     else
-    {
         socket.bindx(addresses, port);
-    }
 
     socket.setCallbackObject(this);
     socket.setOutputGate(gate("sctpOut"));

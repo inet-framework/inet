@@ -20,8 +20,8 @@
 #define __INET_IPADDRESSRESOLVER_H
 
 
+#include <vector>
 #include "INETDefs.h"
-
 #include "IPvXAddress.h"
 
 // Forward declarations:
@@ -78,6 +78,13 @@ class INET_API IPvXAddressResolver
      * addressOf() will be called to determine its IP address.
      */
     virtual IPvXAddress resolve(const char *str, int addrType = ADDR_PREFER_IPv6);
+
+    /**
+     * Utility function: Calls resolve() for each item in the string vector, and
+     * returns the result in an address vector. The string vector may come e.g.
+     * from cStringTokenizer::asVector().
+     */
+    virtual std::vector<IPvXAddress> resolve(std::vector<std::string> strs, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Similar to resolve(), but returns false (instead of throwing an error)

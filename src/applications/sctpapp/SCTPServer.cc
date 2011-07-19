@@ -26,6 +26,7 @@
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
 #include "SCTPSocket.h"
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(SCTPServer);
@@ -33,7 +34,6 @@ Define_Module(SCTPServer);
 void SCTPServer::initialize()
 {
     cPar *delT;
-    AddressVector addresses;
     socket = NULL;
     sctpEV3 << "initialize SCTP Server\n";
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
@@ -42,15 +42,11 @@ void SCTPServer::initialize()
     WATCH(packetsRcvd);
     WATCH(bytesSent);
     WATCH(numRequestsToSend);
+
     // parameters
     finishEndsSimulation = (bool)par("finishEndsSimulation");
-    const char *address = par("localAddress");
-    char *token = strtok((char*)address, ",");
-    while (token != NULL)
-    {
-        addresses.push_back(IPvXAddress(token));
-        token = strtok(NULL, ",");
-    }
+    const char *addressesString = par("localAddress");
+    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
     echo = par("echo");
     delay = par("echoDelay");
@@ -77,12 +73,12 @@ void SCTPServer::initialize()
     socket->setOutputGate(gate("sctpOut"));
     socket->setInboundStreams(inboundStreams);
     socket->setOutboundStreams(outboundStreams);
-    if (strcmp(address, "")==0)
+
+    if (addresses.size() == 0)
         socket->bind(port);
     else
-    {
         socket->bindx(addresses, port);
-    }
+
     socket->listen(true, par("numPacketsToSendPerClient").longValue(), messagesToPush);
     sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
     schedule = false;
