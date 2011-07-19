@@ -20,8 +20,10 @@ package inet.applications.sctpapp;
 
 import inet.applications.ISCTPApp;
 
+//
 // Client app for SCTP-based request-reply protocols.
 // Handles a single session (and SCTP connection) at a time.
+//
 simple SCTPClient like ISCTPApp
 {
     parameters:

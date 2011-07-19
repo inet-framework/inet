@@ -33,7 +33,6 @@ Define_Module(SCTPServer);
 
 void SCTPServer::initialize()
 {
-    cPar *delT;
     sctpEV3 << "initialize SCTP Server\n";
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     WATCH(numSessions);
@@ -50,7 +49,7 @@ void SCTPServer::initialize()
     echo = par("echo");
     delay = par("echoDelay");
     delayFirstRead = par("delayFirstRead");
-    delT = &par("readingInterval");
+    cPar *delT = &par("readingInterval");
     if (delT->isNumeric() && (double)*delT==0)
         readInt = false;
     else
@@ -68,6 +67,7 @@ void SCTPServer::initialize()
     delayTimer->setContextPointer(this);
     delayFirstReadTimer = new cMessage("delayFirstReadTimer");
     firstData = true;
+
     socket = new SCTPSocket();
     socket->setOutputGate(gate("sctpOut"));
     socket->setInboundStreams(inboundStreams);
@@ -86,7 +86,7 @@ void SCTPServer::initialize()
 
 void SCTPServer::sendOrSchedule(cPacket *msg)
 {
-    if (delay==0)
+    if (delay == 0)
         send(msg, "sctpOut");
     else
         scheduleAt(simulation.getSimTime()+delay, msg);

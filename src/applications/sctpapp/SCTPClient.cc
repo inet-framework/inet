@@ -108,7 +108,9 @@ void SCTPClient::initialize()
 void SCTPClient::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
+    {
         handleTimer(msg);
+    }
     else
     {
         socket.processMessage(PK(msg));
@@ -139,13 +141,14 @@ void SCTPClient::close()
 
 void SCTPClient::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (ev.isGUI())
+        getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
 {
-      int32 count = 0;
-     ev << "SCTPClient: connected\n";
+    int32 count = 0;
+    ev << "SCTPClient: connected\n";
     setStatusString("connected");
     bufferSize = buffer;
     // determine number of requests in this session
