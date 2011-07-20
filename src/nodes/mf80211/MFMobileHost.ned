@@ -130,7 +130,7 @@ module MFMobileHost
 
         // connections to network outside
         radioIn --> wlan.radioIn;
-        wlan.uppergateOut --> networkLayer.ifIn[0];
-        wlan.uppergateIn <-- networkLayer.ifOut[0];
+        wlan.upperLayerOut --> networkLayer.ifIn[0];
+        wlan.upperLayerIn <-- networkLayer.ifOut[0];
 }
 

@@ -48,8 +48,8 @@ void BasicSnrEval::initialize(int stage)
     {
         gate("radioIn")->setDeliverOnReceptionStart(true);
 
-        uppergateIn = findGate("uppergateIn");
-        uppergateOut = findGate("uppergateOut");
+        upperLayerIn = findGate("upperLayerIn");
+        upperLayerOut = findGate("upperLayerOut");
 
         headerLength = par("headerLength");
         bitrate = par("bitrate");
@@ -90,7 +90,7 @@ bool BasicSnrEval::processAirFrame(AirFrame *airframe)
  */
 void BasicSnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == uppergateIn)
+    if (msg->getArrivalGateId() == upperLayerIn)
     {
         AirFrame *frame = encapsMsg(PK(msg));
         handleUpperMsg(frame);
@@ -194,7 +194,7 @@ void BasicSnrEval::sendUp(AirFrame *msg, SnrList& list)
     // attach the cInfo to the AirFrame
     msg->setControlInfo(cInfo);
 
-    send(msg, uppergateOut);
+    send(msg, upperLayerOut);
 }
 
 /**

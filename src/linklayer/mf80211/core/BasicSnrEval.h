@@ -67,8 +67,8 @@ class INET_API BasicSnrEval : public ChannelAccess
 
     /** @brief gate id*/
     /*@{*/
-    int uppergateOut;
-    int uppergateIn;
+    int upperLayerOut;
+    int upperLayerIn;
     /*@}*/
     double carrierFrequency;
 

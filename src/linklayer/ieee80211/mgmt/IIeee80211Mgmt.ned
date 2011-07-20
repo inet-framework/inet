@@ -28,8 +28,8 @@ moduleinterface IIeee80211Mgmt
     parameters:
         @display("i=block/cogwheel");
     gates:
-        input uppergateIn;
-        output uppergateOut;
+        input upperLayerIn;
+        output upperLayerOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
         input agentIn;   // optional gates used for the agent in stations

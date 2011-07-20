@@ -29,7 +29,7 @@ void Ieee80211MgmtAPBase::initialize(int stage)
 
     if (stage==0)
     {
-        hasRelayUnit = gate("uppergateOut")->getPathEndGate()->isConnected();
+        hasRelayUnit = gate("upperLayerOut")->getPathEndGate()->isConnected();
         WATCH(hasRelayUnit);
     }
 }

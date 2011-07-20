@@ -58,8 +58,8 @@ simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
         @statistic[dataQueueLen](title="Data queue len"; record=histogram,vector; interpolationmode=sample-hold);
         @statistic[droppedPkBytesByQueue](title="Dropped packet bytes by queue"; source="packetBytes(dropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
-        input uppergateIn; // from ~IMACRelayUnit; can be left unconnected
-        output uppergateOut; // to ~IMACRelayUnit; can be left unconnected
+        input upperLayerIn; // from ~IMACRelayUnit; can be left unconnected
+        output upperLayerOut; // to ~IMACRelayUnit; can be left unconnected
         input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface

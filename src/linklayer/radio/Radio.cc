@@ -57,8 +57,8 @@ void Radio::initialize(int stage)
     {
         gate("radioIn")->setDeliverOnReceptionStart(true);
 
-        uppergateIn = findGate("uppergateIn");
-        uppergateOut = findGate("uppergateOut");
+        upperLayerIn = findGate("upperLayerIn");
+        upperLayerOut = findGate("upperLayerOut");
 
         // read parameters
         transmitterPower = par("transmitterPower");
@@ -201,7 +201,7 @@ void Radio::handleMessage(cMessage *msg)
         this->updateDisplayString();
         return;
     }
-    if (msg->getArrivalGateId()==uppergateIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
+    if (msg->getArrivalGateId()==upperLayerIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
     {
         cObject *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)
@@ -211,7 +211,7 @@ void Radio::handleMessage(cMessage *msg)
         return;
     }
 
-    if (msg->getArrivalGateId() == uppergateIn)
+    if (msg->getArrivalGateId() == upperLayerIn)
     {
         if (this->isEnabled())
         {
@@ -304,7 +304,7 @@ void Radio::sendUp(AirFrame *airframe)
 
     delete airframe;
     EV << "sending up frame " << frame->getName() << endl;
-    send(frame, uppergateOut);
+    send(frame, upperLayerOut);
 }
 
 void Radio::sendDown(AirFrame *airframe)

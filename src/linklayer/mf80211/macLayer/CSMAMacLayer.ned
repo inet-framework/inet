@@ -34,8 +34,8 @@ simple CSMAMacLayer
         int queueLength;
         @display("i=prot2");
     gates:
-        input uppergateIn;
-        output uppergateOut;
+        input upperLayerIn;
+        output upperLayerOut;
         input lowergateIn;
         output lowergateOut;
 }

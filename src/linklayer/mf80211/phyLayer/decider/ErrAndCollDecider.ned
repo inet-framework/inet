@@ -31,6 +31,6 @@ simple ErrAndCollDecider
         bool debug = default(false); // debug switch
         double snrThresholdLevel @unit("dB");
     gates:
-        output uppergateOut;
+        output upperLayerOut;
         input lowergateIn;
 }

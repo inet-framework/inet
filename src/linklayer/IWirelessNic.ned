@@ -21,7 +21,7 @@ moduleinterface IWirelessNic
         @display("i=block/ifcard");
         string mgmtType; // name of the management module type (implements IIeee80211Mgmt)
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
 }

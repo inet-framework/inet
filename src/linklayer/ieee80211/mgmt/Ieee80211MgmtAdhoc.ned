@@ -44,8 +44,8 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
         @statistic[dataQueueLen](title="Data queue len"; record=histogram,vector; interpolationmode=sample-hold);
         @statistic[droppedPkBytesByQueue](title="Dropped packet bytes by queue"; source="packetBytes(dropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
-        input uppergateIn;
-        output uppergateOut;
+        input upperLayerIn;
+        output upperLayerOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface

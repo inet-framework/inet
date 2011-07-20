@@ -56,8 +56,8 @@ simple Ieee80211Mesh like IIeee80211Mgmt
         output routingOutProactive;
         input routingInReactive;
         output routingOutReactive;
-        input uppergateIn @labels(Ieee802Ctrl/down);
-        output uppergateOut @labels(Ieee802Ctrl/up);
+        input upperLayerIn @labels(Ieee802Ctrl/down);
+        output upperLayerOut @labels(Ieee802Ctrl/up);
         input fromEthernet @labels(Ieee80211Frame);
         output toEthernet @labels(Ieee80211Frame);
         input macIn;

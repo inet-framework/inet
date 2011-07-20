@@ -102,8 +102,8 @@ module NodeBase6
         // connections to network outside
         for i=0..sizeof(radioIn)-1 {
             radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> networkLayer.ifIn++;
-            wlan[i].uppergateIn <-- networkLayer.ifOut++;
+            wlan[i].upperLayerOut --> networkLayer.ifIn++;
+            wlan[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(ethg)-1 {

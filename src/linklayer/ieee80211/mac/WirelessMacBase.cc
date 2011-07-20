@@ -34,8 +34,8 @@ void WirelessMacBase::initialize(int stage)
 {
     if (stage==0)
     {
-        uppergateIn = findGate("uppergateIn");
-        uppergateOut = findGate("uppergateOut");
+        upperLayerIn = findGate("upperLayerIn");
+        upperLayerOut = findGate("upperLayerOut");
         lowergateIn = findGate("lowergateIn");
         lowergateOut = findGate("lowergateOut");
 
@@ -56,7 +56,7 @@ void WirelessMacBase::handleMessage(cMessage *msg)
         handleSelfMsg(msg);
     else if (!msg->isPacket())
         handleCommand(msg);
-    else if (msg->getArrivalGateId()==uppergateIn)
+    else if (msg->getArrivalGateId()==upperLayerIn)
     {
         emit(packetReceivedFromUpperSignal, msg);
         handleUpperMsg(PK(msg));
@@ -70,7 +70,7 @@ void WirelessMacBase::handleMessage(cMessage *msg)
 
 bool WirelessMacBase::isUpperMsg(cMessage *msg)
 {
-    return msg->getArrivalGateId()==uppergateIn;
+    return msg->getArrivalGateId()==upperLayerIn;
 }
 
 bool WirelessMacBase::isLowerMsg(cMessage *msg)
@@ -95,6 +95,6 @@ void WirelessMacBase::sendUp(cMessage *msg)
     if (msg->isPacket())
         emit(packetSentToUpperSignal, msg);
 
-    send(msg, uppergateOut);
+    send(msg, upperLayerOut);
 }
 

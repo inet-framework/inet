@@ -51,8 +51,8 @@ module SnrNic
     parameters:
         @display("i=block/ifcard");
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
     submodules:
         mac: CSMAMacLayer {
             parameters:
@@ -67,12 +67,12 @@ module SnrNic
                 @display("p=60,150;b=32,30");
         }
     connections:
-        decider.uppergateOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.uppergateIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.uppergateOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.upperLayerOut --> upperLayerOut;
+        mac.upperLayerIn <-- upperLayerIn;
 
 }
 

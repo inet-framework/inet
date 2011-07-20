@@ -64,7 +64,7 @@ simple Radio like IRadio
         @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
         @statistic[lossRate](title="Packet loss rate"; record=timeavg,vector; interpolationmode=sample-hold; );
     gates:
-        input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
-        output uppergateOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
+        input upperLayerIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
+        output upperLayerOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
         input radioIn @labels(AirFrame); // to receive frames (AirFrame) on the radio channel
 }

@@ -171,8 +171,8 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
 
     /** @name Gate Ids */
     //@{
-    int uppergateOut;
-    int uppergateIn;
+    int upperLayerOut;
+    int upperLayerIn;
     //@}
 
     /**

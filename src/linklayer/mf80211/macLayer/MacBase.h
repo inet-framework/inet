@@ -40,8 +40,8 @@ class INET_API MacBase : public cSimpleModule
   protected:
     /** @brief gate id*/
     //@{
-    int uppergateIn;
-    int uppergateOut;
+    int upperLayerIn;
+    int upperLayerOut;
     int lowergateIn;
     int lowergateOut;
     //@}

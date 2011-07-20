@@ -34,8 +34,8 @@ module Ieee80211gNicMesh like IWirelessNic
         @display("i=block/ifcard");
         string mgmtType = "Ieee80211Mesh";
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
         input radioIn; // to receive AirFrames
         input fromEthernet @labels(Ieee80211Frame);   // to Ethernet MAC
         output toEthernet @labels(Ieee80211Frame); // to Ethernet MAC
@@ -57,14 +57,14 @@ module Ieee80211gNicMesh like IWirelessNic
         }
     connections allowunconnected:
         radioIn --> radio.radioIn;
-        radio.uppergateIn <-- mac.lowergateOut;
-        radio.uppergateOut --> mac.lowergateIn;
+        radio.upperLayerIn <-- mac.lowergateOut;
+        radio.upperLayerOut --> mac.lowergateIn;
 
-        mac.uppergateOut --> mgmt.macIn;
-        mac.uppergateIn <-- mgmt.macOut;
+        mac.upperLayerOut --> mgmt.macIn;
+        mac.upperLayerIn <-- mgmt.macOut;
 
-        mgmt.uppergateOut --> uppergateOut;
-        mgmt.uppergateIn <-- uppergateIn;
+        mgmt.upperLayerOut --> upperLayerOut;
+        mgmt.upperLayerIn <-- upperLayerIn;
         mgmt.toEthernet --> toEthernet;
         mgmt.fromEthernet <-- fromEthernet;
 }

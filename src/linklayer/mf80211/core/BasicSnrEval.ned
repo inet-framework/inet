@@ -52,8 +52,8 @@ simple BasicSnrEval
         int headerLength @unit(b);  // header length of the ~AirFrame
         double carrierFrequency @unit(Hz) = default(0Hz);
     gates:
-        input uppergateIn; // from the MAC layer
-        output uppergateOut; // to the decider sub-module
+        input upperLayerIn; // from the MAC layer
+        output upperLayerOut; // to the decider sub-module
         input radioIn @labels(AirFrame); // to receive AirFrames
 }
 

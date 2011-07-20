@@ -816,7 +816,7 @@ bool Ieee80211Mesh::macLabelBasedSend(Ieee80211DataFrame *frame)
 void Ieee80211Mesh::sendUp(cMessage *msg)
 {
     if (isUpperLayer(msg))
-        send(msg, "uppergateOut");
+        send(msg, "upperLayerOut");
     else
         delete msg;
 }

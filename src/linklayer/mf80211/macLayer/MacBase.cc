@@ -29,8 +29,8 @@ void MacBase::initialize(int stage)
 {
     if (stage==0)
     {
-        uppergateIn = findGate("uppergateIn");
-        uppergateOut = findGate("uppergateOut");
+        upperLayerIn = findGate("upperLayerIn");
+        upperLayerOut = findGate("upperLayerOut");
         lowergateIn = findGate("lowergateIn");
         lowergateOut = findGate("lowergateOut");
 
@@ -46,7 +46,7 @@ void MacBase::handleMessage(cMessage *msg)
         handleSelfMsg(msg);
     else if (!msg->isPacket())
         handleCommand(msg);
-    else if (msg->getArrivalGateId()==uppergateIn)
+    else if (msg->getArrivalGateId()==upperLayerIn)
         handleUpperMsg(PK(msg));
     else
         handleLowerMsg(PK(msg));
@@ -54,7 +54,7 @@ void MacBase::handleMessage(cMessage *msg)
 
 bool MacBase::isUpperMsg(cMessage *msg)
 {
-    return msg->getArrivalGateId()==uppergateIn;
+    return msg->getArrivalGateId()==upperLayerIn;
 }
 
 bool MacBase::isLowerMsg(cMessage *msg)
@@ -71,6 +71,6 @@ void MacBase::sendDown(cMessage *msg)
 void MacBase::sendUp(cMessage *msg)
 {
     EV << "sending up " << msg << "\n";
-    send(msg, uppergateOut);
+    send(msg, upperLayerOut);
 }
 

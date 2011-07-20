@@ -83,8 +83,8 @@ moduleinterface IRadio
     parameters:
         @display("i=block/wrxtx");
     gates:
-        input uppergateIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
-        output uppergateOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
+        input upperLayerIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
+        output upperLayerOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
         input radioIn @labels(AirFrame); // to receive frames (~AirFrame) on the radio channel
 }
 

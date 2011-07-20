@@ -57,6 +57,6 @@ module WirelessAPWithSink
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
-        wlan.uppergateOut --> sink.in++;
+        wlan.upperLayerOut --> sink.in++;
 }
 

@@ -32,6 +32,6 @@ simple SnrDecider
         double snrThresholdLevel @unit("dB");
         @display("i=box2_s");
     gates:
-        output uppergateOut;
+        output upperLayerOut;
         input lowergateIn;
 }

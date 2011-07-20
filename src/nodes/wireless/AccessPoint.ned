@@ -80,8 +80,8 @@ module AccessPoint
         // because broadcasts must be handled differently for wilreless IFs by the relayUnit
         for i=0..numRadios-1 {
             radioIn[i] --> wlan[i].radioIn;
-            wlan[i].uppergateOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
-            wlan[i].uppergateIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
+            wlan[i].upperLayerOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
+            wlan[i].upperLayerIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {

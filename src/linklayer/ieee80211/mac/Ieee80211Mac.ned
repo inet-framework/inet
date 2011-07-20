@@ -70,8 +70,8 @@ simple Ieee80211Mac
         @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
     gates:
-        input uppergateIn @labels(Ieee80211Frame);
-        output uppergateOut @labels(Ieee80211Frame);
+        input upperLayerIn @labels(Ieee80211Frame);
+        output upperLayerOut @labels(Ieee80211Frame);
         input lowergateIn @labels(Ieee80211Frame);
         output lowergateOut @labels(Ieee80211Frame);
 }

@@ -48,8 +48,8 @@ module NicCsma like IWirelessNic
     parameters:
         string mgmtType = ""; // unused
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mac: CSMAMacLayer {
@@ -66,10 +66,10 @@ module NicCsma like IWirelessNic
         }
     connections:
         radioIn --> snrEval.radioIn;
-        decider.uppergateOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.uppergateIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.uppergateOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.upperLayerOut --> upperLayerOut;
+        mac.upperLayerIn <-- upperLayerIn;
 }

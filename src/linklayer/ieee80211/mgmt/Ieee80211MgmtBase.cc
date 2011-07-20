@@ -179,7 +179,7 @@ cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
 {
-    send(msg, "uppergateOut");
+    send(msg, "upperLayerOut");
 }
 
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)

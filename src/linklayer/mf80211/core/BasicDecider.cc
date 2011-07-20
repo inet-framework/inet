@@ -39,7 +39,7 @@ void BasicDecider::initialize(int stage)
 
     if (stage == 0)
     {
-        uppergateOut = findGate("uppergateOut");
+        upperLayerOut = findGate("upperLayerOut");
         lowergateIn = findGate("lowergateIn");
         numRcvd = 0;
         numSentUp = 0;
@@ -94,7 +94,7 @@ void BasicDecider::sendUp(AirFrame * frame)
 {
     numSentUp++;
     cPacket *macMsg = frame->decapsulate();
-    send(macMsg, uppergateOut);
+    send(macMsg, upperLayerOut);
     coreEV << "sending up msg " << frame->getName() << endl;
     delete frame;
 }

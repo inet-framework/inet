@@ -99,7 +99,7 @@ SnrEval::~SnrEval()
 
 void SnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId()==uppergateIn && !msg->isPacket())
+    if (msg->getArrivalGateId()==upperLayerIn && !msg->isPacket())
     {
         cObject *ctrl = msg->removeControlInfo();
         handleCommand(msg->getKind(), ctrl);

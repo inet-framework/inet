@@ -50,8 +50,8 @@ simple SnrEval
         double sensitivity @unit(dBm);
         @display("i=block/wrxtx");
     gates:
-        input uppergateIn;   // from higher layer protocol (MAC)
-        output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        input upperLayerIn;   // from higher layer protocol (MAC)
+        output upperLayerOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
         input radioIn @labels(AirFrame); // to receive frames (~AirFrame) on the radio channel
 }
 
