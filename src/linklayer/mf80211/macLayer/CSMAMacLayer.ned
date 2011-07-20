@@ -36,6 +36,6 @@ simple CSMAMacLayer
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input lowergateIn;
-        output lowergateOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }

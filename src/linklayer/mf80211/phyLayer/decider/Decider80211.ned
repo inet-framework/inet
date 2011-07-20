@@ -34,5 +34,5 @@ simple Decider80211
         @display("i=block/process_s");
     gates:
         output upperLayerOut @labels(Mac80211Pkt);
-        input lowergateIn;
+        input lowerLayerIn;
 }

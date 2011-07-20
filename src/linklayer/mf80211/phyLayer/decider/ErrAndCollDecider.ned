@@ -32,5 +32,5 @@ simple ErrAndCollDecider
         double snrThresholdLevel @unit("dB");
     gates:
         output upperLayerOut;
-        input lowergateIn;
+        input lowerLayerIn;
 }

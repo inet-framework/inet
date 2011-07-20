@@ -33,5 +33,5 @@ simple SnrDecider
         @display("i=box2_s");
     gates:
         output upperLayerOut;
-        input lowergateIn;
+        input lowerLayerIn;
 }

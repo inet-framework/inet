@@ -47,6 +47,6 @@ simple Mac80211
     gates:
         input upperLayerIn @labels(Ieee802Ctrl);
         output upperLayerOut;
-        input lowergateIn @labels(Mac80211Pkt);
-        output lowergateOut @labels(Mac80211Pkt);
+        input lowerLayerIn @labels(Mac80211Pkt);
+        output lowerLayerOut @labels(Mac80211Pkt);
 }

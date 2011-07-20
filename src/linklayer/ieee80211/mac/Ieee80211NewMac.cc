@@ -466,7 +466,7 @@ void Ieee80211NewMac::initialize(int stage)
         // initialize watches
         validRecMode = false;
         initWatches();
-        radioModule = gate("lowergateOut")->getNextGate()->getOwnerModule()->getId();
+        radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule()->getId();
     }
 }
 

@@ -71,8 +71,8 @@ module Ieee80211Nic like IWirelessNic
         }
     connections:
         radioIn --> radio.radioIn;
-        radio.upperLayerIn <-- mac.lowergateOut;
-        radio.upperLayerOut --> mac.lowergateIn;
+        radio.upperLayerIn <-- mac.lowerLayerOut;
+        radio.upperLayerOut --> mac.lowerLayerIn;
 
         mac.upperLayerOut --> mgmt.macIn;
         mac.upperLayerIn <-- mgmt.macOut;

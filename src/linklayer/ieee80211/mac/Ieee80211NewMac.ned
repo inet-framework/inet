@@ -107,6 +107,6 @@ simple Ieee80211NewMac
     gates:
         input upperLayerIn @labels(Ieee80211Frame);
         output upperLayerOut @labels(Ieee80211Frame);
-        input lowergateIn @labels(Ieee80211Frame);
-        output lowergateOut @labels(Ieee80211Frame);
+        input lowerLayerIn @labels(Ieee80211Frame);
+        output lowerLayerOut @labels(Ieee80211Frame);
 }

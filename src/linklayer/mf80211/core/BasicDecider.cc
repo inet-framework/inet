@@ -40,7 +40,7 @@ void BasicDecider::initialize(int stage)
     if (stage == 0)
     {
         upperLayerOut = findGate("upperLayerOut");
-        lowergateIn = findGate("lowergateIn");
+        lowerLayerIn = findGate("lowerLayerIn");
         numRcvd = 0;
         numSentUp = 0;
         WATCH(numRcvd);
@@ -65,7 +65,7 @@ void BasicDecider::initialize(int stage)
  */
 void BasicDecider::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == lowergateIn)
+    if (msg->getArrivalGateId() == lowerLayerIn)
     {
         numRcvd++;
 

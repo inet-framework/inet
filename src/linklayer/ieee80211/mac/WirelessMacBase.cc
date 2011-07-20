@@ -36,8 +36,8 @@ void WirelessMacBase::initialize(int stage)
     {
         upperLayerIn = findGate("upperLayerIn");
         upperLayerOut = findGate("upperLayerOut");
-        lowergateIn = findGate("lowergateIn");
-        lowergateOut = findGate("lowergateOut");
+        lowerLayerIn = findGate("lowerLayerIn");
+        lowerLayerOut = findGate("lowerLayerOut");
 
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
@@ -75,7 +75,7 @@ bool WirelessMacBase::isUpperMsg(cMessage *msg)
 
 bool WirelessMacBase::isLowerMsg(cMessage *msg)
 {
-    return msg->getArrivalGateId()==lowergateIn;
+    return msg->getArrivalGateId()==lowerLayerIn;
 }
 
 void WirelessMacBase::sendDown(cMessage *msg)
@@ -85,7 +85,7 @@ void WirelessMacBase::sendDown(cMessage *msg)
     if (msg->isPacket())
         emit(packetSentToLowerSignal, msg);
 
-    send(msg, lowergateOut);
+    send(msg, lowerLayerOut);
 }
 
 void WirelessMacBase::sendUp(cMessage *msg)

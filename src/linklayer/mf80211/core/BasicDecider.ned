@@ -53,5 +53,5 @@ simple BasicDecider
         @display("i=block/process_s");
     gates:
         output upperLayerOut; // to MAC layer
-        input lowergateIn; // from snrEval sub-module
+        input lowerLayerIn; // from snrEval sub-module
 }

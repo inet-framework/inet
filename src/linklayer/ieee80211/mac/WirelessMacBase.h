@@ -42,8 +42,8 @@ class INET_API WirelessMacBase : public cSimpleModule
     //@{
     int upperLayerIn;
     int upperLayerOut;
-    int lowergateIn;
-    int lowergateOut;
+    int lowerLayerIn;
+    int lowerLayerOut;
     //@}
 
     static simsignal_t packetSentToLowerSignal;

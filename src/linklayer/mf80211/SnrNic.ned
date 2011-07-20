@@ -67,9 +67,9 @@ module SnrNic
                 @display("p=60,150;b=32,30");
         }
     connections:
-        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowerLayerIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowerLayerOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowerLayerIn;
 
         mac.upperLayerOut --> upperLayerOut;
         mac.upperLayerIn <-- upperLayerIn;

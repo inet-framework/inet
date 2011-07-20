@@ -42,8 +42,8 @@ class INET_API MacBase : public cSimpleModule
     //@{
     int upperLayerIn;
     int upperLayerOut;
-    int lowergateIn;
-    int lowergateOut;
+    int lowerLayerIn;
+    int lowerLayerOut;
     //@}
 
     /** @brief Cached pointer to the NotificationBoard module*/

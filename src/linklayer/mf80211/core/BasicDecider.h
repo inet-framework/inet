@@ -61,7 +61,7 @@ class INET_API BasicDecider : public BasicModule
     /** @brief gate id*/
     /*@{*/
     int upperLayerOut;
-    int lowergateIn;
+    int lowerLayerIn;
     /*@}*/
 
     /** @brief statistics*/
