@@ -83,7 +83,6 @@ module NodeBase6
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=159,386;q=queue");
-                mgmtType = default("Ieee80211MgmtSTA");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:

@@ -19,7 +19,7 @@ moduleinterface IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");
-        string mgmtType; // name of the management module type (implements IIeee80211Mgmt)
+        // string mgmtType; // name of the management module type (implements IIeee80211Mgmt)
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers

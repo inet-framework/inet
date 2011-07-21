@@ -57,7 +57,6 @@ module AccessPoint
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=89,225;q=queue");
-                mgmtType = default("Ieee80211MgmtAP");
         }
         eth[sizeof(ethg)]: <default("EtherMACFullDuplex")> like IEtherMAC {
             parameters:
