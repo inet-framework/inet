@@ -32,7 +32,6 @@ class noncobject IPvXAddress;
 //
 enum UDPCommandCode
 {
-
     UDP_C_DATA = 0;    // datagram to send (must carry ~UDPControlInfo)
     UDP_C_BIND = 1;    // fill srcPort and srcAddr in ~UDPControlInfo
     UDP_C_CONNECT = 2; // fill destAddr and destPort in ~UDPControlInfo
@@ -47,7 +46,6 @@ enum UDPCommandCode
 //
 enum UDPStatusInd
 {
-
     UDP_I_DATA = 0;  // data packet (set on data packet)
     UDP_I_ERROR = 1; // ~ICMP error received on a sent datagram
 }

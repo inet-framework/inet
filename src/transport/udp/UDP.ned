@@ -40,14 +40,14 @@ import inet.transport.IUDP;
 // arbitrary message with message kind UDP_C_BIND and an ~UDPControlInfo
 // attached with srcPort filled in.
 //
-// If there is only one app which doesn't bind to any port, it will
-// receive all packets.
+// When UDP receives an ICMP error (~ICMPMessage or ~ICMPv6Message)
+// that refers to an UDP socket, it reports the error to the corresponding 
+// application by sending a message with kind UDP_I_ERROR.
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
 // The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
-// objects attached to ~UDPPacket objects as control info
-// (see cMessage::setControlInfo()).
+// objects attached to ~UDPPacket objects as control info.
 //
 // @see ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
 //

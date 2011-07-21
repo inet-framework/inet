@@ -24,38 +24,40 @@
 
 
 /**
- * UDPSocket is a convenience class, to make it easier to manage TCP connections
- * from your application models. You'd have one (or more) UDPSocket object(s)
- * in your application simple module class, and call its member functions
- * (bind(), listen(), connect(), etc.) to open, close or abort a TCP connection.
+ * UDPSocket is a convenience class, to make it easier to send and receive
+ * UDP packets from your application models. You'd have one (or more)
+ * UDPSocket object(s) in your application simple module class, and call
+ * its member functions (bind(), connect(), sendTo(), etc.) to create and
+ * configure a socket, and to send datagrams.
  *
  * UDPSocket chooses and remembers the sockId for you, assembles and sends command
- * packets (such as OPEN_ACTIVE, OPEN_PASSIVE, CLOSE, ABORT, etc.) to TCP,
- * and can also help you deal with packets and notification messages arriving
- * from TCP.
+ * packets such as UDP_C_BIND to UDP, and can also help you deal with packets and
+ * notification messages arriving from UDP.
  *
- * A session which opens a connection from local port 1000 to 10.0.0.2:2000,
- * sends 16K of data and closes the connection may be as simple as this
- * (the code can be placed in your handleMessage() or activity()):
+ * Here is a code fragment that creates an UDP socket and sends a 1K packet
+ * over it (the code can be placed in your handleMessage() or activity()):
  *
  * <pre>
  *   UDPSocket socket;
  *   socket.connect(IPvXAddress("10.0.0.2"), 2000);
  *
- *   msg = new cMessage("data1");
- *   msg->setByteLength(16*1024);  // 16K
- *   socket.send(msg);
+ *   cPacket *pk = new cPacket("dgram");
+ *   pk->setByteLength(1024);
+ *   socket.send(pk);
  *
  *   socket.close();
  * </pre>
  *
- * Dealing with packets and notification messages coming from TCP is somewhat
+ * Dealing with packets and notification messages coming from UDP is somewhat
  * more cumbersome. Basically you have two choices: you either process those
  * messages yourself, or let UDPSocket do part of the job. For the latter,
  * you give UDPSocket a callback object on which it'll invoke the appropriate
- * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of UDPSocket::CallbackInterface).,
- * The callback object can be your simple module class too.
+ * member functions: socketDatagramArrived() and socketPeerClosed(); these are
+ * methods of UDPSocket::CallbackInterface. The callback object can be your
+ * simple module class too.
+ *
+ * socketPeerClosed() is invoked when UDP receives an ICMP message which
+ * refers to a datagram sent from this socket.
  *
  * This code skeleton example shows how to set up a UDPSocket to use the module
  * itself as callback object:
@@ -64,13 +66,13 @@
  * class MyModule : public cSimpleModule, public UDPSocket::CallbackInterface
  * {
  *    UDPSocket socket;
- *    virtual void socketDataArrived(int sockId, void *yourPtr, cPacket *msg, bool urgent);
- *    virtual void socketFailure(int sockId, void *yourPtr, int code);
- *    ...
+ *    virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPControlInfo *ctrl);
+ *    virtual void socketPeerClosed(int sockId, void *yourPtr);
  * };
  *
  * void MyModule::initialize() {
  *    socket.setCallbackObject(this,NULL);
+ *    socket.bind(5555);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
@@ -81,12 +83,12 @@
  * }
  *
  * void MyModule::socketDatagramArrived(int, void *, cMessage *msg, UDPControlInfo *ctrl) {
- *     ev << "Received UDP packet, " << msg->getByteLength() << " bytes\\n";
+ *     EV << "Received UDP packet, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
  *
- * void MyModule::socketPeerClosed(int, void *, int code) {
- *     ev << "Socket peer closed!\\n";
+ * void MyModule::socketPeerClosed(int, void *) {
+ *     ev << "Received ICMP error, socket peer closed?\\n";
  * }
  * </pre>
  *
