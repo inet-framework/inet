@@ -467,7 +467,7 @@ void UDP::processICMPError(cPacket *msg)
 
 void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort)
 {
-    cPacket *notifyMsg = new cPacket("ERROR", msgkind);
+    cMessage *notifyMsg = new cMessage("ERROR", msgkind);
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
