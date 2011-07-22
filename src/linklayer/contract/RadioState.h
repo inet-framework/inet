@@ -21,7 +21,7 @@
 #ifndef RADIOSTATE_H
 #define RADIOSTATE_H
 
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 /**

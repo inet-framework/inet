@@ -22,7 +22,7 @@
 #define __INET_IBATTERY_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 // INCLUDES for access to the Notification board (publish energy)
 #include "NotifierConsts.h"
@@ -40,7 +40,6 @@
  * time (type=CURRENT).
  *
  * Can be sub-classed for more complex power draws.
- *
  */
 class DrawAmount
 {
@@ -60,10 +59,7 @@ class DrawAmount
     double value;
 
   public:
-    DrawAmount(int type = CURRENT, int value = 0):
-            type(type),
-            value(value)
-    {}
+    DrawAmount(int type = CURRENT, int value = 0) : type(type), value(value) {}
 
     /** @brief Returns the type of power drawn as PowerType. */
     virtual int getType() { return type; }
@@ -119,7 +115,6 @@ class INET_API BatteryAccess : public ModuleAccess<IBattery>
   public:
     BatteryAccess() : ModuleAccess<IBattery>("battery") {}
 };
-
 
 #endif
 

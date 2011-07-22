@@ -20,9 +20,10 @@
  * summary information to Battery Stats module.
  */
 
-#include <omnetpp.h>
-#include "RadioState.h"
+#include "INETDefs.h"
+
 #include "SimpleBattery.h"
+
 #include "Energy.h"
 #include "RadioState.h"
 
@@ -94,16 +95,15 @@ void SimpleBattery::initialize(int stage)
         publishTime = par("publishTime");
         publishDelta = par("publishDelta");
         if (publishDelta < 0 || publishDelta > 1)
-        {
-            error("invalid publishDelta value");
-        }
+            error("invalid publishDelta value: %g", publishDelta);
 
         resolution = par("resolution");
-        EV<< "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh <<
-        ") at " << voltage << "V" << endl;
+
+        EV << "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh
+           << ") at " << voltage << "V" << endl;
         EV << "publishDelta = " << publishDelta * 100 << "%, publishTime = "
-        << publishTime << "s, resolution = " << resolution << "sec"
-        << endl;
+           << publishTime << "s, resolution = " << resolution << "sec"
+           << endl;
 
         double capacity = capmAh * 60 * 60 * voltage; // use mW-sec internally
         nominalCapacity = nominalCapmAh * 60 * 60 * voltage;
@@ -130,16 +130,15 @@ void SimpleBattery::initialize(int stage)
     }
 }
 
-
-
 int SimpleBattery::registerDevice(cObject *id, int numAccts)
 {
-    for (unsigned int i = 0; i<deviceEntryVector.size(); i++)
+    for (unsigned int i = 0; i < deviceEntryVector.size(); i++)
         if (deviceEntryVector[i]->owner == id)
             error("device already registered!");
+
     if (numAccts < 1)
     {
-        error("number of activities must be at least 1");
+        error("Number of activities must be at least 1");
     }
 
     DeviceEntry *device = new DeviceEntry();
@@ -150,13 +149,11 @@ int SimpleBattery::registerDevice(cObject *id, int numAccts)
     for (int i = 0; i < numAccts; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < numAccts; i++)
-    {
-        device->times[i] = 0.0;
+        device->times[i] = SIMTIME_ZERO;
     }
 
-    EV<< "initialized device "  << deviceEntryVector.size() << " with " << numAccts << " accounts" << endl;
+    EV << "Initialized device "  << deviceEntryVector.size() << " with "
+       << numAccts << " accounts" << endl;
     deviceEntryVector.push_back(device);
     return deviceEntryVector.size()-1;
 }
@@ -260,9 +257,8 @@ void SimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic*
 
         double current = it->second->radioUsageCurrent[rs->getState()];
 
-        EV << simTime() << " wireless device " << rs->getRadioId() << " draw current " << current <<
-        "mA, new state = " << rs->getState() << "\n";
-
+        EV << simTime() << " wireless device " << rs->getRadioId() << " draw current " << current
+           << "mA, new state = " << rs->getState() << "\n";
 
         // set the new current draw in the device vector
         it->second->draw = current;
@@ -270,13 +266,10 @@ void SimpleBattery::receiveChangeNotification(int aCategory, const cPolymorphic*
     }
 }
 
-
-
 void SimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 {
     if (amount.getType() == DrawAmount::CURRENT)
     {
-
         double current = amount.getValue();
         if (activity < 0 && current != 0)
             error("invalid CURRENT message");
