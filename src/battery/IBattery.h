@@ -18,8 +18,8 @@
  * @author Isabel Dietrich
 */
 
-#ifndef BASIC_BATTERY_H
-#define BASIC_BATTERY_H
+#ifndef __INET_IBATTERY_H
+#define __INET_IBATTERY_H
 
 // SYSTEM INCLUDES
 #include <omnetpp.h>
@@ -77,7 +77,7 @@ class DrawAmount
 };
 
 
-class INET_API BasicBattery : public cSimpleModule, public INotifiable
+class INET_API IBattery : public cSimpleModule, public INotifiable
 {
   public:
     // LIFECYCLE
@@ -144,10 +144,10 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
 };
 
 
-class INET_API BatteryAccess : public ModuleAccess<BasicBattery>
+class INET_API BatteryAccess : public ModuleAccess<IBattery>
 {
   public:
-    BatteryAccess() : ModuleAccess<BasicBattery>("battery") {}
+    BatteryAccess() : ModuleAccess<IBattery>("battery") {}
 };
 
 

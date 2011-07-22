@@ -18,7 +18,7 @@
 #include <omnetpp.h>
 #include <vector>
 #include <map>
-#include "BasicBattery.h"
+#include "IBattery.h"
 
 /**
  * @brief Base class for any power source.
@@ -32,7 +32,7 @@
 
 
 
-class INET_API SimpleBattery : public BasicBattery
+class INET_API SimpleBattery : public IBattery
 {
   protected:
     class DeviceEntry
