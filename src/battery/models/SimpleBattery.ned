@@ -34,4 +34,6 @@ simple SimpleBattery like IBattery
                                      // observed to have changed by publishDelta * nominal_capacity
         double publishTime @unit(s); // if > 0, capacity is published to the BB each publishTime
                                      // interval, 
+        @statistic[currCapacity](title="Current battery capacity [%]"; record=min,max,vector);
+        @statistic[consumedEnergy](title="Consumed energy [V*mA*s]"; record=histogram,vector);
 }
