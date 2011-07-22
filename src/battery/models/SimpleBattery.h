@@ -12,8 +12,8 @@
  *
  ***************************************************************************/
 
-#ifndef INET_SIMPLE_BATTERY_H
-#define INET_SIMPLE_BATTERY_H
+#ifndef __INET_SIMPLEBATTERY_H
+#define __INET_SIMPLEBATTERY_H
 
 #include <omnetpp.h>
 #include <vector>
@@ -32,7 +32,7 @@
 
 
 
-class INET_API InetSimpleBattery : public BasicBattery
+class INET_API SimpleBattery : public BasicBattery
 {
   protected:
     class DeviceEntry
@@ -97,8 +97,8 @@ class INET_API InetSimpleBattery : public BasicBattery
      * "Account" identifies the account the power is drawn from.
      */
     virtual void draw(int drainID, DrawAmount& amount, int account);
-    ~InetSimpleBattery();
-    InetSimpleBattery() {mustSubscribe = true;}
+    ~SimpleBattery();
+    SimpleBattery() {mustSubscribe = true;}
     double getVoltage();
     /** @brief current state of charge of the battery, relative to its
      * rated nominal capacity [0..1]

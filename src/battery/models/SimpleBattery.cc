@@ -22,13 +22,13 @@
 
 #include <omnetpp.h>
 #include "RadioState.h"
-#include "InetSimpleBattery.h"
+#include "SimpleBattery.h"
 #include "Energy.h"
 
-Define_Module(InetSimpleBattery);
+Define_Module(SimpleBattery);
 
 
-void InetSimpleBattery::initialize(int stage)
+void SimpleBattery::initialize(int stage)
 {
 
     BasicBattery::initialize(stage); //DO NOT DELETE!!
@@ -94,7 +94,7 @@ void InetSimpleBattery::initialize(int stage)
 
 
 
-int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
+int SimpleBattery::registerDevice(cObject *id, int numAccts)
 {
     for (unsigned int i = 0; i<deviceEntryVector.size(); i++)
         if (deviceEntryVector[i]->owner == id)
@@ -123,7 +123,7 @@ int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
     return deviceEntryVector.size()-1;
 }
 
-void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
+void SimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
 {
     Enter_Method_Silent();
     if (deviceEntryMap.find(id)!=deviceEntryMap.end())
@@ -167,7 +167,7 @@ void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, d
     }
 }
 
-void InetSimpleBattery::handleMessage(cMessage *msg)
+void SimpleBattery::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -200,7 +200,7 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
 
 
 
-void InetSimpleBattery::finish()
+void SimpleBattery::finish()
 {
     // do a final update of battery capacity
     deductAndCheck();
@@ -208,7 +208,7 @@ void InetSimpleBattery::finish()
     deviceEntryVector.clear();
 }
 
-void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* aDetails)
+void SimpleBattery::receiveChangeNotification(int aCategory, const cObject* aDetails)
 {
     Enter_Method_Silent();
     //EV << "[Battery]: receiveChangeNotification" << endl;
@@ -239,7 +239,7 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* 
 
 
 
-void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
+void SimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 {
     if (amount.getType() == DrawAmount::CURRENT)
     {
@@ -289,7 +289,7 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
  *  Function to update the display string with the remaining energy
  */
 
-InetSimpleBattery::~InetSimpleBattery()
+SimpleBattery::~SimpleBattery()
 {
     while (!deviceEntryMap.empty())
     {
@@ -307,7 +307,7 @@ InetSimpleBattery::~InetSimpleBattery()
 }
 
 
-void InetSimpleBattery::deductAndCheck()
+void SimpleBattery::deductAndCheck()
 {
     // already depleted, devices should have stopped sending drawMsg,
     // but we catch any leftover messages in queue
