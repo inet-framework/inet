@@ -45,7 +45,9 @@ class INET_API RadioState : public cObject
       IDLE,
       RECV,
       TRANSMIT,
-      SLEEP
+      SLEEP,
+
+      NUMBER_OF_ELEMENTS   // number of states, stay in last position!
     };
 
     //XXX consider adding the following:
