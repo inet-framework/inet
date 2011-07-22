@@ -23,7 +23,8 @@
 #include "INETDefs.h"
 
 #include "SimpleBattery.h"
-
+#include "NotifierConsts.h"
+#include "NotificationBoard.h"
 #include "Energy.h"
 #include "RadioState.h"
 
@@ -77,8 +78,6 @@ SimpleBattery::~SimpleBattery()
 
 void SimpleBattery::initialize(int stage)
 {
-    IBattery::initialize(stage); //DO NOT DELETE!!
-
     if (stage == 0)
     {
         mustSubscribe = true;

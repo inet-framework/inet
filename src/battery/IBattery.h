@@ -21,12 +21,8 @@
 #ifndef __INET_IBATTERY_H
 #define __INET_IBATTERY_H
 
-// SYSTEM INCLUDES
 #include "INETDefs.h"
-
-// INCLUDES for access to the Notification board (publish energy)
-#include "NotifierConsts.h"
-#include "NotificationBoard.h"
+#include "ModuleAccess.h"
 
 
 /**
@@ -41,7 +37,7 @@
  *
  * Can be sub-classed for more complex power draws.
  */
-class DrawAmount
+class DrawAmount  //FIXME this class is nonsense, eliminate! use two draw() methods instead! --Andras
 {
   public:
     /** @brief The type of the amount to draw.*/
@@ -73,7 +69,7 @@ class DrawAmount
 };
 
 
-class INET_API IBattery : public cSimpleModule, public INotifiable
+class INET_API IBattery
 {
   public:
     /**

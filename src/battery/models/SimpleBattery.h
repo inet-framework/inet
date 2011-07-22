@@ -19,15 +19,16 @@
 #include <map>
 
 #include "INETDefs.h"
-
 #include "IBattery.h"
+#include "INotifiable.h"
+#include "NotificationBoard.h"
 
 /**
  * Simple battery module
  *
  * generate an error, when discharged.
  */
-class INET_API SimpleBattery : public IBattery
+class INET_API SimpleBattery : public cSimpleModule, public INotifiable, public IBattery
 {
   protected:
     class DeviceEntry
