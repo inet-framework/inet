@@ -20,14 +20,18 @@ import inet.battery.IBattery;
 //
 // a simple battery module
 //
+// Publish capacity to BatteryStats every publishTime (if > 0) and
+// whenever capacity has changed by publishDelta (if < 100%).
+//
 simple SimpleBattery like IBattery
 {
     parameters:
-        double nominal;
-        double capacity;
-        double voltage;
-        double resolution @unit(s);
-        double publishDelta;
-        double publishTime @unit(s);
-        bool ConsumedVector = default(false);
+        double nominal @unit(mAh);   //nominal battery capacity
+        double capacity @unit(mAh);  // initial capacity of battery
+        double voltage @unit(V);     // nominal voltage
+        double resolution @unit(s);  //  capacity is updated at least every resolution time
+        double publishDelta;         // [0,1] capacity is published to the BB each time it is
+                                     // observed to have changed by publishDelta * nominal_capacity
+        double publishTime @unit(s); // if > 0, capacity is published to the BB each publishTime
+                                     // interval, 
 }
