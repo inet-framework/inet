@@ -207,6 +207,14 @@ class INET_API IPvXAddress
     }
 
     /**
+     * True if the stored address is a multicast address.
+     */
+    bool isMulticast() const
+    {
+        return isv6 ? get6().isMulticast() : get4().isMulticast();
+    }
+
+    /**
      * Returns length of internal binary representation of address,
      * (count of 32-bit unsigned integers.)
      */
