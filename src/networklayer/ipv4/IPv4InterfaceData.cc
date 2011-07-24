@@ -68,10 +68,32 @@ std::string IPv4InterfaceData::detailedInfo() const
 
 bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const
 {
-    int n = getMulticastGroups().size();
+    int n = multicastGroups.size();
     for (int i=0; i<n; i++)
-        if (multicastAddress.equals(getMulticastGroups()[i]))
+        if (multicastGroups[i] == multicastAddress)
             return true;
     return false;
 }
 
+void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
+{
+    if (!isMemberOfMulticastGroup(multicastAddress))
+    {
+        multicastGroups.push_back(multicastAddress);
+        changed1();
+    }
+}
+
+void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
+{
+    int i;
+    int n = multicastGroups.size();
+    for (i = 0; i < n; i++)
+        if (multicastGroups[i] == multicastAddress)
+            break;
+    if (i != n)
+    {
+        multicastGroups.erase(multicastGroups.begin() + i);
+        changed1();
+    }
+}

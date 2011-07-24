@@ -77,6 +77,8 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     virtual void setNetmask(IPv4Address m) {netmask = m; changed1();}
     virtual void setMetric(int m) {metric = m; changed1();}
     virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v; changed1();}
+    virtual void joinMulticastGroup(const IPv4Address& multicastAddress);
+    virtual void leaveMulticastGroup(const IPv4Address& multicastAddress);
     //@}
 };
 
