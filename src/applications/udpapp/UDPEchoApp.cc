@@ -82,6 +82,7 @@ void UDPEchoApp::processPacket(cPacket *msg)
     }
     else
     {
+        // response packet: compute round-trip time
         simtime_t rtt = simTime() - packet->getCreationTime();
         EV << "RTT: " << rtt << "\n";
         emit(roundTripTimeSignal, rtt);

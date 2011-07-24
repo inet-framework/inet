@@ -221,7 +221,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     IPv4Address nextHopAddress;
     IPv4Address *nextHopAddressPrt = NULL;
 
-    // if HL send a Ipdatagram routing the packet
+    // if HL sends an IPv4Datagram, route the packet
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
         IPv4Datagram *datagram = check_and_cast  <IPv4Datagram *>(msg);
@@ -235,7 +235,6 @@ void IPv4::handleMessageFromHL(cPacket *msg)
             routeMulticastPacket(datagram, destIE, NULL);
         return;
     }
-    // encapsulate and send
 
     // encapsulate and send
     IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());

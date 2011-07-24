@@ -91,7 +91,7 @@ class INET_API IPv6Address
         //@}
 
         /**
-         *  Constructor
+         *  Constructor.
          *  Set all 128 bits of the IPv6 address to '0'.
          *  0:0:0:0:0:0:0:0
          */

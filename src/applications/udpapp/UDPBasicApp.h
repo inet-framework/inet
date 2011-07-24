@@ -37,7 +37,7 @@ class INET_API UDPBasicApp : public UDPAppBase
 
     static int counter; // counter for generating a global number for each packet
 
-    //statistics
+    // statistics
     int numSent;
     int numReceived;
 

@@ -18,11 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.applications.udpapp;
 
-
 import inet.applications.IUDPApp;
+
 
 //
 // Sends UDP packets to the given IP address(es) in bursts, or acts as a

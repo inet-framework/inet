@@ -51,7 +51,7 @@ class INET_API MACAddress
     MACAddress();
 
     /**
-     * Initializes the address from a 48 bits integer
+     * Initializes the address from a 48-bit integer
      */
     MACAddress(uint64 bits);
 
@@ -72,7 +72,7 @@ class INET_API MACAddress
     MACAddress& operator=(const MACAddress& other);
 
     /**
-     * Returns 6.
+     * Returns the address size in bytes, that is, 6.
      */
     unsigned int getAddressSize() const;
 

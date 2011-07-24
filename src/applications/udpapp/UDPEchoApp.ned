@@ -40,7 +40,7 @@ simple UDPEchoApp like IUDPApp
         @signal[roundTripTime](type=simtime_t);
         @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
         @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[roundTripTime](title="Round trip delay time"; unit=s; record=histogram,stats,vector);
+        @statistic[roundTripTime](title="Round trip time"; unit=s; record=histogram,stats,vector);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

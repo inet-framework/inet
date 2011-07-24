@@ -31,7 +31,6 @@ class noncobject IPvXAddress;
 //
 enum TcpCommandCode
 {
-
     TCP_C_OPEN_ACTIVE = 1;   // active open (must carry ~TCPOpenCommand)
     TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry ~TCPOpenCommand)
     TCP_C_SEND = 3;          // send data (set on data packet)
@@ -49,7 +48,6 @@ enum TcpCommandCode
 //
 enum TcpStatusInd
 {
-
     TCP_I_DATA = 1;              // data packet (set on data packet)
     TCP_I_URGENT_DATA = 2;       // urgent data (set on data packet)
     TCP_I_ESTABLISHED = 3;       // connection established
@@ -67,7 +65,6 @@ enum TcpStatusInd
 //
 enum TCPErrorCode
 {
-
 }
 
 
