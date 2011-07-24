@@ -1,4 +1,14 @@
-TODO: MACAddress to use int64 (code becomes a lot simpler)
+TODO: IPv4 misfeature: in IPv4::handleMessageFromHL(cPacket *msg), if the packet is already
+      an IP datagram, then it does not encapsulate the packet but just routes it!
+      Problem: HL cannot control whether it wants IP to route the packet or tunnel (encapsulate) it!!
+
+TODO: fix typos: recived, broadCast
+
+TODO: TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
+      hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
+
+TODO: StandardHost: do we need tcpType, udpType, sctpType? why not just <default("UDP")>, <default("SCTP")>, etc? they are conditional anyway!
+
 TODO: make copyright headers uniform....
 
 
