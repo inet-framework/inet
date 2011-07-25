@@ -187,6 +187,9 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     static simsignal_t packetReceivedFromUpperSignal;
 
   public:
+    static const double SPEED_OF_LIGHT_IN_CABLE;
+
+  public:
     EtherMACBase();
     virtual ~EtherMACBase();
 
@@ -209,30 +212,12 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     virtual bool checkDestinationAddress(EtherFrame *frame);
     virtual void calculateParameters();
     virtual void printParameters();
-    virtual void prepareTxFrame(EtherFrame *frame);
 
     // finish
     virtual void finish();
 
-    // event handlers
-    virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(EtherTraffic *msg);
-    virtual void processMessageWhenNotConnected(cMessage *msg);
-    virtual void processMessageWhenDisabled(cMessage *msg);
-    virtual void handleEndIFGPeriod();
-    virtual void handleEndTxPeriod();
-    virtual void handleEndPausePeriod();
-    virtual void scheduleEndIFGPeriod();
-    virtual void scheduleEndTxPeriod(cPacket *);
-    virtual void scheduleEndPausePeriod(int pauseUnits);
-
     // helpers
-    virtual bool checkAndScheduleEndPausePeriod();
     virtual void fireChangeNotification(int type, cPacket *msg);
-    virtual void beginSendFrames();
-    virtual void frameReceptionComplete(EtherTraffic *frame);
-    virtual void processReceivedDataFrame(EtherFrame *frame);
-    virtual void processPauseCommand(int pauseUnits);
     virtual void getNextFrameFromQueue();
 
     // display
