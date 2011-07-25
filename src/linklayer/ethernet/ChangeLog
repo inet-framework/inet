@@ -1,3 +1,6 @@
+2011-07-05  Zoltan Bojthe
+    * Added EtherFrameClassifier for QoS queues.
+
 2008-07-26  Andras Varga
 
     * EtherMAC2: refactored to use cGate::getDatarateChannel()
