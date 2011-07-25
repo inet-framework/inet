@@ -340,12 +340,12 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 lwmplspk->setType(WMPLS_NORMAL);
                 if (forwarding_ptr->return_label_input==label && forwarding_ptr->output_label>0)
                 {
-                    next = MacAddress(forwarding_ptr->mac_address);
+                    next = MACAddress(forwarding_ptr->mac_address);
                     lwmplspk->setLabel(forwarding_ptr->output_label);
                 }
                 else if (forwarding_ptr->input_label==label && forwarding_ptr->return_label_output>0)
                 {
-                    next = MacAddress(forwarding_ptr->input_mac_address);
+                    next = MACAddress(forwarding_ptr->input_mac_address);
                     lwmplspk->setLabel(forwarding_ptr->return_label_output);
                 }
                 else
@@ -360,10 +360,10 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 int dist = forwarding_ptr->path.size()-2;
                 lwmplspk->setVectorAddressArraySize(dist);
                 //lwmplspk->setDist(dist);
-                next = MacAddress(forwarding_ptr->path[1]);
+                next = MACAddress(forwarding_ptr->path[1]);
 
                 for (int i=0; i<dist; i++)
-                    lwmplspk->setVectorAddress(i, MacAddress(forwarding_ptr->path[i+1]));
+                    lwmplspk->setVectorAddress(i, MACAddress(forwarding_ptr->path[i+1]));
                 lwmplspk->setLabel(forwarding_ptr->return_label_input);
             }
         }
@@ -372,12 +372,12 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
             lwmplspk->setType(WMPLS_NORMAL);
             if (forwarding_ptr->input_label==label && forwarding_ptr->output_label>0)
             {
-                next = MacAddress(forwarding_ptr->mac_address);
+                next = MACAddress(forwarding_ptr->mac_address);
                 lwmplspk->setLabel(forwarding_ptr->output_label);
             }
             else if (forwarding_ptr->return_label_input==label && forwarding_ptr->return_label_output>0)
             {
-                next = MacAddress(forwarding_ptr->input_mac_address);
+                next = MACAddress(forwarding_ptr->input_mac_address);
                 lwmplspk->setLabel(forwarding_ptr->return_label_output);
             }
             else
@@ -473,7 +473,7 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
 
             forwarding_ptr->path.push_back(myAddress.getInt());
             for (int i=0; i<dist-1; i++)
-                forwarding_ptr->path.push_back(add[i].getInt());
+                forwarding_ptr->path.push_back(add[i].getLo());
             forwarding_ptr->path.push_back(dest.getInt());
 
             mplsData->lwmpls_forwarding_input_data_add(label_in, forwarding_ptr);
@@ -756,7 +756,7 @@ bool Ieee80211Mesh::macLabelBasedSend(Ieee80211DataFrame *frame)
 
     if (next)
     {
-        frame->setReceiverAddress(MacAddress(next));
+        frame->setReceiverAddress(MACAddress(next));
     }
     else
     {

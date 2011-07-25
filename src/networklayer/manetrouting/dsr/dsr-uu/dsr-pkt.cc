@@ -347,8 +347,8 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         if (ctrl!=NULL)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-            memcpy (dp->mac.ethh->h_dest,ctrlmac->getDest().getAddressBytes(),ETH_ALEN);    /* destination eth addr */
-            memcpy (dp->mac.ethh->h_source,ctrlmac->getSrc().getAddressBytes(),ETH_ALEN);   /* destination eth addr */
+            ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
+            ctrlmac->getSrc().getAddressBytes(dp->mac.ethh->h_source);   /* destination eth addr */
             delete ctrl;
         }
 

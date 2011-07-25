@@ -585,7 +585,7 @@ void DYMOUM::getMacAddress(IPv4Datagram *dgram)
         if (ctrl!=NULL)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-            memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
+            ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
             // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
             delete ctrl;
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
@@ -737,7 +737,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
                     {
-                        memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
+                        ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
                         // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
                         delete ctrl;
                         MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
@@ -823,8 +823,8 @@ void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &s
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
                     {
-                        memcpy(macAddressConv.address, ctrlmac->getSrc().getAddressBytes(), 6);  /* destination eth addr */
-                        // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
+                        ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
+                        // ctrlmac->getDest().getAddressBytes(&dest);   /* destination eth addr */
                         delete ctrl;
                         rerr_send(dest_addr, 1, entry, addr);
                     }
@@ -950,7 +950,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
         rtable_entry_t *entry = NULL;
         if (!isInMacLayer())
         {
-            memcpy(macAddressConv.address, frame->getTransmitterAddress().getAddressBytes(), 6);
+            frame->getTransmitterAddress().getAddressBytes(macAddressConv.address);
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
 
             if (ip_msg)
@@ -1068,7 +1068,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
         twoAddressFrame = check_and_cast<Ieee80211TwoAddressFrame *>(details);
         if (!isInMacLayer())
         {
-            memcpy(macAddressConv.address, frame->getTransmitterAddress().getAddressBytes(), 6);
+            frame->getTransmitterAddress().getAddressBytes(macAddressConv.address);
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it!=macToIpAdress->end())
                 addr.s_addr = (*it).second;
