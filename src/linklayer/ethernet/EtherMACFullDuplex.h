@@ -60,8 +60,6 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
 
-    // notifications
-    virtual void updateHasSubcribers();
 
     // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel

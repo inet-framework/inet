@@ -1,6 +1,7 @@
 //
-// Copyright (C) 2006 Levente Meszaros
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2006 Levente Meszaros
+// Copyright (C) 2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,21 +22,18 @@
 
 #include "INETDefs.h"
 
-#include "INotifiable.h"
 #include "IPassiveQueue.h"
 #include "MACAddress.h"
-#include "TxNotifDetails.h"
 
 // Forward declarations:
 class EtherFrame;
 class EtherTraffic;
 class InterfaceEntry;
-class NotificationBoard;
 
 /**
  * Base class for ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public cListener
+class INET_API EtherMACBase : public cSimpleModule, public cListener
 {
   protected:
     enum MACTransmitState
@@ -128,8 +126,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
 
-    bool hasSubscribers;            // only notify if somebody is listening
-
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
     simtime_t lastTxFinishTime;     // time of finish last transmission
 
@@ -154,8 +150,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     // notification stuff
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
-    NotificationBoard *nb;
-    TxNotifDetails notifDetails;
 
     EtherFrame *curTxFrame;
 
@@ -207,7 +201,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     virtual void initializeFlags();
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();
-    virtual void initializeNotificationBoard();
     virtual void initializeStatistics();
     virtual void registerInterface();
 
@@ -229,17 +222,12 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     // event handlers
 
     // helpers
-    virtual void fireChangeNotification(int type, cPacket *msg);
     virtual void getNextFrameFromQueue();
     virtual void ifDown();
 
     // display
     virtual void updateDisplayString();
     virtual void updateConnectionColor(int txState);
-
-    // notifications
-    virtual void updateHasSubcribers() = 0;
-    virtual void receiveChangeNotification(int category, const cObject *details);
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);

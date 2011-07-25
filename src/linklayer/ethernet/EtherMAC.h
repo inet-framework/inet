@@ -109,9 +109,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processDetectedCollision();
 
     virtual void printState();
-
-    // notifications
-    virtual void updateHasSubcribers();
 };
 
 #endif

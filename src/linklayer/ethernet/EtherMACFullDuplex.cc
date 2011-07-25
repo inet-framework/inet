@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Levente Meszaros
+// Copyright (C) 2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -105,13 +106,6 @@ void EtherMACFullDuplex::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 
-    if (hasSubscribers)
-    {
-        // fire notification
-        notifDetails.setPacket(frame);
-        nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
-    }
-
     // send
     EV << "Starting transmission of " << frame << endl;
     emit(packetSentToLowerSignal, frame);
@@ -189,13 +183,6 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
     totalSuccessfulRxTime += frame->getDuration();
 
-    if (hasSubscribers)
-    {
-        // fire notification
-        notifDetails.setPacket(frame);
-        nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
-    }
-
     if (checkDestinationAddress(frame))
     {
         if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
@@ -229,13 +216,6 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
 
 void EtherMACFullDuplex::handleEndTxPeriod()
 {
-    if (hasSubscribers)
-    {
-        // fire notification
-        notifDetails.setPacket(curTxFrame);
-        nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
-    }
-
     // we only get here if transmission has finished successfully, without collision
     if (transmitState != TRANSMITTING_STATE)
         error("End of transmission, and incorrect state detected");
@@ -284,13 +264,6 @@ void EtherMACFullDuplex::finish()
     simtime_t totalChannelIdleTime = t - totalSuccessfulRxTime;
     recordScalar("rx channel idle (%)", 100 * (totalChannelIdleTime / t));
     recordScalar("rx channel utilization (%)", 100 * (totalSuccessfulRxTime / t));
-}
-
-void EtherMACFullDuplex::updateHasSubcribers()
-{
-    hasSubscribers = nb->hasSubscribers(NF_PP_TX_BEGIN) ||
-                     nb->hasSubscribers(NF_PP_TX_END) ||
-                     nb->hasSubscribers(NF_PP_RX_END);
 }
 
 void EtherMACFullDuplex::processMessageWhenNotConnected(cMessage *msg)

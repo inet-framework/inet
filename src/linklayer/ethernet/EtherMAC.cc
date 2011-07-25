@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+ * Copyright (C) 2011 Zoltan Bojthe
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -708,11 +709,6 @@ void EtherMAC::finish()
     recordScalar("rx channel collision (%)", 100*(totalCollisionTime/t));
     recordScalar("collisions", numCollisions);
     recordScalar("backoffs", numBackoffs);
-}
-
-void EtherMAC::updateHasSubcribers()
-{
-    hasSubscribers = false;  // currently we don't fire any notifications
 }
 
 void EtherMAC::processMessageWhenNotConnected(cMessage *msg)

@@ -115,7 +115,6 @@ EtherMACBase::EtherMACBase()
     physInGate = NULL;
     physOutGate = NULL;
     interfaceEntry = NULL;
-    nb = NULL;
     curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
 }
@@ -141,7 +140,6 @@ void EtherMACBase::initialize()
 
     initializeMACAddress();
     initializeQueueModule();
-    initializeNotificationBoard();
     initializeStatistics();
 
     registerInterface(); // needs MAC address
@@ -201,19 +199,6 @@ void EtherMACBase::initializeMACAddress()
     else
     {
         address.setAddress(addrstr);
-    }
-}
-
-void EtherMACBase::initializeNotificationBoard()
-{
-    hasSubscribers = false;
-
-    if (interfaceEntry)
-    {
-        nb = NotificationBoardAccess().getIfExists();
-        notifDetails.setInterfaceEntry(interfaceEntry);
-        nb->subscribe(this, NF_SUBSCRIBERLIST_CHANGED);
-        updateHasSubcribers();
     }
 }
 
@@ -484,15 +469,6 @@ void EtherMACBase::getNextFrameFromQueue()
     }
 }
 
-void EtherMACBase::fireChangeNotification(int type, cPacket *msg)
-{
-    if (nb)
-    {
-        notifDetails.setPacket(msg);
-        nb->fireChangeNotification(type, &notifDetails);
-    }
-}
-
 void EtherMACBase::finish()
 {
     if (!disabled)
@@ -597,12 +573,6 @@ void EtherMACBase::updateConnectionColor(int txState)
             getDisplayString().setTagArg("i", 2, "100");
         }
     }
-}
-
-void EtherMACBase::receiveChangeNotification(int category, const cObject *)
-{
-    if (category == NF_SUBSCRIBERLIST_CHANGED)
-        updateHasSubcribers();
 }
 
 
