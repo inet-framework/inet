@@ -44,6 +44,7 @@ packet EtherTraffic
 //
 packet EtherJam extends EtherTraffic
 {
+    long abortedPkTreeID = 0;  // this field stores the packetTreeId of aborted packet
 }
 
 //

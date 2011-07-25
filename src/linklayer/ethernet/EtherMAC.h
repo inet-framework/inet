@@ -23,6 +23,7 @@
 #include "EtherMACBase.h"
 
 
+class EtherJam;
 class IPassiveQueue;
 
 /**
@@ -43,8 +44,8 @@ class INET_API EtherMAC : public EtherMACBase
 
   protected:
     // states
-    int  backoffs;          // Value of backoff for exponential back-off algorithm
-    int  numConcurrentTransmissions; // number of colliding frames -- we must receive this many jams
+    int  backoffs;                     // value of backoff for exponential back-off algorithm
+    long currentSendPkTreeID;
 
     // other variables
     EtherTraffic *frameBeingReceived;
@@ -60,11 +61,20 @@ class INET_API EtherMAC : public EtherMACBase
     long bytesSentInBurst;             // Number of bytes transmitted in current frame burst
     double slotTime;                   // slot time for half-duplex mode
 
+    struct PkIdRxTime
+    {
+        long packetTreeId;             // tree ID of packet being received.
+        simtime_t endTime;             // end of reception
+        PkIdRxTime(long id, simtime_t time) {packetTreeId=id; endTime = time;}
+    };
+    typedef std::list<PkIdRxTime> EndRxTimeList;
+    EndRxTimeList endRxTimeList;       // list of incoming packets, ordered by endTime
+    int numConcurrentTransmissions;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
+
     static simsignal_t collisionSignal;
     static simsignal_t backoffSignal;
 
-    // helpers
-
+  protected:
     // event handlers
     virtual void handleSelfMessage(cMessage *msg);
     virtual void handleEndIFGPeriod();
@@ -83,16 +93,20 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndTxPeriod(EtherFrame *);
-    virtual void scheduleEndRxPeriod(cPacket *);
+    virtual void scheduleEndRxPeriod(EtherTraffic *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual bool checkAndScheduleEndPausePeriod();
     virtual void beginSendFrames();
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
-    virtual void frameReceptionComplete(EtherTraffic *frame);
+    virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(EtherFrame *frame);
+    virtual void processReceivedJam(EtherJam *jam);
     virtual void processPauseCommand(int pauseUnits);
     virtual void ifDown();
+    virtual simtime_t insertEndReception(long id, simtime_t endRxTime);
+    virtual void removeExpiredEndRxTimes();
+    virtual void processDetectedCollision();
 
     virtual void printState();
 
