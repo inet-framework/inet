@@ -147,30 +147,30 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
             handleEndIFGPeriod();
             break;
 
-            case ENDTRANSMISSION:
-                handleEndTxPeriod();
-                break;
+        case ENDTRANSMISSION:
+            handleEndTxPeriod();
+            break;
 
-            case ENDRECEPTION:
-                handleEndRxPeriod();
-                break;
+        case ENDRECEPTION:
+            handleEndRxPeriod();
+            break;
 
-            case ENDBACKOFF:
-                handleEndBackoffPeriod();
-                break;
+        case ENDBACKOFF:
+            handleEndBackoffPeriod();
+            break;
 
-            case ENDJAMMING:
-                handleEndJammingPeriod();
-                break;
+        case ENDJAMMING:
+            handleEndJammingPeriod();
+            break;
 
-            case ENDPAUSE:
-                handleEndPausePeriod();
-                break;
+        case ENDPAUSE:
+            handleEndPausePeriod();
+            break;
 
-            default:
-                throw cRuntimeError(this, "self-message with unexpected message kind %d", msg->getKind());
-        }
+        default:
+            throw cRuntimeError(this, "self-message with unexpected message kind %d", msg->getKind());
     }
+}
 
 void EtherMAC::handleMessage(cMessage *msg)
 {
@@ -626,8 +626,8 @@ void EtherMAC::handleRetransmission()
 void EtherMAC::printState()
 {
 #define CASE(x) case x: EV << #x; break
-    EV << "transmitState: ";
 
+    EV << "transmitState: ";
     switch (transmitState)
     {
         CASE(TX_IDLE_STATE);
@@ -664,8 +664,8 @@ void EtherMAC::finish()
     recordScalar("rx channel idle (%)", 100*(totalChannelIdleTime/t));
     recordScalar("rx channel utilization (%)", 100*(totalSuccessfulRxTxTime/t));
     recordScalar("rx channel collision (%)", 100*(totalCollisionTime/t));
-    recordScalar("collisions",     numCollisions);
-    recordScalar("backoffs",       numBackoffs);
+    recordScalar("collisions", numCollisions);
+    recordScalar("backoffs", numBackoffs);
 }
 
 void EtherMAC::updateHasSubcribers()
