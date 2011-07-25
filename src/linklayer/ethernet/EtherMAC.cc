@@ -26,7 +26,6 @@
 #include "IPassiveQueue.h"
 
 
-
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();
@@ -95,7 +94,7 @@ void EtherMAC::initializeFlags()
 {
     EtherMACBase::initializeFlags();
 
-    duplexMode = par("duplexEnabled");
+    duplexMode = par("duplexEnabled").boolValue();
     frameBursting = !duplexMode && par("frameBursting").boolValue();
     physInGate->setDeliverOnReceptionStart(true);
 }
@@ -169,7 +168,7 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
                 break;
 
             default:
-                error("self-message with unexpected message kind %d", msg->getKind());
+                throw cRuntimeError(this, "self-message with unexpected message kind %d", msg->getKind());
         }
     }
 

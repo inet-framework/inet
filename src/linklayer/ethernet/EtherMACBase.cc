@@ -183,7 +183,7 @@ void EtherMACBase::initializeQueueModule()
     }
     else
     {
-        txQueue.setInternalQueue("txQueue", par("txQueueLimit"));
+        txQueue.setInternalQueue("txQueue", par("txQueueLimit").longValue());
     }
 }
 
@@ -295,7 +295,7 @@ void EtherMACBase::registerInterface()
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setMtu(par("mtu").longValue());
 
     // capabilities
     interfaceEntry->setMulticast(true);
