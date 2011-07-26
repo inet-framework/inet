@@ -39,3 +39,4 @@ void dumpHListLink(HListLink *hlistLink1, uint16_t hostid);
 
 // for transaction (indirect transmission)
 #endif
+

@@ -19,21 +19,22 @@ class INET_API Ieee802154StarRouting : public cSimpleModule
 
   protected:
     // Message handle functions
-    void                handleMessage           (cMessage*);
+    void handleMessage(cMessage*);
 
     // debugging enabled for this node? Used in the definition of EV
-    bool                m_debug;
-    bool                isPANCoor;
-    const char*     m_moduleName;
+    bool m_debug;
+    bool isPANCoor;
+    const char* m_moduleName;
 
     // module gate ID
-    int             mUppergateIn;
-    int             mUppergateOut;
-    int             mLowergateIn;
-    int             mLowergateOut;
+    int mUppergateIn;
+    int mUppergateOut;
+    int mLowergateIn;
+    int mLowergateOut;
 
     // for statistical data
-    double          numForward;
+    double numForward;
 };
+
 #endif
 

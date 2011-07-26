@@ -10,16 +10,17 @@ void Ieee802154TestApp::initialize(int aStage)
 {
     TrafGenPar::initialize(aStage);
     EV << getParentModule()->getFullName() << ": initializing Ieee802154TestApp, stage=" << aStage << endl;
+
     if (0 == aStage)
     {
-        m_debug             = par("debug");
-        mLowergateIn        = findGate("lowergateIn");
-        mLowergateOut       = findGate("lowergateOut");
-        m_moduleName        = getParentModule()->getFullName();
-        sumE2EDelay         = 0;
-        numReceived         = 0;
-        mNumTrafficMsgs     = 0;
-        totalByteRecv           = 0;
+        m_debug = par("debug");
+        mLowergateIn = findGate("lowergateIn");
+        mLowergateOut = findGate("lowergateOut");
+        m_moduleName = getParentModule()->getFullName();
+        sumE2EDelay = 0;
+        numReceived = 0;
+        mNumTrafficMsgs = 0;
+        totalByteRecv = 0;
         e2eDelayVec.setName("End-to-end delay");
         meanE2EDelayVec.setName("Mean end-to-end delay");
     }
@@ -82,5 +83,5 @@ void Ieee802154TestApp::SendTraf(cPacket* apMsg, const char* apDest)
 
     mNumTrafficMsgs++;
     send(appPkt, mLowergateOut);
-
 }
+

@@ -24,6 +24,7 @@ Define_Module( Ieee802154StarRouting );
 void Ieee802154StarRouting::initialize(int aStage)
 {
     cSimpleModule::initialize(aStage); //DO NOT DELETE!!
+
     if (0 == aStage)
     {
         // WirelessMacBase stuff...
@@ -32,12 +33,12 @@ void Ieee802154StarRouting::initialize(int aStage)
         mLowergateIn  = findGate("lowergateIn");
         mLowergateOut = findGate("lowergateOut");
 
-        m_moduleName    = getParentModule()->getFullName();
+        m_moduleName = getParentModule()->getFullName();
 
-        m_debug         = par("debug");
-        isPANCoor       = par("isPANCoor");
+        m_debug = par("debug");
+        isPANCoor = par("isPANCoor");
 
-        numForward      = 0;
+        numForward = 0;
     }
 }
 
@@ -101,7 +102,4 @@ void Ieee802154StarRouting::handleMessage(cMessage* msg)
         // not defined
     }
 }
-
-
-
 

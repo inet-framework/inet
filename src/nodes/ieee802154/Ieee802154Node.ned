@@ -34,7 +34,7 @@ module Ieee802154Node
 
         }
         // battery module
-        battery: InetSimpleBattery{
+        battery: InetSimpleBattery {
             parameters:
                 @display("p=65,310;i=block/plug");
 

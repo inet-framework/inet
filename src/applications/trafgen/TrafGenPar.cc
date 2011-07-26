@@ -220,6 +220,7 @@ void TrafGenPar::handleSelfMsg(cMessage * apMsg)
             mOnOff = TRAFFIC_OFF;
             scheduleAt(simTime() + OffIntv(), mpOnOffSwitch);
             cancelEvent(mpSendMessage);
+
             if (mOffTraffic)
             {
                 scheduleAt(simTime() + OffInterDepartureTime(), mpSendMessage);
@@ -301,3 +302,4 @@ std::string TrafGenPar::calculateDestination()
         return dest;
     }
 }
+

@@ -9,7 +9,7 @@ simple Ieee802154Phy extends Radio
         @class(Ieee802154Phy);
 
         bool debug;
-        bool NoBitError =default(true);
+        bool NoBitError = default(true);
 
         // power used for transmission of messages (mW)
         transmitterPower @unit("mW") = default(1.0mW);

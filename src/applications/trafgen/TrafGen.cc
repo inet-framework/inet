@@ -33,9 +33,9 @@
  */
 
 TrafGen::TrafGen()
-        :
-        mpSendMessage(NULL),
-        mpOnOffSwitch(NULL)
+    :
+    mpSendMessage(NULL),
+    mpOnOffSwitch(NULL)
 {
 }
 
@@ -87,8 +87,10 @@ void TrafGen::initialize(int aStage)
             {
                 mOnIntv.parse(rootelement->getElementById(id)->getAttribute("onLength"));
                 mOffIntv.parse(rootelement->getElementById(id)->getAttribute("offLength"));
+
                 if (mOnIntv.doubleValue(this) < 0)
                     error("TrafficGenerator, attribute onLength: interval length < 0 is not legal");
+
                 if (mOffIntv.doubleValue(this) < 0)
                     error("TrafficGenerator, attribute offLength: interval length < 0 is not legal");
 
@@ -121,8 +123,10 @@ void TrafGen::initialize(int aStage)
                 && rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest") != NULL)
         {
             cMsgPar temp;
+
             if (!temp.parse(rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest")))
                 error("wrong value in xml file, attribute onIdenticalTrafDest");
+
             mOnIdenticalDest = temp.boolValue();
         }
         else
@@ -132,6 +136,7 @@ void TrafGen::initialize(int aStage)
 
         const char *destination = rootelement->getElementById(id)->getAttribute("trafDest");
         mDestination = destination ? destination : "";
+
         if (mDestination == std::string("-1"))
         {
             mDestination = "BROADCAST"; // Broadcast
@@ -235,6 +240,7 @@ void TrafGen::handleSelfMsg(cMessage* apMsg)
             mOnOff = TRAFFIC_OFF;
             scheduleAt(simTime() + mOffIntv.doubleValue(this), mpOnOffSwitch);
             cancelEvent(mpSendMessage);
+
             if (mOffTraffic)
             {
                 scheduleAt(simTime() + mOffInterDepartureTime.doubleValue(this), mpSendMessage);
@@ -328,11 +334,13 @@ void TrafGen::setParams(int aNewTrafficPattern)
     cXMLElement* rootelement = par("trafConfig").xmlValue();
     char buf[4];
     sprintf(buf, "%d", aNewTrafficPattern);
+
     try
     {
         mPacketSize.parse(rootelement->getElementById(buf)->getAttribute("packetSize"));
         mInterDepartureTime.parse(rootelement->getElementById(buf)->getAttribute("interDepartureTime"));
         mFirstPacketTime.parse(rootelement->getElementById(buf)->getAttribute("firstPacketTime"));
+
         if (rootelement->getElementById(buf)->getAttribute("onLength") != NULL)
         {
             mOnIntv.parse(rootelement->getElementById(buf)->getAttribute("onLength"));
@@ -379,6 +387,7 @@ void TrafGen::setParams(int aNewTrafficPattern)
     }
 
     mDestination = rootelement->getElementById(buf)->getAttribute("trafDest");
+
     if (mDestination == std::string("-1"))
     {
         mDestination = "BROADCAST"; // Broadcast

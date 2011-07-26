@@ -1,9 +1,11 @@
 
 #include "Ieee802154RadioModel.h"
+
 #include "Ieee802154Const.h"
 #include "FWMath.h"
 
 Register_Class(Ieee802154RadioModel);
+
 static const double BER_LOWER_BOUND = 1e-10;
 
 void Ieee802154RadioModel::initializeFrom(cModule *radioModule)
@@ -15,9 +17,8 @@ void Ieee802154RadioModel::initializeFrom(cModule *radioModule)
 
 double Ieee802154RadioModel::calculateDuration(AirFrame *airframe)
 {
-    return (def_phyHeaderLength*8 + airframe->getBitLength())/airframe->getBitrate() ;
+    return (def_phyHeaderLength * 8 + airframe->getBitLength()) / airframe->getBitrate() ;
 }
-
 
 bool Ieee802154RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
 {
@@ -26,6 +27,7 @@ bool Ieee802154RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList
     for (SnrList::const_iterator iter = receivedList.begin(); iter != receivedList.end(); iter++)
         if (iter->snr < snirMin)
             snirMin = iter->snr;
+
 #if OMNETPP_VERSION>0x0400
     cPacket *frame = airframe->getEncapsulatedPacket();
 # else
@@ -39,10 +41,11 @@ bool Ieee802154RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
+
     if (!packetOk(snirMin, airframe->getEncapsulatedMsg()->getBitLength(), airframe->getBitrate()))
     {
-    	EV << "Packet has BIT ERRORS! It is lost!\n";
-    	return false;
+        EV << "Packet has BIT ERRORS! It is lost!\n";
+        return false;
     }
     /*else if (packetOk(snirMin, airframe->getEncapsulatedMsg()->length(), airframe->getBitrate()))
     {
@@ -58,18 +61,14 @@ bool Ieee802154RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList
     return true;
 }
 
-
-
 bool Ieee802154RadioModel::packetOk(double snirMin, int lengthMPDU, double bitrate)
 {
+    if (ownerRadioModule->par("NoBitError"))
+        return true;
 
-	if (ownerRadioModule->par("NoBitError"))
-			return true;
-
-	double errorHeader;
-
-    double  ber = std::max(0.5 * exp(-snirMin /2), BER_LOWER_BOUND);
-    errorHeader = 1.0 - pow((1.0 - ber), def_phyHeaderLength*8);
+    double errorHeader;
+    double  ber = std::max(0.5 * exp(-snirMin / 2), BER_LOWER_BOUND);
+    errorHeader = 1.0 - pow((1.0 - ber), def_phyHeaderLength * 8);
 
     double MpduError = 1.0 - pow((1.0 - ber), lengthMPDU);
 
@@ -83,8 +82,6 @@ bool Ieee802154RadioModel::packetOk(double snirMin, int lengthMPDU, double bitra
     else
         return true; // no error
 }
-
-
 
 double Ieee802154RadioModel::dB2fraction(double dB)
 {

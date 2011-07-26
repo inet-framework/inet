@@ -5,6 +5,7 @@
 int addHListLink(HListLink **hlistLink1, HListLink **hlistLink2, uint16_t hostid, uint8_t sn)
 {
     HListLink *tmp;
+
     if (*hlistLink2 == 0)       //not exist yet
     {
         *hlistLink2 = new HListLink(hostid, sn);
@@ -36,6 +37,7 @@ int updateHListLink(int oper, HListLink **hlistLink1, HListLink **hlistLink2, ui
     ok = 1;
 
     tmp = *hlistLink1;
+
     while (tmp != 0)
     {
         if (tmp->hostID == hostid)
@@ -45,6 +47,7 @@ int updateHListLink(int oper, HListLink **hlistLink1, HListLink **hlistLink2, ui
                 if (tmp->last != 0)
                 {
                     tmp->last->next = tmp->next;
+
                     if (tmp->next != 0)
                         tmp->next->last = tmp->last;
                     else
@@ -60,8 +63,10 @@ int updateHListLink(int oper, HListLink **hlistLink1, HListLink **hlistLink2, ui
                     *hlistLink1 = 0;
                     *hlistLink2 = 0;
                 }
+
                 delete tmp;
             }
+
             if (oper == hl_oper_rpl)    //replace
             {
                 if (tmp->SN != sn)
@@ -72,11 +77,14 @@ int updateHListLink(int oper, HListLink **hlistLink1, HListLink **hlistLink2, ui
                     break;
                 }
             }
+
             ok = 0;
             break;
         }
+
         tmp = tmp->next;
     }
+
     return ok;
 }
 
@@ -100,14 +108,17 @@ void emptyHListLink(HListLink **hlistLink1, HListLink **hlistLink2)
     if (*hlistLink1 != 0)
     {
         tmp = *hlistLink1;
+
         while (tmp != 0)
         {
             tmp2 = tmp;
             tmp = tmp->next;
             delete tmp2;
         }
+
         *hlistLink1 = 0;
     }
+
     *hlistLink2 = *hlistLink1;
 }
 
@@ -118,6 +129,7 @@ void dumpHListLink(HListLink *hlistLink1, uint16_t hostid)
 
     tmp = hlistLink1;
     i = 1;
+
     while (tmp != 0)
     {
         tmp = tmp->next;

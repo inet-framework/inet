@@ -137,3 +137,4 @@ class INET_API TrafGen : public cSimpleModule
 };
 
 #endif
+

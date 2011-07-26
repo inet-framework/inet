@@ -26,34 +26,39 @@
  **************************************************************************/
 
 #include "csma802154.h"
+
 #include "InterfaceTableAccess.h"
 #include "MACAddress.h"
 #include "Ieee802Ctrl_m.h"
+
 #include <assert.h>
 
 Define_Module(csma802154);
+
 static uint64_t MacToUint64(const MACAddress &add)
 {
     uint64_t aux;
     uint64_t lo=0;
-    for (int i=0; i<MAC_ADDRESS_BYTES; i++)
+
+    for (int i = 0; i < MAC_ADDRESS_BYTES; i++)
     {
-        aux  = add.getAddressByte(MAC_ADDRESS_BYTES-i-1);
-        aux <<= 8*i;
+        aux  = add.getAddressByte(MAC_ADDRESS_BYTES - i - 1);
+        aux <<= 8 * i;
         lo  |= aux ;
     }
+
     return lo;
 }
 
 static MACAddress Uint64ToMac(uint64_t lo)
 {
     MACAddress add;
-    add.setAddressByte(0, (lo>>40)&0xff);
-    add.setAddressByte(1, (lo>>32)&0xff);
-    add.setAddressByte(2, (lo>>24)&0xff);
-    add.setAddressByte(3, (lo>>16)&0xff);
-    add.setAddressByte(4, (lo>>8)&0xff);
-    add.setAddressByte(5, lo&0xff);
+    add.setAddressByte(0, (lo >> 40) & 0xff);
+    add.setAddressByte(1, (lo >> 32) & 0xff);
+    add.setAddressByte(2, (lo >> 24) & 0xff);
+    add.setAddressByte(3, (lo >> 16) & 0xff);
+    add.setAddressByte(4, (lo >> 8) & 0xff);
+    add.setAddressByte(5, lo & 0xff);
     return add;
 }
 
@@ -63,6 +68,7 @@ static MACAddress Uint64ToMac(uint64_t lo)
  */
 
 #define L2BROADCAST def_macCoordExtendedAddress
+
 void csma802154::sendUp(cMessage *msg)
 {
     mpNb->fireChangeNotification(NF_LINK_PROMISCUOUS, msg);
@@ -73,12 +79,14 @@ void csma802154::initialize(int stage)
 {
 
     cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         //get my mac address
         useIeee802Ctrl=true;
 
         const char *addressString = par("address");
+
         if (!strcmp(addressString, "auto"))
         {
             // assign automatic address
@@ -136,6 +144,7 @@ void csma802154::initialize(int stage)
 
         //init parameters for backoff method
         std::string backoffMethodStr = par("backoffMethod").stdstringValue();
+
         if (backoffMethodStr == "exponential")
         {
             backoffMethod = EXPONENTIAL;
@@ -157,16 +166,15 @@ void csma802154::initialize(int stage)
                 error("Unknown backoff method '%s'. Use 'constant', 'linear' or 'exponential'.",
                         backoffMethodStr.c_str());
             }
+
             initialCW = par("contentionWindow");
         }
+
         NB = 0;
 
         // txPower = par("txPower").doubleValue();
 
-
         nicId = getParentModule()->getId();
-
-
 
         // initialize the timers
         backoffTimer = new cMessage("timer-backoff");
@@ -175,13 +183,12 @@ void csma802154::initialize(int stage)
         rxAckTimer = new cMessage("timer-rxAck");
         macState = IDLE_1;
         txAttempts = 0;
-
     }
     else if (stage == 2)
     {
         EV << "queueLength = " << queueLength
-        << " bitrate = " << bitrate
-        << " backoff method = " << par("backoffMethod").stringValue() << endl;
+           << " bitrate = " << bitrate
+           << " backoff method = " << par("backoffMethod").stringValue() << endl;
 
         EV << "finished csma init stage 1." << endl;
     }
@@ -198,6 +205,7 @@ void csma802154::finish()
         recordScalar("nbRecvdAcks", nbRecvdAcks);
         recordScalar("nbTxAcks", nbTxAcks);
         recordScalar("nbDuplicates", nbDuplicates);
+
         if (nbBackoffs > 0)
         {
             recordScalar("meanBackoff", backoffValues / nbBackoffs);
@@ -206,6 +214,7 @@ void csma802154::finish()
         {
             recordScalar("meanBackoff", 0);
         }
+
         recordScalar("nbBackoffs", nbBackoffs);
         recordScalar("backoffDurations", backoffValues);
     }
@@ -217,9 +226,12 @@ csma802154::~csma802154()
     cancelAndDelete(ccaTimer);
     cancelAndDelete(sifsTimer);
     cancelAndDelete(rxAckTimer);
+
     if (ackMessage)
         delete ackMessage;
+
     MacQueue::iterator it;
+
     for (it = macQueue.begin(); it != macQueue.end(); ++it)
     {
         delete (*it);
@@ -229,11 +241,11 @@ csma802154::~csma802154()
 
 void csma802154::handleMessage(cMessage* msg)
 {
-
     if (msg->getArrivalGateId() == mLowergateIn && !msg->isPacket())
     {
-        if (msg->getKind()==0)
+        if (msg->getKind() == 0)
             error("[MAC]: message '%s' with length==0 is supposed to be a primitive, but msg kind is also zero", msg->getName());
+
         handleLowerControl(msg);
         return;
     }
@@ -265,6 +277,7 @@ void csma802154::handleUpperMsg(cMessage *msg)
     macPkt->setBitLength(def_phyHeaderLength);
     cObject *controlInfo = msg->removeControlInfo();
     IE3ADDR dest;
+
     if (dynamic_cast<Ieee802Ctrl *>(controlInfo))
     {
         useIeee802Ctrl = true;
@@ -277,10 +290,11 @@ void csma802154::handleUpperMsg(cMessage *msg)
         useIeee802Ctrl = false;
         Ieee802154NetworkCtrlInfo* cInfo = check_and_cast<Ieee802154NetworkCtrlInfo *>(controlInfo);
 
-        if (cInfo->getNetwAddr()==-1)
+        if (cInfo->getNetwAddr() == -1)
         {
             if (!simulation.getModuleByPath(cInfo->getDestName()))
                 error("[MAC]: address conversion fails, destination host does not exist!");
+
             cModule* module = simulation.getModuleByPath(cInfo->getDestName())->getModuleByRelativePath("nic.mac");
             Ieee802154Mac* macModule = check_and_cast<Ieee802154Mac *>(module);
             dest = macModule->getMacAddr();
@@ -328,7 +342,7 @@ void csma802154::updateStatusIdle(t_mac_event event, cMessage *msg)
         if (macQueue.size() <= queueLength)
         {
             macQueue.push_back(static_cast<Ieee802154Frame *> (msg));
-            EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
+            EV << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
             updateMacState(BACKOFF_2);
             NB = 0;
             //BE = macMinBE;
@@ -346,7 +360,9 @@ void csma802154::updateStatusIdle(t_mac_event event, cMessage *msg)
             //utility->publishBBItem(catDroppedPacket, &droppedPacket, nicId);
             updateMacState(IDLE_1);
         }
+
         break;
+
     case EV_DUPLICATE_RECEIVED:
         EV << "(15) FSM State IDLE_1, EV_DUPLICATE_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
         //sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
@@ -359,6 +375,7 @@ void csma802154::updateStatusIdle(t_mac_event event, cMessage *msg)
             updateMacState(WAITSIFS_6);
             startTimer(TIMER_SIFS);
         }
+
         break;
 
     case EV_FRAME_RECEIVED:
@@ -373,6 +390,7 @@ void csma802154::updateStatusIdle(t_mac_event event, cMessage *msg)
             updateMacState(WAITSIFS_6);
             startTimer(TIMER_SIFS);
         }
+
         break;
 
     case EV_BROADCAST_RECEIVED:
@@ -380,6 +398,7 @@ void csma802154::updateStatusIdle(t_mac_event event, cMessage *msg)
         sendUp(decapsMsg(static_cast<Ieee802154Frame *>(msg)));
         delete msg;
         break;
+
     default:
         fsmError(event, msg);
     }
@@ -397,11 +416,13 @@ void csma802154::updateStatusBackoff(t_mac_event event, cMessage *msg)
         PLME_SET_TRX_STATE_request(phy_RX_ON);
         //phy->setRadioState(Radio::RX);
         break;
+
     case EV_DUPLICATE_RECEIVED:
         // suspend current transmission attempt,
         // transmit ack,
         // and resume transmission when entering manageQueue()
         EV << "(28) FSM State BACKOFF, EV_DUPLICATE_RECEIVED:";
+
         if (useMACAcks)
         {
             EV << "suspending current transmit tentative and transmitting ack";
@@ -416,15 +437,17 @@ void csma802154::updateStatusBackoff(t_mac_event event, cMessage *msg)
         {
             EV << "Nothing to do.";
         }
+
         //sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
         delete msg;
-
         break;
+
     case EV_FRAME_RECEIVED:
         // suspend current transmission attempt,
         // transmit ack,
         // and resume transmission when entering manageQueue()
         EV << "(28) FSM State BACKOFF, EV_FRAME_RECEIVED:";
+
         if (useMACAcks)
         {
             EV << "suspending current transmit tentative and transmitting ack";
@@ -439,15 +462,18 @@ void csma802154::updateStatusBackoff(t_mac_event event, cMessage *msg)
         {
             EV << "sending frame up and resuming normal operation.";
         }
+
         sendUp(decapsMsg(static_cast<Ieee802154Frame *>(msg)));
         delete msg;
         break;
+
     case EV_BROADCAST_RECEIVED:
         EV << "(29) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
-        << "sending frame up and resuming normal operation." <<endl;
+           << "sending frame up and resuming normal operation." << endl;
         sendUp(decapsMsg(static_cast<Ieee802154Frame *>(msg)));
         delete msg;
         break;
+
     default:
         fsmError(event, msg);
     }
@@ -462,6 +488,7 @@ void csma802154::updateStatusCCA(t_mac_event event, cMessage *msg)
     {
         EV<< "(25) FSM State CCA_3, EV_TIMER_CCA" << endl;
         bool isIdle = radioState  == RadioState::IDLE;
+
         if (isIdle)
         {
             EV << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
@@ -484,7 +511,7 @@ void csma802154::updateStatusCCA(t_mac_event event, cMessage *msg)
             //BE = std::min(BE+1, macMaxBE);
 
             // decide if we go for another backoff or if we drop the frame.
-            if (NB> macMaxCSMABackoffs)
+            if (NB > macMaxCSMABackoffs)
             {
                 // drop the frame
                 EV << "Tried " << NB << " backoffs, all reported a busy "
@@ -506,10 +533,13 @@ void csma802154::updateStatusCCA(t_mac_event event, cMessage *msg)
                 startTimer(TIMER_BACKOFF);
             }
         }
+
         break;
     }
+
     case EV_DUPLICATE_RECEIVED:
         EV << "(26) FSM State CCA_3, EV_DUPLICATE_RECEIVED:";
+
         if (useMACAcks)
         {
             EV << " setting up radio tx -> WAITSIFS." << endl;
@@ -527,12 +557,14 @@ void csma802154::updateStatusCCA(t_mac_event event, cMessage *msg)
         {
             EV << " Nothing to do." << endl;
         }
+
         //sendUp(decapsMsg(static_cast<MacPkt *>(msg)));
         delete msg;
         break;
 
     case EV_FRAME_RECEIVED:
         EV << "(26) FSM State CCA_3, EV_FRAME_RECEIVED:";
+
         if (useMACAcks)
         {
             EV << " setting up radio tx -> WAITSIFS." << endl;
@@ -550,15 +582,18 @@ void csma802154::updateStatusCCA(t_mac_event event, cMessage *msg)
         {
             EV << " Nothing to do." << endl;
         }
+
         sendUp(decapsMsg(static_cast<Ieee802154Frame *>(msg)));
         delete msg;
         break;
+
     case EV_BROADCAST_RECEIVED:
         EV << "(24) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
-        << " Nothing to do." << endl;
+           << " Nothing to do." << endl;
         sendUp(decapsMsg(static_cast<Ieee802154Frame *>(msg)));
         delete msg;
         break;
+
     default:
         fsmError(event, msg);
     }
@@ -574,6 +609,7 @@ void csma802154::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
         //phy->setRadioState(Radio::RX);
 
         bool expectAck = useMACAcks;
+
         if (packet->getDstAddr() != L2BROADCAST)
         {
             //unicast
@@ -613,13 +649,16 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     assert(useMACAcks);
 
     cMessage * mac;
+
     switch (event)
     {
     case EV_ACK_RECEIVED:
         EV<< "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: "
         << " ProcessAck, manageQueue..." << endl;
+
         if (rxAckTimer->isScheduled())
             cancelEvent(rxAckTimer);
+
         mac = static_cast<cMessage *>(macQueue.front());
         macQueue.pop_front();
         txAttempts = 0;
@@ -630,11 +669,13 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
         delete msg;
         manageQueue();
         break;
+
     case EV_ACK_TIMEOUT:
         EV << "(12) FSM State WAITACK_5, EV_ACK_TIMEOUT:"
-        << " incrementCounter/dropPacket, manageQueue..." << endl;
+           << " incrementCounter/dropPacket, manageQueue..." << endl;
         manageMissingAck(event, msg);
         break;
+
     case EV_BROADCAST_RECEIVED:
     case EV_FRAME_RECEIVED:
         sendUp(decapsMsg(static_cast<Ieee802154Frame*>(msg)));
@@ -643,10 +684,10 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
         EV << "Error ! Received a frame during SIFS !" << endl;
         delete msg;
         break;
+
     default:
         fsmError(event, msg);
     }
-
 }
 
 void csma802154::manageMissingAck(t_mac_event event, cMessage *msg)
@@ -655,14 +696,14 @@ void csma802154::manageMissingAck(t_mac_event event, cMessage *msg)
     {
         // increment counter
         txAttempts++;
-        EV<< "I will retransmit this packet (I already tried "
-        << txAttempts << " times)." << endl;
+        EV << "I will retransmit this packet (I already tried "
+           << txAttempts << " times)." << endl;
     }
     else
     {
         // drop packet
         EV << "Packet was transmitted " << txAttempts
-        << " times and I never got an Ack. I drop the packet." << endl;
+           << " times and I never got an Ack. I drop the packet." << endl;
         cMessage * mac = macQueue.front();
         macQueue.pop_front();
         txAttempts = 0;
@@ -672,6 +713,7 @@ void csma802154::manageMissingAck(t_mac_event event, cMessage *msg)
         mpNb->fireChangeNotification(NF_LINK_BREAK, mac);
         delete mac;
     }
+
     manageQueue();
 }
 void csma802154::updateStatusSIFS(t_mac_event event, cMessage *msg)
@@ -691,19 +733,22 @@ void csma802154::updateStatusSIFS(t_mac_event event, cMessage *msg)
         //      sendDelayed(ackMessage, aTurnaroundTime, lowergateOut);
         ackMessage = NULL;
         break;
+
     case EV_TIMER_BACKOFF:
         // Backoff timer has expired while receiving a frame. Restart it
         // and stay here.
         EV << "(16) FSM State WAITSIFS_6, EV_TIMER_BACKOFF. "
-        << "Restart backoff timer and don't move." << endl;
+           << "Restart backoff timer and don't move." << endl;
         startTimer(TIMER_BACKOFF);
         break;
+
     case EV_BROADCAST_RECEIVED:
     case EV_FRAME_RECEIVED:
         EV << "Error ! Received a frame during SIFS !" << endl;
         sendUp(decapsMsg(static_cast<Ieee802154Frame*>(msg)));
         delete msg;
         break;
+
     default:
         fsmError(event, msg);
     }
@@ -730,12 +775,13 @@ void csma802154::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 
 void csma802154::updateStatusNotIdle(cMessage *msg)
 {
-    EV<< "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
+    EV << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
+
     if (macQueue.size() <= queueLength)
     {
         macQueue.push_back(static_cast<Ieee802154Frame *>(msg));
         EV << "(21) FSM State NOT IDLE, EV_SEND_REQUEST"
-        <<" and [TxBuff avail]: enqueue packet and don't move." << endl;
+           << " and [TxBuff avail]: enqueue packet and don't move." << endl;
     }
     else
     {
@@ -757,7 +803,8 @@ void csma802154::updateStatusNotIdle(cMessage *msg)
  */
 void csma802154::executeMac(t_mac_event event, cMessage *msg)
 {
-    EV<< "In executeMac" << endl;
+    EV << "In executeMac" << endl;
+
     if (macState != IDLE_1 && event == EV_SEND_REQUEST)
     {
         updateStatusNotIdle(msg);
@@ -769,24 +816,31 @@ void csma802154::executeMac(t_mac_event event, cMessage *msg)
         case IDLE_1:
             updateStatusIdle(event, msg);
             break;
+
         case BACKOFF_2:
             updateStatusBackoff(event, msg);
             break;
+
         case CCA_3:
             updateStatusCCA(event, msg);
             break;
+
         case TRANSMITFRAME_4:
             updateStatusTransmitFrame(event, msg);
             break;
+
         case WAITACK_5:
             updateStatusWaitAck(event, msg);
             break;
+
         case WAITSIFS_6:
             updateStatusSIFS(event, msg);
             break;
+
         case TRANSMITACK_7:
             updateStatusTransmitAck(event, msg);
             break;
+
         default:
             EV << "Error in CSMA FSM: an unknown state has been reached. macState=" << macState << endl;
         }
@@ -798,10 +852,13 @@ void csma802154::manageQueue()
     if (macQueue.size() != 0)
     {
         EV<< "(manageQueue) there are " << macQueue.size() << " packets to send, entering backoff wait state." << endl;
+
         if (! backoffTimer->isScheduled())
             startTimer(TIMER_BACKOFF);
+
         updateMacState(BACKOFF_2);
-        if ( transmissionAttemptInterruptedByRx)
+
+        if (transmissionAttemptInterruptedByRx)
         {
             // resume a transmission cycle which was interrupted by
             // a frame reception during CCA check
@@ -832,7 +889,8 @@ void csma802154::updateMacState(t_mac_states newMacState)
  */
 void csma802154::fsmError(t_mac_event event, cMessage *msg)
 {
-    EV<< "FSM Error ! In state " << macState << ", received unknown event:" << event << "." << endl;
+    EV << "FSM Error ! In state " << macState << ", received unknown event:" << event << "." << endl;
+
     if (msg != NULL)
         delete msg;
 }
@@ -851,17 +909,17 @@ void csma802154::startTimer(t_mac_timer timer)
         << "," << ccaDetectionTime <<")." << endl;
         scheduleAt(simTime()+rxSetupTime+ccaDetectionTime, ccaTimer);
     }
-    else if (timer==TIMER_SIFS)
+    else if (timer == TIMER_SIFS)
     {
         assert(useMACAcks);
         EV << "(startTimer) sifsTimer value=" << sifs << endl;
         scheduleAt(simTime()+sifs, sifsTimer);
     }
-    else if (timer==TIMER_RX_ACK)
+    else if (timer == TIMER_RX_ACK)
     {
         assert(useMACAcks);
-        simtime_t ackDuration = ((double)(ackLength+(def_phyHeaderLength*8)))/bitrate;
-        EV << "(startTimer) rxAckTimer value=" << macAckWaitDuration <<" + " << ackDuration<< endl;
+        simtime_t ackDuration = ((double)(ackLength + (def_phyHeaderLength * 8))) / bitrate;
+        EV << "(startTimer) rxAckTimer value=" << macAckWaitDuration <<" + " << ackDuration << endl;
         scheduleAt(simTime()+ackDuration+macAckWaitDuration, rxAckTimer);
     }
     else
@@ -890,20 +948,23 @@ double csma802154::scheduleBackoff()
         << r << ")" << endl;
         break;
     }
+
     case LINEAR:
     {
         int slots = intuniform(1, initialCW + NB, 0);
         backoffTime = slots * aUnitBackoffPeriod.dbl();
-        EV<< "(startTimer) backoffTimer value=" << backoffTime << endl;
+        EV << "(startTimer) backoffTimer value=" << backoffTime << endl;
         break;
     }
+
     case CONSTANT:
     {
         int slots = intuniform(1, initialCW, 0);
         backoffTime = slots * aUnitBackoffPeriod.dbl();
-        EV<< "(startTimer) backoffTimer value=" << backoffTime << endl;
+        EV << "(startTimer) backoffTimer value=" << backoffTime << endl;
         break;
     }
+
     default:
         error("Unknown backoff method!");
     }
@@ -919,8 +980,9 @@ double csma802154::scheduleBackoff()
  */
 void csma802154::handleSelfMsg(cMessage *msg)
 {
-    EV<< "timer routine." << endl;
-    if (msg==backoffTimer)
+    EV << "timer routine." << endl;
+
+    if (msg == backoffTimer)
         executeMac(EV_TIMER_BACKOFF, msg);
     else if (msg==ccaTimer)
         executeMac(EV_TIMER_CCA, msg);
@@ -958,6 +1020,7 @@ void csma802154::handleLowerMsg(cMessage *msg)
             EV << "[MAC]: frame corrupted due to collision, dropped" << endl;
             numCollision++;
         }
+
         delete macPkt;
         return;
     }
@@ -994,10 +1057,12 @@ void csma802154::handleLowerMsg(cMessage *msg)
 
                 if (ackMessage != NULL)
                     delete ackMessage;
+
                 ackMessage = new Ieee802154Frame("CSMA-Ack");
                 ackMessage->setSrcAddr(getMacAddr());
                 ackMessage->setDstAddr(macPkt->getSrcAddr());
                 ackMessage->setBitLength(ackLength);
+
                 //Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end())
                 {
@@ -1012,6 +1077,7 @@ void csma802154::handleLowerMsg(cMessage *msg)
                     EV << "Expected Sequence number is " << ExpectedNr <<
                     " and number of packet is " << SeqNr << endl;
                     int8_t sub     = ((int8_t)SeqNr) - ((int8_t) ExpectedNr);
+
                     //if (SeqNr < ExpectedNr)
                     if (sub < 0)
                     {
@@ -1025,14 +1091,13 @@ void csma802154::handleLowerMsg(cMessage *msg)
                         executeMac(EV_FRAME_RECEIVED, macPkt);
                     }
                 }
-
             }
             else if (macQueue.size() != 0)
             {
-
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
                 Ieee802154Frame * firstPacket = static_cast<Ieee802154Frame *>(macQueue.front());
+
                 if (macPkt->getSrcAddr() == firstPacket->getDstAddr())
                 {
                     nbRecvdAcks++;
@@ -1062,7 +1127,6 @@ void csma802154::handleLowerMsg(cMessage *msg)
     }
 }
 
-
 void csma802154::handleLowerControl(cMessage *msg)
 {
     if (msg->getKind() == PD_DATA_CONFIRM)
@@ -1071,10 +1135,11 @@ void csma802154::handleLowerControl(cMessage *msg)
     {
         Ieee802154MacPhyPrimitives* primitive = check_and_cast<Ieee802154MacPhyPrimitives *>(msg);
         phystatus = PHYenum(primitive->getStatus());
-        if (primitive->getStatus()==phy_TX_ON && sendPacket)
+
+        if (primitive->getStatus() == phy_TX_ON && sendPacket)
         {
             sendDown(sendPacket);
-            sendPacket=NULL;
+            sendPacket = NULL;
         }
     }
 
@@ -1112,9 +1177,10 @@ void csma802154::handleLowerControl(cMessage *msg)
 //  }
 //}
 
-cPacket *csma802154::decapsMsg(Ieee802154Frame * macPkt)
+cPacket *csma802154::decapsMsg(Ieee802154Frame *macPkt)
 {
-    cPacket * msg = macPkt->decapsulate();
+    cPacket *msg = macPkt->decapsulate();
+
     if (useIeee802Ctrl)
     {
         Ieee802Ctrl* cinfo = new Ieee802Ctrl();
@@ -1124,9 +1190,10 @@ cPacket *csma802154::decapsMsg(Ieee802154Frame * macPkt)
     }
     else
     {
-        Ieee802154NetworkCtrlInfo * cinfo = new Ieee802154NetworkCtrlInfo();
+        Ieee802154NetworkCtrlInfo *cinfo = new Ieee802154NetworkCtrlInfo();
         cinfo->setNetwAddr(macPkt->getSrcAddr());
     }
+
     return msg;
 }
 
@@ -1148,6 +1215,7 @@ void csma802154::receiveChangeNotification(int category, const cPolymorphic *det
         phy_symbolrate = getRate('s');
         bPeriod = aUnitBackoffPeriod / phy_symbolrate;
         break;
+
     case NF_RADIOSTATE_CHANGED:
         radioState = check_and_cast<RadioState *>(details)->getState();
         break;
@@ -1168,3 +1236,4 @@ void csma802154::receiveChangeNotification(int category, const cPolymorphic *det
         break;
     }
 }
+

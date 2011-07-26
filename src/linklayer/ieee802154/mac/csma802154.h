@@ -30,6 +30,7 @@
 
 
 #include <list>
+
 #include "Ieee802154Mac.h"
 
 /**
@@ -48,11 +49,11 @@
  */
 class INET_API csma802154 : public Ieee802154Mac
 {
-
     Ieee802154Frame *sendPacket;
     PHYenum phystatus;
+
   public:
-    virtual int    numInitStages    () const { return 3; }
+    virtual int numInitStages() const { return 3; }
     csma802154() {sendPacket = NULL;}
     ~csma802154();
 
@@ -94,6 +95,7 @@ class INET_API csma802154 : public Ieee802154Mac
 
     /** @brief Records general statistics?*/
     bool stats;
+
     /** @brief Record out put vectors?*/
     bool trace;
 
@@ -102,14 +104,13 @@ class INET_API csma802154 : public Ieee802154Mac
      */
     enum t_mac_states
     {
-        IDLE_1=1,
+        IDLE_1 = 1,
         BACKOFF_2,
         CCA_3,
         TRANSMITFRAME_4,
         WAITACK_5,
         WAITSIFS_6,
         TRANSMITACK_7
-
     };
 
     /*************************************************************/
@@ -119,7 +120,7 @@ class INET_API csma802154 : public Ieee802154Mac
     /** @brief Kinds for timer messages.*/
     enum t_mac_timer
     {
-        TIMER_NULL=0,
+        TIMER_NULL = 0,
         TIMER_BACKOFF,
         TIMER_CCA,
         TIMER_SIFS,
@@ -128,14 +129,14 @@ class INET_API csma802154 : public Ieee802154Mac
 
     /** @name Pointer for timer messages.*/
     /*@{*/
-    cMessage * backoffTimer, * ccaTimer, * txTimer, * sifsTimer, * rxAckTimer;
+    cMessage *backoffTimer, *ccaTimer, *txTimer, *sifsTimer, *rxAckTimer;
     /*@}*/
 
     /** @brief MAC state machine events.
      * See state diagram.*/
     enum t_mac_event
     {
-        EV_SEND_REQUEST=1,                   // 1, 11, 20, 21, 22
+        EV_SEND_REQUEST = 1,                   // 1, 11, 20, 21, 22
         EV_TIMER_BACKOFF,                    // 2, 7, 14, 15
         EV_FRAME_TRANSMITTED,                // 4, 19
         EV_ACK_RECEIVED,                     // 5
@@ -156,13 +157,13 @@ class INET_API csma802154 : public Ieee802154Mac
 
     enum t_mac_carrier_sensed
     {
-        CHANNEL_BUSY=1,
+        CHANNEL_BUSY = 1,
         CHANNEL_FREE
     } ;
 
     enum t_mac_status
     {
-        STATUS_OK=1,
+        STATUS_OK = 1,
         STATUS_ERROR,
         STATUS_RX_ERROR,
         STATUS_RX_TIMEOUT,
@@ -261,13 +262,12 @@ class INET_API csma802154 : public Ieee802154Mac
     /** @brief The bit length of the ACK packet.*/
     int ackLength;
 
-
-
     void sendNewPacketInTx(Ieee802154Frame *p)
     {
         if (sendPacket)
             error("the previous packet is not send yet");
-        if (phystatus==phy_TX_ON)
+
+        if (phystatus == phy_TX_ON)
             sendDown(p);
         else
             sendPacket = p;
@@ -296,8 +296,8 @@ class INET_API csma802154 : public Ieee802154Mac
     virtual void handleMessage(cMessage* msg);
     virtual void sendUp(cMessage *msg);
 
-    virtual cPacket *decapsMsg(Ieee802154Frame * macPkt);
-    Ieee802154Frame * ackMessage;
+    virtual cPacket *decapsMsg(Ieee802154Frame* macPkt);
+    Ieee802154Frame* ackMessage;
 
     //sequence number for sending, map for the general case with more senders
     //also in initialisation phase multiple potential parents

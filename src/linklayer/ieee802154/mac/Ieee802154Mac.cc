@@ -13,19 +13,19 @@ IE3ADDR Ieee802154Mac::addrCount = 0;
 /** Default MAC PIB Attributes */
 MAC_PIB Ieee802154Mac::MPIB =
 {
-    def_macAckWaitDuration,     def_macAssociationPermit,
-    def_macAutoRequest,     def_macBattLifeExt,
-    def_macBattLifeExtPeriods,  def_macBeaconPayload,
+    def_macAckWaitDuration, def_macAssociationPermit,
+    def_macAutoRequest, def_macBattLifeExt,
+    def_macBattLifeExtPeriods, def_macBeaconPayload,
     def_macBeaconPayloadLength, def_macBeaconOrder,
-    def_macBeaconTxTime,        0/*def_macBSN*/,
-    def_macCoordExtendedAddress,    def_macCoordShortAddress,
-    0/*def_macDSN*/,        def_macGTSPermit,
-    def_macMaxCSMABackoffs,     def_macMinBE,
-    def_macPANId,           def_macPromiscuousMode,
-    def_macRxOnWhenIdle,        def_macShortAddress,
-    def_macSuperframeOrder,     def_macTransactionPersistenceTime
+    def_macBeaconTxTime, 0/*def_macBSN*/,
+    def_macCoordExtendedAddress, def_macCoordShortAddress,
+    0/*def_macDSN*/, def_macGTSPermit,
+    def_macMaxCSMABackoffs, def_macMinBE,
+    def_macPANId, def_macPromiscuousMode,
+    def_macRxOnWhenIdle, def_macShortAddress,
+    def_macSuperframeOrder, def_macTransactionPersistenceTime
     /*def_macACLEntryDescriptorSet, def_macACLEntryDescriptorSetSize,
-    def_macDefaultSecurity,     def_macACLDefaultSecurityMaterialLength,
+    def_macDefaultSecurity, def_macACLDefaultSecurityMaterialLength,
     def_macDefaultSecurityMaterial, def_macDefaultSecuritySuite,
     def_macSecurityMode*/
 };
@@ -169,42 +169,42 @@ Ieee802154Mac::Ieee802154Mac()
 {
     // aExtendedAddress = addrCount++;
     // buffer
-    txPkt           = NULL;
-    txBeacon            = NULL;
-    txBcnCmdUpper   = NULL;
-    txBcnCmd        = NULL;
-    txData          = NULL;
+    txPkt = NULL;
+    txBeacon = NULL;
+    txBcnCmdUpper = NULL;
+    txBcnCmd = NULL;
+    txData = NULL;
     txGTS = NULL;
-    txAck           = NULL;
-    txCsmaca        = NULL;
-    tmpCsmaca       = NULL;
-    rxBeacon            = NULL;
-    rxData          = NULL;
-    rxCmd           = NULL;
+    txAck = NULL;
+    txCsmaca = NULL;
+    tmpCsmaca = NULL;
+    rxBeacon = NULL;
+    rxData = NULL;
+    rxCmd = NULL;
 
     // timer
-    backoffTimer        = NULL;
-    deferCCATimer   = NULL;
-    bcnRxTimer      = NULL;
-    bcnTxTimer      = NULL;
-    ackTimeoutTimer     = NULL;
-    txAckBoundTimer     = NULL;
+    backoffTimer = NULL;
+    deferCCATimer = NULL;
+    bcnRxTimer = NULL;
+    bcnTxTimer = NULL;
+    ackTimeoutTimer = NULL;
+    txAckBoundTimer = NULL;
     txCmdDataBoundTimer = NULL;
-    ifsTimer        = NULL;
-    txSDTimer       = NULL;
-    rxSDTimer       = NULL;
-    finalCAPTimer       = NULL;
-    gtsTimer            = NULL;
+    ifsTimer = NULL;
+    txSDTimer = NULL;
+    rxSDTimer = NULL;
+    finalCAPTimer = NULL;
+    gtsTimer = NULL;
 
     // link
-    hlistBLink1         = NULL;
-    hlistBLink2         = NULL;
-    hlistDLink1         = NULL;
-    hlistDLink2         = NULL;
-    //deviceLink1       = NULL;
-    //deviceLink2       = NULL;
-    //transacLink1      = NULL;
-    //transacLink2      = NULL;
+    hlistBLink1 = NULL;
+    hlistBLink2 = NULL;
+    hlistDLink1 = NULL;
+    hlistDLink2 = NULL;
+    //deviceLink1 = NULL;
+    //deviceLink2 = NULL;
+    //transacLink1 = NULL;
+    //transacLink2 = NULL;
 }
 
 Ieee802154Mac::~Ieee802154Mac()
@@ -222,24 +222,26 @@ Ieee802154Mac::~Ieee802154Mac()
     cancelAndDelete(finalCAPTimer);
     cancelAndDelete(gtsTimer);
 
-    emptyHListLink(&hlistBLink1,&hlistBLink2);
-    emptyHListLink(&hlistDLink1,&hlistDLink2);
+    emptyHListLink(&hlistBLink1, &hlistBLink2);
+    emptyHListLink(&hlistDLink1, &hlistDLink2);
 }
 
 void Ieee802154Mac::registerInterface()
 {
     int size = sizeof(IE3ADDR);
     aExtendedAddress = 0;
-    for (int i=0; i<size; i++)
+
+    for (int i = 0; i < size; i++)
     {
-        if (i<6)
+        if (i < 6)
         {
-            IE3ADDR aux = macaddress.getAddressByte(5-i);
-            aExtendedAddress |=  aux<<(8*i);
+            IE3ADDR aux = macaddress.getAddressByte(5 - i);
+            aExtendedAddress |= aux << (8 * i);
         }
     }
 
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+
     if (!ift)
         return;
 
@@ -248,9 +250,11 @@ void Ieee802154Mac::registerInterface()
     // interface name: NetworkInterface module's name without special characters ([])
     char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
     char *d = interfaceName;
+
     for (const char *s = getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
+
     *d = '\0';
 
     e->setName(interfaceName);
@@ -281,6 +285,7 @@ void Ieee802154Mac::initialize(int stage)
     if (0 == stage)
     {
         const char *addressString = par("address");
+
         if (!strcmp(addressString, "auto"))
         {
             // assign automatic address
@@ -315,80 +320,82 @@ void Ieee802154Mac::initialize(int stage)
         mpib.macDSN = intrand(256);     //Random::random() % 0x100;
 
         // User-specified MAC parameters
-        m_debug                 = par("debug");
-        isPANCoor               = par("isPANCoor");
-        mpib.macBeaconOrder     = par("BO");
+        m_debug = par("debug");
+        isPANCoor = par("isPANCoor");
+        mpib.macBeaconOrder = par("BO");
         mpib.macSuperframeOrder = par("SO");
-        dataTransMode           = par("dataTransMode");
-        panCoorName             = par("panCoorName");
-        isRecvGTS               = par("isRecvGTS");
+        dataTransMode = par("dataTransMode");
+        panCoorName = par("panCoorName");
+        isRecvGTS = par("isRecvGTS");
         gtsPayload = par("gtsPayload");
-        ack4Gts                 = par("ack4Gts");
+        ack4Gts = par("ack4Gts");
 
-        if (mpib.macBeaconOrder >15 || mpib.macSuperframeOrder > mpib.macBeaconOrder)
+        if (mpib.macBeaconOrder > 15 || mpib.macSuperframeOrder > mpib.macBeaconOrder)
             error("[MAC]: wrong values for MAC parameter BO or SO");
         else if (mpib.macBeaconOrder == 15)
             error("[MAC]: non-beacon mode (BO = 15) has not been tested!");
         else if (mpib.macSuperframeOrder == mpib.macBeaconOrder)
             error("[MAC]: warning!! the case BO == SO has not been tested!");
 
-        if (dataTransMode != 1 && dataTransMode!= 3)
+        if (dataTransMode != 1 && dataTransMode != 3)
             error("[MAC]: data transfer mode = %d is not supported in the model!", dataTransMode);
 
-        panStartTime        = 0.0;
-        ack4Data        = true;
-        secuData        = false;
-        secuBeacon      = false;
+        panStartTime = 0.0;
+        ack4Data = true;
+        secuData = false;
+        secuBeacon = false;
 
         taskP.init();
 
         // for beacon
-        rxBO                = 15;
-        rxSO                    = 15;
-        beaconWaitingTx     = false;
-        notAssociated           = true;
+        rxBO = 15;
+        rxSO = 15;
+        beaconWaitingTx = false;
+        notAssociated = true;
         bcnLossCounter = 0;
 
         // for transmission
-        inTransmission          = false;
-        waitBcnCmdAck       = false;
-        waitBcnCmdUpperAck  = false;
-        waitDataAck         = false;
+        inTransmission = false;
+        waitBcnCmdAck = false;
+        waitBcnCmdUpperAck = false;
+        waitDataAck = false;
         waitGTSAck = false;
-        numBcnCmdRetry      = 0;
+        numBcnCmdRetry = 0;
         numBcnCmdUpperRetry = 0;
-        numDataRetry            = 0;
+        numDataRetry = 0;
         numGTSRetry = 0;
 
         // for CSMA-CA
-        csmacaWaitNextBeacon    = false;
-        backoffStatus           = 0;
+        csmacaWaitNextBeacon = false;
+        backoffStatus = 0;
 
         // for timer
         lastTime_bcnRxTimer = 0;
-        inTxSD_txSDTimer        = false;
-        inRxSD_rxSDTimer        = false;
+        inTxSD_txSDTimer = false;
+        inRxSD_rxSDTimer = false;
         index_gtsTimer = 0;
 
         // device capability
-        capability.alterPANCoor         = false;
-        capability.FFD              = true;
-        //capability.mainsPower     = false;
-        capability.recvOnWhenIdle   = mpib.macRxOnWhenIdle;
-        capability.secuCapable      = false;
-        capability.alloShortAddr        = true;
+        capability.alterPANCoor = false;
+        capability.FFD = true;
+        //capability.mainsPower = false;
+        capability.recvOnWhenIdle = mpib.macRxOnWhenIdle;
+        capability.secuCapable = false;
+        capability.alloShortAddr = true;
         capability.hostName = getParentModule()->getParentModule()->getFullName();
 
         // GTS variables for PAN coordinator
         gtsCount = 0;
-        for (int i=0; i<7; i++)
+
+        for (int i = 0; i < 7; i++)
         {
-            gtsList[i].devShortAddr = def_macShortAddress;  // 0xffff
-            gtsList[i].startSlot        = 0;
-            gtsList[i].length       = 0;
-            gtsList[i].isRecvGTS        = false;
-            gtsList[i].isTxPending  = false;
+            gtsList[i].devShortAddr = def_macShortAddress; // 0xffff
+            gtsList[i].startSlot = 0;
+            gtsList[i].length = 0;
+            gtsList[i].isRecvGTS = false;
+            gtsList[i].isTxPending = false;
         }
+
         tmp_finalCap = aNumSuperframeSlots - 1; // 15 if no GTS
         indexCurrGts = 99;
 
@@ -405,22 +412,22 @@ void Ieee802154Mac::initialize(int stage)
 
         // pkt counter
 
-        numUpperPkt         = 0;
-        numUpperPktLost     = 0;
-        numCollision            = 0;
+        numUpperPkt = 0;
+        numUpperPktLost = 0;
+        numCollision = 0;
         numLostBcn = 0;
-        numTxBcnPkt         = 0;
-        numTxDataSucc       = 0;
-        numTxDataFail           = 0;
+        numTxBcnPkt = 0;
+        numTxDataSucc = 0;
+        numTxDataFail = 0;
         numTxGTSSucc = 0;
         numTxGTSFail = 0;
-        numTxAckPkt         = 0;
-        numRxBcnPkt         = 0;
-        numRxDataPkt            = 0;
+        numTxAckPkt = 0;
+        numRxBcnPkt = 0;
+        numRxDataPkt = 0;
         numRxGTSPkt = 0;
-        numRxAckPkt         = 0;
+        numRxAckPkt = 0;
 
-        numTxAckInactive        = 0;
+        numTxAckInactive = 0;
 
         WATCH(inTxSD_txSDTimer);
         WATCH(inRxSD_rxSDTimer);
@@ -445,18 +452,18 @@ void Ieee802154Mac::initialize(int stage)
     else if (1 == stage)
     {
         // initialize timers
-        backoffTimer                = new cMessage("backoffTimer",      MAC_BACKOFF_TIMER);
-        deferCCATimer           = new cMessage("deferCCATimer",     MAC_DEFER_CCA_TIMER);
-        bcnRxTimer              = new cMessage("bcnRxTimer",        MAC_BCN_RX_TIMER);
-        bcnTxTimer              = new cMessage("bcnTxTimer",        MAC_BCN_TX_TIMER);
-        ackTimeoutTimer         = new cMessage("ackTimeoutTimer",   MAC_ACK_TIMEOUT_TIMER);
-        txAckBoundTimer         = new cMessage("txAckBoundTimer",   MAC_TX_ACK_BOUND_TIMER);
-        txCmdDataBoundTimer     = new cMessage("txCmdDataBoundTimer",   MAC_TX_CMD_DATA_BOUND_TIMER);
-        ifsTimer                    = new cMessage("ifsTimer",          MAC_IFS_TIMER);
-        txSDTimer               = new cMessage("txSDTimer",         MAC_TX_SD_TIMER);
-        rxSDTimer               = new cMessage("rxSDTimer",         MAC_RX_SD_TIMER);
-        finalCAPTimer               = new cMessage("finalCAPTimer",     MAC_FINAL_CAP_TIMER);
-        gtsTimer                    = new cMessage("gtsTimer",      MAC_GTS_TIMER);
+        backoffTimer = new cMessage("backoffTimer", MAC_BACKOFF_TIMER);
+        deferCCATimer = new cMessage("deferCCATimer", MAC_DEFER_CCA_TIMER);
+        bcnRxTimer = new cMessage("bcnRxTimer", MAC_BCN_RX_TIMER);
+        bcnTxTimer = new cMessage("bcnTxTimer", MAC_BCN_TX_TIMER);
+        ackTimeoutTimer = new cMessage("ackTimeoutTimer", MAC_ACK_TIMEOUT_TIMER);
+        txAckBoundTimer = new cMessage("txAckBoundTimer", MAC_TX_ACK_BOUND_TIMER);
+        txCmdDataBoundTimer = new cMessage("txCmdDataBoundTimer", MAC_TX_CMD_DATA_BOUND_TIMER);
+        ifsTimer = new cMessage("ifsTimer", MAC_IFS_TIMER);
+        txSDTimer = new cMessage("txSDTimer", MAC_TX_SD_TIMER);
+        rxSDTimer = new cMessage("rxSDTimer", MAC_RX_SD_TIMER);
+        finalCAPTimer = new cMessage("finalCAPTimer", MAC_FINAL_CAP_TIMER);
+        gtsTimer = new cMessage("gtsTimer", MAC_GTS_TIMER);
         // get initial radio state, channel number, transmit power etc. from Phy layer in this stage
     }
     else if (2 == stage)
@@ -464,12 +471,14 @@ void Ieee802154Mac::initialize(int stage)
         EV << "MAC extended address is: " << aExtendedAddress << endl;
         EV << "mpib.macBSN initialized with: " << (int)mpib.macBSN << endl;
         EV << "mpib.macDSN initialized with: " << (int)mpib.macDSN << endl;
+
         // start a pan coordinator or a device
         if (isPANCoor)
         {
             // check name
             if (strcmp(panCoorName, getParentModule()->getParentModule()->getFullName()) != 0)
                 error("[MAC]: name of PAN coordinator does not match!");
+
             // chage icon desplayed in Tkenv
             cDisplayString* display_string = &getParentModule()->getParentModule()->getDisplayString();
             display_string->setTagArg("i", 0, "misc/house");
@@ -506,27 +515,28 @@ void Ieee802154Mac::finish()
 {
     double t = SIMTIME_DBL(simTime());
     if (t==0) return;
-    recordScalar("Total simulation time",               t);
-    recordScalar("total num of upper pkts received",        numUpperPkt);
-    recordScalar("num of upper pkts dropped",           numUpperPktLost);
-    recordScalar("num of BEACON pkts sent",             numTxBcnPkt);
-    recordScalar("num of DATA pkts sent successfully",  numTxDataSucc);
-    recordScalar("num of DATA pkts failed",             numTxDataFail);
-    recordScalar("num of DATA pkts sent successfully in GTS",   numTxGTSSucc);
-    recordScalar("num of DATA pkts failed in GTS",          numTxGTSFail);
-    recordScalar("num of ACK pkts sent",                numTxAckPkt);
-    recordScalar("num of BEACON pkts received",     numRxBcnPkt);
-    recordScalar("num of BEACON pkts lost",     numLostBcn);
-    recordScalar("num of DATA pkts received",           numRxDataPkt);
-    recordScalar("num of DATA pkts received in GTS",            numRxGTSPkt);
-    recordScalar("num of ACK pkts received",            numRxAckPkt);
-    recordScalar("num of collisions"    ,               numCollision);
+    recordScalar("Total simulation time", t);
+    recordScalar("total num of upper pkts received", numUpperPkt);
+    recordScalar("num of upper pkts dropped", numUpperPktLost);
+    recordScalar("num of BEACON pkts sent", numTxBcnPkt);
+    recordScalar("num of DATA pkts sent successfully", numTxDataSucc);
+    recordScalar("num of DATA pkts failed", numTxDataFail);
+    recordScalar("num of DATA pkts sent successfully in GTS", numTxGTSSucc);
+    recordScalar("num of DATA pkts failed in GTS", numTxGTSFail);
+    recordScalar("num of ACK pkts sent", numTxAckPkt);
+    recordScalar("num of BEACON pkts received", numRxBcnPkt);
+    recordScalar("num of BEACON pkts lost", numLostBcn);
+    recordScalar("num of DATA pkts received", numRxDataPkt);
+    recordScalar("num of DATA pkts received in GTS", numRxGTSPkt);
+    recordScalar("num of ACK pkts received", numRxAckPkt);
+    recordScalar("num of collisions", numCollision);
 }
 
 void Ieee802154Mac::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
+
 
     switch (category)
     {
@@ -573,9 +583,9 @@ void Ieee802154Mac::startPANCoor()
 void Ieee802154Mac::startDevice()
 {
     // now only star topology, only PAN coordinator transmits beacon
-    mpib.macBeaconOrder     = 15;
-    mpib.macSuperframeOrder     = 15;
-    mpib.macAssociationPermit   = false;
+    mpib.macBeaconOrder = 15;
+    mpib.macSuperframeOrder = 15;
+    mpib.macAssociationPermit = false;
 
     // open radio receiver, waiting for first beacon's arrival
     PLME_SET_TRX_STATE_request(phy_RX_ON);
@@ -588,10 +598,11 @@ void Ieee802154Mac::startDevice()
 void Ieee802154Mac::handleMessage(cMessage* msg)
 {
 
-    if (msg->getArrivalGateId() == mLowergateIn && dynamic_cast<cPacket*>(msg)==NULL)
+    if (msg->getArrivalGateId() == mLowergateIn && dynamic_cast<cPacket*>(msg) == NULL)
     {
-        if (msg->getKind()==0)
+        if (msg->getKind() == 0)
             error("[MAC]: message '%s' with length==0 is supposed to be a primitive, but msg kind is also zero", msg->getName());
+
         handleMacPhyPrimitive(msg->getKind(), msg);
         return;
     }
@@ -709,6 +720,7 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
                     break;
                 }
             }
+
             if (gtsFound)
             {
                 // set isTxPending true in corresponding GTS descriptor
@@ -732,7 +744,7 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
     cPacket * pkt = PK(msg);
     MCPS_DATA_request(defFrmCtrl_AddrMode16,    mpib.macPANId,  mpib.macShortAddress,
                       defFrmCtrl_AddrMode16,      mpib.macPANId,  destAddr,
-                      pkt,(Ieee802154TxOption)dataTransMode);
+                      pkt, (Ieee802154TxOption)dataTransMode);
     delete control_info;
 }
 
@@ -741,6 +753,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     bool noAck;
     int i;
     Ieee802154Frame* frame = dynamic_cast<Ieee802154Frame *>(msg);
+
     if (!frame)
     {
         EV << "[MAC]: message from physical layer (" <<  msg->getClassName() << ")" << msg->getName() << " is not a subclass of Ieee802154Frame, drop it" << endl;
@@ -752,6 +765,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     Ieee802154FrameType frmType = frmCtrl.frmType;
 
     EV << "[MAC]: an " << frmType << " frame received from the PHY layer, performing filtering now ..." << endl;
+
     // perform MAC frame filtering
     if (frameFilter(frame))
     {
@@ -812,6 +826,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
             {
                 EV << "[MAC]: yes, constructing the ACK frame" << endl;
                 constructACK(frame);
+
                 //stop CSMA-CA if it is pending (it will be restored after the transmission of ACK)
                 if (backoffStatus == 99)
                 {
@@ -845,7 +860,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
 
     // drop new received cmd pkt if mac is current processing a cmd
     if (frmType == Ieee802154_CMD)
-        if ((rxCmd)||(txBcnCmd))
+        if ((rxCmd) || (txBcnCmd))
         {
             EV << "[MAC]: the received CMD frame is dropped, because MAC is currently processing a MAC CMD" << endl;
             delete frame;
@@ -862,6 +877,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
         }
 
     EV << "[MAC]: checking duplication ..." << endl;
+
     //check duplication -- must be performed AFTER all drop's
     if (frmType == Ieee802154_BEACON)
         i = chkAddUpdHListLink(&hlistBLink1, &hlistBLink2, frame->getSrcAddr(), frame->getBdsn());
@@ -871,6 +887,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     {
         // check ACK in <handleAck()>
     }
+
     if (i == 2) // duplication found in the HListLink
     {
         EV << "[MAC]: duplication detected, drop frame" << endl;
@@ -966,7 +983,7 @@ void Ieee802154Mac::handleSelfMsg(cMessage* msg)
 
 void Ieee802154Mac::sendDown(Ieee802154Frame* frame)
 {
-    /*if (updateNFailLink(fl_oper_est,index_) == 0)
+    /*if (updateNFailLink(fl_oper_est, index_) == 0)
     {
         if (txBeacon)
         {
@@ -976,9 +993,9 @@ void Ieee802154Mac::sendDown(Ieee802154Frame* frame)
         }
         return;
     }
-    else if (updateLFailLink(fl_oper_est,index_,p802_15_4macDA(p)) == 0)
+    else if (updateLFailLink(fl_oper_est, index_, p802_15_4macDA(p)) == 0)
     {
-        dispatch(p_UNDEFINED,"PD_DATA_confirm");
+        dispatch(p_UNDEFINED, "PD_DATA_confirm");
         return;
     }*/
 
@@ -1008,7 +1025,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
     Ieee802154BeaconFrame *bcnFrame = check_and_cast<Ieee802154BeaconFrame *>(frame);
     FrameCtrl frmCtrl;
     bool pending;
-    simtime_t now,  tmpf, w_time,duration;
+    simtime_t now, tmpf, w_time, duration;
     uint8_t ifs;
     int  dataFrmLength;
     now = simTime();
@@ -1031,9 +1048,11 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
         ifs = aMinSIFSPeriod;
     else
         ifs = aMinLIFSPeriod;
+
     tmpf = duration * phy_symbolrate;
     tmpf += ifs;
     rxBcnDuration = (uint8_t)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
+
     if (fmod(tmpf, aUnitBackoffPeriod) > 0.0)
         rxBcnDuration++;
 
@@ -1041,10 +1060,10 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
     //gtsFields = bcnFrame->getGtsFields();
 
     //update PAN descriptor
-    rxPanDescriptor.CoordAddrMode       = frmCtrl.srcAddrMode;
-    rxPanDescriptor.CoordPANId      = frame->getSrcPanId();
-    rxPanDescriptor.CoordAddress_16_or_64   = frame->getSrcAddr();
-    rxPanDescriptor.LogicalChannel      = ppib.phyCurrentChannel;
+    rxPanDescriptor.CoordAddrMode = frmCtrl.srcAddrMode;
+    rxPanDescriptor.CoordPANId = frame->getSrcPanId();
+    rxPanDescriptor.CoordAddress_16_or_64 = frame->getSrcAddr();
+    rxPanDescriptor.LogicalChannel = ppib.phyCurrentChannel;
     // rxPanDescriptor.SuperframeSpec           // ignored, store in rxSfSpec above
     //rxPanDescriptor.GTSPermit     = gtsFields.permit;
     // rxPanDescriptor.LinkQuality              // TBD link quality at PHY layer
@@ -1091,22 +1110,26 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
             // calculate the length of data frame transmitted in GTS
             // MHR(11) + gtsPayload + MFR(2)
             dataFrmLength = 11 + gtsPayload + 2;
+
             if (dataFrmLength <= aMaxSIFSFrameSize)
                 ifs = aMinSIFSPeriod;
             else
                 ifs = aMinLIFSPeriod;
 
             // calculate duration of the entire data transaction
-            duration = (def_phyHeaderLength + dataFrmLength)*8/phy_bitrate;
+            duration = (def_phyHeaderLength + dataFrmLength) * 8 / phy_bitrate;
+
             if (ack4Gts)
-                duration += (mpib.macAckWaitDuration + ifs)/phy_symbolrate;
+                duration += (mpib.macAckWaitDuration + ifs) / phy_symbolrate;
             else                    // no ACK required
-                duration += (aTurnaroundTime + ifs)/phy_symbolrate;
+                duration += (aTurnaroundTime + ifs) / phy_symbolrate;
+
             // store duration value for later evaluation in gtsCanProceed()
             gtsTransDuration = duration;
 
             // duration of one superframe slot (one GTS slot)
-            tmpf = rxSfSlotDuration/phy_symbolrate;
+            tmpf = rxSfSlotDuration / phy_symbolrate;
+
             if (duration < tmpf)
                 gtsLength = 1;
             else
@@ -1120,6 +1143,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
             // call gts_request_cmd() at the PAN coordinator to apply for GTS
             EV << "[GTS]: request " << (int)gtsLength << " GTS slots from the PAN coordinator" << endl;
             gtsStartSlot = macModule->gts_request_cmd(mpib.macShortAddress, gtsLength, isRecvGTS);
+
             if (gtsStartSlot != 0)      // successfully
                 EV << "[GTS]: my GTS start slot is " << (int)gtsStartSlot << endl;
             else        // failed
@@ -1135,9 +1159,11 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
     {
         tmpf = bcnRxTime + gtsStartSlot * rxSfSlotDuration / phy_symbolrate;
         w_time = tmpf - now;
+
         // should turn on radio receiver aTurnaroundTime symbols berfore GTS starts, if I have a receive GTS
         if (isRecvGTS)
             w_time = w_time - aTurnaroundTime / phy_symbolrate;
+
         EV << "[GTS]: schedule for my GTS with start slot #" << (int)gtsStartSlot << endl;
         startGtsTimer(w_time);
 
@@ -1152,7 +1178,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
         }
     }
 
-    dispatch(phy_SUCCESS,__FUNCTION__);
+    dispatch(phy_SUCCESS, __FUNCTION__);
 
     //CSMA-CA may be waiting for the new beacon
     if (backoffStatus == 99)
@@ -1185,7 +1211,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
         }
 
         if (pending)    // mlme_poll_request TBD
-            mlme_poll_request(frmCtrl.srcAddrMode,wph->MHR_SrcAddrInfo.panID,wph->MHR_SrcAddrInfo.addr_64,capability.secuCapable,true,true);
+            mlme_poll_request(frmCtrl.srcAddrMode, wph->MHR_SrcAddrInfo.panID, wph->MHR_SrcAddrInfo.addr_64, capability.secuCapable, true, true);
     }
     #endif
     */
@@ -1205,10 +1231,12 @@ void Ieee802154Mac::handleData(Ieee802154Frame* frame)
     ASSERT(rxData == NULL);
     rxData = frame;
     //rxDataTime = simTime();
+
     if (!frmCtrl.ackReq)
     {
         if (frame->getByteLength() <= aMaxSIFSFrameSize)
             isSIFS = true;
+
         startIfsTimer(isSIFS);
     }
     //else  //schedule and dispatch after finishing ack. transmission
@@ -1218,7 +1246,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
 {
 
 
-    if ((txBcnCmd==NULL)&&(txBcnCmdUpper==NULL)&&(txData==NULL)&&(txGTS==NULL))
+    if ((txBcnCmd == NULL) && (txBcnCmdUpper == NULL) && (txData == NULL) && (txGTS == NULL))
     {
         EV << "[MAC]: no pending transmission task is waiting for this ACK, drop it!" << endl;
         delete frame;
@@ -1246,6 +1274,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
         numRxAckPkt++;
         EV << "[MAC]: the ACK arrives before timeout, cancel timeout timer" << endl;
         cancelEvent(ackTimeoutTimer);
+
         // reset retry counter
         if (txPkt == txBcnCmd)
             numBcnCmdRetry = 0;
@@ -1268,7 +1297,8 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
 
         if (backoffStatus == 99)
         {
-            EV << "[MAC]: this is a late ACK for " << txData->getName() << ":#" << (int)txData->getBdsn() << ", stop retrying" << endl;
+            EV << "[MAC]: this is a late ACK for " << txData->getName() << ":#"
+               << (int)txData->getBdsn() << ", stop retrying\n";
             backoffStatus = 0;
             csmacaCancel();
         }
@@ -1279,13 +1309,13 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
     // If ack is for data request cmd (through data poll primitive), set pending flag for data polling
     if (txPkt == txBcnCmdUpper)
     if ((taskP.taskStatus(TP_mlme_poll_request))
-     && (strcmp(taskP.taskFrFunc(TP_mlme_poll_request),__FUNCTION__) == 0))
+     && (strcmp(taskP.taskFrFunc(TP_mlme_poll_request), __FUNCTION__) == 0))
     {
         frmCtrl = frame->getFrmCtrl();
         taskP.mlme_poll_request_pending = frmCtrl.frmPending;   // indicating whether a data is pending at the coordinator for me
     }*/
 
-    dispatch(phy_SUCCESS,__FUNCTION__);
+    dispatch(phy_SUCCESS, __FUNCTION__);
 
     delete frame;
 }
@@ -1316,7 +1346,7 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
         wph = HDR_LRWPAN(p);
         rt_myNodeID = *((uint16_t *)wph->MSDU_Payload);
         #ifdef ZigBeeIF
-        sscs->setGetClusTreePara('g',p);
+        sscs->setGetClusTreePara('g', p);
         #endif*/
         break;
 
@@ -1337,7 +1367,7 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
     case Ieee802154_ORPHAN_NOTIFICATION:    //Orphan notification
         // TBD
         /*wph = HDR_LRWPAN(p);
-        sscs->MLME_ORPHAN_indication(wph->MHR_SrcAddrInfo.addr_64,false,0);*/
+        sscs->MLME_ORPHAN_indication(wph->MHR_SrcAddrInfo.addr_64, false, 0);*/
         break;
 
     case Ieee802154_BEACON_REQUEST: //Beacon request
@@ -1378,11 +1408,11 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
             wph->MSDU_PendAddrFields.spec = 0;
             wph->MSDU_PayloadLen = 0;
         #ifdef ZigBeeIF
-            sscs->setGetClusTreePara('s',txBcnCmd);
+            sscs->setGetClusTreePara('s', txBcnCmd);
         #endif
-            constructMPDU(4,txBcnCmd,frmCtrl.FrmCtrl,mpib.macBSN++,wph->MHR_DstAddrInfo,wph->MHR_SrcAddrInfo,sfSpec.SuperSpec,0,0);
-            hdr_dst((char *)HDR_MAC(txBcnCmd),p802_15_4macSA(p));
-            hdr_src((char *)HDR_MAC(txBcnCmd),index_);
+            constructMPDU(4, txBcnCmd, frmCtrl.FrmCtrl, mpib.macBSN++, wph->MHR_DstAddrInfo, wph->MHR_SrcAddrInfo, sfSpec.SuperSpec, 0, 0);
+            hdr_dst((char *)HDR_MAC(txBcnCmd), p802_15_4macSA(p));
+            hdr_src((char *)HDR_MAC(txBcnCmd), index_);
             HDR_CMN(txBcnCmd)->ptype() = PT_MAC;
             //for trace
             HDR_CMN(txBcnCmd)->next_hop_ = p802_15_4macDA(txBcnCmd);        //nam needs the nex_hop information
@@ -1412,7 +1442,7 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
             mpib.macPANId = *((uint16_t *)wph->MSDU_Payload);
             mpib.macCoordShortAddress = *((uint16_t *)(wph->MSDU_Payload + 2));
             tmp_ppib.phyCurrentChannel = wph->MSDU_Payload[4];
-            phy->PLME_SET_request(phyCurrentChannel,&tmp_ppib);
+            phy->PLME_SET_request(phyCurrentChannel, &tmp_ppib);
         }*/
         break;
 
@@ -1542,6 +1572,7 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
             {
                 if (!isPANCoor)     // not a PAN coordinator
                     return true;
+
                 /*
                 if (((!capability.FFD)||(numberDeviceLink(&deviceLink1) == 0))  //I am not a coordinator (nor a PAN coordinator)
                   ||(wph->MHR_SrcAddrInfo.panID != mpib.macPANId))
@@ -1551,6 +1582,7 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
             }
         }
     }
+
     return false;
 }
 
@@ -1580,13 +1612,13 @@ void Ieee802154Mac::constructACK(Ieee802154Frame* rxFrame)
     i = 1;
 
     // construct frame control field
-    ackFrmCtrl.frmType          = Ieee802154_ACK;
-    ackFrmCtrl.secu                 = false;
-    ackFrmCtrl.frmPending           = (i==0)?true:false;
-    ackFrmCtrl.ackReq               = false;
-    ackFrmCtrl.intraPan             = origFrmCtrl.intraPan;         // copy from original frame
-    ackFrmCtrl.dstAddrMode      = defFrmCtrl_AddrModeNone;  // dst address fields empty
-    ackFrmCtrl.srcAddrMode      = defFrmCtrl_AddrModeNone;  // src address fields empty
+    ackFrmCtrl.frmType = Ieee802154_ACK;
+    ackFrmCtrl.secu = false;
+    ackFrmCtrl.frmPending = (i == 0) ? true : false;
+    ackFrmCtrl.ackReq = false;
+    ackFrmCtrl.intraPan = origFrmCtrl.intraPan; // copy from original frame
+    ackFrmCtrl.dstAddrMode = defFrmCtrl_AddrModeNone; // dst address fields empty
+    ackFrmCtrl.srcAddrMode = defFrmCtrl_AddrModeNone; // src address fields empty
 
     Ieee802154AckFrame* tmpAck = new Ieee802154AckFrame();
     tmpAck->setName("Ieee802154ACK");
@@ -1613,7 +1645,7 @@ void Ieee802154Mac::resetTRX()
 {
     PHYenum t_state;
     EV << "[MAC]: reset radio state after a task has completed" << endl;
-    if ((mpib.macBeaconOrder != 15)||(rxBO != 15))  //beacon enabled
+    if ((mpib.macBeaconOrder != 15) || (rxBO != 15))  //beacon enabled
     {
         if ((!inTxSD_txSDTimer) && (!inRxSD_rxSDTimer))     // in inactive portion, go to sleep
         {
@@ -1714,6 +1746,7 @@ void Ieee802154Mac::PLME_bitrate_request()
 void Ieee802154Mac::handleMacPhyPrimitive(int msgkind, cMessage* msg)
 {
     Ieee802154MacPhyPrimitives* primitive = check_and_cast<Ieee802154MacPhyPrimitives *>(msg);
+
     switch (msgkind)
     {
         if (primitive->getBitRate()>0)
@@ -1759,9 +1792,10 @@ void Ieee802154Mac::handle_PD_DATA_confirm(PHYenum status)
 
     if (backoffStatus == 1)
         backoffStatus = 0;
+
     if (status == phy_SUCCESS)
     {
-        dispatch(status,__FUNCTION__);
+        dispatch(status, __FUNCTION__);
     }
     // sending pkt at phy layer failed, it may happen only when txing is terminated by FORCE_TRX_OFF
     else if (txPkt == txBeacon)
@@ -1823,7 +1857,9 @@ void Ieee802154Mac::handle_PLME_CCA_confirm(PHYenum status)
         else    // busy channel
         {
             if (beaconEnabled) CW = 2;              // Case C2
+
             NB++;
+
             if (NB > mpib.macMaxCSMABackoffs)   // Case F1
             {
                 tmpCsmaca = 0;
@@ -1834,6 +1870,7 @@ void Ieee802154Mac::handle_PLME_CCA_confirm(PHYenum status)
             {
                 BE++;
                 if (BE > aMaxBE) BE = aMaxBE;       // aMaxBE defined in Ieee802154Const.h
+
                 csmacaStart(false);             // not the first time
             }
         }
@@ -1846,6 +1883,7 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
     simtime_t delay;
 
     PHYenum recStatus = status;
+
     if (status == phy_SUCCESS)
         status = trx_state_req;
 
@@ -1861,7 +1899,8 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
         }
     }
     /*else
-        dispatch(status,__FUNCTION__,trx_state_req);*/
+        dispatch(status, __FUNCTION__, trx_state_req);*/
+
 
     if (status != phy_TX_ON) return;
     // wait the phy_succes
@@ -1877,14 +1916,14 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
         //although no CSMA-CA required for the transmission of ack.,
         //but we still need to locate the backoff period boundary if beacon enabled
         //(refer to page 157, line 25-31)
-        if ((mpib.macBeaconOrder == 15)&&(rxBO == 15))  //non-beacon enabled
+        if ((mpib.macBeaconOrder == 15) && (rxBO == 15))  //non-beacon enabled
             delay = 0.0;
         else if (txAck->getIsGTS())
             delay = 0.0;
         else                                //beacon enabled
         {
             // here we use the hidden dst addr that we already set in ACK on purpose
-            delay  = csmacaLocateBoundary((txAck->getDstAddr() == mpib.macCoordShortAddress),0.0);
+            delay  = csmacaLocateBoundary((txAck->getDstAddr() == mpib.macCoordShortAddress), 0.0);
             ASSERT(delay < bPeriod);
         }
 
@@ -1901,10 +1940,10 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
     }
     else        // tx cmd or data
     {
-        if ((mpib.macBeaconOrder == 15)&&(rxBO == 15))  //non-beacon enabled
+        if ((mpib.macBeaconOrder == 15) && (rxBO == 15))  //non-beacon enabled
             delay = 0.0;
         else
-            delay = csmacaLocateBoundary(toParent(txCsmaca),0.0);
+            delay = csmacaLocateBoundary(toParent(txCsmaca), 0.0);
 
         if (delay == 0.0)
             handleTxCmdDataBoundTimer();            //transmit immediately
@@ -1938,6 +1977,7 @@ void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE
     frmCtrl.intraPan = (SrcPANId == DstPANId)? true:false;
     frmCtrl.dstAddrMode = DstAddrMode;
     frmCtrl.srcAddrMode = SrcAddrMode;
+
     if (TxOption == DIRECT_TRANS)
         frmCtrl.ackReq = ack4Data;
     else if (TxOption == GTS_TRANS)
@@ -1951,6 +1991,7 @@ void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE
     tmpData->setDstAddr(DstAddr);
     tmpData->setSrcPanId(SrcPANId);
     tmpData->setSrcAddr(SrcAddr);
+
     if (TxOption == GTS_TRANS)
         tmpData->setIsGTS(true);
 
@@ -1958,12 +1999,13 @@ void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE
     tmpData->setByteLength(calFrmByteLength(tmpData));
     tmpData->encapsulate(msdu);     // the length of msdu is added to mpdu
     EV << "[MAC]: MPDU constructed: " << tmpData->getName() << ", #" << (int)tmpData->getBdsn() << ", " << tmpData->getByteLength() << " Bytes" << endl;
+
     switch (TxOption)
     {
     case DIRECT_TRANS:
     {
         taskP.taskStep(task)++;
-        strcpy(taskP.taskFrFunc(task),"csmacaCallBack");
+        strcpy(taskP.taskFrFunc(task), "csmacaCallBack");
         ASSERT(txData == NULL);
         txData = tmpData;
         csmacaEntry('d');
@@ -1978,7 +2020,7 @@ void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE
     {
         taskP.taskStep(task)++;
         // waiting for GTS arriving, callback from handleGtsTimer()
-        strcpy(taskP.taskFrFunc(task),"handleGtsTimer");
+        strcpy(taskP.taskFrFunc(task), "handleGtsTimer");
         ASSERT(txGTS == NULL);
         txGTS = tmpData;
         numGTSRetry = 0;
@@ -2020,9 +2062,10 @@ void Ieee802154Mac::MCPS_DATA_indication(Ieee802154Frame* tmpData)
     {
         numRxDataPkt++;
     }
+
     cMessage *appframe = tmpData->decapsulate();
     delete tmpData;
-    EV << "[MAC]: sending received " << appframe->getName() << " frame to upper layer" << endl;
+    EV << "[MAC]: sending received " << appframe->getName() << " frame to upper layer\n";
     send(appframe, mUppergateOut);
 }
 
@@ -2035,24 +2078,27 @@ void Ieee802154Mac::csmacaEntry(char pktType)
     {
         waitBcnCmdAck = false;          // beacon packet not yet transmitted
         numBcnCmdRetry = 0;
+
         if (backoffStatus == 99)        // backoffing for data packet
         {
             backoffStatus = 0;
             csmacaCancel();
         }
+
         csmacaResume();
     }
     else if (pktType == 'u')    // txBcnCmdUpper
     {
         waitBcnCmdUpperAck = false;         //command packet not yet transmitted
         numBcnCmdUpperRetry = 0;
+
         if ((backoffStatus == 99)&&(txCsmaca != txBcnCmd))  //backoffing for data packet
         {
             backoffStatus = 0;
             csmacaCancel();
         }
-        csmacaResume();
 
+        csmacaResume();
     }
     else //if (pktType == 'd')  //txData
     {
@@ -2127,6 +2173,7 @@ void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ack
         // or being in the middle of rxing a beacon
         schedBcnRxTime = bcnRxTime;
         rxBI = rxSfSpec.BI / phy_symbolrate;
+
         while (schedBcnRxTime + rxBI < simTime())
             schedBcnRxTime += rxBI;
     }
@@ -2145,9 +2192,11 @@ void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ack
             wtime = csmacaLocateBoundary(toParent(tmpCsmaca), wtime);
             EV << "[CSMA-CA]: backoff time after locating boundary: " << wtime*1000 << " ms" << endl;
         }
+
         if (!csmacaCanProceed(wtime))   // check if backoff can be applied now. If not, canProceed() will decide how to proceed.
             backoff = false;
     }
+
     if (backoff)
     {
         startBackoffTimer(wtime);
@@ -2162,19 +2211,20 @@ void Ieee802154Mac::csmacaCancel()
         cancelEvent(deferCCATimer);
     else
         taskP.taskStatus(TP_CCA_CSMACA) = false;
+
     tmpCsmaca = 0;
 }
 
 void Ieee802154Mac::csmacaCallBack(PHYenum status)
 {
-    if (((!txBcnCmd)||(waitBcnCmdAck))
-            &&((!txBcnCmdUpper)||(waitBcnCmdUpperAck))
-            &&((!txData)||(waitDataAck)))
+    if (((!txBcnCmd) || (waitBcnCmdAck))
+            && ((!txBcnCmdUpper) || (waitBcnCmdUpperAck))
+            && ((!txData) || (waitDataAck)))
         return;
 
-    backoffStatus = (status == phy_IDLE)?1:2;
+    backoffStatus = (status == phy_IDLE) ? 1 : 2;
 
-    dispatch(status,__FUNCTION__);
+    dispatch(status, __FUNCTION__);
 }
 
 void Ieee802154Mac::csmacaReset(bool bcnEnabled)
@@ -2184,7 +2234,8 @@ void Ieee802154Mac::csmacaReset(bool bcnEnabled)
         NB = 0;
         CW = 2;
         BE = mpib.macMinBE;
-        if ((mpib.macBattLifeExt)&&(BE > 2))
+
+        if ((mpib.macBattLifeExt) && (BE > 2))
             BE = 2;
     }
     else
@@ -2202,6 +2253,7 @@ simtime_t Ieee802154Mac::csmacaAdjustTime(simtime_t wtime)
     simtime_t tmpf;
 
     ASSERT(tmpCsmaca);
+
     if (!toParent(tmpCsmaca))       // as a coordinator
     {
         if (mpib.macBeaconOrder != 15)
@@ -2218,6 +2270,7 @@ simtime_t Ieee802154Mac::csmacaAdjustTime(simtime_t wtime)
 
             if (neg < 0.0)
                 wtime -= neg;
+
             return wtime;
         }
         else
@@ -2239,6 +2292,7 @@ simtime_t Ieee802154Mac::csmacaAdjustTime(simtime_t wtime)
 
             if (neg < 0.0)
                 wtime -= neg;
+
             return wtime;
         }
         else
@@ -2255,9 +2309,9 @@ simtime_t Ieee802154Mac::csmacaLocateBoundary(bool toParent, simtime_t wtime)
         return wtime;
 
     if (toParent)
-        align = (rxBO == 15)?1:2;
+        align = (rxBO == 15) ? 1 : 2;
     else
-        align = (mpib.macBeaconOrder == 15)?2:1;
+        align = (mpib.macBeaconOrder == 15) ? 2 : 1;
 
     // we need to do this here, because this function may be called outside the CSMA-CA algorithm, e.g. in handle_PLME_SET_TRX_STATE_confirm while preparing to send an ACK
     if (rxBO != 15)     // is receiving beacon
@@ -2267,11 +2321,12 @@ simtime_t Ieee802154Mac::csmacaLocateBoundary(bool toParent, simtime_t wtime)
         // or being in the middle of rxing a beacon
         schedBcnRxTime = bcnRxTime;
         rxBI = rxSfSpec.BI / phy_symbolrate;
+
         while (schedBcnRxTime + rxBI < simTime())
             schedBcnRxTime += rxBI;
     }
 
-    bcnTxRxTime = (align == 1)? mpib.macBeaconTxTime:schedBcnRxTime;
+    bcnTxRxTime = (align == 1) ? mpib.macBeaconTxTime:schedBcnRxTime;
 
     /* Linux floating number compatibility
     newtime = fmod(CURRENT_TIME + wtime - bcnTxRxTime, bPeriod);
@@ -2319,6 +2374,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
         if (mpib.macBeaconOrder != 15)      // beacon enabled as a coordinator
         {
             t_fCAP = mpib.macBeaconTxTime + (txSfSpec.finalCap + 1) * txSfSlotDuration / phy_symbolrate;
+
             if (now >= t_fCAP)      // Check 1
             {
                 csmacaWaitNextBeacon = true;
@@ -2344,6 +2400,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
                 tmpf = now + wtime;
                 tmpf -= mpib.macBeaconTxTime;
+
                 if (fmod(tmpf, bPeriod) > 0.0)
                     t_bPeriods++;
 
@@ -2390,7 +2447,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
                 tmpf = now + wtime;
                 tmpf -= schedBcnRxTime;
                 double temp = SIMTIME_DBL(tmpf);
-                tmpf =(temp/bPeriod);
+                tmpf =(temp / bPeriod);
                 EV << "[CSMA-CA]: tmpf = " << tmpf << "; bPeriod  = " << bPeriod << endl;
                 t_bPeriods = (uint16_t)(SIMTIME_DBL(tmpf) - rxBcnDuration);
                 EV << "[CSMA-CA]: t_bPeriods = " << t_bPeriods
@@ -2398,8 +2455,10 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
                 tmpf = now + wtime;
                 tmpf -= schedBcnRxTime;
+
                 if (fmod(tmpf, bPeriod) > 0.0)
                     t_bPeriods++;
+
                 bPeriodsLeft = t_bPeriods - t_CAP;      // backoff periods left for next superframe
             }
         }
@@ -2409,6 +2468,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
     EV << "[CSMA-CA]: bPeriodsLeft = " << bPeriodsLeft << endl;
     ok = true;
+
     if (bPeriodsLeft > 0)
         ok = false;
     else if (bPeriodsLeft == 0)
@@ -2423,22 +2483,26 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
     if (!ok)
     {
         EV << "[CSMA-CA]: cannot porceed because the chosen num of backoffs cannot finish before the end of current CAP, resume at the beginning of next CAP" << endl;
+
         // if as a device, need to track next beacon if it is not being tracked
         if (rxBO != 15)
             if (!bcnRxTimer->isScheduled())
                 startBcnRxTimer();
+
         csmacaWaitNextBeacon = true;
         return false;
     }
 
     // check 3
     // If backoff can finish before the end of CAP or sent in non-beacon, calculate the time needed to finish the transaction and evaluate it
-    t_CCATime = 8.0/phy_symbolrate;
+    t_CCATime = 8.0 / phy_symbolrate;
+
     if (tmpCsmaca->getByteLength() <= aMaxSIFSFrameSize)
         t_IFS = aMinSIFSPeriod;
     else
         t_IFS = aMinLIFSPeriod;
-    t_IFS = t_IFS/phy_symbolrate;
+
+    t_IFS = t_IFS / phy_symbolrate;
 
     if (!afterCCA)
     {
@@ -2451,13 +2515,13 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
     if (csmacaAckReq)       // if ACK required
     {
-        t_transacTime += mpib.macAckWaitDuration/phy_symbolrate;    //ack. waiting time (this value does not include round trip propagation delay)
-        //t_transacTime += 2*max_pDelay;    //round trip propagation delay (802.15.4 ignores this, but it should be there even though it is very small)
+        t_transacTime += mpib.macAckWaitDuration / phy_symbolrate;    //ack. waiting time (this value does not include round trip propagation delay)
+        //t_transacTime += 2 * max_pDelay;    //round trip propagation delay (802.15.4 ignores this, but it should be there even though it is very small)
         t_transacTime += t_IFS;             //IFS time -- not only ensure that the sender can finish the transaction, but also the receiver
     }
     else                    // no ACK required
     {
-        t_transacTime += aTurnaroundTime/phy_symbolrate;        //transceiver turn-around time (receiver may need to do this to transmit next beacon)
+        t_transacTime += aTurnaroundTime / phy_symbolrate;        //transceiver turn-around time (receiver may need to do this to transmit next beacon)
         //t_transacTime += max_pDelay;      //one-way trip propagation delay (802.15.4 ignores this, but it should be there even though it is very small)
         t_transacTime += t_IFS;         //IFS time -- not only ensure that the sender can finish the transaction, but also the receiver
     }
@@ -2484,6 +2548,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
     }
 
     EV << "[CSMA-CA]: the current CAP will end at " << t_fCAP << " s" << endl;
+
     // evaluate if the entire transmission process can be finished before end of current CAP
     if (tmpf > t_fCAP)
     {
@@ -2500,9 +2565,11 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
     if (!ok)
     {
         bPeriodsLeft = 0;       // in the next superframe, apply a further backoff delay before evaluating once again
+
         // if as a device, need to track next beacon if it is not being tracked
         if (rxBO != 15)
             if (!bcnRxTimer->isScheduled()) startBcnRxTimer();
+
         csmacaWaitNextBeacon = true;
         return false;
     }
@@ -2515,13 +2582,13 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
 simtime_t Ieee802154Mac::getFinalCAP(char trxType)
 {
-    simtime_t txSlotDuration ,rxSlotDuration, rxBI, txCAP, rxCAP;
-    simtime_t now,oneDay,tmpf;
+    simtime_t txSlotDuration, rxSlotDuration, rxBI, txCAP, rxCAP;
+    simtime_t now, oneDay, tmpf;
 
     now = simTime();
-    oneDay = now + 24.0*3600;
+    oneDay = now + 24.0 * 3600;
 
-    if ((mpib.macBeaconOrder == 15)&&(rxBO == 15))          //non-beacon enabled
+    if ((mpib.macBeaconOrder == 15) && (rxBO == 15))          //non-beacon enabled
         return oneDay;                                  //transmission can always go ahead
 
     txSlotDuration = txSfSlotDuration / phy_symbolrate;
@@ -2543,7 +2610,7 @@ simtime_t Ieee802154Mac::getFinalCAP(char trxType)
                 tmpf = (txSfSpec.finalCap + 1) * txSlotDuration;
                 txCAP = mpib.macBeaconTxTime + tmpf;
             }
-            return (txCAP >= now)? txCAP:oneDay;
+            return (txCAP >= now) ? txCAP : oneDay;
         }
         else
             return oneDay;
@@ -2570,13 +2637,15 @@ simtime_t Ieee802154Mac::getFinalCAP(char trxType)
             }
 
             tmpf = aMaxLostBeacons * rxBI;
+
             // adjust if beacon loss occurs or during rceiving bcn
-            if ((rxCAP < now)&&(rxCAP + tmpf >= now))   //no more than <aMaxLostBeacons> beacons missed
+            if ((rxCAP < now) && (rxCAP + tmpf >= now))   //no more than <aMaxLostBeacons> beacons missed
             {
                 EV << "[MAC]: during receiving a beacon, now is: " << now << ", last beacon is rceived at " << bcnRxTime << endl;
                 while (rxCAP < now) rxCAP += rxBI;
             }
-            return (rxCAP>=now)?rxCAP:oneDay;
+
+            return (rxCAP >= now) ? rxCAP : oneDay;
         }
         else
             return oneDay;
@@ -2600,6 +2669,7 @@ void Ieee802154Mac::csmaca_handle_RX_ON_confirm(PHYenum status)
             EV << "[CSMA-CA]: RX_ON request did not succeed, try again" << endl;
             handleBackoffTimer();
         }
+
         return;
     }
 
@@ -2607,6 +2677,7 @@ void Ieee802154Mac::csmaca_handle_RX_ON_confirm(PHYenum status)
     // locate backoff boundary if needed
     EV << "[CSMA-CA]: ok, radio is set to RX_ON " << endl;
     now = simTime();
+
     if (beaconEnabled)
     {
         EV << "[CSMA-CA]: locate backoff boundary before sending CCA request" << endl;
@@ -2629,6 +2700,7 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
 // To be called each time that a beacon received or transmitted if backoffStatus == 99
 {
     simtime_t wtime;
+
     if (!txAck)
         PLME_SET_TRX_STATE_request(phy_RX_ON);
 
@@ -2642,6 +2714,7 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
         {
             EV << "[CSMA-CA]:  triggered again by the starting of the new CAP" << endl;
             ASSERT(bPeriodsLeft >= 0);
+
             if (bPeriodsLeft == 0)      // backoff again
             {
                 EV << "[CSMA-CA]: bPeriodsLeft == 0, need to rechoose random number of backoffs" << endl;
@@ -2660,6 +2733,7 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
             return;             // debug here
         }
     }
+
     csmacaWaitNextBeacon = false;   // really necessary??
 }
 
@@ -2669,8 +2743,10 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
 void Ieee802154Mac::startBackoffTimer(simtime_t wtime)
 {
     EV << "[CSMA-CA]: #"<< (int)tmpCsmaca->getBdsn()<< ": starting backoff for " << wtime << " s" << endl;
+
     if (backoffTimer->isScheduled())
         cancelEvent(backoffTimer);
+
     scheduleAt(simTime() + wtime, backoffTimer);
 }
 
@@ -2678,6 +2754,7 @@ void Ieee802154Mac::startDeferCCATimer(simtime_t wtime)
 {
     if (deferCCATimer->isScheduled())
         cancelEvent(deferCCATimer);
+
     scheduleAt(simTime() + wtime, deferCCATimer);
     EV << "[CSMA-CA]: delay " << wtime << " s before performing CCA" << endl;
 }
@@ -2685,6 +2762,7 @@ void Ieee802154Mac::startDeferCCATimer(simtime_t wtime)
 void Ieee802154Mac::startBcnRxTimer()
 {
     simtime_t rxBI, t_bcnRxTime, now, len12s, wtime, tmpf;
+
     now = simTime();
 
     rxBI = rxSfSpec.BI / phy_symbolrate;
@@ -2692,6 +2770,7 @@ void Ieee802154Mac::startBcnRxTimer()
 
     while (now - t_bcnRxTime > rxBI)
         t_bcnRxTime += rxBI;
+
     len12s = aTurnaroundTime / phy_symbolrate;
 
     tmpf = (now - t_bcnRxTime);
@@ -2701,6 +2780,7 @@ void Ieee802154Mac::startBcnRxTimer()
         wtime -= len12s;
 
     tmpf = now + wtime;
+
     if (tmpf - lastTime_bcnRxTimer < rxBI - len12s)
     {
         tmpf = 2 * rxBI;
@@ -2709,9 +2789,12 @@ void Ieee802154Mac::startBcnRxTimer()
         wtime = tmpf - len12s;
         //wtime = 2* BI - (now - bcnRxTime) - len12s;
     }
+
     lastTime_bcnRxTimer = now + wtime;
+
     if (bcnRxTimer->isScheduled())
         cancelEvent(bcnRxTimer);
+
     scheduleAt(now + wtime, bcnRxTimer);
 }
 
@@ -2723,6 +2806,7 @@ void Ieee802154Mac::startBcnTxTimer(bool txFirstBcn, simtime_t startTime)
     if (txFirstBcn)     // tx my first beacon
     {
         ASSERT(mpib.macBeaconOrder != 15);
+
         if (startTime == 0.0)   // transmit beacon right now
         {
             txNow_bcnTxTimer = true;
@@ -2738,11 +2822,12 @@ void Ieee802154Mac::startBcnTxTimer(bool txFirstBcn, simtime_t startTime)
             // wtime = startTime - (now - bcnRxTime) - 12.0/phy_symbolrate;
             tmpf = now - bcnRxTime;
             tmpf = startTime - tmpf;
-            wtime = tmpf - aTurnaroundTime/phy_symbolrate;
+            wtime = tmpf - aTurnaroundTime / phy_symbolrate;
             ASSERT(wtime >= 0.0);
 
             if (bcnTxTimer->isScheduled())
                 cancelEvent(bcnTxTimer);
+
             scheduleAt(now + wtime, bcnTxTimer);
             return;
         }
@@ -2752,13 +2837,16 @@ void Ieee802154Mac::startBcnTxTimer(bool txFirstBcn, simtime_t startTime)
     {
         if (bcnTxTimer->isScheduled())
             cancelEvent(bcnTxTimer);
-        scheduleAt(now + aTurnaroundTime/phy_symbolrate, bcnTxTimer);
+
+        scheduleAt(now + aTurnaroundTime / phy_symbolrate, bcnTxTimer);
     }
     else if (mpib.macBeaconOrder != 15)
     {
         wtime = (aBaseSuperframeDuration * (1 << mpib.macBeaconOrder) - aTurnaroundTime) / phy_symbolrate;
+
         if (bcnTxTimer->isScheduled())
             cancelEvent(bcnTxTimer);
+
         scheduleAt(now + wtime, bcnTxTimer);
     }
 
@@ -2769,13 +2857,15 @@ void Ieee802154Mac::startAckTimeoutTimer()
 {
     if (ackTimeoutTimer->isScheduled())
         cancelEvent(ackTimeoutTimer);
-    scheduleAt(simTime() + mpib.macAckWaitDuration/phy_symbolrate, ackTimeoutTimer);
+
+    scheduleAt(simTime() + mpib.macAckWaitDuration / phy_symbolrate, ackTimeoutTimer);
 }
 
 void Ieee802154Mac::startTxAckBoundTimer(simtime_t wtime)
 {
     if (txAckBoundTimer->isScheduled())
         cancelEvent(txAckBoundTimer);
+
     scheduleAt(simTime() + wtime, txAckBoundTimer);
 }
 
@@ -2783,19 +2873,22 @@ void Ieee802154Mac::startTxCmdDataBoundTimer(simtime_t wtime)
 {
     if (txCmdDataBoundTimer->isScheduled())
         cancelEvent(txCmdDataBoundTimer);
+
     scheduleAt(simTime() + wtime, txCmdDataBoundTimer);
 }
 
 void Ieee802154Mac::startIfsTimer(bool sifs)
 {
     simtime_t wtime;
+
     if (sifs)                   // SIFS
-        wtime = aMinSIFSPeriod/phy_symbolrate;
+        wtime = aMinSIFSPeriod / phy_symbolrate;
     else                                // LIFS
-        wtime = aMinLIFSPeriod/phy_symbolrate;
+        wtime = aMinLIFSPeriod / phy_symbolrate;
 
     if (ifsTimer->isScheduled())
         cancelEvent(ifsTimer);
+
     scheduleAt(simTime() + wtime, ifsTimer);
 }
 
@@ -2809,6 +2902,7 @@ void Ieee802154Mac::startTxSDTimer()
 
     if (txSDTimer->isScheduled())
         cancelEvent(txSDTimer);
+
     scheduleAt(simTime() + wtime, txSDTimer);
     inTxSD_txSDTimer = true;
 }
@@ -2825,6 +2919,7 @@ void Ieee802154Mac::startRxSDTimer()
 
     if (rxSDTimer->isScheduled())
         cancelEvent(rxSDTimer);
+
     scheduleAt(simTime() + wtime, rxSDTimer);
     //EV << "The current SD will end at " << simTime() + wtime << endl;
     inRxSD_rxSDTimer = true;
@@ -2856,6 +2951,7 @@ void Ieee802154Mac::handleBcnRxTimer()
             delete txAck;
             txAck = NULL;
         }
+
         //enable the receiver
         PLME_SET_TRX_STATE_request(phy_RX_ON);
 
@@ -2863,6 +2959,7 @@ void Ieee802154Mac::handleBcnRxTimer()
         {
             numCollision++;//
         }
+
         bcnLossCounter++;
         startBcnRxTimer();
     }
@@ -2880,11 +2977,13 @@ void Ieee802154Mac::handleBcnTxTimer()
         {
             beaconWaitingTx = true;
             PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);  //finish your job before this!
+
             if (txAck)      // transmitting beacon has highest priority
             {
                 delete txAck;
                 txAck = NULL;
             }
+
             PLME_SET_TRX_STATE_request(phy_TX_ON);
         }
         else        // it's time to transmit beacon
@@ -2901,6 +3000,7 @@ void Ieee802154Mac::handleBcnTxTimer()
             frmCtrl.ackReq = false;         // ignored upon reception
             frmCtrl.intraPan = false;       // ignored upon reception
             frmCtrl.dstAddrMode = defFrmCtrl_AddrModeNone; // 0x00, ignored upon reception
+
             if (mpib.macShortAddress == 0xfffe)
             {
                 frmCtrl.srcAddrMode = defFrmCtrl_AddrMode64;
@@ -2953,6 +3053,7 @@ void Ieee802154Mac::handleBcnTxTimer()
             }
         }
     }
+
     startBcnTxTimer();  //don't disable this even beacon not enabled (beacon may be temporarily disabled like in channel scan, but it will be enabled again)
 }
 
@@ -2960,6 +3061,7 @@ void Ieee802154Mac::handleAckTimeoutTimer()
 {
     //ASSERT(txBcnCmd||txBcnCmdUpper||txData);
     bool error = true;
+
     if (txBcnCmd)
         error = false;
     else if (txBcnCmdUpper)
@@ -2968,10 +3070,11 @@ void Ieee802154Mac::handleAckTimeoutTimer()
         error = false;
     else if (txGTS && waitGTSAck)
         error = false;
+
     if (error)
         opp_error("handleAckTimeoutTimer");
 
-    dispatch(phy_BUSY,__FUNCTION__);    //the status p_BUSY will be ignore
+    dispatch(phy_BUSY, __FUNCTION__);    //the status p_BUSY will be ignore
 }
 
 void Ieee802154Mac::handleTxAckBoundTimer()
@@ -2985,7 +3088,6 @@ void Ieee802154Mac::handleTxAckBoundTimer()
         }
     }
 }
-
 
 void Ieee802154Mac::handleTxCmdDataBoundTimer()
 // called when txCmdDataBoundTimer expires or directly by <handle_PLME_SET_TRX_STATE_confirm()>
@@ -3004,16 +3106,18 @@ void Ieee802154Mac::handleTxCmdDataBoundTimer()
     // need to update first to see if this transaction expired already
     if (check_and_cast<Ieee802154Frame *>(txCsmaca)->indirect)
     {
-        i = updateTransacLinkByPktOrHandle(tr_oper_est,&transacLink1,&transacLink2,txCsmaca); // if expired, txCsmaca will be deleted here
+        i = updateTransacLinkByPktOrHandle(tr_oper_est, &transacLink1, &transacLink2, txCsmaca); // if expired, txCsmaca will be deleted here
         if (i != 0) //transaction expired
         {
             resetTRX();
+
             if (txBcnCmd == txCsmaca)
                 txBcnCmd = NULL;
             else if (txBcnCmd2 == txCsmaca)
                 txBcnCmd2 = NULL;
             else if (txData == txCsmaca)
                 txData = NULL;
+
             //Packet::free(txCsmaca);   //don't do this, since the packet will be automatically deleted when expired
             csmacaResume();
             return;
@@ -3079,6 +3183,7 @@ void Ieee802154Mac::handleSDTimer()     // we must make sure that outgoing CAP a
     }
     else
         numTxAckInactive++;
+
     /*if ((!waitBcnCmdAck) && (!waitBcnCmdUpperAck) && (!waitDataAck))      // not waiting for ACK
     {
         EV << "[MAC]: entering inactive period, turn off radio and go to sleep" << endl;
@@ -3100,12 +3205,14 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
     if (type == 'b')    //beacon
     {
         EV << "[MAC]: taskSuccess for sending beacon" << endl;
+
         /*if (!txBeacon)
         {
             assert(txBcnCmdUpper);
             txBeacon = txBcnCmdUpper;
             txBcnCmdUpper = 0;
         }*/
+
         //--- calculate CAP ---
         if (txBeacon->getByteLength() <= aMaxSIFSFrameSize)
             ifs = aMinSIFSPeriod;
@@ -3116,8 +3223,10 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
         tmpf = calDuration(txBeacon) * phy_symbolrate;
         tmpf += ifs;
         txBcnDuration = (uint8_t)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
+
         if (fmod(tmpf, aUnitBackoffPeriod) > 0.0)
             txBcnDuration++;
+
         EV << "[MAC]: calculating txBcnDuration = " << (int)txBcnDuration << endl;
 
         t_CAP = (txSfSpec.finalCap + 1) * txSfSlotDuration / aUnitBackoffPeriod - txBcnDuration;
@@ -3133,9 +3242,11 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
             PLME_SET_TRX_STATE_request(phy_RX_ON);
             EV << "[MAC]: turn on radio receiver after txing beacon" << endl;
         }
+
         //CSMA-CA may be waiting for the new beacon
         if (backoffStatus == 99)
             csmacaTrxBeacon('t');
+
         //----------------------
         beaconWaitingTx = false;
         delete txBeacon;
@@ -3161,7 +3272,7 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
     {
         ASSERT(txBcnCmd);
         //if it is a pending packet, delete it from the pending list
-        updateTransacLinkByPktOrHandle(tr_oper_del,&transacLink1,&transacLink2,txBcnCmd);
+        updateTransacLinkByPktOrHandle(tr_oper_del, &transacLink1, &transacLink2, txBcnCmd);
         delete txBcnCmd;
         txBcnCmd = NULL;
     }
@@ -3180,27 +3291,32 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
         txData = NULL;
         MCPS_DATA_confirm(mac_SUCCESS);
         numTxDataSucc++;
+
         // request another msg from ifq (if it exists), only when MAC is idle for data transmission
         if (!taskP.taskStatus(TP_MCPS_DATA_REQUEST))
             reqtMsgFromIFq();
+
         //if it is a pending packet, delete it from the pending list
-        //updateTransacLinkByPktOrHandle(tr_oper_del,&transacLink1,&transacLink2,p);
+        //updateTransacLinkByPktOrHandle(tr_oper_del, &transacLink1, &transacLink2, p);
     }
     else if (type == 'g')   // GTS
     {
         csmacaRes = false;
         ASSERT(txGTS);
         EV << "[GTS]: taskSuccess for sending : " << txGTS->getName() <<":#" << (int)txGTS->getBdsn() << endl;
+
         // if PAN coordinator, need to clear isTxPending in corresponding GTS descriptor
         if (isPANCoor)
         {
             ASSERT(gtsList[indexCurrGts].isTxPending);
             gtsList[indexCurrGts].isTxPending = false;
         }
+
         delete txGTS;
         txGTS = NULL;
         MCPS_DATA_confirm(mac_SUCCESS);
         numTxGTSSucc++;
+
         // request another msg from ifq (if it exists), only when MAC is idle for data transmission
         if (!taskP.taskStatus(TP_MCPS_DATA_REQUEST))
             reqtMsgFromIFq();
@@ -3233,8 +3349,10 @@ void Ieee802154Mac::taskFailed(char type, MACenum status, bool csmacaRes)
         txData = NULL;
         numTxDataFail++;
         MCPS_DATA_confirm(status);
+
         if (csmacaRes)
             csmacaResume();
+
         // request another msg from ifq (if it exists), only when MAC is idle for data transmission
         if (!taskP.taskStatus(TP_MCPS_DATA_REQUEST))
             reqtMsgFromIFq();
@@ -3243,16 +3361,19 @@ void Ieee802154Mac::taskFailed(char type, MACenum status, bool csmacaRes)
     {
         ASSERT(txGTS);
         EV << "[MAC]: taskFailed for sending : " << txGTS->getName() <<":#" << (int)txGTS->getBdsn() << endl;
+
         // if PAN coordinator, need to clear isTxPending in corresponding GTS descriptor
         if (isPANCoor)
         {
             ASSERT(gtsList[indexCurrGts].isTxPending);
             gtsList[indexCurrGts].isTxPending = false;
         }
+
         delete txGTS;
         txGTS = NULL;
         numTxGTSFail++;
         MCPS_DATA_confirm(status);
+
         // request another msg from ifq (if it exists), only when MAC is idle for data transmission
         if (!taskP.taskStatus(TP_MCPS_DATA_REQUEST))
             reqtMsgFromIFq();
@@ -3288,7 +3409,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             if (pStatus == phy_IDLE)        // CSMA/CA succeeds
             {
                 taskP.taskStep(task)++;
-                strcpy(taskP.taskFrFunc(task),"handle_PD_DATA_confirm");
+                strcpy(taskP.taskFrFunc(task), "handle_PD_DATA_confirm");
                 //enable the transmitter
                 PLME_SET_TRX_STATE_request(phy_TX_ON);
             }
@@ -3303,7 +3424,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             if (txData->getFrmCtrl().ackReq)    //ack. required
             {
                 taskP.taskStep(task)++;
-                strcpy(taskP.taskFrFunc(task),"handleAck");
+                strcpy(taskP.taskFrFunc(task), "handleAck");
                 //enable the receiver
                 PLME_SET_TRX_STATE_request(phy_RX_ON);
                 startAckTimeoutTimer();
@@ -3312,7 +3433,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             else        //assume success if ack. not required
             {
                 taskP.taskStatus(task) = false; // task ends successfully
-                EV << "[MAC-TASK-SUCCESS]: reset TP_MCPS_DATA_REQUEST" << endl;
+                EV << "[MAC-TASK-SUCCESS]: reset TP_MCPS_DATA_REQUEST\n";
                 resetTRX();
                 taskSuccess('d');
             }
@@ -3332,11 +3453,12 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             {
                 EV << "[MAC]: ACK timeout for " << txData->getName() << ":#" << (int)txData->getBdsn()  << endl;
                 numDataRetry++;
+
                 if (numDataRetry <= aMaxFrameRetries)
                 {
                     EV << "[MAC]: starting " << numDataRetry << "th retry for " << txData->getName() << ":#" << (int)txData->getBdsn()  << endl;
                     taskP.taskStep(task) = 1;   // go back to step 1
-                    strcpy(taskP.taskFrFunc(task),"csmacaCallBack");
+                    strcpy(taskP.taskFrFunc(task), "csmacaCallBack");
                     waitDataAck = false;
                     csmacaResume();
                 }
@@ -3372,7 +3494,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             // two possible callbacks, one from handleGtsTimer() at the starting of one GTS
             // the other directly from MCPS_DATA_request(), only possible for devices when receiving a data from upper layer during the GTS
             taskP.taskStep(task)++;
-            strcpy(taskP.taskFrFunc(task),"handle_PD_DATA_confirm");
+            strcpy(taskP.taskFrFunc(task), "handle_PD_DATA_confirm");
             // should transmit right now, since the timing is very strictly controlled in GTS,
             // we can simply use phy_FORCE_TRX_OFF and then phy_TX_ON to turn on transmitter immediately
             PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
@@ -3384,7 +3506,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             if (txGTS->getFrmCtrl().ackReq) //ack. required
             {
                 taskP.taskStep(task)++;
-                strcpy(taskP.taskFrFunc(task),"handleAck");
+                strcpy(taskP.taskFrFunc(task), "handleAck");
                 //enable the receiver
                 EV << "[GTS]: data successfully transmitted, turn on radio and wait for ACK" << endl;
                 PLME_SET_TRX_STATE_request(phy_RX_ON);
@@ -3397,7 +3519,8 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
                 EV << "[GTS]: need to delay IFS before next GTS transmission can proceed" << endl;
                 taskP.taskStep(task) = 4;
-                strcpy(taskP.taskFrFunc(task),"handleIfsTimer");
+                strcpy(taskP.taskFrFunc(task), "handleIfsTimer");
+
                 if (txGTS->getByteLength() <= aMaxSIFSFrameSize)
                     startIfsTimer(true);
                 else
@@ -3413,7 +3536,8 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
                 EV << "[GTS]: need to delay IFS before next GTS transmission can proceed" << endl;
                 taskP.taskStep(task)++;
-                strcpy(taskP.taskFrFunc(task),"handleIfsTimer");
+                strcpy(taskP.taskFrFunc(task), "handleIfsTimer");
+
                 if (txGTS->getByteLength() <= aMaxSIFSFrameSize)
                     startIfsTimer(true);
                 else
@@ -3423,12 +3547,13 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             {
                 EV << "[MAC]: ACK timeout for " << txGTS->getName() << ":#" << (int)txGTS->getBdsn()  << endl;
                 numGTSRetry++;
+
                 if (numGTSRetry <= aMaxFrameRetries)
                 {
                     // retry in next GTS
                     EV << "[GTS]: retry in this GTS of next superframe, turn off radio now" << endl;
                     taskP.taskStep(task) = 1;   // go back to step 1
-                    strcpy(taskP.taskFrFunc(task),"handleGtsTimer");
+                    strcpy(taskP.taskFrFunc(task), "handleGtsTimer");
                     waitGTSAck = false;
                     // to avoid several consecutive PLME_SET_TRX_STATE_request are called at the same time, which may lead to error operation,
                     // use phy_FORCE_TRX_OFF to turn off radio, because PHY will not send back a confirm from it
@@ -3471,7 +3596,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
     /*****************************************/
     /************<csmacaCallBack()>**********/
     /***************************************/
-    if (strcmp(frFunc,"csmacaCallBack") == 0)
+    if (strcmp(frFunc, "csmacaCallBack") == 0)
     {
         if (txCsmaca == txBcnCmdUpper)
         {
@@ -3479,7 +3604,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         else if (txCsmaca == txData)
         {
             ASSERT(taskP.taskStatus(TP_MCPS_DATA_REQUEST)
-                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0));
+                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), frFunc) == 0));
 
             FSM_MCPS_DATA_request(pStatus); // mStatus ignored
         }
@@ -3488,7 +3613,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
     /*****************************************/
     /*******<handle_PD_DATA_confirm()>*******/
     /***************************************/
-    else if (strcmp(frFunc,"handle_PD_DATA_confirm") == 0)  // only process phy_SUCCESS here
+    else if (strcmp(frFunc, "handle_PD_DATA_confirm") == 0)  // only process phy_SUCCESS here
     {
         if (txPkt == txBeacon)
         {
@@ -3501,6 +3626,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
             {
                 if (rxCmd->getByteLength() <= aMaxSIFSFrameSize)
                     isSIFS = true;
+
                 startIfsTimer(isSIFS);
                 resetTRX();
                 taskSuccess('a');
@@ -3509,7 +3635,9 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
             {
                 if (rxData->getByteLength() <= aMaxSIFSFrameSize)
                     isSIFS = true;
+
                 startIfsTimer(isSIFS);
+
                 if (rxData->getIsGTS()) // received in GTS
                 {
                     if (isPANCoor)
@@ -3525,6 +3653,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
                 }
                 else
                     resetTRX();
+
                 taskSuccess('a');
             }
             else    //ack. for duplicated packet
@@ -3536,9 +3665,10 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         else if (txPkt == txData)
         {
             ASSERT((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
-                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0));
+                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), frFunc) == 0));
 
             frmCtrl = txData->getFrmCtrl();
+
             if (taskP.taskStatus(TP_MCPS_DATA_REQUEST))
             {
                 FSM_MCPS_DATA_request(pStatus); // mStatus ignored
@@ -3547,7 +3677,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         else if (txPkt == txGTS)
         {
             ASSERT((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
-                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0));
+                   && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), frFunc) == 0));
             ASSERT(taskP.mcps_data_request_TxOption == GTS_TRANS);
             // hand over back to FSM
             FSM_MCPS_DATA_request(pStatus); // mStatus ignored
@@ -3558,12 +3688,12 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
     /*****************************************/
     /**************<handleAck()>*************/
     /***************************************/
-    else if (strcmp(frFunc,"handleAck") == 0)       //always check the task status if the dispatch comes from recvAck()
+    else if (strcmp(frFunc, "handleAck") == 0)       //always check the task status if the dispatch comes from recvAck()
     {
         if (txPkt == txData)
         {
             if ((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
-                    && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0))
+                    && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), frFunc) == 0))
             {
                 FSM_MCPS_DATA_request(pStatus); // mStatus ignored
             }
@@ -3571,6 +3701,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
             {
                 if (taskP.taskStatus(TP_MCPS_DATA_REQUEST)) //seems late ACK received
                     taskP.taskStatus(TP_MCPS_DATA_REQUEST) = false;
+
                 resetTRX();
                 taskSuccess('d');
             }
@@ -3578,7 +3709,7 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         else if (txPkt == txGTS)
         {
             if ((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
-                    && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0))
+                    && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), frFunc) == 0))
             {
                 FSM_MCPS_DATA_request(pStatus); // mStatus ignored
             }
@@ -3588,12 +3719,12 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
     /*****************************************/
     /*******<handleAckTimeoutTimer()>********/
     /***************************************/
-    else if (strcmp(frFunc,"handleAckTimeoutTimer") == 0)   //always check the task status if the dispatch comes from a timer handler
+    else if (strcmp(frFunc, "handleAckTimeoutTimer") == 0)   //always check the task status if the dispatch comes from a timer handler
     {
         if (txPkt == txData)
         {
             if ((!taskP.taskStatus(TP_MCPS_DATA_REQUEST))
-                    || (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),"handleAck") != 0))
+                    || (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST), "handleAck") != 0))
                 return;
 
             if (taskP.taskStatus(TP_MCPS_DATA_REQUEST))
@@ -3637,6 +3768,7 @@ int Ieee802154Mac::calFrmByteLength(Ieee802154Frame* frame)
     else if (frmType == Ieee802154_CMD)
     {
         Ieee802154CmdFrame* cmdFrm = check_and_cast<Ieee802154CmdFrame *>(frame);
+
         switch (cmdFrm->getCmdType())
         {
         case    Ieee802154_ASSOCIATION_REQUEST: // Fig 48: MHR (17/23) + Payload (2) + FCS (2)
@@ -3712,7 +3844,7 @@ int Ieee802154Mac::calMHRByteLength(uint8_t addrModeSum)
 
 simtime_t Ieee802154Mac::calDuration(Ieee802154Frame* frame)
 {
-    return (def_phyHeaderLength*8 + frame->getBitLength())/phy_bitrate;
+    return (def_phyHeaderLength * 8 + frame->getBitLength()) / phy_bitrate;
 }
 
 double Ieee802154Mac::getRate(char bitOrSymbol)
@@ -3740,7 +3872,7 @@ double Ieee802154Mac::getRate(char bitOrSymbol)
         else
             rate = SR_2_4G;
     }
-    return (rate*1000);
+    return (rate * 1000);
 }
 
 bool Ieee802154Mac::toParent(Ieee802154Frame* frame)
@@ -3769,7 +3901,7 @@ void Ieee802154Mac::gtsScheduler()
 
     // should turn on radio receiver aTurnaroundTime symbols berfore GTS starts, if it is a transmit GTS relative to device
     if (!gtsList[index_gtsTimer].isRecvGTS)
-        w_time = w_time - aTurnaroundTime/phy_symbolrate;
+        w_time = w_time - aTurnaroundTime / phy_symbolrate;
 
     EV << "[GTS]: schedule for starting of GTS index: " << index_gtsTimer << ", slot:#" << (int)gtsList[index_gtsTimer].startSlot << " with " << w_time << " s" << endl;
     startGtsTimer(w_time);
@@ -3779,6 +3911,7 @@ void Ieee802154Mac::startGtsTimer(simtime_t w_time)
 {
     if (gtsTimer->isScheduled())
         cancelEvent(gtsTimer);
+
     scheduleAt(simTime() + w_time, gtsTimer);
 }
 
@@ -3868,8 +4001,10 @@ void Ieee802154Mac::handleGtsTimer()
             index_gtsTimer = 99;
             // calculate the duration of my GTS
             w_time = gtsLength * rxSfSlotDuration / phy_symbolrate;
+
             if (isRecvGTS)
-                w_time += aTurnaroundTime/phy_symbolrate;
+                w_time += aTurnaroundTime / phy_symbolrate;
+
             EV << "[GTS]: scheduling for the end of my GTS slot" << endl;
             startGtsTimer(w_time);
         }
@@ -3896,6 +4031,7 @@ uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bo
     ASSERT(isPANCoor);
     EV << "[GTS]: the PAN coordinator is processing GTS request from MAC address " << macShortAddr << endl;
     // check whether this device is device list
+
     if (deviceList.find(macShortAddr) == deviceList.end())
     {
         EV << "[GTS]: the address " << macShortAddr << " not found in the device list, no GTS allocated" << endl;
@@ -3909,6 +4045,7 @@ uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bo
 
     // check if the min CAP length can still be satisfied after this allocation
     t_cap = txSfSlotDuration * (tmp_finalCap - length + 1);
+
     if (t_cap < aMinCAPLength)
     {
         EV << "[GTS]: violation of the min CAP length, no GTS allocated for the MAC address " << macShortAddr << endl;
@@ -3934,6 +4071,7 @@ void Ieee802154Mac::startFinalCapTimer(simtime_t w_time)
 {
     if (finalCAPTimer->isScheduled())
         cancelEvent(finalCAPTimer);
+
     scheduleAt(simTime() + w_time, finalCAPTimer);
 }
 

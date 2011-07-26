@@ -9,16 +9,16 @@
 enum Ieee802154MacPhyPrimitiveType
 {
     //UNDEFINED                 = 0,
-    PD_DATA_CONFIRM                 = 1,
-    PLME_CCA_REQUEST                = 2,
-    PLME_CCA_CONFIRM                = 3,
-    PLME_ED_REQUEST                 = 4,
-    PLME_ED_CONFIRM                 = 5,
-    PLME_SET_TRX_STATE_REQUEST          = 6,
-    PLME_SET_TRX_STATE_CONFIRM          = 7,
-    PLME_SET_REQUEST                = 8,
-    PLME_SET_CONFIRM                = 9,
-    PLME_GET_BITRATE                = 10
+    PD_DATA_CONFIRM = 1,
+    PLME_CCA_REQUEST = 2,
+    PLME_CCA_CONFIRM = 3,
+    PLME_ED_REQUEST = 4,
+    PLME_ED_CONFIRM = 5,
+    PLME_SET_TRX_STATE_REQUEST = 6,
+    PLME_SET_TRX_STATE_CONFIRM = 7,
+    PLME_SET_REQUEST = 8,
+    PLME_SET_CONFIRM = 9,
+    PLME_GET_BITRATE = 10
 };
 
 //PHY enumerations description (Table 16)
@@ -154,33 +154,30 @@ typedef enum
     Ieee802154_DATA         = 2,        // MAC Data
     Ieee802154_ACK          = 3,        // MAC ACK
     Ieee802154_CMD          = 4     // MAC command
-
 } Ieee802154FrameType;
 
 // MAC command type - Table 67
 typedef enum
 {
     //Ieee802154_UNDEFINED_CMD              = 0,
-    Ieee802154_ASSOCIATION_REQUEST              = 1,
-    Ieee802154_ASSOCIATION_RESPONSE             = 2,
-    Ieee802154_DISASSOCIATION_NOTIFICATION          = 3,
-    Ieee802154_DATA_REQUEST                 = 4,
-    Ieee802154_PANID_CONFLICT_NOTIFICATION          = 5,
-    Ieee802154_ORPHAN_NOTIFICATION              = 6,
-    Ieee802154_BEACON_REQUEST               = 7,
-    Ieee802154_COORDINATOR_REALIGNMENT          = 8,
-    Ieee802154_GTS_REQUEST                  = 9
-
+    Ieee802154_ASSOCIATION_REQUEST = 1,
+    Ieee802154_ASSOCIATION_RESPONSE = 2,
+    Ieee802154_DISASSOCIATION_NOTIFICATION = 3,
+    Ieee802154_DATA_REQUEST = 4,
+    Ieee802154_PANID_CONFLICT_NOTIFICATION = 5,
+    Ieee802154_ORPHAN_NOTIFICATION = 6,
+    Ieee802154_BEACON_REQUEST = 7,
+    Ieee802154_COORDINATOR_REALIGNMENT = 8,
+    Ieee802154_GTS_REQUEST = 9
 } Ieee802154MacCmdType;
 
 // Pkt tx options
 typedef enum
 {
     //UNDEFINED         = 0,
-    DIRECT_TRANS            = 1,
-    INDIRECT_TRANS          = 2,
-    GTS_TRANS           = 3
-
+    DIRECT_TRANS = 1,
+    INDIRECT_TRANS = 2,
+    GTS_TRANS = 3
 } Ieee802154TxOption;
 
 // MAC timer type
@@ -206,11 +203,10 @@ enum Ieee802154MacTimerType
 typedef enum
 {
     //UNDEFINED         = 0,
-    ED_SCAN             = 1,
-    ACTIVE_SCAN         = 2,
-    PASSIVE_SCAN            = 3,
-    ORPHAN_SCAN         = 4
-
+    ED_SCAN = 1,
+    ACTIVE_SCAN = 2,
+    PASSIVE_SCAN = 3,
+    ORPHAN_SCAN = 4
 } Ieee802154ChannelScanType;
 
 // MAC task pending type
@@ -229,8 +225,7 @@ typedef enum
     TP_MLME_POLL_REQUEST,
     TP_CCA_CSMACA,
     TP_RX_ON_CSMACA
-
 } Ieee802154MacTaskType;
 
-
 #endif
+

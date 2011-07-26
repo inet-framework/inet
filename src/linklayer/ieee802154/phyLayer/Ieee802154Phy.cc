@@ -1,6 +1,8 @@
 #include "Ieee802154Phy.h"
+
 #include "BasicBattery.h"
 #include "PhyControlInfo_m.h"
+
 // #undef EV
 //#define EV (ev.isDisabled() || !m_debug) ? std::cout : ev  ==> EV is now part of <omnetpp.h>
 
@@ -14,23 +16,23 @@ Ieee802154Phy::Ieee802154Phy() : rs(this->getId())
     ED_timer = NULL;
     TRX_timer = NULL;
     TxOver_timer = NULL;
-    updateString =NULL;
-
+    updateString = NULL;
 }
 
 void Ieee802154Phy::registerBattery()
 {
     BasicBattery *bat = BatteryAccess().getIfExists();
+
     if (bat)
     {
         //int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;
         // read parameters
-        double mUsageRadioIdle      = par("usage_radio_idle");
-        double mUsageRadioRecv      = par("usage_radio_recv");
-        double mUsageRadioSleep     = par("usage_radio_sleep");
-        double mTransmitterPower        = par("transmitterPower");
+        double mUsageRadioIdle = par("usage_radio_idle");
+        double mUsageRadioRecv = par("usage_radio_recv");
+        double mUsageRadioSleep = par("usage_radio_sleep");
+        double mTransmitterPower = par("transmitterPower");
 
-        double trans_power_dbm = 10*log10(mTransmitterPower);
+        double trans_power_dbm = 10 * log10(mTransmitterPower);
         // calculation of usage_radio_send
         // based on the values in Olaf Landsiedel's AEON paper
         /*if (trans_power_dbm <= -18)
@@ -74,6 +76,7 @@ void Ieee802154Phy::registerBattery()
             mUsageRadioSend = 16.24;
         else
             error("[Battery]: transmitter Power too high!");
+
         bat->registerWirelessDevice(rs.getRadioId(),mUsageRadioIdle,mUsageRadioRecv,mUsageRadioSend,mUsageRadioSleep);
     }
 }
@@ -86,11 +89,12 @@ Ieee802154Phy::~Ieee802154Phy()
     cancelAndDelete(TxOver_timer);
     delete radioModel;
     delete receptionModel;
+
     if (txPktCopy != NULL)
         delete txPktCopy;
 
     // delete messages being received
-    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
+    for (RecvBuff::iterator it = recvBuff.begin(); it != recvBuff.end(); ++it)
         delete it->first;
 }
 
@@ -107,7 +111,7 @@ void Ieee802154Phy::initialize(int stage)
         gate("radioIn")->setDeliverOnReceptionStart(true);
 
         // The following parameters to be specified in omnetpp.ini
-        m_debug             = par("debug");
+        m_debug = par("debug");
         rs.setChannelNumber(par("channelNumber")); // default: 11, 2.4G
         // carrierFrequency     = cc->par("carrierFrequency");  // taken from ChannelControl
         carrierFrequency = par("carrierFrequency");
@@ -123,10 +127,12 @@ void Ieee802154Phy::initialize(int stage)
         snrInfo.ptr = NULL;
         txPktCopy = NULL;
         //rxPkt = NULL;
-        for (int i=0; i<27; i++)
+
+        for (int i = 0; i < 27; i++)
         {
             rxPower[i] = 0;     // remember to clear after channel switching
         }
+
         rxPeakPower = 0;
         numCurrRx = 0;
 
@@ -142,10 +148,10 @@ void Ieee802154Phy::initialize(int stage)
         isCCAStartIdle = false;
 
         // initalize self messages (timer)
-        CCA_timer   = new cMessage("CCA_timer",     PHY_CCA_TIMER);
-        ED_timer    = new cMessage("ED_timer",  PHY_ED_TIMER);
-        TRX_timer   = new cMessage("TRX_timer", PHY_TRX_TIMER);
-        TxOver_timer    = new cMessage("TxOver_timer",  PHY_TX_OVER_TIMER);
+        CCA_timer = new cMessage("CCA_timer", PHY_CCA_TIMER);
+        ED_timer = new cMessage("ED_timer", PHY_ED_TIMER);
+        TRX_timer = new cMessage("TRX_timer", PHY_TRX_TIMER);
+        TxOver_timer = new cMessage("TxOver_timer", PHY_TX_OVER_TIMER);
 
 
         receptionModel = (IReceptionModel *)createOne(getChannelControlPar("propagationModel").stringValue());
@@ -179,6 +185,7 @@ void Ieee802154Phy::initialize(int stage)
         	updateStringInterval = par("refresCoverageInterval");
         else
         	updateStringInterval = 0;
+
         WATCH(rs);
         WATCH(phyRadioState);
     }
@@ -190,7 +197,6 @@ void Ieee802154Phy::finish()
 
 bool Ieee802154Phy::processAirFrame(AirFrame *airframe)
 {
-
     int chnum = airframe->getChannelNumber();
 /*
     double perc = cc->getPercentage();
@@ -208,17 +214,19 @@ bool Ieee802154Phy::processAirFrame(AirFrame *airframe)
 void Ieee802154Phy::handleMessage(cMessage *msg)
 {
     // handle primitives
-    if (updateString && updateString==msg)
+    if (updateString && updateString == msg)
     {
         updateDisplayString();
         return;
     }
+
     if (!msg->isSelfMessage())
     {
-        if (msg->getArrivalGateId()==uppergateIn && (dynamic_cast<cPacket*>(msg)==NULL))
+        if (msg->getArrivalGateId() == uppergateIn && (dynamic_cast<cPacket*>(msg) == NULL))
         {
-            if (msg->getKind()==0)
+            if (msg->getKind() == 0)
                 error("[PHY]: Message '%s' with length==0 is supposed to be a primitive, but msg kind is also zero", msg->getName());
+
             EV << "[PHY]: a primitive received from MAC layer, processing ..." << endl;
             handlePrimitive(msg->getKind(), msg);
             return;
@@ -259,30 +267,35 @@ void Ieee802154Phy::handleMessage(cMessage *msg)
 void Ieee802154Phy::handlePrimitive(int msgkind, cMessage *msg)
 {
     Ieee802154MacPhyPrimitives *primitive = check_and_cast<Ieee802154MacPhyPrimitives *>(msg);
+
     switch (msgkind)
     {
     case PLME_CCA_REQUEST:
         EV <<"[PHY]: this is a PLME_CCA_REQUEST" << endl;
+
         if (phyRadioState == phy_RX_ON)
         {
             // perform CCA, delay 8 symbols
             if (CCA_timer->isScheduled())
                 error("[CCA]: received a PLME_CCA_REQUEST from MAC layer while CCA is running");
+
             // check if it's idle at start
             isCCAStartIdle = (rs.getState() == RadioState::IDLE);
-            EV <<"[CCA]: performing CCA ..., lasting 8 symbols" << endl;
+            EV << "[CCA]: performing CCA ..., lasting 8 symbols" << endl;
             scheduleAt(simTime() + 8.0/getRate('s'), CCA_timer);
         }
         else
         {
-            EV <<"[CCA]: received a PLME_CCA_REQUEST from MAC layer while receiver is off, reporting to MAC layer" << endl;
+            EV << "[CCA]: received a PLME_CCA_REQUEST from MAC layer while receiver is off, reporting to MAC layer" << endl;
             PLME_CCA_confirm(phyRadioState);
         }
+
         delete primitive;
         break;
 
     case PLME_ED_REQUEST:
-        EV <<"[PHY]: this is a PLME_ED_REQUEST" << endl;
+        EV << "[PHY]: this is a PLME_ED_REQUEST" << endl;
+
         if (phyRadioState == phy_RX_ON)
         {
             rxPeakPower = rxPower[getChannelNumber()];
@@ -291,11 +304,12 @@ void Ieee802154Phy::handlePrimitive(int msgkind, cMessage *msg)
         }
         else
             PLME_ED_confirm(phyRadioState, 0);
+
         delete primitive;
         break;
 
     case PLME_SET_TRX_STATE_REQUEST:
-        EV <<"[PHY]: this is a PLME_SET_TRX_STATE_REQUEST" << endl;
+        EV << "[PHY]: this is a PLME_SET_TRX_STATE_REQUEST" << endl;
         handle_PLME_SET_TRX_STATE_request(PHYenum(primitive->getStatus()));
         delete primitive;
         break;
@@ -325,21 +339,26 @@ AirFrame* Ieee802154Phy::encapsulatePacket(cMessage *frame)
     airframe->setPSend(transmitterPower);
     airframe->setChannelNumber(getChannelNumber());
     airframe->setBitrate(rs.getBitrate());
+
     if (ctrl)
     {
-        if (ctrl->getChannelNumber()>=0)
+        if (ctrl->getChannelNumber() >= 0)
             airframe->setChannelNumber(ctrl->getChannelNumber());
-        if (ctrl->getBitrate()>=0)
+
+        if (ctrl->getBitrate() >= 0)
         {
             airframe->setBitrate(ctrl->getBitrate());
-            if (rs.getBitrate()!=ctrl->getBitrate())
+
+            if (rs.getBitrate() != ctrl->getBitrate())
                 rs.setBitrate(ctrl->getBitrate());
         }
-        if (ctrl->getTransmitterPower()>=0)
+
+        if (ctrl->getTransmitterPower() >= 0)
         {
             if (ctrl->getTransmitterPower() <= (double)(getChannelControlPar("pMax")))
                airframe->setPSend(ctrl->getTransmitterPower());
         }
+
         delete ctrl;
     }
     airframe->encapsulate(PK(frame));
@@ -360,10 +379,11 @@ void Ieee802154Phy::handleUpperMsg(AirFrame *airframe)
         EV << "[PHY]: transmitter is on, start sending message ..." << endl;
         setRadioState(RadioState::TRANSMIT);
         ASSERT(txPktCopy == NULL);
-        txPktCopy = (AirFrame *) airframe->dup();
+        txPktCopy = (AirFrame *)airframe->dup();
 
         if (TxOver_timer->isScheduled())
             error("[PHY]: try to transmit a pkt whihe radio is Txing");
+
         scheduleAt(simTime() + airframe->getDuration(), TxOver_timer);
         EV << "[PHY]: the transmission needs " << airframe->getDuration() << " s" << endl;
         sendDown(airframe);
@@ -407,7 +427,7 @@ AirFrame* Ieee802154Phy::unbufferMsg(cMessage *msg)
     return airframe;
 }
 
-void Ieee802154Phy::handleLowerMsgStart(AirFrame * airframe)
+void Ieee802154Phy::handleLowerMsgStart(AirFrame *airframe)
 {
     // Calculate the receive power of the message
 
@@ -562,10 +582,12 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
     {
         setRadioState(RadioState::IDLE);
         EV << "[PHY]: radio finishes receiving\n";
+
         if (newState != phy_IDLE)
         {
             newState_turnaround = newState;
             newState = phy_IDLE;
+
             if (newState_turnaround == phy_TRX_OFF)
             {
                 phyRadioState = phy_TRX_OFF;
@@ -579,6 +601,7 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
                 PLME_SET_TRX_STATE_confirm(phyRadioState);
                 setRadioState(RadioState::SLEEP); // radio disabled during TRx turnaround
                 if (TRX_timer->isScheduled())    cancelEvent(TRX_timer);
+
                 scheduleAt(simTime() + aTurnaroundTime/getRate('s'), TRX_timer);
             }
         }
@@ -605,12 +628,12 @@ void Ieee802154Phy::handleSelfMsg(cMessage *msg)
         EV << "[PHY]: send a PD_DATA_confirm with success to MAC layer" << endl;
         PD_DATA_confirm(phy_SUCCESS,TX_OVER);//
 
-
         // process radio and channel state switch
         if (newState != phy_IDLE)
         {
             newState_turnaround = newState;
             newState = phy_IDLE;
+
             if (newState_turnaround == phy_TRX_OFF)
             {
                 phyRadioState = phy_TRX_OFF;
@@ -721,8 +744,10 @@ void Ieee802154Phy::PLME_SET_TRX_STATE_confirm(PHYenum status)
     primitive->setKind(PLME_SET_TRX_STATE_CONFIRM);
     primitive->setStatus(status);
     primitive->setBitRate(rs.getBitrate());
+
     if (status == phy_SUCCESS)
     	EV << "phy_SUCCESS";
+
     EV << "[PHY]: sending a PLME_SET_TRX_STATE_confirm with " << status << " to MAC" << endl;
     send(primitive, uppergateOut);
 }
@@ -747,33 +772,36 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
     switch (setState)
     {
     case phy_BUSY:
-    	EV << "request Busy \n";
-    	break;
+        EV<< "request Busy \n";
+        break;
+
     case phy_BUSY_RX:
-    	EV << "request Busy RX\n";
-    	break;
+        EV << "request Busy RX\n";
+        break;
+
     case phy_BUSY_TX:
-    	EV << "request Busy TX\n";
-    	break;
+        EV << "request Busy TX\n";
+        break;
+
     case phy_FORCE_TRX_OFF:
-    	EV << "request FORCE TX OFF \n";
-    	break;
+        EV << "request FORCE TX OFF \n";
+        break;
 
     case phy_IDLE:
-    	EV << "request idle \n";
-    	break;
+        EV << "request idle \n";
+        break;
 
     case phy_INVALID_PARAMETER:
-    	EV << "request INVALID_PARAMETER \n";
-    	break;
+        EV << "request INVALID_PARAMETER \n";
+        break;
 
     case phy_RX_ON:
-    	EV << "request RX ON \n";
-    	break;
+        EV << "request RX ON \n";
+        break;
 
     case phy_SUCCESS:
-    	EV << "request success \n";
-    	break;
+        EV << "request success \n";
+        break;
 
     case phy_TRX_OFF:
     	EV << "request tx Off \n";
@@ -797,6 +825,7 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
     }
 
     tmp_state = curr_state;
+
     if (setState != curr_state) // case A: desired state is different from current state
     {
         delay = false;
@@ -815,7 +844,7 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
         // case A3
         else if (setState == phy_FORCE_TRX_OFF)
         {
-            tmp_state = (curr_state == phy_TRX_OFF)? phy_TRX_OFF:phy_SUCCESS;
+            tmp_state = (curr_state == phy_TRX_OFF)? phy_TRX_OFF : phy_SUCCESS;
             phyRadioState = phy_TRX_OFF; // turn off radio immediately
             PLME_SET_TRX_STATE_confirm(phyRadioState);
             setRadioState(RadioState::SLEEP);
@@ -853,8 +882,8 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
         else
         {
             tmp_state = phy_SUCCESS;
-            if (((setState == phy_RX_ON)&&(curr_state == phy_TX_ON))
-                    ||((setState == phy_TX_ON)&&(curr_state == phy_RX_ON)))
+            if (((setState == phy_RX_ON) && (curr_state == phy_TX_ON))
+                    || ((setState == phy_TX_ON) && (curr_state == phy_RX_ON)))
             {
                 newState_turnaround = setState;
                 delay = true;
@@ -867,6 +896,7 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
             {
                 phyRadioState = setState;
                 PLME_SET_TRX_STATE_confirm(phyRadioState);
+
                 if (setState == phy_TRX_OFF)
                     setRadioState(RadioState::SLEEP);
                 else
@@ -949,16 +979,15 @@ void Ieee802154Phy::handle_PLME_SET_request(Ieee802154MacPhyPrimitives *primitiv
     delete primitive;
 }
 
-
-
 void Ieee802154Phy::changeChannel(int newChannel)
 {
     // since channel is chaging, all current rxing or txing actions should be terminated
     // clear recvbuff (including noises), stop all recv timers, reset noise level and power recorder
     int newChannelINT = newChannel;
+
     if (!recvBuff.empty())
     {
-        for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
+        for (RecvBuff::iterator it = recvBuff.begin(); it != recvBuff.end(); ++it)
         {
             AirFrame *airframe = it->first;
             cMessage *endRxTimer = (cMessage *)airframe->getContextPointer();
@@ -1066,7 +1095,7 @@ double Ieee802154Phy::getRate(char bitOrSymbol)
     }
     else
         error("[PHY]: channel number ", getChannelNumber(), " is not supported");
-    return (rate*1000);     // return bit/s
+    return (rate * 1000);     // return bit/s
 }
 
 uint8_t Ieee802154Phy::calculateEnergyLevel()
@@ -1082,10 +1111,10 @@ uint8_t Ieee802154Phy::calculateEnergyLevel()
     */
 
     double tmpf;
-    tmpf = rxPeakPower/sensitivity;
+    tmpf = rxPeakPower / sensitivity;
     energy = (int)(tmpf * 128);
 
-    t_EnergyLevel = (energy > 255)?255:energy;
+    t_EnergyLevel = (energy > 255) ? 255 : energy;
     return t_EnergyLevel;
 }
 
@@ -1122,17 +1151,18 @@ void Ieee802154Phy::updateDisplayString() {
         double sensitivity_limit = cc->getInterferenceRange(myRadioRef);
         d.removeTag("r1");
         d.insertTag("r1");
-        d.setTagArg("r1",0,(long) sensitivity_limit);
-        d.setTagArg("r1",2,"gray");
+        d.setTagArg("r1", 0, (long)sensitivity_limit);
+        d.setTagArg("r1", 2, "gray");
         d.removeTag("r2");
         d.insertTag("r2");
-        d.setTagArg("r2",0,(long) calcDistFreeSpace());
-        d.setTagArg("r2",2,"blue");
+        d.setTagArg("r2", 0, (long)calcDistFreeSpace());
+        d.setTagArg("r2", 2, "blue");
     }
-    if (updateString==NULL && updateStringInterval>0)
-    	updateString = new cMessage("refress timer");
-    if (updateStringInterval>0)
-        scheduleAt(simTime()+updateStringInterval,updateString);
+    if (updateString == NULL && updateStringInterval > 0)
+        updateString = new cMessage("refress timer");
+
+    if (updateStringInterval > 0)
+        scheduleAt(simTime() + updateStringInterval, updateString);
 }
 
 double Ieee802154Phy::calcDistFreeSpace()

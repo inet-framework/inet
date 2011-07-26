@@ -13,13 +13,14 @@ message Ieee802154MacPhyPrimitives
 {
     short status enum(PHYenum);
     short attribute enum(PHYPIBenum);
-    double   bitRate;
-    short additional=-1; 
+    double bitRate;
+    short additional = -1;
 
     unsigned char energyLevel;
 
-    int channelNumber; 		// the current radio channel
-		//unsigned int	phyChannelsSupported; 
-		//double		phyTransmitPower;
-		//unsigned char	phyCCAMode;
+    int channelNumber;   // the current radio channel
+        //unsigned int phyChannelsSupported;
+        //double phyTransmitPower;
+        //unsigned char phyCCAMode;
 }
+
