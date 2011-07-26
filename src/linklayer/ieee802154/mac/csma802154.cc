@@ -306,7 +306,8 @@ void csma802154::handleUpperMsg(cMessage *msg)
     delete controlInfo;
     macPkt->setDstAddr(dest);
 
-    EV<<"CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< dest <<endl;
+    EV << "CSMA received a message from upper layer, name is " << msg->getName()
+       << ", CInfo removed, mac addr="<< dest <<endl;
     macPkt->setSrcAddr(getMacAddr());
 
     if (useMACAcks)
@@ -409,8 +410,7 @@ void csma802154::updateStatusBackoff(t_mac_event event, cMessage *msg)
     switch (event)
     {
     case EV_TIMER_BACKOFF:
-        EV<< "(2) FSM State BACKOFF, EV_TIMER_BACKOFF:"
-        << " starting CCA timer." << endl;
+        EV<< "(2) FSM State BACKOFF, EV_TIMER_BACKOFF:" << " starting CCA timer." << endl;
         startTimer(TIMER_CCA);
         updateMacState(CCA_3);
         PLME_SET_TRX_STATE_request(phy_RX_ON);
@@ -613,14 +613,12 @@ void csma802154::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
         if (packet->getDstAddr() != L2BROADCAST)
         {
             //unicast
-            EV << "(4) FSM State TRANSMITFRAME_4, "
-            << "EV_FRAME_TRANSMITTED [Unicast]: ";
+            EV << "(4) FSM State TRANSMITFRAME_4, EV_FRAME_TRANSMITTED [Unicast]: ";
         }
         else
         {
             //broadcast
-            EV << "(27) FSM State TRANSMITFRAME_4, EV_FRAME_TRANSMITTED "
-            << " [Broadcast]";
+            EV << "(27) FSM State TRANSMITFRAME_4, EV_FRAME_TRANSMITTED [Broadcast]: ";
             expectAck = false;
         }
 
@@ -653,8 +651,7 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     switch (event)
     {
     case EV_ACK_RECEIVED:
-        EV<< "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: "
-        << " ProcessAck, manageQueue..." << endl;
+        EV << "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: ProcessAck, manageQueue..." << endl;
 
         if (rxAckTimer->isScheduled())
             cancelEvent(rxAckTimer);
@@ -723,8 +720,7 @@ void csma802154::updateStatusSIFS(t_mac_event event, cMessage *msg)
     switch (event)
     {
     case EV_TIMER_SIFS:
-        EV<< "(17) FSM State WAITSIFS_6, EV_TIMER_SIFS:"
-        << " sendAck -> TRANSMITACK." << endl;
+        EV << "(17) FSM State WAITSIFS_6, EV_TIMER_SIFS:" << " sendAck -> TRANSMITACK." << endl;
         updateMacState(TRANSMITACK_7);
         //attachSignal(ackMessage, simTime());
         //sendDown(ackMessage);
@@ -760,8 +756,7 @@ void csma802154::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 
     if (event == EV_FRAME_TRANSMITTED)
     {
-        EV<< "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:"
-        << " ->manageQueue." << endl;
+        EV << "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:" << " ->manageQueue." << endl;
         PLME_SET_TRX_STATE_request(phy_RX_ON);
         //phy->setRadioState(Radio::RX);
         //      delete msg;
@@ -787,8 +782,7 @@ void csma802154::updateStatusNotIdle(cMessage *msg)
     {
         // queue is full, message has to be deleted
         EV << "(22) FSM State NOT IDLE, EV_SEND_REQUEST"
-        << " and [TxBuff not avail]: dropping packet and don't move."
-        << endl;
+           << " and [TxBuff not avail]: dropping packet and don't move." << endl;
         //msg->setName("MAC ERROR");
         //msg->setKind(PACKET_DROPPED);
         //sendControlUp(msg);
@@ -851,7 +845,8 @@ void csma802154::manageQueue()
 {
     if (macQueue.size() != 0)
     {
-        EV<< "(manageQueue) there are " << macQueue.size() << " packets to send, entering backoff wait state." << endl;
+        EV << "(manageQueue) there are " << macQueue.size()
+           << " packets to send, entering backoff wait state." << endl;
 
         if (! backoffTimer->isScheduled())
             startTimer(TIMER_BACKOFF);
@@ -943,9 +938,8 @@ double csma802154::scheduleBackoff()
         int r = intuniform(1, v, 0);
         backoffTime = r * aUnitBackoffPeriod.dbl();
 
-        EV<< "(startTimer) backoffTimer value=" << backoffTime
-        << " (BE=" << BE << ", 2^BE-1= " << v << "r="
-        << r << ")" << endl;
+        EV << "(startTimer) backoffTimer value=" << backoffTime
+           << " (BE=" << BE << ", 2^BE-1= " << v << "r=" << r << ")" << endl;
         break;
     }
 
@@ -1009,7 +1003,7 @@ void csma802154::handleLowerMsg(cMessage *msg)
     //long ExpectedNr = 0;
     uint8_t ExpectedNr = 0;
 
-    if (macPkt->getKind()!=PACKETOK)
+    if (macPkt->getKind() != PKT_PACKETOK)
     {
         EV << "Received with errors frame name= " << macPkt->getName()
            << ", myState=" << macState << " src=" << macPkt->getSrcAddr()
@@ -1025,10 +1019,9 @@ void csma802154::handleLowerMsg(cMessage *msg)
         return;
     }
 
-    EV<< "Received frame name= " << macPkt->getName()
-    << ", myState=" << macState << " src=" << macPkt->getSrcAddr()
-    << " dst=" << macPkt->getDstAddr() << " myAddr="
-    << getMacAddr() << endl;
+    EV << "Received frame name= " << macPkt->getName()
+       << ", myState=" << macState << " src=" << macPkt->getSrcAddr()
+       << " dst=" << macPkt->getDstAddr() << " myAddr=" << getMacAddr() << endl;
 
     if (macPkt->getDstAddr() == getMacAddr())
     {
@@ -1050,8 +1043,7 @@ void csma802154::handleLowerMsg(cMessage *msg)
                 // and we should send an ack.
                 // we build the ack packet here because we need to
                 // copy data from macPkt (src).
-                EV << "Received a data packet addressed to me,"
-                << " preparing an ack..." << endl;
+                EV << "Received a data packet addressed to me, preparing an ack..." << endl;
 
                 nbRxFrames++;
 
@@ -1074,8 +1066,8 @@ void csma802154::handleLowerMsg(cMessage *msg)
                 else
                 {
                     ExpectedNr = SeqNrChild[src];
-                    EV << "Expected Sequence number is " << ExpectedNr <<
-                    " and number of packet is " << SeqNr << endl;
+                    EV << "Expected Sequence number is " << ExpectedNr
+                       << " and number of packet is " << SeqNr << endl;
                     int8_t sub     = ((int8_t)SeqNr) - ((int8_t) ExpectedNr);
 
                     //if (SeqNr < ExpectedNr)
@@ -1105,13 +1097,16 @@ void csma802154::handleLowerMsg(cMessage *msg)
                 }
                 else
                 {
-                    EV << "Error! Received an ack from an unexpected source: src=" << macPkt->getSrcAddr() << ", I was expecting from node addr=" << firstPacket->getDstAddr() << endl;
+                    EV << "Error! Received an ack from an unexpected source: src="
+                       << macPkt->getSrcAddr() << ", I was expecting from node addr="
+                       << firstPacket->getDstAddr() << endl;
                     delete macPkt;
                 }
             }
             else
             {
-                EV << "Error! Received an Ack while my send queue was empty. src=" << macPkt->getSrcAddr() << "." << endl;
+                EV << "Error! Received an Ack while my send queue was empty. src="
+                   << macPkt->getSrcAddr() << "." << endl;
                 delete macPkt;
             }
         }

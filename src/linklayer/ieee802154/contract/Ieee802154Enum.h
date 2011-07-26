@@ -66,7 +66,8 @@ enum Ieee802154PktErrorType   // for msgKind set by PHY layer
     PKT_RX_DURING_CCA                   // pkts received during CCA need to be discarded
 };
 
-typedef enum {
+typedef enum
+{
 	TX_OVER = 0
 } additionalData;
 /********************************/

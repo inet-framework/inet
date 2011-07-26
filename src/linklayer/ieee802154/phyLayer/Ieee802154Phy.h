@@ -52,7 +52,11 @@ class INET_API Ieee802154Phy : public ChannelAccess
     void PLME_bitRate(double bitRate);
     void setRadioState(RadioState::State newState);
 
-    int                 getChannelNumber        () const {return rs.getChannelNumber();}
+    int getChannelNumber() const
+    {
+        return rs.getChannelNumber();
+    }
+
     void addNewSnr();
     void changeChannel(int newChannel);
     bool channelSupported(int channel);

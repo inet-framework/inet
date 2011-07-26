@@ -93,12 +93,17 @@ int chkAddUpdHListLink(HListLink **hlistLink1, HListLink **hlistLink2, uint16_t 
     int i;
 
     i = updateHListLink(hl_oper_rpl, hlistLink1, hlistLink2, hostid, sn);
-    if (i == 0) return 1;
-    else if (i == 2) return 2;
+
+    if (i == 0)
+        return 1;
+    else if (i == 2)
+        return 2;
 
     i = addHListLink(hlistLink1, hlistLink2, hostid, sn);
-    if (i == 0) return 0;
-    else return 3;
+    if (i == 0)
+        return 0;
+    else
+        return 3;
 }
 
 void emptyHListLink(HListLink **hlistLink1, HListLink **hlistLink2)

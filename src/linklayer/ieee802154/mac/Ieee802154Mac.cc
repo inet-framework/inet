@@ -280,7 +280,8 @@ void Ieee802154Mac::registerInterface()
 void Ieee802154Mac::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    EV << getParentModule()->getParentModule()->getFullName() << ": initializing Ieee802154Mac, stage=" << stage << endl;
+    EV << getParentModule()->getParentModule()->getFullName()
+       << ": initializing Ieee802154Mac, stage=" << stage << endl;
 
     if (0 == stage)
     {
@@ -483,13 +484,23 @@ void Ieee802154Mac::initialize(int stage)
             cDisplayString* display_string = &getParentModule()->getParentModule()->getDisplayString();
             display_string->setTagArg("i", 0, "misc/house");
 
-            ev << "**************************** PAN Parameters ****************************" << endl;
-            ev << getParentModule()->getParentModule()->getFullName() << " is the PAN coordinator!" << endl;
-            ev << "Channel Number: " << ppib.phyCurrentChannel << "; bit rate: " << phy_bitrate /1000 << " kb/s; symbol rate: " << phy_symbolrate/1000 << " ksymbol/s" << endl;
-            ev << "BO = " << (int)mpib.macBeaconOrder << ", BI = " << (int)aBaseSuperframeDuration * (1 << mpib.macBeaconOrder)/phy_symbolrate << " s; SO = " << (int)mpib.macSuperframeOrder << ", SD = " << (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder)/phy_symbolrate << " s; duty cycle = " << pow(2, (mpib.macSuperframeOrder-mpib.macBeaconOrder))*100 << "%" << endl;
-            ev << "There are " << (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder) << " symbols (" <<  (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder)/aUnitBackoffPeriod << " backoff periods) in CAP" << endl;
-            ev << "Length of a unit of backoff period: " << bPeriod << " s" << endl;
-            ev << "************************************************************************" << endl;
+            ev << "**************************** PAN Parameters ****************************\n";
+            ev << getParentModule()->getParentModule()->getFullName() << " is the PAN coordinator!"
+               << endl;
+            ev << "Channel Number: " << ppib.phyCurrentChannel << "; bit rate: "
+               << phy_bitrate / 1000 << " kb/s; symbol rate: " << phy_symbolrate / 1000 <<
+               " ksymbol/s\n";
+            ev << "BO = " << (int)mpib.macBeaconOrder << ", BI = "
+               << (int)aBaseSuperframeDuration * (1 << mpib.macBeaconOrder) / phy_symbolrate
+               << " s; SO = " << (int)mpib.macSuperframeOrder << ", SD = "
+               << (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder) / phy_symbolrate
+               << " s; duty cycle = " << pow(2, (mpib.macSuperframeOrder - mpib.macBeaconOrder)) * 100
+               << "%\n";
+            ev << "There are " << (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder)
+               << " symbols (" <<  (int)aBaseSuperframeDuration * (1 << mpib.macSuperframeOrder) /
+                   aUnitBackoffPeriod << " backoff periods) in CAP\n";
+            ev << "Length of a unit of backoff period: " << bPeriod << " s\n";
+            ev << "************************************************************************\n";
             cMessage* startPANCoorTimer = new cMessage("startPANCoorTimer", START_PAN_COOR_TIMER);
             scheduleAt(simTime() + panStartTime, startPANCoorTimer);    // timer will be handled after initialization is done, even when panStartTime = 0.
         }
@@ -635,7 +646,8 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
 
     if (taskP.taskStatus(TP_MCPS_DATA_REQUEST))
     {
-        EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt << ") received from the upper layer, but drop it due to busy MAC" << endl;
+        EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt
+           << ") received from the upper layer, but drop it due to busy MAC\n";
         delete msg;
         numUpperPktLost++;
         reqtMsgFromIFq();
@@ -645,7 +657,8 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
     //check if parameters valid or not, only check msdu size here
     if (PK(msg)->getByteLength() > aMaxMACFrameSize)
     {
-        EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt << ") received from the upper layer, but drop it due to oversize" << endl;
+        EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt
+           << ") received from the upper layer, but drop it due to oversize\n";
         MCPS_DATA_confirm(mac_INVALID_PARAMETER);
         delete msg;
         numUpperPktLost++;
@@ -653,14 +666,17 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
         return;
     }
 
-    Ieee802154NetworkCtrlInfo* control_info = check_and_cast<Ieee802154NetworkCtrlInfo *>(msg->removeControlInfo());
+    Ieee802154NetworkCtrlInfo* control_info =
+            check_and_cast<Ieee802154NetworkCtrlInfo *>(msg->removeControlInfo());
 
     // translate to MAC address
     if (control_info->getToParent())    // pkt destined for my coordinator
     {
         if (notAssociated)
         {
-            EV << "[MAC]: an " << msg->getName() <<" destined for the coordinator received from the upper layer, but drop it due to being not associated with any coordinator yet" << endl;
+            EV << "[MAC]: an " << msg->getName() <<" destined for the coordinator received from"
+                    " the upper layer, but drop it due to being not associated with any"
+                    " coordinator yet\n";
             delete msg;
             delete control_info;
             numUpperPktLost++;
@@ -673,7 +689,9 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
             // check if I have a transmit GTS
             if (gtsStartSlot == 0 || isRecvGTS)
             {
-                EV << "[MAC]: an " << msg->getName() <<" requesting GTS transmission destined for the PAN Coordinator received from the upper layer, but drop it due to no transmit GTS allocated by the PAN coordinator yet" << endl;
+                EV << "[MAC]: an " << msg->getName() <<" requesting GTS transmission destined for"
+                        " the PAN Coordinator received from the upper layer, but drop it due to no"
+                        " transmit GTS allocated by the PAN coordinator yet\n";
                 delete msg;
                 delete control_info;
                 numUpperPktLost++;
@@ -692,14 +710,17 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
     {
         if (!simulation.getModuleByPath(control_info->getDestName()))
             error("[MAC]: address conversion fails, destination host does not exist!");
-        cModule* module = simulation.getModuleByPath(control_info->getDestName())->getModuleByRelativePath("nic.mac");
+        cModule* module = simulation.getModuleByPath(
+                control_info->getDestName())->getModuleByRelativePath("nic.mac");
         Ieee802154Mac* macModule = check_and_cast<Ieee802154Mac *>(module);
         destAddr = macModule->getMacAddr();
 
         // check if dest node is in my device list (associated or not)
         if (deviceList.find(destAddr) == deviceList.end())
         {
-            EV << "[MAC]: an " << msg->getName() <<" destined for the device with MAC address " << destAddr << " received from the upper layer, but drop it due to no device with this address found in my device list" << endl;
+            EV << "[MAC]: an " << msg->getName() <<" destined for the device with MAC address "
+               << destAddr << " received from the upper layer, but drop it due to no device with"
+                   " this address found in my device list\n";
             delete msg;
             delete control_info;
             numUpperPktLost++;
@@ -728,7 +749,9 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
             }
             else
             {
-                EV << "[MAC]: an " << msg->getName() <<" requesting GTS transmission destined for the device received from the upper layer, but drop it due to no valid GTS for this device found in my GTS list" << endl;
+                EV << "[MAC]: an " << msg->getName() <<" requesting GTS transmission destined for"
+                        " the device received from the upper layer, but drop it due to no valid"
+                        " GTS for this device found in my GTS list\n";
                 delete msg;
                 delete control_info;
                 numUpperPktLost++;
@@ -738,7 +761,10 @@ void Ieee802154Mac::handleUpperMsg(cMessage* msg)
         }
     }
 
-    EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt << ", " << PK(msg)->getByteLength() << " Bytes, destined for " << control_info->getDestName() << " with MAC address " << destAddr << ", transfer mode " << dataTransMode << ") received from the upper layer" << endl;
+    EV << "[MAC]: an " << msg->getName() <<" (#" << numUpperPkt << ", " << PK(msg)->getByteLength()
+       << " Bytes, destined for " << control_info->getDestName() << " with MAC address "
+       << destAddr << ", transfer mode " << dataTransMode << ") received from the upper layer"
+       << endl;
 
     // here always use short address:defFrmCtrl_AddrMode16
     cPacket * pkt = PK(msg);
@@ -756,7 +782,8 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
 
     if (!frame)
     {
-        EV << "[MAC]: message from physical layer (" <<  msg->getClassName() << ")" << msg->getName() << " is not a subclass of Ieee802154Frame, drop it" << endl;
+        EV << "[MAC]: message from physical layer (" <<  msg->getClassName() << ")"
+           << msg->getName() << " is not a subclass of Ieee802154Frame, drop it\n";
         delete frame;
         return;
     }
@@ -764,12 +791,13 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     FrameCtrl frmCtrl = frame->getFrmCtrl();
     Ieee802154FrameType frmType = frmCtrl.frmType;
 
-    EV << "[MAC]: an " << frmType << " frame received from the PHY layer, performing filtering now ..." << endl;
+    EV << "[MAC]: an " << frmType
+       << " frame received from the PHY layer, performing filtering now ...\n";
 
     // perform MAC frame filtering
     if (frameFilter(frame))
     {
-        EV << "The received frame is filtered, drop frame" << endl;
+        EV << "The received frame is filtered, drop frame\n";
         delete frame;
         return;
     }
@@ -790,7 +818,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
         }
     }
 
-    EV << "[MAC]: checking if the received frame requires an ACK" << endl;
+    EV << "[MAC]: checking if the received frame requires an ACK\n";
     //send an acknowledgement if needed (no matter this is a duplicated packet or not)
     if ((frmType == Ieee802154_DATA) || (frmType == Ieee802154_CMD))
     {
@@ -810,7 +838,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
             noAck = false;
             // MAC layer can process only one command (rx or tx) at a time
             if (frmType == Ieee802154_CMD)
-                if ((rxCmd)||(txBcnCmd))
+                if (rxCmd || txBcnCmd)
                     noAck = true;
 
             // FIXME It's a HACK, is this good? (Zoltan Bojthe)
@@ -824,17 +852,18 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
 
             if (!noAck)
             {
-                EV << "[MAC]: yes, constructing the ACK frame" << endl;
+                EV << "[MAC]: yes, constructing the ACK frame\n";
                 constructACK(frame);
 
                 //stop CSMA-CA if it is pending (it will be restored after the transmission of ACK)
                 if (backoffStatus == 99)
                 {
-                    EV << "[MAC]: CSMA-CA is pending, stop it, it will resume after sending ACK" << endl;
+                    EV << "[MAC]: CSMA-CA is pending, stop it, it will resume after sending ACK\n";
                     backoffStatus = 0;
                     csmacaCancel();
                 }
-                EV << "[MAC]: prepare to send the ACK, ask PHY layer to turn on the transmitter first" << endl;
+
+                EV << "[MAC]: prepare to send the ACK, ask PHY layer to turn on the transmitter first\n";
                 PLME_SET_TRX_STATE_request(phy_TX_ON);
             }
         }
@@ -862,7 +891,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     if (frmType == Ieee802154_CMD)
         if ((rxCmd) || (txBcnCmd))
         {
-            EV << "[MAC]: the received CMD frame is dropped, because MAC is currently processing a MAC CMD" << endl;
+            EV << "[MAC]: the received CMD frame is dropped, because MAC is currently processing a MAC CMD\n";
             delete frame;
             return;
         }
@@ -871,12 +900,13 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     if (frmType == Ieee802154_DATA)
         if (rxData)
         {
-            EV << "[MAC]: the received DATA frame is dropped, because MAC is currently processing the last received DATA frame" << endl;
+            EV << "[MAC]: the received DATA frame is dropped,"
+                    " because MAC is currently processing the last received DATA frame\n";
             delete frame;
             return;
         }
 
-    EV << "[MAC]: checking duplication ..." << endl;
+    EV << "[MAC]: checking duplication ...\n";
 
     //check duplication -- must be performed AFTER all drop's
     if (frmType == Ieee802154_BEACON)
@@ -890,7 +920,7 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
 
     if (i == 2) // duplication found in the HListLink
     {
-        EV << "[MAC]: duplication detected, drop frame" << endl;
+        EV << "[MAC]: duplication detected, drop frame\n";
         delete frame;
         return;
     }
@@ -898,22 +928,22 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
     switch (frmType)
     {
     case Ieee802154_BEACON:
-        EV << "[MAC]: continue to process received BEACON pkt" << endl;
+        EV << "[MAC]: continue to process received BEACON pkt\n";
         handleBeacon(frame);
         break;
 
     case Ieee802154_DATA:
-        EV << "[MAC]: continue to process received DATA pkt" << endl;
+        EV << "[MAC]: continue to process received DATA pkt\n";
         handleData(frame);
         break;
 
     case Ieee802154_ACK:
-        EV << "[MAC]: continue to process received ACK pkt" << endl;
+        EV << "[MAC]: continue to process received ACK pkt\n";
         handleAck(frame);
         break;
 
     case Ieee802154_CMD:
-        EV << "[MAC]: continue to process received CMD pkt" << endl;
+        EV << "[MAC]: continue to process received CMD pkt\n";
         handleCommand(frame);
         break;
 
@@ -1002,8 +1032,9 @@ void Ieee802154Mac::sendDown(Ieee802154Frame* frame)
     // TBD: energy model
     inTransmission = true;              // cleared by PD_DATA_confirm
     send(frame, mLowergateOut);     // send a duplication
-    EV << "[MAC]: sending frame " << frame->getName() << " (" << frame->getByteLength() << " Bytes) to PHY layer" << endl;
-    EV << "[MAC]: the estimated transmission time is " << calDuration(frame) << " s" << endl;
+    EV << "[MAC]: sending frame " << frame->getName() << " (" << frame->getByteLength()
+       << " Bytes) to PHY layer\n";
+    EV << "[MAC]: the estimated transmission time is " << calDuration(frame) << " s\n";
 }
 
 void Ieee802154Mac::reqtMsgFromIFq()
@@ -1011,7 +1042,7 @@ void Ieee802154Mac::reqtMsgFromIFq()
     if (queueModule)
     {
         // tell queue module that we've become idle
-        EV << "[MAC]: requesting another frame from queue module" << endl;
+        EV << "[MAC]: requesting another frame from queue module\n";
         queueModule->requestPacket();
     }
 }
@@ -1021,7 +1052,7 @@ void Ieee802154Mac::reqtMsgFromIFq()
 //-------------------------------------------------------------------------------/
 void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
 {
-    EV << "[MAC]: starting processing received Beacon frame" << endl;
+    EV << "[MAC]: starting processing received Beacon frame\n";
     Ieee802154BeaconFrame *bcnFrame = check_and_cast<Ieee802154BeaconFrame *>(frame);
     FrameCtrl frmCtrl;
     bool pending;
@@ -1090,7 +1121,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
         mpib.macCoordExtendedAddress = frame->getSrcAddr(); // PAN coordinator uses the same address for both its own 16 and 64 bit address
         //mpib.macShortAddress = aExtendedAddress;  // set my short address the same as the extended address by myself, instead from an association response, TBD
 
-        EV << "This is my first beacon, associate with it" << endl;
+        EV << "This is my first beacon, associate with it\n";
         cModule* module = simulation.getModuleByPath(panCoorName)->getModuleByRelativePath("nic.mac");
         Ieee802154Mac* macModule = check_and_cast<Ieee802154Mac *>(module);
         mpib.macShortAddress = macModule->associate_request_cmd(aExtendedAddress, capability);
@@ -1138,10 +1169,12 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
                 if (fmod(duration, tmpf) > 0.0)
                     gtsLength++;
             }
-            EV << "[GTS]: gtsTransDuration = " << gtsTransDuration << " s, duration of one GTS slot = " << tmpf << " s" << endl;
+
+            EV << "[GTS]: gtsTransDuration = " << gtsTransDuration
+               << " s, duration of one GTS slot = " << tmpf << " s\n";
 
             // call gts_request_cmd() at the PAN coordinator to apply for GTS
-            EV << "[GTS]: request " << (int)gtsLength << " GTS slots from the PAN coordinator" << endl;
+            EV << "[GTS]: request " << (int)gtsLength << " GTS slots from the PAN coordinator\n";
             gtsStartSlot = macModule->gts_request_cmd(mpib.macShortAddress, gtsLength, isRecvGTS);
 
             if (gtsStartSlot != 0)      // successfully
@@ -1149,7 +1182,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
             else        // failed
             {
                 // TBD: what to do if failed
-                // EV << "[GTS]: request for GTS failed" << endl;
+                // EV << "[GTS]: request for GTS failed\n";
                 error("[GTS]: request for GTS failed!");
             }
         }
@@ -1173,7 +1206,8 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
             ASSERT(gtsStartSlot > rxSfSpec.finalCap);
             tmpf = bcnRxTime + (rxSfSpec.finalCap + 1) * rxSfSlotDuration / phy_symbolrate;
             w_time = tmpf - now;
-            EV << "[GTS]: my GTS is not the first one in the CFP, schedule a timer to turn off radio at the end of CAP" << endl;
+            EV << "[GTS]: my GTS is not the first one in the CFP, schedule a timer to turn off"
+                    " radio at the end of CAP\n";
             startFinalCapTimer(w_time);
         }
     }
@@ -1248,7 +1282,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
 
     if ((txBcnCmd == NULL) && (txBcnCmdUpper == NULL) && (txData == NULL) && (txGTS == NULL))
     {
-        EV << "[MAC]: no pending transmission task is waiting for this ACK, drop it!" << endl;
+        EV << "[MAC]: no pending transmission task is waiting for this ACK, drop it!\n";
         delete frame;
         return;
     }
@@ -1256,7 +1290,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
     if ((txPkt != txBcnCmd) && (txPkt != txBcnCmdUpper) && (txPkt != txData) && (txPkt != txGTS))
         // ack received after corresponding task has failed duo to reaching max retries
     {
-        EV << "[MAC]: this is a late ACK received after corresponding task has failed, drop it!" << endl;
+        EV << "[MAC]: this is a late ACK received after corresponding task has failed, drop it!\n";
         delete frame;
         return;
     }
@@ -1264,7 +1298,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
     //check the sequence number in the ACK. to see if it matches that in the <txPkt>
     if (frame->getBdsn() != check_and_cast<Ieee802154Frame *>(txPkt)->getBdsn())
     {
-        EV << "[MAC]: the SN in the ACK does not match, drop it!" << endl;
+        EV << "[MAC]: the SN in the ACK does not match, drop it!\n";
         delete frame;
         return;
     }
@@ -1272,7 +1306,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
     if (ackTimeoutTimer->isScheduled())         // ACK arrives before ACK timeout expires
     {
         numRxAckPkt++;
-        EV << "[MAC]: the ACK arrives before timeout, cancel timeout timer" << endl;
+        EV << "[MAC]: the ACK arrives before timeout, cancel timeout timer\n";
         cancelEvent(ackTimeoutTimer);
 
         // reset retry counter
@@ -1290,7 +1324,7 @@ void Ieee802154Mac::handleAck(Ieee802154Frame* frame)
         //only handle late ack. for data packet not in GTS
         if (txPkt != txData)
         {
-            EV << "[MAC]: this is a late ACK, but not for a DATA pkt, drop it!" << endl;
+            EV << "[MAC]: this is a late ACK, but not for a DATA pkt, drop it!\n";
             delete frame;
             return;
         }
@@ -1474,13 +1508,13 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
     // Fisrt check flag set by Phy layer, COLLISION or
     if (frame->getKind() == PKT_COLLISION)
     {
-        EV << "[MAC]: frame corrupted due to collision, dropped" << endl;
+        EV << "[MAC]: frame corrupted due to collision, dropped\n";
         numCollision++;
         return true;
     }
     else if  (frame->getKind() == PKT_RX_DURING_CCA)
     {
-        EV << "[MAC]: frame corrupted due to being received during CCA, dropped" << endl;
+        EV << "[MAC]: frame corrupted due to being received during CCA, dropped\n";
         return true;
     }
     /*
@@ -1538,8 +1572,7 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
         //check dest. address
         if (frmCtrl.dstAddrMode == defFrmCtrl_AddrMode16)   // short address
         {
-            if ((frame->getDstAddr() != 0xffff)
-                    && (frame->getDstAddr() != mpib.macShortAddress))
+            if ((frame->getDstAddr() != 0xffff) && (frame->getDstAddr() != mpib.macShortAddress))
             {
                 return true;
             }
@@ -1644,28 +1677,30 @@ void Ieee802154Mac::constructACK(Ieee802154Frame* rxFrame)
 void Ieee802154Mac::resetTRX()
 {
     PHYenum t_state;
-    EV << "[MAC]: reset radio state after a task has completed" << endl;
+    EV << "[MAC]: reset radio state after a task has completed\n";
     if ((mpib.macBeaconOrder != 15) || (rxBO != 15))  //beacon enabled
     {
         if ((!inTxSD_txSDTimer) && (!inRxSD_rxSDTimer))     // in inactive portion, go to sleep
         {
-            EV << "[MAC]: it's now in inactive period, should turn off radio and go to sleep" << endl;
+            EV << "[MAC]: it's now in inactive period, should turn off radio and go to sleep\n";
             t_state = phy_TRX_OFF;
         }
         else if (inTxSD_txSDTimer)      // should not go to sleep
         {
-            EV << "[MAC]: it's now in outgoing active period (as a coordinator), should stay awake and turn on receiver" << endl;
+            EV << "[MAC]: it's now in outgoing active period (as a coordinator),"
+                    " should stay awake and turn on receiver\n";
             t_state = phy_RX_ON;
         }
         else                                                    // in rx SD, according to macRxOnWhenIdle
         {
-            EV << "[MAC]: it's now in incoming active period (as a device), whether go to sleep depending on parameter macRxOnWhenIdle" << endl;
+            EV << "[MAC]: it's now in incoming active period (as a device),"
+                    " whether go to sleep depending on parameter macRxOnWhenIdle\n";
             t_state = mpib.macRxOnWhenIdle?phy_RX_ON:phy_TRX_OFF;
         }
     }
     else // non-beacon
     {
-        EV << "[MAC]: non-beacon, wether go to sleep depending on parameter macRxOnWhenIdle" << endl;
+        EV << "[MAC]: non-beacon, wether go to sleep depending on parameter macRxOnWhenIdle\n";
         t_state = mpib.macRxOnWhenIdle?phy_RX_ON:phy_TRX_OFF;
     }
     PLME_SET_TRX_STATE_request(t_state);
@@ -1676,7 +1711,7 @@ void Ieee802154Mac::resetTRX()
 //-------------------------------------------------------------------------------/
 void Ieee802154Mac::PLME_SET_TRX_STATE_request(PHYenum state)
 {
-    EV << "[MAC]: sending PLME_SET_TRX_STATE_request <" << state <<"> to PHY layer" << endl;
+    EV << "[MAC]: sending PLME_SET_TRX_STATE_request <" << state <<"> to PHY layer\n";
     // construct PLME_SET_TRX_STATE_request primitive
     Ieee802154MacPhyPrimitives *primitive = new Ieee802154MacPhyPrimitives();
     primitive->setKind(PLME_SET_TRX_STATE_REQUEST);
@@ -1727,7 +1762,7 @@ void Ieee802154Mac::PLME_CCA_request()
     Ieee802154MacPhyPrimitives *primitive = new Ieee802154MacPhyPrimitives();
     primitive->setKind(PLME_CCA_REQUEST);
     send(primitive, mLowergateOut);
-    EV << "[MAC]: send PLME_CCA_request to PHY layer" << endl;
+    EV << "[MAC]: send PLME_CCA_request to PHY layer\n";
 }
 
 void Ieee802154Mac::PLME_bitrate_request()
@@ -1736,7 +1771,7 @@ void Ieee802154Mac::PLME_bitrate_request()
     Ieee802154MacPhyPrimitives *primitive = new Ieee802154MacPhyPrimitives();
     primitive->setKind(PLME_GET_BITRATE);
     send(primitive, mLowergateOut);
-    EV << "[MAC]: send PLME_GET_BITRATE to PHY layer" << endl;
+    EV << "[MAC]: send PLME_GET_BITRATE to PHY layer\n";
 }
 
 
@@ -1851,12 +1886,14 @@ void Ieee802154Mac::handle_PLME_CCA_confirm(PHYenum status)
                         csmacaWaitNextBeacon = true;    // Debugged
                     }
                 }
-                else    handleBackoffTimer();           // Case D2: perform CCA again, this function sends a CCA_request
+                else
+                    handleBackoffTimer();  // Case D2: perform CCA again, this function sends a CCA_request
             }
         }
         else    // busy channel
         {
-            if (beaconEnabled) CW = 2;              // Case C2
+            if (beaconEnabled)
+                CW = 2;              // Case C2
 
             NB++;
 
@@ -1869,7 +1906,8 @@ void Ieee802154Mac::handle_PLME_CCA_confirm(PHYenum status)
             else    // Case F2: backoff again
             {
                 BE++;
-                if (BE > aMaxBE) BE = aMaxBE;       // aMaxBE defined in Ieee802154Const.h
+                if (BE > aMaxBE)
+                    BE = aMaxBE;       // aMaxBE defined in Ieee802154Const.h
 
                 csmacaStart(false);             // not the first time
             }
@@ -1879,7 +1917,8 @@ void Ieee802154Mac::handle_PLME_CCA_confirm(PHYenum status)
 
 void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
 {
-    EV << "[MAC]: a PLME_SET_TRX_STATE_confirm with " << status << " reveived from PHY, the requested state is " << trx_state_req << endl;
+    EV << "[MAC]: a PLME_SET_TRX_STATE_confirm with " << status
+       << " reveived from PHY, the requested state is " << trx_state_req << endl;
     simtime_t delay;
 
     PHYenum recStatus = status;
@@ -1901,10 +1940,12 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
     /*else
         dispatch(status, __FUNCTION__, trx_state_req);*/
 
+    if (status != phy_TX_ON)
+        return;
 
-    if (status != phy_TX_ON) return;
     // wait the phy_succes
-    if (recStatus!= phy_SUCCESS) return;
+    if (recStatus != phy_SUCCESS)
+        return;
 
     //transmit the packet
     if (beaconWaitingTx)        // periodically tx beacon
@@ -1998,7 +2039,8 @@ void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE
     // set length and encapsulate msdu
     tmpData->setByteLength(calFrmByteLength(tmpData));
     tmpData->encapsulate(msdu);     // the length of msdu is added to mpdu
-    EV << "[MAC]: MPDU constructed: " << tmpData->getName() << ", #" << (int)tmpData->getBdsn() << ", " << tmpData->getByteLength() << " Bytes" << endl;
+    EV << "[MAC]: MPDU constructed: " << tmpData->getName() << ", #" << (int)tmpData->getBdsn()
+       << ", " << tmpData->getByteLength() << " Bytes\n";
 
     switch (TxOption)
     {
@@ -2158,7 +2200,8 @@ void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ack
 
     if (firsttime)
     {
-        EV << "[CSMA-CA]: starting CSMA-CA for " << frame->getName() << ":#" << (int)frame->getBdsn() << endl;
+        EV << "[CSMA-CA]: starting CSMA-CA for " << frame->getName() << ":#"
+           << (int)frame->getBdsn() << endl;
         beaconEnabled = ((mpib.macBeaconOrder != 15)||(rxBO != 15));
         csmacaReset(beaconEnabled);
         ASSERT(tmpCsmaca == 0);
@@ -2179,10 +2222,10 @@ void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ack
     }
 
     wtime = intrand(1<<BE) * bPeriod;   // choose a number in [0, pow(2, BE)-1]
-    EV << "[CSMA-CA]: choosing random number of backoff periods: " << wtime/bPeriod << endl;
-    EV << "[CSMA-CA]: backoff time before adjusting: " << wtime*1000 << " ms" << endl;
+    EV << "[CSMA-CA]: choosing random number of backoff periods: " << wtime / bPeriod << endl;
+    EV << "[CSMA-CA]: backoff time before adjusting: " << wtime * 1000 << " ms\n";
     wtime = csmacaAdjustTime(wtime);    // if scheduled backoff ends before CAP, wtime should be adjusted
-    EV << "[CSMA-CA]: backoff time after adjusting: " << wtime*1000 << " ms" << endl;
+    EV << "[CSMA-CA]: backoff time after adjusting: " << wtime * 1000 << " ms\n";
     backoff = true;
 
     if (beaconEnabled)
@@ -2190,7 +2233,7 @@ void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ack
         if (firsttime)
         {
             wtime = csmacaLocateBoundary(toParent(tmpCsmaca), wtime);
-            EV << "[CSMA-CA]: backoff time after locating boundary: " << wtime*1000 << " ms" << endl;
+            EV << "[CSMA-CA]: backoff time after locating boundary: " << wtime * 1000 << " ms\n";
         }
 
         if (!csmacaCanProceed(wtime))   // check if backoff can be applied now. If not, canProceed() will decide how to proceed.
@@ -2343,7 +2386,7 @@ simtime_t Ieee802154Mac::csmacaLocateBoundary(bool toParent, simtime_t wtime)
         */
 
         tmpf = bPeriod - newtime;
-        EV << "[CSMA-CA]: deviation to backoff boundary: " << tmpf << " s" <<endl;
+        EV << "[CSMA-CA]: deviation to backoff boundary: " << tmpf << " s\n";
         newtime = wtime + tmpf;
     }
     else
@@ -2368,7 +2411,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
     // Check 2: if the number of backoff periods greater than the remaining number of backoff periods in the CAP
     // check 3: if the entire transmission can be finished before the end of current CAP
 
-    EV << "[CSMA-CA]: starting to evaluate whether CSMA-CA can proceed ..." << endl;
+    EV << "[CSMA-CA]: starting to evaluate whether CSMA-CA can proceed ...\n";
     if (!toParent(tmpCsmaca))       // as a coordinator
     {
         if (mpib.macBeaconOrder != 15)      // beacon enabled as a coordinator
@@ -2379,7 +2422,8 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
             {
                 csmacaWaitNextBeacon = true;
                 bPeriodsLeft = 0;   // rechoose random backoff
-                EV <<"[CSMA-CA]: cannot porceed because it's now NOT in CAP (outgoing), resume at the beginning of next CAP" << endl;
+                EV <<"[CSMA-CA]: cannot porceed because it's now NOT in CAP (outgoing),"
+                        " resume at the beginning of next CAP\n";
                 return false;
             }
             else                    // Check 2
@@ -2391,7 +2435,8 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
                 // calculate num of Backoff periods from the first backoff in CAP to now+wtime
                 tmpf = now + wtime;
                 tmpf -= mpib.macBeaconTxTime;
-                EV << "[CSMA-CA]: wtime = " << wtime << "; mpib.macBeaconTxTime = " << mpib.macBeaconTxTime << endl;
+                EV << "[CSMA-CA]: wtime = " << wtime << "; mpib.macBeaconTxTime = "
+                   << mpib.macBeaconTxTime << endl;
                 tmpf = tmpf / bPeriod;
                 EV << "[CSMA-CA]: tmpf = " << tmpf << "; bPeriod  = " << bPeriod << endl;
                 t_bPeriods = (uint16_t)(SIMTIME_DBL(tmpf) - txBcnDuration);
@@ -2432,7 +2477,8 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
             {
                 csmacaWaitNextBeacon = true;
                 bPeriodsLeft = 0;   // rechoose random backoff
-                EV <<"[CSMA-CA]: cannot porceed because it's now NOT in CAP (incoming), resume at the beginning of next CAP" << endl;
+                EV <<"[CSMA-CA]: cannot porceed because it's now NOT in CAP (incoming),"
+                        " resume at the beginning of next CAP\n";
                 return false;
             }
             else
@@ -2473,16 +2519,15 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
         ok = false;
     else if (bPeriodsLeft == 0)
     {
-        if ((!toParent(tmpCsmaca))
-                &&  (!txSfSpec.battLifeExt))
+        if ((!toParent(tmpCsmaca)) && (!txSfSpec.battLifeExt))
             ok = false;
-        else if ((toParent(tmpCsmaca))
-                 &&  (!rxSfSpec.battLifeExt))
+        else if ((toParent(tmpCsmaca)) && (!rxSfSpec.battLifeExt))
             ok = false;
     }
     if (!ok)
     {
-        EV << "[CSMA-CA]: cannot porceed because the chosen num of backoffs cannot finish before the end of current CAP, resume at the beginning of next CAP" << endl;
+        EV << "[CSMA-CA]: cannot porceed because the chosen num of backoffs cannot finish before"
+                " the end of current CAP, resume at the beginning of next CAP\n";
 
         // if as a device, need to track next beacon if it is not being tracked
         if (rxBO != 15)
@@ -2528,7 +2573,7 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
     tmpf = now + wtime;
     tmpf += t_transacTime;
-    EV << "[CSMA-CA]: the entire transmission is estimated to finish at " << tmpf << " s" << endl;
+    EV << "[CSMA-CA]: the entire transmission is estimated to finish at " << tmpf << " s\n";
     // calculate the time for the end of cap
     if (!toParent(tmpCsmaca))               // sent as a coordinator
     {
@@ -2547,18 +2592,18 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
             t_fCAP = getFinalCAP('t');
     }
 
-    EV << "[CSMA-CA]: the current CAP will end at " << t_fCAP << " s" << endl;
+    EV << "[CSMA-CA]: the current CAP will end at " << t_fCAP << " s\n";
 
     // evaluate if the entire transmission process can be finished before end of current CAP
     if (tmpf > t_fCAP)
     {
         ok = false;
-        EV << "[CSMA-CA]: cannot proceed because the entire transmission cannot finish before the end of current cap" << endl;
+        EV << "[CSMA-CA]: cannot proceed because the entire transmission cannot finish before the end of current cap\n";
     }
     else
     {
         ok = true;
-        EV << "[CSMA-CA]: can proceed" << endl;
+        EV << "[CSMA-CA]: can proceed\n";
     }
 
     //check if have enough CAP to finish the transaction
@@ -2568,7 +2613,8 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 
         // if as a device, need to track next beacon if it is not being tracked
         if (rxBO != 15)
-            if (!bcnRxTimer->isScheduled()) startBcnRxTimer();
+            if (!bcnRxTimer->isScheduled())
+                startBcnRxTimer();
 
         csmacaWaitNextBeacon = true;
         return false;
@@ -2641,8 +2687,11 @@ simtime_t Ieee802154Mac::getFinalCAP(char trxType)
             // adjust if beacon loss occurs or during rceiving bcn
             if ((rxCAP < now) && (rxCAP + tmpf >= now))   //no more than <aMaxLostBeacons> beacons missed
             {
-                EV << "[MAC]: during receiving a beacon, now is: " << now << ", last beacon is rceived at " << bcnRxTime << endl;
-                while (rxCAP < now) rxCAP += rxBI;
+                EV << "[MAC]: during receiving a beacon, now is: " << now
+                   << ", last beacon is rceived at " << bcnRxTime << endl;
+
+                while (rxCAP < now)
+                    rxCAP += rxBI;
             }
 
             return (rxCAP >= now) ? rxCAP : oneDay;
@@ -2660,13 +2709,13 @@ void Ieee802154Mac::csmaca_handle_RX_ON_confirm(PHYenum status)
     {
         if (status == phy_BUSY_TX)
         {
-            EV << "[CSMA-CA]: radio is busy Txing now, RX_ON will be set later" << endl;
+            EV << "[CSMA-CA]: radio is busy Txing now, RX_ON will be set later\n";
             taskP.taskStatus(TP_RX_ON_CSMACA) = true;
-            EV  << "[MAC-TASK]: TP_RX_ON_CSMACA = true" << endl;
+            EV  << "[MAC-TASK]: TP_RX_ON_CSMACA = true\n";
         }
         else
         {
-            EV << "[CSMA-CA]: RX_ON request did not succeed, try again" << endl;
+            EV << "[CSMA-CA]: RX_ON request did not succeed, try again\n";
             handleBackoffTimer();
         }
 
@@ -2675,12 +2724,12 @@ void Ieee802154Mac::csmaca_handle_RX_ON_confirm(PHYenum status)
 
     // phy_RX_ON
     // locate backoff boundary if needed
-    EV << "[CSMA-CA]: ok, radio is set to RX_ON " << endl;
+    EV << "[CSMA-CA]: ok, radio is set to RX_ON \n";
     now = simTime();
 
     if (beaconEnabled)
     {
-        EV << "[CSMA-CA]: locate backoff boundary before sending CCA request" << endl;
+        EV << "[CSMA-CA]: locate backoff boundary before sending CCA request\n";
         wtime = csmacaLocateBoundary(toParent(tmpCsmaca), 0.0);
     }
     else
@@ -2689,7 +2738,7 @@ void Ieee802154Mac::csmaca_handle_RX_ON_confirm(PHYenum status)
     if (wtime == 0.0)
     {
         taskP.taskStatus(TP_CCA_CSMACA) = true;
-        EV  << "[MAC-TASK]: TP_CCA_CSMACA = true" << endl;
+        EV  << "[MAC-TASK]: TP_CCA_CSMACA = true\n";
         PLME_CCA_request();
     }
     else
@@ -2712,19 +2761,19 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
     {
         if (tmpCsmaca && (!backoffTimer->isScheduled()))
         {
-            EV << "[CSMA-CA]:  triggered again by the starting of the new CAP" << endl;
+            EV << "[CSMA-CA]:  triggered again by the starting of the new CAP\n";
             ASSERT(bPeriodsLeft >= 0);
 
             if (bPeriodsLeft == 0)      // backoff again
             {
-                EV << "[CSMA-CA]: bPeriodsLeft == 0, need to rechoose random number of backoffs" << endl;
+                EV << "[CSMA-CA]: bPeriodsLeft == 0, need to rechoose random number of backoffs\n";
                 csmacaStart(false);
             }
             else        // resume backoff: this is the second entry to CSMA-CA without calling <csmacaStart()>
             {
                 /*wtime = csmacaAdjustTime(0.0);
                 EV << "wtime = " << wtime << endl;*/
-                EV << "[CSMA-CA]: bPeriodsLeft > 0, continue with the number of backoffs left from last time" << endl;
+                EV << "[CSMA-CA]: bPeriodsLeft > 0, continue with the number of backoffs left from last time\n";
                 wtime += bPeriodsLeft * bPeriod;
                 if (csmacaCanProceed(wtime))
                     startBackoffTimer(wtime);
@@ -2756,7 +2805,7 @@ void Ieee802154Mac::startDeferCCATimer(simtime_t wtime)
         cancelEvent(deferCCATimer);
 
     scheduleAt(simTime() + wtime, deferCCATimer);
-    EV << "[CSMA-CA]: delay " << wtime << " s before performing CCA" << endl;
+    EV << "[CSMA-CA]: delay " << wtime << " s before performing CCA\n";
 }
 
 void Ieee802154Mac::startBcnRxTimer()
@@ -2930,7 +2979,7 @@ void Ieee802154Mac::startRxSDTimer()
 //--------------------------------------------------------------------------------/
 void Ieee802154Mac::handleBackoffTimer()
 {
-    EV << "[CSMA-CA]: before sending CCA primative, tell PHY to turn on the receiver" << endl;
+    EV << "[CSMA-CA]: before sending CCA primative, tell PHY to turn on the receiver\n";
     taskP.taskStatus(TP_RX_ON_CSMACA) = true;
     PLME_SET_TRX_STATE_request(phy_RX_ON);
 }
@@ -2938,7 +2987,7 @@ void Ieee802154Mac::handleBackoffTimer()
 void Ieee802154Mac::handleDeferCCATimer()
 {
     taskP.taskStatus(TP_CCA_CSMACA) = true;
-    EV << "[MAC-TASK]: TP_CCA_CSMACA = true" << endl;
+    EV << "[MAC-TASK]: TP_CCA_CSMACA = true\n";
     PLME_CCA_request();
 }
 
@@ -3176,7 +3225,9 @@ void Ieee802154Mac::handleSDTimer()     // we must make sure that outgoing CAP a
     // If PAN coordinator uses GTS, this is the end of CFP, reset indexCurrGts
     if (isPANCoor)
         indexCurrGts = 99;
-    EV << "[MAC]: entering inactive period, turn off radio and go to sleep" << endl;
+
+    EV << "[MAC]: entering inactive period, turn off radio and go to sleep\n";
+
     if (!txAck)
     {
         PLME_SET_TRX_STATE_request(phy_TRX_OFF);
@@ -3186,11 +3237,11 @@ void Ieee802154Mac::handleSDTimer()     // we must make sure that outgoing CAP a
 
     /*if ((!waitBcnCmdAck) && (!waitBcnCmdUpperAck) && (!waitDataAck))      // not waiting for ACK
     {
-        EV << "[MAC]: entering inactive period, turn off radio and go to sleep" << endl;
+        EV << "[MAC]: entering inactive period, turn off radio and go to sleep\n";
         PLME_SET_TRX_STATE_request(phy_TRX_OFF);
     }
     else
-        EV << "[MAC]: entering inactive period, but can not go to sleep" << endl;*/
+        EV << "[MAC]: entering inactive period, but can not go to sleep\n";*/
 }
 
 //-------------------------------------------------------------------------------/
@@ -3204,7 +3255,7 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
 
     if (type == 'b')    //beacon
     {
-        EV << "[MAC]: taskSuccess for sending beacon" << endl;
+        EV << "[MAC]: taskSuccess for sending beacon\n";
 
         /*if (!txBeacon)
         {
@@ -3235,12 +3286,12 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
         {
             csmacaRes = false;
             PLME_SET_TRX_STATE_request(phy_TRX_OFF);
-            EV << "[MAC]: no time left in current CAP after txing beacon, trying to turn off radio" << endl;
+            EV << "[MAC]: no time left in current CAP after txing beacon, trying to turn off radio\n";
         }
         else
         {
             PLME_SET_TRX_STATE_request(phy_RX_ON);
-            EV << "[MAC]: turn on radio receiver after txing beacon" << endl;
+            EV << "[MAC]: turn on radio receiver after txing beacon\n";
         }
 
         //CSMA-CA may be waiting for the new beacon
@@ -3344,7 +3395,8 @@ void Ieee802154Mac::taskFailed(char type, MACenum status, bool csmacaRes)
     else if (type == 'd')   //data
     {
         ASSERT(txData);
-        EV << "[MAC]: taskFailed for sending : " << txData->getName() <<":#" << (int)txData->getBdsn() << endl;
+        EV << "[MAC]: taskFailed for sending : " << txData->getName() <<":#"
+           << (int)txData->getBdsn() << endl;
         delete txData;
         txData = NULL;
         numTxDataFail++;
@@ -3442,21 +3494,24 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
         case 3:
             if (pStatus == phy_SUCCESS) //ack. received
             {
-                EV << "[MAC]: ACK for " << txData->getName() << ":#" << (int)txData->getBdsn() << " received successfully" << endl;
+                EV << "[MAC]: ACK for " << txData->getName() << ":#" << (int)txData->getBdsn()
+                   << " received successfully\n";
                 taskP.taskStatus(task) = false; // task ends successfully
-                EV << "[MAC-TASK-SUCCESS]: reset TP_MCPS_DATA_REQUEST" << endl;
+                EV << "[MAC-TASK-SUCCESS]: reset TP_MCPS_DATA_REQUEST\n";
                 waitDataAck = false;    // debug
                 resetTRX();
                 taskSuccess('d');
             }
             else                // time out when waiting for ack.
             {
-                EV << "[MAC]: ACK timeout for " << txData->getName() << ":#" << (int)txData->getBdsn()  << endl;
+                EV << "[MAC]: ACK timeout for " << txData->getName() << ":#"
+                   << (int)txData->getBdsn()  << endl;
                 numDataRetry++;
 
                 if (numDataRetry <= aMaxFrameRetries)
                 {
-                    EV << "[MAC]: starting " << numDataRetry << "th retry for " << txData->getName() << ":#" << (int)txData->getBdsn()  << endl;
+                    EV << "[MAC]: starting " << numDataRetry << "th retry for " << txData->getName()
+                       << ":#" << (int)txData->getBdsn()  << endl;
                     taskP.taskStep(task) = 1;   // go back to step 1
                     strcpy(taskP.taskFrFunc(task), "csmacaCallBack");
                     waitDataAck = false;
@@ -3464,9 +3519,9 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 }
                 else
                 {
-                    EV << "[MAC]: the max num of retries reached" << endl;
+                    EV << "[MAC]: the max num of retries reached\n";
                     taskP.taskStatus(task) = false; //task fails
-                    EV << "[MAC-TASK-FAIL]: reset TP_MCPS_DATA_REQUEST" << endl;
+                    EV << "[MAC-TASK-FAIL]: reset TP_MCPS_DATA_REQUEST\n";
                     waitDataAck = false;        // debug
                     resetTRX();
                     taskFailed('d', mac_NO_ACK);
@@ -3508,16 +3563,16 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 taskP.taskStep(task)++;
                 strcpy(taskP.taskFrFunc(task), "handleAck");
                 //enable the receiver
-                EV << "[GTS]: data successfully transmitted, turn on radio and wait for ACK" << endl;
+                EV << "[GTS]: data successfully transmitted, turn on radio and wait for ACK\n";
                 PLME_SET_TRX_STATE_request(phy_RX_ON);
                 startAckTimeoutTimer();
                 waitGTSAck = true;
             }
             else        //assume success if ack. not required
             {
-                EV << "[GTS]: data successfully transmitted, no ACK required, turn off radio now" << endl;
+                EV << "[GTS]: data successfully transmitted, no ACK required, turn off radio now\n";
                 PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
-                EV << "[GTS]: need to delay IFS before next GTS transmission can proceed" << endl;
+                EV << "[GTS]: need to delay IFS before next GTS transmission can proceed\n";
                 taskP.taskStep(task) = 4;
                 strcpy(taskP.taskFrFunc(task), "handleIfsTimer");
 
@@ -3532,9 +3587,10 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
             if (pStatus == phy_SUCCESS) //ack. received
             {
                 waitGTSAck = false;
-                EV << "[GTS]: ACK for " << txGTS->getName() << ":#" << (int)txGTS->getBdsn() << " received successfully, turn off radio now" << endl;
+                EV << "[GTS]: ACK for " << txGTS->getName() << ":#" << (int)txGTS->getBdsn()
+                   << " received successfully, turn off radio now\n";
                 PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
-                EV << "[GTS]: need to delay IFS before next GTS transmission can proceed" << endl;
+                EV << "[GTS]: need to delay IFS before next GTS transmission can proceed\n";
                 taskP.taskStep(task)++;
                 strcpy(taskP.taskFrFunc(task), "handleIfsTimer");
 
@@ -3551,7 +3607,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 if (numGTSRetry <= aMaxFrameRetries)
                 {
                     // retry in next GTS
-                    EV << "[GTS]: retry in this GTS of next superframe, turn off radio now" << endl;
+                    EV << "[GTS]: retry in this GTS of next superframe, turn off radio now\n";
                     taskP.taskStep(task) = 1;   // go back to step 1
                     strcpy(taskP.taskFrFunc(task), "handleGtsTimer");
                     waitGTSAck = false;
@@ -3561,9 +3617,9 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
                 }
                 else
                 {
-                    EV << "[GTS]: the max num of retries reached, task failed" << endl;
+                    EV << "[GTS]: the max num of retries reached, task failed\n";
                     taskP.taskStatus(task) = false; //task fails
-                    EV << "[MAC-TASK-FAIL]: reset TP_MCPS_DATA_REQUEST" << endl;
+                    EV << "[MAC-TASK-FAIL]: reset TP_MCPS_DATA_REQUEST\n";
                     waitGTSAck = false;
                     // to avoid several consecutive PLME_SET_TRX_STATE_request are called at the same time, which may lead to error operation,
                     // use phy_FORCE_TRX_OFF to turn off radio, because PHY will not send back a confirm from it
@@ -3815,8 +3871,8 @@ int Ieee802154Mac::calFrmByteLength(Ieee802154Frame* frame)
     else
         error("[MAC]: cannot calculate the size of a MAC frame with unknown type!");
 
-    //EV << "[MAC]: header size is " << MHRLength << " Bytes" << endl;
-    //EV << "[MAC]: MAC frame size is " << byteLength << " Bytes" << endl;
+    //EV << "[MAC]: header size is " << MHRLength << " Bytes\n";
+    //EV << "[MAC]: MAC frame size is " << byteLength << " Bytes\n";
     return byteLength;
 }
 
@@ -3877,8 +3933,10 @@ double Ieee802154Mac::getRate(char bitOrSymbol)
 
 bool Ieee802154Mac::toParent(Ieee802154Frame* frame)
 {
-    if (((frame->getFrmCtrl().dstAddrMode == defFrmCtrl_AddrMode16)&&(frame->getDstAddr() == mpib.macCoordShortAddress))
-            ||  ((frame->getFrmCtrl().dstAddrMode == defFrmCtrl_AddrMode64)&&(frame->getDstAddr() == mpib.macCoordExtendedAddress)))
+    if (((frame->getFrmCtrl().dstAddrMode == defFrmCtrl_AddrMode16)
+                && (frame->getDstAddr() == mpib.macCoordShortAddress))
+            || ((frame->getFrmCtrl().dstAddrMode == defFrmCtrl_AddrMode64)
+                && (frame->getDstAddr() == mpib.macCoordExtendedAddress)))
         return true;
     else
         return false;
@@ -3903,7 +3961,8 @@ void Ieee802154Mac::gtsScheduler()
     if (!gtsList[index_gtsTimer].isRecvGTS)
         w_time = w_time - aTurnaroundTime / phy_symbolrate;
 
-    EV << "[GTS]: schedule for starting of GTS index: " << index_gtsTimer << ", slot:#" << (int)gtsList[index_gtsTimer].startSlot << " with " << w_time << " s" << endl;
+    EV << "[GTS]: schedule for starting of GTS index: " << index_gtsTimer << ", slot:#"
+       << (int)gtsList[index_gtsTimer].startSlot << " with " << w_time << " s\n";
     startGtsTimer(w_time);
 }
 
@@ -3923,13 +3982,16 @@ void Ieee802154Mac::handleGtsTimer()
     if (isPANCoor)
     {
         indexCurrGts = index_gtsTimer;
-        EV << "[GTS]: GTS with index = " << (int)indexCurrGts << " in my GTS list starts now!" << endl;
-        EV << "allocated for MAC address = " << (int)gtsList[indexCurrGts].devShortAddr << ", startSlot = " << (int)gtsList[indexCurrGts].startSlot << ", length = " << (int)gtsList[indexCurrGts].length << ", isRecvGTS = " << gtsList[indexCurrGts].isRecvGTS << ", isTxPending = " << gtsList[indexCurrGts].isTxPending << endl;
+        EV << "[GTS]: GTS with index = " << (int)indexCurrGts << " in my GTS list starts now!\n";
+        EV << "allocated for MAC address = " << (int)gtsList[indexCurrGts].devShortAddr
+           << ", startSlot = " << (int)gtsList[indexCurrGts].startSlot << ", length = "
+           << (int)gtsList[indexCurrGts].length << ", isRecvGTS = " << gtsList[indexCurrGts].isRecvGTS
+           << ", isTxPending = " << gtsList[indexCurrGts].isTxPending << endl;
 
         // is transmit GTS relative to device , turn on radio receiver
         if (!gtsList[indexCurrGts].isRecvGTS)
         {
-            EV << "[GTS]: tell PHY to turn on radio receiver and prepare for receiving pkts from device" << endl;
+            EV << "[GTS]: tell PHY to turn on radio receiver and prepare for receiving pkts from device\n";
             PLME_SET_TRX_STATE_request(phy_RX_ON);
         }
         // my time to transmit pkts to certain device
@@ -3941,13 +4003,13 @@ void Ieee802154Mac::handleGtsTimer()
                 ASSERT(taskP.taskStatus(TP_MCPS_DATA_REQUEST) && taskP.taskStep(TP_MCPS_DATA_REQUEST) == 1);
                 // hand over to FSM, which will go to next step
                 // no need to call gtsCanProceed() at this time, timing is already guaranteed when allocating GTS
-                EV << "[GTS]: a data pending for this GTS found in the buffer, starting GTS transmission now" << endl;
+                EV << "[GTS]: a data pending for this GTS found in the buffer, starting GTS transmission now\n";
                 FSM_MCPS_DATA_request();    // state parameters are ignored
             }
             // turn off radio
             else
             {
-                EV << "[GTS]: no data pending for current transmit GTS, turn off radio now" << endl;
+                EV << "[GTS]: no data pending for current transmit GTS, turn off radio now\n";
                 PLME_SET_TRX_STATE_request(phy_TRX_OFF);
             }
         }
@@ -3972,7 +4034,7 @@ void Ieee802154Mac::handleGtsTimer()
             // is receive GTS, turn on radio receiver
             if (isRecvGTS)
             {
-                EV << "[GTS]: tell PHY to turn on radio receiver and prepare for receiving pkts from PAN coordinator" << endl;
+                EV << "[GTS]: tell PHY to turn on radio receiver and prepare for receiving pkts from PAN coordinator\n";
                 PLME_SET_TRX_STATE_request(phy_RX_ON);
             }
             // my GTS to transmit pkts to PAN coordinator
@@ -3984,12 +4046,12 @@ void Ieee802154Mac::handleGtsTimer()
                     ASSERT(taskP.taskStatus(TP_MCPS_DATA_REQUEST) && taskP.taskStep(TP_MCPS_DATA_REQUEST) == 1);
                     // hand over to FSM, which will go to next step
                     // no need to call gtsCanProceed() at this time, timing is already guaranteed when applying for GTS
-                    EV << "[GTS]: a data is pending for this GTS in the buffer, starting GTS transmission now" << endl;
+                    EV << "[GTS]: a data is pending for this GTS in the buffer, starting GTS transmission now\n";
                     FSM_MCPS_DATA_request();    // state parameters are ignored
                 }
                 else
                 {
-                    EV << "[GTS]: no data pending for GTS transmission, turn off radio now" << endl;
+                    EV << "[GTS]: no data pending for GTS transmission, turn off radio now\n";
                     // to avoid several consecutive PLME_SET_TRX_STATE_request are called at the same time, which may lead to error operation,
                     // use phy_FORCE_TRX_OFF to turn off radio, because PHY will not send back a confirm from it
                     PLME_SET_TRX_STATE_request(phy_FORCE_TRX_OFF);
@@ -4005,14 +4067,14 @@ void Ieee802154Mac::handleGtsTimer()
             if (isRecvGTS)
                 w_time += aTurnaroundTime / phy_symbolrate;
 
-            EV << "[GTS]: scheduling for the end of my GTS slot" << endl;
+            EV << "[GTS]: scheduling for the end of my GTS slot\n";
             startGtsTimer(w_time);
         }
         // my GTS expired, turn off radio
         else
         {
             index_gtsTimer = 0;
-            EV << "[GTS]: now is the end of my GTS, turn off radio now" << endl;
+            EV << "[GTS]: now is the end of my GTS, turn off radio now\n";
             PLME_SET_TRX_STATE_request(phy_TRX_OFF);
         }
     }
@@ -4034,12 +4096,14 @@ uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bo
 
     if (deviceList.find(macShortAddr) == deviceList.end())
     {
-        EV << "[GTS]: the address " << macShortAddr << " not found in the device list, no GTS allocated" << endl;
+        EV << "[GTS]: the address " << macShortAddr
+           << " not found in the device list, no GTS allocated\n";
         return 0;
     }
     else if (gtsCount >= 7)
     {
-        EV << "[GTS]: max number of GTSs reached, no GTS available for the MAC address " << macShortAddr << endl;
+        EV << "[GTS]: max number of GTSs reached, no GTS available for the MAC address "
+           << macShortAddr << endl;
         return 0;
     }
 
@@ -4048,7 +4112,8 @@ uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bo
 
     if (t_cap < aMinCAPLength)
     {
-        EV << "[GTS]: violation of the min CAP length, no GTS allocated for the MAC address " << macShortAddr << endl;
+        EV << "[GTS]: violation of the min CAP length, no GTS allocated for the MAC address "
+           << macShortAddr << endl;
         return 0;
     }
 
@@ -4060,7 +4125,9 @@ uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bo
     gtsList[gtsCount].startSlot = startSlot;
     gtsList[gtsCount].length = length;
     gtsList[gtsCount].isRecvGTS = isReceive;
-    EV << "[GTS]: add a new GTS descriptor with index = " << (int)gtsCount << " for MAC address = " << macShortAddr << ", startSlot = " <<  (int)startSlot << ", length = " << (int)length << ", isRecvGTS = " << isReceive << endl;
+    EV << "[GTS]: add a new GTS descriptor with index = " << (int)gtsCount << " for MAC address = "
+       << macShortAddr << ", startSlot = " <<  (int)startSlot << ", length = " << (int)length
+       << ", isRecvGTS = " << isReceive << endl;
     gtsCount++;
     // new paramters put into effect when txing next beacon
     //isGtsUpdate = true;
@@ -4079,7 +4146,7 @@ void Ieee802154Mac::handleFinalCapTimer()
 {
     // only be called when my GTS is not the first one in the CFP
     ASSERT(gtsStartSlot > rxSfSpec.finalCap + 1);
-    EV << "[GTS]: it's now the end of CAP, turn off radio and wait for my GTS coming" << endl;
+    EV << "[GTS]: it's now the end of CAP, turn off radio and wait for my GTS coming\n";
     PLME_SET_TRX_STATE_request(phy_TRX_OFF);
 }
 
@@ -4089,7 +4156,8 @@ uint16_t Ieee802154Mac::associate_request_cmd(IE3ADDR extAddr, const DevCapabili
     // store MAC address and capability info
     // here simply assign short address with its extended address
     deviceList[extAddr] = capaInfo;
-    EV << "[MAC]: associate request received from " << capaInfo.hostName << " with MAC address: " << extAddr << endl;
+    EV << "[MAC]: associate request received from " << capaInfo.hostName << " with MAC address: "
+       << extAddr << endl;
     return extAddr;
 }
 
@@ -4109,12 +4177,12 @@ bool Ieee802154Mac::gtsCanProceed()
 
     if (t_left > gtsTransDuration)
     {
-        EV << "yes" << endl;
+        EV << "yes\n";
         return true;
     }
     else
     {
-        EV << "no" << endl;
+        EV << "no\n";
         return false;
     }
 }

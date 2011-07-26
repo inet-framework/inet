@@ -36,15 +36,15 @@ void Ieee802154TestApp::finish()
 
 void Ieee802154TestApp::handleLowerMsg(cMessage* apMsg)
 {
-    simtime_t e2eDelay;
     Ieee802154AppPkt* tmpPkt = check_and_cast<Ieee802154AppPkt *>(apMsg);
-    e2eDelay = simTime() - tmpPkt->getCreationTime();
+    simtime_t e2eDelay = simTime() - tmpPkt->getCreationTime();
     totalByteRecv += tmpPkt->getByteLength();
     e2eDelayVec.record(SIMTIME_DBL(e2eDelay));
     numReceived++;
     sumE2EDelay += e2eDelay;
     meanE2EDelayVec.record(sumE2EDelay/numReceived);
-    EV << "[APP]: a message sent by " << tmpPkt->getSourceName() << " arrived at application with delay " << e2eDelay << " s" << endl;
+    EV << "[APP]: a message sent by " << tmpPkt->getSourceName()
+       << " arrived at application with delay " << e2eDelay << " s" << endl;
     delete apMsg;
 }
 

@@ -86,7 +86,8 @@ void Ieee802154StarRouting::handleMessage(cMessage* msg)
             control_info->setToParent(false);
             control_info->setDestName(appPkt->getDestName());
             appPkt->setControlInfo(control_info);
-            EV << "[NETWORK]: received a pkt from " << appPkt->getSourceName() << " and forward it to " << appPkt->getDestName() << endl;
+            EV << "[NETWORK]: received a pkt from " << appPkt->getSourceName()
+               << " and forward it to " << appPkt->getDestName() << endl;
             numForward++;
             send(appPkt, mLowergateOut);
         }

@@ -189,7 +189,8 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     /**
     * @name Command handling functions
     *  for convenience, some MAC commands are implemeted in a tricky way in the model
-    *  these functions are only called directly by ohter MAC modules, instead of via messages exchange like in real world
+    *  these functions are only called directly by ohter MAC modules, instead of via messages
+    *  exchange like in real world
     */
     //@{
     /** This function is a part of simplified association process in the model.
@@ -251,9 +252,8 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     * @name State control and task management functions
     */
     //@{
-    virtual void    dispatch    (PHYenum pStatus, const char *frFunc,
-                                 PHYenum req_state = phy_SUCCESS,
-                                 MACenum mStatus = mac_SUCCESS);
+    virtual void dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_state = phy_SUCCESS,
+            MACenum mStatus = mac_SUCCESS);
     virtual void taskSuccess(char type, bool csmacaRes = true);
     virtual void taskFailed(char type, MACenum status, bool csmacaRes = true);
     virtual void checkTaskOverflow(Ieee802154MacTaskType task);
@@ -464,7 +464,8 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     simtime_t bcnRxTime;
 
     /** @brief the scheduled time that the latest beacon should have arrived
-     sometimes bcnRxTime lags due to beacon loss (assumed impossible in the model) or in the middle of receiving a beacon,
+     sometimes bcnRxTime lags due to beacon loss (assumed impossible in the model) or in the middle
+     of receiving a beacon,
      some calculations use this value to avoid incorrectness */
     simtime_t schedBcnRxTime;
 

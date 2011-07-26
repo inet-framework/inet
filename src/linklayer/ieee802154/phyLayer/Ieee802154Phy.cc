@@ -102,7 +102,8 @@ void Ieee802154Phy::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << getParentModule()->getParentModule()->getFullName() << ": initializing Ieee802154Phy, stage=" << stage << endl;
+    EV << getParentModule()->getParentModule()->getFullName()
+       << ": initializing Ieee802154Phy, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -522,12 +523,14 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
         else if (airframe->getEncapsulatedMsg()->getKind() == PKT_BITERROR_FORCE_TRX_OFF)
 #endif
         {
-            EV << "[PHY]: reception of " << airframe->getName() << " frame failed because the sender turned off its transmitter during the tranmission, drop it \n";
+            EV << "[PHY]: reception of " << airframe->getName()
+               << " frame failed because the sender turned off its transmitter during the tranmission, drop it \n";
             isCorrupt = true;
         }
         else
         {
-            EV << "[PHY]: reception of " << airframe->getName() << " frame is over, preparing to send it to MAC layer\n";
+            EV << "[PHY]: reception of " << airframe->getName()
+               << " frame is over, preparing to send it to MAC layer\n";
             // get Packet and list out of the receive buffer:
             SnrList list;
             list = snrInfo.sList;
@@ -559,17 +562,21 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
 
         // delete the frame from the recvBuff
         recvBuff.erase(airframe);
-        if (isCorrupt)  delete airframe;
+
+        if (isCorrupt)
+            delete airframe;
     }
     // all other messages are noise
     else
     {
-        EV << "[PHY]: reception of noise message " << airframe->getName() <<" is over, removing recvdPower from noiseLevel....\n";
+        EV << "[PHY]: reception of noise message " << airframe->getName()
+           << " is over, removing recvdPower from noiseLevel....\n";
         noiseLevel -= recvBuff[airframe];   // get the rcvdPower and subtract it from the noiseLevel
         recvBuff.erase(airframe);       // delete message from the recvBuff
 
         // update snr info for message currently being received if any
-        if (snrInfo.ptr != NULL)    addNewSnr();
+        if (snrInfo.ptr != NULL)
+            addNewSnr();
 
         delete airframe;    // message should be deleted
     }
@@ -578,7 +585,8 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
     // change to idle if noiseLevel smaller than threshold and state was
     // not idle before
     // do not change state if currently sending or receiving a message!!!
-    if (noiseLevel < sensitivity && phyRadioState == phy_RX_ON && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
+    if (noiseLevel < sensitivity && phyRadioState == phy_RX_ON
+            && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
     {
         setRadioState(RadioState::IDLE);
         EV << "[PHY]: radio finishes receiving\n";
@@ -600,7 +608,9 @@ void Ieee802154Phy::handleLowerMsgEnd(AirFrame * airframe)
                 phyRadioState = phy_TRX_OFF;
                 PLME_SET_TRX_STATE_confirm(phyRadioState);
                 setRadioState(RadioState::SLEEP); // radio disabled during TRx turnaround
-                if (TRX_timer->isScheduled())    cancelEvent(TRX_timer);
+
+                if (TRX_timer->isScheduled())
+                    cancelEvent(TRX_timer);
 
                 scheduleAt(simTime() + aTurnaroundTime/getRate('s'), TRX_timer);
             }
@@ -646,8 +656,11 @@ void Ieee802154Phy::handleSelfMsg(cMessage *msg)
                 phyRadioState = phy_TRX_OFF;
                 PLME_SET_TRX_STATE_confirm(phyRadioState);
                 setRadioState(RadioState::SLEEP);       // radio disabled during TRx turnaround
-                if (TRX_timer->isScheduled())    cancelEvent(TRX_timer);
-                scheduleAt(simTime() + aTurnaroundTime/getRate('s'), TRX_timer);
+
+                if (TRX_timer->isScheduled())
+                    cancelEvent(TRX_timer);
+
+                scheduleAt(simTime() + aTurnaroundTime / getRate('s'), TRX_timer);
             }
         }
         break;
@@ -759,7 +772,8 @@ void Ieee802154Phy::PLME_SET_confirm(PHYenum status, PHYPIBenum attribute)
     primitive->setStatus(status);
     primitive->setAttribute(attribute);
     primitive->setBitRate(rs.getBitrate());
-    EV << "[PHY]: sending a PLME_SET_confirm with " << status << " and attr " <<  attribute << " to MAC" << endl;
+    EV << "[PHY]: sending a PLME_SET_confirm with " << status << " and attr " <<  attribute
+       << " to MAC" << endl;
     send(primitive, uppergateOut);
 }
 
@@ -830,13 +844,15 @@ void Ieee802154Phy::handle_PLME_SET_TRX_STATE_request(PHYenum setState)
     {
         delay = false;
         // case A1
-        if (((setState == phy_RX_ON)||(setState == phy_TRX_OFF)) && rs.getState() == RadioState::TRANSMIT)
+        if (((setState == phy_RX_ON) || (setState == phy_TRX_OFF))
+                && rs.getState() == RadioState::TRANSMIT)
         {
             tmp_state = phy_BUSY_TX;
             newState = setState;
         }
         // case A2
-        else if (((setState == phy_TX_ON)||(setState == phy_TRX_OFF)) &&  rs.getState() == RadioState::RECV)
+        else if (((setState == phy_TX_ON) || (setState == phy_TRX_OFF))
+                && rs.getState() == RadioState::RECV)
         {
             tmp_state = phy_BUSY_RX;
             newState = setState;
@@ -1043,7 +1059,8 @@ void Ieee802154Phy::changeChannel(int newChannel)
 
                 // we need to send to each radioIn[] gate of this host
                 for (int i = 0; i < radioGate->size(); i++)
-                    sendDirect((cMessage*)airframe->dup(),airframe->getTimestamp() + propagationDelay - simTime(),0, myHost, radioGate->getId() + i);
+                    sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp()
+                            + propagationDelay - simTime(), 0, myHost, radioGate->getId() + i);
             }
             // if we hear some part of the message
             else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
@@ -1133,7 +1150,8 @@ void Ieee802154Phy::addNewSnr()
 }
 
 // TODO: change the parent to AbstractRadioExtended and remove this methods
-void Ieee802154Phy::updateDisplayString() {
+void Ieee802154Phy::updateDisplayString()
+{
     // draw the interference area and sensitivity area
     // according pathloss propagation only
     // we use the channel controller method to calculate interference distance

@@ -33,7 +33,8 @@ bool Ieee802154RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList
 # else
     cPacket *frame = airframe->getEncapsulatedMsg();
 #endif
-    EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
+    EV << "packet (" << frame->getClassName() << ")" << frame->getName()
+       << " (" << frame->info() << ") snrMin=" << snirMin << endl;
 
     if (snirMin <= snirThreshold)
     {
