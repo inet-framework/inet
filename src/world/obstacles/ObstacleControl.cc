@@ -23,10 +23,21 @@
 
 #include "ObstacleControl.h"
 
-#include <unitconversion.h>
-
 
 Define_Module(ObstacleControl);
+
+namespace
+{
+    double parseQuantity(const char *str, const char *expectedUnit)
+    {
+        char *u;
+        double val = strtod(str, &u);
+        if (u == str || u == NULL)
+            throw cRuntimeError("invalid usage of parseQuantity('%s', '%s')", str, expectedUnit);
+        return cNEDValue::convertUnit(val, u, expectedUnit);
+    }
+}
+
 
 ObstacleControl::~ObstacleControl()
 {
@@ -102,16 +113,17 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
         ASSERT(e->getAttribute("shape"));
         std::string shape = e->getAttribute("shape");
 
-        //TODO: add XML attributes for two next values, and use parameters from NED only for default values, when missing from xml
         double attenuationPerWall = 0; /**< in dB */
         double attenuationPerMeter = 0; /**< in dB / m */
         if (type == "building")
         {
             const char *attr;
             attr = e->getAttribute("attenuationPerWall");
-            attenuationPerWall = attr ? parseQuantity(attr, par("attenuationPerWall").getUnit()) : par("attenuationPerWall").doubleValue();
+            attenuationPerWall = attr ? parseQuantity(attr, par("attenuationPerWall").getUnit())
+                                      : par("attenuationPerWall").doubleValue();
             attr = e->getAttribute("attenuationPerMeter");
-            attenuationPerMeter = attr ? parseQuantity(attr, par("attenuationPerMeter").getUnit()) : par("attenuationPerMeter").doubleValue();
+            attenuationPerMeter = attr ? parseQuantity(attr, par("attenuationPerMeter").getUnit())
+                                       : par("attenuationPerMeter").doubleValue();
         }
         else
             error("unknown obstacle type: %s", type.c_str());
@@ -131,7 +143,7 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
     }
 }
 
-void ObstacleControl::add(Obstacle obstacle)
+void ObstacleControl::add(const Obstacle &obstacle)
 {
     Obstacle* o = new Obstacle(obstacle);
 
@@ -228,8 +240,8 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 
                 pSend = o->calculateReceivedPower(pSend, carrierFrequency, senderPos, senderAngle, receiverPos, receiverAngle);
 
-                // draw a "hit!" bubble
-                if (annotations && (pSend < pSendOld))
+                // draw a "hit!" bubble in debug mode
+                if (debug && annotations && (pSend < pSendOld))
                     o->visualRepresentation->bubble("hit");
 //                    annotations->drawBubble(o->getBboxP1(), "hit");
 

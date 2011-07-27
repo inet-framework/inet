@@ -26,9 +26,9 @@
 #include "INETDefs.h"
 
 #include "ModuleAccess.h"
+#include "AnnotationManager.h"
 #include "Coord.h"
-#include "world/obstacles/Obstacle.h"
-#include "world/annotations/AnnotationManager.h"
+#include "Obstacle.h"
 
 /**
  * ObstacleControl models obstacles that block radio transmissions.
@@ -113,9 +113,6 @@ class INET_API ObstacleControl : public cSimpleModule
 class ObstacleControlAccess
 {
     public:
-        ObstacleControlAccess() {
-        }
-
         ObstacleControl* getIfExists() {
             return dynamic_cast<ObstacleControl*>(simulation.getModuleByPath("obstacles"));
         }
