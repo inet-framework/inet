@@ -501,6 +501,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
+                       inet.examples.obstacles
                        inet.examples.wireless
                       "
         extraSourceFolders = ""
