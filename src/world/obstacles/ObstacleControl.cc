@@ -238,7 +238,8 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 
                 double pSendOld = pSend;
 
-                pSend = o->calculateReceivedPower(pSend, carrierFrequency, senderPos, senderAngle, receiverPos, receiverAngle);
+                pSend = o->calculateReceivedPower(pSend, carrierFrequency, senderPos, senderAngle,
+                                                  receiverPos, receiverAngle);
 
                 // draw a "hit!" bubble in debug mode
                 if (debug && annotations && (pSend < pSendOld))

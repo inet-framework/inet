@@ -47,17 +47,19 @@ class INET_API ObstacleControl : public cSimpleModule
         void handleMessage(cMessage *msg);
         void handleSelfMsg(cMessage *msg);
 
-        void addFromXml(cXMLElement* xml);
-        void add(Obstacle obstacle);
-        void erase(const Obstacle* obstacle);
+        void addFromXml(cXMLElement *xml);
+        void add(const Obstacle& obstacle);
+        void erase(const Obstacle *obstacle);
 
         /**
          * calculate additional attenuation by obstacles, return signal strength
          */
-        double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const;
+        double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos,
+                double senderAngle, const Coord& receiverPos, double receiverAngle) const;
 
     protected:
-        struct CacheKey {
+        struct CacheKey
+        {
             const double pSend;
             const double carrierFrequency;
             const Coord senderPos;
@@ -65,15 +67,20 @@ class INET_API ObstacleControl : public cSimpleModule
             const Coord receiverPos;
             const double receiverAngle;
 
-            CacheKey(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) :
+            CacheKey(double pSend, double carrierFrequency, const Coord& senderPos,
+                    double senderAngle, const Coord& receiverPos, double receiverAngle)
+                :
                 pSend(pSend),
                 carrierFrequency(carrierFrequency),
                 senderPos(senderPos),
                 senderAngle(senderAngle),
                 receiverPos(receiverPos),
-                receiverAngle(receiverAngle) {
+                receiverAngle(receiverAngle)
+            {
             }
-            bool operator<(const CacheKey& o) const {
+
+            bool operator<(const CacheKey& o) const
+            {
                 if (senderPos.x < o.senderPos.x) return true;
                 if (senderPos.x > o.senderPos.x) return false;
                 if (senderPos.y < o.senderPos.y) return true;
@@ -102,18 +109,19 @@ class INET_API ObstacleControl : public cSimpleModule
         typedef std::map<CacheKey, double> CacheEntries;
 
         bool debug; /**< whether to emit debug messages */
-        cXMLElement* obstaclesXml; /**< obstacles to add at startup */
+        cXMLElement *obstaclesXml; /**< obstacles to add at startup */
 
         Obstacles obstacles;
-        AnnotationManager* annotations;
-        AnnotationManager::Group* annotationGroup;
+        AnnotationManager *annotations;
+        AnnotationManager::Group *annotationGroup;
         mutable CacheEntries cacheEntries;
 };
 
 class ObstacleControlAccess
 {
     public:
-        ObstacleControl* getIfExists() {
+        ObstacleControl* getIfExists()
+        {
             return dynamic_cast<ObstacleControl*>(simulation.getModuleByPath("obstacles"));
         }
 };
