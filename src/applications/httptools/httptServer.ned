@@ -29,6 +29,8 @@
 //
 // ----------------------------------------------------------------------------
 
+package inet.httptools;
+
 import inet.applications.ITCPApp;
 
 
