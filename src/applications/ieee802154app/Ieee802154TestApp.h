@@ -7,9 +7,9 @@
 
 #include "TrafGenPar.h"
 #include "Ieee802154AppPkt_m.h"
-//#include "Ieee802154UpperCtrlInfo_m.h"
 
-class Ieee802154TestApp : public TrafGenPar
+
+class INET_API Ieee802154TestApp : public TrafGenPar
 {
   public:
 

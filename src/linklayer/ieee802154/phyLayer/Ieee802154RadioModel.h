@@ -1,7 +1,11 @@
 #ifndef IEEE_802154_RADIOMODEL_H
 #define IEEE_802154_RADIOMODEL_H
 
+#include "INETDefs.h"
+
 #include "IRadioModel.h"
+#include "SnrList.h"
+
 
 class INET_API Ieee802154RadioModel : public IRadioModel
 {

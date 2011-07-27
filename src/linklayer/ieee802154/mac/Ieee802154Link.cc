@@ -1,19 +1,26 @@
+
 #include "Ieee802154Link.h"
 
-// Operations for HLISTLINK
-int addHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UINT_16 hostid, UINT_8 sn)
+// Operations for HListLink
+int addHListLink(HListLink **hlistLink1, HListLink **hlistLink2, uint16_t hostid, uint8_t sn)
 {
-    HLISTLINK *tmp;
+    HListLink *tmp;
     if (*hlistLink2 == 0)       //not exist yet
     {
-        *hlistLink2 = new HLISTLINK(hostid, sn);
-        if (*hlistLink2 == 0) return 1;
+        *hlistLink2 = new HListLink(hostid, sn);
+
+        if (*hlistLink2 == 0)
+            return 1;
+
         *hlistLink1 = *hlistLink2;
     }
     else
     {
-        tmp=new HLISTLINK(hostid, sn);
-        if (tmp == 0) return 1;
+        tmp = new HListLink(hostid, sn);
+
+        if (tmp == 0)
+            return 1;
+
         tmp->last = *hlistLink2;
         (*hlistLink2)->next = tmp;
         *hlistLink2 = tmp;
@@ -21,9 +28,9 @@ int addHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UINT_16 hostid,
     return 0;
 }
 
-int updateHListLink(int oper, HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UINT_16 hostid, UINT_8 sn)
+int updateHListLink(int oper, HListLink **hlistLink1, HListLink **hlistLink2, uint16_t hostid, uint8_t sn)
 {
-    HLISTLINK *tmp;
+    HListLink *tmp;
     int ok;
 
     ok = 1;
@@ -73,7 +80,7 @@ int updateHListLink(int oper, HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UI
     return ok;
 }
 
-int chkAddUpdHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UINT_16 hostid, UINT_8 sn)
+int chkAddUpdHListLink(HListLink **hlistLink1, HListLink **hlistLink2, uint16_t hostid, uint8_t sn)
 {
     int i;
 
@@ -86,9 +93,9 @@ int chkAddUpdHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2, UINT_16 h
     else return 3;
 }
 
-void emptyHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2)
+void emptyHListLink(HListLink **hlistLink1, HListLink **hlistLink2)
 {
-    HLISTLINK *tmp, *tmp2;
+    HListLink *tmp, *tmp2;
 
     if (*hlistLink1 != 0)
     {
@@ -104,9 +111,9 @@ void emptyHListLink(HLISTLINK **hlistLink1, HLISTLINK **hlistLink2)
     *hlistLink2 = *hlistLink1;
 }
 
-void dumpHListLink(HLISTLINK *hlistLink1, UINT_16 hostid)
+void dumpHListLink(HListLink *hlistLink1, uint16_t hostid)
 {
-    HLISTLINK *tmp;
+    HListLink *tmp;
     int i;
 
     tmp = hlistLink1;

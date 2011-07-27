@@ -1,5 +1,9 @@
 
+#include <fstream>
+
 #include "AnalysisEnergy.h"
+
+#include "BasicBattery.h"   // provides: access to the node batteries
 
 #define coreEV (ev.isDisabled()||!mCoreDebug) ? std::cout : ev << "AnalysisEnergy: "
 
@@ -21,18 +25,11 @@ void AnalysisEnergy::initialize(int aStage)
         scheduleAt(1000, mCreateSnapshot);
 
         // read the parameters from the .ini file
-        mCoreDebug      = hasPar("coreDebug") ? (bool) par("coreDebug") : false;
-        mNumHosts       = par("numHosts");
+        mCoreDebug = (bool) par("coreDebug");
+        mNumHosts = par("numHosts");
         mpHostModuleName.assign(par("hostModuleName").stdstringValue());
 
-        mpCc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
-        if (0 == mpCc)
-        {
-            error("Could not find channelcontrol module");
-        }
-
         mNumHostsDepleted = 0;
-
     }
 }
 
@@ -49,13 +46,14 @@ void AnalysisEnergy::handleMessage(cMessage* apMsg)
 {
     if (apMsg->isSelfMessage())
     {
-
         if (apMsg == mCreateSnapshot) // msg not scheduled in initialize!!
         {
             SnapshotEnergies();
+
             if (simTime() < 1900)
                 scheduleAt(2000, mCreateSnapshot);
         }
+
         return;
     }
     else
@@ -72,6 +70,7 @@ void AnalysisEnergy::handleMessage(cMessage* apMsg)
 void AnalysisEnergy::Snapshot()
 {
     mNumHostsDepleted++;
+
     if (mNumHostsDepleted == 1)
     {
         SnapshotEnergies();
@@ -82,6 +81,7 @@ void AnalysisEnergy::Snapshot()
         // alle hosts sind tot: simulation beenden!
         endSimulation();
     }
+
     ev << "hosts depleted: " << mNumHostsDepleted << endl;
 }
 
@@ -99,26 +99,20 @@ void AnalysisEnergy::SnapshotEnergies()
     // the filename is composited like this:
     // "energies-$network-$run-$time.snapshot
     std::stringstream filename;
+
     filename << "energies-" << simulation.getSystemModule()->getName() << "-"
-    << "-" << simTime() << ".snapshot";
+             << "-" << simTime() << ".snapshot";
     std::ofstream fout(filename.str().c_str());
 
-    for (int i=0; i<mNumHosts; i++)
+    for (int i = 0; i < mNumHosts; i++)
     {
         // build string with module path for each host in mNumHosts
         std::stringstream host_path;
         host_path << mpHostModuleName << "[" << i << "]";
 
         // test if the host is present
-        if (NULL == simulation.getModuleByPath(host_path.str().c_str()))
-        {
+        if (!simulation.getModuleByPath(host_path.str().c_str()))
             error("Host not found");
-        }
-
-        // read the host position
-        mTempHostRef = mpCc->lookupHost(getParentModule()->
-                                        getModuleByRelativePath(host_path.str().c_str()));
-        Coord pos = mpCc->getHostPosition(mTempHostRef);
 
         host_path << ".battery";
 
@@ -126,12 +120,11 @@ void AnalysisEnergy::SnapshotEnergies()
         double ene = dynamic_cast<BasicBattery*>(simulation.getModuleByPath(host_path.str().c_str()))->GetEnergy();
 
         // write the energy values into a file
-        fout << pos.x << "\t" << pos.y << "\t" << ene << endl;
-        ev << pos.x << "/" << pos.y << ", " << ene << endl;
+        fout << host_path << "\t" << ene << endl;
+        ev << host_path << ": " << ene << endl;
     }
 
     fout.close();
-
 }
 
 void AnalysisEnergy::SnapshotLifetimes()
@@ -143,10 +136,10 @@ void AnalysisEnergy::SnapshotLifetimes()
     // "lifetimes-$network-$run-$time.snapshot
     std::stringstream filename;
     filename << "lifetimes-" << simulation.getSystemModule()->getName() << "-"
-    << "-" << simTime() << ".snapshot";
+             << "-" << simTime() << ".snapshot";
     std::ofstream fout(filename.str().c_str());
 
-    for (int i=0; i<mNumHosts; i++)
+    for (int i = 0; i < mNumHosts; i++)
     {
         // build string with module path for each host in mNumHosts
         std::stringstream host_path;
@@ -158,21 +151,15 @@ void AnalysisEnergy::SnapshotLifetimes()
             error("Host not found");
         }
 
-        // read the host position
-        mTempHostRef = mpCc->lookupHost(getParentModule()->
-                                        getModuleByRelativePath(host_path.str().c_str()));
-        Coord pos = mpCc->getHostPosition(mTempHostRef);
-
         host_path << ".battery";
 
         // read the host lifetime
         simtime_t lt = dynamic_cast<BasicBattery*>(simulation.getModuleByPath(host_path.str().c_str()))->GetLifetime();
 
         // write the lifetime values into a file
-        fout << pos.x << "\t" << pos.y << "\t" << lt << endl;
-        ev << pos.x << "/" << pos.y << ", " << lt << endl;
+        fout << host_path << "\t" << lt << endl;
+        ev << host_path << ": " << lt << endl;
     }
 
     fout.close();
-
 }

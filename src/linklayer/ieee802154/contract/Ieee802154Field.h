@@ -18,71 +18,71 @@
 //Elements of PAN descriptor (Table 41)
 struct PAN_ELE
 {
-    UINT_8          CoordAddrMode;
-    UINT_16         CoordPANId;
+    uint8_t CoordAddrMode;
+    uint16_t CoordPANId;
 
-    UINT_16         CoordAddress_16_or_64;      // shared by both 16 bit short address or 64 bit extended address
+    uint16_t CoordAddress_16_or_64; // shared by both 16 bit short address or 64 bit extended address
 
-    UINT_8          LogicalChannel;
-    //UINT_16           SuperframeSpec;     // ignored, store in txSfSpec or rxSfSpec instead
+    uint8_t LogicalChannel;
+    //uint16_t           SuperframeSpec;     // ignored, store in txSfSpec or rxSfSpec instead
     bool                GTSPermit;
-    UINT_8          LinkQuality;
+    uint8_t LinkQuality;
     //simtime_t     TimeStamp;              // ignored, use bcnRxTime instead
     bool                SecurityUse;
-    UINT_8          ACLEntry;
+    uint8_t ACLEntry;
     bool                SecurityFailure;
     //add one field for cluster tree
-    //UINT_16   clusTreeDepth;
+    //uint16_t   clusTreeDepth;
 };
 
 struct PHY_PIB
 {
     int             phyCurrentChannel;
-    //UINT_32       phyChannelsSupported;
+    //uint32_t phyChannelsSupported;
     //double            phyTransmitPower;
-    //UINT_8            phyCCAMode;
+    //uint8_t phyCCAMode;
 };
 
 struct MAC_PIB
 {
     //attributes from Table 71
-    UINT_8          macAckWaitDuration;
+    uint8_t macAckWaitDuration;
     bool                macAssociationPermit;
     bool                macAutoRequest;
     bool                macBattLifeExt;
-    UINT_8          macBattLifeExtPeriods;
+    uint8_t macBattLifeExtPeriods;
     /*
-    UINT_8  macBeaconPayload[aMaxPHYPacketSize-(6+9+2+1)+1];    //beacon length in octets (w/o payload):
+    uint8_t  macBeaconPayload[aMaxPHYPacketSize-(6+9+2+1)+1];    //beacon length in octets (w/o payload):
                                     //  max: 6(phy) + 15(mac) + 23 (GTSs) + 57 (pending addresses)
                                     //  min: 6(phy) + 9(mac) + 2 (GTSs) + 1 (pending addresses)
     */
-    UINT_8          macBeaconPayload[aMaxBeaconPayloadLength+1];
-    UINT_8          macBeaconPayloadLength;
-    UINT_8          macBeaconOrder;
+    uint8_t macBeaconPayload[aMaxBeaconPayloadLength + 1];
+    uint8_t macBeaconPayloadLength;
+    uint8_t macBeaconOrder;
     double      macBeaconTxTime;            // we use actual time in double instead of integer in spec
-    UINT_8          macBSN;                             // sequence number for beacon pkt
-    IE3ADDR         macCoordExtendedAddress;
-    UINT_16         macCoordShortAddress;
-    UINT_8          macDSN;                             // sequence number for data or cmd pkt
+    uint8_t macBSN; // sequence number for beacon pkt
+    IE3ADDR macCoordExtendedAddress;
+    uint16_t macCoordShortAddress;
+    uint8_t macDSN; // sequence number for data or cmd pkt
     bool                macGTSPermit;
-    UINT_8          macMaxCSMABackoffs;
-    UINT_8          macMinBE;
-    UINT_16         macPANId;
+    uint8_t macMaxCSMABackoffs;
+    uint8_t macMinBE;
+    uint16_t macPANId;
     bool                macPromiscuousMode;
     bool                macRxOnWhenIdle;
-    UINT_16         macShortAddress;
-    UINT_8          macSuperframeOrder;
-    UINT_16         macTransactionPersistenceTime;
+    uint16_t macShortAddress;
+    uint8_t macSuperframeOrder;
+    uint16_t macTransactionPersistenceTime;
     //attributes from Table 72 (security attributes)
 
     /*
     MAC_ACL*        macACLEntryDescriptorSet;
-    UINT_8          macACLEntryDescriptorSetSize;
+    uint8_t macACLEntryDescriptorSetSize;
     bool                macDefaultSecurity;
-    UINT_8          macACLDefaultSecurityMaterialLength;
-    UINT_8*         macDefaultSecurityMaterial;
-    UINT_8          macDefaultSecuritySuite;
-    UINT_8          macSecurityMode;
+    uint8_t macACLDefaultSecurityMaterialLength;
+    uint8_t* macDefaultSecurityMaterial;
+    uint8_t macDefaultSecuritySuite;
+    uint8_t macSecurityMode;
     */
 };
 
@@ -90,11 +90,11 @@ struct MAC_PIB
 struct MAC_ACL
 {
     IE3ADDR         ACLExtendedAddress;
-    UINT_16         ACLShortAddress;
-    UINT_16         ACLPANId;
-    UINT_8          ACLSecurityMaterialLength;
-    UINT_8*         ACLSecurityMaterial;
-    UINT_8          ACLSecuritySuite;
+    uint16_t ACLShortAddress;
+    uint16_t ACLPANId;
+    uint8_t ACLSecurityMaterialLength;
+    uint8_t* ACLSecurityMaterial;
+    uint8_t ACLSecuritySuite;
 };
 
 // Frame Control field in MHR (Figure 35)
@@ -105,18 +105,18 @@ struct FrameCtrl
     bool                frmPending;
     bool                ackReq;
     bool                intraPan;
-    UINT_8          dstAddrMode;
-    UINT_8          srcAddrMode;
+    uint8_t dstAddrMode;
+    uint8_t srcAddrMode;
 };
 
 // Superframe specification (SS) (16 bits) - Fig 40
 struct SuperframeSpec
 {
-    UINT_8          BO;         // beacon order
-    UINT_32             BI;         // becaon interval
-    UINT_8          SO;         // superframe order
-    UINT_32             SD;         // superframe duration
-    UINT_8          finalCap;       // final superframe slot utilized by the CAP
+    uint8_t BO; // beacon order
+    uint32_t BI; // becaon interval
+    uint8_t SO; // superframe order
+    uint32_t SD; // superframe duration
+    uint8_t finalCap; // final superframe slot utilized by the CAP
     bool                battLifeExt;    // battery life extention
     bool                panCoor;        // PAN coordinator
     bool                assoPmt;        // association permit
@@ -135,17 +135,17 @@ struct DevCapability
 
 struct GTSDescriptor
 {
-    UINT_16 devShortAddr;       // device short address
-    UINT_8 startSlot;           // starting slot
-    UINT_8 length;          // length in slots
+    uint16_t devShortAddr;       // device short address
+    uint8_t startSlot;           // starting slot
+    uint8_t length;          // length in slots
     bool isRecvGTS;     // transmit or receive in GTS, not defined here is spec, but we put it here just for convenience
     bool isTxPending;       // there is a data pending for txing
 };
 
 struct PendingAddrFields
 {
-    UINT_8          numShortAddr;   //num of short addresses pending
-    UINT_8          numExtendedAddr;    //num of extended addresses pending
+    uint8_t numShortAddr;   //num of short addresses pending
+    uint8_t numExtendedAddr;    //num of extended addresses pending
     IE3ADDR             addrList[7];    //pending address list (shared by short/extended addresses)
 };
 

@@ -6,21 +6,14 @@
 #define IEEE_802154_PHY_H
 
 #include "ChannelAccess.h"
-#include "ChannelAccessExtended.h"
 #include "RadioState.h"
-#include "Ieee802154Const.h"
-#include "Ieee802154Def.h"
-#include "Ieee802154Enum.h"
 #include "Ieee802154MacPhyPrimitives_m.h"
 #include "AirFrame_m.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
-#include "FWMath.h"
-#include "NotificationBoard.h"
-#include "NotifierConsts.h"
 
 
-class INET_API Ieee802154Phy : public ChannelAccessExtended
+class INET_API Ieee802154Phy : public ChannelAccess
 {
   public:
     Ieee802154Phy           ();
@@ -44,8 +37,8 @@ class INET_API Ieee802154Phy : public ChannelAccessExtended
     void                sendUp          (cMessage*);
     void                sendDown        (AirFrame*);
 
-    virtual IReceptionModel *createReceptionModel() {return (IReceptionModel *)createOne(par("attenuationModel").stringValue());}
-    virtual IRadioModel *createRadioModel() {return (IRadioModel *)createOne(par("radioModel").stringValue());}
+//    virtual IReceptionModel *createReceptionModel() {return (IReceptionModel *)createOne(par("attenuationModel").stringValue());}
+//    virtual IRadioModel *createRadioModel() {return (IRadioModel *)createOne(par("radioModel").stringValue());}
 
     // primitives processing functions
     void                PD_DATA_confirm     (PHYenum status);
@@ -122,3 +115,4 @@ class INET_API Ieee802154Phy : public ChannelAccessExtended
 };
 
 #endif
+

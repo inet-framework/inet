@@ -29,9 +29,6 @@
 #define csma_H
 
 
-#include <string>
-#include <sstream>
-#include <vector>
 #include <list>
 #include "Ieee802154Mac.h"
 
@@ -49,7 +46,7 @@
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class  csma802154 : public Ieee802154Mac
+class INET_API csma802154 : public Ieee802154Mac
 {
 
     Ieee802154Frame *sendPacket;

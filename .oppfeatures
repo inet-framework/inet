@@ -554,11 +554,10 @@
         name="IEEE 802.15.4"
         description = "IEEE 802.15.4"
         initiallyEnabled = "true"
-        requires = ""
+        requires = "radio mobility"
         labels = "nic wireless"
         nedPackages = "
                        inet.applications.ieee802154app
-                       inet.linklayer.bmac
                        inet.linklayer.ieee802154
                        inet.networklayer.ieee802154
                        inet.nodes.ieee802154

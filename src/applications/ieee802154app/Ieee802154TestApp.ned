@@ -1,6 +1,8 @@
 
-package inet.underTest.wpan.applications.Ieee802154TestApp;
-import  inet.applications.trafgen.TrafGenPar;
+package inet.applications.ieee802154app;
+
+import inet.applications.trafgen.TrafGenPar;
+
 
 simple Ieee802154TestApp extends TrafGenPar
 {

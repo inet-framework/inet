@@ -8,10 +8,10 @@
 #ifndef IEEE_802154_STAR_ROUTING_H
 #define IEEE_802154_STAR_ROUTING_H
 
-#include "Ieee802154AppPkt_m.h"
-#include "Ieee802154NetworkCtrlInfo_m.h"
+#include "INETDefs.h"
 
-class Ieee802154StarRouting : public cSimpleModule
+
+class INET_API Ieee802154StarRouting : public cSimpleModule
 {
   public:
     virtual void initialize(int);

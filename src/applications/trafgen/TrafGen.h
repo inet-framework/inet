@@ -79,10 +79,11 @@ Nodes sending no traffic can be achieved by two methods:
 
 // SYSTEM INCLUDES
 #include <cdynamicexpression.h>
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include <string>
 
-class TrafGen : public cSimpleModule
+class INET_API TrafGen : public cSimpleModule
 {
   public:
     TrafGen();

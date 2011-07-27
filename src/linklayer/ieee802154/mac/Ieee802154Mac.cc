@@ -1,5 +1,6 @@
 
 #include "Ieee802154Mac.h"
+
 #include "InterfaceTableAccess.h"
 #include "MACAddress.h"
 
@@ -30,6 +31,139 @@ MAC_PIB Ieee802154Mac::MPIB =
 };
 
 Define_Module(Ieee802154Mac);
+
+void Ieee802154Mac::TaskPending::init()
+{
+    mcps_data_request = false;
+    mcps_data_request_STEP = 0;
+    /*mlme_associate_request = false;
+    mlme_associate_request_STEP = 0;
+    mlme_associate_response = false;
+    mlme_associate_response_STEP = 0;
+    mlme_disassociate_request = false;
+    mlme_disassociate_request_STEP = 0;
+    mlme_orphan_response = false;
+    mlme_orphan_response_STEP = 0;
+    mlme_reset_request = false;
+    mlme_reset_request_STEP = 0;
+    mlme_rx_enable_request = false;
+    mlme_rx_enable_request_STEP = 0;
+    mlme_scan_request = false;
+    mlme_scan_request_STEP = 0;
+    mlme_start_request = false;
+    mlme_start_request_STEP = 0;
+    mlme_sync_request = false;
+    mlme_sync_request_STEP = 0;
+    mlme_sync_request_tracking = false;
+    mlme_poll_request = false;
+    mlme_poll_request_STEP = 0;*/
+    CCA_csmaca = false;
+    CCA_csmaca_STEP = 0;
+    RX_ON_csmaca = false;
+    RX_ON_csmaca_STEP = 0;
+}
+
+bool& Ieee802154Mac::TaskPending::taskStatus(Ieee802154MacTaskType task)
+{
+    switch (task)
+    {
+    case TP_MCPS_DATA_REQUEST:
+        return mcps_data_request;
+        /*case TP_MLME_ASSOCIATE_REQUEST:
+            return mlme_associate_request;
+        case TP_MLME_ASSOCIATE_RESPONSE:
+            return mlme_associate_response;
+        case TP_MLME_DISASSOCIATE_REQUEST:
+            return mlme_disassociate_request;
+        case TP_MLME_ORPHAN_RESPONSE:
+            return mlme_orphan_response;
+        case TP_MLME_RESET_REQUEST:
+            return mlme_reset_request;
+        case TP_MLME_RX_ENABLE_REQUEST:
+            return mlme_rx_enable_request;
+        case TP_MLME_SCAN_REQUEST:
+            return mlme_scan_request;
+        case TP_MLME_START_REQUEST:
+            return mlme_start_request;
+        case TP_MLME_SYNC_REQUEST:
+            return mlme_sync_request;
+        case TP_MLME_POLL_REQUEST:
+            return mlme_poll_request;*/
+    case TP_CCA_CSMACA:
+        return CCA_csmaca;
+    case TP_RX_ON_CSMACA:
+        return RX_ON_csmaca;
+    default:
+        throw cRuntimeError("Invalid Ieee802154MacTaskType: %d", task);
+    }
+}
+
+uint8_t& Ieee802154Mac::TaskPending::taskStep(Ieee802154MacTaskType task)
+{
+    switch (task)
+    {
+    case TP_MCPS_DATA_REQUEST:
+        return mcps_data_request_STEP;
+    /*case TP_MLME_ASSOCIATE_REQUEST:
+        return mlme_associate_request_STEP;
+    case TP_MLME_ASSOCIATE_RESPONSE:
+        return mlme_associate_response_STEP;
+    case TP_MLME_DISASSOCIATE_REQUEST:
+        return mlme_disassociate_request_STEP;
+    case TP_MLME_ORPHAN_RESPONSE:
+        return mlme_orphan_response_STEP;
+    case TP_MLME_RESET_REQUEST:
+        return mlme_reset_request_STEP;
+    case TP_MLME_RX_ENABLE_REQUEST:
+        return mlme_rx_enable_request_STEP;
+    case TP_MLME_SCAN_REQUEST:
+        return mlme_scan_request_STEP;
+    case TP_MLME_START_REQUEST:
+        return mlme_start_request_STEP;
+    case TP_MLME_SYNC_REQUEST:
+        return mlme_sync_request_STEP;
+    case TP_MLME_POLL_REQUEST:
+        return mlme_poll_request_STEP;*/
+    case TP_CCA_CSMACA:
+        return CCA_csmaca_STEP;
+    case TP_RX_ON_CSMACA:
+        return RX_ON_csmaca_STEP;
+    default:
+        throw cRuntimeError("Invalid Ieee802154MacTaskType: %d", task);
+    }
+}
+
+char* Ieee802154Mac::TaskPending::taskFrFunc(Ieee802154MacTaskType task)
+{
+    switch (task)
+    {
+    case TP_MCPS_DATA_REQUEST:
+        return mcps_data_request_frFunc;
+    /*case TP_MLME_ASSOCIATE_REQUEST:
+        return mlme_associate_request_frFunc;
+    case TP_MLME_ASSOCIATE_RESPONSE:
+        return mlme_associate_response_frFunc;
+    case TP_MLME_DISASSOCIATE_REQUEST:
+        return mlme_disassociate_request_frFunc;
+    case TP_MLME_ORPHAN_RESPONSE:
+        return mlme_orphan_response_frFunc;
+    case TP_MLME_RESET_REQUEST:
+        return mlme_reset_request_frFunc;
+    case TP_MLME_RX_ENABLE_REQUEST:
+        return mlme_rx_enable_request_frFunc;
+    case TP_MLME_SCAN_REQUEST:
+        return mlme_scan_request_frFunc;
+    case TP_MLME_START_REQUEST:
+        return mlme_start_request_frFunc;
+    case TP_MLME_SYNC_REQUEST:
+        return mlme_sync_request_frFunc;
+    case TP_MLME_POLL_REQUEST:
+        return mlme_poll_request_frFunc;*/
+    default:
+        throw cRuntimeError("Invalid Ieee802154MacTaskType: %d", task);
+    }
+}
+
 
 Ieee802154Mac::Ieee802154Mac()
 {
@@ -396,9 +530,9 @@ void Ieee802154Mac::receiveChangeNotification(int category, const cPolymorphic *
 
     switch (category)
     {
-
-        if (check_and_cast<RadioState *>(details)->getRadioId()!=getRadioModuleId())
-            return;
+//TODO when can run the next check?
+//    if (check_and_cast<RadioState *>(details)->getRadioId() != getRadioModuleId())
+//        return;
 
     case NF_RADIO_CHANNEL_CHANGED:
         ppib.phyCurrentChannel = check_and_cast<RadioState *>(details)->getChannelNumber();
@@ -478,7 +612,7 @@ void Ieee802154Mac::handleMessage(cMessage* msg)
 
 void Ieee802154Mac::handleUpperMsg(cMessage* msg)
 {
-    UINT_8 index;
+    uint8_t index;
     IE3ADDR destAddr;
     bool gtsFound = false;
     numUpperPkt++;
@@ -664,6 +798,16 @@ void Ieee802154Mac::handleLowerMsg(cMessage* msg)
             if (frmType == Ieee802154_CMD)
                 if ((rxCmd)||(txBcnCmd))
                     noAck = true;
+
+            // FIXME It's a HACK, is this good? (Zoltan Bojthe)
+            if (frmType == Ieee802154_DATA)
+                if (txAck)
+                {
+                    EV << "txAck HACK\n";
+                    noAck = true;
+                }
+            // end of HACK
+
             if (!noAck)
             {
                 EV << "[MAC]: yes, constructing the ACK frame" << endl;
@@ -865,7 +1009,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
     FrameCtrl frmCtrl;
     bool pending;
     simtime_t now,  tmpf, w_time,duration;
-    UINT_8 ifs;
+    uint8_t ifs;
     int  dataFrmLength;
     now = simTime();
 
@@ -889,7 +1033,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
         ifs = aMinLIFSPeriod;
     tmpf = duration * phy_symbolrate;
     tmpf += ifs;
-    rxBcnDuration = (UINT_8)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
+    rxBcnDuration = (uint8_t)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
     if (fmod(tmpf, aUnitBackoffPeriod) > 0.0)
         rxBcnDuration++;
 
@@ -967,7 +1111,7 @@ void Ieee802154Mac::handleBeacon(Ieee802154Frame* frame)
                 gtsLength = 1;
             else
             {
-                gtsLength = (UINT_8)(duration/tmpf);
+                gtsLength = (uint8_t)(duration / tmpf);
                 if (fmod(duration, tmpf) > 0.0)
                     gtsLength++;
             }
@@ -1170,7 +1314,7 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
         rxCmd = frame;
         ackReq = true;
         wph = HDR_LRWPAN(p);
-        rt_myNodeID = *((UINT_16 *)wph->MSDU_Payload);
+        rt_myNodeID = *((uint16_t *)wph->MSDU_Payload);
         #ifdef ZigBeeIF
         sscs->setGetClusTreePara('g',p);
         #endif*/
@@ -1265,8 +1409,8 @@ void Ieee802154Mac::handleCommand(Ieee802154Frame* frame)
         && (wph->MHR_SrcAddrInfo.panID == mpib.macPANId))
         {
             //no specification in the draft as how to handle this packet, so use our discretion
-            mpib.macPANId = *((UINT_16 *)wph->MSDU_Payload);
-            mpib.macCoordShortAddress = *((UINT_16 *)(wph->MSDU_Payload + 2));
+            mpib.macPANId = *((uint16_t *)wph->MSDU_Payload);
+            mpib.macCoordShortAddress = *((uint16_t *)(wph->MSDU_Payload + 2));
             tmp_ppib.phyCurrentChannel = wph->MSDU_Payload[4];
             phy->PLME_SET_request(phyCurrentChannel,&tmp_ppib);
         }*/
@@ -1298,13 +1442,13 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
     */
 
     // Fisrt check flag set by Phy layer, COLLISION or
-    if (frame->getKind() == COLLISION)
+    if (frame->getKind() == PKT_COLLISION)
     {
         EV << "[MAC]: frame corrupted due to collision, dropped" << endl;
         numCollision++;
         return true;
     }
-    else if  (frame->getKind() == RX_DURING_CCA)
+    else if  (frame->getKind() == PKT_RX_DURING_CCA)
     {
         EV << "[MAC]: frame corrupted due to being received during CCA, dropped" << endl;
         return true;
@@ -1352,12 +1496,14 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
 
         //check dest. PAN ID (beacon has no dest address fields)
         if ((frmCtrl.dstAddrMode == defFrmCtrl_AddrMode16)
-                ||(frmCtrl.dstAddrMode == defFrmCtrl_AddrMode64))
-            if ((frame->getDstPanId() != 0xffff)                        // PAN id do not match for other pkts
+                || (frmCtrl.dstAddrMode == defFrmCtrl_AddrMode64))
+        {
+            if ((frame->getDstPanId() != 0xffff)              // PAN id do not match for other pkts
                     &&(frame->getDstPanId() != mpib.macPANId))
             {
                 return true;
             }
+        }
 
         //check dest. address
         if (frmCtrl.dstAddrMode == defFrmCtrl_AddrMode16)   // short address
@@ -1391,6 +1537,7 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
         //check for Data/Cmd frame only with source address:: destined for PAN coordinator
         // temporary solution, consider only star topology
         if ((frmType == Ieee802154_DATA) || (frmType == Ieee802154_CMD))
+        {
             if (frmCtrl.dstAddrMode == defFrmCtrl_AddrModeNone)     // dest address fileds not included
             {
                 if (!isPANCoor)     // not a PAN coordinator
@@ -1402,6 +1549,7 @@ bool Ieee802154Mac::frameFilter(Ieee802154Frame* frame)
                     return true;
                 }*/
             }
+        }
     }
     return false;
 }
@@ -1615,7 +1763,7 @@ void Ieee802154Mac::handle_PD_DATA_confirm(PHYenum status)
     {
         dispatch(status,__FUNCTION__);
     }
-    // sening pkt at phy layer failed, it may happen only when txing is terminated by FORCE_TRX_OFF
+    // sending pkt at phy layer failed, it may happen only when txing is terminated by FORCE_TRX_OFF
     else if (txPkt == txBeacon)
     {
         beaconWaitingTx = false;
@@ -1768,9 +1916,9 @@ void Ieee802154Mac::handle_PLME_SET_TRX_STATE_confirm(PHYenum status)
 //-------------------------------------------------------------------------------/
 /***************************** <SSCS-MAC Primitive> *****************************/
 //-------------------------------------------------------------------------------/
-void Ieee802154Mac::MCPS_DATA_request(UINT_8 SrcAddrMode, UINT_16 SrcPANId, IE3ADDR SrcAddr,
-                                      UINT_8 DstAddrMode, UINT_16 DstPANId, IE3ADDR DstAddr,
-                                      cPacket* msdu,  Ieee802154TxOption TxOption)
+void Ieee802154Mac::MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE3ADDR SrcAddr,
+                                      uint8_t DstAddrMode, uint16_t DstPANId, IE3ADDR DstAddr,
+                                      cPacket* msdu, Ieee802154TxOption TxOption)
 {
 
     Ieee802154MacTaskType task = TP_MCPS_DATA_REQUEST;
@@ -1920,6 +2068,7 @@ void Ieee802154Mac::csmacaResume()
 
     if ((backoffStatus != 99)           //not during backoff
             &&  (!inTransmission))              //not during transmission
+    {
         if ((txBcnCmd) && (!waitBcnCmdAck))
         {
             backoffStatus = 99;
@@ -1944,6 +2093,7 @@ void Ieee802154Mac::csmacaResume()
             txCsmaca = txData;
             csmacaStart(true, txData, ackReq);
         }
+    }
 }
 
 void Ieee802154Mac::csmacaStart(bool firsttime, Ieee802154Frame* frame, bool ackReq)
@@ -2150,7 +2300,7 @@ simtime_t Ieee802154Mac::csmacaLocateBoundary(bool toParent, simtime_t wtime)
 bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
 {
     bool ok;
-    UINT_16 t_bPeriods, t_CAP;
+    uint16_t t_bPeriods, t_CAP;
     simtime_t tmpf, rxBI, t_fCAP, t_CCATime, t_IFS, t_transacTime;
     simtime_t now = simTime();
     csmacaWaitNextBeacon = false;
@@ -2188,8 +2338,9 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
                 EV << "[CSMA-CA]: wtime = " << wtime << "; mpib.macBeaconTxTime = " << mpib.macBeaconTxTime << endl;
                 tmpf = tmpf / bPeriod;
                 EV << "[CSMA-CA]: tmpf = " << tmpf << "; bPeriod  = " << bPeriod << endl;
-                t_bPeriods = (UINT_16)(SIMTIME_DBL(tmpf) - txBcnDuration);
-                EV << "[CSMA-CA]: t_bPeriods = " << t_bPeriods << "; txBcnDuration = " << (int)txBcnDuration << endl;
+                t_bPeriods = (uint16_t)(SIMTIME_DBL(tmpf) - txBcnDuration);
+                EV << "[CSMA-CA]: t_bPeriods = " << t_bPeriods << "; txBcnDuration = "
+                   << (int)txBcnDuration << endl;
 
                 tmpf = now + wtime;
                 tmpf -= mpib.macBeaconTxTime;
@@ -2241,8 +2392,9 @@ bool Ieee802154Mac::csmacaCanProceed(simtime_t wtime, bool afterCCA)
                 double temp = SIMTIME_DBL(tmpf);
                 tmpf =(temp/bPeriod);
                 EV << "[CSMA-CA]: tmpf = " << tmpf << "; bPeriod  = " << bPeriod << endl;
-                t_bPeriods = (UINT_16)(SIMTIME_DBL(tmpf) - rxBcnDuration);
-                EV << "[CSMA-CA]: t_bPeriods = " << t_bPeriods << "; rxBcnDuration = " << (int)rxBcnDuration << endl;
+                t_bPeriods = (uint16_t)(SIMTIME_DBL(tmpf) - rxBcnDuration);
+                EV << "[CSMA-CA]: t_bPeriods = " << t_bPeriods
+                   << "; rxBcnDuration = " << (int)rxBcnDuration << endl;
 
                 tmpf = now + wtime;
                 tmpf -= schedBcnRxTime;
@@ -2485,6 +2637,7 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
     csmacaReset(beaconEnabled);
 
     if (csmacaWaitNextBeacon)
+    {
         if (tmpCsmaca && (!backoffTimer->isScheduled()))
         {
             EV << "[CSMA-CA]:  triggered again by the starting of the new CAP" << endl;
@@ -2506,6 +2659,7 @@ void Ieee802154Mac::csmacaTrxBeacon(char trx)
 
             return;             // debug here
         }
+    }
     csmacaWaitNextBeacon = false;   // really necessary??
 }
 
@@ -2721,6 +2875,7 @@ void Ieee802154Mac::handleBcnTxTimer()
     int i;*/
 
     if (mpib.macBeaconOrder != 15)      //beacon enabled
+    {
         if (!txNow_bcnTxTimer)          //enable the transmitter
         {
             beaconWaitingTx = true;
@@ -2797,6 +2952,7 @@ void Ieee802154Mac::handleBcnTxTimer()
                 gtsScheduler();
             }
         }
+    }
     startBcnTxTimer();  //don't disable this even beacon not enabled (beacon may be temporarily disabled like in channel scan, but it will be enabled again)
 }
 
@@ -2821,11 +2977,13 @@ void Ieee802154Mac::handleAckTimeoutTimer()
 void Ieee802154Mac::handleTxAckBoundTimer()
 {
     if (!beaconWaitingTx)
+    {
         if (txAck)      //<txAck> may have been cancelled by <macBeaconRxTimer>
         {
             txPkt = txAck;
             sendDown(check_and_cast<Ieee802154Frame *>(txAck->dup()));
         }
+    }
 }
 
 
@@ -2935,8 +3093,8 @@ void Ieee802154Mac::handleSDTimer()     // we must make sure that outgoing CAP a
 //-------------------------------------------------------------------------------/
 void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
 {
-    UINT_16 t_CAP;
-    UINT_8 ifs;
+    uint16_t t_CAP;
+    uint8_t ifs;
     simtime_t tmpf;
 
     if (type == 'b')    //beacon
@@ -2957,8 +3115,8 @@ void Ieee802154Mac::taskSuccess(char type, bool csmacaRes)
         // calculate <txBcnDuration>
         tmpf = calDuration(txBeacon) * phy_symbolrate;
         tmpf += ifs;
-        txBcnDuration = (UINT_8)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
-        if (fmod(tmpf,aUnitBackoffPeriod) > 0.0)
+        txBcnDuration = (uint8_t)(SIMTIME_DBL(tmpf) / aUnitBackoffPeriod);
+        if (fmod(tmpf, aUnitBackoffPeriod) > 0.0)
             txBcnDuration++;
         EV << "[MAC]: calculating txBcnDuration = " << (int)txBcnDuration << endl;
 
@@ -3306,7 +3464,7 @@ void Ieee802154Mac::FSM_MCPS_DATA_request(PHYenum pStatus, MACenum mStatus)
 void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_state, MACenum mStatus)
 {
     FrameCtrl frmCtrl;
-    UINT_8 ifs;
+    uint8_t ifs;
     bool isSIFS = false;
     //int i;
 
@@ -3334,10 +3492,8 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
     {
         if (txPkt == txBeacon)
         {
-            {
-                resetTRX();
-                taskSuccess('b');   // beacon transmitted successfully
-            }
+            resetTRX();
+            taskSuccess('b');   // beacon transmitted successfully
         }
         else if (txPkt == txAck)
         {
@@ -3408,7 +3564,9 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         {
             if ((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
                     && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0))
+            {
                 FSM_MCPS_DATA_request(pStatus); // mStatus ignored
+            }
             else    //default handling for <txData>
             {
                 if (taskP.taskStatus(TP_MCPS_DATA_REQUEST)) //seems late ACK received
@@ -3421,7 +3579,9 @@ void Ieee802154Mac::dispatch(PHYenum pStatus, const char *frFunc, PHYenum req_st
         {
             if ((taskP.taskStatus(TP_MCPS_DATA_REQUEST))
                     && (strcmp(taskP.taskFrFunc(TP_MCPS_DATA_REQUEST),frFunc) == 0))
+            {
                 FSM_MCPS_DATA_request(pStatus); // mStatus ignored
+            }
         }
     }
 
@@ -3528,7 +3688,7 @@ int Ieee802154Mac::calFrmByteLength(Ieee802154Frame* frame)
     return byteLength;
 }
 
-int Ieee802154Mac::calMHRByteLength(UINT_8 addrModeSum)
+int Ieee802154Mac::calMHRByteLength(uint8_t addrModeSum)
 {
     switch (addrModeSum)
     {
@@ -3600,7 +3760,7 @@ bool Ieee802154Mac::toParent(Ieee802154Frame* frame)
  */
 void Ieee802154Mac::gtsScheduler()
 {
-    UINT_8 t_SO;
+    uint8_t t_SO;
     simtime_t w_time, tmpf;
 
     ASSERT(isPANCoor);
@@ -3728,11 +3888,11 @@ void Ieee802154Mac::handleGtsTimer()
  *  The return value indicates the GTS start slot for corresponding device
  *  Note: devices are allowed to call this function only in CAP
  */
-UINT_8 Ieee802154Mac::gts_request_cmd(UINT_16 macShortAddr, UINT_8 length, bool isReceive)
+uint8_t Ieee802154Mac::gts_request_cmd(uint16_t macShortAddr, uint8_t length, bool isReceive)
 {
     Enter_Method_Silent();
-    UINT_8 startSlot;
-    UINT_32 t_cap;
+    uint8_t startSlot;
+    uint32_t t_cap;
     ASSERT(isPANCoor);
     EV << "[GTS]: the PAN coordinator is processing GTS request from MAC address " << macShortAddr << endl;
     // check whether this device is device list
@@ -3785,7 +3945,7 @@ void Ieee802154Mac::handleFinalCapTimer()
     PLME_SET_TRX_STATE_request(phy_TRX_OFF);
 }
 
-UINT_16 Ieee802154Mac::associate_request_cmd(IE3ADDR extAddr, const DevCapability& capaInfo)
+uint16_t Ieee802154Mac::associate_request_cmd(IE3ADDR extAddr, const DevCapability& capaInfo)
 {
     Enter_Method_Silent();
     // store MAC address and capability info

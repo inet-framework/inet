@@ -23,246 +23,115 @@
  * @ingroup macLayer
  */
 
-struct taskPending
-{
-    taskPending()
-    {
-        init();
-    }
-    inline void init()
-    {
-        mcps_data_request = false;
-        mcps_data_request_STEP = 0;
-        /*mlme_associate_request = false;
-        mlme_associate_request_STEP = 0;
-        mlme_associate_response = false;
-        mlme_associate_response_STEP = 0;
-        mlme_disassociate_request = false;
-        mlme_disassociate_request_STEP = 0;
-        mlme_orphan_response = false;
-        mlme_orphan_response_STEP = 0;
-        mlme_reset_request = false;
-        mlme_reset_request_STEP = 0;
-        mlme_rx_enable_request = false;
-        mlme_rx_enable_request_STEP = 0;
-        mlme_scan_request = false;
-        mlme_scan_request_STEP = 0;
-        mlme_start_request = false;
-        mlme_start_request_STEP = 0;
-        mlme_sync_request = false;
-        mlme_sync_request_STEP = 0;
-        mlme_sync_request_tracking = false;
-        mlme_poll_request = false;
-        mlme_poll_request_STEP = 0;*/
-        CCA_csmaca = false;
-        CCA_csmaca_STEP = 0;
-        RX_ON_csmaca = false;
-        RX_ON_csmaca_STEP = 0;
-    }
-
-    bool &taskStatus(Ieee802154MacTaskType task)
-    {
-        switch (task)
-        {
-        case TP_MCPS_DATA_REQUEST:
-            return mcps_data_request;
-            /*case TP_MLME_ASSOCIATE_REQUEST:
-                return mlme_associate_request;
-            case TP_MLME_ASSOCIATE_RESPONSE:
-                return mlme_associate_response;
-            case TP_MLME_DISASSOCIATE_REQUEST:
-                return mlme_disassociate_request;
-            case TP_MLME_ORPHAN_RESPONSE:
-                return mlme_orphan_response;
-            case TP_MLME_RESET_REQUEST:
-                return mlme_reset_request;
-            case TP_MLME_RX_ENABLE_REQUEST:
-                return mlme_rx_enable_request;
-            case TP_MLME_SCAN_REQUEST:
-                return mlme_scan_request;
-            case TP_MLME_START_REQUEST:
-                return mlme_start_request;
-            case TP_MLME_SYNC_REQUEST:
-                return mlme_sync_request;
-            case TP_MLME_POLL_REQUEST:
-                return mlme_poll_request;*/
-        case TP_CCA_CSMACA:
-            return CCA_csmaca;
-        case TP_RX_ON_CSMACA:
-            return RX_ON_csmaca;
-        default:
-            ASSERT(0);
-            // shutup the compiler.
-            return RX_ON_csmaca;
-        }
-    }
-
-    UINT_8 &taskStep(Ieee802154MacTaskType task)
-    {
-        switch (task)
-        {
-        case TP_MCPS_DATA_REQUEST:
-            return mcps_data_request_STEP;
-            /*case TP_MLME_ASSOCIATE_REQUEST:
-                return mlme_associate_request_STEP;
-            case TP_MLME_ASSOCIATE_RESPONSE:
-                return mlme_associate_response_STEP;
-            case TP_MLME_DISASSOCIATE_REQUEST:
-                return mlme_disassociate_request_STEP;
-            case TP_MLME_ORPHAN_RESPONSE:
-                return mlme_orphan_response_STEP;
-            case TP_MLME_RESET_REQUEST:
-                return mlme_reset_request_STEP;
-            case TP_MLME_RX_ENABLE_REQUEST:
-                return mlme_rx_enable_request_STEP;
-            case TP_MLME_SCAN_REQUEST:
-                return mlme_scan_request_STEP;
-            case TP_MLME_START_REQUEST:
-                return mlme_start_request_STEP;
-            case TP_MLME_SYNC_REQUEST:
-                return mlme_sync_request_STEP;
-            case TP_MLME_POLL_REQUEST:
-                return mlme_poll_request_STEP;*/
-        case TP_CCA_CSMACA:
-            return CCA_csmaca_STEP;
-        case TP_RX_ON_CSMACA:
-            return RX_ON_csmaca_STEP;
-        default:
-            ASSERT(0);
-            // shutup compiler.
-            return RX_ON_csmaca_STEP;
-        }
-    }
-
-    char *taskFrFunc(Ieee802154MacTaskType task)
-    {
-        switch (task)
-        {
-        case TP_MCPS_DATA_REQUEST:
-            return mcps_data_request_frFunc;
-            /*case TP_MLME_ASSOCIATE_REQUEST:
-                return mlme_associate_request_frFunc;
-            case TP_MLME_ASSOCIATE_RESPONSE:
-                return mlme_associate_response_frFunc;
-            case TP_MLME_DISASSOCIATE_REQUEST:
-                return mlme_disassociate_request_frFunc;
-            case TP_MLME_ORPHAN_RESPONSE:
-                return mlme_orphan_response_frFunc;
-            case TP_MLME_RESET_REQUEST:
-                return mlme_reset_request_frFunc;
-            case TP_MLME_RX_ENABLE_REQUEST:
-                return mlme_rx_enable_request_frFunc;
-            case TP_MLME_SCAN_REQUEST:
-                return mlme_scan_request_frFunc;
-            case TP_MLME_START_REQUEST:
-                return mlme_start_request_frFunc;
-            case TP_MLME_SYNC_REQUEST:
-                return mlme_sync_request_frFunc;
-            case TP_MLME_POLL_REQUEST:
-                return mlme_poll_request_frFunc;*/
-        default:
-            ASSERT(0);
-            // shutup compiler.
-            //return mlme_poll_request_frFunc;
-        }
-        return 0;
-    }
-
-    //----------------
-    bool    mcps_data_request;
-    UINT_8  mcps_data_request_STEP;
-    char    mcps_data_request_frFunc[81];
-    Ieee802154TxOption  mcps_data_request_TxOption;
-    Ieee802154Frame*    mcps_data_request_pendPkt;
-    /*----------------
-    bool    mlme_associate_request;
-    UINT_8  mlme_associate_request_STEP;
-    char    mlme_associate_request_frFunc[81];
-    bool    mlme_associate_request_SecurityEnable;
-    UINT_8  mlme_associate_request_CoordAddrMode;
-    Packet  *mlme_associate_request_pendPkt;
-    //----------------
-    bool    mlme_associate_response;
-    UINT_8  mlme_associate_response_STEP;
-    char    mlme_associate_response_frFunc[81];
-    IE3ADDR mlme_associate_response_DeviceAddress;
-    Packet  *mlme_associate_response_pendPkt;
-    //----------------
-    bool    mlme_disassociate_request;
-    UINT_8  mlme_disassociate_request_STEP;
-    char    mlme_disassociate_request_frFunc[81];
-    bool    mlme_disassociate_request_toCoor;
-    Packet  *mlme_disassociate_request_pendPkt;
-    //----------------
-    bool    mlme_orphan_response;
-    UINT_8  mlme_orphan_response_STEP;
-    char    mlme_orphan_response_frFunc[81];
-    IE3ADDR mlme_orphan_response_OrphanAddress;
-    //----------------
-    bool    mlme_reset_request;
-    UINT_8  mlme_reset_request_STEP;
-    char    mlme_reset_request_frFunc[81];
-    bool    mlme_reset_request_SetDefaultPIB;
-    //----------------
-    bool    mlme_rx_enable_request;
-    UINT_8  mlme_rx_enable_request_STEP;
-    char    mlme_rx_enable_request_frFunc[81];
-    UINT_32 mlme_rx_enable_request_RxOnTime;
-    UINT_32 mlme_rx_enable_request_RxOnDuration;
-    double  mlme_rx_enable_request_currentTime;
-    //----------------
-    bool    mlme_scan_request;
-    UINT_8  mlme_scan_request_STEP;
-    char    mlme_scan_request_frFunc[81];
-    UINT_8  mlme_scan_request_ScanType;
-    UINT_8  mlme_scan_request_orig_macBeaconOrder;
-    UINT_8  mlme_scan_request_orig_macBeaconOrder2;
-    UINT_8  mlme_scan_request_orig_macBeaconOrder3;
-    UINT_16 mlme_scan_request_orig_macPANId;
-    UINT_32 mlme_scan_request_ScanChannels;
-    UINT_8  mlme_scan_request_ScanDuration;
-    UINT_8  mlme_scan_request_CurrentChannel;
-    UINT_8  mlme_scan_request_ListNum;
-    UINT_8  mlme_scan_request_EnergyDetectList[27];
-    PAN_ELE mlme_scan_request_PANDescriptorList[27];
-    //----------------
-    bool    mlme_start_request;
-    UINT_8  mlme_start_request_STEP;
-    char    mlme_start_request_frFunc[81];
-    UINT_8  mlme_start_request_BeaconOrder;
-    UINT_8  mlme_start_request_SuperframeOrder;
-    bool    mlme_start_request_BatteryLifeExtension;
-    bool    mlme_start_request_SecurityEnable;
-    bool    mlme_start_request_PANCoordinator;
-    UINT_16 mlme_start_request_PANId;
-    UINT_8  mlme_start_request_LogicalChannel;
-    //----------------
-    bool    mlme_sync_request;
-    UINT_8  mlme_sync_request_STEP;
-    char    mlme_sync_request_frFunc[81];
-    UINT_8  mlme_sync_request_numSearchRetry;
-    bool    mlme_sync_request_tracking;
-    //----------------
-    bool    mlme_poll_request;
-    UINT_8  mlme_poll_request_STEP;
-    char    mlme_poll_request_frFunc[81];
-    UINT_8  mlme_poll_request_CoordAddrMode;
-    UINT_16 mlme_poll_request_CoordPANId;
-    IE3ADDR mlme_poll_request_CoordAddress;
-    bool    mlme_poll_request_SecurityEnable;
-    bool    mlme_poll_request_autoRequest;
-    bool    mlme_poll_request_pending;
-    //----------------*/
-    bool    CCA_csmaca;
-    UINT_8  CCA_csmaca_STEP;
-    //----------------
-    bool    RX_ON_csmaca;
-    UINT_8  RX_ON_csmaca_STEP;
-    //----------------
-};
-
 class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
 {
+  protected:
+    class TaskPending
+    {
+      public:
+        TaskPending()
+        {
+            init();
+        }
+
+        void init();
+        bool& taskStatus(Ieee802154MacTaskType task);
+        uint8_t& taskStep(Ieee802154MacTaskType task);
+        char* taskFrFunc(Ieee802154MacTaskType task);
+
+        //----------------
+        bool    mcps_data_request;
+        uint8_t mcps_data_request_STEP;
+        char    mcps_data_request_frFunc[81];
+        Ieee802154TxOption  mcps_data_request_TxOption;
+        Ieee802154Frame*    mcps_data_request_pendPkt;
+        /*----------------
+        bool    mlme_associate_request;
+        uint8_t  mlme_associate_request_STEP;
+        char    mlme_associate_request_frFunc[81];
+        bool    mlme_associate_request_SecurityEnable;
+        uint8_t  mlme_associate_request_CoordAddrMode;
+        Packet  *mlme_associate_request_pendPkt;
+        //----------------
+        bool    mlme_associate_response;
+        uint8_t  mlme_associate_response_STEP;
+        char    mlme_associate_response_frFunc[81];
+        IE3ADDR mlme_associate_response_DeviceAddress;
+        Packet  *mlme_associate_response_pendPkt;
+        //----------------
+        bool    mlme_disassociate_request;
+        uint8_t  mlme_disassociate_request_STEP;
+        char    mlme_disassociate_request_frFunc[81];
+        bool    mlme_disassociate_request_toCoor;
+        Packet  *mlme_disassociate_request_pendPkt;
+        //----------------
+        bool    mlme_orphan_response;
+        uint8_t  mlme_orphan_response_STEP;
+        char    mlme_orphan_response_frFunc[81];
+        IE3ADDR mlme_orphan_response_OrphanAddress;
+        //----------------
+        bool    mlme_reset_request;
+        uint8_t  mlme_reset_request_STEP;
+        char    mlme_reset_request_frFunc[81];
+        bool    mlme_reset_request_SetDefaultPIB;
+        //----------------
+        bool    mlme_rx_enable_request;
+        uint8_t  mlme_rx_enable_request_STEP;
+        char    mlme_rx_enable_request_frFunc[81];
+        uint32_t mlme_rx_enable_request_RxOnTime;
+        uint32_t mlme_rx_enable_request_RxOnDuration;
+        double  mlme_rx_enable_request_currentTime;
+        //----------------
+        bool    mlme_scan_request;
+        uint8_t  mlme_scan_request_STEP;
+        char    mlme_scan_request_frFunc[81];
+        uint8_t  mlme_scan_request_ScanType;
+        uint8_t  mlme_scan_request_orig_macBeaconOrder;
+        uint8_t  mlme_scan_request_orig_macBeaconOrder2;
+        uint8_t  mlme_scan_request_orig_macBeaconOrder3;
+        uint16_t mlme_scan_request_orig_macPANId;
+        uint32_t mlme_scan_request_ScanChannels;
+        uint8_t  mlme_scan_request_ScanDuration;
+        uint8_t  mlme_scan_request_CurrentChannel;
+        uint8_t  mlme_scan_request_ListNum;
+        uint8_t  mlme_scan_request_EnergyDetectList[27];
+        PAN_ELE mlme_scan_request_PANDescriptorList[27];
+        //----------------
+        bool    mlme_start_request;
+        uint8_t  mlme_start_request_STEP;
+        char    mlme_start_request_frFunc[81];
+        uint8_t  mlme_start_request_BeaconOrder;
+        uint8_t  mlme_start_request_SuperframeOrder;
+        bool    mlme_start_request_BatteryLifeExtension;
+        bool    mlme_start_request_SecurityEnable;
+        bool    mlme_start_request_PANCoordinator;
+        uint16_t mlme_start_request_PANId;
+        uint8_t  mlme_start_request_LogicalChannel;
+        //----------------
+        bool    mlme_sync_request;
+        uint8_t  mlme_sync_request_STEP;
+        char    mlme_sync_request_frFunc[81];
+        uint8_t  mlme_sync_request_numSearchRetry;
+        bool    mlme_sync_request_tracking;
+        //----------------
+        bool    mlme_poll_request;
+        uint8_t  mlme_poll_request_STEP;
+        char    mlme_poll_request_frFunc[81];
+        uint8_t  mlme_poll_request_CoordAddrMode;
+        uint16_t mlme_poll_request_CoordPANId;
+        IE3ADDR mlme_poll_request_CoordAddress;
+        bool    mlme_poll_request_SecurityEnable;
+        bool    mlme_poll_request_autoRequest;
+        bool    mlme_poll_request_pending;
+        //----------------*/
+        bool    CCA_csmaca;
+        uint8_t CCA_csmaca_STEP;
+        //----------------
+        bool    RX_ON_csmaca;
+        uint8_t RX_ON_csmaca_STEP;
+        //----------------
+    };
+
   public:
     /**
     * @name Constructor and destructor
@@ -325,13 +194,16 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     //@{
     /** This function is a part of simplified association process in the model.
      *  After receiving a beacon from the coordinator for the first time and associating with it,
-     *  each device should call this function of its coordinator to register its MAC address and capability info at the coordinator and get the short MAC address from the return value */
-    virtual UINT_16    associate_request_cmd    (IE3ADDR extAddr, const DevCapability& capaInfo);
+     *  each device should call this function of its coordinator to register its MAC address and
+     *  capability info at the coordinator and get the short MAC address from the return value
+     */
+    virtual uint16_t associate_request_cmd(IE3ADDR extAddr, const DevCapability& capaInfo);
 
     /** This function is a part of simplified GTS request process in the model.
      *  After association, each device should call this function of its PAN Coordinator
-     *  to apply for GTS and get its GTS starting number from the return value */
-    virtual UINT_8    gts_request_cmd    (UINT_16 macShortAddr, UINT_8 length, bool isReceive);
+     *  to apply for GTS and get its GTS starting number from the return value
+     */
+    virtual uint8_t gts_request_cmd(uint16_t macShortAddr, uint8_t length, bool isReceive);
 
     /**
     * @name MAC-PHY primitives related functions
@@ -350,11 +222,11 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     * @name SSCS-MAC primitives related functions
     */
     //@{
-    virtual void    MCPS_DATA_request    (UINT_8 SrcAddrMode, UINT_16 SrcPANId, IE3ADDR SrcAddr,
-                                          UINT_8 DstAddrMode, UINT_16 DstPANId, IE3ADDR DstAddr,
-                                          cPacket* msdu,     Ieee802154TxOption TxOption);
-    virtual void    MCPS_DATA_confirm    (MACenum status);
-    virtual void    MCPS_DATA_indication    (Ieee802154Frame*);
+    virtual void MCPS_DATA_request(uint8_t SrcAddrMode, uint16_t SrcPANId, IE3ADDR SrcAddr,
+            uint8_t DstAddrMode, uint16_t DstPANId, IE3ADDR DstAddr, cPacket* msdu,
+            Ieee802154TxOption TxOption);
+    virtual void MCPS_DATA_confirm(MACenum status);
+    virtual void MCPS_DATA_indication(Ieee802154Frame*);
     //@}
 
     /**
@@ -443,7 +315,7 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     virtual int    calFrmByteLength    (Ieee802154Frame*);
 
     /** @brief calculate byte length of frame header  */
-    virtual int    calMHRByteLength    (UINT_8);
+    virtual int calMHRByteLength(uint8_t);
 
     /** @brief calculate duration of the frame transmitted over wireless channel  */
     virtual simtime_t    calDuration    (Ieee802154Frame*);
@@ -528,7 +400,7 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     IPassiveQueue* queueModule;
 
     // for task processing
-    taskPending taskP;
+    TaskPending taskP;
 
     /** @brief current requested radio state sent to PHY via PLME_SET_TRX_STATE_request */
     PHYenum trx_state_req;
@@ -567,22 +439,22 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     */
     //@{
     /** @brief beacon order of incoming superframe */
-    UINT_8 rxBO;
+    uint8_t rxBO;
 
     /** @brief superframe order of incoming superframe */
-    UINT_8 rxSO;
+    uint8_t rxSO;
 
     /** @brief duration (in symbol) of a outgoing superframe slot (aBaseSlotDuration * 2^mpib.macSuperframeOrder) */
-    UINT_32 txSfSlotDuration;
+    uint32_t txSfSlotDuration;
 
     /** @brief duration (in symbol) of a incoming superframe slot (aBaseSlotDuration * 2^rxSO) */
-    UINT_32 rxSfSlotDuration;
+    uint32_t rxSfSlotDuration;
 
     /** @brief duration (in backoff periods) of latest outgoing beacon */
-    UINT_8 txBcnDuration;
+    uint8_t txBcnDuration;
 
     /** @brief duration (in backoff periods) of latest incoming beacon */
-    UINT_8 rxBcnDuration;
+    uint8_t rxBcnDuration;
 
     /** @brief length (in s) of a unit of backoff period, aUnitBackoffPeriod/phy_symbolrate */
     simtime_t bPeriod;
@@ -618,17 +490,17 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     bool notAssociated;
 
     /** @brief num of incoming beacons lost in a row */
-    UINT_8 bcnLossCounter;
+    uint8_t bcnLossCounter;
     //@}
 
     /**
     * @name CSMA/CA related variables
     */
     //@{
-    UINT_8 NB;
-    UINT_8 CW;
-    UINT_8 BE;
-    UINT_8 backoffStatus;   // 0: no backoff; 1: backoff successful; 2: backoff failed; 99: is backing off
+    uint8_t NB;
+    uint8_t CW;
+    uint8_t BE;
+    uint8_t backoffStatus;   // 0: no backoff; 1: backoff successful; 2: backoff failed; 99: is backing off
     int bPeriodsLeft;   // backoff periods left
     bool csmacaAckReq;
     bool csmacaWaitNextBeacon;
@@ -639,17 +511,17 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     */
     //@{
     /** @brief number of GTS descriptors being maintained */
-    UINT_8 gtsCount;
+    uint8_t gtsCount;
 
     /** @brief list of GTS descriptors for all existing GTS being maintained */
     GTSDescriptor gtsList[7];
 
     /** @brief store new value of final superframe slot in the CAP after updating GTS settings
      and put into effect when next beacon is transmitted  */
-    UINT_8 tmp_finalCap;
+    uint8_t tmp_finalCap;
 
     /** @brief index of current running GTS, 99 means not in GTS */
-    UINT_8 indexCurrGts;
+    uint8_t indexCurrGts;
     //@}
 
 
@@ -658,10 +530,11 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     */
     //@{
     /** @brief number of superframe slots for the GTS, calculated in handleBeacon()  */
-    UINT_8 gtsLength;
+    uint8_t gtsLength;
 
-    /** @brief GTS starting slot, 0 means no GTS for me, allocated by the PAN coordinator when applying for GTS */
-    UINT_8 gtsStartSlot;
+    /** @brief GTS starting slot, 0 means no GTS for me, allocated by the PAN coordinator when
+     * applying for GTS */
+    uint8_t gtsStartSlot;
 
     /** @brief duration of one complete data transaction in GTS, calculated in handleBeacon() */
     simtime_t gtsTransDuration;
@@ -780,7 +653,7 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
      * that GTS timer is currently scheduling for its starting;
      * for devices: 99 indicating currently being in my GTS
     */
-    UINT_8 index_gtsTimer;
+    uint8_t index_gtsTimer;
     //@}
 
     /**
@@ -803,32 +676,32 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     bool waitGTSAck;
 
     /** @brief number of retries for txing a beacon or cmd frame in txBcnCmd */
-    UINT_8 numBcnCmdRetry;
+    uint8_t numBcnCmdRetry;
 
     /** @brief number of retries for txing a beacon or cmd frame in txBcnCmdUpper */
-    UINT_8 numBcnCmdUpperRetry;
+    uint8_t numBcnCmdUpperRetry;
 
     /** @brief number of retries for txing a data frame in txData */
-    UINT_8 numDataRetry;
+    uint8_t numDataRetry;
 
     /** @brief number of retries for txing a data frame in txGTS */
-    UINT_8 numGTSRetry;
+    uint8_t numGTSRetry;
     //@}
 
     /**
     * @name Link objects for beacon and data pkts duplication detection
     */
     //@{
-    HLISTLINK* hlistBLink1;
-    HLISTLINK* hlistBLink2;
-    HLISTLINK* hlistDLink1;
-    HLISTLINK* hlistDLink2;
+    HListLink* hlistBLink1;
+    HListLink* hlistBLink2;
+    HListLink* hlistDLink1;
+    HListLink* hlistDLink2;
     //@}
 
     /**
     * @name Container used by coordinator to store info of associated devices
     */
-    typedef std::map<UINT_16, DevCapability> DeviceList;
+    typedef std::map<uint16_t, DevCapability> DeviceList;
     DeviceList deviceList;
 
     /**
@@ -882,3 +755,4 @@ class INET_API Ieee802154Mac: public cSimpleModule, public INotifiable
     double numTxAckInactive;
 };
 #endif
+

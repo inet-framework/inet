@@ -1,4 +1,5 @@
-package inet.underTest.wpan.networklayer.Ieee802154StarRouting;
+package inet.networklayer.ieee802154;
+
 simple Ieee802154StarRouting
 {
     parameters:

@@ -21,7 +21,7 @@
 //***************************************************************************
 //* part of:    Modifications to the MF-2 framework by CSEM
 //**************************************************************************/
-package inet.underTest.wpan.linklayer.ieee802154.mac;
+package inet.linklayer.ieee802154.mac;
 
 //
 // IEEE 802.15.4-2006 non-beacon enabled CSMA protocol

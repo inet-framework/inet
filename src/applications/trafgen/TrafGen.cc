@@ -122,9 +122,7 @@ void TrafGen::initialize(int aStage)
         {
             cMsgPar temp;
             if (!temp.parse(rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest")))
-            {
                 error("wrong value in xml file, attribute onIdenticalTrafDest");
-            }
             mOnIdenticalDest = temp.boolValue();
         }
         else

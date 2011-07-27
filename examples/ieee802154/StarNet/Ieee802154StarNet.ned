@@ -16,17 +16,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.wpan.StarNet;
+package inet.examples.ieee802154.StarNet;
 
-import inet.underTest.wpan.nodes.Ieee802154Node;
-import inet.world.ChannelControl;
+import inet.world.radio.ChannelControl;
+import inet.nodes.ieee802154.Ieee802154Node;
+
 
 network Ieee802154StarNet
 {
     parameters:
         double numHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         host[numHosts]: Ieee802154Node {
             parameters:
@@ -34,8 +33,6 @@ network Ieee802154StarNet
         }
         channelcontrol: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=-65,20;i=misc/sun");
         }
     connections allowunconnected:

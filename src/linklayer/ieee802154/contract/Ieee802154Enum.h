@@ -59,11 +59,11 @@ enum Ieee802154PhyTimerType
 // packet error type
 enum Ieee802154PktErrorType   // for msgKind set by PHY layer
 {
-    PACKETOK=0,
-    COLLISION = 1,
-    BITERROR,
-    BITERROR_FORCE_TRX_OFF,
-    RX_DURING_CCA                   // pkts received during CCA need to be discarded
+    PKT_PACKETOK=0,
+    PKT_COLLISION = 1,
+    PKT_BITERROR,
+    PKT_BITERROR_FORCE_TRX_OFF,
+    PKT_RX_DURING_CCA                   // pkts received during CCA need to be discarded
 };
 
 typedef enum {

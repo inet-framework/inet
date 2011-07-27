@@ -1,11 +1,12 @@
 //
 // This NIC implements an IEEE 802.15.4 network interface card with an interface queue.
 //
-package inet.underTest.wpan.linklayer.ieee802154;
+package inet.linklayer.ieee802154;
 
-import inet.networklayer.queue.OutputQueue;
-import inet.underTest.wpan.linklayer.ieee802154.mac.Ieee802154Mac;
-import inet.underTest.wpan.linklayer.ieee802154.phyLayer.Ieee802154Phy;
+import inet.networklayer.queue.IOutputQueue;
+import inet.linklayer.ieee802154.phyLayer.Ieee802154Phy;
+import inet.linklayer.ieee802154.mac.Ieee802154Mac;
+
 
 module Ieee802154Nic
 {
@@ -17,7 +18,7 @@ module Ieee802154Nic
         output uppergateOut; // from upper layers
         input radioIn; // to receive AirFrames
     submodules:
-        ifq: <ifqType> like OutputQueue {
+        ifq: <ifqType> like IOutputQueue {
             parameters:
                 @display("p=70,80;i=block/passiveq;q=IFQueue");
         }

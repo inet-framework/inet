@@ -154,9 +154,8 @@ void csma802154::initialize(int stage)
             }
             else
             {
-                error("Unknown backoff method \"%s\".\
-					   Use \"constant\", \"linear\" or \"\
-					   \"exponential\".", backoffMethodStr.c_str());
+                error("Unknown backoff method '%s'. Use 'constant', 'linear' or 'exponential'.",
+                        backoffMethodStr.c_str());
             }
             initialCW = par("contentionWindow");
         }
@@ -639,6 +638,7 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     case EV_BROADCAST_RECEIVED:
     case EV_FRAME_RECEIVED:
         sendUp(decapsMsg(static_cast<Ieee802154Frame*>(msg)));
+        //FIXME break?
     case EV_DUPLICATE_RECEIVED:
         EV << "Error ! Received a frame during SIFS !" << endl;
         delete msg;
@@ -949,11 +949,11 @@ void csma802154::handleLowerMsg(cMessage *msg)
 
     if (macPkt->getKind()!=PACKETOK)
     {
-        EV<< "Received with errors frame name= " << macPkt->getName()
-        << ", myState=" << macState << " src=" << macPkt->getSrcAddr()
-        << " dst=" << macPkt->getDstAddr() << " myAddr="
-        << getMacAddr() << endl;
-        if (macPkt->getKind() == COLLISION)
+        EV << "Received with errors frame name= " << macPkt->getName()
+           << ", myState=" << macState << " src=" << macPkt->getSrcAddr()
+           << " dst=" << macPkt->getDstAddr() << " myAddr=" << getMacAddr() << endl;
+
+        if (macPkt->getKind() == PKT_COLLISION)
         {
             EV << "[MAC]: frame corrupted due to collision, dropped" << endl;
             numCollision++;
@@ -1137,9 +1137,9 @@ void csma802154::receiveChangeNotification(int category, const cPolymorphic *det
 
     switch (category)
     {
-
-        if (check_and_cast<RadioState *>(details)->getRadioId()!=getRadioModuleId())
-            return;
+// TODO when can do next check?
+//        if (check_and_cast<RadioState *>(details)->getRadioId() != getRadioModuleId())
+//            return;
 
     case NF_RADIO_CHANNEL_CHANGED:
         ppib.phyCurrentChannel = check_and_cast<RadioState *>(details)->getChannelNumber();

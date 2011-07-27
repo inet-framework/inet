@@ -6,11 +6,12 @@
 
 #define DEBUG
 
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef __INET_DISPLAY_H
+#define __INET_DISPLAY_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 
 class Display : public cSimpleModule
 {
@@ -26,8 +27,7 @@ class Display : public cSimpleModule
     // OPERATIONS
     /** @brief Function to get a pointer to the host module*/
     cModule *findHost(void) const;
-
 };
 
-#endif
+#endif  // __INET_DISPLAY_H
 

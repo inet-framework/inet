@@ -1,25 +1,20 @@
-package inet.underTest.wpan.nodes;
+package inet.nodes.ieee802154;
 
-import inet.underTest.wpan.linklayer.ieee802154.Ieee802154Nic;
-import inet.underTest.wpan.networklayer.Ieee802154StarRouting.Ieee802154StarRouting;
-
-//import inet.underTest.wpan.battery.Ieee802154Battery;
-import inet.battery.InetSimpleBattery;
-import inet.underTest.wpan.applications.Ieee802154TestApp.Ieee802154TestApp;
-import inet.mobility.BasicMobility;
+import inet.world.ieee802154.base.Display;
+import inet.networklayer.ieee802154.Ieee802154StarRouting;
+import inet.mobility.IMobility;
+import inet.linklayer.ieee802154.Ieee802154Nic;
+import inet.battery.models.InetSimpleBattery;
 import inet.base.NotificationBoard;
-import inet.underTest.wpan.Isabel.Base.Display;
+import inet.applications.ieee802154app.Ieee802154TestApp;
 
-//
-// This module implements simple ZigBee nodes with IEEE 802.15.4 MAC and PHY layer, plus a simple test app layer
-//
 
 module Ieee802154Node
 {
     parameters:
         @node();
         string mobilityType;
-        volatile double numHosts;
+        int numHosts;
     gates:
         input radioIn;
     submodules:
@@ -28,7 +23,7 @@ module Ieee802154Node
                 @display("p=65,70;i=block/control");
 
         }
-        mobility: <mobilityType> like BasicMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=65,150;i=block/cogwheel");
 

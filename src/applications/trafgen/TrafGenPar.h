@@ -65,12 +65,16 @@ Nodes sending no traffic can be achieved by two methods:
 #define TRAFFIC_GENERATOR_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include <string>
 
-class TrafGenPar : public cSimpleModule
+
+class INET_API TrafGenPar : public cSimpleModule
 {
   public:
+    TrafGenPar();
+    virtual ~TrafGenPar();
     // LIFECYCLE
     // this takes care of constructors and destructors
     //Module_Class_Members(TrafGen, cSimpleModule, 0);

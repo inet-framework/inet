@@ -7,6 +7,9 @@
 
 #include "Ieee802154StarRouting.h"
 
+#include "Ieee802154AppPkt_m.h"
+#include "Ieee802154NetworkCtrlInfo_m.h"
+
 //#undef EV
 //#define EV (ev.isDisabled()||!m_debug) ? std::cout : ev ==> EV is now part of <omnetpp.h>
 

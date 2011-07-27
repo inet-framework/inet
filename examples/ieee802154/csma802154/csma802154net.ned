@@ -16,36 +16,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.wpan.csma802154;
+package inet.examples.ieee802154.csma802154;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.adhoc.MobileHost;
-import inet.experimental.nodes.adhoc.MobileManetRoutingMesh;
-import inet.experimental.nodes.adhoc.BasicMobileManetMesh;
-import inet.world.ChannelControl;
-import inet.examples.wpan.csma802154.nodecsma802154;
+import inet.world.radio.ChannelControl;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
-network csma802454net
+network csma802154net
 {
     parameters:
         int numHosts;
         int numFixHosts;
         int numBasic;
-        double nodeSeparation =default (40);
-        double playgroundSizeX;
-        double playgroundSizeY;
+        double nodeSeparation @unit("m") = default(40m);
     submodules:
         fixhost[numFixHosts]: nodecsma802154 {
             parameters:
-              y =  (floor(index/sqrt(numFixHosts))*nodeSeparation)+(nodeSeparation);
-              x = ((index%floor(sqrt(numFixHosts)))*nodeSeparation)+(nodeSeparation);
-              @display("i=device/pocketpc_s;r=,,#707070");
+                y = (floor(index/sqrt(numFixHosts))*nodeSeparation)+(nodeSeparation);
+                x = ((index%floor(sqrt(numFixHosts)))*nodeSeparation)+(nodeSeparation);
+                @display("i=device/pocketpc_s;r=,,#707070");
         }
         channelcontrol: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=60,50;i=misc/sun");
         }
         configurator: FlatNetworkConfigurator {

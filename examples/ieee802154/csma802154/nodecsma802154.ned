@@ -16,22 +16,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.wpan.csma802154;
+package inet.examples.ieee802154.csma802154;
 
-import inet.applications.pingapp.PingApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.udpapp.UDPApp;
-import inet.base.NotificationBoard;
-import inet.mobility.NullMobility;
-import inet.underTest.wpan.linklayer.ieee802154.Ieee802154csmaNic;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayerGlobalArp;
-import inet.transport.tcp.TCP;
+import inet.world.ieee802154.base.Display;
 import inet.transport.udp.UDP;
-import inet.networklayer.manetrouting.ManetRouting;
-import inet.battery.InetSimpleBattery;
-import inet.underTest.wpan.Isabel.Base.Display;
+import inet.transport.tcp.TCP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.IManetRouting;
+import inet.mobility.models.NullMobility;
+import inet.linklayer.ieee802154.Ieee802154csmaNic;
+import inet.battery.models.InetSimpleBattery;
+import inet.base.NotificationBoard;
+import inet.applications.pingapp.PingApp;
+import inet.applications.IUDPApp;
+import inet.applications.ITCPApp;
 
 
 //
@@ -46,11 +46,12 @@ module nodecsma802154
         @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
-        int x;
-        int y;
+        int x @unit("m");
+        int y @unit("m");
         string tcpAppType = default("");
         string udpAppType = default("");
         string routingFile = default("");
+        string manetRoutingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman");  // used mobile routing protocol. see: inet.networklayer.manetrouting
         @display("i=device/pocketpc_s");
 
     gates:
@@ -73,7 +74,7 @@ module nodecsma802154
                 routingFile = routingFile;
                 @display("p=60,230;i=block/table");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
+        tcpApp[numTcpApps]: <tcpAppType> like ITCPApp {
             parameters:
                 @display("p=163,67;i=block/app");
         }
@@ -81,7 +82,7 @@ module nodecsma802154
             parameters:
                 @display("p=163,154;i=block/wheelbarrow");
         }
-        udpApp[numUdpApps]: <udpAppType> like UDPApp {
+        udpApp[numUdpApps]: <udpAppType> like IUDPApp {
             parameters:
                 @display("i=block/app;p=272,67");
         }
@@ -93,16 +94,16 @@ module nodecsma802154
             parameters:
                 @display("i=block/app;p=343,200");
         }
-        networkLayer: NetworkLayerGlobalArp {
+        networkLayer: NetworkLayer { //NetworkLayerGlobalArp
             parameters:
                 proxyARP = false;
-                globalARP = true;
+                arp.globalARP = true;
                 @display("p=248,247;i=block/fork;q=queue");
             gates:
                 ifIn[1];
                 ifOut[1];
         }
-        manetrouting: ManetRouting {
+        manetrouting: <manetRoutingProtocol> like IManetRouting {
             parameters:
                 @display("p=153,247;i=block/network2");
         }
@@ -115,8 +116,8 @@ module nodecsma802154
         //            display: "p=248,349;q=queue;i=block/ifcard";
         mobility: NullMobility {
             parameters:
-                x = x;
-                y = y;
+                initialX = x;
+                initialY = y;
                 @display("p=149,307;i=block/cogwheel");
         }
         disp: Display {
@@ -149,8 +150,8 @@ module nodecsma802154
 
         networkLayer.pingOut --> pingApp.pingIn;
         networkLayer.pingIn <-- pingApp.pingOut;
-        networkLayer.MANETOut --> manetrouting.from_ip;
-        networkLayer.MANETIn <-- manetrouting.to_ip;
+        networkLayer.manetOut --> manetrouting.from_ip;
+        networkLayer.manetIn <-- manetrouting.to_ip;
 
         // connections to network outside
         radioIn --> wlan.radioIn;
