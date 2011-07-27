@@ -31,6 +31,7 @@ network Net80211
         int numHosts;
         double playgroundSizeX;
         double playgroundSizeY;
+        @display("bgb=818,436");
     submodules:
         host[numHosts]: AdhocHost {
             parameters:
@@ -41,13 +42,13 @@ network Net80211
                 @display("p=60,50");
         }
         obstacles: ObstacleControl {
-            @display("p=240,50");
+            @display("p=60,230");
         }
         annotations: AnnotationManager {
-            @display("p=260,50");
+            @display("p=60,320");
         }
         configurator: FlatNetworkConfigurator {
-            @display("p=140,50");
+            @display("p=60,140");
         }
 }
 
