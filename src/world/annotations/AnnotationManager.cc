@@ -19,7 +19,7 @@
 
 #include <sstream>
 
-#include "world/annotations/AnnotationManager.h"
+#include "AnnotationManager.h"
 
 
 Define_Module(AnnotationManager);
@@ -85,13 +85,9 @@ void AnnotationManager::handleParameterChange(const char *parname)
     if (parname && (std::string(parname) == "draw"))
     {
         if (ev.isGUI() && par("draw"))
-        {
             showAll();
-        }
         else
-        {
             hideAll();
-        }
     }
 }
 
@@ -147,7 +143,6 @@ void AnnotationManager::addFromXml(cXMLElement* xml)
             error("while reading annotations xml: expected 'line' or 'poly', but got '%s'", tag.c_str());
         }
     }
-
 }
 
 AnnotationManager::Group* AnnotationManager::createGroup(std::string title)
@@ -246,16 +241,14 @@ cModule* AnnotationManager::createDummyModuleLine(Coord p1, Coord p2, std::strin
     return createDummyModule(displayString);
 }
 
-
 void AnnotationManager::show(const Annotation* annotation)
 {
-
-    if (annotation->dummyObjects.size() > 0) return;
+    if (annotation->dummyObjects.size() > 0)
+        return;
 
     if (const Line* l = dynamic_cast<const Line*>(annotation))
     {
         cModule* mod = createDummyModuleLine(l->p1, l->p2, l->color);
-
         annotation->dummyObjects.push_back(mod);
     }
     else if (const Polygon* p = dynamic_cast<const Polygon*>(annotation))
@@ -272,13 +265,11 @@ void AnnotationManager::show(const Annotation* annotation)
             cModule* mod = createDummyModuleLine(c1, c2, p->color);
             annotation->dummyObjects.push_back(mod);
         }
-
     }
     else
     {
         error("unknown Annotation type");
     }
-
 }
 
 void AnnotationManager::hide(const Annotation* annotation)
@@ -295,7 +286,8 @@ void AnnotationManager::showAll(Group* group)
 {
     for (Annotations::const_iterator i = annotations.begin(); i != annotations.end(); ++i)
     {
-        if ((!group) || ((*i)->group == group)) show(*i);
+        if ((!group) || ((*i)->group == group))
+            show(*i);
     }
 }
 
@@ -303,6 +295,7 @@ void AnnotationManager::hideAll(Group* group)
 {
     for (Annotations::const_iterator i = annotations.begin(); i != annotations.end(); ++i)
     {
-        if ((!group) || ((*i)->group == group)) hide(*i);
+        if ((!group) || ((*i)->group == group))
+            hide(*i);
     }
 }

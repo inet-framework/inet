@@ -128,7 +128,6 @@ class INET_API AnnotationManager : public cSimpleModule
     typedef std::list<Group*> Groups;
 
     cXMLElement* annotationsXml; /**< annotations to add at startup */
-
     Annotations annotations;
     Groups groups;
 };
@@ -136,9 +135,7 @@ class INET_API AnnotationManager : public cSimpleModule
 class AnnotationManagerAccess
 {
   public:
-    AnnotationManagerAccess()
-    {
-    }
+    AnnotationManagerAccess() {}
 
     AnnotationManager* getIfExists()
     {
