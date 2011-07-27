@@ -29,9 +29,7 @@ network Net80211
 {
     parameters:
         int numHosts;
-        double playgroundSizeX;
-        double playgroundSizeY;
-        @display("bgb=818,436");
+        @display("bgb=800,600");
     submodules:
         host[numHosts]: AdhocHost {
             parameters:
