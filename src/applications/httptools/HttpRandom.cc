@@ -31,7 +31,7 @@
 
 #include "HttpRandom.h"
 
-string rdObject::typeStr()
+std::string rdObject::typeStr()
 {
     switch (m_type)
     {
@@ -158,7 +158,7 @@ rdHistogram::rdHistogram( cXMLAttributeMap attributes )
     m_type = dt_histogram;
     if ( !_hasKey(attributes, "bins") )
         throw "No bins specified for a histogram distribution";
-    string binstr = attributes["bins"];
+    std::string binstr = attributes["bins"];
     if ( _hasKey(attributes, "zeroBased") )
         m_zeroBased = strcmp(attributes["zeroBased"].c_str(), "true")==0;
     __parseBinString(binstr);
@@ -190,15 +190,15 @@ double rdHistogram::get()
     return -1.0; // Default return in case something weird happens
 }
 
-void rdHistogram::__parseBinString( string binstr )
+void rdHistogram::__parseBinString( std::string binstr )
 {
     // The bins string is of the form [(count1,sum1);(count2,sum2);...;(countn,sumn)]
     binstr = trimLeft(binstr, "[");
     binstr = trimRight(binstr, "]");
     cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
-    std::vector<string> res = tokenizer.asVector();
-    std::vector<string>::iterator i;
-    string curtuple, countstr, sumstr;
+    std::vector<std::string> res = tokenizer.asVector();
+    std::vector<std::string>::iterator i;
+    std::string curtuple, countstr, sumstr;
     int count;
     double sum;
     int pos;
@@ -308,9 +308,9 @@ double rdZipf::get()
     else return i;
 }
 
-string rdZipf::toString()
+std::string rdZipf::toString()
 {
-    ostringstream str;
+    std::ostringstream str;
     str << "Zipf probability distribution. n=" << m_number << ", alpha=" << m_alpha;
     if (m_baseZero)
         str << " Zero-based";
@@ -336,7 +336,7 @@ void rdZipf::__setup_c()
 
 rdObject* rdObjectFactory::create( cXMLAttributeMap attributes )
 {
-    string typeName = attributes["type"];
+    std::string typeName = attributes["type"];
     DISTR_TYPE dt;
     if ( typeName=="normal" ) dt = dt_normal;
     else if ( typeName=="uniform" ) dt = dt_uniform;

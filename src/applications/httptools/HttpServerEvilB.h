@@ -35,8 +35,6 @@
 #include <string>
 #include "HttpServer.h"
 
-using namespace std;
-
 /**
 * @brief An evil attacker server demonstration - type B
  *
@@ -60,7 +58,7 @@ class INET_API HttpServerEvilB : public HttpServer
         int badHigh;
     protected:
         virtual void initialize();
-        virtual string generateBody();
+        virtual std::string generateBody();
 };
 
 #endif /* HttpServerEvilB */

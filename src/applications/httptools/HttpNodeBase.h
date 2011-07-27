@@ -51,11 +51,9 @@
 #define HTTPT_RESPONSE_MESSAGE          10010
 #define HTTPT_DELAYED_RESPONSE_MESSAGE  10011
 
-using namespace std;
-
 enum LOG_FORMAT {lf_short, lf_long};
 
-typedef deque<cMessage*> MESSAGE_QUEUE_TYPE;
+typedef std::deque<cMessage*> MESSAGE_QUEUE_TYPE;
 
 /**
  * @short The base class for browser and server nodes.
@@ -75,7 +73,7 @@ class HttpNodeBase : public cSimpleModule
         int ll;
 
         /** The WWW name of the node. */
-        string wwwName;
+        std::string wwwName;
         /** The listening port of the node. Really only applies to servers. */
         int port; // @todo Move to server base class?
 
@@ -86,7 +84,7 @@ class HttpNodeBase : public cSimpleModule
         int httpProtocol;
 
         /** The log file name for message generation events */
-        string logFileName;
+        std::string logFileName;
         /** Enable/disable of logging message generation events to file */
         bool enableLogging;
         /** The format used to log message events to the log file (if enabled) */
@@ -123,15 +121,15 @@ class HttpNodeBase : public cSimpleModule
         /** Log a response message to file and optionally display in console */
         void logResponse( const HttpReplyMessage* httpResponse );
         /** Used by logRequest and logResponse to write the formatted message to file */
-        void logEntry( string line );
+        void logEntry( std::string line );
         /** Format a request message in compact semicolon-delimited format */
-        string formatHttpRequestShort( const HttpRequestMessage* httpRequest );
+        std::string formatHttpRequestShort( const HttpRequestMessage* httpRequest );
         /** Format a response message in compact semicolon-delimited format */
-        string formatHttpResponseShort( const HttpReplyMessage* httpResponse );
+        std::string formatHttpResponseShort( const HttpReplyMessage* httpResponse );
         /** Format a request message in a more human-readable format */
-        string formatHttpRequestLong( const HttpRequestMessage* httpRequest );
+        std::string formatHttpRequestLong( const HttpRequestMessage* httpRequest );
         /** Format a response message in a more human-readable format */
-        string formatHttpResponseLong( const HttpReplyMessage* httpResponse );
+        std::string formatHttpResponseLong( const HttpReplyMessage* httpResponse );
         //@}
 };
 

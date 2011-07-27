@@ -49,7 +49,7 @@ std::string HttpServerDirectEvilB::generateBody()
 {
     int numResources = badLow+(int)uniform(0, badHigh-badLow);
     double rndDelay;
-    string result;
+    std::string result;
 
     char tempBuf[128];
     int refSize;

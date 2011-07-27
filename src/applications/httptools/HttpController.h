@@ -43,8 +43,6 @@
 #include "HttpRandom.h"
 #include "HttpEventMessages_m.h"
 
-using namespace std;
-
 // Definitions for the insertion of registered servers into the picklist.
 #define INSERT_END 0
 #define INSERT_RANDOM -1
@@ -57,8 +55,8 @@ enum ServerStatus {ss_normal, ss_special};
  */
 struct WEB_SERVER_ENTRY
 {
-    string name;                // The server URL.
-    string host;                // The OMNeT++ object name.
+    std::string name;                // The server URL.
+    std::string host;                // The OMNeT++ object name.
     int port;                   // Listening port.
     cModule *module;            // The actual OMNeT++ module reference to the server object.
     simtime_t activationTime;   // Activation time for the server relative to simulation start.
@@ -89,9 +87,9 @@ class HttpController : public cSimpleModule
     protected:
         int ll; //> The log level
 
-        map<string,WEB_SERVER_ENTRY*> webSiteList;  //> A list of registered web sites (server objects)
-        vector<WEB_SERVER_ENTRY*> pickList;         //> The picklist used to select sites at random.
-        list<WEB_SERVER_ENTRY*> specialList;        //> The special list -- contains sites with active popularity modification events.
+        std::map<std::string,WEB_SERVER_ENTRY*> webSiteList;  //> A list of registered web sites (server objects)
+        std::vector<WEB_SERVER_ENTRY*> pickList;         //> The picklist used to select sites at random.
+        std::list<WEB_SERVER_ENTRY*> specialList;        //> The special list -- contains sites with active popularity modification events.
         double pspecial;                            //> The probability [0,1) of selecting a site from the special list.
 
         unsigned long totalLookups;     //> A counter for the total number of lookups
@@ -165,7 +163,7 @@ class HttpController : public cSimpleModule
 
     protected:
         /** @brief helper used by the server registration to locate the tcpApp getModule(server or browser) */
-        cModule* getTcpApp(string node);
+        cModule* getTcpApp(std::string node);
 
         /** @brief Set special status of a WWW server. Triggered by an event message. */
         void setSpecialStatus( const char* www, ServerStatus status, double p, double amortize );
@@ -177,20 +175,20 @@ class HttpController : public cSimpleModule
         WEB_SERVER_ENTRY* selectFromSpecialList();
 
         /** @brief list the registered servers. Useful for debug. */
-        string listRegisteredServers();
+        std::string listRegisteredServers();
 
         /** @brief list the servers on the special list, i.e. those with custom selection probability. Useful for debug. */
-        string listSpecials();
+        std::string listSpecials();
 
         /** @brief list the registered servers in the order of the general population pick list. Useful for debug. */
-        string listPickOrder();
+        std::string listPickOrder();
 
         /**
          * @brief Parse a popularity modification events definition file at startup (if defined)
          * Format: {time};{www name};{event kind};{p value};{amortization factor}
          * Event kind is not used at the present -- use 1 as a default here.
         */
-        void parseOptionsFile(string file, string section);
+        void parseOptionsFile(std::string file, std::string section);
 
     private:
         /** @brief Get a random server from the special list with p=pspecial or from the general population with p=1-pspecial. */

@@ -148,7 +148,7 @@ void HttpBrowser::sendRequestToRandomServer()
     submitToSocket(szModuleName, connectPort, generateRandomPageRequest(szWWW));
 }
 
-void HttpBrowser::sendRequestsToServer( string www, MESSAGE_QUEUE_TYPE queue )
+void HttpBrowser::sendRequestsToServer( std::string www, MESSAGE_QUEUE_TYPE queue )
 {
     int connectPort;
     char szModuleName[127];

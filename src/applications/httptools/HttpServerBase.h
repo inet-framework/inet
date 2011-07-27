@@ -46,15 +46,13 @@
 #define LL_INFO 1
 #define LL_DEBUG 2
 
-using namespace std;
-
 /**
  * @brief Site definition data structure. Used for scripted sites.
  */
 struct SITE_DEF_STRUCT
 {
     long size;
-    string body;
+    std::string body;
 };
 
 /**
@@ -81,9 +79,9 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** set to true if a scripted site definition is used */
         bool scriptedMode;
         /** A map of html pages, keyed by a resource URL. Used in scripted mode. */
-        map<string,SITE_DEF_STRUCT> htmlPages;
+        std::map<std::string,SITE_DEF_STRUCT> htmlPages;
         /** A map of resource, keyed by a resource URL. Used in scripted mode. */
-        map<string,unsigned int> resources;
+        std::map<std::string,unsigned int> resources;
 
         // Basic statistics
         long htmlDocsServed;
@@ -125,13 +123,13 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Generate a HTML document in response to a request. */
         HttpReplyMessage* generateDocument( HttpRequestMessage *request, const char* resource, int size = 0 );
         /** Generate a resource message in response to a request. */
-        HttpReplyMessage* generateResourceMessage( HttpRequestMessage *request, string resource, CONTENT_TYPE_ENUM category );
+        HttpReplyMessage* generateResourceMessage( HttpRequestMessage *request, std::string resource, CONTENT_TYPE_ENUM category );
         /** Handle a received HTTP GET request */
-        HttpReplyMessage* handleGetRequest( HttpRequestMessage *request, string resource );
+        HttpReplyMessage* handleGetRequest( HttpRequestMessage *request, std::string resource );
         /** Generate a error reply in case of invalid resource requests. */
         HttpReplyMessage* generateErrorReply( HttpRequestMessage *request, int code );
         /** Create a random body according to the site content random distributions. */
-        virtual string generateBody();
+        virtual std::string generateBody();
 
     protected:
         /** Handle a received data message, e.g. check if the content requested exists. */
@@ -139,9 +137,9 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Register the server object with the controller. Called at initialization (simulation startup). */
         void registerWithController();
         /** Read a site definition from file if a scripted site definition is used. */
-        void readSiteDefinition(string file);
+        void readSiteDefinition(std::string file);
         /** Read a html body from a file. Used by readSiteDefinition. */
-        string readHtmlBodyFile( string file, string path );
+        std::string readHtmlBodyFile( std::string file, std::string path );
 };
 
 #endif

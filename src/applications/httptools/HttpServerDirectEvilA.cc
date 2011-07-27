@@ -48,7 +48,7 @@ std::string HttpServerDirectEvilA::generateBody()
 {
     int numImages = badLow+(int)uniform(0, badHigh-badLow);
     double rndDelay;
-    string result;
+    std::string result;
 
     char tempBuf[128];
     for ( int i=0; i<numImages; i++ )

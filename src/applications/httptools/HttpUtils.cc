@@ -31,9 +31,9 @@
 
 #include "HttpUtils.h"
 
-string trimLeft( string str )
+std::string trimLeft( std::string str )
 {
-    string::iterator i;
+    std::string::iterator i;
     for (i = str.begin(); i != str.end(); i++) {
           if (!isspace(*i)) {
               break;
@@ -47,16 +47,16 @@ string trimLeft( string str )
     return str;
 }
 
-string trimLeft( string str, string delim )
+std::string trimLeft( std::string str, std::string delim )
 {
     int pos = str.find(delim);
     if ( pos==-1 ) return str;
     else return str.substr(pos+1, str.size()-pos-1);
 }
 
-string trimRight( string str )
+std::string trimRight( std::string str )
 {
-    string::iterator i;
+    std::string::iterator i;
     for (i = str.end() - 1;; i--) {
           if (!isspace(*i)) {
               str.erase(i + 1, str.end());
@@ -70,21 +70,21 @@ string trimRight( string str )
     return str;
 }
 
-string trimRight( string str, string delim )
+std::string trimRight( std::string str, std::string delim )
 {
     int pos = str.rfind(delim);
     if ( pos==-1 ) return str;
     else return str.substr(0, pos-1);
 }
 
-string trim( string str )
+std::string trim( std::string str )
 {
     str = trimLeft(str);
     str = trimRight(str);
     return str;
 }
 
-string extractServerName( const char* path )
+std::string extractServerName( const char* path )
 {
     std::string www(path);
     int position = www.find("http://");
@@ -110,7 +110,7 @@ string extractServerName( const char* path )
     return www;
 }
 
-string extractResourceName( const char* path )
+std::string extractResourceName( const char* path )
 {
     std::string www(path);
     int position = www.find("http://");
@@ -134,11 +134,11 @@ string extractResourceName( const char* path )
         return "";
 }
 
-std::vector<std::string> parseResourceName(string resource)
+std::vector<std::string> parseResourceName(std::string resource)
 {
-    string path = "";
-    string resourceName = "";
-    string extension = "";
+    std::string path = "";
+    std::string resourceName = "";
+    std::string extension = "";
 
     int slashpos = resource.rfind("/");
     if ( slashpos!=-1 )
@@ -161,7 +161,7 @@ std::vector<std::string> parseResourceName(string resource)
     return res;
 }
 
-std::string getDelimited(string str, string ldelim, string rdelim)
+std::string getDelimited(std::string str, std::string ldelim, std::string rdelim)
 {
     int lpos = str.find(ldelim);
     int rpos;
@@ -173,7 +173,7 @@ std::string getDelimited(string str, string ldelim, string rdelim)
     else return str.substr(lpos+1, rpos-lpos-1);
 }
 
-CONTENT_TYPE_ENUM getResourceCategory(vector<std::string> res)
+CONTENT_TYPE_ENUM getResourceCategory(std::vector<std::string> res)
 {
     if ( res.size()==2 )
         return rt_html_page;
@@ -182,7 +182,7 @@ CONTENT_TYPE_ENUM getResourceCategory(vector<std::string> res)
     return rt_unknown;
 }
 
-CONTENT_TYPE_ENUM getResourceCategory(string resourceExt)
+CONTENT_TYPE_ENUM getResourceCategory(std::string resourceExt)
 {
     if (resourceExt=="" || resourceExt=="htm" || resourceExt=="html")
         return rt_html_page;
@@ -193,7 +193,7 @@ CONTENT_TYPE_ENUM getResourceCategory(string resourceExt)
     return rt_unknown;
 }
 
-string htmlErrFromCode(int code)
+std::string htmlErrFromCode(int code)
 {
     switch (code)
     {
@@ -239,11 +239,11 @@ int safeatobool(const char* strval, bool defaultVal)
     }
 }
 
-std::vector<std::string> splitFile(string fileName)
+std::vector<std::string> splitFile(std::string fileName)
 {
-    string path = "";
-    string file = "";
-    string ext = "";
+    std::string path = "";
+    std::string file = "";
+    std::string ext = "";
 
     int slashpos = fileName.rfind("/");
     if ( slashpos==-1 )

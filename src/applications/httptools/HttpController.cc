@@ -74,8 +74,8 @@ void HttpController::initialize(int stage)
 
         EV_DEBUG << "Server selection probability distribution: " << rdServerSelection->toString() << endl;
 
-        string optionsfile = (const char*)par("events");
-        string optionssection = (const char*)par("eventsSection");
+        std::string optionsfile = (const char*)par("events");
+        std::string optionssection = (const char*)par("eventsSection");
         if ( optionsfile.size()!=0 )
             parseOptionsFile(optionsfile, optionssection);
     }
@@ -86,7 +86,7 @@ void HttpController::finish()
     EV_SUMMARY << "Invoking finish on the controller. Total lookups " << totalLookups << endl;
 
     WEB_SERVER_ENTRY *en;
-    map<string,WEB_SERVER_ENTRY*>::const_iterator iter;
+    std::map<std::string,WEB_SERVER_ENTRY*>::const_iterator iter;
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
     {
         en = (*iter).second;
@@ -117,7 +117,7 @@ void HttpController::registerWWWserver( const char* objectName, const char* wwwN
 {
     Enter_Method_Silent();
 
-    string serverUrl = extractServerName(wwwName);
+    std::string serverUrl = extractServerName(wwwName);
 
     EV_DEBUG << "Registering www server: " << objectName << ", " << wwwName
              << " (" << port << "). Activation time is " << activationTime << endl;
@@ -144,7 +144,7 @@ void HttpController::registerWWWserver( const char* objectName, const char* wwwN
     webSiteList[en->name] = en;
 
     int pos;
-    vector<WEB_SERVER_ENTRY*>::iterator begin = pickList.begin();
+    std::vector<WEB_SERVER_ENTRY*>::iterator begin = pickList.begin();
     if ( rank==INSERT_RANDOM  )
     {
         if ( pickList.size()==0 )
@@ -176,7 +176,7 @@ cModule* HttpController::getServerModule( const char* wwwName )
 {
     Enter_Method_Silent();
 
-    string serverUrl = extractServerName(wwwName);
+    std::string serverUrl = extractServerName(wwwName);
 
     if ( webSiteList.find(serverUrl) == webSiteList.end() ) // The www name is not in the map
     {
@@ -226,7 +226,7 @@ int HttpController::getServerInfo( const char* wwwName, char* module, int &port 
 {
     Enter_Method_Silent();
 
-    string serverUrl = extractServerName(wwwName);
+    std::string serverUrl = extractServerName(wwwName);
 
     if ( webSiteList.find(serverUrl) == webSiteList.end() ) // The www name is not in the map
     {
@@ -277,15 +277,15 @@ int HttpController::getAnyServerInfo( char* wwwName, char* module, int &port )
     return 0;
 }
 
-cModule* HttpController::getTcpApp(string node)
+cModule* HttpController::getTcpApp(std::string node)
 {
     int pos = node.find("[");
     int rpos = node.rfind("]");
     cModule * receiverModule = NULL;
     if ( pos > -1 && rpos > -1 )
     {
-        string id = node.substr(pos+1, pos-rpos-1);
-        string name = node.substr(0, pos);
+        std::string id = node.substr(pos+1, pos-rpos-1);
+        std::string name = node.substr(0, pos);
         int numid = atoi(id.c_str());
         receiverModule = simulation.getSystemModule()->getSubmodule(name.c_str(), numid);
     }
@@ -323,7 +323,7 @@ void HttpController::cancelSpecialStatus( const char* www )
 {
     if (specialList.size()==0) return;
     WEB_SERVER_ENTRY *en;
-    list<WEB_SERVER_ENTRY*>::iterator i;
+    std::list<WEB_SERVER_ENTRY*>::iterator i;
     for (i=specialList.begin(); i!=specialList.end(); i++)
     {
         en = (*i);
@@ -362,7 +362,7 @@ WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
     {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        list<WEB_SERVER_ENTRY*>::iterator i;
+        std::list<WEB_SERVER_ENTRY*>::iterator i;
         for (i=specialList.begin(); i!=specialList.end(); i++)
         {
             en = (*i);
@@ -393,11 +393,11 @@ WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
     return en;
 }
 
-string HttpController::listRegisteredServers()
+std::string HttpController::listRegisteredServers()
 {
-    ostringstream str;
+    std::ostringstream str;
     WEB_SERVER_ENTRY *en;
-    map<string,WEB_SERVER_ENTRY*>::const_iterator iter;
+    std::map<std::string,WEB_SERVER_ENTRY*>::const_iterator iter;
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
     {
         en = (*iter).second;
@@ -406,11 +406,11 @@ string HttpController::listRegisteredServers()
     return str.str();
 }
 
-string HttpController::listSpecials()
+std::string HttpController::listSpecials()
 {
-    ostringstream str;
+    std::ostringstream str;
     WEB_SERVER_ENTRY *en;
-    list<WEB_SERVER_ENTRY*>::iterator i;
+    std::list<WEB_SERVER_ENTRY*>::iterator i;
     for (i=specialList.begin(); i!=specialList.end(); i++)
     {
         en = (*i);
@@ -420,11 +420,11 @@ string HttpController::listSpecials()
     return str.str();
 }
 
-string HttpController::listPickOrder()
+std::string HttpController::listPickOrder()
 {
-    ostringstream str;
+    std::ostringstream str;
     WEB_SERVER_ENTRY *en;
-    vector<WEB_SERVER_ENTRY*>::iterator i;
+    std::vector<WEB_SERVER_ENTRY*>::iterator i;
     for ( i=pickList.begin(); i!=pickList.end(); i++ )
     {
         en = (*i);
@@ -434,10 +434,10 @@ string HttpController::listPickOrder()
     return str.str();
 }
 
-void HttpController::parseOptionsFile(string file, string section)
+void HttpController::parseOptionsFile(std::string file, std::string section)
 {
     bool bSectionFound = false;
-    ifstream tracefilestream;
+    std::ifstream tracefilestream;
     tracefilestream.open(file.c_str());
     if (!tracefilestream.is_open())
         error("Could not open events file %s", file.c_str());
@@ -447,7 +447,7 @@ void HttpController::parseOptionsFile(string file, string section)
     double pval;
     double amortizeval;
     simtime_t activationtime;
-    string line;
+    std::string line;
     int linecount = 0;
     HttpServerStatusUpdateMsg *statusChange;
     while (!std::getline(tracefilestream, line).eof())
@@ -459,7 +459,7 @@ void HttpController::parseOptionsFile(string file, string section)
         {
             // Section
             bSectionFound = false;
-            string sectionsub = line.substr(1, line.size()-2);
+            std::string sectionsub = line.substr(1, line.size()-2);
             bSectionFound = sectionsub==section;
         }
         else
@@ -470,7 +470,7 @@ void HttpController::parseOptionsFile(string file, string section)
                 // Event kind is not used at the present
 
                 cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
-                std::vector<string> res = tokenizer.asVector();
+                std::vector<std::string> res = tokenizer.asVector();
                 if ( res.size()!=5 )
                     error("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
                 try

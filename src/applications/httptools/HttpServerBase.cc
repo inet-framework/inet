@@ -108,7 +108,7 @@ void HttpServerBase::initialize()
     activationTime = par("activationTime");
     EV_INFO << "Activation time is " << activationTime << endl;
 
-    string siteDefinition = (const char*)par("siteDefinition");
+    std::string siteDefinition = (const char*)par("siteDefinition");
     scriptedMode = (siteDefinition.size() != 0);
     if ( scriptedMode )
         readSiteDefinition(siteDefinition);
@@ -191,7 +191,7 @@ cMessage* HttpServerBase::handleReceivedMessage( cMessage *msg )
 
     // Parse the request string on spaces
     cStringTokenizer tokenizer = cStringTokenizer(request->heading(), " ");
-    std::vector<string> res = tokenizer.asVector();
+    std::vector<std::string> res = tokenizer.asVector();
     if ( res.size() != 3 )
     {
         EV_ERROR << "Invalid request string: " << request->heading() << endl;
@@ -222,12 +222,12 @@ cMessage* HttpServerBase::handleReceivedMessage( cMessage *msg )
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request, string resource )
+HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request, std::string resource )
 {
     EV_DEBUG << "Handling GET request " << request->getName() << " resource: " << resource << endl;
 
     resource = trimLeft(resource, "/");
-    vector<string> req = parseResourceName(resource);
+    std::vector<std::string> req = parseResourceName(resource);
     if ( req.size()!=3 )
     {
         EV_ERROR << "Invalid GET request string: " << request->heading() << endl;
@@ -317,7 +317,7 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *request, string resource, CONTENT_TYPE_ENUM category )
+HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *request, std::string resource, CONTENT_TYPE_ENUM category )
 {
     EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
 
@@ -361,13 +361,13 @@ HttpReplyMessage* HttpServerBase::generateErrorReply( HttpRequestMessage *reques
     return replymsg;
 }
 
-string HttpServerBase::generateBody()
+std::string HttpServerBase::generateBody()
 {
     int numResources = (int)rdNumResources->get();
     int numImages = (int)(numResources*rdTextImageResourceRatio->get());
     int numText = numResources - numImages;
 
-    string result;
+    std::string result;
 
     char tempBuf[128];
     for ( int i=0; i<numImages; i++ )
@@ -393,23 +393,23 @@ void HttpServerBase::registerWithController()
     ((HttpController*)controller)->registerWWWserver(getParentModule()->getFullName(), wwwName.c_str(), port, INSERT_END, activationTime);
 }
 
-void HttpServerBase::readSiteDefinition(string file)
+void HttpServerBase::readSiteDefinition(std::string file)
 {
     EV_DEBUG << "Reading site definition file " << file << endl;
 
-    ifstream tracefilestream;
+    std::ifstream tracefilestream;
     tracefilestream.open(file.c_str());
     if (tracefilestream.fail())
         error("Could not open site definition file %s", file.c_str());
 
-    vector<string> siteFileSplit = splitFile(file);
-    string line;
-    string key;
-    string htmlfile;
-    string body;
-    string value1;
-    string value2;
-    string sectionsub;
+    std::vector<std::string> siteFileSplit = splitFile(file);
+    std::string line;
+    std::string key;
+    std::string htmlfile;
+    std::string body;
+    std::string value1;
+    std::string value2;
+    std::string sectionsub;
     int size;
     int linecount = 0;
     bool siteSection = false;
@@ -431,7 +431,7 @@ void HttpServerBase::readSiteDefinition(string file)
         else
         {
             cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
-            std::vector<string> res = tokenizer.asVector();
+            std::vector<std::string> res = tokenizer.asVector();
 
             if ( siteSection )
             {
@@ -501,16 +501,16 @@ void HttpServerBase::readSiteDefinition(string file)
     tracefilestream.close();
 }
 
-string HttpServerBase::readHtmlBodyFile( string file, string path )
+std::string HttpServerBase::readHtmlBodyFile( std::string file, std::string path )
 {
     EV_DEBUG << "Reading HTML page definition file" << endl;
 
-    string filePath = path;
+    std::string filePath = path;
     filePath += file;
 
-    string line;
-    string body = "";
-    ifstream htmlfilestream;
+    std::string line;
+    std::string body = "";
+    std::ifstream htmlfilestream;
     htmlfilestream.open(filePath.c_str());
     if (htmlfilestream.fail())
         error("Could not open page definition file '%s'", filePath.c_str());

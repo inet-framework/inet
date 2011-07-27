@@ -114,7 +114,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         virtual void sendRequestToRandomServer();
 
         /** @brief Sends a number of queued messages to the specified server */
-        virtual void sendRequestsToServer( string www, MESSAGE_QUEUE_TYPE queue );
+        virtual void sendRequestsToServer( std::string www, MESSAGE_QUEUE_TYPE queue );
     //@}
 
     /** @name TCPSocket::CallbackInterface callback methods */

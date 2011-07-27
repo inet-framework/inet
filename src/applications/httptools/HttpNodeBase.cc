@@ -82,18 +82,18 @@ void HttpNodeBase::logResponse( const HttpReplyMessage* httpResponse )
         EV_INFO << "Response:\n" << formatHttpResponseLong(httpResponse);
 }
 
-void HttpNodeBase::logEntry( string line )
+void HttpNodeBase::logEntry( std::string line )
 {
     if (!enableLogging) return;
     if (logFileName.size() == 0) return;
 
-    ofstream outfile;
+    std::ofstream outfile;
     time_t curtime;
     time(&curtime);
 
     bool exists = fileExists(logFileName.c_str()); // Check if the file exists. If not, add the field names at top.
 
-    outfile.open(logFileName.c_str(), ios::app);
+    outfile.open(logFileName.c_str(), std::ios::app);
     if ( !exists )
         outfile << "time;simtime;logging-node;sending-node;type;originator-url;target-url;protocol;keep-alive;serial;heading;bad-req;result-code;content-type" << endl;
     outfile << curtime << ";" << simTime() << ";" << getParentModule()->getName();
@@ -105,11 +105,11 @@ void HttpNodeBase::logEntry( string line )
     outfile.close();
 }
 
-string HttpNodeBase::formatHttpRequestShort( const HttpRequestMessage* httpRequest )
+std::string HttpNodeBase::formatHttpRequestShort( const HttpRequestMessage* httpRequest )
 {
-    ostringstream str;
+    std::ostringstream str;
 
-    string originatorStr = "";
+    std::string originatorStr = "";
     cModule *originator = httpRequest->getSenderModule();
     if ( originator!=NULL && originator->getParentModule()!=NULL )
         originatorStr = originator->getParentModule()->getFullName();
@@ -122,11 +122,11 @@ string HttpNodeBase::formatHttpRequestShort( const HttpRequestMessage* httpReque
     return str.str();
 }
 
-string HttpNodeBase::formatHttpResponseShort( const HttpReplyMessage* httpResponse )
+std::string HttpNodeBase::formatHttpResponseShort( const HttpReplyMessage* httpResponse )
 {
-    ostringstream str;
+    std::ostringstream str;
 
-    string originatorStr = "";
+    std::string originatorStr = "";
     cModule *originator = httpResponse->getSenderModule();
     if ( originator!=NULL && originator->getParentModule()!=NULL )
         originatorStr = originator->getParentModule()->getFullName();
@@ -140,9 +140,9 @@ string HttpNodeBase::formatHttpResponseShort( const HttpReplyMessage* httpRespon
     return str.str();
 }
 
-string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpRequest )
+std::string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpRequest )
 {
-    ostringstream str;
+    std::ostringstream str;
 
     str << "REQUEST: " << httpRequest->getName() << " -- " << httpRequest->getByteLength() << " bytes\n";
     str << "Target URL:" << httpRequest->targetUrl() << "  Originator URL:" << httpRequest->originatorUrl() << endl;
@@ -165,9 +165,9 @@ string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpReques
     return str.str();
 }
 
-string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpResponse )
+std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpResponse )
 {
-    ostringstream str;
+    std::ostringstream str;
 
     str << "RESPONSE: " << httpResponse->getName() << " -- " << httpResponse->getByteLength() << " bytes\n";
 
