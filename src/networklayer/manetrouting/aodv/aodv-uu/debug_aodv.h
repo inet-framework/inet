@@ -34,8 +34,6 @@
 #endif
 
 
-//#include <syslog.h>
-
 #ifndef NS_PORT
 extern int debug;
 #endif
@@ -62,36 +60,24 @@ const char *state_to_str(u_int8_t state);
 
 #ifndef NS_NO_GLOBALS
 
-/*
-#ifdef _WIN32
-#ifdef DEBUG
-#undef DEBUG
-#endif
-#endif
-*/
 
 #ifdef DEBUG
-#undef DEBUG
+#define WANT_DEBUGMODE
+#undef DEBUG    // as we'll redefine it below
 #endif
-#define DEBUG
 
-#ifdef DEBUG
-#undef DEBUG
-// Disable the debug output
-//#define DEBUG_OUTPUT
-#define DEBUG(l, s, args...)
-// #define DEBUG(l, s, args...) alog(l, s, __FUNCTION__, ## args)
+#ifdef _MSC_VER
+// MSVC does not support variadic macros
+#define DEBUG   /**/
+#else
+#ifdef WANT_DEBUGMODE
+#define DEBUG(l, s, args...)   alog(l, s, __FUNCTION__, ## args)
 // #define DEBUG(l, i,s, args...) syslog(l, strcpy  s, ## args)
 #else
-/*
-#ifdef _WIN32
-#define DEBUG(l, s, args)
-#else
 #define DEBUG(l, s, args...)
 #endif
-*/
-#define DEBUG(l, s, args...)
-#endif /* DEBUG*/
+#endif
+
 #endif              /* NS_NO_GLOBALS */
 
 #endif              /* _DEBUG_H */

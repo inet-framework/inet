@@ -24,9 +24,9 @@
 
 #ifndef NS_NO_GLOBALS
 
-//#ifndef  _WIN32
+#ifndef  _MSC_VER
 #include <sys/time.h>
-//#endif
+#endif
 
 #include "defs_aodv.h"
 #include "list.h"

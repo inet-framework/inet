@@ -22,7 +22,9 @@
 #ifndef __Manet_routing_base_h__
 #define __Manet_routing_base_h__
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include "compatibility.h"
 #include "IPv4Datagram_m.h"
 #include "IRoutingTable.h"
@@ -37,6 +39,7 @@
 #include <set>
 
 class ManetRoutingBase;
+
 class ManetTimer :  public cOwnedObject
 {
   protected:
