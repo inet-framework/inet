@@ -24,6 +24,12 @@
 
 Define_Module(AnnotationManager);
 
+void AnnotationManager::Annotation::bubble(const char *text)
+{
+    if (!dummyObjects.empty())
+        dummyObjects.front()->bubble(text);
+}
+
 AnnotationManager::~AnnotationManager()
 {
     while (annotations.begin() != annotations.end())

@@ -44,6 +44,7 @@ class INET_API AnnotationManager : public cSimpleModule
       public:
         Annotation() : group(0) {}
         virtual ~Annotation() {}
+        void bubble(const char *text);
 
       protected:
         friend class AnnotationManager;
