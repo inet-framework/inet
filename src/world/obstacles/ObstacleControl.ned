@@ -22,11 +22,35 @@ package inet.world.obstacles;
 //
 // ObstacleControl models obstacles that block radio transmissions
 //
+// The XML:
+//   <obstacles>
+//     <poly
+//       id="building#0"
+//       type="building"
+//       color="#F00"
+//       shape="16,0 8,13.8564 -8,13.8564 -16,0 -8,-13.8564 8,-13.8564"
+//       attenuationPerWall="50dB"
+//       attenuationPerMeter="1dB"
+//     />
+//       ...
+//   </obstacles>
+//
+//  The attributes of 'poly' element:
+//    - id: identifier, required.
+//    - type: Type of obstacle, must be "building", required.
+//    - color: Color of obstacle, required, used by AnnotationManager.
+//    - shape: Shape of polygon obstacle, required, the walls of obstacle.
+//             The last and first point will be connected, also.
+//    - attenuationPerWall: Attenaution when wave crossed the wall [dB].
+//    - attenuationPerMeter: Attenaution in inside of obstacle [dB/m].
+//
 simple ObstacleControl
 {
     parameters:
         bool debug = default(false);  // emit debug messages?
         xml obstacles = default(xml("<obstacles/>")); // obstacles to add at startup
+        double attenuationPerWall @unit(dB) = default(50dB); //default attenaution per wall
+        double attenuationPerMeter @unit(dB) = default(1dB); //default attenaution in inside of obstacle in dB/m
         @display("i=misc/town");
         @labels(node);
 }

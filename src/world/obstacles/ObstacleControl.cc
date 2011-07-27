@@ -23,6 +23,8 @@
 
 #include "ObstacleControl.h"
 
+#include <unitconversion.h>
+
 
 Define_Module(ObstacleControl);
 
@@ -100,12 +102,16 @@ void ObstacleControl::addFromXml(cXMLElement* xml)
         ASSERT(e->getAttribute("shape"));
         std::string shape = e->getAttribute("shape");
 
-        double attenuationPerWall = 50; /**< in dB */
-        double attenuationPerMeter = 1; /**< in dB / m */
+        //TODO: add XML attributes for two next values, and use parameters from NED only for default values, when missing from xml
+        double attenuationPerWall = 0; /**< in dB */
+        double attenuationPerMeter = 0; /**< in dB / m */
         if (type == "building")
         {
-            attenuationPerWall = 50;
-            attenuationPerMeter = 1;
+            const char *attr;
+            attr = e->getAttribute("attenuationPerWall");
+            attenuationPerWall = attr ? parseQuantity(attr, par("attenuationPerWall").getUnit()) : par("attenuationPerWall").doubleValue();
+            attr = e->getAttribute("attenuationPerMeter");
+            attenuationPerMeter = attr ? parseQuantity(attr, par("attenuationPerMeter").getUnit()) : par("attenuationPerMeter").doubleValue();
         }
         else
             error("unknown obstacle type: %s", type.c_str());
@@ -224,7 +230,8 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 
                 // draw a "hit!" bubble
                 if (annotations && (pSend < pSendOld))
-                    annotations->drawBubble(o->getBboxP1(), "hit");
+                    o->visualRepresentation->bubble("hit");
+//                    annotations->drawBubble(o->getBboxP1(), "hit");
 
                 // bail if attenuation is already extremely high
                 if (pSend < 1e-30)
