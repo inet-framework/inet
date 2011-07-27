@@ -29,7 +29,8 @@
 //
 // ----------------------------------------------------------------------------
 
-import inet.applications.tcpapp.TCPApp;
+import inet.applications.ITCPApp;
+
 
 //
 // httptServerDirectEvilA
@@ -47,7 +48,7 @@ import inet.applications.tcpapp.TCPApp;
 // @version 1.0
 // @author  Kristjan V. Jonsson
 //
-simple httptServerDirectEvilA like TCPApp
+simple httptServerDirectEvilA like ITCPApp
 {
     parameters:
         string www = default("");                         // The WWW name of the server

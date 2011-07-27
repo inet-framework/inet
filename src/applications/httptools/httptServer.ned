@@ -29,6 +29,9 @@
 //
 // ----------------------------------------------------------------------------
 
+import inet.applications.ITCPApp;
+
+
 //
 // httptServer
 //
@@ -45,7 +48,7 @@
 // @version 1.0 
 // @author  Kristjan V. Jonsson
 //
-simple httptServer like inet.applications.tcpapp.TCPApp
+simple httptServer like ITCPApp
 {
     parameters:
         string www = default("");						// The WWW name of the server

@@ -29,7 +29,8 @@
 //
 // ----------------------------------------------------------------------------
 
-import inet.applications.tcpapp.TCPApp;
+import inet.applications.ITCPApp;
+
 
 //
 // httptBrowserDirect
@@ -50,7 +51,7 @@ import inet.applications.tcpapp.TCPApp;
 // @version 1.0 
 // @author  Kristjan V. Jonsson
 //
-simple httptBrowserDirect like TCPApp
+simple httptBrowserDirect like ITCPApp
 {
     parameters:
         int logLevel = default(0);								// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
