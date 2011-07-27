@@ -289,7 +289,7 @@ simtime_t EtherMAC::insertEndReception(long packetTreeId, simtime_t endRxTime)
         }
     }
 
-    //find insertion position
+    // find insertion position
     for (i = endRxTimeList.begin(); i != endRxTimeList.end() && i->endTime <= endRxTime; i++)
         ;
 

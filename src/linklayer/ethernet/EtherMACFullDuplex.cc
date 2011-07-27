@@ -93,7 +93,7 @@ void EtherMACFullDuplex::startFrameTransmission()
 {
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
-    EtherFrame *frame = curTxFrame->dup();
+    EtherFrame *frame = curTxFrame->dup();  // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
 
     if (frame->getSrc().isUnspecified())
         frame->setSrc(address);
@@ -216,7 +216,7 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
 
 void EtherMACFullDuplex::handleEndTxPeriod()
 {
-    // we only get here if transmission has finished successfully, without collision
+    // we only get here if transmission has finished successfully
     if (transmitState != TRANSMITTING_STATE)
         error("End of transmission, and incorrect state detected");
 

@@ -317,7 +317,6 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
 
 void EtherMACBase::handleDisconnect()
 {
-    // cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
     cancelEvent(endTxMsg);
     cancelEvent(endIFGMsg);
     cancelEvent(endPauseMsg);
@@ -326,7 +325,7 @@ void EtherMACBase::handleDisconnect()
     {
         delete curTxFrame;
         curTxFrame = NULL;
-        lastTxFinishTime = simTime() - 1.0;  // never equals with current simtime. for Burst mode.
+        lastTxFinishTime = -1.0;  // so that it never equals with current simtime, used for Burst mode detection.
     }
 
     if (txQueue.extQueue)
