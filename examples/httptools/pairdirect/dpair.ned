@@ -29,26 +29,32 @@
 //
 // ----------------------------------------------------------------------------
 
-import
-    "DirectHost",
-    "httptController";
+package inet.examples.httptools.pairdirect;
+
+import inet.httptools.DirectHost;
+import inet.httptools.httptController;
+
 
 //
 // Simple scenario with a pair of nodes. Direct message passing used.
 //
 module httptDirectPair
+{
+    parameters:
+        @display("bgb=474,374");
     submodules:
-        controller: httptController;
-            display: "p=62,60;i=block/cogwheel";
-        srv: DirectHost;
-            display: "p=170,188;i=device/server_l";
-        cli: DirectHost;
-            display: "p=316,188;i=device/laptop_l";
-    connections nocheck:
-
-    display: "b=474,374";
-endmodule
-
-network httptDirectPair : httptDirectPair
-endnetwork
+        controller: httptController {
+            parameters:
+                @display("p=62,60;i=block/cogwheel");
+        }
+        srv: DirectHost {
+            parameters:
+                @display("p=170,188;i=device/server_l");
+        }
+        cli: DirectHost {
+            parameters:
+                @display("p=316,188;i=device/laptop_l");
+        }
+    connections allowunconnected:
+}
 

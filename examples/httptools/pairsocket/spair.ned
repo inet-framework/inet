@@ -4,38 +4,47 @@
 //
 
 
-import
-    "Router",
-    "StandardHost",
-    "FlatNetworkConfigurator",
-    "httptController";
 
-channel gigabitline
-    delay 0.1us;
-    datarate 1000*1000000;
-endchannel
+package inet.examples.httptools.pairsocket;
+
+import inet.httptools.httptController;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+
+
+channel gigabitline extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.1us;
+        datarate = 1000*1000000;
+}
 
 module httptSockPair
+{
+    parameters:
+        @display("bgb=474,374");
     submodules:
-        configurator: FlatNetworkConfigurator;
+        configurator: FlatNetworkConfigurator {
             parameters:
-                moduleTypes = "StandardHost",
-                nonIPModuleTypes = "",
-                networkAddress = "145.236.0.0",
+//                moduleTypes = "StandardHost";
+//                nonIPModuleTypes = "";
+                networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";
-            display: "i=block/cogwheel";
-        controller: httptController;
-            display: "p=62,60;i=block/cogwheel";
-        srv: StandardHost;
-            display: "p=170,188;i=device/server_l";
-        cli: StandardHost;
-            display: "p=316,188;i=device/laptop_l";
+                @display("i=block/cogwheel");
+        }
+        controller: httptController {
+            parameters:
+                @display("p=62,60;i=block/cogwheel");
+        }
+        srv: StandardHost {
+            parameters:
+                @display("p=170,188;i=device/server_l");
+        }
+        cli: StandardHost {
+            parameters:
+                @display("p=316,188;i=device/laptop_l");
+        }
     connections:
-		cli.out++ --> gigabitline --> srv.in++;
-		cli.in++ <-- gigabitline <-- srv.out++;
-    display: "b=474,374";
-endmodule
-
-network httptSockPair : httptSockPair
-endnetwork
+        cli.ethg++ <--> gigabitline <--> srv.ethg++;
+}
 

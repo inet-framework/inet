@@ -29,9 +29,11 @@
 //
 // ----------------------------------------------------------------------------
 
-import
-    "DirectHost",
-    "httptController";
+package inet.examples.httptools.flashdirect;
+
+import inet.httptools.DirectHost;
+import inet.httptools.httptController;
+
 
 //
 // Flash crowd simulation 
@@ -41,41 +43,59 @@ import
 // scenario used to demonstrate the sockets components.
 //
 module httptDirectFlash
+{
     parameters:
-        num_browsers: numeric const;
+        double num_browsers @prompt("Number of browsers") = default(2);
+        @display("bgb=754,559");
     submodules:
-        controller: httptController;
-            display: "p=54,60;i=block/cogwheel";
-        server1: DirectHost;
-            display: "p=68,164;i=device/server";
-        server2: DirectHost;
-            display: "p=148,164;i=device/server";
-        server3: DirectHost;
-            display: "p=228,164;i=device/server";
-        server4: DirectHost;
-            display: "p=308,164;i=device/server";
-        server5: DirectHost;
-            display: "p=388,164;i=device/server";
-        server6: DirectHost;
-            display: "p=468,164;i=device/server";
-        server7: DirectHost;
-            display: "p=548,164;i=device/server";
-        server8: DirectHost;
-            display: "p=620,164;i=device/server";
-        server9: DirectHost;
-            display: "p=700,164;i=device/server";
-        abc: DirectHost;
-            display: "p=365,300;i=device/server_l";
-        client: DirectHost[num_browsers];
-            display: "i=device/laptop";
-    connections nocheck:
-
-
-    display: "b=754,559";
-endmodule
-
-network httptDirectFlash : httptDirectFlash
-    parameters:
-        num_browsers = input(2, "Number of browsers");
-endnetwork
+        controller: httptController {
+            parameters:
+                @display("p=54,60;i=block/cogwheel");
+        }
+        server1: DirectHost {
+            parameters:
+                @display("p=68,164;i=device/server");
+        }
+        server2: DirectHost {
+            parameters:
+                @display("p=148,164;i=device/server");
+        }
+        server3: DirectHost {
+            parameters:
+                @display("p=228,164;i=device/server");
+        }
+        server4: DirectHost {
+            parameters:
+                @display("p=308,164;i=device/server");
+        }
+        server5: DirectHost {
+            parameters:
+                @display("p=388,164;i=device/server");
+        }
+        server6: DirectHost {
+            parameters:
+                @display("p=468,164;i=device/server");
+        }
+        server7: DirectHost {
+            parameters:
+                @display("p=548,164;i=device/server");
+        }
+        server8: DirectHost {
+            parameters:
+                @display("p=620,164;i=device/server");
+        }
+        server9: DirectHost {
+            parameters:
+                @display("p=700,164;i=device/server");
+        }
+        abc: DirectHost {
+            parameters:
+                @display("p=365,300;i=device/server_l");
+        }
+        client[num_browsers]: DirectHost {
+            parameters:
+                @display("i=device/laptop");
+        }
+    connections allowunconnected:
+}
 

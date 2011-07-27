@@ -29,18 +29,22 @@
 //
 // ----------------------------------------------------------------------------
 
-import
-    "Router",
-    "StandardHost",
-    "FlatNetworkConfigurator",
-    "NAMTrace",
-    "ChannelInstaller",
-    "httptController";
 
-channel ethernetline
-    delay 0.1us;
-    datarate 100*1000000;
-endchannel
+package inet.examples.httptools.simpledirectddos;
+
+import inet.httptools.httptController;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
+
+
+channel ethernetline extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.1us;
+        datarate = 100*1000000;
+}
+
 
 //
 // n-nodes test scenario for sockets. 
@@ -49,50 +53,53 @@ endchannel
 // with a single link.
 //
 module httptNnodes
+{
     parameters:
-        numservers: numeric const,
-        numclients: numeric const;
+        double numservers @prompt("Number of servers") = default(10);
+        double numclients @prompt("Number of clients") = default(10);
+        @display("bgb=474,374");
     submodules:
-        channelInstaller: ChannelInstaller;
+        //        channelInstaller: ChannelInstaller {
+        //            parameters:
+        ////                channelClass = "ThruputMeteringChannel";
+        ////                channelAttrs = "format=u";
+        //                @display("p=98,50;i=block/cogwheel_s");
+        //        }
+        configurator: FlatNetworkConfigurator {
             parameters:
-                channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=u";
-            display: "p=98,50;i=block/cogwheel_s";
-        configurator: FlatNetworkConfigurator;
-            parameters:
-                moduleTypes = "Router StandardHost",
-                nonIPModuleTypes = "",
-                networkAddress = "145.236.0.0",
+                //                moduleTypes = "Router StandardHost";
+                //                nonIPModuleTypes = "";
+                networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";
-            display: "p=50,64;i=block/cogwheel";
-        controller: httptController;
-            display: "p=46,140;i=block/cogwheel";
-        router_c: Router;
-            display: "p=100,200;i=abstract/router_l";
-        router_s: Router;
-            display: "p=300,200;i=abstract/router_l";
-        client: StandardHost[numclients];
-            display: "i=device/laptop_l";
-		server: StandardHost[numservers];
-            display: "i=device/server_l";
-    connections nocheck:
-        for i=0..numservers-1 do
-            server[i].out++ --> ethernetline --> router_s.in++;
-            server[i].in++ <-- ethernetline <-- router_s.out++;
-        endfor
-        for i=0..numclients-1 do
-            client[i].out++ --> ethernetline --> router_c.in++;
-            client[i].in++ <-- ethernetline <-- router_c.out++;
-        endfor
-		router_s.out++ --> ethernetline --> router_c.in++;
-		router_s.in++ <-- ethernetline <-- router_c.out++;
-
-    display: "b=474,374";
-endmodule
-
-network httptNnodes : httptNnodes
-   parameters:
-        numclients = input(10, "Number of clients"),
-        numservers = input(10, "Number of servers");
-endnetwork
+                @display("p=50,64;i=block/cogwheel");
+        }
+        controller: httptController {
+            parameters:
+                @display("p=46,140;i=block/cogwheel");
+        }
+        router_c: Router {
+            parameters:
+                @display("p=100,200;i=abstract/router_l");
+        }
+        router_s: Router {
+            parameters:
+                @display("p=300,200;i=abstract/router_l");
+        }
+        client[numclients]: StandardHost {
+            parameters:
+                @display("i=device/laptop_l");
+        }
+        server[numservers]: StandardHost {
+            parameters:
+                @display("i=device/server_l");
+        }
+    connections allowunconnected:
+        for i=0..numservers-1 {
+            server[i].ethg++ <--> ethernetline <--> router_s.ethg++;
+        }
+        for i=0..numclients-1 {
+            client[i].ethg++ <--> ethernetline <--> router_c.ethg++;
+        }
+        router_s.ethg++ <--> ethernetline <--> router_c.ethg++;
+}
 
