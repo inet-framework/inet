@@ -26,15 +26,13 @@
 #include <map>
 
 #include "INETDefs.h"
-
-#include "IPvXAddress.h"
-#include "UDPAppBase.h"
+#include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicBurst : public UDPAppBase
+class INET_API UDPBasicBurst : public cSimpleModule
 {
   public:
     enum ChooseDestAddrMode
@@ -42,7 +40,8 @@ class INET_API UDPBasicBurst : public UDPAppBase
         ONCE = 1, PER_BURST, PER_SEND
     };
 
-    protected:
+  protected:
+    UDPSocket socket;
     int localPort, destPort;
 
     ChooseDestAddrMode chooseDestAddrMode;

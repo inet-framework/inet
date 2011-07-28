@@ -29,7 +29,11 @@
 
 #include "IPvXAddress.h"
 
+#ifdef WITH_UDP
+#include "UDPSocket.h"
+#endif
 
+#define SCTP_UDP_PORT  9899
 
 class SCTPAssociation;
 class SCTPMessage;
@@ -163,10 +167,14 @@ class INET_API SCTP : public cSimpleModule
         typedef std::map<AppConnKey,SCTPAssociation*> SctpAppConnMap;
         typedef std::map<SockPair,SCTPAssociation*> SctpConnMap;
 
-
         SctpAppConnMap sctpAppConnMap;
         SctpConnMap sctpConnMap;
         std::list<SCTPAssociation*>assocList;
+
+#ifdef WITH_UDP
+        UDPSocket udpSocket;
+#endif
+
     protected:
         int32 sizeConnMap;
         static int32 nextConnId;

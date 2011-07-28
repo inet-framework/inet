@@ -21,6 +21,7 @@
 
 #include "INETDefs.h"
 #include "IPv4Address.h"
+#include "UDPSocket.h"
 
 
 //Forward declarations:
@@ -214,14 +215,9 @@ class INET_API RTCP : public cSimpleModule
     cArray _participantInfos;
 
     /**
-     * The server socket for receiving rtcp packets.
+     * The UDP socket for sending/receiving rtcp packets.
      */
-    int _socketFdIn;
-
-    /**
-     * The client socket for sending rtcp packets.
-     */
-    int _socketFdOut;
+    UDPSocket _udpSocket;
 
     /**
      * The number of packets this rtcp module has

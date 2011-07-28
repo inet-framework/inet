@@ -42,8 +42,7 @@ void RTCP::initialize()
     // initialize variables
     _ssrcChosen = false;
     _leaveSession = false;
-    _socketFdIn = -1;
-    _socketFdOut = -1;
+    _udpSocket.setOutputGate(gate("udpOut"));
 
     _packetsCalculated = 0;
     _averagePacketSize = 0.0;
@@ -208,31 +207,8 @@ void RTCP::readRet(cPacket *sifpIn)
 
 void RTCP::createSocket()
 {
-    // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
-    // we just manage the UDP socket by hand...
-    if (_socketFdIn == -1)
-    {
-        _socketFdIn = UDPSocket::generateSocketId();
-        UDPControlInfo *ctrl = new UDPControlInfo();
-        IPv4Address ipaddr(_destinationAddress);
-
-        if (ipaddr.isMulticast())
-        {
-            ctrl->setSrcAddr(IPv4Address(_destinationAddress));
-            ctrl->setSrcPort(_port);
-        }
-        else
-        {
-             ctrl->setSrcPort(_port);
-             ctrl->setSockId(_socketFdOut);
-        }
-        ctrl->setSockId((int)_socketFdIn);
-        cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
-        msg->setControlInfo(ctrl);
-        send(msg, "udpOut");
-
-        connectRet();
-    }
+    _udpSocket.bind(IPvXAddress(_destinationAddress), _port);  //XXX this will fail if this function is invoked multiple times; not sure that may (or is expected to) happen
+    connectRet();
 }
 
 void RTCP::scheduleInterval()
@@ -314,6 +290,7 @@ void RTCP::createPacket()
             }
         }
     }
+
     // insert source description items (at least common name)
     RTCPSDESPacket *sdesPacket = new RTCPSDESPacket("SDESPacket");
 
@@ -337,14 +314,7 @@ void RTCP::createPacket()
 
     cPacket *msg = new cPacket("RTCPCompoundPacket");
     msg->encapsulate(compoundPacket);
-    msg->setKind(UDP_C_DATA);
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setSockId(_socketFdOut);
-    ctrl->setDestAddr(_destinationAddress);
-    ctrl->setDestPort(_port);
-    msg->setControlInfo(ctrl);
-
-    send(msg, "udpOut");
+    _udpSocket.sendTo(msg, _destinationAddress, _port);
 
     if (_leaveSession)
     {

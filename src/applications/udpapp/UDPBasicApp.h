@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,16 +21,17 @@
 #define __INET_UDPBASICAPP_H
 
 #include <vector>
-
-#include "UDPAppBase.h"
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public UDPAppBase
+class INET_API UDPBasicApp : public cSimpleModule
 {
   protected:
+    UDPSocket socket;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
     simtime_t stopTime;

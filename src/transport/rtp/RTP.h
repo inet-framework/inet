@@ -24,6 +24,7 @@
 #include "IPvXAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
+#include "UDPSocket.h"
 
 
 /**
@@ -192,14 +193,9 @@ class INET_API RTP : public cSimpleModule
     int _rtcpPercentage;
 
     /**
-     * The RTP server socket file descriptor.
+     * The UDP socket.
      */
-    int _socketFdIn;
-
-    /**
-     * The RTP client socket file descriptor.
-     */
-    int _socketFdOut;
+    UDPSocket _udpSocket;
 
     /**
      * True when this end system is about to leave the session.

@@ -17,11 +17,13 @@
 
 
 #include "UDPSink.h"
+#include "UDPControlInfo_m.h"
 
 
 Define_Module(UDPSink);
 
 simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
+
 
 void UDPSink::initialize()
 {
@@ -29,15 +31,28 @@ void UDPSink::initialize()
     WATCH(numReceived);
     rcvdPkSignal = registerSignal("rcvdPk");
 
-    int port = par("localPort");
+    socket.setOutputGate(gate("udpOut"));
 
-    if (port != -1)
-        bindToPort(port);
+    int localPort = par("localPort");
+    socket.bind(localPort);
 }
 
 void UDPSink::handleMessage(cMessage *msg)
 {
-    processPacket(PK(msg));
+    if (msg->getKind() == UDP_I_DATA)
+    {
+        // process incoming packet
+        processPacket(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
+    }
 
     if (ev.isGUI())
     {
@@ -49,15 +64,13 @@ void UDPSink::handleMessage(cMessage *msg)
 
 void UDPSink::finish()
 {
-    recordScalar("packets received", numReceived);
 }
 
-void UDPSink::processPacket(cPacket *msg)
+void UDPSink::processPacket(cPacket *pk)
 {
-    EV << "Received packet: ";
-    emit(rcvdPkSignal, msg);
-    printPacket(msg);
-    delete msg;
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    emit(rcvdPkSignal, pk);
+    delete pk;
 
     numReceived++;
 }

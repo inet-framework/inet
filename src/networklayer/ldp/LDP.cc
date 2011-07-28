@@ -28,6 +28,7 @@
 #include "LIBTableAccess.h"
 #include "TEDAccess.h"
 #include "NotifierConsts.h"
+#include "UDPControlInfo_m.h"
 #include "UDPPacket.h"
 #include "TCPSegment.h"
 
@@ -486,7 +487,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
 void LDP::processLDPHello(LDPHello *msg)
 {
-    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
+    UDPDataIndication *controlInfo = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
     //IPv4Address peerAddr = controlInfo->getSrcAddr().get4();
     IPv4Address peerAddr = msg->getSenderAddress();
     int interfaceId = controlInfo->getInterfaceId();

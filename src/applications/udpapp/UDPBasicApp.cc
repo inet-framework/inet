@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,7 +18,7 @@
 
 
 #include "UDPBasicApp.h"
-
+#include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
 
 
@@ -55,7 +56,8 @@ void UDPBasicApp::initialize(int stage)
     if (destAddresses.empty())
         return;
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
     stopTime = par("stopTime").doubleValue();
     simtime_t startTime = par("startTime").doubleValue();
@@ -94,7 +96,7 @@ void UDPBasicApp::sendPacket()
     IPvXAddress destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
-    sendToUDP(payload, localPort, destAddr, destPort);
+    socket.sendTo(payload, destAddr, destPort);
     numSent++;
 }
 
@@ -110,10 +112,19 @@ void UDPBasicApp::handleMessage(cMessage *msg)
         else
             delete msg;
     }
-    else
+    else if (msg->getKind() == UDP_I_DATA)
     {
         // process incoming packet
         processPacket(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
     if (ev.isGUI())
@@ -124,12 +135,11 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     }
 }
 
-void UDPBasicApp::processPacket(cPacket *msg)
+void UDPBasicApp::processPacket(cPacket *pk)
 {
-    emit(rcvdPkSignal, msg);
-    EV << "Received packet: ";
-    printPacket(msg);
-    delete msg;
+    emit(rcvdPkSignal, pk);
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    delete pk;
     numReceived++;
 }
 

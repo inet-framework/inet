@@ -40,13 +40,12 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void RTP::initialize()
 {
-    _socketFdIn = -1; //UDPSocket::generateSocketId();
-    _socketFdOut = -1;
     _leaveSession = false;
     appInGate = findGate("appIn");
     profileInGate = findGate("profileIn");
     rtcpInGate = findGate("rtcpIn");
     udpInGate = findGate("udpIn");
+    _udpSocket.setOutputGate(gate("udpOut"));
 
     rcvdPkSignal = registerSignal("rcvdPk");
 }
@@ -296,27 +295,12 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 
 void RTP::dataOut(RTPInnerPacket *rinp)
 {
-    RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->decapsulate());
+    RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket()->dup());
 
-    // send message to UDP, with the appropriate control info attached
-    msg->setKind(UDP_C_DATA);
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setDestAddr(_destinationAddress);
-    ctrl->setDestPort(_port);
-    msg->setControlInfo(ctrl);
-
-    RTPInnerPacket *rinpOut = new RTPInnerPacket(*rinp);
-    rinpOut->encapsulate(new RTPPacket(*msg));
-
-//     ev << "Sending packet: ";msg->dump();
-    send(msg, "udpOut");
+    _udpSocket.sendTo(msg, _destinationAddress, _port);
 
     // RTCP module must be informed about sent rtp data packet
-
-    send(rinpOut, "rtcpOut");
-
-    delete rinp;
+    send(rinp, "rtcpOut");
 }
 
 void RTP::rtcpInitialized(RTPInnerPacket *rinp)
@@ -404,33 +388,8 @@ void RTP::createProfile()
 
 void RTP::createSocket()
 {
-    // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
-    // we just manage the UDP socket by hand...
-    if (_socketFdIn == -1)
-    {
-        _socketFdIn = UDPSocket::generateSocketId();
-
-        UDPControlInfo *ctrl = new UDPControlInfo();
-
-        IPv4Address ipaddr(_destinationAddress);
-
-        if (ipaddr.isMulticast())
-        {
-            ctrl->setSrcAddr(IPv4Address(_destinationAddress));
-            ctrl->setSrcPort(_port);
-        }
-        else
-        {
-             ctrl->setSrcPort(_port);
-             ctrl->setSockId(_socketFdOut); //FIXME The next statement overwrite it!!!
-        }
-        ctrl->setSockId((int)_socketFdIn);
-        cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
-        msg->setControlInfo(ctrl);
-        send(msg, "udpOut");
-
-        connectRet();
-    }
+    _udpSocket.bind(_destinationAddress, _port);
+    connectRet();
 }
 
 void RTP::initializeProfile()

@@ -222,6 +222,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     IPv4Address *nextHopAddressPrt = NULL;
 
     // if HL sends an IPv4Datagram, route the packet
+    //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
         IPv4Datagram *datagram = check_and_cast  <IPv4Datagram *>(msg);

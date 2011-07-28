@@ -86,15 +86,11 @@ void SCTP::printVTagMap()
 
 void SCTP::bindPortForUDP()
 {
-    EV << "Binding to UDP port " << 9899 << endl;
+    EV << "Binding to UDP port " << SCTP_UDP_PORT << endl;
 
 #ifdef WITH_UDP
-    cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setSrcPort(9899);
-    ctrl->setSockId(UDPSocket::generateSocketId());
-    msg->setControlInfo(ctrl);
-    send(msg, "to_ip");
+    udpSocket.setOutputGate(gate("to_ip"));
+    udpSocket.bind(SCTP_UDP_PORT);
 #else
     throw cRuntimeError("SCTP feature compiled without UDP feature.");
 #endif
@@ -191,9 +187,9 @@ void SCTP::handleMessage(cMessage *msg)
 #ifdef WITH_IPv4
             if (par("udpEncapsEnabled"))
             {
-                std::cout<<"Laenge SCTPMSG="<<sctpmsg->getByteLength()<<"\n";
+                std::cout<<"Size of SCTPMSG="<<sctpmsg->getByteLength()<<"\n";
 #ifdef WITH_UDP
-                UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+                UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
                 srcAddr = ctrl->getSrcAddr();
                 destAddr = ctrl->getDestAddr();
                 std::cout<<"controlInfo srcAddr="<<srcAddr<<"  destAddr="<<destAddr<<"\n";
@@ -369,13 +365,8 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddr
     if ((bool)par("udpEncapsEnabled"))
     {
 #ifdef WITH_UDP
-        msg->setKind(UDP_C_DATA);
         std::cout<<"VTag="<<msg->getTag()<<"\n";
-        UDPControlInfo *ctrl = new UDPControlInfo();
-        ctrl->setSrcPort(9899);
-        ctrl->setDestAddr(destAddr.get4());
-        ctrl->setDestPort(9899);
-        msg->setControlInfo(ctrl);
+        udpSocket.sendTo(msg, destAddr, SCTP_UDP_PORT);
 #else
         throw cRuntimeError("SCTP feature compiled without UDP feature.");
 #endif
@@ -387,8 +378,8 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddr
         controlInfo->setSrcAddr(srcAddr.get4());
         controlInfo->setDestAddr(destAddr.get4());
         msg->setControlInfo(controlInfo);
+        send(msg, "to_ip");
     }
-    send(msg, "to_ip");
 }
 
 void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr)

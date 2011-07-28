@@ -96,12 +96,12 @@ void UDPBasicBurst::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-
 
     IPvXAddress myAddr = IPvXAddressResolver().resolve(this->getParentModule()->getFullPath().c_str());
     while ((token = tokenizer.nextToken()) != NULL)
@@ -168,10 +168,19 @@ void UDPBasicBurst::handleMessage(cMessage *msg)
                 generateBurst();
         }
     }
-    else
+    else if (msg->getKind() == UDP_I_DATA)
     {
         // process incoming packet
         processPacket(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
     if (ev.isGUI())
@@ -182,28 +191,28 @@ void UDPBasicBurst::handleMessage(cMessage *msg)
     }
 }
 
-void UDPBasicBurst::processPacket(cPacket *msg)
+void UDPBasicBurst::processPacket(cPacket *pk)
 {
-    if (msg->getKind() == UDP_I_ERROR)
+    if (pk->getKind() == UDP_I_ERROR)
     {
-        delete msg;
+        EV << "UDP error received\n";
+        delete pk;
         return;
     }
 
-    if (msg->hasPar("sourceId") && msg->hasPar("msgId"))
+    if (pk->hasPar("sourceId") && pk->hasPar("msgId"))
     {
         // duplicate control
-        int moduleId = (int)msg->par("sourceId");
-        int msgId = (int)msg->par("msgId");
+        int moduleId = (int)pk->par("sourceId");
+        int msgId = (int)pk->par("msgId");
         SourceSequence::iterator it = sourceSequence.find(moduleId);
         if (it != sourceSequence.end())
         {
             if (it->second >= msgId)
             {
-                EV << "Out of order packet: ";
-                printPacket(msg);
-                emit(outOfOrderPkSignal, msg);
-                delete msg;
+                EV << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+                emit(outOfOrderPkSignal, pk);
+                delete pk;
                 numDuplicated++;
                 return;
             }
@@ -216,22 +225,20 @@ void UDPBasicBurst::processPacket(cPacket *msg)
 
     if (delayLimit > 0)
     {
-        if (simTime() - msg->getTimestamp() > delayLimit)
+        if (simTime() - pk->getTimestamp() > delayLimit)
         {
-            EV << "Old packet: ";
-            printPacket(msg);
-            emit(dropPkSignal, msg);
-            delete msg;
+            EV << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+            emit(dropPkSignal, pk);
+            delete pk;
             numDeleted++;
             return;
         }
     }
 
-    EV << "Received packet: ";
-    printPacket(msg);
-    emit(rcvdPkSignal, msg);
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    emit(rcvdPkSignal, pk);
     numReceived++;
-    delete msg;
+    delete pk;
 }
 
 void UDPBasicBurst::generateBurst()
@@ -273,7 +280,7 @@ void UDPBasicBurst::generateBurst()
     cPacket *payload = createPacket();
     payload->setTimestamp();
     emit(sentPkSignal, payload);
-    sendToUDP(payload, localPort, destAddr, destPort);
+    socket.sendTo(payload, destAddr, destPort);
     numSent++;
 
     // Next timer

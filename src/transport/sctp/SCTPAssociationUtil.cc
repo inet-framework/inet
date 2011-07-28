@@ -248,12 +248,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
     if ((bool)sctpMain->par("udpEncapsEnabled"))
     {
 #ifdef WITH_UDP
-        sctpmsg->setKind(UDP_C_DATA);
-        UDPControlInfo* controlInfo = new UDPControlInfo();
-        controlInfo->setSrcPort(9899);
-        controlInfo->setDestAddr(remoteAddr.get4());
-        controlInfo->setDestPort(9899);
-        sctpmsg->setControlInfo(controlInfo);
+        sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
 #else
         throw cRuntimeError("SCTP feature compiled without UDP feature.");
 #endif

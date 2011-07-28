@@ -26,9 +26,8 @@
 
 #include <vector>
 
-#include "UDPAppBase.h"
-
-#include "IPvXAddress.h"
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 
 /**
@@ -38,7 +37,7 @@
  * and UDPVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UDPVideoStreamSvr : public UDPAppBase
+class INET_API UDPVideoStreamSvr : public cSimpleModule
 {
   public:
     /**
@@ -56,6 +55,7 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
   protected:
     typedef std::vector<VideoStreamData *> VideoStreamVector;
     VideoStreamVector streamVector;
+    UDPSocket socket;
 
     // module parameters
     int localPort;

@@ -38,13 +38,12 @@ extern "C" {
 
 #include "AudioOutFile.h"
 #include "IPvXAddressResolver.h"
-#include "UDPAppBase.h"
-#include "UDPControlInfo_m.h"
+#include "UDPSocket.h"
 #include "VoIPPacket_m.h"
 
 //using namespace std;
 
-class INET_API VoIPSourceApp : public UDPAppBase
+class INET_API VoIPSourceApp : public cSimpleModule
 {
   public:
     ~VoIPSourceApp();
@@ -84,6 +83,7 @@ class INET_API VoIPSourceApp : public UDPAppBase
         void align();
     };
 
+  protected:
     // general parameters
     int localPort;
     int destPort;
@@ -111,6 +111,7 @@ class INET_API VoIPSourceApp : public UDPAppBase
     AVCodec *pCodecEncoder;         // output encoder codec
 
     // state variables
+    UDPSocket socket;
     int streamIndex;
     uint32_t pktID;                 // increasing packet sequence number
     int samplesPerPacket;

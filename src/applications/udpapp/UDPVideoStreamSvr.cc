@@ -50,8 +50,6 @@ UDPVideoStreamSvr::~UDPVideoStreamSvr()
 
 void UDPVideoStreamSvr::initialize()
 {
-    this->UDPAppBase::initialize();
-
     sendInterval = &par("sendInterval");
     packetLen = &par("packetLen");
     videoSize = &par("videoSize");
@@ -65,7 +63,8 @@ void UDPVideoStreamSvr::initialize()
 
     WATCH_PTRVECTOR(streamVector);
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 }
 
 void UDPVideoStreamSvr::finish()
@@ -79,17 +78,26 @@ void UDPVideoStreamSvr::handleMessage(cMessage *msg)
         // timer for a particular video stream expired, send packet
         sendStreamData(msg);
     }
-    else
+    else if (msg->getKind() == UDP_I_DATA)
     {
         // start streaming
         processStreamRequest(msg);
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 }
 
 void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 {
     // register video stream...
-    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
+    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
 
     VideoStreamData *d = new VideoStreamData;
     d->clientAddr = ctrl->getSrcAddr();
@@ -122,7 +130,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 
     pkt->setByteLength(pktLen);
     emit(sentPkSignal, pkt);
-    sendToUDP(pkt, localPort, d->clientAddr, d->clientPort);
+    socket.sendTo(pkt, d->clientAddr, d->clientPort);
 
     d->bytesLeft -= pktLen;
     d->numPkSent++;

@@ -30,12 +30,10 @@ void UDPEchoApp::initialize(int stage)
 {
     UDPBasicApp::initialize(stage);
 
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
-
-    roundTripTimeSignal = registerSignal("roundTripTime");
+    if (stage == 0)
+    {
+        roundTripTimeSignal = registerSignal("roundTripTime");
+    }
 }
 
 void UDPEchoApp::finish()
@@ -66,19 +64,15 @@ void UDPEchoApp::processPacket(cPacket *msg)
 
     if (packet->getIsRequest())
     {
-        UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->getControlInfo());
-
-        // swap src and dest
-        IPvXAddress srcAddr = controlInfo->getSrcAddr();
-        int srcPort = controlInfo->getSrcPort();
-        controlInfo->setSrcAddr(controlInfo->getDestAddr());
-        controlInfo->setSrcPort(controlInfo->getDestPort());
-        controlInfo->setDestAddr(srcAddr);
-        controlInfo->setDestPort(srcPort);
-
+        // send back as response
         packet->setIsRequest(false);
+        UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
+        IPvXAddress srcAddr = ctrl->getSrcAddr();
+        int srcPort = ctrl->getSrcPort();
+        delete ctrl;
+
         emit(sentPkSignal, packet);
-        send(packet, "udpOut");
+        socket.sendTo(packet, srcAddr, srcPort);
     }
     else
     {

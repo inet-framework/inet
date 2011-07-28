@@ -38,14 +38,14 @@ extern "C" {
 #include <sys/stat.h>
 
 #include "IPvXAddressResolver.h"
-#include "UDPAppBase.h"
 #include "UDPControlInfo_m.h"
+#include "UDPSocket.h"
 
 #include "VoIPPacket_m.h"
 
 #include "AudioOutFile.h"
 
-class VoIPSinkApp : public UDPAppBase
+class VoIPSinkApp : public cSimpleModule
 {
   public:
     VoIPSinkApp() { resultFile = ""; }
@@ -95,6 +95,8 @@ class VoIPSinkApp : public UDPAppBase
     int localPort;
     simtime_t playOutDelay;
     const char *resultFile;
+
+    UDPSocket socket;
 
     Connection curConn;
 

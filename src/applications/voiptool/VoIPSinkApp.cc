@@ -50,7 +50,6 @@ void VoIPSinkApp::initSignals()
 
 void VoIPSinkApp::initialize()
 {
-    UDPAppBase::initialize();
     initSignals();
 
     // Say Hello to the world
@@ -63,7 +62,8 @@ void VoIPSinkApp::initialize()
     // initialize avcodec library
     av_register_all();
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 }
 
 void VoIPSinkApp::handleMessage(cMessage *msg)

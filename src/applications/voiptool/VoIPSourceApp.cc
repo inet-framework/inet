@@ -18,6 +18,8 @@
 
 #include "VoIPSourceApp.h"
 
+#include "UDPControlInfo_m.h"
+
 Define_Module(VoIPSourceApp);
 
 
@@ -52,8 +54,6 @@ void VoIPSourceApp::Buffer::clear(int framesize)
 
 void VoIPSourceApp::initialize(int stage)
 {
-    UDPAppBase::initialize(stage);
-
     if (stage != 3)  //wait until stage 3 - The Address resolver does not work before that!
         return;
 
@@ -64,6 +64,8 @@ void VoIPSourceApp::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
     destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
     voipHeaderSize = par("voipHeaderSize");
     voipSilenceThreshold = par("voipSilenceThreshold");
@@ -136,7 +138,7 @@ void VoIPSourceApp::handleMessage(cMessage *msg)
         {
             packet = check_and_cast<VoIPPacket *>(msg);
             emit(sentPkSignal, packet);
-            sendToUDP(packet, localPort, destAddress, destPort);
+            socket.sendTo(packet, destAddress, destPort);
         }
     }
     else
