@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,9 +19,10 @@
 #ifndef __INET_UDPSOCKET_H
 #define __INET_UDPSOCKET_H
 
-#include <omnetpp.h>
-#include "UDPControlInfo_m.h"
+#include "INETDefs.h"
+#include "IPvXAddress.h"
 
+class UDPDataIndication;
 
 /**
  * UDPSocket is a convenience class, to make it easier to send and receive
@@ -112,27 +113,15 @@ class INET_API UDPSocket
     {
       public:
         virtual ~CallbackInterface() {}
-        virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPControlInfo *ctrl) = 0;
+        virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPDataIndication *ctrl) = 0;
         virtual void socketPeerClosed(int sockId, void *yourPtr) {}
     };
 
-    enum State {NOT_BOUND, BOUND};  // FIXME needed?
-
   protected:
     int sockId;
-    int usrId;
-    int sockstate;
-
-    IPvXAddress localAddr; // needed for sendTo() as local address
-    int localPrt;
-    IPvXAddress remoteAddr; // needed to enable send(msg) call
-    int remotePrt; // needed to enable send(msg) call
-    int mcastIfaceId;
-
+    cGate *gateToUdp;
     CallbackInterface *cb;
     void *yourPtr;
-
-    cGate *gateToUdp;
 
   protected:
     void sendToUDP(cMessage *msg);
@@ -155,38 +144,9 @@ class INET_API UDPSocket
     int getSocketId() const  {return sockId;}
 
     /**
-     * Sets userId to an arbitrary value. (This value will be sent back to us
-     * by UDP in UDPControlInfo if we receive a packet on this socket.)
-     */
-    void setUserId(int userId);
-
-    /**
-     * Returns the userId.
-     */
-    int getUserId() const  {return usrId;}
-
-    /**
-     * Returns the socket state, one of NOT_BOUND, BOUND, etc.
-     * Messages received from UDP must be routed through
-     * processMessage() in order to keep socket state up-to-date.
-     */
-    int getState()   {return sockstate;}
-
-    /**
-     * Returns name of socket state code returned by getState().
-     */
-    static const char *stateName(int state);
-
-    /**
      * Generates a new socket id.
      */
     static int generateSocketId();
-
-    /** @name Getter functions */
-    //@{
-    IPvXAddress getLocalAddress() {return localAddr;}
-    int getLocalPort() {return localPrt;}
-    //@}
 
     /** @name Opening and closing connections, sending data */
     //@{
@@ -216,16 +176,36 @@ class INET_API UDPSocket
     void connect(IPvXAddress remoteAddr, int remotePort);
 
     /**
-     * Set the output interface for sending multicast packets (like the Unix
-     * IP_MULTICAST_IF socket option). The argument is the interface's Id
-     * in InterfaceTable.
+     * Set the TTL (IPv6: Hop Limit) field on sent packets.
      */
-    void setMulticastInterfaceId(int interfaceId) {mcastIfaceId = interfaceId;}
+    void setTimeToLive(int ttl);
 
     /**
-     * Returns the output interface for sending multicast packets.
+     * Set the Broadcast option on the UDP socket. This will cause the
+     * socket to receive broadcast packets as well.
      */
-    int getMulticastInterfaceId() const {return mcastIfaceId;}
+    void setBroadcast(bool broadcast);
+
+    /**
+     * Set the output interface for sending multicast packets (like the Unix
+     * IP_MULTICAST_IF socket option). The argument is the interface's ID in
+     * InterfaceTable.
+     */
+    void setMulticastOutputInterface(int interfaceId);
+
+    /**
+     * Adds the socket to the given multicast group, that is, UDP packets
+     * arriving to the given multicast address will be passed up to the socket.
+     * One can also optionally specify the output interface for packets sent to
+     * that address.
+     */
+    void joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId=-1);
+
+    /**
+     * Causes the socket to socket leave the given multicast group, i.e. UDP packets
+     * arriving to the given multicast address will no longer passed up to the socket.
+     */
+    void leaveMulticastGroup(const IPvXAddress& multicastAddr);
 
     /**
      * Sends a data packet to the given address and port.
@@ -259,6 +239,11 @@ class INET_API UDPSocket
      * it as getControlInfo().)
      */
     static bool belongsToAnyUDPSocket(cMessage *msg);
+
+    /**
+     * Utility function: returns a line of information about a packet received via UDP.
+     */
+    static std::string getReceivedPacketInfo(cPacket *pk);
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -298,5 +283,4 @@ class INET_API UDPSocket
 };
 
 #endif
-
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,6 +16,7 @@
 //
 
 #include "UDPSocket.h"
+#include "UDPControlInfo_m.h"
 
 
 UDPSocket::UDPSocket()
@@ -23,28 +24,9 @@ UDPSocket::UDPSocket()
     // don't allow user-specified sockIds because they may conflict with
     // automatically assigned ones.
     sockId = generateSocketId();
-    usrId = -1;
-    sockstate = NOT_BOUND;
-
-    localPrt = remotePrt = 0;
-    mcastIfaceId = -1;
+    gateToUdp = NULL;
     cb = NULL;
     yourPtr = NULL;
-
-    gateToUdp = NULL;
-}
-
-const char *UDPSocket::stateName(int state)
-{
-#define CASE(x) case x: s=#x; break
-    const char *s = "unknown";
-    switch (state)
-    {
-        CASE(NOT_BOUND);
-        CASE(BOUND);
-    }
-    return s;
-#undef CASE
 }
 
 int UDPSocket::generateSocketId()
@@ -60,114 +42,119 @@ void UDPSocket::sendToUDP(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
-void UDPSocket::setUserId(int userId)
+void UDPSocket::bind(int localPort)
 {
-    if (sockstate!=NOT_BOUND)
-        throw cRuntimeError("UDPSocket::setUserId(): cannot change userId after socket is bound");
-
-    usrId = userId;
+    bind(IPvXAddress(), localPort);
 }
 
-void UDPSocket::bind(int lPort)
+void UDPSocket::bind(IPvXAddress localAddr, int localPort)
 {
-    if (sockstate!=NOT_BOUND)
-        throw cRuntimeError("UDPSocket::bind(): socket already bound");
+    if (localPort<-1 || localPort>65535)  // -1: ephemeral port
+        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", localPort);
 
-    if (lPort<=0 || lPort>65535)
-        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", lPort);
-
-    localPrt = lPort;
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
+    UDPBindCommand *ctrl = new UDPBindCommand();
     ctrl->setSockId(sockId);
-    ctrl->setUserId(usrId);
-    ctrl->setSrcPort(localPrt);
+    ctrl->setLocalAddr(localAddr);
+    ctrl->setLocalPort(localPort);
     cMessage *msg = new cMessage("BIND", UDP_C_BIND);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
-
-    sockstate = BOUND;
-}
-
-void UDPSocket::bind(IPvXAddress lAddr, int lPort)
-{
-    if (sockstate!=NOT_BOUND)
-        throw cRuntimeError("UDPSocket::bind(): socket already bound");
-
-    if (lPort<=0 || lPort>65535)
-        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", lPort);
-
-    localAddr = lAddr;
-    localPrt = lPort;
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setSockId(sockId);
-    ctrl->setUserId(usrId);
-    ctrl->setSrcAddr(localAddr);
-    ctrl->setSrcPort(localPrt);
-    cMessage *msg = new cMessage("BIND", UDP_C_BIND);
-    msg->setControlInfo(ctrl);
-    sendToUDP(msg);
-
-    sockstate = BOUND;
 }
 
 void UDPSocket::connect(IPvXAddress addr, int port)
 {
-    if (sockstate!=BOUND)
-        throw cRuntimeError( "UDPSocket::connect(): socket must be bound before connect() can be called");
-
     if (addr.isUnspecified())
         throw cRuntimeError("UDPSocket::connect(): unspecified remote address");
-
     if (port<=0 || port>65535)
         throw cRuntimeError("UDPSocket::connect(): invalid remote port number %d", port);
 
-    remoteAddr = addr;
-    remotePrt = port;
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
+    UDPConnectCommand *ctrl = new UDPConnectCommand();
     ctrl->setSockId(sockId);
-    ctrl->setDestAddr(remoteAddr);
-    ctrl->setDestPort(remotePrt);
+    ctrl->setRemoteAddr(addr);
+    ctrl->setRemotePort(port);
     cMessage *msg = new cMessage("CONNECT", UDP_C_CONNECT);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
 
-void UDPSocket::sendTo(cPacket *msg, IPvXAddress destAddr, int destPort)
+void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort)
 {
-    msg->setKind(UDP_C_DATA);
-    UDPControlInfo *ctrl = new UDPControlInfo();
+    pk->setKind(UDP_C_DATA);
+    UDPSendCommand *ctrl = new UDPSendCommand();
     ctrl->setSockId(sockId);
-    ctrl->setSrcAddr(localAddr);
-    ctrl->setSrcPort(localPrt);
     ctrl->setDestAddr(destAddr);
     ctrl->setDestPort(destPort);
-    ctrl->setInterfaceId(mcastIfaceId);
-    msg->setControlInfo(ctrl);
-    sendToUDP(msg);
+    pk->setControlInfo(ctrl);
+    sendToUDP(pk);
 }
 
-void UDPSocket::send(cPacket *msg)
+void UDPSocket::send(cPacket *pk)
 {
-    if (remoteAddr.isUnspecified() || remotePrt==0)
-        throw cRuntimeError("UDPSocket::send(): must call connect() before using send()");
-
-    sendTo(msg, remoteAddr, remotePrt);
+    pk->setKind(UDP_C_DATA);
+    UDPSendCommand *ctrl = new UDPSendCommand();
+    ctrl->setSockId(sockId);
+    pk->setControlInfo(ctrl);
+    sendToUDP(pk);
 }
 
 void UDPSocket::close()
 {
-    if (sockstate!=BOUND)
-        return;
-
-    cMessage *msg = new cMessage("UNBIND", UDP_C_UNBIND);
-    UDPControlInfo *ctrl = new UDPControlInfo();
+    cMessage *msg = new cMessage("CLOSE", UDP_C_CLOSE);
+    UDPCloseCommand *ctrl = new UDPCloseCommand();
     ctrl->setSockId(sockId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
-    sockstate = NOT_BOUND;
+}
+
+void UDPSocket::setBroadcast(bool broadcast)
+{
+    cMessage *msg = new cMessage("SetBroadcast", UDP_C_SETOPTION);
+    UDPSetBroadcastCommand *ctrl = new UDPSetBroadcastCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setBroadcast(broadcast);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::setTimeToLive(int ttl)
+{
+    cMessage *msg = new cMessage("SetTTL", UDP_C_SETOPTION);
+    UDPSetTimeToLiveCommand *ctrl = new UDPSetTimeToLiveCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setTtl(ttl);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::setMulticastOutputInterface(int interfaceId)
+{
+    cMessage *msg = new cMessage("SetMulticastOutputIf", UDP_C_SETOPTION);
+    UDPSetMulticastInterfaceCommand *ctrl = new UDPSetMulticastInterfaceCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId)
+{
+    cMessage *msg = new cMessage("JoinMulticastGroup", UDP_C_SETOPTION);
+    UDPJoinMulticastGroupCommand *ctrl = new UDPJoinMulticastGroupCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setInterfaceId(interfaceId);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::leaveMulticastGroup(const IPvXAddress& multicastAddr)
+{
+    cMessage *msg = new cMessage("LeaveMulticastGroup", UDP_C_SETOPTION);
+    UDPLeaveMulticastGroupCommand *ctrl = new UDPLeaveMulticastGroupCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setMulticastAddr(multicastAddr);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
 }
 
 bool UDPSocket::belongsToSocket(cMessage *msg)
@@ -181,6 +168,21 @@ bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
     return dynamic_cast<UDPControlInfo *>(msg->getControlInfo());
 }
 
+std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
+{
+    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->getControlInfo());
+
+    IPvXAddress srcAddr = ctrl->getSrcAddr();
+    IPvXAddress destAddr = ctrl->getDestAddr();
+    int srcPort = ctrl->getSrcPort();
+    int destPort = ctrl->getDestPort();
+
+    std::stringstream os;
+    os  << pk << "  (" << pk->getByteLength() << " bytes)" << endl;
+    os  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;
+    return os.str();
+}
+
 void UDPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
 {
     cb = callback;
@@ -189,7 +191,7 @@ void UDPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer
 
 void UDPSocket::processMessage(cMessage *msg)
 {
-    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
     ASSERT(ctrl->getSockId()==sockId);
 
     switch (msg->getKind())
@@ -203,7 +205,6 @@ void UDPSocket::processMessage(cMessage *msg)
              }
              break;
         case UDP_I_ERROR:
-             sockstate = NOT_BOUND;
              delete msg;
              if (cb)
                  cb->socketPeerClosed(sockId, yourPtr);
