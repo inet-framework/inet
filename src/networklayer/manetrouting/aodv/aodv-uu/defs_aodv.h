@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrom, <erik.nordstrom@it.uu.se>
  *
  *****************************************************************************/
 #ifndef _DEFS_H
@@ -29,9 +29,8 @@
 #include <sys/time.h>
 #include <sys/types.h>
 //#include <syslog.h>
-#else
-#include "compatibility.h"
 #endif
+#include "compatibility.h"
 
 
 #ifndef NS_PORT
