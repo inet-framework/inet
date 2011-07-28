@@ -27,7 +27,7 @@ import inet.applications.IUDPApp;
 simple UDPEchoApp like IUDPApp
 {
     parameters:
-        int localPort;  // local port
+        int localPort = default(-1);  // local port (-1: use ephemeral port)
         string destAddresses = default(""); // list of destination IP addresses, separated by spaces
         int destPort;  // destination port 
         volatile int messageLength @unit(B); // length of messages to generate, int bytes

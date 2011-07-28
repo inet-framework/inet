@@ -37,7 +37,7 @@ import inet.applications.IUDPApp;
 simple UDPVideoStreamCli like IUDPApp
 {
     parameters:
-        int localPort;  // local port
+        int localPort = default(-1);  // local port (-1: use ephemeral port)
         string serverAddress;  // server address
         int serverPort;  // server port
         double startTime @unit(s) = default(1s);

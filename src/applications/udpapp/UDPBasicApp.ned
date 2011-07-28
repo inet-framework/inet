@@ -39,7 +39,7 @@ import inet.applications.IUDPApp;
 simple UDPBasicApp like IUDPApp
 {
     parameters:
-        int localPort; // if -1, app doesn't bind in UDP
+        int localPort = default(-1);  // local port (-1: use ephemeral port)
         int destPort;
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
