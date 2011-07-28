@@ -25,8 +25,6 @@ UDPSocket::UDPSocket()
     // automatically assigned ones.
     sockId = generateSocketId();
     gateToUdp = NULL;
-    cb = NULL;
-    yourPtr = NULL;
 }
 
 int UDPSocket::generateSocketId()
@@ -181,36 +179,5 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     os  << pk << "  (" << pk->getByteLength() << " bytes)" << endl;
     os  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;
     return os.str();
-}
-
-void UDPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
-{
-    cb = callback;
-    yourPtr = yourPointer;
-}
-
-void UDPSocket::processMessage(cMessage *msg)
-{
-    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
-    ASSERT(ctrl->getSockId()==sockId);
-
-    switch (msg->getKind())
-    {
-        case UDP_I_DATA:
-             if (cb)
-                 cb->socketDatagramArrived(sockId, yourPtr, msg, ctrl);
-             else {
-                 delete msg;
-                 delete ctrl;
-             }
-             break;
-        case UDP_I_ERROR:
-             delete msg;
-             if (cb)
-                 cb->socketPeerClosed(sockId, yourPtr);
-             break;
-        default:
-             throw cRuntimeError("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
-    }
 }
 

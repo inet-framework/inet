@@ -49,79 +49,18 @@ class UDPDataIndication;
  *   socket.close();
  * </pre>
  *
- * Dealing with packets and notification messages coming from UDP is somewhat
- * more cumbersome. Basically you have two choices: you either process those
- * messages yourself, or let UDPSocket do part of the job. For the latter,
- * you give UDPSocket a callback object on which it'll invoke the appropriate
- * member functions: socketDatagramArrived() and socketPeerClosed(); these are
- * methods of UDPSocket::CallbackInterface. The callback object can be your
- * simple module class too.
- *
- * socketPeerClosed() is invoked when UDP receives an ICMP message which
- * refers to a datagram sent from this socket.
- *
- * This code skeleton example shows how to set up a UDPSocket to use the module
- * itself as callback object:
- *
- * <pre>
- * class MyModule : public cSimpleModule, public UDPSocket::CallbackInterface
- * {
- *    UDPSocket socket;
- *    virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPControlInfo *ctrl);
- *    virtual void socketPeerClosed(int sockId, void *yourPtr);
- * };
- *
- * void MyModule::initialize() {
- *    socket.setCallbackObject(this,NULL);
- *    socket.bind(5555);
- * }
- *
- * void MyModule::handleMessage(cMessage *msg) {
- *    if (socket.belongsToSocket(msg))
- *       socket.processMessage(msg);
- *    else
- *       ...
- * }
- *
- * void MyModule::socketDatagramArrived(int, void *, cMessage *msg, UDPControlInfo *ctrl) {
- *     EV << "Received UDP packet, " << msg->getByteLength() << " bytes\\n";
- *     delete msg;
- * }
- *
- * void MyModule::socketPeerClosed(int, void *) {
- *     ev << "Received ICMP error, socket peer closed?\\n";
- * }
- * </pre>
- *
- * If you need to manage a large number of sockets, the UDPSocketMap
- * class may be useful.
- *
- * @see UDPSocketMap
+ * Processing messages sent up by the UDP module is relatively straightforward.
+ * You only need to distinguish between data packets and error notifications,
+ * by checking the message kind (should be either UDP_I_DATA or UDP_I_ERROR),
+ * and casting the control info to UDPDataIndication or UDPErrorIndication.
+ * USPSocket provides some help for this with the belongsToSocket() and
+ * belongsToAnyUDPSocket() methods.
  */
 class INET_API UDPSocket
 {
-  public:
-    /**
-     * Abstract base class for your callback objects. See setCallbackObject()
-     * and processMessage() for more info.
-     *
-     * Note: this class is not subclassed from cObject, because
-     * classes may have both this class and cSimpleModule as base class,
-     * and cSimpleModule is already a cObject.
-     */
-    class CallbackInterface
-    {
-      public:
-        virtual ~CallbackInterface() {}
-        virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPDataIndication *ctrl) = 0;
-        virtual void socketPeerClosed(int sockId, void *yourPtr) {}
-    };
-
   protected:
     int sockId;
     cGate *gateToUdp;
-    CallbackInterface *cb;
-    void *yourPtr;
 
   protected:
     void sendToUDP(cMessage *msg);
@@ -219,7 +158,8 @@ class INET_API UDPSocket
     void send(cPacket *msg);
 
     /**
-     * Unbinds the socket. There is no need for renewSocket() as with TCPSocket.
+     * Unbinds the socket. Once closed, a closed socket may be bound to another
+     * (or the same) port, and reused.
      */
     void close();
     //@}
@@ -244,41 +184,6 @@ class INET_API UDPSocket
      * Utility function: returns a line of information about a packet received via UDP.
      */
     static std::string getReceivedPacketInfo(cPacket *pk);
-
-    /**
-     * Sets a callback object, to be used with processMessage().
-     * This callback object may be your simple module itself (if it
-     * multiply inherits from CallbackInterface too, that is you
-     * declared it as
-     * <pre>
-     * class MyAppModule : public cSimpleModule, public UDPSocket::CallbackInterface
-     * </pre>
-     * and redefined the necessary virtual functions; or you may use
-     * dedicated class (and objects) for this purpose.
-     *
-     * UDPSocket doesn't delete the callback object in the destructor
-     * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * UDPSocket will not look at it or do anything with it except passing
-     * it back to you in the CallbackInterface calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by sockId in the callbacks,
-     * you can have it passed to you as yourPtr.
-     */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = NULL);
-
-    /**
-     * Examines the message (which should have arrived from UDP),
-     * and if there is a callback object installed (see setCallbackObject(),
-     * class CallbackInterface), dispatches to the appropriate method of
-     * it with the same yourPtr that you gave in the setCallbackObject() call.
-     *
-     * IMPORTANT: for performance reasons, this method doesn't check that
-     * the message belongs to this socket, i.e. belongsToSocket(msg) would
-     * return true!
-     */
-    void processMessage(cMessage *msg);
     //@}
 };
 
