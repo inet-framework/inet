@@ -122,106 +122,6 @@ void UDP::initialize()
     droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 }
 
-UDP::SockDesc *UDP::createSocket(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort)
-{
-    // validate sockId
-    if (sockId == -1)
-        error("sockId in BIND or CONNECT message not filled in");
-    if (socketsByIdMap.find(sockId) != socketsByIdMap.end())
-        error("Cannot create socket: sockId=%d is not unique (already taken)", sockId);
-
-    if (localPort<-1 || localPort>65535) // -1: ephemeral port
-        error(this, "bind: invalid local port number %d", localPort);
-
-    // do not allow two apps to bind to the same address/port combination
-    SockDesc *existing = findSocketByLocalAddress(localAddr, localPort);
-    if (existing != NULL)
-        error("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
-
-    // create and fill in SockDesc
-    SockDesc *sd = new SockDesc(sockId, gateIndex);
-    sd->localAddr = localAddr;
-    sd->localPort = localPort == -1 ? getEphemeralPort() : localPort;
-    sd->onlyLocalPortIsSet = sd->localAddr.isUnspecified();
-
-    // add to socketsByIdMap
-    socketsByIdMap[sockId] = sd;
-
-    // add to socketsByPortMap
-    SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
-    list.push_back(sd);
-
-    EV << "Socket created: " << *sd << "\n";
-    return sd;
-}
-
-void UDP::bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort)
-{
-    createSocket(sockId, gateIndex, IPvXAddress(), getEphemeralPort());
-}
-
-void UDP::connect(int sockId, int gateIndex, const IPvXAddress& remoteAddr, int remotePort)
-{
-    if (remoteAddr.isUnspecified())
-        error("connect: unspecified remote address");
-    if (remotePort<=0 || remotePort>65535)
-        error("connect: invalid remote port number %d", remotePort);
-
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
-    SockDesc *sd;
-    if (it != socketsByIdMap.end())
-        sd = it->second;
-    else
-        sd = createSocket(sockId, gateIndex, IPvXAddress(), getEphemeralPort());
-
-    sd->remoteAddr = remoteAddr;
-    sd->remotePort = remotePort;
-    sd->onlyLocalPortIsSet = false;
-
-    EV << "Socket connected: " << *sd << "\n";
-}
-
-void UDP::close(int sockId)
-{
-    // remove from socketsByIdMap
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
-    if (it==socketsByIdMap.end())
-        error("socket id=%d doesn't exist (already closed?)", sockId);
-    SockDesc *sd = it->second;
-    socketsByIdMap.erase(it);
-
-    EV << "Closing socket: " << *sd << "\n";
-
-    // remove from socketsByPortMap
-    SockDescList& list = socketsByPortMap[sd->localPort];
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
-        if (*it == sd)
-            {list.erase(it); break;}
-    if (list.empty())
-        socketsByPortMap.erase(sd->localPort);
-    delete sd;
-}
-
-ushort UDP::getEphemeralPort()
-{
-    // start at the last allocated port number + 1, and search for an unused one
-    ushort searchUntil = lastEphemeralPort++;
-    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
-        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-
-    while (socketsByPortMap.find(lastEphemeralPort) != socketsByPortMap.end())
-    {
-        if (lastEphemeralPort == searchUntil) // got back to starting point?
-            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
-        lastEphemeralPort++;
-        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
-            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    }
-
-    // found a free one, return it
-    return lastEphemeralPort;
-}
-
 void UDP::handleMessage(cMessage *msg)
 {
     // received from IP layer
@@ -256,208 +156,71 @@ void UDP::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-UDP::SockDesc *UDP::findSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort)
+void UDP::processCommandFromApp(cMessage *msg)
 {
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
-    if (it == socketsByPortMap.end())
-        return NULL;
-
-    SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    switch (msg->getKind())
     {
-        SockDesc *sd = *it;
-        if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
-            return sd;
-    }
-    return NULL;
-}
-
-UDP::SockDesc *UDP::findSocketForUnicastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort)
-{
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
-    if (it == socketsByPortMap.end())
-        return NULL;
-
-    SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
-    {
-        SockDesc *sd = *it;
-        if (sd->onlyLocalPortIsSet || (
-                (sd->remotePort == -1 || sd->remotePort == remotePort) &&
-                (sd->localAddr.isUnspecified() || sd->localAddr == localAddr) &&
-                (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr)
-        ))
-            return sd;
-    }
-    return NULL;
-}
-
-std::vector<UDP::SockDesc*> UDP::findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast)
-{
-    ASSERT(isMulticast || isBroadcast);
-    std::vector<SockDesc*> result;
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
-    if (it == socketsByPortMap.end())
-        return result;
-
-    SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
-    {
-        SockDesc *sd = *it;
-        if (isBroadcast)
-        {
-            if (sd->isBroadcast)
-            {
-                if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
-                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr))
-                    result.push_back(sd);
-            }
+        case UDP_C_BIND: {
+            UDPBindCommand *ctrl = check_and_cast<UDPBindCommand*>(msg->getControlInfo());
+            bind(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
+            break;
         }
-        else if (isMulticast)
-        {
-            if (sd->multicastAddrs.find(localAddr) != sd->multicastAddrs.end())
-            {
-                if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
-                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr))
-                    result.push_back(sd);
-            }
+        case UDP_C_CONNECT: {
+            UDPConnectCommand *ctrl = check_and_cast<UDPConnectCommand*>(msg->getControlInfo());
+            connect(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
+            break;
+        }
+        case UDP_C_CLOSE: {
+            UDPCloseCommand *ctrl = check_and_cast<UDPCloseCommand*>(msg->getControlInfo());
+            close(ctrl->getSockId());
+            break;
+        }
+        case UDP_C_SETOPTION: {
+            UDPSetOptionCommand *ctrl = check_and_cast<UDPSetOptionCommand *>(msg->getControlInfo());
+            if (dynamic_cast<UDPSetTimeToLiveCommand*>(ctrl))
+                setTimeToLive(ctrl->getSockId(), ((UDPSetTimeToLiveCommand*)ctrl)->getTtl());
+            else if (dynamic_cast<UDPSetBroadcastCommand*>(ctrl))
+                setTimeToLive(ctrl->getSockId(), ((UDPSetBroadcastCommand*)ctrl)->getBroadcast());
+            else if (dynamic_cast<UDPSetMulticastInterfaceCommand*>(ctrl))
+                setMulticastOutputInterface(ctrl->getSockId(), ((UDPSetMulticastInterfaceCommand*)ctrl)->getInterfaceId());
+            else if (dynamic_cast<UDPJoinMulticastGroupCommand*>(ctrl))
+                joinMulticastGroup(ctrl->getSockId(), ((UDPJoinMulticastGroupCommand*)ctrl)->getMulticastAddr(), ((UDPJoinMulticastGroupCommand*)ctrl)->getInterfaceId());
+            else if (dynamic_cast<UDPLeaveMulticastGroupCommand*>(ctrl))
+                leaveMulticastGroup(ctrl->getSockId(), ((UDPLeaveMulticastGroupCommand*)ctrl)->getMulticastAddr());
+            else
+                error("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
+            break;
+        }
+        default: {
+            error("unknown command code (message kind) %d received from app", msg->getKind());
         }
     }
-    return result;
+
+    delete msg; // also deletes control info in it
 }
 
-void UDP::sendUp(cPacket *payload, SockDesc *sd, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl)
+void UDP::processPacketFromApp(cPacket *appData)
 {
-    EV << "Sending payload up to socket sockId=" << sd->sockId << "\n";
+    UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
 
-    // send payload with UDPControlInfo up to the application
-    UDPDataIndication *udpCtrl = new UDPDataIndication();
-    udpCtrl->setSockId(sd->sockId);
-    udpCtrl->setSrcAddr(srcAddr);
-    udpCtrl->setDestAddr(destAddr);
-    udpCtrl->setSrcPort(srcPort);
-    udpCtrl->setDestPort(destPort);
-    udpCtrl->setInterfaceId(interfaceId);
-    udpCtrl->setTtl(ttl);
-    payload->setKind(UDP_I_DATA);
-    payload->setControlInfo(udpCtrl);
+    SocketsByIdMap::iterator it = socketsByIdMap.find(ctrl->getSockId());
+    if (it == socketsByIdMap.end())
+        error("send: no socket with sockId=%d", ctrl->getSockId());
 
-    emit(passedUpPkSignal, payload);
-    send(payload, "appOut", sd->appGateIndex);
-    numPassedUp++;
-}
+    SockDesc *sd = it->second;
+    const IPvXAddress& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
+    ushort destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
+    if (destAddr.isUnspecified() || destPort == -1)
+        error("send: missing destination address or port when sending over unconnected port");
 
-void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
-{
-    emit(droppedPkWrongPortSignal, udpPacket);
-    numDroppedWrongPort++;
-
-    // send back ICMP PORT_UNREACHABLE
-#ifdef WITH_IPv4
-    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL)
+    int interfaceId = -1;
+    if (destAddr.isMulticast())
     {
-        if (!icmp)
-            icmp = ICMPAccess().get();
-
-        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-
-        if (!ctrl4->getDestAddr().isMulticast())
-            icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+        std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
+        interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
     }
-    else
-#endif
-#ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
-    {
-        if (!icmpv6)
-            icmpv6 = ICMPv6Access().get();
-
-        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-
-        if (!ctrl6->getDestAddr().isMulticast())
-            icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-    }
-    else
-#endif
-    {
-        error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName()); //FIXME rather: with unrecognized control info
-    }
-}
-
-void UDP::processICMPError(cPacket *pk)
-{
-    // extract details from the error message, then try to notify socket that sent bogus packet
-    int type, code;
-    IPvXAddress localAddr, remoteAddr;
-    ushort localPort, remotePort;
-
-#ifdef WITH_IPv4
-    if (dynamic_cast<ICMPMessage *>(pk))
-    {
-        ICMPMessage *icmpMsg = (ICMPMessage *)pk;
-        type = icmpMsg->getType();
-        code = icmpMsg->getCode();
-        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
-        localAddr = datagram->getSrcAddress();
-        remoteAddr = datagram->getDestAddress();
-        localPort = packet->getSourcePort();
-        remotePort = packet->getDestinationPort();
-        delete icmpMsg;
-    }
-    else
-#endif
-#ifdef WITH_IPv6
-    if (dynamic_cast<ICMPv6Message *>(pk))
-    {
-        ICMPv6Message *icmpMsg = (ICMPv6Message *)pk;
-        type = icmpMsg->getType();
-        code = -1; // FIXME this is dependent on getType()...
-        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
-        localAddr = datagram->getSrcAddress();
-        remoteAddr = datagram->getDestAddress();
-        localPort = packet->getSourcePort();
-        remotePort = packet->getDestinationPort();
-        delete icmpMsg;
-    }
-    else
-#endif
-    {
-        error("Unrecognized packet (%s)%s: not an ICMP error message", pk->getClassName(), pk->getName());
-    }
-
-    EV << "ICMP error received: type=" << type << " code=" << code
-       << " about packet " << localAddr << ":" << localPort << " > "
-       << remoteAddr << ":" << remotePort << "\n";
-
-    // identify socket and report error to it
-    SockDesc *sd = findSocketByLocalAddress(localAddr, localPort);
-    if (!sd)
-    {
-        EV << "No socket on that local port, ignoring ICMP error\n";
-        return;
-    }
-
-    // send UDP_I_ERROR to socket
-    EV << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-    sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
-}
-
-void UDP::sendUpErrorIndication(SockDesc *sd, const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort)
-{
-    cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
-    UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-    udpCtrl->setSockId(sd->sockId);
-    udpCtrl->setSrcAddr(localAddr);
-    udpCtrl->setDestAddr(remoteAddr);
-    udpCtrl->setSrcPort(sd->localPort);
-    udpCtrl->setDestPort(remotePort);
-    notifyMsg->setControlInfo(udpCtrl);
-
-    send(notifyMsg, "appOut", sd->appGateIndex);
+    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->ttl);
+    delete ctrl; // cannot be deleted earlier, due to destAddr
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -565,29 +328,308 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     }
 }
 
-
-void UDP::processPacketFromApp(cPacket *appData)
+void UDP::processICMPError(cPacket *pk)
 {
-    UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
+    // extract details from the error message, then try to notify socket that sent bogus packet
+    int type, code;
+    IPvXAddress localAddr, remoteAddr;
+    ushort localPort, remotePort;
 
-    SocketsByIdMap::iterator it = socketsByIdMap.find(ctrl->getSockId());
-    if (it == socketsByIdMap.end())
-        error("send: no socket with sockId=%d", ctrl->getSockId());
-
-    SockDesc *sd = it->second;
-    const IPvXAddress& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
-    ushort destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
-    if (destAddr.isUnspecified() || destPort == -1)
-        error("send: missing destination address or port when sending over unconnected port");
-
-    int interfaceId = -1;
-    if (destAddr.isMulticast())
+#ifdef WITH_IPv4
+    if (dynamic_cast<ICMPMessage *>(pk))
     {
-        std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
-        interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
+        ICMPMessage *icmpMsg = (ICMPMessage *)pk;
+        type = icmpMsg->getType();
+        code = icmpMsg->getCode();
+        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
+        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+        localAddr = datagram->getSrcAddress();
+        remoteAddr = datagram->getDestAddress();
+        localPort = packet->getSourcePort();
+        remotePort = packet->getDestinationPort();
+        delete icmpMsg;
     }
-    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->ttl);
-    delete ctrl; // cannot be deleted earlier, due to destAddr
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<ICMPv6Message *>(pk))
+    {
+        ICMPv6Message *icmpMsg = (ICMPv6Message *)pk;
+        type = icmpMsg->getType();
+        code = -1; // FIXME this is dependent on getType()...
+        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
+        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+        localAddr = datagram->getSrcAddress();
+        remoteAddr = datagram->getDestAddress();
+        localPort = packet->getSourcePort();
+        remotePort = packet->getDestinationPort();
+        delete icmpMsg;
+    }
+    else
+#endif
+    {
+        error("Unrecognized packet (%s)%s: not an ICMP error message", pk->getClassName(), pk->getName());
+    }
+
+    EV << "ICMP error received: type=" << type << " code=" << code
+       << " about packet " << localAddr << ":" << localPort << " > "
+       << remoteAddr << ":" << remotePort << "\n";
+
+    // identify socket and report error to it
+    SockDesc *sd = findSocketByLocalAddress(localAddr, localPort);
+    if (!sd)
+    {
+        EV << "No socket on that local port, ignoring ICMP error\n";
+        return;
+    }
+
+    // send UDP_I_ERROR to socket
+    EV << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
+    sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
+}
+
+void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
+{
+    emit(droppedPkWrongPortSignal, udpPacket);
+    numDroppedWrongPort++;
+
+    // send back ICMP PORT_UNREACHABLE
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL)
+    {
+        if (!icmp)
+            icmp = ICMPAccess().get();
+
+        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
+
+        if (!ctrl4->getDestAddr().isMulticast())
+            icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+    }
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
+    {
+        if (!icmpv6)
+            icmpv6 = ICMPv6Access().get();
+
+        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
+
+        if (!ctrl6->getDestAddr().isMulticast())
+            icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+    }
+    else
+#endif
+    {
+        error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName()); //FIXME rather: with unrecognized control info
+    }
+}
+
+void UDP::bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort)
+{
+    createSocket(sockId, gateIndex, localAddr, localPort);
+}
+
+void UDP::connect(int sockId, int gateIndex, const IPvXAddress& remoteAddr, int remotePort)
+{
+    if (remoteAddr.isUnspecified())
+        error("connect: unspecified remote address");
+    if (remotePort<=0 || remotePort>65535)
+        error("connect: invalid remote port number %d", remotePort);
+
+    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    SockDesc *sd;
+    if (it != socketsByIdMap.end())
+        sd = it->second;
+    else
+        sd = createSocket(sockId, gateIndex, IPvXAddress(), getEphemeralPort());
+
+    sd->remoteAddr = remoteAddr;
+    sd->remotePort = remotePort;
+    sd->onlyLocalPortIsSet = false;
+
+    EV << "Socket connected: " << *sd << "\n";
+}
+
+UDP::SockDesc *UDP::createSocket(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort)
+{
+    // validate sockId
+    if (sockId == -1)
+        error("sockId in BIND or CONNECT message not filled in");
+    if (socketsByIdMap.find(sockId) != socketsByIdMap.end())
+        error("Cannot create socket: sockId=%d is not unique (already taken)", sockId);
+
+    if (localPort<-1 || localPort>65535) // -1: ephemeral port
+        error("connect: invalid local port number %d", localPort);
+
+    // do not allow two apps to bind to the same address/port combination
+    SockDesc *existing = findSocketByLocalAddress(localAddr, localPort);
+    if (existing != NULL)
+        error("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
+
+    // create and fill in SockDesc
+    SockDesc *sd = new SockDesc(sockId, gateIndex);
+    sd->localAddr = localAddr;
+    sd->localPort = localPort == -1 ? getEphemeralPort() : localPort;
+    sd->onlyLocalPortIsSet = sd->localAddr.isUnspecified();
+
+    // add to socketsByIdMap
+    socketsByIdMap[sockId] = sd;
+
+    // add to socketsByPortMap
+    SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
+    list.push_back(sd);
+
+    EV << "Socket created: " << *sd << "\n";
+    return sd;
+}
+
+void UDP::close(int sockId)
+{
+    // remove from socketsByIdMap
+    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    if (it==socketsByIdMap.end())
+        error("socket id=%d doesn't exist (already closed?)", sockId);
+    SockDesc *sd = it->second;
+    socketsByIdMap.erase(it);
+
+    EV << "Closing socket: " << *sd << "\n";
+
+    // remove from socketsByPortMap
+    SockDescList& list = socketsByPortMap[sd->localPort];
+    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+        if (*it == sd)
+            {list.erase(it); break;}
+    if (list.empty())
+        socketsByPortMap.erase(sd->localPort);
+    delete sd;
+}
+
+ushort UDP::getEphemeralPort()
+{
+    // start at the last allocated port number + 1, and search for an unused one
+    ushort searchUntil = lastEphemeralPort++;
+    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+
+    while (socketsByPortMap.find(lastEphemeralPort) != socketsByPortMap.end())
+    {
+        if (lastEphemeralPort == searchUntil) // got back to starting point?
+            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+        lastEphemeralPort++;
+        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    }
+
+    // found a free one, return it
+    return lastEphemeralPort;
+}
+
+UDP::SockDesc *UDP::findSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort)
+{
+    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    if (it == socketsByPortMap.end())
+        return NULL;
+
+    SockDescList& list = it->second;
+    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        SockDesc *sd = *it;
+        if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
+            return sd;
+    }
+    return NULL;
+}
+
+UDP::SockDesc *UDP::findSocketForUnicastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort)
+{
+    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    if (it == socketsByPortMap.end())
+        return NULL;
+
+    SockDescList& list = it->second;
+    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        SockDesc *sd = *it;
+        if (sd->onlyLocalPortIsSet || (
+                (sd->remotePort == -1 || sd->remotePort == remotePort) &&
+                (sd->localAddr.isUnspecified() || sd->localAddr == localAddr) &&
+                (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr)
+        ))
+            return sd;
+    }
+    return NULL;
+}
+
+std::vector<UDP::SockDesc*> UDP::findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast)
+{
+    ASSERT(isMulticast || isBroadcast);
+    std::vector<SockDesc*> result;
+    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    if (it == socketsByPortMap.end())
+        return result;
+
+    SockDescList& list = it->second;
+    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        SockDesc *sd = *it;
+        if (isBroadcast)
+        {
+            if (sd->isBroadcast)
+            {
+                if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
+                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr))
+                    result.push_back(sd);
+            }
+        }
+        else if (isMulticast)
+        {
+            if (sd->multicastAddrs.find(localAddr) != sd->multicastAddrs.end())
+            {
+                if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
+                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr))
+                    result.push_back(sd);
+            }
+        }
+    }
+    return result;
+}
+
+void UDP::sendUp(cPacket *payload, SockDesc *sd, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl)
+{
+    EV << "Sending payload up to socket sockId=" << sd->sockId << "\n";
+
+    // send payload with UDPControlInfo up to the application
+    UDPDataIndication *udpCtrl = new UDPDataIndication();
+    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setSrcAddr(srcAddr);
+    udpCtrl->setDestAddr(destAddr);
+    udpCtrl->setSrcPort(srcPort);
+    udpCtrl->setDestPort(destPort);
+    udpCtrl->setInterfaceId(interfaceId);
+    udpCtrl->setTtl(ttl);
+    payload->setControlInfo(udpCtrl);
+    payload->setKind(UDP_I_DATA);
+
+    emit(passedUpPkSignal, payload);
+    send(payload, "appOut", sd->appGateIndex);
+    numPassedUp++;
+}
+
+void UDP::sendUpErrorIndication(SockDesc *sd, const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort)
+{
+    cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
+    UDPErrorIndication *udpCtrl = new UDPErrorIndication();
+    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setSrcAddr(localAddr);
+    udpCtrl->setDestAddr(remoteAddr);
+    udpCtrl->setSrcPort(sd->localPort);
+    udpCtrl->setDestPort(remotePort);
+    notifyMsg->setControlInfo(udpCtrl);
+
+    send(notifyMsg, "appOut", sd->appGateIndex);
 }
 
 void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl)
@@ -649,49 +691,6 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
 UDPPacket *UDP::createUDPPacket(const char *name)
 {
     return new UDPPacket(name);
-}
-
-void UDP::processCommandFromApp(cMessage *msg)
-{
-    switch (msg->getKind())
-    {
-        case UDP_C_BIND: {
-            UDPBindCommand *ctrl = check_and_cast<UDPBindCommand*>(msg->getControlInfo());
-            bind(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
-            break;
-        }
-        case UDP_C_CONNECT: {
-            UDPConnectCommand *ctrl = check_and_cast<UDPConnectCommand*>(msg->getControlInfo());
-            connect(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
-            break;
-        }
-        case UDP_C_CLOSE: {
-            UDPCloseCommand *ctrl = check_and_cast<UDPCloseCommand*>(msg->getControlInfo());
-            close(ctrl->getSockId());
-            break;
-        }
-        case UDP_C_SETOPTION: {
-            UDPSetOptionCommand *ctrl = check_and_cast<UDPSetOptionCommand *>(msg->getControlInfo());
-            if (dynamic_cast<UDPSetTimeToLiveCommand*>(ctrl))
-                setTimeToLive(ctrl->getSockId(), ((UDPSetTimeToLiveCommand*)ctrl)->getTtl());
-            else if (dynamic_cast<UDPSetBroadcastCommand*>(ctrl))
-                setTimeToLive(ctrl->getSockId(), ((UDPSetBroadcastCommand*)ctrl)->getBroadcast());
-            else if (dynamic_cast<UDPSetMulticastInterfaceCommand*>(ctrl))
-                setMulticastOutputInterface(ctrl->getSockId(), ((UDPSetMulticastInterfaceCommand*)ctrl)->getInterfaceId());
-            else if (dynamic_cast<UDPJoinMulticastGroupCommand*>(ctrl))
-                joinMulticastGroup(ctrl->getSockId(), ((UDPJoinMulticastGroupCommand*)ctrl)->getMulticastAddr(), ((UDPJoinMulticastGroupCommand*)ctrl)->getInterfaceId());
-            else if (dynamic_cast<UDPLeaveMulticastGroupCommand*>(ctrl))
-                leaveMulticastGroup(ctrl->getSockId(), ((UDPLeaveMulticastGroupCommand*)ctrl)->getMulticastAddr());
-            else
-                error("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
-            break;
-        }
-        default: {
-            error("unknown command code (message kind) %d received from app", msg->getKind());
-        }
-    }
-
-    delete msg; // also deletes control info in it
 }
 
 UDP::SockDesc *UDP::getSocketById(int sockId)
