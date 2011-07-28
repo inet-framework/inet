@@ -1,3 +1,66 @@
+2011-07-25  Andras Varga
+
+   * UDP: heavy API changes; added multicast, broadcast and ttl support
+
+    Bugs fixed:
+    - connect without bind is now supported (used to be an error)
+    - send has previously ignored the socket altogether
+    - bug: for bind, port=0 was refused
+    - it was not possible to receive broadcasts and multicasts
+
+    Features/improvements:
+    - added support for the following socket options (see Unix setsockopt()):
+      time-to-live (unicast and multicast), broadcast, multicast output
+      interface, join multicast group, leave multicast group.
+    - UDPControlInfo was as a bit confusing, as it contained the union of
+      all fields needed for all commands/indications, so it was not
+      clear whether some field X was used for some command/indication,
+      and if so, what its exact role was. Specific UDPControlInfo classes
+      are now much more explicit about this.
+    - UDPSocket class now contains much less state (clearer responsibilities,
+      less chance of disagreement with UDP module's view)
+
+    Details:
+    - UDPControlInfo has been split to:
+         UDPBindCommand,
+         UDPConnectCommand,
+         UDPSendCommand,
+         UDPCloseCommand,
+      and
+         UDPDataIndication,
+         UDPErrorIndication
+      for the opposite direction. Used with the corresponding
+      UDP_C_xxx and UDP_I_xxx message kinds.
+    - UDP_C_UNBIND message kind has been renamed to UDP_C_CLOSE
+    - added UDP_C_SETOPTION (for setting socket options);
+      it must be acompanied by any of:
+         UDPSetTimeToLiveCommand,
+         UDPSetBroadcastCommand,
+         UDPSetMulticastInterfaceCommand,
+         UDPJoinMulticastGroupCommand,
+         UDPLeaveMulticastGroupCommand.
+    - the "unspecified" port number value has been changed from 0 to -1,
+      for consistency with other parameters in the NED file
+    - userId was removed, as it hasn't offered a tremendous utility
+      value, and apparently nobody used it
+
+    UDPSocket class:
+    - now it stores minimal state (practically just the socket id),
+      and everything else is immediately sent down to the UDP module
+    - new methods for socket options:
+         setTimeToLive(),
+         setBroadcast(),
+         setMulticastOutputInterface()
+         joinMulticastGroup()
+         leaveMulticastGroup()
+    - new utility method:
+         getReceivedPacketInfo()
+    - removed methods:
+         setUserId() / getUserId() -- userId is no longer;
+         getState() / stateName() -- state is not kept;
+         getLocalAddress() / getLocalPort() -- state is not kept;
+         setMulticastInterfaceId() / getMulticastInterfaceId() -- renamed
+
 2010-03-26  Andras Varga
 
     * fix: represent port numbers with ushort
