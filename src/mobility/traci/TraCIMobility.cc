@@ -172,22 +172,24 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 
 void TraCIMobility::changePosition()
 {
-	simtime_t updateInterval = simTime() - this->lastUpdate;
-	this->lastUpdate = simTime();
+	// ensure we're not called twice in one time step
+	ASSERT(lastUpdate != simTime());
 
-	// keep track of first road id we encounter
-	if (statistics.firstRoadNumber == MY_INFINITY && (!road_id.empty())) statistics.firstRoadNumber = roadIdAsDouble(road_id);
+	// keep statistics (for current step)
+	currentPosXVec.record(pos.x);
+	currentPosYVec.record(pos.y);
 
-	// keep speed statistics
-	if ((pos.x != -1) && (pos.y != -1)) {
+	// keep statistics (relative to last step)
+	if (statistics.startTime != simTime()) {
+		simtime_t updateInterval = simTime() - this->lastUpdate;
+		this->lastUpdate = simTime();
+
 		double distance = pos.distance(nextPos);
 		statistics.totalDistance += distance;
 		statistics.totalTime += updateInterval;
 		if (speed != -1) {
 			statistics.minSpeed = std::min(statistics.minSpeed, speed);
 			statistics.maxSpeed = std::max(statistics.maxSpeed, speed);
-			currentPosXVec.record(pos.x);
-			currentPosYVec.record(pos.y);
 			currentSpeedVec.record(speed);
 			if (last_speed != -1) {
 				double acceleration = (speed - last_speed) / updateInterval;
