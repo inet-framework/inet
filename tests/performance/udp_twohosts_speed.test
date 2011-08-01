@@ -64,12 +64,7 @@ sim-time-limit = 16s
 
 **.arp.cacheTimeout = 1s
 
-# NIC configuration
-**.ppp[*].queueType = "DropTailQueue" # in routers
-**.ppp[*].queue.frameCapacity = 10  # in routers
-
 *.configurator.networkAddress = "192.168.1.0"
-#**.eth.mac.txrate = 10Mbps;
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
