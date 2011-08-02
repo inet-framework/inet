@@ -779,7 +779,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
         return;
     }
 
-    // in link layer uses MAC addresses (basically, not PPP), add control info
+    // if link layer uses MAC addresses (basically, not PPP), add control info
     if (!macAddr.isUnspecified())
     {
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();

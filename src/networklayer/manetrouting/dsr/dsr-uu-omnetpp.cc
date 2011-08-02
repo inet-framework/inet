@@ -801,7 +801,7 @@ DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedMsg());
                     DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
                     take(p);
                     EV << "####################################################\n";
-                    EV << "Dsr procotocol received promiscuos packet from " << p->getSrcAddress() << "\n";
+                    EV << "Dsr protocol received promiscuous packet from " << p->getSrcAddress() << "\n";
                     EV << "#####################################################\n";
                     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                     ctrl->setSrc(frame->getTransmitterAddress());

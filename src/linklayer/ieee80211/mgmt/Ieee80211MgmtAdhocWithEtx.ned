@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2010 Alfonso Ariza Quintana
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,6 +16,8 @@
 //
 
 package inet.linklayer.ieee80211.mgmt;
+
+
 //
 // 802.11 management module used for ad-hoc mode.
 // Relies on the MAC layer (Ieee80211Mac) for reception and transmission of frames.

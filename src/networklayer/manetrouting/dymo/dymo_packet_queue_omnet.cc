@@ -208,7 +208,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     // now Ip layer decremented again
                     if (isInMacLayer())
                     {
-                        Ieee802Ctrl *ctrl = new Ieee802Ctrl;
+                        Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                         Uint128 nextHop;
                         int iface;
                         double cost;

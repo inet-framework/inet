@@ -850,7 +850,7 @@ void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &s
             delete p->removeControlInfo();
         if (isInMacLayer())
         {
-            Ieee802Ctrl *ctrl = new Ieee802Ctrl;
+            Ieee802Ctrl *ctrl = new Ieee802Ctrl();
             ctrl->setDest(entry->rt_nxthop_addr.s_addr.getMACAddress());
             p->setControlInfo(ctrl);
         }
