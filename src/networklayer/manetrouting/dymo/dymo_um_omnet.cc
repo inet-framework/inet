@@ -615,11 +615,8 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         src.s_addr = srcAddr.get4().getInt();
         dst.s_addr = destAddr.get4().getInt();
         interfaceId = ctrl->getInterfaceId();
-        if (ctrl)
-        {
-            getMacAddress(ctrl->removeOrigDatagram());
-            delete ctrl;
-        }
+        getMacAddress(ctrl->removeOrigDatagram());
+        delete ctrl;
     }
     else
     {
