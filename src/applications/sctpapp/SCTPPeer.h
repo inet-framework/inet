@@ -90,6 +90,12 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         };
         typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
         SCTPPathStatus sctpPathStatus;
+
+    public:
+        SCTPPeer();
+        ~SCTPPeer();
+
+    protected:
         void initialize();
         void handleMessage(cMessage *msg);
         void finish();

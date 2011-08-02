@@ -39,6 +39,34 @@ simsignal_t SCTPPeer::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPPeer::sentEchoedPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
 
+SCTPPeer::SCTPPeer()
+{
+    timeoutMsg = NULL;
+    timeMsg = NULL;
+    connectTimer = NULL;
+}
+
+SCTPPeer::~SCTPPeer()
+{
+    cancelAndDelete(timeoutMsg);
+    cancelAndDelete(connectTimer);
+    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); ++j)
+        delete j->second;
+    bytesPerAssoc.clear();
+
+    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); ++k)
+        delete k->second;
+    endToEndDelay.clear();
+
+    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); ++l)
+        delete l->second;
+    histEndToEndDelay.clear();
+
+    rcvdPacketsPerAssoc.clear();
+    sentPacketsPerAssoc.clear();
+    rcvdBytesPerAssoc.clear();
+}
+
 void SCTPPeer::initialize()
 {
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
@@ -700,8 +728,6 @@ void SCTPPeer::sendqueueFullArrived(int32 assocId)
 
 void SCTPPeer::finish()
 {
-    delete timeoutMsg;
-    delete connectTimer;
     ev << getFullPath() << ": opened " << numSessions << " sessions\n";
     ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
@@ -712,30 +738,5 @@ void SCTPPeer::finish()
 
     ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
-
-    while (!bytesPerAssoc.empty())
-    {
-        BytesPerAssoc::iterator j = bytesPerAssoc.begin();
-        delete j->second;
-        bytesPerAssoc.erase(j);
-    }
-
-    while (!endToEndDelay.empty())
-    {
-        EndToEndDelay::iterator k = endToEndDelay.begin();
-        delete k->second;
-        endToEndDelay.erase(k);
-    }
-
-    while (!histEndToEndDelay.empty())
-    {
-        HistEndToEndDelay::iterator l = histEndToEndDelay.begin();
-        delete l->second;
-        histEndToEndDelay.erase(l);
-    }
-
-    rcvdPacketsPerAssoc.clear();
-    sentPacketsPerAssoc.clear();
-    rcvdBytesPerAssoc.clear();
 }
 
