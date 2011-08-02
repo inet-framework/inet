@@ -193,7 +193,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 outboundStreams = connectInfo->getOutboundStreams();
                 rcvdPacketsPerAssoc[serverAssocId] = (long) par("numPacketsToReceivePerClient");
                 sentPacketsPerAssoc[serverAssocId] = (long) par("numPacketsToSendPerClient");
-                char text[30];
+                char text[50];
                 sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
                 bytesPerAssoc[serverAssocId] = new cOutVector(text);
                 rcvdBytesPerAssoc[serverAssocId] = 0;
@@ -713,20 +713,23 @@ void SCTPPeer::finish()
     ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
 
-    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++)
+    while (!bytesPerAssoc.empty())
     {
+        BytesPerAssoc::iterator j = bytesPerAssoc.begin();
         delete j->second;
         bytesPerAssoc.erase(j);
     }
 
-    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); k++)
+    while (!endToEndDelay.empty())
     {
+        EndToEndDelay::iterator k = endToEndDelay.begin();
         delete k->second;
         endToEndDelay.erase(k);
     }
 
-    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++)
+    while (!histEndToEndDelay.empty())
     {
+        HistEndToEndDelay::iterator l = histEndToEndDelay.begin();
         delete l->second;
         histEndToEndDelay.erase(l);
     }
