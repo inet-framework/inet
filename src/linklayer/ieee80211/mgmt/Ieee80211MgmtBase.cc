@@ -171,6 +171,7 @@ cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     ctrl->setSrc(frame->getAddress3());
     ctrl->setDest(frame->getReceiverAddress());
+    //TODO ctrl->setEtherType(...);
     payload->setControlInfo(ctrl);
 
     delete frame;

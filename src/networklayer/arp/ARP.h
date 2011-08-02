@@ -100,7 +100,7 @@ class INET_API ARP : public cSimpleModule
     virtual void finish();
 
     virtual void processOutboundPacket(cMessage *msg);
-    virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
+    virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 
     virtual void initiateARPResolution(ARPCacheEntry *entry);
     virtual void sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress);

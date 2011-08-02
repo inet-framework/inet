@@ -737,6 +737,7 @@ void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId
                 take(p);
                 /*
                 Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                //TODO ctrl->setEtherType(...);
                 ctrl->setSrc(frame->getTransmitterAddress());
                 ctrl->setDest(frame->getReceiverAddress());
                 p->setControlInfo(ctrl);
@@ -806,6 +807,7 @@ DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedMsg());
                     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                     ctrl->setSrc(frame->getTransmitterAddress());
                     ctrl->setDest(frame->getReceiverAddress());
+                    //TODO ctrl->setEtherType(...);
                     p->setControlInfo(ctrl);
                     tap(p);
                 }

@@ -852,6 +852,7 @@ void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &s
         {
             Ieee802Ctrl *ctrl = new Ieee802Ctrl();
             ctrl->setDest(entry->rt_nxthop_addr.s_addr.getMACAddress());
+            //TODO ctrl->setEtherType(...);
             p->setControlInfo(ctrl);
         }
 

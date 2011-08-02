@@ -214,6 +214,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                         double cost;
                         getNextHop(dest_addr.s_addr, nextHop, iface, cost);
                         ctrl->setDest(nextHop.getMACAddress());
+                        //TODO ctrl->setEtherType(...);
                         qp->p->setControlInfo(ctrl);
                     }
                     sendDelayed(qp->p, delay, "to_ip");

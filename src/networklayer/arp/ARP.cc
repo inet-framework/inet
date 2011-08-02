@@ -201,7 +201,7 @@ void ARP::processOutboundPacket(cMessage *msg)
         // FIXME: we do a simpler solution right now: send to the Broadcast MAC address
         EV << "destination address is multicast, sending packet to broadcast MAC address\n";
         static MACAddress broadcastAddr("FF:FF:FF:FF:FF:FF");
-        sendPacketToNIC(msg, ie, broadcastAddr);
+        sendPacketToNIC(msg, ie, broadcastAddr, ETHERTYPE_IPv4);
         return;
 #if 0
         // experimental  RFC 1112, section 6.4 code
@@ -215,7 +215,7 @@ void ARP::processOutboundPacket(cMessage *msg)
         macBytes[5] = nextHopAddr.getDByte(3);
         MACAddress multicastMacAddr;
         multicastMacAddr.setAddressBytes(bytes);
-        sendPacketToNIC(msg, ie, multicastMacAddr);
+        sendPacketToNIC(msg, ie, multicastMacAddr, ETHERTYPE_IPv4);
         return;
 #endif
     }
@@ -224,9 +224,8 @@ void ARP::processOutboundPacket(cMessage *msg)
     {
         ARPCache::iterator it = globalArpCache.find(nextHopAddr);
         if (it==globalArpCache.end())
-            throw cRuntimeError(this, "Addres not found in global");
-        else
-            sendPacketToNIC(msg, ie, (*it).second->macAddress);
+            throw cRuntimeError(this, "Address not found in global ARP cache");
+        sendPacketToNIC(msg, ie, (*it).second->macAddress, ETHERTYPE_IPv4);
         return;
     }
 
@@ -272,7 +271,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     {
         // valid ARP cache entry found, flag msg with MAC address and send it out
         EV << "ARP cache hit, MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
-        sendPacketToNIC(msg, ie, (*it).second->macAddress);
+        sendPacketToNIC(msg, ie, (*it).second->macAddress, ETHERTYPE_IPv4);
     }
 }
 
@@ -293,11 +292,12 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     emit(initiatedResolutionSignal, 1L);
 }
 
-void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress)
+void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
 {
     // add control info with MAC address
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
+    controlInfo->setEtherType(etherType);
     msg->setControlInfo(controlInfo);
 
     // send out
@@ -323,7 +323,7 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress)
     arp->setDestIPAddress(ipAddress);
 
     static MACAddress broadcastAddress("ff:ff:ff:ff:ff:ff");
-    sendPacketToNIC(arp, ie, broadcastAddress);
+    sendPacketToNIC(arp, ie, broadcastAddress, ETHERTYPE_ARP);
     numRequestsSent++;
     emit(sentReqSignal, 1L);
 }
@@ -489,7 +489,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 arp->setSrcMACAddress(myMACAddress);
                 arp->setOpcode(ARP_REPLY);
                 delete arp->removeControlInfo();
-                sendPacketToNIC(arp, ie, srcMACAddress);
+                sendPacketToNIC(arp, ie, srcMACAddress, ETHERTYPE_ARP);
                 numRepliesSent++;
                 emit(sentReplySignal, 1L);
                 break;
@@ -537,7 +537,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
         EV << "Sending out queued packet " << msg << "\n";
-        sendPacketToNIC(msg, entry->ie, macAddress);
+        sendPacketToNIC(msg, entry->ie, macAddress, ETHERTYPE_IPv4);
     }
 }
 

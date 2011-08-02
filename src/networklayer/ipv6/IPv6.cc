@@ -784,6 +784,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     {
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setDest(macAddr);
+        controlInfo->setEtherType(ETHERTYPE_IPv6);
         datagram->setControlInfo(controlInfo);
     }
 

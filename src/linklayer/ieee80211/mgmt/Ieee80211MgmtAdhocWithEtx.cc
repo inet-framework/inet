@@ -95,8 +95,9 @@ void Ieee80211MgmtAdhocWithEtx::handleEtxMessage(cPacket *pk)
     ETXBasePacket * etxMsg = dynamic_cast<ETXBasePacket*>(pk);
     if (etxMsg)
     {
-        Ieee80211DataFrame *frame = new Ieee80211DataFrame(etxMsg->getName());
+        Ieee80211DataFrame *frame = new Ieee80211DataFrameWithSNAP(etxMsg->getName());
         frame->setReceiverAddress(etxMsg->getDest());
+        //TODO frame->setEtherType(...);
         frame->encapsulate(etxMsg);
         sendOrEnqueue(frame);
     }

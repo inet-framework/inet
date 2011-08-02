@@ -844,6 +844,7 @@ cPacket *Ieee80211Mesh::decapsulate(Ieee80211DataFrame *frame)
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     ctrl->setSrc(frame->getTransmitterAddress());
     ctrl->setDest(frame->getReceiverAddress());
+    //TODO ctrl->setEtherType(...);
     payload->setControlInfo(ctrl);
     delete frame;
     return payload;

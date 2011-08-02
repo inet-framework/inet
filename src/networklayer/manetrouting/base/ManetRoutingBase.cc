@@ -353,6 +353,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAd
     if (mac_layer_)
     {
         Ieee802Ctrl *ctrl = new Ieee802Ctrl;
+        //TODO ctrl->setEtherType(...);
         MACAddress macadd = destAddr.getMACAddress();
         IPv4Address add = destAddr.getIPAddress();
         if (iface!=0)
@@ -493,6 +494,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAd
     if (mac_layer_)
     {
         Ieee802Ctrl *ctrl = new Ieee802Ctrl;
+        //TODO ctrl->setEtherType(...);
         MACAddress macadd = destAddr.getMACAddress();
         IPv4Address add = destAddr.getIPAddress();
         if (index!=-1)
