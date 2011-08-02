@@ -60,12 +60,13 @@ int NS_CLASS blacklist_remove(blacklist_t *entry)
         return 0;
 
     DymoBlackList::iterator it;
-    for (it=dymoBlackList->begin();it != dymoBlackList->end();it++)
+    for (it=dymoBlackList->begin(); it != dymoBlackList->end(); )
     {
-        if ((*it).second==entry)
+        DymoBlackList::iterator cur = it++;
+        if ((*cur).second==entry)
         {
             timer_remove(&entry->timer);
-            dymoBlackList->erase(it);
+            dymoBlackList->erase(cur);
         }
     }
     delete entry;
