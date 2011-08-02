@@ -34,6 +34,7 @@ std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQ& o)
 }
 
 DYMO_OutstandingRREQList::DYMO_OutstandingRREQList()
+  : host(NULL)
 {
 }
 

@@ -66,7 +66,7 @@ class VoIPSinkApp : public cSimpleModule
     class Connection
     {
       public:
-        Connection() : offline(true) {}
+        Connection() : offline(true), oc(NULL), fmt(NULL), audio_st(NULL), decCtx(NULL), pCodecDec(NULL) {}
         void addAudioStream(enum CodecID codec_id);
         bool openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);

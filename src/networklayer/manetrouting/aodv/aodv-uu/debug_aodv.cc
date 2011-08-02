@@ -225,7 +225,7 @@ void NS_CLASS alog(int type, int errnum, const char *function, const char *forma
 
     /* If we have the debug option set, also write to stdout */
     if (debug)
-        printf(log_buf);
+        fputs(log_buf, stdout);
 
     /* Syslog all messages that are of severity LOG_NOTICE or worse */
 syslog:

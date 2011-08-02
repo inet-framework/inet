@@ -114,7 +114,7 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
         break;
 
     default:
-        error("unknown RTPInnerPacket type");
+        throw cRuntimeError("unknown RTPInnerPacket type");
     }
 }
 

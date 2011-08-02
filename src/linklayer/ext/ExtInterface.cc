@@ -127,7 +127,7 @@ void ExtInterface::handleMessage(cMessage *msg)
     }
     else
     {
-        memset(buffer, 0, 1<<16);
+        memset(buffer, 0, sizeof(buffer));
         IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
 
         if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&

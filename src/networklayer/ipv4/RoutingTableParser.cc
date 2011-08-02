@@ -128,8 +128,8 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     if (routeFile)
         parseRouting(routeFile);
 
-    delete ifconfigFile;
-    delete routeFile;
+    delete [] ifconfigFile;
+    delete [] routeFile;
 
     return 0;
 

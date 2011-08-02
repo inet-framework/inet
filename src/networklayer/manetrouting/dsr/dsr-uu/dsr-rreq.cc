@@ -712,7 +712,7 @@ int NSCLASS dsr_rreq_opt_recv(struct dsr_pkt *dp, struct dsr_rreq_opt *rreq_opt)
     int i, n;
     double cost;
 
-    if (!dp || !rreq_opt || dp->flags & PKT_PROMISC_RECV)
+    if (!dp || !rreq_opt || (dp->flags & PKT_PROMISC_RECV))
         return DSR_PKT_DROP;
 
     dp->num_rreq_opts++;

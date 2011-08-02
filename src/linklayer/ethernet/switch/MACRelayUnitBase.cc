@@ -50,7 +50,10 @@ static char *fgetline(FILE *fp)
     // alloc buffer and read a line
     char *line = new char[MAX_LINE];
     if (fgets(line, MAX_LINE, fp)==NULL)
+    {
+        delete [] line;
         return NULL;
+    }
 
     // chop CR/LF
     line[MAX_LINE-1] = '\0';

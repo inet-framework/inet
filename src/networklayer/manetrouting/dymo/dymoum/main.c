@@ -103,21 +103,30 @@ int set_kernel_options()
 	if ((fd = open("/proc/sys/net/ipv4/ip_forward", O_WRONLY)) < 0)
 		return -1;
 	if (write(fd, &on, sizeof(char)) < 0)
-		return -1;
+    {
+        close(fd);
+        return -1;
+    }
 	close(fd);
 	
 	// Deactivate route cache
 	if ((fd = open("/proc/sys/net/ipv4/route/max_delay", O_WRONLY)) < 0)
 		return -1;
 	if (write(fd, &off, sizeof(char)) < 0)
-		return -1;
+    {
+        close(fd);
+        return -1;
+    }
 	close(fd);
 	
 	// Deactivate route cache
 	if ((fd = open("/proc/sys/net/ipv4/route/min_delay", O_WRONLY)) < 0)
 		return -1;
 	if (write(fd, &off, sizeof(char)) < 0)
-		return -1;
+    {
+        close(fd);
+        return -1;
+    }
 	close(fd);
 	
 	// AODVUU disables ICMP redirects on all interfaces. I guess that this
@@ -134,7 +143,10 @@ int set_kernel_options()
 		if ((fd = open(command, O_WRONLY)) < 0)
 			return -1;
 		if (write(fd, &off, sizeof(char)) < 0)
-			return -1;
+	    {
+	        close(fd);
+	        return -1;
+	    }
 		close(fd);
 		
 		memset(command, '\0', 64);
@@ -143,7 +155,10 @@ int set_kernel_options()
 		if ((fd = open(command, O_WRONLY)) < 0)
 			return -1;
 		if (write(fd, &off, sizeof(char)) < 0)
-			return -1;
+	    {
+	        close(fd);
+	        return -1;
+	    }
 		close(fd);
 	}
 	memset(command, '\0', 64);
@@ -151,7 +166,10 @@ int set_kernel_options()
 	if ((fd = open(command, O_WRONLY)) < 0)
 		return -1;
 	if (write(fd, &off, sizeof(char)) < 0)
-		return -1;
+    {
+        close(fd);
+        return -1;
+    }
 	close(fd);
 	
 	return 0;

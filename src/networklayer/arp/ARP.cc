@@ -500,9 +500,9 @@ void ARP::processARPPacket(ARPPacket *arp)
                 delete arp;
                 break;
             }
-            case ARP_RARP_REQUEST: error("RARP request received: RARP is not supported");
-            case ARP_RARP_REPLY: error("RARP reply received: RARP is not supported");
-            default: error("Unsupported opcode %d in received ARP packet", arp->getOpcode());
+            case ARP_RARP_REQUEST: throw cRuntimeError("RARP request received: RARP is not supported");
+            case ARP_RARP_REPLY: throw cRuntimeError("RARP reply received: RARP is not supported");
+            default: throw cRuntimeError("Unsupported opcode %d in received ARP packet", arp->getOpcode());
         }
     }
     else

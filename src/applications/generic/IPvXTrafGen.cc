@@ -89,7 +89,7 @@ void IPvXTrafGen::sendPacket()
     payload->setByteLength(msgByteLength);
 
     IPvXAddress destAddr = chooseDestAddr();
-    char *gate;
+    const char *gate;
 
     if (!destAddr.isIPv6())
     {

@@ -749,6 +749,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
                 break;
             case 1:
                 rerr_send(dest_addr, NET_DIAMETER, entry);
+                //FIXME  need a break or not?
             default:
                 //  icmpAccess.get()->sendErrorMessage(p, ICMP_DESTINATION_UNREACHABLE, 0);
                 sendICMP(p);
@@ -831,6 +832,7 @@ void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &s
                 break;
             case 1:
                 rerr_send(dest_addr, NET_DIAMETER, entry);
+                //FIXME  need a break or not?
             default:
                 //  icmpAccess.get()->sendErrorMessage(p, ICMP_DESTINATION_UNREACHABLE, 0);
                 sendICMP(p);

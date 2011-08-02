@@ -574,6 +574,7 @@ void DSRUU::defaultProcess(cMessage *ipDgram)
                   print_ip(dp->src));
             dsr_pkt_free(dp);
         }
+        break;
     }
 }
 
@@ -961,6 +962,7 @@ void DSRUU::tap(DSRPkt *p)
         DEBUG("Data packet from %s without DSR header!n",
               print_ip(dp->src));
         dsr_pkt_free(dp);
+        break;
     }
     return;
 }

@@ -188,11 +188,11 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPLeaveMulticastGroupCommand*>(ctrl))
                 leaveMulticastGroup(ctrl->getSockId(), ((UDPLeaveMulticastGroupCommand*)ctrl)->getMulticastAddr());
             else
-                error("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
+                throw cRuntimeError("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
         }
         default: {
-            error("unknown command code (message kind) %d received from app", msg->getKind());
+            throw cRuntimeError("unknown command code (message kind) %d received from app", msg->getKind());
         }
     }
 
@@ -370,7 +370,7 @@ void UDP::processICMPError(cPacket *pk)
     else
 #endif
     {
-        error("Unrecognized packet (%s)%s: not an ICMP error message", pk->getClassName(), pk->getName());
+        throw cRuntimeError("Unrecognized packet (%s)%s: not an ICMP error message", pk->getClassName(), pk->getName());
     }
 
     EV << "ICMP error received: type=" << type << " code=" << code
@@ -663,7 +663,7 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
 #else
-        error("Cannot send packet over IPv4: INET was compiled without the IPv4 feature");
+        throw cRuntimeError("Cannot send packet over IPv4: INET compiled without the IPv4 feature");
 #endif
     }
     else
@@ -682,7 +682,7 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipv6Out");
 #else
-        error("Cannot send packet over IPv6: INET was compiled without the IPv6 feature");
+        throw cRuntimeError("Cannot send packet over IPv6: INET compiled without the IPv6 feature");
 #endif
     }
     numSent++;

@@ -506,7 +506,7 @@ void SCTPServer::finish()
 
     ev << getFullPath() << ": opened " << numSessions << " sessions\n";
     ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); l++)
+    for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); ++l)
     {
         ev << getFullPath() << " Assoc: " << l->first << "\n";
         ev << "\tstart time: " << l->second.start << "\n";
