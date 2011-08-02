@@ -477,6 +477,8 @@ struct dsr_srt *dsr_srt_new_rev(struct dsr_srt *srt)
         size_cost=srt->cost_size*sizeof(unsigned int);
     srt_rev = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) + srt->laddrs+size_cost,
                                        GFP_ATOMIC);
+    if (!srt_rev)
+        return NULL;
 
     char *aux = (char *) srt_rev;
     aux += sizeof(struct dsr_srt);
@@ -494,9 +496,9 @@ struct dsr_srt *dsr_srt_new_rev(struct dsr_srt *srt)
 #else
     srt_rev = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                        srt->laddrs, GFP_ATOMIC);
-#endif
     if (!srt_rev)
         return NULL;
+#endif
 
     srt_rev->src.s_addr = srt->dst.s_addr;
     srt_rev->dst.s_addr = srt->src.s_addr;
@@ -541,6 +543,8 @@ split:
     srt_split = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                          (i * sizeof(struct in_addr)),
                                          GFP_ATOMIC);
+    if (!srt_split)
+        return NULL;
 #else
     int size_cost = 0;
     if (srt->cost_size>0)
@@ -548,6 +552,9 @@ split:
     srt_split = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                          (i * sizeof(struct in_addr))+size_cost,
                                          GFP_ATOMIC);
+
+    if (!srt_split)
+        return NULL;
 
     char *aux = (char *) srt_split;
     aux += sizeof(struct dsr_srt);
@@ -563,9 +570,6 @@ split:
     }
     srt_split->flags = srt->flags;
 #endif
-
-    if (!srt_split)
-        return NULL;
 
     srt_split->src.s_addr = srt->src.s_addr;
     srt_split->dst.s_addr = srt->addrs[i].s_addr;
@@ -635,6 +639,8 @@ struct dsr_srt *dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
     srt_cut = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                        (n_cut*sizeof(struct in_addr)),
                                        GFP_ATOMIC);
+    if (!srt_cut)
+        return NULL;
 #else
     int size_cost = 0;
     if (srt->cost_size>0)
@@ -642,6 +648,8 @@ struct dsr_srt *dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
     srt_cut = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                        (n_cut * sizeof(struct in_addr))+size_cost,
                                        GFP_ATOMIC);
+    if (!srt_cut)
+        return NULL;
 
     char *aux = (char *) srt_cut;
     aux += sizeof(struct dsr_srt);
@@ -661,10 +669,6 @@ struct dsr_srt *dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
     }
     srt_cut->flags = srt->flags;
 #endif
-
-
-    if (!srt_cut)
-        return NULL;
 
     srt_cut->src = srt->src;
     srt_cut->dst = srt->dst;
@@ -719,6 +723,8 @@ struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
     srt_cat = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                        (n * sizeof(struct in_addr)),
                                        GFP_ATOMIC);
+    if (!srt_cat)
+        return NULL;
 #else
     int size_cost = 0;
     if (srt1->cost_size>0 || srt2->cost_size>0)
@@ -726,6 +732,8 @@ struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
     srt_cat = (struct dsr_srt *)MALLOC(sizeof(struct dsr_srt) +
                                        (n * sizeof(struct in_addr))+size_cost,
                                        GFP_ATOMIC);
+    if (!srt_cat)
+        return NULL;
 
     char *aux = (char *) srt_cat;
     aux += sizeof(struct dsr_srt);
@@ -742,9 +750,6 @@ struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
         srt_cat->cost_size=srt1->cost_size+srt2->cost_size;
     srt_cat->flags = srt1->flags & srt2->flags;
 #endif
-
-    if (!srt_cat)
-        return NULL;
 
     srt_cat->src = srt1->src;
     srt_cat->dst = srt2->dst;
