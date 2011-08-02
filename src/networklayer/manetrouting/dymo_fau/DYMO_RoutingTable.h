@@ -36,7 +36,6 @@
 class DYMO_RoutingTable : public cObject
 {
   public:
-    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr, const char* DYMO_INTERFACES, const IPv4Address& LL_MANET_ROUTERS) {DYMO_RoutingTable(host, myAddr);}
     DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr);
     virtual ~DYMO_RoutingTable();
 
