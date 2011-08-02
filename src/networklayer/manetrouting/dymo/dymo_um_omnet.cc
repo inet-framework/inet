@@ -85,7 +85,7 @@ void DYMOUM::initialize(int stage)
         gateWayAddress = new IPv4Address("0.0.0.0");
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));
-        memset(dev_indices, 0, sizeof(unsigned int) * DYMO_MAX_NR_INTERFACES);
+        memset(dev_indices, 0, sizeof(dev_indices));
         this_host.seqnum = 1;
         this_host.nif = 1;
         this_host.prefix = 0;
