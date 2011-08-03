@@ -35,7 +35,7 @@ module EthernetInterface like IWiredNic
     parameters:
         bool csmacdSupport = default(false);  // by default no CSMA/CD so only only point-to-point duplex links are supported.
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~EthDropTailQoSQueue, ~REDQueue, ~NoQueue
+        string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~EthDropTailQoSQueue, ~REDQueue, or empty for use internal queue
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
@@ -46,14 +46,14 @@ module EthernetInterface like IWiredNic
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
-        queue: <queueType> like IOutputQueue if queueType != "NoQueue" {
+        queue: <queueType> like IOutputQueue if queueType != "" {
             parameters:
                 @display("p=53,196;q=l2queue");
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = (queueType == "NoQueue" ? "" : "queue");
-                txQueueLimit = (queueType == "NoQueue" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (queueType == "" ? "" : "queue");
+                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=143,243");
         }
         encap: EtherEncap {
@@ -61,9 +61,9 @@ module EthernetInterface like IWiredNic
                 @display("p=143,151");
         }
     connections:
-        encap.lowerLayerOut --> queue.in if queueType != "NoQueue";
-        queue.out --> mac.upperLayerIn if queueType != "NoQueue";
-        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "NoQueue";
+        encap.lowerLayerOut --> queue.in if queueType != "";
+        queue.out --> mac.upperLayerIn if queueType != "";
+        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
         encap.lowerLayerIn <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 

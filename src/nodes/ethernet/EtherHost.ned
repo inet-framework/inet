@@ -37,14 +37,14 @@ module EtherHost
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD 
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string queueType = default("NoQueue"); // DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
+        string queueType = default(""); // DropTailQueue, DropTailQoSQueue, REDQueue, or empty for use internal queue
         @node();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        queue: <queueType> like IOutputQueue if queueType != "NoQueue" {
+        queue: <queueType> like IOutputQueue if queueType != "" {
             parameters:
                 @display("p=99,201;q=l2queue");
         }
@@ -67,7 +67,7 @@ module EtherHost
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = (queueType == "NoQueue" ? "" : "queue");
+                queueModule = (queueType == "" ? "" : "queue");
                 @display("p=155,272;q=queue");
         }
     connections:
@@ -78,8 +78,8 @@ module EtherHost
 
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
-        llc.lowerLayerOut --> queue.in if queueType != "NoQueue";
-        queue.out --> mac.upperLayerIn if queueType != "NoQueue";
-        llc.lowerLayerOut --> mac.upperLayerIn if queueType == "NoQueue";
+        llc.lowerLayerOut --> queue.in if queueType != "";
+        queue.out --> mac.upperLayerIn if queueType != "";
+        llc.lowerLayerOut --> mac.upperLayerIn if queueType == "";
         mac.upperLayerOut --> llc.lowerLayerIn;
 }
