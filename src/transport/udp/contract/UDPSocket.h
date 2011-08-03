@@ -40,6 +40,7 @@ class UDPDataIndication;
  *
  * <pre>
  *   UDPSocket socket;
+ *   socket.setOutputGate(gate("udpOut"));
  *   socket.connect(IPvXAddress("10.0.0.2"), 2000);
  *
  *   cPacket *pk = new cPacket("dgram");
