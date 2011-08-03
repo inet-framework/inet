@@ -2205,7 +2205,7 @@ void Ieee80211NewMac::logState()
     {
         if (endBackoff(i)->isScheduled())
             b[i] = "scheduled";
-        if (endAIFS(i)->isScheduled());
+        if (endAIFS(i)->isScheduled())
             a[i] = "scheduled";
     }
 
