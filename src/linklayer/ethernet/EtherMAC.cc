@@ -170,7 +170,7 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError(this, "self-message with unexpected message kind %d", msg->getKind());
+            throw cRuntimeError("Self-message with unexpected message kind %d", msg->getKind());
     }
 }
 
@@ -196,7 +196,7 @@ void EtherMAC::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == gate("phys$i"))
         processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
     else
-        throw cRuntimeError(this, "Message received from unknown gate!");
+        throw cRuntimeError("Message received from unknown gate");
 
     if (ev.isGUI())
         updateDisplayString();

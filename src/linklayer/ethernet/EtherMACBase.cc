@@ -410,7 +410,7 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
     if (dataratesDiffer)
     {
         if (errorWhenAsymmetric)
-            throw cRuntimeError(this, "The input/output datarates differ (%g / %g bps)", rxRate, txRate);
+            throw cRuntimeError("The input/output datarates differ (%g / %g bps)", rxRate, txRate);
 
         // When the datarate of the connected channels change at runtime, we'll receive
         // two separate notifications (one for the rx channel and one for the tx one),
@@ -434,7 +434,7 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
                 return;
             }
         }
-        throw cRuntimeError(this, "Invalid transmission rate %g bps on channel %s at module %s",
+        throw cRuntimeError("Invalid transmission rate %g bps on channel %s at module %s",
                     txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
     }
 }

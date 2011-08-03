@@ -69,7 +69,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == gate("phys$i"))
         processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
     else
-        throw cRuntimeError(this, "Message received from unknown gate!");
+        throw cRuntimeError("Message received from unknown gate!");
 
     if (ev.isGUI())
         updateDisplayString();
@@ -86,7 +86,7 @@ void EtherMACFullDuplex::handleSelfMessage(cMessage *msg)
     else if (msg == endPauseMsg)
         handleEndPausePeriod();
     else
-        throw cRuntimeError(this, "Unknown self message received!");
+        throw cRuntimeError("Unknown self message received!");
 }
 
 void EtherMACFullDuplex::startFrameTransmission()
