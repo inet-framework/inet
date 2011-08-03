@@ -392,8 +392,6 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
         curEtherDescr = nullEtherDescr;
         carrierExtension = false;
         dataratesDiffer = (outTrChannel != NULL) || (inTrChannel != NULL);
-        if (transmissionChannel)
-            transmissionChannel->forceTransmissionFinishTime(SimTime());
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
         interfaceEntry->setDatarate(0);
