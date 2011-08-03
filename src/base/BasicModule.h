@@ -53,9 +53,6 @@
 class INET_API BasicModule: public cSimpleModule, public INotifiable
 {
   protected:
-    /** @brief Cached pointer to the NotificationBoard module*/
-    NotificationBoard *nb;
-
     /** @brief Debug switch for the core modules*/
     bool coreDebug;
 

@@ -44,6 +44,7 @@ void ChannelAccess::initialize(int stage)
     if (stage == 0)
     {
         cc = getChannelControl();
+        nb = NotificationBoardAccess().get();
         hostModule = findHost();
 
         positionUpdateArrived = false;

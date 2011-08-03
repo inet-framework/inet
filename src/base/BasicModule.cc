@@ -56,20 +56,19 @@ void BasicModule::initialize(int stage)
             loggingName = parent->getName();
         sprintf(&tmp[0], "[%d]", parent->getIndex());
         loggingName += tmp;
-
-        // get a pointer to the NotificationBoard module
-        nb = NotificationBoardAccess().get();
     }
 }
 
 cModule *BasicModule::findHost(void) const
 {
     cModule *mod;
-    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule())
-        if (mod->getSubmodule("notificationBoard"))
+    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule()) {
+        cProperties *properties = mod->getProperties();
+        if (properties && properties->getAsBool("node"))
             break;
+    }
     if (!mod)
-        error("findHost(): host module not found (it should have a submodule named notificationBoard)");
+        error("findHost(): host module not found (it should have a property named node)");
 
     return mod;
 }
