@@ -298,9 +298,9 @@ def run_sumo(runpath, sumo_command, shlex, config_file_name, remote_port, seed, 
     return result_xml
 
 
-def set_sumoconfig_option(config_parser, config_xml, key, value):
+def set_sumoconfig_option(config_parser, config_xml, section, key, value):
     """
-    Add or replace named config option
+    Add or replace named config option (currently ignores given section)
     """
 
     key_nodes = config_xml.getElementsByTagName(key)
@@ -308,13 +308,13 @@ def set_sumoconfig_option(config_parser, config_xml, key, value):
         raise RuntimeError('config file "%s" contains %d <%s> nodes, expected at most 1' % (file_dst_name, key, len(key_nodes)))
     elif len(key_nodes) < 1:
         key_node = config_parser.createElement(key)
-        key_node.appendChild(config_parser.createTextNode(str(value)))
+        key_node.setAttribute("value", str(value))
         config_xml.appendChild(key_node)
     else:
         key_node = key_nodes[0]
         for n in key_node.childNodes:
             key_node.removeChild(n)
-        key_node.appendChild(config_parser.createTextNode(str(value)))
+        key_node.setAttribute("value", str(value))
 
 
 def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed):
@@ -362,9 +362,9 @@ def copy_and_modify_files(basedir, copy_nodes, runpath, remote_port, seed):
             config_parser = xml.dom.minidom.parseString(file_contents)
             config_xml = config_parser.documentElement
 
-            set_sumoconfig_option(config_parser, config_xml, "remote-port", remote_port)
-            set_sumoconfig_option(config_parser, config_xml, "srand", seed)
-            set_sumoconfig_option(config_parser, config_xml, "abs-rand", "false")
+            set_sumoconfig_option(config_parser, config_xml, "traci_server", "remote-port", remote_port)
+            set_sumoconfig_option(config_parser, config_xml, "random_number", "seed", seed)
+            set_sumoconfig_option(config_parser, config_xml, "random_number", "random", "false")
 
             file_contents = config_xml.toxml()
 

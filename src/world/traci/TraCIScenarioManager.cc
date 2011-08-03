@@ -183,6 +183,8 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCI(uint8_t comma
 	ASSERT(commandResp == commandId);
 	uint8_t result; obuf >> result;
 	std::string description; obuf >> description;
+	if (result == RTYPE_NOTIMPLEMENTED) error("TraCI server reported command 0x%2x not implemented (\"%s\"). Might need newer version.", commandId, description.c_str());
+	if (result == RTYPE_ERR) error("TraCI server reported error executing command 0x%2x (\"%s\").", commandId, description.c_str());
 	ASSERT(result == RTYPE_OK);
 	return obuf;
 }
@@ -242,38 +244,29 @@ void TraCIScenarioManager::init_traci() {
 		uint32_t apiVersion = version.first;
 		std::string serverVersion = version.second;
 
-		if (apiVersion == 0) {
-			MYDEBUG << "WARNING: TraCI server didn't report API version. Expect trouble down the road." << endl;
-		}
-		else if (apiVersion == 1) {
-			MYDEBUG << "TraCI server reports version \"" << serverVersion << "\"" << endl;
+		if (apiVersion == 2) {
+			MYDEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
 		}
 		else {
-			error("TraCI server reports API version %d, but only version 1 is supported.", apiVersion);
+			error("TraCI server \"%s\" reports API version %d. This server is unsupported.", serverVersion.c_str(), apiVersion);
 		}
 
 	}
 
 	{
 		// query road network boundaries
-		uint8_t do_write = 0x00;
-		uint8_t domain = DOM_ROADMAP;
-		uint32_t objectId = 0;
-		uint8_t variableId = DOMVAR_BOUNDINGBOX;
-		uint8_t typeId = TYPE_BOUNDINGBOX;
-		TraCIBuffer buf = queryTraCI(CMD_SCENARIO, TraCIBuffer() << do_write << domain << objectId << variableId << typeId);
+		TraCIBuffer buf = queryTraCI(CMD_GET_SIM_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_NET_BOUNDING_BOX) << std::string("sim0"));
 		uint8_t cmdLength_resp; buf >> cmdLength_resp;
-		uint8_t commandId_resp; buf >> commandId_resp;
-		ASSERT(commandId_resp == CMD_SCENARIO);
-		uint8_t do_write_resp; buf >> do_write_resp;
-		uint8_t domain_resp; buf >> domain_resp;
-		uint32_t objectId_resp; buf >> objectId_resp;
-		uint8_t variableId_resp; buf >> variableId_resp;
-		uint8_t typeId_resp; buf >> typeId_resp;
-		float x1; buf >> x1;
-		float y1; buf >> y1;
-		float x2; buf >> x2;
-		float y2; buf >> y2;
+		uint8_t commandId_resp; buf >> commandId_resp; ASSERT(commandId_resp == RESPONSE_GET_SIM_VARIABLE);
+		uint8_t variableId_resp; buf >> variableId_resp; ASSERT(variableId_resp == VAR_NET_BOUNDING_BOX);
+		std::string simId; buf >> simId;
+		uint8_t typeId_resp; buf >> typeId_resp; ASSERT(typeId_resp == TYPE_BOUNDINGBOX);
+		double x1; buf >> x1;
+		double y1; buf >> y1;
+		double x2; buf >> x2;
+		double y2; buf >> y2;
+		ASSERT(buf.eof());
+
 		netbounds1 = TraCICoord(x1, y1);
 		netbounds2 = TraCICoord(x2, y2);
 		MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-("<< x2 << ", " << y2 << ")" << endl;
@@ -360,10 +353,10 @@ std::pair<uint32_t, std::string> TraCIScenarioManager::commandGetVersion() {
 	return std::pair<uint32_t, std::string>(apiVersion, serverVersion);
 }
 
-void TraCIScenarioManager::commandSetMaximumSpeed(std::string nodeId, float maxSpeed) {
-	uint8_t variableId = CMD_SETMAXSPEED;
-	uint8_t variableType = TYPE_FLOAT;
-	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << maxSpeed);
+void TraCIScenarioManager::commandSetSpeedMode(std::string nodeId, int32_t bitset) {
+	uint8_t variableId = VAR_SPEEDSETMODE;
+	uint8_t variableType = TYPE_INTEGER;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << bitset);
 	ASSERT(buf.eof());
 }
 
@@ -381,8 +374,8 @@ void TraCIScenarioManager::commandChangeRoute(std::string nodeId, std::string ro
 		int32_t count = 2;
 		uint8_t edgeIdT = TYPE_STRING;
 		std::string edgeId = roadId;
-		uint8_t newTimeT = TYPE_FLOAT;
-		float newTime = travelTime;
+		uint8_t newTimeT = TYPE_DOUBLE;
+		double newTime = travelTime;
 		TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << count << edgeIdT << edgeId << newTimeT << newTime);
 		ASSERT(buf.eof());
 	} else {
@@ -403,10 +396,10 @@ void TraCIScenarioManager::commandChangeRoute(std::string nodeId, std::string ro
 	}
 }
 
-float TraCIScenarioManager::commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
+double TraCIScenarioManager::commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
 	TraCICoord p1 = omnet2traci(position1);
 	TraCICoord p2 = omnet2traci(position2);
-	TraCIBuffer buf = queryTraCI(CMD_DISTANCEREQUEST, TraCIBuffer() << static_cast<uint8_t>(POSITION_2D) << float(p1.x) << float(p1.y) << static_cast<uint8_t>(POSITION_2D) << float(p2.x) << float(p2.y) << static_cast<uint8_t>(returnDrivingDistance ? REQUEST_DRIVINGDIST : REQUEST_AIRDIST));
+	TraCIBuffer buf = queryTraCI(CMD_DISTANCEREQUEST, TraCIBuffer() << static_cast<uint8_t>(POSITION_2D) << double(p1.x) << double(p1.y) << static_cast<uint8_t>(POSITION_2D) << double(p2.x) << double(p2.y) << static_cast<uint8_t>(returnDrivingDistance ? REQUEST_DRIVINGDIST : REQUEST_AIRDIST));
 
 	uint8_t cmdLength; buf >> cmdLength;
 	uint8_t commandId; buf >> commandId;
@@ -415,21 +408,21 @@ float TraCIScenarioManager::commandDistanceRequest(Coord position1, Coord positi
 	uint8_t flag; buf >> flag;
 	ASSERT(flag == static_cast<uint8_t>(returnDrivingDistance ? REQUEST_DRIVINGDIST : REQUEST_AIRDIST));
 
-	float distance; buf >> distance;
+	double distance; buf >> distance;
 
 	ASSERT(buf.eof());
 
 	return distance;
 }
 
-void TraCIScenarioManager::commandStopNode(std::string nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
+void TraCIScenarioManager::commandStopNode(std::string nodeId, std::string roadId, double pos, uint8_t laneid, double radius, double waittime) {
 	uint8_t variableId = CMD_STOP;
 	uint8_t variableType = TYPE_COMPOUND;
 	int32_t count = 4;
 	uint8_t edgeIdT = TYPE_STRING;
 	std::string edgeId = roadId;
-	uint8_t stopPosT = TYPE_FLOAT;
-	float stopPos = pos;
+	uint8_t stopPosT = TYPE_DOUBLE;
+	double stopPos = pos;
 	uint8_t stopLaneT = TYPE_BYTE;
 	uint8_t stopLane = laneid;
 	uint8_t durationT = TYPE_INTEGER;
@@ -526,8 +519,8 @@ std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId
 	ASSERT(resType_r == TYPE_POLYGON);
 	uint8_t count; buf >> count;
 	for (uint8_t i = 0; i < count; i++) {
-		float x; buf >> x;
-		float y; buf >> y;
+		double x; buf >> x;
+		double y; buf >> y;
 		Coord pos = traci2omnet(TraCICoord(x, y));
 		res.push_back(pos);
 	}
@@ -537,15 +530,15 @@ std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId
 	return res;
 }
 
-void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
+void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points) {
 	TraCIBuffer buf;
 	uint8_t count = static_cast<uint8_t>(points.size());
 	buf << static_cast<uint8_t>(VAR_SHAPE) << polyId << static_cast<uint8_t>(TYPE_POLYGON) << count;
-	for (std::list<std::pair<float, float> >::const_iterator i = points.begin(); i != points.end(); ++i) {
-		float x = i->first;
-		float y = i->second;
+	for (std::list<std::pair<double, double> >::const_iterator i = points.begin(); i != points.end(); ++i) {
+		double x = i->first;
+		double y = i->second;
 		TraCICoord pos = omnet2traci(Coord(x, y));
-		buf << static_cast<float>(pos.x) << static_cast<float>(pos.y);
+		buf << static_cast<double>(pos.x) << static_cast<double>(pos.y);
 	}
 	TraCIBuffer obuf = queryTraCI(CMD_SET_POLYGON_VARIABLE, buf);
 	ASSERT(obuf.eof());
@@ -715,7 +708,13 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 	for (uint8_t j = 0; j < variableNumber_resp; ++j) {
 		uint8_t variable1_resp; buf >> variable1_resp;
 		uint8_t isokay; buf >> isokay;
-		ASSERT(isokay == RTYPE_OK);
+		if (isokay != RTYPE_OK) {
+			uint8_t varType; buf >> varType;
+			ASSERT(varType == TYPE_STRING);
+			std::string description; buf >> description;
+			if (isokay == RTYPE_NOTIMPLEMENTED) error("TraCI server reported subscribing to variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, description.c_str());
+			error("TraCI server reported error subscribing to variable 0x%2x (\"%s\").", variable1_resp, description.c_str());
+		}
 
 		if (variable1_resp == VAR_DEPARTED_VEHICLES_IDS) {
 			uint8_t varType; buf >> varType;
@@ -767,11 +766,11 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraCIBuffer& buf) {
 	bool isSubscribed = (subscribedVehicles.find(objectId) != subscribedVehicles.end());
-	float px;
-	float py;
+	double px;
+	double py;
 	std::string edge;
-	float speed;
-	float angle_traci;
+	double speed;
+	double angle_traci;
 	int numRead = 0;
 
 	uint8_t variableNumber_resp; buf >> variableNumber_resp;
@@ -782,7 +781,10 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			uint8_t varType; buf >> varType;
 			ASSERT(varType == TYPE_STRING);
 			std::string errormsg; buf >> errormsg;
-			if (isSubscribed) error("Expected result RTYPE_OK, but got %s", errormsg.c_str());
+			if (isSubscribed) {
+				if (isokay == RTYPE_NOTIMPLEMENTED) error("TraCI server reported subscribing to vehicle variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, errormsg.c_str());
+				error("TraCI server reported error subscribing to vehicle variable 0x%2x (\"%s\").", variable1_resp, errormsg.c_str());
+			}
 		} else if (variable1_resp == ID_LIST) {
 			uint8_t varType; buf >> varType;
 			ASSERT(varType == TYPE_STRINGLIST);
@@ -808,12 +810,12 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			numRead++;
 		} else if (variable1_resp == VAR_SPEED) {
 			uint8_t varType; buf >> varType;
-			ASSERT(varType == TYPE_FLOAT);
+			ASSERT(varType == TYPE_DOUBLE);
 			buf >> speed;
 			numRead++;
 		} else if (variable1_resp == VAR_ANGLE) {
 			uint8_t varType; buf >> varType;
-			ASSERT(varType == TYPE_FLOAT);
+			ASSERT(varType == TYPE_DOUBLE);
 			buf >> angle_traci;
 			numRead++;
 		} else {
@@ -830,7 +832,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 	Coord p = traci2omnet(TraCICoord(px, py));
 	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
 
-	float angle = traci2omnetAngle(angle_traci);
+	double angle = traci2omnetAngle(angle_traci);
 
 	cModule* mod = getManagedModule(objectId);
 

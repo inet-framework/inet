@@ -55,17 +55,17 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		virtual void handleSelfMsg(cMessage *msg);
 
 		std::pair<uint32_t, std::string> commandGetVersion();
-		void commandSetMaximumSpeed(std::string nodeId, float maxSpeed);
+		void commandSetSpeedMode(std::string nodeId, int32_t bitset);
 		void commandSetSpeed(std::string nodeId, double speed);
 		void commandChangeRoute(std::string nodeId, std::string roadId, double travelTime);
-		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
-		void commandStopNode(std::string nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
+		double commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
+		void commandStopNode(std::string nodeId, std::string roadId, double pos, uint8_t laneid, double radius, double waittime);
 		void commandSetTrafficLightProgram(std::string trafficLightId, std::string program);
 		void commandSetTrafficLightPhaseIndex(std::string trafficLightId, int32_t index);
 		std::list<std::string> commandGetPolygonIds();
 		std::string commandGetPolygonTypeId(std::string polyId);
 		std::list<Coord> commandGetPolygonShape(std::string polyId);
-		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points);
+		void commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points);
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 
 		const std::map<std::string, cModule*>& getManagedHosts() {

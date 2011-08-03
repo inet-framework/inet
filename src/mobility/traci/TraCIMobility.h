@@ -100,8 +100,8 @@ class INET_API TraCIMobility : public BasicMobility
 			if (!manager) manager = TraCIScenarioManagerAccess().get();
 			return manager;
 		}
-		void commandSetMaximumSpeed(float maxSpeed) {
-			getManager()->commandSetMaximumSpeed(getExternalId(), maxSpeed);
+		void commandSetSpeedMode(int32_t bitset) {
+			getManager()->commandSetSpeedMode(getExternalId(), bitset);
 		}
 		void commandSetSpeed(double speed) {
 			getManager()->commandSetSpeed(getExternalId(), speed);
@@ -109,10 +109,10 @@ class INET_API TraCIMobility : public BasicMobility
 		void commandChangeRoute(std::string roadId, double travelTime) {
 			getManager()->commandChangeRoute(getExternalId(), roadId, travelTime);
 		}
-		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
+		double commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
 			return getManager()->commandDistanceRequest(position1, position2, returnDrivingDistance);
 		}
-		void commandStopNode(std::string roadId, float pos, uint8_t laneid, float radius, double waittime) {
+		void commandStopNode(std::string roadId, double pos, uint8_t laneid, double radius, double waittime) {
 			return getManager()->commandStopNode(getExternalId(), roadId, pos, laneid, radius, waittime);
 		}
 		std::list<std::string> commandGetPolygonIds() {
@@ -124,10 +124,10 @@ class INET_API TraCIMobility : public BasicMobility
 		std::list<Coord> commandGetPolygonShape(std::string polyId) {
 			return getManager()->commandGetPolygonShape(polyId);
 		}
-		void commandSetPolygonShape(std::string polyId, std::list<std::pair<float, float> > points) {
+		void commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points) {
 			getManager()->commandSetPolygonShape(polyId, points);
 		}
-		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed) {
+		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, double emitPosition, double emitSpeed) {
 			return getManager()->commandAddVehicle(vehicleId, vehicleTypeId, routeId, laneId, emitPosition, emitSpeed);
 		}
 

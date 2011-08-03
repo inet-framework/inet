@@ -11,7 +11,7 @@ highway1.host[4].app	hasStopped	1
 highway1.host[5].app	visitedEdges	25 28 31 34 37 40 43 46 49 52
 highway1.host[5].app	hasStopped	1
 highway1.host[6].app	visitedEdges	25 28 31 34 37 40 43 46 49 52
-highway1.host[6].app	hasStopped	1
+highway1.host[6].app	hasStopped	0
 highway1.host[7].app	visitedEdges	25 28 31 34 37 40 43 46 49 52
 highway1.host[7].app	hasStopped	0
 highway1.host[8].app	visitedEdges	25 28 31 34 37 40 43 46 49 52

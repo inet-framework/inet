@@ -1,5 +1,5 @@
 highway1.host[0].app	commandDistanceRequest	859.5
-highway1.host[0].app	commandDistanceRequest	905.1
+highway1.host[0].app	commandDistanceRequest	847.6
 highway1.host[0].app	visitedEdges	25 28 31 34 37 40 43 46 49 52
 highway1.host[0].app	hasStopped	0
 highway1.host[1].app	visitedEdges	25 28 31 34 37 40 43 46 49 52

@@ -92,7 +92,8 @@ void Test_TraCI::executeCommand(const cXMLElement* e) {
 
 	if (name == "CMD_SETMAXSPEED") {
 		float maxspeed = parseOrBail<float>(e, "maxspeed");
-		mobility->commandSetMaximumSpeed(maxspeed);
+		mobility->commandSetSpeedMode(0x00);
+		mobility->commandSetSpeed(maxspeed);
 	}
 	else if (name == "CMD_CHANGEROUTE") {
 		std::string roadid = parseOrBail<std::string>(e, "roadid");
