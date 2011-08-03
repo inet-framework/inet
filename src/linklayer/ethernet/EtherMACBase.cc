@@ -315,7 +315,7 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
     }
 }
 
-void EtherMACBase::ifDown()
+void EtherMACBase::handleDisconnect()
 {
     // cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
     cancelEvent(endTxMsg);
@@ -359,7 +359,7 @@ void EtherMACBase::refreshConnection()
     calculateParameters(false);
 
     if (!connected)
-        ifDown();
+        handleDisconnect();
 }
 
 bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)

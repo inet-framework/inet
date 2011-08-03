@@ -101,7 +101,7 @@ void EtherMAC::initializeFlags()
     physInGate->setDeliverOnReceptionStart(true);
 }
 
-void EtherMAC::ifDown()
+void EtherMAC::handleDisconnect()
 {
     delete frameBeingReceived;
     frameBeingReceived = NULL;
@@ -111,7 +111,7 @@ void EtherMAC::ifDown()
     bytesSentInBurst = 0;
     framesSentInBurst = 0;
 
-    EtherMACBase::ifDown();
+    EtherMACBase::handleDisconnect();
 }
 
 void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
