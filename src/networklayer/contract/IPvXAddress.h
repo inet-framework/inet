@@ -231,7 +231,7 @@ class INET_API IPvXAddress
     bool equals(const IPv6Address& addr) const
     {
         const uint32 *w = addr.words();
-        return isv6 && d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0];
+        return isv6 ? (d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0]) : (isUnspecified() && addr.isUnspecified());
     }
 
     /**
