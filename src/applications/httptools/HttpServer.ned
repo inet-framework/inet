@@ -34,20 +34,9 @@ import inet.applications.ITCPApp;
 
 
 //
-// HttpServer
-//
 // A Web server module for OMNeT++ simulations. This module is intended for use with the
 // INET StandardHost module and plugs in as a tcpApp. The INET TCP/IP stack modeling is
 // used for transport. See the INET documentation for more details.
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @see HttpServerDirect
-// @see DirectHost
-//
-// @version 1.0
-// @author  Kristjan V. Jonsson
-//
 //
 // The purpose of the HTTPServer component is to simulate a Web server operating on a single host.
 // It operates in conjunction with the browser component to provide a realistic simulation of Web
@@ -68,7 +57,7 @@ import inet.applications.ITCPApp;
 //
 //  - Random document generation mode, in which the server responds to requests for HTML documents
 //     by generating replies according to statistical distributions.
-//  - Scripted mode, in which the pages and resources served are predetermined. 
+//  - Scripted mode, in which the pages and resources served are predetermined.
 //
 // <h1>Random document generation mode</h1>
 //
@@ -119,7 +108,13 @@ import inet.applications.ITCPApp;
 // and size in bytes.
 //
 // The server responds with a message containing the specified page or resource if the request
-// can be satisfied (a 200:OK reply). Otherwise, a 404:Not found reply is issued. 
+// can be satisfied (a 200:OK reply). Otherwise, a 404:Not found reply is issued.
+//
+// @see HttpServerDirect
+// @see DirectHost
+//
+// @version 1.0
+// @author  Kristjan V. Jonsson
 //
 simple HttpServer like ITCPApp
 {

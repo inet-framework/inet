@@ -31,17 +31,15 @@
 package inet.applications.httptools;
 
 //
-// HttpServerDirectEvilA
-//
 // Demonstrates subclassing the server to create a custom site. This site is an attacker -- a puppetmaster --
 // which serves HTML pages containing attack code. In this case, we are simulating JavaScript attack code which prompts
-// the unsuspecting browser to request a number of images from a wictim site. Delays are specified to simulate hiding
+// the unsuspecting browser to request a number of images from a victim site. Delays are specified to simulate hiding
 // the attack from the browser user by use of JavaScript timeouts or similar mechanisms.
 // The generateBody virtual function is redefined to create a page containing the attack code.
 //
 // This module definition has two additional parameters to the standard HttpServerDirect definition:
-// * minBadRequests specifies the lower bound on bad requests caused to be sent to the wictim by the browser.
-// * maxBadRequests specifies the upper bound on bad requests caused to be sent to the wictim by the browser.
+// * minBadRequests specifies the lower bound on bad requests caused to be sent to the victim by the browser.
+// * maxBadRequests specifies the upper bound on bad requests caused to be sent to the victim by the browser.
 //
 // @version 1.0
 // @author  Kristjan V. Jonsson
@@ -56,7 +54,7 @@ simple HttpServerDirectEvilA like IHttpDirectApp
         string logFile = default("");                     // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition = default("");              // The site script file. Blank to disable.
         double activationTime @unit(s) = default(0s);     // The initial activation delay. Zero to disable.
-        double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays.
+        double linkSpeed @unit(bps) = default(11Mbps);    // Used to model transmission delays.
         int minBadRequests;                               // The lower bound of bad requests.
         int maxBadRequests;                               // The upper bound of bad requests
         xml config;                                       // The XML configuration file for random sites

@@ -31,16 +31,12 @@
 package inet.applications.httptools;
 
 //
-// HttpBrowserDirect
-//
 // This component is the direct message passing version of the browser simulation
 // component. It is derived from HttpBrowserBase. Use this component with the
 // DirectHost container module.
 //
 // Direct message passing is used for transmission, thus bypassing the normal links and
 // interfaces. A linkSpeed parameter is hence needed to model transmission delays.
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
 // @see DirectHost
 // @see HttpBrowserBase
@@ -52,13 +48,13 @@ package inet.applications.httptools;
 simple HttpBrowserDirect like IHttpDirectApp
 {
     parameters:
-        int logLevel = default(0);                              // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
-        int httpProtocol = default(11);                         // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        string logFile = default("");                           // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
-        string scriptFile = default("");                        // The browsing script file. Blank to disable.
-        double activationTime @unit(s) = default(0s);           // The initial activation delay. Zero to disable (seconds).
-        double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays (Bit/s)
-        xml config;                                             // The XML configuration file for the browser
+        int logLevel = default(0);                     // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        int httpProtocol = default(11);                // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        string logFile = default("");                  // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
+        string scriptFile = default("");               // The browsing script file. Blank to disable.
+        double activationTime @unit(s) = default(0s);  // The initial activation delay. Zero to disable (seconds).
+        double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays (Bit/s)
+        xml config;                                    // The XML configuration file for the browser
     gates:
         input httpIn @directIn;
 }

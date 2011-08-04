@@ -34,18 +34,11 @@ import inet.applications.ITCPApp;
 
 
 //
-// HttpBrowser
-//
 // The component is derived from HttpBrowseBase and is intended to be used
 // with the INET frameworks StandardHost and TCP/IP stack modeling.
 //
 // See the API documentation for HttpBrowserBase and HttpBrowser for further details.
 // See the INET documentation for more information on StandardHost and the TCP/IP stack.
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @version 1.0
-// @author  Kristjan V. Jonsson
 //
 // The purpose of the HttpBrowser component is to simulate a browser operating on a single host.
 // It operates in conjunction with the server component to provide a realistic simulation of Web
@@ -69,7 +62,7 @@ import inet.applications.ITCPApp;
 //  - Random request mode, in which the browser uses statistical distributions of usage patterns
 //       to generate requests to random Web servers.
 //  - Scripted mode, in which the browsing behavior is determined by a list of predefined Web
-//       sites to visit at specific times. 
+//       sites to visit at specific times.
 //
 // <h1>Random request mode</h1>
 //
@@ -80,7 +73,7 @@ import inet.applications.ITCPApp;
 // file, and assigned to the browser component at run-time using a XML initialization parameter
 // and optional XPath-like section specifier. Uniform, normal, exponential, and Zipf random
 // distributions are currently supported, in addition to a histogram object for empirical
-// distributions. 
+// distributions.
 //
 // Parameters:
 // - activityPeriod:        The activity period of the browser during a 24h day. We can think of
@@ -94,14 +87,14 @@ import inet.applications.ITCPApp;
 // - reqInSession:          The number of requests per activity period
 // - processingDelay:       The delay in processing of each received HTML document before issuing
 //                          requests for referenced resources
-// - requestSize:           The size of request, disregarding the TCP/IP headers 
+// - requestSize:           The size of request, disregarding the TCP/IP headers
 //
 // The browser selects a server to query in this mode by utilizing the global controller object to
 // return a random server reference.
 //
 // Every browser in a simulation can be configured with different parameters, although this would
 // quickly become unwieldy when setting up a large simulation. The flexibility to define groups of
-// users, e.g. for light, normal and heavy browsing, is however useful in many cases. 
+// users, e.g. for light, normal and heavy browsing, is however useful in many cases.
 //
 // <h1>Scripted mode</h1>
 //
@@ -123,7 +116,10 @@ import inet.applications.ITCPApp;
 // <pre>{simulation time};{resource URL} </pre>
 //
 // The simulation time parameter indicates the time at which the request for a specific resource,
-// indicated by the resource URL, is made. 
+// indicated by the resource URL, is made.
+//
+// @version 1.0
+// @author  Kristjan V. Jonsson
 //
 simple HttpBrowser like ITCPApp
 {
@@ -132,7 +128,7 @@ simple HttpBrowser like ITCPApp
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         string logFile = default("");                   // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
         string scriptFile = default("");                // The browsing script file. Blank to disable.
-        double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable. This is the time at which the browser first comes to life in a simulation scenario. Note that this can be any random distribution which OMNeT++ supports. 
+        double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable. This is the time at which the browser first comes to life in a simulation scenario. Note that this can be any random distribution which OMNeT++ supports.
         xml config;                                     // The XML config file
     gates:
         input tcpIn;

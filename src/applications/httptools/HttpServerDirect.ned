@@ -34,13 +34,8 @@ import inet.applications.ITCPApp;
 
 
 //
-// HttpServerDirect
-//
 // A Web server module for OMNeT++ simulations and direct message passing between modules.
 // This module is intended for use with the DirectHost module and plugs in as a tcpApp.
-//
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
 // @see HttpServerBase
 // @see HttpServer
@@ -59,7 +54,7 @@ simple HttpServerDirect like IHttpDirectApp
         string logFile = default("");                       // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition = default("");                // The site script file. Blank to disable.
         double activationTime @unit(s) = default(0s);       // The initial activation delay. Zero to disable.
-        double linkSpeed @unit(bps) = default(11Mbps);  // Used to model transmission delays.
+        double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays.
         xml config;                                         // The XML configuration file for random sites
     gates:
         input httpIn @directIn;

@@ -31,8 +31,6 @@
 package inet.applications.httptools;
 
 //
-// HttpServerDirectEvilB
-//
 // Demonstrates subclassing the server to create a custom site. This site is an attacker -- a puppetmaster --
 // which serves HTML pages containing attack code. In this case, we are simulating JavaScript attack code which prompts
 // the unsuspecting browser to issue a number of requests for non-existing resources (random URLS) to the victim site.
@@ -40,8 +38,8 @@ package inet.applications.httptools;
 // The generateBody virtual function is redefined to create a page containing the attack code.
 //
 // This module definition has two additional parameters to the standard HttpServerDirect definition:
-// * minBadRequests specifies the lower bound on bad requests caused to be sent to the wictim by the browser.
-// * maxBadRequests specifies the upper bound on bad requests caused to be sent to the wictim by the browser.
+// * minBadRequests specifies the lower bound on bad requests caused to be sent to the victim by the browser.
+// * maxBadRequests specifies the upper bound on bad requests caused to be sent to the victim by the browser.
 //
 // @version 1.0
 // @author  Kristjan V. Jonsson

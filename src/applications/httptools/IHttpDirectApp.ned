@@ -1,4 +1,3 @@
-
 // ----------------------------------------------------------------------------
 //
 // HttpTools Project
@@ -33,13 +32,9 @@ package inet.applications.httptools;
 
 
 //
-// IHttpDirectApp
-//
-// A Web server module for OMNeT++ simulations and direct message passing between modules.
-// This module is intended for use with the DirectHost module and plugs in as a tcpApp.
-//
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
+// Interface for HTTP server and browser models that communicate directly,
+// without lower layer protocols. This module is intended for use with the
+// DirectHost module and plugs in as a tcpApp.
 //
 // @see HttpServerBase
 // @see HttpServer
