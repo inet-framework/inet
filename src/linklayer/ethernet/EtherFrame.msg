@@ -49,10 +49,12 @@ packet EtherJam extends EtherTraffic
 }
 
 //
-// Represents padding when packet too short, and filled IFG on burst mode.
+// Represents filled Interframe gap in burst mode.
+// Also used for calculating IFG times.
 //
-packet EtherPadding extends EtherTraffic
+packet EtherIFG extends EtherTraffic
 {
+    bitLength = INTERFRAME_GAP_BITS;
 }
 
 //
