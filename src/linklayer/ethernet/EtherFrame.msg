@@ -1,3 +1,4 @@
+
 //
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
 //
@@ -31,10 +32,10 @@ enum EtherType;
 
 enum SAPCode;
 
-// containing their common header fields.
 //
 // This class should never be instantiated by the models, only specific
 // subclasses: EthernetJam, EtherIFG and submodules of ~EtherFrame.
+//
 packet EtherTraffic
 {
 }
@@ -73,7 +74,6 @@ packet EtherFrame extends EtherTraffic
     MACAddress dest;
     MACAddress src;
     int origByteLength;
-    //MessageId id; -- uncomment for tracing frames
 }
 
 
@@ -125,3 +125,4 @@ packet EtherPauseFrame extends EtherFrame
 {
     int pauseTime; // in 512 bit-time units
 }
+

@@ -34,7 +34,7 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 }
 
 
-Define_Module( EtherMAC );
+Define_Module(EtherMAC);
 
 simsignal_t EtherMAC::collisionSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMAC::backoffSignal = SIMSIGNAL_NULL;
