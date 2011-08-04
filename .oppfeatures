@@ -84,7 +84,7 @@
         name="INET examples"
         description = "Examples for Basic Internet Protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
-        requires = "IPv4 TCP_common UDP Ethernet PPP"
+        requires = "IPv4 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.inet
@@ -115,7 +115,7 @@
         name="IPv6 examples"
         description = "Examples for Basic IPv6 support (IPv6)"
         initiallyEnabled = "true"
-        requires = "IPv6 TCP_common UDP Ethernet PPP"
+        requires = "IPv6 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.ipv6
@@ -145,7 +145,7 @@
         name="xMIPv6 examples"
         description = "Examples for Mobile IPv6 support (xMIPv6)"
         initiallyEnabled = "true"
-        requires = "xMIPv6 TCP_common UDP Ethernet PPP Ieee80211 mobility"
+        requires = "xMIPv6 TCP_INET UDP Ethernet PPP Ieee80211 mobility"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.mobileipv6
@@ -308,7 +308,7 @@
         id="MPLS"
         name="MPLS support (incl. LDP and RSVP-TE)"
         description = "MPLS support"
-        requires = "TCP_common UDP IPv4"
+        requires = "TCP_INET UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.mpls inet.nodes.mpls
@@ -368,7 +368,7 @@
         name="BGPv4"
         description = "BGP support"
         initiallyEnabled = "true"
-        requires = "IPv4 OSPFv2 TCP_common"
+        requires = "IPv4 OSPFv2 TCP_INET"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.bgpv4
@@ -497,7 +497,7 @@
         name="802.11a/b/g/e (mesh networking mode)"
         description = "IEEE 802.11a/b/g/e NIC supporting mesh networking"
         initiallyEnabled = "true"
-        requires = "mobility radio TCP_common MANET OSPFv2 MPLS UDP IPv4 IPv6"
+        requires = "mobility radio TCP_INET MANET OSPFv2 MPLS UDP IPv4 IPv6"
         labels = "nic wireless mesh"
         nedPackages = "
                        inet.linklayer.ieee80211mesh
