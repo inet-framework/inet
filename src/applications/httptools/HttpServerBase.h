@@ -45,14 +45,6 @@
 #define LL_INFO 1
 #define LL_DEBUG 2
 
-/**
- * @brief Site definition data structure. Used for scripted sites.
- */
-struct SITE_DEF_STRUCT
-{
-    long size;
-    std::string body;
-};
 
 /**
  * @brief Web server base class
@@ -75,10 +67,19 @@ struct SITE_DEF_STRUCT
 class INET_API HttpServerBase : public HttpNodeBase
 {
     protected:
+        /**
+         * Describes a HTML page
+         */
+        struct HtmlPageData
+        {
+            long size;
+            std::string body;
+        };
+
         /** set to true if a scripted site definition is used */
         bool scriptedMode;
         /** A map of html pages, keyed by a resource URL. Used in scripted mode. */
-        std::map<std::string,SITE_DEF_STRUCT> htmlPages;
+        std::map<std::string,HtmlPageData> htmlPages;
         /** A map of resource, keyed by a resource URL. Used in scripted mode. */
         std::map<std::string,unsigned int> resources;
 
