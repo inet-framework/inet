@@ -116,6 +116,19 @@ packet HttpRequestMessage extends HttpBaseMessage
     bool badRequest = false;    // Set to true to simulate a bad request. Server answers w. 404.
 }
 
+
+//
+// Content type of HTTP responses.
+//
+enum HttpContentType
+{
+    CT_UNKNOWN = 0;
+    CT_HTML = 1;
+    CT_IMAGE = 2;
+    CT_TEXT = 3;
+};
+
+
 //
 // Message class for HTTP replies
 //
@@ -127,8 +140,8 @@ packet HttpRequestMessage extends HttpBaseMessage
 packet HttpReplyMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);
-    int result = 0;                 // e.g. 200 for OK, 404 for NOT FOUND.
-    int contentType = 0;            // The content type: HTML pages, text or image resources.
+    int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
+    int contentType @enum(HttpContentType) = CT_UNKNOWN;
 }
 
 

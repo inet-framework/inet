@@ -233,9 +233,9 @@ HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request,
         return generateErrorReply(request, 400);
     }
 
-    CONTENT_TYPE_ENUM cat = getResourceCategory(req);
+    HttpContentType cat = getResourceCategory(req);
 
-    if ( cat==rt_html_page )
+    if ( cat==CT_HTML )
     {
         if ( scriptedMode )
         {
@@ -260,7 +260,7 @@ HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request,
         }
         return generateDocument(request, resource.c_str());
     }
-    else if ( cat==rt_text || cat==rt_image )
+    else if ( cat==CT_TEXT || cat==CT_IMAGE )
     {
         if ( scriptedMode && resources.find(resource)==resources.end() )
         {
@@ -289,7 +289,7 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
     replymsg->setProtocol(request->protocol());
     replymsg->setSerial(request->serial());
     replymsg->setResult(200);
-    replymsg->setContentType(rt_html_page); // Emulates the content-type header field
+    replymsg->setContentType(CT_HTML); // Emulates the content-type header field
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
 
     if ( scriptedMode )
@@ -316,13 +316,13 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *request, std::string resource, CONTENT_TYPE_ENUM category )
+HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *request, std::string resource, HttpContentType category )
 {
     EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
 
-    if ( category==rt_text )
+    if ( category==CT_TEXT )
         textResourcesServed++;
-    else if ( category==rt_image )
+    else if ( category==CT_IMAGE )
         imgResourcesServed++;
 
     char szReply[512];

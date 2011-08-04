@@ -171,24 +171,24 @@ std::string getDelimited(std::string str, std::string ldelim, std::string rdelim
     else return str.substr(lpos+1, rpos-lpos-1);
 }
 
-CONTENT_TYPE_ENUM getResourceCategory(std::vector<std::string> res)
+HttpContentType getResourceCategory(std::vector<std::string> res)
 {
     if ( res.size()==2 )
-        return rt_html_page;
+        return CT_HTML;
     else if (res.size()>2)
         return getResourceCategory(res[2]); // get the category from the extension
-    return rt_unknown;
+    return CT_UNKNOWN;
 }
 
-CONTENT_TYPE_ENUM getResourceCategory(std::string resourceExt)
+HttpContentType getResourceCategory(std::string resourceExt)
 {
     if (resourceExt=="" || resourceExt=="htm" || resourceExt=="html")
-        return rt_html_page;
-    else if (resourceExt=="jpg" || resourceExt=="gif" || resourceExt=="bmp")
-        return rt_image;
+        return CT_HTML;
+    else if (resourceExt=="jpg" || resourceExt=="gif" || resourceExt=="png" || resourceExt=="bmp")
+        return CT_IMAGE;
     else if (resourceExt=="css" || resourceExt=="txt" || resourceExt=="js")
-        return rt_text;
-    return rt_unknown;
+        return CT_TEXT;
+    return CT_UNKNOWN;
 }
 
 std::string htmlErrFromCode(int code)

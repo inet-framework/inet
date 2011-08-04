@@ -122,7 +122,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Generate a HTML document in response to a request. */
         HttpReplyMessage* generateDocument( HttpRequestMessage *request, const char* resource, int size = 0 );
         /** Generate a resource message in response to a request. */
-        HttpReplyMessage* generateResourceMessage( HttpRequestMessage *request, std::string resource, CONTENT_TYPE_ENUM category );
+        HttpReplyMessage* generateResourceMessage( HttpRequestMessage *request, std::string resource, HttpContentType category );
         /** Handle a received HTTP GET request */
         HttpReplyMessage* handleGetRequest( HttpRequestMessage *request, std::string resource );
         /** Generate a error reply in case of invalid resource requests. */

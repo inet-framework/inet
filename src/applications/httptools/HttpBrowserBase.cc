@@ -284,7 +284,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
     std::string senderWWW = appmsg->originatorUrl();
     EV_DEBUG << "Handling received message from " << senderWWW << ": " << msg->getName() << ". Received @T=" << simTime() << endl;
 
-    if ( appmsg->result()!=200 || (CONTENT_TYPE_ENUM)appmsg->contentType()==rt_unknown )
+    if ( appmsg->result()!=200 || (HttpContentType)appmsg->contentType()==CT_UNKNOWN )
     {
         EV_INFO << "Result for " << appmsg->getName() << " was other than OK. Code: " << appmsg->result() << endl;
         htmlErrorsReceived++;
@@ -293,9 +293,9 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
     }
     else
     {
-        switch ( (CONTENT_TYPE_ENUM)appmsg->contentType() )
+        switch ( (HttpContentType)appmsg->contentType() )
         {
-            case rt_html_page:
+            case CT_HTML:
                 EV_INFO << "HTML Document received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 if ( strlen(appmsg->payload()) != 0 )
                     EV_DEBUG << "Payload of " << appmsg->getName() << " is: " << endl << appmsg->payload()
@@ -305,24 +305,24 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
                 htmlReceived++;
                 if (ev.isGUI()) bubble("Received a HTML document");
                 break;
-            case rt_text:
+            case CT_TEXT:
                 EV_INFO << "Text resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 textResourcesReceived++;
                 if (ev.isGUI()) bubble("Received a text resource");
                 break;
-            case rt_image:
+            case CT_IMAGE:
                 EV_INFO << "Image resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 imgResourcesReceived++;
                 if (ev.isGUI()) bubble("Received an image resource");
                 break;
-            case rt_unknown:
-                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (CONTENT_TYPE_ENUM)appmsg->contentType() << endl;
+            case CT_UNKNOWN:
+                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->contentType() << endl;
                 if (ev.isGUI()) bubble("Received an unknown resource type");
                 break;
         }
 
         // Parse the html page body
-        if ( (CONTENT_TYPE_ENUM)appmsg->contentType() == rt_html_page && strlen(appmsg->payload()) != 0 )
+        if ( (HttpContentType)appmsg->contentType() == CT_HTML && strlen(appmsg->payload()) != 0 )
         {
             EV_DEBUG << "Processing HTML document body:\n";
             cStringTokenizer lineTokenizer( (const char*)appmsg->payload(), "\n" );
@@ -451,9 +451,9 @@ cMessage* HttpBrowserBase::generateResourceRequest(std::string www, std::string 
         resource.insert(0, "/");
 
     std::string ext = trimLeft(resource, ".");
-    CONTENT_TYPE_ENUM rc = getResourceCategory(ext);
-    if ( rc==rt_image ) imgResourcesRequested++;
-    else if ( rc==rt_text ) textResourcesRequested++;
+    HttpContentType rc = getResourceCategory(ext);
+    if ( rc==CT_IMAGE ) imgResourcesRequested++;
+    else if ( rc==CT_TEXT ) textResourcesRequested++;
 
     char szReq[MAX_URL_LENGTH+24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());

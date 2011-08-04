@@ -190,9 +190,9 @@ std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpRe
     str << "CONTENT-TYPE:";
     switch ( httpResponse->contentType() )
     {
-        case rt_html_page: str << "HTML DOC"; break;
-        case rt_text: str << "Text/HTML RES"; break;
-        case rt_image: str << "IMG RES"; break;
+        case CT_HTML: str << "HTML DOC"; break;
+        case CT_TEXT: str << "Text/HTML RES"; break;
+        case CT_IMAGE: str << "IMG RES"; break;
         default: str << "UNKNOWN"; break;
     }
     str << endl;

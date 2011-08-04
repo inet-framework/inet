@@ -43,9 +43,8 @@
 # include <unistd.h>
 #endif
 
+#include "HttpMessages_m.h"  // for HttpContentType
 
-/** @brief type of returned content. Used in http responses. */
-enum CONTENT_TYPE_ENUM {rt_unknown, rt_html_page, rt_image, rt_text};
 
 std::string trimLeft( std::string str );
 std::string trimRight( std::string str );
@@ -56,8 +55,8 @@ std::string extractServerName( const char *path );
 std::string extractResourceName( const char *path );
 std::string getDelimited(std::string str, std::string ldelim, std::string rdelim = "");
 std::vector<std::string> parseResourceName(std::string resource);
-CONTENT_TYPE_ENUM getResourceCategory(std::vector<std::string> res);
-CONTENT_TYPE_ENUM getResourceCategory(std::string resourceExt);
+HttpContentType getResourceCategory(std::vector<std::string> res);
+HttpContentType getResourceCategory(std::string resourceExt);
 std::string htmlErrFromCode(int code);
 double safeatof(const char* strval, double defaultVal = 0.0);
 int safeatoi(const char* strval, int defaultVal = 0);
