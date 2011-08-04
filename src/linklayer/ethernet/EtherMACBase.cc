@@ -166,7 +166,7 @@ void EtherMACBase::initialize()
     WATCH(transmitState);
     WATCH(receiveState);
 
-    // initalize pause
+    // initialize pause
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
 

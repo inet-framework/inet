@@ -115,7 +115,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     bool disabled;                  // true if the MAC is disabled, defined by the user
     bool promiscuous;               // if true, passes up all received frames
 
-    bool dataratesDiffer;         // true when tx rate and rx rate differ (configuration error, or between datarate change of tx/rx channels)
+    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate change of tx/rx channels)
 
     // MAC operation modes and parameters
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
@@ -134,13 +134,13 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
     static const EtherDescr nullEtherDescr;
 
-    EtherDescr curEtherDescr;    // Current Ethernet Constants (eg txrate, ...)
+    EtherDescr curEtherDescr;       // Current Ethernet Constants (eg txrate, ...)
 
     cChannel *transmissionChannel;  // transmission channel
 
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
 
-    MacQueue txQueue;            // output queue
+    MacQueue txQueue;               // output queue
 
     cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
