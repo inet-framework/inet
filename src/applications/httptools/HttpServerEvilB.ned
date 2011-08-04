@@ -60,7 +60,7 @@ simple HttpServerEvilB like ITCPApp
         string siteDefinition;      // The site script file. Blank to disable.
         xml config;             // The XML configuration file for random sites
         double activationTime;  // The initial activation delay. Zero to disable.
-        double linkSpeed;           // Used to model transmission delays.
+        double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays.
         int minBadRequests; // The lower bound of bad requests.
         int maxBadRequests; // The upper bound of bad requests
     gates:

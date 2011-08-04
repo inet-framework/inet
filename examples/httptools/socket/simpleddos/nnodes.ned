@@ -37,16 +37,8 @@ import inet.nodes.inet.StandardHost;
 import inet.world.httptools.HttpController;
 
 
-channel ethernetline extends ned.DatarateChannel
-{
-    parameters:
-        delay = 0.1us;
-        datarate = 100*1000000;
-}
-
-
 //
-// n-nodes test scenario for sockets. 
+// n-nodes test scenario for sockets.
 //
 // The scenario consists of a number of clients and servers connected to two routers. The routers are connected
 // with a single link.
@@ -56,6 +48,11 @@ network HttpNnodes
     parameters:
         double numclients @prompt("Number of clients") = default(10);
         @display("bgb=474,374");
+    types:
+        channel ethernetline extends ned.DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
     submodules:
         //        channelInstaller: ChannelInstaller {
         //            parameters:
