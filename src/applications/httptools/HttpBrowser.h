@@ -37,21 +37,6 @@
 #include "IPvXAddressResolver.h"
 #include "HttpBrowserBase.h"
 
-/**
- * @brief Data structure used to keep state for each opened socket
- *
- * An instance of this struct is created for each opened socket and assigned to
- * it as a myPtr. See the TCPSocket::CallbackInterface methods of HttpBrowser for more
- * details.
- *
- * @see HttpBrowser
- */
-struct SOCK_DATA_STRUCT
-{
-    MESSAGE_QUEUE_TYPE messageQueue;    //> Queue of pending messages.
-    TCPSocket *socket;                  //> A reference to the socket object.
-    int pending;                        //> A counter for the number of outstanding replies.
-};
 
 /**
  * @short Browser module for OMNeT++ simulations
@@ -74,11 +59,26 @@ struct SOCK_DATA_STRUCT
 class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackInterface
 {
     protected:
+        /**
+         * @brief Data structure used to keep state for each opened socket.
+         *
+         * An instance of this struct is created for each opened socket and assigned to
+         * it as a myPtr. See the TCPSocket::CallbackInterface methods of HttpBrowser for more
+         * details.
+         */
+        struct SockData
+        {
+            MESSAGE_QUEUE_TYPE messageQueue;    //> Queue of pending messages.
+            TCPSocket *socket;                  //> A reference to the socket object.
+            int pending;                        //> A counter for the number of outstanding replies.
+        };
+
+    protected:
         TCPSocketMap sockCollection;    //> List of active sockets
         unsigned long numBroken;        //> Counter for the number of broken connections
         unsigned long socketsOpened;    //> Counter for opened sockets
 
-        SOCK_DATA_STRUCT *pendingSocket;
+        SockData *pendingSocket;
 
     public:
         HttpBrowser(); //* Constructor. Initializes counters */

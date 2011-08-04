@@ -176,7 +176,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     }
 
     // Get the socket and associated datastructure.
-    SOCK_DATA_STRUCT *sockdata = (SOCK_DATA_STRUCT*)yourPtr;
+    SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
     if ( sockdata->messageQueue.size()==0 )
     {
@@ -208,7 +208,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
         return;
     }
 
-    SOCK_DATA_STRUCT *sockdata = (SOCK_DATA_STRUCT*)yourPtr;
+    SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
 
     handleDataMessage(msg);
@@ -235,7 +235,7 @@ void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
         return;
     }
 
-    SOCK_DATA_STRUCT *sockdata = (SOCK_DATA_STRUCT*)yourPtr;
+    SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
 
     // close the connection (if not already closed)
@@ -256,7 +256,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
         return;
     }
 
-    SOCK_DATA_STRUCT *sockdata = (SOCK_DATA_STRUCT*)yourPtr;
+    SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
@@ -279,7 +279,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     else if (code==TCP_I_CONNECTION_REFUSED)
         EV_WARNING << "Connection refused!\\n";
 
-    SOCK_DATA_STRUCT *sockdata = (SOCK_DATA_STRUCT*)yourPtr;
+    SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
@@ -313,7 +313,7 @@ void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, MESSA
     sockCollection.addSocket(socket);
 
     // Initialize the associated datastructure
-    SOCK_DATA_STRUCT *sockdata = new SOCK_DATA_STRUCT;
+    SockData *sockdata = new SockData;
     sockdata->messageQueue = MESSAGE_QUEUE_TYPE(queue);
     sockdata->socket = socket;
     sockdata->pending = 0;
