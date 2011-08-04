@@ -87,7 +87,7 @@ void HttpBrowserDirect::sendRequestToRandomServer()
     }
 }
 
-void HttpBrowserDirect::sendRequestsToServer( std::string www, MESSAGE_QUEUE_TYPE queue )
+void HttpBrowserDirect::sendRequestsToServer( std::string www, HttpRequestQueue queue )
 {
     cMessage *msg;
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(www.c_str()));

@@ -52,8 +52,6 @@
 
 enum LOG_FORMAT {lf_short, lf_long};
 
-typedef std::deque<cMessage*> MESSAGE_QUEUE_TYPE;
-
 /**
  * @short The base class for browser and server nodes.
  *

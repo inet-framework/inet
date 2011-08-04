@@ -91,6 +91,11 @@ class INET_API HttpBrowserBase : public HttpNodeBase
          */
         typedef std::deque<BrowseEvent> BrowseEventsList;
 
+        /**
+         * A list of HTTP requests to send.
+         */
+        typedef std::deque<HttpRequestMessage*> HttpRequestQueue;
+
     protected:
         cMessage *eventTimer;           //> The timer object used to trigger browsing events
         HttpController *controller;     //> Reference to the central controller object
@@ -179,17 +184,17 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** Send a request to a randomly selected server. The derived class utilizes the controller object to retrieve the object */
         virtual void sendRequestToRandomServer() = 0;
         /** Send a request to a named server */
-        virtual void sendRequestsToServer( std::string www, MESSAGE_QUEUE_TYPE queue ) = 0;
+        virtual void sendRequestsToServer( std::string www, HttpRequestQueue queue ) = 0;
         //@}
 
         /** @name Methods for generating HTML page requests and resource requests */
         //@{
         /** Generate a HTTP request to a specific server and for a specific page */
-        cMessage* generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
+        HttpRequestMessage* generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
         /** Generate a random HTTP request -- used in case we dont care which page is requested */
-        cMessage* generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
+        HttpRequestMessage* generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
         /** Generate a resource request, e.g. for an image or css document */
-        cMessage* generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
+        HttpRequestMessage* generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
         //@}
 
         //* Read scripted events from file. Triggered if the script file parameter is specified in the initialization file. */

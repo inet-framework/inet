@@ -333,8 +333,8 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
             double delay = 0.0;
             bool bad = false;
             int refSize = 0;
-            MESSAGE_QUEUE_TYPE queue;
-            std::map<std::string,MESSAGE_QUEUE_TYPE> requestQueues;
+            HttpRequestQueue queue;
+            std::map<std::string,HttpRequestQueue> requestQueues;
             for ( std::vector<std::string>::iterator iter = lines.begin(); iter != lines.end(); iter++)
             {
                 std::string resourceLine = *iter;
@@ -368,7 +368,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
                          << ", delay: " << delay << ", bad: " << bad << ", ref.size: " << refSize <<endl;
 
                 // Generate a request message and push on queue for the intended recipient
-                cMessage *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO: KVJ: CHECK HERE FOR XSITE
+                HttpRequestMessage *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO: KVJ: CHECK HERE FOR XSITE
                 if ( delay==0.0 )
                 {
                     requestQueues[providerName].push_front(reqmsg);
@@ -382,7 +382,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
             // Iterate through the list of queues (one for each recipient encountered) and submit each queue.
             // A single socket will thus be opened for each recipient for a rough HTTP/1.1 emulation.
             // This is only done for messages which are not delayed in the simulated page.
-            std::map<std::string,MESSAGE_QUEUE_TYPE>::iterator i = requestQueues.begin();
+            std::map<std::string,HttpRequestQueue>::iterator i = requestQueues.begin();
             for (; i!=requestQueues.end(); i++ )
                 sendRequestsToServer((*i).first, (*i).second);
         }
@@ -391,7 +391,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
     delete msg;
 }
 
-cMessage* HttpBrowserBase::generatePageRequest(std::string www, std::string pageName, bool bad, int size)
+HttpRequestMessage* HttpBrowserBase::generatePageRequest(std::string www, std::string pageName, bool bad, int size)
 {
     EV_DEBUG << "Generating page request for URL " << www << ", page " << pageName << endl;
 
@@ -424,13 +424,13 @@ cMessage* HttpBrowserBase::generatePageRequest(std::string www, std::string page
     return msg;
 }
 
-cMessage* HttpBrowserBase::generateRandomPageRequest(std::string www, bool bad, int size)
+HttpRequestMessage* HttpBrowserBase::generateRandomPageRequest(std::string www, bool bad, int size)
 {
     EV_DEBUG << "Generating random page request, URL: " << www << endl;
     return generatePageRequest(www, "random_page.html", bad, size);
 }
 
-cMessage* HttpBrowserBase::generateResourceRequest(std::string www, std::string resource, int serial, bool bad, int size)
+HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, std::string resource, int serial, bool bad, int size)
 {
     EV_DEBUG << "Generating resource request for URL " << www << ", resource: " << resource << endl;
 

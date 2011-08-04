@@ -147,7 +147,7 @@ void HttpBrowser::sendRequestToRandomServer()
     submitToSocket(szModuleName, connectPort, generateRandomPageRequest(szWWW));
 }
 
-void HttpBrowser::sendRequestsToServer( std::string www, MESSAGE_QUEUE_TYPE queue )
+void HttpBrowser::sendRequestsToServer( std::string www, HttpRequestQueue queue )
 {
     int connectPort;
     char szModuleName[127];
@@ -286,16 +286,16 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     delete sockdata;
 }
 
-void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, cMessage *msg )
+void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, HttpRequestMessage *msg )
 {
     // Create a queue and push the single message
-    MESSAGE_QUEUE_TYPE queue;
+    HttpRequestQueue queue;
     queue.push_back(msg);
     // Call the overloaded version with the queue as parameter
     submitToSocket(moduleName, connectPort, queue);
 }
 
-void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, MESSAGE_QUEUE_TYPE &queue )
+void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, HttpRequestQueue &queue )
 {
     // Dont do anything if the queue is empty.s
     if ( queue.size()==0 )
@@ -314,7 +314,7 @@ void HttpBrowser::submitToSocket( const char* moduleName, int connectPort, MESSA
 
     // Initialize the associated datastructure
     SockData *sockdata = new SockData;
-    sockdata->messageQueue = MESSAGE_QUEUE_TYPE(queue);
+    sockdata->messageQueue = HttpRequestQueue(queue);
     sockdata->socket = socket;
     sockdata->pending = 0;
     socket->setCallbackObject(this, sockdata);
