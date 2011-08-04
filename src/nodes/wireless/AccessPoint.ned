@@ -46,6 +46,7 @@ module AccessPoint
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
         int numRadios = default(1);               // the number of radios in the access point
+        wlan[*].mgmtType = default("Ieee80211MgmtAP");
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
