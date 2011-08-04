@@ -54,7 +54,7 @@ void HttpBrowserDirect::handleMessage(cMessage *msg)
         handleDataMessage(msg);
 }
 
-void HttpBrowserDirect::sendRequestToServer( BROWSE_EVENT_ENTRY be )
+void HttpBrowserDirect::sendRequestToServer( BrowseEvent be )
 {
     sendDirectToModule(be.serverModule, generatePageRequest(be.wwwhost, be.resourceName), 0.0, rdProcessingDelay);
 }

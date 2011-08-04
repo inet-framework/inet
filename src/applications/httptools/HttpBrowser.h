@@ -104,7 +104,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     //@{
     protected:
         /** @brief Sends a scripted browse event to a specific server */
-        virtual void sendRequestToServer( BROWSE_EVENT_ENTRY be );
+        virtual void sendRequestToServer( BrowseEvent be );
 
         /** Send a request to server. Uses the recipient stamped in the request. */
         virtual void sendRequestToServer( HttpRequestMessage *request );

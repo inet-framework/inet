@@ -101,7 +101,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
     }
 }
 
-void HttpBrowser::sendRequestToServer( BROWSE_EVENT_ENTRY be )
+void HttpBrowser::sendRequestToServer( BrowseEvent be )
 {
     int connectPort;
     char szModuleName[127];

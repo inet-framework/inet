@@ -245,7 +245,7 @@ void HttpBrowserBase::handleSelfScriptedEvent()
     messagesInCurrentSession = 0;
     // Get the browse event
     if ( browseEvents.size() == 0 ) error("No event entry in queue");
-    BROWSE_EVENT_ENTRY be = browseEvents.back();
+    BrowseEvent be = browseEvents.back();
     browseEvents.pop_back();
     sendRequestToServer(be);
     // Schedule the next event
@@ -548,7 +548,7 @@ void HttpBrowserBase::readScriptedEvents( const char* filename )
 
         std::vector<std::string> path = parseResourceName(wwwpart);
 
-        BROWSE_EVENT_ENTRY be;
+        BrowseEvent be;
         be.time = t;
         be.wwwhost = extractServerName(wwwpart.c_str());
         be.resourceName = extractResourceName(wwwpart.c_str());
@@ -562,7 +562,7 @@ void HttpBrowserBase::readScriptedEvents( const char* filename )
 
     if ( browseEvents.size() != 0 )
     {
-        BROWSE_EVENT_ENTRY be = browseEvents.back();
+        BrowseEvent be = browseEvents.back();
         eventTimer->setKind(MSGKIND_SCRIPT_EVENT);
         scheduleAt(be.time, eventTimer);
     }

@@ -43,22 +43,6 @@
 #define MAX_URL_LENGTH 2048 // The maximum allowed URL string length.
 
 /**
- * @brief Browse event item. Used in scripted mode.
- */
-struct BROWSE_EVENT_ENTRY
-{
-    simtime_t time;                 //> Event triggering time
-    std::string wwwhost;                 //> Host to contact
-    std::string resourceName;            //> The resource to request
-    HttpNodeBase *serverModule; //> Reference to the omnet server object. Resolved at parse time.
-};
-
-/**
- * @brief Browse events queue. Used in scripted mode.
- */
-typedef std::deque<BROWSE_EVENT_ENTRY> BROWSE_EVENT_QUEUE_TYPE;
-
-/**
  * @short Browser module for OMNeT++ simulations - base class
  *
  * A simulated browser module for OMNeT++ simulations. A part of HttpTools.
@@ -91,11 +75,28 @@ typedef std::deque<BROWSE_EVENT_ENTRY> BROWSE_EVENT_QUEUE_TYPE;
 class INET_API HttpBrowserBase : public HttpNodeBase
 {
     protected:
+        /**
+         * Browse event item. Used in scripted mode.
+         */
+        struct BrowseEvent
+        {
+            simtime_t time;              //> Event triggering time
+            std::string wwwhost;         //> Host to contact
+            std::string resourceName;    //> The resource to request
+            HttpNodeBase *serverModule;  //> Reference to the omnet server object. Resolved at parse time.
+        };
+
+        /**
+         * Browse events queue. Used in scripted mode.
+         */
+        typedef std::deque<BrowseEvent> BrowseEventsList;
+
+    protected:
         cMessage *eventTimer;           //> The timer object used to trigger browsing events
         HttpController *controller;     //> Reference to the central controller object
 
         bool scriptedMode;                      //> Set to true if a script file is defined, False otherwise
-        BROWSE_EVENT_QUEUE_TYPE browseEvents;   //> Queue of browse events used in scripted mode
+        BrowseEventsList browseEvents;   //> Queue of browse events used in scripted mode
 
         /** @name The current session parameters */
         //@{
@@ -172,7 +173,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** @name pure virtual methods to communicate with the server. Must be implemented in derived classes */
         //@{
         /** Send a request defined by a browse event (scripted entry) to a server */
-        virtual void sendRequestToServer( BROWSE_EVENT_ENTRY be ) = 0;
+        virtual void sendRequestToServer( BrowseEvent be ) = 0;
         /** Send a request to server. Uses the recipient stamped in the request. */
         virtual void sendRequestToServer( HttpRequestMessage *request ) = 0;
         /** Send a request to a randomly selected server. The derived class utilizes the controller object to retrieve the object */
