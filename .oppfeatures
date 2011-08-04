@@ -554,7 +554,7 @@
         name="HttpTools"
         description = "HttpTools"
         initiallyEnabled = "true"
-        requires = ""
+        requires = "TCP_common"
         labels = ""
         nedPackages = "
                        inet.applications.httptools
@@ -566,14 +566,28 @@
         linkerFlags = ""
         />
     <feature
-        id="HttpTools_examples"
-        name="HttpTools examples"
-        description = "HttpTools examples"
+        id="HttpTools_examples_direct"
+        name="HttpTools examples with direct sending"
+        description = "HttpTools examples with direct sending"
         initiallyEnabled = "true"
         requires = "HttpTools"
         labels = ""
         nedPackages = "
-                       inet.examples.httptools
+                       inet.examples.httptools.direct
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="HttpTools_examples_socket"
+        name="HttpTools examples with socket mode"
+        description = "HttpTools examples with socket mode"
+        initiallyEnabled = "true"
+        requires = "HttpTools IPv4 Ethernet TCP_INET"
+        labels = ""
+        nedPackages = "
+                       inet.examples.httptools.socket
                       "
         extraSourceFolders = ""
         compileFlags = ""

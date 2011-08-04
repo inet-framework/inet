@@ -4,7 +4,7 @@
 
 
 
-package inet.examples.httptools.pairsocket;
+package inet.examples.httptools.socket.pairsocket;
 
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost;

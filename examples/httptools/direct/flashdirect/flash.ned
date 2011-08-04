@@ -28,7 +28,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.examples.httptools.flashdirect;
+package inet.examples.httptools.direct.flashdirect;
 
 import inet.nodes.httptools.DirectHost;
 import inet.world.httptools.HttpController;

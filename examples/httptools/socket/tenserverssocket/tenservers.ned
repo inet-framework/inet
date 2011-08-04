@@ -29,7 +29,7 @@
 // ----------------------------------------------------------------------------
 
 
-package inet.examples.httptools.simpledirectddos;
+package inet.examples.httptools.socket.tenserverssocket;
 
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
@@ -41,71 +41,100 @@ channel ethernetline extends ned.DatarateChannel
 {
     parameters:
         delay = 0.1us;
-        datarate = 100*1000000;
+        datarate = 100Mbps;
 }
 
-
 //
-// n-nodes test scenario for sockets. 
+// 10-nodes test scenario for sockets.
 //
-// The scenario consists of a number of clients and servers connected to two routers. The routers are connected
+// The scenario consists of a number of clients and 10 servers connected to two routers. The routers are connected
 // with a single link.
 //
-network HttpNnodes
+network Http10Servers
 {
     parameters:
         double numclients @prompt("Number of clients") = default(10);
-        @display("bgb=474,374");
+        @display("bgb=939,624");
     submodules:
-        //        channelInstaller: ChannelInstaller {
-        //            parameters:
-        ////                channelClass = "ThruputMeteringChannel";
-        ////                channelAttrs = "format=u";
-        //                @display("p=98,50;i=block/cogwheel_s");
-        //        }
         configurator: FlatNetworkConfigurator {
             parameters:
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";
                 networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";
-                @display("p=50,64;i=block/cogwheel");
+                @display("p=58,79;i=block/cogwheel");
         }
         controller: HttpController {
             parameters:
-                @display("p=46,140;i=block/cogwheel");
+                @display("p=62,156;i=block/cogwheel");
         }
         router_c: Router {
             parameters:
-                @display("p=100,200;i=abstract/router_l");
+                @display("p=492,424;i=abstract/router_l");
         }
         router_s: Router {
             parameters:
-                @display("p=300,200;i=abstract/router_l");
+                @display("p=492,320;i=abstract/router_l");
         }
         client[numclients]: StandardHost {
             parameters:
                 @display("i=device/laptop_l");
         }
-        thegood: StandardHost {
+        server1: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("p=191,316;i=device/server_l");
         }
-        thebad: StandardHost {
+        server2: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("p=231,220;i=device/server_l");
         }
-        theugly: StandardHost {
+        server3: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("p=278,140;i=device/server_l");
+        }
+        server4: StandardHost {
+            parameters:
+                @display("p=355,92;i=device/server_l");
+        }
+        server5: StandardHost {
+            parameters:
+                @display("p=452,60;i=device/server_l");
+        }
+        server6: StandardHost {
+            parameters:
+                @display("p=549,60;i=device/server_l");
+        }
+        server7: StandardHost {
+            parameters:
+                @display("p=660,84;i=device/server_l");
+        }
+        server8: StandardHost {
+            parameters:
+                @display("p=734,148;i=device/server_l");
+        }
+        server9: StandardHost {
+            parameters:
+                @display("p=772,228;i=device/server_l");
+        }
+        server10: StandardHost {
+            parameters:
+                @display("p=797,324;i=device/server_l");
         }
     connections allowunconnected:
-        thegood.ethg++ <--> ethernetline <--> router_s.ethg++;
-        thebad.ethg++ <--> ethernetline <--> router_s.ethg++;
-        theugly.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server1.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server2.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server3.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server4.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server5.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server6.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server7.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server8.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server9.ethg++ <--> ethernetline <--> router_s.ethg++;
+        server10.ethg++ <--> ethernetline <--> router_s.ethg++;
         for i=0..numclients-1 {
             client[i].ethg++ <--> ethernetline <--> router_c.ethg++;
         }
         router_s.ethg++ <--> ethernetline <--> router_c.ethg++;
+
 }
 
