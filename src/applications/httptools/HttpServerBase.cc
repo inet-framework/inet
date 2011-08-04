@@ -61,42 +61,49 @@ void HttpServerBase::initialize()
     cXMLAttributeMap attributes;
     cXMLElement *element;
     rdObjectFactory rdFactory;
+
     // The reply delay
     element = rootelement->getFirstChildWithTag("replyDelay");
     if (element==NULL) error("Reply delay parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdReplyDelay = rdFactory.create(attributes);
     if (rdReplyDelay==NULL) error("Reply delay random object could not be created");
+
     // HTML page size
     element = rootelement->getFirstChildWithTag("htmlPageSize");
     if (element==NULL) error("HTML page size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdHtmlPageSize = rdFactory.create(attributes);
     if (rdHtmlPageSize==NULL) error("HTML page size random object could not be created");
+
     // Text resource size
     element = rootelement->getFirstChildWithTag("textResourceSize");
     if (element==NULL) error("Text resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextResourceSize = rdFactory.create(attributes);
     if (rdTextResourceSize==NULL) error("Text resource size random object could not be created");
+
     // Image resource size
     element = rootelement->getFirstChildWithTag("imageResourceSize");
     if (element==NULL) error("Image resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdImageResourceSize = rdFactory.create(attributes);
     if (rdImageResourceSize==NULL) error("Image resource size random object could not be created");
+
     // Number of resources per page
     element = rootelement->getFirstChildWithTag("numResources");
     if (element==NULL) error("Number of resources parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdNumResources = rdFactory.create(attributes);
     if (rdNumResources==NULL) error("Number of resources random object could not be created");
+
     // Text/Image resources ratio
     element = rootelement->getFirstChildWithTag("textImageResourceRatio");
     if (element==NULL) error("Text/image resource ratio parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextImageResourceRatio = rdFactory.create(attributes);
     if (rdTextImageResourceRatio==NULL) error("Text/image resource ratio random object could not be created");
+
     // Error message size
     element = rootelement->getFirstChildWithTag("errorMessageSize");
     if (element==NULL) error("Error message size parameter undefined in XML configuration");

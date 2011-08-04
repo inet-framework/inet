@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httpUtils_H_
-#define __httpUtils_H_
+#ifndef __INET_HTTPUTILS_H
+#define __INET_HTTPUTILS_H
 
 #include <vector>
 #include <string>
@@ -64,4 +64,4 @@ int safeatobool(const char* strval, bool defaultVal = false);
 std::vector<std::string> splitFile(std::string fileName);
 bool fileExists(const char *file);
 
-#endif /* __httpUtils_H_ */
+#endif

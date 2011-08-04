@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptServerDirect_H_
-#define __httptServerDirect_H_
+#ifndef __INET_HTTPSERVERDIRECT_H
+#define __INET_HTTPSERVERDIRECT_H
 
 #include "HttpServerBase.h"
 

@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptServerEvilA_H_
-#define __httptServerEvilA_H_
+#ifndef __INET_HTTPSERVEREVILA_H
+#define __INET_HTTPSERVEREVILA_H
 
 #include <string>
 #include "HttpServer.h"

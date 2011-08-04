@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptServerDirectEvilA_H_
-#define __httptServerDirectEvilA_H_
+#ifndef __INET_HTTPSERVERDIRECTEVILA_H
+#define __INET_HTTPSERVERDIRECTEVILA_H
 
 #include <string>
 #include "HttpServerDirect.h"

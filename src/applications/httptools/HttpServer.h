@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptServerSock_H_
-#define __httptServerSock_H_
+#ifndef __INET_HTTPSERVERSOCK_H
+#define __INET_HTTPSERVERSOCK_H
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"

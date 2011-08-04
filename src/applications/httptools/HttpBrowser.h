@@ -29,8 +29,8 @@
 // ***************************************************************************
 
 
-#ifndef __httptBrowserDirect_H_
-#define __httptBrowserDirect_H_
+#ifndef __INET_HTTPBROWSERDIRECT_H
+#define __INET_HTTPBROWSERDIRECT_H
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
@@ -68,20 +68,20 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         struct SockData
         {
-            HttpRequestQueue messageQueue;      //> Queue of pending messages.
-            TCPSocket *socket;                  //> A reference to the socket object.
-            int pending;                        //> A counter for the number of outstanding replies.
+            HttpRequestQueue messageQueue; ///< Queue of pending messages.
+            TCPSocket *socket;             ///< A reference to the socket object.
+            int pending;                   ///< A counter for the number of outstanding replies.
         };
 
     protected:
-        TCPSocketMap sockCollection;    //> List of active sockets
-        unsigned long numBroken;        //> Counter for the number of broken connections
-        unsigned long socketsOpened;    //> Counter for opened sockets
+        TCPSocketMap sockCollection;    ///< List of active sockets
+        unsigned long numBroken;        ///< Counter for the number of broken connections
+        unsigned long socketsOpened;    ///< Counter for opened sockets
 
         SockData *pendingSocket;
 
     public:
-        HttpBrowser(); //* Constructor. Initializes counters */
+        HttpBrowser();
         virtual ~HttpBrowser();
 
     /** @name cSimpleModule redefinitions */

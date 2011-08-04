@@ -155,7 +155,7 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
 
 void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 {
-    EV_WARNING << "connection broken. Conneciton id " << connId << endl;
+    EV_WARNING << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
     EV_INFO << "connection closed. Connection id " << connId << endl;

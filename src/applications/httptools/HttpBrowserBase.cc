@@ -68,6 +68,7 @@ void HttpBrowserBase::initialize(int stage)
         cXMLAttributeMap attributes;
         cXMLElement *element;
         rdObjectFactory rdFactory;
+
         // Activity period length -- the waking period
         element = rootelement->getFirstChildWithTag("activityPeriod");
         if (element==NULL)
@@ -80,30 +81,35 @@ void HttpBrowserBase::initialize(int stage)
             rdActivityLength = rdFactory.create(attributes);
             if (rdActivityLength==NULL) error("Activity period random object could not be created");
         }
+
         // Inter-session interval
         element = rootelement->getFirstChildWithTag("interSessionInterval");
         if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterSessionInterval = rdFactory.create(attributes);
         if (rdInterSessionInterval==NULL) error("Inter-session interval random object could not be created");
+
         // Inter-request interval
         element = rootelement->getFirstChildWithTag("InterRequestInterval");
         if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterRequestInterval = rdFactory.create(attributes);
         if (rdInterRequestInterval==NULL) error("Inter-request interval random object could not be created");
-        // request size
+
+        // Request size
         element = rootelement->getFirstChildWithTag("requestSize");
         if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdRequestSize = rdFactory.create(attributes);
         if (rdRequestSize==NULL) error("Request size random object could not be created");
+
         // Requests in session
         element = rootelement->getFirstChildWithTag("reqInSession");
         if (element==NULL) error("requests in session parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReqInSession = rdFactory.create(attributes);
         if (rdReqInSession==NULL) error("Requests in session random object could not be created");
+
         // Processing delay
         element = rootelement->getFirstChildWithTag("processingDelay");
         if (element==NULL) error("processing delay parameter undefined in XML configuration");

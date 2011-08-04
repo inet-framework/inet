@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptRandom_H_
-#define __httptRandom_H_
+#ifndef __INET_HTTPRANDOM_H
+#define __INET_HTTPRANDOM_H
 
 #include <exception>
 #include <string>
@@ -56,7 +56,8 @@ class rdObject
     protected:
         DISTR_TYPE m_type;
     public:
-        virtual double get() = 0; //> Pure virtual get a random number. Must be implemented in derived classes.
+        /** Returns a random number. Must be implemented in derived classes. */
+        virtual double get() = 0;
     public:
         DISTR_TYPE getType() {return m_type;}
         std::string typeStr();
@@ -72,11 +73,11 @@ class rdObject
 class rdNormal : public rdObject
 {
     protected:
-        double m_mean;          //> The mean of the distribution.
-        double m_sd;            //> The sd of the distribution.
-        double m_min;           //> The minumum limit   .
-        bool m_bMinLimit;       //> Set if the minumum limit is set.
-        bool m_nonNegative;     //> Non-negative only -- uses the truncnormal function.
+        double m_mean;          ///< The mean of the distribution.
+        double m_sd;            ///< The sd of the distribution.
+        double m_min;           ///< The minumum limit   .
+        bool m_bMinLimit;       ///< Set if the minumum limit is set.
+        bool m_nonNegative;     ///< Non-negative only -- uses the truncnormal function.
     public:
         /** Constructor for direct initialization */
         rdNormal(double mean, double sd, bool nonNegative = false);
@@ -97,8 +98,8 @@ class rdNormal : public rdObject
 class rdUniform : public rdObject
 {
     protected:
-        double m_beginning; //> Low limit
-        double m_end;       //> High limit
+        double m_beginning; ///< Low limit
+        double m_end;       ///< High limit
     public:
         /** Constructor for direct initialization */
         rdUniform(double beginning, double end);
@@ -120,9 +121,9 @@ class rdUniform : public rdObject
 class rdExponential : public rdObject
 {
     protected:
-        double m_mean;      //> The distribution mean
-        double m_min;       //> The low limit
-        double m_max;       //> The high limit
+        double m_mean;      ///< The distribution mean
+        double m_min;       ///< The low limit
+        double m_max;       ///< The high limit
         bool m_bMinLimit;
         bool m_bMaxLimit;
     public:
@@ -176,7 +177,7 @@ class rdHistogram : public rdObject
 class rdConstant : public rdObject
 {
     protected:
-        double m_value; //> The constant
+        double m_value; ///< The constant
     public:
         /** Constructor for direct initialization */
         rdConstant(double value);
@@ -194,10 +195,10 @@ class rdConstant : public rdObject
 class rdZipf : public rdObject
 {
     protected:
-        double m_alpha;     //> The alpha value
-        int m_number;       //> The number of nodes to pick from
-        double m_c;         //> Helper constant.
-        bool m_baseZero;    //> True if we want a zero-based return value
+        double m_alpha;     ///< The alpha value
+        int m_number;       ///< The number of nodes to pick from
+        double m_c;         ///< Helper constant.
+        bool m_baseZero;    ///< True if we want a zero-based return value
     public:
         /** Constructor for direct initialization */
         rdZipf(int n, double alpha, bool baseZero = false);
@@ -230,4 +231,4 @@ class rdObjectFactory
         rdObject* create(cXMLAttributeMap attributes);
 };
 
-#endif /* __httptRandom_H_ */
+#endif

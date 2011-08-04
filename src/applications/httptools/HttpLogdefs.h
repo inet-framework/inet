@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptLogdefs_H_
-#define __httptLogdefs_H_
+#ifndef __INET_HTTPLOGDEFS_H
+#define __INET_HTTPLOGDEFS_H
 
 #define LL_NONE 0
 #define LL_INFO 1
@@ -41,4 +41,4 @@
 #define EV_ERROR EV << getFullPath() << " #ERROR#    : "
 #define EV_SUMMARY EV << getFullPath() << " #SUMMARY#    : "
 
-#endif /* __httptLogdefs_H_ */
+#endif

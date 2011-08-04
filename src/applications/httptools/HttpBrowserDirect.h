@@ -29,8 +29,8 @@
 // ***************************************************************************
 
 
-#ifndef __httptBrowserDirect_H_
-#define __httptBrowserDirect_H_
+#ifndef __INET_HTTPBROWSERDIRECT_H
+#define __INET_HTTPBROWSERDIRECT_H
 
 #include "HttpBrowserBase.h"
 

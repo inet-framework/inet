@@ -28,8 +28,8 @@
 //
 // ***************************************************************************
 
-#ifndef __httptServerBase_H_
-#define __httptServerBase_H_
+#ifndef __INET_HTTPSERVERBASE_H
+#define __INET_HTTPSERVERBASE_H
 
 #include <string>
 #include <vector>
@@ -91,13 +91,13 @@ class INET_API HttpServerBase : public HttpNodeBase
 
         /** @name The random objects for content generation */
         //@{
-        rdObject *rdReplyDelay;             //> The processing delay of the server.
-        rdObject *rdHtmlPageSize;           //> The HTML page size distribution for the site.
-        rdObject *rdTextResourceSize;       //> The text resource size distribution for the site.
-        rdObject *rdImageResourceSize;      //> The image resource size distribution for the site.
-        rdObject *rdNumResources;           //> Number of resources per HTML page.
-        rdObject *rdTextImageResourceRatio; //> The ratio of text resources to images referenced in HTML pages.
-        rdObject *rdErrorMsgSize;           //> The size of error messages.
+        rdObject *rdReplyDelay;             ///< The processing delay of the server.
+        rdObject *rdHtmlPageSize;           ///< The HTML page size distribution for the site.
+        rdObject *rdTextResourceSize;       ///< The text resource size distribution for the site.
+        rdObject *rdImageResourceSize;      ///< The image resource size distribution for the site.
+        rdObject *rdNumResources;           ///< Number of resources per HTML page.
+        rdObject *rdTextImageResourceRatio; ///< The ratio of text resources to images referenced in HTML pages.
+        rdObject *rdErrorMsgSize;           ///< The size of error messages.
         //@}
 
         /** The activation time of the server -- initial startup delay. */
@@ -117,7 +117,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     //@}
 
     protected:
-        void updateDisplay(); //> Update the display string if running in GUI mode
+        void updateDisplay();
 
     protected:
         /** Generate a HTML document in response to a request. */

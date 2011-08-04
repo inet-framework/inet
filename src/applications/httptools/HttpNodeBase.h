@@ -29,8 +29,8 @@
 // ***************************************************************************
 
 
-#ifndef __httptNodeBase_H_
-#define __httptNodeBase_H_
+#ifndef __INET_HTTPNODEBASE_H
+#define __INET_HTTPNODEBASE_H
 
 #include <string>
 #include <map>
@@ -131,6 +131,6 @@ class HttpNodeBase : public cSimpleModule
         //@}
 };
 
-#endif /* __httptNodeBase_H_ */
+#endif
 
 

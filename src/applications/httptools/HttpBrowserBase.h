@@ -29,8 +29,8 @@
 // ***************************************************************************
 
 
-#ifndef __httptBrowserBase_H_
-#define __httptBrowserBase_H_
+#ifndef __INET_HTTPBROWSERBASE_H
+#define __INET_HTTPBROWSERBASE_H
 
 #include <omnetpp.h>
 #include "HttpNodeBase.h"
@@ -80,10 +80,10 @@ class INET_API HttpBrowserBase : public HttpNodeBase
          */
         struct BrowseEvent
         {
-            simtime_t time;              //> Event triggering time
-            std::string wwwhost;         //> Host to contact
-            std::string resourceName;    //> The resource to request
-            HttpNodeBase *serverModule;  //> Reference to the omnet server object. Resolved at parse time.
+            simtime_t time;              ///< Event triggering time
+            std::string wwwhost;         ///< Host to contact
+            std::string resourceName;    ///< The resource to request
+            HttpNodeBase *serverModule;  ///< Reference to the omnet server object. Resolved at parse time.
         };
 
         /**
@@ -97,18 +97,18 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         typedef std::deque<HttpRequestMessage*> HttpRequestQueue;
 
     protected:
-        cMessage *eventTimer;           //> The timer object used to trigger browsing events
-        HttpController *controller;     //> Reference to the central controller object
+        cMessage *eventTimer;           ///< The timer object used to trigger browsing events
+        HttpController *controller;     ///< Reference to the central controller object
 
-        bool scriptedMode;                      //> Set to true if a script file is defined, False otherwise
-        BrowseEventsList browseEvents;   //> Queue of browse events used in scripted mode
+        bool scriptedMode;              ///< Set to true if a script file is defined
+        BrowseEventsList browseEvents;  ///< Queue of browse events used in scripted mode
 
         /** @name The current session parameters */
         //@{
-        int reqInCurSession;            //> The number of requests made sofar in the current session
-        int reqNoInCurSession;          //> The total number of requests to be made in the current session
-        double activityPeriodLength;    //> The length of the currently active activity period
-        simtime_t acitivityPeriodEnd;   //> The end in simulation time of the current activity period
+        int reqInCurSession;            ///< The number of requests made sofar in the current session
+        int reqNoInCurSession;          ///< The total number of requests to be made in the current session
+        double activityPeriodLength;    ///< The length of the currently active activity period
+        simtime_t acitivityPeriodEnd;   ///< The end in simulation time of the current activity period
         //@}
 
         /** @name The random objects */
@@ -139,9 +139,9 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         HttpBrowserBase();
         virtual ~HttpBrowserBase();
 
-    /** @name cSimpleModule redefinitions */
-    //@{
     protected:
+        /** @name cSimpleModule redefinitions */
+        //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
 
@@ -153,10 +153,8 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 
         /** @brief Returns the number of initialization stages. Two required. */
         int numInitStages() const {return 2;}
+        //@}
 
-    //@}
-
-    protected:
         /** Handle a HTTP data message */
         void handleDataMessage(cMessage *msg);
 
@@ -165,11 +163,16 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 
         /** @name Handlers for self messages */
         //@{
-        void handleSelfActivityStart();                         //> Handle start of activity period trigger
-        void handleSelfStartSession();                          //> Handle start of session trigger
-        void handleSelfNextMessage();                           //> Handle browse event trigger
-        void handleSelfScriptedEvent();                         //> Handle a scheduled scripted event
-        void handleSelfDelayedRequestMessage(cMessage *msg);    //> Handle a delayed message event
+        /** Handle start of activity period trigger */
+        void handleSelfActivityStart();
+        /** Handle start of session trigger */
+        void handleSelfStartSession();
+        /** Handle browse event trigger */
+        void handleSelfNextMessage();
+        /** Handle a scheduled scripted event */
+        void handleSelfScriptedEvent();
+        /** Handle a delayed message event */
+        void handleSelfDelayedRequestMessage(cMessage *msg);
         //@}
 
         /** Schedule the next browse event. Handles the activity, session and inter-request times */
@@ -197,7 +200,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         HttpRequestMessage* generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
         //@}
 
-        //* Read scripted events from file. Triggered if the script file parameter is specified in the initialization file. */
+        /** Read scripted events from file. Triggered if the script file parameter is specified in the initialization file. */
         void readScriptedEvents(const char* filename);
 };
 
