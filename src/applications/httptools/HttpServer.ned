@@ -42,7 +42,6 @@ import inet.applications.ITCPApp;
 //
 // NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @see HttpServerBase
 // @see HttpServerDirect
 // @see DirectHost
 //

@@ -89,7 +89,6 @@ void HttpBrowserDirect::sendRequestToRandomServer()
 
 void HttpBrowserDirect::sendRequestsToServer( std::string www, HttpRequestQueue queue )
 {
-    cMessage *msg;
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(www.c_str()));
     if ( serverModule == NULL )
         EV_ERROR << "Failed to get server module " << www << endl;
@@ -97,7 +96,7 @@ void HttpBrowserDirect::sendRequestsToServer( std::string www, HttpRequestQueue 
     {
         while ( queue.size()!=0 )
         {
-            msg = queue.back();
+            HttpRequestMessage *msg = queue.back();
             queue.pop_back();
             sendDirectToModule(serverModule, msg, 0.0, rdProcessingDelay);
         }

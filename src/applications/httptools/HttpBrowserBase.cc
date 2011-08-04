@@ -444,7 +444,7 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 
     if (resource.size()==0)
     {
-        EV_ERROR << "Unable to request resource -- empty resource std::string" << endl;
+        EV_ERROR << "Unable to request resource -- empty resource string" << endl;
         return NULL;
     }
     else if (resource[0]!='/')

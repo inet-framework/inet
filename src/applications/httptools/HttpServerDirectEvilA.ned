@@ -30,9 +30,6 @@
 
 package inet.applications.httptools;
 
-import inet.applications.ITCPApp;
-
-
 //
 // HttpServerDirectEvilA
 //
@@ -49,7 +46,7 @@ import inet.applications.ITCPApp;
 // @version 1.0
 // @author  Kristjan V. Jonsson
 //
-simple HttpServerDirectEvilA like ITCPApp
+simple HttpServerDirectEvilA like IHttpDirectApp
 {
     parameters:
         string hostName = default("");                    // The domain name of the server
@@ -64,7 +61,6 @@ simple HttpServerDirectEvilA like ITCPApp
         int maxBadRequests;                               // The upper bound of bad requests
         xml config;                                       // The XML configuration file for random sites
     gates:
-        input tcpIn;
-        output tcpOut;
+        input httpIn @directIn;
 }
 

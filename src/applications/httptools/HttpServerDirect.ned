@@ -49,7 +49,7 @@ import inet.applications.ITCPApp;
 // @version 1.0
 // @author  Kristjan V. Jonsson
 //
-simple HttpServerDirect like ITCPApp
+simple HttpServerDirect like IHttpDirectApp
 {
     parameters:
         string hostName = default("");                      // The domain name of the server
@@ -62,7 +62,6 @@ simple HttpServerDirect like ITCPApp
         double linkSpeed @unit(bps) = default(11Mbps);  // Used to model transmission delays.
         xml config;                                         // The XML configuration file for random sites
     gates:
-        input tcpIn;
-        output tcpOut;
+        input httpIn @directIn;
 }
 

@@ -1,3 +1,4 @@
+
 // ----------------------------------------------------------------------------
 //
 // HttpTools Project
@@ -5,7 +6,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -28,36 +29,30 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.nodes.httptools;
-
-import inet.applications.httptools.IHttpDirectApp;
+package inet.applications.httptools;
 
 
 //
-// DirectHost
+// IHttpDirectApp
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// A Web server module for OMNeT++ simulations and direct message passing between modules.
+// This module is intended for use with the DirectHost module and plugs in as a tcpApp.
 //
-// @see HttpServerDirect
-// @see HttpBrowserDirect
 //
-// @author Kristjan V. Jonsson (kristjanvj@gmail.com)
+// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
+//
+// @see HttpServerBase
+// @see HttpServer
+// @see DirectHost
+//
 // @version 1.0
+// @author  Kristjan V. Jonsson
 //
-module DirectHost
+moduleinterface IHttpDirectApp
 {
     parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
-    submodules:
-        tcpApp[numTcpApps]: <> like IHttpDirectApp {
-            parameters:
-                @display("p=163,67;i=block/app");
-        }
+        double linkSpeed @unit(bps);  // Used to model transmission delays.
+    gates:
+        input httpIn @directIn;
 }
-
 

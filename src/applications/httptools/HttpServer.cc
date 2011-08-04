@@ -91,7 +91,7 @@ void HttpServer::handleMessage(cMessage *msg)
         EV_DEBUG << "Process the message " << msg->getName() << endl;
         socket->processMessage(msg);
     }
-    HttpServerBase::handleMessage(msg);
+    updateDisplay();
 }
 
 void HttpServer::socketEstablished(int connId, void *yourPtr)
@@ -114,7 +114,6 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
 
     // call the message handler to process the message.
     cMessage *reply = handleReceivedMessage(msg);
-    cPacket *pckt = check_and_cast<cPacket *>(msg);
     if ( reply!=NULL )
     {
         socket->send(reply); // Send to socket if the reply is non-zero.

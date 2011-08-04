@@ -36,26 +36,21 @@ HttpNodeBase::HttpNodeBase()
     m_bDisplayResponseContent = false;
 }
 
-const char* HttpNodeBase::getWWW()
+void HttpNodeBase::sendDirectToModule( HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay )
 {
-    Enter_Method_Silent();
-    return wwwName.c_str();
+    if (pckt == NULL)
+        return;
+    simtime_t delay = constdelay+transmissionDelay(pckt);
+    if (rdDelay != NULL)
+        delay += rdDelay->get();
+    EV_DEBUG << "Sending " << pckt->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
+    sendDirect(pckt, receiver, "httpIn");
 }
 
-void HttpNodeBase::sendDirectToModule( HttpNodeBase *receiver, cMessage *message, simtime_t constdelay, rdObject *rdDelay )
+double HttpNodeBase::transmissionDelay(cPacket *pckt)
 {
-    cPacket *pckt = check_and_cast<cPacket *>(message);  // MIGRATE40: kvj
-    if ( message==NULL ) return;
-    simtime_t delay = constdelay+transmissionDelay(message);
-    if ( rdDelay!=NULL ) delay += rdDelay->get();
-    EV_DEBUG << "Sending " << message->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
-    sendDirect(message, receiver, "tcpIn");
-}
-
-double HttpNodeBase::transmissionDelay( cMessage *msg )
-{
-    cPacket *pckt = check_and_cast<cPacket *>(msg);
-    if ( linkSpeed==0 ) return 0.0; // No delay if linkspeed unspecified
+    if (linkSpeed == 0)
+        return 0.0; // No delay if linkspeed unspecified
     return pckt->getBitLength()/((double)linkSpeed);  // The linkspeed is in bits/s
 }
 

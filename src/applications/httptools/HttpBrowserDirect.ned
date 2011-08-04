@@ -30,9 +30,6 @@
 
 package inet.applications.httptools;
 
-import inet.applications.ITCPApp;
-
-
 //
 // HttpBrowserDirect
 //
@@ -52,7 +49,7 @@ import inet.applications.ITCPApp;
 // @version 1.0
 // @author  Kristjan V. Jonsson
 //
-simple HttpBrowserDirect like ITCPApp
+simple HttpBrowserDirect like IHttpDirectApp
 {
     parameters:
         int logLevel = default(0);                              // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
@@ -63,7 +60,6 @@ simple HttpBrowserDirect like ITCPApp
         double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays (Bit/s)
         xml config;                                             // The XML configuration file for the browser
     gates:
-        input tcpIn;
-        output tcpOut;
+        input httpIn @directIn;
 }
 

@@ -32,13 +32,14 @@
 #ifndef __httptNodeBase_H_
 #define __httptNodeBase_H_
 
-#include <omnetpp.h>
-#include <INETDefs.h>
 #include <string>
 #include <map>
 #include <queue>
 #include <iostream>
 #include <fstream>
+
+#include "INETDefs.h"
+
 #include "HttpController.h"
 #include "HttpMessages_m.h"
 #include "HttpRandom.h"
@@ -95,7 +96,7 @@ class HttpNodeBase : public cSimpleModule
         HttpNodeBase();
 
         /** Return the WWW name of the node */
-        const char* getWWW();
+        const std::string& getWWW() { return wwwName; }
 
     protected:
         /** @name Direct message passing utilities */
@@ -106,9 +107,9 @@ class HttpNodeBase : public cSimpleModule
          * a random delay object may be specified. Those delays add to the total used to submit the message to the
          * OMNeT++ direct message passing mechanism.
          */
-        void sendDirectToModule( HttpNodeBase *receiver, cMessage *message, simtime_t constdelay = 0.0, rdObject *rd = NULL );
-        /** Calculate the transmission delay for the message msg */
-        double transmissionDelay( cMessage *msg );
+        void sendDirectToModule(HttpNodeBase *receiver, cPacket *packet, simtime_t constdelay = 0.0, rdObject *rd = NULL);
+        /** Calculate the transmission delay for the packet */
+        double transmissionDelay(cPacket *packet);
         //@}
 
         /** @name Methods for logging and formatting messages */

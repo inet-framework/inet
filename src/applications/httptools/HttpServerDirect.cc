@@ -65,13 +65,13 @@ void HttpServerDirect::handleMessage(cMessage *msg)
 
         EV_DEBUG << "Sender is " << senderModule->getFullName()
                  << " in host " << senderModule->getParentModule()->getFullName() << endl;
-        cMessage* reply = handleReceivedMessage(msg);
+        cPacket* reply = handleReceivedMessage(msg);
         // Echo back to the requester
         if ( reply!=NULL )
             sendDirectToModule(senderModule, reply, 0.0, rdReplyDelay);
         delete msg;
     }
-    HttpServerBase::handleMessage(msg);
+    updateDisplay();
 }
 
 

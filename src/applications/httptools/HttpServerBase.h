@@ -133,7 +133,7 @@ class INET_API HttpServerBase : public HttpNodeBase
 
     protected:
         /** Handle a received data message, e.g. check if the content requested exists. */
-        cMessage* handleReceivedMessage( cMessage *msg );
+        cPacket* handleReceivedMessage(cMessage *msg);
         /** Register the server object with the controller. Called at initialization (simulation startup). */
         void registerWithController();
         /** Read a site definition from file if a scripted site definition is used. */

@@ -167,7 +167,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
     updateDisplay();
 }
 
-cMessage* HttpServerBase::handleReceivedMessage( cMessage *msg )
+cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request==NULL) error("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
