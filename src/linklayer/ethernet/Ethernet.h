@@ -43,7 +43,7 @@
 #define JAM_SIGNAL_BYTES             4
 #define PREAMBLE_BYTES               7
 #define SFD_BYTES                    1
-#define PAUSE_BITTIME                512 /* pause is in 512-bit-time units */
+#define PAUSE_UNIT_BITS              512 /* one pause unit is 512 bit times */
 
 #define ETHER_MAC_FRAME_BYTES        (6+6+2+4) /* src(6)+dest(6)+length/type(2)+FCS(4) */
 #define ETHER_LLC_HEADER_LENGTH      (3) /* ssap(1)+dsap(1)+control(1) */

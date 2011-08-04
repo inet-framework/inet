@@ -371,7 +371,7 @@ void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
     cPacket pause;
-    pause.setBitLength(pauseUnits * PAUSE_BITTIME);
+    pause.setBitLength(pauseUnits * PAUSE_UNIT_BITS);
     simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
