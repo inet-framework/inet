@@ -33,6 +33,7 @@ module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
+        @node();
     gates:
         input radioIn @directIn;
 
@@ -64,6 +65,7 @@ module ThroughputServer
 {
     parameters:
         @display("i=device/wifilaptop");
+        @node();
     gates:
         input radioIn @directIn;
 
