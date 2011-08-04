@@ -84,10 +84,6 @@ void PingApp::initialize(int stage)
     // schedule first ping (use empty destAddr to disable)
     if (par("destAddr").stringValue()[0])
     {
-        srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
-        destAddr = IPvXAddressResolver().resolve(par("destAddr"));
-        ASSERT(!destAddr.isUnspecified());
-
         cMessage *msg = new cMessage("sendPing");
         scheduleAt(startTime, msg);
     }
@@ -99,7 +95,13 @@ void PingApp::handleMessage(cMessage *msg)
     {
         // on first call we need to initialize
         if (sendSeqNo == 0)
+        {
+            srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
+            destAddr = IPvXAddressResolver().resolve(par("destAddr"));
+            ASSERT(!destAddr.isUnspecified());
+
             EV << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "\n";
+        }
 
         // send a ping
         sendPing();
