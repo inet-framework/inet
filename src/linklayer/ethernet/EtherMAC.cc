@@ -126,7 +126,7 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
         if (curEtherDescr.txrate == GIGABIT_ETHERNET_TXRATE)
         {
             carrierExtension = par("carrierExtension").boolValue();
-            curEtherDescr.frameMinBytes = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
+            curEtherDescr.frameMinBytes = carrierExtension ? GIGABIT_MIN_FRAME_BYTES_WITH_EXT : MIN_ETHERNET_FRAME_BYTES;
             EV << "Half duplex Gigabit Ethernet, carrier extension "
                << (carrierExtension ? "enabled" : "disabled") << endl;
         }
@@ -216,10 +216,10 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (frame->getByteLength() > MAX_ETHERNET_FRAME)
+    if (frame->getByteLength() > MAX_ETHERNET_FRAME_BYTES)
     {
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
-                (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
+                (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
 
     // fill in src address if not set

@@ -127,10 +127,10 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (frame->getByteLength() > MAX_ETHERNET_FRAME)
+    if (frame->getByteLength() > MAX_ETHERNET_FRAME_BYTES)
     {
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
-                (int)(frame->getByteLength()), MAX_ETHERNET_FRAME);
+                (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
 
     // fill in src address if not set

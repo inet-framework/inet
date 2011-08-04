@@ -117,8 +117,8 @@ void EtherLLC::updateDisplayString()
 
 void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 {
-    if (msg->getByteLength() > (MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
-        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA);
+    if (msg->getByteLength() > (MAX_ETHERNET_DATA_BYTES-ETHER_LLC_HEADER_LENGTH))
+        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;
     emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
@@ -144,8 +144,8 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     delete etherctrl;
 
     frame->encapsulate(msg);
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
-        frame->setByteLength(MIN_ETHERNET_FRAME);
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
+        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
     send(frame, "lowerLayerOut");
 }
@@ -253,8 +253,8 @@ void EtherLLC::handleSendPause(cMessage *msg)
     frame->setDest(dest);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
-        frame->setByteLength(MIN_ETHERNET_FRAME);
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
+        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
     send(frame, "lowerLayerOut");
     emit(sendPauseSignal, pauseUnits);
