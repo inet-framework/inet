@@ -162,7 +162,7 @@ void HttpController::registerWWWserver( const char* objectName, const char* wwwN
         pos = pickList.size()/2;
         pickList.insert(begin+pos, en);
     }
-    else if ( rank==INSERT_END or rank>=pickList.size())
+    else if ( rank==INSERT_END || rank>=pickList.size())
     {
         pickList.push_back(en);
     }

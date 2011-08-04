@@ -36,7 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if WIN32
+#ifdef _WIN32
 # include <io.h>
 # include <stdio.h>
 #else

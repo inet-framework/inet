@@ -272,14 +272,11 @@ std::vector<std::string> splitFile(std::string fileName)
 
 bool fileExists( const char *file )
 {
-    #if WIN32
-    # define CHECKACCESS _access
-    # define CHECKRIGHTS 0
-    #else
-    # define CHECKACCESS access
-    # define CHECKRIGHTS F_OK
-    #endif
-    return CHECKACCESS(file, CHECKRIGHTS) == 0;
+#ifdef _WIN32
+    return _access(file, 0) == 0;
+#else
+    return access(file, F_OK) == 0;
+#endif
 }
 
 
