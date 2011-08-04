@@ -52,6 +52,9 @@ void VoIPSinkApp::initialize()
 {
     initSignals();
 
+    // Hack for create results folder
+    recordScalar("hackForCreateResultsFolder", 0);
+
     // Say Hello to the world
     ev << "VoIPSinkApp initialize()" << endl;
 

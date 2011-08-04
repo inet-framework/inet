@@ -60,6 +60,9 @@ void VoIPSourceApp::initialize(int stage)
     // say HELLO to the world
     ev << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
+    // Hack for create results folder
+    recordScalar("hackForCreateResultsFolder", 0);
+
     pReSampleCtx = NULL;
     localPort = par("localPort");
     destPort = par("destPort");
