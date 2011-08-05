@@ -87,8 +87,8 @@ void HttpController::finish()
 {
     EV_SUMMARY << "Invoking finish on the controller. Total lookups " << totalLookups << endl;
 
-    WEB_SERVER_ENTRY *en;
-    std::map<std::string,WEB_SERVER_ENTRY*>::const_iterator iter;
+    WebServerEntry *en;
+    std::map<std::string,WebServerEntry*>::const_iterator iter;
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
     {
         en = (*iter).second;
@@ -127,7 +127,7 @@ void HttpController::registerWWWserver(const char* objectName, const char* wwwNa
     if (webSiteList.find(wwwName) != webSiteList.end())
         EV_ERROR << "Server " << wwwName << " is already registered\n";
 
-    WEB_SERVER_ENTRY *en = new WEB_SERVER_ENTRY;
+    WebServerEntry *en = new WebServerEntry;
 
     en->name = serverUrl;
     en->host = objectName;
@@ -135,7 +135,7 @@ void HttpController::registerWWWserver(const char* objectName, const char* wwwNa
     en->module = getTcpApp(objectName);
     en->activationTime = activationTime;
     en->statusSetTime = simTime();
-    en->serverStatus = ss_normal;
+    en->serverStatus = SS_NORMAL;
     en->pvalue = 0.0;
     en->pamortize = 0.0;
     en->accessCount = 0;
@@ -146,7 +146,7 @@ void HttpController::registerWWWserver(const char* objectName, const char* wwwNa
     webSiteList[en->name] = en;
 
     int pos;
-    std::vector<WEB_SERVER_ENTRY*>::iterator begin = pickList.begin();
+    std::vector<WebServerEntry*>::iterator begin = pickList.begin();
     if (rank==INSERT_RANDOM )
     {
         if (pickList.size()==0)
@@ -186,7 +186,7 @@ cModule* HttpController::getServerModule(const char* wwwName)
         return NULL;
     }
 
-    WEB_SERVER_ENTRY *en = webSiteList[serverUrl];
+    WebServerEntry *en = webSiteList[serverUrl];
     EV_DEBUG << "Got module object for www name " << wwwName << ": " << en->host << " (" << en->port << ")\n";
 
     totalLookups++;
@@ -215,7 +215,7 @@ cModule* HttpController::getAnyServerModule()
 
     EV_DEBUG << "Getting a random server module with pspecial=" << pspecial << endl;
 
-    WEB_SERVER_ENTRY *en = __getRandomServerInfo();
+    WebServerEntry *en = __getRandomServerInfo();
     EV_DEBUG << "Got a random www module: " << en->name << ", " << en->host << " (" << en->port << ")\n";
 
     totalLookups++;
@@ -236,7 +236,7 @@ int HttpController::getServerInfo(const char* wwwName, char* module, int &port)
         return -1;
     }
 
-    WEB_SERVER_ENTRY *en = webSiteList[serverUrl];
+    WebServerEntry *en = webSiteList[serverUrl];
     EV_DEBUG << "Got module object for www name " << wwwName << ": " << en->host << " (" << en->port << ")\n";
 
     totalLookups++;
@@ -266,7 +266,7 @@ int HttpController::getAnyServerInfo(char* wwwName, char* module, int &port)
 
     EV_DEBUG << "Getting a random server module with pspecial=" << pspecial << endl;
 
-    WEB_SERVER_ENTRY *en = __getRandomServerInfo();
+    WebServerEntry *en = __getRandomServerInfo();
     EV_DEBUG << "Got a random www module: " << en->name << ", " << en->host << " (" << en->port << ")\n";
 
     totalLookups++;
@@ -309,7 +309,7 @@ void HttpController::setSpecialStatus(const char* www, ServerStatus status, doub
 
     EV_DEBUG << "Setting special status for " << www << ", p=" << p << " and amortize=" << amortize << endl;
 
-    WEB_SERVER_ENTRY *en = webSiteList[www];
+    WebServerEntry *en = webSiteList[www];
 
     en->statusSetTime = simTime();
     en->serverStatus = status;
@@ -324,8 +324,8 @@ void HttpController::setSpecialStatus(const char* www, ServerStatus status, doub
 void HttpController::cancelSpecialStatus(const char* www)
 {
     if (specialList.size()==0) return;
-    WEB_SERVER_ENTRY *en;
-    std::list<WEB_SERVER_ENTRY*>::iterator i;
+    WebServerEntry *en;
+    std::list<WebServerEntry*>::iterator i;
     for (i=specialList.begin(); i!=specialList.end(); i++)
     {
         en = (*i);
@@ -333,7 +333,7 @@ void HttpController::cancelSpecialStatus(const char* www)
         {
             pspecial -= en->pvalue;
             en->statusSetTime = simTime();
-            en->serverStatus = ss_normal;
+            en->serverStatus = SS_NORMAL;
             en->pvalue = 0.0;
             en->pamortize = 0.0;
             specialList.erase(i);
@@ -346,7 +346,7 @@ void HttpController::cancelSpecialStatus(const char* www)
     EV_DEBUG << "Size of special list is now " << specialList.size() << endl;
 }
 
-WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
+HttpController::WebServerEntry* HttpController::selectFromSpecialList()
 {
     if (specialList.size()==0)
     {
@@ -354,7 +354,7 @@ WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
         return NULL;
     }
 
-    WEB_SERVER_ENTRY *en = NULL;
+    WebServerEntry *en = NULL;
 
     if (specialList.size()==1)
     {
@@ -364,7 +364,7 @@ WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
     {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        std::list<WEB_SERVER_ENTRY*>::iterator i;
+        std::list<WebServerEntry*>::iterator i;
         for (i=specialList.begin(); i!=specialList.end(); i++)
         {
             en = (*i);
@@ -398,8 +398,8 @@ WEB_SERVER_ENTRY* HttpController::selectFromSpecialList()
 std::string HttpController::listRegisteredServers()
 {
     std::ostringstream str;
-    WEB_SERVER_ENTRY *en;
-    std::map<std::string,WEB_SERVER_ENTRY*>::const_iterator iter;
+    WebServerEntry *en;
+    std::map<std::string,WebServerEntry*>::const_iterator iter;
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
     {
         en = (*iter).second;
@@ -411,8 +411,8 @@ std::string HttpController::listRegisteredServers()
 std::string HttpController::listSpecials()
 {
     std::ostringstream str;
-    WEB_SERVER_ENTRY *en;
-    std::list<WEB_SERVER_ENTRY*>::iterator i;
+    WebServerEntry *en;
+    std::list<WebServerEntry*>::iterator i;
     for (i=specialList.begin(); i!=specialList.end(); i++)
     {
         en = (*i);
@@ -425,8 +425,8 @@ std::string HttpController::listSpecials()
 std::string HttpController::listPickOrder()
 {
     std::ostringstream str;
-    WEB_SERVER_ENTRY *en;
-    std::vector<WEB_SERVER_ENTRY*>::iterator i;
+    WebServerEntry *en;
+    std::vector<WebServerEntry*>::iterator i;
     for (i=pickList.begin(); i!=pickList.end(); i++)
     {
         en = (*i);
@@ -501,9 +501,9 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     tracefilestream.close();
 }
 
-WEB_SERVER_ENTRY* HttpController::__getRandomServerInfo()
+HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
 {
-    WEB_SERVER_ENTRY* en;
+    WebServerEntry* en;
     int selected = 0;
     // @todo Reimplement! This is a ugly hack to enable easy activation of servers - can lead to problems if no servers active!!!
     do

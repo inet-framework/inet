@@ -47,25 +47,6 @@
 #define INSERT_RANDOM -1
 #define INSERT_MIDDLE -2
 
-enum ServerStatus {ss_normal, ss_special};
-
-/**
- * Registration entry for Web servers
- */
-struct WEB_SERVER_ENTRY
-{
-    std::string name;           // The server URL.
-    std::string host;           // The OMNeT++ object name.
-    int port;                   // Listening port.
-    cModule *module;            // The actual OMNeT++ module reference to the server object.
-    simtime_t activationTime;   // Activation time for the server relative to simulation start.
-    simtime_t statusSetTime;    // Special status set time.
-    ServerStatus serverStatus;  // The default is ss_normal -- no modification events set.
-    double pvalue;              // Special (elevated) picking probability if ss_special is set.
-    double pamortize;           // Amortization factor -- reduces special probability on each hit.
-    unsigned long accessCount;  // A counter for the number of server hits.
-};
-
 #define STATUS_UPDATE_MSG 0
 
 /**
@@ -84,11 +65,31 @@ struct WEB_SERVER_ENTRY
 class HttpController : public cSimpleModule
 {
     protected:
+        enum ServerStatus {SS_NORMAL, SS_SPECIAL};
+
+        /**
+         * Registration entry for Web servers
+         */
+        struct WebServerEntry
+        {
+            std::string name;           ///< The server URL.
+            std::string host;           ///< The OMNeT++ object name.
+            int port;                   ///< Listening port.
+            cModule *module;            ///< The actual OMNeT++ module reference to the server object.
+            simtime_t activationTime;   ///< Activation time for the server relative to simulation start.
+            simtime_t statusSetTime;    ///< Special status set time.
+            ServerStatus serverStatus;  ///< The default is SS_NORMAL -- no modification events set.
+            double pvalue;              ///< Special (elevated) picking probability if SS_SPECIAL is set.
+            double pamortize;           ///< Amortization factor -- reduces special probability on each hit.
+            unsigned long accessCount;  ///< A counter for the number of server hits.
+        };
+
+    protected:
         int ll; ///< The log level
 
-        std::map<std::string,WEB_SERVER_ENTRY*> webSiteList;  ///< A list of registered web sites (server objects)
-        std::vector<WEB_SERVER_ENTRY*> pickList;   ///< The picklist used to select sites at random.
-        std::list<WEB_SERVER_ENTRY*> specialList;  ///< The special list -- contains sites with active popularity modification events.
+        std::map<std::string,WebServerEntry*> webSiteList;  ///< A list of registered web sites (server objects)
+        std::vector<WebServerEntry*> pickList;   ///< The picklist used to select sites at random.
+        std::list<WebServerEntry*> specialList;  ///< The special list -- contains sites with active popularity modification events.
         double pspecial;                ///< The probability [0,1) of selecting a site from the special list.
 
         unsigned long totalLookups;     ///< A counter for the total number of lookups
@@ -171,7 +172,7 @@ class HttpController : public cSimpleModule
         void cancelSpecialStatus(const char* www);
 
         /** Select a server from the special list. This method is called with the pspecial probability. */
-        WEB_SERVER_ENTRY* selectFromSpecialList();
+        WebServerEntry* selectFromSpecialList();
 
         /** List the registered servers. Useful for debug. */
         std::string listRegisteredServers();
@@ -191,7 +192,7 @@ class HttpController : public cSimpleModule
 
     private:
         /** Get a random server from the special list with p=pspecial or from the general population with p=1-pspecial. */
-        WEB_SERVER_ENTRY* __getRandomServerInfo();
+        WebServerEntry* __getRandomServerInfo();
 };
 
 #endif
