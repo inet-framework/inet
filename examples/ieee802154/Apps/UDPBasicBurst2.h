@@ -27,15 +27,16 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
-#include "UDPAppBase.h"
+#include "UDPSocket.h"
 /**
  * UDP application. See NED for more info.
  */
 
-class INET_API UDPBasicBurst2 : public UDPAppBase
+class INET_API UDPBasicBurst2 : public cSimpleModule
 {
   protected:
     std::string nodeName;
+    UDPSocket socket;
     int localPort, destPort;
     int msgByteLength;
 
@@ -105,7 +106,7 @@ class INET_API UDPBasicBurst2 : public UDPAppBase
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();
 
-    virtual void sendToUDPDelayed(cPacket *, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
+//    virtual void sendToUDPDelayed(cPacket *, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
 
   protected:
     virtual int numInitStages() const {return 4;}

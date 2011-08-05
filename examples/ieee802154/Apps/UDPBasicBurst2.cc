@@ -112,10 +112,8 @@ void UDPBasicBurst2::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
 
-    if (localPort != -1)
-        bindToPort(localPort);
-    else
-        bindToPort(destPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
     msgByteLength = par("messageLength").longValue();
 
@@ -261,14 +259,16 @@ void UDPBasicBurst2::sendPacket()
 {
     cPacket *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr(toFix);
-    sendToUDP(payload, localPort, destAddr, destPort);
+    socket.sendTo(payload, destAddr, destPort);
     numSent++;
 }
 
+/*
 void UDPBasicBurst2::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr,
                                       int destPort, double delay)
 {
     // send message to UDP, with the appropriate control info attached
+    socket.sendTo()
     msg->setKind(UDP_C_DATA);
 
     UDPControlInfo *ctrl = new UDPControlInfo();
@@ -283,6 +283,7 @@ void UDPBasicBurst2::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddre
 
     sendDelayed (msg,delay-simTime(), "udpOut");
 }
+*/
 
 void UDPBasicBurst2::handleMessage(cMessage *msg)
 {
@@ -330,8 +331,7 @@ void UDPBasicBurst2::processPacket(cPacket *msg)
         {
             if (i->second >= msgId)
             {
-                EV << "Duplicated packet: ";
-                printPacket(msg);
+                EV << "Duplicated packet: " << UDPSocket::getReceivedPacketInfo(msg) << endl;
                 delete msg;
                 numDeleted++;
                 return;
@@ -347,16 +347,14 @@ void UDPBasicBurst2::processPacket(cPacket *msg)
     {
         if (simTime() - msg->getTimestamp() > limitDelay)
         {
-            EV << "Old packet: ";
-            printPacket(msg);
+            EV << "Old packet: " << UDPSocket::getReceivedPacketInfo(msg) << endl;
             delete msg;
             numDeleted++;
             return;
         }
     }
 
-    EV << "Received packet: ";
-    printPacket(msg);
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(msg) << endl;
     numReceived++;
     totalRec++;
 
@@ -419,7 +417,7 @@ void UDPBasicBurst2::generateBurst()
 
     cPacket *payload = createPacket();
     payload->setTimestamp();
-    sendToUDP(payload, localPort, destAddr, destPort);
+    socket.sendTo(payload, destAddr, destPort);
 
     totalSend++;
     numSent++;
