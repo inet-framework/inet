@@ -102,7 +102,7 @@ void HttpServer::socketEstablished(int connId, void *yourPtr)
 
 void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
-    if ( yourPtr==NULL )
+    if (yourPtr==NULL)
     {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -114,7 +114,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
 
     // call the message handler to process the message.
     cMessage *reply = handleReceivedMessage(msg);
-    if ( reply!=NULL )
+    if (reply!=NULL)
     {
         socket->send(reply); // Send to socket if the reply is non-zero.
     }
@@ -123,7 +123,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
 
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)
 {
-    if ( yourPtr==NULL )
+    if (yourPtr==NULL)
     {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -142,7 +142,7 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-    if ( yourPtr==NULL )
+    if (yourPtr==NULL)
     {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -160,7 +160,7 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-    if ( yourPtr==NULL )
+    if (yourPtr==NULL)
     {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;

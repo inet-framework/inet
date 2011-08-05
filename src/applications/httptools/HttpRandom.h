@@ -164,7 +164,7 @@ class rdHistogram : public rdObject
         /** Get a random value */
         double get();
     private:
-        void __parseBinString( std::string binstr );
+        void __parseBinString(std::string binstr);
         void __normalizeBins();
 };
 
@@ -227,7 +227,7 @@ class rdObjectFactory
 {
     public:
         /** Return a rdObject-derived class based on the type name in the XML element */
-        rdObject* create( cXMLAttributeMap attributes );
+        rdObject* create(cXMLAttributeMap attributes);
 };
 
 #endif /* __httptRandom_H_ */

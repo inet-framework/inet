@@ -63,14 +63,14 @@ void HttpBrowserBase::initialize(int stage)
         EV_DEBUG << "Initializing base HTTP browser component -- phase 0\n";
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if ( rootelement==NULL ) error("Configuration file is not defined");
+        if (rootelement==NULL) error("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
         cXMLElement *element;
         rdObjectFactory rdFactory;
         // Activity period length -- the waking period
         element = rootelement->getFirstChildWithTag("activityPeriod");
-        if ( element==NULL )
+        if (element==NULL)
         {
             rdActivityLength = NULL; // Disabled if this parameter is not defined in the file
         }
@@ -78,41 +78,41 @@ void HttpBrowserBase::initialize(int stage)
         {
             attributes = element->getAttributes();
             rdActivityLength = rdFactory.create(attributes);
-            if ( rdActivityLength==NULL) error("Activity period random object could not be created");
+            if (rdActivityLength==NULL) error("Activity period random object could not be created");
         }
         // Inter-session interval
         element = rootelement->getFirstChildWithTag("interSessionInterval");
-        if ( element==NULL ) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterSessionInterval = rdFactory.create(attributes);
-        if ( rdInterSessionInterval==NULL) error("Inter-session interval random object could not be created");
+        if (rdInterSessionInterval==NULL) error("Inter-session interval random object could not be created");
         // Inter-request interval
         element = rootelement->getFirstChildWithTag("InterRequestInterval");
-        if ( element==NULL ) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterRequestInterval = rdFactory.create(attributes);
-        if ( rdInterRequestInterval==NULL) error("Inter-request interval random object could not be created");
+        if (rdInterRequestInterval==NULL) error("Inter-request interval random object could not be created");
         // request size
         element = rootelement->getFirstChildWithTag("requestSize");
-        if ( element==NULL ) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdRequestSize = rdFactory.create(attributes);
-        if ( rdRequestSize==NULL) error("Request size random object could not be created");
+        if (rdRequestSize==NULL) error("Request size random object could not be created");
         // Requests in session
         element = rootelement->getFirstChildWithTag("reqInSession");
-        if ( element==NULL ) error("requests in session parameter undefined in XML configuration");
+        if (element==NULL) error("requests in session parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReqInSession = rdFactory.create(attributes);
-        if ( rdReqInSession==NULL) error("Requests in session random object could not be created");
+        if (rdReqInSession==NULL) error("Requests in session random object could not be created");
         // Processing delay
         element = rootelement->getFirstChildWithTag("processingDelay");
-        if ( element==NULL ) error("processing delay parameter undefined in XML configuration");
+        if (element==NULL) error("processing delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdProcessingDelay = rdFactory.create(attributes);
-        if ( rdProcessingDelay==NULL) error("Processing delay random object could not be created");
+        if (rdProcessingDelay==NULL) error("Processing delay random object could not be created");
 
         controller = dynamic_cast<HttpController*>(getParentModule()->getParentModule()->getSubmodule("controller"));
-        if ( controller == NULL )
+        if (controller == NULL)
             error("Controller module not found");
 
         httpProtocol = par("httpProtocol");
@@ -143,8 +143,8 @@ void HttpBrowserBase::initialize(int stage)
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
 
         std::string scriptFile = (const char*)par("scriptFile");
-        scriptedMode = ( scriptFile.size() != 0 );
-        if ( scriptedMode )
+        scriptedMode = (scriptFile.size() != 0);
+        if (scriptedMode)
         {
             EV_DEBUG << "Scripted mode. Script file: " << scriptFile << endl;
             readScriptedEvents(scriptFile.c_str());
@@ -152,7 +152,7 @@ void HttpBrowserBase::initialize(int stage)
         else
         {
             double activationTime = par("activationTime"); // This is the activation delay. Optional
-            if ( rdActivityLength != NULL )
+            if (rdActivityLength != NULL)
                 activationTime += (86400.0 - rdActivityLength->get())/2; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
@@ -244,12 +244,12 @@ void HttpBrowserBase::handleSelfScriptedEvent()
     sessionCount++;
     messagesInCurrentSession = 0;
     // Get the browse event
-    if ( browseEvents.size() == 0 ) error("No event entry in queue");
+    if (browseEvents.size() == 0) error("No event entry in queue");
     BrowseEvent be = browseEvents.back();
     browseEvents.pop_back();
     sendRequestToServer(be);
     // Schedule the next event
-    if ( browseEvents.size() != 0 )
+    if (browseEvents.size() != 0)
     {
         be = browseEvents.back();
         EV_DEBUG << "Scheduling next event @ " << be.time << "\n";
@@ -270,7 +270,7 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
     sendRequestToServer(reqmsg);
 }
 
-void HttpBrowserBase::handleDataMessage( cMessage *msg )
+void HttpBrowserBase::handleDataMessage(cMessage *msg)
 {
     HttpReplyMessage *appmsg = check_and_cast<HttpReplyMessage*>(msg);
     if (appmsg==NULL) error("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
@@ -284,7 +284,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
     std::string senderWWW = appmsg->originatorUrl();
     EV_DEBUG << "Handling received message from " << senderWWW << ": " << msg->getName() << ". Received @T=" << simTime() << endl;
 
-    if ( appmsg->result()!=200 || (HttpContentType)appmsg->contentType()==CT_UNKNOWN )
+    if (appmsg->result()!=200 || (HttpContentType)appmsg->contentType()==CT_UNKNOWN)
     {
         EV_INFO << "Result for " << appmsg->getName() << " was other than OK. Code: " << appmsg->result() << endl;
         htmlErrorsReceived++;
@@ -293,11 +293,11 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
     }
     else
     {
-        switch ( (HttpContentType)appmsg->contentType() )
+        switch ((HttpContentType)appmsg->contentType())
         {
             case CT_HTML:
                 EV_INFO << "HTML Document received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
-                if ( strlen(appmsg->payload()) != 0 )
+                if (strlen(appmsg->payload()) != 0)
                     EV_DEBUG << "Payload of " << appmsg->getName() << " is: " << endl << appmsg->payload()
                              << ", " << strlen(appmsg->payload()) << " bytes" << endl;
                 else
@@ -322,10 +322,10 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
         }
 
         // Parse the html page body
-        if ( (HttpContentType)appmsg->contentType() == CT_HTML && strlen(appmsg->payload()) != 0 )
+        if ((HttpContentType)appmsg->contentType() == CT_HTML && strlen(appmsg->payload()) != 0)
         {
             EV_DEBUG << "Processing HTML document body:\n";
-            cStringTokenizer lineTokenizer( (const char*)appmsg->payload(), "\n" );
+            cStringTokenizer lineTokenizer((const char*)appmsg->payload(), "\n");
             std::vector<std::string> lines = lineTokenizer.asVector();
             int serial = 0;
             std::string providerName = "";
@@ -335,12 +335,12 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
             int refSize = 0;
             HttpRequestQueue queue;
             std::map<std::string,HttpRequestQueue> requestQueues;
-            for ( std::vector<std::string>::iterator iter = lines.begin(); iter != lines.end(); iter++)
+            for (std::vector<std::string>::iterator iter = lines.begin(); iter != lines.end(); iter++)
             {
                 std::string resourceLine = *iter;
-                cStringTokenizer fieldTokenizer( resourceLine.c_str(), ";" );
+                cStringTokenizer fieldTokenizer(resourceLine.c_str(), ";");
                 std::vector<std::string> fields = fieldTokenizer.asVector();
-                if ( fields.size()<1 )
+                if (fields.size()<1)
                 {
                     EV_ERROR << "Invalid resource reference in received message: " << resourceLine << endl;
                     continue;
@@ -349,19 +349,19 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
                 resourceName = fields[0];
 
                 providerName = senderWWW;
-                if ( fields.size()>1 )
+                if (fields.size()>1)
                     providerName = fields[1];
 
                 delay = 0.0;
-                if ( fields.size()>2 )
+                if (fields.size()>2)
                     delay = safeatof(fields[2].c_str());
 
                 bad = false;
-                if ( fields.size()>3 )
+                if (fields.size()>3)
                     bad = safeatobool(fields[3].c_str());
 
                 refSize = 0;
-                if ( fields.size()>4 )
+                if (fields.size()>4)
                     refSize = safeatoi(fields[4].c_str());
 
                 EV_DEBUG << "Generating resource request: " << resourceName << ". Provider: " << providerName
@@ -369,7 +369,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
 
                 // Generate a request message and push on queue for the intended recipient
                 HttpRequestMessage *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO: KVJ: CHECK HERE FOR XSITE
-                if ( delay==0.0 )
+                if (delay==0.0)
                 {
                     requestQueues[providerName].push_front(reqmsg);
                 }
@@ -383,7 +383,7 @@ void HttpBrowserBase::handleDataMessage( cMessage *msg )
             // A single socket will thus be opened for each recipient for a rough HTTP/1.1 emulation.
             // This is only done for messages which are not delayed in the simulated page.
             std::map<std::string,HttpRequestQueue>::iterator i = requestQueues.begin();
-            for (; i!=requestQueues.end(); i++ )
+            for (; i!=requestQueues.end(); i++)
                 sendRequestsToServer((*i).first, (*i).second);
         }
     }
@@ -395,7 +395,7 @@ HttpRequestMessage* HttpBrowserBase::generatePageRequest(std::string www, std::s
 {
     EV_DEBUG << "Generating page request for URL " << www << ", page " << pageName << endl;
 
-    if ( www.size()+pageName.size() > MAX_URL_LENGTH )
+    if (www.size()+pageName.size() > MAX_URL_LENGTH)
     {
         EV_ERROR << "URL for site " << www << " exceeds allowed maximum size" << endl;
         return NULL;
@@ -434,7 +434,7 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 {
     EV_DEBUG << "Generating resource request for URL " << www << ", resource: " << resource << endl;
 
-    if ( www.size()+resource.size() > MAX_URL_LENGTH )
+    if (www.size()+resource.size() > MAX_URL_LENGTH)
     {
         EV_ERROR << "URL for site " << www << " exceeds allowed maximum size" << endl;
         return NULL;
@@ -452,8 +452,8 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 
     std::string ext = trimLeft(resource, ".");
     HttpContentType rc = getResourceCategory(ext);
-    if ( rc==CT_IMAGE ) imgResourcesRequested++;
-    else if ( rc==CT_TEXT ) textResourcesRequested++;
+    if (rc==CT_IMAGE) imgResourcesRequested++;
+    else if (rc==CT_TEXT) textResourcesRequested++;
 
     char szReq[MAX_URL_LENGTH+24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
@@ -475,13 +475,13 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 
 void HttpBrowserBase::scheduleNextBrowseEvent()
 {
-    if ( eventTimer->isScheduled() )
+    if (eventTimer->isScheduled())
         cancelEvent(eventTimer);
     simtime_t nextEventTime;  // MIGRATE40: kvj
-    if ( ++reqInCurSession >= reqNoInCurSession )
+    if (++reqInCurSession >= reqNoInCurSession)
     {
         // The requests in the current round are done. Lets check what to do next.
-        if ( rdActivityLength==NULL || simTime() < acitivityPeriodEnd )
+        if (rdActivityLength==NULL || simTime() < acitivityPeriodEnd)
         {
             // Scheduling next session start within an activity period.
             nextEventTime = simTime()+ (simtime_t)rdInterSessionInterval->get();
@@ -512,7 +512,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
     }
 }
 
-void HttpBrowserBase::readScriptedEvents( const char* filename )
+void HttpBrowserBase::readScriptedEvents(const char* filename)
 {
     EV_DEBUG << "Reading scripted events from " << filename << "\n";
 
@@ -529,11 +529,11 @@ void HttpBrowserBase::readScriptedEvents( const char* filename )
     while (!std::getline(scriptfilestream, line).eof())
     {
         line = trim(line);
-        if ( line.find("#") == 0 )
+        if (line.find("#") == 0)
             continue;
 
         pos = line.find(";");
-        if ( pos == -1 ) continue;
+        if (pos == -1) continue;
         timepart = line.substr(0, pos);
         wwwpart = line.substr(pos+1, line.size()-pos-1);
 
@@ -553,14 +553,14 @@ void HttpBrowserBase::readScriptedEvents( const char* filename )
         be.wwwhost = extractServerName(wwwpart.c_str());
         be.resourceName = extractResourceName(wwwpart.c_str());
         be.serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(wwwpart.c_str()));
-        if ( be.serverModule==NULL ) error("Unable to locate server %s in the scenario", wwwpart.c_str());
+        if (be.serverModule==NULL) error("Unable to locate server %s in the scenario", wwwpart.c_str());
 
         EV_DEBUG << "Creating scripted browse event @ T=" << t << ", " << be.wwwhost << " / " << be.resourceName << endl;
         browseEvents.push_front(be);
     }
     scriptfilestream.close();
 
-    if ( browseEvents.size() != 0 )
+    if (browseEvents.size() != 0)
     {
         BrowseEvent be = browseEvents.back();
         eventTimer->setKind(MSGKIND_SCRIPT_EVENT);

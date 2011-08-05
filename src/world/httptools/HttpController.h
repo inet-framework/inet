@@ -128,14 +128,14 @@ class HttpController : public cSimpleModule
          * play a role when zipf or other non-uniform selection probability is used (the pick list is basically mapped to
          * the non-uniform distribution).
          */
-        void registerWWWserver( const char* objectName, const char* wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0 );
+        void registerWWWserver(const char* objectName, const char* wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0);
 
         /**
          * @brief Get a specific server module reference
          * Returns a OMNeT++ module reference for a specific WWW name. Called by browser modules to get a
          * communications partner. @see HttpBrowserBase
          */
-        cModule* getServerModule( const char* wwwName );
+        cModule* getServerModule(const char* wwwName);
 
         /**
          * @brief Get a random server object
@@ -150,7 +150,7 @@ class HttpController : public cSimpleModule
          * Get a module reference and port number for a specific www name. Used by the browser modules
          * when using TCP transport. @see HttpBrowser
          */
-        int getServerInfo( const char* wwwName, char* module, int &port );
+        int getServerInfo(const char* wwwName, char* module, int &port);
 
         /**
          * @brief Get module and port for a random server.
@@ -158,7 +158,7 @@ class HttpController : public cSimpleModule
          * is used in conjunction with the special list to determine the module returned. Called by browser
          * modules to get a random communications partner. @see HttpBrowserBase
          */
-        int getAnyServerInfo( char* wwwName, char* module, int &port );
+        int getAnyServerInfo(char* wwwName, char* module, int &port);
     //@}
 
     protected:
@@ -166,10 +166,10 @@ class HttpController : public cSimpleModule
         cModule* getTcpApp(std::string node);
 
         /** @brief Set special status of a WWW server. Triggered by an event message. */
-        void setSpecialStatus( const char* www, ServerStatus status, double p, double amortize );
+        void setSpecialStatus(const char* www, ServerStatus status, double p, double amortize);
 
         /** @brief Cancel special popularity status for a server. Called when popularity has been amortized to zero. */
-        void cancelSpecialStatus( const char* www );
+        void cancelSpecialStatus(const char* www);
 
         /** @brief Select a server from the special list. This method is called with the pspecial probability. */
         WEB_SERVER_ENTRY* selectFromSpecialList();

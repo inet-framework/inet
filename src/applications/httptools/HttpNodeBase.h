@@ -115,19 +115,19 @@ class HttpNodeBase : public cSimpleModule
         /** @name Methods for logging and formatting messages */
         //@{
         /** Log a request message to file and optionally display in console */
-        void logRequest( const HttpRequestMessage* httpRequest );
+        void logRequest(const HttpRequestMessage* httpRequest);
         /** Log a response message to file and optionally display in console */
-        void logResponse( const HttpReplyMessage* httpResponse );
+        void logResponse(const HttpReplyMessage* httpResponse);
         /** Used by logRequest and logResponse to write the formatted message to file */
-        void logEntry( std::string line );
+        void logEntry(std::string line);
         /** Format a request message in compact semicolon-delimited format */
-        std::string formatHttpRequestShort( const HttpRequestMessage* httpRequest );
+        std::string formatHttpRequestShort(const HttpRequestMessage* httpRequest);
         /** Format a response message in compact semicolon-delimited format */
-        std::string formatHttpResponseShort( const HttpReplyMessage* httpResponse );
+        std::string formatHttpResponseShort(const HttpReplyMessage* httpResponse);
         /** Format a request message in a more human-readable format */
-        std::string formatHttpRequestLong( const HttpRequestMessage* httpRequest );
+        std::string formatHttpRequestLong(const HttpRequestMessage* httpRequest);
         /** Format a response message in a more human-readable format */
-        std::string formatHttpResponseLong( const HttpReplyMessage* httpResponse );
+        std::string formatHttpResponseLong(const HttpReplyMessage* httpResponse);
         //@}
 };
 

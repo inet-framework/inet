@@ -69,16 +69,16 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
     //@{
     protected:
         /** @brief Sends a scripted browse event to a specific server */
-        virtual void sendRequestToServer( BrowseEvent be );
+        virtual void sendRequestToServer(BrowseEvent be);
 
         /** Send a request to server. Uses the recipient stamped in the request. */
-        virtual void sendRequestToServer( HttpRequestMessage *request );
+        virtual void sendRequestToServer(HttpRequestMessage *request);
 
         /** @brief Sends a generic request to a randomly chosen server */
         virtual void sendRequestToRandomServer();
 
         /** @brief Sends a number of queued messages to the specified server */
-        virtual void sendRequestsToServer( std::string www, HttpRequestQueue queue );
+        virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
     //@}
 };
 

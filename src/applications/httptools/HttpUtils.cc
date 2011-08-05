@@ -29,7 +29,7 @@
 
 #include "HttpUtils.h"
 
-std::string trimLeft( std::string str )
+std::string trimLeft(std::string str)
 {
     std::string::iterator i;
     for (i = str.begin(); i != str.end(); i++) {
@@ -45,14 +45,14 @@ std::string trimLeft( std::string str )
     return str;
 }
 
-std::string trimLeft( std::string str, std::string delim )
+std::string trimLeft(std::string str, std::string delim)
 {
     int pos = str.find(delim);
-    if ( pos==-1 ) return str;
+    if (pos==-1) return str;
     else return str.substr(pos+1, str.size()-pos-1);
 }
 
-std::string trimRight( std::string str )
+std::string trimRight(std::string str)
 {
     std::string::iterator i;
     for (i = str.end() - 1;; i--) {
@@ -68,39 +68,39 @@ std::string trimRight( std::string str )
     return str;
 }
 
-std::string trimRight( std::string str, std::string delim )
+std::string trimRight(std::string str, std::string delim)
 {
     int pos = str.rfind(delim);
-    if ( pos==-1 ) return str;
+    if (pos==-1) return str;
     else return str.substr(0, pos-1);
 }
 
-std::string trim( std::string str )
+std::string trim(std::string str)
 {
     str = trimLeft(str);
     str = trimRight(str);
     return str;
 }
 
-std::string extractServerName( const char* path )
+std::string extractServerName(const char* path)
 {
     std::string www(path);
     int position = www.find("http://");
-    if ( position != -1 )
+    if (position != -1)
     {
         www = www.erase(0, position);
     }
     else
     {
         position = www.find("https://");
-        if ( position != -1 )
+        if (position != -1)
         {
             www = www.erase(0, position);
         }
     }
 
     position = www.find("/");
-    if ( position != -1 )
+    if (position != -1)
     {
         www = www.substr(0, position);
     }
@@ -108,25 +108,25 @@ std::string extractServerName( const char* path )
     return www;
 }
 
-std::string extractResourceName( const char* path )
+std::string extractResourceName(const char* path)
 {
     std::string www(path);
     int position = www.find("http://");
-    if ( position != -1 )
+    if (position != -1)
     {
         www = www.erase(0, position);
     }
     else
     {
         position = www.find("https://");
-        if ( position != -1 )
+        if (position != -1)
         {
             www = www.erase(0, position);
         }
     }
 
     position = www.find("/");
-    if ( position != -1 )
+    if (position != -1)
         return www.substr(position+1, www.size()-position);
     else
         return "";
@@ -139,10 +139,10 @@ std::vector<std::string> parseResourceName(std::string resource)
     std::string extension = "";
 
     int slashpos = resource.rfind("/");
-    if ( slashpos!=-1 )
+    if (slashpos!=-1)
         path = resource.substr(0, slashpos);
     int dotpos = resource.rfind(".");
-    if ( dotpos!=-1 )
+    if (dotpos!=-1)
     {
         resourceName = resource.substr(slashpos+1, dotpos-slashpos-1);
         extension = resource.substr(dotpos+1, resource.size()-dotpos-1);
@@ -163,17 +163,17 @@ std::string getDelimited(std::string str, std::string ldelim, std::string rdelim
 {
     int lpos = str.find(ldelim);
     int rpos;
-    if ( rdelim=="" )
+    if (rdelim=="")
         rpos = str.rfind(ldelim);
     else
         rpos = str.rfind(rdelim);
-    if ( lpos==-1 || rpos==-1 || lpos==rpos ) return ""; // Not found
+    if (lpos==-1 || rpos==-1 || lpos==rpos) return ""; // Not found
     else return str.substr(lpos+1, rpos-lpos-1);
 }
 
 HttpContentType getResourceCategory(std::vector<std::string> res)
 {
-    if ( res.size()==2 )
+    if (res.size()==2)
         return CT_HTML;
     else if (res.size()>2)
         return getResourceCategory(res[2]); // get the category from the extension
@@ -229,7 +229,7 @@ int safeatobool(const char* strval, bool defaultVal)
 {
     try
     {
-        return ( strcmp(strval, "TRUE")==0 || strcmp(strval, "true")==0 );
+        return (strcmp(strval, "TRUE")==0 || strcmp(strval, "true")==0);
     }
     catch (...)
     {
@@ -244,16 +244,16 @@ std::vector<std::string> splitFile(std::string fileName)
     std::string ext = "";
 
     int slashpos = fileName.rfind("/");
-    if ( slashpos==-1 )
+    if (slashpos==-1)
         slashpos = fileName.rfind("\\");
-    if ( slashpos!=-1 )
+    if (slashpos!=-1)
     {
         path = fileName.substr(0, slashpos+1);
         fileName = fileName.substr(slashpos+1, fileName.size()-slashpos-1);
     }
 
     int dotpos = fileName.find(".");
-    if ( dotpos!=-1 )
+    if (dotpos!=-1)
     {
         ext = fileName.substr(dotpos+1, fileName.size()-dotpos-1);
         file = fileName.substr(0, dotpos);
@@ -270,7 +270,7 @@ std::vector<std::string> splitFile(std::string fileName)
     return res;
 }
 
-bool fileExists( const char *file )
+bool fileExists(const char *file)
 {
 #ifdef _WIN32
     return _access(file, 0) == 0;

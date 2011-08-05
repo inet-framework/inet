@@ -158,10 +158,10 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 
     protected:
         /** Handle a HTTP data message */
-        void handleDataMessage( cMessage *msg );
+        void handleDataMessage(cMessage *msg);
 
         /** Handle a self message -- events and such */
-        void handleSelfMessages( cMessage *msg );
+        void handleSelfMessages(cMessage *msg);
 
         /** @name Handlers for self messages */
         //@{
@@ -178,13 +178,13 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** @name pure virtual methods to communicate with the server. Must be implemented in derived classes */
         //@{
         /** Send a request defined by a browse event (scripted entry) to a server */
-        virtual void sendRequestToServer( BrowseEvent be ) = 0;
+        virtual void sendRequestToServer(BrowseEvent be) = 0;
         /** Send a request to server. Uses the recipient stamped in the request. */
-        virtual void sendRequestToServer( HttpRequestMessage *request ) = 0;
+        virtual void sendRequestToServer(HttpRequestMessage *request) = 0;
         /** Send a request to a randomly selected server. The derived class utilizes the controller object to retrieve the object */
         virtual void sendRequestToRandomServer() = 0;
         /** Send a request to a named server */
-        virtual void sendRequestsToServer( std::string www, HttpRequestQueue queue ) = 0;
+        virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) = 0;
         //@}
 
         /** @name Methods for generating HTML page requests and resource requests */
@@ -198,7 +198,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         //@}
 
         //* Read scripted events from file. Triggered if the script file parameter is specified in the initialization file. */
-        void readScriptedEvents( const char* filename );
+        void readScriptedEvents(const char* filename);
 };
 
 #endif

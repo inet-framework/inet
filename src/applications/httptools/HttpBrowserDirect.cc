@@ -54,15 +54,15 @@ void HttpBrowserDirect::handleMessage(cMessage *msg)
         handleDataMessage(msg);
 }
 
-void HttpBrowserDirect::sendRequestToServer( BrowseEvent be )
+void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
 {
     sendDirectToModule(be.serverModule, generatePageRequest(be.wwwhost, be.resourceName), 0.0, rdProcessingDelay);
 }
 
-void HttpBrowserDirect::sendRequestToServer( HttpRequestMessage *request )
+void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
 {
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(request->targetUrl()));
-    if ( serverModule == NULL )
+    if (serverModule == NULL)
     {
         EV_ERROR << "Failed to get server module for " << request->targetUrl() << endl;
     }
@@ -76,7 +76,7 @@ void HttpBrowserDirect::sendRequestToServer( HttpRequestMessage *request )
 void HttpBrowserDirect::sendRequestToRandomServer()
 {
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getAnyServerModule());
-    if ( serverModule == NULL )
+    if (serverModule == NULL)
     {
         EV_ERROR << "Failed to get a random server module" << endl;
     }
@@ -87,14 +87,14 @@ void HttpBrowserDirect::sendRequestToRandomServer()
     }
 }
 
-void HttpBrowserDirect::sendRequestsToServer( std::string www, HttpRequestQueue queue )
+void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue queue)
 {
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(www.c_str()));
-    if ( serverModule == NULL )
+    if (serverModule == NULL)
         EV_ERROR << "Failed to get server module " << www << endl;
     else
     {
-        while ( queue.size()!=0 )
+        while (queue.size()!=0)
         {
             HttpRequestMessage *msg = queue.back();
             queue.pop_back();

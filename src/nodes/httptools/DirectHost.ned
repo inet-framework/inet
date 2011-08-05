@@ -5,7 +5,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -37,7 +37,7 @@ import inet.applications.httptools.IHttpDirectApp;
 // DirectHost
 //
 // Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
+// StandardHost module. All network infrastructure modules were removed;
 // the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
 // and HttpServerDirect modules from HttpTools.
 // See the INET documentation for StandardHost and the provided examples on how
@@ -52,7 +52,7 @@ import inet.applications.httptools.IHttpDirectApp;
 module DirectHost
 {
     parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
+        double numTcpApps = default(0);     // The number of tcpApps in the array
     submodules:
         tcpApp[numTcpApps]: <> like IHttpDirectApp {
             parameters:

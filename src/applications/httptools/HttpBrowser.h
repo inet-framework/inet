@@ -104,16 +104,16 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     //@{
     protected:
         /** @brief Sends a scripted browse event to a specific server */
-        virtual void sendRequestToServer( BrowseEvent be );
+        virtual void sendRequestToServer(BrowseEvent be);
 
         /** Send a request to server. Uses the recipient stamped in the request. */
-        virtual void sendRequestToServer( HttpRequestMessage *request );
+        virtual void sendRequestToServer(HttpRequestMessage *request);
 
         /** @brief Sends a generic request to a randomly chosen server */
         virtual void sendRequestToRandomServer();
 
         /** @brief Sends a number of queued messages to the specified server */
-        virtual void sendRequestsToServer( std::string www, HttpRequestQueue queue );
+        virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
     //@}
 
     /** @name TCPSocket::CallbackInterface callback methods */
@@ -164,13 +164,13 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          *  stored as a myPtr with the socket. The message is transmitted once the socket is established, signaled
          *  by a call to socketEstablished.
          */
-        void submitToSocket( const char* moduleName, int connectPort, HttpRequestMessage *msg );
+        void submitToSocket(const char* moduleName, int connectPort, HttpRequestMessage *msg);
 
         /** @brief Establishes a socket and assigns a queue of messages to be transmitted.
          *  Same as the overloaded version, except a number of messages are queued for transmission. The same socket
          *  instance is used for all the queued messages.
          */
-        void submitToSocket( const char* moduleName, int connectPort, HttpRequestQueue &queue );
+        void submitToSocket(const char* moduleName, int connectPort, HttpRequestQueue &queue);
     //@}
 };
 

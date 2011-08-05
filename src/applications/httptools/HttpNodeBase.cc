@@ -36,7 +36,7 @@ HttpNodeBase::HttpNodeBase()
     m_bDisplayResponseContent = false;
 }
 
-void HttpNodeBase::sendDirectToModule( HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay )
+void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay)
 {
     if (pckt == NULL)
         return;
@@ -54,29 +54,29 @@ double HttpNodeBase::transmissionDelay(cPacket *pckt)
     return pckt->getBitLength()/((double)linkSpeed);  // The linkspeed is in bits/s
 }
 
-void HttpNodeBase::logRequest( const HttpRequestMessage* httpRequest )
+void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
 {
     if (!enableLogging) return;
-    if ( outputFormat == lf_short )
+    if (outputFormat == lf_short)
         logEntry(formatHttpRequestShort(httpRequest));
     else
         logEntry(formatHttpRequestLong(httpRequest));
-    if ( m_bDisplayMessage )
+    if (m_bDisplayMessage)
         EV_INFO << "Request:\n" << formatHttpRequestLong(httpRequest);
 }
 
-void HttpNodeBase::logResponse( const HttpReplyMessage* httpResponse )
+void HttpNodeBase::logResponse(const HttpReplyMessage* httpResponse)
 {
     if (!enableLogging) return;
-    if ( outputFormat == lf_short )
+    if (outputFormat == lf_short)
         logEntry(formatHttpResponseShort(httpResponse));
     else
         logEntry(formatHttpResponseLong(httpResponse));
-    if ( m_bDisplayMessage )
+    if (m_bDisplayMessage)
         EV_INFO << "Response:\n" << formatHttpResponseLong(httpResponse);
 }
 
-void HttpNodeBase::logEntry( std::string line )
+void HttpNodeBase::logEntry(std::string line)
 {
     if (!enableLogging) return;
     if (logFileName.size() == 0) return;
@@ -88,10 +88,10 @@ void HttpNodeBase::logEntry( std::string line )
     bool exists = fileExists(logFileName.c_str()); // Check if the file exists. If not, add the field names at top.
 
     outfile.open(logFileName.c_str(), std::ios::app);
-    if ( !exists )
+    if (!exists)
         outfile << "time;simtime;logging-node;sending-node;type;originator-url;target-url;protocol;keep-alive;serial;heading;bad-req;result-code;content-type" << endl;
     outfile << curtime << ";" << simTime() << ";" << getParentModule()->getName();
-    if ( outputFormat == lf_short )
+    if (outputFormat == lf_short)
         outfile << ";";
     else
         outfile << endl;
@@ -99,13 +99,13 @@ void HttpNodeBase::logEntry( std::string line )
     outfile.close();
 }
 
-std::string HttpNodeBase::formatHttpRequestShort( const HttpRequestMessage* httpRequest )
+std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage* httpRequest)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
     cModule *originator = httpRequest->getSenderModule();
-    if ( originator!=NULL && originator->getParentModule()!=NULL )
+    if (originator!=NULL && originator->getParentModule()!=NULL)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";
@@ -116,13 +116,13 @@ std::string HttpNodeBase::formatHttpRequestShort( const HttpRequestMessage* http
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseShort( const HttpReplyMessage* httpResponse )
+std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage* httpResponse)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
     cModule *originator = httpResponse->getSenderModule();
-    if ( originator!=NULL && originator->getParentModule()!=NULL )
+    if (originator!=NULL && originator->getParentModule()!=NULL)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";
@@ -134,7 +134,7 @@ std::string HttpNodeBase::formatHttpResponseShort( const HttpReplyMessage* httpR
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpRequest )
+std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage* httpRequest)
 {
     std::ostringstream str;
 
@@ -142,7 +142,7 @@ std::string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpR
     str << "Target URL:" << httpRequest->targetUrl() << "  Originator URL:" << httpRequest->originatorUrl() << endl;
 
     str << "PROTOCOL:";
-    switch ( httpRequest->protocol() )  // MIGRATE40: kvj
+    switch (httpRequest->protocol())  // MIGRATE40: kvj
     {
         case 10: str << "HTTP/1.0"; break;
         case 11: str << "HTTP/1.1"; break;
@@ -159,7 +159,7 @@ std::string HttpNodeBase::formatHttpRequestLong( const HttpRequestMessage* httpR
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpResponse )
+std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage* httpResponse)
 {
     std::ostringstream str;
 
@@ -168,7 +168,7 @@ std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpRe
     str << "Target URL:" << httpResponse->targetUrl() << "  Originator URL:" << httpResponse->originatorUrl() << endl;
 
     str << "PROTOCOL:";
-    switch ( httpResponse->protocol() )
+    switch (httpResponse->protocol())
     {
         case 10: str << "HTTP/1.0"; break;
         case 11: str << "HTTP/1.1"; break;
@@ -183,7 +183,7 @@ std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpRe
     str << "RESPONSE: " << httpResponse->heading() << endl;
 
     str << "CONTENT-TYPE:";
-    switch ( httpResponse->contentType() )
+    switch (httpResponse->contentType())
     {
         case CT_HTML: str << "HTML DOC"; break;
         case CT_TEXT: str << "Text/HTML RES"; break;
@@ -192,7 +192,7 @@ std::string HttpNodeBase::formatHttpResponseLong( const HttpReplyMessage* httpRe
     }
     str << endl;
 
-    if ( m_bDisplayResponseContent )
+    if (m_bDisplayResponseContent)
     {
         str << "CONTENT:" << endl;
         str << httpResponse->payload() << endl;

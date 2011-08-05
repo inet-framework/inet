@@ -52,19 +52,19 @@ rdNormal::rdNormal(double mean, double sd, bool nonNegative)
     m_bMinLimit = false;
 }
 
-rdNormal::rdNormal( cXMLAttributeMap attributes )
+rdNormal::rdNormal(cXMLAttributeMap attributes)
 {
     m_type = dt_normal;
-    if ( !_hasKey(attributes, "mean") )
+    if (!_hasKey(attributes, "mean"))
         throw "Undefined parameter for random distribution. Mean must be defined for a normal distribution";
-    if ( !_hasKey(attributes, "sd") )
+    if (!_hasKey(attributes, "sd"))
         throw "Undefined parameter for random distribution. sd must be defined for a normal distribution";
     m_mean = atof(attributes["mean"].c_str());
     m_sd = atof(attributes["sd"].c_str());
     m_bMinLimit = _hasKey(attributes, "min");
-    if ( m_bMinLimit )
+    if (m_bMinLimit)
         m_min = atof(attributes["min"].c_str());
-    if ( _hasKey(attributes, "nonNegative") )
+    if (_hasKey(attributes, "nonNegative"))
         m_nonNegative = strcmp(attributes["nonNegative"].c_str(), "true")==0;
     else
         m_nonNegative = false;
@@ -75,7 +75,7 @@ double rdNormal::get()
     double retval = 0.0;
     do
     {
-        if ( m_nonNegative )
+        if (m_nonNegative)
             retval = truncnormal(m_mean, m_sd);
         else
             retval = normal(m_mean, m_sd);
@@ -92,12 +92,12 @@ rdUniform::rdUniform(double beginning, double end)
     m_end = end;
 }
 
-rdUniform::rdUniform( cXMLAttributeMap attributes )
+rdUniform::rdUniform(cXMLAttributeMap attributes)
 {
     m_type = dt_uniform;
-    if ( !_hasKey(attributes, "beginning") )
+    if (!_hasKey(attributes, "beginning"))
         throw "Undefined parameter for random distribution. Beginning must be defined for a normal distribution";
-    if ( !_hasKey(attributes, "end") )
+    if (!_hasKey(attributes, "end"))
         throw "Undefined parameter for random distribution. End must be defined for a normal distribution";
     m_beginning = atof(attributes["beginning"].c_str());
     m_end = atof(attributes["end"].c_str());
@@ -108,7 +108,7 @@ double rdUniform::get()
     return uniform(m_beginning, m_end);
 }
 
-rdExponential::rdExponential( double mean )
+rdExponential::rdExponential(double mean)
 {
     m_type = dt_exponential;
     m_mean = mean;
@@ -118,11 +118,11 @@ rdExponential::rdExponential( double mean )
     m_bMaxLimit = false;
 }
 
-rdExponential::rdExponential( cXMLAttributeMap attributes )
+rdExponential::rdExponential(cXMLAttributeMap attributes)
 {
     m_type = dt_exponential;
 
-    if ( !_hasKey(attributes, "mean") )
+    if (!_hasKey(attributes, "mean"))
         throw "Undefined parameter for random distribution. Mean must be defined for an exponential distribution";
     m_mean = atof(attributes["mean"].c_str());
 
@@ -130,9 +130,9 @@ rdExponential::rdExponential( cXMLAttributeMap attributes )
     m_max = 0.0;
     m_bMinLimit = _hasKey(attributes, "min");
     m_bMaxLimit = _hasKey(attributes, "max");
-    if ( m_bMinLimit )
+    if (m_bMinLimit)
         m_min = atof(attributes["min"].c_str());
-    if ( m_bMaxLimit )
+    if (m_bMaxLimit)
         m_max = atof(attributes["max"].c_str());
 }
 
@@ -141,7 +141,7 @@ double rdExponential::get()
     double val;
     do
         val = exponential(m_mean);
-    while ( ( m_bMinLimit && val < m_min ) || ( m_bMaxLimit && val > m_max ) );
+    while ((m_bMinLimit && val < m_min) || (m_bMaxLimit && val > m_max));
     return val;
 }
 
@@ -152,13 +152,13 @@ rdHistogram::rdHistogram(rdHistogramBins bins, bool zeroBased)
     __normalizeBins();
 }
 
-rdHistogram::rdHistogram( cXMLAttributeMap attributes )
+rdHistogram::rdHistogram(cXMLAttributeMap attributes)
 {
     m_type = dt_histogram;
-    if ( !_hasKey(attributes, "bins") )
+    if (!_hasKey(attributes, "bins"))
         throw "No bins specified for a histogram distribution";
     std::string binstr = attributes["bins"];
-    if ( _hasKey(attributes, "zeroBased") )
+    if (_hasKey(attributes, "zeroBased"))
         m_zeroBased = strcmp(attributes["zeroBased"].c_str(), "true")==0;
     __parseBinString(binstr);
     __normalizeBins();
@@ -172,16 +172,16 @@ double rdHistogram::get()
     double val = uniform(0, 1);
     double cumsum = 0;
     int cumcount = 0;
-    for ( i=0; i<count; i++ )
+    for (i=0; i<count; i++)
     {
         // First select the bin
         bin = m_bins[i];
         cumsum += bin.sum;
-        if ( cumsum >= val )
+        if (cumsum >= val)
         {
             // Then choose from the elements in the bin
             double n = uniform(1, bin.count)+cumcount;
-            if ( m_zeroBased) return n-1.0;
+            if (m_zeroBased) return n-1.0;
             else return n;
         }
         cumcount += bin.count; // Keep the running count for the elements
@@ -189,7 +189,7 @@ double rdHistogram::get()
     return -1.0; // Default return in case something weird happens
 }
 
-void rdHistogram::__parseBinString( std::string binstr )
+void rdHistogram::__parseBinString(std::string binstr)
 {
     // The bins string is of the form [(count1,sum1);(count2,sum2);...;(countn,sumn)]
     binstr = trimLeft(binstr, "[");
@@ -202,13 +202,13 @@ void rdHistogram::__parseBinString( std::string binstr )
     double sum;
     int pos;
     rdHistogramBin bin;
-    for ( i=res.begin(); i!=res.end(); i++ )
+    for (i=res.begin(); i!=res.end(); i++)
     {
         curtuple = (*i);
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
         pos = curtuple.find(',');
-        if ( pos==-1 ) continue;  // Invalid tuple -- raise error here?
+        if (pos==-1) continue;  // Invalid tuple -- raise error here?
         countstr = curtuple.substr(0, pos);
         sumstr = curtuple.substr(pos+1, curtuple.size()-pos-1);
         sum = safeatof(sumstr.c_str(), 0.0);
@@ -223,10 +223,10 @@ void rdHistogram::__normalizeBins()
 {
     unsigned int i;
     double sum = 0;
-    for ( i=0; i<m_bins.size(); i++ )
+    for (i=0; i<m_bins.size(); i++)
         sum += m_bins[i].sum;
-    if ( sum==0 ) return;
-    for ( i=0; i<m_bins.size(); i++ )
+    if (sum==0) return;
+    for (i=0; i<m_bins.size(); i++)
         m_bins[i].sum = m_bins[i].sum/sum;
 }
 
@@ -236,10 +236,10 @@ rdConstant::rdConstant(double value)
     m_value = value;
 }
 
-rdConstant::rdConstant( cXMLAttributeMap attributes )
+rdConstant::rdConstant(cXMLAttributeMap attributes)
 {
     m_type = dt_constant;
-    if ( !_hasKey(attributes, "value") )
+    if (!_hasKey(attributes, "value"))
         throw "No value specified";
     m_value = atof(attributes["value"].c_str());
 }
@@ -253,16 +253,16 @@ rdZipf::rdZipf(cXMLAttributeMap attributes)
 {
     m_type = dt_zipf;
 
-    if ( !_hasKey(attributes, "n") )
+    if (!_hasKey(attributes, "n"))
         throw "Undefined parameter for zipf distribution. n must be defined for an exponential distribution";
-    if ( !_hasKey(attributes, "alpha") )
+    if (!_hasKey(attributes, "alpha"))
         throw "Undefined parameter for zipf distribution. alpha must be defined for an exponential distribution";
 
     int n;
     double alpha;
     bool baseZero = false;
 
-    if ( _hasKey(attributes, "zeroBased") )
+    if (_hasKey(attributes, "zeroBased"))
         baseZero = strcmp(attributes["zeroBased"].c_str(), "true")==0;
 
     try
@@ -303,7 +303,7 @@ double rdZipf::get()
         sum_prob += m_c / pow((double) i, m_alpha);
         if (sum_prob >= z) break;
     }
-    if ( m_baseZero ) return i-1;
+    if (m_baseZero) return i-1;
     else return i;
 }
 
@@ -333,19 +333,19 @@ void rdZipf::__setup_c()
     m_c = 1.0 / m_c;
 }
 
-rdObject* rdObjectFactory::create( cXMLAttributeMap attributes )
+rdObject* rdObjectFactory::create(cXMLAttributeMap attributes)
 {
     std::string typeName = attributes["type"];
     DISTR_TYPE dt;
-    if ( typeName=="normal" ) dt = dt_normal;
-    else if ( typeName=="uniform" ) dt = dt_uniform;
-    else if ( typeName=="exponential") dt = dt_exponential;
-    else if ( typeName=="histogram") dt = dt_histogram;
-    else if ( typeName=="constant") dt = dt_constant;
-    else if ( typeName=="zipf") dt = dt_zipf;
+    if (typeName=="normal") dt = dt_normal;
+    else if (typeName=="uniform") dt = dt_uniform;
+    else if (typeName=="exponential") dt = dt_exponential;
+    else if (typeName=="histogram") dt = dt_histogram;
+    else if (typeName=="constant") dt = dt_constant;
+    else if (typeName=="zipf") dt = dt_zipf;
     else return NULL;
 
-    switch ( dt )
+    switch (dt)
     {
         case dt_normal:
             return new rdNormal(attributes);

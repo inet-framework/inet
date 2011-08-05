@@ -38,7 +38,7 @@ void HttpServerBase::initialize()
     EV_DEBUG << "Initializing server component\n";
 
     wwwName = (const char*)par("hostName");
-    if ( wwwName.size() == 0 )
+    if (wwwName.size() == 0)
     {
         wwwName = "www.";
         wwwName += getParentModule()->getFullName();
@@ -54,7 +54,7 @@ void HttpServerBase::initialize()
     httpProtocol = par("httpProtocol");
 
     cXMLElement *rootelement = par("config").xmlValue();
-    if ( rootelement==NULL ) error("Configuration file is not defined");
+    if (rootelement==NULL) error("Configuration file is not defined");
 
     // Initialize the distribution objects for random browsing
     // @todo Skip initialization of random objects for scripted servers?
@@ -63,53 +63,53 @@ void HttpServerBase::initialize()
     rdObjectFactory rdFactory;
     // The reply delay
     element = rootelement->getFirstChildWithTag("replyDelay");
-    if ( element==NULL ) error("Reply delay parameter undefined in XML configuration");
+    if (element==NULL) error("Reply delay parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdReplyDelay = rdFactory.create(attributes);
-    if ( rdReplyDelay==NULL) error("Reply delay random object could not be created");
+    if (rdReplyDelay==NULL) error("Reply delay random object could not be created");
     // HTML page size
     element = rootelement->getFirstChildWithTag("htmlPageSize");
-    if ( element==NULL ) error("HTML page size parameter undefined in XML configuration");
+    if (element==NULL) error("HTML page size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdHtmlPageSize = rdFactory.create(attributes);
-    if ( rdHtmlPageSize==NULL) error("HTML page size random object could not be created");
+    if (rdHtmlPageSize==NULL) error("HTML page size random object could not be created");
     // Text resource size
     element = rootelement->getFirstChildWithTag("textResourceSize");
-    if ( element==NULL ) error("Text resource size parameter undefined in XML configuration");
+    if (element==NULL) error("Text resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextResourceSize = rdFactory.create(attributes);
-    if ( rdTextResourceSize==NULL) error("Text resource size random object could not be created");
+    if (rdTextResourceSize==NULL) error("Text resource size random object could not be created");
     // Image resource size
     element = rootelement->getFirstChildWithTag("imageResourceSize");
-    if ( element==NULL ) error("Image resource size parameter undefined in XML configuration");
+    if (element==NULL) error("Image resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdImageResourceSize = rdFactory.create(attributes);
-    if ( rdImageResourceSize==NULL) error("Image resource size random object could not be created");
+    if (rdImageResourceSize==NULL) error("Image resource size random object could not be created");
     // Number of resources per page
     element = rootelement->getFirstChildWithTag("numResources");
-    if ( element==NULL ) error("Number of resources parameter undefined in XML configuration");
+    if (element==NULL) error("Number of resources parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdNumResources = rdFactory.create(attributes);
-    if ( rdNumResources==NULL) error("Number of resources random object could not be created");
+    if (rdNumResources==NULL) error("Number of resources random object could not be created");
     // Text/Image resources ratio
     element = rootelement->getFirstChildWithTag("textImageResourceRatio");
-    if ( element==NULL ) error("Text/image resource ratio parameter undefined in XML configuration");
+    if (element==NULL) error("Text/image resource ratio parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextImageResourceRatio = rdFactory.create(attributes);
-    if ( rdTextImageResourceRatio==NULL) error("Text/image resource ratio random object could not be created");
+    if (rdTextImageResourceRatio==NULL) error("Text/image resource ratio random object could not be created");
     // Error message size
     element = rootelement->getFirstChildWithTag("errorMessageSize");
-    if ( element==NULL ) error("Error message size parameter undefined in XML configuration");
+    if (element==NULL) error("Error message size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdErrorMsgSize = rdFactory.create(attributes);
-    if ( rdErrorMsgSize==NULL) error("Error message size random object could not be created");
+    if (rdErrorMsgSize==NULL) error("Error message size random object could not be created");
 
     activationTime = par("activationTime");
     EV_INFO << "Activation time is " << activationTime << endl;
 
     std::string siteDefinition = (const char*)par("siteDefinition");
     scriptedMode = (siteDefinition.size() != 0);
-    if ( scriptedMode )
+    if (scriptedMode)
         readSiteDefinition(siteDefinition);
 
     // Register the server with the controller object
@@ -142,13 +142,13 @@ void HttpServerBase::finish()
 
 void HttpServerBase::updateDisplay()
 {
-    if ( ev.isGUI() )
+    if (ev.isGUI())
     {
         char buf[1024];
-        sprintf( buf, "%ld", htmlDocsServed );
+        sprintf(buf, "%ld", htmlDocsServed);
         getParentModule()->getDisplayString().setTagArg("t", 0, buf);
 
-        if ( activationTime<=simTime() )
+        if (activationTime<=simTime())
         {
             getParentModule()->getDisplayString().setTagArg("i2", 0, "status/up");
             getParentModule()->getDisplayString().setTagArg("i2", 1, "green");
@@ -167,7 +167,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
     updateDisplay();
 }
 
-cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
+cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request==NULL) error("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
@@ -179,7 +179,7 @@ cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
     simtime_t processingDelay = 0;
 
     bool recipientError = false;
-    if ( extractServerName(request->targetUrl()) != wwwName )
+    if (extractServerName(request->targetUrl()) != wwwName)
     {
         // This should never happen but lets check
         error("Received message indended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
@@ -191,7 +191,7 @@ cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
     // Parse the request string on spaces
     cStringTokenizer tokenizer = cStringTokenizer(request->heading(), " ");
     std::vector<std::string> res = tokenizer.asVector();
-    if ( res.size() != 3 )
+    if (res.size() != 3)
     {
         EV_ERROR << "Invalid request string: " << request->heading() << endl;
         replymsg = generateErrorReply(request, 400);
@@ -199,13 +199,13 @@ cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
         return replymsg;
     }
 
-    if ( request->badRequest() )
+    if (request->badRequest())
     {
         // Bad requests get a 404 reply.
         EV_ERROR << "Bad request - bad flag set. Message: " << request->getName() << endl;
         replymsg = generateErrorReply(request, 404);
     }
-    else if ( res[0] == "GET" )
+    else if (res[0] == "GET")
     {
         replymsg = handleGetRequest(request, res[1]); // Pass in the resource string part
     }
@@ -215,19 +215,19 @@ cPacket* HttpServerBase::handleReceivedMessage( cMessage *msg )
         replymsg = generateErrorReply(request, 400);
     }
 
-    if ( replymsg!=NULL )
+    if (replymsg!=NULL)
         logResponse(replymsg);
 
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request, std::string resource )
+HttpReplyMessage* HttpServerBase::handleGetRequest(HttpRequestMessage *request, std::string resource)
 {
     EV_DEBUG << "Handling GET request " << request->getName() << " resource: " << resource << endl;
 
     resource = trimLeft(resource, "/");
     std::vector<std::string> req = parseResourceName(resource);
-    if ( req.size()!=3 )
+    if (req.size()!=3)
     {
         EV_ERROR << "Invalid GET request string: " << request->heading() << endl;
         return generateErrorReply(request, 400);
@@ -235,18 +235,18 @@ HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request,
 
     HttpContentType cat = getResourceCategory(req);
 
-    if ( cat==CT_HTML )
+    if (cat==CT_HTML)
     {
-        if ( scriptedMode )
+        if (scriptedMode)
         {
-            if ( resource.size()==0 && htmlPages.find("root") != htmlPages.end() )
+            if (resource.size()==0 && htmlPages.find("root") != htmlPages.end())
             {
                 EV_DEBUG << "Generating root resource" << endl;
                 return generateDocument(request, "root");
             }
-            if ( htmlPages.find(resource) == htmlPages.end() )
+            if (htmlPages.find(resource) == htmlPages.end())
             {
-                if ( htmlPages.find("default") != htmlPages.end() )
+                if (htmlPages.find("default") != htmlPages.end())
                 {
                     EV_DEBUG << "Generating default resource" << endl;
                     return generateDocument(request, "default");
@@ -260,9 +260,9 @@ HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request,
         }
         return generateDocument(request, resource.c_str());
     }
-    else if ( cat==CT_TEXT || cat==CT_IMAGE )
+    else if (cat==CT_TEXT || cat==CT_IMAGE)
     {
-        if ( scriptedMode && resources.find(resource)==resources.end() )
+        if (scriptedMode && resources.find(resource)==resources.end())
         {
             EV_ERROR << "Resource not found: " << resource << endl;
             return generateErrorReply(request, 404);
@@ -276,7 +276,7 @@ HttpReplyMessage* HttpServerBase::handleGetRequest( HttpRequestMessage *request,
     }
 }
 
-HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request, const char* resource, int size )
+HttpReplyMessage* HttpServerBase::generateDocument(HttpRequestMessage *request, const char* resource, int size)
 {
     EV_DEBUG << "Generating HTML document for request " << request->getName() << " from " << request->getSenderModule()->getName() << endl;
 
@@ -292,7 +292,7 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
     replymsg->setContentType(CT_HTML); // Emulates the content-type header field
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
 
-    if ( scriptedMode )
+    if (scriptedMode)
     {
         replymsg->setPayload(htmlPages[resource].body.c_str());
         size = htmlPages[resource].size;
@@ -302,7 +302,7 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
         replymsg->setPayload(generateBody().c_str());
     }
 
-    if ( size==0 )
+    if (size==0)
     {
         EV_DEBUG << "Using random distribution for page size" << endl;
         size = (int)rdHtmlPageSize->get();
@@ -316,13 +316,13 @@ HttpReplyMessage* HttpServerBase::generateDocument( HttpRequestMessage *request,
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *request, std::string resource, HttpContentType category )
+HttpReplyMessage* HttpServerBase::generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category)
 {
     EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
 
-    if ( category==CT_TEXT )
+    if (category==CT_TEXT)
         textResourcesServed++;
-    else if ( category==CT_IMAGE )
+    else if (category==CT_IMAGE)
         imgResourcesServed++;
 
     char szReply[512];
@@ -335,14 +335,14 @@ HttpReplyMessage* HttpServerBase::generateResourceMessage( HttpRequestMessage *r
     replymsg->setSerial(request->serial());
     replymsg->setResult(200);
     replymsg->setContentType(category); // Emulates the content-type header field
-    replymsg->setByteLength( resources[resource] ); // Set the resource size
+    replymsg->setByteLength(resources[resource]); // Set the resource size
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
 
     sprintf(szReply, "RESOURCE-BODY:%s", resource.c_str());
     return replymsg;
 }
 
-HttpReplyMessage* HttpServerBase::generateErrorReply( HttpRequestMessage *request, int code )
+HttpReplyMessage* HttpServerBase::generateErrorReply(HttpRequestMessage *request, int code)
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
@@ -369,12 +369,12 @@ std::string HttpServerBase::generateBody()
     std::string result;
 
     char tempBuf[128];
-    for ( int i=0; i<numImages; i++ )
+    for (int i=0; i<numImages; i++)
     {
         sprintf(tempBuf, "%s%.4d.%s\n", "IMG", i, "jpg");
         result.append(tempBuf);
     }
-    for ( int i=0; i<numText; i++ )
+    for (int i=0; i<numText; i++)
     {
         sprintf(tempBuf, "%s%.4d.%s\n", "TEXT", i, "txt");
         result.append(tempBuf);
@@ -387,7 +387,7 @@ void HttpServerBase::registerWithController()
 {
     // Find controller object and register
     cModule * controller = simulation.getSystemModule()->getSubmodule("controller");
-    if ( controller == NULL )
+    if (controller == NULL)
         error("Controller module not found");
     ((HttpController*)controller)->registerWWWserver(getParentModule()->getFullName(), wwwName.c_str(), port, INSERT_END, activationTime);
 }
@@ -418,10 +418,10 @@ void HttpServerBase::readSiteDefinition(std::string file)
     {
         linecount++;
         line = trim(line);
-        if ( line.size()==0 ) continue;
-        if ( line[0]=='#' ) continue;
+        if (line.size()==0) continue;
+        if (line[0]=='#') continue;
         sectionsub = getDelimited(line, "[", "]");
-        if ( sectionsub.size()!=0 )
+        if (sectionsub.size()!=0)
         {
             // Section
             siteSection = sectionsub == "HTML";
@@ -432,15 +432,15 @@ void HttpServerBase::readSiteDefinition(std::string file)
             cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
             std::vector<std::string> res = tokenizer.asVector();
 
-            if ( siteSection )
+            if (siteSection)
             {
-                if ( res.size()<2 || res.size()>3 )
+                if (res.size()<2 || res.size()>3)
                     error("Invalid format of site configuration file '%s'. Site section, line (%d): %s",
                            file.c_str(), linecount, line.c_str());
                 key = trimLeft(res[0], "/");
-                if ( key.size()==0 )
+                if (key.size()==0)
                 {
-                    if ( htmlPages.find("root")==htmlPages.end() )
+                    if (htmlPages.find("root")==htmlPages.end())
                         key = "root";
                     else
                         error("Second root page found in site definition file %s, line (%d): %s",
@@ -449,7 +449,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                 htmlfile = res[1];
                 body = readHtmlBodyFile(htmlfile, siteFileSplit[0]); // Pass in the path of the definition file. Page defs are relative to that.
                 size = 0;
-                if ( res.size()>2 )
+                if (res.size()>2)
                 {
                     try
                     {
@@ -465,9 +465,9 @@ void HttpServerBase::readSiteDefinition(std::string file)
                 htmlPages[key].size = size;
                 htmlPages[key].body = body;
             }
-            else if ( resourceSection )
+            else if (resourceSection)
             {
-                if ( res.size()<2 || res.size()>3 )
+                if (res.size()<2 || res.size()>3)
                     error("Invalid format of site configuration file '%s'. Resource section, line (%d): %s",
                           file.c_str(), linecount, line.c_str());
                 key = res[0];
@@ -482,7 +482,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                           file.c_str(), linecount, line.c_str());
                 }
 
-                if ( res.size() > 2 )
+                if (res.size() > 2)
                 {
                     // The type parameter - skip this
                 }
@@ -500,7 +500,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
     tracefilestream.close();
 }
 
-std::string HttpServerBase::readHtmlBodyFile( std::string file, std::string path )
+std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
 {
     EV_DEBUG << "Reading HTML page definition file" << endl;
 
@@ -516,8 +516,8 @@ std::string HttpServerBase::readHtmlBodyFile( std::string file, std::string path
     while (!std::getline(htmlfilestream, line).eof())
     {
         line = trim(line);
-        if ( line.size()==0 ) continue;
-        if ( line[0]=='#' ) continue;
+        if (line.size()==0) continue;
+        if (line[0]=='#') continue;
         body += line;
         body += "\n";
     }

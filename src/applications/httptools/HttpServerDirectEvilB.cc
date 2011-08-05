@@ -52,7 +52,7 @@ std::string HttpServerDirectEvilB::generateBody()
 
     char tempBuf[128];
     int refSize;
-    for ( int i=0; i<numResources; i++ )
+    for (int i=0; i<numResources; i++)
     {
         rndDelay = 10.0+uniform(0, 2.0);
         refSize = (int)uniform(500, 1000); // The random size represents a random reference string length

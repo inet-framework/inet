@@ -121,13 +121,13 @@ class INET_API HttpServerBase : public HttpNodeBase
 
     protected:
         /** Generate a HTML document in response to a request. */
-        HttpReplyMessage* generateDocument( HttpRequestMessage *request, const char* resource, int size = 0 );
+        HttpReplyMessage* generateDocument(HttpRequestMessage *request, const char* resource, int size = 0);
         /** Generate a resource message in response to a request. */
-        HttpReplyMessage* generateResourceMessage( HttpRequestMessage *request, std::string resource, HttpContentType category );
+        HttpReplyMessage* generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
         /** Handle a received HTTP GET request */
-        HttpReplyMessage* handleGetRequest( HttpRequestMessage *request, std::string resource );
+        HttpReplyMessage* handleGetRequest(HttpRequestMessage *request, std::string resource);
         /** Generate a error reply in case of invalid resource requests. */
-        HttpReplyMessage* generateErrorReply( HttpRequestMessage *request, int code );
+        HttpReplyMessage* generateErrorReply(HttpRequestMessage *request, int code);
         /** Create a random body according to the site content random distributions. */
         virtual std::string generateBody();
 
@@ -139,7 +139,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Read a site definition from file if a scripted site definition is used. */
         void readSiteDefinition(std::string file);
         /** Read a html body from a file. Used by readSiteDefinition. */
-        std::string readHtmlBodyFile( std::string file, std::string path );
+        std::string readHtmlBodyFile(std::string file, std::string path);
 };
 
 #endif
