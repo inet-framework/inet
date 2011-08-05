@@ -675,8 +675,11 @@ void csma802154::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 
     case EV_BROADCAST_RECEIVED:
     case EV_FRAME_RECEIVED:
+        EV << "Frame/broadcast received\n";
         sendUp(decapsMsg(static_cast<Ieee802154Frame*>(msg)));
-        //FIXME break?
+        delete msg;
+        break;
+
     case EV_DUPLICATE_RECEIVED:
         EV << "Error ! Received a frame during SIFS !" << endl;
         delete msg;
@@ -960,7 +963,7 @@ double csma802154::scheduleBackoff()
     }
 
     default:
-        error("Unknown backoff method!");
+        throw cRuntimeError("Unknown backoff method!");
     }
 
     nbBackoffs = nbBackoffs + 1;
