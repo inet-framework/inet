@@ -47,7 +47,7 @@
 
 
 /**
- * @brief Web server base class
+ * Web server base class.
  *
  * This module implements a flexible Web server. It is part of the HttpTools project
  * and should be used in conjunction with a number of browsing clients.
@@ -103,9 +103,9 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** The activation time of the server -- initial startup delay. */
         simtime_t activationTime;
 
-    /** @name cSimpleModule redefinitions */
-    //@{
     protected:
+        /** @name cSimpleModule redefinitions */
+        //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize();
 
@@ -114,12 +114,12 @@ class INET_API HttpServerBase : public HttpNodeBase
 
         /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg) = 0;
-    //@}
+        //@}
 
     protected:
+        /** Update graphical appearance when running under a GUI */
         void updateDisplay();
 
-    protected:
         /** Generate a HTML document in response to a request. */
         HttpReplyMessage* generateDocument(HttpRequestMessage *request, const char* resource, int size = 0);
         /** Generate a resource message in response to a request. */
@@ -131,7 +131,6 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Create a random body according to the site content random distributions. */
         virtual std::string generateBody();
 
-    protected:
         /** Handle a received data message, e.g. check if the content requested exists. */
         cPacket* handleReceivedMessage(cMessage *msg);
         /** Register the server object with the controller. Called at initialization (simulation startup). */

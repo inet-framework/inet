@@ -36,7 +36,7 @@
 #include "HttpServerBase.h"
 
 /**
- * @brief HttpServerDirect module
+ * HttpServerDirect module.
  *
  * This module implements a flexible Web server. It is part of the HttpTools project
  * and should be used in conjunction with a number of clients running the HttpBrowserDirect.
@@ -54,53 +54,53 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         unsigned long numBroken;
         unsigned long socketsOpened;
 
-    /** @name cSimpleModule redefinitions */
-    //@{
     protected:
-        /** @brief Initialization of the component and startup of browse event scheduling */
+        /** @name cSimpleModule redefinitions */
+        //@{
+        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize();
 
-        /** @brief Report final statistics */
+        /** Report final statistics */
         virtual void finish();
 
-        /** @brief Handle incoming messages */
+        /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg);
-    //@}
+        //@}
 
-    /** @name TCPSocket::CallbackInterface methods */
-    //@{
     protected:
+        /** @name TCPSocket::CallbackInterface methods */
+        //@{
         /**
-         * @brief handler for socket established events.
+         * Handler for socket established events.
          * Only used to update statistics.
          */
         virtual void socketEstablished(int connId, void *yourPtr);
 
         /**
-         * @brief handler for socket data arrived events
+         * Handler for socket data arrived events.
          * Dispatces the received message to the message handler in the base class and
          * finishes by deleting the received message.
          */
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
         /**
-         * @brief handler for socket closed by peer event
+         * Handler for socket closed by peer event.
          * Does little apart from calling socket->close() to allow the TCPSocket object to close properly.
          */
         virtual void socketPeerClosed(int connId, void *yourPtr);
 
         /**
-         * @brief handler for socket closed event
+         * Handler for socket closed event.
          * Cleanup the resources for the closed socket.
          */
         virtual void socketClosed(int connId, void *yourPtr);
 
         /**
-         * @brief handler for socket failure event
+         * Handler for socket failure event.
          * Very basic handling -- displays warning and cleans up resources.
          */
         virtual void socketFailure(int connId, void *yourPtr, int code);
-    //@}
+        //@}
 };
 
 #endif

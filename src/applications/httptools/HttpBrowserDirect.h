@@ -35,8 +35,6 @@
 #include "HttpBrowserBase.h"
 
 /**
- * @short Browser module for OMNeT++ simulations
- *
  * A simulated browser module for OMNeT++ simulations.
  *
  * This module implements direct message passing between modules.
@@ -49,9 +47,9 @@
  */
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
-    /** @name cSimpleModule redefinitions */
-    //@{
     protected:
+        /** @name cSimpleModule redefinitions */
+        //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
 
@@ -61,25 +59,25 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
         /** Handle incoming messages. See the parent class for details. */
         virtual void handleMessage(cMessage *msg);
 
-        /** @brief Returns the number of initialization stages. Two required. */
+        /** Returns the number of initialization stages. Two required. */
 //      int numInitStages() const {return 2;}
-    //@}
+        //@}
 
-    /** @name Implementation of methods for sending requests to a server. See parent class for details. */
-    //@{
     protected:
-        /** @brief Sends a scripted browse event to a specific server */
+        /** @name Implementation of methods for sending requests to a server. See parent class for details. */
+        //@{
+        /** Sends a scripted browse event to a specific server */
         virtual void sendRequestToServer(BrowseEvent be);
 
         /** Send a request to server. Uses the recipient stamped in the request. */
         virtual void sendRequestToServer(HttpRequestMessage *request);
 
-        /** @brief Sends a generic request to a randomly chosen server */
+        /** Sends a generic request to a randomly chosen server */
         virtual void sendRequestToRandomServer();
 
-        /** @brief Sends a number of queued messages to the specified server */
+        /** Sends a number of queued messages to the specified server */
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
-    //@}
+        //@}
 };
 
 #endif

@@ -43,8 +43,6 @@
 #define MAX_URL_LENGTH 2048 // The maximum allowed URL string length.
 
 /**
- * @short Browser module for OMNeT++ simulations - base class
- *
  * A simulated browser module for OMNeT++ simulations. A part of HttpTools.
  *
  * The component is designed to plug into the existing INET StandardHost module as a
@@ -151,16 +149,18 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg) = 0;
 
-        /** @brief Returns the number of initialization stages. Two required. */
+        /** Returns the number of initialization stages. Two required. */
         int numInitStages() const {return 2;}
         //@}
 
+    protected:
         /** Handle a HTTP data message */
         void handleDataMessage(cMessage *msg);
 
         /** Handle a self message -- events and such */
         void handleSelfMessages(cMessage *msg);
 
+    protected:
         /** @name Handlers for self messages */
         //@{
         /** Handle start of activity period trigger */
@@ -178,6 +178,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** Schedule the next browse event. Handles the activity, session and inter-request times */
         void scheduleNextBrowseEvent();
 
+    protected:
         /** @name pure virtual methods to communicate with the server. Must be implemented in derived classes */
         //@{
         /** Send a request defined by a browse event (scripted entry) to a server */
@@ -190,6 +191,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) = 0;
         //@}
 
+    protected:
         /** @name Methods for generating HTML page requests and resource requests */
         //@{
         /** Generate a HTTP request to a specific server and for a specific page */

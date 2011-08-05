@@ -35,7 +35,7 @@
 #include "HttpServer.h"
 
 /**
-* @brief An evil attacker server demonstration - type B
+ * An evil attacker server demonstration - type B.
  *
  * Demonstrates subclassing the server to create a custom site. This site is an attacker -- a puppetmaster --
  * which serves HTML pages containing attack code. In this case, we are simulating JavaScript attack code which prompts

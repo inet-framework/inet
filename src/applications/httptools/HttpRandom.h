@@ -47,7 +47,7 @@ enum DISTR_TYPE {dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constan
 #define DISTR_ZIPF_STR "zipf"
 
 /**
- * @brief Base random object. Should not be instantiated directly.
+ * Base random object. Should not be instantiated directly.
  */
 class rdObject
 {
@@ -67,7 +67,7 @@ class rdObject
 };
 
 /**
- * @brief Normal distribution random object.
+ * Normal distribution random object.
  * Wraps the OMNeT++ normal distribution function but adds a minimum limit.
  */
 class rdNormal : public rdObject
@@ -92,7 +92,7 @@ class rdNormal : public rdObject
 };
 
 /**
- * @brief Uniform distribution random object.
+ * Uniform distribution random object.
  * Wraps the OMNeT++ uniform distribution function.
  */
 class rdUniform : public rdObject
@@ -115,7 +115,7 @@ class rdUniform : public rdObject
 };
 
 /**
- * @brief Exponential distribution random object.
+ * Exponential distribution random object.
  * Wraps the OMNeT++ exponential distribution function, but adds min and max limits.
  */
 class rdExponential : public rdObject
@@ -150,7 +150,7 @@ struct rdHistogramBin
 typedef std::vector<rdHistogramBin> rdHistogramBins;
 
 /**
- * @brief Histogram distribution random object.
+ * Histogram distribution random object.
  */
 class rdHistogram : public rdObject
 {
@@ -170,7 +170,7 @@ class rdHistogram : public rdObject
 };
 
 /**
- * @brief Constant distribution random object.
+ * Constant distribution random object.
  * Not really a random object, but used to allow constants to be assigned in stead of random distributions
  * when initializing parameters.
  */
@@ -188,7 +188,7 @@ class rdConstant : public rdObject
 };
 
 /**
- * @brief Zipf distribution random object.
+ * Zipf distribution random object.
  * Returns a random value from a zipf distribution (1/n^a), where a is the constant alpha and n is a order of popularity.
  * See more details on http://en.wikipedia.org/wiki/Zipf.
  */
@@ -221,7 +221,7 @@ class rdZipf : public rdObject
 };
 
 /**
- * @brief A factory class used to construct random distribution objects based on XML elements.
+ * A factory class used to construct random distribution objects based on XML elements.
  * The type name is used to instantiate the appropriate rdObject-derived class.
  */
 class rdObjectFactory

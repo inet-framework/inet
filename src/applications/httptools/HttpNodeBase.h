@@ -54,7 +54,7 @@
 enum LOG_FORMAT {lf_short, lf_long};
 
 /**
- * @short The base class for browser and server nodes.
+ * The base class for browser and server nodes.
  *
  * See the derived classes HttpBrowserBase and HttpServerBase for details
  *
@@ -102,7 +102,7 @@ class HttpNodeBase : public cSimpleModule
         /** @name Direct message passing utilities */
         //@{
         /**
-         * @brief Send a single message direct to the specified module.
+         * Send a single message direct to the specified module.
          * Transmission delay is automatically calculated from the size of the message. In addition, a constant delay
          * a random delay object may be specified. Those delays add to the total used to submit the message to the
          * OMNeT++ direct message passing mechanism.
@@ -112,6 +112,7 @@ class HttpNodeBase : public cSimpleModule
         double transmissionDelay(cPacket *packet);
         //@}
 
+    protected:
         /** @name Methods for logging and formatting messages */
         //@{
         /** Log a request message to file and optionally display in console */

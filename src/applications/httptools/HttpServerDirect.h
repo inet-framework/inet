@@ -34,7 +34,7 @@
 #include "HttpServerBase.h"
 
 /**
- * @brief Server module for direct message passing.
+ * Server module for direct message passing.
  *
  * This module implements a flexible Web server for direct message passing. It is part of the HttpTools project
  * and should be used in conjunction with a number of clients running the HttpBrowserDirect.
@@ -48,9 +48,9 @@
  */
 class INET_API HttpServerDirect : public HttpServerBase
 {
-    /** @name cSimpleModule redefinitions */
-    //@{
     protected:
+        /** @name cSimpleModule redefinitions */
+        //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize();
 
@@ -59,7 +59,7 @@ class INET_API HttpServerDirect : public HttpServerBase
 
         /** Handle incoming messages. See the parent class for details. */
         virtual void handleMessage(cMessage *msg);
-    //@}
+        //@}
 };
 
 #endif
