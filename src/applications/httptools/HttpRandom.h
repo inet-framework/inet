@@ -140,20 +140,20 @@ class rdExponential : public rdObject
         void resetMaxLimit() {m_bMaxLimit = false;}
 };
 
-
-struct rdHistogramBin
-{
-    int count;
-    double sum;
-};
-
-typedef std::vector<rdHistogramBin> rdHistogramBins;
-
 /**
  * Histogram distribution random object.
  */
 class rdHistogram : public rdObject
 {
+    protected:
+        struct rdHistogramBin
+        {
+            int count;
+            double sum;
+        };
+
+        typedef std::vector<rdHistogramBin> rdHistogramBins;
+
     protected:
         rdHistogramBins m_bins;
         bool m_zeroBased;
