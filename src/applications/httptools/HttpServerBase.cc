@@ -328,7 +328,7 @@ HttpReplyMessage* HttpServerBase::generateDocument(HttpRequestMessage *request, 
     if (size==0)
     {
         EV_DEBUG << "Using random distribution for page size" << endl;
-        size = (int)rdHtmlPageSize->get();
+        size = (int)rdHtmlPageSize->draw();
     }
 
     replymsg->setByteLength(size);
@@ -376,7 +376,7 @@ HttpReplyMessage* HttpServerBase::generateErrorReply(HttpRequestMessage *request
     replymsg->setProtocol(request->protocol());  // MIGRATE40: kvj
     replymsg->setSerial(request->serial());
     replymsg->setResult(code);
-    replymsg->setByteLength((int)rdErrorMsgSize->get());
+    replymsg->setByteLength((int)rdErrorMsgSize->draw());
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;
@@ -385,8 +385,8 @@ HttpReplyMessage* HttpServerBase::generateErrorReply(HttpRequestMessage *request
 
 std::string HttpServerBase::generateBody()
 {
-    int numResources = (int)rdNumResources->get();
-    int numImages = (int)(numResources*rdTextImageResourceRatio->get());
+    int numResources = (int)rdNumResources->draw();
+    int numImages = (int)(numResources*rdTextImageResourceRatio->draw());
     int numText = numResources - numImages;
 
     std::string result;

@@ -57,7 +57,7 @@ class rdObject
         DISTR_TYPE m_type;
     public:
         /** Returns a random number. Must be implemented in derived classes. */
-        virtual double get() = 0;
+        virtual double draw() = 0;
     public:
         DISTR_TYPE getType() {return m_type;}
         std::string typeStr();
@@ -88,7 +88,7 @@ class rdNormal : public rdObject
         /** Cancel the min limit when not needed any more */
         void resetMinLimit() {m_bMinLimit = false;}
         /** Get a random value */
-        virtual double get();
+        virtual double draw();
 };
 
 /**
@@ -106,7 +106,7 @@ class rdUniform : public rdObject
         /** Constructor for initialization with an XML element */
         rdUniform(cXMLAttributeMap attributes);
         /** Get a random value */
-        virtual double get();
+        virtual double draw();
         // Getters and setters
         double getBeginning() {return m_beginning;}
         void setBeginning(double beginning) {m_beginning = beginning;}
@@ -132,7 +132,7 @@ class rdExponential : public rdObject
         /** Constructor for initialization with an XML element */
         rdExponential(cXMLAttributeMap attributes);
         /** Get a random value */
-        virtual double get();
+        virtual double draw();
         // Getters and setters
         void setMinLimit(double min) {m_min = min; m_bMinLimit = true;}
         void resetMinLimit() {m_bMinLimit = false;}
@@ -163,7 +163,7 @@ class rdHistogram : public rdObject
         /** Constructor for initialization with an XML element */
         rdHistogram(cXMLAttributeMap attributes);
         /** Get a random value */
-        double get();
+        double draw();
     private:
         void __parseBinString(std::string binstr);
         void __normalizeBins();
@@ -184,7 +184,7 @@ class rdConstant : public rdObject
         /** Constructor for initialization with an XML element */
         rdConstant(cXMLAttributeMap attributes);
         /** Get a random value */
-        double get();
+        double draw();
 };
 
 /**
@@ -206,14 +206,14 @@ class rdZipf : public rdObject
         rdZipf(cXMLAttributeMap attributes);
     public:
         /** Get a random value -- a element in the pick order (popularity order) */
-        virtual double get();
+        virtual double draw();
         /** Return the object definition as a string */
         virtual std::string toString();
         // Getters and setters
-        void setn(int n) {m_number = n; __setup_c();}
-        int getn() {return m_number;}
-        void setalpha(double alpha) {m_alpha = alpha; __setup_c();}
-        double getalpha() {return m_alpha;}
+        void setN(int n) {m_number = n; __setup_c();}
+        int getN() {return m_number;}
+        void setAlpha(double alpha) {m_alpha = alpha; __setup_c();}
+        double getAlpha() {return m_alpha;}
     private:
         // Initialization methods.
         void __initialize(int n, double alpha, bool baseZero);

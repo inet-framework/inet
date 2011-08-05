@@ -171,7 +171,7 @@ void HttpBrowserBase::initialize(int stage)
         {
             double activationTime = par("activationTime"); // This is the activation delay. Optional
             if (rdActivityLength != NULL)
-                activationTime += (86400.0 - rdActivityLength->get())/2; // First activate after half the sleep period
+                activationTime += (86400.0 - rdActivityLength->draw())/2; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(simTime()+(simtime_t)activationTime, eventTimer);
@@ -229,10 +229,10 @@ void HttpBrowserBase::handleSelfActivityStart()
     eventTimer->setKind(MSGKIND_START_SESSION);
     messagesInCurrentSession = 0;
     reqNoInCurSession = 0;
-    activityPeriodLength = rdActivityLength->get(); // Get the length of the activity period
+    activityPeriodLength = rdActivityLength->draw(); // Get the length of the activity period
     acitivityPeriodEnd = simTime()+activityPeriodLength; // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << activityPeriodLength/3600 << " hours." << endl;
-    scheduleAt(simTime() + (simtime_t)rdInterSessionInterval->get()/2, eventTimer);
+    scheduleAt(simTime() + (simtime_t)rdInterSessionInterval->draw()/2, eventTimer);
 }
 
 void HttpBrowserBase::handleSelfStartSession()
@@ -241,7 +241,7 @@ void HttpBrowserBase::handleSelfStartSession()
     sessionCount++;
     messagesInCurrentSession = 0;
     reqInCurSession = 0;
-    reqNoInCurSession = (int)rdReqInSession->get();
+    reqNoInCurSession = (int)rdReqInSession->draw();
     EV_INFO << "Starting session # " << sessionCount << " @ T=" << simTime() << ". Requests in session are " << reqNoInCurSession << "\n";
     sendRequestToRandomServer();
     scheduleNextBrowseEvent();
@@ -425,7 +425,7 @@ HttpRequestMessage* HttpBrowserBase::generatePageRequest(std::string www, std::s
         return NULL;
     }
 
-    long requestLength = (long)rdRequestSize->get();
+    long requestLength = (long)rdRequestSize->draw();
 
     if (pageName.empty())
         pageName = "/";
@@ -466,7 +466,7 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
         return NULL;
     }
 
-    long requestLength = (long)rdRequestSize->get()+size;
+    long requestLength = (long)rdRequestSize->draw()+size;
 
     if (resource.empty())
     {
@@ -512,7 +512,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
         if (rdActivityLength==NULL || simTime() < acitivityPeriodEnd)
         {
             // Scheduling next session start within an activity period.
-            nextEventTime = simTime()+ (simtime_t)rdInterSessionInterval->get();
+            nextEventTime = simTime()+ (simtime_t)rdInterSessionInterval->draw();
             EV_INFO << "Scheduling a new session start @ T=" << nextEventTime << endl;
             messagesInCurrentSession = 0;
             eventTimer->setKind(MSGKIND_START_SESSION);
@@ -523,7 +523,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
             // when the user is near his workstation and periodically browsing the web. Inactivity periods then
             // correspond to sleep time or time away from the office
-            simtime_t activationTime = simTime() + (simtime_t)(86400.0 - rdActivityLength->get()); // Sleep for a while
+            simtime_t activationTime = simTime() + (simtime_t)(86400.0 - rdActivityLength->draw()); // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(activationTime, eventTimer);
@@ -532,7 +532,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
     else
     {
         // Schedule another browse event in a while.
-        nextEventTime = simTime() + (simtime_t)rdInterRequestInterval->get();
+        nextEventTime = simTime() + (simtime_t)rdInterRequestInterval->draw();
         EV_INFO << "Scheduling a browse event @ T=" << nextEventTime
                 << ". Request " << reqInCurSession << " of " << reqNoInCurSession << endl;
         eventTimer->setKind(MSGKIND_NEXT_MESSAGE);

@@ -70,7 +70,7 @@ rdNormal::rdNormal(cXMLAttributeMap attributes)
         m_nonNegative = false;
 }
 
-double rdNormal::get()
+double rdNormal::draw()
 {
     double retval = 0.0;
     do
@@ -103,7 +103,7 @@ rdUniform::rdUniform(cXMLAttributeMap attributes)
     m_end = atof(attributes["end"].c_str());
 }
 
-double rdUniform::get()
+double rdUniform::draw()
 {
     return uniform(m_beginning, m_end);
 }
@@ -136,7 +136,7 @@ rdExponential::rdExponential(cXMLAttributeMap attributes)
         m_max = atof(attributes["max"].c_str());
 }
 
-double rdExponential::get()
+double rdExponential::draw()
 {
     double val;
     do
@@ -164,7 +164,7 @@ rdHistogram::rdHistogram(cXMLAttributeMap attributes)
     __normalizeBins();
 }
 
-double rdHistogram::get()
+double rdHistogram::draw()
 {
     int i;
     int count = m_bins.size();
@@ -245,7 +245,7 @@ rdConstant::rdConstant(cXMLAttributeMap attributes)
     m_value = atof(attributes["value"].c_str());
 }
 
-double rdConstant::get()
+double rdConstant::draw()
 {
     return m_value;
 }
@@ -293,7 +293,7 @@ rdZipf::rdZipf(int n, double alpha, bool baseZero)
     __initialize(n, alpha, baseZero);
 }
 
-double rdZipf::get()
+double rdZipf::draw()
 {
     double sum_prob = 0;
     double z = uniform(0.0001, 0.9999);

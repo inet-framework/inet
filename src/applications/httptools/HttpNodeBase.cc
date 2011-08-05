@@ -42,7 +42,7 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
         return;
     simtime_t delay = constdelay+transmissionDelay(pckt);
     if (rdDelay != NULL)
-        delay += rdDelay->get();
+        delay += rdDelay->draw();
     EV_DEBUG << "Sending " << pckt->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
     sendDirect(pckt, receiver, "httpIn");
 }

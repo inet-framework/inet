@@ -72,7 +72,7 @@ void HttpController::initialize(int stage)
         if (rdServerSelection->getType()==dt_uniform)
             ((rdUniform*)rdServerSelection)->setEnd(webSiteList.size());
         else if (rdServerSelection->getType()==dt_zipf)
-            ((rdZipf*)rdServerSelection)->setn(webSiteList.size());
+            ((rdZipf*)rdServerSelection)->setN(webSiteList.size());
 
         EV_DEBUG << "Server selection probability distribution: " << rdServerSelection->toString() << endl;
 
@@ -517,7 +517,7 @@ HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
         else
         {
             // Pick from the probability distribution which applies to the general population.
-            selected = (int)rdServerSelection->get();
+            selected = (int)rdServerSelection->draw();
             en = pickList[selected];
             if (en == NULL)
                 error("Invalid node selected at index %d", selected);
