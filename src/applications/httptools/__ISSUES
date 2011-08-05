@@ -1,0 +1,50 @@
+Issues with the code:
+
+- The term "www name" is used many times in comments, and there are a lot
+  of variables and function args called "www" or "wwwName". Beyond "www name"
+  being a nonexistent term (no relevant hits in Google!), there is also
+  a complete confusion in the code whether it means "host name" or "URL";
+  often on one line in the code "www" means hostname, and on the next it
+  is used as an URL (e.g. extractServerName() is called on it).
+  See e.g. HttpController's registerServer() and getServerModule() as examples.
+
+- In replies, HttpBaseMessage::originatorUrl contains the hostname (NOT and URL!),
+  see HttpServerBase::generateDocument():
+     replymsg->setOriginatorUrl(hostName.c_str());
+  This bug (?) comes from the wwwName confusion outline above.
+
+- In HttpController, getServerModule() and getAnyServerModule() should probably
+  return HttpServerBase*, and then several check_and_cast<HttpServerBase*>()
+  calls elsewhere in the code could be eliminated. In addition, WebServerEntry's
+  cModule *module field could also be changed to HttpServerBase*; the "host" field
+  is redundant (it is module->getFullName());
+
+- HttpController::registerServer() should take HttpServerBase* as arg, instead
+  of looking up the module from its name using getTcpApp(). Then getTcpApp()
+  could be removed altogether.
+
+- In HttpUtils.cc, safeatof(), safeatoi(), safeatobool() are dubious; first their
+  implementation (atoi() or strcmp() don't throw exceptions, so the "catch" block
+  will never be activated); and also in their purpose: it is not a good idea to
+  return a default value when some unexpected string comes as input, it is better
+  to stop with an error message.
+
+- There are some catch(...) lines in the code; catching "..." is usually not
+  advised, because e.g on Windows it also catches segfaults and thus can
+  hinder debugging.
+
+- Many comment lines are well above the 80-char line limit
+
+- Classes to be renamed: rdObject, rdUniform, rdNormal, etc. Also, these classes
+  would be generally useful (in INET or even in OMNeT++), but in their current
+  form they are too specific to HttpTools (initialization from XML, etc).
+
+- There are some fixed-length buffers with Hungarian notation names:
+  szModuleName, szReg, szWWW, szReply, szErrStr; better use dynamic buffers
+  or std::string, and no "sz" prefix (the convention in INET is not to use
+  type prefixes)
+
+- Currently some examples do not work (probably due to errors introducted during
+  refactoring)
+
+
