@@ -51,13 +51,14 @@ std::string trimRight(std::string str);
 std::string trimLeft(std::string str, std::string delim);
 std::string trimRight(std::string str, std::string delim);
 std::string trim(std::string str);
-std::string extractServerName(const char *path);
-std::string extractResourceName(const char *path);
+std::string extractServerName(const char *url);
+std::string extractResourceName(const char *url);
 std::string getDelimited(std::string str, std::string ldelim, std::string rdelim = "");
 std::vector<std::string> parseResourceName(std::string resource);
 HttpContentType getResourceCategory(std::vector<std::string> res);
 HttpContentType getResourceCategory(std::string resourceExt);
 std::string htmlErrFromCode(int code);
+
 double safeatof(const char* strval, double defaultVal = 0.0);
 int safeatoi(const char* strval, int defaultVal = 0);
 int safeatobool(const char* strval, bool defaultVal = false);

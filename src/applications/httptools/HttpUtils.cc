@@ -82,52 +82,52 @@ std::string trim(std::string str)
     return str;
 }
 
-std::string extractServerName(const char* path)
+std::string extractServerName(const char* url)
 {
-    std::string www(path);
-    int position = www.find("http://");
+    std::string str(url);
+    int position = str.find("http://");
     if (position != -1)
     {
-        www = www.erase(0, position);
+        str = str.erase(0, position);
     }
     else
     {
-        position = www.find("https://");
+        position = str.find("https://");
         if (position != -1)
         {
-            www = www.erase(0, position);
+            str = str.erase(0, position);
         }
     }
 
-    position = www.find("/");
+    position = str.find("/");
     if (position != -1)
     {
-        www = www.substr(0, position);
+        str = str.substr(0, position);
     }
 
-    return www;
+    return str;
 }
 
-std::string extractResourceName(const char* path)
+std::string extractResourceName(const char* url)
 {
-    std::string www(path);
-    int position = www.find("http://");
+    std::string str(url);
+    int position = str.find("http://");
     if (position != -1)
     {
-        www = www.erase(0, position);
+        str = str.erase(0, position);
     }
     else
     {
-        position = www.find("https://");
+        position = str.find("https://");
         if (position != -1)
         {
-            www = www.erase(0, position);
+            str = str.erase(0, position);
         }
     }
 
-    position = www.find("/");
+    position = str.find("/");
     if (position != -1)
-        return www.substr(position+1, www.size()-position);
+        return str.substr(position+1, str.size()-position);
     else
         return "";
 }
