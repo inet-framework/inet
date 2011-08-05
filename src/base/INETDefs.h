@@ -20,13 +20,12 @@
 
 //
 // General definitions.
-// Andras Varga
 //
 
 #include <omnetpp.h>
 
-#if OMNETPP_VERSION < 0x0400
-#  error At least OMNeT++/OMNEST version 4.0 required
+#if OMNETPP_VERSION < 0x0402
+#  error At least OMNeT++/OMNEST version 4.2 required
 #endif
 
 #if defined(INET_EXPORT)
