@@ -115,11 +115,11 @@ void HttpController::handleMessage(cMessage *msg)
     }
 }
 
-void HttpController::registerWWWserver(const char* objectName, const char* wwwName, int port, int rank, simtime_t activationTime)
+void HttpController::registerServer(const char* objectName, const char* wwwName, int port, int rank, simtime_t activationTime)
 {
     Enter_Method_Silent();
 
-    std::string serverUrl = extractServerName(wwwName);
+    std::string serverName = extractServerName(wwwName);
 
     EV_DEBUG << "Registering www server: " << objectName << ", " << wwwName
              << " (" << port << "). Activation time is " << activationTime << endl;
@@ -129,7 +129,7 @@ void HttpController::registerWWWserver(const char* objectName, const char* wwwNa
 
     WebServerEntry *en = new WebServerEntry;
 
-    en->name = serverUrl;
+    en->name = serverName;
     en->host = objectName;
     en->port = port;
     en->module = getTcpApp(objectName);

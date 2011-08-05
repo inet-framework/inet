@@ -412,7 +412,7 @@ void HttpServerBase::registerWithController()
     cModule * controller = simulation.getSystemModule()->getSubmodule("controller");
     if (controller == NULL)
         error("Controller module not found");
-    ((HttpController*)controller)->registerWWWserver(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    ((HttpController*)controller)->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

@@ -128,7 +128,7 @@ class HttpController : public cSimpleModule
          * play a role when zipf or other non-uniform selection probability is used (the pick list is basically mapped to
          * the non-uniform distribution).
          */
-        void registerWWWserver(const char* objectName, const char* wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0);
+        void registerServer(const char* objectName, const char* wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0);
 
         /**
          * Get a specific server module reference.
