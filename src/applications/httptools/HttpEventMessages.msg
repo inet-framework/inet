@@ -1,4 +1,3 @@
-
 // ----------------------------------------------------------------------------
 //
 // HttpTools Project
@@ -6,7 +5,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -32,12 +31,12 @@
 // ----------------------------------------------------------------------------
 //
 // @file HttpEventMessages.ned
-// 
+//
 // Event messages for the HttpTools components
 //
 // NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @version 1.0 
+// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 // @todo Document parameters
@@ -51,17 +50,17 @@
 //
 // NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @version 1.0 
+// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 packet HttpServerStatusUpdateMsg
 {
     @omitGetVerb(true);
-    string www;				// Name of the WWW site.
-    simtime_t setTime;		// The event set time.
-    int eventKind;			// The event kind, e.g. ss_special.
-    double pvalue;			// The initial elevated probability.
-    double pamortize;		// The amortization factor -- i.e. how much the pvalue is decreased on each hit.
+    string www;             // Name of the WWW site.
+    simtime_t setTime;      // The event set time.
+    int eventKind;          // The event kind, e.g. ss_special.
+    double pvalue;          // The initial elevated probability.
+    double pamortize;       // The amortization factor -- i.e. how much the pvalue is decreased on each hit.
 }
 
 

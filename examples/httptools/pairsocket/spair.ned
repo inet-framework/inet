@@ -1,4 +1,3 @@
-
 //
 // Pair scenario file for the sockets pair example. 
 //

@@ -1,8 +1,8 @@
-
 // ***************************************************************************
 //
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
 // behaviour in a high-fidelity manner along with a highly configurable
