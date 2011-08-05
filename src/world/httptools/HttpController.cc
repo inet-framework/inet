@@ -42,17 +42,20 @@ void HttpController::initialize(int stage)
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if (rootelement==NULL) error("Configuration file is not defined");
+        if (rootelement==NULL)
+            error("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
         cXMLElement *element;
         // Initialize the random object for random site selection
         rdObjectFactory rdFactory;
         element = rootelement->getFirstChildWithTag("serverPopularityDistribution");
-        if (element==NULL) error("Server popularity distribution parameter undefined in XML configuration");
+        if (element==NULL)
+            error("Server popularity distribution parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdServerSelection = rdFactory.create(attributes);
-        if (rdServerSelection==NULL) error("Server popularity distribution random object could not be created");
+        if (rdServerSelection==NULL)
+            error("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
         pspecial = 0.0; // No special events by defaault
@@ -441,7 +444,8 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     if (!tracefilestream.is_open())
         error("Could not open events file %s", file.c_str());
 
-    if (section.size()==0) bSectionFound = true; // Grab first section
+    if (section.size()==0)
+        bSectionFound = true; // Grab first section
 
     double pval;
     double amortizeval;
@@ -452,8 +456,8 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     while (!std::getline(tracefilestream, line).eof())
     {
         linecount++;
-        if (line.size()==0) continue;
-        if (line[0]=='#') continue;
+        if (line.empty() || line[0]=='#')
+            continue;
         if (line[0]=='[')
         {
             // Section
@@ -515,7 +519,8 @@ WEB_SERVER_ENTRY* HttpController::__getRandomServerInfo()
             // Pick from the probability distribution which applies to the general population.
             selected = (int)rdServerSelection->get();
             en = pickList[selected];
-            if (en == NULL) error("Invalid node selected at index %d", selected);
+            if (en == NULL)
+                error("Invalid node selected at index %d", selected);
             EV_DEBUG << "Selecting from normal list. Got node " << en->name << endl;
         }
         EV_DEBUG << "Activation time of the node is " << en->activationTime << " and the current time is " << simTime() << endl;

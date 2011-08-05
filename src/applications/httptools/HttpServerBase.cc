@@ -54,7 +54,8 @@ void HttpServerBase::initialize()
     httpProtocol = par("httpProtocol");
 
     cXMLElement *rootelement = par("config").xmlValue();
-    if (rootelement==NULL) error("Configuration file is not defined");
+    if (rootelement==NULL)
+        error("Configuration file is not defined");
 
     // Initialize the distribution objects for random browsing
     // @todo Skip initialization of random objects for scripted servers?
@@ -64,52 +65,66 @@ void HttpServerBase::initialize()
 
     // The reply delay
     element = rootelement->getFirstChildWithTag("replyDelay");
-    if (element==NULL) error("Reply delay parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Reply delay parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdReplyDelay = rdFactory.create(attributes);
-    if (rdReplyDelay==NULL) error("Reply delay random object could not be created");
+    if (rdReplyDelay==NULL)
+        error("Reply delay random object could not be created");
 
     // HTML page size
     element = rootelement->getFirstChildWithTag("htmlPageSize");
-    if (element==NULL) error("HTML page size parameter undefined in XML configuration");
+    if (element==NULL)
+        error("HTML page size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdHtmlPageSize = rdFactory.create(attributes);
-    if (rdHtmlPageSize==NULL) error("HTML page size random object could not be created");
+    if (rdHtmlPageSize==NULL)
+        error("HTML page size random object could not be created");
 
     // Text resource size
     element = rootelement->getFirstChildWithTag("textResourceSize");
-    if (element==NULL) error("Text resource size parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Text resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextResourceSize = rdFactory.create(attributes);
-    if (rdTextResourceSize==NULL) error("Text resource size random object could not be created");
+    if (rdTextResourceSize==NULL)
+        error("Text resource size random object could not be created");
 
     // Image resource size
     element = rootelement->getFirstChildWithTag("imageResourceSize");
-    if (element==NULL) error("Image resource size parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Image resource size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdImageResourceSize = rdFactory.create(attributes);
-    if (rdImageResourceSize==NULL) error("Image resource size random object could not be created");
+    if (rdImageResourceSize==NULL)
+        error("Image resource size random object could not be created");
 
     // Number of resources per page
     element = rootelement->getFirstChildWithTag("numResources");
-    if (element==NULL) error("Number of resources parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Number of resources parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdNumResources = rdFactory.create(attributes);
-    if (rdNumResources==NULL) error("Number of resources random object could not be created");
+    if (rdNumResources==NULL)
+        error("Number of resources random object could not be created");
 
     // Text/Image resources ratio
     element = rootelement->getFirstChildWithTag("textImageResourceRatio");
-    if (element==NULL) error("Text/image resource ratio parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Text/image resource ratio parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdTextImageResourceRatio = rdFactory.create(attributes);
-    if (rdTextImageResourceRatio==NULL) error("Text/image resource ratio random object could not be created");
+    if (rdTextImageResourceRatio==NULL)
+        error("Text/image resource ratio random object could not be created");
 
     // Error message size
     element = rootelement->getFirstChildWithTag("errorMessageSize");
-    if (element==NULL) error("Error message size parameter undefined in XML configuration");
+    if (element==NULL)
+        error("Error message size parameter undefined in XML configuration");
     attributes = element->getAttributes();
     rdErrorMsgSize = rdFactory.create(attributes);
-    if (rdErrorMsgSize==NULL) error("Error message size random object could not be created");
+    if (rdErrorMsgSize==NULL)
+        error("Error message size random object could not be created");
 
     activationTime = par("activationTime");
     EV_INFO << "Activation time is " << activationTime << endl;
@@ -177,7 +192,8 @@ void HttpServerBase::handleMessage(cMessage *msg)
 cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
-    if (request==NULL) error("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
+    if (request==NULL)
+        error("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
 
@@ -425,8 +441,8 @@ void HttpServerBase::readSiteDefinition(std::string file)
     {
         linecount++;
         line = trim(line);
-        if (line.empty()) continue;
-        if (line[0]=='#') continue;
+        if (line.empty() || line[0]=='#')
+            continue;
         sectionsub = getDelimited(line, "[", "]");
         if (!sectionsub.empty())
         {
@@ -523,8 +539,8 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     while (!std::getline(htmlfilestream, line).eof())
     {
         line = trim(line);
-        if (line.empty()) continue;
-        if (line[0]=='#') continue;
+        if (line.empty() || line[0]=='#')
+            continue;
         body += line;
         body += "\n";
     }

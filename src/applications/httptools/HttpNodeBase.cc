@@ -56,7 +56,8 @@ double HttpNodeBase::transmissionDelay(cPacket *pckt)
 
 void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
 {
-    if (!enableLogging) return;
+    if (!enableLogging)
+        return;
     if (outputFormat == lf_short)
         logEntry(formatHttpRequestShort(httpRequest));
     else
@@ -67,7 +68,8 @@ void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
 
 void HttpNodeBase::logResponse(const HttpReplyMessage* httpResponse)
 {
-    if (!enableLogging) return;
+    if (!enableLogging)
+        return;
     if (outputFormat == lf_short)
         logEntry(formatHttpResponseShort(httpResponse));
     else
@@ -78,8 +80,8 @@ void HttpNodeBase::logResponse(const HttpReplyMessage* httpResponse)
 
 void HttpNodeBase::logEntry(std::string line)
 {
-    if (!enableLogging) return;
-    if (logFileName.empty()) return;
+    if (!enableLogging || logFileName.empty())
+        return;
 
     std::ofstream outfile;
     time_t curtime;

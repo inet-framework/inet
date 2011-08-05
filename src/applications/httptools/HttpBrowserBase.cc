@@ -63,7 +63,8 @@ void HttpBrowserBase::initialize(int stage)
         EV_DEBUG << "Initializing base HTTP browser component -- phase 0\n";
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if (rootelement==NULL) error("Configuration file is not defined");
+        if (rootelement==NULL)
+            error("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
         cXMLElement *element;
@@ -79,43 +80,54 @@ void HttpBrowserBase::initialize(int stage)
         {
             attributes = element->getAttributes();
             rdActivityLength = rdFactory.create(attributes);
-            if (rdActivityLength==NULL) error("Activity period random object could not be created");
+            if (rdActivityLength==NULL)
+                error("Activity period random object could not be created");
         }
 
         // Inter-session interval
         element = rootelement->getFirstChildWithTag("interSessionInterval");
-        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL)
+            error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterSessionInterval = rdFactory.create(attributes);
-        if (rdInterSessionInterval==NULL) error("Inter-session interval random object could not be created");
+        if (rdInterSessionInterval==NULL)
+            error("Inter-session interval random object could not be created");
 
         // Inter-request interval
         element = rootelement->getFirstChildWithTag("InterRequestInterval");
-        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL)
+            error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterRequestInterval = rdFactory.create(attributes);
-        if (rdInterRequestInterval==NULL) error("Inter-request interval random object could not be created");
+        if (rdInterRequestInterval==NULL)
+            error("Inter-request interval random object could not be created");
 
         // Request size
         element = rootelement->getFirstChildWithTag("requestSize");
-        if (element==NULL) error("Inter-request interval parameter undefined in XML configuration");
+        if (element==NULL)
+            error("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdRequestSize = rdFactory.create(attributes);
-        if (rdRequestSize==NULL) error("Request size random object could not be created");
+        if (rdRequestSize==NULL)
+            error("Request size random object could not be created");
 
         // Requests in session
         element = rootelement->getFirstChildWithTag("reqInSession");
-        if (element==NULL) error("requests in session parameter undefined in XML configuration");
+        if (element==NULL)
+            error("requests in session parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReqInSession = rdFactory.create(attributes);
-        if (rdReqInSession==NULL) error("Requests in session random object could not be created");
+        if (rdReqInSession==NULL)
+            error("Requests in session random object could not be created");
 
         // Processing delay
         element = rootelement->getFirstChildWithTag("processingDelay");
-        if (element==NULL) error("processing delay parameter undefined in XML configuration");
+        if (element==NULL)
+            error("processing delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdProcessingDelay = rdFactory.create(attributes);
-        if (rdProcessingDelay==NULL) error("Processing delay random object could not be created");
+        if (rdProcessingDelay==NULL)
+            error("Processing delay random object could not be created");
 
         controller = dynamic_cast<HttpController*>(getParentModule()->getParentModule()->getSubmodule("controller"));
         if (controller == NULL)
@@ -250,7 +262,8 @@ void HttpBrowserBase::handleSelfScriptedEvent()
     sessionCount++;
     messagesInCurrentSession = 0;
     // Get the browse event
-    if (browseEvents.empty()) error("No event entry in queue");
+    if (browseEvents.empty())
+        error("No event entry in queue");
     BrowseEvent be = browseEvents.back();
     browseEvents.pop_back();
     sendRequestToServer(be);
@@ -279,7 +292,8 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 void HttpBrowserBase::handleDataMessage(cMessage *msg)
 {
     HttpReplyMessage *appmsg = check_and_cast<HttpReplyMessage*>(msg);
-    if (appmsg==NULL) error("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
+    if (appmsg==NULL)
+        error("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
 
     logResponse(appmsg);
 
@@ -309,21 +323,25 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
                 else
                     EV_DEBUG << appmsg->getName() << " has no referenced resources. No GETs will be issued in parsing" << endl;
                 htmlReceived++;
-                if (ev.isGUI()) bubble("Received a HTML document");
+                if (ev.isGUI())
+                    bubble("Received a HTML document");
                 break;
             case CT_TEXT:
                 EV_INFO << "Text resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 textResourcesReceived++;
-                if (ev.isGUI()) bubble("Received a text resource");
+                if (ev.isGUI())
+                    bubble("Received a text resource");
                 break;
             case CT_IMAGE:
                 EV_INFO << "Image resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 imgResourcesReceived++;
-                if (ev.isGUI()) bubble("Received an image resource");
+                if (ev.isGUI())
+                    bubble("Received an image resource");
                 break;
             case CT_UNKNOWN:
                 EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->contentType() << endl;
-                if (ev.isGUI()) bubble("Received an unknown resource type");
+                if (ev.isGUI())
+                    bubble("Received an unknown resource type");
                 break;
         }
 
@@ -409,8 +427,10 @@ HttpRequestMessage* HttpBrowserBase::generatePageRequest(std::string www, std::s
 
     long requestLength = (long)rdRequestSize->get();
 
-    if (pageName.empty()) pageName = "/";
-    else if (pageName[0]!='/') pageName.insert(0, "/");
+    if (pageName.empty())
+        pageName = "/";
+    else if (pageName[0]!='/')
+        pageName.insert(0, "/");
 
     char szReq[MAX_URL_LENGTH+24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
@@ -458,8 +478,10 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 
     std::string ext = trimLeft(resource, ".");
     HttpContentType rc = getResourceCategory(ext);
-    if (rc==CT_IMAGE) imgResourcesRequested++;
-    else if (rc==CT_TEXT) textResourcesRequested++;
+    if (rc==CT_IMAGE)
+        imgResourcesRequested++;
+    else if (rc==CT_TEXT)
+        textResourcesRequested++;
 
     char szReq[MAX_URL_LENGTH+24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
@@ -539,7 +561,8 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
             continue;
 
         pos = line.find(";");
-        if (pos == -1) continue;
+        if (pos == -1)
+            continue;
         timepart = line.substr(0, pos);
         wwwpart = line.substr(pos+1, line.size()-pos-1);
 
@@ -559,7 +582,8 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
         be.wwwhost = extractServerName(wwwpart.c_str());
         be.resourceName = extractResourceName(wwwpart.c_str());
         be.serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(wwwpart.c_str()));
-        if (be.serverModule==NULL) error("Unable to locate server %s in the scenario", wwwpart.c_str());
+        if (be.serverModule==NULL)
+            error("Unable to locate server %s in the scenario", wwwpart.c_str());
 
         EV_DEBUG << "Creating scripted browse event @ T=" << t << ", " << be.wwwhost << " / " << be.resourceName << endl;
         browseEvents.push_front(be);

@@ -208,7 +208,8 @@ void rdHistogram::__parseBinString(std::string binstr)
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
         pos = curtuple.find(',');
-        if (pos==-1) continue;  // Invalid tuple -- raise error here?
+        if (pos==-1)
+            continue;  // Invalid tuple -- raise error here?
         countstr = curtuple.substr(0, pos);
         sumstr = curtuple.substr(pos+1, curtuple.size()-pos-1);
         sum = safeatof(sumstr.c_str(), 0.0);
@@ -225,9 +226,9 @@ void rdHistogram::__normalizeBins()
     double sum = 0;
     for (i=0; i<m_bins.size(); i++)
         sum += m_bins[i].sum;
-    if (sum==0) return;
-    for (i=0; i<m_bins.size(); i++)
-        m_bins[i].sum = m_bins[i].sum/sum;
+    if (sum!=0)
+        for (i=0; i<m_bins.size(); i++)
+            m_bins[i].sum = m_bins[i].sum/sum;
 }
 
 rdConstant::rdConstant(double value)
@@ -301,7 +302,8 @@ double rdZipf::get()
     for (i=1; i<=m_number; i++)
     {
         sum_prob += m_c / pow((double) i, m_alpha);
-        if (sum_prob >= z) break;
+        if (sum_prob >= z)
+            break;
     }
     if (m_baseZero) return i-1;
     else return i;
