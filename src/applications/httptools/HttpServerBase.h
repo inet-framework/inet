@@ -76,6 +76,11 @@ class INET_API HttpServerBase : public HttpNodeBase
             std::string body;
         };
 
+        /** The server name, e.g. www.example.com. */
+        std::string hostName;
+        /** The listening port of the server */
+        int port;
+
         /** set to true if a scripted site definition is used */
         bool scriptedMode;
         /** A map of html pages, keyed by a resource URL. Used in scripted mode. */
@@ -115,6 +120,10 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg) = 0;
         //@}
+
+    public:
+        /** Return the name of the server */
+        const std::string& getHostName() { return hostName; }
 
     protected:
         /** Update graphical appearance when running under a GUI */

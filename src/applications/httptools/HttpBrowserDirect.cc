@@ -29,6 +29,7 @@
 // ***************************************************************************
 
 #include "HttpBrowserDirect.h"
+#include "HttpServerBase.h"
 
 Define_Module(HttpBrowserDirect);
 
@@ -61,29 +62,29 @@ void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
 
 void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
 {
-    HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(request->targetUrl()));
+    HttpServerBase *serverModule = dynamic_cast<HttpServerBase*>(controller->getServerModule(request->targetUrl()));
     if (serverModule == NULL)
     {
         EV_ERROR << "Failed to get server module for " << request->targetUrl() << endl;
     }
     else
     {
-        EV_DEBUG << "Sending request to " << serverModule->getWWW() << endl;
+        EV_DEBUG << "Sending request to " << serverModule->getHostName() << endl;
         sendDirectToModule(serverModule, request, 0.0, rdProcessingDelay);
     }
 }
 
 void HttpBrowserDirect::sendRequestToRandomServer()
 {
-    HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getAnyServerModule());
+    HttpServerBase *serverModule = dynamic_cast<HttpServerBase*>(controller->getAnyServerModule());
     if (serverModule == NULL)
     {
         EV_ERROR << "Failed to get a random server module" << endl;
     }
     else
     {
-        EV_DEBUG << "Sending request randomly to " << serverModule->getWWW() << endl;
-        sendDirectToModule(serverModule, generateRandomPageRequest(serverModule->getWWW()), 0.0, rdProcessingDelay);
+        EV_DEBUG << "Sending request randomly to " << serverModule->getHostName() << endl;
+        sendDirectToModule(serverModule, generateRandomPageRequest(serverModule->getHostName()), 0.0, rdProcessingDelay);
     }
 }
 

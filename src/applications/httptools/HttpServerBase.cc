@@ -37,14 +37,14 @@ void HttpServerBase::initialize()
 
     EV_DEBUG << "Initializing server component\n";
 
-    wwwName = (const char*)par("hostName");
-    if (wwwName.empty())
+    hostName = (const char*)par("hostName");
+    if (hostName.empty())
     {
-        wwwName = "www.";
-        wwwName += getParentModule()->getFullName();
-        wwwName += ".com";
+        hostName = "www.";
+        hostName += getParentModule()->getFullName();
+        hostName += ".com";
     }
-    EV_DEBUG << "Initializing HTTP server. Using WWW name " << wwwName << endl;
+    EV_DEBUG << "Initializing HTTP server. Using WWW name " << hostName << endl;
     port = par("port");
 
     logFileName = (const char*)par("logFile");
@@ -202,7 +202,7 @@ cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
     simtime_t processingDelay = 0;
 
     bool recipientError = false;
-    if (extractServerName(request->targetUrl()) != wwwName)
+    if (extractServerName(request->targetUrl()) != hostName)
     {
         // This should never happen but lets check
         error("Received message intended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
@@ -307,7 +307,7 @@ HttpReplyMessage* HttpServerBase::generateDocument(HttpRequestMessage *request, 
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
     HttpReplyMessage* replymsg = new HttpReplyMessage(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
-    replymsg->setOriginatorUrl(wwwName.c_str());
+    replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
     replymsg->setProtocol(request->protocol());
     replymsg->setSerial(request->serial());
@@ -352,7 +352,7 @@ HttpReplyMessage* HttpServerBase::generateResourceMessage(HttpRequestMessage *re
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
     HttpReplyMessage* replymsg = new HttpReplyMessage(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
-    replymsg->setOriginatorUrl(wwwName.c_str());
+    replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
     replymsg->setProtocol(request->protocol()); // MIGRATE40: kvj
     replymsg->setSerial(request->serial());
@@ -371,7 +371,7 @@ HttpReplyMessage* HttpServerBase::generateErrorReply(HttpRequestMessage *request
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
     HttpReplyMessage* replymsg = new HttpReplyMessage(szErrStr);
     replymsg->setHeading(szErrStr);
-    replymsg->setOriginatorUrl(wwwName.c_str());
+    replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
     replymsg->setProtocol(request->protocol());  // MIGRATE40: kvj
     replymsg->setSerial(request->serial());
@@ -412,7 +412,7 @@ void HttpServerBase::registerWithController()
     cModule * controller = simulation.getSystemModule()->getSubmodule("controller");
     if (controller == NULL)
         error("Controller module not found");
-    ((HttpController*)controller)->registerWWWserver(getParentModule()->getFullName(), wwwName.c_str(), port, INSERT_END, activationTime);
+    ((HttpController*)controller)->registerWWWserver(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

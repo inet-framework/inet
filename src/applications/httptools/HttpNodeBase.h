@@ -70,11 +70,6 @@ class HttpNodeBase : public cSimpleModule
         /** Log level 2: Debug, 1: Info; 0: Errors and warnings only */
         int ll;
 
-        /** The WWW name of the node. */
-        std::string wwwName;
-        /** The listening port of the node. Really only applies to servers. */
-        int port; // @todo Move to server base class?
-
         /** The link speed in bits per second. Only needed for direct message passing transmission delay calculations. */
         unsigned long linkSpeed;
 
@@ -94,9 +89,6 @@ class HttpNodeBase : public cSimpleModule
 
     public:
         HttpNodeBase();
-
-        /** Return the WWW name of the node */
-        const std::string& getWWW() { return wwwName; }
 
     protected:
         /** @name Direct message passing utilities */
