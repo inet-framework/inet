@@ -18,20 +18,20 @@
 
 package inet.examples.ieee802154.csma802154;
 
-import inet.world.ieee802154.base.Display;
-import inet.transport.udp.UDP;
-import inet.transport.tcp.TCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.IManetRouting;
-import inet.mobility.models.NullMobility;
-import inet.linklayer.ieee802154.Ieee802154csmaNic;
-import inet.battery.models.InetSimpleBattery;
-import inet.base.NotificationBoard;
-import inet.applications.pingapp.PingApp;
-import inet.applications.IUDPApp;
 import inet.applications.ITCPApp;
+import inet.applications.IUDPApp;
+import inet.applications.pingapp.PingApp;
+import inet.base.NotificationBoard;
+import inet.battery.models.InetSimpleBattery;
+import inet.linklayer.ieee802154.Ieee802154csmaNic;
+import inet.mobility.models.StationaryMobility;
+import inet.networklayer.IManetRouting;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.nodes.inet.NetworkLayer;
+import inet.transport.tcp.TCP;
+import inet.transport.udp.UDP;
+import inet.world.ieee802154.base.Display;
 
 
 //
@@ -114,7 +114,7 @@ module nodecsma802154
         }
         //        wlan: Nic80211;
         //            display: "p=248,349;q=queue;i=block/ifcard";
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 initialX = x;
                 initialY = y;
