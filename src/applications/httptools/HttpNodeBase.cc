@@ -79,7 +79,7 @@ void HttpNodeBase::logResponse(const HttpReplyMessage* httpResponse)
 void HttpNodeBase::logEntry(std::string line)
 {
     if (!enableLogging) return;
-    if (logFileName.size() == 0) return;
+    if (logFileName.empty()) return;
 
     std::ofstream outfile;
     time_t curtime;

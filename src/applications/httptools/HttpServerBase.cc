@@ -38,7 +38,7 @@ void HttpServerBase::initialize()
     EV_DEBUG << "Initializing server component\n";
 
     wwwName = (const char*)par("hostName");
-    if (wwwName.size() == 0)
+    if (wwwName.empty())
     {
         wwwName = "www.";
         wwwName += getParentModule()->getFullName();
@@ -115,7 +115,7 @@ void HttpServerBase::initialize()
     EV_INFO << "Activation time is " << activationTime << endl;
 
     std::string siteDefinition = (const char*)par("siteDefinition");
-    scriptedMode = (siteDefinition.size() != 0);
+    scriptedMode = !siteDefinition.empty();
     if (scriptedMode)
         readSiteDefinition(siteDefinition);
 
@@ -246,7 +246,7 @@ HttpReplyMessage* HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
     {
         if (scriptedMode)
         {
-            if (resource.size()==0 && htmlPages.find("root") != htmlPages.end())
+            if (resource.empty() && htmlPages.find("root") != htmlPages.end())
             {
                 EV_DEBUG << "Generating root resource" << endl;
                 return generateDocument(request, "root");
@@ -425,10 +425,10 @@ void HttpServerBase::readSiteDefinition(std::string file)
     {
         linecount++;
         line = trim(line);
-        if (line.size()==0) continue;
+        if (line.empty()) continue;
         if (line[0]=='#') continue;
         sectionsub = getDelimited(line, "[", "]");
-        if (sectionsub.size()!=0)
+        if (!sectionsub.empty())
         {
             // Section
             siteSection = sectionsub == "HTML";
@@ -445,7 +445,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                     error("Invalid format of site configuration file '%s'. Site section, line (%d): %s",
                            file.c_str(), linecount, line.c_str());
                 key = trimLeft(res[0], "/");
-                if (key.size()==0)
+                if (key.empty())
                 {
                     if (htmlPages.find("root")==htmlPages.end())
                         key = "root";
@@ -523,7 +523,7 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     while (!std::getline(htmlfilestream, line).eof())
     {
         line = trim(line);
-        if (line.size()==0) continue;
+        if (line.empty()) continue;
         if (line[0]=='#') continue;
         body += line;
         body += "\n";

@@ -149,7 +149,7 @@ void HttpBrowserBase::initialize(int stage)
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
 
         std::string scriptFile = (const char*)par("scriptFile");
-        scriptedMode = (scriptFile.size() != 0);
+        scriptedMode = !scriptFile.empty();
         if (scriptedMode)
         {
             EV_DEBUG << "Scripted mode. Script file: " << scriptFile << endl;
@@ -250,12 +250,12 @@ void HttpBrowserBase::handleSelfScriptedEvent()
     sessionCount++;
     messagesInCurrentSession = 0;
     // Get the browse event
-    if (browseEvents.size() == 0) error("No event entry in queue");
+    if (browseEvents.empty()) error("No event entry in queue");
     BrowseEvent be = browseEvents.back();
     browseEvents.pop_back();
     sendRequestToServer(be);
     // Schedule the next event
-    if (browseEvents.size() != 0)
+    if (!browseEvents.empty())
     {
         be = browseEvents.back();
         EV_DEBUG << "Scheduling next event @ " << be.time << "\n";
@@ -409,7 +409,7 @@ HttpRequestMessage* HttpBrowserBase::generatePageRequest(std::string www, std::s
 
     long requestLength = (long)rdRequestSize->get();
 
-    if (pageName.size()==0) pageName = "/";
+    if (pageName.empty()) pageName = "/";
     else if (pageName[0]!='/') pageName.insert(0, "/");
 
     char szReq[MAX_URL_LENGTH+24];
@@ -448,7 +448,7 @@ HttpRequestMessage* HttpBrowserBase::generateResourceRequest(std::string www, st
 
     long requestLength = (long)rdRequestSize->get()+size;
 
-    if (resource.size()==0)
+    if (resource.empty())
     {
         EV_ERROR << "Unable to request resource -- empty resource string" << endl;
         return NULL;
@@ -566,7 +566,7 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
     }
     scriptfilestream.close();
 
-    if (browseEvents.size() != 0)
+    if (!browseEvents.empty())
     {
         BrowseEvent be = browseEvents.back();
         eventTimer->setKind(MSGKIND_SCRIPT_EVENT);

@@ -94,7 +94,7 @@ void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue q
         EV_ERROR << "Failed to get server module " << www << endl;
     else
     {
-        while (queue.size()!=0)
+        while (!queue.empty())
         {
             HttpRequestMessage *msg = queue.back();
             queue.pop_back();

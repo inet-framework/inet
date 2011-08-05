@@ -178,7 +178,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     // Get the socket and associated data structure.
     SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
-    if (sockdata->messageQueue.size()==0)
+    if (sockdata->messageQueue.empty())
     {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
         socket->close();
@@ -188,7 +188,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     // Send pending messages on the established socket.
     cMessage *msg;
     EV_DEBUG << "Proceeding to send messages on socket " << connId << endl;
-    while (sockdata->messageQueue.size()!=0)
+    while (!sockdata->messageQueue.empty())
     {
         msg = sockdata->messageQueue.back();
         cPacket *pckt = check_and_cast<cPacket *>(msg);
@@ -275,9 +275,9 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     }
 
     if (code==TCP_I_CONNECTION_RESET)
-        EV_WARNING << "Connection reset!\\n";
+        EV_WARNING << "Connection reset!\n";
     else if (code==TCP_I_CONNECTION_REFUSED)
-        EV_WARNING << "Connection refused!\\n";
+        EV_WARNING << "Connection refused!\n";
 
     SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
@@ -298,7 +298,7 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
 void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRequestQueue &queue)
 {
     // Dont do anything if the queue is empty.s
-    if (queue.size()==0)
+    if (queue.empty())
     {
         EV_INFO << "Submitting to socket. No data to send to " << moduleName << ". Skipping connection." << endl;
         return;

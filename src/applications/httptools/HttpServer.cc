@@ -168,9 +168,9 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
     TCPSocket *socket = (TCPSocket*)yourPtr;
 
     if (code==TCP_I_CONNECTION_RESET)
-        EV_WARNING << "Connection reset!\\n";
+        EV_WARNING << "Connection reset!\n";
     else if (code==TCP_I_CONNECTION_REFUSED)
-        EV_WARNING << "Connection refused!\\n";
+        EV_WARNING << "Connection refused!\n";
 
     // Cleanup
     sockCollection.removeSocket(socket);
