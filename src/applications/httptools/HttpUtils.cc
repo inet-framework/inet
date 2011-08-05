@@ -27,52 +27,35 @@
 //
 // ***************************************************************************
 
+#include <algorithm>
+#include <ctype.h>
+
 #include "HttpUtils.h"
 
-std::string trimLeft(std::string str)
+inline bool isnotspace(int c) {return !isspace(c);}
+
+std::string trimLeft(std::string s)
 {
-    std::string::iterator i;
-    for (i = str.begin(); i != str.end(); i++) {
-          if (!isspace(*i)) {
-              break;
-          }
-    }
-    if (i == str.end()) {
-          str.clear();
-    } else {
-          str.erase(str.begin(), i);
-    }
-    return str;
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), isnotspace));
+    return s;
 }
 
 std::string trimLeft(std::string str, std::string delim)
 {
     int pos = str.find(delim);
-    if (pos==-1) return str;
-    else return str.substr(pos+1, str.size()-pos-1);
+    return pos==-1 ? str : str.substr(pos+1, str.size()-pos-1);
 }
 
-std::string trimRight(std::string str)
+std::string trimRight(std::string s)
 {
-    std::string::iterator i;
-    for (i = str.end() - 1;; i--) {
-          if (!isspace(*i)) {
-              str.erase(i + 1, str.end());
-              break;
-          }
-          if (i == str.begin()) {
-              str.clear();
-              break;
-          }
-    }
-    return str;
+    s.erase(std::find_if(s.rbegin(), s.rend(), isnotspace).base(), s.end());
+    return s;
 }
 
 std::string trimRight(std::string str, std::string delim)
 {
     int pos = str.rfind(delim);
-    if (pos==-1) return str;
-    else return str.substr(0, pos-1);
+    return pos==-1 ? str : str.substr(0, pos-1);
 }
 
 std::string trim(std::string str)
