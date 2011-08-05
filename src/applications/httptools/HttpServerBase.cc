@@ -189,7 +189,7 @@ cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
     if (extractServerName(request->targetUrl()) != wwwName)
     {
         // This should never happen but lets check
-        error("Received message indended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
+        error("Received message intended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
         return NULL;
     }
 

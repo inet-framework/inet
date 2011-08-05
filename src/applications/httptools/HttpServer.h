@@ -78,7 +78,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
 
         /**
          * Handler for socket data arrived events.
-         * Dispatces the received message to the message handler in the base class and
+         * Dispatches the received message to the message handler in the base class and
          * finishes by deleting the received message.
          */
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);

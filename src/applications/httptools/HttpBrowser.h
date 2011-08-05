@@ -164,7 +164,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         /** @name Socket establishment and data submission */
         //@{
         /**
-         * Establishes a socket and queues a single message for transmisson.
+         * Establishes a socket and queues a single message for transmission.
          * A new socket is created and added to the collection. The message is assigned to a data structure
          * stored as a myPtr with the socket. The message is transmitted once the socket is established, signaled
          * by a call to socketEstablished.

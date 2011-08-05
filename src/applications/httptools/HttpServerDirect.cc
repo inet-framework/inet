@@ -38,7 +38,7 @@ void HttpServerDirect::initialize()
 
     EV_DEBUG << "Initializing direct server component\n";
 
-    // Set the linkspeed
+    // Set the link speed
     linkSpeed = par("linkSpeed");
 }
 

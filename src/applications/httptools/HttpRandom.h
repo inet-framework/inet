@@ -75,8 +75,8 @@ class rdNormal : public rdObject
     protected:
         double m_mean;          ///< The mean of the distribution.
         double m_sd;            ///< The sd of the distribution.
-        double m_min;           ///< The minumum limit   .
-        bool m_bMinLimit;       ///< Set if the minumum limit is set.
+        double m_min;           ///< The minimum limit   .
+        bool m_bMinLimit;       ///< Set if the minimum limit is set.
         bool m_nonNegative;     ///< Non-negative only -- uses the truncnormal function.
     public:
         /** Constructor for direct initialization */

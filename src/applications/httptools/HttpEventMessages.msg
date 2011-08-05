@@ -28,20 +28,6 @@
 //
 // ----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-//
-// @file HttpEventMessages.ned
-//
-// Event messages for the HttpTools components
-//
-// NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @version 1.0
-// @author  Kristjan V. Jonsson
-//
-// @todo Document parameters
-//
-// ----------------------------------------------------------------------------
 
 //
 // Server status update event

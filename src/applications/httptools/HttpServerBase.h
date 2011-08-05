@@ -53,7 +53,7 @@
  * and should be used in conjunction with a number of browsing clients.
  *
  * The server base class cannot be instantiated directly in a simulation. Use rather
- * the HttpServer for INET TCP/IP appliations or HttpServerDirect for direct message passing.
+ * the HttpServer for INET TCP/IP applications or HttpServerDirect for direct message passing.
  * See those classes for details. See the INET documentation for details on the StandardHost
  * and the TCP/IP simulation.
  *

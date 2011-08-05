@@ -198,6 +198,7 @@ std::string htmlErrFromCode(int code)
         case 200: return "OK";
         case 400: return "ERROR";
         case 404: return "NOT FOUND";
+        default: return "???";
     }
 }
 

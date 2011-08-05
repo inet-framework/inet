@@ -175,7 +175,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
         return;
     }
 
-    // Get the socket and associated datastructure.
+    // Get the socket and associated data structure.
     SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
     if (sockdata->messageQueue.size()==0)
@@ -312,7 +312,7 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
     socket->setOutputGate(gate("tcpOut"));
     sockCollection.addSocket(socket);
 
-    // Initialize the associated datastructure
+    // Initialize the associated data structure
     SockData *sockdata = new SockData;
     sockdata->messageQueue = HttpRequestQueue(queue);
     sockdata->socket = socket;

@@ -75,7 +75,7 @@ class HttpNodeBase : public cSimpleModule
         /** The listening port of the node. Really only applies to servers. */
         int port; // @todo Move to server base class?
 
-        /** The linkspeed in bits per second. Only needed for direct message passing transmission delay calculations. */
+        /** The link speed in bits per second. Only needed for direct message passing transmission delay calculations. */
         unsigned long linkSpeed;
 
         /** The http protocol. http/1.0: 10 ; http/1.1: 11 */

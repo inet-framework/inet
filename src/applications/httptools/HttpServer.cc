@@ -64,7 +64,7 @@ void HttpServer::finish()
     recordScalar("sock.opened", socketsOpened);
     recordScalar("sock.broken", numBroken);
 
-    // Clean up sockets and datastructures
+    // Clean up sockets and data structures
     sockCollection.deleteSockets();
 }
 

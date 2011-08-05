@@ -103,7 +103,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 
         /** @name The current session parameters */
         //@{
-        int reqInCurSession;            ///< The number of requests made sofar in the current session
+        int reqInCurSession;            ///< The number of requests made so far in the current session
         int reqNoInCurSession;          ///< The total number of requests to be made in the current session
         double activityPeriodLength;    ///< The length of the currently active activity period
         simtime_t acitivityPeriodEnd;   ///< The end in simulation time of the current activity period
@@ -196,7 +196,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         //@{
         /** Generate a HTTP request to a specific server and for a specific page */
         HttpRequestMessage* generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
-        /** Generate a random HTTP request -- used in case we dont care which page is requested */
+        /** Generate a random HTTP request -- used in case we don't care which page is requested */
         HttpRequestMessage* generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
         /** Generate a resource request, e.g. for an image or css document */
         HttpRequestMessage* generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);

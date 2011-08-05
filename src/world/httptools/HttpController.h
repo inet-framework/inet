@@ -116,12 +116,12 @@ class HttpController : public cSimpleModule
         //@}
 
     public:
-        /** @name public initerface used by server and browser objects in the simulation */
+        /** @name public interface used by server and browser objects in the simulation */
         //@{
         /**
          * Register a WWW server object.
          * Called by server objects at startup. @see HttpServerBase.
-         * A datastructure is created for the registered server for easy lookup. It is entered into
+         * A data structure is created for the registered server for easy lookup. It is entered into
          * the site picklist which is used to select servers in the general population. The insertion is specified
          * by the INSERT_* defines: Registered sites can be inserted at the end, in the middle or at random. This does
          * play a role when zipf or other non-uniform selection probability is used (the pick list is basically mapped to

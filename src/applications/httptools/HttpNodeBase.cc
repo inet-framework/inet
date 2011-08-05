@@ -50,8 +50,8 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
 double HttpNodeBase::transmissionDelay(cPacket *pckt)
 {
     if (linkSpeed == 0)
-        return 0.0; // No delay if linkspeed unspecified
-    return pckt->getBitLength()/((double)linkSpeed);  // The linkspeed is in bits/s
+        return 0.0; // No delay if link speed unspecified
+    return pckt->getBitLength()/((double)linkSpeed);  // The link speed is in bit/s
 }
 
 void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
