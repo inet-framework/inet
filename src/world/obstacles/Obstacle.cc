@@ -90,13 +90,15 @@ namespace
         Coord p2Vec = p2To - p2From;
         Coord p1p2 = p1From - p2From;
 
-        double D = (p1Vec.x * p2Vec.y - p1Vec.y * p2Vec.x);
+        double d = (p1Vec.x * p2Vec.y - p1Vec.y * p2Vec.x);
+        if (d == 0.0)
+            return -1;
 
-        double p1Frac = (p2Vec.x * p1p2.y - p2Vec.y * p1p2.x) / D;
+        double p1Frac = (p2Vec.x * p1p2.y - p2Vec.y * p1p2.x) / d;
         if (p1Frac < 0 || p1Frac > 1)
             return -1;
 
-        double p2Frac = (p1Vec.x * p1p2.y - p1Vec.y * p1p2.x) / D;
+        double p2Frac = (p1Vec.x * p1p2.y - p1Vec.y * p1p2.x) / d;
         if (p2Frac < 0 || p2Frac > 1)
             return -1;
 
@@ -115,9 +117,9 @@ double Obstacle::calculateReceivedPower(double pSend, double carrierFrequency, c
     std::multiset<double> intersectAt;
     bool doesIntersect = false;
     const Obstacle::Coords& shape = getShape();
-    Obstacle::Coords::const_iterator i = shape.begin();
+
     Obstacle::Coords::const_iterator j = (shape.rbegin()+1).base();
-    for (; i != shape.end(); j = i++)
+    for (Obstacle::Coords::const_iterator i = shape.begin(); i != shape.end(); j = i++)
     {
         Coord c1 = *i;
         Coord c2 = *j;

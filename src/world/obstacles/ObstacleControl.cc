@@ -133,14 +133,15 @@ void ObstacleControl::add(Obstacle obstacle)
     size_t toRow = std::max(0, int(o->getBboxP2().x / GRIDCELL_SIZE));
     size_t fromCol = std::max(0, int(o->getBboxP1().y / GRIDCELL_SIZE));
     size_t toCol = std::max(0, int(o->getBboxP2().y / GRIDCELL_SIZE));
-    for (size_t row = fromRow; row <= toRow; ++row)
+
+    if (obstacles.size() < toCol+1)
+        obstacles.resize(toCol+1);
+    for (size_t col = fromCol; col <= toCol; ++col)
     {
-        for (size_t col = fromCol; col <= toCol; ++col)
+        if (obstacles[col].size() < toRow+1)
+            obstacles[col].resize(toRow+1);
+        for (size_t row = fromRow; row <= toRow; ++row)
         {
-            if (obstacles.size() < col+1)
-                obstacles.resize(col+1);
-            if (obstacles[col].size() < row+1)
-                obstacles[col].resize(row+1);
             (obstacles[col])[row].push_back(o);
         }
     }
@@ -197,14 +198,10 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
     size_t toCol = std::max(0, int(bboxP2.y / GRIDCELL_SIZE));
 
     std::set<Obstacle*> processedObstacles;
-    for (size_t col = fromCol; col <= toCol; ++col)
+    for (size_t col = fromCol; col <= toCol && col < obstacles.size(); ++col)
     {
-        if (col >= obstacles.size())
-            break;
-        for (size_t row = fromRow; row <= toRow; ++row)
+        for (size_t row = fromRow; row <= toRow && row < obstacles[col].size(); ++row)
         {
-            if (row >= obstacles[col].size())
-                break;
             const ObstacleGridCell& cell = (obstacles[col])[row];
             for (ObstacleGridCell::const_iterator k = cell.begin(); k != cell.end(); ++k)
             {
