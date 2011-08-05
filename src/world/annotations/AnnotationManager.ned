@@ -20,12 +20,17 @@
 package inet.world.annotations;
 
 //
-// manages annotations on the OMNeT++ canvas
+// Manages annotations on the OMNeT++ canvas
+//
+// An xml example:
+//    <annotations>
+//      <line color="#F00" shape="16,0 8,13.8564" />
+//      <poly color="#0F0" shape="16,64 8,77.8564 -8,77.8564 -16,64 -8,50.1436 8,50.1436" />
+//    </annotations>
 //
 simple AnnotationManager
 {
     parameters:
-        bool debug = default(false);  // emit debug messages?
         volatile bool draw = default(false);  // draw annotations?
         xml annotations = default(xml("<annotations/>")); // annotations to add at startup
         @display("i=msg/paperclip");
