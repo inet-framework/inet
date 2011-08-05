@@ -70,9 +70,9 @@ simple CSMA802154
         // maximum backoff exponent (for exponential backoff method only)
         double macMaxBE = default(8);
     gates:
-        input uppergateIn; 			// from the upper layer
-        output uppergateOut; 		// to the upper layer
-        input lowergateIn; 			// from the physical layer
-        output lowergateOut; 			// to the physical layer
+        input upperLayerIn; 			// from the upper layer
+        output upperLayerOut; 		// to the upper layer
+        input lowerLayerIn; 			// from the physical layer
+        output lowerLayerOut; 			// to the physical layer
 
 }

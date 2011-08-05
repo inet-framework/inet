@@ -300,10 +300,10 @@ void Ieee802154Mac::initialize(int stage)
         registerInterface();
 
         // get gate ID
-        mUppergateIn  = findGate("uppergateIn");
-        mUppergateOut = findGate("uppergateOut");
-        mLowergateIn  = findGate("lowergateIn");
-        mLowergateOut = findGate("lowergateOut");
+        mUppergateIn  = findGate("upperLayerIn");
+        mUppergateOut = findGate("upperLayerOut");
+        mLowergateIn  = findGate("lowerLayerIn");
+        mLowergateOut = findGate("lowerLayerOut");
 
         // get a pointer to the NotificationBoard module
         mpNb = NotificationBoardAccess().get();
@@ -448,7 +448,7 @@ void Ieee802154Mac::initialize(int stage)
         WATCH(numRxAckPkt);
 
         WATCH(numTxAckInactive);
-        radioModule = gate("lowergateOut")->getNextGate()->getOwnerModule()->getId();
+        radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule()->getId();
     }
     else if (1 == stage)
     {

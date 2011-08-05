@@ -100,10 +100,10 @@ void csma802154::initialize(int stage)
         registerInterface();
 
         // get gate ID
-        mUppergateIn  = findGate("uppergateIn");
-        mUppergateOut = findGate("uppergateOut");
-        mLowergateIn  = findGate("lowergateIn");
-        mLowergateOut = findGate("lowergateOut");
+        mUppergateIn  = findGate("upperLayerIn");
+        mUppergateOut = findGate("upperLayerOut");
+        mLowergateIn  = findGate("lowerLayerIn");
+        mLowergateOut = findGate("lowerLayerOut");
 
         // get a pointer to the NotificationBoard module
         mpNb = NotificationBoardAccess().get();
@@ -726,7 +726,7 @@ void csma802154::updateStatusSIFS(t_mac_event event, cMessage *msg)
         //sendDown(ackMessage);
         sendNewPacketInTx(ackMessage);
         nbTxAcks++;
-        //      sendDelayed(ackMessage, aTurnaroundTime, lowergateOut);
+        //      sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
         ackMessage = NULL;
         break;
 

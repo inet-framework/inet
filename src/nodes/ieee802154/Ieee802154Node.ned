@@ -59,8 +59,8 @@ module Ieee802154Node
         }
     connections allowunconnected:
         radioIn --> nic.radioIn;
-        nic.uppergateOut --> net.lowergateIn;
-        nic.uppergateIn <-- net.lowergateOut;
-        net.uppergateOut --> app.lowergateIn;
-        net.uppergateIn <-- app.lowergateOut;
+        nic.upperLayerOut --> net.lowerLayerIn;
+        nic.upperLayerIn <-- net.lowerLayerOut;
+        net.upperLayerOut --> app.lowerLayerIn;
+        net.upperLayerIn <-- app.lowerLayerOut;
 }

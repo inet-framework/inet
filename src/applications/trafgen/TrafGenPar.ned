@@ -34,7 +34,7 @@ simple TrafGenPar
 	    volatile double offInterDepartureTime @unit("s")= default(0s);
     //    xml trafConfig;
     gates:
-        input lowergateIn;
-        output lowergateOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }
 

@@ -28,10 +28,10 @@ void Ieee802154StarRouting::initialize(int aStage)
     if (0 == aStage)
     {
         // WirelessMacBase stuff...
-        mUppergateIn  = findGate("uppergateIn");
-        mUppergateOut = findGate("uppergateOut");
-        mLowergateIn  = findGate("lowergateIn");
-        mLowergateOut = findGate("lowergateOut");
+        mUppergateIn  = findGate("upperLayerIn");
+        mUppergateOut = findGate("upperLayerOut");
+        mLowergateIn  = findGate("lowerLayerIn");
+        mLowergateOut = findGate("lowerLayerOut");
 
         m_moduleName = getParentModule()->getFullName();
 

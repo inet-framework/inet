@@ -14,8 +14,8 @@ void Ieee802154TestApp::initialize(int aStage)
     if (0 == aStage)
     {
         m_debug = par("debug");
-        mLowergateIn = findGate("lowergateIn");
-        mLowergateOut = findGate("lowergateOut");
+        mLowergateIn = findGate("lowerLayerIn");
+        mLowergateOut = findGate("lowerLayerOut");
         m_moduleName = getParentModule()->getFullName();
         sumE2EDelay = 0;
         numReceived = 0;

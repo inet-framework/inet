@@ -70,8 +70,8 @@ class INET_API Ieee802154Phy : public ChannelAccess
     IRadioModel* radioModel;
     IReceptionModel* receptionModel;
 
-    int uppergateOut;
-    int uppergateIn;
+    int upperLayerOut;
+    int upperLayerIn;
 
     double transmitterPower; // in mW
     double noiseLevel;
