@@ -530,10 +530,10 @@ void UDPBasicBurst2::finish()
 
 UDPBasicBurst2::~UDPBasicBurst2()
 {
-    if (pktDelayFtoF) delete pktDelayFtoF;
-    if (pktDelayFtoM) delete pktDelayFtoM;
-    if (pktDelayMtoM) delete pktDelayMtoM;
-    if (pktDelayMtoF) delete pktDelayMtoF;
+    delete pktDelayFtoF;
+    delete pktDelayFtoM;
+    delete pktDelayMtoM;
+    delete pktDelayMtoF;
 
     cancelAndDelete(timerNext);
 }
