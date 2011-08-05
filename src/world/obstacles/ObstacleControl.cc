@@ -224,8 +224,7 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 
                 // draw a "hit!" bubble
                 if (annotations && (pSend < pSendOld))
-                    o->visualRepresentation->bubble("hit");
-//                    annotations->drawBubble(o->getBboxP1(), "hit");
+                    annotations->drawBubble(o->getBboxP1(), "hit");
 
                 // bail if attenuation is already extremely high
                 if (pSend < 1e-30)
