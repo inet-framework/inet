@@ -40,9 +40,9 @@ static uint64_t MacToUint64(const MACAddress &add)
     uint64_t aux;
     uint64_t lo=0;
 
-    for (int i = 0; i < MAC_ADDRESS_BYTES; i++)
+    for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
     {
-        aux  = add.getAddressByte(MAC_ADDRESS_BYTES - i - 1);
+        aux  = add.getAddressByte(MAC_ADDRESS_SIZE - i - 1);
         aux <<= 8 * i;
         lo  |= aux ;
     }
