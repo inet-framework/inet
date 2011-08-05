@@ -106,8 +106,6 @@ class INET_API UDPBasicBurst2 : public cSimpleModule
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();
 
-//    virtual void sendToUDPDelayed(cPacket *, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
-
   protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);

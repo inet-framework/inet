@@ -263,28 +263,6 @@ void UDPBasicBurst2::sendPacket()
     numSent++;
 }
 
-/*
-void UDPBasicBurst2::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr,
-                                      int destPort, double delay)
-{
-    // send message to UDP, with the appropriate control info attached
-    socket.sendTo()
-    msg->setKind(UDP_C_DATA);
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setSrcPort(srcPort);
-    ctrl->setDestAddr(destAddr);
-    ctrl->setDestPort(destPort);
-    msg->setControlInfo(ctrl);
-    msg->setTimestamp(delay);
-
-    EV << "Sending packet: ";
-    printPacket(msg);
-
-    sendDelayed (msg,delay-simTime(), "udpOut");
-}
-*/
-
 void UDPBasicBurst2::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
