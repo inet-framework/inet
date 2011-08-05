@@ -224,10 +224,11 @@ void UDPBasicBurst2::initialize(int stage)
         destAddr = chooseDestAddr(toFix);
     }
 
+    timerNext = new cMessage("UDPBasicBurst2_timer");
     if ((double)par("time_begin") == -1)
-        scheduleAt(0, &timerNext);
+        scheduleAt(0, timerNext);
     else
-        scheduleAt(par("time_begin"), &timerNext);
+        scheduleAt(par("time_begin"), timerNext);
 }
 
 IPvXAddress UDPBasicBurst2::chooseDestAddr(bool &fix)
@@ -444,7 +445,7 @@ void UDPBasicBurst2::generateBurst()
         opp_error("UDPBasicBurst bad parameters: next pkt time in the past ");
     }
 
-    scheduleAt(pkt_time, &timerNext);
+    scheduleAt(pkt_time, timerNext);
 }
 
 void UDPBasicBurst2::finish()
@@ -523,16 +524,16 @@ void UDPBasicBurst2::finish()
     pktDelayMtoM = NULL;
     pktDelayMtoF = NULL;
 
+    cancelAndDelete(timerNext);
+    timerNext = NULL;
 }
 
 UDPBasicBurst2::~UDPBasicBurst2()
 {
-
     if (pktDelayFtoF) delete pktDelayFtoF;
     if (pktDelayFtoM) delete pktDelayFtoM;
     if (pktDelayMtoM) delete pktDelayMtoM;
     if (pktDelayMtoF) delete pktDelayMtoF;
 
-    if (timerNext.isScheduled())
-        cancelEvent(&timerNext);
+    cancelAndDelete(timerNext);
 }

@@ -47,7 +47,7 @@ class INET_API UDPBasicBurst2 : public cSimpleModule
     SurceSequence sourceSequence;
     simtime_t limitDelay;
     int randGenerator;
-    cMessage timerNext;
+    cMessage *timerNext;
     simtime_t endSend;
     simtime_t nextPkt;
     simtime_t timeBurst;
@@ -113,7 +113,7 @@ class INET_API UDPBasicBurst2 : public cSimpleModule
     virtual void finish();
 
   public:
-    UDPBasicBurst2() {}
+    UDPBasicBurst2() { timerNext = NULL; pktDelayFtoF = NULL; pktDelayFtoM = NULL; pktDelayMtoM = NULL; pktDelayMtoF = NULL; }
     ~UDPBasicBurst2();
 };
 
