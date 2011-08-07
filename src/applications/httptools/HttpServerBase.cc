@@ -37,7 +37,7 @@ void HttpServerBase::initialize()
 
     EV_DEBUG << "Initializing server component\n";
 
-    wwwName = (const char*)par("www");
+    wwwName = (const char*)par("hostName");
     if ( wwwName.size() == 0 )
     {
         wwwName = "www.";

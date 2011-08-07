@@ -52,7 +52,7 @@ import inet.applications.ITCPApp;
 simple HttpServerEvilB like ITCPApp
 {
     parameters:
-        string www;             // The WWW name of the server
+        string hostName;        // The domain name of the server
         int port;       // The listening port number
         int httpProtocol;       // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         int logLevel;           // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
