@@ -54,7 +54,6 @@ channel ethernetline extends ned.DatarateChannel
 network HttpNnodes
 {
     parameters:
-        double numservers @prompt("Number of servers") = default(10);
         double numclients @prompt("Number of clients") = default(10);
         @display("bgb=474,374");
     submodules:
@@ -88,14 +87,22 @@ network HttpNnodes
             parameters:
                 @display("i=device/laptop_l");
         }
-        server[numservers]: StandardHost {
+        thegood: StandardHost {
+            parameters:
+                @display("i=device/server_l");
+        }
+        thebad: StandardHost {
+            parameters:
+                @display("i=device/server_l");
+        }
+        theugly: StandardHost {
             parameters:
                 @display("i=device/server_l");
         }
     connections allowunconnected:
-        for i=0..numservers-1 {
-            server[i].ethg++ <--> ethernetline <--> router_s.ethg++;
-        }
+        thegood.ethg++ <--> ethernetline <--> router_s.ethg++;
+        thebad.ethg++ <--> ethernetline <--> router_s.ethg++;
+        theugly.ethg++ <--> ethernetline <--> router_s.ethg++;
         for i=0..numclients-1 {
             client[i].ethg++ <--> ethernetline <--> router_c.ethg++;
         }
