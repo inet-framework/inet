@@ -354,7 +354,7 @@
         name="OSPFv2 examples"
         description = "Examples for OSPFv2"
         initiallyEnabled = "true"
-        requires = "OSPFv2 Ethernet"
+        requires = "OSPFv2 UDP IPv4 Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.ospfv2
@@ -383,7 +383,7 @@
         name="BGPv4 examples"
         description = "Examples for BGPv4"
         initiallyEnabled = "true"
-        requires = "BGPv4 Ethernet"
+        requires = "BGPv4 TCP_INET UDP IPv4 Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.bgpv4
@@ -411,7 +411,7 @@
         name="MANET routing examples"
         description = "Examples for the MANET routing protocols"
         initiallyEnabled = "true"
-        requires = "MANET"
+        requires = "MANET TCP_INET UDP IPv4"
         labels = "routing manet examples"
         nedPackages = "
                        inet.examples.manetrouting
@@ -511,7 +511,7 @@
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "IPv4 Ethernet Ieee80211 MF80211"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 MF80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
