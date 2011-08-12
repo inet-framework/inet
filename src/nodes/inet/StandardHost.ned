@@ -61,7 +61,7 @@ module StandardHost extends NodeBase
     submodules:
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
-                @display("p=186,54");
+                @display("p=186,54,row");
         }
         tcp: <tcpType> like ITCP if numTcpApps>0 {
             parameters:
@@ -69,7 +69,7 @@ module StandardHost extends NodeBase
         }
         udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
-                @display("p=336,54");
+                @display("p=336,54,row");
         }
         udp: <udpType> like IUDP if numUdpApps>0 {
             parameters:
@@ -77,7 +77,7 @@ module StandardHost extends NodeBase
         }
         sctpApp[numSctpApps]: <> like ISCTPApp {
             parameters:
-                @display("p=501,54");
+                @display("p=501,54,row");
         }
         sctp: <sctpType> like ISCTP if numSctpApps>0 {
             @display("p=501,141");
