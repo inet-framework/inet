@@ -437,7 +437,7 @@ void PPP::updateDisplayString()
         double datarate = datarateChannel->getNominalDatarate();
         if (datarate >= 1e9) sprintf(datarateText, "%gGbps", datarate / 1e9);
         else if (datarate >= 1e6) sprintf(datarateText, "%gMbps", datarate / 1e6);
-        else if (datarate >= 1e3) sprintf(datarateText, "%gKbps", datarate / 1e3);
+        else if (datarate >= 1e3) sprintf(datarateText, "%gkbps", datarate / 1e3);
         else sprintf(datarateText, "%gbps", datarate);
 
 /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6

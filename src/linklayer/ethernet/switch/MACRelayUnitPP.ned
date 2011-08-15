@@ -41,8 +41,8 @@ simple MACRelayUnitPP like IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit
         double processingTime @unit("s") = default(0s);   // processing time of one frame
-        int bufferSize @unit("B") = default(1MB);   // memory
-        int highWatermark @unit("B") = default(512KB); // buffer usage threshold to send PAUSE frame
+        int bufferSize @unit("B") = default(1MiB);   // memory
+        int highWatermark @unit("B") = default(512KiB); // buffer usage threshold to send PAUSE frame
         int pauseUnits = default(300);       // time to put in PAUSE frames (in units of 512 bit times)
         @display("i=block/switch");
         @statistic[processedBytes](title="Processed bytes"; record=sum,count,vector);

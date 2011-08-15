@@ -24,7 +24,7 @@ network R37
         channel line extends ThruputMeteringChannel
         {
             delay = 15ms;
-            datarate = 128Kbps;
+            datarate = 128kbps;
             thruputDisplayFormat = "u";
         }
     submodules:

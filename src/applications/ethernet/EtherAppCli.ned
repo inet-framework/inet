@@ -31,7 +31,7 @@ simple EtherAppCli
         double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
         volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
-        volatile int respLength @unit(B) = default(1KB);  // length of response packets
+        volatile int respLength @unit(B) = default(1KiB);  // length of response packets
         bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
