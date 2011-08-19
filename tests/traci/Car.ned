@@ -25,7 +25,7 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.transport.udp.UDP;
 import inet.nodes.inet.NetworkLayer;
 import inet.linklayer.mf80211.Nic80211;
-import inet.applications.traci.Test_TraCI;
+import inet.applications.traci.TraCITestApp;
 
 module Car
 {
@@ -43,7 +43,7 @@ module Car
             parameters:
                 @display("p=140,326;i=block/table");
         }
-        app: Test_TraCI {
+        app: TraCITestApp {
             parameters:
                 @display("p=153,62;i=block/app");
         }

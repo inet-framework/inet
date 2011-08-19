@@ -20,28 +20,14 @@
 
 package inet.applications.traci;
 
-//
-// Processes an XML script to test the OMNeT++ TraCI client modules.
-//
-// Parameter "commands" takes as input an XML fragment of the following form:
-//
-// <commands>
-//   <CMD_SETMAXSPEED t="10" maxspeed="0" />
-//   <CMD_CHANGEROUTE dt="0" roadid="28" traveltime="9999" />
-// </commands>
-//
-// Execution times can be specified relative to the start of the 
-// simulation ("t") or the last command ("dt"), i.e. the above example sends 
-// CMD_SETMAXSPEED at t=10 and CMD_CHANGEROUTE as soon as the vehicle enters
-// the simulation.
-//
-simple Test_TraCI
-{
-    parameters:
-        bool debug = default(false);  // output debugging information
-        xml commands;  // test script to run
 
-        @display("i=block/app2");
-    gates:
+simple TraCITestApp
+{
+	parameters:
+		bool debug = default(false);  // output debugging information
+		int testNumber;  // number of test to run (-1: no test)
+
+		@display("i=block/app2");
+	gates:
 
 }

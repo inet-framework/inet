@@ -1,3 +1,2 @@
 #!/bin/sh
-which texttest.py || (echo "Please install Texttest (http://texttest.carmen.se/) and add texttest.py to your PATH"; exit 1)
-texttest.py
+opp_run -l../../src/inet -n"../../src;." -u Cmdenv "$@" | egrep -i "^(Pass|FAIL)"
