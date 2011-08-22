@@ -49,6 +49,7 @@
 #define ETHER_LLC_HEADER_LENGTH      (3) /* ssap(1)+dsap(1)+control(1) */
 #define ETHER_SNAP_HEADER_LENGTH     (5) /* org(3)+local(2) */
 #define ETHER_PAUSE_COMMAND_BYTES    (2+2) /* opcode(2)+parameters(2) */
+#define ETHER_PAUSE_COMMAND_PADDED_BYTES std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES)
 
 #endif
 
