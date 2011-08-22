@@ -61,8 +61,8 @@ simple EtherLLC
         @statistic[droppedPkBytesUnknownDSAP](title="Dropped bytes unknown DSAP";record=sum,count,vector);
         @statistic[sendPauseSignal](title="send Pause";record=count,vector);
     gates:
-        input upperLayerIn[];   // higher layer protocols or applications
-        output upperLayerOut[]; // higher layer protocols or applications
+        input upperLayerIn[] @labels(Ieee802Ctrl/down);   // higher layer
+        output upperLayerOut[] @labels(Ieee802Ctrl/up); // higher layer
         input lowerLayerIn @labels(EtherFrame);     // to Ethernet MAC
         output lowerLayerOut @labels(EtherFrame);   // to Ethernet MAC
 }

@@ -33,6 +33,7 @@ simple EtherHub
 {
     parameters:
         @node();
+        @labels(node,ethernet-node);
         @display("i=device/hub");
         @statistic[pkBytes](title="Handled packet bytes";record=count,sum,vector);
     gates:
