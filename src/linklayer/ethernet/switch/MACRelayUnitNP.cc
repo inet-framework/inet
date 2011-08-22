@@ -78,7 +78,7 @@ void MACRelayUnitNP::initialize()
     endProcEvents = new cMessage *[numCPUs];
     for (int i=0; i<numCPUs; i++)
     {
-        char msgname[20];
+        char msgname[40];
         sprintf(msgname, "endProcessing-cpu%d", i);
         endProcEvents[i] = new cMessage(msgname, i);
     }
