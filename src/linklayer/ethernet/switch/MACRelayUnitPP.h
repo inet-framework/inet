@@ -70,11 +70,6 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
      * and processFrame() for self messages.
      */
     virtual void handleMessage(cMessage *msg);
-
-    /**
-     * Writes statistics.
-     */
-    virtual void finish();
     //@}
 
     /**

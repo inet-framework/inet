@@ -49,7 +49,6 @@ class INET_API EtherLLC : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void finish();
 
     virtual void processPacketFromHigherLayer(cPacket *msg);
     virtual void processFrameFromMAC(EtherFrameWithLLC *msg);

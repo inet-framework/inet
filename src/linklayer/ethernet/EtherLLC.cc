@@ -261,8 +261,3 @@ void EtherLLC::handleSendPause(cMessage *msg)
 
     delete msg;
 }
-
-void EtherLLC::finish()
-{
-}
-

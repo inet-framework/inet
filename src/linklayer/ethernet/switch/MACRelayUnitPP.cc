@@ -176,7 +176,3 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     }
 }
 
-void MACRelayUnitPP::finish()
-{
-}
-
