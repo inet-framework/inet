@@ -1,4 +1,4 @@
-<features cppSourceRoots="src">
+<features cppSourceRoots="src examples">
     <feature
         id="TCP_common"
         name="TCP Common"
