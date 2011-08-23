@@ -175,13 +175,13 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 {
     EV << "Received frame from network: " << msg << endl;
 
-    if (dynamic_cast<EtherIFG *>(msg))
+    EtherFrame *frame = dynamic_cast<EtherFrame *>(msg);
+    if (!frame)
     {
-        delete msg;
-        return;
+        if (dynamic_cast<EtherIFG *>(msg))
+            throw cRuntimeError("There is no burst mode in full duplex, invalid received EtherIFG frame");
+        check_and_cast<EtherFrame *>(msg);
     }
-
-    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
     totalSuccessfulRxTime += frame->getDuration();
 
@@ -204,7 +204,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
 void EtherMACFullDuplex::handleEndIFGPeriod()
 {
-    if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
+    if (transmitState != WAIT_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
     if (NULL == curTxFrame)
