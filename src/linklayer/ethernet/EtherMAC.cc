@@ -346,9 +346,9 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
 
-        insertEndReception(msg->getTreeId(), endRxTime);
+        simtime_t newTime = insertEndReception(msg->getTreeId(), endRxTime);
         cancelEvent(endRxMsg);
-        scheduleAt(endRxTime, endRxMsg);
+        scheduleAt(newTime, endRxMsg);
         delete msg;
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
