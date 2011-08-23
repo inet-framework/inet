@@ -366,6 +366,7 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
     // If not set to promiscuous = on, then checks if received frame contains destination MAC address
     // matching port's MAC address, also checks if broadcast bit is set
 
+    // TODO: why don't we check here if a multicast message is really for us? where is that done?
     if (promiscuous || frame->getDest().isBroadcast() || frame->getDest().isMulticast() || frame->getDest().equals(address))
         return true;
 

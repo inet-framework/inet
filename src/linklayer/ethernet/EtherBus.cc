@@ -110,6 +110,7 @@ void EtherBus::initialize()
 
     EV << "\n";
 
+    // TODO: the following code block is a duplicate of another found in EtherHub
     double datarate = 0.0;
 
     for (i = 0; i < taps; i++)

@@ -23,6 +23,8 @@
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
+// TODO: refactor using a statemachine that is present in a single function
+// TODO: this helps understanding what interactions are there and how they affect the state
 
 Define_Module(EtherMACFullDuplex);
 

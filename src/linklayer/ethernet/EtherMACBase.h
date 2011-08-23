@@ -123,6 +123,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate change of tx/rx channels)
 
     // MAC operation modes and parameters
+    // TODO: some of these parameters do not have any meaning for EtherMACFullDuplex, they should rather be in EtherMAC instead
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
 

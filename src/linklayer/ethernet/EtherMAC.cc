@@ -26,6 +26,10 @@
 #include "Ieee802Ctrl_m.h"
 #include "IPassiveQueue.h"
 
+// TODO: there is some code that is pretty much the same as the one found in EtherMACFullDuplex.cc (e.g. EtherMAC::beginSendFrames)
+// TODO: refactor using a statemachine that is present in a single function
+// TODO: this helps understanding what interactions are there and how they affect the state
+
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
