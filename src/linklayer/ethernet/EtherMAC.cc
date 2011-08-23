@@ -592,14 +592,22 @@ void EtherMAC::handleEndRxPeriod()
 
     simtime_t dt = simTime() - channelBusySince;
 
-    if (receiveState == RECEIVING_STATE) // i.e. not RX_COLLISION_STATE
+    switch (receiveState)
     {
-        frameReceptionComplete();
-        totalSuccessfulRxTxTime += dt;
-    }
-    else
-    {
-        totalCollisionTime += dt;
+        case RECEIVING_STATE:
+            frameReceptionComplete();
+            totalSuccessfulRxTxTime += dt;
+            break;
+
+        case RX_COLLISION_STATE:
+            totalCollisionTime += dt;
+            break;
+
+        case RX_RECONNECT_STATE:
+            break;
+
+        default:
+            throw cRuntimeError("model error: invalid receiveState %d", receiveState);
     }
 
     receiveState = RX_IDLE_STATE;
