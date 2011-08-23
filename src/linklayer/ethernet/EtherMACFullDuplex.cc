@@ -185,7 +185,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
     totalSuccessfulRxTime += frame->getDuration();
 
-    if (checkDestinationAddress(frame))
+    if (!dropFrameNotForUs(frame))
     {
         if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
         {

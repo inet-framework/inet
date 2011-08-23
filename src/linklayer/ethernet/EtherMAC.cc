@@ -789,7 +789,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
 
-    if (!checkDestinationAddress(frame))
+    if (dropFrameNotForUs(frame))
         return;
 
     numFramesPassedToHL++;

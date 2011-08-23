@@ -361,20 +361,20 @@ void EtherMACBase::refreshConnection()
         handleDisconnect();
 }
 
-bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
+bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
 {
     // If not set to promiscuous = on, then checks if received frame contains destination MAC address
     // matching port's MAC address, also checks if broadcast bit is set
 
     // TODO: why don't we check here if a multicast message is really for us? where is that done?
     if (promiscuous || frame->getDest().isBroadcast() || frame->getDest().isMulticast() || frame->getDest().equals(address))
-        return true;
+        return false;
 
     EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
     numDroppedNotForUs++;
     emit(dropPkNotForUsSignal, frame);
     delete frame;
-    return false;
+    return true;
 }
 
 void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)

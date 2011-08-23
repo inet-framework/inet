@@ -207,7 +207,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
 
     // helpers
     /** Checks destination address and drop frame when not came for me */
-    virtual bool checkDestinationAddress(EtherFrame *frame);
+    virtual bool dropFrameNotForUs(EtherFrame *frame);
 
     /**
      * Calculates datarates, etc. Verify the same settings on in/out channels, and throw error
