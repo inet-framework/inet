@@ -67,9 +67,9 @@ packet EtherIFG extends EtherTraffic
 // Source and destination MAC address are stored in data members.
 // Other fields include:
 //  - preamble: not stored (only contributes length)
-//  - length: stored in cMessage length, not stored explicitly
-//  - payload: stored a encapsulated packet (cMessage::encapsulate())
-//  - crc: represented by cMessage::hasBitError()
+//  - length: stored in cPacket length, not stored explicitly
+//  - payload: stored a encapsulated packet (cPacket::encapsulate())
+//  - crc: represented by cPacket::hasBitError()
 //
 packet EtherFrame extends EtherTraffic
 {

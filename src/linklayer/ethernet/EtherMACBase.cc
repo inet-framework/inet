@@ -146,7 +146,7 @@ void EtherMACBase::initialize()
 
     calculateParameters(true);
 
-    lastTxFinishTime = -1.0; // never equals with current simtime.
+    lastTxFinishTime = -1.0; // not equals with current simtime.
 
     // initialize self messages
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);

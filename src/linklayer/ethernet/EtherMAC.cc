@@ -440,10 +440,9 @@ void EtherMAC::handleEndIFGPeriod()
     if (NULL == curTxFrame)
         error("End of IFG and no frame to transmit");
 
-    // End of IFG period, okay to transmit, if Rx idle OR duplexMode
     EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
 
-    // End of IFG period, okay to transmit, if Rx idle OR duplexMode
+    // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
 
     // send frame to network
     startFrameTransmission();

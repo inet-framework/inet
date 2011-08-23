@@ -33,7 +33,7 @@ import inet.base.IHook;
 module EthernetInterface like IWiredNic
 {
     parameters:
-        bool csmacdSupport = default(false);  // by default no CSMA/CD so only only point-to-point duplex links are supported.
+        bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~EthDropTailQoSQueue, ~REDQueue, or empty for use internal queue
