@@ -317,9 +317,6 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
 
-    if (!checkDestinationAddress(frame))
-        return;
-
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
