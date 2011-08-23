@@ -56,7 +56,7 @@ class INET_API EtherBus : public cSimpleModule
 
   protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage*);
+    virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
     // tokenize string containing space-separated numbers into the array

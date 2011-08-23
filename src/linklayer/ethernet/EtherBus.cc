@@ -178,10 +178,8 @@ void EtherBus::handleMessage(cMessage *msg)
         bool isLast = (direction == UPSTREAM) ? (tapPoint == 0) : (tapPoint == taps-1);
         cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
 
-        {
-            // stop current transmission
-            gate("ethg$o", tapPoint)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
-        }
+        // stop current transmission
+        gate("ethg$o", tapPoint)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
 
         send(msg2, "ethg$o", tapPoint);
 

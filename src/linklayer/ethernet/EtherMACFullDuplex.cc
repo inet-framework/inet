@@ -263,8 +263,8 @@ void EtherMACFullDuplex::finish()
     EtherMACBase::finish();
 
     simtime_t t = simTime();
-    simtime_t totalChannelIdleTime = t - totalSuccessfulRxTime;
-    recordScalar("rx channel idle (%)", 100 * (totalChannelIdleTime / t));
+    simtime_t totalRxChannelIdleTime = t - totalSuccessfulRxTime;
+    recordScalar("rx channel idle (%)", 100 * (totalRxChannelIdleTime / t));
     recordScalar("rx channel utilization (%)", 100 * (totalSuccessfulRxTime / t));
 }
 

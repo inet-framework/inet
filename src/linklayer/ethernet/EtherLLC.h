@@ -63,5 +63,3 @@ class INET_API EtherLLC : public cSimpleModule
 };
 
 #endif
-
-
