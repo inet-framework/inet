@@ -140,11 +140,9 @@ simple EtherMACFullDuplex like IEtherMAC
         string address = default("auto");        // MAC address as hex string (12 hex digits), or
                                                  // "auto". "auto" values will be replaced by
                                                  // a generated MAC address in init stage 0.
-        bool duplexEnabled = true;               // duplex mode can be enabled;
         int txQueueLimit = default(1000);        // maximum number of frames queued up for transmission;
                                                  // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");        // name of optional external queue module
-        bool frameBursting = default(false);     // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
 
