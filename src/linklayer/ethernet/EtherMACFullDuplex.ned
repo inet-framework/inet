@@ -60,12 +60,12 @@ import inet.linklayer.IEtherMAC;
 // Processing of frames received from higher layers:
 // - if src address in the frame is empty, fill it out
 // - frames get queued up until transmission
-// - transmit according to the CSMA/CD protocol
+// - transmits the frame when the transmitter is ready
 // - can send PAUSE message if requested by higher layers (PAUSE protocol,
 //   used in switches).
 //
 // Processing of frames incoming from the network:
-// - receive according to the CSMA/CD protocol
+// - receive frame from the network
 // - CRC checking (frames with the error bit set are discarded).
 // - respond to PAUSE frames
 // - in promiscuous mode, pass up all received frames;
@@ -78,8 +78,7 @@ import inet.linklayer.IEtherMAC;
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
 // (including the destination MAC address). The source address, if left empty,
-// will be filled in. Then frame is queued and transmitted according
-// to the CSMA/CD protocol.
+// will be filled in. Then frame is queued and transmitted.
 //
 // Data frames received from the network are EtherFrames. They are passed to
 // the higher layers without modification.
