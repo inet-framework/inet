@@ -345,6 +345,15 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     simtime_t endRxTime = simTime() + msg->getDuration();
     bool isJam = dynamic_cast<EtherJam*>(msg) != NULL;
 
+    if (!duplexMode && receiveState == RX_RECONNECT_STATE)
+    {
+        long treeId = isJam ? ((EtherJam*)msg)->getAbortedPkTreeID() : msg->getTreeId();
+        simtime_t newTime = insertEndReception(treeId, endRxTime);
+        cancelEvent(endRxMsg);
+        scheduleAt(newTime, endRxMsg);
+        delete msg;
+    }
+    else
     if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
