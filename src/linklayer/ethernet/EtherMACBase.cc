@@ -345,50 +345,54 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
     }
 }
 
-void EtherMACBase::handleDisconnect()
+void EtherMACBase::processConnectionChanged()
 {
-    cancelEvent(endTxMsg);
-    cancelEvent(endIFGMsg);
-    cancelEvent(endPauseMsg);
+    if (!connected)
+    {
+        cancelEvent(endTxMsg);
+        cancelEvent(endIFGMsg);
+        cancelEvent(endPauseMsg);
 
-    if (curTxFrame)
-    {
-        delete curTxFrame;
-        curTxFrame = NULL;
-        lastTxFinishTime = -1.0;  // so that it never equals with current simtime, used for Burst mode detection.
-    }
-
-    if (txQueue.extQueue)
-    {
-        // Clear external queue: send a request, and received packet will be deleted in handleMessage()
-        if (0 == txQueue.extQueue->getNumPendingRequests())
-            txQueue.extQueue->requestPacket();
-    }
-    else
-    {
-        //Clear inner queue
-        while (!txQueue.innerQueue->empty())
+        if (curTxFrame)
         {
-            cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
-            EV << "Interface is not connected, dropping packet " << msg << endl;
-            numDroppedIfaceDown++;
-            emit(dropPkIfaceDownSignal, msg);
-            delete msg;
+            delete curTxFrame;
+            curTxFrame = NULL;
+            lastTxFinishTime = -1.0;  // so that it never equals with current simtime, used for Burst mode detection.
         }
-    }
 
-    transmitState = TX_IDLE_STATE;
-    receiveState = RX_IDLE_STATE;
+        if (txQueue.extQueue)
+        {
+            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
+            if (0 == txQueue.extQueue->getNumPendingRequests())
+                txQueue.extQueue->requestPacket();
+        }
+        else
+        {
+            //Clear inner queue
+            while (!txQueue.innerQueue->empty())
+            {
+                cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
+                EV << "Interface is not connected, dropping packet " << msg << endl;
+                numDroppedIfaceDown++;
+                emit(dropPkIfaceDownSignal, msg);
+                delete msg;
+            }
+        }
+
+        transmitState = TX_IDLE_STATE;
+        receiveState = RX_IDLE_STATE;
+    }
 }
 
 void EtherMACBase::refreshConnection()
 {
     Enter_Method_Silent();
 
+    bool oldConn = connected;
     calculateParameters(false);
 
-    if (!connected)
-        handleDisconnect();
+    if (oldConn != connected)
+        processConnectionChanged();
 }
 
 bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
