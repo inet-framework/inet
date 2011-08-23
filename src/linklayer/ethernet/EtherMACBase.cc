@@ -467,6 +467,15 @@ void EtherMACBase::getNextFrameFromQueue()
     }
 }
 
+void EtherMACBase::requestNextFrameFromExtQueue()
+{
+    if (txQueue.extQueue)
+    {
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
+    }
+}
+
 void EtherMACBase::finish()
 {
     if (!disabled)

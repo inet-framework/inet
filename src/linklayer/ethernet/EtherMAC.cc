@@ -721,9 +721,7 @@ void EtherMAC::processMessageWhenNotConnected(cMessage *msg)
     numDroppedIfaceDown++;
     delete msg;
 
-    if (txQueue.extQueue)
-        if (0 == txQueue.extQueue->getNumPendingRequests())
-            txQueue.extQueue->requestPacket();
+    requestNextFrameFromExtQueue();
 }
 
 void EtherMAC::processMessageWhenDisabled(cMessage *msg)
@@ -732,9 +730,7 @@ void EtherMAC::processMessageWhenDisabled(cMessage *msg)
     emit(dropPkIfaceDownSignal, msg);
     delete msg;
 
-    if (txQueue.extQueue)
-        if (0 == txQueue.extQueue->getNumPendingRequests())
-            txQueue.extQueue->requestPacket();
+    requestNextFrameFromExtQueue();
 }
 
 void EtherMAC::handleEndPausePeriod()
