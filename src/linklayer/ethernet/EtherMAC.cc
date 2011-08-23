@@ -684,6 +684,7 @@ void EtherMAC::printState()
         CASE(RX_IDLE_STATE);
         CASE(RECEIVING_STATE);
         CASE(RX_COLLISION_STATE);
+        CASE(RX_RECONNECT_STATE);
     }
 
     EV << ",  backoffs: " << backoffs;

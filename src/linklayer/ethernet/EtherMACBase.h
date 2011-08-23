@@ -51,7 +51,8 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     {
         RX_IDLE_STATE = 1,
         RECEIVING_STATE,
-        RX_COLLISION_STATE
+        RX_COLLISION_STATE,
+        RX_RECONNECT_STATE
     };
 
     // Self-message kind values
