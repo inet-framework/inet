@@ -120,6 +120,18 @@ void EtherMAC::processConnectionChanged()
 
     EtherMACBase::processConnectionChanged();
 
+    if (connected)
+    {
+        if (!duplexMode)
+        {
+            // start RX_RECONNECT_STATE
+            receiveState = RX_RECONNECT_STATE;
+            simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
+            endRxTimeList.clear();
+            insertEndReception(endRxMsg->getTreeId(), reconnectEndTime);
+            scheduleAt(reconnectEndTime, endRxMsg);
+        }
+    }
 }
 
 void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
