@@ -379,17 +379,12 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
     else if (receiveState == RX_IDLE_STATE)
     {
-        channelBusySince = simTime();
         if (isJam)
-        {
-            EV << "Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)";
-            processReceivedJam((EtherJam *)msg);
-        }
-        else
-        {
-            EV << "Start reception of frame\n";
-            scheduleEndRxPeriod(msg);
-        }
+            error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
+
+        channelBusySince = simTime();
+        EV << "Start reception of frame\n";
+        scheduleEndRxPeriod(msg);
     }
     else if (receiveState == RECEIVING_STATE
             && !isJam
