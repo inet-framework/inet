@@ -128,8 +128,7 @@ void EtherMAC::processConnectionChanged()
             receiveState = RX_RECONNECT_STATE;
             simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
             endRxTimeList.clear();
-            insertEndReception(endRxMsg->getTreeId(), reconnectEndTime);
-            scheduleAt(reconnectEndTime, endRxMsg);
+            processEndReceptionAtReconnectState(endRxMsg->getTreeId(), reconnectEndTime);
         }
     }
 }
@@ -274,20 +273,14 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     }
 }
 
-void EtherMAC::removeExpiredEndRxTimes()
-{
-    // remove expired entries from endRxTimeList
-    simtime_t now = simTime();
-    while (!endRxTimeList.empty() && endRxTimeList.front().endTime <= now)
-        endRxTimeList.pop_front();
-}
-
-simtime_t EtherMAC::insertEndReception(long packetTreeId, simtime_t endRxTime)
+void EtherMAC::processEndReceptionAtReconnectState(long packetTreeId, simtime_t endRxTime)
 {
     ASSERT(packetTreeId != 0);
 
     // remove expired entries from endRxTimeList
-    removeExpiredEndRxTimes();
+    simtime_t now = simTime();
+    while (!endRxTimeList.empty() && endRxTimeList.front().endTime <= now)
+        endRxTimeList.pop_front();
 
     EndRxTimeList::iterator i;
 
@@ -309,19 +302,41 @@ simtime_t EtherMAC::insertEndReception(long packetTreeId, simtime_t endRxTime)
     PkIdRxTime item(packetTreeId, endRxTime);
     i = endRxTimeList.insert(i, item);
 
-    numConcurrentTransmissions = endRxTimeList.size();
-
-    // return the highest endTime (stored in last element)
     simtime_t maxRxTime = endRxTimeList.back().endTime;
-    return maxRxTime;
+    simtime_t oldRxTime = endRxMsg->getArrivalTime();
+    if (oldRxTime < maxRxTime)
+    {
+        cancelEvent(endRxMsg);
+        scheduleAt(maxRxTime, endRxMsg);
+    }
+}
+
+void EtherMAC::processEndReception(simtime_t endRxTime)
+{
+    numConcurrentTransmissions++;
+
+    if (endRxMsg->getArrivalTime() < endRxTime)
+    {
+        cancelEvent(endRxMsg);
+        scheduleAt(endRxTime, endRxMsg);
+    }
 }
 
 void EtherMAC::processReceivedJam(EtherJam *jam)
 {
-    simtime_t newRxTime = insertEndReception(jam->getAbortedPkTreeID(), simTime() + jam->getDuration());
-    cancelEvent(endRxMsg);
-    scheduleAt(newRxTime, endRxMsg);
+    simtime_t endRxTime = simTime() + jam->getDuration();
     delete jam;
+
+    numConcurrentTransmissions--;
+    if (numConcurrentTransmissions < 0)
+        error("Received JAM without message");
+
+    if (numConcurrentTransmissions == 0 || endRxMsg->getArrivalTime() < endRxTime)
+    {
+        cancelEvent(endRxMsg);
+        scheduleAt(endRxTime, endRxMsg);
+    }
+
     processDetectedCollision();
 }
 
@@ -348,9 +363,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     if (!duplexMode && receiveState == RX_RECONNECT_STATE)
     {
         long treeId = jamMsg ? jamMsg->getAbortedPkTreeID() : msg->getTreeId();
-        simtime_t newTime = insertEndReception(treeId, endRxTime);
-        cancelEvent(endRxMsg);
-        scheduleAt(newTime, endRxMsg);
+        processEndReceptionAtReconnectState(treeId, endRxTime);
         delete msg;
     }
     else
@@ -363,9 +376,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
 
-        simtime_t newTime = insertEndReception(msg->getTreeId(), endRxTime);
-        cancelEvent(endRxMsg);
-        scheduleAt(newTime, endRxMsg);
+        processEndReception(endRxTime);
         delete msg;
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
@@ -418,9 +429,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         else // EtherFrame or EtherPauseFrame
         {
             EV << "Overlapping receptions -- setting collision state\n";
-            endRxTime = insertEndReception(msg->getTreeId(), endRxTime);
-            cancelEvent(endRxMsg);
-            scheduleAt(endRxTime, endRxMsg);
+            processEndReception(endRxTime);
             // delete collided frames: arrived frame as well as the one we're currently receiving
             delete msg;
             processDetectedCollision();
@@ -573,32 +582,33 @@ void EtherMAC::handleEndTxPeriod()
 void EtherMAC::scheduleEndRxPeriod(EtherTraffic *frame)
 {
     ASSERT(frameBeingReceived == NULL);
+    ASSERT(!endRxMsg->isScheduled());
 
     frameBeingReceived = frame;
     receiveState = RECEIVING_STATE;
-    simtime_t endRxTime = insertEndReception(frame->getTreeId(), simTime() + frame->getDuration());
-    scheduleAt(endRxTime, endRxMsg);
+    processEndReception(simTime() + frame->getDuration());
 }
 
 void EtherMAC::handleEndRxPeriod()
 {
-    EV << "Frame reception complete\n";
-    removeExpiredEndRxTimes();
-
     simtime_t dt = simTime() - channelBusySince;
 
     switch (receiveState)
     {
         case RECEIVING_STATE:
+            EV << "Frame reception complete\n";
             frameReceptionComplete();
             totalSuccessfulRxTxTime += dt;
             break;
 
         case RX_COLLISION_STATE:
+            EV << "Incoming signals finished after collision\n";
             totalCollisionTime += dt;
             break;
 
         case RX_RECONNECT_STATE:
+            EV << "Incoming signals finished or reconnect time ellapsed after reconnect\n";
+            endRxTimeList.clear();
             break;
 
         default:
