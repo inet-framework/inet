@@ -122,7 +122,7 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
 {
     EtherMACBase::calculateParameters(errorWhenAsymmetric);
 
-    if (!duplexMode)
+    if (connected && !duplexMode)
     {
         if (curEtherDescr.txrate >= FAST_GIGABIT_ETHERNET_TXRATE)
             error("The fast gigabit ethernet supports only the full duplex connections");
