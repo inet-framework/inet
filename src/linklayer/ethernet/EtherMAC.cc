@@ -343,11 +343,11 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
 
     simtime_t endRxTime = simTime() + msg->getDuration();
-    bool isJam = dynamic_cast<EtherJam*>(msg) != NULL;
+    EtherJam *jamMsg = dynamic_cast<EtherJam*>(msg);
 
     if (!duplexMode && receiveState == RX_RECONNECT_STATE)
     {
-        long treeId = isJam ? ((EtherJam*)msg)->getAbortedPkTreeID() : msg->getTreeId();
+        long treeId = jamMsg ? jamMsg->getAbortedPkTreeID() : msg->getTreeId();
         simtime_t newTime = insertEndReception(treeId, endRxTime);
         cancelEvent(endRxMsg);
         scheduleAt(newTime, endRxMsg);
@@ -357,7 +357,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
-        if (isJam)
+        if (jamMsg)
             error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
         // set receive state and schedule end of reception
@@ -379,7 +379,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
     else if (receiveState == RX_IDLE_STATE)
     {
-        if (isJam)
+        if (jamMsg)
             error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         channelBusySince = simTime();
@@ -387,7 +387,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         scheduleEndRxPeriod(msg);
     }
     else if (receiveState == RECEIVING_STATE
-            && !isJam
+            && !jamMsg
             && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
@@ -411,9 +411,9 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     else // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
     {
         // handle overlapping receptions
-        if (isJam)
+        if (jamMsg)
         {
-            processReceivedJam((EtherJam *)msg);
+            processReceivedJam(jamMsg);
         }
         else // EtherFrame or EtherPauseFrame
         {
