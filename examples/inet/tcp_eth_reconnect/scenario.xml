@@ -12,7 +12,10 @@
             <param name="delay" value="0.1us" />
         </connect>
     </at>
-    <set-channel-attr t="2" src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+    <at t="2">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+    </at>
     <at t="3.3">
         <disconnect src-module="server" src-gate="ethg$o[0]" />
     </at>
