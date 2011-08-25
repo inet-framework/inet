@@ -28,6 +28,11 @@ package inet.linklayer.ethernet;
 // model is not specific to Ethernet. Messages may represent anything, from
 // the beginning of a frame transmission to end (or abortion) of transmission.
 //
+// The module checks equivalence of input/output datarates only in initialize() function.
+// The module don't work correctly when you modify some datarates or add new connections
+// with different datarates.
+//
+
 simple EtherHub
 {
     parameters:

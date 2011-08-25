@@ -37,6 +37,8 @@ class INET_API EtherHub : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual void checkConnections();
 };
 
 #endif
