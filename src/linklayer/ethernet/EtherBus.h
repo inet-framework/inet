@@ -59,6 +59,8 @@ class INET_API EtherBus : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+    virtual void checkConnections();
+
     // tokenize string containing space-separated numbers into the array
     virtual void tokenize(const char *str, std::vector<double>& array);
 };

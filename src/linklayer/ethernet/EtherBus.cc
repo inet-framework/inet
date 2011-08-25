@@ -19,6 +19,14 @@
 
 Define_Module(EtherBus);
 
+//TODO
+// For checking datarates and connections when changed these, you must add a listener
+// of POST_MODEL_CHANGE signal and recheck settings when created a new connection or changed a
+// datarate parameter. When a new connection created, the module receives two signal:
+// one signal for incoming and one for outgoing gate.
+// See it in EtherMACBase, EtherMAC, EtherMACFullDuplex modules.
+
+
 static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 {
     out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
@@ -92,15 +100,26 @@ void EtherBus::initialize()
     }
     EV << "\n";
 
-    // TODO: the following code block is a duplicate of another found in EtherHub
+    checkConnections();
+}
+
+void EtherBus::checkConnections()
+{
+    int activeTaps = 0;
+
     double datarate = 0.0;
 
-    for (i = 0; i < taps; i++)
+    for (int i=0; i < taps; i++)
     {
         cGate* igate = gate("ethg$i", i);
+        cGate* ogate = gate("ethg$o", i);
+        if (!(igate->isConnected() && ogate->isConnected()))
+            continue;
+
+        activeTaps++;
         double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
 
-        if (i == 0)
+        if (activeTaps == 1)
             datarate = drate;
         else if (datarate != drate)
             throw cRuntimeError("The input datarate at tap %i differs from datarates of previous taps", i);
@@ -158,12 +177,24 @@ void EtherBus::handleMessage(cMessage *msg)
 
         // send out on gate
         bool isLast = (direction == UPSTREAM) ? (tapPoint == 0) : (tapPoint == taps-1);
-        cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
+        cGate* igate = gate("ethg$i", tapPoint);
+        cGate* ogate = gate("ethg$o", tapPoint);
+        if (igate->isConnected() && ogate->isConnected())
+        {
+            // send out on gate
 
-        // stop current transmission
-        gate("ethg$o", tapPoint)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
+            cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
 
-        send(msg2, "ethg$o", tapPoint);
+            // stop current transmission
+            ogate->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
+            send(msg2, ogate);
+        }
+        else
+        {
+            // skip gate
+            if (isLast)
+                delete msg;
+        }
 
         // if not end of the bus, schedule for next tap
         if (isLast)

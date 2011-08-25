@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+// The module checks equivalence of input/output datarates only in initialize() function.
+// The module don't work correctly when you modify some datarates or add new connections
+// with different datarates.
+//
 
 
 package inet.linklayer.ethernet;
