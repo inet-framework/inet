@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import inet.world.radio.ChannelControl;
 import inet.nodes.wireless.AccessPoint;
-import inet.mobility.models.NullMobility;
+import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
@@ -34,6 +34,7 @@ module ThroughputClient
         int idx;
         int maxCli;
         int maxSrv;
+        @node();
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -68,6 +69,7 @@ module ThroughputServer
     parameters:
         int idx;
         int maxSrv;
+        @node();
         @display("i=device/wifilaptop");
     gates:
         input radioIn @directIn;
@@ -85,7 +87,7 @@ module ThroughputServer
             parameters:
                 @display("p=120,158;q=queue");
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 initialX = 350m * (idx+1) / maxSrv;
                 @display("p=50,141");
