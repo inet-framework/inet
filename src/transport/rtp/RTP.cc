@@ -388,7 +388,7 @@ void RTP::createProfile()
 
 void RTP::createSocket()
 {
-    _udpSocket.bind(_destinationAddress, _port);
+    _udpSocket.bind(_port);
     connectRet();
 }
 
