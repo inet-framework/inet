@@ -68,7 +68,7 @@ module EtherHost
         mac: <macType> like IEtherMAC {
             parameters:
                 queueModule = (queueType == "" ? "" : "queue");
-                @display("p=155,272;q=queue");
+                @display("p=155,272;q=txQueue");
         }
     connections:
         mac.phys <--> ethg;

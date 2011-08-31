@@ -64,7 +64,7 @@ module AccessPoint
                 promiscuous = true;
                 txQueueLimit = 1000; // increase if needed
                 queueModule = "";
-                @display("p=208,225,row;q=queue");
+                @display("p=208,225,row;q=txQueue");
         }
         notificationBoard: NotificationBoard {
             parameters:

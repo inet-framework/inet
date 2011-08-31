@@ -55,7 +55,7 @@ module EtherSwitch
             parameters:
                 promiscuous = true;
                 queueModule = "";
-                @display("p=70,150,row;q=queue");
+                @display("p=70,150,row;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
