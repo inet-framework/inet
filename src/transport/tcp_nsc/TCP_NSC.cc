@@ -558,7 +558,8 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 ++changes;
 
                 TCP_NSC_Connection *conn;
-                int newConnId = ev.getUniqueNumber();
+                // int newConnId = ev.getUniqueNumber();
+                int newConnId = int(ev.getUniqueNumber() & INT_MAX);
                 // add into appConnMap
                 conn = &tcpAppConnMapM[newConnId];
                 conn->connIdM = newConnId;

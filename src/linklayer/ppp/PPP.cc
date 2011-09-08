@@ -135,7 +135,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setDatarate(datarate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    // InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    InterfaceToken token(0, uint32(simulation.getUniqueNumber() & UINT_MAX), 64);
     e->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),

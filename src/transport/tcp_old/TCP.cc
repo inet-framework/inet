@@ -368,7 +368,8 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXA
     key.appGateIndex = conn->appGateIndex;
     key.connId = conn->connId;
     tcpAppConnMap.erase(key);
-    key.connId = conn->connId = ev.getUniqueNumber();
+    // key.connId = conn->connId = ev.getUniqueNumber();
+    key.connId =  conn->connId = int(ev.getUniqueNumber() & INT_MAX);
     tcpAppConnMap[key] = conn;
 
     // ...and newConn will live on with the old connId

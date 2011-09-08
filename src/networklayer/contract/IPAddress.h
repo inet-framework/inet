@@ -255,7 +255,13 @@ inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPAddress& addr)
+
+//
+// Fixed by Kyeong Soo (Joseph) Kim (kyeongsoo.kim@gmail.com)
+// per Rudolf Hornig's suggestion for parallel simulation, Apr/13/2011
+//
+//inline void doPacking(cCommBuffer *buf, const IPAddress& addr)
+inline void doPacking(cCommBuffer *buf, IPAddress& addr)
 {
     buf->pack(addr.getInt());
 }

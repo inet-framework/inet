@@ -1,0 +1,2 @@
+#!/bin/sh
+mpiexec -n 2 ./run --parsim-communications-class=cMPICommunications -u Cmdenv -f parsim.ini $*

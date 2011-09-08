@@ -1,0 +1,17 @@
+### routing table of host[0] connected to server (through ONU[0])
+
+ifconfig:
+
+# ethernet card 0 to server
+name: eth0	inet_addr: 172.0.0.100	MTU: 1500	Metric: 1	BROADCAST MULTICAST
+
+ifconfigend.
+
+route:
+
+#Destination	Gateway		Genmask			Flags	Metric	Iface
+#default:		172.0.0.1	0.0.0.0			H		0		eth0
+172.0.0.0		*			255.255.255.0	H		0		eth0
+default:		*			0.0.0.0			H		0		eth0
+
+routeend.
