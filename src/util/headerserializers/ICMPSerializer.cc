@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <platdep/sockets.h>
 #include "headers/defs.h"
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
