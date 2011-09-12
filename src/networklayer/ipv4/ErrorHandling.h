@@ -33,6 +33,9 @@ class INET_API ErrorHandling: public cSimpleModule
 {
   protected:
     long numReceived;
+    long numHostUnreachable;
+    long numTimeExceeded;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

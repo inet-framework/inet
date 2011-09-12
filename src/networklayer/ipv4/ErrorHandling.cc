@@ -30,7 +30,12 @@ Define_Module(ErrorHandling);
 void ErrorHandling::initialize()
 {
     numReceived = 0;
+    numHostUnreachable = 0;
+    numTimeExceeded = 0;
+
     WATCH(numReceived);
+    WATCH(numHostUnreachable);
+    WATCH(numTimeExceeded);
 }
 
 void ErrorHandling::handleMessage(cMessage *msg)
@@ -49,6 +54,17 @@ void ErrorHandling::handleMessage(cMessage *msg)
        << " Dest: " << d->getDestAddress()
        << " Time: " << simTime()
        << "\n";
+
+    switch (icmpMsg->getType())
+    {
+        case ICMP_DESTINATION_UNREACHABLE:
+            numHostUnreachable++;
+            break;
+
+        case ICMP_TIME_EXCEEDED:
+            numTimeExceeded++;
+            break;
+    }
 
     delete icmpMsg;
 
