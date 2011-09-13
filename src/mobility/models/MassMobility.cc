@@ -51,10 +51,9 @@ void MassMobility::setTargetPosition()
     EV << "angle: " << angle << endl;
     double rad = PI * angle / 180.0;
     Coord direction(cos(rad), sin(rad));
-    lastSpeed = direction * speedParameter->doubleValue();
     simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
     EV << "interval: " << nextChangeInterval << endl;
-    targetPosition = lastPosition + lastSpeed * nextChangeInterval.dbl();
+    targetPosition = lastPosition + direction * speedParameter->doubleValue() * nextChangeInterval.dbl();
     nextChange = simTime() + nextChangeInterval;
 }
 

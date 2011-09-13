@@ -102,9 +102,8 @@ void GaussMarkovMobility::setTargetPosition()
 
     double rad = PI * angle / 180.0;
     Coord direction(cos(rad), sin(rad));
-    lastSpeed = direction * speed;
     nextChange = simTime() + updateInterval;
-    targetPosition = lastPosition + lastSpeed * updateInterval.dbl();
+    targetPosition = lastPosition + direction * speed * updateInterval.dbl();
 
     EV << " speed= " << speed << " angle= " << angle << endl;
     EV << " mspeed= " << speedMean << " mangle " << angleMean << endl;

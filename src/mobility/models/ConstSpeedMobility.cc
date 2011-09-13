@@ -47,6 +47,5 @@ void ConstSpeedMobility::setTargetPosition()
     Coord positionDelta = targetPosition - lastPosition;
     double distance = positionDelta.length();
     nextChange = simTime() + distance / speed;
-    lastSpeed = positionDelta / distance * speed;
     EV << "new target set. distance=" << distance << " xpos= " << targetPosition.x << " ypos=" << targetPosition.y << " nextChange=" << nextChange;
 }
