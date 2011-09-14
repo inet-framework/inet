@@ -72,35 +72,6 @@
 // care about the specific subclass.
 //
 //
-// <h3>Autoconfiguration</h3>
-//
-// In order to facilitate building large models, ~EtherMAC and other Ethernet model
-// components provide some degree of auto-configuration. Specifically, transmission
-// rate and half duplex/full duplex mode can be chosen automatically so that
-// connecting Ethernet MACs have matching settings. The purpose is similar to
-// Ethernet Auto-Negotiation; however the mechanism is NOT a model of
-// Auto-Negotiation (e.g. ~EtherBus and ~EtherHub also actively participate,
-// which obviously does not happen in a real Ethernet.)
-//
-// What it does:
-//  - the txrate parameters of ~EtherMAC represent the highest speed supported
-//    by that station, or 0 for full autoconfiguration. Autoconfig will choose
-//    the largest common denominator (the speed of the slowest station in the
-//    collision domain) for all stations. If all stations are set to auto
-//    txrate, 100Mb will be chosen, or 10Mb if there's a bus (~EtherBus) in
-//    the collision domain.
-//  - the duplexEnabled parameter of ~EtherMAC means whether the station supports
-//    duplex operation. However, duplex operation will actually be chosen only
-//    if it's a DTE-to-DTE direct connection (there's no shared media like
-//    ~EtherHub or ~EtherBus) and both sides have duplexEnabled=true set.
-//
-// How it works:
-//
-// Auto-configuration occurs at the beginning of the simulation, by
-// Ethernet model components (~EtherMAC, ~EtherHub and ~EtherBus) exchanging
-// EtherAutoconfig messages with each other. See description of EtherAutoconfig
-// for more info.
-//
 // <h3>MAC and higher layers</h3>
 //
 // MAC and LLC are implemented as separate modules (~EtherMAC and
@@ -252,7 +223,7 @@
 // @page largenet.html, LargeNet model description
 //
 // The ~LargeNet model demonstrates how one can put together models of large
-// LANs with little effort, making use of MAC auto-configuration.
+// LANs with little effort.
 //
 // ~LargeNet models a large Ethernet campus backbone. As configured in the
 // default omnetpp.ini, it contains altogether about 8000 computers
