@@ -96,16 +96,18 @@ void Ieee80211MgmtSTA::initialize(int stage)
 
         nb = NotificationBoardAccess().get();
 
-        // determine numChannels (needed when we're told to scan "all" channels)
-        IChannelControl *cc = ChannelAccess::getChannelControl();
-        numChannels = cc->getNumChannels();
-
         WATCH(isScanning);
         WATCH(isAssociated);
 
         WATCH(scanning);
         WATCH(assocAP);
         WATCH_LIST(apList);
+    }
+    else if (stage == 1)
+    {
+        // determine numChannels (needed when we're told to scan "all" channels)
+        IChannelControl *cc = ChannelAccess::getChannelControl();
+        numChannels = cc->getNumChannels();
     }
 }
 
