@@ -106,6 +106,7 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     d->bytesLeft = d->videoSize;
     d->numPkSent = 0;
     streamVector.push_back(d);
+    delete msg;
 
     cMessage *timer = new cMessage("VideoStreamTmr");
     timer->setContextPointer(d);
