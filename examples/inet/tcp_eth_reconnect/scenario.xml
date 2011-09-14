@@ -13,6 +13,8 @@
         </connect>
     </at>
     <set-channel-attr t="2" src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+    <set-channel-attr t="2.5" src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="true"/>
+    <set-channel-attr t="2.6" src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="false"/>
     <at t="3.3">
         <disconnect src-module="server" src-gate="ethg$o[0]" />
     </at>

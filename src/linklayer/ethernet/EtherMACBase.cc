@@ -798,16 +798,12 @@ void EtherMACBase::scheduleEndIFGPeriod()
     }
 }
 
-void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
+void EtherMACBase::scheduleEndTxPeriod()
 {
-    // update burst variables
-    if (frameBursting)
-    {
-        bytesSentInBurst += frame->getByteLength();
-        framesSentInBurst++;
-    }
-
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    simtime_t endTransmissionTime = transmissionChannel->getTransmissionFinishTime();
+    if (endTransmissionTime < simTime())
+        endTransmissionTime = simTime();
+    scheduleAt(endTransmissionTime, endTxMsg);
     transmitState = TRANSMITTING_STATE;
 }
 

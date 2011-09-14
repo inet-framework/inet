@@ -104,7 +104,7 @@ void EtherMACFullDuplex::startFrameTransmission()
     EV << "Starting transmission of " << frame << endl;
     emit(packetSentToLowerSignal, frame);
     send(frame, physOutGate);
-    scheduleEndTxPeriod(frame);
+    scheduleEndTxPeriod();
 }
 
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)

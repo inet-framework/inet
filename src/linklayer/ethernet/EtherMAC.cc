@@ -315,6 +315,14 @@ void EtherMAC::startFrameTransmission()
         updateConnectionColor(TRANSMITTING_STATE);
 
     emit(packetSentToLowerSignal, frame);
+
+    // update burst variables
+    if (frameBursting)
+    {
+        bytesSentInBurst += frame->getByteLength();
+        framesSentInBurst++;
+    }
+
     send(frame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
@@ -347,7 +355,7 @@ void EtherMAC::startFrameTransmission()
     else
     {
         // no collision
-        scheduleEndTxPeriod(frame);
+        scheduleEndTxPeriod();
 
         // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
         if (!duplexMode)

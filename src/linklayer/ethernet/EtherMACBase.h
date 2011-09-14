@@ -220,7 +220,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     virtual void handleEndTxPeriod();
     virtual void handleEndPausePeriod();
     virtual void scheduleEndIFGPeriod();
-    virtual void scheduleEndTxPeriod(cPacket *);
+    virtual void scheduleEndTxPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);
 
     // helpers
