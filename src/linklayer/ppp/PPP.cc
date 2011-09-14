@@ -295,6 +295,8 @@ void PPP::startTransmitting(cPacket *msg)
 
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
+    if (endTransmissionTime < simTime())
+        endTransmissionTime = simTime();
     scheduleAt(endTransmissionTime, endTransmissionEvent);
     numSent++;
 }
