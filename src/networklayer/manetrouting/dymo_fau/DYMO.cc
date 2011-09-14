@@ -326,7 +326,7 @@ void DYMO::handleLowerMsg(cPacket* apMsg)
     if (dynamic_cast<DYMO_RM*>(apMsg)) handleLowerRM(dynamic_cast<DYMO_RM*>(apMsg));
     else if (dynamic_cast<DYMO_RERR*>(apMsg)) handleLowerRERR(dynamic_cast<DYMO_RERR*>(apMsg));
     else if (dynamic_cast<DYMO_UERR*>(apMsg)) handleLowerUERR(dynamic_cast<DYMO_UERR*>(apMsg));
-    else if (apMsg->getKind() == UDP_I_ERROR) { ev << "discarded UDP error message" << endl; }
+    else if (apMsg->getKind() == UDP_I_ERROR) { ev << "discarded UDP error message" << endl; delete apMsg; }
     else error("message is no DYMO Packet");
 }
 
