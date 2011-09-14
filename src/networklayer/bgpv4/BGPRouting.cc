@@ -91,7 +91,7 @@ void BGPRouting::handleTimer(cMessage *timer)
                 pSession->getFSM()->KeepaliveTimer_Expires();
                 break;
             default :
-                error("Invalid timer kind %d", timer->getKind());
+                throw cRuntimeError("Invalid timer kind %d", timer->getKind());
         }
     }
 }
@@ -158,7 +158,7 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
         socket->setOutputGate(gate("tcpOut"));
         IPv4Address peerAddr = socket->getRemoteAddress().get4();
         BGP::SessionID i = findIdFromPeerAddr(_BGPSessions, peerAddr);
-        if (i==-1)
+        if (i == (BGP::SessionID)-1)
         {
             socket->close();
             delete socket;
@@ -178,14 +178,14 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
 void BGPRouting::socketEstablished(int connId, void *yourPtr)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId == -1)
+    if (_currSessionId == (BGP::SessionID)-1)
     {
         error("socket id=%d is not established", connId);
     }
 
     //if it's an IGP Session, TCPConnectionConfirmed only if all EGP Sessions established
     if (_BGPSessions[_currSessionId]->getType() == BGP::IGP &&
-        this->findNextSession(BGP::EGP) != -1)
+        this->findNextSession(BGP::EGP) != (BGP::SessionID)-1)
     {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
     }
@@ -197,7 +197,7 @@ void BGPRouting::socketEstablished(int connId, void *yourPtr)
 
     if (_BGPSessions[_currSessionId]->getSocketListen()->getConnectionId() != connId &&
         _BGPSessions[_currSessionId]->getType() == BGP::EGP &&
-        this->findNextSession(BGP::EGP) != -1 )
+        this->findNextSession(BGP::EGP) != (BGP::SessionID)-1 )
     {
         _BGPSessions[_currSessionId]->getSocketListen()->abort();
     }
@@ -206,7 +206,7 @@ void BGPRouting::socketEstablished(int connId, void *yourPtr)
 void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId != -1)
+    if (_currSessionId != (BGP::SessionID)-1)
     {
         BGPHeader* ptrHdr = check_and_cast<BGPHeader*>(msg);
         switch (ptrHdr->getType())
@@ -222,7 +222,7 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
                 processMessage(*check_and_cast<BGPUpdateMessage*>(msg));
                 break;
             default:
-                error("Invalid BGP message type %d", ptrHdr->getType());
+                throw cRuntimeError("Invalid BGP message type %d", ptrHdr->getType());
         }
     }
     delete msg;
@@ -231,7 +231,7 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
 void BGPRouting::socketFailure(int connId, void *yourPtr, int code)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId != -1)
+    if (_currSessionId != (BGP::SessionID)-1)
     {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
     }
@@ -285,7 +285,7 @@ void BGPRouting::processMessage(const BGPUpdateMessage& msg)
 unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex)
 {
     //Don't add the route if it exists in PrefixListINTable or in ASListINTable
-    if (isInTable(_prefixListIN, entry) != -1 || isInASList(_ASListIN, entry))
+    if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry))
     {
         return 0;
     }
@@ -298,7 +298,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
     //if the route already exist in BGP routing table, tieBreakingProcess();
     //(RFC 4271: 9.1.2.2 Breaking Ties)
     unsigned long BGPindex = isInTable(_BGPRoutingTable, entry);
-    if (BGPindex != -1)
+    if (BGPindex != (unsigned long)-1)
     {
         if (tieBreakingProcess(_BGPRoutingTable[BGPindex], entry))
         {
@@ -388,7 +388,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
     for (std::map<BGP::SessionID, BGPSession*>::iterator sessionIt = _BGPSessions.begin();
         sessionIt != _BGPSessions.end(); sessionIt ++)
     {
-        if (isInTable(_prefixListOUT, entry) != -1 || isInASList(_ASListOUT, entry) ||
+        if (isInTable(_prefixListOUT, entry) != (unsigned long)-1 || isInASList(_ASListOUT, entry) ||
             ((*sessionIt).first == sessionIndex && type != BGP::NEW_SESSION_ESTABLISHED ) ||
             (type == BGP::NEW_SESSION_ESTABLISHED && (*sessionIt).first != sessionIndex ) ||
             !(*sessionIt).second->isEstablished() )
@@ -843,7 +843,7 @@ BGP::SessionID BGPRouting::findNextSession(BGP::type type, bool startSession)
             break;
         }
     }
-    if (startSession == true && type == BGP::IGP && sessionID != -1)
+    if (startSession == true && type == BGP::IGP && sessionID != (BGP::SessionID)-1)
     {
         InterfaceEntry* linkIntf = _rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
         if (linkIntf == 0)

@@ -317,8 +317,8 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         }
         else
         {
-            int i;
-            for (i = 0; i < sds.size()-1; i++)
+            unsigned int i;
+            for (i = 0; i < sds.size()-1; i++)      // sds.size() >= 1
                 sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl); // dup() to all but the last one
             sendUp(payload, sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);  // send original to last socket
             delete udpPacket;

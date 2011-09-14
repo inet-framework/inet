@@ -59,7 +59,7 @@ long NS_CLASS hello_jitter()
         return (long) (((float) Random::integer(RAND_MAX + 1) / RAND_MAX - 0.5)
                        * JITTER_INTERVAL);
 #else
-        return (long) (((float) intuniform(0,RAND_MAX + 1) / RAND_MAX - 0.5)
+        return (long) (((float) intuniform(0, RAND_MAX) / RAND_MAX - 0.5)
                        * JITTER_INTERVAL);
 #endif
 #else

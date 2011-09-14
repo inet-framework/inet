@@ -419,7 +419,7 @@ void Established::entry()
 
     //when all EGP Session is in established state, start IGP Session(s)
     BGP::SessionID nextSession = session.findAndStartNextSession(BGP::EGP);
-    if (nextSession == -1)
+    if (nextSession == (BGP::SessionID)-1)
     {
         session.findAndStartNextSession(BGP::IGP);
     }

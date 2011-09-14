@@ -1953,7 +1953,7 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo* ctrl
 
     /* The Home Init Cookie field in the message matches the value stored
        in the Binding Update List. */
-    if (bulEntry->cookieHoTI != HoT.getHomeInitCookie())
+    if (bulEntry->cookieHoTI != (int)HoT.getHomeInitCookie())
     {
         EV << "Invalid HoT: Cookie value different from the stored one." << endl;
         return false;
@@ -2054,7 +2054,7 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo* ct
 
     /* The Care-of Init Cookie field in the message matches the value
        stored in the Binding Update List. */
-    if (bulEntry->cookieCoTI != CoT.getCareOfInitCookie())
+    if (bulEntry->cookieCoTI != (int)CoT.getCareOfInitCookie())
     {
         EV << "Invalid CoT: Cookie value different from the stored one." << endl;
         return false;

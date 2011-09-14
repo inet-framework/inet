@@ -46,7 +46,7 @@ void Ieee80211Etx::initialize(int stage)
         {
             InterfaceEntry * ie = inet_ift->getInterface(i);
             if (ie->getMacAddress()==myAddress)
-                ie->setEstimateCostProcess(par("Index"), this);
+                ie->setEstimateCostProcess(par("Index").longValue(), this);
         }
         if (etxSize>0 && etxInterval>0)
             scheduleAt(simTime()+par("jitter")+etxInterval, etxTimer);

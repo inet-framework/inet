@@ -1361,7 +1361,7 @@ void RSVP::processRSVPMessage(RSVPMessage *msg)
             break;
 
         default:
-            ASSERT(false);
+            throw cRuntimeError("Invalid RSVP kind of message '%s': %d", msg->getName(), kind);
     }
 }
 
@@ -1500,7 +1500,7 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
                 break;
 
             default:
-                ASSERT(false);
+                throw cRuntimeError("Invalid errorcode %d in message '%s'", errCode, msg->getName());
         }
 
         delete msg;
@@ -1528,7 +1528,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
     for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++)
     {
-        if (it->OutInterface.getInt() != lspid)
+        if (it->OutInterface.getInt() != (uint32)lspid)
             continue;
 
         // merging backup exists
@@ -1759,7 +1759,7 @@ void RSVP::processSignallingMessage(SignallingMsg *msg)
             break;
 
         default:
-            ASSERT(false);
+            throw cRuntimeError("Invalid command %d in message '%s'", command, msg->getName());
     }
 }
 

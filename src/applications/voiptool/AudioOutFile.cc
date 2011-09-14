@@ -125,7 +125,7 @@ bool AudioOutFile::write(void *decBuf, int pktBytes)
     int samples = pktBytes * 8 / bitsPerInSample;
     int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
     pkt.size = avcodec_encode_audio(c, outbuf, buf_size, (short int*)decBuf);
-    if (c->coded_frame->pts != AV_NOPTS_VALUE)
+    if (c->coded_frame->pts != (int64_t)AV_NOPTS_VALUE)
         pkt.pts = av_rescale_q(c->coded_frame->pts, c->time_base, audio_st->time_base);
     pkt.flags |= AV_PKT_FLAG_KEY;
     pkt.stream_index = audio_st->index;
