@@ -17,7 +17,7 @@
  *              in the top level directory
  ***************************************************************************
  * part of:     framework implementation developed by tkn
- **************************************************************************/
+ *************************************************************************/
 
 
 #ifndef IMOBILITY_H
@@ -37,22 +37,22 @@
 class INET_API IMobility
 {
   public:
-    /** @brief Returns the current position at the current simulation time. **/
+    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() = 0;
 
-    /** @brief Returns the current speed at the current simulation time. **/
+    /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() = 0;
 
-    /** @brief Returns the current acceleration at the current simulation time. **/
+    /** @brief Returns the current acceleration at the current simulation time. */
     // virtual Coord getCurrentAcceleration() = 0;
 
-    /** @brief Returns the current angular position at the current simulation time. **/
+    /** @brief Returns the current angular position at the current simulation time. */
     // virtual Coord getCurrentAngularPosition() = 0;
 
-    /** @brief Returns the current angular speed at the current simulation time. **/
+    /** @brief Returns the current angular speed at the current simulation time. */
     // virtual Coord getCurrentAngularSpeed() = 0;
 
-    /** @brief Returns the current angular acceleration at the current simulation time. **/
+    /** @brief Returns the current angular acceleration at the current simulation time. */
     // virtual Coord getCurrentAngularAcceleration() = 0;
 };
 

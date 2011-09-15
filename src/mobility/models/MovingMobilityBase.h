@@ -83,10 +83,10 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual void move() = 0;
 
   public:
-    /** @brief Returns the current position at the current simulation time. **/
+    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition();
 
-    /** @brief Returns the current speed at the current simulation time. **/
+    /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed();
 };
 

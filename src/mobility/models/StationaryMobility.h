@@ -37,10 +37,10 @@ class INET_API StationaryMobility : public MobilityBase
     virtual void handleSelfMessage(cMessage *message);
 
   public:
-    /** @brief Returns the current position at the current simulation time. **/
+    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() { return lastPosition; }
 
-    /** @brief Returns the current speed at the current simulation time. **/
+    /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
 };
 
