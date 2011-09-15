@@ -18,32 +18,20 @@
 
 package inet.examples.mobility;
 
-import inet.mobility.IMobility;
-import inet.base.NotificationBoard;
+import inet.world.scenario.ScenarioManager;
 
-
-//
-// A host for demonstrating mobility models only -- it contains
-// no protocol layers at all.
-//
-module PlainMobilityHost
+network MobileNetworkWithScenario
 {
     parameters:
-        @node();
-        @labels(node);
-        string mobilityType = default("StationaryMobility");
-        @display("i=device/pocketpc_s");
-    gates:
-        input radioIn @directIn;
+        int numHosts;
+        @display("bgb=600,400");
     submodules:
-        notificationBoard: NotificationBoard {
+        host[numHosts]: MobileHost {
             parameters:
-                @display("p=70,67");
+                @display("p=300,300;r=,,#707070");
         }
-        mobility: <mobilityType> like IMobility {
+        scenarioManager: ScenarioManager {
             parameters:
-                @display("p=132,141");
+                @display("p=50,50");
         }
-    connections allowunconnected:
 }
-

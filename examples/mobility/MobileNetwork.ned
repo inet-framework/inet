@@ -18,22 +18,14 @@
 
 package inet.examples.mobility;
 
-import inet.world.scenario.ScenarioManager;
-
-
-network MobileNetWithScenario
+network MobileNetwork
 {
     parameters:
         int numHosts;
         @display("bgb=600,400");
     submodules:
-        host[numHosts]: PlainMobilityHost {
+        host[numHosts]: MobileHost {
             parameters:
                 @display("p=300,300;r=,,#707070");
         }
-        scenarioManager: ScenarioManager {
-            parameters:
-                @display("p=50,50");
-        }
 }
-

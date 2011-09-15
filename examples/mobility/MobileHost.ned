@@ -18,15 +18,23 @@
 
 package inet.examples.mobility;
 
-network MobileNet
+import inet.mobility.IMobility;
+import inet.base.NotificationBoard;
+
+
+//
+// A host for demonstrating mobility models only -- it contains
+// no protocol layers at all.
+//
+module MobileHost
 {
     parameters:
-        int numHosts;
-        @display("bgb=600,400");
+        string mobilityType = default("StationaryMobility");
+        @node();
+        @display("i=device/pocketpc_s");
     submodules:
-        host[numHosts]: PlainMobilityHost {
+        mobility: <mobilityType> like IMobility {
             parameters:
-                @display("p=300,300;r=,,#707070");
+                @display("p=132,141");
         }
 }
-
