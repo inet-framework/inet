@@ -48,16 +48,20 @@ public:
     /*@}*/
 
 public:
+    /** @brief Default constructor. */
+    Coord()
+        : x(0.0), y(0.0), z(0.0) {}
+
     /** @brief Initializes a coordinate. */
-    Coord(double x = 0.0, double y = 0.0, double z = 0.0)
+    Coord(double x, double y, double z = 0.0)
         : x(x), y(y), z(z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord( const Coord& pos )
+    Coord(const Coord& pos)
         : cObject(pos), x(pos.x), y(pos.y), z(pos.z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord( const Coord* pos )
+    Coord(const Coord* pos)
         : cObject(*pos), x(pos->x), y(pos->y), z(pos->z) {}
 
     /** @brief Returns a string with the value of the coordinate. */
@@ -170,7 +174,7 @@ public:
     /**
      * @brief Returns the distance to Coord 'a'.
      */
-    double distance( const Coord& a ) const {
+    double distance(const Coord& a) const {
         Coord dist=*this-a;
         return dist.length();
     }
@@ -178,7 +182,7 @@ public:
     /**
      * @brief Returns distance^2 to Coord 'a' (omits calling square root).
      */
-    double sqrdist( const Coord& a ) const {
+    double sqrdist(const Coord& a) const {
         Coord dist=*this-a;
         return dist.squareLength();
     }
@@ -207,13 +211,13 @@ public:
     /**
      * @brief Checks if this coordinate is inside a specified rectangle.
      *
-     * @param upperLeftNearCorner The upper left near corner of the rectangle.
-     * @param lowerRightFarCorner the lower right corner of the rectangle.
+     * @param lowerBound The upper bound of the rectangle.
+     * @param upperBound The lower bound of the rectangle.
      */
-    bool isInRectangle(const Coord& upperLeftNearCorner, const Coord& lowerRightFarCorner) const {
-        return  x >= upperLeftNearCorner.x && x <= lowerRightFarCorner.x &&
-                y >= upperLeftNearCorner.y && y <= lowerRightFarCorner.y &&
-                z >= upperLeftNearCorner.z && z <= lowerRightFarCorner.z;
+    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const {
+        return  lowerBound.x <= x && x <= upperBound.x &&
+                lowerBound.y <= y && y <= upperBound.y &&
+                lowerBound.z <= z && z <= upperBound.z;
     }
 
     /**
