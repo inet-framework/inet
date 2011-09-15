@@ -35,6 +35,7 @@ class INET_API CircleMobility : public MovingMobilityBase
   protected:
     double cx;
     double cy;
+    double cz;
     double r;
     double startAngle;
     double speed;

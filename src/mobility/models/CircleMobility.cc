@@ -27,6 +27,7 @@ CircleMobility::CircleMobility()
 {
     cx = 0;
     cy = 0;
+    cz = 0;
     r = -1;
     startAngle = 0;
     speed = 0;
@@ -42,6 +43,7 @@ void CircleMobility::initialize(int stage)
     {
         cx = par("cx");
         cy = par("cy");
+        cz = par("cz");
         r = par("r");
         ASSERT(r > 0);
         startAngle = par("startAngle").doubleValue() / 180.0 * PI;
@@ -61,10 +63,12 @@ void CircleMobility::move()
     angle = startAngle + omega * simTime().dbl();
     lastPosition.x = cx + r * cos(angle);
     lastPosition.y = cy + r * sin(angle);
+    lastPosition.z = cz;
     lastSpeed.x = sin(angle) * speed;
     lastSpeed.y = -cos(angle) * speed;
+    lastSpeed.z = 0;
     // do something if we reach the wall
     Coord dummyCoord; double dummyAngle;
     handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
-    EV << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << endl;
+    EV << " xpos = " << lastPosition.x << " ypos =" << lastPosition.y << " zpos =" << lastPosition.z << endl;
 }

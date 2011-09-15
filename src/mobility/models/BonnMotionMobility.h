@@ -34,6 +34,7 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 {
   protected:
     // state
+    bool is3D;
     const BonnMotionFile::Line *lines;
     int currentLine;
 

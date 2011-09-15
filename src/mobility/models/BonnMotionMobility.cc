@@ -26,6 +26,7 @@ Define_Module(BonnMotionMobility);
 
 BonnMotionMobility::BonnMotionMobility()
 {
+    is3D = false;
     lines = NULL;
     currentLine = -1;
 }
@@ -41,6 +42,7 @@ void BonnMotionMobility::initialize(int stage)
     EV << "initializing BonnMotionMobility stage " << stage << endl;
     if (stage == 0)
     {
+        is3D  = par("is3D").boolValue();
         int nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getParentModule()->getIndex();
@@ -66,7 +68,7 @@ void BonnMotionMobility::initializePosition()
 void BonnMotionMobility::setTargetPosition()
 {
     const BonnMotionFile::Line& vec = *lines;
-    if (currentLine + 2 >= (int)vec.size())
+    if (currentLine + (is3D ? 3 : 2) >= (int)vec.size())
     {
         stationary = true;
         return;
@@ -74,7 +76,8 @@ void BonnMotionMobility::setTargetPosition()
     nextChange = vec[currentLine];
     targetPosition.x = vec[currentLine+1];
     targetPosition.y = vec[currentLine+2];
-    currentLine += 3;
+    targetPosition.z = is3D ? vec[currentLine+3] : 0;
+    currentLine += (is3D ? 4 : 3);
     EV << "TARGET: t=" << nextChange << " (" << targetPosition.x << "," << targetPosition.y << ")\n";
 }
 
