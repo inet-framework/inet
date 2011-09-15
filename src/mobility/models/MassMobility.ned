@@ -55,10 +55,10 @@ simple MassMobility extends MovingMobilityBase
         double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
         double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
         double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
-        double angle = default(uniform(0,360)); // start angel in degrees
+        double angle @unit(deg) = default(uniform(0deg, 360deg)); // start angel in degrees
         bool initFromDisplayString = default(true);
-        volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random) [s]
-        volatile double changeAngleBy @unit(deg); // change angle by this much (can be random) [deg]
-        volatile double speed @unit(mps) = default(2mps); // speed (can be random, updated every changeInterval) [m/s]
+        volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random)
+        volatile double changeAngleBy @unit(deg); // change angle by this much (can be random)
+        volatile double speed @unit(mps); // speed (can be random, updated every changeInterval)
         @class(MassMobility);
 }

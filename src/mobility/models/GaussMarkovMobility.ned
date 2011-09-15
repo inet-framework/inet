@@ -30,9 +30,9 @@ simple GaussMarkovMobility extends MovingMobilityBase
 {
     parameters:
         double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
-        double speed @unit(mps) = default(10mps);
-        double angle @unit(deg) = default(0deg);
-        double variance = default(40);
-        int margin @unit(m) = default(30m);
+        double speed @unit(mps);
+        double angle @unit(deg) = default(uniform(0deg, 360deg));
+        double variance;
+        int margin @unit(m);
         @class(GaussMarkovMobility);
 }

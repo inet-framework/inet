@@ -27,10 +27,10 @@ package inet.mobility.models;
 simple CircleMobility extends MovingMobilityBase
 {
     parameters:
-        double cx @unit(m) = default(100m); // x coord of the center of the circle
-        double cy @unit(m) = default(100m); // y coord of the center of the circle
-        double r @unit(m) = default(100m); // radius of the circle
-        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
-        double startAngle @unit(deg) = default(0); // starting angle (degreees)
+        double cx @unit(m); // x coord of the center of the circle
+        double cy @unit(m); // y coord of the center of the circle
+        double r @unit(m); // radius of the circle
+        double speed @unit(mps); // speed of the host
+        double startAngle @unit(deg) = default(uniform(0deg, 360deg)); // starting angle
         @class(CircleMobility);
 }

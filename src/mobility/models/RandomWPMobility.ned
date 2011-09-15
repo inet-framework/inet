@@ -46,7 +46,7 @@ simple RandomWPMobility extends MovingMobilityBase
         double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
         double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        volatile double speed @unit(mps) = default(2mps); // use uniform(minSpeed, maxSpeed) or another distribution
+        volatile double speed @unit(mps); // use uniform(minSpeed, maxSpeed) or another distribution
         volatile double waitTime @unit(s); // wait time between reaching a target and choosing a new one
         @class(RandomWPMobility);
 }

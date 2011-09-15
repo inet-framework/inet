@@ -29,5 +29,5 @@ import inet.mobility.IMobility;
 simple MovingMobilityBase extends MobilityBase
 {
     parameters:
-        double updateInterval @unit(s) = default(0.1s); // the simulation time interval used to regularly signal mobility state changes
+        double updateInterval @unit(s) = default(0.1s); // the simulation time interval used to regularly signal mobility state changes and update the display
 }

@@ -34,8 +34,8 @@ simple LinearMobility extends MovingMobilityBase
         double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
         double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
         bool initFromDisplayString = default(true);
-        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
-        double angle @unit(deg) = default(0); // angle of linear motion (degreees)
+        double speed @unit(mps); // speed of the host
+        double angle @unit(deg) = default(uniform(0deg, 360deg)); // angle of linear motion
         double acceleration = default(0); // acceleration of linear motion (m/s2)
         @class(LinearMobility);
 }

@@ -31,7 +31,7 @@ package inet.mobility.models;
 simple ChiangMobility extends MovingMobilityBase
 {
     parameters:
-        double stateTransitionUpdateInterval @unit(s) = default(3s);
-        double speed @unit(mps) = default(10mps); // in meter/sec
+        double stateTransitionUpdateInterval @unit(s);
+        double speed @unit(mps);
         @class(ChiangMobility);
 }

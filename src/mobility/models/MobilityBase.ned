@@ -30,10 +30,10 @@ simple MobilityBase like IMobility
 {
     parameters:
         bool debug = default(false);
-        double constraintAreaX @unit("m") = default(0m); // min x position of the constraint area
-        double constraintAreaY @unit("m") = default(0m); // min y position of the constraint area
-        double constraintAreaZ @unit("m") = default(0m); // min z position of the constraint area
-        double constraintAreaWidth @unit("m") = default(600m); // x size of the constraint area
-        double constraintAreaHeight @unit("m") = default(400m); // y size of the constraint area
-        double constraintAreaDepth @unit("m") = default(0m); // z size of the constraint area
+        double constraintAreaX @unit(m) = default(0m); // min x position of the constraint area
+        double constraintAreaY @unit(m) = default(0m); // min y position of the constraint area
+        double constraintAreaZ @unit(m) = default(0m); // min z position of the constraint area
+        double constraintAreaWidth @unit(m) = default(600m); // x size of the constraint area
+        double constraintAreaHeight @unit(m) = default(400m); // y size of the constraint area
+        double constraintAreaDepth @unit(m) = default(0m); // z size of the constraint area
 }

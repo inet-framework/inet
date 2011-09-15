@@ -29,6 +29,6 @@ simple RectangleMobility extends MovingMobilityBase
 {
     parameters:
         double startPos; // in range [0.0,4.0): topleft=0, topright=1, bottomright=2, bottomleft=3
-        double speed @unit(mps) = default(2mps); // speed of the host (in m/s)
+        double speed @unit(mps); // speed of the host
         @class(RectangleMobility);
 }
