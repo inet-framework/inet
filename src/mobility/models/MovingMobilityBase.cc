@@ -26,6 +26,7 @@
 
 MovingMobilityBase::MovingMobilityBase()
 {
+    moveTimer = NULL;
     updateInterval = 0;
     stationary = false;
     lastSpeed = Coord::ZERO;
@@ -33,15 +34,22 @@ MovingMobilityBase::MovingMobilityBase()
     nextChange = -1;
 }
 
+MovingMobilityBase::~MovingMobilityBase()
+{
+    cancelAndDelete(moveTimer);
+}
+
 void MovingMobilityBase::initialize(int stage)
 {
     MobilityBase::initialize(stage);
     EV << "initializing MovingMobilityBase stage " << stage << endl;
-    if (stage == 0)
+    if (stage == 0) {
+        moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
+    }
     else if (stage == 3) {
-        if (!stationary && updateInterval != 0)
-            scheduleUpdate(simTime(), new cMessage("move"));
+        lastUpdate = simTime();
+        scheduleUpdate();
     }
 }
 
@@ -55,16 +63,28 @@ void MovingMobilityBase::moveAndUpdate()
     }
 }
 
-void MovingMobilityBase::handleSelfMessage(cMessage *msg)
+void MovingMobilityBase::handleSelfMessage(cMessage *message)
 {
     moveAndUpdate();
-    if (!stationary && updateInterval != 0)
-        scheduleUpdate(simTime() + updateInterval, msg);
+    scheduleUpdate();
 }
 
-void MovingMobilityBase::scheduleUpdate(simtime_t nextUpdate, cMessage *message)
+void MovingMobilityBase::scheduleUpdate()
 {
-    scheduleAt(nextChange != -1 && nextUpdate > nextChange ? nextChange : nextUpdate, message);
+    cancelEvent(moveTimer);
+    if (!stationary && updateInterval != 0) {
+        // periodic update is needed
+        simtime_t nextUpdate = simTime() + updateInterval;
+        if (nextChange != -1 && nextChange < nextUpdate)
+            // next change happens earlier than next update
+            scheduleAt(nextChange, moveTimer);
+        else
+            // next update happens earlier than next change or there is no change at all
+            scheduleAt(nextUpdate, moveTimer);
+    }
+    else if (nextChange != -1)
+        // no periodic update is needed
+        scheduleAt(nextChange, moveTimer);
 }
 
 Coord MovingMobilityBase::getCurrentPosition()

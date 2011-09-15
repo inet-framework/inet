@@ -37,6 +37,9 @@
 class INET_API MovingMobilityBase : public MobilityBase
 {
   protected:
+    /** @brief The message used for mobility state changes. */
+    cMessage *moveTimer;
+
     /** @brief The simulation time interval used to regularly signal mobility state changes.
      *
      * The 0 value turns off the signal. */
@@ -61,16 +64,14 @@ class INET_API MovingMobilityBase : public MobilityBase
   protected:
     MovingMobilityBase();
 
-    /** @brief Initializes mobility model parameters. */
+    virtual ~MovingMobilityBase();
+
     void initialize(int stage);
 
-    /** @brief Called upon arrival of a self messages, subclasses must override. */
-    void handleSelfMessage(cMessage *msg);
-
-    /** @brief Schedules the next self message that will update the mobility state. */
-    void scheduleUpdate(simtime_t nextUpdate, cMessage *message);
+    void handleSelfMessage(cMessage *message);
 
     /** @brief Schedules the move timer that will update the mobility state. */
+    void scheduleUpdate();
 
     /** @brief Moves and notifies listeners. */
     void moveAndUpdate();
