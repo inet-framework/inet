@@ -158,7 +158,7 @@ void LWMPLSDataStructure::lwmpls_interface_delete_list_mpls(uint64_t mac_addr)
         interfaceMap->erase(macIterator);
     }
 
-    for (unsigned int i = 1; i<-label_list.size(); i++)
+    for (size_t i=1; i<=label_list.size(); i++)
     {
         if (label_list[i-1].in_use)
         {
