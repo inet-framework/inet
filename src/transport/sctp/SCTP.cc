@@ -411,6 +411,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAdd
 
 void SCTP::updateDisplayString()
 {
+#if 0
     if (ev.disable_tracing)
     {
         // in express mode, we don't bother to update the display
@@ -419,6 +420,45 @@ void SCTP::updateDisplayString()
         return;
     }
 
+    //char buf[40];
+    //sprintf(buf,"%d conns", sctpAppConnMap.size());
+    //displayString().setTagArg("t",0,buf);
+
+    int32 numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
+       numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
+       numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
+
+    for (SctpAppConnMap::iterator i=sctpAppConnMap.begin(); i!=sctpAppConnMap.end(); ++i)
+    {
+       int32 state = (*i).second->getFsmState();
+       switch(state)
+       {
+           // case SCTP_S_INIT:           numINIT++; break;
+           case SCTP_S_CLOSED:            numCLOSED++; break;
+           case SCTP_S_COOKIE_WAIT:       numLISTEN++; break;
+           case SCTP_S_COOKIE_ECHOED:     numSYN_SENT++; break;
+           case SCTP_S_ESTABLISHED:       numESTABLISHED++; break;
+           case SCTP_S_SHUTDOWN_PENDING:  numCLOSE_WAIT++; break;
+           case SCTP_S_SHUTDOWN_SENT:     numLAST_ACK++; break;
+           case SCTP_S_SHUTDOWN_RECEIVED: numFIN_WAIT_1++; break;
+           case SCTP_S_SHUTDOWN_ACK_SENT: numFIN_WAIT_2++; break;
+       }
+    }
+    char buf2[300];
+    buf2[0] = '\0';
+    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2),"estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+    getDisplayString().setTagArg("t", 0, buf2);
+#endif
 }
 
 SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort)

@@ -61,7 +61,8 @@ void ExtInterface::initialize(int stage)
     if (stage == 3)
     {
         // update display string when addresses have been autoconfigured etc.
-        updateDisplayString();
+        if (ev.isGUI())
+            updateDisplayString();
         return;
     }
 
@@ -188,14 +189,20 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::updateDisplayString()
 {
+    if (!ev.isGUI())
+        return;
+
+    const char *str;
     char buf[80];
-    if (ev.disable_tracing)
-        getDisplayString().setTagArg("t", 0, "");
+
     if (connected)
+    {
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
+        str = buf;
+    }
     else
-        sprintf(buf, "not connected");
-    getDisplayString().setTagArg("t", 0, buf);
+        str = "not connected";
+    getDisplayString().setTagArg("t", 0, str);
 }
 
 void ExtInterface::finish()

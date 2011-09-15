@@ -31,7 +31,7 @@
 
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.disable_tracing)||(TCP_lwIP::testingS)) ? ev : ev
+#define tcpEV ((ev.isDisabled())||(TCP_lwIP::testingS)) ? ev : ev
 
 
 TcpLwipConnection::Stats::Stats()
