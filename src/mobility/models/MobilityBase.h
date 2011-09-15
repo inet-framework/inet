@@ -41,9 +41,10 @@
  * schedule the next update. Subclasses must also redefine initialize() to read their
  * specific parameters and schedule the first update.
  *
- * This base class also provides random placement and keeps the display continuously
- * updated. At regular intervals the module emits a signal to subscribers providing
- * the mobility state. Subscribers to this signal can query the mobility state through IMobility interface.
+ * This base class also provides random initial placement as a default mechanism.
+ * After initialization the module updates the display and emits a signal to subscribers
+ * providing the mobility state. Receivers of this signal can query the mobility state
+ * through the IMobility interface.
  *
  * @ingroup mobility
  * @ingroup basicModules
@@ -67,8 +68,8 @@ class INET_API MobilityBase : public BasicModule, public IMobility
     /** @brief A signal used to publish mobility state changes. */
     static simsignal_t mobilityStateChangedSignal;
 
-    /** @brief Pointer to host module, to speed up repeated access. */
-    cModule* hostModule;
+    /** @brief Pointer to visual representation module, to speed up repeated access. */
+    cModule* visualRepresentation;
 
     /** @brief 3 dimensional position and size of the constraint area (in meters). */
     Coord constraintAreaMin, constraintAreaMax;
@@ -85,7 +86,7 @@ class INET_API MobilityBase : public BasicModule, public IMobility
     /** @brief Initializes mobility model parameters in 4 stages. */
     virtual void initialize(int stage);
 
-    /** @brief Initializes the position from the display string or from parameters. */
+    /** @brief Initializes the position from the display string or from module parameters. */
     virtual void initializePosition();
 
     /** @brief This modules should only receive self-messages. */
@@ -94,15 +95,17 @@ class INET_API MobilityBase : public BasicModule, public IMobility
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
 
-    /** @brief Notifies listeners of the updated position.
-     *
-     * This function sends a signal telling that the position has changed, and
-     * it also moves the host's icon to the new position on the screen.
-     */
-    virtual void positionUpdated();
+    /** @brief Moves the visual representation module's icon to the new position on the screen. */
+    virtual void updateVisualRepresentation();
+
+    /** @brief Emits a signal with the updated mobility state. */
+    virtual void emitMobilityStateChangedSignal();
 
     /** @brief Returns a new random position satisfying the constraint area. */
     virtual Coord getRandomPosition();
+
+    /** @brief Returns the module that represents the object moved by this mobility module. */
+    virtual cModule *findVisualRepresentation() { return findHost(); }
 
     /** @brief Returns true if the mobility is outside of the constraint area. */
     virtual bool isOutside();

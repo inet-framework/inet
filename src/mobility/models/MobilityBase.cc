@@ -44,7 +44,7 @@ static bool parseIntTo(const char *s, double& destValue)
 
 MobilityBase::MobilityBase()
 {
-    hostModule = NULL;
+    visualRepresentation = NULL;
     constraintAreaMin = Coord::ZERO;
     constraintAreaMax = Coord::ZERO;
     lastPosition = Coord::ZERO;
@@ -64,32 +64,34 @@ void MobilityBase::initialize(int stage)
         constraintAreaMin.z = par("constraintAreaZ");
         constraintAreaMax.z = par("constraintAreaDepth");
         constraintAreaMax += constraintAreaMin;
-        hostModule = findHost();
-        const char *s = hostModule->getDisplayString().getTagArg("p", 2);
-        if (s && *s)
-            error("The coordinates of '%s' host are invalid. Please remove automatic arrangement"
-                  " (3rd argument of 'p' tag) from '@display' attribute.",
-                  hostModule->getFullPath().c_str());
+        visualRepresentation = findVisualRepresentation();
+        if (visualRepresentation) {
+            const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
+            if (s && *s)
+                error("The coordinates of '%s' are invalid. Please remove automatic arrangement"
+                      " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
+        }
     }
     else if (stage == 1)
     {
         initializePosition();
         if (isOutside())
             throw cRuntimeError("node position (%g,%g,%g) is outside the constraint area", lastPosition.x, lastPosition.y, lastPosition.z);
-        positionUpdated();
     }
-    else if (stage == 3)
-        positionUpdated();
+    else if (stage == 3) {
+        emitMobilityStateChangedSignal();
+        updateVisualRepresentation();
+    }
 }
 
 void MobilityBase::initializePosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
-    if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue())
+    if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue() && visualRepresentation)
     {
-        filled = parseIntTo(hostModule->getDisplayString().getTagArg("p", 0), lastPosition.x)
-              && parseIntTo(hostModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x)
+              && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled)
             lastPosition.z = 0;
 
@@ -114,14 +116,18 @@ void MobilityBase::handleMessage(cMessage * message)
         throw cRuntimeError("mobility modules can only receive self messages");
 }
 
-void MobilityBase::positionUpdated()
+void MobilityBase::updateVisualRepresentation()
 {
-    if (ev.isGUI())
+    if (ev.isGUI() && visualRepresentation)
     {
-        hostModule->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
-        hostModule->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
+        visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
+        visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
     }
-    getParentModule()->emit(mobilityStateChangedSignal, this);
+}
+
+void MobilityBase::emitMobilityStateChangedSignal()
+{
+    emit(mobilityStateChangedSignal, this);
 }
 
 Coord MobilityBase::getRandomPosition()

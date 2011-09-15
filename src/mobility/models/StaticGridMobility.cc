@@ -44,7 +44,7 @@ void StaticGridMobility::initialize(int stage)
 
 void StaticGridMobility::initializePosition()
 {
-    int index = hostModule->getIndex();
+    int index = visualRepresentation->getIndex();
     int size = (int)ceil(sqrt((double)numHosts));
     int row = (int)floor((double)index / (double)size);
     int col = index % size;

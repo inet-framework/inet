@@ -45,17 +45,13 @@ void MovingMobilityBase::initialize(int stage)
     }
 }
 
-void MovingMobilityBase::positionUpdated()
-{
-    lastUpdate = simTime();
-    MobilityBase::positionUpdated();
-}
-
 void MovingMobilityBase::moveAndUpdate()
 {
     if (lastUpdate != simTime()) {
         move();
-        positionUpdated();
+        lastUpdate = simTime();
+        emitMobilityStateChangedSignal();
+        updateVisualRepresentation();
     }
 }
 

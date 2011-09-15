@@ -70,8 +70,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief Schedules the next self message that will update the mobility state. */
     void scheduleUpdate(simtime_t nextUpdate, cMessage *message);
 
-    /** @brief Update the position information for this node. */
-    void positionUpdated();
+    /** @brief Schedules the move timer that will update the mobility state. */
 
     /** @brief Moves and notifies listeners. */
     void moveAndUpdate();
