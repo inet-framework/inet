@@ -107,14 +107,12 @@ cPacket *TCPDataStreamRcvQueue::extractBytesUpTo(uint32 seq)
 {
     cPacket *msg = NULL;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
-
     if (reg)
     {
         msg = new ByteArrayMessage("data");
         reg->copyTo(msg);
+        delete reg;
     }
-
-    delete reg;
     return msg;
 }
 

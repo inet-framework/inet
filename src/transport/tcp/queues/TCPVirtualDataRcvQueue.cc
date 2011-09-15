@@ -164,9 +164,8 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     {
         msg = new cPacket("data");
         reg->copyTo(msg);
+        delete reg;
     }
-
-    delete reg;
     return msg;
 }
 

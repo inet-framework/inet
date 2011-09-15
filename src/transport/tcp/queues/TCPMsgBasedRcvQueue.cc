@@ -83,13 +83,19 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
 cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    extractTo(seq);
+    cPacket *msg = NULL;
+    if (!payloadList.empty() && seqLess(payloadList.begin()->first, seq))
+        seq = payloadList.begin()->first;
 
-    // pass up payload messages, in sequence number order
-    if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
-        return NULL;
-
-    cPacket *msg = payloadList.begin()->second;
-    payloadList.erase(payloadList.begin());
+    Region *reg = extractTo(seq);
+    if (reg)
+    {
+        if (!payloadList.empty() && payloadList.begin()->first == reg->getEnd())
+        {
+            msg = payloadList.begin()->second;
+            payloadList.erase(payloadList.begin());
+        }
+        delete reg;
+    }
     return msg;
 }
