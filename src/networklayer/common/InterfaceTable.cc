@@ -40,6 +40,7 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 
 InterfaceTable::InterfaceTable()
 {
+    nb = NULL;
     tmpNumInterfaces = -1;
     tmpInterfaceList = NULL;
 }
@@ -140,6 +141,8 @@ InterfaceEntry *InterfaceTable::getInterfaceById(int id)
 
 void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 {
+    if (!nb)
+        throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
     if (getInterfaceByName(entry->getName())!=NULL)
         throw cRuntimeError(this, "addInterface(): interface '%s' already registered", entry->getName());
