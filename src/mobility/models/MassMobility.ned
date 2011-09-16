@@ -52,9 +52,9 @@ package inet.mobility.models;
 simple MassMobility extends MovingMobilityBase
 {
     parameters:
-        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaWidth)); // start x coordinate
-        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaHeight)); // start y coordinate
-        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaDepth)); // start z coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaSizeX)); // start x coordinate
+        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaSizeY)); // start y coordinate
+        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaSizeZ)); // start z coordinate
         double angle @unit(deg) = default(uniform(0deg, 360deg)); // start angel in degrees
         bool initFromDisplayString = default(true);
         volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random)

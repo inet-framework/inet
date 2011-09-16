@@ -58,11 +58,11 @@ void MobilityBase::initialize(int stage)
     {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         constraintAreaMin.x = par("constraintAreaX");
-        constraintAreaMax.x = par("constraintAreaWidth");
+        constraintAreaMax.x = par("constraintAreaSizeX");
         constraintAreaMin.y = par("constraintAreaY");
-        constraintAreaMax.y = par("constraintAreaHeight");
+        constraintAreaMax.y = par("constraintAreaSizeY");
         constraintAreaMin.z = par("constraintAreaZ");
-        constraintAreaMax.z = par("constraintAreaDepth");
+        constraintAreaMax.z = par("constraintAreaSizeZ");
         constraintAreaMax += constraintAreaMin;
         visualRepresentation = findVisualRepresentation();
         if (visualRepresentation) {
