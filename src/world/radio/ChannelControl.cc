@@ -52,8 +52,7 @@ ChannelControl::~ChannelControl()
 }
 
 /**
- * Sets up the playgroundSize and calculates the
- * maxInterferenceDistance
+ * Calculates maxInterferenceDistance.
  *
  * @ref calcInterfDist
  */

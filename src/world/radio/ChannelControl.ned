@@ -28,10 +28,6 @@ package inet.world.radio;
 // radio interfaces of nodes at transmissions.
 // Must be named as "channelControl" inside the network.
 //
-// // Side effect: updates the containing compound module's display string
-// // according to the given playground size (sets <tt>"p=0,0;b=$playgroundSizeX,
-// // $playgroundSizeY"</tt>).
-//
 // This ~ChannelControl is a different implementation from the one in
 // Mobility Framework 1.0a5: here we use sendDirect(), while the MF version
 // used normal send() and dynamic connections.

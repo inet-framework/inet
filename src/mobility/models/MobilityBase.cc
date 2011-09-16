@@ -57,13 +57,20 @@ void MobilityBase::initialize(int stage)
     if (stage == 0)
     {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+        Coord contraintAreaSize;
+        contraintAreaSize.x = par("constraintAreaSizeX");
+        contraintAreaSize.y = par("constraintAreaSizeY");
+        contraintAreaSize.z = par("constraintAreaSizeZ");
+        if (contraintAreaSize.x == -1)
+            contraintAreaSize.x = INFINITY;
+        if (contraintAreaSize.y == -1)
+            contraintAreaSize.y = INFINITY;
+        if (contraintAreaSize.z == -1)
+            contraintAreaSize.z = INFINITY;
         constraintAreaMin.x = par("constraintAreaX");
-        constraintAreaMax.x = par("constraintAreaSizeX");
         constraintAreaMin.y = par("constraintAreaY");
-        constraintAreaMax.y = par("constraintAreaSizeY");
         constraintAreaMin.z = par("constraintAreaZ");
-        constraintAreaMax.z = par("constraintAreaSizeZ");
-        constraintAreaMax += constraintAreaMin;
+        constraintAreaMax = constraintAreaMin + contraintAreaSize;
         visualRepresentation = findVisualRepresentation();
         if (visualRepresentation) {
             const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
