@@ -21,11 +21,14 @@ Features:
 
 
 Note:
-The results from this work are published in [1].
+The results from this work are published in [1], [2].
 
 
 References:
 [1] Kyeong Soo (Joseph) Kim, "An equivalent circuit rate-based study
     of 10-Gb/s next-generation optical access architectures,"
     Submitted to ICC 2011, Sep. 2010.
-
+[2] Kyeong Soo Kim and Karin Ennser, "A comparison study of
+    10-Gb/s next-generation optical access architectures
+    based on equivalence framework," Submitted to GLOBECOM 2011,
+    Sep. 2010.
