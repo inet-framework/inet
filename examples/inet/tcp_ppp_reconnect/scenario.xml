@@ -22,6 +22,8 @@
         </connect>
     </at>
     <set-channel-attr t="5" src-module="client1" src-gate="pppg$o[0]" attr="datarate" value="10000bps"/>
+    <set-channel-attr t="5.5" src-module="client1" src-gate="pppg$o[0]" attr="disabled" value="true"/>
+    <set-channel-attr t="5.6" src-module="client1" src-gate="pppg$o[0]" attr="disabled" value="false"/>
     <at t="12.3">
         <disconnect src-module="server" src-gate="pppg[0]" />
     </at>
