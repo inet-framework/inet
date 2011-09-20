@@ -155,6 +155,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setDatarate(datarate);
 
     // generate a link-layer address to be used as interface token for IPv6
+//    MACAddress address = MACAddress::generateAutoAddress();
+//    e->setMACAddress(address);
     InterfaceToken token(0, simulation.getUniqueNumber(), 64);
     e->setInterfaceToken(token);
 
