@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <stdexcept>
 
 #define WANT_WINSOCK2
@@ -790,13 +791,28 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			ASSERT(varType == TYPE_STRINGLIST);
 			uint32_t count; buf >> count;
 			MYDEBUG << "TraCI reports " << count << " active vehicles." << endl;
+			std::set<std::string> drivingVehicles;
 			for (uint32_t i = 0; i < count; ++i) {
 				std::string idstring; buf >> idstring;
-				if (subscribedVehicles.find(idstring) == subscribedVehicles.end()) {
-					subscribedVehicles.insert(idstring);
-					subscribeToVehicleVariables(idstring);
-				}
+				drivingVehicles.insert(idstring);
 			}
+
+			// check for vehicles that need subscribing to
+			std::set<std::string> needSubscribe;
+			std::set_difference(drivingVehicles.begin(), drivingVehicles.end(), subscribedVehicles.begin(), subscribedVehicles.end(), std::inserter(needSubscribe, needSubscribe.begin()));
+			for (std::set<std::string>::const_iterator i = needSubscribe.begin(); i != needSubscribe.end(); ++i) {
+				subscribedVehicles.insert(*i);
+				subscribeToVehicleVariables(*i);
+			}
+
+			// check for vehicles that need unsubscribing from
+			std::set<std::string> needUnsubscribe;
+			std::set_difference(subscribedVehicles.begin(), subscribedVehicles.end(), drivingVehicles.begin(), drivingVehicles.end(), std::inserter(needUnsubscribe, needUnsubscribe.begin()));
+			for (std::set<std::string>::const_iterator i = needUnsubscribe.begin(); i != needUnsubscribe.end(); ++i) {
+				subscribedVehicles.erase(*i);
+				unsubscribeFromVehicleVariables(*i);
+			}
+
 		} else if (variable1_resp == VAR_POSITION) {
 			uint8_t varType; buf >> varType;
 			ASSERT(varType == POSITION_2D);
