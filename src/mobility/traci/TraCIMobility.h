@@ -74,29 +74,29 @@ class INET_API TraCIMobility : public BasicMobility
 		virtual void setExternalId(std::string external_id) {
 			this->external_id = external_id;
 		}
-		virtual std::string getExternalId() {
+		virtual std::string getExternalId() const {
 			if (external_id == "") throw cRuntimeError("TraCIMobility::getExternalId called with no external_id set yet");
 			return external_id;
 		}
-		virtual Coord getPosition() {
+		virtual Coord getPosition() const {
 			return pos;
 		}
-		virtual std::string getRoadId() {
+		virtual std::string getRoadId() const {
 			if (road_id == "") throw cRuntimeError("TraCIMobility::getRoadId called with no road_id set yet");
 			return road_id;
 		}
-		virtual double getSpeed() {
+		virtual double getSpeed() const {
 			if (speed == -1) throw cRuntimeError("TraCIMobility::getSpeed called with no speed set yet");
 			return speed;
 		}
 		/**
 		 * returns angle in rads, 0 being east, with -M_PI <= angle < M_PI. 
 		 */
-		virtual double getAngleRad() {
+		virtual double getAngleRad() const {
 			if (angle == M_PI) throw cRuntimeError("TraCIMobility::getAngleRad called with no angle set yet");
 			return angle;
 		}
-		virtual TraCIScenarioManager* getManager() {
+		virtual TraCIScenarioManager* getManager() const {
 			if (!manager) manager = TraCIScenarioManagerAccess().get();
 			return manager;
 		}
@@ -124,7 +124,7 @@ class INET_API TraCIMobility : public BasicMobility
 		std::list<Coord> commandGetPolygonShape(std::string polyId) {
 			return getManager()->commandGetPolygonShape(polyId);
 		}
-		void commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points) {
+		void commandSetPolygonShape(std::string polyId, std::list<Coord> points) {
 			getManager()->commandSetPolygonShape(polyId, points);
 		}
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, double emitPosition, double emitSpeed) {
@@ -155,7 +155,7 @@ class INET_API TraCIMobility : public BasicMobility
 
 		cMessage* startAccidentMsg;
 		cMessage* stopAccidentMsg;
-		TraCIScenarioManager* manager;
+		mutable TraCIScenarioManager* manager;
 		double last_speed;
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */
@@ -166,7 +166,7 @@ class INET_API TraCIMobility : public BasicMobility
 		 * @param a acceleration in m/s^2
 		 * @returns emission in g/s
 		 */
-		double calculateCO2emission(double v, double a);
+		double calculateCO2emission(double v, double a) const;
 };
 
 class TraCIMobilityAccess : public ModuleAccess<TraCIMobility>

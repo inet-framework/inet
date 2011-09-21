@@ -65,7 +65,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		std::list<std::string> commandGetPolygonIds();
 		std::string commandGetPolygonTypeId(std::string polyId);
 		std::list<Coord> commandGetPolygonShape(std::string polyId);
-		void commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points);
+		void commandSetPolygonShape(std::string polyId, std::list<Coord> points);
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 
 		const std::map<std::string, cModule*>& getManagedHosts() {

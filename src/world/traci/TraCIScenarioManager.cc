@@ -531,14 +531,12 @@ std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId
 	return res;
 }
 
-void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<std::pair<double, double> > points) {
+void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<Coord> points) {
 	TraCIBuffer buf;
 	uint8_t count = static_cast<uint8_t>(points.size());
 	buf << static_cast<uint8_t>(VAR_SHAPE) << polyId << static_cast<uint8_t>(TYPE_POLYGON) << count;
-	for (std::list<std::pair<double, double> >::const_iterator i = points.begin(); i != points.end(); ++i) {
-		double x = i->first;
-		double y = i->second;
-		TraCICoord pos = omnet2traci(Coord(x, y));
+	for (std::list<Coord>::const_iterator i = points.begin(); i != points.end(); ++i) {
+		TraCICoord pos = omnet2traci(*i);
 		buf << static_cast<double>(pos.x) << static_cast<double>(pos.y);
 	}
 	TraCIBuffer obuf = queryTraCI(CMD_SET_POLYGON_VARIABLE, buf);
