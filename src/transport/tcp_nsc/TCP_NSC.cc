@@ -253,74 +253,76 @@ void TCP_NSC::decode_tcp(const void *packet_data, int hdr_len)
     if(hdr_len > 20)
     {
         unsigned char const *opt = (unsigned char const*)packet_data + sizeof(struct tcphdr);
+        unsigned int optlen = tcp->th_offs*4 - 20;
+        unsigned int optoffs = 0;
 
         tcpEV << this << ": " << ("Options: ");
         while(
-                (*opt != 0) &&
-                ((unsigned int)opt < (unsigned int)packet_data + tcp->th_offs*4)
+                (opt[optoffs] != 0) &&
+                (optoffs < optlen)
              )
         {
-            unsigned char len = opt[1];
-            if(len == 0 && opt[0] != 1)
+            unsigned char len = opt[optoffs+1];
+            if(len == 0 && opt[optoffs] != 1)
             {
-                sprintf(buf, "0-length option(%u)\n", opt[0]);
+                sprintf(buf, "0-length option(%u)\n", opt[optoffs]);
                 tcpEV << this << ": " << buf;
                 break;
             }
 
             len -= 2;
 
-            switch(*opt)
+            switch(opt[optoffs])
             {
-                case 1: tcpEV << ("No-Op "); opt++; break;
+                case 1: tcpEV << ("No-Op "); optoffs++; break;
                 case 2: {       unsigned short mss = 0;
                             //assert(len == 2);
                             if(len == 2) {
-                                mss = (opt[2] << 8) + (opt[3]);
+                                mss = (opt[optoffs+2] << 8) + (opt[optoffs+3]);
                                 sprintf(buf, "MSS(%u) ", mss);
                                 tcpEV << buf;
                             } else {
                                 sprintf(buf, "MSS:l:%u ", len);
                                 tcpEV << buf;
                             }
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
                 case 3: {
                             unsigned char ws = 0;
                             ASSERT(len == 1);
-                            ws = opt[2];
+                            ws = opt[optoffs+2];
                             sprintf(buf, "WS(%u) ", ws);
                             tcpEV << buf;
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
                 case 4: {
                             sprintf(buf, "SACK-Permitted ");
                             tcpEV << buf;
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
                 case 5: {
                             tcpEV << ("SACK ");
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
                 case 8: {
                             int i;
                             tcpEV << ("Timestamp(");
                             for(i = 0; i < len; i++) {
-                                sprintf(buf, "%02x", opt[2+i]);
+                                sprintf(buf, "%02x", opt[optoffs+2+i]);
                                 tcpEV << buf;
                             }
                             tcpEV << (") ");
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
                 default:{
                             sprintf(buf, "%u:%u ", opt[0], opt[1]);
                             tcpEV << buf;
-                            opt += opt[1];
+                            optoffs += opt[optoffs+1];
                             break;
                         }
             };
@@ -328,7 +330,6 @@ void TCP_NSC::decode_tcp(const void *packet_data, int hdr_len)
         }
         tcpEV << ("\n");
     }
-
 }
 
 void TCP_NSC::initialize()

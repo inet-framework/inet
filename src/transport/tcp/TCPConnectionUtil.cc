@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2009-2011 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -755,25 +755,41 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
     ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
             sendQueue->getBytesAvailable(state->snd_nxt));
 
-    ASSERT(bytes!=0);
-
-    sendSegment(bytes);
-    if (!called_at_rto)
+    // FIN (without user data) needs to be resent
+    if (bytes == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq())
     {
-        if (seqGreater(old_snd_nxt, state->snd_nxt))
-            state->snd_nxt = old_snd_nxt;
+        state->snd_max = sendQueue->getBufferEndSeq();
+        tcpEV << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
+        state->snd_nxt = state->snd_max;
+        sendFin();
+        state->snd_max = ++state->snd_nxt;
+
+        if (unackedVector)
+            unackedVector->record(state->snd_max - state->snd_una);
     }
-
-    // notify
-    tcpAlgorithm->ackSent();
-
-    if (state->sack_enabled)
+    else
     {
-        // RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
-        // starting with sequence number HighACK + 1.  To prevent repeated
-        // retransmission of the same data, set HighRxt to the highest
-        // sequence number in the retransmitted segment."
-        state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+        ASSERT(bytes != 0);
+
+        sendSegment(bytes);
+
+        if (!called_at_rto)
+        {
+            if (seqGreater(old_snd_nxt, state->snd_nxt))
+                state->snd_nxt = old_snd_nxt;
+        }
+
+        // notify
+        tcpAlgorithm->ackSent();
+
+        if (state->sack_enabled)
+        {
+            // RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
+            // starting with sequence number HighACK + 1.  To prevent repeated
+            // retransmission of the same data, set HighRxt to the highest
+            // sequence number in the retransmitted segment."
+            state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+        }
     }
 }
 
