@@ -17,6 +17,7 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
+#include "assert.h"
 #include "Coord.h"
 
 const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
@@ -29,8 +30,15 @@ const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
  * half of the size there must be a "shorter way" over the border on this axis
  */
 static double dist(double coord1, double coord2, double size) {
-    double dist = FWMath::modulo(fabs(coord1 - coord2), size);
-    return std::min(dist, size - dist);
+    double difference = fabs(coord1 - coord2);
+    if (difference == 0)
+        // NOTE: event if size is zero
+        return 0;
+    else {
+        assert(size != 0);
+        double dist = FWMath::modulo(difference, size);
+        return std::min(dist, size - dist);
+    }
 }
 
 double Coord::sqrTorusDist(const Coord& b, const Coord& size) const {
