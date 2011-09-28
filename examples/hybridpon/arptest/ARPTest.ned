@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Andras Varga
+// Copyright (C) 2010-2011 Kyeong Soo (Joseph) Kim
 //
 // This library is free software, you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,13 +15,15 @@
 
 package inet.examples.hybridpon.arptest;
 
+import ned.DatarateChannel;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.hybridpon.LambdaSplitter;
+import inet.nodes.ethernet.EtherSwitch3;
+import inet.nodes.inet.StandardHost3WithEthernetInterface2;
+import inet.nodes.inet.StandardServerWithEthernetInterface2;
+import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.hybridpon.Olt;
 import inet.nodes.hybridpon.Onu;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import ned.DatarateChannel;
+import inet.nodes.hybridpon.LambdaSplitter;
 
 
 network ARPTest
@@ -34,21 +37,31 @@ network ARPTest
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel fiber_10g extends DatarateChannel
+        channel fiber_100M extends DatarateChannel
+        {
+            delay = 1us;
+            datarate = 100Mbps;
+        }
+        channel fiber_1g extends DatarateChannel
+        {
+            delay = 1us;
+            datarate = 1Gbps;
+        }
+        channel fiber_10G extends DatarateChannel
         {
             delay = 1us;
             datarate = 10Gbps;
         }
     submodules:
-        client: StandardHost {
+        client: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("p=42,95;i=device/laptop");
         }
-        host1: StandardHost {
+        host1: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("p=42,172;i=device/pc");
         }
-        host2: StandardHost {
+        host2: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("p=42,257;i=device/pc");
         }
@@ -74,11 +87,11 @@ network ARPTest
         //        net: Router {
         //            @display("p=510,161");
         //        }
-        router: Router {
+        router: RouterWithEthernetInterface2 {
             parameters:
                 @display("p=410,161");
         }
-        server: StandardHost {
+        server: StandardServerWithEthernetInterface2 {
             parameters:
                 @display("p=552,161;i=device/server_l");
         }
@@ -87,14 +100,14 @@ network ARPTest
                 @display("p=318,30");
         }
     connections:
-        client.ethg++ <--> onu1.ethg++;
-        host1.ethg++ <--> onu2.ethg++;
-        host2.ethg++ <--> onu2.ethg++;
-        onu1.phyg <--> fiber_10g <--> awg.demuxg++;
-        onu2.phyg <--> fiber_10g <--> awg.demuxg++;
+        client.ethg++ <--> fiber_100M <--> onu1.ethg++;
+        host1.ethg++ <--> fiber_100M <--> onu2.ethg++;
+        host2.ethg++ <--> fiber_100M <--> onu2.ethg++;
+        onu1.phyg <--> fiber_10G <--> awg.demuxg++;
+        onu2.phyg <--> fiber_10G <--> awg.demuxg++;
         for i=0..numOnus-1 {
-            awg.muxg++ <--> fiber_10g <--> olt.phyg++;
+            awg.muxg++ <--> fiber_10G <--> olt.phyg++;
         }
-        olt.ethg++ <--> router.ethg++;
+        olt.ethg++ <-->  fiber_100M <--> router.ethg++;
         router.pppg++ <--> fiberline <--> server.pppg++;
 }
