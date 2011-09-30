@@ -18,7 +18,7 @@
 //
 
 
-package inet.examples.ngoa.comparison_framework;
+package inet.examples.ngoa.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.ethernet.EtherSwitch3;
