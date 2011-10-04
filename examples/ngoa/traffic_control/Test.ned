@@ -21,8 +21,8 @@
 package inet.examples.ngoa.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-//import inet.nodes.ethernet.EtherSwitch3;
-import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
+import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+//import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
@@ -56,20 +56,20 @@ network Test
             parameters:
                 @display("p=464,119;i=device/server_l");
 			gates:
-				pppg[1];
+				ethg[1];
         }
-        olt: EtherSwitch3WithPPP2Interface {
+        olt: EtherSwitch2WithOutputQueue {
+//        olt: EtherSwitch3WithPPP2Interface {
             parameters:
                 @display("p=300,119");
 			gates:
-				pppg[N+1];
+				ethg[N+1];
         }
-        onu[N]: EtherSwitch3WithPPP2Interface {
+        onu[N]: EtherSwitch2WithOutputQueue {
             parameters:
                 @display("p=131,119");
 			gates:
-			    ethg[n];
-				pppg[1];
+			    ethg[n+1];
         }
         host[N*n]: StandardHost3WithEthernetInterface2 {
             parameters:
@@ -82,7 +82,7 @@ network Test
 			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
 		}
 		for i=0..N-1 {
-			onu[i].pppg[0] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.pppg[i];
+			onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
         }
-        olt.pppg[N] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.pppg[0];
+        olt.ethg[N] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
 }
