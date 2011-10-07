@@ -36,26 +36,22 @@ class INET_API DropTailTBFQueue : public DropTailQueue
 {
   protected:
     // configuration
-    int frameCapacity;
-    int burstSize;
+    int burstSize;  // in bit; note that the corresponding parameter in NED/INI is in byte!
     double meanRate;
-    int mtu;
+    int mtu;    // in bit; note that the corresponding parameter in NED/INI is in byte!
     double peakRate;
 
-    // token buckets
+    // state
     int meanBucketLength;   // the number of tokens (bits) in the bucket for mean rate/burst control
     int peakBucketLength;   // the number of tokens (bits) in the bucket for peak rate/mtu control
     simtime_t lastTime; // the last time the shaping action occurred
-
-    // state
-    cQueue queue;
-    cGate *outGate;
+    bool isTxScheduled;    // flag to indicate whether there is any scheduled frame transmission 
 
     // statistics
     int numQueueShaped;
-    cOutVector qlenVec;
-    cOutVector dropVec;
-
+// DEBUG
+    int numQueueSent;
+// DEBUG
 
     // timer
     cMessage *resumeTransmissionTimer;
@@ -85,7 +81,7 @@ class INET_API DropTailTBFQueue : public DropTailQueue
     /**
      * Newly defined.
      */
-    virtual void scheduleTransmission(cMessage *msg);
+    virtual void scheduleTransmission(int pktLength);
 
     /**
      * Newly defined.

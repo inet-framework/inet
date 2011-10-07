@@ -36,26 +36,24 @@ DropTailTBFQueue::~DropTailTBFQueue()
 void DropTailTBFQueue::initialize()
 {
     DropTailQueue::initialize();
-    queue.setName("l2queue");
 
     // statistic
     numQueueShaped = 0;
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
-
-    outGate = gate("out");
 
     // configuration
-    frameCapacity = par("frameCapacity");
-    burstSize = par("burstSize"); // in bytes
+    burstSize = par("burstSize").longValue()*8; // in bit
     meanRate = par("meanRate"); // in bps
-    mtu = par("mtu"); // in bytes
+    mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
 
-    // variables
-    meanBucketLength = burstSize * 8;
-    peakBucketLength = mtu * 8;
+    // state
+    meanBucketLength = burstSize;
+    peakBucketLength = mtu;
     lastTime = simTime();
+    isTxScheduled = false;
+// DEBUG
+    numQueueSent = 0;
+// DEBUG
 
     // timers
     resumeTransmissionTimer = new cMessage("Resume frame transmission");
@@ -66,37 +64,46 @@ void DropTailTBFQueue::handleMessage(cMessage *msg)
     if (msg == resumeTransmissionTimer)
     {
         // resume frame transmission (scheduled from the previous shaping)
+        isTxScheduled = false;
         cMessage *queuedMsg = (cMessage *) queue.front();
-        if (isConformed(queuedMsg))
-        {
-            requestPacket();
-        }
-        else
-        {
-            dumpTbfStatus();
-            error("Resumed frame transmission (length=%d [bit]) is not conformed by TBF",
-                    (check_and_cast<cPacket *>(queuedMsg))->getBitLength());
-        }
+        requestPacket();
+        // if (isConformed(queuedMsg))
+        // {
+        //     requestPacket();
+        // }
+        // else
+        // {
+        //     dumpTbfStatus();
+        //     error("Resumed frame transmission (length=%d [bit]) is not conformed by TBF",
+        //             (check_and_cast<cPacket *>(queuedMsg))->getBitLength());
+        // }
     }
 //    else if (msg->arrivedOn("in"))
     else if (dynamic_cast<EtherFrame *>(msg) != NULL)
     {
         numQueueReceived++;
-        if (packetRequested > 0)
+        if ((packetRequested > 0) && (!isTxScheduled))
         {
             if (isConformed(msg))
             {
                 packetRequested--;
+// DEBUG
+                numQueueSent++;
+// DEBUG
                 sendOut(msg);
             }
             else
             {
-                // schedule frame transmission when enough tokens will be available
-                scheduleTransmission(msg);
+                numQueueShaped++;
+                int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
                 bool dropped = enqueue(msg);
                 if (dropped) {
                     numQueueDropped++;
-                    cancelEvent(resumeTransmissionTimer);
+                }
+                else {
+                    // schedule frame transmission when enough tokens will be available
+                    scheduleTransmission(pktLength);
+                    isTxScheduled = true;
                 }
             }
         }
@@ -123,9 +130,12 @@ void DropTailTBFQueue::handleMessage(cMessage *msg)
 void DropTailTBFQueue::requestPacket()
 {
     Enter_Method("requestPacket()");
+// DEBUG
+    EV << "DropTailTBFQueue::requestPacket() is called" << endl;
+// DEBUG
 
     cMessage *msg = (cMessage *) queue.front();
-    if (msg == NULL)
+    if ((msg == NULL) || isTxScheduled)
     {
         packetRequested++;
     }
@@ -134,24 +144,37 @@ void DropTailTBFQueue::requestPacket()
         if (isConformed(msg))
         {
             cMessage *msg = dequeue();
+// DEBUG
+            numQueueSent++;
+// DEBUG
             sendOut(msg);
         }
         else
         {
+            numQueueShaped++;
             // schedule frame transmission when enough tokens will be available
-            scheduleTransmission(msg);
+            scheduleTransmission((check_and_cast<cPacket *>(msg))->getBitLength());
+            isTxScheduled = true;
         }
     }
 }
 
 bool DropTailTBFQueue::isConformed(cMessage *msg)
 {
-    // update TBF
-    simtime_t now;
-    meanBucketLength += int(meanRate*(now - lastTime).dbl() + 0.5);
-    meanBucketLength = meanBucketLength > burstSize ? burstSize : meanBucketLength;
-    peakBucketLength += int(peakRate*(now - lastTime).dbl() + 0.5);
-    peakBucketLength += peakBucketLength > mtu ? mtu : peakBucketLength;
+// DEBUG
+    EV << "DropTailTBFQueue::isConformed() is called" << endl;
+    EV << "Last Time = " << lastTime << endl;
+    EV << "Current Time = " << simTime() << endl;
+// DEBUG
+
+    // update states
+    simtime_t now = simTime();
+    // meanBucketLength += int(meanRate*(now - lastTime).dbl() + 0.5);
+    unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl() + 0.5);
+    meanBucketLength = int((meanTemp > burstSize) ? burstSize : meanTemp);
+    // peakBucketLength += int(peakRate*(now - lastTime).dbl() + 0.5);
+    unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl() + 0.5);
+    peakBucketLength = int((peakTemp > mtu) ? mtu : peakTemp);
     lastTime = now;
 
 // DEBUG
@@ -162,6 +185,9 @@ bool DropTailTBFQueue::isConformed(cMessage *msg)
 // DEBUG
 
     int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
+// DEBUG
+    EV << "Packet Length = " << pktLength << endl;
+// DEBUG
     if (pktLength <= meanBucketLength)
     {
         if  (pktLength <= peakBucketLength)
@@ -174,18 +200,20 @@ bool DropTailTBFQueue::isConformed(cMessage *msg)
     return false;
 }
 
-void DropTailTBFQueue::scheduleTransmission(cMessage *msg)
+void DropTailTBFQueue::scheduleTransmission(int pktLength)
 {
-// DEBUG
-    if (msg == NULL)
-    {
-        error("msg is NULL inside scheduleTransmission()");
-    }
-// DEBUG
-
-    int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
     double meanDelay = (pktLength - meanBucketLength) / meanRate;
     double peakDelay = (pktLength - peakBucketLength) / peakRate;
+
+// DEBUG
+    EV << "Packet Length = " << pktLength << endl;
+    EV << "DropTailTBFQueue::scheduleTransmission() is called" << endl;
+    dumpTbfStatus();
+    EV << "Delay for Mean TBF = " << meanDelay << endl;
+    EV << "Delay for Peak TBF = " << peakDelay << endl;
+    EV << "Current Time = " << simTime() << endl;
+    EV << "Scheduled Time = " << simTime() + max(meanDelay, peakDelay) << endl;
+// DEBUG
 
     scheduleAt(simTime() + max(meanDelay, peakDelay), resumeTransmissionTimer);
 }
@@ -193,17 +221,20 @@ void DropTailTBFQueue::scheduleTransmission(cMessage *msg)
 void DropTailTBFQueue::dumpTbfStatus()
 {
     EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Burst size: " << burstSize << endl;
-    EV << "- Mean rate: " << meanRate << endl;
-    EV << "- Bucket length: " << meanBucketLength << endl;
+    EV << "- Burst size [bit]: " << burstSize << endl;
+    EV << "- Mean rate [bps]: " << meanRate << endl;
+    EV << "- Bucket length [bit]: " << meanBucketLength << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;
-    EV << "- MTU: " << mtu << endl;
-    EV << "- Peak rate: " << peakRate << endl;
-    EV << "- Bucket length: " << peakBucketLength << endl;
+    EV << "- MTU [bit]: " << mtu << endl;
+    EV << "- Peak rate [bps]: " << peakRate << endl;
+    EV << "- Bucket length [bit]: " << peakBucketLength << endl;
 }
 
 void DropTailTBFQueue::finish()
 {
     DropTailQueue::finish();
     recordScalar("packets shaped by queue", numQueueShaped);
+// DEBUG
+    recordScalar("packets sent by queue", numQueueSent);
+// DEBUG
 }

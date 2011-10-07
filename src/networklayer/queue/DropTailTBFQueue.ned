@@ -33,12 +33,12 @@ simple DropTailTBFQueue like OutputQueue
 {
     parameters:
         int frameCapacity = default(100);
-		int burstSize @unit(byte) = default(1000B);
+		int burstSize @unit(byte) = default(3000B);
 			// token bucket size; must be larger than mtu
 			// note that with a finite line rate or peak rate,
 			// the maximum size of burst is not equal to token bucket size.
 		double meanRate @unit(bps) = default(10Mbps);	// token generation rate
-		int mtu @unit(byte) = default(1500B);
+		int mtu @unit(byte) = default(1518B);	// for Ethernet frame with header(18) + maximum payload (1500)
 		double peakRate @unit(bps) = default(100Mbps);	// must be larger than meanRate
         @display("i=block/queue");
     gates:
