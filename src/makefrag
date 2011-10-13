@@ -25,7 +25,7 @@ endif
 #
 # pkg-config:
 #
-HAVE_PKGCFG := $(shell pkg-config --version)
+HAVE_PKGCFG := $(shell pkg-config --version 2>/dev/null)
 ifeq ($(strip $(HAVE_PKGCFG)),)
   HAVE_PKGCFG := no
 else
