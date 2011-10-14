@@ -44,6 +44,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     virtual ~IPv6ControlInfo();
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
+    virtual IPv6ControlInfo *dup() const {return new IPv6ControlInfo(*this);}
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const {return dgram;}

@@ -41,6 +41,7 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base
     virtual ~IPv4ControlInfo();
     IPv4ControlInfo(const IPv4ControlInfo& other) : IPv4ControlInfo_Base(other) { dgram = NULL; copy(other); }
     IPv4ControlInfo& operator=(const IPv4ControlInfo& other);
+    virtual IPv4ControlInfo *dup() const {return new IPv4ControlInfo(*this);}
 
     virtual void setOrigDatagram(IPv4Datagram *d);
     virtual IPv4Datagram *getOrigDatagram() const {return dgram;}
