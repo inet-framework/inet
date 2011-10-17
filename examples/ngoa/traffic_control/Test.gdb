@@ -1,8 +1,9 @@
 set breakpoint pending on
 exec-file /home/kks/omnetpp/bin/opp_run
-set args -l /home/kks/tools/omnetpp/inet-hnrl/src/inet -n /home/kks/tools/omnetpp/inet-hnrl/examples:/home/kks/tools/omnetpp/inet-hnrl/src -f test.ini -u Cmdenv -c N1_n1_nh1_nf0_nv0 
+set args -l /home/kks/tools/omnetpp/inet-hnrl/src/inet -n /home/kks/tools/omnetpp/inet-hnrl/examples:/home/kks/tools/omnetpp/inet-hnrl/src -f Test.ini -u Cmdenv -c N1_n1_nh1_nf0_nv0_tbf -r 0 
 tbreak main
 #tbreak UDP::bind
+tbreak EtherMACBase::calculateParameters
 tbreak DropTailTBFQueue::initialize
 #tbreak DropTailTBFQueue::handleMessag
 break DropTailTBFQueue::requestPacket

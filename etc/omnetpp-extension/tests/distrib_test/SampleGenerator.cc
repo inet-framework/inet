@@ -26,7 +26,9 @@ class SampleGenerator: public cSimpleModule
 private:
 	long n;	// number of samples generated
 	long numSamples; // number of samples to generate
-	cStdDev sampleStats; // sample statistics
+	// cStdDev sampleStats; // sample statistics
+	// cPSquare sampleStats; // sample statistics
+	cPSquare* sampleStats; // sample statistics
 	cOutVector sampleVector; // sample vector
 	cMessage *genEvent;
 
@@ -56,7 +58,8 @@ void SampleGenerator::initialize()
 {
 	n = 0;
 	numSamples = par("numSamples").longValue();
-	sampleStats.setName("sample statistics");
+    sampleStats = new cPSquare("sample statistic", 100);
+	// sampleStats.setName("sample statistics");
 	sampleVector.setName("sample vector");
 
     genEvent = new cMessage("New sample generation event");
@@ -68,7 +71,7 @@ void SampleGenerator::handleMessage(cMessage *msg)
 	ASSERT(msg==genEvent);
 
 	double sample = par("distribution").doubleValue();
-	sampleStats.collect(sample);
+	sampleStats->collect(sample);
 	sampleVector.record(sample);
 
 	EV<< "Generate sample value = " << sample << endl;
@@ -82,13 +85,15 @@ void SampleGenerator::handleMessage(cMessage *msg)
 
 void SampleGenerator::finish()
 {
-	EV << "Total number of samples generated: " << sampleStats.getCount() <<endl;
-	EV << "Sample mean: " << sampleStats.getMean() << endl;
-	EV << "Sample max.: " << sampleStats.getMax() << endl;
-	EV << "Sample std.: " << sampleStats.getStddev() << endl;
+	EV << "Total number of samples generated: " << sampleStats->getCount() <<endl;
+	EV << "Sample mean: " << sampleStats->getMean() << endl;
+	EV << "Sample max.: " << sampleStats->getMax() << endl;
+	EV << "Sample std.: " << sampleStats->getStddev() << endl;
 
 	recordScalar("Simulation duration", simTime());
-	sampleStats.record();
+    // 95-percentile
+	sampleStats->record();
+    delete sampleStats;
 }
 
 //}	// end of namespace

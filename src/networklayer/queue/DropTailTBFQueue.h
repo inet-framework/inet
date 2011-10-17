@@ -26,7 +26,7 @@
 /**
  * Returns the maximum of a and b.
  */
-inline double max(const double a, const double b) { return (a < b) ? b : a; }
+inline double max(const double a, const double b) { return (a > b) ? a : b; }
 
 /**
  * Drop-front queue with token bucket filter (TBF) traffic shaper.
@@ -36,22 +36,20 @@ class INET_API DropTailTBFQueue : public DropTailQueue
 {
   protected:
     // configuration
-    int burstSize;  // in bit; note that the corresponding parameter in NED/INI is in byte!
+    int burstSize; // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;
-    int mtu;    // in bit; note that the corresponding parameter in NED/INI is in byte!
+    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
 
     // state
-    int meanBucketLength;   // the number of tokens (bits) in the bucket for mean rate/burst control
-    int peakBucketLength;   // the number of tokens (bits) in the bucket for peak rate/mtu control
-    simtime_t lastTime; // the last time the shaping action occurred
-    bool isTxScheduled;    // flag to indicate whether there is any scheduled frame transmission 
+    int meanBucketLength;  // the number of tokens (bits) in the bucket for mean rate/burst control
+    int peakBucketLength;  // the number of tokens (bits) in the bucket for peak rate/MTU control
+    simtime_t lastTime; // the last time the TBF used
+    bool isTxScheduled; // flag to indicate whether there is any scheduled frame transmission
 
     // statistics
     int numQueueShaped;
-// DEBUG
     int numQueueSent;
-// DEBUG
 
     // timer
     cMessage *resumeTransmissionTimer;
@@ -76,7 +74,7 @@ class INET_API DropTailTBFQueue : public DropTailQueue
     /**
      * Newly defined.
      */
-    virtual bool isConformed(cMessage *msg);
+    virtual bool isConformed(int pktLength);
 
     /**
      * Newly defined.
