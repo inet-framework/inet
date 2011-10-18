@@ -1,0 +1,8 @@
+# To submit an array job to the Sun Grid Engine (SGE).
+qsub -t 1-200 -o ./results/HybridPon -j yes ./scripts/arrayrun.sh HybridPon.ini N16_dr10_br1000_rtt10
+
+
+# To profile a program with Valgrind/KCachegrind.
+# - Note that you should directly call 'opp_run' (not via 'run' script!).
+valgrind --tool=callgrind opp_run -l ${HOME}/inet-hnrl/src/inet -n ${HOME}/inet-hnrl/examples:${HOME}/inet-hnrl/src -f HybridPon.ini -u Cmdenv -c Debug_N2 -r 9
+
