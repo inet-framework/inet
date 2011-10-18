@@ -8,15 +8,14 @@
 //-------------------------------------------------------------------------------
 
 #include <omnetpp.h>
-#include <unitconversion.h>
 
-typedef cDynamicExpression::Value Value;  // abbreviation for local use
-
+#define DEF(FUNCTION, SIGNATURE, CATEGORY, DESCRIPTION, BODY) \
+    static cNEDValue FUNCTION(cComponent *context, cNEDValue argv[], int argc) {BODY} \
+    Define_NED_Function2(FUNCTION, SIGNATURE, CATEGORY, DESCRIPTION);
 
 // function signatures
 double trunc_lognormal(double m, double w, double min, double max, bool t, int rng);
 double trunc_pareto(double k, double alpha, double m, int rng);
-
 
 ///
 /// Implementation of a truncated log normal distribution based on
@@ -34,23 +33,20 @@ double trunc_pareto(double k, double alpha, double m, int rng);
 ///     <a href="http://www.jstatsoft.org/v16/c02/paper">http://www.jstatsoft.org/v16/c02/paper</a>
 /// </ol>
 ///
-static Value trunc_lognormal_wrapper(cComponent *context, Value argv[], int argc)
-{
-    bool t = argc==5 ? (bool)argv[4].bl : true;
-    int rng = argc==6 ? (int)argv[5].dbl : 0;
-    double argv1converted = UnitConversion::convertUnit(argv[1].dbl, argv[1].dblunit, argv[0].dblunit);
-    double argv2converted = UnitConversion::convertUnit(argv[2].dbl, argv[2].dblunit, argv[0].dblunit);
-    double argv3converted = UnitConversion::convertUnit(argv[3].dbl, argv[3].dblunit, argv[0].dblunit);
-    argv[0].dbl = trunc_lognormal(argv[0].dbl, argv1converted, argv2converted, argv3converted, t, rng);
-    return argv[0];
-}
-
-Define_NED_Function2(trunc_lognormal_wrapper,
+DEF(nedf_trunc_lognormal,
     "quantity trunc_lognormal(quantity m, quantity w, quantity min, quantity max, bool t?, long rng?)",
     "random/continuous",
-    "Returns a random number from the truncated Lognormal distribution");
+    "Returns a random number from the truncated Lognormal distribution",
+{
+	bool t = argc==5 ? (bool)argv[4] : true;
+    int rng = argc==6 ? (int)argv[5] : 0;
+    double argv1converted = argv[1].doubleValueInUnit(argv[0].getUnit());
+    double argv2converted = argv[2].doubleValueInUnit(argv[0].getUnit());
+    double argv3converted = argv[3].doubleValueInUnit(argv[0].getUnit());
+    return cNEDValue(trunc_lognormal((double)argv[0], argv1converted, argv2converted, argv3converted, t, rng), argv[0].getUnit());
+})
 
-double trunc_lognormal(double m, double w, double min, double max, bool t, int rng)
+SIM_API double trunc_lognormal(double m, double w, double min, double max, bool t, int rng)
 {
 	double res;
 
@@ -60,7 +56,6 @@ double trunc_lognormal(double m, double w, double min, double max, bool t, int r
 
 	return res;
 }
-
 
 ///
 /// Implementation of an upper-truncated Pareto distribution [1].
@@ -74,20 +69,17 @@ double trunc_lognormal(double m, double w, double min, double max, bool t, int r
 /// </li>
 /// </ol>
 ///
-static Value trunc_pareto_wrapper(cComponent *context, Value argv[], int argc)
-{
-    int rng = argc==4 ? (int)argv[3].dbl : 0;
-    double argv2converted = UnitConversion::convertUnit(argv[2].dbl, argv[2].dblunit, argv[0].dblunit);
-    argv[0].dbl = trunc_pareto(argv[0].dbl, argv[1].dbl, argv2converted, rng);
-    return argv[0];
-}
-
-Define_NED_Function2(trunc_pareto_wrapper,
+DEF(nedf_trunc_pareto,
     "quantity trunc_pareto(quantity k, double alpha, quantity m, long rng?)",
     "random/continuous",
-    "Returns a random number from the upper-truncated Pareto distribution");
+    "Returns a random number from the truncated Pareto distribution",
+{
+    int rng = argc==4 ? (int)argv[3] : 0;
+    double argv2converted = argv[2].doubleValueInUnit(argv[0].getUnit());
+    return cNEDValue(trunc_pareto((double)argv[0], (double)argv[1], argv2converted, rng), argv[0].getUnit());
+})
 
-double trunc_pareto(double k, double alpha, double m, int rng)
+SIM_API double trunc_pareto(double k, double alpha, double m, int rng)
 {
 	if ((k <= 0) || (alpha <= 0))
 		throw cRuntimeError(

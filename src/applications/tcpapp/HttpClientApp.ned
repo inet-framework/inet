@@ -70,9 +70,9 @@ simple HttpClientApp like TCPApp2
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(80); // port number to connect to (80 is for HTTP)
         double startTime @unit("s") = default(1s); // time first session begins
-        volatile int htmlObjectLength @unit("B") = default(10KB); // length of an HTML object
+        volatile int htmlObjectLength @unit("B") = default(10KiB); // length of an HTML object
         volatile int numEmbeddedObjects = default(1); // number of embedded objects per HTML object
-        volatile int embeddedObjectLength @unit("B") = default(12KB); // length of an embedded object
+        volatile int embeddedObjectLength @unit("B") = default(12KiB); // length of an embedded object
         volatile int requestLength @unit(B) = default(200B); // length of a request
         volatile double parsingTime @unit("s") = default(0s); // time gap between requests for HTML object and 1st embedded object
         volatile double thinkTime @unit("s") = default(0s); // time gap between requests

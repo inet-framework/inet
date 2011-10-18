@@ -1,0 +1,21 @@
+file 31667138 1318932462                                        
+version 2
+run Test8-0-20111018-11:07:34-29680
+attr configname Test8
+attr datetime 20111018-11:07:34
+attr experiment Test8
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network DistributionTest
+attr processid 29680
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 0  DistributionTest.gen  "sample vector"  ETV
+0	421 22069832 1 699051 1 699051 699051 363879.57728264 4999954.8883441 1395053421648.7 3.1266564162283e+18
+0	22070253 9596885 699052 1000000 699052 1000000 300949 280977.55522161 4998857.5916595 600731028807.01 1.3474372589817e+18
