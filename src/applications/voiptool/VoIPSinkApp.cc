@@ -108,9 +108,15 @@ void VoIPSinkApp::Connection::writeLostSamples(int sampleCount)
 
 void VoIPSinkApp::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
 {
+    AVPacket avpkt;
+    av_init_packet(&avpkt);
+    avpkt.data = inbuf;
+    avpkt.size = inbytes;
+
     int decBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
     int16_t *decBuf = new int16_t[decBufSize]; // output is 16bit
-    int ret = avcodec_decode_audio2(decCtx, decBuf, &decBufSize, inbuf, inbytes);
+//    int ret = avcodec_decode_audio2(decCtx, decBuf, &decBufSize, inbuf, inbytes);
+    int ret = avcodec_decode_audio3(decCtx, decBuf, &decBufSize, &avpkt);
     if (ret < 0)
         throw cRuntimeError("avcodec_decode_audio2(): received packet decoding error: %d", ret);
 
@@ -223,6 +229,7 @@ void VoIPSinkApp::decodePacket(VoIPPacket *vp)
     }
     emit(delaySignal, curConn.lastPacketFinish - vp->getCreationTime());
     curConn.seqNo = newSeqNo;
+
     int len = vp->getByteArray().getDataArraySize();
     uint8_t buff[len];
     vp->copyDataToBuffer(buff, len);

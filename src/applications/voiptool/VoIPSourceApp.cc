@@ -93,6 +93,7 @@ void VoIPSourceApp::initialize(int stage)
 
     // initialize avcodec library
     av_register_all();
+    avcodec_register_all();
 
     av_init_packet(&packet);
 
@@ -199,7 +200,7 @@ void VoIPSourceApp::openSoundFile(const char *name)
     streamIndex = -1;
     for (unsigned int j = 0; j < pFormatCtx->nb_streams; j++)
     {
-        if (pFormatCtx->streams[j]->codec->codec_type == CODEC_TYPE_AUDIO)
+        if (pFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
         {
             streamIndex = j;
             break;
@@ -231,10 +232,10 @@ void VoIPSourceApp::openSoundFile(const char *name)
     if (pCodecEncoder == NULL)
         error("Codec '%s' not found!", codec);
 
+    pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
+
     if (avcodec_open(pEncoderCtx, pCodecEncoder) < 0)
         error("could not open %s encoding codec!", codec);
-
-    pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
 
     if (pCodecCtx->sample_rate != sampleRate
             || pEncoderCtx->sample_fmt != pCodecCtx->sample_fmt
@@ -279,14 +280,16 @@ VoIPPacket* VoIPSourceApp::generatePacket()
     int outByteCount = 0;
     uint8_t *outBuf = NULL;
 
-    if (pEncoderCtx->frame_size > 1)
+//    if (pEncoderCtx->frame_size > 1)
+//    {
+//        error("Unsupported codec");
+//        // int encoderBufSize = (int)(compressedBitRate * SIMTIME_DBL(packetTimeLength)) / 8 + 256;
+//    }
+//    else
     {
-        error("Unsupported codec");
-        // int encoderBufSize = (int)(compressedBitRate * SIMTIME_DBL(packetTimeLength)) / 8 + 256;
-    }
-    else
-    {
-        int encoderBufSize = samples * bitsPerOutSample/8 + 256;
+        pEncoderCtx->frame_size = samples; //HACK!!!!
+
+        int encoderBufSize = std::max(std::max(pEncoderCtx->frame_size, samples * bitsPerOutSample/8 + 256), samples);
         outBuf = new uint8_t[encoderBufSize];
         memset(outBuf, 0, encoderBufSize);
 
@@ -295,11 +298,12 @@ VoIPPacket* VoIPSourceApp::generatePacket()
         // and read (buf_size/(av_get_bits_per_sample(avctx->codec->id)/8)) samples from input buffer
         // When codec is g726, the return value is count of output bytes,
         // and read buf_size samples from input buffer
+        int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
 
         // The bitsPerOutSample is not 0 when codec is PCM.
-        int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
         outByteCount = avcodec_encode_audio(pEncoderCtx, outBuf, buf_size, (short int*)(sampleBuffer.readPtr()));
-
+        if(encoderBufSize < outByteCount)
+            error("avcodec_encode_audio() error: too small buffer: %d instead %d", encoderBufSize, outByteCount);
         if (outByteCount <= 0)
             error("avcodec_encode_audio() error: %d", outByteCount);
 
@@ -430,10 +434,12 @@ void VoIPSourceApp::readFrame()
         if (packet.size == 0)
             continue;
 
-        uint8_t *ptr = packet.data;
-        int len = packet.size;
+        AVPacket avpkt;
+        av_init_packet(&avpkt);
+        avpkt.data = packet.data;
+        avpkt.size = packet.size;
 
-        while (len > 0)
+        while (avpkt.size > 0)
         {
             // decode audio and save the decoded samples in our buffer
             int16_t *rbuf, *nbuf;
@@ -442,13 +448,13 @@ void VoIPSourceApp::readFrame()
 
             int frame_size = (pReSampleCtx) ? Buffer::BUFSIZE : sampleBuffer.availableSpace();
             memset(rbuf, 0, frame_size);
-            int decoded = avcodec_decode_audio2(pCodecCtx, rbuf, &frame_size, ptr, len);
+            int decoded = avcodec_decode_audio3(pCodecCtx, rbuf, &frame_size, &avpkt);
 
             if (decoded < 0)
                 error("Error decoding frame, err=%d", decoded);
 
-            ptr += decoded;
-            len -= decoded;
+            avpkt.data += decoded;
+            avpkt.size -= decoded;
 
             if (frame_size == 0)
                 continue;
