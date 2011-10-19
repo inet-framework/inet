@@ -214,7 +214,7 @@ class Hna_global_entry
     std::vector<OrigNode *> orig_list;
     ~Hna_global_entry()
     {
-        while (orig_list.empty())
+        while (!orig_list.empty())
         {
             delete orig_list.back();
             orig_list.pop_back();
