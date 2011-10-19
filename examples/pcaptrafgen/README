@@ -1,0 +1,7 @@
+The network (consisting of three routers, a server and several clients)
+can be simulated telnet sessions, using the TelnetApp and TCPGenericSrvApp modules.
+
+IP addresses and routing tables are set up automatically, by using
+the FlatNetworkConfigurator module.
+
+For testing pcapTrafficGenerator, you must push into this directory a test.pcap file
