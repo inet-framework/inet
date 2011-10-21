@@ -25,21 +25,24 @@
 class INET_API HttpClientApp : public TCPGenericCliAppBase
 {
   protected:
-	  cMessage *timeoutMsg;
-	  bool earlySend;	///< if true, don't wait with sendRequest() until established()
-      bool htmlObjectRcvd;	///< if true, response to HTML object (i.e., 1st request) has been received
-	  bool warmupFinished;	///< if true, start statistics gathering
-	  int numEmbeddedObjects;	///< number of embedded objects per HTML object
-      int numSessionsFinished;	///< number of sessions finished (not just started)
-	  int bytesRcvdAtSessionStart;	///< number of bytes received (so far) at the start of a session
+    simsignal_t sessionDelaySignal;
+    simsignal_t sessionTransferRateSignal;
+    
+    cMessage *timeoutMsg;
+    bool earlySend;	///< if true, don't wait with sendRequest() until established()
+    bool htmlObjectRcvd;	///< if true, response to HTML object (i.e., 1st request) has been received
+    bool warmupFinished;	///< if true, start statistics gathering
+    int numEmbeddedObjects;	///< number of embedded objects per HTML object
+    int numSessionsFinished;    ///< number of sessions finished (not just started)
+    int bytesRcvdAtSessionStart;    ///< number of bytes received (so far) at the start of a session
 									///< this is used to calculate session size and session transfer rate
 									///< (i.e., session size to session delay ratio)
-	  int bytesRcvdAtSessionEnd;	///< number of bytes received (so far) at the end of a session
-  									///< this is used to calculate average session throughput
-	  simtime_t sessionStart;	///< start time of a session
-	  double sumSessionDelays;	///< sum of session delays
-	  double sumSessionSizes;	///< sum of session sizes in bytes
-	  double sumSessionTransferRates;	///< sum of session transfer rates in bytes/second
+    int bytesRcvdAtSessionEnd;  ///< number of bytes received (so far) at the end of a session
+                                ///< this is used to calculate average session throughput
+    simtime_t sessionStart; ///< start time of a session
+    double sumSessionDelays;    ///< sum of session delays
+    double sumSessionSizes; ///< sum of session sizes in bytes
+    double sumSessionTransferRates; ///< sum of session transfer rates in bytes/second
 
     /** Utility: sends a request to the server */
     virtual void sendRequest();

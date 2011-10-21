@@ -11,9 +11,11 @@ cleanall: checkmakefiles
 
 makefiles:
 ### To create a shared library
-	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF
+#	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF
+	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
 ### To create a single executable
 #	cd src && opp_makemake -f --deep -o inet -O out $$NSC_VERSION_DEF
+#	cd src && opp_makemake -f --deep -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

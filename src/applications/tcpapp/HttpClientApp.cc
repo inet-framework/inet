@@ -39,6 +39,9 @@ void HttpClientApp::initialize()
 {
     TCPGenericCliAppBase::initialize();
 
+    sessionDelaySignal = registerSignal("sessionDelay");
+    sessionTransferRateSignal = registerSignal("sessionTransferRate");
+
     numEmbeddedObjects = 0;
     numSessionsFinished = 0;
     sumSessionDelays = 0.0;
@@ -172,13 +175,20 @@ void HttpClientApp::socketClosed(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketClosed(connId, ptr);
 
+    // emit statistics signals
+    bytesRcvdAtSessionEnd = bytesRcvd;
+    double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
+    long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
+    emit(sessionDelaySignal, sessionDelay);
+    emit(sessionTransferRateSignal, sessionSize / sessionDelay);
+
     if (warmupFinished == true)
 	{
 		// update session statistics
 		numSessionsFinished++;
-		bytesRcvdAtSessionEnd = bytesRcvd;
-		double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
-		long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
+		// bytesRcvdAtSessionEnd = bytesRcvd;
+		// double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
+		// long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
 		sumSessionSizes += sessionSize;	///< counting the size of sessions only after the warm-up period
 		sumSessionDelays += sessionDelay;
 		sumSessionTransferRates += sessionSize / sessionDelay;

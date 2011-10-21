@@ -20,9 +20,12 @@ package inet.util;
 simple SampleGenerator
 {
     parameters:
+        @display("i=block/source");
+		@signal[sample](type="double");	// sample value from a given distribution
+		@statistic[sample](title="sample"; record=stats,vector?,percentile?);
+
         int numSamples = default(1000);	// number of samples to generate
         volatile double distribution;
-        @display("i=block/source");
 }
 
 

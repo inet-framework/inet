@@ -1,8 +1,9 @@
 set breakpoint pending on
-exec-file /home/kks/inet-hnrl/etc/omnetpp-extension/tests/distrib_test/out/gcc-debug/distrib_test
-set args -l /home/kks/tools/omnetpp/inet-hnrl/src/inet -n /home/kks/tools/omnetpp/inet-hnrl/etc/omnetpp-extension/tests/distrib_test:/home/kks/tools/omnetpp/inet-hnrl/src -f omnetpp.ini -u Cmdenv -c Test9
+exec-file /home/kks/omnetpp/bin/opp_run
+set args -l /home/kks/tools/omnetpp/inet-hnrl/src/inet -n /home/kks/tools/omnetpp/inet-hnrl/examples:/home/kks/tools/omnetpp/inet-hnrl/src -f omnetpp.ini -u Cmdenv -c Test1 -r 0 
 tbreak main
-break SampleGenerator::initialize
-break SampleGenerator::handleMessage
+tbreak SampleGenerator::initialize
+tbreak SampleGenerator::handleMessage
+tbreak PercentileRecorder::finish
 #display bytes
 run
