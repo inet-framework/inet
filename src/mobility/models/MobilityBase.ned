@@ -30,10 +30,10 @@ simple MobilityBase like IMobility
 {
     parameters:
         bool debug = default(false);
-        double constraintAreaX @unit(m) = default(0m); // min x position of the constraint area
-        double constraintAreaY @unit(m) = default(0m); // min y position of the constraint area
-        double constraintAreaZ @unit(m) = default(0m); // min z position of the constraint area
-        double constraintAreaSizeX @unit(m) = default(-1m); // x size of the constraint area, -1 means unbounded
-        double constraintAreaSizeY @unit(m) = default(-1m); // y size of the constraint area, -1 means unbounded
-        double constraintAreaSizeZ @unit(m) = default(-1m); // z size of the constraint area, -1 means unbounded
+        double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinY @unit(m) = default(-1m/0); // min y position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinZ @unit(m) = default(-1m/0); // min z position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMaxX @unit(m) = default(1m/0); // max x position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxY @unit(m) = default(1m/0); // max y position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxZ @unit(m) = default(1m/0); // max z position of the constraint area, unconstrained by default (positive infinity)
 }

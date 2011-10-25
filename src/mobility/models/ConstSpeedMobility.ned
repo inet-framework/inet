@@ -40,9 +40,9 @@ simple ConstSpeedMobility extends MovingMobilityBase
 {
     parameters:
         double speed @unit(mps); // speed of the host
-        double initialX @unit(m) = default(uniform(constraintAreaX, constraintAreaX + constraintAreaSizeX)); // start x coordinate
-        double initialY @unit(m) = default(uniform(constraintAreaY, constraintAreaY + constraintAreaSizeY)); // start y coordinate
-        double initialZ @unit(m) = default(uniform(constraintAreaZ, constraintAreaZ + constraintAreaSizeZ)); // start z coordinate
+        double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
+        double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
+        double initialZ @unit(m) = default(uniform(constraintAreaMinZ, constraintAreaMaxZ));
         bool initFromDisplayString = default(true);
         @class(ConstSpeedMobility);
 }

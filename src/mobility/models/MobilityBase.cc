@@ -42,6 +42,11 @@ static bool parseIntTo(const char *s, double& destValue)
     return true;
 }
 
+static bool isFiniteNumber(double value)
+{
+    return value <= DBL_MAX && value >= -DBL_MAX;
+}
+
 MobilityBase::MobilityBase()
 {
     visualRepresentation = NULL;
@@ -57,20 +62,12 @@ void MobilityBase::initialize(int stage)
     if (stage == 0)
     {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-        Coord contraintAreaSize;
-        contraintAreaSize.x = par("constraintAreaSizeX");
-        contraintAreaSize.y = par("constraintAreaSizeY");
-        contraintAreaSize.z = par("constraintAreaSizeZ");
-        if (contraintAreaSize.x == -1)
-            contraintAreaSize.x = INFINITY;
-        if (contraintAreaSize.y == -1)
-            contraintAreaSize.y = INFINITY;
-        if (contraintAreaSize.z == -1)
-            contraintAreaSize.z = INFINITY;
-        constraintAreaMin.x = par("constraintAreaX");
-        constraintAreaMin.y = par("constraintAreaY");
-        constraintAreaMin.z = par("constraintAreaZ");
-        constraintAreaMax = constraintAreaMin + contraintAreaSize;
+        constraintAreaMin.x = par("constraintAreaMinX");
+        constraintAreaMin.y = par("constraintAreaMinY");
+        constraintAreaMin.z = par("constraintAreaMinZ");
+        constraintAreaMax.x = par("constraintAreaMaxX");
+        constraintAreaMax.y = par("constraintAreaMaxY");
+        constraintAreaMax.z = par("constraintAreaMaxZ");
         visualRepresentation = findVisualRepresentation();
         if (visualRepresentation) {
             const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
@@ -83,9 +80,15 @@ void MobilityBase::initialize(int stage)
     {
         initializePosition();
         if (isOutside())
-            throw cRuntimeError("node position (%g,%g,%g) is outside the constraint area", lastPosition.x, lastPosition.y, lastPosition.z);
+            throw cRuntimeError("mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
+                  lastPosition.x, lastPosition.y, lastPosition.z,
+                  constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
+                  constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
     }
     else if (stage == 3) {
+        // check for NaN values
+        if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) | !isFiniteNumber(lastPosition.z))
+            throw cRuntimeError("mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
         emitMobilityStateChangedSignal();
         updateVisualRepresentation();
     }
@@ -220,7 +223,7 @@ void MobilityBase::raiseErrorIfOutside()
 {
     if (isOutside())
     {
-        throw cRuntimeError("node moved outside the area %g,%g,%g - %g,%g,%g (x=%g,y=%g,z=%g)",
+        throw cRuntimeError("mobility moved outside the area %g,%g,%g - %g,%g,%g (x=%g,y=%g,z=%g)",
               constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
               constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z,
               lastPosition.x, lastPosition.y, lastPosition.z);
