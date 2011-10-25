@@ -129,8 +129,13 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 100s
 **.vector-recording = false
 
-**.constraintAreaWidth = 400m
-**.constraintAreaHeight = 400m
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 400m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
@@ -191,7 +196,7 @@ linecount <- 10 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
 expectedRate <- 52.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
-unbalancedRate <- 3.0 # %
+unbalancedRate <- 5.0 # %
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation
 expectedRateMax <- expectedRate + maxDeviation

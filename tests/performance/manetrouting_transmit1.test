@@ -26,18 +26,21 @@ network Net80211_aodv_test
             parameters:
                 mobility.initialX = 1m;
                 mobility.initialY = 200m;
+                mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
         rcvrhost: AdhocHost {
             parameters:
                 mobility.initialX = 1m + (numHosts+1) * distance;
                 mobility.initialY = 200m;
+                mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
         host[numHosts]: AdhocHost {
             parameters:
                 mobility.initialX = 1m + (index+1) * distance;
                 mobility.initialY = 200m;
+                mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
         channelControl: ChannelControl {
@@ -71,8 +74,13 @@ description = "Aodv Simple test"
 
 #**.drawCoverage=false
 *.numHosts = 1
-**.constraintAreaWidth = 1000m
-**.constraintAreaHeight = 300m
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 1000m
+**.constraintAreaMaxY = 300m
+**.constraintAreaMaxZ = 0m
 
 # mobility
 **.mobility.initFromDisplayString = false

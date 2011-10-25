@@ -129,8 +129,13 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 100s
 **.vector-recording = false
 
-**.constraintAreaWidth = 400m
-**.constraintAreaHeight = 400m
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 400m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
