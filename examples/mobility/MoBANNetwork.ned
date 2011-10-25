@@ -58,10 +58,10 @@ network MoBANNetwork
     submodules:
         node[numNodes]: MobileHost {
             parameters:
-                @display("p=2,6;b=8,8,oval,red,,");
+                @display("b=8,8,oval,red,,");
         }
         coordinator[numMoBAN]: MoBANCoordinator {
             parameters:
-                @display("p=170,120;i=block/wheelbarrow");
+                @display("i=block/wheelbarrow");
         }
 }

@@ -33,8 +33,5 @@ module MobileHost
         @node();
         @display("i=device/pocketpc_s");
     submodules:
-        mobility: <mobilityType> like IMobility {
-            parameters:
-                @display("p=132,141");
-        }
+        mobility: <mobilityType> like IMobility;
 }
