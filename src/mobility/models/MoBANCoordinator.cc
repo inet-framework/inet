@@ -52,6 +52,7 @@ Define_Module(MoBANCoordinator);
 
 void MoBANCoordinator::initialize(int stage) {
     LineSegmentsMobilityBase::initialize(stage);
+    EV << "initializing MoBANCoordinator stage " << stage << endl;
 	if (stage == 0) {
 		useMobilityPattern = par("useMobilityPattern").boolValue();
 		collectLocalModules(getParentModule());
@@ -129,8 +130,8 @@ void MoBANCoordinator::setTargetPosition() {
     //show posture name in the graphical interface
 	if (ev.isGUI()){
 		char dis_str[100];
-		sprintf(dis_str,"t=%s until %f", currentPosture->getPostureName(), nextChange.dbl());
-		setDisplayString(dis_str);
+		sprintf(dis_str,"%s until %f", currentPosture->getPostureName(), nextChange.dbl());
+        getDisplayString().setTagArg("t", 0, dis_str);
 	}
 
     // write the move step into the output log file

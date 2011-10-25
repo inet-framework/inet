@@ -81,7 +81,7 @@ class INET_API MobilityBase : public BasicModule, public IMobility
     MobilityBase();
 
     /** @brief Returns the required number of initialize stages. */
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const {return 2;}
 
     /** @brief Initializes mobility model parameters in 4 stages. */
     virtual void initialize(int stage);

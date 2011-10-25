@@ -79,16 +79,14 @@ void MobilityBase::initialize(int stage)
     else if (stage == 1)
     {
         initializePosition();
+        if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) | !isFiniteNumber(lastPosition.z))
+            throw cRuntimeError("mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
         if (isOutside())
             throw cRuntimeError("mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
                   lastPosition.x, lastPosition.y, lastPosition.z,
                   constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
                   constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
-    }
-    else if (stage == 3) {
-        // check for NaN values
-        if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) | !isFiniteNumber(lastPosition.z))
-            throw cRuntimeError("mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
+        EV << "initial position. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
         emitMobilityStateChangedSignal();
         updateVisualRepresentation();
     }
@@ -130,6 +128,7 @@ void MobilityBase::updateVisualRepresentation()
 {
     if (ev.isGUI() && visualRepresentation)
     {
+        EV << "visual position. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
         visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
     }

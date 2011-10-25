@@ -53,6 +53,14 @@ MoBANLocal::MoBANLocal()
     speed = 0;
 }
 
+void MoBANLocal::initialize(int stage)
+{
+    LineSegmentsMobilityBase::initialize(stage);
+    EV << "initializing MoBANLocal stage " << stage << endl;
+    if (stage == 2)
+        updateVisualRepresentation();
+}
+
 void MoBANLocal::initializePosition()
 {
     lastPosition = referencePosition;
