@@ -66,6 +66,8 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual ~MovingMobilityBase();
 
+    virtual int numInitStages() const {return 3;}
+
     void initialize(int stage);
 
     void handleSelfMessage(cMessage *message);

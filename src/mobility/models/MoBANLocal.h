@@ -74,8 +74,6 @@ class MoBANLocal : public LineSegmentsMobilityBase
     double speed;
 
   protected:
-    virtual int numInitStages() const {return 3;}
-
     virtual void initialize(int);
 
     virtual void initializePosition();
