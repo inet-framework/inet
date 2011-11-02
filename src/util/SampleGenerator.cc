@@ -5,7 +5,7 @@
 ///
 /// @brief  Implements 'SampleGenerator' class for probability distribution tests.
 ///
-/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+/// @remarks Copyright (C) 2010-2011 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
@@ -15,21 +15,13 @@
 
 #include <omnetpp.h>
 
-
-//namespace fifo {
-
-///
-/// Generates samples from a given probability distribution.
-///
 class SampleGenerator: public cSimpleModule
 {
 private:
+    simsignal_t sampleSignal;
+
 	long n;	// number of samples generated
 	long numSamples; // number of samples to generate
-	// cStdDev sampleStats; // sample statistics
-	// cPSquare sampleStats; // sample statistics
-	cPSquare* sampleStats; // sample statistics
-	cOutVector sampleVector; // sample vector
 	cMessage *genEvent;
 
 public:
@@ -56,11 +48,9 @@ SampleGenerator::~SampleGenerator()
 
 void SampleGenerator::initialize()
 {
+    sampleSignal = registerSignal("sample");
 	n = 0;
 	numSamples = par("numSamples").longValue();
-    sampleStats = new cPSquare("sample statistic", 100);
-	// sampleStats.setName("sample statistics");
-	sampleVector.setName("sample vector");
 
     genEvent = new cMessage("New sample generation event");
     scheduleAt(simTime()+simtime_t(1), genEvent);
@@ -70,30 +60,18 @@ void SampleGenerator::handleMessage(cMessage *msg)
 {
 	ASSERT(msg==genEvent);
 
-	double sample = par("distribution").doubleValue();
-	sampleStats->collect(sample);
-	sampleVector.record(sample);
-
-	EV<< "Generate sample value = " << sample << endl;
-
-	n++;
-	if (n < numSamples)
-	{
+    if (n < numSamples) {
+        double sample = par("distribution").doubleValue();
+        emit(sampleSignal, sample);
+        
+        EV<< "Generate sample value = " << sample << endl;
+        
+        n++;
 		scheduleAt(simTime()+simtime_t(1), genEvent);
-	}
+    }
 }
 
 void SampleGenerator::finish()
 {
-	EV << "Total number of samples generated: " << sampleStats->getCount() <<endl;
-	EV << "Sample mean: " << sampleStats->getMean() << endl;
-	EV << "Sample max.: " << sampleStats->getMax() << endl;
-	EV << "Sample std.: " << sampleStats->getStddev() << endl;
-
 	recordScalar("Simulation duration", simTime());
-    // 95-percentile
-	sampleStats->record();
-    delete sampleStats;
 }
-
-//}	// end of namespace

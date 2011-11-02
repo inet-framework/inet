@@ -17,7 +17,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="INET" buildProperties="" description="" id="org.omnetpp.cdt.gnu.config.debug.200906710" name="gcc-debug" parent="org.omnetpp.cdt.gnu.config.debug">
+<configuration artifactName="INET-HNRL" buildProperties="" description="" id="org.omnetpp.cdt.gnu.config.debug.200906710" name="gcc-debug" parent="org.omnetpp.cdt.gnu.config.debug">
 <folderInfo id="org.omnetpp.cdt.gnu.config.debug.200906710." name="/" resourcePath="">
 <toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.691128580" name="GCC for OMNEST" superClass="org.omnetpp.cdt.gnu.toolchain.debug">
 <targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.1326710610" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
@@ -425,7 +425,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="INET" buildProperties="" description="" id="org.omnetpp.cdt.gnu.config.release.1673461738" name="gcc-release" parent="org.omnetpp.cdt.gnu.config.release">
+<configuration artifactName="INET-HNRL" buildProperties="" description="" id="org.omnetpp.cdt.gnu.config.release.1673461738" name="gcc-release" parent="org.omnetpp.cdt.gnu.config.release">
 <folderInfo id="org.omnetpp.cdt.gnu.config.release.1673461738." name="/" resourcePath="">
 <toolChain id="org.omnetpp.cdt.gnu.toolchain.release.1217798347" name="GCC for OMNEST" superClass="org.omnetpp.cdt.gnu.toolchain.release">
 <targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.1802332129" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
@@ -821,6 +821,6 @@
 
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<project id="INET.org.omnetpp.cdt.omnetppProjectType.887371800" name="OMNEST Simulation" projectType="org.omnetpp.cdt.omnetppProjectType"/>
+<project id="INET-HNRL.org.omnetpp.cdt.omnetppProjectType.887371800" name="OMNEST Simulation" projectType="org.omnetpp.cdt.omnetppProjectType"/>
 </storageModule>
 </cproject>

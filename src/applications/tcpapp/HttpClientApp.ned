@@ -65,20 +65,25 @@ package inet.applications.tcpapp;
 simple HttpClientApp like TCPApp2
 {
     parameters:
+        @display("i=block/app");
+		@signal[sessionDelay](type="double");
+		@signal[sessionTransferRate](type="double");
+		@statistic[sessionDelay](title="session delay"; record=stats,percentile?);
+		@statistic[sessionTransferRate](title="session transfer rate"; record=stats);
+
         string address = default(""); // may be left empty ("")
         int port = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(80); // port number to connect to (80 is for HTTP)
         double startTime @unit("s") = default(1s); // time first session begins
-        volatile int htmlObjectLength @unit("B") = default(10KB); // length of an HTML object
+        volatile int htmlObjectLength @unit("B") = default(10KiB); // length of an HTML object
         volatile int numEmbeddedObjects = default(1); // number of embedded objects per HTML object
-        volatile int embeddedObjectLength @unit("B") = default(12KB); // length of an embedded object
+        volatile int embeddedObjectLength @unit("B") = default(12KiB); // length of an embedded object
         volatile int requestLength @unit(B) = default(200B); // length of a request
         volatile double parsingTime @unit("s") = default(0s); // time gap between requests for HTML object and 1st embedded object
         volatile double thinkTime @unit("s") = default(0s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
-        @display("i=block/app");
     gates:
         input tcpIn;
         output tcpOut;

@@ -19,13 +19,12 @@
 
 package inet.nodes.ethernet;
 
-import inet.linklayer.ethernet.EtherMAC2;
+import inet.linklayer.ethernet.EtherMAC2withOutputQueue;
 import inet.linklayer.etherswitch.MACRelayUnit;
-import inet.networklayer.queue.OutputQueue;
 
 
 //
-// Model of an Ethernet switch built with EtherMAC2 and output queue,
+// Model of an Ethernet switch built with EtherMAC2withOutputQueue,
 // which means that all ports are operating in strictly full-duplex mode
 // with external output queueing (like Router).
 // Use EtherSwitch if you need half-duplex operation on some ports.
@@ -40,9 +39,7 @@ module EtherSwitch2WithOutputQueue
         @display("i=device/switch");
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
                                                           // values are MACRelayUnitNP and MACRelayUnitPP
-        string queueType = default("DropTailQueue");	// type of output queue; currently possible
-        												// values are DropTailQueue and REDQueue                                                          
-    gates:
+gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {
@@ -52,28 +49,15 @@ module EtherSwitch2WithOutputQueue
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        queue[sizeof(ethg)]: <queueType> like OutputQueue {
-            parameters:
-                @display("p=70,50;q=l2queue");
-        }
-        //        mac: EtherMAC2 {
-        //            parameters:
-        //                queueModule = "queue";
-        //                txQueueLimit = 1; // queue sends one packet at a time
-        //                @display("p=116,231");
-        //        }                
-        mac[sizeof(ethg)]: EtherMAC2 {
+        mac[sizeof(ethg)]: EtherMAC2withOutputQueue {
             parameters:
                 promiscuous = true;
-                queueModule = "queue";
-                txQueueLimit = 1; // queue sends one packet at a time
                 @display("p=70,150,row;q=queue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            relayUnit.lowerLayerOut[i] --> queue[i].in;
-            relayUnit.lowerLayerIn[i] <-- mac[i].upperLayerOut;
-            queue[i].out --> mac[i].upperLayerIn;
+            mac[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
+            mac[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
             mac[i].phys <--> ethg[i];
         }
 }
