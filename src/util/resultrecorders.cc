@@ -54,11 +54,9 @@ protected:
     };
     static const double percentage[NUMBER_OF_PERCENTAGES];
     vector<double> signalVector;    // container of signal values
-    // simtime_t startTime;
 protected:
     virtual void collect(simtime_t_cref t, double value);
 public:
-//    PercentileRecorder(double p) {percentage = p;}
     virtual void finish(cResultFilter *prev);
 };
 
@@ -70,9 +68,6 @@ const double PercentileRecorder::percentage[NUMBER_OF_PERCENTAGES]
 
 void PercentileRecorder::collect(simtime_t_cref t, double value)
 {
-    // if (startTime < SIMTIME_ZERO) // uninitialized
-    //     startTime = t;
-    // else
     signalVector.push_back(value);
 }
 
@@ -102,29 +97,13 @@ void PercentileRecorder::finish(cResultFilter *prev)
     }
     
     // record the results
-    // FIXME revise per the example of recordStatistic().
-    // opp_string_map attributes = getStatisticAttributes();
-    // ev.recordScalar(getComponent(), getResultName().c_str(), empty ? NaN : p, &attributes);
+    // FIXME revise them later to use recordStatistic() as follows:
+    // - opp_string_map attributes = getStatisticAttributes();
+    // - ev.recordScalar(getComponent(), getResultName().c_str(), empty ? NaN : p, &attributes);
     for (int i = 0; i < NUMBER_OF_PERCENTAGES; i++)
     {
         string percentage_name = to_string<int>(int(percentage[i])) + "th-";
-        // recordScalar(scalar_name.c_str(), percentile[i]);
         opp_string_map attributes = getStatisticAttributes();
         ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), empty ? NaN : percentile[i], &attributes);
     }
 }
-
-// ///
-// /// Listener for recording the 95th percentile of signal values
-// ///
-// class SIM_API The95thPercentileRecorder : public PercentileRecorder
-// {
-//     public:
-//         The95thPercentileRecorder();
-// };
-
-// Register_ResultRecorder("the95thpercentile", The95thPercentileRecorder);
-
-// The95thPercentileRecorder::The95thPercentileRecorder() : PercentileRecorder(95)
-// {
-// }
