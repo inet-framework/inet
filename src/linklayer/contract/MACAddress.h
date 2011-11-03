@@ -48,18 +48,18 @@ class INET_API MACAddress
     /**
      * Default constructor initializes address bytes to zero.
      */
-    MACAddress();
+    MACAddress() { address = 0; }
 
     /**
      * Initializes the address from a 48-bit integer
      */
-    MACAddress(uint64 bits);
+    MACAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
 
     /**
      * Constructor which accepts a hex string (12 hex digits, may also
      * contain spaces, hyphens and colons)
      */
-    MACAddress(const char *hexstr);
+    MACAddress(const char *hexstr) { setAddress(hexstr); }
 
     /**
      * Copy constructor.
@@ -74,7 +74,7 @@ class INET_API MACAddress
     /**
      * Returns the address size in bytes, that is, 6.
      */
-    unsigned int getAddressSize() const;
+    unsigned int getAddressSize() const { return MAC_ADDRESS_SIZE; }
 
     /**
      * Returns the kth byte of the address.
@@ -113,12 +113,12 @@ class INET_API MACAddress
     /**
      * Sets the address to the broadcast address (hex ff:ff:ff:ff:ff:ff).
      */
-    void setBroadcast();
+    void setBroadcast() { address = MAC_ADDRESS_MASK; }
 
     /**
      * Returns true if this is the broadcast address (hex ff:ff:ff:ff:ff:ff).
      */
-    bool isBroadcast() const;
+    bool isBroadcast() const { return address == MAC_ADDRESS_MASK; }
 
     /**
      * Returns true if this is a multicast logical address (first byte's lsb is 1).
@@ -128,7 +128,7 @@ class INET_API MACAddress
     /**
      * Returns true if all address bytes are zero.
      */
-    bool isUnspecified() const;
+    bool isUnspecified() const { return address == 0; }
 
     /**
      * Converts address to a hex string.
@@ -138,22 +138,22 @@ class INET_API MACAddress
     /**
      * Converts address to 48 bits integer.
      */
-    uint64 getInt() const;
+    uint64 getInt() const { return address; }
 
     /**
      * Returns true if the two addresses are equal.
      */
-    bool equals(const MACAddress& other) const;
+    bool equals(const MACAddress& other) const { return address == other.address; }
 
     /**
      * Returns true if the two addresses are equal.
      */
-    bool operator==(const MACAddress& other) const {return (*this).equals(other);}
+    bool operator==(const MACAddress& other) const { return address == other.address; }
 
     /**
      * Returns true if the two addresses are not equal.
      */
-    bool operator!=(const MACAddress& other) const {return !(*this).equals(other);}
+    bool operator!=(const MACAddress& other) const { return address != other.address; }
 
     /**
      * Returns -1, 0 or 1 as result of comparison of 2 addresses.

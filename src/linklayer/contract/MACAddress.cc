@@ -25,30 +25,10 @@ unsigned int MACAddress::autoAddressCtr;
 const MACAddress MACAddress::UNSPECIFIED_ADDRESS;
 const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 
-MACAddress::MACAddress()
-{
-    address = 0;
-}
-
-MACAddress::MACAddress(uint64 bits)
-{
-    address = bits & MAC_ADDRESS_MASK;
-}
-
-MACAddress::MACAddress(const char *hexstr)
-{
-    setAddress(hexstr);
-}
-
 MACAddress& MACAddress::operator=(const MACAddress& other)
 {
     address = other.address;
     return *this;
-}
-
-unsigned int MACAddress::getAddressSize() const
-{
-    return MAC_ADDRESS_SIZE;
 }
 
 unsigned char MACAddress::getAddressByte(unsigned int k) const
@@ -130,21 +110,6 @@ void MACAddress::setAddressBytes(unsigned char *addrbytes)
         setAddressByte(i, addrbytes[i]);
 }
 
-void MACAddress::setBroadcast()
-{
-    address = MAC_ADDRESS_MASK;
-}
-
-bool MACAddress::isBroadcast() const
-{
-    return address == MAC_ADDRESS_MASK;
-}
-
-bool MACAddress::isUnspecified() const
-{
-    return address == 0;
-}
-
 std::string MACAddress::str() const
 {
     char buf[20];
@@ -153,16 +118,6 @@ std::string MACAddress::str() const
         sprintf(s, "%2.2X-", getAddressByte(i));
     *(s-1) = '\0';
     return std::string(buf);
-}
-
-uint64 MACAddress::getInt() const
-{
-    return address;
-}
-
-bool MACAddress::equals(const MACAddress& other) const
-{
-	return address == other.address;
 }
 
 int MACAddress::compareTo(const MACAddress& other) const
@@ -181,15 +136,7 @@ MACAddress MACAddress::generateAutoAddress()
 {
     ++autoAddressCtr;
 
-    unsigned char addrbytes[MAC_ADDRESS_SIZE];
-    addrbytes[0] = 0x0A;
-    addrbytes[1] = 0xAA;
-    addrbytes[2] = (autoAddressCtr>>24)&0xff;
-    addrbytes[3] = (autoAddressCtr>>16)&0xff;
-    addrbytes[4] = (autoAddressCtr>>8)&0xff;
-    addrbytes[5] = (autoAddressCtr>>0)&0xff;
-
-    MACAddress addr;
-    addr.setAddressBytes(addrbytes);
+    uint64 intAddr = 0x0AAA00000000L + (autoAddressCtr & 0xffffffffL);
+    MACAddress addr(intAddr);
     return addr;
 }
