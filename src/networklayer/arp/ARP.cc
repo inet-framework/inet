@@ -589,7 +589,6 @@ void ARP::setChangeAddress(const IPv4Address &oldAddress)
 {
     Enter_Method_Silent();
     ARPCache::iterator it;
-    MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
     if (globalARP)
     {
         it = globalArpCache.find(oldAddress);

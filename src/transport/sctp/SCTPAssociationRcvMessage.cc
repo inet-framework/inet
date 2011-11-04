@@ -1106,7 +1106,6 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
                 if (fastRtx) {
 
                     // ====== Add chunk to transmission queue ========
-                    SCTPQueue::PayloadQueue::iterator it = transmissionQ->payloadQueue.find(myChunk->tsn);
                     if (transmissionQ->getChunk(myChunk->tsn) == NULL) {
                         SCTP::AssocStat* assocStat = sctpMain->getAssocStat(assocId);
                         if (assocStat) {

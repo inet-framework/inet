@@ -51,7 +51,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     EV << "Received packet `" << msg->getName() << "'\n";
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     packetsReceived++;
-    simtime_t lastEED = simTime() - msg->getCreationTime();
     emit(rcvdPkSignal, req);
 
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());

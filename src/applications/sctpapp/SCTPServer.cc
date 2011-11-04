@@ -444,7 +444,6 @@ void SCTPServer::handleTimer(cMessage *msg)
 
     if (msg==delayTimer)
     {
-        ServerAssocStatMap::iterator i = serverAssocStatMap.find(assocId);
         sctpEV3 << simulation.getSimTime() << " delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
         scheduleAt(simulation.getSimTime()+(double)par("readingInterval"), delayTimer);
