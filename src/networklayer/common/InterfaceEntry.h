@@ -91,7 +91,7 @@ class INET_API InterfaceEntry : public cNamedObject
     bool loopback;        ///< interface is loopback interface
     double datarate;      ///< data rate in bit/s
     MACAddress macAddr;   ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
-    InterfaceToken token; ///< for IPv6 stateless autoconfig (RFC 1971)
+    InterfaceToken token; ///< for IPv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
     IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IPv4 address, etc)
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
