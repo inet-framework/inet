@@ -7,7 +7,7 @@ Licensed under the Creative Commons Attribution-ShareAlike 2.0 license <http://c
 -->
 <net version="0.13" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/net_file.xsd">
 
-    <location netOffset="-1220299.625000,-6338933.000000" convBoundary="0.000000,0.000000,10671.750000,7104.500000" origBoundary="10.962138,49.566135,11.058004,49.607628" projParameter="+proj=merc"/>
+    <location netOffset="-1220299.625000,-6338933.000000" convBoundary="0.000000,0.000000,10671.750000,7104.500000" origBoundary="10.962138,49.566135,11.058004,49.607628" projParameter="!"/>
 
     <edge id="-10057977" from="21749615" to="82653456" priority="-1" type="residential">
         <lane id="-10057977_0" index="0" speed="13.89" length="252.13" shape="5631.98,6962.61 5637.82,6932.37 5658.13,6901.39 5696.68,6868.85 5719.13,6839.73 5730.38,6802.64 5738.69,6744.93"/>
