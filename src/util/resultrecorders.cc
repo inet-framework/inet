@@ -17,7 +17,7 @@
 #include <vector>
 #include <sstream>
 #include <omnetpp.h>
-#ifndef _WIN32
+#ifdef __linux__
 #include <expression.h>
 #endif
 
@@ -107,10 +107,10 @@ void PercentileRecorder::finish(cResultFilter *prev)
         string percentage_name = to_string<int>(int(percentage[i])) + "th-";
         opp_string_map attributes = getStatisticAttributes();
         // FIXME remove macro processing here once the library issues with windows platfom have been solved
-#ifdef _WIN32
-        ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), percentile[i], &attributes);
-#else
+#ifdef __linux__
         ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), empty ? NaN : percentile[i], &attributes);
+#else
+        ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), percentile[i], &attributes);
 #endif
     }
 }
