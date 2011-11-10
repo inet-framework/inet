@@ -1,3 +1,12 @@
+TODO: TCP,UDP,SCTP: Need revision for PORT_ANY usage:
+      What will the PORT_ANY value: -1 or 0.
+      Where do replace from PORT_ANY to a valid port: in TCPSocket or in
+          TCPConnection::process_OPEN_ACTIVE/process_OPEN_PASSIVE
+      Check it in other protocols.
+
+TODO: Int128/Uint128 code revision / optimisation
+      Optimise *= and other operators/functions.
+
 TODO: IPv4 misfeature: in IPv4::handleMessageFromHL(cPacket *msg), if the packet is already
       an IP datagram, then it does not encapsulate the packet but just routes it!
       Problem: HL cannot control whether it wants IP to route the packet or tunnel (encapsulate) it!!
