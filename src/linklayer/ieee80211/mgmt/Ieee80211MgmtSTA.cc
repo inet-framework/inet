@@ -176,13 +176,15 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = encapsulate(msg);
+    if (!isAssociated || assocAP.address.isUnspecified())
+    {
+        EV << "STA is not associated with an access point, discarding packet" << msg << "\n";
+        delete msg;
+        return;
+    }
 
-    // Discard frame if STA is not associated (assocAP.address is unspecified).
-    if (frame->getReceiverAddress().isUnspecified())
-        delete frame;
-    else
-        sendOrEnqueue(frame);
+    Ieee80211DataFrame *frame = encapsulate(msg);
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
