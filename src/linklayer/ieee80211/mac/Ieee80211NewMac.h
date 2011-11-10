@@ -91,10 +91,10 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     /** MAC address */
     MACAddress address;
     char opMode;
-    /** The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
+    /** The bitrate is used to send unicast data and mgmt frames; be sure to use a valid 802.11 bitrate */
     double bitrate;
 
-    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
+    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames and multicast/broadcast frames */
     double basicBitrate;
     // Variables used by the auto bit rate
     bool forceBitRate; //if true the

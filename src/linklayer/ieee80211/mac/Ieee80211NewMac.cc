@@ -1859,7 +1859,7 @@ void Ieee80211NewMac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 void Ieee80211NewMac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Multicast frame\n";
-    sendDown(setBitrateFrame(buildDataFrame(frameToSend)));
+    sendDown(setBasicBitrate(buildDataFrame(frameToSend)));
 }
 
 void Ieee80211NewMac::sendCTSFrameOnEndSIFS()
