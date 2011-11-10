@@ -172,15 +172,9 @@ class INET_API MACAddress
      */
     static MACAddress generateAutoAddress();
 
-    bool operator<(const MACAddress& addr) const {return compare(addr)<0;}
+    bool operator<(const MACAddress& other) const { return address < other.address; }
 
-    bool operator>(const MACAddress& addr) const {return compare(addr)>0;}
-
-    /**
-     * Compares two MAC addresses.
-     * Returns -1, 0 or 1.
-     */
-    int compare(const MACAddress& other) const { return address - other.address; }
+    bool operator>(const MACAddress& other) const { return address > other.address; }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)

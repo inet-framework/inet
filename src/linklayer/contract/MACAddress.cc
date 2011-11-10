@@ -122,7 +122,7 @@ std::string MACAddress::str() const
 
 int MACAddress::compareTo(const MACAddress& other) const
 {
-	return address - other.address;
+    return (address < other.address) ? -1 : (address == other.address) ? 0 : 1;  // note: "return address-other.address" is not OK because 64-bit result does not fit into the return type
 }
 
 InterfaceToken MACAddress::formInterfaceIdentifier() const
