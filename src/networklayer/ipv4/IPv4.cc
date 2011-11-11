@@ -306,7 +306,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
                      datagram->setSrcAddress(destIE->ipv4Data()->getIPAddress());
                 fragmentAndSend(datagram, destIE, IPv4Address::ALLONES_ADDRESS);
             }
-            else if (destIE!=NULL && forceBroadcast)
+            else if (forceBroadcast)
             {
                 for (int i = 0; i<ift->getNumInterfaces(); i++)
                 {
@@ -316,7 +316,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
                         IPv4Datagram * dataAux = datagram->dup();
                         if (dataAux->getSrcAddress().isUnspecified())
                              dataAux->setSrcAddress(ie->ipv4Data()->getIPAddress());
-                        fragmentAndSend(datagram->dup(), ie, IPv4Address::ALLONES_ADDRESS);
+                        fragmentAndSend(dataAux, ie, IPv4Address::ALLONES_ADDRESS);
                     }
                 }
                 delete datagram;
