@@ -1,6 +1,44 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-1.99.2 (Nov ??, 2011)
+--------------------------
+
+Requires OMNeT++ 4.2 (final).
+
+- Integrated Kristjan Jonsson's HttpTools project,
+  http://code.google.com/p/omnet-httptools/
+
+- The mobility models have been revised and brought in sync with their
+  MiXiM versions; added 3D coordinate system from MiXim; added MoBAN mobility
+  model from MiXiM.
+
+- UDP: multicast, broadcast and ttl support; bugfixes; heavy API changes.
+  It is now possible to receive broadcasts and multicasts. Implemented support
+  for the following socket options: time-to-live (unicast and multicast),
+  broadcast, multicast output interface, join multicast group, leave multicast
+  group. Connect without bind is now supported (used to be an error).
+  The cost of the above is changes in the way you talk to the UDP module:
+  UDPControlInfo has been split to several classes (UDPBindCommand, UDPConnect-
+  Command, UDPSendCommand, etc.), and the UDPSocket class has been redesigned.
+  Check transport/udp/ChangeLog for detailed information.
+
+- Apps: some standardization of parameter names, so that various modules don't
+  call the same thing differently. Introduced the following names:
+  'startTime', 'stopTime', 'sendInterval', 'localAddress', 'localPort'.
+  E.g. the following parameters became 'sendInterval': 'messageFreq',
+  'waitTime', 'packetInterval', 'interval', and 'waitInterval'.
+
+- Added a 'stopTime' parameter to several apps: TelnetApp, UDPBasicApp,
+  TCPBasicClientApp, IPvXTrafGen, EtherAppCli
+
+- UDPBasicBurst revised
+
+- Removed Blackboard (it was obsolete and out of use)
+
+- Numerous bugfixes.
+
+
 INET-1.99.1 (May 27, 2011)
 --------------------------
 
