@@ -1,0 +1,7 @@
+#
+# Browsing script file for the pair test scenario. Contains references to non-existent resources on www.single.org
+#
+3600;www.single.org/development
+7200;www.single.org/finances
+10800;www.single.org/users
+22300;www.single.org/topsecret

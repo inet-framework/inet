@@ -1,0 +1,62 @@
+HttpTools Examples
+==================
+
+pair-direct
+-----------
+
+Pairs scenario for direct message passing. Scripted browsing and site used for repeatable results.
+The scenario consists of one browser and one server.
+Initialization files:
+  - scripted.ini        : Requests for two existing pages from the server. One has a number of resource references.
+  - scripted-bad.ini    : Requests for a number of non-existent pages from the server.
+  - scripted-cross.ini  : Request for a page with an embedded reference to a resource on another site.
+
+
+pair-socket
+-----------
+
+Pairs scenario consisting of one browser and one server, directly connected using a TCP/IP link. 
+Scripted browsing and site used for repeatable results. See the pair-direct scenario for discussion on the scripts.
+
+
+simple-direct-ddos
+------------------
+
+Simple DDoS scenario consisting of a browser, a victim server (www.good.com) and two attackers (www.bad.org
+and www.ugly.org). The attackers serve HTML code containing embedded references to resources on www.good.com.
+The result is a DDoS attack on www.good.com. See the API documentation for further details on the attacks.
+
+
+simple-socket-ddos
+------------------
+
+A simple DDoS scenario similar to the direct version. A router and TCP/IP links are added.
+
+
+nnodes-socket
+-------------
+
+A simple sockets example with variable number of browsers and servers. The servers are connected to one router, 
+while the browsers use another one. A single leg connects the routers, producing a "dumbbell" topology.
+
+
+10servers-socket
+----------------
+
+A sockets example consisting of ten servers and a variable number of browsers. The same dumbbell topology is used
+as in nnodes-socket. This scenario demonstrates the use of the controller component to select servers on behalf of
+browsers in random browsing mode, using three different popularity distributions:
+  - omnetpp.ini :  Uniform server popularity distribution used.
+  - zipf.ini:      Zipf server popularity distribution used.
+  - histogram.ini: A histogram popularity distribution used.
+
+
+flash-direct
+------------
+
+A direct message passing scenario involving ten servers and a number of browsers. A popularity modification event is
+triggered at 6 hours, by means of a script read by the controller. The server www.abc.com should see a significant
+rise in popularity at that time. The popularity is gradually decreased -- or amortized -- by the amorization constant
+specified in the script.
+
+

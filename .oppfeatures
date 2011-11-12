@@ -549,4 +549,50 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="HttpTools"
+        name="HttpTools"
+        description = "Components for web traffic simulation.
+                       This is a port of Kristjan Jonsson's HttpTools,
+                       see http://code.google.com/p/omnet-httptools/."
+        initiallyEnabled = "true"
+        requires = "TCP_common"
+        labels = "application http web"
+        nedPackages = "
+                       inet.applications.httptools
+                       inet.nodes.httptools
+                       inet.world.httptools
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="HttpTools_examples_direct"
+        name="HttpTools examples with direct sending"
+        description = "HttpTools examples that do not use underlying protocol layers"
+        initiallyEnabled = "true"
+        requires = "HttpTools"
+        labels = "examples http web"
+        nedPackages = "
+                       inet.examples.httptools.direct
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="HttpTools_examples_socket"
+        name="HttpTools examples with socket mode"
+        description = "HttpTools examples that include the simulation of TCP and lower layers as well"
+        initiallyEnabled = "true"
+        requires = "HttpTools IPv4 Ethernet TCP_INET"
+        labels = "examples http web"
+        nedPackages = "
+                       inet.examples.httptools.socket
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
