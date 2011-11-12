@@ -32,18 +32,18 @@
 package inet.examples.httptools.pairdirect;
 
 import inet.httptools.DirectHost;
-import inet.httptools.httptController;
+import inet.httptools.HttpController;
 
 
 //
 // Simple scenario with a pair of nodes. Direct message passing used.
 //
-network httptDirectPair
+network HttpDirectPair
 {
     parameters:
         @display("bgb=474,374");
     submodules:
-        controller: httptController {
+        controller: HttpController {
             parameters:
                 @display("p=62,60;i=block/cogwheel");
         }

@@ -7,12 +7,12 @@
 
 package inet.examples.httptools.pairsocket;
 
-import inet.httptools.httptController;
+import inet.httptools.HttpController;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 
 
-network httptSockPair
+network HttpSockPair
 {
     parameters:
         @display("bgb=474,374");
@@ -32,7 +32,7 @@ network httptSockPair
                 netmask = "255.255.0.0";
                 @display("i=block/cogwheel");
         }
-        controller: httptController {
+        controller: HttpController {
             parameters:
                 @display("p=62,60;i=block/cogwheel");
         }

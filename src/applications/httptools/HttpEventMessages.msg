@@ -29,37 +29,39 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+// ----------------------------------------------------------------------------
+//
+// @file HttpEventMessages.ned
+// 
+// Event messages for the HttpTools components
+//
+// NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
+//
+// @version 1.0 
+// @author  Kristjan V. Jonsson
+//
+// @todo Document parameters
+//
+// ----------------------------------------------------------------------------
 
-import inet.applications.ITCPApp;
-
-
 //
-// DirectHost
+// Server status update event
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// Used by the controller to trigger popularity modifications for web sites.
 //
-// @see HttpServerDirect
-// @see HttpBrowserDirect
+// NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @author Kristjan V. Jonsson (kristjanvj@gmail.com)
-// @version 1.0
+// @version 1.0 
+// @author  Kristjan V. Jonsson
 //
-module DirectHost
+packet HttpServerStatusUpdateMsg
 {
-    parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
-    submodules:
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=163,67;i=block/app");
-        }
-    connections allowunconnected:
+    @omitGetVerb(true);
+    string www;				// Name of the WWW site.
+    simtime_t setTime;		// The event set time.
+    int eventKind;			// The event kind, e.g. ss_special.
+    double pvalue;			// The initial elevated probability.
+    double pamortize;		// The amortization factor -- i.e. how much the pvalue is decreased on each hit.
 }
 
 

@@ -35,31 +35,34 @@ import inet.applications.ITCPApp;
 
 
 //
-// DirectHost
+// HttpServer
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// A Web server module for OMNeT++ simulations. This module is intended for use with the
+// INET StandardHost module and plugs in as a tcpApp. The INET TCP/IP stack modeling is
+// used for transport. See the INET documentation for more details.
 //
+// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
+//
+// @see HttpServerBase
 // @see HttpServerDirect
-// @see HttpBrowserDirect
+// @see DirectHost
 //
-// @author Kristjan V. Jonsson (kristjanvj@gmail.com)
-// @version 1.0
+// @version 1.0 
+// @author  Kristjan V. Jonsson
 //
-module DirectHost
+simple HttpServer like ITCPApp
 {
     parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
-    submodules:
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=163,67;i=block/app");
-        }
-    connections allowunconnected:
+        string www = default("");						// The WWW name of the server
+        int port = default(80);							// The listening port number
+        int httpProtocol = default(11);					// The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        int logLevel = default(0);						// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        string logFile = default("");					// Name of server log file. Events are appended, allowing sharing of file for multiple servers.
+        string siteDefinition = default("");			// The site script file. Blank to disable.
+        double activationTime @unit("s") = default(0s);	// The initial activation delay. Zero to disable.
+        xml config;										// The XML configuration file for random sites
+    gates:
+        input tcpIn;
+        output tcpOut;
 }
-
 

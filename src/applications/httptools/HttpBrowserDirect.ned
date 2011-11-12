@@ -35,31 +35,36 @@ import inet.applications.ITCPApp;
 
 
 //
-// DirectHost
+// HttpBrowserDirect
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// This component is the direct message passing version of the browser simulation 
+// component. It is derived from HttpBrowserBase. Use this component with the
+// DirectHost container module.
 //
-// @see HttpServerDirect
-// @see HttpBrowserDirect
+// Direct message passing is used for transmission, thus bypassing the normal links and
+// interfaces. A linkSpeed parameter is hence needed to model transmission delays.
 //
-// @author Kristjan V. Jonsson (kristjanvj@gmail.com)
-// @version 1.0
+// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-module DirectHost
+// @see DirectHost
+// @see HttpBrowserBase
+// @see HttpBrowser
+//
+// @version 1.0 
+// @author  Kristjan V. Jonsson
+//
+simple HttpBrowserDirect like ITCPApp
 {
     parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
-    submodules:
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=163,67;i=block/app");
-        }
-    connections allowunconnected:
+        int logLevel = default(0);								// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        int httpProtocol = default(11);							// The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        string logFile = default("");							// Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
+        string scriptFile = default("");						// The browsing script file. Blank to disable.
+        double activationTime @unit(s) = default(0s);			// The initial activation delay. Zero to disable (seconds).
+        double linkSpeed @unit(bps) = default(11Mbps);		// Used to model transmission delays (Bit/s)
+        xml config;												// The XML configuration file for the browser
+    gates:
+        input tcpIn;
+        output tcpOut;
 }
-
 

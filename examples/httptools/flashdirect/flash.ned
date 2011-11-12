@@ -32,7 +32,7 @@
 package inet.examples.httptools.flashdirect;
 
 import inet.httptools.DirectHost;
-import inet.httptools.httptController;
+import inet.httptools.HttpController;
 
 
 //
@@ -42,13 +42,13 @@ import inet.httptools.httptController;
 // a flashcrowd. Direct message passing. This scenario is similar to the 10servers
 // scenario used to demonstrate the sockets components.
 //
-network httptDirectFlash
+network HttpDirectFlash
 {
     parameters:
         double num_browsers @prompt("Number of browsers") = default(2);
         @display("bgb=754,559");
     submodules:
-        controller: httptController {
+        controller: HttpController {
             parameters:
                 @display("p=54,60;i=block/cogwheel");
         }

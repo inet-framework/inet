@@ -32,7 +32,7 @@
 
 package inet.examples.httptools.tenserverssocket;
 
-import inet.httptools.httptController;
+import inet.httptools.HttpController;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
@@ -65,7 +65,7 @@ module httpt10servers
                 netmask = "255.255.0.0";
                 @display("p=58,79;i=block/cogwheel");
         }
-        controller: httptController {
+        controller: HttpController {
             parameters:
                 @display("p=62,156;i=block/cogwheel");
         }

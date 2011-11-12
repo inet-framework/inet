@@ -31,35 +31,25 @@
 
 package inet.httptools;
 
-import inet.applications.ITCPApp;
-
-
 //
-// DirectHost
+// HttpNodeBase
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed; 
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @see HttpServerDirect
-// @see HttpBrowserDirect
-//
-// @author Kristjan V. Jonsson (kristjanvj@gmail.com)
+// @author Kristjan V. Jonsson
 // @version 1.0
 //
-module DirectHost
+simple HttpNodeBase
 {
     parameters:
-        double numTcpApps = default(0);		// The number of tcpApps in the array
-    submodules:
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=163,67;i=block/app");
-        }
-    connections allowunconnected:
+        string address;
+        int port;
+        xml config;
+        int logLevel;
+        int httpProtocol;
+        double linkSpeed;
+    gates:
+        input tcpIn;
+        output tcpOut;
 }
-
 

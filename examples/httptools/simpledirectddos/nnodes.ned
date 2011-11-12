@@ -32,7 +32,7 @@
 
 package inet.examples.httptools.simpledirectddos;
 
-import inet.httptools.httptController;
+import inet.httptools.HttpController;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
@@ -52,7 +52,7 @@ channel ethernetline extends ned.DatarateChannel
 // The scenario consists of a number of clients and servers connected to two routers. The routers are connected
 // with a single link.
 //
-network httptNnodes
+network HttpNnodes
 {
     parameters:
         double numservers @prompt("Number of servers") = default(10);
@@ -73,7 +73,7 @@ network httptNnodes
                 netmask = "255.255.0.0";
                 @display("p=50,64;i=block/cogwheel");
         }
-        controller: httptController {
+        controller: HttpController {
             parameters:
                 @display("p=46,140;i=block/cogwheel");
         }
