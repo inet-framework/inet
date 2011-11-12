@@ -6,7 +6,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+package inet.applications.httptools;
 
 import inet.applications.ITCPApp;
 
@@ -37,7 +37,7 @@ import inet.applications.ITCPApp;
 //
 // HttpBrowserDirect
 //
-// This component is the direct message passing version of the browser simulation 
+// This component is the direct message passing version of the browser simulation
 // component. It is derived from HttpBrowserBase. Use this component with the
 // DirectHost container module.
 //
@@ -50,19 +50,19 @@ import inet.applications.ITCPApp;
 // @see HttpBrowserBase
 // @see HttpBrowser
 //
-// @version 1.0 
+// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 simple HttpBrowserDirect like ITCPApp
 {
     parameters:
-        int logLevel = default(0);								// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
-        int httpProtocol = default(11);							// The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        string logFile = default("");							// Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
-        string scriptFile = default("");						// The browsing script file. Blank to disable.
-        double activationTime @unit(s) = default(0s);			// The initial activation delay. Zero to disable (seconds).
-        double linkSpeed @unit(bps) = default(11Mbps);		// Used to model transmission delays (Bit/s)
-        xml config;												// The XML configuration file for the browser
+        int logLevel = default(0);                              // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        int httpProtocol = default(11);                         // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        string logFile = default("");                           // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
+        string scriptFile = default("");                        // The browsing script file. Blank to disable.
+        double activationTime @unit(s) = default(0s);           // The initial activation delay. Zero to disable (seconds).
+        double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays (Bit/s)
+        xml config;                                             // The XML configuration file for the browser
     gates:
         input tcpIn;
         output tcpOut;

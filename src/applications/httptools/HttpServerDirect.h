@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -27,7 +28,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // ***************************************************************************
- 
+
 #ifndef __httptServerDirect_H_
 #define __httptServerDirect_H_
 
@@ -48,18 +49,18 @@
  */
 class INET_API HttpServerDirect : public HttpServerBase
 {
-	/** @name cSimpleModule redefinitions */
-	//@{
-	protected:
-		/** Initialization of the component and startup of browse event scheduling */
-		virtual void initialize();
+    /** @name cSimpleModule redefinitions */
+    //@{
+    protected:
+        /** Initialization of the component and startup of browse event scheduling */
+        virtual void initialize();
 
-		/** Report final statistics */
-		virtual void finish();
+        /** Report final statistics */
+        virtual void finish();
 
-		/** Handle incoming messages. See the parent class for details. */
-		virtual void handleMessage(cMessage *msg);
-	//@}
+        /** Handle incoming messages. See the parent class for details. */
+        virtual void handleMessage(cMessage *msg);
+    //@}
 };
 
 #endif

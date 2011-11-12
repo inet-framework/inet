@@ -6,7 +6,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+package inet.applications.httptools;
 
 import inet.applications.ITCPApp;
 
@@ -47,23 +47,23 @@ import inet.applications.ITCPApp;
 // * minBadRequests specifies the lower bound on bad requests caused to be sent to the wictim by the browser.
 // * maxBadRequests specifies the upper bound on bad requests caused to be sent to the wictim by the browser.
 //
-// @version 0.9 
+// @version 0.9
 // @author  Kristjan V. Jonsson
 //
 simple HttpServerEvilB like ITCPApp
 {
     parameters:
-        string www;				// The WWW name of the server
-        int port;		// The listening port number
-        int httpProtocol;		// The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        int logLevel;			// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
-        string logFile;			// Name of server log file. Events are appended, allowing sharing of file for multiple servers.
-        string siteDefinition;		// The site script file. Blank to disable.
-        xml config;				// The XML configuration file for random sites
-        double activationTime;	// The initial activation delay. Zero to disable.
-        double linkSpeed;			// Used to model transmission delays.
-        int minBadRequests;	// The lower bound of bad requests.
-        int maxBadRequests;	// The upper bound of bad requests
+        string www;             // The WWW name of the server
+        int port;       // The listening port number
+        int httpProtocol;       // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        int logLevel;           // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        string logFile;         // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
+        string siteDefinition;      // The site script file. Blank to disable.
+        xml config;             // The XML configuration file for random sites
+        double activationTime;  // The initial activation delay. Zero to disable.
+        double linkSpeed;           // Used to model transmission delays.
+        int minBadRequests; // The lower bound of bad requests.
+        int maxBadRequests; // The upper bound of bad requests
     gates:
         input tcpIn;
         output tcpOut;

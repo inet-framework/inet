@@ -6,7 +6,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+package inet.applications.httptools;
 
 import inet.applications.ITCPApp;
 
@@ -38,25 +38,25 @@ import inet.applications.ITCPApp;
 // HttpBrowser
 //
 // The component is derived from HttpBrowseBase and is intended to be used
-// with the INET frameworks StandardHost and TCP/IP stack modeling. 
+// with the INET frameworks StandardHost and TCP/IP stack modeling.
 //
 // See the API documentation for HttpBrowserBase and HttpBrowser for further details.
 // See the INET documentation for more information on StandardHost and the TCP/IP stack.
 //
 // NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @version 1.0 
+// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 simple HttpBrowser like ITCPApp
 {
     parameters:
-        int logLevel = default(0);						// The log level: 2: Debug, 1: Info; 0: Errors and warnings only
-        int httpProtocol = default(11);					// The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        string logFile = default("");					// Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
-        string scriptFile = default("");				// The browsing script file. Blank to disable.
-        double activationTime @unit("s") = default(0s);	// The initial activation delay. Zero to disable.
-        xml config;										// The XML config file        
+        int logLevel = default(0);                      // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
+        int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
+        string logFile = default("");                   // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
+        string scriptFile = default("");                // The browsing script file. Blank to disable.
+        double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable.
+        xml config;                                     // The XML config file
     gates:
         input tcpIn;
         output tcpOut;

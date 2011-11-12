@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -52,12 +53,12 @@ using namespace std;
  */
 class INET_API HttpServerDirectEvilB : public HttpServerDirect
 {
-	private:
-		int badLow;
-		int badHigh;
-	protected:
-		virtual void initialize();
-		virtual string generateBody();
+    private:
+        int badLow;
+        int badHigh;
+    protected:
+        virtual void initialize();
+        virtual string generateBody();
 };
 
 #endif /* HttpServerDirectEvilB */

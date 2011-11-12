@@ -6,7 +6,7 @@
 // This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+package inet.applications.httptools;
 
 import inet.applications.ITCPApp;
 
@@ -63,7 +63,7 @@ simple HttpServerDirectEvilA like ITCPApp
         double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays.
         int minBadRequests;                               // The lower bound of bad requests.
         int maxBadRequests;                               // The upper bound of bad requests
-        xml config;                                       // The XML configuration file for random sites        
+        xml config;                                       // The XML configuration file for random sites
     gates:
         input tcpIn;
         output tcpOut;

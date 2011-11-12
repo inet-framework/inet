@@ -2,7 +2,8 @@
 // ***************************************************************************
 //
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
 // behaviour in a high-fidelity manner along with a highly configurable
@@ -49,37 +50,37 @@
  */
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
-	/** @name cSimpleModule redefinitions */
-	//@{
-	protected:
-		/** Initialization of the component and startup of browse event scheduling */
-		virtual void initialize(int stage);
+    /** @name cSimpleModule redefinitions */
+    //@{
+    protected:
+        /** Initialization of the component and startup of browse event scheduling */
+        virtual void initialize(int stage);
 
-		/** Report final statistics */
-		virtual void finish();
+        /** Report final statistics */
+        virtual void finish();
 
-		/** Handle incoming messages. See the parent class for details. */
-		virtual void handleMessage(cMessage *msg);
+        /** Handle incoming messages. See the parent class for details. */
+        virtual void handleMessage(cMessage *msg);
 
-		/** @brief Returns the number of initialization stages. Two required. */
-//		int numInitStages() const {return 2;}
-	//@}
+        /** @brief Returns the number of initialization stages. Two required. */
+//      int numInitStages() const {return 2;}
+    //@}
 
-	/** @name Implementation of methods for sending requests to a server. See parent class for details. */
-	//@{
-	protected:
-		/** @brief Sends a scripted browse event to a specific server */
-		virtual void sendRequestToServer( BROWSE_EVENT_ENTRY be );
+    /** @name Implementation of methods for sending requests to a server. See parent class for details. */
+    //@{
+    protected:
+        /** @brief Sends a scripted browse event to a specific server */
+        virtual void sendRequestToServer( BROWSE_EVENT_ENTRY be );
 
-		/** Send a request to server. Uses the recipient stamped in the request. */
-		virtual void sendRequestToServer( HttpRequestMessage *request );
+        /** Send a request to server. Uses the recipient stamped in the request. */
+        virtual void sendRequestToServer( HttpRequestMessage *request );
 
-		/** @brief Sends a generic request to a randomly chosen server */
-		virtual void sendRequestToRandomServer();
+        /** @brief Sends a generic request to a randomly chosen server */
+        virtual void sendRequestToRandomServer();
 
-		/** @brief Sends a number of queued messages to the specified server */
-		virtual void sendRequestsToServer( string www, MESSAGE_QUEUE_TYPE queue );
-	//@}
+        /** @brief Sends a number of queued messages to the specified server */
+        virtual void sendRequestsToServer( string www, MESSAGE_QUEUE_TYPE queue );
+    //@}
 };
 
 #endif

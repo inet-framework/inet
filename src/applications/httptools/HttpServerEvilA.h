@@ -1,11 +1,12 @@
 
 // ***************************************************************************
-// 
+//
 // HttpTools Project
-//// This file is a part of the HttpTools project. The project was created at
+//
+// This file is a part of the HttpTools project. The project was created at
 // Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
 // Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable 
+// behaviour in a high-fidelity manner along with a highly configurable
 // Web server component.
 //
 // Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
@@ -41,7 +42,7 @@ using namespace std;
  *
  * Demonstrates subclassing the server to create a custom site. This site is an attacker -- a puppetmaster --
  * which serves HTML pages containing attack code. In this case, we are simulating JavaScript attack code which prompts
- * the unsuspecting browser to issue a number of requests for non-existing resources to the victim site. 
+ * the unsuspecting browser to issue a number of requests for non-existing resources to the victim site.
  * Delays are specified to simulate hiding the attack from the browser user by use of JavaScript timeouts or similar mechanisms.
  * The generateBody virtual function is redefined to create a page containing the attack code.
  *
@@ -50,16 +51,16 @@ using namespace std;
  * @version 0.9
  * @author  Kristjan V. Jonsson
  *
- * @todo Refactor this code and the direct version to cut down on duplicated code. 
+ * @todo Refactor this code and the direct version to cut down on duplicated code.
  */
 class INET_API HttpServerEvilA : public HttpServer
 {
-	private:
-		int badLow;
-		int badHigh;
-	protected:
-		virtual void initialize();
-		virtual string generateBody();
+    private:
+        int badLow;
+        int badHigh;
+    protected:
+        virtual void initialize();
+        virtual string generateBody();
 };
 
 #endif /* HttpServerEvilA */
