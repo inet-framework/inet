@@ -559,7 +559,7 @@
         nedPackages = "
                        inet.applications.httptools
                        inet.nodes.httptools
-                       inet.httptools
+                       inet.world.httptools
                       "
         extraSourceFolders = ""
         compileFlags = ""

@@ -30,8 +30,8 @@
 
 package inet.examples.httptools.flashdirect;
 
-import inet.httptools.HttpController;
 import inet.nodes.httptools.DirectHost;
+import inet.world.httptools.HttpController;
 
 
 //

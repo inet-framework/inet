@@ -31,10 +31,10 @@
 
 package inet.examples.httptools.tenserverssocket;
 
-import inet.httptools.HttpController;
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
+import inet.world.httptools.HttpController;
 
 
 channel ethernetline extends ned.DatarateChannel
