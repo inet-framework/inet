@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.httptools;
+package inet.nodes.httptools;
 
 import inet.applications.ITCPApp;
 
