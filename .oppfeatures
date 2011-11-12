@@ -549,4 +549,34 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="HttpTools"
+        name="HttpTools"
+        description = "HttpTools"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.httptools
+                       inet.nodes.httptools
+                       inet.httptools
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="HttpTools_examples"
+        name="HttpTools examples"
+        description = "HttpTools examples"
+        initiallyEnabled = "true"
+        requires = "HttpTools"
+        labels = ""
+        nedPackages = "
+                       inet.examples.httptools
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
