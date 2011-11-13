@@ -76,29 +76,29 @@ public:
 
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b) {
-        Coord tmp = a;
+        Coord tmp(a);
         tmp += b;
         return tmp;
     }
 
     /** @brief Subtracts two coordinate vectors. */
     friend Coord operator-(const Coord& a, const Coord& b) {
-        Coord tmp = a;
+        Coord tmp(a);
         tmp -= b;
         return tmp;
     }
 
     /** @brief Multiplies a coordinate vector by a real number. */
     friend Coord operator*(const Coord& a, double f) {
-		Coord tmp = a;
-		tmp *= f;
+        Coord tmp(a);
+        tmp *= f;
         return tmp;
     }
 
     /** @brief Divides a coordinate vector by a real number. */
     friend Coord operator/(const Coord& a, double f) {
-		Coord tmp = a;
-		tmp /= f;
+        Coord tmp(a);
+        tmp /= f;
         return tmp;
     }
 
@@ -178,7 +178,7 @@ public:
      * @brief Returns the distance to Coord 'a'.
      */
     double distance(const Coord& a) const {
-        Coord dist=*this-a;
+        Coord dist(*this - a);
         return dist.length();
     }
 
@@ -186,7 +186,7 @@ public:
      * @brief Returns distance^2 to Coord 'a' (omits calling square root).
      */
     double sqrdist(const Coord& a) const {
-        Coord dist=*this-a;
+        Coord dist(*this - a);
         return dist.squareLength();
     }
 
