@@ -30,12 +30,17 @@ std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
 
 IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
 {
+    if (this==&other) return *this;
+    clean();
     IPv6Datagram_Base::operator=(other);
+    copy(other);
+    return *this;
+}
 
+void IPv6Datagram::copy(const IPv6Datagram& other)
+{
     for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); ++i)
         addExtensionHeader((*i)->dup());
-
-    return *this;
 }
 
 void IPv6Datagram::setExtensionHeaderArraySize(unsigned int size)
@@ -92,6 +97,11 @@ IPv6ExtensionHeaderPtr IPv6Datagram::removeFirstExtensionHeader()
 }
 
 IPv6Datagram::~IPv6Datagram()
+{
+    clean();
+}
+
+void IPv6Datagram::clean()
 {
     IPv6ExtensionHeaderPtr eh;
 

@@ -212,6 +212,7 @@ class Hna_global_entry
     uint8_t netmask;
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;
+    Hna_global_entry() { curr_orig_node = NULL; }
     ~Hna_global_entry()
     {
         while (!orig_list.empty())
@@ -220,14 +221,11 @@ class Hna_global_entry
             orig_list.pop_back();
         }
     }
-    Hna_global_entry& operator=(const Hna_global_entry& m)
-    {
-        addr = m.addr;
-        netmask = m.netmask;
-        curr_orig_node = m.curr_orig_node;
-        orig_list = m.orig_list;
-        return *this;
-    }
+
+   private:     // noncopyable
+    Hna_global_entry(const Hna_global_entry& m);
+    Hna_global_entry& operator=(const Hna_global_entry& m);
+   public:
     friend bool operator<(const Hna_global_entry &, const Hna_global_entry &);
     friend bool operator==(const Hna_global_entry &, const Hna_global_entry &);
 };

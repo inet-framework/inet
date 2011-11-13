@@ -63,7 +63,13 @@ struct dsr_srt_opt
 };
 
 #define SIZE_COST_BITS 16
+
 DSRPkt::~DSRPkt()
+{
+    clean();
+}
+
+void DSRPkt::clean()
 {
     if (this->options)
         delete [] this->options;
@@ -71,26 +77,29 @@ DSRPkt::~DSRPkt()
         delete [] costVector;
 }
 
-DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram()
+DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram(m)
 {
-
     costVector = NULL;
     options = NULL;
     costVectorSize = 0;
-
-    setName(m.getName());
-    operator=(m);
-
+    copy(m);
 }
 
 DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 {
     if (this==&m) return *this;
+    clean();
 #ifdef MobilityFramework
     NetwPkt::operator=(m);
 #else
     IPv4Datagram::operator=(m);
 #endif
+    copy(m);
+    return *this;
+}
+
+void DSRPkt::copy(const DSRPkt& m)
+{
     encap_protocol = m.encap_protocol;
     previous = m.previous;
     next = m.next;
@@ -101,22 +110,9 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 
     int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
 
-    if (options)
-    {
-        delete [] options;
-        options = NULL;
-    }
-
-
     options = (struct dsr_opt_hdr *) new char[dsr_opts_len];
 
     memcpy((char*)options, (char*)m.options, dsr_opts_len);
-
-    if (costVectorSize>0)
-    {
-        delete [] costVector;
-        costVector = NULL;
-    }
 
     costVectorSize = m.costVectorSize;
     if (m.costVectorSize>0)
@@ -124,8 +120,8 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
         costVector = new EtxCost[m.costVectorSize];
         memcpy((char*)costVector, (char*)m.costVector, m.costVectorSize*sizeof(EtxCost));
     }
-    return *this;
 }
+
 // Constructor
 DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 {
@@ -495,26 +491,31 @@ void DSRPkt::resetCostVector()
     costVectorSize = 0;
 }
 
-DSRPktExt::DSRPktExt(const DSRPktExt& m) : IPv4Datagram()
+DSRPktExt::DSRPktExt(const DSRPktExt& m) : IPv4Datagram(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 
 DSRPktExt& DSRPktExt::operator=(const DSRPktExt& msg)
 {
     if (this==&msg) return *this;
+    clean();
     IPv4Datagram::operator=(msg);
+    copy(msg);
+    return *this;
+}
+
+void DSRPktExt::copy(const DSRPktExt& msg)
+{
     size = msg.size;
     if (size==0)
     {
         extension = NULL;
-        return *this;
+        return;
     }
     extension = new EtxList[size];
     memcpy(extension, msg.extension, size*sizeof(EtxList));
-    return *this;
 }
 
 void DSRPktExt:: clearExtension()

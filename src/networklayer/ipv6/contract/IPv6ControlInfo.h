@@ -35,11 +35,15 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     typedef std::vector<IPv6ExtensionHeader*> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
+  private:
+    void copy(const IPv6ControlInfo& other);
+    void clean();
+
   public:
     IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram = NULL;}
     virtual ~IPv6ControlInfo();
-    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram = NULL; operator=(other);}
-    IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
+    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
+    IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const {return dgram;}

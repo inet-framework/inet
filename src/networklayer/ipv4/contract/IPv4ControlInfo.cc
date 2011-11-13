@@ -20,10 +20,26 @@
 
 IPv4ControlInfo::~IPv4ControlInfo()
 {
-    if (dgram)
+    clean();
+}
+
+IPv4ControlInfo& IPv4ControlInfo::operator=(const IPv4ControlInfo& other)
+{
+    if (this==&other) return *this;
+    clean();
+    IPv4ControlInfo_Base::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void IPv4ControlInfo::copy(const IPv4ControlInfo& other)
+{
+    dgram = other.dgram;
+
+    if(dgram)
     {
-        drop(dgram);
-        delete dgram;
+        dgram = dgram->dup();
+        take(dgram);
     }
 }
 
@@ -48,5 +64,4 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     dgram = NULL;
     return ret;
 }
-
 

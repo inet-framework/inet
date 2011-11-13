@@ -33,9 +33,13 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
     typedef std::vector<IPv6ExtensionHeader*> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
+  private:
+    void copy(const IPv6Datagram& other);
+    void clean();
+
   public:
     IPv6Datagram(const char *name = NULL, int kind = 0) : IPv6Datagram_Base(name, kind) {}
-    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other.getName()) {operator=(other);}
+    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other) { copy(other); }
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();
 

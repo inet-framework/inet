@@ -39,6 +39,8 @@ struct AODV_msg : public cPacket
     AODV_ext * getNexExtension(AODV_ext*);
     int getNumExtension() {return extensionsize;}
   private:
+    void copy(const AODV_msg& other);
+  private:
     AODV_ext *extension;
     int extensionsize;
     /* NS_PORT: Additions for the AODVUU packet type in ns-2 */
@@ -80,6 +82,8 @@ struct RERR : public AODV_msg
     RERR_udest * getUdest(int);
     RERR &  operator= (const RERR &m);
     virtual RERR *dup() const {return new RERR(*this);}
+  private:
+    void copy(const RERR& other);
 };
 
 #define RERR_UDEST_FIRST(rerr) (rerr->getUdest(0))
@@ -107,6 +111,8 @@ struct RREP : public AODV_msg
     RREP &  operator= (const RREP &m);
     virtual RREP *dup() const {return new RREP(*this);}
     virtual std::string detailedInfo() const;
+  private:
+    void copy(const RREP& other);
 } ;
 #define RREP_SIZE 20
 
@@ -117,6 +123,8 @@ struct RREP_ack : public AODV_msg
     RREP_ack (const RREP_ack  &m);
     RREP_ack &  operator= (const RREP_ack &m);
     virtual RREP_ack *dup() const {return new RREP_ack(*this);}
+  private:
+    void copy(const RREP_ack& other) { reserved = other.reserved; }
 } ;
 #define RREP_ACK_SIZE 2
 
@@ -141,6 +149,8 @@ struct RREQ : public AODV_msg
     RREQ &  operator= (const RREQ &m);
     virtual RREQ *dup() const {return new RREQ(*this);}
     virtual std::string detailedInfo() const;
+  private:
+    void copy(const RREQ& other);
 };
 
 #define RREQ_SIZE 24

@@ -15,6 +15,7 @@
 
 #include "ByteArray.h"
 
+
 void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 {
     if (length != data_arraysize)

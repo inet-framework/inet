@@ -29,7 +29,7 @@ class RSVPPathMsg : public RSVPPathMsg_Base
 {
   public:
     RSVPPathMsg(const char *name = NULL, int kind = PATH_MESSAGE) : RSVPPathMsg_Base(name, kind) {}
-    RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other.getName()) {operator=(other);}
+    RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other) {}
     RSVPPathMsg& operator=(const RSVPPathMsg& other) {RSVPPathMsg_Base::operator=(other); return *this;}
     virtual RSVPPathMsg *dup() const {return new RSVPPathMsg(*this);}
 
@@ -55,7 +55,7 @@ class RSVPPathTear : public RSVPPathTear_Base
 {
   public:
     RSVPPathTear(const char *name = NULL, int kind = PTEAR_MESSAGE) : RSVPPathTear_Base(name, kind) {}
-    RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other.getName()) {operator=(other);}
+    RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other) {}
     RSVPPathTear& operator=(const RSVPPathTear& other) {RSVPPathTear_Base::operator=(other); return *this;}
     virtual RSVPPathTear *dup() const {return new RSVPPathTear(*this);}
 
@@ -76,7 +76,7 @@ class RSVPPathError : public RSVPPathError_Base
 {
   public:
     RSVPPathError(const char *name = NULL, int kind = PERROR_MESSAGE) : RSVPPathError_Base(name, kind) {}
-    RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other.getName()) {operator=(other);}
+    RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other) {}
     RSVPPathError& operator=(const RSVPPathError& other) {RSVPPathError_Base::operator=(other); return *this;}
     virtual RSVPPathError *dup() const {return new RSVPPathError(*this);}
 

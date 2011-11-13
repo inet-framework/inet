@@ -34,9 +34,9 @@ RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     _bytesSent = 0;
 }
 
-RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo()
+RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo(senderInfo)
 {
-    operator=(senderInfo);
+    copy(senderInfo);
 }
 
 RTPSenderInfo::~RTPSenderInfo()
@@ -45,6 +45,14 @@ RTPSenderInfo::~RTPSenderInfo()
 
 RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
 {
+    if (this == &senderInfo) return *this;
+    RTPParticipantInfo::operator=(senderInfo);
+    copy(senderInfo);
+    return *this;
+}
+
+void RTPSenderInfo::copy(const RTPSenderInfo& senderInfo)
+{
     RTPParticipantInfo::operator=(senderInfo);
     _startTime = senderInfo._startTime;
     _clockRate = senderInfo._clockRate;
@@ -52,7 +60,6 @@ RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
     _sequenceNumberBase = senderInfo._sequenceNumberBase;
     _packetsSent = senderInfo._packetsSent;
     _bytesSent = senderInfo._bytesSent;
-    return *this;
 }
 
 RTPSenderInfo *RTPSenderInfo::dup() const

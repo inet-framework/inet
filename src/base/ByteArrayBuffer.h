@@ -27,6 +27,9 @@ class ByteArrayBuffer : public cObject
     uint64 dataLengthM;
     DataList dataListM;
 
+  private:
+    void copy(const ByteArrayBuffer& other) { dataLengthM = other.dataLengthM; dataListM = other.dataListM; }
+
   public:
     /** Ctor. */
     ByteArrayBuffer();

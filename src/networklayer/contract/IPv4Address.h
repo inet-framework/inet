@@ -92,7 +92,7 @@ class INET_API IPv4Address
     /**
      * Copy constructor
      */
-    IPv4Address(const IPv4Address& obj) {operator=(obj);}
+    IPv4Address(const IPv4Address& obj) { addr = obj.addr; }
 
     ~IPv4Address() {}
     //@}

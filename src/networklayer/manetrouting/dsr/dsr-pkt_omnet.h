@@ -65,6 +65,10 @@ class DSRPkt : public IPv4Datagram
     unsigned int costVectorSize;
     int dsr_ttl;
 
+  private:
+    void copy(const DSRPkt& other);
+    void clean();
+
   public:
     explicit DSRPkt(const char *name=NULL) : IPv4Datagram(name) {costVector=NULL; options=NULL; costVectorSize=0; dsr_ttl=0;}
     ~DSRPkt ();
@@ -122,6 +126,11 @@ class DSRPktExt: public IPv4Datagram
   protected:
     EtxList *extension;
     int size;
+
+  private:
+    void copy(const DSRPktExt& other);
+    void clean() { clearExtension(); }
+
   public:
     explicit DSRPktExt(const char *name=NULL) : IPv4Datagram(name) {size=0; extension=NULL;}
     ~DSRPktExt ();

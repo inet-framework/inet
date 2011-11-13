@@ -102,6 +102,10 @@ class INET_API SDESItem : public cObject
      */
     virtual int getLength() const;
 
+  private:
+    void copy(const SDESItem& other);
+    void clean() {}     //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
+
   protected:
     /**
      * The type of this SDESItem.
@@ -182,6 +186,9 @@ class INET_API SDESChunk : public cArray
      * Returns the length in bytes of this SDESChunk.
      */
     virtual int getLength() const;
+
+  private:
+    void copy(const SDESChunk& other);
 
   protected:
     /**

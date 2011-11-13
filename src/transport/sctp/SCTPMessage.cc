@@ -25,17 +25,26 @@ Register_Class(SCTPMessage);
 
 SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
 {
+     if (this == &other) return *this;
+     clean();
      SCTPMessage_Base::operator=(other);
-
-     this->setBitLength(SCTP_COMMON_HEADER*8);
-     this->setTag(other.getTag());
-     for (std::list<cPacket*>::const_iterator i=other.chunkList.begin(); i!=other.chunkList.end(); ++i)
-          addChunk((cPacket *)(*i)->dup());
-
+     copy(other);
      return *this;
 }
 
+void SCTPMessage::copy(const SCTPMessage& other)
+{
+     this->setTag(other.getTag());
+     for (std::list<cPacket*>::const_iterator i=other.chunkList.begin(); i!=other.chunkList.end(); ++i)
+          addChunk((cPacket *)(*i)->dup());
+}
+
 SCTPMessage::~SCTPMessage()
+{
+    clean();
+}
+
+void SCTPMessage::clean()
 {
     SCTPChunk* chunk;
     if (this->getChunksArraySize()>0)
@@ -69,7 +78,6 @@ void SCTPMessage::setChunks(uint32 k, const cPacketPtr& chunks_var)
 {
      throw new cException(this, "setChunks() not supported, use addChunk()");
 }
-
 
 void SCTPMessage::addChunk(cPacket* msg)
 {
@@ -134,13 +142,17 @@ Register_Class(SCTPErrorChunk);
 
 SCTPErrorChunk& SCTPErrorChunk::operator=(const SCTPErrorChunk& other)
 {
+     if (this == &other) return *this;
+     clean();
      SCTPErrorChunk_Base::operator=(other);
+     copy(other);
+     return *this;
+}
 
-     this->setBitLength(4*8);
+void SCTPErrorChunk::copy(const SCTPErrorChunk& other)
+{
      for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
           addParameters((cPacket *)(*i)->dup());
-
-     return *this;
 }
 
 void SCTPErrorChunk::setParametersArraySize(uint32 size)
@@ -185,3 +197,20 @@ cPacket *SCTPErrorChunk::removeParameter()
     this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
     return msg;
 }
+
+SCTPErrorChunk::~SCTPErrorChunk()
+{
+    clean();
+}
+
+void SCTPErrorChunk::clean()
+{
+    while (!parameterList.empty())
+    {
+        cPacket *msg = parameterList.front();
+        parameterList.pop_front();
+        drop(msg);
+        delete msg;
+    }
+}
+

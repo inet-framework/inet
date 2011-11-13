@@ -29,6 +29,9 @@ class INET_API MPLSPacket: public cPacket
     typedef std::vector<int> LabelStack; // note: last element is the top of stack
     LabelStack labels;
 
+  private:
+    void copy(const MPLSPacket& other) { labels = other.labels; }
+
   public:
     /* constructors*/
     MPLSPacket(const char *name = NULL);

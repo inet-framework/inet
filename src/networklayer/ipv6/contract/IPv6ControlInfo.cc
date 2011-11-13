@@ -18,7 +18,30 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 
-IPv6ControlInfo::~IPv6ControlInfo()
+
+void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
+{
+    dgram = other.dgram;
+    if(dgram)
+    {
+        dgram = dgram->dup();
+        take(dgram);
+    }
+
+    for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); i++)
+        extensionHeaders.push_back((*i)->dup());
+}
+
+IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
+{
+    if (this==&other) return *this;
+    clean();
+    IPv6ControlInfo_Base::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void IPv6ControlInfo::clean()
 {
     if (dgram)
     {
@@ -32,6 +55,11 @@ IPv6ControlInfo::~IPv6ControlInfo()
         extensionHeaders.pop_back();
         delete eh;
     }
+}
+
+IPv6ControlInfo::~IPv6ControlInfo()
+{
+    clean();
 }
 
 void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)

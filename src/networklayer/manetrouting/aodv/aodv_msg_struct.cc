@@ -20,10 +20,9 @@
 Register_Class(AODV_msg);
 
 
-AODV_msg::AODV_msg(const AODV_msg& m) : cPacket()
+AODV_msg::AODV_msg(const AODV_msg& m) : cPacket(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 
@@ -31,14 +30,21 @@ AODV_msg& AODV_msg::operator=(const AODV_msg& m)
 {
     if (this==&m) return *this;
 
+    clearExtension();
     cPacket::operator=(m);
+    copy(m);
+    return *this;
+}
+
+void AODV_msg::copy(const AODV_msg& m)
+{
     type = m.type;
     ttl = m.ttl;
     extensionsize = m.extensionsize;
     if (extensionsize==0)
     {
         extension = NULL;
-        return *this;
+        return;
     }
     extension = new AODV_ext [extensionsize];
     for (int i=0; i < extensionsize; i++)
@@ -48,7 +54,6 @@ AODV_msg& AODV_msg::operator=(const AODV_msg& m)
         extension[i].pointer = new char[extension[i].length];
         memcpy(extension[i].pointer, m.extension[i].pointer, extension[i].length);
     }
-    return *this;
 }
 
 void AODV_msg:: clearExtension()
@@ -111,17 +116,22 @@ Register_Class(RERR);
 
 //=========================================================================
 
-RERR::RERR(const RERR& m) : AODV_msg()
+RERR::RERR(const RERR& m) : AODV_msg(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 RERR& RERR::operator=(const RERR& m)
 {
     if (this==&m) return *this;
-
+    clearUdest();
     AODV_msg::operator=(m);
+    copy(m);
+    return *this;
+}
+
+void RERR::copy(const RERR& m)
+{
     n = m.n;
     res1 = m.res1;
     res2 = m.res2;
@@ -132,7 +142,6 @@ RERR& RERR::operator=(const RERR& m)
         _udest[i].dest_addr = m._udest[i].dest_addr;
         _udest[i].dest_seqno = m._udest[i].dest_seqno;
     }
-    return *this;
 }
 
 RERR::~RERR()
@@ -181,16 +190,21 @@ void RERR::clearUdest()
 
 
 Register_Class(RREP);
-RREP::RREP(const RREP& m) : AODV_msg()
+RREP::RREP(const RREP& m) : AODV_msg(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 RREP& RREP::operator=(const RREP& m)
 {
     if (this==&m) return *this;
     AODV_msg::operator=(m);
+    copy(m);
+    return *this;
+}
+
+void RREP::copy(const RREP& m)
+{
     res1 = m.res1;
     a = m.a;
     r = m.r;
@@ -201,7 +215,6 @@ RREP& RREP::operator=(const RREP& m)
     dest_seqno = m.dest_seqno;
     orig_addr = m.orig_addr;
     lifetime = m.lifetime;
-    return *this;
 }
 
 std::string RREP::detailedInfo() const
@@ -221,33 +234,37 @@ std::string RREP::detailedInfo() const
 
 
 Register_Class(RREP_ack);
-RREP_ack::RREP_ack(const RREP_ack& m) : AODV_msg()
+RREP_ack::RREP_ack(const RREP_ack& m) : AODV_msg(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 RREP_ack& RREP_ack::operator=(const RREP_ack& m)
 {
     if (this==&m) return *this;
     AODV_msg::operator=(m);
-    reserved = m.reserved;
+    copy(m);
     return *this;
 }
 
 
 
 Register_Class(RREQ);
-RREQ::RREQ(const RREQ& m) : AODV_msg()
+RREQ::RREQ(const RREQ& m) : AODV_msg(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 RREQ& RREQ::operator=(const RREQ& m)
 {
     if (this==&m) return *this;
     AODV_msg::operator=(m);
+    copy(m);
+    return *this;
+}
+
+void RREQ::copy(const RREQ& m)
+{
     j = m.j;      /* Join flag (multicast) */
     r = m.r;      /* Repair flag */
     g = m.g;      /* Gratuitous RREP flag */
@@ -260,7 +277,6 @@ RREQ& RREQ::operator=(const RREQ& m)
     dest_seqno = m.dest_seqno;
     orig_addr = m.orig_addr;
     orig_seqno = m.orig_seqno;
-    return *this;
 }
 
 std::string RREQ::detailedInfo() const
@@ -277,5 +293,4 @@ std::string RREQ::detailedInfo() const
     out <<" hops :"<< hops << "\n";
     return out.str();
 }
-
 

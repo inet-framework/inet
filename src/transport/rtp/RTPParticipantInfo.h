@@ -176,6 +176,9 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     static char *ssrcToName(uint32 ssrc);
 
+  private:
+    void copy(const RTPParticipantInfo& other);
+
   protected:
     /**
      * Used for storing sdes information about this RTP endsystem.

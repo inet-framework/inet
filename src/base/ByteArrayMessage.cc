@@ -14,6 +14,7 @@
 
 #include "ByteArrayMessage.h"
 
+
 void ByteArrayMessage::setDataFromBuffer(const void *ptr, unsigned int length)
 {
     byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);

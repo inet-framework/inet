@@ -93,15 +93,25 @@ unsigned short TCPSegment::getOptionsArrayLength()
 
 TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 {
+    if (this == &other) return *this;
+    clean();
     TCPSegment_Base::operator=(other);
-
-    for (PayloadList::const_iterator i = other.payloadList.begin(); i != other.payloadList.end(); ++i)
-        addPayloadMessage(i->msg->dup(), i->endSequenceNo);
-
+    copy(other);
     return *this;
 }
 
+void TCPSegment::copy(const TCPSegment& other)
+{
+    for (PayloadList::const_iterator i = other.payloadList.begin(); i != other.payloadList.end(); ++i)
+        addPayloadMessage(i->msg->dup(), i->endSequenceNo);
+}
+
 TCPSegment::~TCPSegment()
+{
+    clean();
+}
+
+void TCPSegment::clean()
 {
     while (!payloadList.empty())
     {

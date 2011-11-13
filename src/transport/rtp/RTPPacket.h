@@ -33,7 +33,7 @@ class RTPPacket : public RTPPacket_Base
 {
   public:
     RTPPacket(const char *name = NULL, int kind = 0) : RTPPacket_Base(name, kind) {}
-    RTPPacket(const RTPPacket& other) : RTPPacket_Base(other.getName()) {operator=(other);}
+    RTPPacket(const RTPPacket& other) : RTPPacket_Base(other) {}
     RTPPacket& operator=(const RTPPacket& other) {RTPPacket_Base::operator=(other); return *this;}
     virtual RTPPacket *dup() const {return new RTPPacket(*this);}
     // ADD CODE HERE to redefine and implement pure virtual functions from RTPPacket_Base

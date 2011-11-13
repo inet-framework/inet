@@ -43,22 +43,30 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
     _length = 2 + strlen(_content);
 }
 
-SDESItem::SDESItem(const SDESItem& sdesItem) : cObject()
+SDESItem::SDESItem(const SDESItem& sdesItem) : cObject(sdesItem)
 {
-    operator=(sdesItem);
+    copy(sdesItem);
 }
 
 SDESItem::~SDESItem()
 {
+    clean();
 }
 
 SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
 {
+    if (this == &sdesItem) return *this;
+    clean();
     cObject::operator=(sdesItem);
+    copy(sdesItem);
+    return *this;
+}
+
+void SDESItem::copy(const SDESItem& sdesItem)
+{
     _type = sdesItem._type;
     _length = sdesItem._length;
     _content = opp_strdup(sdesItem._content);
-    return *this;
 }
 
 SDESItem *SDESItem::dup() const
@@ -113,8 +121,7 @@ SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name)
 
 SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk)
 {
-    setName(sdesChunk.getName());
-    operator=(sdesChunk);
+    copy(sdesChunk);
 }
 
 SDESChunk::~SDESChunk()
@@ -123,10 +130,16 @@ SDESChunk::~SDESChunk()
 
 SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
 {
+    if (this == &sdesChunk) return *this;
     cArray::operator=(sdesChunk);
+    copy(sdesChunk);
+    return *this;
+}
+
+inline void SDESChunk::copy(const SDESChunk& sdesChunk)
+{
     _ssrc = sdesChunk._ssrc;
     _length = sdesChunk._length;
-    return *this;
 }
 
 SDESChunk *SDESChunk::dup() const

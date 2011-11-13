@@ -32,7 +32,7 @@ class ByteArray : public ByteArray_Base
     /**
      * Copy constructor
      */
-    ByteArray(const ByteArray& other) : ByteArray_Base() {operator=(other);}
+    ByteArray(const ByteArray& other) : ByteArray_Base(other) { }
 
     /**
      * operator =

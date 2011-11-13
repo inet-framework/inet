@@ -38,9 +38,9 @@ RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) :
     _silentIntervals = 3;
 }
 
-RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& other) : RTPParticipantInfo_Base()
+RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& other) : RTPParticipantInfo_Base(other)
 {
-    operator=(other);
+    copy(other);
 }
 
 RTPParticipantInfo::~RTPParticipantInfo()
@@ -49,11 +49,16 @@ RTPParticipantInfo::~RTPParticipantInfo()
 
 RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& other)
 {
+    if (this == &other) return *this;
     RTPParticipantInfo_Base::operator=(other);
-    setName(other.getName());
+    copy(other);
+    return *this;
+}
+
+inline void RTPParticipantInfo::copy(const RTPParticipantInfo& other)
+{
     _sdesChunk = other._sdesChunk;
     _silentIntervals = other._silentIntervals;
-    return *this;
 }
 
 RTPParticipantInfo *RTPParticipantInfo::dup() const

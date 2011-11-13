@@ -30,7 +30,7 @@ class RTCPPacket : public RTCPPacket_Base
 {
   public:
     RTCPPacket(const char *name = NULL, int kind = 0) : RTCPPacket_Base(name, kind) { };
-    RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other.getName()) {operator=(other);}
+    RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other) {}
     RTCPPacket& operator=(const RTCPPacket& other) {RTCPPacket_Base::operator=(other); return *this;}
     virtual RTCPPacket *dup() const {return new RTCPPacket(*this);}
 
@@ -47,7 +47,7 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
 {
   public:
     RTCPCompoundPacket(const char *name = NULL, int kind = 0) : RTCPCompoundPacket_Base(name, kind) {};
-    RTCPCompoundPacket(const RTCPCompoundPacket& other) : RTCPCompoundPacket_Base(other.getName()) {operator=(other);}
+    RTCPCompoundPacket(const RTCPCompoundPacket& other) : RTCPCompoundPacket_Base(other) {}
     RTCPCompoundPacket& operator=(const RTCPCompoundPacket& other) {RTCPCompoundPacket_Base::operator=(other); return *this;}
     virtual RTCPCompoundPacket *dup() const {return new RTCPCompoundPacket(*this);}
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base

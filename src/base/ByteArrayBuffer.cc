@@ -22,16 +22,16 @@ ByteArrayBuffer::ByteArrayBuffer()
 }
 
 ByteArrayBuffer::ByteArrayBuffer(const ByteArrayBuffer& other)
- :
-    dataLengthM(other.dataLengthM),
-    dataListM(other.dataListM)
+    : cObject(other)
 {
+    copy(other);
 }
 
 ByteArrayBuffer& ByteArrayBuffer::operator=(const ByteArrayBuffer& other)
 {
-    dataLengthM = other.dataLengthM;
-    dataListM = other.dataListM;
+    if (this==&other) return *this;
+    cObject::operator=(other);
+    copy(other);
     return *this;
 }
 

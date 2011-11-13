@@ -38,7 +38,7 @@ class Sack : public Sack_Base
   public:
     Sack() : Sack_Base() {}
     Sack(unsigned int start_par, unsigned int end_par) { setSegment(start_par, end_par); }
-    Sack(const Sack& other) : Sack_Base() {operator=(other);}
+    Sack(const Sack& other) : Sack_Base(other) {}
     Sack& operator=(const Sack& other) {Sack_Base::operator=(other); return *this;}
     virtual Sack *dup() const {return new Sack(*this);}
     // ADD CODE HERE to redefine and implement pure virtual functions from Sack_Base
@@ -59,9 +59,13 @@ class INET_API TCPSegment : public TCPSegment_Base
     typedef std::list<TCPPayloadMessage> PayloadList;
     PayloadList payloadList;
 
+  private:
+    void copy(const TCPSegment& other);
+    void clean();
+
   public:
     TCPSegment(const char *name = NULL, int kind = 0) : TCPSegment_Base(name, kind) {}
-    TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
+    TCPSegment(const TCPSegment& other) : TCPSegment_Base(other) { copy(other); }
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const {return new TCPSegment(*this);}

@@ -29,7 +29,7 @@ class RSVPResvMsg : public RSVPResvMsg_Base
 {
   public:
     RSVPResvMsg(const char *name = NULL, int kind = RESV_MESSAGE) : RSVPResvMsg_Base(name, kind) {}
-    RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other.getName()) {operator=(other);}
+    RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other) {}
     RSVPResvMsg& operator=(const RSVPResvMsg& other) {RSVPResvMsg_Base::operator=(other); return *this;}
     virtual RSVPResvMsg *dup() const {return new RSVPResvMsg(*this);}
 
@@ -48,7 +48,7 @@ class RSVPResvTear : public RSVPResvTear_Base
 {
   public:
     RSVPResvTear(const char *name = NULL, int kind = RTEAR_MESSAGE) : RSVPResvTear_Base(name, kind) {}
-    RSVPResvTear(const RSVPResvTear& other) : RSVPResvTear_Base(other.getName()) {operator=(other);}
+    RSVPResvTear(const RSVPResvTear& other) : RSVPResvTear_Base(other) {}
     RSVPResvTear& operator=(const RSVPResvTear& other) {RSVPResvTear_Base::operator=(other); return *this;}
     virtual RSVPResvTear *dup() const {return new RSVPResvTear(*this);}
 
@@ -67,7 +67,7 @@ class RSVPResvError : public RSVPResvError_Base
 {
   public:
     RSVPResvError(const char *name = NULL, int kind = RERROR_MESSAGE) : RSVPResvError_Base(name, kind) {}
-    RSVPResvError(const RSVPResvError& other) : RSVPResvError_Base(other.getName()) {operator=(other);}
+    RSVPResvError(const RSVPResvError& other) : RSVPResvError_Base(other) {}
     RSVPResvError& operator=(const RSVPResvError& other) {RSVPResvError_Base::operator=(other); return *this;}
     virtual RSVPResvError *dup() const {return new RSVPResvError(*this);}
 

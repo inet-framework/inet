@@ -14,18 +14,23 @@
 Register_Class(DYMO_element);
 
 
-DYMO_element::DYMO_element(const DYMO_element& m) : cPacket()
+DYMO_element::DYMO_element(const DYMO_element& m) : cPacket(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 
 DYMO_element& DYMO_element::operator=(const DYMO_element& msg)
 {
     if (this==&msg) return *this;
+    clean();
     cPacket::operator=(msg);
+    copy(msg);
+    return *this;
+}
 
+void DYMO_element::copy(const DYMO_element& msg)
+{
     m = msg.m;
     h = msg.h;
     type = msg.type;
@@ -43,12 +48,11 @@ DYMO_element& DYMO_element::operator=(const DYMO_element& msg)
     if (extensionsize==0)
     {
         extension = NULL;
-        return *this;
+        return;
     }
     extension = new char[extensionsize];
 #endif
     memcpy(extension, msg.extension, extensionsize);
-    return *this;
 }
 
 void DYMO_element:: clearExtension()
@@ -121,10 +125,9 @@ Dymo_RE::Dymo_RE(const char *name) : DYMO_element(name)
 
 //=========================================================================
 
-Dymo_RE::Dymo_RE(const Dymo_RE& m) : DYMO_element()
+Dymo_RE::Dymo_RE(const Dymo_RE& m) : DYMO_element(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 Dymo_RE& Dymo_RE::operator=(const Dymo_RE& msg)
@@ -132,6 +135,12 @@ Dymo_RE& Dymo_RE::operator=(const Dymo_RE& msg)
     if (this==&msg) return *this;
 
     DYMO_element::operator=(msg);
+    copy(msg);
+    return *this;
+}
+
+void Dymo_RE::copy(const Dymo_RE& msg)
+{
     target_seqnum = msg.target_seqnum;
     thopcnt = msg.thopcnt;
     a = msg.a;
@@ -140,7 +149,6 @@ Dymo_RE& Dymo_RE::operator=(const Dymo_RE& msg)
     res2 = msg.res2;
     re_blocks = (struct re_block *)extension;
     setBitLength(msg.getBitLength());
-    return *this;
 }
 
 void Dymo_RE::newBocks(int n)
@@ -213,23 +221,26 @@ void Dymo_RE::delBlockI(int blockIndex)
 
 Register_Class(Dymo_UERR);
 
-Dymo_UERR::UERR(const Dymo_UERR& m) : DYMO_element()
+Dymo_UERR::UERR(const Dymo_UERR& m) : DYMO_element(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 Dymo_UERR& Dymo_UERR::operator=(const Dymo_UERR& msg)
 {
     if (this==&msg) return *this;
-
+    clean();
     DYMO_element::operator=(msg);
+    copy(msg);
+    return *this;
+}
 
+void Dymo_UERR::copy(const Dymo_UERR& msg)
+{
     uelem_target_addr = msg.uelem_target_addr;
     uerr_node_addr = msg.uerr_node_addr;
     uelem_type = msg.uelem_type;
     setBitLength(msg.getBitLength());
-    return *this;
 }
 
 
@@ -237,19 +248,24 @@ Register_Class(Dymo_RERR);
 
 //=========================================================================
 
-Dymo_RERR::Dymo_RERR(const Dymo_RERR& m) : DYMO_element()
+Dymo_RERR::Dymo_RERR(const Dymo_RERR& m) : DYMO_element(m)
 {
-    setName(m.getName());
-    operator=(m);
+    copy(m);
 }
 
 Dymo_RERR& Dymo_RERR::operator=(const Dymo_RERR& msg)
 {
     if (this==&msg) return *this;
+    clean();
     DYMO_element::operator=(msg);
+    copy(msg);
+    return *this;
+}
+
+void Dymo_RERR::copy(const Dymo_RERR& msg)
+{
     rerr_blocks = (struct rerr_block *)extension;
     setBitLength(msg.getBitLength());
-    return *this;
 }
 
 void Dymo_RERR::newBocks(int n)

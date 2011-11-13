@@ -49,9 +49,9 @@ RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     packetSequenceLostLogFile = NULL;
 }
 
-RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo()
+RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo(receiverInfo)
 {
-    operator=(receiverInfo);
+    copy(receiverInfo);
 }
 
 RTPReceiverInfo::~RTPReceiverInfo()
@@ -60,8 +60,14 @@ RTPReceiverInfo::~RTPReceiverInfo()
 
 RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
 {
+    if (this == &receiverInfo) return *this;
     RTPParticipantInfo::operator=(receiverInfo);
+    copy(receiverInfo);
+    return *this;
+}
 
+void RTPReceiverInfo::copy(const RTPReceiverInfo& receiverInfo)
+{
     _sequenceNumberBase = receiverInfo._sequenceNumberBase;
     _highestSequenceNumber = receiverInfo._highestSequenceNumber;
     _highestSequenceNumberPrior = receiverInfo._highestSequenceNumberPrior;
@@ -82,8 +88,6 @@ RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
     _inactiveIntervals = receiverInfo._inactiveIntervals;
     _startOfInactivity = receiverInfo._startOfInactivity;
     _itemsReceived = receiverInfo._itemsReceived;
-
-    return *this;
 }
 
 RTPReceiverInfo *RTPReceiverInfo::dup() const

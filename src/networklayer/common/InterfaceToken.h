@@ -32,11 +32,15 @@ class INET_API InterfaceToken
   private:
     uint32 _normal, _low;
     short _len; // in bits, 1..64
+
+  private:
+    void copy(const InterfaceToken& t)  {_normal = t._normal; _low = t._low; _len = t._len;}
+
   public:
     InterfaceToken()  {_normal = _low = _len = 0;}
     InterfaceToken(uint32 low, uint32 normal, int len)  {_normal = normal; _low = low; _len = len;}
-    InterfaceToken(const InterfaceToken& t)  {operator=(t);}
-    void operator=(const InterfaceToken& t)  {_normal = t._normal; _low = t._low; _len = t._len;}
+    InterfaceToken(const InterfaceToken& t)  { copy(t); }
+    InterfaceToken& operator=(const InterfaceToken& t)  { copy(t); return *this; }
     int length() const {return _len;}
     uint32 low() const {return _low;}
     uint32 normal() const {return _normal;}

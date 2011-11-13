@@ -101,6 +101,9 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      */
     virtual bool toBeDeleted(simtime_t now) const;
 
+  private:
+    void copy(const RTPSenderInfo& other);
+
   protected:
     /**
      * The time when the transmission was started.

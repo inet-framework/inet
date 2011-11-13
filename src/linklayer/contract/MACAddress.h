@@ -64,12 +64,12 @@ class INET_API MACAddress
     /**
      * Copy constructor.
      */
-    MACAddress(const MACAddress& other) {operator=(other);}
+    MACAddress(const MACAddress& other) { address = other.address; }
 
     /**
      * Assignment.
      */
-    MACAddress& operator=(const MACAddress& other);
+    MACAddress& operator=(const MACAddress& other) { address = other.address; return *this; }
 
     /**
      * Returns the address size in bytes, that is, 6.

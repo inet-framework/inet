@@ -47,6 +47,9 @@ public:
     double z;
     /*@}*/
 
+private:
+  void copy(const Coord& other) { x = other.x; y = other.y; z = other.z; }
+
 public:
     /** @brief Default constructor. */
     Coord()
@@ -57,12 +60,12 @@ public:
         : x(x), y(y), z(z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord(const Coord& pos)
-        : cObject(pos), x(pos.x), y(pos.y), z(pos.z) {}
+    Coord(const Coord& other)
+        : cObject(other) { copy(other); }
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord(const Coord* pos)
-        : cObject(*pos), x(pos->x), y(pos->y), z(pos->z) {}
+    Coord(const Coord* other)
+        : cObject(*other) { copy(*other); }
 
     /** @brief Returns a string with the value of the coordinate. */
     std::string info() const {
@@ -130,14 +133,14 @@ public:
     }
 
     /**
-     * @brief Assigns coordinate vector 'a' to this.
+     * @brief Assigns coordinate vector 'other' to this.
      *
      * This operator can change the dimension of the coordinate.
      */
-    Coord operator=(const Coord& a) {
-        x = a.x;
-        y = a.y;
-        z = a.z;
+    Coord operator=(const Coord& other) {
+        if (this == &other) return this;
+        cObject::operator=(other);
+        copy(other);
         return *this;
     }
 

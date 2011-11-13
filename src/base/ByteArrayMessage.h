@@ -31,7 +31,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     /**
      * Copy constructor
      */
-    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other.getName()) {operator=(other);}
+    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other) { }
 
     /**
      * operator =
@@ -74,6 +74,4 @@ class ByteArrayMessage : public ByteArrayMessage_Base
 };
 
 #endif
-
-
 

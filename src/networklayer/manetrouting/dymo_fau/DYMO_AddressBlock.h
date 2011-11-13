@@ -41,12 +41,19 @@ class DYMO_AddressBlock
 
     DYMO_AddressBlock(const DYMO_AddressBlock& other)
     {
-        operator=(other);
+        copy(other);
     }
 
     DYMO_AddressBlock& operator=(const DYMO_AddressBlock& other)
     {
         if (this==&other) return *this;
+        copy(other);
+        return *this;
+    }
+
+  private:
+    void copy(const DYMO_AddressBlock& other)
+    {
         this->address = other.address;
         this->seqNum = other.seqNum;
         this->prefix = other.prefix;
@@ -55,9 +62,9 @@ class DYMO_AddressBlock
         this->hasSeqNum_var = other.hasSeqNum_var;
         this->hasPrefix_var = other.hasPrefix_var;
         this->hasDist_var = other.hasDist_var;
-        return *this;
     }
 
+  public:
     bool hasAddress() const
     {
         return hasAddress_var;
