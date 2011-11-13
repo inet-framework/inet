@@ -43,11 +43,7 @@ IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
 
 void IPv6ControlInfo::clean()
 {
-    if (dgram)
-    {
-        drop(dgram);
-        delete dgram;
-    }
+    dropAndDelete(dgram);
 
     while ( ! extensionHeaders.empty() )
     {

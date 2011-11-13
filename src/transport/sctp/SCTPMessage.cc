@@ -51,8 +51,7 @@ void SCTPMessage::clean()
     for (uint32 i=0; i < this->getChunksArraySize(); i++)
     {
         chunk = (SCTPChunk*)this->getChunks(i);
-        drop(chunk);
-        delete chunk;
+        dropAndDelete(chunk);
     }
 }
 
@@ -209,8 +208,7 @@ void SCTPErrorChunk::clean()
     {
         cPacket *msg = parameterList.front();
         parameterList.pop_front();
-        drop(msg);
-        delete msg;
+        dropAndDelete(msg);
     }
 }
 
