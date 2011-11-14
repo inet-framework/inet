@@ -42,9 +42,10 @@ const char * int128::toString(uint32_t radix) const throw ()
     return &sz [i];
 };
 
-int128::int128(const char * sz) throw ()
-        : lo(0u), hi(0)
+void int128::set(const char *sz) throw ()
 {
+    lo = 0u;
+    hi = 0;
 
     if (!sz) return;
     if (!sz [0]) return;

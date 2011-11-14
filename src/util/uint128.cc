@@ -77,14 +77,13 @@ const char * Uint128::toString(unsigned int radix) const throw ()
     return &sz [i];
 }
 
-Uint128 & Uint128::operator=(const char * sz) throw ()
+void Uint128::set(const char *sz) throw ()
 {
-
     hi = 0;
     lo = 0;
 
-    if (!sz) return *this;
-    if (!sz [0]) return *this;
+    if (!sz) return;
+    if (!sz [0]) return;
 
     unsigned int radix = 10;
     unsigned int i = 0;
@@ -130,64 +129,7 @@ Uint128 & Uint128::operator=(const char * sz) throw ()
     {
         *this = Uint128(0) - *this;
     }
-    return *this;
 }
-
-Uint128::Uint128(const char * sz) throw ()
-        : lo(0u), hi(0u)
-{
-
-    if (!sz) return;
-    if (!sz [0]) return;
-
-    unsigned int radix = 10;
-    unsigned int i = 0;
-    bool minus = false;
-
-    if (sz [i] == '-')
-    {
-        ++i;
-        minus = true;
-    };
-
-    if (sz [i] == '0')
-    {
-        radix = 8;
-        ++i;
-        if (sz [i] == 'x')
-        {
-            radix = 16;
-            ++i;
-        };
-    };
-
-    for (; i < strlen(sz); ++i)
-    {
-        unsigned int n = 0;
-        if ((sz [i] >= '0') && (sz [i] <= '9'))
-        {
-            if (radix == 8 && (sz [i] >= '9'))
-                break;
-            n = sz [i] - '0';
-        }
-        else if (sz [i] >= 'a' && sz [i] <= 'a' + (int) radix - 10)
-            n = sz [i] - 'a' + 10;
-        else if (sz [i] >= 'A' && sz [i] <= 'A' + (int) radix - 10)
-            n = sz [i] - 'A' + 10;
-        else
-            break;
-
-        (*this) *= Uint128(radix);
-        (*this) += Uint128(n);
-    };
-
-    if (minus)
-    {
-        *this = Uint128(0) - *this;
-    }
-    return;
-};
-
 
 Uint128 & Uint128::operator=(const float &a) throw ()
 {

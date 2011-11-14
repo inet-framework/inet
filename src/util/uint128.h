@@ -67,6 +67,8 @@ class Uint128
 //            friend Uint128 operator >? (const Uint128 &, const Uint128 &) throw ();
 #endif
   public:
+    void set( const char *sz) throw ();
+
     // Constructors
     Uint128() throw ();
     Uint128(const Uint128 & a) throw ();
@@ -85,7 +87,7 @@ class Uint128
     Uint128(const double & a) throw ();
     Uint128(const long double & a) throw ();
 
-    Uint128(const char * sz) throw ();
+    Uint128(const char *sz) throw () {set(sz);}
 
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
@@ -100,7 +102,7 @@ class Uint128
     Uint128 & operator=(const int64_t &a) {lo = a; hi = 0; return *this;}
     Uint128 & operator=(const uint64_t &a) {lo = a; hi = 0; return *this;}
 
-    Uint128 & operator=( const char * sz) throw ();
+    Uint128 & operator=( const char *sz) throw () {set(sz); return *this;}
     Uint128 & operator=(const float &a) throw ();
     Uint128 & operator=(const double & a) throw ();
     Uint128 & operator=(const long double & a) throw ();

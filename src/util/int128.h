@@ -37,6 +37,8 @@ class int128
 #endif
 
   public:
+    void set(const char *sz) throw ();
+
     // Constructors
     inline int128() throw () {};
     inline int128(const int128 & a) throw () : lo(a.lo), hi(a.hi) {};
@@ -57,7 +59,7 @@ class int128
     int128(const double & a) throw ();
     int128(const long double & a) throw ();
 
-    int128(const char * sz) throw ();
+    int128(const char *sz) throw () { set(sz); }
 
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
@@ -69,7 +71,7 @@ class int128
     int128 & operator=(const int64_t &a) {lo = a; hi = 0; return *this;}
     int128 & operator=(const uint64_t &a) {lo = a; hi = 0; return *this;}
 
-    int128 & operator=( const char * sz) throw ();
+    int128 & operator=( const char *sz) throw () {set(sz); return *this;}
     int128 & operator=(const float &a) throw ();
     int128 & operator=(const double & a) throw ();
     int128 & operator=(const long double & a) throw ();
