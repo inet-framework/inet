@@ -12,11 +12,11 @@
 #include <cmath>
 
 // IMPLEMENTATION
-const int128 int128::INT128_MAX(UINT64_MAX, INT64_MAX);
-const int128 int128::INT128_MIN(0, INT64_MIN);
+const Int128 Int128::INT128_MAX(UINT64_MAX, INT64_MAX);
+const Int128 Int128::INT128_MIN(0, INT64_MIN);
 
 
-const char *int128::toString(uint32_t radix) const
+const char *Int128::toString(uint32_t radix) const
 {
     if (!*this) return "0";
     if (radix < 2 || radix > 37) return "(invalid radix)";
@@ -24,10 +24,10 @@ const char *int128::toString(uint32_t radix) const
     static char sz[256];
     memset(sz, 0, 256);
 
-    int128 r;
-    int128 ii = (*this < 0) ? -*this : *this;
+    Int128 r;
+    Int128 ii = (*this < 0) ? -*this : *this;
     int i = 255;
-    int128 aux = radix;
+    Int128 aux = radix;
 
     while (!!ii && i)
     {
@@ -42,7 +42,7 @@ const char *int128::toString(uint32_t radix) const
     return &sz[i];
 };
 
-void int128::set(const char *sz)
+void Int128::set(const char *sz)
 {
     lo = 0u;
     hi = 0;
@@ -88,51 +88,51 @@ void int128::set(const char *sz)
     }
 
     if (minus)
-        *this = int128(0) - *this;
+        *this = Int128(0) - *this;
 
     return;
 };
 
-int128::int128(const float a)
+Int128::Int128(const float a)
         : lo((uint64_t) fmodf(a, 18446744073709551616.0f)),
         hi((int64_t) (a / 18446744073709551616.0f)) {};
 
-int128::int128(const double & a)
+Int128::Int128(const double & a)
         : lo((uint64_t) fmod(a, 18446744073709551616.0)),
         hi((int64_t) (a / 18446744073709551616.0)) {};
 
-int128::int128(const long double & a)
+Int128::Int128(const long double & a)
         : lo((uint64_t) fmodl(a, 18446744073709551616.0l)),
         hi((int64_t) (a / 18446744073709551616.0l)) {};
 
-float int128::toFloat() const
+float Int128::toFloat() const
 {
     return (float) hi * 18446744073709551616.0f
            + (float) lo;
 };
 
-double int128::toDouble() const
+double Int128::toDouble() const
 {
     return (double) hi * 18446744073709551616.0
            + (double) lo;
 };
 
 
-int128 & int128::operator=(const float &a)
+Int128 & Int128::operator=(const float &a)
 {
     lo = ((uint64_t) fmodf(a, 18446744073709551616.0f));
     hi = ((int64_t) (a / 18446744073709551616.0f));
     return *this;
 }
 
-int128 & int128::operator=(const double & a)
+Int128 & Int128::operator=(const double & a)
 {
     lo = ((uint64_t) fmod(a, 18446744073709551616.0));
     hi = ((int64_t) (a / 18446744073709551616.0));
     return *this;
 }
 
-int128 & int128::operator=(const long double & a)
+Int128 & Int128::operator=(const long double & a)
 {
     lo = ((uint64_t) fmodl(a, 18446744073709551616.0l));
     hi = ((int64_t) (a / 18446744073709551616.0l));
@@ -140,21 +140,21 @@ int128 & int128::operator=(const long double & a)
 }
 
 
-long double int128::toLongDouble() const
+long double Int128::toLongDouble() const
 {
     return (long double) hi * 18446744073709551616.0l
            + (long double) lo;
 };
 
-int128 int128::operator-() const
+Int128 Int128::operator-() const
 {
     if (lo == 0)
-        return int128(0ull, -hi);
+        return Int128(0ull, -hi);
     else
-        return int128(-lo, ~hi);
+        return Int128(-lo, ~hi);
 };
 
-int128 & int128::operator++()
+Int128 & Int128::operator++()
 {
     ++lo;
     if (!lo)
@@ -163,7 +163,7 @@ int128 & int128::operator++()
     return *this;
 };
 
-int128 & int128::operator--()
+Int128 & Int128::operator--()
 {
     if (!lo)
         --hi;
@@ -172,23 +172,23 @@ int128 & int128::operator--()
     return *this;
 };
 
-int128 int128::operator++(int)
+Int128 Int128::operator++(int)
 {
-    int128 b(*this);
+    Int128 b(*this);
     ++ *this;
 
     return b;
 };
 
-int128 int128::operator--(int)
+Int128 Int128::operator--(int)
 {
-    int128 b(*this);
+    Int128 b(*this);
     -- *this;
 
     return b;
 };
 
-int128 & int128::operator+=(const int128 & b)
+Int128 & Int128::operator+=(const Int128 & b)
 {
     uint64_t old_lo = lo;
 
@@ -200,15 +200,15 @@ int128 & int128::operator+=(const int128 & b)
     return *this;
 };
 
-int128 & int128::operator*=(const int128 & b)
+Int128 & Int128::operator*=(const Int128 & b)
 {
     if (!b)
         return *this = 0u;
     if (b == 1u)
         return *this;
 
-    int128 a(*this);
-    int128 t(b);
+    Int128 a(*this);
+    Int128 t(b);
 
     lo = 0ull;
     hi = 0ll;
@@ -225,25 +225,25 @@ int128 & int128::operator*=(const int128 & b)
 };
 
 
-int128 int128::div(const int128 & divisor, int128 & remainder) const
+Int128 Int128::div(const Int128 & divisor, Int128 & remainder) const
 {
     if (!divisor)
         return 1u / (unsigned int) divisor.lo;
     // or RaiseException (EXCEPTION_INT_DIVIDE_BY_ZERO,
     //                    EXCEPTION_NONCONTINUABLE, 0, NULL);
 
-    int128 ds = (divisor < 0) ? -divisor : divisor;
-    int128 dd = (*this < 0) ? -*this : *this;
+    Int128 ds = (divisor < 0) ? -divisor : divisor;
+    Int128 dd = (*this < 0) ? -*this : *this;
 
     // only remainder
     if (ds > dd)
     {
         remainder = *this;
-        return (int128)0;
+        return (Int128)0;
     };
 
-    int128 r = (int128)0;
-    int128 q = (int128)0;
+    Int128 r = (Int128)0;
+    Int128 q = (Int128)0;
 //    while (dd >= ds) { dd -= ds; q += 1; }; // extreme slow version
 
     unsigned int b = 127;
@@ -279,7 +279,7 @@ int128 int128::div(const int128 & divisor, int128 & remainder) const
     return q;
 };
 
-bool int128::bit(unsigned int n) const
+bool Int128::bit(unsigned int n) const
 {
     if (n >= 128)
         return hi < 0;
@@ -290,7 +290,7 @@ bool int128::bit(unsigned int n) const
         return hi & (1ull << (n - 64));
 };
 
-void int128::bit(unsigned int n, bool val)
+void Int128::bit(unsigned int n, bool val)
 {
     if (n >= 128)
         return;
@@ -308,7 +308,7 @@ void int128::bit(unsigned int n, bool val)
 };
 
 
-int128 & int128::operator>>=(unsigned int n)
+Int128 & Int128::operator>>=(unsigned int n)
 {
     if (n >= 128)
     {
@@ -342,7 +342,7 @@ int128 & int128::operator>>=(unsigned int n)
     return *this;
 };
 
-int128 & int128::operator<<=(unsigned int n)
+Int128 & Int128::operator<<=(unsigned int n)
 {
     if (n >= 128)
     {
@@ -375,7 +375,7 @@ int128 & int128::operator<<=(unsigned int n)
     return *this;
 };
 
-bool operator<(const int128 & a, const int128 & b)
+bool operator<(const Int128 & a, const Int128 & b)
 {
     if (a.hi == b.hi)
     {
