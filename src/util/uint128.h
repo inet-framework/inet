@@ -91,7 +91,7 @@ class Uint128
 
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
-    Uint128 & operator=(const Uint128 &other) {if (this==&other) return *this; lo = other.lo; hi = other.hi; return *this;}
+    Uint128 & operator=(const Uint128 &other) {lo = other.lo; hi = other.hi; return *this;}
 
     // Note: int / unsigned int operators conflict with other integer types with at least GCC and MSVC
     // Uint128 & operator = (const int &a) {lo = a; hi = 0; return *this;}

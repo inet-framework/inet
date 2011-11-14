@@ -64,7 +64,7 @@ class int128
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
 
-    int128 & operator=(const int128 &other) {if (this==&other) return *this; lo = other.lo; hi = other.hi; return *this;}
+    int128 & operator=(const int128 &other) {lo = other.lo; hi = other.hi; return *this;}
     int128 & operator=(const int32_t &a) {lo = a; hi = 0; return *this;}
     int128 & operator=(const uint32_t &a) {lo = a; hi = 0; return *this;}
 
