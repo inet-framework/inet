@@ -407,7 +407,7 @@ Uint128 & Uint128::operator>>=(unsigned int n) throw ()
         return *this;
     }
 
-    if (n > 63)
+    if (n >= 64)
     {
         n -= 64;
         this->lo = this->hi;
@@ -440,7 +440,7 @@ Uint128 & Uint128::operator<<=(unsigned int n) throw ()
         return *this;
     }
 
-    if (n > 63)
+    if (n >= 64)
     {
         n -= 64;
         this->hi = this->lo;
