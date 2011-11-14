@@ -1,12 +1,33 @@
-#ifndef INT128_H
-#define INT128_H
+/**
+ * Copyright (c) 2005 Jan Ringoš, www.ringos.cz
+ *
+ * This software is provided 'as-is', without any express or implied warranty.
+ * In no event will the author be held liable for any damages arising from the
+ * use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * The origin of this software must not be misrepresented; you must not claim
+ * that you wrote the original software. If you use this software in a
+ * product, an acknowledgment in the product documentation would be
+ * appreciated but is not required. Altered source versions must be plainly
+ * marked as such, and must not be misrepresented as being the original
+ * software. This notice may not be removed or altered from any source
+ * distribution.
+ */
+
+#ifndef __INET_INT128_H
+#define __INET_INT128_H
 
 /*
   Name: int128.h
-  Copyright: Copyright (C) 2005, Jan Ringos
   Author: Jan Ringos, http://Tringi.Mx-3.cz
-
+  Source: http://mx-3.cz/tringi/www/int128
   Version: 1.1
+
+  Modifications: Alfonso Ariza Quintana, Zoltan Bojthe et al.
 */
 
 #include <exception>
