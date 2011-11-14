@@ -154,11 +154,6 @@ int128 int128::operator-() const
         return int128(-lo, ~hi);
 };
 
-int128 int128::operator ~ () const
-{
-    return int128(~lo, ~hi);
-};
-
 int128 & int128::operator++()
 {
     ++lo;
@@ -380,35 +375,6 @@ int128 & int128::operator<<=(unsigned int n)
     return *this;
 };
 
-bool int128::operator!() const
-{
-    return !(hi || lo);
-};
-
-int128 & int128::operator|=(const int128 & b)
-{
-    hi |= b.hi;
-    lo |= b.lo;
-
-    return *this;
-};
-
-int128 & int128::operator&=(const int128 & b)
-{
-    hi &= b.hi;
-    lo &= b.lo;
-
-    return *this;
-};
-
-int128 & int128::operator^=(const int128 & b)
-{
-    hi ^= b.hi;
-    lo ^= b.lo;
-
-    return *this;
-};
-
 bool operator<(const int128 & a, const int128 & b)
 {
     if (a.hi == b.hi)
@@ -420,20 +386,5 @@ bool operator<(const int128 & a, const int128 & b)
     }
     else
         return a.hi < b.hi;
-};
-
-bool operator==(const int128 & a, const int128 & b)
-{
-    return a.hi == b.hi && a.lo == b.lo;
-};
-
-bool operator&&(const int128 & a, const int128 & b)
-{
-    return (a.hi || a.lo) && (b.hi || b.lo);
-};
-
-bool operator||(const int128 & a, const int128 & b)
-{
-    return (a.hi || a.lo) || (b.hi || b.lo);
 };
 

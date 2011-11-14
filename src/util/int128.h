@@ -83,10 +83,10 @@ class int128
 
   public:
     // Operators
-    bool operator!() const;
+    bool operator!() const { return !(hi || lo); }
 
     int128 operator-() const;
-    int128 operator ~ () const;
+    int128 operator ~ () const { return int128(~lo, ~hi); }
 
     int128 & operator++();
     int128 & operator--();
@@ -99,9 +99,9 @@ class int128
     int128 & operator>>=(unsigned int n);
     int128 & operator<<=(unsigned int n);
 
-    int128 & operator|=(const int128 & b);
-    int128 & operator&=(const int128 & b);
-    int128 & operator^=(const int128 & b);
+    int128 & operator|=(const int128 & b) { hi |= b.hi; lo |= b.lo; return *this; }
+    int128 & operator&=(const int128 & b) { hi &= b.hi; lo &= b.lo; return *this; }
+    int128 & operator^=(const int128 & b) { hi ^= b.hi; lo ^= b.lo; return *this; }
 
     // Inline simple operators
     inline const int128 & operator+() const { return *this; };
@@ -155,9 +155,21 @@ __attribute__((__aligned__(16), __packed__))
 // GLOBAL OPERATORS
 
 bool operator<(const int128 & a, const int128 & b);
-bool operator==(const int128 & a, const int128 & b);
-bool operator||(const int128 & a, const int128 & b);
-bool operator&&(const int128 & a, const int128 & b);
+
+inline bool operator==(const int128 & a, const int128 & b)
+{
+    return a.hi == b.hi && a.lo == b.lo;
+};
+
+inline bool operator&&(const int128 & a, const int128 & b)
+{
+    return (a.hi || a.lo) && (b.hi || b.lo);
+};
+
+inline bool operator||(const int128 & a, const int128 & b)
+{
+    return (a.hi || a.lo) || (b.hi || b.lo);
+};
 
 #ifdef __GNUC__
 // inline int128 operator <? (const int128 & a, const int128 & b) {
