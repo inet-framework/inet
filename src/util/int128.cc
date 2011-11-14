@@ -16,12 +16,12 @@ const int128 int128::INT128_MAX(UINT64_MAX, INT64_MAX);
 const int128 int128::INT128_MIN(0, INT64_MIN);
 
 
-const char * int128::toString(uint32_t radix) const throw ()
+const char *int128::toString(uint32_t radix) const throw ()
 {
     if (!*this) return "0";
     if (radix < 2 || radix > 37) return "(invalid radix)";
 
-    static char sz [256];
+    static char sz[256];
     memset(sz, 0, 256);
 
     int128 r;
@@ -37,9 +37,9 @@ const char * int128::toString(uint32_t radix) const throw ()
     };
 
     if (*this < 0)
-        sz [--i] = '-';
+        sz[--i] = '-';
 
-    return &sz [i];
+    return &sz[i];
 };
 
 void int128::set(const char *sz) throw ()
@@ -48,23 +48,23 @@ void int128::set(const char *sz) throw ()
     hi = 0;
 
     if (!sz) return;
-    if (!sz [0]) return;
+    if (!sz[0]) return;
 
     uint32_t radix = 10;
     uint32_t i = 0;
     bool minus = false;
 
-    if (sz [i] == '-')
+    if (sz[i] == '-')
     {
         ++i;
         minus = true;
     }
 
-    if (sz [i] == '0')
+    if (sz[i] == '0')
     {
         radix = 8;
         ++i;
-        if (sz [i] == 'x')
+        if (sz[i] == 'x')
         {
             radix = 16;
             ++i;
@@ -74,12 +74,12 @@ void int128::set(const char *sz) throw ()
     for (; i < strlen(sz); ++i)
     {
         uint32_t n = 0;
-        if (sz [i] >= '0' && sz [i] <= '9' && sz [i] < '0' + (int) radix)
-            n = sz [i] - '0';
-        else if (sz [i] >= 'a' && sz [i] <= 'a' + (int) radix - 10)
-            n = sz [i] - 'a' + 10;
-        else if (sz [i] >= 'A' && sz [i] <= 'A' + (int) radix - 10)
-            n = sz [i] - 'A' + 10;
+        if (sz[i] >= '0' && sz[i] <= '9' && sz[i] < '0' + (int) radix)
+            n = sz[i] - '0';
+        else if (sz[i] >= 'a' && sz[i] <= 'a' + (int) radix - 10)
+            n = sz[i] - 'a' + 10;
+        else if (sz[i] >= 'A' && sz[i] <= 'A' + (int) radix - 10)
+            n = sz[i] - 'A' + 10;
         else
             break;
 
@@ -426,10 +426,12 @@ bool operator==(const int128 & a, const int128 & b) throw ()
 {
     return a.hi == b.hi && a.lo == b.lo;
 };
+
 bool operator&&(const int128 & a, const int128 & b) throw ()
 {
     return (a.hi || a.lo) && (b.hi || b.lo);
 };
+
 bool operator||(const int128 & a, const int128 & b) throw ()
 {
     return (a.hi || a.lo) || (b.hi || b.lo);

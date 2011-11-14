@@ -17,6 +17,7 @@
 const Uint128 Uint128::UINT128_MAX(UINT64_MAX, UINT64_MAX);
 const Uint128 Uint128::UINT128_MIN(0, 0);
 
+
 Uint128::Uint128() throw ()
 {
     lo = 0ull;
@@ -54,12 +55,12 @@ Uint128::Uint128(const uint64_t & a) throw ()
 }
 
 
-const char * Uint128::toString(unsigned int radix) const throw ()
+const char *Uint128::toString(unsigned int radix) const throw ()
 {
     if (!*this) return "0";
     if (radix < 2 || radix > 37) return "(invalid radix)";
 
-    static char sz [256];
+    static char sz[256];
     memset(sz, 0, 256);
 
     Uint128 r;
@@ -71,10 +72,10 @@ const char * Uint128::toString(unsigned int radix) const throw ()
     {
         ii = ii.div(aux, r);
         unsigned int c = r.toUint();
-        sz [--i] = c + ((c > 9) ? 'A' - 10 : '0');
+        sz[--i] = c + ((c > 9) ? 'A' - 10 : '0');
     };
 
-    return &sz [i];
+    return &sz[i];
 }
 
 void Uint128::set(const char *sz) throw ()

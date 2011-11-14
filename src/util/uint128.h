@@ -157,7 +157,7 @@ class Uint128
     // Common methods
     unsigned int toUint() const throw () {return (unsigned int) this->lo;};
     uint64_t toUint64() const throw () {return this->lo;};
-    const char * toString(unsigned int radix = 10) const throw ();
+    const char *toString(unsigned int radix = 10) const throw ();
     float toFloat() const throw ();
     double toDouble() const throw ();
     long double toLongDouble() const throw ();

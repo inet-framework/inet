@@ -21,8 +21,8 @@ class int128
 {
   private:
     // Binary correct representation of signed 128bit integer
-    uint64_t    lo;
-    int64_t    hi;
+    uint64_t lo;
+    int64_t  hi;
 
   protected:
     // Some global operator functions must be friends
@@ -127,7 +127,7 @@ class int128
     int toInt() const throw () {return (int) this->lo; };
     int64_t toInt64() const throw () {  return (int64_t) this->lo; };
 
-    const char * toString(uint32_t radix = 10) const throw ();
+    const char *toString(uint32_t radix = 10) const throw ();
     float toFloat() const throw ();
     double toDouble() const throw ();
     long double toLongDouble() const throw ();
