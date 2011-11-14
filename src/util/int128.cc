@@ -282,7 +282,8 @@ int128 int128::div(const int128 & divisor, int128 & remainder) const throw ()
 
 bool int128::bit(unsigned int n) const throw ()
 {
-    n &= 0x7F;
+    if (n >= 128)
+        return this->hi < 0;
 
     if (n < 64)
         return this->lo & (1ull << n);
@@ -292,7 +293,8 @@ bool int128::bit(unsigned int n) const throw ()
 
 void int128::bit(unsigned int n, bool val) throw ()
 {
-    n &= 0x7F;
+    if (n >= 128)
+        return;
 
     if (val)
     {
@@ -309,7 +311,12 @@ void int128::bit(unsigned int n, bool val) throw ()
 
 int128 & int128::operator>>=(unsigned int n) throw ()
 {
-    n &= 0x7F;
+    if (n >= 128)
+    {
+        this->hi = (this->hi < 0) ? -1ll : 0ll;
+        this->lo = this->hi;
+        return *this;
+    }
 
     if (n > 63)
     {
@@ -340,7 +347,11 @@ int128 & int128::operator>>=(unsigned int n) throw ()
 
 int128 & int128::operator<<=(unsigned int n) throw ()
 {
-    n &= 0x7F;
+    if (n >= 128)
+    {
+        this->lo = this->hi = 0;
+        return *this;
+    }
 
     if (n > 63)
     {
