@@ -63,8 +63,8 @@ const char * Uint128::toString(unsigned int radix) const throw ()
     memset(sz, 0, 256);
 
     Uint128 r;
-    Uint128 ii = *this;
-    Uint128 aux = radix;
+    Uint128 ii(*this);
+    Uint128 aux(radix);
     int i = 255;
 
     while (!!ii && i)
@@ -274,7 +274,7 @@ Uint128 & Uint128::operator--()
 
 Uint128 Uint128::operator++(int)
 {
-    Uint128 b = *this;
+    Uint128 b(*this);
     ++ *this;
 
     return b;
@@ -282,7 +282,7 @@ Uint128 Uint128::operator++(int)
 
 Uint128 Uint128::operator--(int)
 {
-    Uint128 b = *this;
+    Uint128 b(*this);
     -- *this;
 
     return b;

@@ -178,7 +178,7 @@ int128 & int128::operator--()
 
 int128 int128::operator++(int)
 {
-    int128 b = *this;
+    int128 b(*this);
     ++ *this;
 
     return b;
@@ -186,7 +186,7 @@ int128 int128::operator++(int)
 
 int128 int128::operator--(int)
 {
-    int128 b = *this;
+    int128 b(*this);
     -- *this;
 
     return b;
@@ -209,8 +209,8 @@ int128 & int128::operator*=(const int128 & b) throw ()
     if (b == 1u)
         return *this;
 
-    int128 a = *this;
-    int128 t = b;
+    int128 a(*this);
+    int128 t(b);
 
     this->lo = 0ull;
     this->hi = 0ll;
