@@ -439,63 +439,48 @@ Uint128 & Uint128::operator^=(const Uint128 & b)
 
 bool operator<(const Uint128 & a, const Uint128 & b)
 {
-    return (a.hi == b.hi) ? (a.lo < b.lo) : (a.hi < b.hi);
+    return (a.hi < b.hi) || ((a.hi == b.hi) && (a.lo < b.lo));
 };
 
 bool operator==(const Uint128 & a, const uint32_t & b)
 {
-    if (a.hi != 0) return false;
-    uint64_t aux = b;
-    return  a.lo == aux;
+    return (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const uint32_t & b, const Uint128 & a)
 {
-    if (a.hi != 0) return false;
-    uint64_t aux = b;
-    return  a.lo == aux;
+    return (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const Uint128 & a, const uint64_t & b)
 {
-    if (a.hi != 0) return false;
-    return  a.lo == b;
+    return (a.hi == 0) && (a.lo == b);
 };
 
 bool operator==(const uint64_t & b, const Uint128 & a)
 {
-    if (a.hi != 0) return false;
-    return  a.lo == b;
+    return (a.hi == 0) && (a.lo == b);
 };
 
 
 bool operator==(const Uint128 & a, const int32_t & b)
 {
-    if (a.hi != 0) return false;
-    int64_t aux = b;
-    return  a.lo == (uint64_t)aux;
+    return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const int32_t & b, const Uint128 & a)
 {
-    if (a.hi != 0) return false;
-    int64_t aux = b;
-    if (b < 0) return false;
-    return  a.lo == (uint64_t) aux;
+    return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const Uint128 & a, const int64_t & b)
 {
-    if (a.hi != 0) return false;
-    if (b < 0) return false;
-    return  a.lo == (uint64_t)b;
+    return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const int64_t & b, const Uint128 & a)
 {
-    if (a.hi != 0) return false;
-    if (b < 0) return false;
-    return  a.lo == (uint64_t) b;
+    return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
 };
 
 bool operator==(const Uint128 & a, const Uint128 & b)
