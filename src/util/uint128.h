@@ -30,64 +30,64 @@ class Uint128
     uint64_t lo;
     uint64_t hi;
 
-    //inline Uint128 (const unsigned __int64 & a, const unsigned __int64 & b) throw ()
+    //inline Uint128 (const unsigned __int64 & a, const unsigned __int64 & b)
 //            : lo (a), hi (b) {};
-    inline Uint128(const uint64_t & a, const uint64_t & b) throw ()  {lo = a; hi = b;}
+    inline Uint128(const uint64_t & a, const uint64_t & b)  {lo = a; hi = b;}
   protected:
     // Some global operator functions must be friends
-    friend bool operator<(const Uint128 &, const Uint128 &) throw ();
-    //friend bool operator >  (const Uint128 &, const Uint128 &) throw ();
-    friend bool operator==(const Uint128 &, const uint32_t &) throw ();
-    friend bool operator==(const Uint128 &, const int32_t &) throw ();
-    friend bool operator==(const Uint128 &, const uint64_t &) throw ();
-    friend bool operator==(const Uint128 &, const int64_t &) throw ();
+    friend bool operator<(const Uint128 &, const Uint128 &);
+    //friend bool operator >  (const Uint128 &, const Uint128 &);
+    friend bool operator==(const Uint128 &, const uint32_t &);
+    friend bool operator==(const Uint128 &, const int32_t &);
+    friend bool operator==(const Uint128 &, const uint64_t &);
+    friend bool operator==(const Uint128 &, const int64_t &);
 
-    friend bool operator==(const uint32_t &, const Uint128 &) throw ();
-    friend bool operator==(const int32_t &, const Uint128 &) throw ();
-    friend bool operator==(const uint64_t &, const Uint128 &) throw ();
-    friend bool operator==(const int64_t &, const Uint128 &) throw ();
+    friend bool operator==(const uint32_t &, const Uint128 &);
+    friend bool operator==(const int32_t &, const Uint128 &);
+    friend bool operator==(const uint64_t &, const Uint128 &);
+    friend bool operator==(const int64_t &, const Uint128 &);
 
-    friend bool operator==(const Uint128 &, const Uint128 &) throw ();
-    friend bool operator||(const Uint128 &, const Uint128 &) throw ();
-    friend bool operator&&(const Uint128 &, const Uint128 &) throw ();
+    friend bool operator==(const Uint128 &, const Uint128 &);
+    friend bool operator||(const Uint128 &, const Uint128 &);
+    friend bool operator&&(const Uint128 &, const Uint128 &);
 
-    friend bool operator!=(const Uint128 &, const uint32_t &) throw ();
-    friend bool operator!=(const Uint128 &, const int32_t &) throw ();
-    friend bool operator!=(const Uint128 &, const uint64_t &) throw ();
-    friend bool operator!=(const Uint128 &, const int64_t &) throw ();
+    friend bool operator!=(const Uint128 &, const uint32_t &);
+    friend bool operator!=(const Uint128 &, const int32_t &);
+    friend bool operator!=(const Uint128 &, const uint64_t &);
+    friend bool operator!=(const Uint128 &, const int64_t &);
 
-    friend bool operator!=(const uint32_t &, const Uint128 &) throw ();
-    friend bool operator!=(const int32_t &, const Uint128 &) throw ();
-    friend bool operator!=(const uint64_t &, const Uint128 &) throw ();
-    friend bool operator!=(const int64_t &, const Uint128 &) throw ();
+    friend bool operator!=(const uint32_t &, const Uint128 &);
+    friend bool operator!=(const int32_t &, const Uint128 &);
+    friend bool operator!=(const uint64_t &, const Uint128 &);
+    friend bool operator!=(const int64_t &, const Uint128 &);
     friend std::ostream& operator<<(std::ostream& os, const Uint128& );
 
 #ifdef __GNUC__
-//            friend Uint128 operator <? (const Uint128 &, const Uint128 &) throw ();
-//            friend Uint128 operator >? (const Uint128 &, const Uint128 &) throw ();
+//            friend Uint128 operator <? (const Uint128 &, const Uint128 &);
+//            friend Uint128 operator >? (const Uint128 &, const Uint128 &);
 #endif
   public:
-    void set( const char *sz) throw ();
+    void set( const char *sz);
 
     // Constructors
-    Uint128() throw ();
-    Uint128(const Uint128 & a) throw ();
+    Uint128();
+    Uint128(const Uint128 & a);
 
     // Note: int / unsigned int operators conflict with other integer types with at least GCC and MSVC
-    // inline Uint128 (const unsigned int & a) throw () : lo (a), hi (0ull) {};
-    // inline Uint128 (const int & a) throw () : lo (a), hi (0ull) {};
+    // inline Uint128 (const unsigned int & a) : lo (a), hi (0ull) {};
+    // inline Uint128 (const int & a) : lo (a), hi (0ull) {};
 
-    //   inline Uint128 (const unsigned __int64 & a) throw () : lo (a), hi (0ull) {};
-    Uint128(const int32_t & a) throw ();
-    Uint128(const uint32_t & a) throw ();
-    Uint128(const int64_t & a) throw ();
-    Uint128(const uint64_t & a) throw ();
+    //   inline Uint128 (const unsigned __int64 & a) : lo (a), hi (0ull) {};
+    Uint128(const int32_t & a);
+    Uint128(const uint32_t & a);
+    Uint128(const int64_t & a);
+    Uint128(const uint64_t & a);
 
-    Uint128(const float a) throw ();
-    Uint128(const double & a) throw ();
-    Uint128(const long double & a) throw ();
+    Uint128(const float a);
+    Uint128(const double & a);
+    Uint128(const long double & a);
 
-    Uint128(const char *sz) throw () {set(sz);}
+    Uint128(const char *sz) {set(sz);}
 
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
@@ -102,65 +102,65 @@ class Uint128
     Uint128 & operator=(const int64_t &a) {lo = a; hi = 0; return *this;}
     Uint128 & operator=(const uint64_t &a) {lo = a; hi = 0; return *this;}
 
-    Uint128 & operator=( const char *sz) throw () {set(sz); return *this;}
-    Uint128 & operator=(const float &a) throw ();
-    Uint128 & operator=(const double & a) throw ();
-    Uint128 & operator=(const long double & a) throw ();
+    Uint128 & operator=( const char *sz) {set(sz); return *this;}
+    Uint128 & operator=(const float &a);
+    Uint128 & operator=(const double & a);
+    Uint128 & operator=(const long double & a);
 
-    Uint128 & operator=(const IPv4Address &) throw ();
-    Uint128 & operator=(const MACAddress &) throw ();
-    Uint128 & operator=(const IPv6Address &) throw ();
+    Uint128 & operator=(const IPv4Address &);
+    Uint128 & operator=(const MACAddress &);
+    Uint128 & operator=(const IPv6Address &);
 
-    inline Uint128(const IPv4Address & a) throw ()  {*this = a;}
-    inline Uint128(const MACAddress & a) throw ()  {*this = a;}
-    inline Uint128(const IPv6Address & a) throw ()  {*this = a;}
+    inline Uint128(const IPv4Address & a)  {*this = a;}
+    inline Uint128(const MACAddress & a)  {*this = a;}
+    inline Uint128(const IPv6Address & a)  {*this = a;}
 
 
     // Operators
-    bool operator!() const throw ();
-    Uint128 operator-() const throw ();
-    Uint128 operator ~ () const throw ();
+    bool operator!() const;
+    Uint128 operator-() const;
+    Uint128 operator ~ () const;
     Uint128 & operator++();
     Uint128 & operator--();
     Uint128 operator++(int);
     Uint128 operator--(int);
 
-    Uint128 & operator+=(const Uint128 & b) throw ();
-    Uint128 & operator*=(const Uint128 & b) throw ();
+    Uint128 & operator+=(const Uint128 & b);
+    Uint128 & operator*=(const Uint128 & b);
 
-    Uint128 & operator>>=(unsigned int n) throw ();
-    Uint128 & operator<<=(unsigned int n) throw ();
-    Uint128 & operator|=(const Uint128 & b) throw ();
+    Uint128 & operator>>=(unsigned int n);
+    Uint128 & operator<<=(unsigned int n);
+    Uint128 & operator|=(const Uint128 & b);
 
-    Uint128 & operator&=(const Uint128 & b) throw ();
-    Uint128 & operator^=(const Uint128 & b) throw ();
+    Uint128 & operator&=(const Uint128 & b);
+    Uint128 & operator^=(const Uint128 & b);
 
     // Inline simple operators
-    inline const Uint128 & operator+() const throw () { return *this; };
+    inline const Uint128 & operator+() const { return *this; };
 
     // Rest of inline operators
-    inline Uint128 & operator-=(const Uint128 & b) throw ()
+    inline Uint128 & operator-=(const Uint128 & b)
     {
         return *this += (-b);
     };
-    inline Uint128 & operator/=(const Uint128 & b) throw ()
+    inline Uint128 & operator/=(const Uint128 & b)
     {
         Uint128 dummy;
         *this = this->div(b, dummy);
         return *this;
     };
-    inline Uint128 & operator%=(const Uint128 & b) throw ()
+    inline Uint128 & operator%=(const Uint128 & b)
     {
         this->div(b, *this);
         return *this;
     };
     // Common methods
-    unsigned int toUint() const throw () {return (unsigned int) lo;};
-    uint64_t toUint64() const throw () {return lo;};
-    const char *toString(unsigned int radix = 10) const throw ();
-    float toFloat() const throw ();
-    double toDouble() const throw ();
-    long double toLongDouble() const throw ();
+    unsigned int toUint() const {return (unsigned int) lo;};
+    uint64_t toUint64() const {return lo;};
+    const char *toString(unsigned int radix = 10) const;
+    float toFloat() const;
+    double toDouble() const;
+    long double toLongDouble() const;
     operator double() const {return toDouble(); }
     operator int() const {return toUint();}
     operator uint32_t() const { return toUint();}
@@ -209,11 +209,11 @@ class Uint128
     }
 
     // Arithmetic methods
-    Uint128  div(const Uint128 &, Uint128 &) const throw ();
+    Uint128  div(const Uint128 &, Uint128 &) const;
 
     // Bit operations
-    bool    bit(unsigned int n) const throw ();
-    void    bit(unsigned int n, bool val) throw ();
+    bool    bit(unsigned int n) const;
+    void    bit(unsigned int n, bool val);
     uint64_t getLo() const {return lo;}
     uint64_t getHi() const {return hi;}
     static const Uint128 UINT128_MAX;
@@ -227,77 +227,77 @@ __attribute__((__aligned__(16), __packed__))
 
 // GLOBAL OPERATORS
 
-bool operator<(const Uint128 & a, const Uint128 & b) throw ();
-bool operator==(const Uint128 & a, const Uint128 & b) throw ();
-bool operator||(const Uint128 & a, const Uint128 & b) throw ();
-bool operator&&(const Uint128 & a, const Uint128 & b) throw ();
+bool operator<(const Uint128 & a, const Uint128 & b);
+bool operator==(const Uint128 & a, const Uint128 & b);
+bool operator||(const Uint128 & a, const Uint128 & b);
+bool operator&&(const Uint128 & a, const Uint128 & b);
 
 #ifdef __GNUC__
-//    inline Uint128 operator <? (const Uint128 & a, const Uint128 & b) throw () {
+//    inline Uint128 operator <? (const Uint128 & a, const Uint128 & b) {
 //        return (a < b) ? a : b; };
-//    inline Uint128 operator >? (const Uint128 & a, const Uint128 & b) throw () {
+//    inline Uint128 operator >? (const Uint128 & a, const Uint128 & b) {
 //        return (a < b) ? b : a; };
 #endif
 
 // GLOBAL OPERATOR INLINES
 
-inline Uint128 operator+(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator+(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) += b;
 };
-inline Uint128 operator-(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator-(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) -= b;
 };
-inline Uint128 operator*(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator*(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) *= b;
 };
-inline Uint128 operator/(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator/(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) /= b;
 };
-inline Uint128 operator%(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator%(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) %= b;
 };
 
-inline Uint128 operator>>(const Uint128 & a, unsigned int n) throw ()
+inline Uint128 operator>>(const Uint128 & a, unsigned int n)
 {
     return Uint128(a) >>= n;
 };
-inline Uint128 operator<<(const Uint128 & a, unsigned int n) throw ()
+inline Uint128 operator<<(const Uint128 & a, unsigned int n)
 {
     return Uint128(a) <<= n;
 };
 
-inline Uint128 operator&(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator&(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) &= b;
 };
-inline Uint128 operator|(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator|(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) |= b;
 };
-inline Uint128 operator^(const Uint128 & a, const Uint128 & b) throw ()
+inline Uint128 operator^(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) ^= b;
 };
 
-inline bool operator>(const Uint128 & a, const Uint128 & b) throw ()
+inline bool operator>(const Uint128 & a, const Uint128 & b)
 {
     return   b < a;
 };
-inline bool operator<=(const Uint128 & a, const Uint128 & b) throw ()
+inline bool operator<=(const Uint128 & a, const Uint128 & b)
 {
     return !(b < a);
 };
-inline bool operator>=(const Uint128 & a, const Uint128 & b) throw ()
+inline bool operator>=(const Uint128 & a, const Uint128 & b)
 {
     return !(a < b);
 };
 
-inline bool operator!=(const Uint128 & a, const Uint128 & b) throw ()
+inline bool operator!=(const Uint128 & a, const Uint128 & b)
 {
     return !(a == b);
 };
