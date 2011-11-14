@@ -104,21 +104,21 @@ void Uint128::set(const char *sz)
     }
 }
 
-Uint128 & Uint128::operator=(const float &a)
+Uint128& Uint128::operator=(const float& a)
 {
     lo = ((uint64_t) fmodf(a, 18446744073709551616.0f));
     hi = ((uint64_t) (a / 18446744073709551616.0f));
     return *this;
 }
 
-Uint128 & Uint128::operator=(const double & a)
+Uint128& Uint128::operator=(const double& a)
 {
     lo = ((uint64_t) fmod(a, 18446744073709551616.0));
     hi = ((uint64_t) (a / 18446744073709551616.0));
     return *this;
 }
 
-Uint128 & Uint128::operator=(const long double & a)
+Uint128& Uint128::operator=(const long double& a)
 {
     lo = ((uint64_t) fmodl(a, 18446744073709551616.0l));
     hi = ((uint64_t) (a / 18446744073709551616.0l));
@@ -130,11 +130,11 @@ Uint128::Uint128(const float a)
         : lo((uint64_t) fmodf(a, 18446744073709551616.0f)),
         hi((uint64_t) (a / 18446744073709551616.0f)) {}
 
-Uint128::Uint128(const double & a)
+Uint128::Uint128(const double& a)
         : lo((uint64_t) fmod(a, 18446744073709551616.0)),
         hi((uint64_t) (a / 18446744073709551616.0)) {}
 
-Uint128::Uint128(const long double & a)
+Uint128::Uint128(const long double& a)
         : lo((uint64_t) fmodl(a, 18446744073709551616.0l)),
         hi((uint64_t) (a / 18446744073709551616.0l)) {}
 
@@ -169,7 +169,7 @@ Uint128 Uint128::operator ~ () const
     return Uint128(~lo, ~hi);
 }
 
-Uint128 & Uint128::operator++()
+Uint128& Uint128::operator++()
 {
     ++lo;
     if (!lo)
@@ -178,7 +178,7 @@ Uint128 & Uint128::operator++()
     return *this;
 }
 
-Uint128 & Uint128::operator--()
+Uint128& Uint128::operator--()
 {
     if (!lo)
         --hi;
@@ -203,7 +203,7 @@ Uint128 Uint128::operator--(int)
     return b;
 }
 
-Uint128 & Uint128::operator+=(const Uint128 & b)
+Uint128& Uint128::operator+=(const Uint128& b)
 {
     uint64_t old_lo = lo;
 
@@ -215,7 +215,7 @@ Uint128 & Uint128::operator+=(const Uint128 & b)
     return *this;
 }
 
-Uint128 & Uint128::operator*=(const Uint128 & b)
+Uint128& Uint128::operator*=(const Uint128& b)
 {
     if (!b)
         return *this = 0u;
@@ -240,7 +240,7 @@ Uint128 & Uint128::operator*=(const Uint128 & b)
 }
 
 
-Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const
+Uint128 Uint128::div(const Uint128& ds, Uint128& remainder) const
 {
     if (!ds)
         return 1u / (unsigned int) ds.lo;
@@ -314,7 +314,7 @@ void Uint128::bit(unsigned int n, bool val)
 }
 
 
-Uint128 & Uint128::operator>>=(unsigned int n)
+Uint128& Uint128::operator>>=(unsigned int n)
 {
     if (n >= 128)
     {
@@ -347,7 +347,7 @@ Uint128 & Uint128::operator>>=(unsigned int n)
     return *this;
 }
 
-Uint128 & Uint128::operator<<=(unsigned int n)
+Uint128& Uint128::operator<<=(unsigned int n)
 {
     if (n >= 128)
     {
@@ -381,21 +381,21 @@ Uint128 & Uint128::operator<<=(unsigned int n)
 }
 
 
-Uint128 & Uint128::operator=(const IPv4Address &add)
+Uint128& Uint128::operator=(const IPv4Address &add)
 {
     hi = 0;
     lo = add.getInt();
     return *this;
 }
 
-Uint128 & Uint128::operator=(const MACAddress &add)
+Uint128& Uint128::operator=(const MACAddress &add)
 {
     hi = 0;
     lo = add.getInt();
     return *this;
 }
 
-Uint128 & Uint128::operator=(const IPv6Address &add)
+Uint128& Uint128::operator=(const IPv6Address &add)
 {
     uint32 *w = const_cast<IPv6Address&>(add).words();
     uint64_t aux[4];
@@ -410,43 +410,43 @@ Uint128 & Uint128::operator=(const IPv6Address &add)
 }
 
 
-bool operator!=(const Uint128 & a, const uint32_t & b)
+bool operator!=(const Uint128& a, const uint32_t& b)
 {
     return  !(a == b);
 }
 
-bool operator!=(const uint32_t & b, const Uint128 & a)
+bool operator!=(const uint32_t& b, const Uint128& a)
 {
     return  !(a == b);
 }
 
-bool operator!=(const Uint128 & a, const uint64_t & b)
+bool operator!=(const Uint128& a, const uint64_t& b)
 {
     return  !(a == b);
 }
 
-bool operator!=(const uint64_t & b, const Uint128 & a)
+bool operator!=(const uint64_t& b, const Uint128& a)
 {
     return  !(a == b);
 }
 
 
-bool operator!=(const Uint128 & a, const int32_t & b)
+bool operator!=(const Uint128& a, const int32_t& b)
 {
     return  !(a == b);
 }
 
-bool operator!=(const int32_t & b, const Uint128 & a)
+bool operator!=(const int32_t& b, const Uint128& a)
 {
     return  !(a == b);
 }
 
-bool operator!=(const Uint128 & a, const int64_t & b)
+bool operator!=(const Uint128& a, const int64_t& b)
 {
     return  !(a == b);
 }
 
-bool operator!=(const int64_t & b, const Uint128 & a)
+bool operator!=(const int64_t& b, const Uint128& a)
 {
     return  !(a == b);
 }
