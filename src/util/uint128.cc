@@ -36,7 +36,7 @@ const char *Uint128::toString(unsigned int radix) const
         ii = ii.div(aux, r);
         unsigned int c = r.toUint();
         sz[--i] = c + ((c > 9) ? 'A' - 10 : '0');
-    };
+    }
 
     return &sz[i];
 }
@@ -57,7 +57,7 @@ void Uint128::set(const char *sz)
     {
         ++i;
         minus = true;
-    };
+    }
 
     if (sz [i] == '0')
     {
@@ -67,8 +67,8 @@ void Uint128::set(const char *sz)
         {
             radix = 16;
             ++i;
-        };
-    };
+        }
+    }
 
     for (; i < strlen(sz); ++i)
     {
@@ -87,7 +87,7 @@ void Uint128::set(const char *sz)
             break;
         (*this) *= Uint128(radix);
         (*this) += Uint128(n);
-    };
+    }
 
     if (minus)
     {
@@ -119,33 +119,33 @@ Uint128 & Uint128::operator=(const long double & a)
 
 Uint128::Uint128(const float a)
         : lo((uint64_t) fmodf(a, 18446744073709551616.0f)),
-        hi((uint64_t) (a / 18446744073709551616.0f)) {};
+        hi((uint64_t) (a / 18446744073709551616.0f)) {}
 
 Uint128::Uint128(const double & a)
         : lo((uint64_t) fmod(a, 18446744073709551616.0)),
-        hi((uint64_t) (a / 18446744073709551616.0)) {};
+        hi((uint64_t) (a / 18446744073709551616.0)) {}
 
 Uint128::Uint128(const long double & a)
         : lo((uint64_t) fmodl(a, 18446744073709551616.0l)),
-        hi((uint64_t) (a / 18446744073709551616.0l)) {};
+        hi((uint64_t) (a / 18446744073709551616.0l)) {}
 
 float Uint128::toFloat() const
 {
     return (float) hi * 18446744073709551616.0f
            + (float) lo;
-};
+}
 
 double Uint128::toDouble() const
 {
     return (double) hi * 18446744073709551616.0
            + (double) lo;
-};
+}
 
 long double Uint128::toLongDouble() const
 {
     return (long double) hi * 18446744073709551616.0l
            + (long double) lo;
-};
+}
 
 Uint128 Uint128::operator-() const
 {
@@ -153,12 +153,12 @@ Uint128 Uint128::operator-() const
         return Uint128(0ull, -hi);
     else
         return Uint128(-lo, ~hi);
-};
+}
 
 Uint128 Uint128::operator ~ () const
 {
     return Uint128(~lo, ~hi);
-};
+}
 
 Uint128 & Uint128::operator++()
 {
@@ -167,7 +167,7 @@ Uint128 & Uint128::operator++()
         ++hi;
 
     return *this;
-};
+}
 
 Uint128 & Uint128::operator--()
 {
@@ -176,7 +176,7 @@ Uint128 & Uint128::operator--()
     --lo;
 
     return *this;
-};
+}
 
 Uint128 Uint128::operator++(int)
 {
@@ -184,7 +184,7 @@ Uint128 Uint128::operator++(int)
     ++ *this;
 
     return b;
-};
+}
 
 Uint128 Uint128::operator--(int)
 {
@@ -192,7 +192,7 @@ Uint128 Uint128::operator--(int)
     -- *this;
 
     return b;
-};
+}
 
 Uint128 & Uint128::operator+=(const Uint128 & b)
 {
@@ -204,7 +204,7 @@ Uint128 & Uint128::operator+=(const Uint128 & b)
         ++hi;
 
     return *this;
-};
+}
 
 Uint128 & Uint128::operator*=(const Uint128 & b)
 {
@@ -225,10 +225,10 @@ Uint128 & Uint128::operator*=(const Uint128 & b)
             *this += a << i;
 
         t >>= 1;
-    };
+    }
 
     return *this;
-};
+}
 
 
 Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const
@@ -243,11 +243,11 @@ Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const
     {
         remainder = *this;
         return (Uint128)0;
-    };
+    }
 
     Uint128 r = (Uint128) 0;
     Uint128 q = (Uint128) 0;
-//    while (dd >= ds) { dd -= ds; q += 1; }; // extreme slow version
+//    while (dd >= ds) { dd -= ds; q += 1; } // extreme slow version
 
     uint32_t b = 127;
     while (r < ds)
@@ -255,7 +255,7 @@ Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const
         r <<= 1;
         if (dd.bit(b--))
             r.lo |= 1;
-    };
+    }
     ++b;
 
     while (true)
@@ -272,11 +272,11 @@ Uint128 Uint128::div(const Uint128 & ds, Uint128 & remainder) const
         {
             r -= ds;
             q.bit(b, true);
-        };
+        }
 
     remainder = r;
     return q;
-};
+}
 
 bool Uint128::bit(unsigned int n) const
 {
@@ -285,7 +285,7 @@ bool Uint128::bit(unsigned int n) const
     if (n < 128)
         return hi & (1ull << (n - 64));
     return false;
-};
+}
 
 void Uint128::bit(unsigned int n, bool val)
 {
@@ -301,8 +301,8 @@ void Uint128::bit(unsigned int n, bool val)
     {
         if (n < 64) lo &= ~(1ull << n);
         else hi &= ~(1ull << (n - 64));
-    };
-};
+    }
+}
 
 
 Uint128 & Uint128::operator>>=(unsigned int n)
@@ -318,7 +318,7 @@ Uint128 & Uint128::operator>>=(unsigned int n)
         lo = hi >> (n-64);
         hi = 0ull;
         return *this;
-    };
+    }
 
     if (n)
     {
@@ -333,10 +333,10 @@ Uint128 & Uint128::operator>>=(unsigned int n)
 
         // and finally shift also high qword
         hi >>= n;
-    };
+    }
 
     return *this;
-};
+}
 
 Uint128 & Uint128::operator<<=(unsigned int n)
 {
@@ -351,7 +351,7 @@ Uint128 & Uint128::operator<<=(unsigned int n)
         hi = lo << (n-64);
         lo = 0ull;
         return *this;
-    };
+    }
 
     if (n)
     {
@@ -366,10 +366,10 @@ Uint128 & Uint128::operator<<=(unsigned int n)
 
         // and finally shift also low qword
         lo <<= n;
-    };
+    }
 
     return *this;
-};
+}
 
 
 Uint128 & Uint128::operator=(const IPv4Address &add)

@@ -31,7 +31,7 @@ class Uint128
     uint64_t hi;
 
     //inline Uint128 (const unsigned __int64 & a, const unsigned __int64 & b)
-//            : lo (a), hi (b) {};
+//            : lo (a), hi (b) {}
     inline Uint128(const uint64_t & a, const uint64_t & b)  {lo = a; hi = b;}
   protected:
     // Some global operator functions must be friends
@@ -75,10 +75,10 @@ class Uint128
     Uint128(const Uint128 & a) : lo(a.lo), hi(a.hi) {}
 
     // Note: int / unsigned int operators conflict with other integer types with at least GCC and MSVC
-    // inline Uint128 (const unsigned int & a) : lo (a), hi (0ull) {};
-    // inline Uint128 (const int & a) : lo (a), hi (0ull) {};
+    // inline Uint128 (const unsigned int & a) : lo (a), hi (0ull) {}
+    // inline Uint128 (const int & a) : lo (a), hi (0ull) {}
 
-    //   inline Uint128 (const unsigned __int64 & a) : lo (a), hi (0ull) {};
+    //   inline Uint128 (const unsigned __int64 & a) : lo (a), hi (0ull) {}
     Uint128(const int32_t & a) : lo(a), hi(0) {}
     Uint128(const uint32_t & a) : lo(a), hi(0) {}
     Uint128(const int64_t & a) : lo(a), hi(0) {}
@@ -131,34 +131,34 @@ class Uint128
 
     Uint128 & operator>>=(unsigned int n);
     Uint128 & operator<<=(unsigned int n);
-    Uint128 & operator|=(const Uint128 & b) { hi |= b.hi; lo |= b.lo; return *this; };
+    Uint128 & operator|=(const Uint128 & b) { hi |= b.hi; lo |= b.lo; return *this; }
 
 
-    Uint128 & operator&=(const Uint128 & b) { hi &= b.hi; lo &= b.lo; return *this; };
-    Uint128 & operator^=(const Uint128 & b) { hi ^= b.hi; lo ^= b.lo; return *this; };
+    Uint128 & operator&=(const Uint128 & b) { hi &= b.hi; lo &= b.lo; return *this; }
+    Uint128 & operator^=(const Uint128 & b) { hi ^= b.hi; lo ^= b.lo; return *this; }
 
     // Inline simple operators
-    inline const Uint128 & operator+() const { return *this; };
+    inline const Uint128 & operator+() const { return *this; }
 
     // Rest of inline operators
     inline Uint128 & operator-=(const Uint128 & b)
     {
         return *this += (-b);
-    };
+    }
     inline Uint128 & operator/=(const Uint128 & b)
     {
         Uint128 dummy;
         *this = this->div(b, dummy);
         return *this;
-    };
+    }
     inline Uint128 & operator%=(const Uint128 & b)
     {
         this->div(b, *this);
         return *this;
-    };
+    }
     // Common methods
-    unsigned int toUint() const {return (unsigned int) lo;};
-    uint64_t toUint64() const {return lo;};
+    unsigned int toUint() const {return (unsigned int) lo;}
+    uint64_t toUint64() const {return lo;}
     const char *toString(unsigned int radix = 10) const;
     float toFloat() const;
     double toDouble() const;
@@ -234,25 +234,25 @@ bool operator<(const Uint128 & a, const Uint128 & b);
 inline bool operator==(const Uint128 & a, const Uint128 & b)
 {
     return a.hi == b.hi && a.lo == b.lo;
-};
+}
 
 
 inline bool operator||(const Uint128 & a, const Uint128 & b)
 {
     return (a.hi || a.lo) || (b.hi || b.lo);
-};
+}
 
 inline bool operator&&(const Uint128 & a, const Uint128 & b)
 {
     return (a.hi || a.lo) && (b.hi || b.lo);
-};
+}
 
 
 #ifdef __GNUC__
 //    inline Uint128 operator <? (const Uint128 & a, const Uint128 & b) {
-//        return (a < b) ? a : b; };
+//        return (a < b) ? a : b; }
 //    inline Uint128 operator >? (const Uint128 & a, const Uint128 & b) {
-//        return (a < b) ? b : a; };
+//        return (a < b) ? b : a; }
 #endif
 
 // GLOBAL OPERATOR INLINES
@@ -260,108 +260,108 @@ inline bool operator&&(const Uint128 & a, const Uint128 & b)
 inline bool operator<(const Uint128 & a, const Uint128 & b)
 {
     return (a.hi < b.hi) || ((a.hi == b.hi) && (a.lo < b.lo));
-};
+}
 
 inline bool operator==(const Uint128 & a, const uint32_t & b)
 {
     return (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline bool operator==(const uint32_t & b, const Uint128 & a)
 {
     return (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline bool operator==(const Uint128 & a, const uint64_t & b)
 {
     return (a.hi == 0) && (a.lo == b);
-};
+}
 
 inline bool operator==(const uint64_t & b, const Uint128 & a)
 {
     return (a.hi == 0) && (a.lo == b);
-};
+}
 
 inline bool operator==(const Uint128 & a, const int32_t & b)
 {
     return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline bool operator==(const int32_t & b, const Uint128 & a)
 {
     return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline bool operator==(const Uint128 & a, const int64_t & b)
 {
     return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline bool operator==(const int64_t & b, const Uint128 & a)
 {
     return (b >= 0) && (a.hi == 0) && (a.lo == (uint64_t)b);
-};
+}
 
 inline Uint128 operator+(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) += b;
-};
+}
 inline Uint128 operator-(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) -= b;
-};
+}
 inline Uint128 operator*(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) *= b;
-};
+}
 inline Uint128 operator/(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) /= b;
-};
+}
 inline Uint128 operator%(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) %= b;
-};
+}
 
 inline Uint128 operator>>(const Uint128 & a, unsigned int n)
 {
     return Uint128(a) >>= n;
-};
+}
 inline Uint128 operator<<(const Uint128 & a, unsigned int n)
 {
     return Uint128(a) <<= n;
-};
+}
 
 inline Uint128 operator&(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) &= b;
-};
+}
 inline Uint128 operator|(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) |= b;
-};
+}
 inline Uint128 operator^(const Uint128 & a, const Uint128 & b)
 {
     return Uint128(a) ^= b;
-};
+}
 
 inline bool operator>(const Uint128 & a, const Uint128 & b)
 {
     return   b < a;
-};
+}
 inline bool operator<=(const Uint128 & a, const Uint128 & b)
 {
     return !(b < a);
-};
+}
 inline bool operator>=(const Uint128 & a, const Uint128 & b)
 {
     return !(a < b);
-};
+}
 
 inline bool operator!=(const Uint128 & a, const Uint128 & b)
 {
     return !(a == b);
-};
+}
 
 inline std::ostream& operator<<(std::ostream& os, const Uint128& val)
 {

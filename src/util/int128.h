@@ -40,20 +40,20 @@ class Int128
     void set(const char *sz);
 
     // Constructors
-    inline Int128() {};
-    inline Int128(const Int128 & a) : lo(a.lo), hi(a.hi) {};
+    inline Int128() {}
+    inline Int128(const Int128 & a) : lo(a.lo), hi(a.hi) {}
 
-    inline Int128(const uint32_t & a) : lo(a), hi(0ll) {};
+    inline Int128(const uint32_t & a) : lo(a), hi(0ll) {}
     inline Int128(const int32_t & a) : lo(a), hi(0ll)
     {
         if (a < 0) hi = -1ll;
-    };
+    }
 
-    inline Int128(const uint64_t & a) : lo(a), hi(0ll) {};
+    inline Int128(const uint64_t & a) : lo(a), hi(0ll) {}
     inline Int128(const int64_t & a) : lo(a), hi(0ll)
     {
         if (a < 0) hi = -1ll;
-    };
+    }
 
     Int128(const float a);
     Int128(const double & a);
@@ -79,7 +79,7 @@ class Int128
   private:
     // Special internal constructors
     Int128(const uint64_t & a, const int64_t & b)
-            : lo(a), hi(b) {};
+            : lo(a), hi(b) {}
 
   public:
     // Operators
@@ -104,28 +104,28 @@ class Int128
     Int128 & operator^=(const Int128 & b) { hi ^= b.hi; lo ^= b.lo; return *this; }
 
     // Inline simple operators
-    inline const Int128 & operator+() const { return *this; };
+    inline const Int128 & operator+() const { return *this; }
 
     // Rest of inline operators
     inline Int128 & operator-=(const Int128 & b)
     {
         return *this += (-b);
-    };
+    }
     inline Int128 & operator/=(const Int128 & b)
     {
         Int128 dummy;
         *this = this->div(b, dummy);
         return *this;
-    };
+    }
     inline Int128 & operator%=(const Int128 & b)
     {
         this->div(b, *this);
         return *this;
-    };
+    }
 
     // Common methods
-    int toInt() const {return (int) lo; };
-    int64_t toInt64() const {  return (int64_t) lo; };
+    int toInt() const {return (int) lo; }
+    int64_t toInt64() const {  return (int64_t) lo; }
 
     const char *toString(uint32_t radix = 10) const;
     float toFloat() const;
@@ -159,23 +159,23 @@ bool operator<(const Int128 & a, const Int128 & b);
 inline bool operator==(const Int128 & a, const Int128 & b)
 {
     return a.hi == b.hi && a.lo == b.lo;
-};
+}
 
 inline bool operator&&(const Int128 & a, const Int128 & b)
 {
     return (a.hi || a.lo) && (b.hi || b.lo);
-};
+}
 
 inline bool operator||(const Int128 & a, const Int128 & b)
 {
     return (a.hi || a.lo) || (b.hi || b.lo);
-};
+}
 
 #ifdef __GNUC__
 // inline Int128 operator <? (const Int128 & a, const Int128 & b) {
-//     return (a < b) ? a : b; };
+//     return (a < b) ? a : b; }
 // inline Int128 operator >? (const Int128 & a, const Int128 & b) {
-//     return (a < b) ? b : a; };
+//     return (a < b) ? b : a; }
 #endif
 
 // GLOBAL OPERATOR INLINES
@@ -183,62 +183,62 @@ inline bool operator||(const Int128 & a, const Int128 & b)
 inline Int128 operator+(const Int128 & a, const Int128 & b)
 {
     return Int128(a) += b;
-};
+}
 inline Int128 operator-(const Int128 & a, const Int128 & b)
 {
     return Int128(a) -= b;
-};
+}
 inline Int128 operator*(const Int128 & a, const Int128 & b)
 {
     return Int128(a) *= b;
-};
+}
 inline Int128 operator/(const Int128 & a, const Int128 & b)
 {
     return Int128(a) /= b;
-};
+}
 inline Int128 operator%(const Int128 & a, const Int128 & b)
 {
     return Int128(a) %= b;
-};
+}
 
 inline Int128 operator>>(const Int128 & a, unsigned int n)
 {
     return Int128(a) >>= n;
-};
+}
 inline Int128 operator<<(const Int128 & a, unsigned int n)
 {
     return Int128(a) <<= n;
-};
+}
 
 inline Int128 operator&(const Int128 & a, const Int128 & b)
 {
     return Int128(a) &= b;
-};
+}
 inline Int128 operator|(const Int128 & a, const Int128 & b)
 {
     return Int128(a) |= b;
-};
+}
 inline Int128 operator^(const Int128 & a, const Int128 & b)
 {
     return Int128(a) ^= b;
-};
+}
 
 inline bool operator>(const Int128 & a, const Int128 & b)
 {
     return   b < a;
-};
+}
 inline bool operator<=(const Int128 & a, const Int128 & b)
 {
     return !(b < a);
-};
+}
 inline bool operator>=(const Int128 & a, const Int128 & b)
 {
     return !(a < b);
-};
+}
 inline bool operator!=(const Int128 & a, const Int128 & b)
 {
     return !(a == b);
-};
+}
 
 
 // MISC
