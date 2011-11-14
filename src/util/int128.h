@@ -46,13 +46,13 @@ class int128
     inline int128(const uint32_t & a) throw () : lo(a), hi(0ll) {};
     inline int128(const int32_t & a) throw () : lo(a), hi(0ll)
     {
-        if (a < 0) this->hi = -1ll;
+        if (a < 0) hi = -1ll;
     };
 
     inline int128(const uint64_t & a) throw () : lo(a), hi(0ll) {};
     inline int128(const int64_t & a) throw () : lo(a), hi(0ll)
     {
-        if (a < 0) this->hi = -1ll;
+        if (a < 0) hi = -1ll;
     };
 
     int128(const float a) throw ();
@@ -124,8 +124,8 @@ class int128
     };
 
     // Common methods
-    int toInt() const throw () {return (int) this->lo; };
-    int64_t toInt64() const throw () {  return (int64_t) this->lo; };
+    int toInt() const throw () {return (int) lo; };
+    int64_t toInt64() const throw () {  return (int64_t) lo; };
 
     const char *toString(uint32_t radix = 10) const throw ();
     float toFloat() const throw ();

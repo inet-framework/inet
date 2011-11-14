@@ -107,14 +107,14 @@ int128::int128(const long double & a) throw ()
 
 float int128::toFloat() const throw ()
 {
-    return (float) this->hi * 18446744073709551616.0f
-           + (float) this->lo;
+    return (float) hi * 18446744073709551616.0f
+           + (float) lo;
 };
 
 double int128::toDouble() const throw ()
 {
-    return (double) this->hi * 18446744073709551616.0
-           + (double) this->lo;
+    return (double) hi * 18446744073709551616.0
+           + (double) lo;
 };
 
 
@@ -142,37 +142,37 @@ int128 & int128::operator=(const long double & a) throw ()
 
 long double int128::toLongDouble() const throw ()
 {
-    return (long double) this->hi * 18446744073709551616.0l
-           + (long double) this->lo;
+    return (long double) hi * 18446744073709551616.0l
+           + (long double) lo;
 };
 
 int128 int128::operator-() const throw ()
 {
-    if (this->lo == 0)
-        return int128(0ull, -this->hi);
+    if (lo == 0)
+        return int128(0ull, -hi);
     else
-        return int128(-this->lo, ~this->hi);
+        return int128(-lo, ~hi);
 };
 
 int128 int128::operator ~ () const throw ()
 {
-    return int128(~this->lo, ~this->hi);
+    return int128(~lo, ~hi);
 };
 
 int128 & int128::operator++()
 {
-    ++this->lo;
-    if (!this->lo)
-        ++this->hi;
+    ++lo;
+    if (!lo)
+        ++hi;
 
     return *this;
 };
 
 int128 & int128::operator--()
 {
-    if (!this->lo)
-        --this->hi;
-    --this->lo;
+    if (!lo)
+        --hi;
+    --lo;
 
     return *this;
 };
@@ -195,11 +195,11 @@ int128 int128::operator--(int)
 
 int128 & int128::operator+=(const int128 & b) throw ()
 {
-    uint64_t old_lo = this->lo;
+    uint64_t old_lo = lo;
 
-    this->lo += b.lo;
-    this->hi += b.hi;
-    if (this->lo < old_lo)
+    lo += b.lo;
+    hi += b.hi;
+    if (lo < old_lo)
         ++hi;
 
     return *this;
@@ -215,8 +215,8 @@ int128 & int128::operator*=(const int128 & b) throw ()
     int128 a(*this);
     int128 t(b);
 
-    this->lo = 0ull;
-    this->hi = 0ll;
+    lo = 0ull;
+    hi = 0ll;
 
     for (unsigned int i = 0; i < 128; ++i)
     {
@@ -287,12 +287,12 @@ int128 int128::div(const int128 & divisor, int128 & remainder) const throw ()
 bool int128::bit(unsigned int n) const throw ()
 {
     if (n >= 128)
-        return this->hi < 0;
+        return hi < 0;
 
     if (n < 64)
-        return this->lo & (1ull << n);
+        return lo & (1ull << n);
     else
-        return this->hi & (1ull << (n - 64));
+        return hi & (1ull << (n - 64));
 };
 
 void int128::bit(unsigned int n, bool val) throw ()
@@ -302,13 +302,13 @@ void int128::bit(unsigned int n, bool val) throw ()
 
     if (val)
     {
-        if (n < 64) this->lo |= (1ull << n);
-        else this->hi |= (1ull << (n - 64));
+        if (n < 64) lo |= (1ull << n);
+        else hi |= (1ull << (n - 64));
     }
     else
     {
-        if (n < 64) this->lo &= ~(1ull << n);
-        else this->hi &= ~(1ull << (n - 64));
+        if (n < 64) lo &= ~(1ull << n);
+        else hi &= ~(1ull << (n - 64));
     };
 };
 
@@ -317,31 +317,31 @@ int128 & int128::operator>>=(unsigned int n) throw ()
 {
     if (n >= 128)
     {
-        this->hi = (this->hi < 0) ? -1ll : 0ll;
-        this->lo = this->hi;
+        hi = (hi < 0) ? -1ll : 0ll;
+        lo = hi;
         return *this;
     }
 
     if (n >= 64)
     {
-        this->lo = this->hi >> (n-64);
-        this->hi = (this->hi < 0) ? -1ll : 0ll;
+        lo = hi >> (n-64);
+        hi = (hi < 0) ? -1ll : 0ll;
         return *this;
     };
 
     if (n)
     {
         // shift low qword
-        this->lo >>= n;
+        lo >>= n;
 
         // get lower N bits of high qword
         uint64_t mask = (1ull << n) - 1;
 
         // and add them to low qword
-        this->lo |= (this->hi & mask) << (64 - n);
+        lo |= (hi & mask) << (64 - n);
 
         // and finally shift also high qword
-        this->hi >>= n;
+        hi >>= n;
     };
 
     return *this;
@@ -351,30 +351,30 @@ int128 & int128::operator<<=(unsigned int n) throw ()
 {
     if (n >= 128)
     {
-        this->lo = this->hi = 0;
+        lo = hi = 0;
         return *this;
     }
 
     if (n >= 64)
     {
-        this->hi = this->lo << (n-64);
-        this->lo = 0ull;
+        hi = lo << (n-64);
+        lo = 0ull;
         return *this;
     };
 
     if (n)
     {
         // shift high qword
-        this->hi <<= n;
+        hi <<= n;
 
         // get higher N bits of low qword
         uint64_t mask = ~((1ull << (64 - n)) - 1);
 
         // and add them to high qword
-        this->hi |= (this->lo & mask) >> (64 - n);
+        hi |= (lo & mask) >> (64 - n);
 
         // and finally shift also low qword
-        this->lo <<= n;
+        lo <<= n;
     };
 
     return *this;
@@ -382,29 +382,29 @@ int128 & int128::operator<<=(unsigned int n) throw ()
 
 bool int128::operator!() const throw ()
 {
-    return !(this->hi || this->lo);
+    return !(hi || lo);
 };
 
 int128 & int128::operator|=(const int128 & b) throw ()
 {
-    this->hi |= b.hi;
-    this->lo |= b.lo;
+    hi |= b.hi;
+    lo |= b.lo;
 
     return *this;
 };
 
 int128 & int128::operator&=(const int128 & b) throw ()
 {
-    this->hi &= b.hi;
-    this->lo &= b.lo;
+    hi &= b.hi;
+    lo &= b.lo;
 
     return *this;
 };
 
 int128 & int128::operator^=(const int128 & b) throw ()
 {
-    this->hi ^= b.hi;
-    this->lo ^= b.lo;
+    hi ^= b.hi;
+    lo ^= b.lo;
 
     return *this;
 };

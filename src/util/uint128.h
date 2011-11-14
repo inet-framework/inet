@@ -155,8 +155,8 @@ class Uint128
         return *this;
     };
     // Common methods
-    unsigned int toUint() const throw () {return (unsigned int) this->lo;};
-    uint64_t toUint64() const throw () {return this->lo;};
+    unsigned int toUint() const throw () {return (unsigned int) lo;};
+    uint64_t toUint64() const throw () {return lo;};
     const char *toString(unsigned int radix = 10) const throw ();
     float toFloat() const throw ();
     double toDouble() const throw ();
