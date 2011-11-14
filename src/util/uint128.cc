@@ -293,7 +293,9 @@ Uint128 & Uint128::operator+=(const Uint128 & b) throw ()
     uint64_t old_lo = this->lo;
 
     this->lo += b.lo;
-    this->hi += b.hi + (this->lo < old_lo);
+    this->hi += b.hi;
+    if(this->lo < old_lo)
+        ++hi;
 
     return *this;
 };
