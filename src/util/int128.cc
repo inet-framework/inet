@@ -32,7 +32,8 @@ const char * int128::toString(uint32_t radix) const throw ()
     while (!!ii && i)
     {
         ii = ii.div(aux, r);
-        sz [--i] = r.toInt() + ((r.toInt() > 9) ? 'A' - 10 : '0');
+        unsigned int c = r.toInt();
+        sz[--i] = c + ((c > 9) ? 'A' - 10 : '0');
     };
 
     if (*this < 0)

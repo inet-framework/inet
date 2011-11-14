@@ -70,7 +70,8 @@ const char * Uint128::toString(unsigned int radix) const throw ()
     while (!!ii && i)
     {
         ii = ii.div(aux, r);
-        sz [--i] = r.toUint() + ((r.toUint() > 9) ? 'A' - 10 : '0');
+        unsigned int c = r.toUint();
+        sz [--i] = c + ((c > 9) ? 'A' - 10 : '0');
     };
 
     return &sz [i];
