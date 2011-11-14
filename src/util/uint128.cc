@@ -409,9 +409,9 @@ Uint128 & Uint128::operator>>=(unsigned int n) throw ()
 
     if (n >= 64)
     {
-        n -= 64;
-        this->lo = this->hi;
+        this->lo = this->hi >> (n-64);
         this->hi = 0ull;
+        return *this;
     };
 
     if (n)
@@ -442,9 +442,9 @@ Uint128 & Uint128::operator<<=(unsigned int n) throw ()
 
     if (n >= 64)
     {
-        n -= 64;
-        this->hi = this->lo;
+        this->hi = this->lo << (n-64);
         this->lo = 0ull;
+        return *this;
     };
 
     if (n)
