@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Babos
+// Copyright (C) 2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,25 +22,17 @@ import inet.applications.IUDPApp;
 
 
 //
-// Similar to ~UDPBasicApp, but it sends back the packet after reception.
+// Listens on an UDP port, and sends back each received packet to its sender.
+// Note: when used together with ~UDPBasicApp, ~UDPBasicApp's "received packet
+// lifetime" statistic will record round-trip times.
 //
 simple UDPEchoApp like IUDPApp
 {
     parameters:
-        int localPort = default(-1);  // local port (-1: use ephemeral port)
-        string destAddresses = default(""); // list of destination IP addresses, separated by spaces
-        int destPort;  // destination port 
-        volatile int messageLength @unit(B); // length of messages to generate, int bytes
-        double startTime @unit(s) = default(1s); // application start time (start of the first packet)
-        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
-        volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
+        int localPort;  // local port to listen on
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
-        @signal[roundTripTime](type=simtime_t);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[roundTripTime](title="Round trip time"; unit=s; record=histogram,stats,vector);
+        @signal[pk](type=cPacket);
+        @statistic[echoedPk](title="Echoed Packets"; source=pk; record="count,vector(1)?"; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Babos
+// Copyright (C) 2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,71 +17,73 @@
 
 
 #include "UDPEchoApp.h"
-
-#include "UDPEchoAppMsg_m.h"
 #include "UDPControlInfo_m.h"
 
 
 Define_Module(UDPEchoApp);
 
-simsignal_t UDPEchoApp::roundTripTimeSignal = SIMSIGNAL_NULL;
+simsignal_t UDPEchoApp::pkSignal = SIMSIGNAL_NULL;
 
 void UDPEchoApp::initialize(int stage)
 {
-    UDPBasicApp::initialize(stage);
-
     if (stage == 0)
     {
-        roundTripTimeSignal = registerSignal("roundTripTime");
+        // set up UDP socket
+        socket.setOutputGate(gate("udpOut"));
+        int localPort = par("localPort");
+        socket.bind(localPort);
+
+        // init statistics
+        pkSignal = registerSignal("pk");
+        numEchoed = 0;
+        WATCH(numEchoed);
+
+        if (ev.isGUI())
+            updateDisplay();
     }
+}
+
+void UDPEchoApp::handleMessage(cMessage *msg)
+{
+    cPacket *pk = PK(msg);
+
+    if (pk->getKind() == UDP_I_ERROR)
+    {
+        // ICMP error report -- discard it
+        delete pk;
+    }
+    else if (pk->getKind() == UDP_I_DATA)
+    {
+        // statistics
+        numEchoed++;
+        emit(pkSignal, pk);
+
+        // determine its source address/port
+        UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
+        IPvXAddress srcAddress = ctrl->getSrcAddr();
+        int srcPort = ctrl->getSrcPort();
+        delete ctrl;
+
+        // send back
+        socket.sendTo(pk, srcAddress, srcPort);
+
+        if (ev.isGUI())
+            updateDisplay();
+    }
+    else
+    {
+        error("Packet received with unexpected message kind = %d", pk->getKind());
+    }
+}
+
+void UDPEchoApp::updateDisplay()
+{
+    char buf[40];
+    sprintf(buf, "echoed: %d pks", numEchoed);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void UDPEchoApp::finish()
 {
-}
-
-cPacket *UDPEchoApp::createPacket()
-{
-    char msgName[32];
-    sprintf(msgName, "UDPEcho-%d", counter++);
-
-    UDPEchoAppMsg *message = new UDPEchoAppMsg(msgName);
-    message->setByteLength(par("messageLength").longValue());
-
-    return message;
-}
-
-void UDPEchoApp::processPacket(cPacket *msg)
-{
-    if (msg->getKind() == UDP_I_ERROR)
-    {
-        delete msg;
-        return;
-    }
-
-    UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
-    emit(rcvdPkSignal, packet);
-
-    if (packet->getIsRequest())
-    {
-        // send back as response
-        packet->setIsRequest(false);
-        UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-        IPvXAddress srcAddr = ctrl->getSrcAddr();
-        int srcPort = ctrl->getSrcPort();
-        delete ctrl;
-
-        emit(sentPkSignal, packet);
-        socket.sendTo(packet, srcAddr, srcPort);
-    }
-    else
-    {
-        // response packet: compute round-trip time
-        simtime_t rtt = simTime() - packet->getCreationTime();
-        EV << "RTT: " << rtt << "\n";
-        emit(roundTripTimeSignal, rtt);
-        delete msg;
-    }
-    numReceived++;
 }
 

@@ -1,3 +1,6 @@
+TODO: examples/ospfv2/areas does not work: the UDP apps in H3 keep sending, but never receive answer; seems like
+      sent packets cannot even leave H3 (they are queued up in ARP, due to "address resolution pending")
+
 TODO: TCP,UDP,SCTP: Need revision for PORT_ANY usage:
       What will the PORT_ANY value: -1 or 0.
       Where do replace from PORT_ANY to a valid port: in TCPSocket or in
