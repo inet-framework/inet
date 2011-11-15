@@ -40,12 +40,12 @@ simple UDPBasicApp like IUDPApp
 {
     parameters:
         int localPort = default(-1);  // local port (-1: use ephemeral port)
+        string destAddresses = default(""); // list of IP addresses, separated by spaces
         int destPort;
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
         double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
         volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of IP addresses, separated by spaces
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
