@@ -137,6 +137,8 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     const struct ip *ip = (const struct ip *) buf;
     unsigned int totalLength, headerLength;
 
+    if (ip->ip_v != IPVERSION)
+        throw cRuntimeError("parse(): buffer not contains an IPv4 packet");
     dest->setVersion(ip->ip_v);
     dest->setHeaderLength(IP_HEADER_BYTES);
     dest->setSrcAddress(ntohl(ip->ip_src.s_addr));
