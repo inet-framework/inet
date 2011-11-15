@@ -80,7 +80,7 @@ void IPv6Datagram::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
 
 int IPv6Datagram::calculateHeaderByteLength() const
 {
-    int len = 40;
+    int len = IPv6_HEADER_BYTES;
     for (unsigned int i=0; i<extensionHeaders.size(); i++)
         len += extensionHeaders[i]->getByteLength();
     return len;

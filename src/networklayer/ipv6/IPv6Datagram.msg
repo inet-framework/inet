@@ -21,9 +21,13 @@ cplusplus {{
 #include <iostream>
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
+
 class IPv6ExtensionHeader;
 typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
+
+// default IPv6 header length: 40 bytes
+const int IPv6_HEADER_BYTES = 40;
 }}
 
 

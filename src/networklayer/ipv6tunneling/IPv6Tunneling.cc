@@ -86,7 +86,7 @@ void IPv6Tunneling::handleMessage(cMessage* msg)
 }
 
 IPv6Tunneling::Tunnel::Tunnel(const IPv6Address& _entry, const IPv6Address& _exit, const IPv6Address& _destTrigger)
-    :entry(_entry), exit(_exit), tunnelMTU(IPv6_MIN_MTU - 40), tunnelType(SPLIT), destTrigger(_destTrigger)
+    :entry(_entry), exit(_exit), tunnelMTU(IPv6_MIN_MTU - 40), tunnelType(SPLIT), destTrigger(_destTrigger)     //FIXME 40 ==> IPv6_HEADER_BYTES ?
 {
 }
 
@@ -149,7 +149,7 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
 
         // 6.7
         // TODO perform path MTU on link (interface resolved via exit address)
-        tunnels[vIfIndexTop].tunnelMTU = IPv6_MIN_MTU - 40;
+        tunnels[vIfIndexTop].tunnelMTU = IPv6_MIN_MTU - 40;     //FIXME 40 ==> IPv6_HEADER_BYTES ?
 
         EV << "Tunneling: Created tunnel with entry=" << entry << ", exit=" << exit
            << " and trigger=" << destTrigger << endl;

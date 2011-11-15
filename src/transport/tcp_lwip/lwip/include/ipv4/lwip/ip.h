@@ -49,6 +49,7 @@ extern "C" {
 
 //#define IP_HLEN 20
 #define IP_HLEN ((addr->addr.isIPv6()) ? 40 : 20)
+                                        // IPv6_HEADER_BYTES : IP_HEADER_BYTES
 
 #define IP_PROTO_ICMP    1
 #define IP_PROTO_UDP     17
