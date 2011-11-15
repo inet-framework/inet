@@ -19,7 +19,7 @@ package inet.util;
 //
 // Provides traffic generator - like functionality
 //
-moduleinterface TrafficGenerator {
+moduleinterface ITrafficGenerator {
     gates:
         output out;
 }
