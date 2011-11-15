@@ -595,4 +595,32 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="PcapTrafGen"
+        name="PcapTrafGen"
+        description = "Components for generate traffic from pcap files."
+        initiallyEnabled = "false"
+        requires = "IPv4"
+        labels = "pcap"
+        nedPackages = "
+                       inet.util.pcaptrafgen
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="PcapTrafGen_examples"
+        name="PcapTrafGen examples"
+        description = "PcapTrafGen examples"
+        initiallyEnabled = "false"
+        requires = "PcapTrafGen TCP_INET PPP"
+        labels = "examples pcap"
+        nedPackages = "
+                       inet.examples.pcaptrafgen
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
