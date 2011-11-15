@@ -25,12 +25,6 @@ unsigned int MACAddress::autoAddressCtr;
 const MACAddress MACAddress::UNSPECIFIED_ADDRESS;
 const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 
-MACAddress& MACAddress::operator=(const MACAddress& other)
-{
-    address = other.address;
-    return *this;
-}
-
 unsigned char MACAddress::getAddressByte(unsigned int k) const
 {
     if (k>=MAC_ADDRESS_SIZE) throw cRuntimeError("Array of size 6 indexed with %d", k);
