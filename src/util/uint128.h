@@ -30,10 +30,6 @@
   Modifications: Alfonso Ariza Quintana, Zoltan Bojthe et al.
 */
 
-#include <exception>
-#include <cstdlib>
-#include <cstdio>
-#include <new>
 
 #include <IPv6Address.h>
 #include <IPv4Address.h>

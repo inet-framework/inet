@@ -18,8 +18,6 @@
  * distribution.
  */
 
-#include <memory>
-#include <cmath>
 
 #include "uint128.h"
 

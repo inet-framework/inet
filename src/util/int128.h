@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2005 Jan Ringoš, www.ringos.cz
+ * Copyright (c) 2005 Jan RingoÂš, www.ringos.cz
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the author be held liable for any damages arising from the
@@ -30,11 +30,8 @@
   Modifications: Alfonso Ariza Quintana, Zoltan Bojthe et al.
 */
 
-#include <exception>
-#include <cstdlib>
-#include <cstdio>
-#include <new>
-#include <IPv4Address.h>
+
+#include "IPv4Address.h"
 
 // CLASS
 
