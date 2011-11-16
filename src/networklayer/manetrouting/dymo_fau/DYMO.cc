@@ -230,7 +230,7 @@ void DYMO::handleMessage(cMessage* apMsg)
             msg_aux = udpPacket->decapsulate();
 
             IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
-            if (isLocalAddress(controlInfo->getSrcAddr()) || controlInfo->getSrcAddr().isUnspecified())
+            if (isLocalAddress(controlInfo->getSrcAddr().getInt()) || controlInfo->getSrcAddr().isUnspecified())
             {
                 // local address delete packet
                 delete msg_aux;

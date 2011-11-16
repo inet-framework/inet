@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2005 Jan Ringoš, www.ringos.cz
+ * Copyright (c) 2005 Jan RingoÂš, www.ringos.cz
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the author be held liable for any damages arising from the
@@ -31,9 +31,7 @@
 */
 
 
-#include <IPv6Address.h>
-#include <IPv4Address.h>
-#include <MACAddress.h>
+#include "INETDefs.h"
 
 
 // CLASS
@@ -123,14 +121,6 @@ class Uint128
     Uint128& operator=(const double& a);
     Uint128& operator=(const long double& a);
 
-    Uint128& operator=(const IPv4Address &);
-    Uint128& operator=(const MACAddress &);
-    Uint128& operator=(const IPv6Address &);
-
-    inline Uint128(const IPv4Address & a)  {*this = a;}
-    inline Uint128(const MACAddress & a)  {*this = a;}
-    inline Uint128(const IPv6Address & a)  {*this = a;}
-
     // Operators
     bool operator!() const { return !(hi || lo); }
     Uint128 operator-() const;
@@ -191,40 +181,6 @@ class Uint128
         if (lo==0 && hi == 0)
             return false;
         return true;
-    }
-
-    operator IPv4Address() const {IPv4Address add(toUint()); return add;}
-    operator MACAddress() const
-    {
-        return MACAddress(lo);
-    }
-
-    operator IPv6Address() const
-    {
-        uint32_t d[4];
-        d[0] = lo & 0xffffffff;
-        d[1] = (lo>>32) & 0xffffffff;
-        d[2] = hi & 0xffffffff;
-        d[3] = (hi>>32) & 0xffffffff;
-        IPv6Address add(d[0], d[1], d[2], d[3]);
-        return add;
-    }
-
-    IPv4Address  getIPAddress() const {IPv4Address add(toUint()); return add;}
-    MACAddress getMACAddress() const
-    {
-        return MACAddress(lo);
-    }
-
-    IPv6Address getIPv6Address() const
-    {
-        uint32_t d[4];
-        d[0] = lo & 0xffffffff;
-        d[1] = (lo>>32) & 0xffffffff;
-        d[2] = hi & 0xffffffff;
-        d[3] = (hi>>32) & 0xffffffff;
-        IPv6Address add(d[0], d[1], d[2], d[3]);
-        return add;
     }
 
     // Arithmetic methods

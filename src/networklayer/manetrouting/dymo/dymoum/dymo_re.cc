@@ -642,9 +642,9 @@ void NS_CLASS re_intermediate_rrep (struct in_addr src_addr,struct in_addr dest_
     /** create a new RREP and send it to given destination **/
 #ifdef OMNETPP
     if (isInMacLayer())
-        ev << "sending a reply to OrigNode " <<  src_addr.s_addr.getMACAddress() << endl;
+        ev << "sending a reply to OrigNode " <<  MACAddress(src_addr.s_addr.getLo()) << endl;
     else
-        ev << "sending a reply to OrigNode " <<  src_addr.s_addr.getIPAddress() << endl;
+        ev << "sending a reply to OrigNode " <<  IPv4Address(src_addr.s_addr.getLo()) << endl;
 #endif
     rtable_entry_t *rev_rt  = rtable_find(src_addr);
 

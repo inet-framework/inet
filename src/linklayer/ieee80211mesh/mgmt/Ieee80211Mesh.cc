@@ -395,7 +395,7 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
 
         if (routingModuleProactive)
         {
-            dist = routingModuleProactive->getRoute(dest, add);
+            dist = routingModuleProactive->getRoute(dest.getInt(), add);
             noRoute = false;
         }
 
@@ -409,12 +409,12 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 int iface;
                 noRoute = true;
                 double cost;
-                if (!routingModuleReactive->getNextHop(dest, add[0], iface, cost)) //send the packet to the routingModuleReactive
+                if (!routingModuleReactive->getNextHop(dest.getInt(), add[0], iface, cost)) //send the packet to the routingModuleReactive
                 {
                     ControlManetRouting *ctrlmanet = new ControlManetRouting();
                     ctrlmanet->setOptionCode(MANET_ROUTE_NOROUTE);
-                    ctrlmanet->setDestAddress(dest);
-                    ctrlmanet->setSrcAddress(myAddress);
+                    ctrlmanet->setDestAddress(dest.getInt());
+                    ctrlmanet->setSrcAddress(myAddress.getInt());
                     frame->encapsulate(msg);
                     ctrlmanet->encapsulate(frame);
                     send(ctrlmanet, "routingOutReactive");
@@ -422,7 +422,7 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 }
                 else
                 {
-                    if (add[0].getMACAddress() == dest)
+                    if (add[0].getLo() == dest.getInt())
                         dist = 1;
                     else
                         dist = 2;
@@ -435,7 +435,7 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
                 return NULL;
             }
         }
-        next = add[0];
+        next = MACAddress(add[0]);
         if (dist > 1 && useLwmpls)
         {
             lwmplspk = new LWMPLSPacket(msg->getName());
@@ -449,11 +449,11 @@ Ieee80211DataFrame *Ieee80211Mesh::encapsulate(cPacket *msg)
             lwmplspk->setDest(dest);
             if (!noRoute)
             {
-                next = add[0];
+                next = MACAddress(add[0]);
                 lwmplspk->setVectorAddressArraySize(dist-1);
                 //lwmplspk->setDist(dist-1);
                 for (int i=0; i<dist-1; i++)
-                    lwmplspk->setVectorAddress(i, add[i]);
+                    lwmplspk->setVectorAddress(i, MACAddress(add[i].getLo()));
                 lwmplspk->setByteLength(lwmplspk->getByteLength()+((dist-1)*6));
             }
 
@@ -613,7 +613,7 @@ void Ieee80211Mesh::handleDataFrame(Ieee80211DataFrame *frame)
             if (routingModuleReactive->getDestAddress(msg, dest))
             {
                 std::vector<Uint128>add;
-                Uint128 src = controlInfo->getSrc();
+                Uint128 src = controlInfo->getSrc().getInt();
                 int dist = 0;
                 if (routingModuleProactive && proactiveFeedback)
                 {
@@ -799,7 +799,7 @@ bool Ieee80211Mesh::macLabelBasedSend(Ieee80211DataFrame *frame)
         }
         else
         {
-            frame->setReceiverAddress(add[0].getMACAddress());
+            frame->setReceiverAddress(MACAddress(add[0].getLo()));
         }
 
     }
@@ -877,11 +877,11 @@ void Ieee80211Mesh::actualizeReactive(cPacket *pkt, bool out)
     if (out)
     {
         if (!frame->getAddress4().isUnspecified() && !frame->getAddress4().isBroadcast())
-            dest = frame->getAddress4();
+            dest = frame->getAddress4().getInt();
         else
             return;
         if (!frame->getReceiverAddress().isUnspecified() && !frame->getReceiverAddress().isBroadcast())
-            next = frame->getReceiverAddress();
+            next = frame->getReceiverAddress().getInt();
         else
             return;
 
@@ -889,11 +889,11 @@ void Ieee80211Mesh::actualizeReactive(cPacket *pkt, bool out)
     else
     {
         if (!frame->getAddress3().isUnspecified() && !frame->getAddress3().isBroadcast() )
-            dest = frame->getAddress3();
+            dest = frame->getAddress3().getInt();
         else
             return;
         if (!frame->getTransmitterAddress().isUnspecified() && !frame->getTransmitterAddress().isBroadcast())
-            prev = frame->getTransmitterAddress();
+            prev = frame->getTransmitterAddress().getInt();
         else
             return;
 

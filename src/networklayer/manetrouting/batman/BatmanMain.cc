@@ -211,13 +211,13 @@ void Batman::initialize(int stage)
         batman_if->if_active = true;
         if (isInMacLayer())
         {
-            batman_if->address = (Uint128)iEntry->getMacAddress();
-            batman_if->broad = (Uint128)MACAddress::BROADCAST_ADDRESS;
+            batman_if->address = (Uint128)iEntry->getMacAddress().getInt();
+            batman_if->broad = (Uint128)MACAddress::BROADCAST_ADDRESS.getInt();
         }
         else
         {
-            batman_if->address = (Uint128)iEntry->ipv4Data()->getIPAddress();
-            batman_if->broad = (Uint128)IPv4Address::ALLONES_ADDRESS;
+            batman_if->address = (Uint128)iEntry->ipv4Data()->getIPAddress().getInt();
+            batman_if->broad = (Uint128)IPv4Address::ALLONES_ADDRESS.getInt();
         }
 
         batman_if->if_rp_filter_old = -1;
@@ -337,9 +337,9 @@ void Batman::handleMessage(cMessage *msg)
         //addr_to_string(bat_packet->orig, orig_str, sizeof(orig_str));
         //addr_to_string(bat_packet->prev_sender, prev_sender_str, sizeof(prev_sender_str));
         if (isInMacLayer())
-            EV << "packet receive from :" <<bat_packet->getOrig().getMACAddress() << endl;
+            EV << "packet receive from :" <<MACAddress(bat_packet->getOrig().getLo()) << endl;
         else
-            EV << "packet receive from :" <<bat_packet->getOrig().getIPAddress() << endl;
+            EV << "packet receive from :" <<IPv4Address(bat_packet->getOrig().getLo()) << endl;
         is_my_addr = is_my_orig = is_my_oldorig = is_broadcast = 0;
 
         has_directlink_flag = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
@@ -386,7 +386,7 @@ void Batman::handleMessage(cMessage *msg)
         if (is_my_orig) {
             orig_neigh_node = get_orig_node(neigh);
             bool sameIf = false;
-            if (if_incoming->dev->ipv4Data()->getIPAddress().getInt() == bat_packet->getOrig().getIPAddress().getInt())
+            if (if_incoming->dev->ipv4Data()->getIPAddress().getInt() == bat_packet->getOrig().getLo())
                 sameIf = true;
 
             if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0))

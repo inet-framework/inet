@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2005 Jan Ringoš, www.ringos.cz
+ * Copyright (c) 2005 Jan RingoÂš, www.ringos.cz
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the author be held liable for any damages arising from the
@@ -378,34 +378,6 @@ Uint128& Uint128::operator<<=(unsigned int n)
     return *this;
 }
 
-
-Uint128& Uint128::operator=(const IPv4Address &add)
-{
-    hi = 0;
-    lo = add.getInt();
-    return *this;
-}
-
-Uint128& Uint128::operator=(const MACAddress &add)
-{
-    hi = 0;
-    lo = add.getInt();
-    return *this;
-}
-
-Uint128& Uint128::operator=(const IPv6Address &add)
-{
-    uint32 *w = const_cast<IPv6Address&>(add).words();
-    uint64_t aux[4];
-    aux[0] = w[0];
-    aux[1] = w[1];
-    aux[2] = w[2];
-    aux[3] = w[3];
-
-    lo = aux[0]&(aux[1]<<32);
-    hi = aux[2]&(aux[3]<<32);
-    return *this;
-}
 
 
 bool operator!=(const Uint128& a, const uint32_t& b)

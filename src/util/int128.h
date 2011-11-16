@@ -31,7 +31,7 @@
 */
 
 
-#include "IPv4Address.h"
+#include "INETDefs.h"
 
 // CLASS
 
@@ -159,7 +159,6 @@ class Int128
 
     operator double() { return toDouble(); }
     operator int() { return toInt();}
-    operator IPv4Address() { IPv4Address add(toInt()); return add;}
     static const Int128 INT128_MAX;
     static const Int128 INT128_MIN;
 }

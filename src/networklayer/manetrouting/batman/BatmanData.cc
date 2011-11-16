@@ -52,7 +52,7 @@ void OrigNode::clear()
 std::string OrigNode::info() const
 {
     std::stringstream out;
-    out << "orig:"  << orig.getIPAddress() << "  ";
+    out << "orig:"  << IPv4Address(orig.getLo()) << "  ";
     out << "totalRec:"  << this->totalRec << "  ";
     if (bcast_own[0])
       out << "bcast_own:" << bcast_own[0]<< "  ";
@@ -84,7 +84,7 @@ std::string OrigNode::info() const
 
     for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
-        out << "list neig :" << neigh_list[i]->addr.getIPAddress() << " ";
+        out << "list neig :" << IPv4Address(neigh_list[i]->addr.getLo()) << " ";
     }
 
     out << "\n router info:"; if (router==NULL) out << "*  "; else out << router->info() << "  ";
@@ -94,14 +94,14 @@ std::string OrigNode::info() const
 std::string NeighNode::info() const
 {
     std::stringstream out;
-    out << "addr:"  << addr.getIPAddress() << "  ";
+    out << "addr:"  << IPv4Address(addr.getLo()) << "  ";
     out << "real_packet_count:" << real_packet_count<< "  ";
     out <<  "last_ttl:" << last_ttl<< "  ";
     out <<  "num_hops:" << num_hops<< "  ";
     out <<  "last_valid:" << last_valid<< "  ";            /* when last packet via this neighbour was received */
     out <<  "real_bits:" << real_bits[0]<< "  ";
-    out <<  "orig_node :" << orig_node->orig.getIPAddress()<< "  ";
-    out <<  "owner_node :" << owner_node->orig.getIPAddress()<< "  ";
+    out <<  "orig_node :" << IPv4Address(orig_node->orig.getLo())<< "  ";
+    out <<  "owner_node :" << IPv4Address(owner_node->orig.getLo())<< "  ";
     return out.str();
 }
 /*
@@ -649,7 +649,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
         }
         else
         {
-            if (next.getIPAddress()!=IPv4Address::ALLONES_ADDRESS)
+            if (next.getLo() != IPv4Address::ALLONES_ADDRESS.getInt())
                 add_del_route(orig_node->orig, 32, next, orig_node->batmanIf->if_index,
                       orig_node->batmanIf->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
         }
@@ -1308,7 +1308,7 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
         return 0;
     }
     if (batman_if)
-        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadCastDelay"), batman_if->dev->ipv4Data()->getIPAddress());
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadCastDelay"), batman_if->dev->ipv4Data()->getIPAddress().getInt());
     else
         sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadCastDelay"), (Uint128)0);
     return 0;
@@ -1626,7 +1626,7 @@ void Batman::check_active_interfaces(void)
 
 BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
 {
-    std::string str = "BatmanPkt:"+batman_if->address.getIPAddress().str();
+    std::string str = "BatmanPkt:" + (IPv4Address(batman_if->address.getLo())).str();
     BatmanPacket * pkt = new BatmanPacket(str.c_str());
 
     pkt->setVersion(0);

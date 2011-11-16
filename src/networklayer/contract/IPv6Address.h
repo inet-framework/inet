@@ -25,6 +25,7 @@
 
 #include "INETDefs.h"
 
+#include "uint128.h"
 
 class InterfaceToken;
 
@@ -167,6 +168,28 @@ class INET_API IPv6Address
         void set(uint32 d0, uint32 d1, uint32 d2, uint32 d3) {
             d[0] = d0; d[1] = d1; d[2] = d2; d[3] = d3;
         }
+
+        /**
+         * Sets the address from the given Uint128.
+         */
+        void set(const Uint128 &addr) {
+            uint64_t lo = addr.getLo();
+            uint64_t hi = addr.getHi();
+            d[0] = lo & 0xffffffff;
+            d[1] = (lo>>32) & 0xffffffff;
+            d[2] = hi & 0xffffffff;
+            d[3] = (hi>>32) & 0xffffffff;
+        }
+
+        /**
+         * Constructor. Sets the address from the given Uint128.
+         */
+        IPv6Address(const Uint128 &addr) { set(addr); }
+
+        /**
+         * Converts to Uint128
+         */
+        operator Uint128 () { return Uint128(d[0]) + (Uint128(d[1])<<32u) + (Uint128(d[2])<<64u) + (Uint128(d[3])<<96u); }
 
         /**
          * Returns pointer to internal binary representation of address,

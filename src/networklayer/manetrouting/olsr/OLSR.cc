@@ -543,7 +543,7 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
                 return NULL;
             }
             Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-            src_addr = ctrl->getSrc();
+            src_addr = ctrl->getSrc().getInt();
             delete ctrl;
             return dynamic_cast<OLSR_pkt  *>(msg);
         }
@@ -1458,7 +1458,7 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    Uint128 destAdd = IPv4Address::ALLONES_ADDRESS;
+    Uint128 destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
 
     for (int i = 0; i < num_pkts; i++)
     {
