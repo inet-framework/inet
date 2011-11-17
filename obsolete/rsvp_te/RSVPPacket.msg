@@ -25,16 +25,27 @@ cplusplus {{
 #define SF_STYLE    2
 }}
 
+
 struct SessionObj_t;
+
 struct RsvpHopObj_t;
+
 struct SenderTemplateObj_t;
+
 struct SenderTspecObj_t;
+
 struct FlowSpecObj_t;
+
 struct FilterSpecObj_t;
+
 struct LabelRequestObj_t;
+
 struct SenderDescriptor_t;
+
 struct FlowDescriptor_t;
+
 struct EroObj_t;
+
 
 
 //
@@ -42,9 +53,7 @@ struct EroObj_t;
 //
 message RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        SessionObj_t session;
-        bool checksumValid = true;
-};
+    @customize(true);
+    SessionObj_t session;
+    bool checksumValid = true;
+}
