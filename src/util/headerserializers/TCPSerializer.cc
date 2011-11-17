@@ -121,10 +121,10 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
     } // if options present
 
     // write data
-    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) // data present? FIXME TODO: || tcpseg->getEncapsulatedMsg()!=NULL
+    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=NULL
     {
         unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
-        // TCPPayloadMessage *tcpP = check_and_cast<TCPPayloadMessage* >(tcpseg->getEncapsulatedMsg()); // FIXME
+        // TCPPayloadMessage *tcpP = check_and_cast<TCPPayloadMessage* >(tcpseg->getEncapsulatedPacket()); // FIXME
         char *tcpData = (char *)options+lengthCounter;
         memset(tcpData, 't', dataLength); // fill data part with 't'
         /*

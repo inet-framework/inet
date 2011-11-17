@@ -336,8 +336,8 @@ void UDP::processICMPError(cPacket *msg)
         type = icmpMsg->getType();
         code = icmpMsg->getCode();
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedMsg());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedMsg());
+        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedPacket());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
         localAddr = datagram->getSrcAddress();
         remoteAddr = datagram->getDestAddress();
         localPort = packet->getSourcePort();
@@ -350,8 +350,8 @@ void UDP::processICMPError(cPacket *msg)
         type = icmpMsg->getType();
         code = -1; // FIXME this is dependent on getType()...
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedMsg());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedMsg());
+        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
         localAddr = datagram->getSrcAddress();
         remoteAddr = datagram->getDestAddress();
         localPort = packet->getSourcePort();
@@ -433,7 +433,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int matches = 0;
 
     // deliver a copy of the packet to each matching socket
-    cPacket *payload = udpPacket->getEncapsulatedMsg();
+    cPacket *payload = udpPacket->getEncapsulatedPacket();
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;

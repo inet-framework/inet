@@ -44,9 +44,9 @@ TCPDumper::~TCPDumper()
 
 void TCPDumper::ipDump(const char *label, IPDatagram *dgram, const char *comment)
 {
-     if (dynamic_cast<SCTPMessage *>(dgram->getEncapsulatedMsg()))
+     if (dynamic_cast<SCTPMessage *>(dgram->getEncapsulatedPacket()))
      {
-          SCTPMessage *sctpmsg = check_and_cast<SCTPMessage *>(dgram->getEncapsulatedMsg());
+          SCTPMessage *sctpmsg = check_and_cast<SCTPMessage *>(dgram->getEncapsulatedPacket());
           if (dgram->hasBitError())
                 sctpmsg->setBitError(true);
           sctpDump(label, sctpmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
@@ -364,7 +364,7 @@ TCPDump::TCPDump() : cSimpleModule(), tcpdump(ev.getOStream())
 
 void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)
 {
-    cMessage *encapmsg = dgram->getEncapsulatedMsg();
+    cMessage *encapmsg = dgram->getEncapsulatedPacket();
     if (dynamic_cast<UDPPacket *>(encapmsg))
     {
         std::ostream& out = *outp;
@@ -391,15 +391,15 @@ void TCPDumper::udpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
         out << "UDP: Payload length=" << udppkt->getByteLength()-8 << endl;
         if (udppkt->getSourcePort()==9899 || udppkt->getDestinationPort() == 9899)
         {
-            if (dynamic_cast<SCTPMessage *>(udppkt->getEncapsulatedMsg()))
-                sctpDump("", (SCTPMessage *)(udppkt->getEncapsulatedMsg()), std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
+            if (dynamic_cast<SCTPMessage *>(udppkt->getEncapsulatedPacket()))
+                sctpDump("", (SCTPMessage *)(udppkt->getEncapsulatedPacket()), std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
     }
 }
 
 void TCPDumper::tcpDump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)
 {
-     cMessage *encapmsg = dgram->getEncapsulatedMsg();
+     cMessage *encapmsg = dgram->getEncapsulatedPacket();
      if (dynamic_cast<TCPSegment *>(encapmsg))
      {
           // if TCP, dump as TCP
@@ -423,7 +423,7 @@ void TCPDumper::tcpDump(bool l2r, const char *label, IPDatagram *dgram, const ch
 //FIXME: Temporary hack for Ipv6 support
 void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment)
 {
-     cMessage *encapmsg = dgram->getEncapsulatedMsg();
+     cMessage *encapmsg = dgram->getEncapsulatedPacket();
      if (dynamic_cast<TCPSegment *>(encapmsg))
      {
           // if TCP, dump as TCP
@@ -605,7 +605,7 @@ void TCPDump::handleMessage(cMessage *msg)
             // search for encapsulated IP[v6]Datagram in it
             cPacket *encapmsg = PK(msg);
             while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL && dynamic_cast<IPv6Datagram_Base *>(encapmsg)==NULL)
-                encapmsg = encapmsg->getEncapsulatedMsg();
+                encapmsg = encapmsg->getEncapsulatedPacket();
                 l2r = msg->arrivedOn("in1");
             if (!encapmsg)
             {
