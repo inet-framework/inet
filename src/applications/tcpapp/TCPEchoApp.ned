@@ -31,7 +31,7 @@ package inet.applications.tcpapp;
 // as soon as a segment arrives, so it can be echoed immediately.
 // With TCPMsgBasedSendQueue/RcvQueue, our local TCP reproduces the same
 // messages that the sender app passed down to its TCP -- so if the sender
-// app sent a single 100 MB message, it will be echoed only when all
+// app sent a single 100 MiB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
 // Compatible with both IPv4 and IPv6.

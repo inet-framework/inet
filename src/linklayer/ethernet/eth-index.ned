@@ -256,7 +256,7 @@
 //
 // LargeNet models a large Ethernet campus backbone. As configured in the
 // default omnetpp.ini, it contains altogether about 8000 computers
-// and 900 switches and hubs. This results in about 165MB process size
+// and 900 switches and hubs. This results in about 165MiB process size
 // on my (32-bit) linux box when I run the simulation.
 // The model mixes all kinds of Ethernet technology: Gigabit Ethernet,
 // 100Mb full duplex, 100Mb half duplex, 10Mb UTP, 10Mb bus ("thin Ethernet"),
