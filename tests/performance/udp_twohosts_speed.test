@@ -38,7 +38,6 @@ network UdpClientServer
         host1.ethg++ <--> C <--> host2.ethg++;
 }
 
-
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
@@ -48,21 +47,21 @@ total-stack = 7MiB
 tkenv-plugin-path = ../../../etc/plugins
 #debug-on-errors = true
 #record-eventlog = true
-**.vector-recording = false
+#**.vector-recording = false
 
-sim-time-limit = 16s
+sim-time-limit = 20s
 
 ## UDP apps
-**.numUdpApps = 1
-**.udpApp[0].typename = "UDPEchoApp"
-**.udpApp[0].localPort = 1234
+**.numUdpApps = 2
+**.udpApp[0].typename = "UDPBasicApp"
 **.udpApp[0].destPort = 1234
-**.udpApp[0].sendInterval = 1.6ms
+**.udpApp[0].sendInterval = 1.7ms
+**.udpApp[0].stopTime = 17s
 **.host1.udpApp[0].destAddresses = "host2"
 **.host2.udpApp[0].destAddresses = "host1"
 **.udpApp[0].messageLength = 1000 bytes
-
-**.arp.cacheTimeout = 1s
+**.udpApp[1].typename = "UDPEchoApp"
+**.udpApp[1].localPort = 1234
 
 *.configurator.networkAddress = "192.168.1.0"
 
@@ -77,8 +76,8 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 scafile <- 'results/General-0.sca'
 linecount <- 2
-sentBytes <- 10000000
-rcvdBytes <-  9000000
+sentPk   <- 10000
+echoedPk <-  9990
 
 # begin TEST:
 
@@ -88,30 +87,30 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 udpApp <- dataset$scalars[grep("\\.host\\d\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
 udpSent <- udpApp[udpApp$name == "sentPkBytes:sum",]
-udpRcvd <- udpApp[udpApp$name == "rcvdPkBytes:sum",]
+udpRcvd <- udpApp[udpApp$name == "echoedPk:count",]
 
 cat("  UDP SPEED TEST RESULT:\n")
 
 #print(udpSent)
 cat("    UDP SENT ")
-if(length(udpSent$value) == linecount && min(udpSent$value) >= sentBytes)
+if(length(udpSent$value) == linecount && min(udpSent$value) >= sentPk)
 {
     cat("OK\n")
 } else {
     cat("BAD:\n")
-    udpSent$rate = udpSent$value*100/sentBytes
-    print(udpSent[udpSent$value < sentBytes,])
+    udpSent$rate = udpSent$value*100/sentPk
+    print(udpSent[udpSent$value < sentPk,])
 }
 
 #print(udpRcvd)
 cat("    UDP RCVD ")
-if(length(udpRcvd$value) == linecount && min(udpRcvd$value) >= rcvdBytes)
+if(length(udpRcvd$value) == linecount && min(udpRcvd$value) >= echoedPk)
 {
     cat("OK\n")
 } else {
     cat("BAD:\n")
-    udpRcvd$rate = udpRcvd$value*100/rcvdBytes
-    print(udpRcvd[udpRcvd$value < rcvdBytes,])
+    udpRcvd$rate = udpRcvd$value*100/sentPk
+    print(udpRcvd[udpRcvd$value < echoedPk,])
 }
 
 cat("\n")
