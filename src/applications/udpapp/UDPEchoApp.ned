@@ -32,7 +32,7 @@ simple UDPEchoApp like IUDPApp
         int localPort;  // local port to listen on
         @display("i=block/app");
         @signal[pk](type=cPacket);
-        @statistic[echoedPk](title="Echoed Packets"; source=pk; record="count,vector(1)?"; interpolationmode=none);
+        @statistic[echoedPk](title="Echoed Packets"; source=pk; record=count,"vector(1)?"; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
