@@ -286,8 +286,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
                 udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
     }
 
-    cPacket *payload = udpPacket->decapsulate();
-
     if (!isMulticast && !isBroadcast)
     {
         // unicast packet, there must be only one socket listening
@@ -300,6 +298,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         }
         else
         {
+            cPacket *payload = udpPacket->decapsulate();
             sendUp(payload, sd, srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);
             delete udpPacket;
             delete ctrl;
@@ -317,6 +316,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         }
         else
         {
+            cPacket *payload = udpPacket->decapsulate();
             unsigned int i;
             for (i = 0; i < sds.size()-1; i++)      // sds.size() >= 1
                 sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl); // dup() to all but the last one
@@ -324,7 +324,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             delete udpPacket;
             delete ctrl;
         }
-
     }
 }
 
