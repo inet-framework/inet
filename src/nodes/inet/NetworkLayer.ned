@@ -18,11 +18,11 @@
 
 package inet.nodes.inet;
 
-import inet.networklayer.ipv4.IPv4;
-import inet.networklayer.ipv4.IGMP;
-import inet.networklayer.ipv4.ICMP;
-import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.arp.ARP;
+import inet.networklayer.ipv4.ErrorHandling;
+import inet.networklayer.ipv4.ICMP;
+import inet.networklayer.ipv4.IGMP;
+import inet.networklayer.ipv4.IPv4;
 import inet.util.ITrafficGenerator;
 
 
@@ -122,10 +122,10 @@ module NetworkLayer
         ip.queueOut --> arp.ipIn;
 
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> ip.queueIn[i];
+            ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> ifOut[i];
+            arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
         trafgen.out --> ip.queueIn[sizeof(ifIn)] if trafficGeneratorType != "";
 }
