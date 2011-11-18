@@ -86,7 +86,7 @@ import inet.linklayer.IEtherMAC;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~OutputQueue)
+// In routers, MAC relies on an external queue module (see ~IOutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //

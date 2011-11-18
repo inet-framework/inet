@@ -25,7 +25,7 @@ package inet.networklayer.mpls;
 //
 // Operations
 //
-// MPLS packets are represented by the ~MPLSPacket class.
+// MPLS packets are represented by the MPLSPacket class.
 // The local LIB (Label Information Base) is stored in a ~LIBTable module
 // in the LSR.
 //

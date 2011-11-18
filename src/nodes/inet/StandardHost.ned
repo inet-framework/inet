@@ -40,9 +40,7 @@ import inet.applications.ISCTPApp;
 //   modules implementing ~IWirelessNic
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
-//   **.ext[*].typename in the INI file. see: ~ExtInerface and ~IExternalNic
-// - PPP interface type can be set using **.ppp[*].typename see: ~PPPInterface
-//   and ~PPPInterfaceNoQueue
+//   **.ext[*].typename in the INI file. see: ~ExtInterface and ~IExternalNic
 // - If wireless card is present, node mobility can be set using **.mobilityType
 //   see: inet.mobility and ~IMobility
 //

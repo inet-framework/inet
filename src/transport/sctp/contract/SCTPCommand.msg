@@ -76,7 +76,7 @@ class SCTPErrorInfo extends SCTPCommand
 // Control info to be used for active or passive ~SCTP open.
 //
 // localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
-// localAddr is optional because ~SCTP can learn it from ~IP when a packet
+// localAddr is optional because ~SCTP can learn it from IP when a packet
 // is received from the peer; localPort is optional because ~SCTP supports
 // ephemeral ports.
 //

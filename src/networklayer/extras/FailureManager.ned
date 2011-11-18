@@ -41,8 +41,7 @@ package inet.networklayer.extras;
 //
 // - <code>shutdown</code>: replaces a router module named by the <tt>target</tt> attribute
 //   with another module that represents a failed router. It currently replaces
-//   ~RSVP_LSR with ~RSVP_FAILED, ~LDP_LSR with ~LDP_FAILED, and ~QuaggaRouter with
-//   ~FailedRouter.
+//   ~RSVP_LSR with ~RSVP_FAILED, ~LDP_LSR with ~LDP_FAILED.
 // - <code>startup</code>: the inverse of <tt>shutdown</tt>: replaces a <i>failed</i>
 //   router model named by the <tt>target</tt> attribute with an operational host/router
 //   module type.

@@ -25,7 +25,7 @@ import inet.applications.ITCPApp;
 //
 // Models Telnet sessions with a specific user behaviour.
 // The server app should be ~TCPGenericSrvApp.
-// Compatible with both IPv4 (~IP) and ~IPv6.
+// Compatible with both ~IPv4 and ~IPv6.
 //
 // NOTE: This module emulates a very specific user behaviour, and as such,
 // it should be viewed as an example rather than a generic Telnet model.

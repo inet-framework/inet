@@ -40,7 +40,7 @@ import inet.transport.ITCP;
 //                Algorithm for TCP
 //   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
 //
-// This module is compatible with both IPv4 (~IP) and ~IPv6.
+// This module is compatible with both ~IPv4 and ~IPv6.
 //
 // A TCP segment is represented by the class ~TCPSegment.
 //
@@ -193,7 +193,7 @@ import inet.transport.ITCP;
 //
 // <b>Tests</b>
 //
-// There are automated test cases (*.test files) for TCP -- see the ~Test
+// There are automated test cases (*.test files) for TCP -- see the <i>tests</i>
 // directory in the source distribution.
 //
 // Please also see ChangeLog.

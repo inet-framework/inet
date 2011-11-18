@@ -28,13 +28,11 @@ import inet.base.IHook;
 // PPP interface. Complements the ~PPP module with an output queue
 // for QoS and RED support.
 //
-// @see ~PPPInterfaceNoQueue
-//
 module PPPInterface like IWiredNic
 {
     parameters:
         @display("i=block/ifcard;bgb=214,249");
-        string queueType = default("DropTailQueue"); // DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue
+        string queueType = default("DropTailQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~REDQueue, NoQueue
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
     gates:

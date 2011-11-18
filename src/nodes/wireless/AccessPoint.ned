@@ -27,12 +27,12 @@ import inet.base.NotificationBoard;
 // multiple ethernet ports. The type of the ethernet MAC, relay Unit
 // and wireless card can be specified as parameters.
 //
-// By default the access point is stationary (StationaryMobility), but can be
+// By default the access point is stationary (~StationaryMobility), but can be
 // changed also if needed.
 //
 // The wlan[*].mgmtType can be configured for different management types
-// currently it can be: Ieee80211MgmtAPSimplified and Ieee80211MgmtAP.
-// By default it is Ieee80211MgmtAP. The Simplified version does not 
+// currently it can be: ~Ieee80211MgmtAPSimplified and ~Ieee80211MgmtAP.
+// By default it is ~Ieee80211MgmtAP. The Simplified version does not 
 // support channel scanning, authentication and association . 
 // In this case nodes must explicitly specify the hardware address
 // of the Wlan card they want to be associated with. 

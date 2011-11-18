@@ -123,7 +123,7 @@ enum TCPDataTransferMode
 // Control info to be used for active or passive TCP open.
 //
 // localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
-// localAddr is optional because TCP can learn it from ~IP when a packet
+// localAddr is optional because TCP can learn it from IP when a packet
 // is received from the peer; localPort is optional because TCP supports
 // ephemeral ports.
 //

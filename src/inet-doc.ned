@@ -33,7 +33,7 @@
 // Protocols are represented by simple modules. A simple module's external
 // interface (gates [connectors] and parameters) is described in a NED file,
 // and the implementation is contained in a C++ class with the same name.
-// Some examples: ~TCP, ~IP.
+// Some examples: ~TCP, ~IPv4.
 //
 // These modules can be freely combined to form hosts and other network devices
 // with the NED language (no C++ code and no recompilation required).
@@ -85,7 +85,7 @@
 //
 // - ~RoutingTable. This module contains the IP (v4) routing table, and heavily relies
 //   on ~InterfaceTable for its operation. This module is also accessed from other
-//   modules (typically ~IP) by calling the public member functions of its C++ class.
+//   modules (typically ~IPv4) by calling the public member functions of its C++ class.
 //   There are member functions for querying, adding, deleting routes, and
 //   finding the best matching route for a given destination IP address.
 //   The routing table submodule within the host (router) must be called
