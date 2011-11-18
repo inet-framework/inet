@@ -10,6 +10,9 @@ INET-20111118
 - fixed bug #329: added a way to disable the large amounts of spam PingApp
   generates; added a numPongs watch
 - fixed bug #212: TCP: Assrtion failed when FIN is retransmitted
+- NOTE: If you experience build errors from the OMNeT++ IDE, stating that 
+  RSVPPacket_m.h is missing; just open RSVPPacket.msg, save it (after making 
+  the editor dirty) and restart the build. It should work second time.
 
 INET-20110225
 -------------
