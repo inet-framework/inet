@@ -39,8 +39,6 @@
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //
 // A few useful starting points for browsing the documentation:
-//  - the <a href="full-ned-usage-diagram.html">Usage Diagram</a>
-//    includes all modules and networks
 //  - example networks: ~BulkTransfer, ~MulticastNetwork,
 //    ~MixedLAN, etc.
 //  - hosts, routers, switches: ~StandardHost, ~Router, ~EtherSwitch, ~EtherHub,
