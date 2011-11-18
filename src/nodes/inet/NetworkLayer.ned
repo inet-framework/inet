@@ -23,6 +23,7 @@ import inet.networklayer.ipv4.IGMP;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.arp.ARP;
+import inet.util.ITrafficGenerator;
 
 
 //
@@ -35,6 +36,7 @@ module NetworkLayer
     parameters:
         @display("i=block/fork");
         bool proxyARP = default(true);
+        string trafficGeneratorType = default("");  // traffic generator implementation, e.g. PcapTrafficGenerator
     gates:
         input ifIn[] @labels(IPv4Datagram);
         input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
@@ -61,7 +63,7 @@ module NetworkLayer
             gates:
                 transportIn[8];
                 transportOut[8];
-                queueIn[sizeof(ifIn)];
+                queueIn[sizeof(ifIn) + (trafficGeneratorType != "" ? 1 : 0)];
         }
         arp: ARP {
             parameters:
@@ -81,6 +83,9 @@ module NetworkLayer
         errorHandling: ErrorHandling {
             parameters:
                 @display("p=239,63");
+        }
+        trafgen: <trafficGeneratorType> like ITrafficGenerator if trafficGeneratorType != "" {
+            @display("p=27,45");
         }
 
     connections allowunconnected:
@@ -122,5 +127,6 @@ module NetworkLayer
         for i=0..sizeof(ifOut)-1 {
             arp.nicOut[i] --> ifOut[i];
         }
+        trafgen.out --> ip.queueIn[sizeof(ifIn)] if trafficGeneratorType != "";
 }
 
