@@ -1,11 +1,10 @@
 
 package inet.examples.ospfv2.backbone;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.inet.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
+import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import ned.DatarateChannel;
+import inet.linklayer.ethernet.EtherHub;
 
 
 network Backbone
@@ -13,17 +12,13 @@ network Backbone
     parameters:
         @display("p=10,10;b=736,568");
     types:
-        channel C extends DatarateChannel
+        channel C extends ThruputMeteringChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
+            thruputDisplayFormat = "#N";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=#N";
-                @display("p=98,50");
-        }
         R1: OSPFRouter {
             parameters:
                 @display("p=372,340");

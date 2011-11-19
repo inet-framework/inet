@@ -1,0 +1,23 @@
+==================
+ DYMOUM TODO List 
+==================
+
+
+* Currently the implementation only allows one message on a DYMO packet. When
+  supporting multiple messages we'll need to complete (at least)
+  dymo_generic.c::generic_process_message() and
+  dymo_generic.h::generic_postprocess().
+
+* Change the packet format to the new generic packetbb spec.
+
+* Prefix and gateway stuff is not supported right now. Thus,
+  rtable.c::rtable_find(addr) does not perform longest-prefix matching yet.
+
+* Change routing table data type from a double linked list to a hash table.
+
+* Actions after sequence number loss. Maybe this isn't needed or it isn't very
+  important in our case.
+
+
+ Francisco J. Ros      <fjrm@dif.um.es>
+ University of Murcia  (Spain)

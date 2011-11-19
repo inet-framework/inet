@@ -25,8 +25,6 @@ package inet.linklayer.ethernet;
 // travel on the bus on both directions, and copies of it are sent out
 // on every other tap after delays proportional to their distances.
 //
-// Tap connections should have zero delays and zero data rates!
-//
 // Messages are not interpreted by the bus model in any way, thus the bus
 // model is not specific to Ethernet in any way. Messages may
 // represent anything, from the beginning of a frame transmission to
@@ -42,7 +40,7 @@ simple EtherBus
                            // of numbers separated by spaces. If there are too
                            // few values, the distance between the last two positions
                            // is repeated, or 5 meters is used.
-        double propagationSpeed @unit("mps") = default(200mps); // signal propagation speed on the bus
+        double propagationSpeed @unit("mps") = default(200000000mps); // signal propagation speed on the bus
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a tap
 }

@@ -22,7 +22,7 @@
 
 package inet.examples.ipv6.ipv6bulk;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator6;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -33,7 +33,7 @@ network BulkTransfer6
     types:
         channel C extends DatarateChannel
         {
-//            datarate = 1Mbps;
+            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:

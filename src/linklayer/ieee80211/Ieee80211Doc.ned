@@ -25,10 +25,10 @@
 // in their role (ad-hoc station, infrastructure mode station, or
 // access point) and their level of detail:
 //
-//  - Ieee80211Nic: a generic (configurable) NIC
-//  - Ieee80211NicAdhoc: for ad-hoc mode
-//  - Ieee80211NicAP, Ieee80211NicAPSimplified: for use in an access point
-//  - Ieee80211NicSTA, Ieee80211NicSTASimplified: for use in an
+//  - ~Ieee80211Nic: a generic (configurable) NIC
+//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAdhoc: for ad-hoc mode
+//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAP or ~Ieee80211MgmtAPSimplified: for use in an access point
+//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtSTA, ~Ieee80211MgmtSTASimplified: for use in an
 //    infrastructure-mode station
 //
 // NICs consist of four layers, which are the following (in top-down order):
@@ -38,8 +38,8 @@
 //  -# MAC
 //  -# physical layer (radio)
 //
-// <i>The physical layer</i> modules (Ieee80211Radio; with some limitations,
-// SnrEval80211, Decider80211 can also be used) deal with modelling
+// <i>The physical layer</i> modules (~Ieee80211Radio; with some limitations,
+// ~SnrEval80211, ~Decider80211 can also be used) deal with modelling
 // transmission and reception of frames. They model the characteristics of
 // the radio channel, and determine if a frame was received correctly
 // (that is, it did not suffer bit errors due to low signal power or
@@ -47,7 +47,7 @@
 // up to the MAC. The implementation of these modules is based on the
 // Mobility Framework.
 //
-// <i>The MAC layer</i> (Ieee80211Mac) performs transmission of frames according
+// <i>The MAC layer</i> (~Ieee80211Mac) performs transmission of frames according
 // to the CSMA/CA protocol. It receives data and management frames from
 // the upper layers, and transmits them.
 //
@@ -61,9 +61,9 @@
 // probe responses.
 //
 // The management layer has several implementations which differ in their role
-// (STA/AP/ad-hoc) and level of detail: Ieee80211MgmtAdhoc,
-// Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtSTA,
-// Ieee80211MgmtSTASimplified. The ..Simplified ones differ from the others
+// (STA/AP/ad-hoc) and level of detail: ~Ieee80211MgmtAdhoc,
+// ~Ieee80211MgmtAP, ~Ieee80211MgmtAPSimplified, ~Ieee80211MgmtSTA,
+// ~Ieee80211MgmtSTASimplified. The ..Simplified ones differ from the others
 // in that they do not model the scan-authenticate-associate process,
 // so they cannot be used in experiments involving handover.
 //
@@ -72,8 +72,9 @@
 // just carries out these commands by performing the scanning, authentication
 // and association procedures, and reports back the results to the agent.
 //
-// The agent layer is currenly only present in the Ieee80211NicSTA NIC module,
-// as an Ieee80211AgentSTA module. The managament entities in other NIC
+// The agent layer is currenly only present in the ~Ieee80211Nic with
+// mgmtType = ~Ieee80211MgmtSTA NIC module,
+// as an ~Ieee80211AgentSTA module. The managament entities in other NIC
 // variants do not have as much freedom as to need an agent to control them.
 //
 // By modifying or replacing the agent, one can alter the dynamic behaviour
@@ -81,7 +82,7 @@
 //
 // <b>Limitations</b>
 //
-// See the documentation of Ieee80211Mac for features unsupported by this
+// See the documentation of ~Ieee80211Mac for features unsupported by this
 // model.
 //
 //# further details about the implementation: what is modelled and what is

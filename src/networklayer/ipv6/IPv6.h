@@ -24,6 +24,11 @@
 #include "RoutingTable6.h"
 #include "ICMPv6.h"
 #include "IPv6NeighbourDiscovery.h"
+
+#ifdef WITH_xMIPv6
+#include "IPv6Tunneling.h"
+#endif /* WITH_xMIPv6 */
+
 #include "IPv6Datagram.h"
 #include "IPv6FragBuf.h"
 #include "ProtocolMap.h"
@@ -41,6 +46,10 @@ class INET_API IPv6 : public QueueBase
     IPv6NeighbourDiscovery *nd;
     ICMPv6 *icmp;
 
+#ifdef WITH_xMIPv6
+    IPv6Tunneling* tunneling;
+#endif /* WITH_xMIPv6 */
+
     // working vars
     long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
     IPv6FragBuf fragbuf;  // fragmentation reassembly buffer
@@ -53,6 +62,19 @@ class INET_API IPv6 : public QueueBase
     int numDropped;
     int numUnroutable;
     int numForwarded;
+
+#ifdef WITH_xMIPv6
+    // 28.9.07 - CB
+    // datagrams that are supposed to be sent with a tentative IPv6 address
+    // are resscheduled for later resubmission.
+    class ScheduledDatagram : public cPacket
+    {
+      public:
+        IPv6Datagram* datagram;
+        InterfaceEntry* ie;
+        MACAddress macAddr;
+    };
+#endif /* WITH_xMIPv6 */
 
   protected:
     // utility: look up interface from getArrivalGate()
@@ -89,11 +111,11 @@ class INET_API IPv6 : public QueueBase
      * the datagram to be sent out on a specific interface, bypassing
      * the routing table.
      */
-    virtual void fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE=NULL);
+    virtual void fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE = NULL);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
-     * isLocalAddress() for local packets, to fragmentAndSend() for forwarded packets,
+     * localDeliver() for local packets, to fragmentAndSend() for forwarded packets,
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
@@ -108,7 +130,7 @@ class INET_API IPv6 : public QueueBase
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void isLocalAddress(IPv6Datagram *datagram);
+    virtual void localDeliver(IPv6Datagram *datagram);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
@@ -134,9 +156,23 @@ class INET_API IPv6 : public QueueBase
      * of the queue.
      */
     virtual void endService(cPacket *msg);
+
+#ifdef WITH_xMIPv6
+    /**
+     * Determines the correct interface for the specified destination address.
+     */
+    bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
+            IPv6Datagram* datagram);
+
+    /**
+     * Process the extension headers of the datagram.
+     * Returns true if all have been processed successfully and false if errors occured
+     * and the packet has to be dropped or if the datagram has been forwarded to another
+     * module for further processing.
+     */
+    bool processExtensionHeaders(IPv6Datagram* datagram);
+#endif /* WITH_xMIPv6 */
 };
 
-
 #endif
-
 

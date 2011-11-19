@@ -39,25 +39,26 @@ void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
     sendOrEnqueue(frame);
 }
 
-void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cPolymorphic *ctrl)
+void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
 {
     error("handleCommand(): no commands supported");
 }
 
 Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
+    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // copy receiver address from the control info (sender address will be set in MAC)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setReceiverAddress(ctrl->getDest());
+    frame->setEtherType(ctrl->getEtherType());
     delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
 }
 
-void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

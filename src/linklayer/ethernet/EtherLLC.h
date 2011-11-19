@@ -18,8 +18,10 @@
 #ifndef __INET_ETHERLLC_H
 #define __INET_ETHERLLC_H
 
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "INETDefs.h"
+
+// Forward declarations:
+class EtherFrameWithLLC;
 
 
 /**
@@ -37,6 +39,12 @@ class INET_API EtherLLC : public cSimpleModule
     long totalFromMAC;          // total number of frames received from MAC
     long totalPassedUp;         // total number of packets passed up to higher layer
     long droppedUnknownDSAP;    // frames dropped because no such DSAP was registered here
+    static simsignal_t dsapSignal;
+    static simsignal_t rcvdPkBytesFromHLSignal;
+    static simsignal_t rcvdPkBytesFromMACSignal;
+    static simsignal_t passedUpPkBytesSignal;
+    static simsignal_t droppedPkBytesUnknownDSAPSignal;
+    static simsignal_t sendPauseSignal;
 
   protected:
     virtual void initialize();

@@ -20,19 +20,19 @@
 package inet.linklayer.ppp;
 
 //
-// \PPP implementation.
+// PPP implementation.
 //
-// Packets are encapsulated in PPPFrame.
+// Packets are encapsulated in ~PPPFrame.
 //
-// \PPP is a complex protocol with strong support for link configuration
+// PPP is a complex protocol with strong support for link configuration
 // and maintenance. This model ignores those details, and only performs
 // simple encapsulation/decapsulation and queuing.
 //
-// In routers, \PPP relies on an external queue module (see OutputQueue)
+// In routers, PPP relies on an external queue module (see ~IOutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
-// In hosts, no such queue is used, so \PPP contains an internal
+// In hosts, no such queue is used, so PPP contains an internal
 // queue named txQueue to queue up packets waiting for transmission.
 // Conceptually, txQueue is of infinite size, but for better diagnostics
 // one can specify a hard limit in the txQueueLimit parameter -- if this is
@@ -41,7 +41,7 @@ package inet.linklayer.ppp;
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see PPPInterface, OutputQueue, PPPFrame
+// @see ~PPPInterface, ~IOutputQueue, ~PPPFrame
 //
 simple PPP
 {
@@ -50,10 +50,27 @@ simple PPP
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
         int mtu = default(4470);
         @display("i=block/rxtx");
+
+        @signal[txState](type=long);    // 1:transmit, 0:idle
+        @signal[rxPkOk](type=PPPFrame);
+        @signal[dropPkIfaceDown](type=cMessage);
+        @signal[dropPkBitError](type=cMessage);
+        @signal[packetSentToLower](type=PPPFrame);
+        @signal[packetReceivedFromLower](type=cMessage);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cMessage);
+
+        @statistic[txState](title="TX State"; record=timeavg,vector; interpolationmode=sample-hold);
+        @statistic[txPkBytes](title="TX packet bytes"; source="packetBytes(packetSentToLower)"; unit=B; record=sum,count,vector);
+        @statistic[rxPkBytesOk](title="RX packet bytes OK"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector);
+        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; source="packetBytes(dropPkBitError)"; unit=B; record=sum,count,vector);
+        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector);
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer"; source="packetBytes(packetReceivedFromUpper)"; unit=B; record=sum,count,vector);
+        @statistic[passedUpPkBytes](title="Passed packet bytes to higher layer"; source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector);
+
     gates:
         input netwIn;
         output netwOut;
         inout phys @labels(PPPFrame);
 }
-
 

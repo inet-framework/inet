@@ -19,14 +19,17 @@
 package inet.networklayer.ipv6;
 
 //
-// \IPv6 Routing Table and Neighbour Discovery data structures.
+// IPv6 Routing Table and Neighbour Discovery data structures.
+// NOTE: This component MUST be named as "routingTable6" inside
+// a StandardHost/Router etc. in order to be accessible by the 
+// ~IPv6 and other modules
 //
-// @see IPv6, IPv6NeighbourDiscovery, ICMPv6
+// @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
 //
 simple RoutingTable6
 {
     parameters:
-        xml routingTableFile;
+        xml routingTable = default(xml("<routingTable/>"));
         bool isRouter;
         @display("i=block/table");
 }

@@ -39,8 +39,8 @@ simple GilbertElliotSnr
         double meanGood;
         double meanBad;
     gates:
-        input uppergateIn;
-        output uppergateOut;
+        input upperLayerIn;
+        output upperLayerOut;
         input radioIn @labels(AirFrame); // to receive AirFrames
 }
 

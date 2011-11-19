@@ -34,13 +34,13 @@ enum
     NF_SUBSCRIBERLIST_CHANGED,
 
     // - host
-    NF_HOSTPOSITION_UPDATED,
     NF_NODE_FAILURE,
     NF_NODE_RECOVERY,
 
     // - layer 1 (physical)
     NF_RADIOSTATE_CHANGED,
     NF_RADIO_CHANNEL_CHANGED,
+    NF_RADIO_CHANGE_NOISE,
 
     // - layer 2 (data-link)
     //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
@@ -53,6 +53,12 @@ enum
     NF_MAC_BECAME_IDLE,
     NF_L2_BEACON_LOST,   // missed several consecutive beacons (currently Ieee80211)
     NF_L2_ASSOCIATED,    // successfully associated with an AP (currently Ieee80211)
+
+    NF_LINK_BREAK, // Used for manet link layer feedback
+    NF_LINK_PROMISCUOUS, // Used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
+    NF_LINK_FULL_PROMISCUOUS, // Used for manet promiscuous mode, all packets are promiscuous
+    NF_LINK_REFRESH,     // Used for refresh a neigbourd adjacency
+
 
     // - layer 3 (network)
     NF_INTERFACE_CREATED,
@@ -71,6 +77,7 @@ enum
 
     // layer 3 - IPv6
     NF_IPv6_HANDOVER_OCCURRED,
+    NF_MIPv6_RO_COMPLETED,
 
     // - layer 4 (transport)
     //...
@@ -83,6 +90,9 @@ enum
 
     // - layer 7 (application)
     //...
+    // - battery
+    NF_BATTERY_CHANGED,
+    NF_BATTERY_CPUTIME_CONSUMED,
 };
 
 /**
@@ -93,10 +103,7 @@ const char *notificationCategoryName(int category);
 /**
  * Utility function
  */
-void printNotificationBanner(int category, const cPolymorphic *details);
+void printNotificationBanner(int category, const cObject *details);
 
 #endif
-
-
-
 

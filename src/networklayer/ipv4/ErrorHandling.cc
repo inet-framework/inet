@@ -19,11 +19,10 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <omnetpp.h>
 #include "ErrorHandling.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
+
 #include "ICMPMessage.h"
+#include "IPv4Datagram.h"
 
 
 Define_Module(ErrorHandling);
@@ -31,7 +30,12 @@ Define_Module(ErrorHandling);
 void ErrorHandling::initialize()
 {
     numReceived = 0;
+    numHostUnreachable = 0;
+    numTimeExceeded = 0;
+
     WATCH(numReceived);
+    WATCH(numHostUnreachable);
+    WATCH(numTimeExceeded);
 }
 
 void ErrorHandling::handleMessage(cMessage *msg)
@@ -40,7 +44,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedMsg());
+    IPv4Datagram *d = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
 
     EV << "Error Handler: ICMP message received:\n";
     EV << " Type: " << (int)icmpMsg->getType()
@@ -51,13 +55,24 @@ void ErrorHandling::handleMessage(cMessage *msg)
        << " Time: " << simTime()
        << "\n";
 
+    switch (icmpMsg->getType())
+    {
+        case ICMP_DESTINATION_UNREACHABLE:
+            numHostUnreachable++;
+            break;
+
+        case ICMP_TIME_EXCEEDED:
+            numTimeExceeded++;
+            break;
+    }
+
     delete icmpMsg;
 
     if (ev.isGUI())
     {
         char buf[80];
         sprintf(buf, "errors: %ld", numReceived);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 

@@ -7,14 +7,24 @@ Supported software:
 
   Download NSC from: http://www.wand.net.nz/~stj2/nsc/
 
-  Extract the 'nsc-0.5.1.tar.bz2' tarball in this directory and build it.
+  Extract the 'nsc-0.5.2.tar.bz2' tarball in this directory and build it.
 
-  $ tar xvfj nsc-0.5.1.tar.bz2
-  $ cd nsc-0.5.1
+  $ tar xvfj nsc-0.5.2.tar.bz2
+
+  When you use it on a 64 bit system, you must use the 'patch_for_nsc-0.5.2-amd64.txt'.
+  The NSC works with this patch on 32 bit system, too.
+
+  $ patch -p 1 <patch_for_nsc-0.5.2-amd64.txt
+
+  Build the 'nsc-0.5.2'.
+
+  $ cd nsc-0.5.2
   $ python scons.py
 
   This should generate libfreebsd5.3.so, liblinux2.6.10.so, liblinux2.6.18.so,
-  liblinux2.6.26.so, liblwip.so, libopenbsd3.5.so in the nsc-0.5.1 directory.
+  liblinux2.6.26.so, liblwip.so, libopenbsd3.5.so in the nsc-0.5.2 directory.
+  When you use it on a 64 bit system, the generated libraries are
+  liblinux2.6.18.so and liblinux2.6.26.so only.
 
   Then rebuild INET.
 

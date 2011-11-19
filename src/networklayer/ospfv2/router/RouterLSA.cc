@@ -17,27 +17,27 @@
 
 #include "LSA.h"
 
-bool OSPF::RouterLSA::Update(const OSPFRouterLSA* lsa)
+bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
 {
-    bool different = DiffersFrom(lsa);
+    bool different = differsFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime();
+    resetInstallTime();
     if (different) {
-        ClearNextHops();
+        clearNextHops();
         return true;
     } else {
         return false;
     }
 }
 
-bool OSPF::RouterLSA::DiffersFrom(const OSPFRouterLSA* routerLSA) const
+bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA* routerLSA) const
 {
     const OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
                             (header_var.getLsaLength() != lsaHeader.getLsaLength()));
-    bool differentBody   = false;
+    bool differentBody = false;
 
     if (!differentHeader) {
         differentBody = ((V_VirtualLinkEndpoint_var != routerLSA->getV_VirtualLinkEndpoint()) ||

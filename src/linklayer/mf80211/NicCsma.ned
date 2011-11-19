@@ -20,33 +20,36 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
-import inet.linklayer.mfcore.BasicDecider;
+import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
+import inet.linklayer.mf80211.core.BasicDecider;
+import inet.linklayer.IWirelessNic;
 
 
 //
-// The CsmaNic contains a csma-like MAC layer.
-// The SnrEval module is used as the mac needs a RadioState to be published.
-// However as still the BasicDecider is used all messages will be delivered to
+// The CsmaNic contains a CSMA-like MAC layer.
+// The ~SnrEval module is used as the MAC needs a RadioState to be published.
+// However as still the ~BasicDecider is used all messages will be delivered to
 // the MAC and no packets get lost
 //
 // This nic is intended to be used in order to test the implementation
 // of the csma protocol.
 //
-// IMPORTANT:<br> In order to work with the ChannelControl module the snrEval
-// module has to be called "snrEval" in the ned file.
+// IMPORTANT: In order to work with the ~ChannelControl module, the snrEval
+// module has to be called "snrEval" in the NED file.
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see BasicMacLayer, BasicDecider, BasicSnrEval
+// @see BasicMacLayer, ~BasicDecider, ~BasicSnrEval
 // @author Marc Loebbers
 //
-module NicCsma
+module NicCsma like IWirelessNic
 {
+    parameters:
+        string mgmtType = ""; // unused
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mac: CSMAMacLayer {
@@ -63,10 +66,10 @@ module NicCsma
         }
     connections:
         radioIn --> snrEval.radioIn;
-        decider.uppergateOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.uppergateIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.uppergateOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowerLayerIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowerLayerOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowerLayerIn;
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.upperLayerOut --> upperLayerOut;
+        mac.upperLayerIn <-- upperLayerIn;
 }

@@ -20,13 +20,12 @@
 
 //
 // General definitions.
-// Andras Varga
 //
 
 #include <omnetpp.h>
 
-#if OMNETPP_VERSION < 0x0400
-#  error At least OMNeT++/OMNEST version 4.0 required
+#if OMNETPP_VERSION < 0x0402
+#  error At least OMNeT++/OMNEST version 4.2 required
 #endif
 
 #if defined(INET_EXPORT)
@@ -48,6 +47,8 @@ typedef unsigned long ulong;
 //
 #define EV ev.isDisabled()?ev:ev
 
+// used at several places as
+#define SPEED_OF_LIGHT 299792458.0
 
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()
@@ -61,7 +62,7 @@ template <class T>
 T *__checknull(T *p, const char *expr, const char *file, int line)
 {
     if (!p)
-        opp_error("Expression %s returned NULL at %s:%d",expr,file,line);
+        opp_error("Expression %s returned NULL at %s:%d", expr, file, line);
     return p;
 }
 #define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
@@ -106,6 +107,25 @@ static double erfc(double x)
 
     return x < 0 ? 2 - y : y;
 }
+
+// ISO C99 function, not in MSVC
+inline long lrint(double x)
+{
+    return (long)floor(x+0.5);
+}
+
+// ISO C99 function, not in MSVC
+inline double fmin(double a, double b)
+{
+    return a < b ? a : b;
+}
+
+// ISO C99 function, not in MSVC
+inline double fmax(double a, double b)
+{
+    return a > b ? a : b;
+}
 #endif
+
 
 #endif

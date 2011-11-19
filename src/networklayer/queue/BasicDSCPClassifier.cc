@@ -18,8 +18,12 @@
 
 #include <omnetpp.h>
 #include "BasicDSCPClassifier.h"
-#include "IPDatagram.h"
-#ifndef WITHOUT_IPv6
+
+#ifdef WITH_IPv4
+#include "IPv4Datagram.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6Datagram.h"
 #endif
 
@@ -34,23 +38,26 @@ int BasicDSCPClassifier::getNumQueues()
 
 int BasicDSCPClassifier::classifyPacket(cMessage *msg)
 {
-    if (dynamic_cast<IPDatagram *>(msg))
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4Datagram *>(msg))
     {
         // IPv4 QoS: map DSCP to queue number
-        IPDatagram *datagram = (IPDatagram *)msg;
+        IPv4Datagram *datagram = (IPv4Datagram *)msg;
         int dscp = datagram->getDiffServCodePoint();
         return classifyByDSCP(dscp);
     }
-#ifndef WITHOUT_IPv6
-    else if (dynamic_cast<IPv6Datagram *>(msg))
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6Datagram *>(msg))
     {
         // IPv6 QoS: map Traffic Class to queue number
         IPv6Datagram *datagram = (IPv6Datagram *)msg;
         int dscp = datagram->getTrafficClass();
         return classifyByDSCP(dscp);
     }
-#endif
     else
+#endif
     {
         return BEST_EFFORT; // lowest priority ("best effort")
     }
@@ -75,7 +82,7 @@ int BasicDSCPClassifier::classifyByDSCP(int dscp)
         return BEST_EFFORT;
 
     // from here on, we deal with non-zero standardized DSCP values only
-    int upper3bits = (dscp & 0x3c) >> 3;
+    int upper3bits = (dscp & 0x38) >> 3;
     //int lower3bits = (dscp & 0x07);  -- we'll ignore this
 
     // rfc 2474, section 4.2.2: at least two independently forwarded classes of traffic have to be created

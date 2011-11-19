@@ -18,9 +18,9 @@
 
 #include "TCPIPchecksum.h"
 
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
+//#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
+//#include <netinet/in.h>  // htonl, ntohl, ...
+//#endif
 
 uint16_t TCPIPchecksum::_checksum(const void *addr, unsigned int count)
 {

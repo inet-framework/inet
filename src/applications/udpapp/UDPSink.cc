@@ -16,43 +16,61 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPSink.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
 
 
 Define_Module(UDPSink);
+
+simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 
 void UDPSink::initialize()
 {
     numReceived = 0;
     WATCH(numReceived);
+    rcvdPkSignal = registerSignal("rcvdPk");
 
-    int port = par("localPort");
-    if (port!=-1)
-        bindToPort(port);
+    socket.setOutputGate(gate("udpOut"));
+
+    int localPort = par("localPort");
+    socket.bind(localPort);
 }
 
 void UDPSink::handleMessage(cMessage *msg)
 {
-    processPacket(PK(msg));
+    if (msg->getKind() == UDP_I_DATA)
+    {
+        // process incoming packet
+        processPacket(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
+    }
 
     if (ev.isGUI())
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
-
 }
 
-void UDPSink::processPacket(cPacket *msg)
+void UDPSink::finish()
 {
-    EV << "Received packet: ";
-    printPacket(msg);
-    delete msg;
+}
+
+void UDPSink::processPacket(cPacket *pk)
+{
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    emit(rcvdPkSignal, pk);
+    delete pk;
 
     numReceived++;
 }

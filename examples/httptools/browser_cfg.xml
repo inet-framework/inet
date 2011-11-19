@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sample browser behaviour specification for HttpTools. -->
+<!-- The parameters describe the behaviour of the browser. See also the specification files for the servers. -->
+<root>
+	<!-- Use the user-profile categories to create profiles for browsing behaviour. 
+		 The profile can be selected per browser at run-time by using the XPath argument in the initialization file.
+		 The following parameters are required:
+		  * InterSessionInterval is the interval between browsing sessions.  
+		  * InterRequestInterval is the interval between requests made within a browsing session.
+		  * requestSize describes the size of requests made for resources.
+		  * reqInSession describes the number of requests made by the user within a browsing session.
+		 A random distribution is used for each of the parameters. normal, uniform, exponential, zipf and histogram random
+		 distributions are supported. See the documentation for more details.
+	-->
+    <user-profile id="light">
+		<activityPeriod type='normal' mean='21600' sd='7200' min='7200' />
+		<interRequestInterval type='normal' mean='900' sd='60' nonNegative='true' min='60.0' />
+		<interSessionInterval type='normal' mean='7200' sd='1800' nonNegative='true' min='120.0' />
+		<requestSize type='normal' mean='600' sd='100' nonNegative='true' min='300' />
+		<reqInSession type='normal' mean='5' sd='2' nonNegative='true' min='1' />
+		<processingDelay type='normal' mean='0.05' sd='0.01' nonNegative='true' />
+    </user-profile>
+    <user-profile id="normal">
+		<activityPeriod type='normal' mean='28800' sd='10800' min='7200' />
+		<interRequestInterval type='normal' mean='600' sd='60' nonNegative='true' min='60.0' />
+		<interSessionInterval type='normal' mean='3600' sd='1800' nonNegative='true' min='120.0' />
+		<requestSize type='normal' mean='600' sd='100' nonNegative='true' min='300' />
+		<reqInSession type='normal' mean='10' sd='5' nonNegative='true' min='2' />
+		<processingDelay type='normal' mean='0.05' sd='0.01' nonNegative='true' />
+    </user-profile>
+    <user-profile id="heavy">
+		<activityPeriod type='normal' mean='43200' sd='10800' min='7200' />
+		<interRequestInterval type='normal' mean='300' sd='60' nonNegative='true' min='60.0' />
+		<interSessionInterval type='normal' mean='1800' sd='1800' nonNegative='true' min='120.0' />
+		<requestSize type='normal' mean='600' sd='100' nonNegative='true' min='300' />
+		<reqInSession type='normal' mean='20' sd='10' nonNegative='true' min='5' />
+		<processingDelay type='normal' mean='0.05' sd='0.01' nonNegative='true' />
+    </user-profile>
+</root>

@@ -13,12 +13,13 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ETHERAPPSRV_H
 #define __INET_ETHERAPPSRV_H
 
 #include "INETDefs.h"
+
 #include "MACAddress.h"
 
 #define MAX_REPLY_CHUNK_SIZE   1497
@@ -33,10 +34,11 @@ class INET_API EtherAppSrv : public cSimpleModule
     int localSAP;
     int remoteSAP;
 
+    // statistics
     long packetsSent;
     long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void initialize();
@@ -44,9 +46,7 @@ class INET_API EtherAppSrv : public cSimpleModule
     virtual void finish();
 
     void registerDSAP(int dsap);
-    void sendPacket(cMessage *datapacket, const MACAddress& destAddr);
+    void sendPacket(cPacket *datapacket, const MACAddress& destAddr);
 };
 
 #endif
-
-

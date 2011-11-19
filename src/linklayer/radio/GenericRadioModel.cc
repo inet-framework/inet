@@ -50,7 +50,7 @@ void GenericRadioModel::initializeFrom(cModule *radioModule)
     else if (strcmp(modulationName, "256-QAM")==0)
         modulation = new QAM256Modulation();
     else
-        opp_error("unrecognized modulation '%s'", modulationName);
+        throw cRuntimeError(this, "unrecognized modulation '%s'", modulationName);
 }
 
 

@@ -26,7 +26,7 @@ class LinkStateRequestHandler : public IMessageHandler {
 public:
     LinkStateRequestHandler(Router* containingRouter);
 
-    void    ProcessPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
 } // namespace OSPF

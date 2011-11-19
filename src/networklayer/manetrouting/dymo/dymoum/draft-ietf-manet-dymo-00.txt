@@ -1,0 +1,1511 @@
+
+Mobile Ad hoc Networks Working                               I. Chakeres
+Group                                                   E. Belding-Royer
+Internet-Draft                                          UC Santa Barbara
+Expires: July 5, 2005                                         C. Perkins
+                                                                   Nokia
+                                                            January 2005
+
+
+            Dynamic MANET On-demand Routing Protocol (DYMO)
+                        draft-ietf-manet-dymo-00
+
+Status of this Memo
+
+   This document is an Internet-Draft and is subject to all provisions
+   of Section 3 of RFC 3667.  By submitting this Internet-Draft, each
+   author represents that any applicable patent or other IPR claims of
+   which he or she is aware have been or will be disclosed, and any of
+   which he or she become aware will be disclosed, in accordance with
+   RFC 3668.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as
+   Internet-Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.  The list of
+   Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on July 5, 2005.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2005).
+
+Abstract
+
+   The Dynamic MANET On-demand (DYMO) routing protocol is intended for
+   use by mobile nodes in wireless multihop networks.  It offers quick
+   adaptation to dynamic conditions, low processing and memory overhead,
+   low network utilization, and determines unicast routes between nodes
+   within the network.
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 1]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+Table of Contents
+
+   1.  Overview . . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+
+   2.  Terminology  . . . . . . . . . . . . . . . . . . . . . . . . .  5
+
+   3.  Data Structures  . . . . . . . . . . . . . . . . . . . . . . .  6
+     3.1   Conceptual Data Structures . . . . . . . . . . . . . . . .  6
+       3.1.1   Route Table Entry  . . . . . . . . . . . . . . . . . .  6
+     3.2   DYMO Message Elements  . . . . . . . . . . . . . . . . . .  6
+       3.2.1   Fixed Portion of DYMO Elements . . . . . . . . . . . .  6
+       3.2.2   Routing Element (RE) . . . . . . . . . . . . . . . . .  7
+       3.2.3   Route Error (RERR) . . . . . . . . . . . . . . . . . .  8
+       3.2.4   Unsupported-element Error (UERR) . . . . . . . . . . .  8
+     3.3   Field Descriptions . . . . . . . . . . . . . . . . . . . .  8
+
+   4.  Detailed Operation . . . . . . . . . . . . . . . . . . . . . . 12
+     4.1   Sequence Numbers . . . . . . . . . . . . . . . . . . . . . 12
+       4.1.1   Maintaining a Sequence Number  . . . . . . . . . . . . 12
+       4.1.2   Incrementing a Sequence Number . . . . . . . . . . . . 12
+       4.1.3   Sequence Number Rollover . . . . . . . . . . . . . . . 12
+       4.1.4   Actions After Sequence Number Loss . . . . . . . . . . 12
+     4.2   DYMO Routing Table Operations  . . . . . . . . . . . . . . 12
+       4.2.1   Creating or Updating a Route Table Entry from
+               Routing Element Information  . . . . . . . . . . . . . 12
+       4.2.2   Route Table Entry Timeouts . . . . . . . . . . . . . . 13
+     4.3   DYMO General Processing  . . . . . . . . . . . . . . . . . 13
+       4.3.1   DYMO Control Packet Processing . . . . . . . . . . . . 13
+       4.3.2   Generic Element Pre-processing . . . . . . . . . . . . 14
+       4.3.3   Processing Unsupported DYMO Elements . . . . . . . . . 14
+         4.3.3.1   Generating an Unsupported-element Error  . . . . . 14
+       4.3.4   Generic Element Post-processing  . . . . . . . . . . . 15
+       4.3.5   DYMO Control Packet Transmission . . . . . . . . . . . 15
+     4.4   Routing Element  . . . . . . . . . . . . . . . . . . . . . 15
+       4.4.1   Routing Element Creation . . . . . . . . . . . . . . . 15
+       4.4.2   Appending Additional Routing Information to an
+               Existing Routing Element . . . . . . . . . . . . . . . 15
+       4.4.3   Routing Element Processing . . . . . . . . . . . . . . 16
+     4.5   Route Discovery  . . . . . . . . . . . . . . . . . . . . . 16
+     4.6   Route Maintenance  . . . . . . . . . . . . . . . . . . . . 17
+       4.6.1   Link Breaks  . . . . . . . . . . . . . . . . . . . . . 17
+       4.6.2   Updating Route Lifetimes . . . . . . . . . . . . . . . 17
+       4.6.3   Extending Route Lifetimes  . . . . . . . . . . . . . . 17
+       4.6.4   Route Error Generation . . . . . . . . . . . . . . . . 18
+       4.6.5   Route Error Processing . . . . . . . . . . . . . . . . 18
+     4.7   Routing Prefix . . . . . . . . . . . . . . . . . . . . . . 19
+     4.8   Internet Attachment  . . . . . . . . . . . . . . . . . . . 19
+     4.9   Multiple Interfaces  . . . . . . . . . . . . . . . . . . . 19
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 2]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+     4.10  Packet Generation Limits . . . . . . . . . . . . . . . . . 20
+
+   5.  Configuration Parameters . . . . . . . . . . . . . . . . . . . 21
+
+   6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 22
+
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . . 23
+
+   8.  Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 24
+
+   9.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+     9.1   Normative References . . . . . . . . . . . . . . . . . . . 25
+     9.2   Informative References . . . . . . . . . . . . . . . . . . 25
+
+       Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . 25
+
+       Intellectual Property and Copyright Statements . . . . . . . . 27
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 3]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+1.  Overview
+
+   The Dynamic MANET On-demand (DYMO) routing protocol enables dynamic,
+   reactive, multihop routing between participating nodes wishing to
+   communicate.  The basic operations of the protocol are route
+   discovery and management.  During route discovery the originating
+   node causes dissemination of a Routing Element (RE) throughout the
+   network to find the target node.  During dissemination each
+   intermediate node creates a route to the originating node.  When the
+   target node receives the RE it responds with RE unicast toward
+   originating node.  During propagation each node creates a route to
+   the target node.  When the originating node is reached routes have
+   been established between the originating node and the target node in
+   both directions.
+
+   In order to react quickly to changes in the network topology nodes
+   should maintain their routes and monitor their links.  When a packet
+   is received for a route that is no longer available the source of the
+   packet should be notified.  A Route Error (RERR) is sent to the
+   packet source to indicate the current route is broken.  Once the
+   source receives the RERR, it will re-initiate route discovery if it
+   still has packets to deliver.
+
+   In order to enable extension of the base specification, DYMO defines
+   the handling of unsupported extensions.  By defining default
+   handling, future extensions are handled in a predetermined understood
+   fashion.
+
+   DYMO uses sequence numbers to ensure loop freedom [3].
+
+   All DYMO packets are transmitted via UDP on port TBD.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 4]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+2.  Terminology
+      IPBroadcastAddress
+         Transmit the packet to the IP Limited Broadcast address,
+         255.255.255.255 (IPv4) or FF:FF:FF:FF:FF:FF (IPv6).
+      IPDestinationAddress
+         The destination of a packet, indicated by examining the IP
+         header.
+      IPSourceAddress
+         The source of a packet, indicated by examining the IP header.
+      MANETcast
+         Transmit the packet to all MANET nodes within reception range.
+         In a simple implementation MANETcast packets are sent to the
+         IPBroadcastAddress.  MANETcast SHOULD preform duplicate
+         suppression.
+      Valid Route
+         A known route where the RouteValidTimeout is larger than the
+         current time.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 5]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+3.  Data Structures
+
+3.1  Conceptual Data Structures
+
+3.1.1  Route Table Entry
+   o  RouteAddress
+   o  RouteDeleteTimeout
+   o  RouteHopCnt
+   o  RouteIsGateway
+   o  RouteNextHopAddress
+   o  RouteNextHopInterface
+   o  RoutePrefix
+   o  RouteSeqNum
+   o  RouteValidTimeout
+
+3.2  DYMO Message Elements
+
+3.2.1  Fixed Portion of DYMO Elements
+
+   All DYMO message elements must conform to the fixed data structure
+   below.
+
+
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    ElemType   |T|I|  Res  |  ElemTTL  |      ElemLen          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                      ElemTargetAddress                        .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .      ElemNotifyAddress (Only ElemTypes with M-bit set)        .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                                                               .
+   .                            ElemData                           .
+   .                     ElemType-Specific Payload                 .
+   .                                                               .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 6]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+3.2.2  Routing Element (RE)
+
+
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    ElemType   |T|I|  Res  |  ElemTTL  |        ElemLen        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                        ElemTargetAddress                      .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        ElemTargetSeqNum                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |A|G| Prefix1 | Res | REHopCnt1 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                          RENodeAddress1                       .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          RENodeSeqNum1                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |R|G| PrefixN | Res | REHopCntN |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .               Additional RENodeAddressN (if needed)           .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |               Additional RENodeSeqNumN (if needed)            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+      ElemType: 1.  Nodes MUST implement the Routing Element.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 7]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+3.2.3  Route Error (RERR)
+
+
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    ElemType   |T|I|  Res  |  ElemTTL  |       ElemLen         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                       ElemTargetAddress                       .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                         UNodeAddress1                         .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         UNodeSeqNum1                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .               Additional UNodeAddress (if needed)             .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |               Additional UNodeSeqNum (if needed)              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+      ElemType: 2.  Nodes not implementing RERR will ignore the element
+      and continue.
+
+3.2.4  Unsupported-element Error (UERR)
+
+
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    ElemType   |T|I|  Res  |  ElemTTL  |       ElemLen         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                       ElemTargetAddress                       .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                       UElemTargetAddress                      .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .                        UERRNodeAddress                        .
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   UElemType    |
+   +-+-+-+-+-+-+-+-+
+
+      ElemType: 3.  Nodes not implementing UERR will ignore the element
+      and continue.
+
+3.3  Field Descriptions
+      A-bit (A)
+         1-bit selector indicating whether this RE requires an answer RE
+         by the ElemTargetAddress.  If A=1 an answer is required.  The
+         instructions for generating an answer RE are described in
+         Section 4.4.3.
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 8]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+      Element Data (ElemData)
+         ElemType-specific payload.
+      Element Length (ElemLen)
+         12-bit field that indicates the size of the element in bytes,
+         including the fixed portion.
+      Element Notify Address (ElemNotifyAddress)
+         The node to send a UERR if the ElemType is unsupported.  The
+         ElemNotifyAddress field is only present if the ElemType has the
+         M-bit is set to one (1).
+      Element Target Address (ElemTargetAddress)
+         The node that is the ultimate destination of the element.
+      Element Time to Live (ElemTTL)
+         6-bit field that identifies the maximum number of times the
+         element is to be retransmitted.  The ElemTTL field operates
+         similar to IPTTL (MaxCount) and is decremented at each hop.
+         When ElemTTL reaches zero (0) the element is dropped.
+      Element Type (ElemType)
+
+
+                  0                          0
+                  0 1 2 3 4 5 6 7 8          0 1 2 3 4 5 6 7 8
+                  +-+-+-+-+-+-+-+-+          +-+-+-+-+-+-+-+-+
+                  |    ElemType   |     =    |M| H |         |
+                  +-+-+-+-+-+-+-+-+          +-+-+-+-+-+-+-+-+
+
+         The ElemType field identifies the element as well as the
+         handling by nodes that do not implement or understand the
+         element.  The MSB bit, M-bit, denotes whether the element
+         requires notification via an Unsupported-element Error (UERR)
+         when the element is not understood or handled by a particular
+         node.  The next two bits, H-bits, identify how the ElemType
+         MUST be handled by nodes not implementing the ElemType,
+         regardless of UERR delivery.  Section 4.3.3 describes the
+         handling behavior based on the ElemType.
+      G-bit (G)
+         1-bit selector to indicate whether the RENodeAddress1 is a
+         gateway.  If G=1 RENodeAddress1 is a gateway.  For more
+         information on gateway operation see Section 4.8.
+      I-bit (I)
+         1-bit selector indicating whether the element has been ignored.
+         If I=1 the element has been ignored.  For a description of
+         processing for unsupported elements by ElemType see
+         Section 4.3.3.
+      Prefix Size (Prefix)
+         6-bit field that specifies the size of the subnet reachable
+         through the associated node, see Section 4.7.  The definition
+         of Prefix is different for gateways.
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                  [Page 9]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+      Routing Element Block Hop Count (REHopCnt)
+         6-bit field that identifies the number of intermediate nodes
+         the associated RE block has passed through.
+      Routing Element Node Address (RENodeAddress)
+         The IP address of the node that appending its RENodeAddress.
+      Routing Element Node Sequence Number (RENodeSeqNum)
+         The sequence number of the node appending its RENodeSeqNum.
+      Reserved (Res, R)
+         Reserved bits.  These bits are set to zero (0) during element
+         creation and ignored during processing.
+      Route Node Address (RouteNodeAddress)
+         The IP address of the node associated with the routing table
+         entry.
+      Route Delete Timeout (RouteDeleteTimeout)
+         The corresponding routing table entry MUST be deleted if the
+         current time is after RouteDeleteTimeout.
+      Route Hop Count (RouteHopCnt)
+         The number of intermediate node hops before reaching the
+         RouteNodeAddress.
+      Route Is Gateway (RouteIsGateway)
+         1-bit selector indicating whether the RouteNodeAddress is a
+         gateway.
+      Route Next Hop Address (RouteNextHopAddress)
+         The IP address of the next node on the path toward the
+         RouteNodeAddress.
+      Route Next Hop Interface (RouteNextHopInterface)
+         The interface to send packets toward the RouteNodeAddress.
+      Route Prefix (RoutePrefix)
+         6-bit field that specifies the size of the subnet reachable
+         through the RouteNodeAddress, see Section 4.7.  The definition
+         of the Prefix field is different for gateways.
+      Route Sequence Number (RouteSeqNum)
+         The sequence number of the RouteNodeAddress.
+      RouteValidTimeout
+         The routing table entry is no longer considered valid if the
+         current time is after RouteValidTimeout.
+      T-bit (T)
+         1-bit selector indicating how the element must be transmitted.
+         If T=0 the element is unicast toward the ElemTargetAddress.
+         Otherwise, if T=1 the element is MANETcast.
+      Unreachable Node Address (UNodeAddress)
+         The IP address of the unreachable node.
+      Unreachable Node Sequence Number (UNodeSeqNum)
+         The sequence number of the unreachable node, if known;
+         otherwise, zero (0).
+      Unsupported-element Node Address (UERRNodeAddress)
+         The IP address of the node that generated the UERR.
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 10]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+      Unsupported-element Target Address (UElemTargetAddress)
+         Address of the destination of the element that caused delivery
+         of the UERR.
+      Unsupported-element Type (UElemType)
+         The ElemType that required generation of the UERR.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 11]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+4.  Detailed Operation
+
+4.1  Sequence Numbers
+
+4.1.1  Maintaining a Sequence Number
+
+   DYMO requires each node in the network maintain its own sequence
+   number (OwnSeqNum).  The circumstances for a node to change its
+   OwnSeqNum are described in Section 4.4.1.
+
+4.1.2  Incrementing a Sequence Number
+
+   When a node increments its OwnSeqNum (as proscribed in Section 4.4.1
+   and Section 4.4.3) it MUST do so by treating the sequence number
+   value as if it were an unsigned number.  The sequence number zero (0)
+   is reserved and is used in several DYMO data structures to represent
+   an unknown sequence number.
+
+4.1.3  Sequence Number Rollover
+
+   To accomplish sequence number rollover, if the sequence number has
+   been assigned to be the largest possible number representable as a
+   32-bit unsigned integer (i.e., 4294967295), then the sequence number
+   when incremented MUST be set to one (1).
+
+4.1.4  Actions After Sequence Number Loss
+
+   If a node's OwnSeqNum is lost it MUST NOT participate in the MANET
+   network (forward any data or issue any DYMO control packets) until it
+   is sure that all other nodes have deleted any sequence number
+   information about it.  If RouteDeleteTimeout is set to
+   ROUTE_DELETE_TIMEOUT + the current time (as described in
+   Section 4.2.1), nodes should avoid participation for at least
+   ROUTE_DELETE_TIMEOUT after sequence number loss.
+
+4.2  DYMO Routing Table Operations
+
+4.2.1  Creating or Updating a Route Table Entry from Routing Element
+      Information
+
+   While processing a RE, as described in Section 4.4.3, a node checks
+   its routing table for an entry to the RENodeAddress using
+   longest-prefix matching.  In the event that there is no corresponding
+   entry for the node, an entry is created.
+
+   The routing information about RENodeAddress contained in the RE block
+   is considered stale if:
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 12]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   o  the result of subtracting the RouteSeqNum from RENodeSeqNum is
+      less than zero (0) using signed 32-bit arithmetic, OR
+   o  the result of subtracting the RouteSeqNum from RENodeSeqNum is
+      equal to zero (0) using signed 32-bit arithmetic AND the REHopCnt
+      is greater than RouteHopCnt.
+   If the information is stale and this RE block is the first node in
+   the RE (RENodeAddress1) this DYMO packet dropped.  Otherwise, the
+   RENodeAddress and RENodeSeqNum are removed from this RE.
+
+   If the route information for RENodeAddress is not stale, then the
+   following actions occur to the route table entry for RENodeAddress:
+   o  the RouteDeleteTimeout is set to the current time +
+      ROUTE_DELETE_TIMEOUT,
+   o  the RouteNextHopAddress is set to the node that transmitted this
+      DYMO packet (IPSourceAddress),
+   o  the RouteNextHopInterface is set to the interface that this DYMO
+      packet was received on,
+   o  the RoutePrefix is set to Prefix,
+   o  and the RouteSeqNum is set to the RENodeSeqNum.
+   o  the RouteValidTimeout is set to the current time + ROUTE_TIMEOUT,
+
+   If a valid route exists to RENodeAddress, the route can be used to
+   send any queued data packets and to fulfill any outstanding route
+   requests.
+
+4.2.2  Route Table Entry Timeouts
+
+   If the current time is later than a routing entry's
+   RouteValidTimeout, the route is stale and it is not be used to route
+   packets.
+
+   If the current time is later than a routing entry's
+   RouteDeleteTimeout, the route MUST be deleted.
+
+4.3  DYMO General Processing
+
+4.3.1  DYMO Control Packet Processing
+
+   A DYMO packet may consist of multiple DYMO elements.  Each element is
+   processed individually and in sequence, from first to last.  An
+   incoming DYMO packet MUST be completely processed prior to any DYMO
+   packet transmissions, resulting from the contained DYMO elements.
+
+   The length of IP addresses (32-bits for IPv4 and 128-bits for IPv6)
+   inside DYMO elements is dependent on the IP packet header.  For
+   example, if the IP header is IPv6 then all DYMO elements contained in
+   the payload use IPv6 addresses.
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 13]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   Unless specific element processing requires dropping the DYMO packet,
+   it is retransmitted after processing.
+
+4.3.2  Generic Element Pre-processing
+
+   Each element in a DYMO packet undergoes pre-processing before the
+   element specific processing occurs.  The ElemTTL is decremented by
+   one (1).
+
+4.3.3  Processing Unsupported DYMO Elements
+
+   This section describe the processing for unsupported DYMO ElemTypes.
+   For unsupported DYMO elements, the ElemType field identifies the
+   handling by nodes that do not implement or understand the element.
+   The most significant bit (M-bit) indicates whether an
+   Unsupported-element Error (UERR) SHOULD be sent to the
+   ElemNotifyAddress.  The next two bits (H-bits) identify how the
+   element should be handled.
+
+                  0                          0
+                  0 1 2 3 4 5 6 7 8          0 1 2 3 4 5 6 7 8
+                  +-+-+-+-+-+-+-+-+          +-+-+-+-+-+-+-+-+
+                  |    ElemType   |     =    |M| H |         |
+                  +-+-+-+-+-+-+-+-+          +-+-+-+-+-+-+-+-+
+
+   If the M-bit is set is this DYMO element, a UERR is sent to the
+   ElemNotifyAddress.  This is accomplished by following the
+   instructions in Section 4.3.3.1.
+
+   Regardless of whether or not a UERR is sent in response to this
+   unsupported ElemType, the processing node MUST also examine the
+   H-bits to determine how this unsupported element is handled.  If :
+   o  H == 00: Processing for this ElemType MUST skip the element and
+      continue, as if the packet did not contain this element.
+   o  H == 01: Processing for this ElemType MUST remove the element
+      (using the ElemLen) from the packet and continue, as if the packet
+      did not include this element.
+   o  H == 10: Processing for this ElemType MUST set the ignored bit
+      (I-bit), skip this element and continue, as if the packet did not
+      contain this element.
+   o  H == 11: Processing for this ElemType dictates that the packet
+      MUST be dropped.
+
+4.3.3.1  Generating an Unsupported-element Error
+
+   The ElemTargetAddress in the UERR is set to the ElemNotifyAddress
+   from the unsupported element.  The UElemTargetAddress is set to the
+   ElemTargetAddress from the unsupported element.  The UERRNodeAddress
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 14]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   is set to the generating nodes IP address.  The UElemType is the
+   ElemType from the unsupported element.  The ElemTTL is set to
+   NET_DIAMETER.  The UERRNodeAddress is set to the address of the node
+   generating this UERR.  The ElemLen is set to the total number of
+   bytes in this UERR.  The T-bit is set to zero (T=0).  The element is
+   then processed as described in Section 4.3.4.
+
+4.3.4  Generic Element Post-processing
+
+   If the ElemTTL is zero (0) AND this element is the first element this
+   DYMO packet is dropped after processing of all elements in the DYMO
+   packet.  If the ElemTTL is zero (0) AND this is NOT the first
+   element, this element is removed from the packet.  If the ElemTTL is
+   larger than zero (0), this element is re-transmitted in a DYMO packet
+   after all elements have been processed.
+
+4.3.5  DYMO Control Packet Transmission
+
+   DYMO packet transmission is controlled by the T-bit in the first
+   element.  If T=0 the element is unicast toward the ElemTargetAddress
+   via a routing table lookup.  If the RouteNextHopAddress for the
+   ElemTargetAddress is not known the packet is dropped.  If T=1 the
+   element is MANETcast.
+
+   For all DYMO packets the IPTTL (IPMaxCount) SHOULD be set to 1
+   (IPTTL=1).
+
+4.4  Routing Element
+
+4.4.1  Routing Element Creation
+
+   When a node creates a RE, it first increments its OwnSeqNum by one
+   according to the rules specified in Section 4.1.2.  Then it sets the
+   RENodeAddress1 to its own address.  The RENodeSeqNum1 is the node's
+   OwnSeqNum.  The node may advertise a prefix using the Prefix field,
+   as described in Section 4.7.  Otherwise, the Prefix field is set to
+   zero (0).  This node may advertise it is a gateway by setting the
+   G-bit, as described in Section 4.8.  Otherwise, the G-bit is set to
+   zero (0).  The ElemTTL is set to NET_DIAMETER.
+
+4.4.2  Appending Additional Routing Information to an Existing Routing
+      Element
+
+   After processing a RE, a node MAY append its IP address and OwnSeqNum
+   to the RE.  Appending its own routing information may alleviate some
+   route discovery procedures to this node from other nodes that process
+   this RE.
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 15]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   If this node plans to append its IP address to the RE, it first
+   increments its OwnSeqNum as defined in Section 4.1.2.  Then this node
+   appends its IP address and OwnSeqNum to the RE.  The ElemLen is also
+   adjusted accordingly.
+
+4.4.3  Routing Element Processing
+
+   After general DYMO element pre-processing, the ElemHopCnt is
+   incremented by one.  A route to RENodeAddress1 is then created or
+   updated using the associated RENodeSeqNum, G-bit, Prefix, and
+   REHopCnt, as defined in Section 4.2.1.
+
+   Each RENodeAddress, RENodeSeqNum, G-bit, Prefix, and REHopCnt block
+   MAY be processed.  First the REHopCnt is incremented, then a route is
+   created or updated as defined in Section 4.2.1.  Each RENodeAddress
+   block resulting in a valid route entry may alleviate a future route
+   discovery.  Any unprocessed RENodeAddress blocks MUST be removed from
+   the RE.
+
+   If this node is the ElemTargetAddress AND the A-bit is set (A=1),
+   this node MUST reciprocate with a RE.  This node creates a new RE as
+   described in Section 4.4.1.  The ElemTargetAddress in the new RE is
+   set to the RENodeAddress1 from the RE currently being processed.  The
+   T-bit is set to zero (T=0) and the A-bit is set to (A=0).  Then the
+   new RE undergoes post-processing, according to Section 4.3.5.
+
+   If this node is not the ElemTargetAddress the current RE SHOULD be
+   handled according to Section 4.3.4.
+
+   If this node is the ElemTargetAddress the current packet and any
+   additional elements are processed, but this packet is not
+   retransmitted.
+
+4.5  Route Discovery
+
+   A node generates a Route Request (RREQ) to discover a valid route to
+   a particular destination (ElemTargetAddress), other than itself.  A
+   RREQ is simply a RE with the T-bit set (T=1) to indicate that this RE
+   is to be MANETcast.  Also, the A-bit is set to one (A=1) to indicate
+   that the TargetNode must respond with a RE.  If a sequence number is
+   known for the ElemTargetAddress it is placed in the ElemTargetSeqNum
+   field.  Otherwise, ElemTargetSeqNum is set to zero (0).
+
+   Before sending the RREQ, the generating node buffers its
+   RENodeAddress and RENodeSeqNum in its RE Table.  The RE is then
+   transmitted according to the procedure defined in Section 4.3.5.
+
+   After issuing the RREQ, the node waits for a route to be created to
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 16]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   the TargetNode.  If a route is not received within RREQ_WAIT_TIME
+   milliseconds, this node MAY again try to discover a route by issuing
+   another RREQ.
+
+   To reduce congestion in a network, repeated attempts at route
+   discovery for a particular TargetNode SHOULD utilize a binary
+   exponential backoff.  The first time an node issues a RREQ, it waits
+   RREQ_WAIT_TIME milliseconds for a route to the TargetNode.  If a
+   route is not found within that time, the node may send another RREQ.
+   If a route is not found within 2*RREQ_WAIT_TIME, another RREQ may be
+   sent, up to a total of RREQ_TRIES.  For each additional attempt, the
+   waiting time for the previous RREP is multiplied by 2 so that the
+   waiting time conforms to a binary exponential backoff.
+
+   Data packets waiting for a route SHOULD be buffered.
+
+   If a route discovery has been attempted RREQ_TRIES times without
+   receiving a route to the TargetNode, all data packets destined for
+   the corresponding TargetNode SHOULD be dropped from the buffer and a
+   Destination Unreachable ICMP message SHOULD be delivered to the
+   application.
+
+4.6  Route Maintenance
+
+4.6.1  Link Breaks
+
+   Nodes SHOULD monitor links to active neighbors.  This may be
+   accomplished by one or several mechanisms.  Such as:
+   o  Link layer feedback
+   o  Hello messages
+   o  Neighbor discovery
+   o  Route timeout
+   Upon detecting a link break the valid routes utilizing the broken
+   link MUST set their RouteValidTimeout to the current time.
+
+   A RERR MAY be issued after detecting a broken link of an active
+   route.  RERR Generation is described in Section 4.6.4.
+
+4.6.2  Updating Route Lifetimes
+
+   To avoid route timeouts for active sources, after receiving a packet
+   a node MAY update the RouteValidTimeout to the IPSourceAddress to be
+   the current time + ROUTE_TIMEOUT.
+
+4.6.3  Extending Route Lifetimes
+
+   To avoid route timeouts for active routes, an originating node MAY
+   periodically send a RE with the T-bit set to zero (0), the A-bit set
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 17]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   to one (A=1) and the ElemTargetAddress set to the target node's
+   address (RouteAddress).  The resultant DYMO packet transmissions and
+   RE processing (Section 4.2.1) will update the lifetime of routes to
+   the originating node and target node (RouteAddress) at all
+   intermediate nodes, if a valid route still exists.
+
+4.6.4  Route Error Generation
+
+   When a non-DYMO packet is received for a destination without a valid
+   routing table entry, a Route Error (RERR) SHOULD be generated by this
+   node.  A RERR informs the source that the current route is no longer
+   available in a more timely manner than RouteValidTimeout.
+
+   In the RERR, the ElemTargetAddress is the node that sent the non-DYMO
+   packet, the IPSourceAddress.  The UNodeAddress1 field is the address
+   of the unreachable node (IPDestinationAddress) from the non-DYMO
+   packet.  If the UNodeSeqNum is known, it is placed in the RERR;
+   otherwise zero (0) is placed in the this field of the RERR.  The
+   ElemTTL is set to NET_DIAMETER.  The T-bit is set to one (T=1).
+
+   Additional unreachable nodes utilizing the same invalid link (routes
+   with the same RouteNextHopAddress and RouteNextHopInterface) as the
+   UNodeAddress1 MAY be appended to the RERR.  For each unreachable node
+   their UNodeAddress and UNodeSeqNum are appended.  The ElemLen is set
+   accordingly.
+
+   The RERR is then processed as described in Section 4.3.5.
+
+4.6.5  Route Error Processing
+
+   When a node processes a RERR after generic element pre-processing, it
+   SHOULD set the RouteValidTimeout to the current time for each route
+   to a UNodeAddress that meet all of the following conditions:
+      The RouteNextHopAddress is the same as the RERR IPSourceAddress.
+      The RouteNextHopInterface is the same as the interface this RERR
+      was received.
+      The UNodeSeqNum is zero (0) OR if the result of subtracting
+      RouteSeqNum from UNodeSeqNum is less than or equal to zero using
+      signed 32-bit arithmetic
+
+   If any route's RouteValidTimeout is set to the current time, this
+   RERR MAY be handled as described in Section 4.3.4.  Otherwise, the
+   RERR is dropped.
+
+   Prior to RERR element post processing a node MAY remove UNodeAddress,
+   UNodeSeqNum pairs to decrease the element size.
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 18]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+4.7  Routing Prefix
+
+   Any node can advertise connectivity to a subset of nodes within its
+   address space by using the prefix field in RE.  The nodes within the
+   advertised prefix SHOULD NOT participate in the MANET, and MUST be
+   reachable by forwarding packets to the node advertising connectivity.
+   For example, 192.168.1.1 with a prefix of 16 indicates all nodes with
+   the prefix 192.168.X.X are reachable through 192.168.1.1.
+
+   If the G-bit is set the meaning of the prefix field is altered.  For
+   a gateway the prefix in association with the IP address indicates
+   that nodes outside the subnet are reachable via the gateway node.
+   For example, a gateway with IP address 192.168.1.1 and a prefix of 16
+   indicates all nodes with the IP address NOT matching 192.168.X.X are
+   reachable through 192.168.1.1.
+
+4.8  Internet Attachment
+
+   Basic Internet attachment consists of a stub network of MANET nodes
+   connected to the Internet via a single gateway node.  The gateway is
+   responsible for responding to RREQs for TargetNodes outside its
+   configured MANET subnet, as well as delivering packets to
+   destinations outside the MANET subnet.
+
+   MANET nodes wishing to be reachable from nodes in the Internet MUST
+   have IP addresses within the gateway's configured MANET subnet.
+   Given a node with a globally route-able address or care-of address
+   handled by the gateway, the gateway is responsible for performing
+   route discovery for packets received from the Internet destined for
+   nodes inside its MANET subnet.
+
+   Since many nodes may commonly wish to communicate with the gateway,
+   the gateway SHOULD indicate to nodes that it is a gateway by setting
+   the gateway bit (G-bit) in the RE.  The G-bit flag indicates to nodes
+   in the MANET that the RENodeAddress is attached to the Internet and
+   is capable of routing data packets to all nodes outside of the
+   configured MANET subnet, described by the RENodeAddress and Prefix
+   fields.
+
+4.9  Multiple Interfaces
+
+   It is likely that DYMO will be used with multiple wireless
+   interfaces; therefore, the particular interface over which packets
+   arrive must be known whenever a packet is received.  Whenever a new
+   route is created, the interface through which the RouteAddress can be
+   reached is also recorded into the route table entry.
+
+   When multiple interfaces are available, a node transmitting a
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 19]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   MANETcast packet SHOULD send the packet on all interfaces that have
+   been configured for operation in the MANET.
+
+4.10  Packet Generation Limits
+
+   To avoid congestion, a node SHOULD NOT transmit more than RATE_LIMIT
+   control messages per second.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 20]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+5.  Configuration Parameters
+
+   Here are some suggested parameter values for DYMO:
+      Parameter Name                  Suggested Value
+      ---------------------------     ---------------
+      NET_DIAMETER                    10
+      RATE_LIMIT                      10
+      ROUTE_TIMEOUT                   3000 milliseconds
+      ROUTE_DELETE_TIMEOUT            5*ROUTE_TIMEOUT
+      RREQ_WAIT_TIME                  1000 milliseconds
+      RREQ_TRIES                      3
+   These parameters work well for small well-connected networks with
+   moderate network topology changes.
+
+   For other networks these DYMO parameters SHOULD be adjusted using
+   either dynamic adaptation or experimentally determined values.  For
+   example in static networks, ROUTE_TIMEOUT may be set to a much larger
+   value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 21]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+6.  IANA Considerations
+
+   DYMO defines a ElemType field for each element within a packet sent
+   to port TBD.  A new registry will be created for the values for this
+   ElemType field, and the following values will be assigned:
+      ElemType                             Value
+      --------------------------------     -----
+      Routing Element (RE)                  1
+      Route Error (RERR)                    2
+      Unsupported-element Error (UERR)      3
+
+   Future values of the ElemType and ErrType will be allocated using
+   standard actions as described in [1].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 22]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+7.  Security Considerations
+
+   Currently, DYMO does not specify any special security measures.
+   Routing protocols, however, are prime targets for impersonation
+   attacks.  In networks where the node membership is not known, it is
+   difficult to determine the occurrence of impersonation attacks, and
+   security prevention techniques are difficult at best.  However, when
+   the network membership is known and there is a danger of such
+   attacks, DYMO elements must be protected by the use of authentication
+   techniques, such as those involving generation of unforgeable and
+   cryptographically strong message digests or digital signatures.
+   While DYMO does not place restrictions on the authentication
+   mechanism used for this purpose, IPsec Authentication Element (AH) is
+   an appropriate choice for cases where the nodes share an appropriate
+   security association that enables the use of AH.
+
+   In particular, RE messages SHOULD be authenticated to avoid creation
+   of spurious routes to a destination.  Otherwise, an attacker could
+   masquerade as that destination and maliciously deny service to the
+   destination and/or maliciously inspect and consume traffic intended
+   for delivery to the destination.  RERR messages, while less
+   dangerous, SHOULD be authenticated in order to prevent malicious
+   nodes from disrupting active routes between communicating nodes.
+
+   DYMO does not make any assumption about the method by which addresses
+   are assigned to the mobile nodes except that they are presumed to
+   have unique IP addresses.  Therefore, no special consideration, other
+   than what is natural because of the general protocol specifications,
+   can be made about the applicability of IPsec authentication elements
+   or key exchange mechanisms.  However, if the mobile nodes in the ad
+   hoc network have pre-established security associations, it is
+   presumed that the purposes for which the security associations are
+   created include that of authorizing the processing of DYMO control
+   packets.  Given this understanding, the mobile nodes should be able
+   to use the same authentication mechanisms based on their IP addresses
+   as they would have used otherwise.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 23]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+8.  Acknowledgments
+
+   DYMO is an decedent of the design of previous MANET reactive
+   protocols.  Special thanks to the authors of AODV [2] and DSR [4].
+   The authors of AODV and DSR include Charlie Perkins, Elizabeth
+   Belding-Royer, Samir Das, David Johnson, David Maltz, Yih-Chun Hu and
+   Jorjeta Jetcheva.  Much of the DYMO protocol also stems from research
+   and implementation of MANET reactive-routing protocols.  To mention a
+   few major contributors Sung-Ju Lee, Mahesh Marina, Erik Nordstrom,
+   Yves Prelot, J.J.  Garcia-Luna-Aceves, Marc Mosko, Manel Guerrero
+   Zapata, Philippe Jacquet, and Chris Shiflet.  Also, special thanks to
+   Luke Klein-Berndt for extensive implementation and testing of AODV,
+   early reviewing of DYMO, as well as several technical discussions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 24]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+9.  References
+
+9.1  Normative References
+
+   [1]  Narten, T. and H. Alvestrand, "Guidelines for Writing an IANA
+        Considerations Section in RFCs", RFC 2434, BCP 26, October 1998.
+
+   [2]  Perkins, C., Belding-Royer, E. and S. Das, "Ad hoc On-demand
+        Distance Vector (AODV) Routing", RFC 3561, July 2003.
+
+9.2  Informative References
+
+   [3]  Perkins, C. and E. Belding-Royer, "Ad hoc On-Demand Distance
+        Vector (AODV) Routing", February 1999.
+
+   [4]  Johnson, D. and D. Maltz, "Dynamic Source Routing in Ad-hoc
+        Wireless Networks", August 1996.
+
+
+Authors' Addresses
+
+   Ian Chakeres
+   University of California Santa Barbara
+   Dept. of Electrical and Computer Engineering
+   Santa Barbara, CA  93106
+   USA
+
+   Phone: +1-805-893-8981
+   Fax:   +1-805-893-8553
+   Email: idc@engineering.ucsb.edu
+
+
+   Elizabeth Belding-Royer
+   University of California Santa Barbara
+   Dept. of Computer Science
+   Santa Barbara, CA  93106-5110
+   USA
+
+   Phone: +1-805-893-3411
+   Fax:   +1-805-893-8553
+   Email: ebelding@cs.ucsb.edu
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 25]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+   Charlie Perkins
+   Nokia Research Center
+   313 Fairchild Drive
+   Mountain View, CA  94043
+   USA
+
+   Phone: +1-650-625-2986
+   Fax:   +1-650-625-2502
+   Email: charlie.perkins@nokia.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 26]
+
+Internet-Draft                    DYMO                      January 2005
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2005).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Chakeres, et al.          Expires July 5, 2005                 [Page 27]
+

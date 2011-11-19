@@ -22,8 +22,6 @@ cplusplus {{
 }}
 
 
-
-
 //
 // Not the real ICMP codes; here it's set up so that codes above 128 are
 // informational

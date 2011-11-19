@@ -16,8 +16,16 @@
 #define __INET_UTILS_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IntServ.h"
+
+EroVector routeToEro(IPAddressVector rro);
+std::string vectorToString(IPAddressVector vec);
+std::string vectorToString(IPAddressVector vec, const char *delim);
+std::string vectorToString(EroVector vec);
+std::string vectorToString(EroVector vec, const char *delim);
 
 /**
  * TODO documentation
@@ -32,7 +40,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const IPAddressVector& vec, IPAddress addr); // use TEMPLATE
+bool find(const IPAddressVector& vec, IPv4Address addr); // use TEMPLATE
 
 /**
  * TODO documentation
@@ -42,7 +50,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 /**
  * TODO documentation
  */
-int find(const EroVector& ERO, IPAddress node);
+int find(const EroVector& ERO, IPv4Address node);
 
 /**
  * XXX function appears to be unused

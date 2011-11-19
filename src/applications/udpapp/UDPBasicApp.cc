@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,22 +17,22 @@
 //
 
 
-#include <omnetpp.h>
 #include "UDPBasicApp.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
-
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPBasicApp);
 
 int UDPBasicApp::counter;
+simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPBasicApp::initialize(int stage)
 {
-    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     counter = 0;
@@ -39,6 +40,8 @@ void UDPBasicApp::initialize(int stage)
     numReceived = 0;
     WATCH(numSent);
     WATCH(numReceived);
+    sentPkSignal = registerSignal("sentPk");
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     localPort = par("localPort");
     destPort = par("destPort");
@@ -46,16 +49,29 @@ void UDPBasicApp::initialize(int stage)
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(IPAddressResolver().resolve(token));
+
+    while ((token = tokenizer.nextToken()) != NULL)
+        destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     if (destAddresses.empty())
         return;
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
-    cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("messageFreq"), timer);
+    stopTime = par("stopTime").doubleValue();
+    simtime_t startTime = par("startTime").doubleValue();
+    if (stopTime != 0 && stopTime <= startTime)
+        error("Invalid startTime/stopTime parameters");
+
+    cMessage *timerMsg = new cMessage("sendTimer");
+    scheduleAt(startTime, timerMsg);
+}
+
+void UDPBasicApp::finish()
+{
+    recordScalar("packets sent", numSent);
+    recordScalar("packets received", numReceived);
 }
 
 IPvXAddress UDPBasicApp::chooseDestAddr()
@@ -64,11 +80,10 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
     return destAddresses[k];
 }
 
-
 cPacket *UDPBasicApp::createPacket()
 {
     char msgName[32];
-    sprintf(msgName,"UDPBasicAppData-%d", counter++);
+    sprintf(msgName, "UDPBasicAppData-%d", counter++);
 
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(par("messageLength").longValue());
@@ -79,8 +94,9 @@ void UDPBasicApp::sendPacket()
 {
     cPacket *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr();
-    sendToUDP(payload, localPort, destAddr, destPort);
 
+    emit(sentPkSignal, payload);
+    socket.sendTo(payload, destAddr, destPort);
     numSent++;
 }
 
@@ -90,29 +106,40 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("messageFreq"), msg);
+        simtime_t d = simTime() + par("sendInterval").doubleValue();
+        if (stopTime == 0 || d < stopTime)
+            scheduleAt(d, msg);
+        else
+            delete msg;
     }
-    else
+    else if (msg->getKind() == UDP_I_DATA)
     {
         // process incoming packet
         processPacket(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
+    else
+    {
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
     if (ev.isGUI())
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 
-
-void UDPBasicApp::processPacket(cPacket *msg)
+void UDPBasicApp::processPacket(cPacket *pk)
 {
-    EV << "Received packet: ";
-    printPacket(msg);
-    delete msg;
-
+    emit(rcvdPkSignal, pk);
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    delete pk;
     numReceived++;
 }
 

@@ -44,7 +44,7 @@ class TCPCommand;
  *
  * @see TCPSendQueue
  */
-class INET_API TCPReceiveQueue : public cPolymorphic
+class INET_API TCPReceiveQueue : public cObject
 {
   protected:
     TCPConnection *conn; // the connection that owns this queue
@@ -53,7 +53,7 @@ class INET_API TCPReceiveQueue : public cPolymorphic
     /**
      * Ctor.
      */
-    TCPReceiveQueue()  {conn=NULL;}
+    TCPReceiveQueue()  {conn = NULL;}
 
     /**
      * Virtual dtor.

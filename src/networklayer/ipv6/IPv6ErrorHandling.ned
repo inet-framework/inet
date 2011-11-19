@@ -25,10 +25,6 @@ package inet.networklayer.ipv6;
 // Errors arrive in messages; this implementation just prints a report
 // and discards the message.
 //
-// IPv6 implementation
-// TODO: This is just a quick fix. We should have only ONE error handling
-// module for both versions of IP.-WEI
-//
 simple IPv6ErrorHandling
 {
     parameters:

@@ -1,7 +1,7 @@
 //***************************************************************************
 //* file:        CSMAMacLayer.ned
 //*
-//* author:      Marc Löbbers
+//* author:      Marc Lï¿½bbers
 //*
 //* copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 //*              Technische Universitaet Berlin, Germany.
@@ -34,8 +34,8 @@ simple CSMAMacLayer
         int queueLength;
         @display("i=prot2");
     gates:
-        input uppergateIn;
-        output uppergateOut;
-        input lowergateIn;
-        output lowergateOut;
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }

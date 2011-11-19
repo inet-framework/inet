@@ -20,11 +20,11 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
-#ifndef __INET_UDPVIDEOSTREAM_H
-#define __INET_UDPVIDEOSTREAM_H
+#ifndef __INET_UDPVIDEOSTREAMCLI_H
+#define __INET_UDPVIDEOSTREAMCLI_H
 
-#include <omnetpp.h>
-#include "UDPAppBase.h"
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 /**
  * A "Realtime" VideoStream client application.
@@ -32,11 +32,13 @@
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UDPVideoStreamCli : public UDPAppBase
+class INET_API UDPVideoStreamCli : public cSimpleModule
 {
   protected:
+    UDPSocket socket;
+
     // statistics
-    cOutVector eed;
+    static simsignal_t rcvdPkSignal;
 
   protected:
     ///@name Overridden cSimpleModule functions
@@ -51,8 +53,5 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
     virtual void receiveStream(cPacket *msg);
 };
 
-
 #endif
-
-
 

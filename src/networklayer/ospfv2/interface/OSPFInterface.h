@@ -34,34 +34,34 @@ class Area;
 class Interface {
 public:
     enum InterfaceEventType {
-        InterfaceUp          = 0,
-        HelloTimer           = 1,
-        WaitTimer            = 2,
-        AcknowledgementTimer = 3,
-        BackupSeen           = 4,
-        NeighborChange       = 5,
-        LoopIndication       = 6,
-        UnloopIndication     = 7,
-        InterfaceDown        = 8
+        INTERFACE_UP          = 0,
+        HELLO_TIMER           = 1,
+        WAIT_TIMER            = 2,
+        ACKNOWLEDGEMENT_TIMER = 3,
+        BACKUP_SEEN           = 4,
+        NEIGHBOR_CHANGE       = 5,
+        LOOP_INDICATION       = 6,
+        UNLOOP_INDICATION     = 7,
+        INTERFACE_DOWN        = 8
     };
 
     enum OSPFInterfaceType {
-        UnknownType       = 0,
-        PointToPoint      = 1,
-        Broadcast         = 2,
+        UNKNOWN_TYPE       = 0,
+        POINTTOPOINT      = 1,
+        BROADCAST         = 2,
         NBMA              = 3,
-        PointToMultiPoint = 4,
-        Virtual           = 5
+        POINTTOMULTIPOINT = 4,
+        VIRTUAL           = 5
     };
 
     enum InterfaceStateType {
-        DownState                = 0,
-        LoopbackState            = 1,
-        WaitingState             = 2,
-        PointToPointState        = 3,
-        NotDesignatedRouterState = 4,
-        BackupState              = 5,
-        DesignatedRouterState    = 6
+        DOWN_STATE                = 0,
+        LOOPBACK_STATE            = 1,
+        WAITING_STATE             = 2,
+        POINTTOPOINT_STATE        = 3,
+        NOT_DESIGNATED_ROUTER_STATE = 4,
+        BACKUP_STATE              = 5,
+        DESIGNATED_ROUTER_STATE    = 6
     };
 
 private:
@@ -96,76 +96,76 @@ private:
     Area*                                                               parentArea;
 private:
     friend class InterfaceState;
-    void ChangeState(InterfaceState* newState, InterfaceState* currentState);
+    void changeState(InterfaceState* newState, InterfaceState* currentState);
 
 public:
-            Interface(OSPFInterfaceType ifType = UnknownType);
-    virtual ~Interface(void);
+    Interface(OSPFInterfaceType ifType = UNKNOWN_TYPE);
+    virtual ~Interface();
 
-    void                ProcessEvent                        (InterfaceEventType event);
-    void                Reset                               (void);
-    void                SendHelloPacket                     (IPv4Address destination, short ttl = 1);
-    void                SendLSAcknowledgement               (OSPFLSAHeader* lsaHeader, IPv4Address destination);
-    Neighbor*           GetNeighborByID                     (RouterID neighborID);
-    Neighbor*           GetNeighborByAddress                (IPv4Address address);
-    void                AddNeighbor                         (Neighbor* neighbor);
-    InterfaceStateType  GetState                            (void) const;
-    static const char*  GetStateString                      (InterfaceStateType stateType);
-    bool                HasAnyNeighborInStates              (int states) const;
-    void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
-    bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
-    bool                FloodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
-    void                AddDelayedAcknowledgement           (OSPFLSAHeader& lsaHeader);
-    void                SendDelayedAcknowledgements         (void);
-    void                AgeTransmittedLSALists              (void);
+    void                processEvent(InterfaceEventType event);
+    void                reset();
+    void                sendHelloPacket(IPv4Address destination, short ttl = 1);
+    void                sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Address destination);
+    Neighbor*           getNeighborByID(RouterID neighborID);
+    Neighbor*           getNeighborByAddress(IPv4Address address);
+    void                addNeighbor(Neighbor* neighbor);
+    InterfaceStateType  getState() const;
+    static const char*  getStateString(InterfaceStateType stateType);
+    bool                hasAnyNeighborInStates(int states) const;
+    void                removeFromAllRetransmissionLists(LSAKeyType lsaKey);
+    bool                isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
+    bool                floodLSA(OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    void                addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader);
+    void                sendDelayedAcknowledgements();
+    void                ageTransmittedLSALists();
 
-    OSPFLinkStateUpdatePacket*  CreateUpdatePacket          (OSPFLSA* lsa);
+    OSPFLinkStateUpdatePacket* createUpdatePacket(OSPFLSA* lsa);
 
-    void                    SetType                         (OSPFInterfaceType ifType)  { interfaceType = ifType; }
-    OSPFInterfaceType       GetType                         (void) const                { return interfaceType; }
-    void                    SetIfIndex                      (unsigned char index);
-    unsigned char           GetIfIndex                      (void) const                { return ifIndex; }
-    void                    SetMTU                          (unsigned short ifMTU)      { mtu = ifMTU; }
-    unsigned short          GetMTU                          (void) const                { return mtu; }
-    void                    SetAreaID                       (AreaID areaId)             { areaID = areaId; }
-    AreaID                  GetAreaID                       (void) const                { return areaID; }
-    void                    SetTransitAreaID                (AreaID areaId)             { transitAreaID = areaId; }
-    AreaID                  GetTransitAreaID                (void) const                { return transitAreaID; }
-    void                    SetOutputCost                   (Metric cost)               { interfaceOutputCost = cost; }
-    Metric                  GetOutputCost                   (void) const                { return interfaceOutputCost; }
-    void                    SetRetransmissionInterval       (short interval)            { retransmissionInterval = interval; }
-    short                   GetRetransmissionInterval       (void) const                { return retransmissionInterval; }
-    void                    SetTransmissionDelay            (short delay)               { interfaceTransmissionDelay = delay; }
-    short                   GetTransmissionDelay            (void) const                { return interfaceTransmissionDelay; }
-    void                    SetAcknowledgementDelay         (short delay)               { acknowledgementDelay = delay; }
-    short                   GetAcknowledgementDelay         (void) const                { return acknowledgementDelay; }
-    void                    SetRouterPriority               (unsigned char priority)    { routerPriority = priority; }
-    unsigned char           GetRouterPriority               (void) const                { return routerPriority; }
-    void                    SetHelloInterval                (short interval)            { helloInterval = interval; }
-    short                   GetHelloInterval                (void) const                { return helloInterval; }
-    void                    SetPollInterval                 (short interval)            { pollInterval = interval; }
-    short                   GetPollInterval                 (void) const                { return pollInterval; }
-    void                    SetRouterDeadInterval           (short interval)            { routerDeadInterval = interval; }
-    short                   GetRouterDeadInterval           (void) const                { return routerDeadInterval; }
-    void                    SetAuthenticationType           (AuthenticationType type)   { authenticationType = type; }
-    AuthenticationType      GetAuthenticationType           (void) const                { return authenticationType; }
-    void                    SetAuthenticationKey            (AuthenticationKeyType key) { authenticationKey = key; }
-    AuthenticationKeyType   GetAuthenticationKey            (void) const                { return authenticationKey; }
-    void                    SetAddressRange                 (IPv4AddressRange range)    { interfaceAddressRange = range; }
-    IPv4AddressRange        GetAddressRange                 (void) const                { return interfaceAddressRange; }
+    void                    setType(OSPFInterfaceType ifType)  { interfaceType = ifType; }
+    OSPFInterfaceType       getType() const  { return interfaceType; }
+    void                    setIfIndex(unsigned char index);
+    unsigned char           getIfIndex() const  { return ifIndex; }
+    void                    setMTU(unsigned short ifMTU)  { mtu = ifMTU; }
+    unsigned short          getMTU() const  { return mtu; }
+    void                    setAreaID(AreaID areaId)  { areaID = areaId; }
+    AreaID                  getAreaID() const  { return areaID; }
+    void                    setTransitAreaID(AreaID areaId)  { transitAreaID = areaId; }
+    AreaID                  getTransitAreaID() const  { return transitAreaID; }
+    void                    setOutputCost(Metric cost)  { interfaceOutputCost = cost; }
+    Metric                  getOutputCost() const  { return interfaceOutputCost; }
+    void                    setRetransmissionInterval(short interval)  { retransmissionInterval = interval; }
+    short                   getRetransmissionInterval() const  { return retransmissionInterval; }
+    void                    setTransmissionDelay(short delay)  { interfaceTransmissionDelay = delay; }
+    short                   getTransmissionDelay() const  { return interfaceTransmissionDelay; }
+    void                    setAcknowledgementDelay(short delay)  { acknowledgementDelay = delay; }
+    short                   getAcknowledgementDelay() const  { return acknowledgementDelay; }
+    void                    setRouterPriority(unsigned char priority)  { routerPriority = priority; }
+    unsigned char           getRouterPriority() const  { return routerPriority; }
+    void                    setHelloInterval(short interval)  { helloInterval = interval; }
+    short                   getHelloInterval() const  { return helloInterval; }
+    void                    setPollInterval(short interval)  { pollInterval = interval; }
+    short                   getPollInterval() const  { return pollInterval; }
+    void                    setRouterDeadInterval(short interval)  { routerDeadInterval = interval; }
+    short                   getRouterDeadInterval() const  { return routerDeadInterval; }
+    void                    setAuthenticationType(AuthenticationType type)  { authenticationType = type; }
+    AuthenticationType      getAuthenticationType() const  { return authenticationType; }
+    void                    setAuthenticationKey(AuthenticationKeyType key) { authenticationKey = key; }
+    AuthenticationKeyType   getAuthenticationKey() const  { return authenticationKey; }
+    void                    setAddressRange(IPv4AddressRange range)  { interfaceAddressRange = range; }
+    IPv4AddressRange        getAddressRange() const  { return interfaceAddressRange; }
 
-    OSPFTimer*              GetHelloTimer                   (void)                      { return helloTimer; }
-    OSPFTimer*              GetWaitTimer                    (void)                      { return waitTimer; }
-    OSPFTimer*              GetAcknowledgementTimer         (void)                      { return acknowledgementTimer; }
-    DesignatedRouterID      GetDesignatedRouter             (void) const                { return designatedRouter; }
-    DesignatedRouterID      GetBackupDesignatedRouter       (void) const                { return backupDesignatedRouter; }
-    unsigned long           GetNeighborCount                (void) const                { return neighboringRouters.size(); }
-    Neighbor*               GetNeighbor                     (unsigned long i)           { return neighboringRouters[i]; }
-    const Neighbor*         GetNeighbor                     (unsigned long i) const     { return neighboringRouters[i]; }
+    OSPFTimer*              getHelloTimer()  { return helloTimer; }
+    OSPFTimer*              getWaitTimer()  { return waitTimer; }
+    OSPFTimer*              getAcknowledgementTimer()  { return acknowledgementTimer; }
+    DesignatedRouterID      getDesignatedRouter() const  { return designatedRouter; }
+    DesignatedRouterID      getBackupDesignatedRouter() const  { return backupDesignatedRouter; }
+    unsigned long           getNeighborCount() const  { return neighboringRouters.size(); }
+    Neighbor*               getNeighbor(unsigned long i)  { return neighboringRouters[i]; }
+    const Neighbor*         getNeighbor(unsigned long i) const  { return neighboringRouters[i]; }
 
-    void                    SetArea                         (Area* area)                { parentArea = area; }
-    Area*                   GetArea                         (void)                      { return parentArea; }
-    const Area*             GetArea                         (void) const                { return parentArea; }
+    void                    setArea(Area* area)  { parentArea = area; }
+    Area*                   getArea()  { return parentArea; }
+    const Area*             getArea() const  { return parentArea; }
 };
 
 } // namespace OSPF

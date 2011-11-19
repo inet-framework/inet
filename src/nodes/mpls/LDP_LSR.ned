@@ -9,46 +9,31 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-
-
-
-
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.ldp.LDP;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
+import inet.transport.IUDP;
+import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
-import inet.transport.tcp.TCP;
-import inet.transport.udp.UDP;
-import inet.util.NAMTraceWriter;
+import inet.networklayer.ted.TED;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.ldp.LDP;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
 
 
 //
 // An LDP-capable router.
 //
-// LDP Capable Routers are main building blocks for an LDP MPLS network.
+// LDP Capable Routers are the main building blocks for an LDP MPLS network.
 //
-module LDP_LSR
+module LDP_LSR extends LDP_ROUTER_BASE
 {
     parameters:
-        @node();
-        @labels(node,mpls-node);
         @display("i=abstract/router");
-        double holdTime @unit("s") = default(15s);
-        double helloInterval @unit("s") = default(5s);
-        int namid = default(-1);
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -80,11 +65,11 @@ module LDP_LSR
                 peers = peers;
                 @display("p=360,150");
         }
-        tcp: TCP {
+        tcp: <tcpType> like ITCP {
             parameters:
                 @display("p=177,145");
         }
-        udp: UDP {
+        udp: <default(firstAvailable("UDP","UDP_None"))> like IUDP {
             parameters:
                 @display("p=267,145");
         }
@@ -95,7 +80,7 @@ module LDP_LSR
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=105,388,row,90;q=l2queue");
         }
@@ -113,12 +98,6 @@ module LDP_LSR
         libTable: LIBTable {
             parameters:
                 @display("p=340,305");
-        }
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=70,310");
-
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;
@@ -146,6 +125,4 @@ module LDP_LSR
             mpls.netwIn[i] <-- networkLayer.ifOut[i];
         }
 }
-
-
 

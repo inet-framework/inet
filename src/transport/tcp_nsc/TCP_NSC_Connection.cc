@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2006 Sam Jansen, Andras Varga
-//               2009 Zoltan Bojthe
+// Copyright (C) 2009 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,13 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifdef WITH_TCP_NSC
 
 #include "TCP_NSC_Connection.h"
 
 #include "headers/defs.h"   // for endian macros
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include <sim_interface.h> // NSC header
 #include "headers/tcp.h"
 #include "TCP_NSC.h"
@@ -37,12 +34,9 @@
 #include <dlfcn.h>
 #include <netinet/in.h>
 
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-// FIXME
-//#define tcpEV (((ev.disable_tracing)||(TCP_NSC::testingS)) ? (std::cout) : (ev))
 
-#define tcpEV ev
-//#define tcpEV std::cout
+// macro for normal ev<< logging (note: deliberately no parens in macro def)
+#define tcpEV ((ev.isDisabled())||(TCP_NSC::testingS)) ? ev : ev
 
 
 struct nsc_iphdr
@@ -86,7 +80,7 @@ TCP_NSC_Connection::TCP_NSC_Connection()
 // create a TCP_I_ESTABLISHED msg
 cMessage* TCP_NSC_Connection::createEstablishedMsg()
 {
-    if(sentEstablishedM)
+    if (sentEstablishedM)
         return NULL;
 
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
@@ -94,13 +88,6 @@ cMessage* TCP_NSC_Connection::createEstablishedMsg()
 
     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
 
-/*    struct sockaddr_in peerAddr, sockAddr;
-    size_t peerAddrLen=sizeof(peerAddr),sockAddrLen=sizeof(sockAddr);
-    pNscSocketM->getpeername((sockaddr*)&peerAddr, &peerAddrLen);
-    pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
-    tcpConnectInfo->setLocalPort(ntohs(sockAddr.sin_port));
-    tcpConnectInfo->setRemotePort(ntohs(peerAddr.sin_port));
-*/
     tcpConnectInfo->setConnId(connIdM);
     tcpConnectInfo->setLocalAddr(inetSockPairM.localM.ipAddrM);
     tcpConnectInfo->setRemoteAddr(inetSockPairM.remoteM.ipAddrM);
@@ -131,7 +118,7 @@ void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, Soc
     pNscSocketM->connect(nscSockPairM.remoteM.ipAddrM.str().c_str(), nscSockPairM.remoteM.portM);
 
     struct sockaddr_in sockAddr;
-    size_t sockAddrLen=sizeof(sockAddr);
+    size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
     nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
@@ -164,7 +151,7 @@ void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, Sock
     pNscSocketM->listen(nscSockPairP.localM.portM);
 
     struct sockaddr_in sockAddr;
-    size_t sockAddrLen=sizeof(sockAddr);
+    size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
 
     nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
@@ -181,24 +168,25 @@ void TCP_NSC_Connection::send(cPacket *msgP)
 
 void TCP_NSC_Connection::do_SEND()
 {
-    if(pNscSocketM)
+    if (pNscSocketM)
     {
         ASSERT(sendQueueM);
 
         char buffer[4096];
-
         int allsent = 0;
-        while(1)
+
+        while (1)
         {
-            int bytes = sendQueueM->getNscMsg(buffer, sizeof(buffer));
-            if(0 == bytes)
+            int bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer));
+
+            if (0 == bytes)
                 break;
 
             int sent = pNscSocketM->send_data(buffer, bytes);
 
-            if(sent > 0)
+            if (sent > 0)
             {
-                sendQueueM->dequeueNscMsg(sent);
+                sendQueueM->dequeueTcpLayerMsg(sent);
                 allsent += sent;
             }
             else
@@ -222,4 +210,3 @@ void TCP_NSC_Connection::abort()
     close();
 }
 
-#endif // WITH_TCP_NSC

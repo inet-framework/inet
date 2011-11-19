@@ -19,40 +19,57 @@
 
 package inet.linklayer.ppp;
 
-import inet.networklayer.queue.OutputQueue;
+import inet.networklayer.queue.IOutputQueue;
+import inet.linklayer.IWiredNic;
+import inet.base.IHook;
 
 
 //
-// \PPP interface. Complements the PPP module with an output queue
+// PPP interface. Complements the ~PPP module with an output queue
 // for QoS and RED support.
 //
-// @see PPPInterfaceNoQueue
-//
-module PPPInterface
+module PPPInterface like IWiredNic
 {
     parameters:
-        string queueType = default("DropTailQueue");
-        @display("i=block/ifcard");
+        @display("i=block/ifcard;bgb=214,249");
+        string queueType = default("DropTailQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~REDQueue, NoQueue
+        int numOutputHooks = default(0);
+        int numInputHooks = default(0);
     gates:
         input netwIn;
         output netwOut;
         inout phys @labels(PPPFrame);
     submodules:
-        queue: <queueType> like OutputQueue {
+        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
+        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
+        queue: <queueType> like IOutputQueue {
             parameters:
-                @display("p=60,85;q=l2queue");
+                @display("p=42,112;q=l2queue");
         }
         ppp: PPP {
             parameters:
-                queueModule = "queue";
-                txQueueLimit = 1; // queue sends one packet at a time
-                @display("p=88,165");
+                queueModule = (queueType == "NoQueue" ? "" : "queue");
+                txQueueLimit = (queueType == "NoQueue" ? 10000 : 1); // queue sends one packet at a time
+                @display("p=98,165");
         }
     connections:
-        netwIn --> { @display("m=n"); } --> queue.in;
         queue.out --> ppp.netwIn;
-        netwOut <-- { @display("m=n"); } <-- ppp.netwOut;
         phys <--> { @display("m=s"); } <--> ppp.phys;
+
+        netwIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0;
+        netwOut <-- { @display("m=n"); } <-- ppp.netwOut if numInputHooks == 0;
+
+        ppp.netwOut --> inputHook[0].in if numInputHooks > 0;
+        for i=0..numInputHooks-2 {
+            inputHook[i].out --> inputHook[i+1].in;
+        }
+        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> netwOut if numInputHooks > 0;
+
+        netwIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
+        for i=0..numOutputHooks-2 {
+            outputHook[i].out --> outputHook[i+1].in;
+        }
+        outputHook[numOutputHooks-1].out --> queue.in if numOutputHooks > 0;
 }
 
 

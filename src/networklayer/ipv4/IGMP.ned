@@ -29,8 +29,8 @@ module IGMP
     parameters:
         @display("i=block/cogwheel_s");
     gates:
-        input localIn @labels(IPControlInfo/up);  // delivered IGMP packets
-        output sendOut @labels(IPControlInfo/down); // to IP
+        input localIn @labels(IPv4ControlInfo/up);  // delivered IGMP packets
+        output sendOut @labels(IPv4ControlInfo/down); // to ~IPv4
     connections allowunconnected:
 }
 

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,6 +19,9 @@
 
 #include "TCPMsgBasedRcvQueue.h"
 
+#include "TCPCommand_m.h"
+#include "TCPSegment.h"
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 
@@ -27,6 +31,14 @@ TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 
 TCPMsgBasedRcvQueue::~TCPMsgBasedRcvQueue()
 {
+    while (! payloadList.empty())
+    {
+        EV << "SendQueue Destructor: Drop msg from " << this->getFullPath() <<
+                " Queue: offset=" << payloadList.begin()->first <<
+                ", length=" << payloadList.begin()->second->getByteLength() << endl;
+        delete payloadList.begin()->second;
+        payloadList.erase(payloadList.begin());
+    }
 }
 
 void TCPMsgBasedRcvQueue::init(uint32 startSeq)
@@ -36,20 +48,18 @@ void TCPMsgBasedRcvQueue::init(uint32 startSeq)
 
 std::string TCPMsgBasedRcvQueue::info() const
 {
-    std::string res;
-    char buf[32];
-    sprintf(buf, "rcv_nxt=%u ", rcv_nxt);
-    res = buf;
+    std::stringstream os;
 
-    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
+    os << "rcv_nxt=" << rcv_nxt;
+
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i)
     {
-        sprintf(buf, "[%u..%u) ", i->begin, i->end);
-        res+=buf;
+        os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
     }
-    sprintf(buf, "%u msgs", payloadList.size());
-    res+=buf;
 
-    return res;
+    os << " " << payloadList.size() << " msgs";
+
+    return os.str();
 }
 
 uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
@@ -58,12 +68,14 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
     cPacket *msg;
     uint32 endSeqNo;
-    while ((msg=tcpseg->removeFirstPayloadMessage(endSeqNo))!=NULL)
+    while (NULL != (msg = tcpseg->removeFirstPayloadMessage(endSeqNo)))
     {
         // insert, avoiding duplicates
         PayloadList::iterator i = payloadList.find(endSeqNo);
-        if (i!=payloadList.end()) {delete msg; continue;}
-        payloadList[endSeqNo] = msg;
+        if (i != payloadList.end())
+            delete msg;
+        else
+            payloadList[endSeqNo] = msg;
     }
 
     return rcv_nxt;
@@ -71,14 +83,19 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
 cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    extractTo(seq);
+    cPacket *msg = NULL;
+    if (!payloadList.empty() && seqLess(payloadList.begin()->first, seq))
+        seq = payloadList.begin()->first;
 
-    // pass up payload messages, in sequence number order
-    if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
-        return NULL;
-
-    cPacket *msg = payloadList.begin()->second;
-    payloadList.erase(payloadList.begin());
+    Region *reg = extractTo(seq);
+    if (reg)
+    {
+        if (!payloadList.empty() && payloadList.begin()->first == reg->getEnd())
+        {
+            msg = payloadList.begin()->second;
+            payloadList.erase(payloadList.begin());
+        }
+        delete reg;
+    }
     return msg;
 }
-

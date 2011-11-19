@@ -19,41 +19,51 @@
 
 package inet.examples.ipv6.ipv6nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import inet.nodes.ipv6.Router6;
-import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
+import inet.nodes.ipv6.StandardHost6;
+import inet.nodes.ipv6.Router6;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 
 
 network NClientsEth
 {
     parameters:
         int n;
+        @display("bgb=569,296");
     types:
         channel fiberline extends DatarateChannel
         {
             delay = 1us;
-            datarate = 512Mbps;
+            datarate = 1Gbps;
         }
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
-        r1: Router6;
-        r2: Router6;
-        r3: Router6;
-        cli[n]: StandardHost6;
-        srv: StandardHost6;
-        hub: EtherHub;
+        configurator: FlatNetworkConfigurator6 {
+            @display("p=73,70");
+        }
+        r1: Router6 {
+            @display("p=245,173");
+        }
+        r2: Router6 {
+            @display("p=338,121");
+        }
+        r3: Router6 {
+            @display("p=430,75");
+        }
+        cli[n]: StandardHost6 {
+            @display("p=56,236");
+        }
+        srv: StandardHost6 {
+            @display("p=524,33");
+        }
     connections:
         for i=0..n-1 {
-            cli[i].ethg++ <--> ethernetline <--> hub.ethg++;
+            cli[i].ethg++ <--> ethernetline <--> r1.ethg++;
         }
-        hub.ethg++ <--> ethernetline <--> r1.ethg++;
         r1.ethg++ <--> ethernetline <--> r2.ethg++;
         r2.ethg++ <--> ethernetline <--> r3.ethg++;
         r3.ethg++ <--> ethernetline <--> srv.ethg++;

@@ -15,7 +15,9 @@
 #define __INET_TCPSESSIONAPP_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "TCPSocket.h"
 
 
@@ -40,6 +42,9 @@ class INET_API TCPSessionApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
     int indicationsRcvd;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
+    static simsignal_t recvIndicationsSignal;
 
   public:
     TCPSessionApp() : cSimpleModule(65536) {}
@@ -49,10 +54,11 @@ class INET_API TCPSessionApp : public cSimpleModule
     virtual void waitUntil(simtime_t t);
     virtual void count(cMessage *msg);
 
+    virtual cPacket* genDataMsg(long sendBytes);
+
     virtual void activity();
     virtual void finish();
 };
 
 #endif
-
 

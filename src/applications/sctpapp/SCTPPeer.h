@@ -22,7 +22,11 @@
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
 
+class SCTPConnectInfo;
 
+/**
+ * Implements the SCTPPeer simple module. See the NED file for more info.
+ */
 class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
 {
     protected:
@@ -31,15 +35,16 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 clientAssocId;
         SCTPSocket clientSocket;
         double delay;
-        double echoFactor;
+        bool echo;
         bool schedule;
         bool shutdownReceived;
+        bool ordered;
+        bool sendAllowed;
         long bytesSent;
         int32 packetsSent;
         int32 packetsRcvd;
         int32 numSessions;
         int32 numRequestsToSend; // requests to send in this session
-        bool ordered;
         int32 queueSize;
         cMessage *timeoutMsg;
         int32 outboundStreams;
@@ -48,31 +53,49 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 bytesRcvd;
         int32 echoedBytesSent;
         int32 lastStream;
-        bool sendAllowed;
         int32 numPacketsToReceive;
+
+        // statistics
         typedef std::map<int32,long> RcvdPacketsPerAssoc;
         RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
+
         typedef std::map<int32,long> SentPacketsPerAssoc;
         SentPacketsPerAssoc sentPacketsPerAssoc;
+
         typedef std::map<int32,long> RcvdBytesPerAssoc;
         RcvdBytesPerAssoc rcvdBytesPerAssoc;
+
         typedef std::map<int32,cOutVector*> BytesPerAssoc;
         BytesPerAssoc bytesPerAssoc;
+
         typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
         HistEndToEndDelay histEndToEndDelay;
+
         typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;
+
+    protected:
         void sendOrSchedule(cPacket *msg);
-        void sendRequest(bool last=true);
+        void sendRequest(bool last = true);
         int32 ssn;
+        static simsignal_t sentPkSignal;
+        static simsignal_t sentEchoedPkSignal;
+        static simsignal_t rcvdPkSignal;
+
     public:
         struct pathStatus {
             bool active;
             bool primaryPath;
-            IPAddress  pid;
+            IPv4Address  pid;
         };
         typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
         SCTPPathStatus sctpPathStatus;
+
+    public:
+        SCTPPeer();
+        ~SCTPPeer();
+
+    protected:
         void initialize();
         void handleMessage(cMessage *msg);
         void finish();
@@ -102,7 +125,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         /** Redefine to handle incoming SCTPStatusInfo. */
         void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
         //@}
-        void setPrimaryPath ();
+        void setPrimaryPath();
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int32 connId);

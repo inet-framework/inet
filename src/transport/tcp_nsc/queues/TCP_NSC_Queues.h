@@ -19,8 +19,8 @@
 #ifndef __INET_TCP_NSC_QUEUES_H
 #define __INET_TCP_NSC_QUEUES_H
 
-#include <omnetpp.h>
-//#include "TCPConnection.h"
+#include "INETDefs.h"
+
 #include "TCPSegment.h"
 
 // forward declarations:
@@ -79,7 +79,7 @@ class TCP_NSC_Connection;
  * @see TCP_NSCReceiveQueue
  */
 
-class INET_API TCP_NSC_SendQueue : public cPolymorphic
+class INET_API TCP_NSC_SendQueue : public cObject
 {
   public:
     /**
@@ -114,7 +114,7 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
      *
      * called before called socket->send_data()
      */
-    virtual int getNscMsg(void* bufferP, int bufferLengthP) = 0;
+    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) const = 0;
 
     /**
      * The function should remove msgLengthP bytes from NSCqueue
@@ -124,12 +124,12 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
      *
      * called with return value of socket->send_data() if larger than 0
      */
-    virtual void dequeueNscMsg(int msgLengthP) = 0;
+    virtual void dequeueTcpLayerMsg(int msgLengthP) = 0;
 
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual ulong getBytesAvailable() = 0;
+    virtual unsigned long getBytesAvailable() const = 0;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -153,7 +153,7 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
     TCP_NSC_Connection *connM;
 };
 
-class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
+class INET_API TCP_NSC_ReceiveQueue : public cObject
 {
   public:
     /**
@@ -172,17 +172,14 @@ class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
     virtual void setConnection(TCP_NSC_Connection *connP) { connM = connP; }
 
     /**
-     * Called when a TCP segment arrives, it should extract the payload
-     * from the segment and store it in the receive queue. The segment
+     * Called when a TCP segment arrives. The segment
      * object should *not* be deleted.
      *
-     * The method should return the number of bytes to copied to buffer.
-     *
-     * The method should fill the bufferP for data sending to NSC stack
+     * For remove and store payload messages if need.
      *
      * called before nsc_stack->if_receive_packet() called
      */
-    virtual uint32 insertBytesFromSegment(const TCPSegment *tcpsegP, void* bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP) = 0;
 
     /**
      * The method called when data received from NSC
@@ -199,22 +196,22 @@ class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo() = 0;
+    virtual cPacket* extractBytesUpTo() = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() = 0;
+    virtual uint32 getAmountOfBufferedBytes() const = 0;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() = 0;
+    virtual uint32 getQueueLength() const = 0;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() = 0;
+    virtual void getQueueStatus() const = 0;
 
     /**
      * notify the queue about output messages

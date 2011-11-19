@@ -20,9 +20,10 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <omnetpp.h>
-#include "ModuleAccess.h"
+#include "INETDefs.h"
+
 #include "ICMP.h"
+#include "ModuleAccess.h"
 
 
 /**

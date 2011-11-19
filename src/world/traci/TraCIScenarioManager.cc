@@ -1,13 +1,12 @@
 //
-// TraCIScenarioManager - connects OMNeT++ to a TraCI server, manages hosts
-// Copyright (C) 2006 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +15,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
 #include <fstream>
@@ -39,7 +38,7 @@
 
 #include "world/traci/TraCIScenarioManager.h"
 #include "world/traci/TraCIConstants.h"
-#include "mobility/traci/TraCIMobility.h"
+#include "mobility/models/TraCIMobility.h"
 
 Define_Module(TraCIScenarioManager);
 
@@ -98,8 +97,8 @@ void TraCIScenarioManager::initialize(int stage) {
 	executeOneTimestepTrigger = new cMessage("step");
 	scheduleAt(0, executeOneTimestepTrigger);
 
-	cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
-	if (cc == 0) error("Could not find a ChannelControl module named channelcontrol");
+	cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
+	if (cc == 0) error("Could not find a ChannelControl module named channelControl");
 
 	MYDEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
 	socketPtr = 0;
@@ -271,7 +270,6 @@ void TraCIScenarioManager::init_traci() {
 		netbounds1 = TraCICoord(x1, y1);
 		netbounds2 = TraCICoord(x2, y2);
 		MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-("<< x2 << ", " << y2 << ")" << endl;
-		if ((traci2omnet(netbounds2).x > cc->getPgs()->x) || (traci2omnet(netbounds1).y > cc->getPgs()->y)) MYDEBUG << "WARNING: Playground size (" << cc->getPgs()->x << ", " << cc->getPgs()->y << ") might be too small for vehicle at network bounds (" << traci2omnet(netbounds2).x << ", " << traci2omnet(netbounds1).y << ")" << endl;
 	}
 
 	{
@@ -591,7 +589,6 @@ void TraCIScenarioManager::deleteModule(std::string nodeId) {
 	if (!mod) error("no vehicle with Id \"%s\" found", nodeId.c_str());
 
 	if (!mod->getSubmodule("notificationBoard")) error("host has no submodule notificationBoard");
-	cc->unregisterHost(mod);
 
 	hosts.erase(nodeId);
 	mod->callFinish();

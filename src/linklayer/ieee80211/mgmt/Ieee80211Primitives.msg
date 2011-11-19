@@ -32,7 +32,7 @@ enum Ieee80211ReasonCode;
 // IEEE 802.11 command codes, sent by the agent to the management entity.
 // These constants should be set as message kind on the messages.
 //
-// @see Ieee80211PrimConfirmCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
 //
 enum Ieee80211PrimRequestCode
 {
@@ -50,7 +50,7 @@ enum Ieee80211PrimRequestCode
 // in response to the agents's requests.
 // These constants should be set as message kind on the messages.
 //
-// @see Ieee80211PrimRequestCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+// @see ~Ieee80211PrimRequestCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
 //
 enum Ieee80211PrimConfirmCode
 {
@@ -75,7 +75,7 @@ enum Ieee80211BSSType
 // Values for the resultCode field in confirm primitives, sent from
 // the management entity to the agent.
 //
-// @see Ieee80211PrimConfirmCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
 //
 enum Ieee80211PrimResultCode
 {

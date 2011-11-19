@@ -20,14 +20,14 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.base.NotificationBoard;
+import inet.mobility.models.StationaryMobility;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
-import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
+import inet.base.NotificationBoard;
 
 
 //
-// Well, it Models a 802.11 Access Point with a Sink.
+// Well, this models a 802.11 Access Point with a Sink.
 //
 module WirelessAPWithSink
 {
@@ -42,20 +42,21 @@ module WirelessAPWithSink
             parameters:
                 @display("p=169,124");
         }
-        wlan: Ieee80211NicAPSimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=89,225;q=queue");
+                mgmtType = default("Ieee80211MgmtAPSimplified");
         }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=78,60");
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 @display("p=71,121");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
-        wlan.uppergateOut --> sink.in++;
+        wlan.upperLayerOut --> sink.in++;
 }
 

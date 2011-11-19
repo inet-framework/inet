@@ -16,13 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "INETDefs.h"
-}}
-
-
 //
-// An RTPMpegPacket is intended to be capsulated into an RTPPacket when
+// An ~RTPMpegPacket is intended to be capsulated into an ~RTPPacket when
 // transmitting mpeg data with rtp under the rtp audio/video profile.
 // It stores information about the mpeg data as described in rfc 2250.
 // This implementation doesn't transport real mpeg data. It is intended
@@ -31,8 +26,8 @@ cplusplus {{
 // value. The values for the other header fields can't be determined by
 // reading the gdf file.
 //
-// @see RTPAVProfilePayload32Sender
-// @see RTPAVProfilePayload32Receiver
+// @see ~RTPAVProfilePayload32Sender
+// @see ~RTPAVProfilePayload32Receiver
 //
 packet RTPMpegPacket
 {

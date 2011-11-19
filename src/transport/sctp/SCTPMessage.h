@@ -32,9 +32,13 @@ class INET_API SCTPMessage : public SCTPMessage_Base
     protected:
         std::list<cPacket*> chunkList;
 
+    private:
+      void copy(const SCTPMessage& other);
+      void clean();
+
     public:
-        SCTPMessage(const char *name=NULL, int32 kind=0) : SCTPMessage_Base(name,kind) {}
-        SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other.getName()) {operator=(other);}
+        SCTPMessage(const char *name = NULL, int32 kind = 0) : SCTPMessage_Base(name, kind) {}
+        SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other) { copy(other); }
         ~SCTPMessage();
         SCTPMessage& operator=(const SCTPMessage& other);
         virtual SCTPMessage *dup() const {return new SCTPMessage(*this);}
@@ -100,10 +104,15 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
     protected:
         std::list<cPacket*> parameterList;
 
+    private:
+        void copy(const SCTPErrorChunk& other);
+        void clean();
+
     public:
-            SCTPErrorChunk(const char *name=NULL, int32 kind=0) : SCTPErrorChunk_Base(name, kind) {};
-            SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.getName()) {operator=(other);};
+        SCTPErrorChunk(const char *name = NULL, int32 kind = 0) : SCTPErrorChunk_Base(name, kind) {};
+        SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other) { copy(other); };
         SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
+        ~SCTPErrorChunk();
 
         virtual SCTPErrorChunk *dup() const {return new SCTPErrorChunk(*this);}
         virtual void setParametersArraySize(uint32 size);

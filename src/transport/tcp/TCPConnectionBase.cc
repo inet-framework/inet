@@ -76,7 +76,7 @@ TCPStateVariables::TCPStateVariables()
     snd_ws = false;
     rcv_ws = false;
     rcv_wnd_scale = 0;        // will be set from configureStateVariables()
-    snd_wnd_scale = 0;      
+    snd_wnd_scale = 0;
 
     ts_support = false;       // will be set from configureStateVariables()
     ts_enabled = false;
@@ -105,8 +105,9 @@ TCPStateVariables::TCPStateVariables()
     snd_sacks = 0;
     rcv_sacks = 0;
     rcv_oooseg = 0;
+    rcv_naseg = 0;
 
-    maxRcvBuffer  = 0;  // will be set from configureStateVariables()
+    maxRcvBuffer = 0;  // will be set from configureStateVariables()
     usedRcvBuffer = 0;
     freeRcvBuffer = 0;
     tcpRcvQueueDrops = 0;
@@ -127,37 +128,38 @@ std::string TCPStateVariables::info() const
 std::string TCPStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << "active = " << active << "\n";
-    out << "snd_mss = " << snd_mss << "\n";
-    out << "snd_una = " << snd_una << "\n";
-    out << "snd_nxt = " << snd_nxt << "\n";
-    out << "snd_max = " << snd_max << "\n";
-    out << "snd_wnd = " << snd_wnd << "\n";
-    out << "snd_up = " << snd_up << "\n";
-    out << "snd_wl1 = " << snd_wl1 << "\n";
-    out << "snd_wl2 = " << snd_wl2 << "\n";
-    out << "iss = " << iss << "\n";
-    out << "rcv_nxt = " << rcv_nxt << "\n";
-    out << "rcv_wnd = " << rcv_wnd << "\n";
-    out << "rcv_up = " << rcv_up << "\n";
-    out << "irs = " << irs << "\n";
-    out << "rcv_adv = " << rcv_adv << "\n";
-    out << "fin_ack_rcvd = " << fin_ack_rcvd << "\n";
-    out << "nagle_enabled = " << nagle_enabled << "\n";
-    out << "limited_transmit_enabled = " << limited_transmit_enabled << "\n";
-    out << "increased_IW_enabled = " << increased_IW_enabled << "\n";
-    out << "delayed_acks_enabled = " << delayed_acks_enabled << "\n";
-    out << "ws_support = " << ws_support << "\n";
-    out << "ws_enabled = " << ws_enabled << "\n";
-    out << "ts_support = " << ts_support << "\n";
-    out << "ts_enabled = " << ts_enabled << "\n";
-    out << "sack_support = " << sack_support << "\n";
-    out << "sack_enabled = " << sack_enabled << "\n";
-    out << "snd_sack_perm = " << snd_sack_perm << "\n";
-    out << "snd_sacks = " << snd_sacks << "\n";
-    out << "rcv_sacks = " << rcv_sacks << "\n";
-    out << "dupacks = " << dupacks << "\n";
-    out << "rcv_oooseg = " << rcv_oooseg << "\n";
+    out << "active=" << active << "\n";
+    out << "snd_mss=" << snd_mss << "\n";
+    out << "snd_una=" << snd_una << "\n";
+    out << "snd_nxt=" << snd_nxt << "\n";
+    out << "snd_max=" << snd_max << "\n";
+    out << "snd_wnd=" << snd_wnd << "\n";
+    out << "snd_up=" << snd_up << "\n";
+    out << "snd_wl1=" << snd_wl1 << "\n";
+    out << "snd_wl2=" << snd_wl2 << "\n";
+    out << "iss=" << iss << "\n";
+    out << "rcv_nxt=" << rcv_nxt << "\n";
+    out << "rcv_wnd=" << rcv_wnd << "\n";
+    out << "rcv_up=" << rcv_up << "\n";
+    out << "irs=" << irs << "\n";
+    out << "rcv_adv=" << rcv_adv << "\n";
+    out << "fin_ack_rcvd=" << fin_ack_rcvd << "\n";
+    out << "nagle_enabled=" << nagle_enabled << "\n";
+    out << "limited_transmit_enabled=" << limited_transmit_enabled << "\n";
+    out << "increased_IW_enabled=" << increased_IW_enabled << "\n";
+    out << "delayed_acks_enabled=" << delayed_acks_enabled << "\n";
+    out << "ws_support=" << ws_support << "\n";
+    out << "ws_enabled=" << ws_enabled << "\n";
+    out << "ts_support=" << ts_support << "\n";
+    out << "ts_enabled=" << ts_enabled << "\n";
+    out << "sack_support=" << sack_support << "\n";
+    out << "sack_enabled=" << sack_enabled << "\n";
+    out << "snd_sack_perm=" << snd_sack_perm << "\n";
+    out << "snd_sacks=" << snd_sacks << "\n";
+    out << "rcv_sacks=" << rcv_sacks << "\n";
+    out << "dupacks=" << dupacks << "\n";
+    out << "rcv_oooseg=" << rcv_oooseg << "\n";
+    out << "rcv_naseg=" << rcv_naseg << "\n";
     return out.str();
 }
 
@@ -165,6 +167,7 @@ TCPConnection::TCPConnection()
 {
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
+    transferMode = TCP_TRANSFER_BYTECOUNT;
     sendQueue = NULL;
     rexmitQueue = NULL;
     receiveQueue = NULL;
@@ -172,7 +175,7 @@ TCPConnection::TCPConnection()
     state = NULL;
     the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = NULL;
     sndWndVector = rcvWndVector = rcvAdvVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector =
-    dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector =
+    dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector = rcvNASegVector =
     tcpRcvQueueBytesVector = tcpRcvQueueDropsVector = pipeVector = sackedBytesVector = NULL;
 }
 
@@ -193,7 +196,7 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     fsm.setName(fsmname);
     fsm.setState(TCP_S_INIT);
 
-
+    transferMode = TCP_TRANSFER_UNDEFINED;
     // queues and algorithm will be created on active or passive open
     sendQueue = NULL;
     rexmitQueue = NULL;
@@ -225,6 +228,7 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     sndSacksVector = NULL;
     rcvSacksVector = NULL;
     rcvOooSegVector = NULL;
+    rcvNASegVector = NULL;
     tcpRcvQueueBytesVector = NULL;
     tcpRcvQueueDropsVector = NULL;
     pipeVector = NULL;
@@ -245,6 +249,7 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
         sndSacksVector = new cOutVector("sent sacks");
         rcvSacksVector = new cOutVector("rcvd sacks");
         rcvOooSegVector = new cOutVector("rcvd oooseg");
+        rcvNASegVector = new cOutVector("rcvd naseg");
         sackedBytesVector = new cOutVector("rcvd sackedBytes");
         tcpRcvQueueBytesVector = new cOutVector("tcpRcvQueueBytes");
         tcpRcvQueueDropsVector = new cOutVector("tcpRcvQueueDrops");
@@ -277,6 +282,7 @@ TCPConnection::~TCPConnection()
     delete sndSacksVector;
     delete rcvSacksVector;
     delete rcvOooSegVector;
+    delete rcvNASegVector;
     delete tcpRcvQueueBytesVector;
     delete tcpRcvQueueDropsVector;
     delete pipeVector;
@@ -290,22 +296,23 @@ bool TCPConnection::processTimer(cMessage *msg)
 
     // first do actions
     TCPEventCode event;
-    if (msg==the2MSLTimer)
+
+    if (msg == the2MSLTimer)
     {
         event = TCP_E_TIMEOUT_2MSL;
         process_TIMEOUT_2MSL();
     }
-    else if (msg==connEstabTimer)
+    else if (msg == connEstabTimer)
     {
         event = TCP_E_TIMEOUT_CONN_ESTAB;
         process_TIMEOUT_CONN_ESTAB();
     }
-    else if (msg==finWait2Timer)
+    else if (msg == finWait2Timer)
     {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
         process_TIMEOUT_FIN_WAIT_2();
     }
-    else if (msg==synRexmitTimer)
+    else if (msg == synRexmitTimer)
     {
         event = TCP_E_IGNORE;
         process_TIMEOUT_SYN_REXMIT(event);
@@ -325,13 +332,14 @@ bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPvXAddress segSrcAddr
     printConnBrief();
     if (!localAddr.isUnspecified())
     {
-        ASSERT(localAddr==segDestAddr);
-        ASSERT(localPort==tcpseg->getDestPort());
+        ASSERT(localAddr == segDestAddr);
+        ASSERT(localPort == tcpseg->getDestPort());
     }
+
     if (!remoteAddr.isUnspecified())
     {
-        ASSERT(remoteAddr==segSrcAddr);
-        ASSERT(remotePort==tcpseg->getSrcPort());
+        ASSERT(remoteAddr == segSrcAddr);
+        ASSERT(remotePort == tcpseg->getSrcPort());
     }
 
     if (tryFastRoute(tcpseg))
@@ -352,6 +360,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
     TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
     TCPEventCode event = preanalyseAppCommandEvent(msg->getKind());
     tcpEV << "App command: " << eventName(event) << "\n";
+
     switch (event)
     {
         case TCP_E_OPEN_ACTIVE: process_OPEN_ACTIVE(event, tcpCommand, msg); break;
@@ -360,7 +369,8 @@ bool TCPConnection::processAppCommand(cMessage *msg)
         case TCP_E_CLOSE: process_CLOSE(event, tcpCommand, msg); break;
         case TCP_E_ABORT: process_ABORT(event, tcpCommand, msg); break;
         case TCP_E_STATUS: process_STATUS(event, tcpCommand, msg); break;
-        default: opp_error("wrong event code");
+        default:
+            throw cRuntimeError(tcpMain, "wrong event code");
     }
 
     // then state transitions
@@ -378,16 +388,16 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
         case TCP_C_CLOSE:        return TCP_E_CLOSE;
         case TCP_C_ABORT:        return TCP_E_ABORT;
         case TCP_C_STATUS:       return TCP_E_STATUS;
-        default: opp_error("Unknown message kind in app command");
-                 return (TCPEventCode)0; // to satisfy compiler
+        default:
+            throw cRuntimeError(tcpMain, "Unknown message kind in app command");
     }
 }
 
 bool TCPConnection::performStateTransition(const TCPEventCode& event)
 {
-    ASSERT(fsm.getState()!=TCP_S_CLOSED); // closed connections should be deleted immediately
+    ASSERT(fsm.getState() != TCP_S_CLOSED); // closed connections should be deleted immediately
 
-    if (event==TCP_E_IGNORE)  // e.g. discarded segment
+    if (event == TCP_E_IGNORE)  // e.g. discarded segment
     {
         tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (no FSM event)\n";
         return true;
@@ -397,6 +407,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     // TBD add handling of connection timeout event (KEEP-ALIVE), with transition to CLOSED
     // Note: empty "default:" lines are for gcc's benefit which would otherwise spit warnings
     int oldState = fsm.getState();
+
     switch (fsm.getState())
     {
         case TCP_S_INIT:
@@ -415,7 +426,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_SEND:        FSM_Goto(fsm, TCP_S_SYN_SENT); break;
                 case TCP_E_CLOSE:       FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_ABORT:       FSM_Goto(fsm, TCP_S_CLOSED); break;
-                case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD);break;
+                case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD); break;
                 default:;
             }
             break;
@@ -532,7 +543,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
             break;
     }
 
-    if (oldState!=fsm.getState())
+    if (oldState != fsm.getState())
     {
         tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (event was: " << eventName(event) << ")\n";
         testingEV << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
@@ -545,7 +556,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
         tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (event was: " << eventName(event) << ")\n";
     }
 
-    return fsm.getState()!=TCP_S_CLOSED;
+    return fsm.getState() != TCP_S_CLOSED;
 }
 
 void TCPConnection::stateEntered(int state)
@@ -593,5 +604,3 @@ void TCPConnection::stateEntered(int state)
             break;
     }
 }
-
-

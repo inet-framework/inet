@@ -14,9 +14,7 @@
 #ifndef __INET_TCPSINKAPP_H
 #define __INET_TCPSINKAPP_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-
 
 
 /**
@@ -28,6 +26,9 @@ class INET_API TCPSinkApp : public cSimpleModule
   protected:
     long bytesRcvd;
 
+    //statistics:
+    static simsignal_t rcvdPkSignal;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -35,5 +36,4 @@ class INET_API TCPSinkApp : public cSimpleModule
 };
 
 #endif
-
 

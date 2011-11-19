@@ -13,9 +13,9 @@
 
 package inet.examples.mpls.net37;
 
-import inet.networklayer.autorouting.NetworkConfigurator;
-import inet.nodes.mpls.RSVP_LSR;
 import ned.DatarateChannel;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 
 
 network R37orig
@@ -24,7 +24,7 @@ network R37orig
         channel line extends DatarateChannel
         {
             delay = 15ms;
-            datarate = 60Kbps;
+            datarate = 60kbps;
         }
     submodules:
         configurator: NetworkConfigurator;

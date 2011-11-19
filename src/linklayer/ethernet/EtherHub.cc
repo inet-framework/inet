@@ -16,15 +16,15 @@
 */
 
 #include "EtherHub.h"
-#include "EtherFrame_m.h"  // for EtherAutoconfig only
 
 
 Define_Module(EtherHub);
 
+simsignal_t EtherHub::pkBytesSignal = SIMSIGNAL_NULL;
 
-static cEnvir& operator<< (cEnvir& out, cMessage *msg)
+static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 {
-    out.printf("(%s)%s",msg->getClassName(),msg->getFullName());
+    out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
     return out;
 }
 
@@ -33,15 +33,28 @@ void EtherHub::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
+    pkBytesSignal = registerSignal("pkBytes");
+
     ports = gateSize("ethg");
 
-    // autoconfig: tell everyone that full duplex is not possible over shared media
-    EV << "Autoconfig: advertising that we only support half-duplex operation\n";
-    for (int i=0; i<ports; i++)
+    double datarate = 0.0;
+
+    for (int i=0; i < ports; i++)
     {
-        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-halfduplex");
-        autoconf->setHalfDuplex(true);
-        send(autoconf,"ethg$o",i);
+        cGate* igate = gate("ethg$i", i);
+        double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
+
+        if (i == 0)
+            datarate = drate;
+        else if (datarate != drate)
+            throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
+
+        drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+
+        if (datarate != drate)
+            throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
+
+        igate->setDeliverOnReceptionStart(true);
     }
 }
 
@@ -52,29 +65,33 @@ void EtherHub::handleMessage(cMessage *msg)
     EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;
+    emit(pkBytesSignal, (long)(PK(msg)->getByteLength()));
 
-    if (ports<=1)
+    if (ports <= 1)
     {
         delete msg;
         return;
     }
-    for (int i=0; i<ports; i++)
+
+    for (int i=0; i < ports; i++)
     {
-        if (i!=arrivalPort)
+        if (i != arrivalPort)
         {
-            bool isLast = (arrivalPort==ports-1) ? (i==ports-2) : (i==ports-1);
+            bool isLast = (arrivalPort == ports-1) ? (i == ports-2) : (i == ports-1);
             cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
-            send(msg2,"ethg$o",i);
+            // stop current transmission
+            gate("ethg$o", i)->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
+            send(msg2, "ethg$o", i);
         }
     }
 }
 
-void EtherHub::finish ()
+void EtherHub::finish()
 {
     simtime_t t = simTime();
     recordScalar("simulated time", t);
-    recordScalar("messages handled", numMessages);
-    if (t>0)
-        recordScalar("messages/sec", numMessages/t);
+
+    if (t > 0)
+        recordScalar("messages/sec", numMessages / t);
 }
 

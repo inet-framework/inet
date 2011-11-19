@@ -19,7 +19,7 @@
 #define OPP_UTILS_H
 
 #include <string>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 
@@ -45,6 +45,11 @@ namespace OPP_Global
    *  Converts string to unsigned long
    */
   unsigned long atoul(const char *s);
+
+  /**
+   * Removes non-alphanumeric characters from the given string.
+   */
+  std::string stripnonalnum(const char *s);
 }
 
 #endif

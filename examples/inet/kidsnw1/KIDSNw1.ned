@@ -66,7 +66,7 @@ network KIDSNw1
             gates:
                 pppg[2];
         }
-        // Border Gatgeway Router
+        // Border Gateway Router
         bgrouter[2]: Router {
             parameters:
 

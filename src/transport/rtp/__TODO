@@ -1,3 +1,28 @@
+Notes: 
+
+Andras Varga, 2008 Jun:
+    State: it compiles, runs, and does *something*, but crashes frequently
+
+    Found suspicious things in the code, to be checked:
+     - packet length bit/byte mismatch?
+     - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
+
+    TODO:
+     - replace cArray with std::vector everywhere
+     - use msg files instead of lengthy manually coded classes
+     - use controlInfo instead of InterfacePacket
+     - RTPProfile and Server/Receiver probably don't need to be modules.
+       It's quite enough if they are plain C++ classes that implement
+       an interface, and get instantiated via cClassFactory::createOne()
+
+    Patches welcome...
+
+    Also: move RTPHost out under nodes/?
+
+Ahmed Ayadi, 2007:
+    RTP is now integrated on INET framework
+    If RTP is important to you, please write.
+
 This is the original todo list:
 - rtp intermediate systems
 - more profiles

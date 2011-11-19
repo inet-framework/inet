@@ -30,18 +30,18 @@ enum messageKind
 namespace ConstType
 {
 
-const  char libDataMarker[]="In-lbl       In-intf     Out-lbl       Out-intf";
-const  char prtDataMarker[]="Prefix            Pointer";
+const  char libDataMarker[] = "In-lbl       In-intf     Out-lbl       Out-intf";
+const  char prtDataMarker[] = "Prefix            Pointer";
 
-const char UnknownData[]="UNDEFINED";
+const char UnknownData[] = "UNDEFINED";
 const char NoLabel[] = "Nolabel";
-const char wildcast[]="*";
-const char empty[]="";
+const char wildcast[] = "*";
+const char empty[] = "";
 
 const int ldp_port = 646;
 
-const int LDP_KIND =10;
-const int HOW_KIND =50;
+const int LDP_KIND = 10;
+const int HOW_KIND = 50;
 
 };
 

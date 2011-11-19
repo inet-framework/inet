@@ -18,14 +18,14 @@ cplusplus {{
 }}
 
 
-// Represents a link in the TED and in LinkStateMsg packets; from TED.msg.
+// Represents a link in the ~TED and in ~LinkStateMsg packets; from TED.msg.
 struct TELinkStateInfo;
 
 
 
 //
-// Packet for disseminating link state information (TELinkStateInfo[]) by the
-// LinkStateRouting module which implements a minimalistic link state routing
+// Packet for disseminating link state information (~TELinkStateInfo[]) by the
+// ~LinkStateRouting module which implements a minimalistic link state routing
 // protocol.
 //
 packet LinkStateMsg

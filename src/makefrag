@@ -11,10 +11,38 @@ else
   CFLAGS := $(filter-out -DHAVE_PCAP,$(CFLAGS))
 endif
 
-# TCP implementaion using the Network Simulation Cradle
-NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
-
-ifneq ($(NSC_VERSION),)
-  CFLAGS += -DWITH_TCP_NSC -I../3rdparty/nsc-$(NSC_VERSION)/sim
-  LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+#
+# TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
+#
+ifneq (,$(findstring -DWITH_TCP_NSC,$(COPTS)))
+  NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
+  ifneq ($(NSC_VERSION),)
+    CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
+    LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+  endif
 endif
+
+#
+# pkg-config:
+#
+HAVE_PKGCFG := $(shell pkg-config --version 2>/dev/null)
+ifeq ($(strip $(HAVE_PKGCFG)),)
+  HAVE_PKGCFG := no
+else
+  HAVE_PKGCFG := yes
+  PKGCFG := $(shell which pkg-config)
+endif
+
+#
+# VoipTool feature:
+#
+ifneq (,$(findstring -DWITH_VOIPTOOL,$(COPTS)))
+  ifeq ($(HAVE_PKGCFG), yes)
+    HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
+    ifeq ($(HAVE_FFMPEG), yes)
+      LIBS += $(shell $(PKGCFG) --libs libavcodec libavformat libavutil)
+      CFLAGS += $(shell $(PKGCFG) --cflags libavcodec libavformat libavutil) -DHAVE_FFMPEG
+    endif
+  endif
+endif
+

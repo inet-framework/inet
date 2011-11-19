@@ -1,0 +1,8 @@
+simsignal ötletek:
+
+void registerSignal(simsignal_t& var, const char *name) a jelenlegi helyett.
+ez megnézhetné először, h. a var ID létezik-e, és a neve == name.
+  ha igen: return.
+  ha nem, akkor var = original::registerSignal(name);
+
+a simsignal_t változók lehetnek static member változók, ha konstans névvel hozzuk létre.

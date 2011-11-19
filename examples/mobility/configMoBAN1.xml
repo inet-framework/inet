@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<initialPosture postureID="1"/>
+
+	<initialLocation x="200" y="200" z="200"/>
+	
+	<durationRange min="30" max="60"/>
+</root>

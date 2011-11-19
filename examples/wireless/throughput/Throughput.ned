@@ -19,17 +19,18 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.world.radio.ChannelControl;
+import inet.mobility.models.StationaryMobility;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.NotificationBoard;
-import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.world.ChannelControl;
+import inet.applications.ethernet.EtherAppCli;
 
 
 module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
+        @node();
     gates:
         input radioIn @directIn;
 
@@ -43,25 +44,24 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 @display("p=50,141");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        cli.out --> wlan.uppergateIn;
+        cli.out --> wlan.upperLayerIn;
 }
 
 network Throughput
 {
     parameters:
         int numCli;
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
@@ -72,10 +72,8 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
 }

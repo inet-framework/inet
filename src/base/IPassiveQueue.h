@@ -36,6 +36,21 @@ class INET_API IPassiveQueue
      * when one becomes available.
      */
     virtual void requestPacket() = 0;
+
+    /**
+     * Returns number of pending requests.
+     */
+    virtual int getNumPendingRequests() = 0;
+
+    /**
+     * Return true when queue is empty, otherwise return false.
+     */
+    virtual bool isEmpty() = 0;
+
+    /**
+     * Clear all queued packets and stored requests.
+     */
+    virtual void clear() = 0;
 };
 
 #endif

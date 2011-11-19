@@ -1,4 +1,4 @@
-INET Framework for OMNEST/OMNeT++ 4.0
+INET Framework for OMNEST/OMNeT++ 4.2
 =====================================
 
 The INET framework is an open-source communication networks simulation
@@ -57,17 +57,20 @@ Directories of INET framework source are arranged roughly along the OSI layers.
 Bottom-up:
 
  src/
-   networkinterfaces/    L2 (data link layer) protocols
+   linklayer/            L2 (data link layer) protocols
      contract/           API to common L2 functionality
      ethernet/           Ethernet model (MAC, LLC, Encap)
      etherswitch/        Ethernet switch (relay unit) model
      ppp/                basic PPP model (framing only)
-     mfcore/             Core modules from the Mobility Framework (modified)
+     radio/              //TODO
+     ieee80211/          ieee 802.11 interface //TODO
      mf80211/            MF's 802.11b ad-hoc mode model (modified)
      ext/                External interface
 
-   network/              L3 (network layer) protocols
+   networklayer/         L3 (network layer) protocols
+     common/             InterfaceTable, InterfaceEntry modules //TODO
      contract/           API to common L3 functionality
+     extras/             FailureManager, Dummy //TODO
      autorouting/        autoconfiguration of static routes
      arp/                ARP protocol
      queue/              router queues (QoS, RED, etc)
@@ -78,6 +81,9 @@ Bottom-up:
      ldp/                LDP signalling protocol for MPLS
      rsvp_te/            RSVP-TE signalling protocol for MPLS (will be replaced soon)
      scenario/           specific for RSVP-TE (will be replaced soon)
+     bgpv4/              BGP V4 protocol (see BGPv4 feature) //TODO
+     ospfv2/             OSPF protocol //TODO
+     ted/                Traffic Engineering Database //TODO
 
    transport/            transport layer protocols
      contract/           API to transport layer functionality
@@ -94,13 +100,20 @@ Bottom-up:
      generic/            traffic generators (directly for IP)
      ethernet/           traffic generators (directly for Ethernet)
      pingapp/            ping application
+     rtpapp/             RTP application
+     sctpapp/            SCTP applications
 
-   world/                scenario manager, MF channel manager
+   world/                scenario manager, MF channel manager //TODO is here the MF ch.m.?
 
    nodes/                protocol stacks, host and router models
      inet/               IP-based components
      ipv6/               IPv6-based components
      mpls/               router models with MPLS/LDP/RSVP-TE
+     bgp/                IPv4 router with BGP and OSPF support
+     ethernet/           //TODO
+     mf80211/            host for mf80211
+     ospfv2/             an OSPFv2 router node
+     wireless/           nodes for wireless simulations
 
    base/                 common header files, base classes
    util/                 utility classes
@@ -116,6 +129,7 @@ Bottom-up:
    wireless/             IEEE 802.11 examples
    mpls/                 example networks for MPLS/LDP/RSVP-TE
    ospfv2/               OSPF examples
+   bgpv4                 BGP examples
 
  doc/                    documentation
 
@@ -124,6 +138,70 @@ Bottom-up:
    ipv6/                 for IPv6 components
    mpls/                 for the MPLS models
    newtcp/               for the TCP model
+   dlltest/              //TODO
+   performance/          performance tests for Ethernet, TCP, UDP, ieee80211 protocols
 
  3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
+
+
+xMIPv6 additions for INET Framework
+=======================================
+further info: http://www.kn.e-technik.tu-dortmund.de/content/view/232/lang,de/
+
+
+VoIPTool 2.0
+============
+
+This is the OMNeT++ 4.x port and complete rewrite (by Zoltan Bojthe)
+of the TKN VoIPTool, http://www.tkn.tu-berlin.de/research/omnetVoipTool/
+
+The fraction of voice over Internet Protocol (VoIP) based telephone calls
+among the totality of voice based communication acts has been significantly
+growing during the last years. In wired as well as wireless communication
+applications, VoIP is expected to completely replace former circuit
+switched telephony. This project provides an OMNeT++-based VoIP traffic
+generator that creates realistic VoIP packet streams, due to the
+utilization of real audio data and an existing VoIP standard codec.
+Moreover, by applying ITU-T's perceptual evaluation of speech quality
+(PESQ) approach at the sink, the perceived quality of a transmitted VoIP
+stream can be determined.
+
+This library is an add-on to the INET Framework, http://inet.omnetpp.org.
+It provides two modules: VoIPSourceApp and VoIPSinkApp. Both are
+application- layer modules that operate over UDP, and can be used in INET's
+StandardHost very much like other UDP traffic generators and sinks (see the
+udpApp[] submodule vector, numUdpApps parameter, etc. in StandardHost.)
+
+VoIPSourceApp accepts an audio file and a destination IP address/port as
+input, and will transmit the file's contents as voice traffic over UDP n
+times (by default once). For transmission, the audio is resampled at the
+given frequency (by default 8KHz) and depth (by default 16 bits), and
+encoded with the given codec (by default G.726) at the given bit rate (by
+default 40Kbps), and chopped into packets that each carry dt milliseconds
+of voice (by default 20ms). (The above default values may be out of date;
+actual values come from the NED file).  Packets that are all silence (all
+samples are below a given threshold in absolute value) are transmitted as
+special "silence" packets. The module does not simulate any particular VoIP
+protocol (e.g. RTP), but instead accepts a "header size" parameter that
+can be set accordingly.
+
+VoIPSinkApp listens on an UDP port, and expects to receive VoIP packets on
+it. The received voice is then saved into a result audio file that can be
+compared with the original for further evaluation. VoIP packets are
+numbered, and out-of-order packets are discarded (the corresponding voice
+interval will be recorded as silence into the file). VoIP packets that miss
+their deadlines will similarly be discarded. It is assumed that the audio is
+played back with delay (by default 20ms), which allows some jitter for the
+incoming packets. The resulting audio file is closed when the simulation
+completes (i.e. in the OMNeT++ finish() function).
+
+Related publication:
+
+M. Bohge and M. Renwanz, "A realistic VoIP traffic generation and evaluation
+tool for OMNeT++", 1st International OMNeT++ Workshop, March 2008, Marseille,
+France.
+
+
+---
+Andras
 

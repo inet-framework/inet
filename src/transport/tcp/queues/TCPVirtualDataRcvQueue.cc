@@ -22,6 +22,57 @@
 
 Register_Class(TCPVirtualDataRcvQueue);
 
+bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* other)
+{
+    if (seqLess(end, other->begin) || seqLess(other->end, begin))
+        return false;
+    if (seqLess(other->begin, begin))
+        begin = other->begin;
+    if (seqLess(end, other->end))
+        end = other->end;
+    return true;
+}
+
+TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::Region::split(uint32 seq)
+{
+    ASSERT(seqGreater(seq, begin) && seqLess(seq, end));
+
+    Region * reg = new Region(begin, seq);
+    begin = seq;
+    return reg;
+}
+
+TCPVirtualDataRcvQueue::Region::CompareStatus TCPVirtualDataRcvQueue::Region::compare(const TCPVirtualDataRcvQueue::Region& other) const
+{
+    if (seqLess(end, other.begin))
+        return BEFORE;
+    if (end == other.begin)
+        return BEFORE_TOUCH;
+    if (begin == other.end)
+        return AFTER_TOUCH;
+    if (seqLess(other.end, begin))
+        return AFTER;
+    return OVERLAP;
+}
+
+void TCPVirtualDataRcvQueue::Region::copyTo(cPacket *msg) const
+{
+    msg->setByteLength(getLength());
+}
+
+ulong TCPVirtualDataRcvQueue::Region::getLengthTo(uint32 seq) const
+{
+    // seq below 1st region
+    if (seqLE(seq, begin))
+        return 0;
+
+    if (seqLess(seq, end)) // part of 1st region
+        return (ulong)(seq - begin);
+
+    return (ulong)(end - begin);
+}
+
+////////////////////////////////////////////////////////////////////
 
 TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() : TCPReceiveQueue()
 {
@@ -29,11 +80,22 @@ TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() : TCPReceiveQueue()
 
 TCPVirtualDataRcvQueue::~TCPVirtualDataRcvQueue()
 {
+    while (!regionList.empty())
+    {
+        delete regionList.front();
+        regionList.pop_front();
+    }
 }
 
 void TCPVirtualDataRcvQueue::init(uint32 startSeq)
 {
     rcv_nxt = startSeq;
+
+    while (!regionList.empty())
+    {
+        delete regionList.front();
+        regionList.pop_front();
+    }
 }
 
 std::string TCPVirtualDataRcvQueue::info() const
@@ -45,21 +107,30 @@ std::string TCPVirtualDataRcvQueue::info() const
 
     for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
     {
-        sprintf(buf, "[%u..%u) ", i->begin, i->end);
-        res+=buf;
+        sprintf(buf, "[%u..%u) ", (*i)->getBegin(), (*i)->getEnd());
+        res += buf;
     }
     return res;
 }
 
+TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
+{
+    Region *region = new Region(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
+    return region;
+}
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
-    merge(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
-    if (seqGE(rcv_nxt, regionList.begin()->begin))
-        rcv_nxt = regionList.begin()->end;
+    Region *region = createRegionFromSegment(tcpseg);
+
+    merge(region);
+
+    if (seqGE(rcv_nxt, regionList.front()->getBegin()))
+        rcv_nxt = regionList.front()->getEnd();
+
     return rcv_nxt;
 }
 
-void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
+void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
 {
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
@@ -67,119 +138,66 @@ void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
     // existing regions; we also may have to merge existing regions if
     // they become overlapping (or touching) after adding tcpseg.
 
-    Region seg;
-    seg.begin = segmentBegin;
-    seg.end = segmentEnd;
-
     RegionList::iterator i = regionList.begin();
-    if (i==regionList.end())
-    {
-        // insert as first and only region
-        regionList.insert(regionList.begin(), seg);
-        return;
-    }
+    Region::CompareStatus cmp;
 
-    // skip regions which fall entirely before seg (no overlap or touching)
-    while (i!=regionList.end() && seqLess(i->end,seg.begin))
+    while (i != regionList.end() && Region::AFTER != (cmp = (*i)->compare(*seg)))
     {
-        ++i;
-    }
-
-    if (i==regionList.end())
-    {
-        // seg is entirely past last region: insert as separate region at end
-        regionList.insert(regionList.end(), seg);
-        return;
-    }
-
-    if (seqLess(seg.end,i->begin))
-    {
-        // segment entirely before region "i": insert as separate region before "i"
-        regionList.insert(i, seg);
-        return;
-    }
-
-    if (seqLess(seg.begin,i->begin))
-    {
-        // segment starts before region "i": extend region
-        i->begin = seg.begin;
-    }
-
-    if (seqLess(i->end,seg.end))
-    {
-        // segment ends past end of region "i": extend region
-        i->end = seg.end;
-
-        // maybe we have to merge region "i" with next one(s)
-        RegionList::iterator j = i;
-        ++j;
-        while (j!=regionList.end() && seqGE(i->end,j->begin)) // while there's overlap
+        RegionList::iterator old = i++;
+        if (cmp != Region::BEFORE)
         {
-            // if "j" is longer: extend "i"
-            if (seqLess(i->end,j->end))
-                i->end = j->end;
-
-            // erase "j" (it was merged into "i")
-            RegionList::iterator oldj = j++;
-            regionList.erase(oldj);
+            seg->merge(*old);
+            delete *old;
+            regionList.erase(old);
         }
     }
+
+    regionList.insert(i, seg);
 }
 
 cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    ulong numBytes = extractTo(seq);
-    if (numBytes==0)
-        return NULL;
+    cPacket *msg = NULL;
+    Region *reg = extractTo(seq);
 
-    cPacket *msg = new cPacket("data");
-    msg->setByteLength(numBytes);
+    if (reg)
+    {
+        msg = new cPacket("data");
+        reg->copyTo(msg);
+        delete reg;
+    }
     return msg;
 }
 
-ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
+TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 {
-    ASSERT(seqLE(seq,rcv_nxt));
+    ASSERT(seqLE(seq, rcv_nxt));
 
-    RegionList::iterator i = regionList.begin();
-    if (i==regionList.end())
-        return 0;
+    if (regionList.empty())
+        return NULL;
 
-    ASSERT(seqLess(i->begin,i->end)); // empty regions cannot exist
+    Region *reg = regionList.front();
+    uint32 beg = reg->getBegin();
 
-    // seq below 1st region
-    if (seqLE(seq,i->begin))
-        return 0;
+    if (seqLE(seq, beg))
+        return NULL;
 
-    if (seqLess(seq,i->end))
+    if (seqGE(seq, reg->getEnd()))
     {
-        // part of 1st region
-        ulong octets = seq - i->begin;
-        i->begin = seq;
-        return octets;
+        regionList.pop_front();
+        return reg;
     }
-    else
-    {
-        // full 1st region
-        ulong octets = i->end - i->begin;
-        regionList.erase(i);
-        return octets;
-    }
+
+    return reg->split(seq);
 }
 
 uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
 {
-    uint32 bytes=0;
+    uint32 bytes = 0;
 
-    RegionList::iterator i = regionList.begin();
-    if (i==regionList.end()) // is queue empty?
-        return 0;
+    for (RegionList::iterator i = regionList.begin(); i != regionList.end(); i++)
+        bytes += (*i)->getLength();
 
-    while (i!=regionList.end())
-    {
-        bytes = bytes + (i->end - i->begin);
-        i++;
-    }
     return bytes;
 }
 
@@ -187,7 +205,7 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
 {
     uint32 usedRcvBuffer = getAmountOfBufferedBytes();
     uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
-    return freeRcvBuffer;
+    return (maxRcvBuffer > usedRcvBuffer) ? freeRcvBuffer : 0;
 }
 
 uint32 TCPVirtualDataRcvQueue::getQueueLength()
@@ -204,33 +222,35 @@ void TCPVirtualDataRcvQueue::getQueueStatus()
 uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
 {
     RegionList::iterator i = regionList.begin();
-    while (i!=regionList.end())
+
+    while (i != regionList.end())
     {
-        if (seqLE(i->begin, fromSeqNum) && seqLE(fromSeqNum, i->end))
+        if (seqLE((*i)->getBegin(), fromSeqNum) && seqLess(fromSeqNum, (*i)->getEnd()))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
-            if (seqLess(i->begin, fromSeqNum))
-                return i->begin;
-            return fromSeqNum;
+            return (*i)->getBegin();
         }
+
         i++;
     }
+
     return fromSeqNum;
 }
 
 uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
 {
     RegionList::iterator i = regionList.begin();
-    while (i!=regionList.end())
+
+    while (i != regionList.end())
     {
-        if (seqLE(i->begin, toSeqNum) && seqLE(toSeqNum, i->end))
+        if (seqLess((*i)->getBegin(), toSeqNum) && seqLE(toSeqNum, (*i)->getEnd()))
         {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
-            if (seqLess(toSeqNum, i->end))
-                return i->end;
-            return toSeqNum;
+            return (*i)->getEnd();
         }
+
         i++;
     }
+
     return toSeqNum;
 }

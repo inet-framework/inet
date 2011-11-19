@@ -24,6 +24,9 @@
 #include "SCTPSocket.h"
 
 
+/**
+ * Implements the SCTPServer simple module. See the NED file for more info.
+ */
 class INET_API SCTPServer : public cSimpleModule
 {
     protected:
@@ -31,20 +34,20 @@ class INET_API SCTPServer : public cSimpleModule
         int32 assocId;
         SCTPSocket *socket;
         double delay;
-        double echoFactor;
         double delayFirstRead;
         bool readInt;
         bool schedule;
         bool firstData;
         bool shutdownReceived;
-        uint64 bytesSent;
-        uint64 packetsSent;
-        uint64 packetsRcvd;
-        int32 numSessions;
-        uint64 numRequestsToSend; // requests to send in this session
+        bool echo;
         bool finishEndsSimulation;
         bool ordered;
         bool abortSent;
+        uint64 bytesSent;
+        uint64 packetsSent;
+        uint64 packetsRcvd;
+        uint64 numRequestsToSend; // requests to send in this session
+        int32 numSessions;
         int32 queueSize;
         int32 count;
         cMessage *timeoutMsg;
@@ -54,7 +57,8 @@ class INET_API SCTPServer : public cSimpleModule
         int32 inboundStreams;
         int32 outboundStreams;
         int32 lastStream;
-        typedef struct
+
+        struct ServerAssocStat
         {
             simtime_t start;
             simtime_t stop;
@@ -64,28 +68,29 @@ class INET_API SCTPServer : public cSimpleModule
             simtime_t lifeTime;
             bool abortSent;
             bool peerClosed;
-        }ServerAssocStat;
+        };
+
         typedef std::map<int32,ServerAssocStat> ServerAssocStatMap;
         ServerAssocStatMap serverAssocStatMap;
+
         typedef std::map<int32,cOutVector*> BytesPerAssoc;
         BytesPerAssoc bytesPerAssoc;
+
         typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
         HistEndToEndDelay histEndToEndDelay;
+
         typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;
+
+    protected:
         void sendOrSchedule(cPacket *msg);
         cPacket* makeAbortNotification(SCTPCommand* msg);
         cPacket* makeReceiveRequest(cPacket* msg);
         cPacket* makeDefaultReceive();
         int32 ssn;
-    public:
-        ~SCTPServer();
-        struct pathStatus {
-            bool active;
-            bool primaryPath;
-            IPAddress  pid;
-        };
 
+    public:
+        virtual ~SCTPServer();
         void initialize();
         void handleMessage(cMessage *msg);
         void finish();

@@ -1,0 +1,9 @@
+This example demonstrates the anomalies that may be caused by
+generating wireless traffic in a synchronized way.
+
+Several wireless hosts communicate with UDP packats in an adhoc
+network in two different scenarios. In the synchronized scenario
+all message sends collide and fail. This happens because all hosts
+start transmitting at the very same simulation time and this is
+repeated over and over again. The non-synchronized scenario solves
+this problem by introducing a random delay in the application level.

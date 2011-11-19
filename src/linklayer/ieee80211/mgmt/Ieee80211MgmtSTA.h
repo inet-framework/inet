@@ -66,8 +66,8 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
 
         APInfo() {
-            channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
-            isAuthenticated=false; authTimeoutMsg=NULL;
+            channel = -1; beaconInterval = rxPower = 0; authSeqExpected = -1;
+            isAuthenticated = false; authTimeoutMsg = NULL;
         }
     };
 
@@ -79,7 +79,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         int receiveSequence;
         cMessage *beaconTimeoutMsg;
 
-        AssociatedAPInfo() : APInfo() {receiveSequence=0; beaconTimeoutMsg=NULL;}
+        AssociatedAPInfo() : APInfo() {receiveSequence = 0; beaconTimeoutMsg = NULL;}
     };
 
   protected:
@@ -113,7 +113,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void handleUpperMessage(cPacket *msg);
 
     /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
+    virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
@@ -164,7 +164,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual int statusCodeToPrimResultCode(int statusCode);

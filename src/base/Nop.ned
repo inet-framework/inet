@@ -22,8 +22,9 @@ package inet.base;
 //
 // Just lets messages through without any change or delay.
 //
-module Nop
+module Nop like IHook
 {
+    @display("i=block/socket;is=vs");
     gates:
         input in;
         output out;

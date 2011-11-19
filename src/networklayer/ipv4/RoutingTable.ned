@@ -20,12 +20,12 @@ package inet.networklayer.ipv4;
 
 //
 // Stores the routing table. (Per-interface configuration is stored in
-// InterfaceTable.)
+// ~InterfaceTable.)
 //
 // For hosts, the routerId module parameter should be empty (""),
-// in which case the loopback IP address will be set to 127.0.0.1/8.
+// in which case the loopback IPv4 address will be set to 127.0.0.1/8.
 // For routers which have a routerId set, the loopback address will be set to
-// routerId. (See also RFC 2072 "\Router Renumbering Guide".)
+// routerId. (See also RFC 2072 "Router Renumbering Guide".)
 //
 // RouterId may also be set to the string <tt>"auto"</tt>, in which case the
 // highest interface address will be chosen as routerId; the loopback address
@@ -42,13 +42,13 @@ package inet.networklayer.ipv4;
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
-// @see InterfaceTable
+// @see ~InterfaceTable
 // @author: Jochen Reber, Andras Varga
 //
 simple RoutingTable
 {
     parameters:
-        string routerId = default("auto"); // for routers, the router id using IP address dotted
+        string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
         bool IPForward = default(true);  // turns IP forwarding on/off

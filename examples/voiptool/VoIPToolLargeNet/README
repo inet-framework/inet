@@ -1,0 +1,6 @@
+VoIPToolLargeNet
+================
+
+This is a copy of the LargeNet Ethernet demo simulation in the INET Framework,
+modified to add a VoIP server and a VoIP client. It can be used to test VoIP 
+transmission on a LAN with high background traffic.

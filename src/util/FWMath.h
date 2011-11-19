@@ -25,12 +25,17 @@
 //
 
 #include <math.h>
+#include "INETDefs.h"
 
 
-/* windows math.h doesn't define the PI variable so we have to do it
-   by hand*/
+/* windows math.h doesn't define the PI variable so we have to do it by hand*/
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+
+/* windows math.h doesn't define sqrt(2) so we have to do it by hand. */
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880
 #endif
 
 /* Constant for comparing doubles. Two doubles at most epsilon apart
@@ -67,48 +72,58 @@ class INET_API FWMath {
   static double div(double dividend, double divisor) {
       double i;
       double f;
-      f=modf(dividend/divisor, &i);
+      f = modf(dividend/divisor, &i);
       return i;
   }
 
   /**
+   * Returns the remainder r on division of dividend a by divisor n,
+   * using floored division. The remainder r has the same sign as the divisor n.
+   */
+  static double modulo(double a, double n) { return (a - n * floor(a/n)); }
+
+  /**
    * Tests whether two doubles are close enough to be declared equal.
-   * @return true if parameters are at most epsilon apart, false
+   * Returns true if parameters are at most epsilon apart, false
    * otherwise
    */
-  static bool close(double one, double two) {
-      return fabs(one-two)<EPSILON;
-  }
+  static bool close(double one, double two) { return fabs(one-two)<EPSILON; }
 
   /**
-   * @return 0 if i is close to 0, 1 if i is positive greater epsilon,
-   * -1 if it is negative smaller epsilon.
+   * Returns 0 if i is close to 0, 1 if i is positive and greater than epsilon,
+   * or -1 if it is negative and less than epsilon.
    */
-  static int stepfunction(double i) { return (i>EPSILON) ? 1 : close(i,0) ? 0 :-1; };
-
+  static int stepfunction(double i) { return (i>EPSILON) ? 1 : close(i, 0) ? 0 :-1; };
 
   /**
-   * @return 1 if parameter greater or equal zero, -1 otherwise
+   * Returns 1 if the parameter is greater or equal to zero, -1 otherwise
    */
   static int sign(double i) { return (i>=0)? 1 : -1; };
 
   /**
-   * @return integer that corresponds to rounded double parameter
+   * Returns an integer that corresponds to rounded double parameter
    */
   static int round(double d) { return (int)(ceil(d-0.5)); }
 
   /**
-   * @return greater of the given parameters
+   * Discards the fractional part of the parameter, e.g. -3.8 becomes -3
+   */
+  static double floorToZero(double d) { return (d >= 0.0)? floor(d) : ceil(d); }
+
+  /**
+   * Returns the greater of the given parameters
    */
   static double max(double a, double b) { return (a<b)? b : a; }
 
   /**
-   * convert a dBm value into milli Watt
+   * Converts a dBm value into milliwatts
    */
-  static double dBm2mW(double dBm){
-      return pow(10.0, dBm/10.0);
-  }
+  static double dBm2mW(double dBm) { return pow(10.0, dBm/10.0); }
 
+  /**
+   * Convert a mW value to dBm.
+   */
+  static double mW2dBm(double mW) { return (10 * log10(mW)); }
 };
 
 #endif

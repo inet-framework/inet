@@ -27,7 +27,7 @@
 /**
  * Used in 802.11 infrastructure mode: in a station (STA), this module
  * controls channel scanning, association and handovers, by sending commands
- * (e.g. Ieee80211Prim_ScanRequest) to the management getModule(Ieee80211MgmtSTA).
+ * (e.g. Ieee80211Prim_ScanRequest) to the management module (Ieee80211MgmtSTA).
  *
  * See corresponding NED file for a detailed description.
  *
@@ -44,6 +44,11 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     simtime_t authenticationTimeout;
     simtime_t associationTimeout;
 
+    //Statistics:
+    static simsignal_t sentRequestSignal;
+    static simsignal_t acceptConfirmSignal;
+    static simsignal_t dropConfirmSignal;
+
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -58,7 +63,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     virtual void handleResponse(cMessage *msg);
 
     /** Redefined from INotifiable; called by NotificationBoard */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     virtual void sendRequest(Ieee80211PrimRequest *req);

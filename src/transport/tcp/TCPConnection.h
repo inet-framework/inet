@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -56,18 +57,18 @@ class TCPAlgorithm;
 //
 enum TcpState
 {
-    TCP_S_INIT        = 0,
-    TCP_S_CLOSED      = FSM_Steady(1),
-    TCP_S_LISTEN      = FSM_Steady(2),
-    TCP_S_SYN_SENT    = FSM_Steady(3),
-    TCP_S_SYN_RCVD    = FSM_Steady(4),
+    TCP_S_INIT = 0,
+    TCP_S_CLOSED = FSM_Steady(1),
+    TCP_S_LISTEN = FSM_Steady(2),
+    TCP_S_SYN_SENT = FSM_Steady(3),
+    TCP_S_SYN_RCVD = FSM_Steady(4),
     TCP_S_ESTABLISHED = FSM_Steady(5),
-    TCP_S_CLOSE_WAIT  = FSM_Steady(6),
-    TCP_S_LAST_ACK    = FSM_Steady(7),
-    TCP_S_FIN_WAIT_1  = FSM_Steady(8),
-    TCP_S_FIN_WAIT_2  = FSM_Steady(9),
-    TCP_S_CLOSING     = FSM_Steady(10),
-    TCP_S_TIME_WAIT   = FSM_Steady(11)
+    TCP_S_CLOSE_WAIT = FSM_Steady(6),
+    TCP_S_LAST_ACK = FSM_Steady(7),
+    TCP_S_FIN_WAIT_1 = FSM_Steady(8),
+    TCP_S_FIN_WAIT_2 = FSM_Steady(9),
+    TCP_S_CLOSING = FSM_Steady(10),
+    TCP_S_TIME_WAIT = FSM_Steady(11)
 };
 
 
@@ -111,29 +112,32 @@ enum TCPEventCode
 
 /** @name Timeout values */
 //@{
-#define TCP_TIMEOUT_CONN_ESTAB    75    // 75 seconds
-#define TCP_TIMEOUT_FIN_WAIT_2   600    // 10 minutes
-#define TCP_TIMEOUT_2MSL         240    // 2 * 2 minutes
-#define TCP_TIMEOUT_SYN_REXMIT     3    // initially 3 seconds
+#define TCP_TIMEOUT_CONN_ESTAB      75  // 75 seconds
+#define TCP_TIMEOUT_FIN_WAIT_2     600  // 10 minutes
+#define TCP_TIMEOUT_2MSL           240  // 2 * 2 minutes
+#define TCP_TIMEOUT_SYN_REXMIT       3  // initially 3 seconds
 #define TCP_TIMEOUT_SYN_REXMIT_MAX 240  // 4 mins (will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner)
 //@}
 
-#define MAX_SYN_REXMIT_COUNT     12     // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+#define MAX_SYN_REXMIT_COUNT        12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+#define TCP_MAX_WIN              65535  // 65535 bytes, largest value (16 bit) for (unscaled) window size
+#define DUPTHRESH                    3  // used for TCPTahoe, TCPReno and SACK (RFC 3517)
+#define MAX_SACK_BLOCKS             60  // will only be used with SACK
+#define TCP_OPTIONS_MAX_SIZE        40  // 40 bytes, 15 * 4 bytes (15 is the largest number in 4 bits length data offset field), TCP_MAX_HEADER_OCTETS - TCP_HEADER_OCTETS = 40
+#define TCP_OPTION_SACK_MIN_SIZE    10  // 10 bytes, option length = 8 * n + 2 bytes (NOP)
+#define TCP_OPTION_TS_SIZE          12  // 12 bytes, option length = 10 bytes + 2 bytes (NOP)
+#define PAWS_IDLE_TIME_THRESH   (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
 
-#define MAX_SACK_BLOCKS           60    // will only be used with SACK
-#define DUPTHRESH                  3    // used for TCPTahoe, TCPReno and SACK (RFC 3517)
+#ifndef SACKS_AS_C_ARRAY
+    typedef std::list<Sack> SackList;
+#endif
 
-#define TCP_MAX_WIN            65535    // largest value (16 bit) for (unscaled) window size
-
-#define PAWS_IDLE_TIME_THRESH 24*24*3600 // 24 days in seconds (RFC 1323)
-
-#define TCP_OPTION_TS_SIZE  12
 /**
  * Contains state variables ("TCB") for TCP.
  *
  * TCPStateVariables is effectively a "struct" -- it only contains
  * public data members. (Only declared as a class so that we can use
- * cPolymorphic as base class and make it possible to inspect
+ * cObject as base class and make it possible to inspect
  * it in Tkenv.)
  *
  * TCPStateVariables only contains variables needed to implement
@@ -141,7 +145,7 @@ enum TCPEventCode
  * into TCPAlgorithm subclasses which can have their own state blocks,
  * subclassed from TCPStateVariables. See TCPAlgorithm::createStateVariables().
  */
-class INET_API TCPStateVariables : public cPolymorphic
+class INET_API TCPStateVariables : public cObject
 {
   public:
     TCPStateVariables();
@@ -183,7 +187,7 @@ class INET_API TCPStateVariables : public cPolymorphic
     bool fin_ack_rcvd;
 
     bool send_fin;       // true if a user CLOSE command has been "queued"
-    uint32 snd_fin_seq;  // if send_fin==true: FIN should be sent just before this sequence number
+    uint32 snd_fin_seq;  // if send_fin == true: FIN should be sent just before this sequence number
 
     bool fin_rcvd;       // whether FIN received or not
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
@@ -233,7 +237,11 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 end_seqno;        // end sequence number of last received out-of-order segment
     bool snd_sack;           // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack;          // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
+#ifdef SACKS_AS_C_ARRAY
     Sack sacks_array[MAX_SACK_BLOCKS]; // MAX_SACK_BLOCKS is set to 60
+#else
+    SackList sacks_array; // MAX_SACK_BLOCKS is set to 60
+#endif
     uint32 highRxt;          // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
     uint32 pipe;             // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
     uint32 recoveryPoint;    // RFC 3517
@@ -246,6 +254,7 @@ class INET_API TCPStateVariables : public cPolymorphic
     uint32 snd_sacks;        // number of sent sacks
     uint32 rcv_sacks;        // number of received sacks
     uint32 rcv_oooseg;       // number of received out-of-order segments
+    uint32 rcv_naseg;        // number of received not acceptable segments
 
     // receiver buffer / receiver queue related variables
     uint32 maxRcvBuffer;     // maximal amount of bytes in tcp receive queue
@@ -329,11 +338,12 @@ class INET_API TCPConnection
     // TCP queues
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
- public:
+    TCPDataTransferMode transferMode;   // TCP transfer mode: bytecount, object, bytestream
 
+  public:
     TCPSACKRexmitQueue *rexmitQueue;
 
- protected:
+  protected:
     // TCP behavior in data transfer state
     TCPAlgorithm *tcpAlgorithm;
 
@@ -346,11 +356,11 @@ class INET_API TCPConnection
     // statistics
     cOutVector *sndWndVector;   // snd_wnd
     cOutVector *rcvWndVector;   // rcv_wnd
-    cOutVector *rcvAdvVector;   // current advertised window (=rcv_avd)
+    cOutVector *rcvAdvVector;   // current advertised window (=rcv_adv)
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo
-    cOutVector *rcvAckVector;   // received ackNo (= snd_una)
+    cOutVector *rcvAckVector;   // received ackNo (=snd_una)
     cOutVector *unackedVector;  // number of bytes unacknowledged
 
     cOutVector *dupAcksVector;   // current number of received dupAcks
@@ -358,6 +368,7 @@ class INET_API TCPConnection
     cOutVector *sndSacksVector;  // number of sent Sacks
     cOutVector *rcvSacksVector;  // number of received Sacks
     cOutVector *rcvOooSegVector; // number of received out-of-order segments
+    cOutVector *rcvNASegVector;  // number of received not acceptable segments
 
     cOutVector *sackedBytesVector;        // current number of received sacked bytes
     cOutVector *tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
@@ -433,7 +444,7 @@ class INET_API TCPConnection
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(TCPSegment *tcpseg);
+    virtual bool isSegmentAcceptable(TCPSegment *tcpseg) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -451,10 +462,10 @@ class INET_API TCPConnection
     virtual TCPSegment addSacks(TCPSegment *tcpseg);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(TCPSegment *tcpseg);
+    virtual uint32 getTSval(TCPSegment *tcpseg) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(TCPSegment *tcpseg);
+    virtual uint32 getTSecr(TCPSegment *tcpseg) const;
   public:
     /** Utility: send ACK */
     virtual void sendAck();
@@ -528,7 +539,7 @@ class INET_API TCPConnection
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */
-    virtual void printConnBrief();
+    virtual void printConnBrief() const;
     /** Utility: prints important header fields */
     static void printSegmentBrief(TCPSegment *tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
@@ -548,7 +559,7 @@ class INET_API TCPConnection
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways=false);
+    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways = false);
 
   public:
     /**
@@ -632,8 +643,10 @@ class INET_API TCPConnection
      * (and hence been marked in the scoreboard).  NextSeg () MUST return the
      * sequence number range of the next segment that is to be
      * transmitted..."
+     * Returns true if a valid sequence number (for the next segment) is found and
+     * returns false if no segment should be send.
      */
-    virtual uint32 nextSeg();
+    virtual bool nextSeg(uint32 &seqNum);
 
     /**
      * Utility: send data during Loss Recovery phase (if SACK is enabled).
@@ -653,12 +666,12 @@ class INET_API TCPConnection
     /**
      * Utility: converts a given simtime to a timestamp (TS).
      */
-    virtual uint32 convertSimtimeToTS(simtime_t simtime);
+    static uint32 convertSimtimeToTS(simtime_t simtime);
 
     /**
      * Utility: converts a given timestamp (TS) to a simtime.
      */
-    virtual simtime_t convertTSToSimtime(uint32 timestamp);
+    static simtime_t convertTSToSimtime(uint32 timestamp);
 
     /**
      * Utility: checks if send queue is empty (no data to send).

@@ -1,0 +1,37 @@
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <at t="0.5">
+        <disconnect src-module="server" src-gate="ethg$o[0]" />
+        <disconnect src-module="client1" src-gate="ethg$o[0]" />
+    </at>
+    <at t="1.7">
+        <connect src-module="server" src-gate="ethg[0]"
+                 dest-module="client1" dest-gate="ethg[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+    <set-channel-attr t="2" src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+    <at t="3.3">
+        <disconnect src-module="server" src-gate="ethg$o[0]" />
+    </at>
+    <at t="3.32">
+        <disconnect src-module="client1" src-gate="ethg$o[0]" />
+    </at>
+    <at t="4.7">
+        <connect src-module="server" src-gate="ethg$o[0]"
+                 dest-module="client1" dest-gate="ethg$i[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+        <connect src-module="client1" src-gate="ethg$o[0]"
+                 dest-module="server" dest-gate="ethg$i[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+</scenario>
+

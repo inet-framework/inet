@@ -29,7 +29,7 @@
 class INET_API TCPSACKRexmitQueue
 {
   public:
-    TCPConnection *conn; // the connection that owns this queue
+    TCPConnection *conn;  // the connection that owns this queue
 
     struct Region
     {
@@ -38,11 +38,12 @@ class INET_API TCPSACKRexmitQueue
         bool sacked;      // indicates whether region has already been sacked by data receiver
         bool rexmitted;   // indicates whether region has already been retransmitted by data sender
     };
+
     typedef std::list<Region> RexmitQueue;
-    RexmitQueue rexmitQueue;
+    RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
 
     uint32 begin;  // 1st sequence number stored
-    uint32 end;    // last sequence number stored +1
+    uint32 end;    // last sequence number stored + 1
 
   public:
     /**
@@ -62,7 +63,7 @@ class INET_API TCPSACKRexmitQueue
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first
-     * byte of app data should get. This is usually ISS+1 because SYN consumes
+     * byte of app data should get. This is usually ISS + 1 because SYN consumes
      * one byte in the sequence number space.
      *
      * init() may be called more than once; every call flushes the existing contents
@@ -78,18 +79,18 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Prints the current rexmitQueue status for debug purposes.
      */
-    virtual void info();
+    virtual void info() const;
 
     /**
      * Returns the sequence number of the first byte stored in the buffer.
      */
-    virtual uint32 getBufferStartSeq();
+    virtual uint32 getBufferStartSeq() const { return begin; }
 
     /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
-    virtual uint32 getBufferEndSeq();
+    virtual uint32 getBufferEndSeq() const { return end; }
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -113,29 +114,29 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Returns SackedBit value of seqNum.
      */
-    virtual bool getSackedBit(uint32 seqNum);
+    virtual bool getSackedBit(uint32 seqNum) const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength();
+    virtual uint32 getQueueLength() const { return rexmitQueue.size(); }
 
     /**
      * Returns the highest sequence number sacked by data receiver.
      */
-    virtual uint32 getHighestSackedSeqNum();
+    virtual uint32 getHighestSackedSeqNum() const;
 
     /**
      * Returns the highest sequence number rexmitted by data sender.
      */
-    virtual uint32 getHighestRexmittedSeqNum();
+    virtual uint32 getHighestRexmittedSeqNum() const;
 
     /**
      * Checks rexmit queue for sacked of rexmitted segments and returns a certain offset
      * (contiguous sacked or rexmitted region) to forward snd->nxt.
      * It is called before retransmitting data.
      */
-    virtual uint32 checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeq);
+    virtual uint32 checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeq) const;
 
     /**
      * Called when REXMIT timer expired.
@@ -152,17 +153,29 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
      */
-    virtual uint32 getTotalAmountOfSackedBytes();
+    virtual uint32 getTotalAmountOfSackedBytes() const;
 
     /**
      * Returns amount of sacked bytes above seqNum.
      */
-    virtual uint32 getAmountOfSackedBytes(uint32 seqNum);
+    virtual uint32 getAmountOfSackedBytes(uint32 seqNum) const;
 
     /**
      * Returns the number of discontiguous sacked regions (SACKed sequences) above seqNum.
      */
-    virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum);
+    virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum) const;
+
+    /*
+     * Returns nothing but checks length, sacked bit and rexmitted bit of a given
+     * SACK block starting at seqNum.
+     */
+    virtual void checkSackBlock(uint32 seqNum, uint32 &length, bool &sacked, bool &rexmitted) const;
+
+  protected:
+    /*
+     * Returns if TCPSACKRexmitQueue is valid or not.
+     */
+    bool checkQueue() const;
 };
 
 #endif

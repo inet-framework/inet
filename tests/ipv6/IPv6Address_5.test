@@ -1,12 +1,12 @@
 %description:
 test IPv6Address scope and multicast scope
 
-%global:
+%includes:
 #include "IPv6Address.h"
 
 %activity:
-#define P(X)  ev << #X << "  " << IPv6Address::scopeName(X.scope()) << " " << \
-                    (X.isMulticast() ? X.multicastScope() : -1) << "\n";
+#define P(X)  ev << #X << "  " << IPv6Address::scopeName(X.getScope()) << " " << \
+                    (X.isMulticast() ? X.getMulticastScope() : -1) << "\n";
 
 P(IPv6Address::UNSPECIFIED_ADDRESS);
 P(IPv6Address::LOOPBACK_ADDRESS);

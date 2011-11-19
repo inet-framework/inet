@@ -17,8 +17,8 @@
 package inet.networklayer.mpls;
 
 //
-// Stores the LIB (Label Information Base), accessed by MPLS and its
-// associated control protocols (RSVP, LDP) via direct C++ method calls.
+// Stores the LIB (Label Information Base), accessed by ~MPLS and its
+// associated control protocols (~RSVP, ~LDP) via direct C++ method calls.
 //
 simple LIBTable
 {

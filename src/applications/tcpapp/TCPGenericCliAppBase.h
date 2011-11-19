@@ -14,7 +14,8 @@
 #ifndef __INET_TCPGENERICCLIAPPBASE_H
 #define __INET_TCPGENERICCLIAPPBASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPSocket.h"
 
 
@@ -22,7 +23,7 @@
  * Base class for clients app for TCP-based request-reply protocols or apps.
  * Handles a single session (and TCP connection) at a time.
  *
- * It needs the following NED parameters: address, port, connectAddress, connectPort.
+ * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  *
  * Generally used together with GenericAppMsg and TCPGenericSrvApp.
  */
@@ -39,12 +40,18 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     int bytesSent;
     int bytesRcvd;
 
+    //statistics:
+    static simsignal_t connectSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
+
   protected:
     /**
      * Initialization. Should be redefined to perform or schedule a connect().
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
 
+    virtual int numInitStages() const { return 4; }
     /**
      * For self-messages it invokes handleTimer(); messages arriving from TCP
      * will get dispatched to the socketXXX() functions.
@@ -67,7 +74,7 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     virtual void close();
 
     /** Sends a GenericAppMsg of the given length */
-    virtual void sendPacket(int numBytes, int expectedReplyBytes, bool serverClose=false);
+    virtual void sendPacket(int numBytes, int expectedReplyBytes, bool serverClose = false);
 
     /** When running under GUI, it displays the given string next to the icon */
     virtual void setStatusString(const char *s);
@@ -102,5 +109,4 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
 };
 
 #endif
-
 

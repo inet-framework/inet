@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Levente Mészáros
+// Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,17 +18,14 @@
 #ifndef IEEE80211_CONSTS_H
 #define IEEE80211_CONSTS_H
 
-// XXX these are taken over from Consts80211.h
-// the phy has recognized a bit error in the packet
-#define BITERROR -1
-// packet lost due to collision
-#define COLLISION 9
-
 // frame lengths in bits
-// XXX this is duplicate, it's already in Ieee80211Frame.msg
-const unsigned int LENGTH_RTS = 160;
-const unsigned int LENGTH_CTS = 112;
-const unsigned int LENGTH_ACK = 112;
+const unsigned int LENGTH_RTS = 160; //bits
+const unsigned int LENGTH_CTS = 112; //bits
+const unsigned int LENGTH_ACK = 112; //bits
+const unsigned int LENGTH_MGMT = 28 * 8; //bits
+const unsigned int LENGTH_DATAHDR = 34 * 8; //bits
+
+const unsigned int SNAP_HEADER_BYTES = 8;
 
 // time slot ST, short interframe space SIFS, distributed interframe
 // space DIFS, and extended interframe space EIFS

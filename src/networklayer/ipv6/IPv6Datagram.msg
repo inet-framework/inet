@@ -52,7 +52,7 @@ packet IPv6Datagram
     short hopLimit = 0;
     int transportProtocol enum(IPProtocolId);
 
-    IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
 
 
@@ -61,6 +61,7 @@ packet IPv6Datagram
 //
 class IPv6ExtensionHeader
 {
-    @customize(true);
+    short extensionType;
+    short byteLength = 8;
 }
 

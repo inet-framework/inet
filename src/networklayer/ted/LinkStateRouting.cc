@@ -16,7 +16,7 @@
 #include <algorithm>
 
 #include "LinkStateRouting.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
 #include "RoutingTableAccess.h"
@@ -74,20 +74,20 @@ void LinkStateRouting::handleMessage(cMessage * msg)
     {
         delete announceMsg;
         announceMsg = NULL;
-        sendToPeers(tedmod->ted, true, IPAddress());
+        sendToPeers(tedmod->ted, true, IPv4Address());
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn"))
     {
-        EV << "Processing message from IP: " << msg << endl;
-        IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->getControlInfo());
-        IPAddress sender = controlInfo->getSrcAddr();
+        EV << "Processing message from IPv4: " << msg << endl;
+        IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
+        IPv4Address sender = controlInfo->getSrcAddr();
         processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg*>(msg), sender);
     }
     else
         ASSERT(false);
 }
 
-void LinkStateRouting::receiveChangeNotification(int category, const cPolymorphic *details)
+void LinkStateRouting::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -112,10 +112,10 @@ void LinkStateRouting::receiveChangeNotification(int category, const cPolymorphi
         links.push_back(tedmod->ted[index]);
     }
 
-    sendToPeers(links, false, IPAddress());
+    sendToPeers(links, false, IPv4Address());
 }
 
-void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
+void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address sender)
 {
     EV << "received LINK_STATE message from " << sender << endl;
 
@@ -133,13 +133,13 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
         TELinkStateInfo *match;
 
         // process link if we haven't seen this already and timestamp is newer
-        if(tedmod->checkLinkValidity(link, match))
+        if (tedmod->checkLinkValidity(link, match))
         {
             ASSERT(link.sourceId == link.advrouter.getInt());
 
             EV << "new information found" << endl;
 
-            if(!match)
+            if (!match)
             {
                 // and we have no info on this link so far, store it as it is
                 tedmod->ted.push_back(link);
@@ -148,7 +148,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
             else
             {
                 // copy over the information from it
-                if(match->state != link.state)
+                if (match->state != link.state)
                 {
                     match->state = link.state;
                     change = true;
@@ -156,7 +156,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
                 match->messageId = link.messageId;
                 match->sourceId = link.sourceId;
                 match->timestamp = link.timestamp;
-                for(int i = 0; i < 8; i++)
+                for (int i = 0; i < 8; i++)
                     match->UnResvBandwidth[i] = link.UnResvBandwidth[i];
                 match->MaxBandwidth = link.MaxBandwidth;
                 match->metric = link.metric;
@@ -166,15 +166,15 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
         }
     }
 
-    if(change)
+    if (change)
         tedmod->rebuildRoutingTable();
 
-    if(msg->getRequest())
+    if (msg->getRequest())
     {
         sendToPeer(sender, tedmod->ted, false);
     }
 
-    if(forward.size() > 0)
+    if (forward.size() > 0)
     {
         sendToPeers(forward, false, sender);
     }
@@ -182,23 +182,23 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
     delete msg;
 }
 
-void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer)
+void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer)
 {
     EV << "sending LINK_STATE message to peers" << endl;
 
     // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
     for (unsigned int i = 0; i < tedmod->ted.size(); i++)
     {
-        if(tedmod->ted[i].advrouter != routerId)
+        if (tedmod->ted[i].advrouter != routerId)
             continue;
 
-        if(tedmod->ted[i].linkid == exceptPeer)
+        if (tedmod->ted[i].linkid == exceptPeer)
             continue;
 
-        if(!tedmod->ted[i].state)
+        if (!tedmod->ted[i].state)
             continue;
 
-        if(find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
+        if (find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
             continue;
 
         // send a copy
@@ -206,7 +206,7 @@ void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, boo
     }
 }
 
-void LinkStateRouting::sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req)
+void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo> & list, bool req)
 {
     EV << "sending LINK_STATE message to " << peer << endl;
 
@@ -221,10 +221,10 @@ void LinkStateRouting::sendToPeer(IPAddress peer, const std::vector<TELinkStateI
     sendToIP(out, peer);
 }
 
-void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
+void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 {
     // attach control info to packet
-    IPControlInfo *controlInfo = new IPControlInfo();
+    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setDestAddr(destAddr);
     controlInfo->setSrcAddr(routerId);
     controlInfo->setProtocol(IP_PROT_OSPF);

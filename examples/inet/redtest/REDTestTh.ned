@@ -20,23 +20,22 @@
 
 package inet.examples.inet.redtest;
 
-import inet.linklayer.ppp.ThruputMeter;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
+import inet.world.scenario.ScenarioManager;
+import inet.util.ThruputMeteringChannel;
+import inet.util.ThruputMeter;
 import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import inet.world.ScenarioManager;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network REDTestTh
 {
-    submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=b (u)";
-                @display("p=327,40");
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            thruputDisplayFormat = "b (u)";
         }
+    submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=149,40");
@@ -74,14 +73,13 @@ network REDTestTh
                 @display("p=259,163");
         }
     connections:
-        r1.pppg$i++ <-- {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
-        r1.pppg$o++ --> {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
+        r1.pppg$i++ <-- C {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
+        r1.pppg$o++ --> C {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
         th.out --> r2.pppg$i++;
 
-        s1.pppg++ <--> {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
-        s2.pppg++ <--> {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
-        s3.pppg++ <--> {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
-        s4.pppg++ <--> {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
-
+        s1.pppg++ <--> C {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
+        s2.pppg++ <--> C {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
+        s3.pppg++ <--> C {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
+        s4.pppg++ <--> C {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
 }
 

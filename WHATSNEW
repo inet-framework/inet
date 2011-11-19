@@ -1,14 +1,375 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-1.99.2 (Nov 18, 2011)
+--------------------------
+
+Requires OMNeT++ 4.2 (final).
+
+- Integrated Kristjan Jonsson's HttpTools project,
+  http://code.google.com/p/omnet-httptools/
+
+- The mobility models have been revised and brought in sync with their
+  MiXiM versions; added 3D coordinate system from MiXim; added MoBAN mobility
+  model from MiXiM.
+
+- UDP: multicast, broadcast and ttl support; bugfixes; heavy API changes.
+  It is now possible to receive broadcasts and multicasts. Implemented support
+  for the following socket options: time-to-live (unicast and multicast),
+  broadcast, multicast output interface, join multicast group, leave multicast
+  group. Connect without bind is now supported (used to be an error).
+  The cost of the above is changes in the way you talk to the UDP module:
+  UDPControlInfo has been split to several classes (UDPBindCommand, UDPConnect-
+  Command, UDPSendCommand, etc.), and the UDPSocket class has been redesigned.
+  Check transport/udp/ChangeLog for detailed information.
+
+- Apps: some standardization of parameter names, so that various modules don't
+  call the same thing differently. Introduced the following names:
+  'startTime', 'stopTime', 'sendInterval', 'localAddress', 'localPort'.
+  E.g. the following parameters became 'sendInterval': 'messageFreq',
+  'waitTime', 'packetInterval', 'interval', and 'waitInterval'.
+
+- Added a 'stopTime' parameter to several apps: TelnetApp, UDPBasicApp,
+  TCPBasicClientApp, IPvXTrafGen, EtherAppCli
+
+- UDPBasicBurst revised
+
+- Removed Blackboard (it was obsolete and out of use)
+
+- Numerous bugfixes.
+
+
+INET-1.99.1 (May 27, 2011)
+--------------------------
+
+This is a beta of a major feature release, with new models and a lot of
+incompatible changes. It requires at least OMNeT++ 4.2b2.
+If you are upgrading from an earlier INET version, expect to have
+to revise your existing simulations.
+
+- INET can now be compiled with various parts turned off. This is based on
+  the new OMNeT++ Project Features facility, avaiable from 4.2b2, see
+  http://www.omnet-workshop.org/2011/uploads/slides/OMNeT_WS2011_S3_P1_Varga.pdf
+  slides 9-13. INET project features are defined in the .oppfeatures file;
+  features can be turned on/off in Project -> Project Features... in the IDE.
+  Not all features will compile on Windows: the ones that need to be turned off
+  on Windows are TCP_NSC, TCP_lwIP, VoIPTool, MANET Routing, Mesh Networking.
+
+- Integrated the following external packages: VoIPTool, xMIPv6.
+
+- Several components were taken over from INETMANET: MANET routing, combined
+  802.11a/b/g/e model, 802.11 mesh networking, obstacle model, several
+  mobility models, battery model, globalARP feature. Multiple radio support
+  has also been added to INET, loosely based on the INETMANET solution.
+
+- NED-level cleanup of several compound modules: hosts, routers, NICs, APs,
+  switches, etc. There were a lot of very similar modules that differred in the
+  presence or type of one or more submodules, resulting in code duplication
+  and confusion in general. Many variants have been eliminated, and the
+  differences have been mapped to parameters, parametric or conditional
+  submodules.
+
+- ChannelController now deals only with radios and not hosts. This makes it
+  possible to have hosts with several radio interfaces. The radios are
+  registered/unregistered in the ChannelAccess module (previously host
+  registration was done by the mobility modules). ChannelControl/ChannelAccess
+  are now completely independent of the mobility modules. This means that if
+  there is no mobility module present in a host, the host's displaystring
+  will be used to set the static positions of the radios.
+
+- Ethernet switch was moved under the linklayer/ethernet/switch directory.
+  EtherHostQ is now called EtherHost. To have no queue in the Ethernet host,
+  specify queueType="NoQueue" (which in fact inserts a dummy queue).
+  In EtherSwitch, EtherHost and inside the EthernetInterface the
+  csmacdSupport parameter can be used to switch between the full (EtherMAC)
+  and the simplified (EtherMACFullDuplex) implementation.
+
+- EthernetInterfaceFullDuplex removed. By default EthernetInterface is using
+  EtherMACFullDuplex, a simplified MAC that does not support CSMA/CD and works
+  only with point-to-point links. Use the EthernetInterface with
+  csmacdSupport=true to turn on CSMA/CD support (EtherMAC).
+
+- IPv4-related modules and classes whose names started with "IP" were renamed
+  to start with "IPv4", to be more explicit and more future-proof. IP->IPv4,
+  IPAddress->IPv4Address, IPControlInfo->IPv4ControlInfo, IPRoute->IPv4Route,
+  IPDatagram->IPv4Datagram, etc.
+
+- Renamed routingTableFile to routingTable in RoutingTable6. Added default
+  parameter value. You no longer need to specify **.routingTableFile =
+  xmldoc("empty.xml") and have an empty.xml file in the model directory.
+  OMNeT++ 4.2 supports the xml("<inlinexml/>") syntax; we now use that for
+  the default value.
+
+- New PcapRecorder module (in StandardHost) for recording traffic to a pcap file.
+  It is intended as a replacement for the old TCPDump module.
+
+- StandardHost and Router now have a common base (containing Link~ and
+  NetworkLayer) Wireless~ and AdhocHost is derived from StandardHost. All of
+  them (including Router) support multiple wireless, Ethernet, PPP and
+  external interfaces (i.e. multiple wireless radios are supported using
+  different channels)
+
+- Several modules - especially inside StandardHost - are now conditional
+  (using NED's new "conditional submodule" feature), and will be instantiated
+  only if needed. For example, TCP is only instantiated if there are TCP
+  applications configured for the host.
+
+- Router and StandardHost have optional mobility support. The mobility module
+  is created only if there are wireless cards present in the node (numRadios>0).
+  Of course WirelessHost and AdhocHost have mobility by default. You can configure
+  the mobility type using the "mobilityType" parameter. BasicMobility have
+  been renamed to NullMobility (resulting stationary nodes). There is a dummy
+  mobility type called NoMobility which does not have any C++ implementation.
+  Nodes that do not need mobility support (i.e. no radios) should set their type
+  to NoMobility.
+
+- FailedRouter has been removed (was a trivial node). BurstHost moved to the
+  example directory (it was not generic and was used only by a single example).
+  MobileHost has been removed; use AdhocHost instead as a drop-in replacement.
+
+- Network Interface Cards (Ieee80211Nic, EthernetInterface and PPPInterface)
+  now support input and output hook modules that implement the IHook interface.
+  Hooks are useful for simulating packet drops, duplication or measuring thruput.
+  The number of hook modules can be controlled with the numInputHooks /
+  numOutputHooks parameters, and the hook's type via typename.
+  An example: that installs two hooks in the input path of PPP:
+    **.ppp[*].numInputHooks = 2
+    **.ppp[*].inputHook[0].typename = "DropsGenerator"
+    **.ppp[*].inputHook[1].typename = "ThruputMeter"
+
+- Network interfaces can specify a queueType paramater. Possible values:
+  DropTailQueue, DropTailQoSQueue, REDQueue, NoQueue.
+  To disable queueing, use NoQueue: **.ppp[*].queueType = "NoQueue"
+
+- PPPInterfaceNoQueue and EthernetInterfaceNoQueue have been removed; use the
+  queueType="NoQueue" parameter in the interfaces.
+
+- TCP, UDP and SCTP implementations are now pluggable; you can select the
+  implementation with the tcpType, udpType and sctpType parameters in the host.
+  Modules must implement ITCP, IUDP and ISCTP interface and the specify
+  the implementing NED type in the parameter. At the moment SCTP and UDP
+  have only one implementation. TCP has TCP (the default INET implementation),
+  TCP_NSC (Network Simulation Cradle) and TCP_lwIP (the lightweight IP stack).
+
+- AccessPoint has been generalized. Now it supports both (multiple) wireless
+  and ethernet ports. Relaying between ethernet and wireless ports is now
+  supported. A relay unit is created only if more than one ports are present
+  in the AccessPoint, i.e. having a single radio and no ethernet connections
+  will fall back to a single wireless NIC without a relay unit. Having no radio
+  and several ethernet ports connected will practically result in an ethernet
+  switch.
+
+- Wireless NICs now should implement IWirelessNIC. Now we have only a single
+  Ieee80211Nic implementation instead of the 5 variants we have previously.
+  Management type (Adhoc, AccessPoint, Station, AccessPointSimplified and
+  StationSimplified) can be configured using the mgmtType parameter of the NIC
+  (instead of having separate NIC types for each.)
+
+- Multiple radios on independent channels are now supported by all nodes. See
+  the wireless/multiradio example.
+
+- The radio infrastucture have been refactored. All radios should now implement
+  the IRadio interface. They are now pluggable. RadioModel can be configured
+  also via a module parameter. The attenuationModel parameter was moved from
+  the radio to ChannelController (it is now global) and renamed to propagationModel.
+  Several new propagation model have been added (see NED file docs).
+
+- Removed the TCPSpoofingHost node. Use instead StandardHost with the
+  tcpType="TCPSpoof" parameter.
+
+- NAMTrace and NAMTraceWriter modules have been moved to the obsolete directory.
+  Turn on event logging instead and use the eventlog animator in the IDE. Event
+  logging can be turned on with --record-eventlog=true from the command line or
+  using the toolbar button in Tkenv. Once the .elog file is generated, right
+  click on it in the IDE and select Open with / Animation Player.
+
+- ChannelInstaller module has been removed. Implemented a ThruputMeteringChannel that
+  extends DatarateChannel. It adds thruputDisplayFormat that allows showing different
+  statistics along the source gate of the channel. Specifying "" as display format
+  results the same behavior as DatarateChannel (with no performance penalty).
+  If you want to gather statistics, you do not need this channel. The DatarateChannel
+  already emits signals "channelBusy", "messageSent" and "messageDiscarded"
+  that can be used to calculate different statistics. Use "opp_run -h neddecls"
+  to see what statistics are provided by default. e.g in INI file use
+  **.channel.throughput.result-recording-modes=+last to store all channel's
+  thoughput values as scalars.
+
+
+INET-1.99.0 (March 3, 2011)
+---------------------------
+
+This is a beta of a major feature release, with new models and also incompatible
+changes. If you are upgrading from an earlier INET version, expect to have
+to revise your existing omnetpp.ini files and possibly NED/C++ files as well.
+
+The most significant changes:
+
+- replaced cOutVector and recordScalar() with signal-based statistics
+  recording in most places (see @statistic properties in NED files)
+
+- support for more than one type of tcpApp and udpApp in StandardHost
+  (elimination of tcpAppType/udpAppType parameters)
+
+- Interfaces renamed to start with letter "I". BasicMobility -> IMobility,
+  TCPApp->ITCPApp, UDPApp->IUDPApp, SCTPApp->ISCTPApp, MacRelayUnit->IMacRelayUnit,
+  Radio->IRadio, Ieee80211Mgmt->IIeee80211Mgmt, OutputQueue->IOutputQueue,
+  INetworkInterface->IWiredNic
+
+- added new AdhocHost for basic node types used in adhoc networks. Supports
+  mobility and multiple wireless radios. It obsoletes the MFMobileHost
+  (use AdhocHost with **.wlan.type-name=Nic80211) and MobileHost (use AdhocHost
+  with default parameters)
+
+- added new AccessPoint module with configurable wireless, ethernet and relay
+  unit and mobility module types. Obsoletes: WirelessAP and WirelessAPWithEth
+  (use AccessPoint), WirelessAPSimplified and WirelessAPWithEthSimplified
+  (use AccessPoint with **.wlan.type-name=Ieee80211NicAPSimplified),
+  WirelessHost (use StandardHost with numRadios=1) and WirelessHostSimplified
+  (use StandardHost with numRadios=1 and **.wlan.type-name=Ieee80211NicSTASimplified)
+
+- in StandardHost and Router it is now possible to configure what wireless, ethernet, ppp
+  or external interfaces are used. Wired interfaces must implement IWiredNic, and wireless
+  modules must implement IWirelessNic. Mobility type and number of wireless cards (default=0)
+  can be also configured via **.wlan.type-name and **.mobility.type-name. The use of
+  interfaces obsoletes several older modules which differed only in interface types
+  (like WirelessHost or ExtRouter)
+
+- enhanced Router to support external interfaces, ppp, wireless, ethernet etc. This module
+  is similar to StandardHost except it does not contain the transport layer and application layer
+  protocols (plus IPForwarding is enabled by default). Obsoletes the ExtRouter module (use Router)
+
+- NetworkLayer and NetworkLayer6: added dummy modules that implement the IHook interface
+  at the bottom of network layer (above link layer). This allows one to insert
+  thruput metering, packet drop and duplication modules etc. without modifying the module.
+  New modules implementing IHook: ThruputMeter, DropsGenerator, DuplicatesGenerator and Nop.
+  Use **.networkLayer.outputHook.type-name = "ThruputMeter" to configure them (use inputHook
+  for incoming traffic)
+
+- added global ARP optimization. If you are not interested in modeling the traffic of ARP protocol,
+  it is now possible to use a much faster implementation by specifying (by Alfonso Ariza Quintana):
+  **.networkLayer.arp.globalARP=true
+
+- multiple radios (on multiple channels) are supported by StandardHost, AdhocHost
+  and Router if ChannelControllerExtended is used in the network.
+
+- point-to-point Ethernet links can now use normal DatarateChannels
+  (EtherMAC's txrate parameter was removed)
+
+- added a new TCP model that directly wraps the lwIP stack (without
+  NetworkSimulationCradle (NSC) overhead)
+
+- TCP transfer mode (bytecount / cPacket / bytestream) is now
+  controlled by the app via a control info field (the sendQueueClass/
+  receiveQueueClass TCP module parameters were removed); this works across
+  all three TCP models (native OMNeT++, NSC, lwIP)
+
+- experimental support for application-imposed TCP flow control (i.e.
+  implementation of "socket read" calls; this is not yet in the
+  "integration" branch)
+
+- brand new BGPv4 model, contributed by Helene Lageber
+
+- OSPF model: mass renaming and code formatting to make code conform
+  to the rest of INET in coding style
+
+- fix: Ieee80211DataFrame was missing the LLC SNAP header, so all
+  802.11 data frames were simulated with 8 bytes less length than
+  they should have (this will slightly modify simulation results)
+
+- RTP model refactoring to make it use msg files and a control info
+  based interface toward apps
+
+- some improvements INETMANET implemented have been taken over into
+  INET (also to decrease INETMANET maintenance cost)
+
+- started taking over xMIPv6's modification to the base INET, so
+  xMIPv6 won't need to patch INET
+
+- added basic "New INET simulation" wizards which appear under
+  File|New in the IDE
+
+- started working on an INET User Manual (see inet.omnetpp.org)
+
+- added an initial test suite with tests for Ethernet, 802.11 and TCP
+  (uses OMNeT++'s opp_test utility and the "omnetpp" R plugin for
+  scripted checking of simulation results; not yet in "integration")
+
+- many smaller bug fixes and refactoring, mostly invisible for users
+
+In more details:
+
+* Reorganized StandardHost:
+
+Several changes were introduced to make the basic building blocks of
+simulation (StandardHost, AdhocHost, Router etc.) more configurable,
+without the need to copy and modify the modules or derive a new module
+type. Applications, tcp type, nic, mobility, routing protocols can be
+configured using parameters or the **.type-name=typename in the .ini file.
+
+* Ethernet point-to-point links:
+
+In the old code, datarate of Ethernet channels were to be set to zero, and
+the real datarate given in the txrate parameter of EtherMAC. This was to
+work around a limitation in OMNeT++ 3.x's channel support. In the new code,
+the txrate parameter is gone, and the datarate should be set on the
+channel. This is consistent with e.g. PPP. This requires non-backward
+compatible changes to models.
+
+* Support for several different TCP/UDP apps in StandardHost
+
+In the old code, tcpApp[] is declared as
+  tcpApp[numTcpApps]: <tcpAppType> like TCPApp;
+which has the side effect that when using StandardHost, all apps have to be
+the same type (the one in the tcpAppType parameter). OMNeT++ 4.x supports
+setting the types one-by-one, using the following syntax:
+  tcpApp[numTcpApps]: <> like TCPApp;
+and in the ini file, you have to write
+  **.tcpApp[0].type-name = "inet.applications.tcpapp.TCPBasicClientApp"
+  **.tcpApp[1].type-name = "inet.applications.tcpapp.TCPEchoApp"
+  **.tcpApp[*].type-name = "inet.applications.tcpapp.TCPSinkApp"
+  etc.
+The existing tcpAppType/udpAppType/sctpAppType parameters would be removed.
+However, this also means that existing ini files have to be changed.
+If they are not updated, the simulation will not work.
+
+* Multiple TCP implementations, and related parameterization changes
+
+INET now supports Network Simulation Cradle (NSC; wraps several FreeBSD,
+Linux and lwIP stacks), and we have an lwIP-based TCP module as well
+(without the NSC limitations and overhead); the NED types are TCP, TCP_NSC,
+TCP_lwip. Any of them can be selected in StandardHost, via the tcpType
+parameter (the tcp module is now declared as "tcp: <tcpType> like ITCP").
+tcpType defaults to the native OMNeT++ TCP module.
+
+The sendQueueClass/rcvQueueClass parameters are gone. They were used to
+select what to transmit inside TCP segments: C++ objects (cPacket) or byte
+counts only. Now, this can (must) be specified per-connection by the app
+layer, because the app knows best what it requires. Also, instead of two
+class names now there is a single enum value; it should be put into the
+dataTransferMode field of TCPOpenCommand. Potential values are:
+
+   TCP_TRANSFER_UNDEFINED = 0;  // Invalid value
+   TCP_TRANSFER_BYTECOUNT = 1;  // Transmit byte counts only
+   TCP_TRANSFER_OBJECT = 2;     // Transmit the application packet C++ objects
+   TCP_TRANSFER_BYTESTREAM = 3; // Transmit actual bytes
+
+Ideally, all 3 TCP implementations should understand all 3 transfer modes;
+currently OBJECT support is missing from TCP_NSC.
+
+
 INET-20110225
 -------------
+
 - additional statistics in the SCTP module (Alberto Cortes)
-- Fix for SCTP Path.Max.Retrans threshold problem (Alberto Cortes)
+
+- fix for SCTP Path.Max.Retrans threshold problem (Alberto Cortes)
+
 - minor changes in #includes to ensure compatibility with upcoming OMNeT++ 4.2
+
 
 INET-20100723
 -------------
+
 - TCP improvement (Thomas Reschka, Zoltan Bojthe).
   * implemented RFC 1323 (TCP Extensions for High Performance):
       - Window Scale option
@@ -41,6 +402,7 @@ INET-20100723
 
 INET-20100323
 -------------
+
 - added "label" annotations to gates and modules to support the adaptive palette
   filtering and gate matching in the connection chooser (OMNeT++ 4.1).
 
@@ -58,14 +420,18 @@ INET-20100323
 - added TCP SACK and New Reno implementation by Thomas Reschka. The original TCP
   version is still available as TCP_old. See src/transport/tcp/ChangeLog for details.
 
+
 INET-20090325
 -------------
+
 - tagged version for OMNeT++ 4.0 final
 - reworked build system to create shared library by default
 - added SCTP from Michael Tuexen and Irene Ruengeler
 
+
 INET-20080920
 -------------
+
 Internal snapshot, for omnetpp-4.0b6.
 
 - performance optimization in all queue modules: remember output gate pointer
@@ -83,6 +449,7 @@ Internal snapshot, for omnetpp-4.0b6.
 
 INET-20080709
 -------------
+
 Internal snapshot, for omnetpp-4.0b3.
 
 - interface table and routing table are now accessed via the C++ interfaces
@@ -102,6 +469,7 @@ Internal snapshot, for omnetpp-4.0b3.
 
 INET-20080630
 -------------
+
 Internal snapshot, for omnetpp-4.0b2.
 
 - to enable and encourage extending INET via subclassing (as opposed to
@@ -143,6 +511,7 @@ Internal snapshot, for omnetpp-4.0b2.
 
 INET-20080624
 -------------
+
 Internal snapshot, for omnetpp-4.0b2.
 
 - updated for OMNeT++ 4.0b2
@@ -157,6 +526,7 @@ Internal snapshot, for omnetpp-4.0b2.
 
 INET-20080606
 -------------
+
 Internal snapshot, for omnetpp-4.0b1.
 
 - directory structure reorganized
@@ -483,5 +853,6 @@ created and developed at University of Karlsruhe, Germany.
 
         * CREDITS: Put your name here if you have contributed to the
         OMNeT++ Internet Protocol Suite
+
 
 

@@ -28,7 +28,6 @@ class noncobject MACAddress;
 //
 enum Ieee802MessageKind
 {
-
     IEEE802CTRL_DATA = 2003;  // data to/from higher layer
     IEEE802CTRL_REGISTER_DSAP = 2004;  // higher layer registers itself in LLC
     IEEE802CTRL_DEREGISTER_DSAP = 2005;  // higher layer deregisters itself in LLC
@@ -41,7 +40,6 @@ enum Ieee802MessageKind
 //
 enum SAPCode
 {
-
     SAP_IBM_SNA = 0x04;
     SAP_IP = 0x06;
     SAP_3COM = 0x80;
@@ -58,10 +56,10 @@ enum SAPCode
 //
 enum EtherType
 {
-
     ETHERTYPE_IP = 0x0800;
     ETHERTYPE_ARP = 0x0806;
     ETHERTYPE_RARP = 0x8035;
+    ETHERTYPE_IPv6 = 0x86DD;
 }
 
 
@@ -72,9 +70,9 @@ class Ieee802Ctrl
 {
     MACAddress src;  // src MAC address (can be left empty when sending)
     MACAddress dest; // dest MAC address
-    int etherType;   // used with EthernetIIFrame
-    int ssap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
-    int dsap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
+    int etherType enum (EtherType);   // used with ~EthernetIIFrame
+    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
-    int inputPort;   // convenience field, used between IPv6 and IPv6ND
+    int inputPort;   // convenience field, used between ~IPv6 and ~IPv6NeighbourDiscovery
 }

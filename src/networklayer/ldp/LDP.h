@@ -18,10 +18,11 @@
 
 
 #include <string>
-#include <omnetpp.h>
 #include <iostream>
 #include <vector>
+
 #include "INETDefs.h"
+
 #include "LDPPacket_m.h"
 #include "UDPSocket.h"
 #include "TCPSocket.h"
@@ -54,11 +55,11 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
         int fecid;
 
         // FEC value
-        IPAddress addr;
+        IPv4Address addr;
         int length;
 
         // FEC's next hop address
-        IPAddress nextHop;
+        IPv4Address nextHop;
 
         // possibly also: (speed up)
         // std::string nextHopInterface
@@ -70,7 +71,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     {
         int fecid;
 
-        IPAddress peer;
+        IPv4Address peer;
         int label;
     };
     typedef std::vector<fec_bind_t> FecBindVector;
@@ -79,13 +80,13 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     struct pending_req_t
     {
         int fecid;
-        IPAddress peer;
+        IPv4Address peer;
     };
     typedef std::vector<pending_req_t> PendingVector;
 
     struct peer_info
     {
-        IPAddress peerIP;   // IP address of LDP peer
+        IPv4Address peerIP;   // IPv4 address of LDP peer
         bool activeRole;    // we're in active or passive role in this session
         TCPSocket *socket;  // TCP socket
         std::string linkInterface;
@@ -132,7 +133,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     /**
      * This method finds next peer in upstream direction
      */
-    virtual IPAddress locateNextHop(IPAddress dest);
+    virtual IPv4Address locateNextHop(IPv4Address dest);
 
     /**
      * This method maps the peerIP with the interface name in routing table.
@@ -140,34 +141,34 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
      * In case no corresponding peerIP found, a peerIP (not deterministic)
      * will be returned.
      */
-    virtual IPAddress findPeerAddrFromInterface(std::string interfaceName);
+    virtual IPv4Address findPeerAddrFromInterface(std::string interfaceName);
 
     //This method is the reserve of above method
-    std::string findInterfaceFromPeerAddr(IPAddress peerIP);
+    std::string findInterfaceFromPeerAddr(IPv4Address peerIP);
 
     /** Utility: return peer's index in myPeers table, or -1 if not found */
-    virtual int findPeer(IPAddress peerAddr);
+    virtual int findPeer(IPv4Address peerAddr);
 
     /** Utility: return socket for given peer. Throws error if there's no TCP connection */
-    virtual TCPSocket *getPeerSocket(IPAddress peerAddr);
+    virtual TCPSocket *getPeerSocket(IPv4Address peerAddr);
 
     /** Utility: return socket for given peer, and NULL if session doesn't exist */
-    virtual TCPSocket *findPeerSocket(IPAddress peerAddr);
+    virtual TCPSocket *findPeerSocket(IPv4Address peerAddr);
 
-    virtual void sendToPeer(IPAddress dest, cMessage *msg);
+    virtual void sendToPeer(IPv4Address dest, cMessage *msg);
 
 
     //bool matches(const FEC_TLV& a, const FEC_TLV& b);
 
-    FecVector::iterator findFecEntry(FecVector& fecs, IPAddress addr, int length);
-    FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, IPAddress peer);
+    FecVector::iterator findFecEntry(FecVector& fecs, IPv4Address addr, int length);
+    FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, IPv4Address peer);
 
-    virtual void sendMappingRequest(IPAddress dest, IPAddress addr, int length);
-    virtual void sendMapping(int type, IPAddress dest, int label, IPAddress addr, int length);
-    virtual void sendNotify(int status, IPAddress dest, IPAddress addr, int length);
+    virtual void sendMappingRequest(IPv4Address dest, IPv4Address addr, int length);
+    virtual void sendMapping(int type, IPv4Address dest, int label, IPv4Address addr, int length);
+    virtual void sendNotify(int status, IPv4Address dest, IPv4Address addr, int length);
 
     virtual void rebuildFecList();
-    virtual void updateFecList(IPAddress nextHop);
+    virtual void updateFecList(IPv4Address nextHop);
     virtual void updateFecListEntry(fec_t oldItem);
 
     virtual void announceLinkChange(int tedlinkindex);
@@ -181,7 +182,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    virtual void sendHelloTo(IPAddress dest);
+    virtual void sendHelloTo(IPv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);
 
     virtual void processLDPHello(LDPHello *msg);
@@ -206,10 +207,10 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     //@}
 
     // IClassifier
-    virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
+    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
 
     // INotifiable
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 };
 
 #endif

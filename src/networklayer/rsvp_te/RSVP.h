@@ -77,14 +77,14 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
         // SENDER_TSPEC structure
         SenderTspecObj_t Sender_Tspec_Object;
 
-        // Previous Hop IP address from PHOP object
-        IPAddress Previous_Hop_Address;
+        // Previous Hop IPv4 address from PHOP object
+        IPv4Address Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
-        //IPAddress LIH;
+        //IPv4Address LIH;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
-        IPAddress OutInterface;
+        IPv4Address OutInterface;
 
         // this must be part of PSB to allow refreshing
         EroVector ERO;
@@ -113,11 +113,11 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
         // SESSION object structure
         SessionObj_t Session_Object;
 
-        // Next Hop IP address from PHOP object
-        IPAddress Next_Hop_Address;
+        // Next Hop IPv4 address from PHOP object
+        IPv4Address Next_Hop_Address;
 
         // Outgoing Interface on which reservation is to be made or has been made
-        IPAddress OI;
+        IPv4Address OI;
 
         // Flows description
         FlowDescriptorVector FlowDescriptor;
@@ -147,7 +147,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
      */
     struct HelloState_t
     {
-        IPAddress peer;
+        IPv4Address peer;
 
         int srcInstance;
         int dstInstance;
@@ -183,7 +183,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
 
     int maxSrcInstance;
 
-    IPAddress routerId;
+    IPv4Address routerId;
 
     PSBVector PSBList;
     RSBVector RSBList;
@@ -217,7 +217,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
 
     virtual void refreshPath(PathStateBlock_t *psbEle);
     virtual void refreshResv(ResvStateBlock_t *rsbEle);
-    virtual void refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP);
+    virtual void refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP);
     virtual void commitResv(ResvStateBlock_t *rsb);
 
     virtual void scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay);
@@ -227,23 +227,23 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     virtual void scheduleTimeout(ResvStateBlock_t *rsbEle);
 
     virtual void sendPathErrorMessage(PathStateBlock_t *psb, int errCode);
-    virtual void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPAddress nextHop, int errCode);
-    virtual void sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPAddress LIH, IPAddress NHOP, bool force);
+    virtual void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPv4Address nextHop, int errCode);
+    virtual void sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPv4Address LIH, IPv4Address NHOP, bool force);
     virtual void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay);
 
     virtual void setupHello();
-    virtual void startHello(IPAddress peer, simtime_t delay);
+    virtual void startHello(IPv4Address peer, simtime_t delay);
 
-    virtual void recoveryEvent(IPAddress peer);
+    virtual void recoveryEvent(IPv4Address peer);
 
-    virtual bool allocateResource(IPAddress OI, const SessionObj_t& session, double bandwidth);
-    virtual void preempt(IPAddress OI, int priority, double bandwidth);
-    virtual bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPAddress OI);
+    virtual bool allocateResource(IPv4Address OI, const SessionObj_t& session, double bandwidth);
+    virtual void preempt(IPv4Address OI, int priority, double bandwidth);
+    virtual bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPv4Address OI);
     virtual void announceLinkChange(int tedlinkindex);
 
-    virtual void sendToIP(cMessage *msg, IPAddress destAddr);
+    virtual void sendToIP(cMessage *msg, IPv4Address destAddr);
 
-    virtual bool evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddress& OI);
+    virtual bool evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4Address& OI);
 
     virtual PathStateBlock_t* findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
     virtual ResvStateBlock_t* findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
@@ -254,7 +254,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     std::vector<traffic_session_t>::iterator findSession(const SessionObj_t& session);
     std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj_t &sender);
 
-    virtual HelloState_t* findHello(IPAddress peer);
+    virtual HelloState_t* findHello(IPv4Address peer);
 
     virtual void print(RSVPPathMsg *p);
     virtual void print(RSVPResvMsg *r);

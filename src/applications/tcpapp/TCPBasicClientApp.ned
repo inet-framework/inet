@@ -18,17 +18,20 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.ITCPApp;
+
+
 //
 // Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
-// Compatible with both IPv4 and IPv6.
+// Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
 // The model communicates with the server in sessions. During a session,
-// the client opens a single \TCP connection to the server, sends several
+// the client opens a single TCP connection to the server, sends several
 // requests (always waiting for the complete reply to arrive before
 // sending a new request), and closes the connection.
 //
-// The server app should be TCPGenericSrvApp; the model sends GenericAppMsg
+// The server app should be ~TCPGenericSrvApp; the model sends ~GenericAppMsg
 // messages.
 //
 // Example settings:
@@ -40,7 +43,7 @@ package inet.applications.tcpapp;
 //    replyLength = exponential(1000000)
 // </pre>
 //
-// Note that this module doesn't open separate \TCP connections for commands
+// Note that this module doesn't open separate TCP connections for commands
 // and data transfer as the FTP protocol.
 //
 // HTTP:
@@ -59,23 +62,58 @@ package inet.applications.tcpapp;
 // Also, with HTTP 1.0 it is the server that closes the connection after
 // sending the response, while in this model it is the client.
 //
-// @see TCPGenericSrvApp, GenericAppMsg, TelnetApp
+// <b>Configuring App</b>
 //
-simple TCPBasicClientApp like TCPApp
+// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
+// Currently you have three choices:
+//
+//   -# set them to "bytecount".
+//      This mode manages "virtual bytes", that is, only byte counts are
+//      transmitted over the TCP connection and no actual data. cMessage
+//      contents, and even message boundaries are not preserved with these
+//      classes: for example, if the client sends a single cMessage with
+//      length = 1 megabyte over TCP, the receiver-side client will see a
+//      sequence of MSS-sized messages.
+//
+//   -# use "object", which transmits
+//      cMessage objects (and subclasses) over a TCP connection. The same
+//      message object sequence that was sent by the client to the
+//      sender-side TCP entity will be reproduced on the receiver side.
+//      If a client sends a cMessage with length = 1 megabyte, the
+//      receiver-side client will receive the same message object (or a clone)
+//      after the TCP entities have completed simulating the transmission
+//      of 1 megabyte over the connection. This is a different behaviour
+//      from TCPVirtualDataSendQueue/RcvQueue.
+//      This mode is not implemented in ~TCP_NSC yet.
+//
+//   -# use "bytestream", which transmits real bytes of messages.
+//
+// @see ~TCPGenericSrvApp, ~GenericAppMsg, ~TelnetApp
+//
+simple TCPBasicClientApp like ITCPApp
 {
     parameters:
-        string address = default(""); // may be left empty ("")
-        int port = default(-1); // port number to listen on
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
-        double startTime @unit("s") = default(1s); // time first session begins
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        double startTime @unit(s) = default(1s); // time first session begins
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means infinity
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
-        volatile int replyLength @unit("B") = default(1MB); // length of a reply
-        volatile double thinkTime @unit("s"); // time gap between requests
+        volatile int replyLength @unit(B) = default(1MiB); // length of a reply
+        volatile double thinkTime @unit(s); // time gap between requests
         volatile double idleInterval @unit(s); // time gap between sessions
-        volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, waits this much before trying to reconnect
+        volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
+        @signal[sentPk](type=cPacket);
+        @signal[rcvdPk](type=cPacket);
+        @signal[connect](type=long);
+        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
+        @statistic[connect](title="Connections"; record=sum,timeavg,vector; interpolationmode=sample-hold;);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);

@@ -17,17 +17,27 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <omnetpp.h>
+
+#include "PPP.h"
+
+#include "opp_utils.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "PPP.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
 
-
 Define_Module(PPP);
+
+simsignal_t PPP::txStateSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::rxPkOkSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::dropPkBitErrorSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetSentToLowerSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetSentToUpperSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
 
 PPP::PPP()
 {
@@ -40,13 +50,14 @@ PPP::~PPP()
     // kludgy way to check that nb is not deleted yet
     if (nb && nb == findModuleWhereverInNode("notificationBoard", this))
         nb->unsubscribe(this, NF_SUBSCRIBERLIST_CHANGED);
+
     cancelAndDelete(endTransmissionEvent);
 }
 
 void PPP::initialize(int stage)
 {
     // all initialization is done in the first stage
-    if (stage==0)
+    if (stage == 0)
     {
         txQueue.setName("txQueue");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
@@ -61,8 +72,22 @@ void PPP::initialize(int stage)
         WATCH(numBitErr);
         WATCH(numDroppedIfaceDown);
 
+        rxPkOkSignal = registerSignal("rxPkOk");
+        dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+        txStateSignal = registerSignal("txState");
+        dropPkBitErrorSignal = registerSignal("dropPkBitError");
+        packetSentToLowerSignal = registerSignal("packetSentToLower");
+        packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+        packetSentToUpperSignal = registerSignal("packetSentToUpper");
+        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
+
+        subscribe(POST_MODEL_CHANGE, this);
+
+        emit(txStateSignal, 0L);
+
         // find queueModule
         queueModule = NULL;
+
         if (par("queueModule").stringValue()[0])
         {
             cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
@@ -73,14 +98,15 @@ void PPP::initialize(int stage)
         physOutGate = gate("phys$o");
 
         // we're connected if other end of connection path is an input gate
-        bool connected = physOutGate->getPathEndGate()->getType()==cGate::INPUT;
+        bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
 
         // if we're connected, get the gate with transmission rate
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
-        double datarate = connected ? datarateChannel->par("datarate").doubleValue() : 0;
+        double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
 
         // register our interface entry in IInterfaceTable
         interfaceEntry = registerInterface(datarate);
+        interfaceEntry->setDown(!connected);
 
         // prepare to fire notifications
         nb = NotificationBoardAccess().get();
@@ -91,18 +117,20 @@ void PPP::initialize(int stage)
         // display string stuff
         if (ev.isGUI())
         {
-            if (connected) {
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
+            if (connected)
+            {
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
             }
-            else {
+            else
+            {
                 // we are not connected: gray out our icon
-                getDisplayString().setTagArg("i",1,"#707070");
-                getDisplayString().setTagArg("i",2,"100");
+                getDisplayString().setTagArg("i", 1, "#707070");
+                getDisplayString().setTagArg("i", 2, "100");
             }
         }
 
         // request first frame to send
-        if (queueModule)
+        if (queueModule && 0 == queueModule->getNumPendingRequests())
         {
             EV << "Requesting first frame from queue module\n";
             queueModule->requestPacket();
@@ -110,7 +138,7 @@ void PPP::initialize(int stage)
     }
 
     // update display string when addresses have been autoconfigured etc.
-    if (stage==3)
+    if (stage == 3)
     {
         updateDisplayString();
     }
@@ -120,16 +148,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 {
     InterfaceEntry *e = new InterfaceEntry();
 
-    // interface name: our module name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName())+1];
-    char *d=interfaceName;
-    for (const char *s=getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    // interface name: NIC module's name without special characters ([])
+    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     e->setDatarate(datarate);
@@ -140,7 +160,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    e->setMtu(par("mtu").longValue());
 
     // capabilities
     e->setMulticast(true);
@@ -148,18 +168,115 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // add
     IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    if (ift)
+        ift->addInterface(e, this);
 
     return e;
 }
 
+void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
+{
+    if (dynamic_cast<cPostPathCreateNotification *>(obj))
+    {
+        cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
+        if (physOutGate == gcobj->pathStartGate)
+            refreshOutGateConnection(true);
+    }
+    else if (dynamic_cast<cPostPathCutNotification *>(obj))
+    {
+        cPostPathCutNotification *gcobj = (cPostPathCutNotification *)obj;
+        if (physOutGate == gcobj->pathStartGate)
+            refreshOutGateConnection(false);
+    }
+    else if (datarateChannel && dynamic_cast<cPostParameterChangeNotification *>(obj))
+    {
+        cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
+        if (datarateChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
+            refreshOutGateConnection(true);
+    }
+}
+
+void PPP::refreshOutGateConnection(bool connected)
+{
+    Enter_Method_Silent();
+
+    // we're connected if other end of connection path is an input gate
+    if (connected)
+        ASSERT(physOutGate->getPathEndGate()->getType() == cGate::INPUT);
+
+    if (!connected)
+    {
+        if (endTransmissionEvent->isScheduled())
+        {
+            cancelEvent(endTransmissionEvent);
+
+            if (datarateChannel)
+                datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
+        }
+
+        if (queueModule)
+        {
+            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
+            if (0 == queueModule->getNumPendingRequests())
+                queueModule->requestPacket();
+        }
+        else
+        {
+            //Clear inner queue
+            while (!txQueue.empty())
+            {
+                cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
+                EV << "Interface is not connected, dropping packet " << msg << endl;
+                numDroppedIfaceDown++;
+                emit(dropPkIfaceDownSignal, msg);
+                delete msg;
+            }
+        }
+    }
+
+    cChannel* oldChannel = datarateChannel;
+    // if we're connected, get the gate with transmission rate
+    datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
+    double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
+
+    if (datarateChannel && !oldChannel)
+        datarateChannel->subscribe(POST_MODEL_CHANGE, this);
+
+    if (ev.isGUI())
+    {
+        if (connected)
+        {
+            if (!oldChannel)
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
+        }
+        else
+        {
+            // we are not connected: gray out our icon
+            getDisplayString().setTagArg("i", 1, "#707070");
+            getDisplayString().setTagArg("i", 2, "100");
+        }
+    }
+
+    // set interface state
+    interfaceEntry->setDown(!connected);
+
+    // data rate
+    interfaceEntry->setDatarate(datarate);
+
+    if (queueModule && 0 == queueModule->getNumPendingRequests())
+        queueModule->requestPacket();
+
+    updateDisplayString();
+}
 
 void PPP::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
-    if (ev.isGUI()) displayBusy();
+
+    if (ev.isGUI())
+        displayBusy();
 
     if (hasSubscribers)
     {
@@ -170,26 +287,28 @@ void PPP::startTransmitting(cPacket *msg)
 
     // send
     EV << "Starting transmission of " << pppFrame << endl;
+    emit(txStateSignal, 1L);
+    emit(packetSentToLowerSignal, pppFrame);
     send(pppFrame, physOutGate);
+
+    ASSERT(datarateChannel == physOutGate->getTransmissionChannel()); //FIXME reread datarateChannel when changed
 
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
     scheduleAt(endTransmissionTime, endTransmissionEvent);
+    numSent++;
 }
 
 void PPP::handleMessage(cMessage *msg)
 {
-    if (datarateChannel==NULL)
-    {
-        EV << "Interface is not connected, dropping packet " << msg << endl;
-        delete msg;
-        numDroppedIfaceDown++;
-    }
-    else if (msg==endTransmissionEvent)
+    if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
         EV << "Transmission finished.\n";
-        if (ev.isGUI()) displayIdle();
+        emit(txStateSignal, 0L);
+
+        if (ev.isGUI())
+            displayIdle();
 
         if (hasSubscribers)
         {
@@ -200,18 +319,19 @@ void PPP::handleMessage(cMessage *msg)
 
         if (!txQueue.empty())
         {
-            cPacket *pk = (cPacket *) txQueue.pop();
+            cPacket *pk = (cPacket *)txQueue.pop();
             startTransmitting(pk);
-            numSent++;
         }
-        else if (queueModule)
+        else if (queueModule && 0 == queueModule->getNumPendingRequests())
         {
-            // tell queue module that we've become idle
             queueModule->requestPacket();
         }
     }
     else if (msg->arrivedOn("phys$i"))
     {
+        //TODO: if incoming gate is not connected now, then the link has benn deleted
+        // during packet transmission --> discard incomplete packet.
+
         if (hasSubscribers)
         {
             // fire notification
@@ -219,63 +339,88 @@ void PPP::handleMessage(cMessage *msg)
             nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
         }
 
+        emit(packetReceivedFromLowerSignal, msg);
+
         // check for bit errors
         if (PK(msg)->hasBitError())
         {
             EV << "Bit error in " << msg << endl;
+            emit(dropPkBitErrorSignal, msg);
             numBitErr++;
             delete msg;
         }
         else
         {
             // pass up payload
-            cPacket *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
+            PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
+            emit(rxPkOkSignal, pppFrame);
+            cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
-            send(payload,"netwOut");
+            emit(packetSentToUpperSignal, payload);
+            send(payload, "netwOut");
         }
     }
     else // arrived on gate "netwIn"
     {
-        if (endTransmissionEvent->isScheduled())
+        if (datarateChannel == NULL)
         {
-            // We are currently busy, so just queue up the packet.
-            EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
-            if (ev.isGUI() && txQueue.length()>=3) getDisplayString().setTagArg("i",1,"red");
+            EV << "Interface is not connected, dropping packet " << msg << endl;
+            numDroppedIfaceDown++;
+            emit(dropPkIfaceDownSignal, msg);
+            delete msg;
 
-            if (txQueueLimit && txQueue.length()>txQueueLimit)
-                error("txQueue length exceeds %d -- this is probably due to "
-                      "a bogus app model generating excessive traffic "
-                      "(or if this is normal, increase txQueueLimit!)",
-                      txQueueLimit);
-
-            txQueue.insert(msg);
+            if (queueModule && 0 == queueModule->getNumPendingRequests())
+                queueModule->requestPacket();
         }
         else
         {
-            // We are idle, so we can start transmitting right away.
-            EV << "Received " << msg << " for transmission\n";
-            startTransmitting(PK(msg));
-            numSent++;
+            emit(packetReceivedFromUpperSignal, msg);
+
+            if (endTransmissionEvent->isScheduled())
+            {
+                // We are currently busy, so just queue up the packet.
+                EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
+
+                if (ev.isGUI() && txQueue.length() >= 3)
+                    getDisplayString().setTagArg("i", 1, "red");
+
+                if (txQueueLimit && txQueue.length() > txQueueLimit)
+                    error("txQueue length exceeds %d -- this is probably due to "
+                          "a bogus app model generating excessive traffic "
+                          "(or if this is normal, increase txQueueLimit!)",
+                          txQueueLimit);
+
+                txQueue.insert(msg);
+            }
+            else
+            {
+                // We are idle, so we can start transmitting right away.
+                EV << "Received " << msg << " for transmission\n";
+                startTransmitting(PK(msg));
+            }
         }
     }
 
     if (ev.isGUI())
         updateDisplayString();
-
 }
 
 void PPP::displayBusy()
 {
-    getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    datarateChannel->getDisplayString().setTagArg("ls",0,"yellow");
-    datarateChannel->getDisplayString().setTagArg("ls",1,"3");
+    getDisplayString().setTagArg("i", 1, txQueue.length() >= 3 ? "red" : "yellow");
+    datarateChannel->getDisplayString().setTagArg("ls", 0, "yellow");
+    datarateChannel->getDisplayString().setTagArg("ls", 1, "3");
 }
 
 void PPP::displayIdle()
 {
-    getDisplayString().setTagArg("i",1,"");
-    datarateChannel->getDisplayString().setTagArg("ls",0,oldConnColor.c_str());
-    datarateChannel->getDisplayString().setTagArg("ls",1,"1");
+    getDisplayString().setTagArg("i", 1, "");
+
+    if (datarateChannel)
+    {
+        datarateChannel->getDisplayString().setTagArg("ls", 0, oldConnColor.c_str());
+        datarateChannel->getDisplayString().setTagArg("ls", 1, "1");
+    }
 }
 
 void PPP::updateDisplayString()
@@ -283,35 +428,36 @@ void PPP::updateDisplayString()
     if (ev.isDisabled())
     {
         // speed up things
-        getDisplayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t", 0, "");
     }
-    else if (datarateChannel!=NULL)
+    else if (datarateChannel != NULL)
     {
-        double datarate = datarateChannel->par("datarate").doubleValue();
         char datarateText[40];
-        if (datarate>=1e9) sprintf(datarateText,"%gG", datarate/1e9);
-        else if (datarate>=1e6) sprintf(datarateText,"%gM", datarate/1e6);
-        else if (datarate>=1e3) sprintf(datarateText,"%gK", datarate/1e3);
-        else sprintf(datarateText,"%gbps", datarate);
 
-/* TBD find solution for displaying IP address without dependence on IPv6 or IPv6
-        IPAddress addr = interfaceEntry->ipv4Data()->getIPAddress();
+        double datarate = datarateChannel->getNominalDatarate();
+        if (datarate >= 1e9) sprintf(datarateText, "%gGbps", datarate / 1e9);
+        else if (datarate >= 1e6) sprintf(datarateText, "%gMbps", datarate / 1e6);
+        else if (datarate >= 1e3) sprintf(datarateText, "%gkbps", datarate / 1e3);
+        else sprintf(datarateText, "%gbps", datarate);
+
+/* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
+        IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
         sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
 */
 
         char buf[80];
         sprintf(buf, "%s\nrcv:%ld snt:%ld", datarateText, numRcvdOK, numSent);
 
-        if (numBitErr>0)
-            sprintf(buf+strlen(buf), "\nerr:%ld", numBitErr);
+        if (numBitErr > 0)
+            sprintf(buf + strlen(buf), "\nerr:%ld", numBitErr);
 
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
     else
     {
         char buf[80];
         sprintf(buf, "not connected\ndropped:%ld", numDroppedIfaceDown);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 
@@ -322,9 +468,9 @@ void PPP::updateHasSubcribers()
                      nb->hasSubscribers(NF_PP_RX_END);
 }
 
-void PPP::receiveChangeNotification(int category, const cPolymorphic *)
+void PPP::receiveChangeNotification(int category, const cObject *)
 {
-    if (category==NF_SUBSCRIBERLIST_CHANGED)
+    if (category == NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();
 }
 
@@ -342,5 +488,4 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
     delete pppFrame;
     return msg;
 }
-
 

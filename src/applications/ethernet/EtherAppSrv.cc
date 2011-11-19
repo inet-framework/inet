@@ -17,11 +17,16 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "EtherAppSrv.h"
-#include "Ieee802Ctrl_m.h"
-#include "EtherApp_m.h"
 
-Define_Module (EtherAppSrv);
+#include "EtherAppSrv.h"
+
+#include "EtherApp_m.h"
+#include "Ieee802Ctrl_m.h"
+
+Define_Module(EtherAppSrv);
+
+simsignal_t EtherAppSrv::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppSrv::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void EtherAppSrv::initialize()
 {
@@ -30,8 +35,9 @@ void EtherAppSrv::initialize()
 
     // statistics
     packetsSent = packetsReceived = 0;
-    eedVector.setName("end-to-end delay");
-    eedStats.setName("end-to-end delay");
+    sentPkSignal = registerSignal("sentPk");
+    rcvdPkSignal = registerSignal("rcvdPk");
+
     WATCH(packetsSent);
     WATCH(packetsReceived);
 
@@ -43,33 +49,31 @@ void EtherAppSrv::initialize()
 void EtherAppSrv::handleMessage(cMessage *msg)
 {
     EV << "Received packet `" << msg->getName() << "'\n";
-
-    packetsReceived++;
-    simtime_t lastEED = simTime() - msg->getCreationTime();
-    eedVector.record(lastEED);
-    eedStats.collect(lastEED);
-
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
+    packetsReceived++;
+    emit(rcvdPkSignal, req);
+
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
     MACAddress srcAddr = ctrl->getSrc();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
     char msgname[30];
-    strcpy(msgname,msg->getName());
+    strcpy(msgname, msg->getName());
 
     delete msg;
     delete ctrl;
 
     // send back packets asked by EtherAppCli side
     int k = 0;
-    strcat(msgname,"-resp-");
-    char *s = msgname+strlen(msgname);
-    while (replyBytes>0)
+    strcat(msgname, "-resp-");
+    char *s = msgname + strlen(msgname);
+
+    while (replyBytes > 0)
     {
-        int l = replyBytes>MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
+        int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
 
-        sprintf(s,"%d",k);
+        sprintf(s, "%d", k);
 
         EV << "Generating packet `" << msgname << "'\n";
 
@@ -77,21 +81,21 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         datapacket->setRequestId(requestId);
         datapacket->setByteLength(l);
         sendPacket(datapacket, srcAddr);
-        packetsSent++;
 
         k++;
     }
-
 }
 
-void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
+void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr)
 {
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(remoteSAP);
     etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
+    emit(sentPkSignal, datapacket);
     send(datapacket, "out");
+    packetsSent++;
 }
 
 void EtherAppSrv::registerDSAP(int dsap)
@@ -108,12 +112,5 @@ void EtherAppSrv::registerDSAP(int dsap)
 
 void EtherAppSrv::finish()
 {
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.getMean());
-    recordScalar("end-to-end delay stddev", eedStats.getStddev());
-    recordScalar("end-to-end delay min", eedStats.getMin());
-    recordScalar("end-to-end delay max", eedStats.getMax());
 }
-
 

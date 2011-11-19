@@ -27,60 +27,7 @@ std::string intToString(int i)
   return str;
 }
 
-std::string vectorToString(IPAddressVector vec)
-{
-    return vectorToString(vec, ", ");
-}
-
-std::string vectorToString(IPAddressVector vec, const char *delim)
-{
-  std::ostringstream stream;
-  for(unsigned int i = 0; i < vec.size(); i++)
-  {
-      stream << vec[i];
-      if(i < vec.size() - 1)
-        stream << delim;
-  }
-  stream << std::flush;
-  std::string str(stream.str());
-  return str;
-}
-
-std::string vectorToString(EroVector vec)
-{
-    return vectorToString(vec, ", ");
-}
-
-std::string vectorToString(EroVector vec, const char *delim)
-{
-    std::ostringstream stream;
-    for(unsigned int i = 0; i < vec.size(); i++)
-    {
-        stream << vec[i].node;
-
-        if(i < vec.size() - 1)
-            stream << delim;
-    }
-    stream << std::flush;
-    std::string str(stream.str());
-    return str;
-}
-
-EroVector routeToEro(IPAddressVector rro)
-{
-    EroVector ero;
-
-    for(unsigned int i = 0; i < rro.size(); i++)
-    {
-        EroObj_t hop;
-        hop.L = false;
-        hop.node = rro[i];
-        ero.push_back(hop);
-    }
-
-    return ero;
-}
-uint32 getLevel(IPvXAddress addr)
+int getLevel(const IPvXAddress& addr)
 {
     if (addr.isIPv6())
     {
@@ -96,24 +43,24 @@ uint32 getLevel(IPvXAddress addr)
     else
     {
         //Addresses usable with SCTP, but not as destination or source address
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("0.0.0.0"), IPAddress("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("224.0.0.0"), IPAddress("240.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("198.18.0.0"), IPAddress("255.255.255.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.88.99.0"), IPAddress("255.255.255.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("0.0.0.0"), IPv4Address("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("224.0.0.0"), IPv4Address("240.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("198.18.0.0"), IPv4Address("255.255.255.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.88.99.0"), IPv4Address("255.255.255.0")))
             return 0;
 
         //Loopback
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("127.0.0.0"), IPAddress("255.0.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("127.0.0.0"), IPv4Address("255.0.0.0")))
         return 1;
 
         //Link-local
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("169.254.0.0"), IPAddress("255.255.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("169.254.0.0"), IPv4Address("255.255.0.0")))
             return 2;
 
         //Private
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("10.0.0.0"), IPAddress("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("172.16.0.0"), IPAddress("255.240.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.168.0.0"), IPAddress("255.255.0.0")))
+        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("10.0.0.0"), IPv4Address("255.0.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("172.16.0.0"), IPv4Address("255.240.0.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.168.0.0"), IPv4Address("255.255.0.0")))
             return 3;
      }
     //Global

@@ -4,9 +4,8 @@
 
 package inet.examples.inet.tcpwindowscale;
 
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.StandardHostWithDLThruputMeter;
 import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
 
 network tcpwindowscale {
     parameters:
@@ -18,13 +17,13 @@ network tcpwindowscale {
             gates:
                 pppg[1];
         }
-        server: StandardHostWithDLThruputMeter {
+        server: StandardHost {
             parameters:
                 @display("p=350,100;i=device/server");
             gates:
                 pppg[1];
         }
-    connections allowunconnected:
+    connections:
         client.pppg[0] <--> LFNPath <--> server.pppg[0];
 }
 

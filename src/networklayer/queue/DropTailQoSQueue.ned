@@ -21,14 +21,18 @@ package inet.networklayer.queue;
 //
 // Drop-tail queue with QoS support, to be used in network interfaces.
 // Performs priority queueing.
-// Conforms to the OutputQueue interface.
+// Conforms to the ~IOutputQueue interface.
 //
-simple DropTailQoSQueue like OutputQueue
+simple DropTailQoSQueue like IOutputQueue
 {
     parameters:
         int frameCapacity = default(100);  // per-subqueue capacity
         string classifierClass;  // class that inherits from IQoSClassifier
         @display("i=block/queue");
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
     gates:
         input in;
         output out;

@@ -22,11 +22,11 @@
 
 SCTPReceiveStream::SCTPReceiveStream()
 {
-    streamId                    = 0;
+    streamId = 0;
     expectedStreamSeqNum = 0;
-    deliveryQ               = new SCTPQueue();
-    orderedQ                    = new SCTPQueue();
-    unorderedQ              = new SCTPQueue();
+    deliveryQ = new SCTPQueue();
+    orderedQ = new SCTPQueue();
+    unorderedQ = new SCTPQueue();
 }
 
 SCTPReceiveStream::~SCTPReceiveStream()
@@ -59,14 +59,14 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
             sctpEV3 << "All fragments found, now reassembling..." << endl;
 
             SCTPDataVariables *firstVar = orderedQ->getChunk(begintsn), *processVar;
-            SCTPSimpleMessage* firstSimple=check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
+            SCTPSimpleMessage* firstSimple = check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
 
             sctpEV3 << "First fragment has " << firstVar->len / 8 << " bytes." << endl;
 
             while (++begintsn <= endtsn)
             {
                 processVar = orderedQ->getAndExtractChunk(begintsn);
-                SCTPSimpleMessage* processSimple=check_and_cast<SCTPSimpleMessage*>(processVar->userData);
+                SCTPSimpleMessage* processSimple = check_and_cast<SCTPSimpleMessage*>(processVar->userData);
 
                 sctpEV3 << "Adding fragment with " << processVar->len / 8 << " bytes." << endl;
 

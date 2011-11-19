@@ -1,10 +1,11 @@
 %description:
 Test formLinkLocalAddress()
 
-%global:
+%includes:
 #include "IPv6Address.h"
-#include "InterfaceIdentifier.h"
+#include "InterfaceToken.h"
 
+%global:
 #define P(X)  ev << #X << "-->" << IPv6Address::formLinkLocalAddress(X) << "\n"
 
 %activity:

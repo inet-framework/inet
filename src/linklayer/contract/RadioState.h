@@ -36,7 +36,7 @@
  * @author Andreas Köpke, Andras Varga
  * @see NotificationBoard
  */
-class INET_API RadioState : public cPolymorphic
+class INET_API RadioState : public cObject
 {
   public:
     /** Possible states of the radio */
@@ -67,12 +67,14 @@ class INET_API RadioState : public cPolymorphic
 
   public:
     /** Constructor */
-    RadioState(int radioModuleId) : cPolymorphic() {
+    RadioState(int radioModuleId) : cObject() {
         radioId = radioModuleId; state = IDLE; channelNumber = -1; bitrate = -1;
     }
 
     /** id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
+
+    void setRadioId(int state) { radioId = state; } //AM 6 Dezember nachträglich eingefügt
 
     /** Returns radio state */
     State getState() const { return state; }
@@ -94,7 +96,7 @@ class INET_API RadioState : public cPolymorphic
 
     /** Returns the name of the radio state in a readable form */
     static const char *stateName(State state) {
-        switch(state) {
+        switch (state) {
             case IDLE: return "IDLE";
             case RECV: return "RECV";
             case TRANSMIT: return "TRANSMIT";

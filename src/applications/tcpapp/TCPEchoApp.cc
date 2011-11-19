@@ -13,16 +13,22 @@
 
 
 #include "TCPEchoApp.h"
+
+#include "ByteArrayMessage.h"
 #include "TCPSocket.h"
 #include "TCPCommand_m.h"
 
 
 Define_Module(TCPEchoApp);
 
+simsignal_t TCPEchoApp::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPEchoApp::sentPkSignal = SIMSIGNAL_NULL;
+
 void TCPEchoApp::initialize()
 {
-    const char *address = par("address");
-    int port = par("port");
+    cSimpleModule::initialize();
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
     delay = par("echoDelay");
     echoFactor = par("echoFactor");
 
@@ -30,16 +36,24 @@ void TCPEchoApp::initialize()
     WATCH(bytesRcvd);
     WATCH(bytesSent);
 
+    rcvdPkSignal = registerSignal("rcvdPk");
+    sentPkSignal = registerSignal("sentPk");
+
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.readDataTransferModePar(*this);
+    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     socket.listen();
 }
 
 void TCPEchoApp::sendDown(cMessage *msg)
 {
     if (msg->isPacket())
+    {
         bytesSent += ((cPacket *)msg)->getByteLength();
+        emit(sentPkSignal, (cPacket *)msg);
+    }
+
     send(msg, "tcpOut");
 }
 
@@ -49,21 +63,23 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     {
         sendDown(msg);
     }
-    else if (msg->getKind()==TCP_I_PEER_CLOSED)
+    else if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we'll close too
         msg->setKind(TCP_C_CLOSE);
-        if (delay==0)
+
+        if (delay == 0)
             sendDown(msg);
         else
-            scheduleAt(simTime()+delay, msg); // send after a delay
+            scheduleAt(simTime() + delay, msg); // send after a delay
     }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
         cPacket *pkt = check_and_cast<cPacket *>(msg);
+        emit(rcvdPkSignal, pkt);
         bytesRcvd += pkt->getByteLength();
 
-        if (echoFactor==0)
+        if (echoFactor == 0)
         {
             delete pkt;
         }
@@ -77,14 +93,30 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             pkt->setControlInfo(cmd);
             delete ind;
 
-            long byteLen = pkt->getByteLength()*echoFactor;
-            if (byteLen<1) byteLen=1;
+            long byteLen = pkt->getByteLength() * echoFactor;
+
+            if (byteLen < 1)
+                byteLen = 1;
+
             pkt->setByteLength(byteLen);
 
-            if (delay==0)
+            ByteArrayMessage *baMsg = dynamic_cast<ByteArrayMessage *>(pkt);
+
+            // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
+            if (baMsg)
+            {
+                ByteArray& outdata = baMsg->getByteArray();
+                ByteArray indata = outdata;
+                outdata.setDataArraySize(byteLen);
+
+                for (long i = 0; i < byteLen; i++)
+                    outdata.setData(i, indata.getData(i / echoFactor));
+            }
+
+            if (delay == 0)
                 sendDown(pkt);
             else
-                scheduleAt(simTime()+delay, pkt); // send after a delay
+                scheduleAt(simTime() + delay, pkt); // send after a delay
         }
     }
     else
@@ -97,7 +129,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     {
         char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
-        getDisplayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t", 0, buf);
     }
 }
 
@@ -106,3 +138,4 @@ void TCPEchoApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+

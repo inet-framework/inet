@@ -2,7 +2,7 @@
 // Copyright (C) 1992-2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
@@ -20,6 +20,7 @@
 
 Define_Module(Sink);
 
+simsignal_t Sink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void Sink::initialize()
 {
@@ -27,6 +28,7 @@ void Sink::initialize()
     numBits = 0;
     throughput = 0;
     packetPerSec = 0;
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     WATCH(numPackets);
     WATCH(numBits);
@@ -37,8 +39,9 @@ void Sink::initialize()
 void Sink::handleMessage(cMessage *msg)
 {
     numPackets++;
-    numBits += PK(msg)->getBitLength();
-
+    cPacket *packet = PK(msg);
+    numBits += packet->getBitLength();
+    emit(rcvdPkSignal, packet);
     throughput = numBits / simTime();
     packetPerSec = numPackets / simTime();
 
@@ -47,8 +50,6 @@ void Sink::handleMessage(cMessage *msg)
 
 void Sink::finish()
 {
-    recordScalar("numPackets", numPackets);
-    recordScalar("numBits", numBits);
     recordScalar("throughput", throughput);
     recordScalar("packetPerSec", packetPerSec);
 }

@@ -1,3 +1,12 @@
+2011-07-04 Thomas Reschka
+
+    * replaced "StandardHostWithDLThruputMeter" by "StandardHost" in ned file
+    * README updated - There is no need to modify ned file for config 1-5 and config 6 due to new HookType parameter.
+    * added new "outputHookType" parameter to ini file
+    * replaced "tcpAppType" by "tcpApp[*].typename" parameter in ini file
+    * removed obsolete "tcp.sendQueueClass" and "tcp.receiveQueueClass" parameters from ini file
+    * changed "sim-time-limit" from 60.0 to 2.1 seconds
+
 2010-06-19 Thomas Reschka
 
     * added new tcp parameters to ini file

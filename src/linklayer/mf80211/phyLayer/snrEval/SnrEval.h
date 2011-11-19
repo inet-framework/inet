@@ -84,7 +84,7 @@ class INET_API SnrEval : public BasicSnrEval
 
     virtual void handleSelfMsg(cMessage*);
 
-    virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
+    virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** @brief Buffer the frame and update noise levels and snr information */
     virtual void handleLowerMsgStart(AirFrame*);

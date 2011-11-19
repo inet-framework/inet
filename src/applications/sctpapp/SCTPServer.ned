@@ -19,12 +19,15 @@
 
 package inet.applications.sctpapp;
 
-simple SCTPServer like SCTPApp
+import inet.applications.ISCTPApp;
+
+
+simple SCTPServer like ISCTPApp
 {
     parameters:
-         string address = default(""); // may be left empty ("")
-        int port = default(0); // port number to listen on
-        int echoFactor = default(0);
+        string localAddress = default(""); // comma separated list of addresses
+        int localPort = default(0); // port number to listen on
+        bool echo = default(false);  // echoes received packages when true
         volatile double echoDelay @unit(s) = default(0s);
         double delayFirstRead @unit(s) = default(0s);
         volatile double readingInterval @unit(s) = default(0s);

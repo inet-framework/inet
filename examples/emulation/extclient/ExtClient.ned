@@ -19,22 +19,21 @@
 package inet.examples.emulation.extclient;
 
 import inet.nodes.inet.StandardHost;
-import ned.DatarateChannel;
 
 
 network ExtClient
 {
     parameters:
-       double testTimeout @unit(s) = default(0s);
-       bool testing = default(false);
+        double testTimeout @unit(s) = default(0s);
+        bool testing = default(false);
     submodules:
-       peer: StandardHost {
+        peer: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli1d.mrt";
                 numExtInterfaces = 1;
                 @display("p=29,90;i=laptop3");
-       }
+        }
     connections allowunconnected:
 }
 

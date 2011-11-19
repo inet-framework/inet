@@ -21,13 +21,10 @@
 
 package inet.examples.sctp.nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import inet.world.NAMTrace;
-import ned.DatarateChannel;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network NClients
@@ -35,30 +32,22 @@ network NClients
     parameters:
         int n;
     types:
-        channel fiberline extends DatarateChannel
+        channel fiberline extends ThruputMeteringChannel
         {
             delay = 1us;
             datarate = 512Mbps;
+            thruputDisplayFormat = "u";
         }
-        channel ethernetline extends DatarateChannel
+        channel ethernetline extends ThruputMeteringChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;
+            thruputDisplayFormat = "u";
         }
     submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=u";
-                @display("p=98,50");
-        }
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=185,50");
-        }
-        nam: NAMTrace {
-            parameters:
-                @display("p=260,50");
         }
         r1: Router {
             parameters:

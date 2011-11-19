@@ -22,11 +22,13 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include "RoutingTableAccess.h"
-#include "ICMPMessage.h"
+#include "INETDefs.h"
 
-class IPDatagram;
-class IPControlInfo;
+#include "ICMPMessage.h"
+#include "RoutingTableAccess.h"
+
+class IPv4Datagram;
+class IPv4ControlInfo;
 
 
 /**
@@ -39,10 +41,10 @@ class INET_API ICMP : public cSimpleModule
 
     virtual void processICMPMessage(ICMPMessage *);
     virtual void errorOut(ICMPMessage *);
-    virtual void processEchoRequest (ICMPMessage *);
-    virtual void processEchoReply (ICMPMessage *);
+    virtual void processEchoRequest(ICMPMessage *);
+    virtual void processEchoReply(ICMPMessage *);
     virtual void sendEchoRequest(cPacket *);
-    virtual void sendToIP(ICMPMessage *, const IPAddress& dest);
+    virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
     virtual void sendToIP(ICMPMessage *msg);
 
   public:
@@ -50,16 +52,16 @@ class INET_API ICMP : public cSimpleModule
      * This method can be called from other modules to send an ICMP error packet
      * in response to a received bogus packet.
      */
-    virtual void sendErrorMessage(IPDatagram *datagram, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(IPv4Datagram *datagram, ICMPType type, ICMPCode code);
 
     /**
      * This method can be called from other modules to send an ICMP error packet
      * in response to a received bogus packet from the transport layer (like UDP).
-     * The ICMP error packet needs to include (part of) the original IP datagram,
-     * so this function will wrap back the transport packet into the IP datagram
-     * based on its IPControlInfo.
+     * The ICMP error packet needs to include (part of) the original IPv4 datagram,
+     * so this function will wrap back the transport packet into the IPv4 datagram
+     * based on its IPv4ControlInfo.
      */
-    virtual void sendErrorMessage(cPacket *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code);
 
   protected:
     virtual void handleMessage(cMessage *msg);

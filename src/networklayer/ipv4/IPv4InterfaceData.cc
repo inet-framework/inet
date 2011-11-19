@@ -19,10 +19,6 @@
 
 //  Author: Andras Varga, 2004
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 #include <algorithm>
 #include <sstream>
@@ -32,7 +28,7 @@
 
 IPv4InterfaceData::IPv4InterfaceData()
 {
-    static const IPAddress allOnes("255.255.255.255");
+    static const IPv4Address allOnes("255.255.255.255");
     netmask = allOnes;
 
     metric = 0;
@@ -43,7 +39,7 @@ IPv4InterfaceData::IPv4InterfaceData()
 std::string IPv4InterfaceData::info() const
 {
     std::stringstream out;
-    out << "IP:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
+    out << "IPv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
     if (!getMulticastGroups().empty())
     {
         out << " mcastgrps:";
@@ -70,12 +66,34 @@ std::string IPv4InterfaceData::detailedInfo() const
     return out.str();
 }
 
-bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPAddress& multicastAddress) const
+bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const
 {
-    int n = getMulticastGroups().size();
+    int n = multicastGroups.size();
     for (int i=0; i<n; i++)
-        if (multicastAddress.equals(getMulticastGroups()[i]))
+        if (multicastGroups[i] == multicastAddress)
             return true;
     return false;
 }
 
+void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
+{
+    if (!isMemberOfMulticastGroup(multicastAddress))
+    {
+        multicastGroups.push_back(multicastAddress);
+        changed1();
+    }
+}
+
+void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
+{
+    int i;
+    int n = multicastGroups.size();
+    for (i = 0; i < n; i++)
+        if (multicastGroups[i] == multicastAddress)
+            break;
+    if (i != n)
+    {
+        multicastGroups.erase(multicastGroups.begin() + i);
+        changed1();
+    }
+}

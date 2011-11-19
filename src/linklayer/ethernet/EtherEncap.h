@@ -18,9 +18,13 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
-#include <stdio.h>
+#include "INETDefs.h"
+
 #include "Ethernet.h"
-#include "EtherFrame_m.h"
+
+// Forward declarations:
+class EtherFrame;
+
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
@@ -34,6 +38,9 @@ class INET_API EtherEncap : public cSimpleModule
     long totalFromHigherLayer;  // total number of packets received from higher layer
     long totalFromMAC;          // total number of frames received from MAC
     long totalPauseSent;        // total number of PAUSE frames sent
+    static simsignal_t rcvdPkBytesFromHLSignal;
+    static simsignal_t rcvdPkBytesFromMACSignal;
+    static simsignal_t sentPauseSignal;
 
   protected:
     virtual void initialize();

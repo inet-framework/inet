@@ -32,10 +32,9 @@
  * "Notification Broker".
  *
  * Notification events are grouped into "categories." Examples of categories
- * are: NF_HOSTPOSITION_UPDATED, NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN,
- * NF_PP_TX_END, NF_IPv4_ROUTE_ADDED, NF_BEACON_LOST
- * NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is identified by
- * an integer (right now it's assigned in the source code via an enum,
+ * are: NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN, NF_PP_TX_END, NF_IPv4_ROUTE_ADDED,
+ * NF_BEACON_LOST, NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is
+ * identified by an integer (right now it's assigned in the source code via an enum,
  * in the future we'll convert to dynamic category registration).
  *
  * To trigger a notification, the client must obtain a pointer to the
@@ -54,7 +53,7 @@
  * In cases when the category itself (an int) does not carry enough information
  * about the notification event, one can pass additional information
  * in a data class. There is no restriction on what the data class may contain,
- * except that it has to be subclassed from cPolymorphic, and of course
+ * except that it has to be subclassed from cObject, and of course
  * producers and consumers of notifications should agree on its contents.
  * If no extra info is needed, one can pass a NULL pointer in the
  * fireChangeNotification() method.
@@ -64,7 +63,7 @@
  * <pre>
  * class Foo : public cSimpleModule, public INotifiable {
  *     ...
- *     virtual void receiveChangeNotification(int category, const cPolymorphic *details) {..}
+ *     virtual void receiveChangeNotification(int category, const cObject *details) {..}
  *     ...
  * };
  * </pre>
@@ -135,7 +134,7 @@ class INET_API NotificationBoard : public cSimpleModule
      * information about the change (e.g. exact location, specific attribute
      * that changed, old value, new value, etc).
      */
-    virtual void fireChangeNotification(int category, const cPolymorphic *details=NULL);
+    virtual void fireChangeNotification(int category, const cObject *details = NULL);
     //@}
 };
 

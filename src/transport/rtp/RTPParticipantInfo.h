@@ -15,230 +15,183 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPParticipantInfo.h
- * TThis file declares the class RTPParticipantInfo.
- */
 
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
-#include <stdio.h>
+
+#include "RTPParticipantInfo_m.h"
+
 #include "INETDefs.h"
-#include "IPAddress.h"
-#include "RTPPacket.h"
-#include "RTCPPacket.h"
-#include "reports.h"
+#include "IPv4Address.h"
 #include "sdes.h"
+
+
+//Forward declarations:
+class ReceptionReport;
+class RTPPacket;
+class SenderReport;
 
 /**
  * This class is a super class for classes intended for storing information
- * about rtp end systems.
+ * about RTP end systems.
  * It has two subclasses: RTPReceiverInformation which is used for storing
- * information about other system participating in an rtp session.
- * RTPSenderInformation is used by an rtp endsystem for storing information
+ * information about other system participating in an RTP session.
+ * RTPSenderInformation is used by an RTP endsystem for storing information
  * about itself.
  * \sa RTPReceiverInformation
  * \sa RTPSenderInformation
  */
-class INET_API RTPParticipantInfo : public cObject
+class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
 {
+  public:
+    /**
+     * Default constructor.
+     */
+    RTPParticipantInfo(uint32 ssrc = 0);
 
-    public:
+    /**
+     * Copy constructor.
+     */
+    RTPParticipantInfo(const RTPParticipantInfo& participantInfo);
 
-        /**
-         * Default constructor.
-         */
-        RTPParticipantInfo(uint32 ssrc = 0);
+    /**
+     * Destructor.
+     */
+    virtual ~RTPParticipantInfo();
 
-        /**
-         * Copy constructor.
-         */
-        RTPParticipantInfo(const RTPParticipantInfo& participantInfo);
+    /**
+     * Assignment operator.
+     */
+    RTPParticipantInfo& operator=(const RTPParticipantInfo& participantInfo);
 
-        /**
-         * Destructor.
-         */
-        virtual ~RTPParticipantInfo();
+    /**
+     * Duplicates this RTPParticipantInfo by calling the copy constructor.
+     */
+    virtual RTPParticipantInfo *dup() const;
 
-        /**
-         * Assignment operator.
-         */
-        RTPParticipantInfo& operator=(const RTPParticipantInfo& participantInfo);
+    /**
+     * This method should be extended by a subclass for
+     * extracting information about the originating
+     * endsystem of an RTP packet.
+     * This method sets _silentInterval to 0 so that
+     * the sender of this RTP packet is regarded as
+     * an active sender.
+     */
+    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
 
-        /**
-         * Duplicates this RTPParticipantInfo by calling the copy constructor.
-         */
-        virtual RTPParticipantInfo *dup() const;
+    /**
+     * This method extracts information about an RTP endsystem
+     * as provided by the given SenderReport.
+     */
+    virtual void processSenderReport(SenderReport &report, simtime_t arrivalTime);
 
-        /**
-         * This method should be extended by a subclass for
-         * extracting information about the originating
-         * endsystem of an rtp packet.
-         * This method sets _silentInterval to 0 so that
-         * the sender of this rtp packet is regarded as
-         * an active sender.
-         */
-        virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
+    /**
+     * This method extracts information of the given ReceptionReport.
+     */
+    virtual void processReceptionReport(ReceptionReport &report, simtime_t arrivalTime);
 
-        /**
-         * This method extracts information about an rtp endsystem
-         * as provided by the given SenderReport.
-         */
-        virtual void processSenderReport(SenderReport *report, simtime_t arrivalTime);
+    /**
+     * This method extracts sdes information of the given sdes chunk.and stores it.
+     */
+    virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime);
 
-        /**
-         * This method extracts information of the given ReceptionReport.
-         */
-        virtual void processReceptionReport(ReceptionReport *report, simtime_t arrivalTime);
+    /**
+     * Returns a copy of the sdes chunk used for storing source
+     * description items about this system.
+     */
+    virtual SDESChunk *getSDESChunk() const;
 
-        /**
-         * This method extracts sdes information of the given sdes chunk.and stores it.
-         */
-        virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime);
+    /**
+     * Adds this sdes item to the sdes chunk of this participant.
+     */
+    virtual void addSDESItem(SDESItem *sdesItem);
 
-        /**
-         * Returns a copy of the sdes chunk used for storing source
-         * description items about this system.
-         */
-        virtual SDESChunk *getSDESChunk();
+    /**
+     * This method is intended to be overwritten by subclasses. It
+     * should return a receiver report if there have been received
+     * RTP packets from that endsystem and NULL otherwise.
+     */
+    virtual ReceptionReport *receptionReport(simtime_t now);
 
-        /**
-         * Adds this sdes item to the sdes chunk of this participant.
-         */
-        virtual void addSDESItem(SDESItem *sdesItem);
+    /**
+     * This method is intended to be overwritten by subclasses which
+     * are used for storing information about itself.
+     * It should return a sender report if there have been sent RTP
+     * packets recently or NULL otherwise.
+     * The implementation for this class always returns NULL.
+     */
+    virtual SenderReport *senderReport(simtime_t now);
 
-        /**
-         * This method is intended to be overwritten by subclasses. It
-         * should return a receiver report if there have been received
-         * rtp packets from that endsystem and NULL otherwise.
-         */
-        virtual ReceptionReport *receptionReport(simtime_t now);
+    /**
+     * This method should be called by the rtcp module which uses this class
+     * for storing information every time an rtcp packet is sent.
+     * Some behaviour of RTP and rtcp (and this class) depend on how
+     * many rtcp intervals have passed, for example an RTP end system
+     * is marked as inactive if there haven't been received packets from
+     * it for a certain number of rtpc intervals.
+     * Call getSenderReport() and createReceptionReport() before calling this method.
+     * \sa getSenderReport()
+     * \sa createReceptionReport()
+     */
+    virtual void nextInterval(simtime_t now);
 
-        /**
-         * This method is intended to be overwritten by subclasses which
-         * are used for storing information about itself.
-         * It should return a sender report if there have been sent rtp
-         * packets recently or NULL otherwise.
-         * The implementation for this class always returns NULL.
-         */
-        virtual SenderReport *senderReport(simtime_t now);
+    /**
+     * Returns true if the end system does no longer participate
+     * in the RTP session.
+     * The implementation in this class always returns false.
+     */
+    virtual bool toBeDeleted(simtime_t now);
 
-        /**
-         * This method should be called by the rtcp module which uses this class
-         * for storing information every time an rtcp packet is sent.
-         * Some behaviour of rtp and rtcp (and this class) depend on how
-         * many rtcp intervals have passed, for example an rtp end system
-         * is marked as inactive if there haven't been received packets from
-         * it for a certain number of rtpc intervals.
-         * Call getSenderReport() and createReceptionReport() before calling this method.
-         * \sa getSenderReport()
-         * \sa createReceptionReport()
-         */
-        virtual void nextInterval(simtime_t now);
+    /**
+     * Returns true if this endsystem has sent at least one RTP
+     * data packet during the last two rtcp intervals (including
+     * the current one).
+     */
+    virtual bool isSender() const;
 
-        /**
-         * Returns true if the end system does no longer participate
-         * in the rtp session.
-         * The implementation in this class always returns false.
-         */
-        virtual bool toBeDeleted(simtime_t now);
+    /**
+     * Returns the ssrc identifier of the RTP endsystem.
+     */
+    virtual uint32 getSsrc() const;
 
-        /**
-         * Returns true if this endsystem has sent at least one rtp
-         * data packet during the last two rtcp intervals (including
-         * the current one).
-         */
-        virtual bool isSender();
+    /**
+     * Sets the ssrc identifier.
+     */
+    virtual void setSsrc(uint32 ssrc);
 
-        /**
-         * Returns the ssrc identifier of the rtp endsystem.
-         */
-        virtual uint32 getSSRC();
+    /**
+     * Creates a new SDESItem and adds it to the SDESChunk stored in
+     * this RTPParticipantInfo.
+     */
+    virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
 
-        /**
-         * Sets the ssrc identifier.
-         */
-        virtual void setSSRC(uint32 ssrc);
+    virtual void parsimPack(cCommBuffer *b) { throw cRuntimeError("The parsimPack() not implemented."); }
+    virtual void parsimUnpack(cCommBuffer *b) { throw cRuntimeError("The parsimUnpack() not implemented."); }
 
-        /**
-         * Returns the ip address of the rtp endsystem.
-         */
-        virtual IPAddress getAddress();
+    /**
+     * This method returns the given 32 bit ssrc identifier as
+     * an 8 character hexadecimal number which is used as name
+     * of an RTPParticipantInfo object.
+     */
+    static char *ssrcToName(uint32 ssrc);
 
-        /**
-         * Sets the ip address of the rtp endsystem.
-         */
-        virtual void setAddress(IPAddress address);
+  private:
+    void copy(const RTPParticipantInfo& other);
 
-        /**
-         * Returns the port used by this endsystem for
-         * transmitting rtp packets.
-         */
-        virtual int getRTPPort();
+  protected:
+    /**
+     * Used for storing sdes information about this RTP endsystem.
+     * The ssrc identifier is also stored here.
+     */
+    SDESChunk _sdesChunk;
 
-        /**
-         * Sets the port used by the endsystem for
-         * transmitting rtp packets.
-         */
-        virtual void setRTPPort(int rtpPort);
-
-        /**
-         * Returns the port used by this endsystem for
-         * transmitting rtcp packets.
-         */
-        virtual int getRTCPPort();
-
-        /**
-         * Sets the port used by the endsystem for
-         * transmitting rtcp packets.
-         */
-        virtual void setRTCPPort(int rtpPort);
-
-        /**
-         * This method returns the given 32 bit ssrc identifier as
-         * an 8 character hexadecimal number which is used as name
-         * of an RTPParticipantInfo object.
-         */
-        static char *ssrcToName(uint32 ssrc);
-
-        virtual void dump() const;
-
-    protected:
-
-        /**
-         * Used for storing sdes information about this rtp endsystem.
-         * The ssrc identifier is also stored here.
-         */
-        SDESChunk *_sdesChunk;
-
-        /**
-         * Used for storing the ip address of this endsystem.
-         */
-        IPAddress _address;
-
-        /**
-         * Used for storing the port for rtp by this endsystem.
-         */
-        int _rtpPort;
-
-        /**
-         * Used for storing the port for rtcp by this endsystem.
-         */
-        int _rtcpPort;
-
-        /**
-         * Stores the number of rtcp intervals (including the current one)
-         * during which this rtp endsystem hasn't sent any rtp data packets.
-         * When an rtp data packet is received it is reset to 0.
-         */
-        int _silentIntervals;
-
-        /**
-         * Creates a new SDESItem and adds it to the SDESChunk stored in
-         * this RTPParticipantInfo.
-         */
-        virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
+    /**
+     * Stores the number of rtcp intervals (including the current one)
+     * during which this RTP endsystem hasn't sent any RTP data packets.
+     * When an RTP data packet is received it is reset to 0.
+     */
+    int _silentIntervals;
 };
 
 #endif
-

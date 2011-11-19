@@ -21,18 +21,23 @@
 //
 
 #include "UDPVideoStreamCli.h"
-#include "IPAddressResolver.h"
+
+#include "UDPControlInfo_m.h"
+#include "IPvXAddressResolver.h"
 
 
 Define_Module(UDPVideoStreamCli);
 
+simsignal_t UDPVideoStreamCli::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPVideoStreamCli::initialize()
 {
-    eed.setName("video stream eed");
+    // statistics
+    rcvdPkSignal = registerSignal("rcvdPk");
+
     simtime_t startTime = par("startTime");
 
-    if (startTime>=0)
+    if (startTime >= 0)
         scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
 }
 
@@ -47,9 +52,19 @@ void UDPVideoStreamCli::handleMessage(cMessage* msg)
         delete msg;
         requestStream();
     }
+    else if (msg->getKind() == UDP_I_DATA)
+    {
+        // process incoming packet
+        receiveStream(PK(msg));
+    }
+    else if (msg->getKind() == UDP_I_ERROR)
+    {
+        EV << "Ignoring UDP error report\n";
+        delete msg;
+    }
     else
     {
-        receiveStream(PK(msg));
+        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 }
 
@@ -58,7 +73,8 @@ void UDPVideoStreamCli::requestStream()
     int svrPort = par("serverPort");
     int localPort = par("localPort");
     const char *address = par("serverAddress");
-    IPvXAddress svrAddr = IPAddressResolver().resolve(address);
+    IPvXAddress svrAddr = IPvXAddressResolver().resolve(address);
+
     if (svrAddr.isUnspecified())
     {
         EV << "Server address is unspecified, skip sending video stream request\n";
@@ -67,17 +83,17 @@ void UDPVideoStreamCli::requestStream()
 
     EV << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
-    bindToPort(localPort);
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
 
-    cPacket *msg = new cPacket("VideoStrmReq");
-    sendToUDP(msg, localPort, svrAddr, svrPort);
+    cPacket *pk = new cPacket("VideoStrmReq");
+    socket.sendTo(pk, svrAddr, svrPort);
 }
 
-void UDPVideoStreamCli::receiveStream(cPacket *msg)
+void UDPVideoStreamCli::receiveStream(cPacket *pk)
 {
-    EV << "Video stream packet:\n";
-    printPacket(msg);
-    eed.record(simTime() - msg->getCreationTime());
-    delete msg;
+    EV << "Video stream packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    emit(rcvdPkSignal, pk);
+    delete pk;
 }
 

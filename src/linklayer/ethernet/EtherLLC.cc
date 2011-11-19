@@ -16,10 +16,20 @@
 */
 
 #include "EtherLLC.h"
+
+#include "EtherFrame_m.h"
+#include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 
 
 Define_Module(EtherLLC);
+
+simsignal_t EtherLLC::dsapSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::rcvdPkBytesFromMACSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::passedUpPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::droppedPkBytesUnknownDSAPSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::sendPauseSignal = SIMSIGNAL_NULL;
 
 void EtherLLC::initialize()
 {
@@ -27,6 +37,14 @@ void EtherLLC::initialize()
     WATCH(seqNum);
 
     dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
+
+    dsapSignal = registerSignal("dsap");
+    rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
+    passedUpPkBytesSignal = registerSignal("passedUpPkBytes");
+    droppedPkBytesUnknownDSAPSignal = registerSignal("droppedPkBytesUnknownDSAP");
+    sendPauseSignal = registerSignal("sendPause");
+
     WATCH(dsapsRegistered);
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
@@ -39,7 +57,16 @@ void EtherLLC::handleMessage(cMessage *msg)
     if (msg->arrivedOn("lowerLayerIn"))
     {
         // frame received from lower layer
-        processFrameFromMAC(check_and_cast<EtherFrameWithLLC *>(msg));
+        EtherFrameWithLLC *etherFrameWithLLC = dynamic_cast<EtherFrameWithLLC *>(msg);
+        if (etherFrameWithLLC)
+        {
+            processFrameFromMAC(etherFrameWithLLC);
+        }
+        else
+        {
+            EV << "Drop received " << msg->getClassName() << " msg.\n";
+            delete msg;
+        }
     }
     else
     {
@@ -66,7 +93,7 @@ void EtherLLC::handleMessage(cMessage *msg)
             break;
 
           default:
-            error("received message `%s' with unknown message kind %d",
+            throw cRuntimeError("received message `%s' with unknown message kind %d",
                   msg->getName(), msg->getKind());
         }
     }
@@ -79,11 +106,13 @@ void EtherLLC::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalPassedUp, totalFromHigherLayer);
+
     if (droppedUnknownDSAP>0)
     {
         sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %ld", droppedUnknownDSAP);
     }
-    getDisplayString().setTagArg("t",0,buf);
+
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
@@ -92,6 +121,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
         error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
+    emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
@@ -123,6 +153,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 {
     totalFromMAC++;
+    emit(rcvdPkBytesFromMACSignal, (long)(frame->getByteLength()));
 
     // decapsulate it and pass up to higher layers.
     int sap = frame->getDsap();
@@ -131,6 +162,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     {
         EV << "No higher layer registered for DSAP="<< sap <<", discarding frame `" << frame->getName() <<"'\n";
         droppedUnknownDSAP++;
+        emit(droppedPkBytesUnknownDSAPSignal, (long)(frame->getByteLength()));
         delete frame;
         return;
     }
@@ -150,6 +182,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
     send(higherlayermsg, "upperLayerOut", port);
     totalPassedUp++;
+    emit(passedUpPkBytesSignal, (long)(higherlayermsg->getByteLength()));
     delete frame;
 }
 
@@ -176,6 +209,7 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
 
     dsapToPort[dsap] = port;
     dsapsRegistered = dsapToPort.size();
+    emit(dsapSignal, 1L);
     delete msg;
 }
 
@@ -188,9 +222,13 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
 
     EV << "Deregistering higher layer with DSAP=" << dsap << "\n";
 
+    if (dsapToPort.find(dsap) == dsapToPort.end())
+        error("DSAP=%d not registered with port=%d", dsap, dsapToPort[dsap]);
+
     // delete from table (don't care if it's not in there)
     dsapToPort.erase(dsapToPort.find(dsap));
     dsapsRegistered = dsapToPort.size();
+    emit(dsapSignal, -1L);
     delete msg;
 }
 
@@ -215,16 +253,12 @@ void EtherLLC::handleSendPause(cMessage *msg)
         frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");
+    emit(sendPauseSignal, pauseUnits);
 
     delete msg;
 }
 
 void EtherLLC::finish()
 {
-    recordScalar("dsaps registered", dsapsRegistered);
-    recordScalar("packets from higher layer", totalFromHigherLayer);
-    recordScalar("frames from MAC", totalFromMAC);
-    recordScalar("packets passed up", totalPassedUp);
-    recordScalar("packets dropped - unknown DSAP", droppedUnknownDSAP);
 }
 

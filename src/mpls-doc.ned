@@ -20,14 +20,14 @@
 // - RFC 2205: Resource ReSerVation Protocol
 // - RFC 3031: Multiprotocol Label Switching Architecture
 // - RFC 3036: LDP Specification
-// - RFC 3209: \RSVP-TE Extension to \RSVP for LSP tunnels
-// - RFC 2205: \RSVP Version 1 - Functional Specification
-// - RFC 2209: \RSVP Message processing Version 1
+// - RFC 3209: RSVP-TE Extension to RSVP for LSP tunnels
+// - RFC 2205: RSVP Version 1 - Functional Specification
+// - RFC 2209: RSVP Message processing Version 1
 //
 //#------------------------------------------------------------------------
 // @page mpls-pseudocode.html, MPLS Operation
 //
-// The following algorithm is carried out by the MPLS module:
+// The following algorithm is carried out by the ~MPLS module:
 //
 // <pre>
 // Step 1: - Check which layer the packet is coming from
@@ -56,7 +56,7 @@
 //     Step 3: Check the packet type
 //     Alternative 1: The packet is native IP
 //         Step 1: Check the LSR type
-//         Alternative 1: The LSR is an Ingress \Router
+//         Alternative 1: The LSR is an Ingress Router
 //             Step 1: Look up LIB for outgoing label
 //             Alternative 1: Label cannot be found
 //                 Step 1: Check if the label for this FEC is being requested
@@ -70,16 +70,16 @@
 //                 Step 1: Carry out the label operation on the packet
 //                 Step 2: Forward the packet to the outgoing interface found
 //                 Step 3: Return
-//         Alternative 2: The LSR is not an Ingress \Router
+//         Alternative 2: The LSR is not an Ingress Router
 //             Step 1: Print out the error
 //             Step 2: Delete the packet and return
 //     Alternative 2: The packet is MPLS
 //         Step 1: Check the LSR type
-//         Alternative 1: The LSR is an Egress \Router
+//         Alternative 1: The LSR is an Egress Router
 //             Step 1: POP the top label
 //             Step 2: Forward the packet to the outgoing interface found
 //             Step 3: Return
-//         Alternative 2: The LSR is not an Egress \Router
+//         Alternative 2: The LSR is not an Egress Router
 //             Step 1: Look up LIB for outgoing label
 //             Alternative 1: Label cannot be found
 //                 Step 1: Check if the label for this FEC is being requested
@@ -190,10 +190,10 @@
 // @page cspf-algorithm.html, The CSPF Algorithm
 //
 // CSPF stands for Constraint Shortest Path First.
-// This constraint-based routing is executed online by Ingress \Router.
+// This constraint-based routing is executed online by Ingress Router.
 // The CSPF calculates an optimum explicit route (ER), based on
 // specific constraints. CSPF relies on a Traffic Engineering Database (TED)
-// to do those calculations. The resulting route is then used by \RSVP-TE.
+// to do those calculations. The resulting route is then used by RSVP-TE.
 //
 // The CSPF in particular and any constraint based routing process requires following
 // inputs:
@@ -241,22 +241,22 @@
 //#------------------------------------------------------------------------
 // @page traffic-xml-file.html, The traffic.xml file
 //
-// The traffic.xml file is read by the \RSVP-TE module (\RSVP).
+// The traffic.xml file is read by the RSVP-TE module (RSVP).
 // The file must be in the same folder as the executable
 // network simulation file.
 //
 // The XML elements used in the "traffic.xml" file:
 // - <Traffic></Traffic> is the root element. It may contain one or more <Conn>
 //   elements.
-// - <Conn></Conn> specifies an \RSVP session. It may contain the following elements.
-// - <src></src> specifies sender \IP address
-// - <dest></dest> specifies receiver \IP address
+// - <Conn></Conn> specifies an RSVP session. It may contain the following elements.
+// - <src></src> specifies sender IP address
+// - <dest></dest> specifies receiver IP address
 // - <setupPri></setupPri> specifies LSP setup priority
 // - <holdingPri></holdingPri> specifies LSP holding priority
 // - <bandwidth></bandwidth> specifies the requested BW.
 // - <delay></delay> specifies the requested delay.
 // - <route></route> specifies the explicit route. This is a comma-separated
-//   list of IP-address, hop-type pairs (also separated by comma).
+//   list of IP address, hop-type pairs (also separated by comma).
 //   A hop type has a value of 1 if the hop is a loose hop and 0 otherwise.
 //
 // The following presents an example file:
@@ -284,11 +284,11 @@
 // </traffic>
 // </pre>
 //
-// An example of using \RSVP-TE as signaling protocol can be found in
+// An example of using RSVP-TE as signaling protocol can be found in
 // ExplicitRouting folder distributed with the simulation. In this
 // example, a network similar to the network in LDP-MPLS example is
 // setup. Instead of using LDP, "signaling" parameter is set to 2 (value
-// of \RSVP-TE handler). The following xml file is used for traffic
+// of RSVP-TE handler). The following xml file is used for traffic
 // control. Note the explicit routes specified in the second connection.
 // It indicates that the route is a strict one since the values of every
 // hop types are 0. The route defined is 10.0.0.1 -> 1.0.0.1 ->

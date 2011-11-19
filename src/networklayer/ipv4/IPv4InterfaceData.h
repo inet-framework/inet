@@ -24,14 +24,15 @@
 #define __IPv4INTERFACEDATA_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
-#include "IPAddress.h"
+
 #include "InterfaceEntry.h"
+#include "IPv4Address.h"
 
 
 /**
- * IPv4-specific data in an InterfaceEntry. Stores interface IP address,
+ * IPv4-specific data in an InterfaceEntry. Stores interface IPv4 address,
  * netmask, metric, etc.
  *
  * @see InterfaceEntry
@@ -39,12 +40,12 @@
 class INET_API IPv4InterfaceData : public InterfaceProtocolData
 {
   public:
-    typedef std::vector<IPAddress> IPAddressVector;
+    typedef std::vector<IPv4Address> IPAddressVector;
 
   protected:
-    IPAddress inetAddr;  ///< IP address of interface
-    IPAddress netmask;   ///< netmask
-    int metric;          ///< link "cost"; see e.g. MS KB article Q299540
+    IPv4Address inetAddr;            ///< IPv4 address of interface
+    IPv4Address netmask;             ///< netmask
+    int metric;                      ///< link "cost"; see e.g. MS KB article Q299540
     IPAddressVector multicastGroups; ///< multicast groups
 
   protected:
@@ -63,19 +64,21 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
     /** @name Getters */
     //@{
-    IPAddress getIPAddress() const {return inetAddr;}
-    IPAddress getNetmask() const {return netmask;}
+    IPv4Address getIPAddress() const {return inetAddr;}
+    IPv4Address getNetmask() const {return netmask;}
     int getMetric() const  {return metric;}
     const IPAddressVector& getMulticastGroups() const {return multicastGroups;}
-    bool isMemberOfMulticastGroup(const IPAddress& multicastAddress) const;
+    bool isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const;
     //@}
 
     /** @name Setters */
     //@{
-    virtual void setIPAddress(IPAddress a) {inetAddr = a; changed1();}
-    virtual void setNetmask(IPAddress m) {netmask = m; changed1();}
+    virtual void setIPAddress(IPv4Address a) {inetAddr = a; changed1();}
+    virtual void setNetmask(IPv4Address m) {netmask = m; changed1();}
     virtual void setMetric(int m) {metric = m; changed1();}
     virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v; changed1();}
+    virtual void joinMulticastGroup(const IPv4Address& multicastAddress);
+    virtual void leaveMulticastGroup(const IPv4Address& multicastAddress);
     //@}
 };
 

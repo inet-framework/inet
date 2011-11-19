@@ -14,9 +14,7 @@
 #ifndef __INET_TCPGENERICSRVAPP_H
 #define __INET_TCPGENERICSRVAPP_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-
 
 
 /**
@@ -35,6 +33,10 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
     long msgsSent;
     long bytesRcvd;
     long bytesSent;
+
+    //statistics:
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
 
   protected:
     virtual void sendBack(cMessage *msg);

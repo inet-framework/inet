@@ -22,11 +22,11 @@
 
 #include "networklayer/autorouting/HostAutoConfigurator.h"
 
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 Define_Module(HostAutoConfigurator);
 
@@ -51,18 +51,18 @@ void HostAutoConfigurator::handleSelfMsg(cMessage* apMsg) {
 }
 
 namespace {
-	void addToMcastGroup(InterfaceEntry* ie, IRoutingTable* routingTable, const IPAddress& mcastGroup) {
+	void addToMcastGroup(InterfaceEntry* ie, IRoutingTable* routingTable, const IPv4Address& mcastGroup) {
 		IPv4InterfaceData::IPAddressVector mcg = ie->ipv4Data()->getMulticastGroups();
 		if (std::find(mcg.begin(), mcg.end(), mcastGroup) == mcg.end()) mcg.push_back(mcastGroup);
 		ie->ipv4Data()->setMulticastGroups(mcg);
 
-		IPRoute* re = new IPRoute(); //TODO: add @c delete to destructor
+		IPv4Route* re = new IPv4Route(); //TODO: add @c delete to destructor
 		re->setHost(mcastGroup);
-		re->setNetmask(IPAddress::ALLONES_ADDRESS); // TODO: can't set this to none?
-		re->setGateway(IPAddress()); // none
+		re->setNetmask(IPv4Address::ALLONES_ADDRESS); // TODO: can't set this to none?
+		re->setGateway(IPv4Address()); // none
 		re->setInterface(ie);
-		re->setType(IPRoute::DIRECT);
-		re->setSource(IPRoute::MANUAL);
+		re->setType(IPv4Route::DIRECT);
+		re->setSource(IPv4Route::MANUAL);
 		re->setMetric(1);
 		routingTable->addRoute(re);
 	}
@@ -73,21 +73,21 @@ void HostAutoConfigurator::setupNetworkLayer()
 	EV << "host auto configuration started" << std::endl;
 
 	std::string interfaces = par("interfaces").stringValue();
-	IPAddress addressBase = IPAddress(par("addressBase").stringValue());
-	IPAddress netmask = IPAddress(par("netmask").stringValue());
+	IPv4Address addressBase = IPv4Address(par("addressBase").stringValue());
+	IPv4Address netmask = IPv4Address(par("netmask").stringValue());
 	std::string mcastGroups = par("mcastGroups").stringValue();
-	IPAddress myAddress = IPAddress(addressBase.getInt() + uint32(getParentModule()->getId()));
+	IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(getParentModule()->getId()));
 
 	// get our host module
 	cModule* host = getParentModule();
 	if (!host) throw std::runtime_error("No parent module found");
 
 	// get our routing table
-	IRoutingTable* routingTable = IPAddressResolver().routingTableOf(host);
+	IRoutingTable* routingTable = IPvXAddressResolver().routingTableOf(host);
 	if (!routingTable) throw std::runtime_error("No routing table found");
 
 	// get our interface table
-	IInterfaceTable *ift = IPAddressResolver().interfaceTableOf(host);
+	IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(host);
 	if (!ift) throw std::runtime_error("No interface table found");
 
 	// look at all interface table entries
@@ -110,14 +110,14 @@ void HostAutoConfigurator::setupNetworkLayer()
 		ie->setBroadcast(true);
 
 		// associate interface with default multicast groups
-		addToMcastGroup(ie, routingTable, IPAddress::ALL_HOSTS_MCAST);
-		addToMcastGroup(ie, routingTable, IPAddress::ALL_ROUTERS_MCAST);
+		addToMcastGroup(ie, routingTable, IPv4Address::ALL_HOSTS_MCAST);
+		addToMcastGroup(ie, routingTable, IPv4Address::ALL_ROUTERS_MCAST);
 
 		// associate interface with specified multicast groups
 		cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
 		const char *mcastGroup_s;
 		while ((mcastGroup_s = interfaceTokenizer.nextToken()) != NULL) {
-			IPAddress mcastGroup(mcastGroup_s);
+			IPv4Address mcastGroup(mcastGroup_s);
 			addToMcastGroup(ie, routingTable, mcastGroup);
 		}
 	}

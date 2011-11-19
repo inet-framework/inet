@@ -62,7 +62,8 @@ uint32 TCPVirtualDataSendQueue::getBufferEndSeq()
 TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
-    ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
+
+    ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     char msgname[32];
     sprintf(msgname, "tcpseg(l=%lu)", numBytes);
@@ -76,7 +77,8 @@ TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulon
 void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
-    ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
+
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
+
     begin = seqNum;
 }
-

@@ -23,10 +23,6 @@
 
 #include "cSocketRTScheduler.h"
 
-#ifndef IPPROTO_SCTP
-#define IPPROTO_SCTP 132
-#endif
-
 #include <headers/ethernet.h>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
@@ -63,16 +59,14 @@ cSocketRTScheduler::~cSocketRTScheduler()
 
 void cSocketRTScheduler::startRun()
 {
-#ifdef HAVE_PCAP
-    const int32 on = 1;
-
-#endif
     gettimeofday(&baseTime, NULL);
+
 #ifdef HAVE_PCAP
     // Enabling sending makes no sense when we can't receive...
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler: Root priviledges needed");
+        throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
+    const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 #endif
@@ -81,16 +75,13 @@ void cSocketRTScheduler::startRun()
 
 void cSocketRTScheduler::endRun()
 {
-#ifdef HAVE_PCAP
-    pcap_stat ps;
-
-#endif
     close(fd);
     fd = INVALID_SOCKET;
-#ifdef HAVE_PCAP
 
+#ifdef HAVE_PCAP
     for (uint16 i=0; i<pds.size(); i++)
     {
+        pcap_stat ps;
         if (pcap_stats(pds.at(i), &ps) < 0)
             throw cRuntimeError("cSocketRTScheduler::endRun(): Can not get pcap statistics: %s", pcap_geterr(pds.at(i)));
         else
@@ -128,7 +119,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     memset(&errbuf, 0, sizeof(errbuf));
     if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not open pcap device, error = %s", errbuf);
-    else if(strlen(errbuf) > 0)
+    else if (strlen(errbuf) > 0)
         EV << "cSocketRTScheduler::setInterfaceModule: pcap_open_live returned waring: " << errbuf << "\n";
 
     /* compile this command into a filter program */
@@ -199,7 +190,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // put the IP packet from wire into data[] array of ExtFrame
     ExtFrame *notificationMsg = new ExtFrame("rtEvent");
     notificationMsg->setDataArraySize(hdr->caplen - headerLength);
-    for (uint16 j=0; j< hdr->caplen - headerLength; j++)
+    for (uint16 j=0; j < hdr->caplen - headerLength; j++)
         notificationMsg->setData(j, bytes[j + headerLength]);
 
     // signalize new incoming packet to the interface via cMessage
@@ -228,7 +219,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
 #endif
 
     found = false;
-    timeout.tv_sec  = 0;
+    timeout.tv_sec = 0;
     timeout.tv_usec = PCAP_TIMEOUT * 1000;
 #ifdef HAVE_PCAP
 #ifdef LINUX
@@ -327,7 +318,7 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
 
     int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);  //note: no ssize_t on MSVC
 
-    if (sent == numBytes)
+    if ((size_t)sent == numBytes)
         EV << "Sent an IP packet with length of " << sent << " bytes.\n";
     else
         EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";

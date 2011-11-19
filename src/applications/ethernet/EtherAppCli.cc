@@ -18,12 +18,26 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
 #include "EtherAppCli.h"
-#include "Ieee802Ctrl_m.h"
+
 #include "EtherApp_m.h"
+#include "Ieee802Ctrl_m.h"
 
 
-Define_Module (EtherAppCli);
+Define_Module(EtherAppCli);
+
+simsignal_t EtherAppCli::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::rcvdPkSignal = SIMSIGNAL_NULL;
+
+EtherAppCli::EtherAppCli()
+{
+    timerMsg = NULL;
+}
+EtherAppCli::~EtherAppCli()
+{
+    cancelAndDelete(timerMsg);
+}
 
 void EtherAppCli::initialize(int stage)
 {
@@ -33,7 +47,7 @@ void EtherAppCli::initialize(int stage)
     {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
-        waitTime = &par("waitTime");
+        sendInterval = &par("sendInterval");
 
         localSAP = ETHERAPP_CLI_SAP;
         remoteSAP = ETHERAPP_SRV_SAP;
@@ -43,8 +57,8 @@ void EtherAppCli::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        eedVector.setName("end-to-end delay");
-        eedStats.setName("end-to-end delay");
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
@@ -58,9 +72,13 @@ void EtherAppCli::initialize(int stage)
         if (registerSAP)
             registerDSAP(localSAP);
 
-        cMessage *timermsg = new cMessage("generateNextPacket");
-        simtime_t d = par("startTime").doubleValue();
-        scheduleAt(simTime()+d, timermsg);
+        simtime_t startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime != 0 && stopTime <= startTime)
+            error("Invalid startTime/stopTime parameters");
+
+        timerMsg = new cMessage("generateNextPacket");
+        scheduleAt(startTime, timerMsg);
     }
 }
 
@@ -76,9 +94,11 @@ MACAddress EtherAppCli::resolveDestMACAddress()
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
+
             cModule *destMAC = destStation->getSubmodule("mac");
             if (!destMAC)
                 error("module '%s' has no 'mac' submodule", destAddress);
+
             destMACAddress.setAddress(destMAC->par("address"));
         }
     }
@@ -90,12 +110,13 @@ void EtherAppCli::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         sendPacket();
-        simtime_t d = waitTime->doubleValue();
-        scheduleAt(simTime()+d, msg);
+        simtime_t d = simTime() + sendInterval->doubleValue();
+        if (stopTime == 0 || d < stopTime)
+            scheduleAt(d, msg);
     }
     else
     {
-        receivePacket(msg);
+        receivePacket(check_and_cast<cPacket*>(msg));
     }
 }
 
@@ -135,29 +156,23 @@ void EtherAppCli::sendPacket()
     etherctrl->setDest(destMACAddress);
     datapacket->setControlInfo(etherctrl);
 
+    emit(sentPkSignal, datapacket);
     send(datapacket, "out");
     packetsSent++;
 }
 
-void EtherAppCli::receivePacket(cMessage *msg)
+void EtherAppCli::receivePacket(cPacket *msg)
 {
     EV << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
-    simtime_t lastEED = simTime() - msg->getCreationTime();
-    eedVector.record(lastEED);
-    eedStats.collect(lastEED);
-
+    emit(rcvdPkSignal, msg);
     delete msg;
 }
 
 void EtherAppCli::finish()
 {
-    recordScalar("packets sent", packetsSent);
-    recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.getMean());
-    recordScalar("end-to-end delay stddev", eedStats.getStddev());
-    recordScalar("end-to-end delay min", eedStats.getMin());
-    recordScalar("end-to-end delay max", eedStats.getMax());
+    cancelAndDelete(timerMsg);
+    timerMsg = NULL;
 }
 

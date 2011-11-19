@@ -21,25 +21,28 @@ package inet.linklayer.ethernet;
 // Performs Ethernet II encapsulation/decapsulation.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to Ethernet EtherMAC
+// - lowerLayerIn, lowerLayerOut gates should be connected to Ethernet ~EtherMAC
 // - upperLayerIn, upperLayerOut gates should be connected to higher layer
 //   protocol or application
 //
 // Functionality:
-// - packets coming from upper layers will be encapsulated in EthernetIIFrame
-//   and sent to MAC. EtherType is taken from the Ieee802Ctrl structure attached
+// - packets coming from upper layers will be encapsulated in ~EthernetIIFrame
+//   and sent to MAC. ~EtherType is taken from the ~Ieee802Ctrl structure attached
 //   to the message as control info (see setControlInfo(), controlInfo()
-//   methods). Src address will be filled in by EtherMAC.
+//   methods). Src address will be filled in by ~EtherMAC.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
 //   higher layer: send PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
 // - Ethernet frames arriving from MAC will be decapsulated, and sent up to the
-//   higher layers. Accepts EtherFrameWithLLC and EtherFrameWithSNAP too.
+//   higher layers. Accepts ~EtherFrameWithLLC and ~EtherFrameWithSNAP too.
 //
 simple EtherEncap
 {
     parameters:
         @display("i=block/square");
+        @statistic[rcvdPkBytesFromHL](title="Received packet bytes from higher layer ";record=count,sum,vector);
+        @statistic[rcvdPkBytesFromMAC](title="Received packet bytes from MAC";record=count,sum,vector);
+        @statistic[sentPause](title="sent Pause";record=count,sum,vector);
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down);   // higher layer
         output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer

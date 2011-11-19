@@ -19,12 +19,10 @@
 
 package inet.examples.ipv6.nclients;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import inet.nodes.ipv6.Router6;
-import inet.nodes.ipv6.StandardHost6;
 import ned.DatarateChannel;
+import inet.nodes.ipv6.StandardHost6;
+import inet.nodes.ipv6.Router6;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 
 
 network NClientsEth
@@ -40,6 +38,7 @@ network NClientsEth
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 10Mbps;
         }
     submodules:
         configurator: FlatNetworkConfigurator6;
@@ -48,12 +47,10 @@ network NClientsEth
         r3: Router6;
         cli[n]: StandardHost6;
         srv: StandardHost6;
-        hub: EtherHub;
     connections:
         for i=0..n-1 {
-            cli[i].ethg++ <--> ethernetline <--> hub.ethg++;
+            cli[i].ethg++ <--> ethernetline <--> r1.ethg++;
         }
-        hub.ethg++ <--> ethernetline <--> r1.ethg++;
         r1.ethg++ <--> ethernetline <--> r2.ethg++;
         r2.ethg++ <--> ethernetline <--> r3.ethg++;
         r3.ethg++ <--> ethernetline <--> srv.ethg++;

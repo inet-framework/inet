@@ -1,0 +1,24 @@
+<!-- Only the 'mobility' child of 'simulation' is processed by OMNeT++, others are ignored -->
+<!ELEMENT simulation (parameter, node_settings, mobility, statistics?)>
+<!ELEMENT parameter (field_shape, xmin, xmax, ymin, ymax, numberOfNodes, mobility_model, max_stopTime)>
+<!ELEMENT node_settings (node*)>
+<!ELEMENT mobility (position_change*)>
+<!ELEMENT statistics EMPTY>
+<!ELEMENT field_shape (#PCDATA)>
+<!ELEMENT xmin (#PCDATA)>
+<!ELEMENT xmax (#PCDATA)>
+<!ELEMENT ymin (#PCDATA)>
+<!ELEMENT ymax (#PCDATA)>
+<!ELEMENT numberOfNodes (#PCDATA)>
+<!ELEMENT mobility_model (#PCDATA)>
+<!ELEMENT max_stopTime (#PCDATA)>
+<!ELEMENT node (node_id, range?, position)>
+<!ELEMENT position_change (node_id, start_time, end_time, destination)>
+<!ELEMENT node_id (#PCDATA)>
+<!ELEMENT range (#PCDATA)>
+<!ELEMENT position (xpos, ypos)>
+<!ELEMENT start_time (#PCDATA)>
+<!ELEMENT end_time (#PCDATA)>
+<!ELEMENT destination (xpos, ypos)>
+<!ELEMENT xpos (#PCDATA)>
+<!ELEMENT ypos (#PCDATA)>

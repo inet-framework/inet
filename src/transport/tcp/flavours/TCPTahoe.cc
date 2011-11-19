@@ -30,24 +30,30 @@ TCPTahoe::TCPTahoe() : TCPTahoeRenoFamily(),
 
 void TCPTahoe::recalculateSlowStartThreshold()
 {
-    // set ssthresh to flight size/2, but at least 2 MSS
-    // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
+    // set ssthresh to flight size / 2, but at least 2 MSS
+    // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
     uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
-    state->ssthresh = std::max(flight_size/2, 2*state->snd_mss);
-    if (ssthreshVector) ssthreshVector->record(state->ssthresh);
+    state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
+
+    if (ssthreshVector)
+        ssthreshVector->record(state->ssthresh);
 }
 
 void TCPTahoe::processRexmitTimer(TCPEventCode& event)
 {
     TCPTahoeRenoFamily::processRexmitTimer(event);
-    if (event==TCP_E_ABORT)
+
+    if (event == TCP_E_ABORT)
         return;
 
     // begin Slow Start (RFC 2581)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
-    if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+    if (cwndVector)
+        cwndVector->record(state->snd_cwnd);
+
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -66,7 +72,7 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     //
     if (state->snd_cwnd < state->ssthresh)
     {
-        tcpEV << "cwnd<=ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
+        tcpEV << "cwnd <= ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
 
         // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
         // by at most SMSS bytes for each ACK received that acknowledges new data."
@@ -80,7 +86,8 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
         // int bytesAcked = state->snd_una - firstSeqAcked;
         // state->snd_cwnd += bytesAcked;
 
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
 
         tcpEV << "cwnd=" << state->snd_cwnd << "\n";
     }
@@ -88,13 +95,17 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     {
         // perform Congestion Avoidance (RFC 2581)
         int incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
-        if (incr==0)
+
+        if (incr == 0)
             incr = 1;
+
         state->snd_cwnd += incr;
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
 
         //
-        // Note: some implementations use extra additive constant mss/8 here
+        // Note: some implementations use extra additive constant mss / 8 here
         // which is known to be incorrect (RFC 2581 p5)
         //
         // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
@@ -112,14 +123,16 @@ void TCPTahoe::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks==DUPTHRESH) // DUPTHRESH = 3
+    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
     {
-        tcpEV << "Tahoe on dupAck=DUPTHRESH(=3): perform Fast Retransmit, and enter Slow Start:\n";
+        tcpEV << "Tahoe on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Slow Start:\n";
 
         // enter Slow Start
         recalculateSlowStartThreshold();
         state->snd_cwnd = state->snd_mss;
-        if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+        if (cwndVector)
+            cwndVector->record(state->snd_cwnd);
 
         tcpEV << "Set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -132,5 +145,3 @@ void TCPTahoe::receivedDuplicateAck()
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
 }
-
-

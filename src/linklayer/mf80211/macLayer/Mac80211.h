@@ -22,7 +22,7 @@
 #define MAC_80211_H
 
 #include <list>
-#include "WirelessMacBase.h"
+#include "MacBase.h"
 #include "Mac80211Pkt_m.h"
 #include "Consts80211.h"
 #include "NotificationBoard.h"
@@ -37,7 +37,7 @@
  * @ingroup macLayer
  * @author David Raguin
  */
-class INET_API Mac80211 : public WirelessMacBase, public INotifiable
+class INET_API Mac80211 : public MacBase, public INotifiable
 {
     typedef std::list<Mac80211Pkt*> MacPktList;
 
@@ -55,7 +55,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
       WFDATA = 0, // waiting for data packet
       QUIET = 1,  // waiting for the communication between two other nodes to end
       IDLE = 2,   // no packet to send, no packet receiving
-      CONTEND = 3,// contention state (battle for the channel)
+      CONTEND = 3, // contention state (battle for the channel)
       WFCTS = 4,  // RTS sent, waiting for CTS
       WFACK = 5,  // DATA packet sent, waiting for ACK
       BUSY = 6    // during transmission of an ACK or a BROADCAST packet
@@ -75,7 +75,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
 
   protected:
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     /** @brief Handle self messages such as timer... */
     virtual void handleSelfMsg(cMessage*);

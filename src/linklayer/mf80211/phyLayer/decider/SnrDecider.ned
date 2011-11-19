@@ -21,7 +21,7 @@
 package inet.linklayer.mf80211.phyLayer.decider;
 
 //
-// Decider module to be used with SnrEval
+// Decider module to be used with ~SnrEval
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
@@ -32,6 +32,6 @@ simple SnrDecider
         double snrThresholdLevel @unit("dB");
         @display("i=box2_s");
     gates:
-        output uppergateOut;
-        input lowergateIn;
+        output upperLayerOut;
+        input lowerLayerIn;
 }

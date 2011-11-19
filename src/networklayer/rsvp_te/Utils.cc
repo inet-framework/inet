@@ -15,6 +15,62 @@
 #include "Utils.h"
 #include "IntServ.h"
 
+
+std::string vectorToString(IPAddressVector vec)
+{
+    return vectorToString(vec, ", ");
+}
+
+std::string vectorToString(IPAddressVector vec, const char *delim)
+{
+  std::ostringstream stream;
+  for (unsigned int i = 0; i < vec.size(); i++)
+  {
+      stream << vec[i];
+      if (i < vec.size() - 1)
+        stream << delim;
+  }
+  stream << std::flush;
+  std::string str(stream.str());
+  return str;
+}
+
+std::string vectorToString(EroVector vec)
+{
+    return vectorToString(vec, ", ");
+}
+
+std::string vectorToString(EroVector vec, const char *delim)
+{
+    std::ostringstream stream;
+    for (unsigned int i = 0; i < vec.size(); i++)
+    {
+        stream << vec[i].node;
+
+        if (i < vec.size() - 1)
+            stream << delim;
+    }
+    stream << std::flush;
+    std::string str(stream.str());
+    return str;
+}
+
+EroVector routeToEro(IPAddressVector rro)
+{
+    EroVector ero;
+
+    for (unsigned int i = 0; i < rro.size(); i++)
+    {
+        EroObj_t hop;
+        hop.L = false;
+        hop.node = rro[i];
+        ero.push_back(hop);
+    }
+
+    return ero;
+}
+
+
 void removeDuplicates(std::vector<int>& vec)
 {
     for (unsigned int i = 0; i < vec.size(); i++)
@@ -31,7 +87,7 @@ void removeDuplicates(std::vector<int>& vec)
     }
 }
 
-int find(const EroVector& ERO, IPAddress node)
+int find(const EroVector& ERO, IPv4Address node)
 {
     for (unsigned int i = 0; i < ERO.size(); i++)
         if (ERO[i].node == node)
@@ -48,7 +104,7 @@ bool find(std::vector<int>& vec, int value)
     return false;
 }
 
-bool find(const IPAddressVector& vec, IPAddress addr)
+bool find(const IPAddressVector& vec, IPv4Address addr)
 {
     for (unsigned int i = 0; i < vec.size(); i++)
         if (vec[i] == addr)
@@ -64,8 +120,8 @@ void append(std::vector<int>& dest, const std::vector<int>& src)
 
 cModule *getPayloadOwner(cPacket *msg)
 {
-    while(msg->getEncapsulatedMsg())
-        msg = msg->getEncapsulatedMsg();
+    while (msg->getEncapsulatedPacket())
+        msg = msg->getEncapsulatedPacket();
 
     if (msg->hasPar("owner"))
         return simulation.getModule(msg->par("owner"));

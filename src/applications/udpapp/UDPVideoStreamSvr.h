@@ -20,12 +20,14 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
-#ifndef UDPVIDEOSTREAMSVR_H
-#define UDPVIDEOSTREAMSVR_H
+#ifndef __INET_UDPVIDEOSTREAMSVR_H
+#define __INET_UDPVIDEOSTREAMSVR_H
+
 
 #include <vector>
-#include <omnetpp.h>
-#include "UDPAppBase.h"
+
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 
 /**
@@ -35,7 +37,7 @@
  * and UDPVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UDPVideoStreamSvr : public UDPAppBase
+class INET_API UDPVideoStreamSvr : public cSimpleModule
 {
   public:
     /**
@@ -53,16 +55,19 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
   protected:
     typedef std::vector<VideoStreamData *> VideoStreamVector;
     VideoStreamVector streamVector;
+    UDPSocket socket;
 
     // module parameters
-    int serverPort;
-    cPar *waitInterval;
+    int localPort;
+    cPar *sendInterval;
     cPar *packetLen;
     cPar *videoSize;
 
     // statistics
     unsigned int numStreams;  // number of video streams served
     unsigned long numPkSent;  // total number of packets sent
+    static simsignal_t reqStreamBytesSignal;  // length of video streams served
+    static simsignal_t sentPkSignal;
 
   protected:
     // process stream request from client
@@ -76,7 +81,7 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     virtual ~UDPVideoStreamSvr();
 
   protected:
-    ///@name Overidden cSimpleModule functions
+    ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize();
     virtual void finish();
@@ -84,7 +89,5 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     //@}
 };
 
-
 #endif
-
 

@@ -24,14 +24,14 @@ cplusplus {{
 
 //
 // Message class for generic request-reply style applications.
-// The client sends a GenericAppMsg which contains the number of
+// The client sends a ~GenericAppMsg which contains the number of
 // bytes the client wants the server to send back as reply.
 //
 // This way intelligence (behaviour specific to the modelled application,
 // e.g. HTTP, SMB, database protocol) needs only to be present in
 // the client, and the server model can be kept simple and dumb.
 //
-// @see TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
+// @see ~TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
 //
 packet GenericAppMsg
 {

@@ -14,9 +14,7 @@
 #ifndef __INET_TCPECHOAPP_H
 #define __INET_TCPECHOAPP_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-
 
 
 /**
@@ -31,6 +29,9 @@ class INET_API TCPEchoApp : public cSimpleModule
 
     long bytesRcvd;
     long bytesSent;
+
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t sentPkSignal;
 
   protected:
     virtual void sendDown(cMessage *msg);

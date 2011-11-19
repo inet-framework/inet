@@ -1,3 +1,5 @@
+//FIXME: rewrite it, usage changed
+
 This directory contains "plug-in" queue classes for TCP. You can configure
 TCP to use a particular queue class by setting its sendQueueClass,
 receiveQueueClass NED parameters to the given class name.
@@ -29,5 +31,3 @@ passed up to the application when its last byte has arrved on the simulated
 connection. This is done by TCPMsgBasedSendQueue/RcvQueue.
 
 You always choose the ones appropriate for your app model.
-
-

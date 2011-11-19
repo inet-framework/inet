@@ -19,8 +19,8 @@
 #define __INET_PPP_H
 
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "PPPFrame_m.h"
 #include "TxNotifDetails.h"
 #include "INotifiable.h"
@@ -32,7 +32,7 @@ class NotificationBoard;
 /**
  * PPP implementation.
  */
-class INET_API PPP : public cSimpleModule, public INotifiable
+class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
 {
   protected:
     long txQueueLimit;
@@ -57,6 +57,15 @@ class INET_API PPP : public cSimpleModule, public INotifiable
     long numBitErr;
     long numDroppedIfaceDown;
 
+    static simsignal_t txStateSignal;
+    static simsignal_t rxPkOkSignal;
+    static simsignal_t dropPkIfaceDownSignal;
+    static simsignal_t dropPkBitErrorSignal;
+    static simsignal_t packetSentToLowerSignal;
+    static simsignal_t packetReceivedFromLowerSignal;
+    static simsignal_t packetSentToUpperSignal;
+    static simsignal_t packetReceivedFromUpperSignal;
+
   protected:
     virtual InterfaceEntry *registerInterface(double datarate);
     virtual void startTransmitting(cPacket *msg);
@@ -66,7 +75,9 @@ class INET_API PPP : public cSimpleModule, public INotifiable
     virtual void displayIdle();
     virtual void updateDisplayString();
     virtual void updateHasSubcribers();
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+    virtual void refreshOutGateConnection(bool connected);
 
   public:
     PPP();
@@ -79,5 +90,3 @@ class INET_API PPP : public cSimpleModule, public INotifiable
 };
 
 #endif
-
-

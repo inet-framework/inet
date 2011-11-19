@@ -28,15 +28,15 @@
 class RSVPPathMsg : public RSVPPathMsg_Base
 {
   public:
-    RSVPPathMsg(const char *name=NULL, int kind=PATH_MESSAGE) : RSVPPathMsg_Base(name,kind) {}
-    RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other.getName()) {operator=(other);}
+    RSVPPathMsg(const char *name = NULL, int kind = PATH_MESSAGE) : RSVPPathMsg_Base(name, kind) {}
+    RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other) {}
     RSVPPathMsg& operator=(const RSVPPathMsg& other) {RSVPPathMsg_Base::operator=(other); return *this;}
     virtual RSVPPathMsg *dup() const {return new RSVPPathMsg(*this);}
 
-    inline IPAddress getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
+    inline IPv4Address getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
     inline int getLspId() {return getSender_descriptor().Sender_Template_Object.Lsp_Id;}
-    inline IPAddress getNHOP() {return getHop().Next_Hop_Address;}
-    inline IPAddress getLIH() {return getHop().Logical_Interface_Handle;}
+    inline IPv4Address getNHOP() {return getHop().Next_Hop_Address;}
+    inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
     inline double getBW() {return getSender_descriptor().Sender_Tspec_Object.req_bandwidth;}
     inline SenderTemplateObj_t& getSenderTemplate() {return getSender_descriptor().Sender_Template_Object;}
     inline void setSenderTemplate(const SenderTemplateObj_t& s) {getSender_descriptor().Sender_Template_Object = s;}
@@ -54,14 +54,14 @@ class RSVPPathMsg : public RSVPPathMsg_Base
 class RSVPPathTear : public RSVPPathTear_Base
 {
   public:
-    RSVPPathTear(const char *name=NULL, int kind=PTEAR_MESSAGE) : RSVPPathTear_Base(name,kind) {}
-    RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other.getName()) {operator=(other);}
+    RSVPPathTear(const char *name = NULL, int kind = PTEAR_MESSAGE) : RSVPPathTear_Base(name, kind) {}
+    RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other) {}
     RSVPPathTear& operator=(const RSVPPathTear& other) {RSVPPathTear_Base::operator=(other); return *this;}
     virtual RSVPPathTear *dup() const {return new RSVPPathTear(*this);}
 
-    inline IPAddress getNHOP() {return getHop().Next_Hop_Address;}
-    inline IPAddress getLIH() {return getHop().Logical_Interface_Handle;}
-    inline IPAddress getSrcAddress() {return getSenderTemplate().SrcAddress;}
+    inline IPv4Address getNHOP() {return getHop().Next_Hop_Address;}
+    inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
+    inline IPv4Address getSrcAddress() {return getSenderTemplate().SrcAddress;}
     inline int getLspId() {return getSenderTemplate().Lsp_Id;}
 };
 
@@ -75,12 +75,12 @@ class RSVPPathTear : public RSVPPathTear_Base
 class RSVPPathError : public RSVPPathError_Base
 {
   public:
-    RSVPPathError(const char *name=NULL, int kind=PERROR_MESSAGE) : RSVPPathError_Base(name,kind) {}
-    RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other.getName()) {operator=(other);}
+    RSVPPathError(const char *name = NULL, int kind = PERROR_MESSAGE) : RSVPPathError_Base(name, kind) {}
+    RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other) {}
     RSVPPathError& operator=(const RSVPPathError& other) {RSVPPathError_Base::operator=(other); return *this;}
     virtual RSVPPathError *dup() const {return new RSVPPathError(*this);}
 
-    inline IPAddress getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
+    inline IPv4Address getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
     inline int getLspId() {return getSender_descriptor().Sender_Template_Object.Lsp_Id;}
     inline double getBW() {return getSender_descriptor().Sender_Tspec_Object.req_bandwidth;}
 

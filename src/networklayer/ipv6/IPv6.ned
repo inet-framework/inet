@@ -18,59 +18,59 @@
 package inet.networklayer.ipv6;
 
 //
-// Implements the \IPv6 protocol.
+// Implements the IPv6 protocol.
 //
-// An overview of the \IPv6 implementation in the INET Framework is
+// An overview of the IPv6 implementation in the INET Framework is
 // provided <a href="ipv6overview.html">here</a>.
 //
-// The \IPv6 protocol header is represented by the IPv6Datagram message class.
+// The IPv6 protocol header is represented by the ~IPv6Datagram message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over \IPv6 from a higher layer protocol, the module should
-// fill in an IPv6ControlInfo object, attach it to the packet with cMessage's
-// setControlInfo() method, the send it to the IPv6 module.
+// To send a packet over IPv6 from a higher layer protocol, the module should
+// fill in an ~IPv6ControlInfo object, attach it to the packet with cMessage's
+// setControlInfo() method, the send it to the ~IPv6 module.
 //
-// When IPv6 sends up a packet to a higher layer protocol, it will also attach
-// an IPv6ControlInfo to the packet, with the source and destination \IPv6 address,
-// etc. of the \IPv6 datagram in which the packet arrived.
+// When ~IPv6 sends up a packet to a higher layer protocol, it will also attach
+// an ~IPv6ControlInfo to the packet, with the source and destination IPv6 address,
+// etc. of the IPv6 datagram in which the packet arrived.
 //
-// IPv6 can serve several higher-layer protocols. When delivering packets
+// ~IPv6 can serve several higher-layer protocols. When delivering packets
 // to them, the output gate is determined from the Protocol field in the
-// \IPv6 datagram class. The protocol-to-gateindex mapping must be given
+// IPv6 datagram class. The protocol-to-gateindex mapping must be given
 // in the protocolMapping string parameter, in the following format:
 // <pre>
 // protocolnumber:gateindex, protocolnumber:gateindex, ...
 // </pre>
 //
 // The recommended setting is:
-// - \TCP (6) : 0
-// - \UDP (17) : 1
-// - \RSVP (46) : 2
-// - \ICMPv6 (89) : 3
+// - TCP (6) : 0
+// - UDP (17) : 1
+// - RSVP (46) : 2
+// - ICMPv6 (89) : 3
 //
 // That is, <tt>protocolMapping="6:0,17:1,46:2,89:3"</tt>
 //
 // <b>Routing and interfacing with lower layers</b>
 //
-// The routing table is stored in the module RoutingTable6. When a datagram
-// needs to be routed, \IPv6 queries RoutingTable6 for the output interface
+// The routing table is stored in the module ~RoutingTable6. When a datagram
+// needs to be routed, IPv6 queries ~RoutingTable6 for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods of RoutingTable6. No message exchange with RoutingTable6
+// calling C++ methods of ~RoutingTable6. No message exchange with ~RoutingTable6
 // takes place.
 //
 //#FIXME TBD describe operation
 //
 // Routing protocol implementations can also query and manipulate the route table
-// by calling RoutingTable6's methods in C++.
+// by calling ~RoutingTable6's methods in C++.
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, IPv6 contains a FIFO which queues up \IPv6 datagrams;
+// In the current form, ~IPv6 contains a FIFO which queues up IPv6 datagrams;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
-// @see RoutingTable6, IPv6ControlInfo, IPv6NeighbourDiscovery, ICMPv6
+// @see ~RoutingTable6, ~IPv6ControlInfo, ~IPv6NeighbourDiscovery, ~ICMPv6
 //
 // @author Andras Varga
 //
@@ -89,5 +89,13 @@ simple IPv6
         output icmpOut;
         input ndIn;
         output ndOut;
+        // tunneling gates - CB
+        input upperTunnelingIn;
+        output upperTunnelingOut;
+        input lowerTunnelingIn;
+        output lowerTunnelingOut;
+        //the following gates are added by Zarrar Yousaf on 19.06.07
+        input xMIPv6In;
+        output xMIPv6Out;
 }
 

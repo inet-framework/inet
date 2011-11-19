@@ -22,13 +22,17 @@
 
 Define_Module(DropTailQueue);
 
+simsignal_t DropTailQueue::queueLengthSignal = SIMSIGNAL_NULL;
+
 void DropTailQueue::initialize()
 {
     PassiveQueueBase::initialize();
+
     queue.setName("l2queue");
 
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
+    //statistics
+    queueLengthSignal = registerSignal("queueLength");
+    emit(queueLengthSignal, queue.length());
 
     outGate = gate("out");
 
@@ -36,20 +40,18 @@ void DropTailQueue::initialize()
     frameCapacity = par("frameCapacity");
 }
 
-bool DropTailQueue::enqueue(cMessage *msg)
+cMessage *DropTailQueue::enqueue(cMessage *msg)
 {
     if (frameCapacity && queue.length() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
-        delete msg;
-        dropVec.record(1);
-        return true;
+        return msg;
     }
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
-        return false;
+        emit(queueLengthSignal, queue.length());
+        return NULL;
     }
 }
 
@@ -58,12 +60,12 @@ cMessage *DropTailQueue::dequeue()
     if (queue.empty())
         return NULL;
 
-   cMessage *pk = (cMessage *)queue.pop();
+    cMessage *msg = (cMessage *)queue.pop();
 
     // statistics
-    qlenVec.record(queue.length());
+    emit(queueLengthSignal, queue.length());
 
-    return pk;
+    return msg;
 }
 
 void DropTailQueue::sendOut(cMessage *msg)
@@ -71,4 +73,8 @@ void DropTailQueue::sendOut(cMessage *msg)
     send(msg, outGate);
 }
 
+bool DropTailQueue::isEmpty()
+{
+    return queue.empty();
+}
 

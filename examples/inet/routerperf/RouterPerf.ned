@@ -16,30 +16,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
-
-
 package inet.examples.inet.routerperf;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.BurstHost;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.Router;
-import inet.world.ChannelInstaller;
-
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 network RouterPerfNetwork
 {
     parameters:
         int nodeNo;
-    submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=u";
-                @display("p=59,211");
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            thruputDisplayFormat = "u";
         }
+    submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=61,163");
@@ -58,8 +50,8 @@ network RouterPerfNetwork
         }
     connections:
         for i=0..nodeNo-1 {
-            sender[i].pppg++ <--> {  datarate = 1Mbps; } <--> router.pppg++;
-            recip[i].pppg++ <--> {  datarate = 1Mbps; } <--> router.pppg++;
+            sender[i].pppg++ <--> C {  datarate = 1Mbps; } <--> router.pppg++;
+            recip[i].pppg++ <--> C {  datarate = 1Mbps; } <--> router.pppg++;
         }
 }
 

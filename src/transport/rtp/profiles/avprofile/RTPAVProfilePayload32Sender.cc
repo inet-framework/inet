@@ -15,103 +15,26 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPAVProfilePayload32Sender.cc
- *
- * Parts of the code in this file (reading of the gdf data) are
- * extracted from the program generator.cc of Klaus Wehrle's mpg2
- * package.
- */
 
 #include <fstream>
 #include <string.h>
-#include "RTPPacket.h"
-#include "RTPInnerPacket.h"
+
 #include "RTPAVProfilePayload32Sender.h"
+#include "RTPInnerPacket.h"
 #include "RTPMpegPacket_m.h"
+#include "RTPPacket.h"
+
 
 Define_Module(RTPAVProfilePayload32Sender);
 
+
 void RTPAVProfilePayload32Sender::initialize()
 {
-
     RTPPayloadSender::initialize();
 
     _clockRate = 90000;
     _payloadType = 32;
 }
-
-
-/*
-void RTPAVProfilePayload32Sender::activity()
-{
-
-    cMessage *msg = receive();
-    RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
-
-    if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
-        initializeSenderModule(rinpIn);
-    }
-    else {
-        error("first messsage to payload sender module must be createSenderModule");
-    }
-
-    bool moreFrames = true;
-
-
-    do {
-
-        cMessage *msgIn;
-
-        if (_status == STOPPED) {
-            msgIn = receiveOn(findGate("profileIn"));
-
-        }
-        else {
-            msgIn = receive();
-
-
-        }
-
-        if (msgIn->getArrivalGateId() == findGate("profileIn")) {
-            RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msgIn);
-            if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
-
-
-                RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinp->decapsulate());
-
-
-                if (!opp_strcmp(rscm->getCommand(), "PLAY")) {
-
-                    play();
-
-
-                    moreFrames = sendPacket();
-
-
-                }
-                else if (!opp_strcmp(rscm->getCommand(), "STOP")) {
-
-
-                    stop();
-                }
-                else {
-                    ev << "payload sender: unknown sender control message, ignored" << endl;
-                }
-                //delete rscm;
-            }
-        }
-        else {
-
-
-            moreFrames = sendPacket();
-        }
-        delete msgIn;
-
-        if (!moreFrames)
-            finish();
-    } while (true);
-}
-*/
 
 void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
 {
@@ -146,9 +69,8 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     // wait initial delay
     // cPacket *reminderMessage = new cMessage("next frame");
     // scheduleAt(simTime() + _initialDelay, reminderMessage);
-    ev << "initializeSenderModule Exit"<<endl;
+    ev << "initializeSenderModule Exit" << endl;
 }
-
 
 bool RTPAVProfilePayload32Sender::sendPacket()
 {
@@ -162,25 +84,26 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     _inputFileStream >> unit;
     _inputFileStream.get(description, 100, '\n');
 
-    int pictureType = 0;
+    int pictureType;
+    char *ptr;
 
-    if (strchr(description, 'I')) {
-        pictureType = 1;
-    }
-    else if (strchr(description, 'P')) {
-        pictureType = 2;
-    }
-    else if (strchr(description, 'B')) {
-        pictureType = 3;
-    }
-    else if (strchr(description, 'D')) {
-        pictureType = 4;
+    for (ptr = description; *ptr == ' '; ptr++)
+        ;
+    switch (*ptr)
+    {
+        case 'I': pictureType = 1; break;
+        case 'P': pictureType = 2; break;
+        case 'B': pictureType = 3; break;
+        case 'D': pictureType = 4; break;
+        default: pictureType = 0; break;
     }
 
     int bytesRemaining = bits / 8;
 
-    if (!_inputFileStream.eof()) {
-        while (bytesRemaining > 0) {
+    if (!_inputFileStream.eof())
+    {
+        while (bytesRemaining > 0)
+        {
             RTPPacket *rtpPacket = new RTPPacket("RTPPacket");
             RTPMpegPacket *mpegPacket = new RTPMpegPacket("MpegPacket");
 
@@ -190,8 +113,8 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             // the maximum number of real data bytes
             int maxDataSize = _mtu - rtpPacket->getBitLength() - mpegPacket->getBitLength();
 
-            if (bytesRemaining > maxDataSize) {
-
+            if (bytesRemaining > maxDataSize)
+            {
                 // we do not know where slices in the
                 // mpeg picture begin
                 // so we simulate by assuming a slice
@@ -205,7 +128,8 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
                 bytesRemaining = bytesRemaining - slicedDataSize;
             }
-            else {
+            else
+            {
                 mpegPacket->addBitLength(bytesRemaining);
                 rtpPacket->encapsulate(mpegPacket);
                 // set marker because this is
@@ -220,16 +144,15 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
 
             rtpPacket->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
-            rtpPacket->setSSRC(_ssrc);
+            rtpPacket->setSsrc(_ssrc);
 
 
             RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");
 
 
-            rinpOut->dataOut(rtpPacket);
+            rinpOut->setDataOutPkt(rtpPacket);
 
             send(rinpOut, "profileOut");
-
         }
         _frameNumber++;
 
@@ -237,10 +160,10 @@ bool RTPAVProfilePayload32Sender::sendPacket()
         scheduleAt(simTime() + 1.0 / _framesPerSecond, _reminderMessage);
         return true;
     }
-    else {
+    else
+    {
         std::cout <<"LastSequenceNumber "<< _sequenceNumber << endl;
         return false;
     }
     ev << "sendPacket() Exit"<< endl;
 }
-

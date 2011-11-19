@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004,2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,24 +21,29 @@
 #define __INET_UDPBASICAPP_H
 
 #include <vector>
-#include <omnetpp.h>
-#include "UDPAppBase.h"
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public UDPAppBase
+class INET_API UDPBasicApp : public cSimpleModule
 {
   protected:
-    std::string nodeName;
+    UDPSocket socket;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
+    simtime_t stopTime;
 
     static int counter; // counter for generating a global number for each packet
 
+    // statistics
     int numSent;
     int numReceived;
+
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
@@ -50,8 +55,8 @@ class INET_API UDPBasicApp : public UDPAppBase
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 };
 
 #endif
-
 

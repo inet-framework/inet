@@ -20,33 +20,48 @@ package inet.linklayer.ieee80211.mgmt;
 
 //
 // Used in 802.11 infrastructure mode: handles management frames for
-// an access point (AP). It relies on a connected Ieee80211Mac for actual
+// an access point (AP). It relies on a connected ~Ieee80211Mac for actual
 // reception and transmission of frames.
 //
 // This management module variant does not implement beacons, probes,
 // authentication and association -- it simply treats all stations
 // as associated all the time. This also means that you cannot use this
 // module in a simulation that involves handovers; for that you need
-// to use the full version, Ieee80211MgmtAP.
+// to use the full version, ~Ieee80211MgmtAP.
 //
 // When simulating an AP that has other (Ethernet or wireless) interfaces
-// as well, this module can be connected to a MACRelayUnit which performs
+// as well, this module can be connected to a ~IMACRelayUnit which performs
 // bridging of Ethernet frames. This module will perform conversion from/to
-// EtherFrame for MACRelayUnit.
+// ~EtherFrame for ~IMACRelayUnit.
 //
 // This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see channelNumber in Ieee80211Radio).
+// the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
+//
+// This module checks if there is an other module connected above the management
+// module (e.g. RelayUnit) and sends a copy of the frame there and at the same time
+// sends the frame back to the wirless interface. The relay unit will send it out
+// on the interface which is towards the destination or will broadcast it on all
+// interfaces (except on which it was received).
 //
 // @author Andras Varga
 //
-simple Ieee80211MgmtAPSimplified like Ieee80211Mgmt
+simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
 {
     parameters:
         int frameCapacity = default(100);
         @display("i=block/cogwheel");
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[dataQueueLen](type=long; interpolationmode=sample-hold);  // number of stored packets
+        @statistic[dataQueueLen](title="Data queue len"; record=histogram,vector; interpolationmode=sample-hold);
+        @statistic[droppedPkBytesByQueue](title="Dropped packet bytes by queue"; source="packetBytes(dropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
-        input uppergateIn; // from MACRelayUnit; can be left unconnected
-        output uppergateOut; // to MACRelayUnit; can be left unconnected
-        input macIn @labels(Ieee80211Frame); // from Ieee80211Mac
-        output macOut @labels(Ieee80211Frame); // to Ieee80211Mac
+        input upperLayerIn; // from ~IMACRelayUnit; can be left unconnected
+        output upperLayerOut; // to ~IMACRelayUnit; can be left unconnected
+        input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
+        output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
+        input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }

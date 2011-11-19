@@ -20,10 +20,11 @@
 #ifndef __IPv6ADDRESS_H
 #define __IPv6ADDRESS_H
 
-#include <omnetpp.h>
 #include <iostream>
 #include <string>
+
 #include "INETDefs.h"
+
 
 class InterfaceToken;
 
@@ -90,12 +91,12 @@ class INET_API IPv6Address
         //@}
 
         /**
-         *  Constructor
+         *  Constructor.
          *  Set all 128 bits of the IPv6 address to '0'.
          *  0:0:0:0:0:0:0:0
          */
         IPv6Address()  {
-            d[0]=d[1]=d[2]=d[3]=0;
+            d[0] = d[1] = d[2] = d[3] = 0;
         }
 
         /**
@@ -115,21 +116,25 @@ class INET_API IPv6Address
          */
         IPv6Address(const char *addr) {set(addr);}
 
-        bool operator<(const IPv6Address& addr) const {return compare(addr)<0;}
-        bool operator>(const IPv6Address& addr) const {return compare(addr)>0;}
-        bool operator==(const IPv6Address& addr) const {
-            return d[3]==addr.d[3] && d[0]==addr.d[0] && d[1]==addr.d[1] && d[2]==addr.d[2]; // d[3] differs most often, compare it first
+        bool operator<(const IPv6Address& addr) const {return compare(addr) < 0;}
+        bool operator>(const IPv6Address& addr) const {return compare(addr) > 0;}
+
+        bool operator==(const IPv6Address& addr) const
+        {
+            return d[3]==addr.d[3] && d[2]==addr.d[2] && d[1]==addr.d[1] && d[0]==addr.d[0]; // d[3] differs most often, compare it first
         }
+
         bool operator!=(const IPv6Address& addr) const {return !operator==(addr);}
 
         /**
          * Returns -1, 0 or 1.
          */
-        int compare(const IPv6Address& addr) const  {
-            return d[0]<addr.d[0] ? -1 : d[0]>addr.d[0] ? 1 :
-                   d[1]<addr.d[1] ? -1 : d[1]>addr.d[1] ? 1 :
-                   d[2]<addr.d[2] ? -1 : d[2]>addr.d[2] ? 1 :
-                   d[3]<addr.d[3] ? -1 : d[3]>addr.d[3] ? 1 : 0;
+        int compare(const IPv6Address& addr) const
+        {
+            return d[0] < addr.d[0] ? -1 : d[0] > addr.d[0] ? 1 :
+                   d[1] < addr.d[1] ? -1 : d[1] > addr.d[1] ? 1 :
+                   d[2] < addr.d[2] ? -1 : d[2] > addr.d[2] ? 1 :
+                   d[3] < addr.d[3] ? -1 : d[3] > addr.d[3] ? 1 : 0;
         }
 
         /**
@@ -160,7 +165,7 @@ class INET_API IPv6Address
          * Set the address to the given four 32-bit integers.
          */
         void set(uint32 d0, uint32 d1, uint32 d2, uint32 d3) {
-            d[0]=d0; d[1]=d1; d[2]=d2; d[3]=d3;
+            d[0] = d0; d[1] = d1; d[2] = d2; d[3] = d3;
         }
 
         /**
@@ -237,7 +242,8 @@ class INET_API IPv6Address
          * </pre>
          */
         // TODO revise doc, revise function! make static?  (Andras)
-        IPv6Address formSubnetRouterAnycastAddress(int prefixLength) const {
+        IPv6Address formSubnetRouterAnycastAddress(int prefixLength) const
+        {
             return IPv6Address(*this).setSuffix(UNSPECIFIED_ADDRESS, prefixLength);
         }
 

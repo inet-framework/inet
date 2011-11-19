@@ -20,7 +20,7 @@
 #include <omnetpp.h>
 #include "SomeUDPApp.h"
 #include "UDPControlInfo_m.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 
 
 
@@ -30,7 +30,7 @@ int SomeUDPApp::counter;
 
 void SomeUDPApp::initialize(int stage)
 {
-    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage!=3)
         return;
@@ -49,7 +49,7 @@ void SomeUDPApp::initialize(int stage)
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(IPAddressResolver().resolve(token));
+        destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     if (destAddresses.empty())
         return;
@@ -57,7 +57,7 @@ void SomeUDPApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("messageFreq"), timer);
+    scheduleAt((double)par("sendInterval"), timer);
 }
 
 IPvXAddress SomeUDPApp::chooseDestAddr()
@@ -86,7 +86,7 @@ void SomeUDPApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("messageFreq"), msg);
+        scheduleAt(simTime()+(double)par("sendInterval"), msg);
     }
     else
     {

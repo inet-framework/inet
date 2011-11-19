@@ -19,6 +19,7 @@
 #define __INET_ETHERBUS_H
 
 #include <vector>
+
 #include "INETDefs.h"
 
 // Direction of frame travel on bus; also used as selfmessage kind

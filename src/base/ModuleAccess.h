@@ -18,7 +18,6 @@
 #ifndef __INET_MODULEACCESS_H
 #define __INET_MODULEACCESS_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 
@@ -47,11 +46,23 @@ INET_API cModule *findModuleWhereverInNode(const char *name, cModule *from);
 INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
+ * Checks if the module is node, i.e. it has a @node attribute.
+ */
+bool isNode(cModule *mod);
+
+/**
+ * Find the node containing the given module.
+ * Returns NULL, if no containing node.
+ */
+INET_API cModule *findContainingNode(cModule *from);
+
+
+/**
  * Finds and returns the pointer to a module of type T and name N.
- * Uses findModuleWherever(). See usage e.g. at RoutingTableAccess.
+ * Uses findModuleWhereverInNode(). See usage e.g. at RoutingTableAccess.
  */
 template<typename T>
-class ModuleAccess
+class INET_API ModuleAccess
 {
      // Note: MSVC 6.0 doesn't like const char *N as template parameter,
      // so we have to pass it via the ctor...
@@ -59,25 +70,25 @@ class ModuleAccess
     const char *name;
     T *p;
   public:
-    ModuleAccess(const char *n) {name = n; p=NULL;}
+    ModuleAccess(const char *n) {name = n; p = NULL;}
     virtual ~ModuleAccess() {}
 
-    virtual T *get()
+    virtual T *get(cModule *from = simulation.getContextModule())
     {
         if (!p)
         {
-            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
-            if (!m) opp_error("Module (%s)%s not found",opp_typename(typeid(T)),name);
+            cModule *m = findModuleWhereverInNode(name, from);
+            if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
             p = check_and_cast<T*>(m);
         }
         return p;
     }
 
-    virtual T *getIfExists()
+    virtual T *getIfExists(cModule *from = simulation.getContextModule())
     {
         if (!p)
         {
-            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
+            cModule *m = findModuleWhereverInNode(name, from);
             p = dynamic_cast<T*>(m);
         }
         return p;

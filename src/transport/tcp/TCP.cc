@@ -20,10 +20,24 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo.h"
-#include "IPv6ControlInfo.h"
+
+#ifdef WITH_IPv4
+#include "IPv4ControlInfo.h"
 #include "ICMPMessage_m.h"
+#endif
+
+#ifdef WITH_IPv6
+#include "IPv6ControlInfo.h"
 #include "ICMPv6Message_m.h"
+#endif
+
+#include "TCPDataStreamRcvQueue.h"
+#include "TCPDataStreamSendQueue.h"
+#include "TCPMsgBasedRcvQueue.h"
+#include "TCPMsgBasedSendQueue.h"
+#include "TCPVirtualDataRcvQueue.h"
+#include "TCPVirtualDataSendQueue.h"
+
 
 Define_Module(TCP);
 
@@ -57,6 +71,15 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize()
 {
+    const char *q;
+    q = par("sendQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+
+    q = par("receiveQueueClass");
+    if (*q != '\0')
+        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     WATCH(lastEphemeralPort);
 
@@ -91,7 +114,14 @@ void TCP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
-        if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
+        if (false
+#ifdef WITH_IPv4
+                || dynamic_cast<ICMPMessage *>(msg)
+#endif
+#ifdef WITH_IPv6
+                || dynamic_cast<ICMPv6Message *>(msg)
+#endif
+            )
         {
             tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msg;
@@ -103,14 +133,19 @@ void TCP::handleMessage(cMessage *msg)
 
             // get src/dest addresses
             IPvXAddress srcAddr, destAddr;
-            if (dynamic_cast<IPControlInfo *>(tcpseg->getControlInfo())!=NULL)
+
+#ifdef WITH_IPv4
+            if (dynamic_cast<IPv4ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
-                IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
+                IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->getSrcAddr();
                 destAddr = controlInfo->getDestAddr();
                 delete controlInfo;
             }
-            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo())!=NULL)
+            else
+#endif
+#ifdef WITH_IPv6
+            if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
                 IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->getSrcAddr();
@@ -118,6 +153,7 @@ void TCP::handleMessage(cMessage *msg)
                 delete controlInfo;
             }
             else
+#endif
             {
                 error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }
@@ -185,7 +221,7 @@ void TCP::updateDisplayString()
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
-        getDisplayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t", 0, "");
         return;
     }
 
@@ -193,14 +229,15 @@ void TCP::updateDisplayString()
     //sprintf(buf,"%d conns", tcpAppConnMap.size());
     //getDisplayString().setTagArg("t",0,buf);
 
-    int numINIT=0, numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
-        numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
-        numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
+    int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
+        numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
+        numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (TcpAppConnMap::iterator i=tcpAppConnMap.begin(); i!=tcpAppConnMap.end(); ++i)
+    for (TcpAppConnMap::iterator i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i)
     {
         int state = (*i).second->getFsmState();
-        switch(state)
+
+        switch (state)
         {
            case TCP_S_INIT:        numINIT++; break;
            case TCP_S_CLOSED:      numCLOSED++; break;
@@ -216,21 +253,24 @@ void TCP::updateDisplayString()
            case TCP_S_TIME_WAIT:   numTIME_WAIT++; break;
         }
     }
+
     char buf2[200];
     buf2[0] = '\0';
-    if (numINIT>0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
-    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
-    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
-    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
-    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
-    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2),"estab:%d ", numESTABLISHED);
-    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
-    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
-    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
-    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
-    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
-    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
-    getDisplayString().setTagArg("t",0,buf2);
+
+    if (numINIT > 0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
+    if (numCLOSED > 0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN > 0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT > 0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD > 0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED > 0) sprintf(buf2+strlen(buf2), "estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT > 0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK > 0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1 > 0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2 > 0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING > 0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT > 0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+
+    getDisplayString().setTagArg("t", 0, buf2);
 }
 
 TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
@@ -245,13 +285,15 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
     // try with fully qualified SockPair
     TcpConnMap::iterator i;
     i = tcpConnMap.find(key);
-    if (i!=tcpConnMap.end())
+
+    if (i != tcpConnMap.end())
         return i->second;
 
     // try with localAddr missing (only localPort specified in passive/active open)
     key.localAddr = IPvXAddress();
     i = tcpConnMap.find(key);
-    if (i!=tcpConnMap.end())
+
+    if (i != tcpConnMap.end())
         return i->second;
 
     // try fully qualified local socket + blank remote socket (for incoming SYN)
@@ -259,13 +301,15 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
     key.remoteAddr = IPvXAddress();
     key.remotePort = -1;
     i = tcpConnMap.find(key);
-    if (i!=tcpConnMap.end())
+
+    if (i != tcpConnMap.end())
         return i->second;
 
     // try with blank remote socket, and localAddr missing (for incoming SYN)
     key.localAddr = IPvXAddress();
     i = tcpConnMap.find(key);
-    if (i!=tcpConnMap.end())
+
+    if (i != tcpConnMap.end())
         return i->second;
 
     // given up
@@ -279,7 +323,7 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
     key.connId = connId;
 
     TcpAppConnMap::iterator i = tcpAppConnMap.find(key);
-    return i==tcpAppConnMap.end() ? NULL : i->second;
+    return i == tcpAppConnMap.end() ? NULL : i->second;
 }
 
 ushort TCP::getEphemeralPort()
@@ -289,11 +333,13 @@ ushort TCP::getEphemeralPort()
     if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
-    while (usedEphemeralPorts.find(lastEphemeralPort)!=usedEphemeralPorts.end())
+    while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end())
     {
         if (lastEphemeralPort == searchUntil) // got back to starting point?
             error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+
         lastEphemeralPort++;
+
         if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
             lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     }
@@ -313,10 +359,10 @@ void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress re
 
     // make sure connection is unique
     TcpConnMap::iterator it = tcpConnMap.find(key);
-    if (it!=tcpConnMap.end())
+    if (it != tcpConnMap.end())
     {
         // throw "address already in use" error
-        if (remoteAddr.isUnspecified() && remotePort==-1)
+        if (remoteAddr.isUnspecified() && remotePort == -1)
             error("Address already in use: there is already a connection listening on %s:%d",
                   localAddr.str().c_str(), localPort);
         else
@@ -328,7 +374,7 @@ void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress re
     tcpConnMap[key] = conn;
 
     // mark port as used
-    if (localPort>=EPHEMERAL_PORTRANGE_START && localPort<EPHEMERAL_PORTRANGE_END)
+    if (localPort >= EPHEMERAL_PORTRANGE_START && localPort < EPHEMERAL_PORTRANGE_END)
         usedEphemeralPorts.insert(localPort);
 }
 
@@ -341,7 +387,8 @@ void TCP::updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress
     key.localPort = conn->localPort;
     key.remotePort = conn->remotePort;
     TcpConnMap::iterator it = tcpConnMap.find(key);
-    ASSERT(it!=tcpConnMap.end() && it->second==conn);
+
+    ASSERT(it != tcpConnMap.end() && it->second == conn);
 
     // ...and remove from the old place in tcpConnMap
     tcpConnMap.erase(it);
@@ -395,7 +442,8 @@ void TCP::removeConnection(TCPConnection *conn)
     // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
     // deletes ALL occurrences of the port from the multiset.
     std::multiset<ushort>::iterator it = usedEphemeralPorts.find(conn->localPort);
-    if (it!=usedEphemeralPorts.end())
+
+    if (it != usedEphemeralPorts.end())
         usedEphemeralPorts.erase(it);
 
     delete conn;
@@ -404,4 +452,26 @@ void TCP::removeConnection(TCPConnection *conn)
 void TCP::finish()
 {
     tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+}
+
+TCPSendQueue* TCP::createSendQueue(TCPDataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataSendQueue();
+        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  return new TCPDataStreamSendQueue();
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
+}
+
+TCPReceiveQueue* TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
+{
+    switch (transferModeP)
+    {
+        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataRcvQueue();
+        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedRcvQueue();
+        case TCP_TRANSFER_BYTESTREAM:  return new TCPDataStreamRcvQueue;
+        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    }
 }

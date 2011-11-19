@@ -21,7 +21,9 @@
 
 #include <map>
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IPv6Address.h"
 #include "MACAddress.h"
 
@@ -56,7 +58,7 @@ class INET_API IPv6NeighbourCache
     {
         IPv6Address address;
         int interfaceID;
-        Key(IPv6Address addr, int ifaceID) {address=addr; interfaceID=ifaceID;}
+        Key(IPv6Address addr, int ifaceID) {address = addr; interfaceID = ifaceID;}
         bool operator<(const Key& b) const {
             return interfaceID==b.interfaceID ? address<b.address : interfaceID<b.interfaceID;
         }
@@ -66,10 +68,11 @@ class INET_API IPv6NeighbourCache
     struct Neighbour
     {
         // Neighbour info
-        const Key *nceKey;//store a pointer back to the key that links to this NCE.-WEI
+        const Key *nceKey; //store a pointer back to the key that links to this NCE.-WEI
         MACAddress macAddress;
         bool isRouter;
         bool isDefaultRouter; // is it on the Default Router List?
+        bool isHomeAgent;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
 
         // Neighbour Unreachability Detection variables
         ReachabilityState reachabilityState;
@@ -77,14 +80,14 @@ class INET_API IPv6NeighbourCache
         short numProbesSent;
         cMessage *nudTimeoutEvent; // DELAY or PROBE timer
 
-        //WEI-We could have a seperate AREntry in the ND module.
+        //WEI-We could have a separate AREntry in the ND module.
         //But we should merge those information in the neighbour cache for a
         //cleaner solution. if reachability state is INCOMPLETE, it means that
         //addr resolution is being performed for this NCE.
-        int numOfARNSSent;
-        cMessage *arTimer;//Address Resolution self-message timer
+        unsigned int numOfARNSSent;
+        cMessage *arTimer; //Address Resolution self-message timer
         MsgPtrVector pendingPackets; //ptrs to queued packets associated with this NCE
-        IPv6Address nsSrcAddr;//the src addr that was used to send the previous NS
+        IPv6Address nsSrcAddr; //the src addr that was used to send the previous NS
 
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement
@@ -108,10 +111,11 @@ class INET_API IPv6NeighbourCache
     typedef NeighbourMap::iterator iterator;
 
   protected:
+    cSimpleModule &neighbourDiscovery; // for cancelAndDelete() calls
     NeighbourMap neighbourMap;
 
   public:
-    IPv6NeighbourCache();
+    IPv6NeighbourCache(cSimpleModule &neighbourDiscovery);
     virtual ~IPv6NeighbourCache() {}
 
     /** Returns a neighbour entry, or NULL. */
@@ -137,14 +141,23 @@ class INET_API IPv6NeighbourCache
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), state=INCOMPLETE. */
     //TODO merge into next one (using default arg)
     virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
-                        simtime_t expiryTime);
+                        simtime_t expiryTime, bool isHomeAgent = false); // added HA flag, 3.9.07 - CB
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE. */
     virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
-                         MACAddress macAddress, simtime_t expiryTime);
+                         MACAddress macAddress, simtime_t expiryTime, bool isHomeAgent = false); // added HA flag, 3.9.07 - CB
 
     /** Deletes the given neighbour from the cache. */
     virtual void remove(const IPv6Address& addr, int interfaceID);
+
+    /** Set status of all neighbours on given interface to state PROBE. */
+    // Added by CB
+    virtual void invalidateEntriesForInterfaceID(int interfaceID);
+
+    /** Set status of all neighbours to state PROBE. */
+    // Added by CB
+    virtual void invalidateAllEntries();
+
 
     /** Deletes the given neighbour from the cache. */
     virtual void remove(NeighbourMap::iterator it);

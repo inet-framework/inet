@@ -14,12 +14,11 @@
 
 package inet.examples.mpls.ldp;
 
-import inet.networklayer.extras.FailureManager;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.LDP_LSR;
-import inet.world.NAMTrace;
-import inet.world.ScenarioManager;
 import ned.DatarateChannel;
+import inet.world.scenario.ScenarioManager;
+import inet.nodes.mpls.LDP_LSR;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.extras.FailureManager;
 
 
 network LDPTEST
@@ -27,24 +26,20 @@ network LDPTEST
     types:
         channel C5 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 5us;
         }
         channel C10 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 10us;
         }
         channel C15 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 15us;
         }
     submodules:
-        nam: NAMTrace {
-            parameters:
-                @display("p=152,280");
-        }
         LSR1: LDP_LSR {
             parameters:
                 peers = "ppp0 ppp1 ppp2";

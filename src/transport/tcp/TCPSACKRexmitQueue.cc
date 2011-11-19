@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2011 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -40,326 +41,368 @@ void TCPSACKRexmitQueue::init(uint32 seqNum)
 std::string TCPSACKRexmitQueue::str() const
 {
     std::stringstream out;
+
     out << "[" << begin << ".." << end << ")";
     return out.str();
 }
 
-void TCPSACKRexmitQueue::info()
+void TCPSACKRexmitQueue::info() const
 {
-    str();
-    RexmitQueue::iterator i = rexmitQueue.begin();
+    tcpEV << str() << endl;
+
     uint j = 1;
-    while (i!=rexmitQueue.end())
+
+    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
     {
-        tcpEV << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted << "\n";
-        i++;
+        tcpEV << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum
+              << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted
+              << endl;
         j++;
     }
 }
 
-uint32 TCPSACKRexmitQueue::getBufferStartSeq()
-{
-    return begin;
-}
-
-uint32 TCPSACKRexmitQueue::getBufferEndSeq()
-{
-    return end;
-}
-
 void TCPSACKRexmitQueue::discardUpTo(uint32 seqNum)
 {
-    if (rexmitQueue.empty())
-        return;
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
-    ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
+    if (!rexmitQueue.empty())
+    {
+        RexmitQueue::iterator i = rexmitQueue.begin();
+
+        while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
+            i = rexmitQueue.erase(i);
+
+        if (i != rexmitQueue.end())
+        {
+            ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
+            i->beginSeqNum = seqNum;
+        }
+    }
+
     begin = seqNum;
 
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end()) // discard/delete regions from rexmit queue, which have been acked
-    {
-        if (seqLess(i->beginSeqNum,begin))
-            i = rexmitQueue.erase(i);
-        else
-            i++;
-    }
-
-    // update begin and end of rexmit queue
-    if (rexmitQueue.empty())
-        begin = end = 0;
-    else
-    {
-        i = rexmitQueue.begin();
-        begin = i->beginSeqNum;
-        i = rexmitQueue.end();
-        end = i->endSeqNum;
-    }
+    // TESTING queue:
+    ASSERT(checkQueue());
 }
 
 void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
 {
+    ASSERT(seqLE(begin, fromSeqNum) && seqLE(fromSeqNum, end));
+
     bool found = false;
+    Region region;
 
     tcpEV << "rexmitQ: " << str() << " enqueueSentData [" << fromSeqNum << ".." << toSeqNum << ")\n";
 
-    Region region;
-    region.beginSeqNum = fromSeqNum;
-    region.endSeqNum = toSeqNum;
-    region.sacked = false;
-    region.rexmitted = false;
+    ASSERT(seqLess(fromSeqNum, toSeqNum));
 
-    if (getQueueLength()==0)
+    if (rexmitQueue.empty() || (end == fromSeqNum))
     {
-        begin = fromSeqNum;
-        end = toSeqNum;
+        region.beginSeqNum = fromSeqNum;
+        region.endSeqNum = toSeqNum;
+        region.sacked = false;
+        region.rexmitted = false;
         rexmitQueue.push_back(region);
-//        tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
-        return;
+        found = true;
+        fromSeqNum = toSeqNum;
     }
-
-    if (seqLE(begin,fromSeqNum) && seqLE(toSeqNum,end))
+    else
     {
-        // Search for region in queue!
         RexmitQueue::iterator i = rexmitQueue.begin();
-        while (i!=rexmitQueue.end())
-        {
-            if (i->beginSeqNum == fromSeqNum && i->endSeqNum == toSeqNum)
-            {
-                i->rexmitted = true; // set rexmitted bit
-                found = true;
-            }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
             i++;
+
+        ASSERT(i != rexmitQueue.end());
+        ASSERT(seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        if (i->beginSeqNum != fromSeqNum)
+        {
+            // chunk item
+            region = *i;
+            region.endSeqNum = fromSeqNum;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = fromSeqNum;
+        }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum))
+        {
+            i->rexmitted = true;
+            fromSeqNum = i->endSeqNum;
+            found = true;
+            i++;
+        }
+
+        if (fromSeqNum != toSeqNum)
+        {
+            bool beforeEnd = (i != rexmitQueue.end());
+
+            ASSERT(i == rexmitQueue.end() || seqLess(i->beginSeqNum, toSeqNum));
+
+            region.beginSeqNum = fromSeqNum;
+            region.endSeqNum = toSeqNum;
+            region.sacked = beforeEnd ? i->sacked : false;
+            region.rexmitted = beforeEnd;
+            rexmitQueue.insert(i, region);
+            found = true;
+            fromSeqNum = toSeqNum;
+
+            if (beforeEnd)
+                i->beginSeqNum = toSeqNum;
         }
     }
 
+    ASSERT(fromSeqNum == toSeqNum);
+
     if (!found)
     {
-        end = toSeqNum;
-        rexmitQueue.push_back(region);
+        EV << "Not found enqueueSentData(" << fromSeqNum << ", " << toSeqNum << ")\nThe Queue is:\n";
+        info();
     }
-//    tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+
+    ASSERT(found);
+
+    begin = rexmitQueue.front().beginSeqNum;
+    end = rexmitQueue.back().endSeqNum;
+
+    // TESTING queue:
+    ASSERT(checkQueue());
+
+    // tcpEV << "rexmitQ: rexmitQLength=" << getQueueLength() << "\n";
+}
+
+bool TCPSACKRexmitQueue::checkQueue() const
+{
+    uint32 b = begin;
+    bool f = true;
+
+    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
+    {
+        f = f && (b == i->beginSeqNum);
+        f = f && seqLess(i->beginSeqNum, i->endSeqNum);
+        b = i->endSeqNum;
+    }
+
+    f = f && (b == end);
+
+    if (!f)
+    {
+        EV << "Invalid Queue\nThe Queue is:\n";
+        info();
+    }
+
+    return f;
 }
 
 void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
 {
+    if (seqLess(fromSeqNum, begin))
+        fromSeqNum = begin;
+
+    ASSERT(seqLess(fromSeqNum, end));
+    ASSERT(seqLess(begin, toSeqNum) && seqLE(toSeqNum, end));
+    ASSERT(seqLess(fromSeqNum, toSeqNum));
+
     bool found = false;
 
-    if (seqLE(toSeqNum,end))
+    if (!rexmitQueue.empty())
     {
         RexmitQueue::iterator i = rexmitQueue.begin();
-        while (i!=rexmitQueue.end())
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
+            i++;
+
+        ASSERT(i != rexmitQueue.end() && seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        if (i->beginSeqNum != fromSeqNum)
         {
-            if (i->beginSeqNum == fromSeqNum && seqGE(toSeqNum, i->endSeqNum)) // Search for LE of region in queue!
+            Region region = *i;
+
+            region.endSeqNum = fromSeqNum;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = fromSeqNum;
+        }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum))
+        {
+            if (seqGE(i->beginSeqNum, fromSeqNum)) // Search region in queue!
             {
-                i->sacked = true; // set sacked bit
                 found = true;
-                i++;
-                while (seqGE(toSeqNum, i->endSeqNum) && i!=rexmitQueue.end()) // Search for RE of region in queue!
-                {
-                    i->sacked = true; // set sacked bit
-                    i++;
-                }
+                i->sacked = true; // set sacked bit
             }
-            else
-                i++;
+
+            i++;
+        }
+
+        if (i != rexmitQueue.end() && seqLess(i->beginSeqNum, toSeqNum) && seqLess(toSeqNum, i->endSeqNum))
+        {
+            Region region = *i;
+
+            region.endSeqNum = toSeqNum;
+            region.sacked = true;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = toSeqNum;
         }
     }
 
     if (!found)
         tcpEV << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
+
+    ASSERT(checkQueue());
 }
 
-bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum)
+bool TCPSACKRexmitQueue::getSackedBit(uint32 seqNum) const
 {
-    bool found = false;
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
-    if (seqLE(begin,seqNum))
-    {
-        RexmitQueue::iterator i = rexmitQueue.begin();
-        while (i!=rexmitQueue.end())
-        {
-            if (i->beginSeqNum == seqNum) // Search for region in queue!
-            {
-                found = i->sacked;
-                break;
-            }
-            i++;
-        }
-    }
-    return found;
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+
+    if (end == seqNum)
+        return false;
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, seqNum))
+        i++;
+
+    ASSERT((i != rexmitQueue.end()) && seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
+
+    return i->sacked;
 }
 
-uint32 TCPSACKRexmitQueue::getQueueLength()
+uint32 TCPSACKRexmitQueue::getHighestSackedSeqNum() const
 {
-    return rexmitQueue.size();
-}
-
-uint32 TCPSACKRexmitQueue::getHighestSackedSeqNum()
-{
-    uint32 tmp_highest_sacked = 0;
-
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
+    for (RexmitQueue::const_reverse_iterator i = rexmitQueue.rbegin(); i != rexmitQueue.rend(); i++)
     {
         if (i->sacked)
-            tmp_highest_sacked = i->endSeqNum;
-        i++;
+            return i->endSeqNum;
     }
-    return tmp_highest_sacked;
+
+    return begin;
 }
 
-uint32 TCPSACKRexmitQueue::getHighestRexmittedSeqNum()
+uint32 TCPSACKRexmitQueue::getHighestRexmittedSeqNum() const
 {
-    uint32 tmp_highest_rexmitted = 0;
-
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
+    for (RexmitQueue::const_reverse_iterator i = rexmitQueue.rbegin(); i != rexmitQueue.rend(); i++)
     {
         if (i->rexmitted)
-            tmp_highest_rexmitted = i->endSeqNum;
-        i++;
+            return i->endSeqNum;
     }
-    return tmp_highest_rexmitted;
+
+    return begin;
 }
 
-uint32 TCPSACKRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeqNum)
+uint32 TCPSACKRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeqNum) const
 {
-    uint32 counter = 0;
+    ASSERT(seqLE(begin, fromSeqNum) && seqLE(fromSeqNum, end));
 
-    if (fromSeqNum==0 || rexmitQueue.empty() || !(seqLE(begin,fromSeqNum) && seqLE(fromSeqNum,end)))
-        return counter;
+    if (rexmitQueue.empty() || (end == fromSeqNum))
+        return 0;
 
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+    uint32 bytes = 0;
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
+        i++;
+
+    while (i != rexmitQueue.end() && ((i->sacked || i->rexmitted)))
     {
-        // search for fromSeqNum (snd_nxt)
-        if (i->beginSeqNum == fromSeqNum)
-            break;
-        else
-            i++;
+        ASSERT(seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        bytes += (i->endSeqNum - fromSeqNum);
+        fromSeqNum = i->endSeqNum;
+        i++;
     }
 
-    // search for adjacent sacked/rexmitted regions
-    while (i!=rexmitQueue.end())
-    {
-        if (i->sacked || i->rexmitted)
-        {
-            counter = counter + (i->endSeqNum - i->beginSeqNum);
-
-            // adjacent regions?
-            uint32 tmp = i->endSeqNum;
-            i++;
-            if (i->beginSeqNum != tmp)
-                break;
-        }
-        else
-            break;
-    }
-    return counter;
+    return bytes;
 }
 
 void TCPSACKRexmitQueue::resetSackedBit()
 {
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
-    {
+    for (RexmitQueue::iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
         i->sacked = false; // reset sacked bit
-        i++;
-    }
 }
 
 void TCPSACKRexmitQueue::resetRexmittedBit()
 {
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
-    {
+    for (RexmitQueue::iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
         i->rexmitted = false; // reset rexmitted bit
-        i++;
-    }
 }
 
-uint32 TCPSACKRexmitQueue::getTotalAmountOfSackedBytes()
+uint32 TCPSACKRexmitQueue::getTotalAmountOfSackedBytes() const
 {
     uint32 bytes = 0;
-    uint32 counter = 0;
 
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end())
+    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
     {
         if (i->sacked)
-        {
-            counter++;
-            bytes = bytes + (i->endSeqNum - i->beginSeqNum);
-        }
-        i++;
+            bytes += (i->endSeqNum - i->beginSeqNum);
     }
+
     return bytes;
 }
 
-uint32 TCPSACKRexmitQueue::getAmountOfSackedBytes(uint32 seqNum)
+uint32 TCPSACKRexmitQueue::getAmountOfSackedBytes(uint32 fromSeqNum) const
 {
+    ASSERT(seqLE(begin, fromSeqNum) && seqLE(fromSeqNum, end));
+
     uint32 bytes = 0;
-    uint32 counter = 0;
+    RexmitQueue::const_reverse_iterator i = rexmitQueue.rbegin();
 
-    if (rexmitQueue.empty() || seqGE(seqNum,end))
-        return counter;
-
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end() && seqLess(i->beginSeqNum, seqNum)) // search for seqNum
-    {
-        i++;
-        if (i->beginSeqNum == seqNum)
-            break;
-    }
-
-    ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
-
-    while (i!=rexmitQueue.end())
+    for (; i != rexmitQueue.rend() && seqLE(fromSeqNum, i->beginSeqNum); i++)
     {
         if (i->sacked)
-        {
-            counter++;
-            bytes = bytes + (i->endSeqNum - i->beginSeqNum);
-        }
-        i++;
+            bytes += (i->endSeqNum - i->beginSeqNum);
     }
+
+    if ( i != rexmitQueue.rend()
+            && seqLess(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum) && i->sacked)
+    {
+        bytes += (i->endSeqNum - fromSeqNum);
+    }
+
     return bytes;
 }
 
-
-uint32 TCPSACKRexmitQueue::getNumOfDiscontiguousSacks(uint32 seqNum)
+uint32 TCPSACKRexmitQueue::getNumOfDiscontiguousSacks(uint32 fromSeqNum) const
 {
+    ASSERT(seqLE(begin, fromSeqNum) && seqLE(fromSeqNum, end));
+
+    if (rexmitQueue.empty() || (fromSeqNum == end))
+        return 0;
+
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
     uint32 counter = 0;
 
-    if (rexmitQueue.empty() || seqGE(seqNum,end))
-        return counter;
-
-    RexmitQueue::iterator i = rexmitQueue.begin();
-    while (i!=rexmitQueue.end() && seqLess(i->beginSeqNum, seqNum)) // search for seqNum
-    {
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum)) // search for seqNum
         i++;
-        if (i->beginSeqNum == seqNum)
-            break;
-    }
-
-    ASSERT(seqLE(seqNum,i->beginSeqNum) || seqGE(seqNum,--i->endSeqNum));
 
     // search for discontiguous sacked regions
-    while (i!=rexmitQueue.end())
+    bool prevSacked = false;
+
+    while (i != rexmitQueue.end())
     {
-        if (i->sacked)
-        {
+        if (i->sacked && !prevSacked)
             counter++;
-            uint32 tmp = i->endSeqNum;
-            i++;
-            while (i->sacked && i->beginSeqNum == tmp && i!=rexmitQueue.end()) // adjacent sacked regions?
-            {
-                tmp = i->endSeqNum;
-                i++;
-            }
-        }
-        else
-            i++;
+
+        prevSacked = i->sacked;
+        i++;
     }
+
     return counter;
+}
+
+void TCPSACKRexmitQueue::checkSackBlock(uint32 fromSeqNum, uint32 &length, bool &sacked, bool &rexmitted) const
+{
+    ASSERT(seqLE(begin, fromSeqNum) && seqLess(fromSeqNum, end));
+
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum)) // search for seqNum
+        i++;
+
+    ASSERT(i != rexmitQueue.end());
+    ASSERT(seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+    length = (i->endSeqNum - fromSeqNum);
+    sacked = i->sacked;
+    rexmitted = i->rexmitted;
 }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<initialPosture postureID="3"/>
+
+	<initialLocation x="20" y="20" z="4"/>
+	
+	<durationRange min="30" max="60"/>
+	
+	<areaTypes>
+		<areaType name="LivingRoom">
+			<boundary xMin="0" yMin="0" zMin="0" xMax="25" yMax="25" zMax="10"/>
+			<boundary xMin="25" yMin="25" zMin="0" xMax="50" yMax="50" zMax="10"/>
+		</areaType>
+		
+		<areaType name="BedRoom">
+			<boundary xMin="0" yMin="25" zMin="0" xMax="25" yMax="50" zMax="10"/>
+			<boundary xMin="25" yMin="0" zMin="0" xMax="50" yMax="25" zMax="10"/>
+		</areaType>
+	</areaTypes>
+	
+	<timeDomains>
+		<timeDomain name="Day">
+			<boundary tMin="0" tMax="1000"/>
+			<boundary tMin="2000" tMax="3000"/>
+		</timeDomain>
+		
+		<timeDomain name="Night">
+			<boundary tMin="1000" tMax="2000"/>
+			<boundary tMin="3000" tMax="4000"/>
+		</timeDomain>
+	</timeDomains>
+	
+	<combinations>
+		<combination areaType="LivingRoom" timeDomain="Day" matrix="M1"/>
+		<combination areaType="LivingRoom" timeDomain="Night" matrix="M2"/>
+		<combination areaType="BedRoom" timeDomain="Day" matrix="M3"/>
+		<combination areaType="BedRoom" timeDomain="Night" matrix="M4"/>
+	</combinations>
+
+	<markovMatrices>
+		<markovMatrix name="M1" type="default">
+			<row> 
+		        	<cell value="0.1" /> 
+		        	<cell value="0.3" /> 
+		        	<cell value="0.1" /> 
+			       	<cell value="0.0" /> 
+		        	<cell value="0.0" /> 
+		    </row>
+			<row> 
+		        	<cell value="0.7" /> 
+		        	<cell value="0.2" /> 
+		        	<cell value="0.3" /> 
+			       	<cell value="0.1" /> 
+		        	<cell value="0.0" /> 
+		    </row>
+			<row> 
+		        	<cell value="0.2" /> 
+		        	<cell value="0.4" /> 
+		        	<cell value="0.3" /> 
+			       	<cell value="0.3" /> 
+		        	<cell value="0.1" /> 
+		    </row>
+			<row> 
+		        	<cell value="0.0" /> 
+		        	<cell value="0.1" /> 
+		        	<cell value="0.2" /> 
+			       	<cell value="0.4" /> 
+		        	<cell value="0.4" /> 
+		    </row>
+			<row> 
+		        	<cell value="0.0" /> 
+		        	<cell value="0.0" /> 
+		        	<cell value="0.1" /> 
+			       	<cell value="0.2" /> 
+		        	<cell value="0.5" /> 
+		    </row>
+		</markovMatrix>
+
+		<markovMatrix name="M2">
+			<row> 
+		        	<cell value="0.05" /> 
+		        	<cell value="0.1" /> 
+		        	<cell value="0.15" /> 
+			       	<cell value="0.35" /> 
+		        	<cell value="0.35" /> 
+		    </row>
+		</markovMatrix>
+		
+		<markovMatrix name="M3">
+			<row> 
+		        	<cell value="0.05" /> 
+		        	<cell value="0.2" /> 
+		        	<cell value="0.2" /> 
+			       	<cell value="0.35" /> 
+		        	<cell value="0.2" /> 
+		    </row>
+		</markovMatrix>
+		
+		<markovMatrix name="M4">
+			<row> 
+		        	<cell value="0.0" /> 
+		        	<cell value="0.1" /> 
+		        	<cell value="0.05" /> 
+			       	<cell value="0.15" /> 
+		        	<cell value="0.7" /> 
+		    </row>
+		</markovMatrix>
+		
+	</markovMatrices>
+</root>

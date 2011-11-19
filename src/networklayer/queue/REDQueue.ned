@@ -20,7 +20,7 @@ package inet.networklayer.queue;
 
 //
 // RED (Random Early Detection) queue, to be used in routers' network
-// interfaces. Conforms to the OutputQueue interface.
+// interfaces. Conforms to the ~IOutputQueue interface.
 //
 // Implements the original RED algorithm from
 // "Random Early Detection Gateways for Congestion Avoidance" by
@@ -81,7 +81,7 @@ package inet.networklayer.queue;
 // Example parameter values: wq = 0.002, minth = 5 packets, maxth = 15 packets,
 // maxp = 1/50 = 0.02 and pkrate = 12000 (~1K packets on 100Mbps link).
 //
-simple REDQueue like OutputQueue
+simple REDQueue like IOutputQueue
 {
     parameters:
         double wq = default(0.002);  // queue weight
@@ -90,6 +90,16 @@ simple REDQueue like OutputQueue
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
         @display("i=block/queue");
+        @signal[enqueuePk](type=cMessage);
+        @signal[dequeuePk](type=cMessage);
+        @signal[dropPkByQueue](type=cMessage);
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[queueLength](type=long; interpolationmode=sample-hold);
+        @signal[earlyDropPkByQueue](type=cMessage);
+        @signal[avgQueueLength](type="double");
+        @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; source="packetBytes(earlyDropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none;);
+        @statistic[avgQueueLength](title="Avg queue length"; record=stats,vector);
+        @statistic[queueLength](title="Queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;

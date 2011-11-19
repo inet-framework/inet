@@ -33,6 +33,6 @@ simple Decider80211
         double bitrate @unit("bps");
         @display("i=block/process_s");
     gates:
-        output uppergateOut @labels(Mac80211Pkt);
-        input lowergateIn;
+        output upperLayerOut @labels(Mac80211Pkt);
+        input lowerLayerIn;
 }

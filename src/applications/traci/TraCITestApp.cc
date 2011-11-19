@@ -1,22 +1,22 @@
-/*
- *  Copyright (C) 2009 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
- *
- *  Documentation for these modules is at http://veins.car2x.org/
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+//
+// Documentation for these modules is at http://veins.car2x.org/
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
 
 #include "applications/traci/TraCITestApp.h"
 #include "NotificationBoard.h"
@@ -29,9 +29,10 @@ void TraCITestApp::initialize(int stage) {
 	if (stage == 0) {
 		debug = par("debug");
 		testNumber = par("testNumber");
-		NotificationBoard* nb = NotificationBoardAccess().get();
-		nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
+
+		mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 		traci = TraCIMobilityAccess().get();
+		traci->subscribe(mobilityStateChangedSignal, this);
 
 		visitedEdges.clear();
 		hasStopped = false;
@@ -59,10 +60,8 @@ void TraCITestApp::handleMessage(cMessage* msg) {
 }
 
 
-void TraCITestApp::receiveChangeNotification(int category, const cPolymorphic *details) {
-	Enter_Method_Silent();
-
-	if (category == NF_HOSTPOSITION_UPDATED) {
+void TraCITestApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+	if (signalID == mobilityStateChangedSignal) {
 		handlePositionUpdate();
 	}
 }

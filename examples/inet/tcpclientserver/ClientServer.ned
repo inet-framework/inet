@@ -18,9 +18,10 @@
 
 package inet.examples.inet.tcpclientserver;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.util.NetAnimTrace;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network ClientServer
@@ -29,7 +30,7 @@ network ClientServer
     types:
         channel C extends DatarateChannel
         {
-            datarate = 1Mbps;
+            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:
@@ -43,7 +44,10 @@ network ClientServer
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                @display("p=109,142");
+                @display("p=53,134");
+        }
+        netAnimTrace: NetAnimTrace {
+            @display("p=184,142");
         }
     connections:
         client1.pppg++ <--> C <--> server.pppg++;

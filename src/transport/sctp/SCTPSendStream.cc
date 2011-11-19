@@ -21,7 +21,7 @@
 
 SCTPSendStream::SCTPSendStream(const uint16 id)
 {
-    streamId              = id;
+    streamId = id;
     nextStreamSeqNum = 0;
 
     char queueName[64];
@@ -43,14 +43,14 @@ void SCTPSendStream::deleteQueue()
     int32                    count = streamQ->length();
     while (!streamQ->empty()) {
         datMsg = check_and_cast<SCTPDataMsg*>(streamQ->pop());
-        smsg     = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
+        smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
         count--;
     }
     while (!uStreamQ->empty()) {
         datMsg = check_and_cast<SCTPDataMsg*>(uStreamQ->pop());
-        smsg     = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
+        smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
     }

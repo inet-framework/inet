@@ -59,7 +59,7 @@ SCTPDataVariables* SCTPQueue::extractMessage()
 {
     if (!payloadQueue.empty()) {
         PayloadQueue::iterator iterator = payloadQueue.begin();
-        SCTPDataVariables*    chunk   = iterator->second;
+        SCTPDataVariables*    chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
     }
@@ -70,7 +70,7 @@ SCTPDataVariables* SCTPQueue::getAndExtractChunk(const uint32 tsn)
 {
     if (!payloadQueue.empty()) {
         PayloadQueue::iterator iterator = payloadQueue.find(tsn);
-        SCTPDataVariables*    chunk   = iterator->second;
+        SCTPDataVariables*    chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
     }
@@ -82,7 +82,7 @@ void SCTPQueue::printQueue() const
     sctpEV3 << "Queue contents:\n";
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
           iterator != payloadQueue.end(); ++iterator) {
-        const uint32                 key     = iterator->first;
+        const uint32                 key = iterator->first;
         const SCTPDataVariables* chunk = iterator->second;
         sctpEV3 << key << ":\t"
                   << "lastDestination="             << chunk->getLastDestination()
@@ -98,7 +98,7 @@ void SCTPQueue::printQueue() const
 SCTPDataVariables* SCTPQueue::getFirstChunk() const
 {
     PayloadQueue::const_iterator iterator = payloadQueue.begin();
-    SCTPDataVariables* chunk                  = iterator->second;
+    SCTPDataVariables* chunk = iterator->second;
     return chunk;
 }
 
@@ -125,26 +125,26 @@ SCTPDataVariables* SCTPQueue::getChunk(const uint32 tsn) const
 
 SCTPDataVariables* SCTPQueue::getChunkFast(const uint32 tsn, bool& firstTime)
 {
-    if(!firstTime) {
-        if(GetChunkFastIterator != payloadQueue.end()) {
+    if (!firstTime) {
+        if (GetChunkFastIterator != payloadQueue.end()) {
             SCTPDataVariables* chunk = GetChunkFastIterator->second;
-            if(chunk->tsn == tsn) {
+            if (chunk->tsn == tsn) {
                 GetChunkFastIterator++;
-                return(chunk);    // Found the right TSN!
+                return (chunk);    // Found the right TSN!
             }
         }
         // TSN not found -> needs regular TSN lookup.
     }
 
     GetChunkFastIterator = payloadQueue.find(tsn);
-    if(GetChunkFastIterator != payloadQueue.end()) {
+    if (GetChunkFastIterator != payloadQueue.end()) {
         SCTPDataVariables* chunk = GetChunkFastIterator->second;
         GetChunkFastIterator++;
         firstTime = false;
-        return(chunk);
+        return (chunk);
     }
 
-    return(NULL);
+    return (NULL);
 }
 
 

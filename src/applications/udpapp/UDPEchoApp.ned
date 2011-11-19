@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Babos
+// Copyright (C) 2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,22 +18,22 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
-// Similar to UDPBasicApp, but it sends back the packet after reception.
+// Listens on an UDP port, and sends back each received packet to its sender.
+// Note: when used together with ~UDPBasicApp, ~UDPBasicApp's "received packet
+// lifetime" statistic will record round-trip times.
 //
-simple UDPEchoApp like UDPApp
+simple UDPEchoApp like IUDPApp
 {
     parameters:
-        int localPort;
-        int destPort;
-        volatile int messageLength @unit("B"); // length of messages to generate, int bytes
-        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        int localPort;  // local port to listen on
         @display("i=block/app");
+        @signal[pk](type=cPacket);
+        @statistic[echoedPk](title="Echoed Packets"; source=pk; record=count,"vector(1)?"; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
-
-
-

@@ -81,5 +81,3 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
 };
 
 #endif
-
-

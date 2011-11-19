@@ -19,25 +19,26 @@
 #ifndef __SCTPASSOCIATION_H
 #define __SCTPASSOCIATION_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPvXAddress.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "SCTP.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+//#include "RoutingTable.h"
+//#include "RoutingTableAccess.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "SCTPQueue.h"
 #include "SCTPSendStream.h"
 #include "SCTPReceiveStream.h"
 #include "SCTPMessage.h"
-#include "IPControlInfo.h"
+//#include "IPv4ControlInfo.h"
 #include <list>
 #include <iostream>
 #include <errno.h>
 #include <math.h>
 #include <platdep/intxtypes.h>
-#include "common.h"
+//#include "common.h"
 
 
 class SCTPMessage;
@@ -200,7 +201,7 @@ inline double min(const double a, const double b) { return (a < b) ? a : b; }
 inline double max(const double a, const double b) { return (a < b) ? b : a; }
 
 
-class INET_API SCTPPathVariables : public cPolymorphic
+class INET_API SCTPPathVariables : public cObject
 {
     public:
         SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* assoc);
@@ -283,7 +284,7 @@ class INET_API SCTPPathVariables : public cPolymorphic
 
 
 
-class INET_API SCTPDataVariables : public cPolymorphic
+class INET_API SCTPDataVariables : public cObject
 {
     public:
         SCTPDataVariables();
@@ -293,39 +294,39 @@ class INET_API SCTPDataVariables : public cPolymorphic
             initialDestination = path;
         }
         inline const IPvXAddress& getInitialDestination() const {
-            if(initialDestination != NULL) {
-                return(initialDestination->remoteAddress);
+            if (initialDestination != NULL) {
+                return (initialDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getInitialDestinationPath() const {
-            return(initialDestination);
+            return (initialDestination);
         }
 
         inline void setLastDestination(SCTPPathVariables* path) {
             lastDestination = path;
         }
         inline const IPvXAddress& getLastDestination() const {
-            if(lastDestination != NULL) {
-                return(lastDestination->remoteAddress);
+            if (lastDestination != NULL) {
+                return (lastDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getLastDestinationPath() const {
-            return(lastDestination);
+            return (lastDestination);
         }
 
         inline void setNextDestination(SCTPPathVariables* path) {
             nextDestination = path;
         }
         inline const IPvXAddress& getNextDestination() const {
-            if(nextDestination != NULL) {
-                return(nextDestination->remoteAddress);
+            if (nextDestination != NULL) {
+                return (nextDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getNextDestinationPath() const {
-            return(nextDestination);
+            return (nextDestination);
         }
 
         cPacket*            userData;
@@ -364,7 +365,7 @@ class INET_API SCTPDataVariables : public cPolymorphic
 
 
 
-class INET_API SCTPStateVariables : public cPolymorphic
+class INET_API SCTPStateVariables : public cObject
 {
     public:
         SCTPStateVariables();
@@ -374,13 +375,13 @@ class INET_API SCTPStateVariables : public cPolymorphic
             primaryPath = path;
         }
         inline const IPvXAddress& getPrimaryPathIndex() const {
-            if(primaryPath != NULL) {
-                return(primaryPath->remoteAddress);
+            if (primaryPath != NULL) {
+                return (primaryPath->remoteAddress);
             }
-            return(SCTPDataVariables::zeroAddress);
+            return (SCTPDataVariables::zeroAddress);
         }
         inline SCTPPathVariables* getPrimaryPath() const {
-            return(primaryPath);
+            return (primaryPath);
         }
 
         bool                        active;
@@ -508,12 +509,12 @@ class INET_API SCTPAssociation : public cObject
         uint32 bytesToSend;
     } BytesToBeSent;
     typedef struct congestionControlFunctions {
-        void (SCTPAssociation::*ccInitParams)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateAfterSack)();
-        void (SCTPAssociation::*ccUpdateAfterCwndTimeout)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateAfterRtxTimeout)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateMaxBurst)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateBytesAcked)(SCTPPathVariables* path, const uint32 ackedBytes, const bool ctsnaAdvanced);
+        void(SCTPAssociation::*ccInitParams)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateAfterSack)();
+        void(SCTPAssociation::*ccUpdateAfterCwndTimeout)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateAfterRtxTimeout)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateMaxBurst)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateBytesAcked)(SCTPPathVariables* path, const uint32 ackedBytes, const bool ctsnaAdvanced);
     } CCFunctions;
     typedef std::map<uint32, SCTPSendStream*>       SCTPSendStreamMap;
     typedef std::map<uint32, SCTPReceiveStream*> SCTPReceiveStreamMap;
@@ -630,7 +631,7 @@ class INET_API SCTPAssociation : public cObject
         void stopTimers();
         inline SCTPPathVariables* getPath(const IPvXAddress& pathId) const {
             SCTPPathMap::const_iterator iterator = sctpPathMap.find(pathId);
-            if (iterator !=sctpPathMap.end()) {
+            if (iterator != sctpPathMap.end()) {
                 return iterator->second;
             }
             return NULL;
@@ -765,10 +766,10 @@ class INET_API SCTPAssociation : public cObject
         SCTPPathVariables* getNextPath(const SCTPPathVariables* oldPath) const;
         inline const IPvXAddress& getNextAddress(const SCTPPathVariables* oldPath) const {
             const SCTPPathVariables* nextPath = getNextPath(oldPath);
-            if(nextPath != NULL) {
-                return(nextPath->remoteAddress);
+            if (nextPath != NULL) {
+                return (nextPath->remoteAddress);
             }
-            return(SCTPDataVariables::zeroAddress);
+            return (SCTPDataVariables::zeroAddress);
         }
         SCTPPathVariables* getNextDestination(SCTPDataVariables* chunk) const;
 
@@ -792,9 +793,9 @@ class INET_API SCTPAssociation : public cObject
         void initStreams(uint32 inStreams, uint32 outStreams);
         int32 numUsableStreams();
         typedef struct streamSchedulingFunctions {
-            void (SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
-            int32 (SCTPAssociation::*ssGetNextSid)(bool peek);
-            int32 (SCTPAssociation::*ssUsableStreams)();
+            void(SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
+            int32(SCTPAssociation::*ssGetNextSid)(bool peek);
+            int32(SCTPAssociation::*ssUsableStreams)();
         } SSFunctions;
         SSFunctions ssFunctions;
         uint16 ssModule;
@@ -828,13 +829,13 @@ class INET_API SCTPAssociation : public cObject
         /**
         * Compare TSNs
         */
-        inline static int32 tsnLt (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<0); }
-        inline static int32 tsnLe (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<=0); }
-        inline static int32 tsnGe (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>=0); }
-        inline static int32 tsnGt (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>0); }
-        inline static int32 tsnBetween (const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return ((tsn2-tsn1)>=(midtsn-tsn1)); }
+        inline static int32 tsnLt(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<0); }
+        inline static int32 tsnLe(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<=0); }
+        inline static int32 tsnGe(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>=0); }
+        inline static int32 tsnGt(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>0); }
+        inline static int32 tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return ((tsn2-tsn1)>=(midtsn-tsn1)); }
 
-        inline static int16 ssnGt (const uint16 ssn1, const uint16 ssn2) { return ((int16)(ssn1-ssn2)>0); }
+        inline static int16 ssnGt(const uint16 ssn1, const uint16 ssn2) { return ((int16)(ssn1-ssn2)>0); }
 
         void disposeOf(SCTPMessage* sctpmsg);
         void tsnWasReneged(SCTPDataVariables*         chunk,
@@ -891,14 +892,14 @@ class INET_API SCTPAssociation : public cObject
             chunk->hasBeenAcked = false;
         }
         inline bool chunkHasBeenAcked(const SCTPDataVariables* chunk) const {
-            return(chunk->hasBeenAcked);
+            return (chunk->hasBeenAcked);
         }
         inline bool chunkHasBeenAcked(const uint32 tsn) const {
             const SCTPDataVariables* chunk = retransmissionQ->getChunk(tsn);
-            if(chunk) {
-                return(chunkHasBeenAcked(chunk));
+            if (chunk) {
+                return (chunkHasBeenAcked(chunk));
             }
-            return(false);
+            return (false);
         }
 };
 

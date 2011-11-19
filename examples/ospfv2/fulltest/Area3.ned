@@ -1,10 +1,10 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.inet.OSPFRouter;
-import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.nodes.inet.StandardHost;
+import inet.linklayer.ethernet.EtherHub;
 
 
 module OSPF_Area3
@@ -17,6 +17,7 @@ module OSPF_Area3
         channel C extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 100Mbps;
         }
     submodules:
         RT9: OSPFRouter {

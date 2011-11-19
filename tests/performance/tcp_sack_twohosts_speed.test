@@ -1,0 +1,206 @@
+%description:
+Testing TCP communication speed
+    TCP
+    TCP_NSC
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+
+
+channel C extends DatarateChannel
+{
+    delay = 0.01us; // ~ 2m
+    datarate = 10Mbps;
+}
+
+module SubTest
+{
+    parameters:
+        string cliTcpType = default("n/a");
+        string srvTcpType = default("n/a");
+    submodules:
+        server: StandardHost {
+            parameters:
+                numTcpApps = 1;
+                tcpType = srvTcpType;
+        }
+        client: StandardHost {
+            parameters:
+                numTcpApps = 1;
+                tcpType = cliTcpType;
+                tcpApp[0].connectAddress = substringBeforeLast(fullPath(),".client") + ".server";
+        }
+    connections:
+        server.pppg++ <--> C <--> client.pppg++;
+}
+
+module STest
+{
+    parameters:
+        string srvTcpType = default("n/a");
+    submodules:
+        clients_INET: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP";
+        }
+        clients_NSC: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_NSC";
+        }
+        clients_LWIP: SubTest {
+            parameters:
+                srvTcpType = srvTcpType;
+                cliTcpType = "TCP_lwIP";
+        }
+}
+
+network TcpSpeedTest
+{
+    submodules:
+        server_INET: STest {
+            parameters:
+                srvTcpType = "TCP";
+        }
+        server_NSC: STest {
+            parameters:
+                srvTcpType = "TCP_NSC";
+        }
+        server_LWIP: STest {
+            parameters:
+                srvTcpType = "TCP_lwIP";
+        }
+        configurator: FlatNetworkConfigurator {
+            @display("p=70,40");
+        }
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TcpSpeedTest
+total-stack = 7MiB
+tkenv-plugin-path = ../../../etc/plugins
+#debug-on-errors = true
+#record-eventlog = true
+**.vector-recording = false
+
+#sim-time-limit = 2s+20s
+sim-time-limit = 2s+20s+4.2s
+
+**.server*.tcpApp[0].typename = "TCPEchoApp"
+**.client*.tcpApp[0].typename = "TCPSessionApp"
+
+#client app:
+**.client*.tcpApp[0].active = true
+**.client*.tcpApp[0].localPort = -1
+**.client*.tcpApp[0].connectPort = 1000
+**.client*.tcpApp[0].tOpen = 1s
+**.client*.tcpApp[0].tSend = 2s
+**.client*.tcpApp[0].sendBytes = 10000000B
+**.client*.tcpApp[0].sendScript = ""
+**.client*.tcpApp[0].tClose = 100s
+
+#server app:
+**.server*.tcpApp[0].localPort = 1000
+**.server*.tcpApp[0].echoFactor = 2.0
+**.server*.tcpApp[0].echoDelay = 0
+
+## tcp apps
+
+## tcp layer
+**.tcp.sackSupport = true
+
+# NIC configuration
+**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.frameCapacity = 10
+**.ppp[*].queue.frameCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
+
+*.configurator.networkAddress = "192.168.1.0"
+
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 3 * 3
+cliBytes <- 10000000
+srvBytes <- 2 * cliBytes
+
+# begin TEST:
+
+dataset <- loadDataset(scafile)
+
+cat("\nOMNETPP TEST RESULT:\n")
+cli <- dataset$scalars[grep("\\.client\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
+cliSent <- cli[cli$name == "bytesSent",]
+cliRcvd <- cli[cli$name == "bytesRcvd",]
+
+srv <- dataset$scalars[grep("\\.server\\.tcpApp\\[\\d\\]$",dataset$scalars$module),]
+srvSent <- srv[srv$name == "bytesSent",]
+srvRcvd <- srv[srv$name == "bytesRcvd",]
+
+cat("\nTCP SPEED TEST RESULT:\n")
+
+if(length(cliSent$value) == linecount && min(cliSent$value) == cliBytes)
+{
+    cat("CLIENT SENT OK\n")
+} else {
+    cat("CLIENT SENT BAD:\n")
+    cliSent$rate = cliSent$value*100/cliBytes
+    print(cliSent[cliSent$value != cliBytes,])
+}
+
+if(length(srvRcvd$value) == linecount && min(srvRcvd$value) == cliBytes)
+{
+    cat("SERVER RCVD OK\n")
+} else {
+    cat("SERVER RCVD BAD:\n")
+    srvRcvd$rate = srvRcvd$value*100/cliBytes
+    print(srvRcvd[srvRcvd$value != cliBytes,])
+}
+
+if(length(srvSent$value) == linecount && min(srvSent$value) == srvBytes)
+{
+    cat("SERVER SENT OK\n")
+} else {
+    cat("SERVER SENT BAD:\n")
+    srvSent$rate = srvSent$value*100/srvBytes
+    print(srvSent[srvSent$value != srvBytes,])
+}
+
+if(length(cliRcvd$value) == linecount && min(cliRcvd$value) == srvBytes)
+{
+    cat("CLIENT RCVD OK\n")
+} else {
+    cat("CLIENT RCVD BAD:\n")
+    cliRcvd$rate = cliRcvd$value*100/srvBytes
+    print(cliRcvd[cliRcvd$value != srvBytes,])
+}
+
+cat("\n")
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT:
+
+TCP SPEED TEST RESULT:
+CLIENT SENT OK
+SERVER RCVD OK
+SERVER SENT OK
+CLIENT RCVD OK
+
+%#--------------------------------------------------------------------------------------------------------------

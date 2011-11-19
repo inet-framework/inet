@@ -21,6 +21,11 @@
 
 #include "INETDefs.h"
 
+
+// Forward declarations:
+class InterfaceEntry;
+
+
 /**
  * Details class for the NF_PP_TX_BEGIN, NF_PP_TX_END and NF_PP_RX_END
  * notifications (normally triggered from PPP).
@@ -28,14 +33,14 @@
  * @see NotificationBoard
  */
 //XXX also used by Ieee80211 to signal that a msg has been acked (must use an ID to identify msg!!!), and that channel was switched (msg==NULL then)
-class TxNotifDetails : public cPolymorphic
+class TxNotifDetails : public cObject
 {
   protected:
     cPacket *msg;
     InterfaceEntry *ie;
 
   public:
-    TxNotifDetails() {msg=NULL; ie=NULL;}
+    TxNotifDetails() {msg = NULL; ie = NULL;}
 
     cPacket *getPacket() const {return msg;}
     InterfaceEntry *getInterfaceEntry() const {return ie;}

@@ -1,0 +1,13 @@
+
+#
+# www_single_org_bad.def page definiton file for the pairs scenario
+#
+# Defines a page with several resource references which do not exist on the site
+#
+
+# Load some images
+images/imageA.jpg
+images/imageB.jpg
+images/imageC.jpg
+images/imageD.jpg
+

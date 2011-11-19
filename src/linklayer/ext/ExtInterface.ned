@@ -17,7 +17,9 @@
 
 package inet.linklayer.ext;
 
-simple ExtInterface
+import inet.linklayer.IExternalNic;
+
+simple ExtInterface like IExternalNic
 {
     parameters:
         string filterString;

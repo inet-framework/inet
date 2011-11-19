@@ -16,129 +16,124 @@
  ***************************************************************************/
 
 
-/** \file RTPSenderInfo.h
- * This file declares the class RTPSenderInfo.
- */
-
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 
-#include "INETDefs.h"
+
 #include "RTPParticipantInfo.h"
-#include "reports.h"
+
+#include "INETDefs.h"
 
 
 /**
- * The class RTPSenderInfo is used by an rtp end system for storing information
+ * The class RTPSenderInfo is used by an RTP end system for storing information
  * about itself. With the stored information it can create a SenderReport.
  */
 class INET_API RTPSenderInfo : public RTPParticipantInfo
 {
+  public:
+    /**
+     * Default constructor.
+     */
+    RTPSenderInfo(uint32 ssrc = 0);
 
-    public:
+    /**
+     * Copy constructor.
+     */
+    RTPSenderInfo(const RTPSenderInfo& senderInfo);
 
-        /**
-         * Default constructor.
-         */
-        RTPSenderInfo(uint32 ssrc = 0);
+    /**
+     * Destructor.
+     */
+    virtual ~RTPSenderInfo();
 
-        /**
-         * Copy constructor.
-         */
-        RTPSenderInfo(const RTPSenderInfo& senderInfo);
+    /**
+     * Assignment operator.
+     */
+    RTPSenderInfo& operator=(const RTPSenderInfo& senderInfo);
 
-        /**
-         * Destructor.
-         */
-        virtual ~RTPSenderInfo();
+    /**
+     * Duplicates this RTPSenderInfo by calling the copy constructor.
+     */
+    virtual RTPSenderInfo *dup() const;
 
-        /**
-         * Assignment operator.
-         */
-        RTPSenderInfo& operator=(const RTPSenderInfo& senderInfo);
+    /**
+     * Stores information about this outgoing RTPPacket.
+     */
+    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
 
-        /**
-         * Duplicates this RTPSenderInfo by calling the copy constructor.
-         */
-        virtual RTPSenderInfo *dup() const;
+    /**
+     * Processes an incoming ReceptionReport for this sender.
+     */
+    virtual void processReceptionReport(ReceptionReport *report, simtime_t arrivalTime);
 
-        /**
-         * Stores information about this outgoing RTPPacket.
-         */
-        virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
+    /**
+     * Returns a SenderReport for this rtp endsystem.
+     * If it hasn't sent rtp data packets during the
+     * last 2 rtcp intervals, it returns NULL.
+     */
+    virtual SenderReport *senderReport(simtime_t now);
 
-        /**
-         * Processes an incoming ReceptionReport for this sender.
-         */
-        virtual void processReceptionReport(ReceptionReport *report, simtime_t arrivalTime);
+    /**
+     * Sets the time (simTime) when this endsystem has
+     * started sending rtp packets.
+     */
+    virtual void setStartTime(simtime_t startTime);
 
-        /**
-         * Returns a SenderReport for this rtp endsystem.
-         * If it hasn't sent rtp data packets during the
-         * last 2 rtcp intervals, it returns NULL.
-         */
-        virtual SenderReport *senderReport(simtime_t now);
+    /**
+     * Sets the clock rate (in ticks per second) this sender
+     * increases the rtp time stamp.
+     */
+    virtual void setClockRate(int clockRate);
 
-        /**
-         * Sets the time (simTime) when this endsystem has
-         * started sending rtp packets.
-         */
-        virtual void setStartTime(simtime_t startTime);
+    /**
+     * Sets the initial rtp time stamp.
+     */
+    virtual void setTimeStampBase(uint32 timeStampBase);
 
-        /**
-         * Sets the clock rate (in ticks per second) this sender
-         * increases the rtp time stamp.
-         */
-        virtual void setClockRate(int clockRate);
+    /**
+     * Sets the initial sequence number.
+     */
+    virtual void setSequenceNumberBase(uint16 sequenceNumberBase);
 
-        /**
-         * Sets the initial rtp time stamp.
-         */
-        virtual void setTimeStampBase(uint32 timeStampBase);
+    /**
+     * A sender info shall never be deleted!
+     */
+    virtual bool toBeDeleted(simtime_t now) const;
 
-        /**
-         * Sets the initial sequence number.
-         */
-        virtual void setSequenceNumberBase(uint16 sequenceNumberBase);
+  private:
+    void copy(const RTPSenderInfo& other);
 
-        /**
-         * A sender info shall never be deleted!
-         */
-        virtual bool toBeDeleted(simtime_t now);
+  protected:
+    /**
+     * The time when the transmission was started.
+     */
+    simtime_t _startTime;
 
-    protected:
+    /**
+     * The clock rate this sender increases the rtp time stamp.
+     */
+    int _clockRate;
 
-        /**
-         * The time when the transmission was started.
-         */
-        simtime_t _startTime;
+    /**
+     * The initial rtp time stamp.
+     */
+    uint32 _timeStampBase;
 
-        /**
-         * The clock rate this sender increases the rtp time stamp.
-         */
-        int _clockRate;
+    /**
+     * The initial sequence number.
+     */
+    uint16 _sequenceNumberBase;
 
-        /**
-         * The initial rtp time stamp.
-         */
-        uint32 _timeStampBase;
+    /**
+     * The number of rtp data packets this sender has sent.
+     */
+    uint32 _packetsSent;
 
-        /**
-         * The initial sequence number.
-         */
-        uint16 _sequenceNumberBase;
-
-        /**
-         * The number of rtp data packets this sender has sent.
-         */
-        uint32 _packetsSent;
-
-        /**
-         * The number of data bytes this sender has sent.
-         */
-        uint32 _bytesSent;
-
+    /**
+     * The number of data bytes this sender has sent.
+     */
+    uint32 _bytesSent;
 };
 
 #endif
-

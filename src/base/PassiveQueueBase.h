@@ -19,7 +19,10 @@
 #ifndef __INET_PASSIVEQUEUEBASE_H
 #define __INET_PASSIVEQUEUEBASE_H
 
-#include <omnetpp.h>
+#include <map>
+
+#include "INETDefs.h"
+
 #include "IPassiveQueue.h"
 
 
@@ -32,12 +35,24 @@
 class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 {
   protected:
+    typedef std::map<long, simtime_t> MsgId2TimeMap;
+    MsgId2TimeMap msgId2TimeMap;
+
     // state
     int packetRequested;
 
     // statistics
     int numQueueReceived;
     int numQueueDropped;
+
+    /** Signal with size (or 0 if unknown) of packet when received it */
+    static simsignal_t enqueuePkSignal;
+    /** Signal with size (or 0 if unknown) of packet when sent out it */
+    static simsignal_t dequeuePkSignal;
+    /** Signal with size (or 0 if unknown) of packet when dropped it */
+    static simsignal_t dropPkByQueueSignal;
+    /** Signal with value of delaying time when sent out a packet. */
+    static simsignal_t queueingTimeSignal;
 
   protected:
     virtual void initialize();
@@ -46,9 +61,9 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 
     /**
      * Inserts packet into the queue or the priority queue, or drops it
-     * (or another packet). Returns true if a packet was dropped.
+     * (or another packet). Returns NULL if successful, or the pointer of the dropped packet.
      */
-    virtual bool enqueue(cMessage *msg) = 0;
+    virtual cMessage *enqueue(cMessage *msg) = 0;
 
     /**
      * Returns a packet from the queue, or NULL if the queue is empty.
@@ -67,8 +82,16 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      * when one becomes available.
      */
     virtual void requestPacket();
+
+    /**
+     * Returns number of pending requests.
+     */
+    virtual int getNumPendingRequests() { return packetRequested; }
+
+    /**
+     * Clear all queued packets and stored requests.
+     */
+    virtual void clear();
 };
 
 #endif
-
-

@@ -23,13 +23,13 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
-import inet.linklayer.mf80211.phyLayer.decider.SnrDecider;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
+import inet.linklayer.mf80211.phyLayer.decider.SnrDecider;
+import inet.linklayer.mf80211.macLayer.CSMAMacLayer;
 
 
 // This is the easiest nic to implement "real" network behaviour. It uses
-// the CsmaMacLayer and the SnrDecider and SnrEval modules.
+// the CsmaMacLayer and the ~SnrDecider and ~SnrEval modules.
 //
 // The csma mac provides basic medium access and is used here to prevent a
 // host from trying to send a message while it is still in receive mode.
@@ -37,12 +37,12 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval;
 // The phy layer modules allow to account for collision and take fading into
 // account so that messages can actually be lost.
 //
-// IMPORTANT:<br> In order to work with the ChannelControl module the snrEval
+// IMPORTANT:<br> In order to work with the ~ChannelControl module the snrEval
 // module has to be called "snrEval" in the ned file.
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see BasicMacLayer, SnrDecider, SnrEval
+// @see BasicMacLayer, ~SnrDecider, ~SnrEval
 //
 // @author Daniel Willkomm
 //
@@ -51,8 +51,8 @@ module SnrNic
     parameters:
         @display("i=block/ifcard");
     gates:
-        input uppergateIn; // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn; // to upper layers
+        output upperLayerOut; // from upper layers
     submodules:
         mac: CSMAMacLayer {
             parameters:
@@ -67,12 +67,12 @@ module SnrNic
                 @display("p=60,150;b=32,30");
         }
     connections:
-        decider.uppergateOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.uppergateIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.uppergateOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowerLayerIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowerLayerOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowerLayerIn;
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.upperLayerOut --> upperLayerOut;
+        mac.upperLayerIn <-- upperLayerIn;
 
 }
 

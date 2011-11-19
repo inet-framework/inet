@@ -1,3 +1,0 @@
-IPv6 is not yet fully functional -- writing IPv6NeighborDiscovery is currently
-in progress, and IPv6.cc is still somewhat incomplete (e.g. regarding option
-handling).

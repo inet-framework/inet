@@ -1,0 +1,9 @@
+VoIPToolTest
+============
+
+This is basic test network for VoIP testing. It contains two hosts connected
+via two routers and a switch. The hosts have a VoIP session set up between them.
+One host (the "server") transmits the contents of an audio file to the other 
+(the "client"), which records it to a file. The two files can then be compared
+for sound quality.
+

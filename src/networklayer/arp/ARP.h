@@ -18,21 +18,22 @@
 #ifndef __INET_ARP_H
 #define __INET_ARP_H
 
-#include <stdio.h>
-#include <string.h>
-#include <vector>
+//#include <stdio.h>
+//#include <string.h>
+//#include <vector>
 #include <map>
-#include <omnetpp.h>
-#include "IPAddress.h"
-#include "ARPPacket_m.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
-#include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
-#include "IRoutingTable.h"
-#include "RoutingTableAccess.h"
 
+#include "INETDefs.h"
 
+#include "MACAddress.h"
+#include "ModuleAccess.h"
+#include "IPv4Address.h"
+
+// Forward declarations:
+class ARPPacket;
+class IInterfaceTable;
+class InterfaceEntry;
+class IRoutingTable;
 
 /**
  * ARP implementation.
@@ -41,11 +42,11 @@ class INET_API ARP : public cSimpleModule
 {
   public:
     struct ARPCacheEntry;
-    typedef std::map<IPAddress, ARPCacheEntry*> ARPCache;
+    typedef std::map<IPv4Address, ARPCacheEntry*> ARPCache;
     typedef std::vector<cMessage*> MsgPtrVector;
 
-    // IPAddress -> MACAddress table
-    // TBD should we key it on (IPAddress, InterfaceEntry*)?
+    // IPv4Address -> MACAddress table
+    // TBD should we key it on (IPv4Address, InterfaceEntry*)?
     struct ARPCacheEntry
     {
         InterfaceEntry *ie; // NIC to send the packet to
@@ -64,13 +65,20 @@ class INET_API ARP : public cSimpleModule
     int retryCount;
     simtime_t cacheTimeout;
     bool doProxyARP;
+    bool globalARP;
 
     long numResolutions;
     long numFailedResolutions;
     long numRequestsSent;
     long numRepliesSent;
 
+    static simsignal_t sentReqSignal;
+    static simsignal_t sentReplySignal;
+    static simsignal_t failedResolutionSignal;
+    static simsignal_t initiatedResolutionSignal;
+
     ARPCache arpCache;
+    static ARPCache globalArpCache;
 
     cQueue pendingQueue; // outbound packets waiting for ARP resolution
     int nicOutBaseGateId;  // id of the nicOut[0] gate
@@ -81,9 +89,13 @@ class INET_API ARP : public cSimpleModule
   public:
     ARP() {}
     virtual ~ARP();
+    int numInitStages() const {return 5;}
+    const MACAddress getDirectAddressResolution(const IPv4Address &) const;
+    const IPv4Address getInverseAddressResolution(const MACAddress &) const;
+    void setChangeAddress(const IPv4Address &);
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -91,15 +103,21 @@ class INET_API ARP : public cSimpleModule
     virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
 
     virtual void initiateARPResolution(ARPCacheEntry *entry);
-    virtual void sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress);
+    virtual void sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
-    virtual bool addressRecognized(IPAddress destAddr, InterfaceEntry *ie);
+    virtual bool addressRecognized(IPv4Address destAddr, InterfaceEntry *ie);
     virtual void processARPPacket(ARPPacket *arp);
     virtual void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 
     virtual void dumpARPPacket(ARPPacket *arp);
     virtual void updateDisplayString();
 
+};
+
+class INET_API ArpAccess : public ModuleAccess<ARP>
+{
+  public:
+    ArpAccess() : ModuleAccess<ARP>("arp") {}
 };
 
 #endif

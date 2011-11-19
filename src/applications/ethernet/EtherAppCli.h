@@ -19,6 +19,7 @@
 #define __INET_ETHERAPPCLI_H
 
 #include "INETDefs.h"
+
 #include "MACAddress.h"
 
 
@@ -32,17 +33,25 @@ class INET_API EtherAppCli : public cSimpleModule
     long seqNum;
     cPar *reqLength;
     cPar *respLength;
-    cPar *waitTime;
+    cPar *sendInterval;
 
     int localSAP;
     int remoteSAP;
     MACAddress destMACAddress;
 
+    // self messages
+    cMessage *timerMsg;
+    simtime_t stopTime;
+
     // receive statistics
     long packetsSent;
     long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
+
+  public:
+    EtherAppCli();
+    ~EtherAppCli();
 
   protected:
     virtual void initialize(int stage);
@@ -53,10 +62,8 @@ class INET_API EtherAppCli : public cSimpleModule
     virtual MACAddress resolveDestMACAddress();
 
     virtual void sendPacket();
-    virtual void receivePacket(cMessage *msg);
+    virtual void receivePacket(cPacket *msg);
     virtual void registerDSAP(int dsap);
 };
 
 #endif
-
-

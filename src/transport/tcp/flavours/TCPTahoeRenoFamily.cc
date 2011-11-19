@@ -37,7 +37,7 @@ std::string TCPTahoeRenoFamilyStateVariables::detailedInfo() const
 {
     std::stringstream out;
     out << TCPBaseAlgStateVariables::detailedInfo();
-    out << "ssthresh = " << ssthresh << "\n";
+    out << "ssthresh=" << ssthresh << "\n";
     return out.str();
 }
 
@@ -47,5 +47,3 @@ TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
   state((TCPTahoeRenoFamilyStateVariables *&)TCPAlgorithm::state)
 {
 }
-
-

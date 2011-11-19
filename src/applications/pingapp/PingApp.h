@@ -16,7 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPvXAddress.h"
 
 class PingPayload;
@@ -31,7 +32,8 @@ class PingPayload;
 class INET_API PingApp : public cSimpleModule
 {
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 4; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -47,7 +49,7 @@ class INET_API PingApp : public cSimpleModule
     IPvXAddress destAddr;
     IPvXAddress srcAddr;
     int packetSize;
-    cPar *intervalp;
+    cPar *sendIntervalp;
     int hopLimit;
     int count;
     simtime_t startTime;
@@ -60,10 +62,14 @@ class INET_API PingApp : public cSimpleModule
 
     // statistics
     cStdDev delayStat;
-    cOutVector delayVector;
-    cOutVector dropVector;
+    static simsignal_t endToEndDelaySignal;
+    static simsignal_t dropSignal;
+    static simsignal_t outOfOrderArrivalSignal;
+    static simsignal_t pingTxSignal;
+    static simsignal_t pingRxSignal;
     long dropCount;
     long outOfOrderArrivalCount;
+    long numPongs;
 };
 
 

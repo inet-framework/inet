@@ -1,6 +1,0 @@
-This implementation (based on the Mobility Framework) currently only supports
-802.11b ad-hoc mode. Adding functionality to support infrastructure mode
-(access points, handling management frames, etc) is in progress.
-
-We're seeking contributors to integrate IPv6Suite's 802.11 model ("Wireless")
-as well.

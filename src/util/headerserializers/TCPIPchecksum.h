@@ -20,13 +20,7 @@
 #define __TCPIPCHECKSUM_H
 
 
-#include "TCPSegment.h"
-#include "TCPSegment_m.h"
-#include "IPvXAddress.h"
-
-#include "headers/defs.h"
-
-#include "headers/tcp.h"
+#include "INETDefs.h"
 
 /**
  * Calculates checksum.

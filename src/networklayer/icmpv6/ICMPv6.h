@@ -21,7 +21,7 @@
 #define __ICMPv6_H__
 
 #include <omnetpp.h>
-#include "RoutingTable6Access.h"
+
 #include "IPv6Datagram.h"
 #include "ICMPv6Message_m.h"
 #include "IPv6ControlInfo.h"
@@ -53,7 +53,7 @@ class INET_API ICMPv6 : public cSimpleModule
      * in response to a received bogus packet from the transport layer (like UDP).
      * The ICMP error packet needs to include (part of) the original IP datagram,
      * so this function will wrap back the transport packet into the IP datagram
-     * based on its IPControlInfo.
+     * based on its IPv4ControlInfo.
      */
     virtual void sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
 
@@ -65,7 +65,7 @@ class INET_API ICMPv6 : public cSimpleModule
     virtual ICMPv6Message *createDestUnreachableMsg(int code);
     virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
     virtual ICMPv6Message *createTimeExceededMsg(int code);
-    virtual ICMPv6Message *createParamProblemMsg(int code);//TODO:Section 3.4 describes a pointer. What is it?
+    virtual ICMPv6Message *createParamProblemMsg(int code); //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**

@@ -52,11 +52,11 @@ void SimpleClassifier::handleMessage(cMessage *)
 
 // IClassifier implementation (method invoked by MPLS)
 
-bool SimpleClassifier::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     // never label OSPF(TED) and RSVP traffic
 
-    switch(ipdatagram->getTransportProtocol())
+    switch (ipdatagram->getTransportProtocol())
     {
         case IP_PROT_OSPF:
         case IP_PROT_RSVP:
@@ -150,7 +150,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
         newFec.id = fecid;
         newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPAddress());
+        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
 
         newFec.inLabel = getParameterIntValue(fec, "label");
 
@@ -176,7 +176,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
         newFec.id = fecid;
         newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPAddress());
+        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
         newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();

@@ -22,8 +22,8 @@ package inet.networklayer.extras;
 // Module for managing node failure and recovery in the network. If used,
 // it should have exactly one instance in the whole network.
 //
-// FailureManager does not send or receive messages, and has no parameters
-// either. Instead, it is invoked from ScenarioManager scripts, for example:
+// ~FailureManager does not send or receive messages, and has no parameters
+// either. Instead, it is invoked from ~ScenarioManager scripts, for example:
 //
 // <pre><nohtml>
 // <scenario>
@@ -36,18 +36,17 @@ package inet.networklayer.extras;
 // </scenario>
 // </nohtml></pre>
 //
-// It is currently only used with MPLS simulations, and supports the following
+// It is currently only used with ~MPLS simulations, and supports the following
 // commands:
 //
 // - <code>shutdown</code>: replaces a router module named by the <tt>target</tt> attribute
 //   with another module that represents a failed router. It currently replaces
-//   RSVP_LSR with RSVP_FAILED, LDP_LSR with LDP_FAILED, and QuaggaRouter with
-//   FailedRouter.
+//   ~RSVP_LSR with ~RSVP_FAILED, ~LDP_LSR with ~LDP_FAILED.
 // - <code>startup</code>: the inverse of <tt>shutdown</tt>: replaces a <i>failed</i>
 //   router model named by the <tt>target</tt> attribute with an operational host/router
 //   module type.
 //
-// The operation of FailureManager is likely to get refined and generalized in next
+// The operation of ~FailureManager is likely to get refined and generalized in next
 // versions.
 //
 simple FailureManager

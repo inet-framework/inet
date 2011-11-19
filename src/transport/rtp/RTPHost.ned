@@ -1,19 +1,22 @@
-// the original file was included in the UDP sockets example
+// the original file was included in the ~UDP sockets example
 
 package inet.transport.rtp;
 
-import inet.applications.rtpapp.RTPApplication;
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.NetworkLayer;
+import ned.IdealChannel;
 import inet.transport.udp.UDP;
+import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
+import inet.applications.rtpapp.RTPApplication;
 
 
 module RTPHost
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
         string profileName;
         string destinationAddress;
         int portNumber;
@@ -21,9 +24,9 @@ module RTPHost
         string fileName;
         int payloadType;
         // network information
-        bool IPForward;
-        string routingFile;
-        @display("i=device/pc2");
+        bool IPForward = default(false);
+        string routingFile = default("");
+        @display("i=device/pc2;bgb=323,371");
 
     gates:
         inout pppg[] @labels(PPPFrame-conn);
@@ -52,13 +55,15 @@ module RTPHost
                 payloadType = payloadType;
                 @display("p=161,36");
         }
-        rtpLayer: RTPLayer {
-            parameters:
-                @display("p=161,104");
+        rtp: RTP {
+            @display("p=163,104");
         }
-        udpModule: UDP {
+        rtcp: RTCP {
+            @display("p=243,104");
+        }
+        udp: UDP {
             parameters:
-                @display("p=161,170");
+                @display("p=202,173");
             gates:
                 appIn[2];
                 appOut[2];
@@ -66,28 +71,29 @@ module RTPHost
         networkLayer: NetworkLayer {
             parameters:
                 proxyARP = false;
-                @display("p=161,246");
+                @display("p=202,244");
             gates:
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=161,324,row");
+                @display("p=202,320,row");
         }
+
     connections allowunconnected:
         // transport connections
-        application.rtpOut --> rtpLayer.appIn;
-        application.rtpIn <-- rtpLayer.appOut;
+        application.rtpOut --> rtp.appIn;
+        application.rtpIn <-- rtp.appOut;
 
-        rtpLayer.toUDPfromRTP --> udpModule.appIn[0];
-        rtpLayer.fromUDPtoRTP <-- udpModule.appOut[0];
+        rtp.udpOut --> udp.appIn[0];
+        rtp.udpIn <-- udp.appOut[0];
 
-        rtpLayer.toUDPfromRTCP --> udpModule.appIn[1];
-        rtpLayer.fromUDPtoRTCP <-- udpModule.appOut[1];
+        rtcp.udpOut --> udp.appIn[1];
+        rtcp.udpIn <-- udp.appOut[1];
 
-        networkLayer.udpOut --> udpModule.ipIn;
-        networkLayer.udpIn <-- udpModule.ipOut;
+        networkLayer.udpOut --> udp.ipIn;
+        networkLayer.udpIn <-- udp.ipOut;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
@@ -96,5 +102,7 @@ module RTPHost
             ppp[i].netwIn <-- networkLayer.ifOut[i];
         }
 
+        rtp.rtcpOut --> IdealChannel --> rtcp.rtpIn;
+        rtcp.rtpOut --> IdealChannel --> rtp.rtcpIn;
 }
 

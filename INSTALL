@@ -62,3 +62,41 @@ Note:
 - If you add/remove files/directories later in the src directory, you MUST
   re-create your makefile. Run "make makefiles" again if you are building
   from the command line. (The IDE does it for you automatically)
+
+VoIPTool feature
+================
+
+VoIPTool has only been tested on Linux. This does not mean it won't work on other
+systems, but your milage may vary on getting it up and running.
+
+
+PREREQUISITES.
+
+This library is an add-on to the INET Framework for OMNeT++. It requires a working
+installation of OMNeT++ 4.1 or later, and INET Framework version 20100723.
+
+VoIPTool requires a "devel" package of the avcodec library (part of FFmpeg) 
+to be installed on your system. On Ubuntu, this package can be installed with the 
+following command:
+
+$ sudo apt-get install libavcodec-dev
+$ sudo apt-get install libavformat-dev
+
+The package name and installation command may vary for other Linux systems.
+
+
+INSTALLATION USING THE OMNeT++ IDE.
+
+Start the IDE, and make sure you have a working INET Framework installation 
+as a project named "inet".
+
+Import the VoIPTool project into the IDE (File->Import->General->Existing 
+project into workspace), and make sure it has the "inet" project marked
+as dependency (Project->Properties->Project References).
+
+Hit Ctrl+B to build.
+
+Run the example simulations to check everything works fine.
+
+---
+Andras

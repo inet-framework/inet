@@ -16,15 +16,18 @@
 */
 
 #include <stdio.h>
+
 #include "EtherEncap.h"
+
 #include "EtherFrame_m.h"
-#include "Ieee802Ctrl_m.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
-#include "EtherMAC.h"
 
 
 Define_Module(EtherEncap);
+
+simsignal_t EtherEncap::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::rcvdPkBytesFromMACSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::sentPauseSignal = SIMSIGNAL_NULL;
 
 void EtherEncap::initialize()
 {
@@ -32,6 +35,11 @@ void EtherEncap::initialize()
     WATCH(seqNum);
 
     totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
+
+    rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
+    rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
+    sentPauseSignal = registerSignal("sentPause");
+
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
     WATCH(totalPauseSent);
@@ -46,7 +54,7 @@ void EtherEncap::handleMessage(cMessage *msg)
     else
     {
         // from higher layer
-        switch(msg->getKind())
+        switch (msg->getKind())
         {
             case IEEE802CTRL_DATA:
             case 0: // default message kind (0) is also accepted
@@ -71,7 +79,7 @@ void EtherEncap::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
-    getDisplayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
@@ -80,6 +88,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)msg->getByteLength(), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
+    emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
@@ -106,6 +115,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 {
     totalFromMAC++;
+    emit(rcvdPkBytesFromMACSignal, (long)(frame->getByteLength()));
 
     // decapsulate and attach control info
     cPacket *higherlayermsg = frame->decapsulate();
@@ -147,13 +157,10 @@ void EtherEncap::handleSendPause(cMessage *msg)
     send(frame, "lowerLayerOut");
     delete msg;
 
+    emit(sentPauseSignal, pauseUnits);
     totalPauseSent++;
 }
 
 void EtherEncap::finish()
 {
-    recordScalar("packets from higher layer", totalFromHigherLayer);
-    recordScalar("frames from MAC", totalFromMAC);
 }
-
-

@@ -1,0 +1,37 @@
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <set-channel-attr t="2.1" src-module="client1" src-gate="pppg$o[0]" attr="datarate" value="1Mbps"/>
+    <at t="3.3">
+        <disconnect src-module="server" src-gate="pppg$o[0]" />
+    </at>
+    <at t="3.32">
+        <disconnect src-module="client1" src-gate="pppg$o[0]" />
+    </at>
+    <at t="3.7">
+        <connect src-module="server" src-gate="pppg$o[0]"
+                 dest-module="client1" dest-gate="pppg$i[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+        <connect src-module="client1" src-gate="pppg$o[0]"
+                 dest-module="server" dest-gate="pppg$i[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+    <set-channel-attr t="5" src-module="client1" src-gate="pppg$o[0]" attr="datarate" value="10000bps"/>
+    <at t="12.3">
+        <disconnect src-module="server" src-gate="pppg[0]" />
+    </at>
+    <at t="12.7">
+        <connect src-module="server" src-gate="pppg[0]"
+                 dest-module="client1" dest-gate="pppg[0]" 
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="10Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+</scenario>
+

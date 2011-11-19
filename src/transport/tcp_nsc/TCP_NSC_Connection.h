@@ -20,12 +20,18 @@
 #ifndef __TCP_NSC_CONNECTION_H
 #define __TCP_NSC_CONNECTION_H
 
-#include <omnetpp.h>
+#ifndef HAVE_NSC
+#error Please install NSC or disable 'TCP_NSC' feature
+#endif
+
+
+#include "INETDefs.h"
+
 #include "IPvXAddress.h"
 
 // forward declarations:
-class TCP_NSC;
 class TCPConnectInfo;
+class TCP_NSC;
 class TCP_NSC_ReceiveQueue;
 class TCP_NSC_SendQueue;
 class INetStack;
@@ -40,7 +46,7 @@ class INET_API TCP_NSC_Connection
     class SockAddr
     {
       public:
-        SockAddr() : ipAddrM(),portM(-1) {}
+        SockAddr() : ipAddrM(), portM(-1) {}
         IPvXAddress ipAddrM;
         unsigned short portM;
 

@@ -18,8 +18,10 @@
  **************************************************************************/
 
 
+#include "opp_utils.h"
 #include "Mac80211.h"
 #include "Ieee802Ctrl_m.h"
+#include "PhyControlInfo_m.h"  // for COLLISION and BITERROR
 #include "RadioState.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -44,7 +46,7 @@ Mac80211::~Mac80211()
 
 void Mac80211::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MacBase::initialize(stage);
 
     if (stage == 0)
     {
@@ -87,16 +89,8 @@ void Mac80211::registerInterface()
 {
     InterfaceEntry *e = new InterfaceEntry();
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    // interface name: NIC module's name without special characters ([])
+    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     const char *addrstr = par("address");
     if (!strcmp(addrstr, "auto"))
@@ -537,7 +531,7 @@ void Mac80211::handleEndContentionTimer()
         // removes the packet from the queue without waiting for an acknowledgement
         Mac80211Pkt *temp = fromUpperLayer.front();
         fromUpperLayer.pop_front();
-        delete(temp);
+        delete (temp);
     }
 }
 
@@ -903,7 +897,7 @@ void Mac80211::testMaxAttempts()
         // delete the frame to transmit
         Mac80211Pkt *temp = fromUpperLayer.front();
         fromUpperLayer.pop_front();
-        delete(temp);
+        delete (temp);
     }
 }
 
@@ -911,7 +905,7 @@ void Mac80211::testMaxAttempts()
  * Handle change nofitications. In this layer it is usually
  * information about the radio channel, i.e. if it is IDLE etc.
  */
-void Mac80211::receiveChangeNotification(int category, const cPolymorphic *details)
+void Mac80211::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

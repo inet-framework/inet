@@ -21,7 +21,7 @@
 package inet.linklayer.mf80211.phyLayer.decider;
 
 //
-// Decider module to use with digital channel modules like GilbertElliotSnr
+// Decider module to use with digital channel modules like ~GilbertElliotSnr
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
@@ -31,6 +31,6 @@ simple ErrAndCollDecider
         bool debug = default(false); // debug switch
         double snrThresholdLevel @unit("dB");
     gates:
-        output uppergateOut;
-        input lowergateIn;
+        output upperLayerOut;
+        input lowerLayerIn;
 }

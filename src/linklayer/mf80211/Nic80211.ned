@@ -20,9 +20,10 @@
 
 package inet.linklayer.mf80211;
 
-import inet.linklayer.mf80211.macLayer.Mac80211;
-import inet.linklayer.mf80211.phyLayer.decider.Decider80211;
 import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval80211;
+import inet.linklayer.mf80211.phyLayer.decider.Decider80211;
+import inet.linklayer.mf80211.macLayer.Mac80211;
+import inet.linklayer.IWirelessNic;
 
 
 //
@@ -30,16 +31,17 @@ import inet.linklayer.mf80211.phyLayer.snrEval.SnrEval80211;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @see Mac80211, Decider80211, SnrEval80211
+// @see ~Mac80211, ~Decider80211, ~SnrEval80211
 // @author Marc Loebbers
 //
-module Nic80211
+module Nic80211 like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard");
+        string mgmtType = "";      // unused
     gates:
-        input uppergateIn @labels(Ieee802Ctrl); // to upper layers
-        output uppergateOut; // from upper layers
+        input upperLayerIn @labels(Ieee802Ctrl); // to upper layers
+        output upperLayerOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
         mac: Mac80211 {
@@ -56,11 +58,11 @@ module Nic80211
         }
     connections:
         radioIn --> snrEval.radioIn;
-        decider.uppergateOut --> { @display("m=m,50,50,75,0"); } --> mac.lowergateIn;
-        snrEval.uppergateIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowergateOut;
-        snrEval.uppergateOut --> { @display("m=m,73,0,50,50"); } --> decider.lowergateIn;
+        decider.upperLayerOut --> { @display("m=m,50,50,75,0"); } --> mac.lowerLayerIn;
+        snrEval.upperLayerIn <-- { @display("m=m,25,0,25,0"); } <-- mac.lowerLayerOut;
+        snrEval.upperLayerOut --> { @display("m=m,73,0,50,50"); } --> decider.lowerLayerIn;
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.upperLayerOut --> upperLayerOut;
+        mac.upperLayerIn <-- upperLayerIn;
 }
 

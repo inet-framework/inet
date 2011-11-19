@@ -36,7 +36,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
     IPvXAddress localAddr, remoteAddr;
     int localPort, remotePort;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -48,10 +48,10 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             localPort = openCmd->getLocalPort();
             remotePort = openCmd->getRemotePort();
 
-            if (remoteAddr.isUnspecified() || remotePort==-1)
-                opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+            if (remoteAddr.isUnspecified() || remotePort == -1)
+                throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
-            if (localPort==-1)
+            if (localPort == -1)
             {
                 localPort = tcpMain->getEphemeralPort();
                 tcpEV << "Assigned ephemeral port " << localPort << "\n";
@@ -69,7 +69,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             break;
 
         default:
-            opp_error("Error processing command OPEN_ACTIVE: connection already exists");
+            throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: connection already exists");
     }
 
     delete openCmd;
@@ -82,7 +82,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     IPvXAddress localAddr;
     int localPort;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -93,8 +93,8 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             localAddr = openCmd->getLocalAddr();
             localPort = openCmd->getLocalPort();
 
-            if (localPort==-1)
-                opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
+            if (localPort == -1)
+                throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: local port must be specified");
 
             tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
@@ -102,7 +102,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             break;
 
         default:
-            opp_error("Error processing command OPEN_PASSIVE: connection already exists");
+            throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: connection already exists");
     }
 
     delete openCmd;
@@ -115,10 +115,10 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command SEND: connection not open");
+            throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");
 
         case TCP_S_LISTEN:
             tcpEV << "SEND command turns passive open into active open, sending initial SYN\n";
@@ -151,7 +151,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
         case TCP_S_TIME_WAIT:
-            opp_error("Error processing command SEND: connection closing");
+            throw cRuntimeError(tcpMain, "Error processing command SEND: connection closing");
     }
 
     delete sendCommand; // msg itself has been taken by the sendQueue
@@ -162,10 +162,10 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     delete tcpCommand;
     delete msg;
 
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command CLOSE: connection not open");
+            throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
 
         case TCP_S_LISTEN:
             // Nothing to do here
@@ -186,21 +186,23 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_max==sendQueue->getBufferEndSeq())
+            if (state->snd_max == sendQueue->getBufferEndSeq())
             {
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
                 tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
-                if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
+
+                if (unackedVector)
+                    unackedVector->record(state->snd_max - state->snd_una);
 
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
             else
             {
-                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq()-state->snd_max) <<
-                      " bytes pending, deferring sending of FIN\n";
+                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq() - state->snd_max)
+                      << " bytes pending, deferring sending of FIN\n";
                 event = TCP_E_IGNORE;
             }
             state->send_fin = true;
@@ -214,7 +216,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
         case TCP_S_TIME_WAIT:
             // RFC 793 is not entirely clear on how to handle a duplicate close request.
             // Here we treat it as an error.
-            opp_error("Duplicate CLOSE command: connection already closing");
+            throw cRuntimeError(tcpMain, "Duplicate CLOSE command: connection already closing");
     }
 }
 
@@ -228,10 +230,10 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     // state, flush queues etc -- no need to do it here. Also, we don't need to
     // send notification to the user, they know what's going on.
     //
-    switch(fsm.getState())
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
-            opp_error("Error processing command ABORT: connection not open");
+            throw cRuntimeError("Error processing command ABORT: connection not open");
 
         case TCP_S_SYN_RCVD:
         case TCP_S_ESTABLISHED:
@@ -253,8 +255,8 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
 {
     delete tcpCommand; // but reuse msg for reply
 
-    if (fsm.getState()==TCP_S_INIT)
-        opp_error("Error processing command STATUS: connection not open");
+    if (fsm.getState() == TCP_S_INIT)
+        throw cRuntimeError("Error processing command STATUS: connection not open");
 
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
 
@@ -284,5 +286,3 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
     msg->setControlInfo(statusInfo);
     sendToApp(msg);
 }
-
-

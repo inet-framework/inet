@@ -15,112 +15,112 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file sdes.h
- * This file declares the source description classes SDESItem and SDESChunk.
- */
 
-#ifndef __INET_SDES_H
-#define __INET_SDES_H
+#ifndef __INET_RTP_SDES_H
+#define __INET_RTP_SDES_H
 
 #include "INETDefs.h"
 
 /**
  * The class SDESItem is used for storing a source description item
- * (type of description, description string) for an rtp end system.
+ * (type of description, description string) for an RTP end system.
  */
 class INET_API SDESItem : public cObject
 {
+  public:
+    /**
+     * This enumeration holds the types of source description items
+     * as defined in the RFC. In this implementation only SDES_UNDEF
+     * and SDES_CNAME are usable.
+     */
+    enum SDES_ITEM_TYPE
+    {
+        SDES_UNDEF = 0,
+        SDES_CNAME = 1,
+        SDES_NAME = 2,
+        SDES_EMAIL = 3,
+        SDES_PHONE = 4,
+        SDES_LOC = 5,
+        SDES_TOOL = 6,
+        SDES_NOTE = 7,
+        SDES_PRIV = 8
+    };
 
-    public:
-        /**
-         * This enumeration holds the types of source description items
-         * as defined in the rfc. In this implementation only SDES_UNDEF
-         * and SDES_CNAME are usable.
-         */
-        enum SDES_ITEM_TYPE {
-            SDES_UNDEF = 0,
-            SDES_CNAME = 1,
-            SDES_NAME = 2,
-            SDES_EMAIL = 3,
-            SDES_PHONE = 4,
-            SDES_LOC = 5,
-            SDES_TOOL = 6,
-            SDES_NOTE = 7,
-            SDES_PRIV = 8
-        };
+    /**
+     * Default constructor.
+     */
+    SDESItem();
 
-        /**
-         * Default constructor.
-         */
-        SDESItem();
+    /**
+     * Constructor which sets the entry.
+     */
+    SDESItem(SDES_ITEM_TYPE type, const char *content);
 
-        /**
-         * Constructor which sets the entry.
-         */
-        SDESItem(SDES_ITEM_TYPE type, const char *content);
+    /**
+     * Copy constructor.
+     */
+    SDESItem(const SDESItem& sdesItem);
 
-        /**
-         * Copy constructor.
-         */
-        SDESItem(const SDESItem& sdesItem);
+    /**
+     * Destructor.
+     */
+    virtual ~SDESItem();
 
-        /**
-         * Destructor.
-         */
-        virtual ~SDESItem();
+    /**
+     * Assignment operator.
+     */
+    SDESItem& operator=(const SDESItem& sdesItem);
 
-        /**
-         * Assignment operator.
-         */
-        SDESItem& operator=(const SDESItem& sdesItem);
+    /**
+     * Duplicates theis SDESItem by calling the copy constructor.
+     */
+    virtual SDESItem *dup() const;
 
-        /**
-         * Duplicates theis SDESItem by calling the copy constructor.
-         */
-        virtual SDESItem *dup() const;
+    /**
+     * Writes a short info about this SDESItem into the given string.
+     */
+    virtual std::string info() const;
 
-        /**
-         * Writes a short info about this SDESItem into the given string.
-         */
-        virtual std::string info();
+    /**
+     * Writes an info about this SDESItem into the give output stream.
+     */
+    virtual void dump(std::ostream& os) const;
 
-        /**
-         * Writes an info about this SDESItem into the give output stream.
-         */
-        virtual void dump(std::ostream& os);
+    /**
+     * Returns the type of this sdes item.
+     */
+    virtual SDES_ITEM_TYPE getType() const;
 
-        /**
-         * Returns the type of this sdes item.
-         */
-        virtual SDES_ITEM_TYPE getType();
+    /**
+     * Returns the stored sdes string.
+     */
+    virtual const char *getContent() const;
 
-        /**
-         * Returns the stored sdes string.
-         */
-        virtual const char *getContent();
+    /**
+     * This method returns the size of this SDESItem in bytes as it
+     * would be in the real world.
+     */
+    virtual int getLength() const;
 
-        /**
-         * This method returns the size of this SDESItem in bytes as it
-         * would be in the real world.
-         */
-        virtual int getLength();
+  private:
+    void copy(const SDESItem& other);
+    void clean() {}     //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
 
-    protected:
+  protected:
+    /**
+     * The type of this SDESItem.
+     */
+    SDES_ITEM_TYPE _type;
 
-        /**
-         * The type of this SDESItem.
-         */
-        SDES_ITEM_TYPE _type;
+    /**
+     * The length of this SDESItem.
+     */
+    int _length;
 
-        /**
-         * The length of this SDESItem.
-         */
-        int _length;
-
-        /**
-         * The sdes string.
-         */
-        const char *_content;
+    /**
+     * The sdes string.
+     */
+    const char *_content;
 };
 
 
@@ -130,76 +130,76 @@ class INET_API SDESItem : public cObject
  */
 class INET_API SDESChunk : public cArray
 {
+  public:
+    /**
+     * Default constructor.
+     */
+    SDESChunk(const char *name = NULL, uint32 ssrc = 0);
 
-    public:
-        /**
-         * Default constructor.
-         */
-        SDESChunk(const char *name = NULL, uint32 ssrc = 0);
+    /**
+     * Copy constructor.
+     */
+    SDESChunk(const SDESChunk& sdesChunk);
 
-        /**
-         * Copy constructor.
-         */
-        SDESChunk(const SDESChunk& sdesChunk);
+    /**
+     * Destructor.
+     */
+    virtual ~SDESChunk();
 
-        /**
-         * Destructor.
-         */
-        virtual ~SDESChunk();
+    /**
+     * Operator equal.
+     */
+    SDESChunk& operator=(const SDESChunk& sdesChunk);
 
-        /**
-         * Operator equal.
-         */
-        SDESChunk& operator=(const SDESChunk& sdesChunk);
+    /**
+     * Duplicates this SDESChunk by calling the copy constructor.
+     */
+    virtual SDESChunk *dup() const;
 
-        /**
-         * Duplicates this SDESChunk by calling the copy constructor.
-         */
-        virtual SDESChunk *dup() const;
+    /**
+     * Writes a short info about this SDESChunk into the given string.
+     */
+    virtual std::string info() const;
 
-        /**
-         * Writes a short info about this SDESChunk into the given string.
-         */
-        virtual std::string info();
+    /**
+     * Writes a longer info about this SDESChunk into the given stream.
+     */
+    virtual void dump(std::ostream& os) const;
 
-        /**
-         * Writes a longer info about this SDESChunk into the given stream.
-         */
-        virtual void dump(std::ostream& os);
+    /**
+     * Adds an SDESItem to this SDESChunk. If there is already an SDESItem
+     * of the same type in this SDESChunk it is replaced by the new one.
+     */
+    virtual void addSDESItem(SDESItem *item);
 
-        /**
-         * Adds an SDESItem to this SDESChunk. If there is already an SDESItem
-         * of the same type in this SDESChunk it is replaced by the new one.
-         */
-        virtual void addSDESItem(SDESItem *item);
+    /**
+     * Returns the ssrc identifier this SDESChunk is for.
+     */
+    virtual uint32 getSsrc() const;
 
-        /**
-         * Returns the ssrc identifier this SDESChunk is for.
-         */
-        virtual uint32 getSSRC();
+    /**
+     * Sets the ssrc identifier this SDESChunk is for.
+     */
+    virtual void setSsrc(uint32 ssrc);
 
-        /**
-         * Sets the ssrc identifier this SDESChunk is for.
-         */
-        virtual void setSSRC(uint32 ssrc);
+    /**
+     * Returns the length in bytes of this SDESChunk.
+     */
+    virtual int getLength() const;
 
-        /**
-         * Returns the length in bytes of this SDESChunk.
-         */
-        virtual int getLength();
+  private:
+    void copy(const SDESChunk& other);
 
-    protected:
+  protected:
+    /**
+     * The ssrc identifier this SDESChunk is for.
+     */
+    uint32 _ssrc;
 
-        /**
-         * The ssrc identifier this SDESChunk is for.
-         */
-        uint32 _ssrc;
-
-        /**
-         * The length in bytes of this SDESChunk.
-         */
-        int _length;
+    /**
+     * The length in bytes of this SDESChunk.
+     */
+    int _length;
 };
 
 #endif
-

@@ -16,12 +16,12 @@
 package inet.networklayer.rsvp_te;
 
 //
-// Implements \RSVP-TE, a signalling protocol for MPLS. The module
-// processes \RSVP-TE messages, installs labels and does the reservation
+// Implements RSVP-TE, a signalling protocol for MPLS. The module
+// processes RSVP-TE messages, installs labels and does the reservation
 // along LSP paths.
 //
 // Paths can be specified statically in an XML config file ("traffic"
-// parameter), or can be set up and torn down dynamically with ScenarioManager
+// parameter), or can be set up and torn down dynamically with ~ScenarioManager
 // commands.
 //
 // An example traffic.xml file:
@@ -56,7 +56,7 @@ package inet.networklayer.rsvp_te;
 //
 // In the route, <node> stands for strict hop, and <lnode> for loose hop.
 //
-// RSVP understands the "add-session" and "del-session" ScenarioManager
+// ~RSVP understands the "add-session" and "del-session" ~ScenarioManager
 // commands. The contents of the <add-session> element can be the same
 // as the <session> element for the traffic.xml above.
 // The <del-command> element syntax is also similar, but only
@@ -90,11 +90,11 @@ package inet.networklayer.rsvp_te;
 // </scenario>
 // </pre>
 //
-// \RSVP messages are subclassed from RSVPMessage, and include RSVPPathMsg,
-// RSVPPathTear, RSVPPathError, RSVPResvMsg and RSVPHelloMsg.
+// RSVP messages are subclassed from ~RSVPMessage, and include ~RSVPPathMsg,
+// ~RSVPPathTear, ~RSVPPathError, ~RSVPResvMsg and ~RSVPHelloMsg.
 //
-// \RSVP-TE communicates with the following components in the system:
-// TED, MPLS, and may receive commands from ScenarioManager.
+// RSVP-TE communicates with the following components in the system:
+// ~TED, ~MPLS, and may receive commands from ~ScenarioManager.
 //
 simple RSVP
 {
@@ -105,8 +105,8 @@ simple RSVP
         double helloTimeout @unit(s);
         @display("i=block/control");
     gates:
-        input ipIn @labels(IPControlInfo/up);
-        output ipOut @labels(IPControlInfo/down);
+        input ipIn @labels(IPv4ControlInfo/up);
+        output ipOut @labels(IPv4ControlInfo/down);
         input mplsSwitchIn;
         input appIn;
 }

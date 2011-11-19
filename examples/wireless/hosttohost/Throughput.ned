@@ -19,20 +19,21 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.applications.ethernet.EtherAppCli;
-import inet.base.NotificationBoard;
+import inet.world.radio.ChannelControl;
+import inet.nodes.wireless.AccessPoint;
+import inet.mobility.models.StationaryMobility;
+import inet.mobility.models.CircleMobility;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
-import inet.mobility.CircleMobility;
-import inet.mobility.NullMobility;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.nodes.wireless.WirelessAPSimplified;
-import inet.world.ChannelControl;
+import inet.base.NotificationBoard;
+import inet.applications.ethernet.EtherAppCli;
 
 
 module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
+        @node();
     gates:
         input radioIn @directIn;
 
@@ -46,9 +47,10 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
+                mgmtType = "Ieee80211MgmtSTASimplified";
         }
         mobility: CircleMobility {
             parameters:
@@ -56,13 +58,14 @@ module ThroughputClient
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        cli.out --> wlan.uppergateIn;
+        cli.out --> wlan.upperLayerIn;
 }
 
 module ThroughputServer
 {
     parameters:
         @display("i=device/wifilaptop");
+        @node();
     gates:
         input radioIn @directIn;
 
@@ -75,25 +78,24 @@ module ThroughputServer
             parameters:
                 @display("p=210,68,col");
         }
-        wlan: Ieee80211NicSTASimplified {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=120,158;q=queue");
+                mgmtType = "Ieee80211MgmtSTASimplified";
         }
-        mobility: NullMobility {
+        mobility: StationaryMobility {
             parameters:
                 @display("p=50,141");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        sink.in++ <-- wlan.uppergateOut;
+        sink.in++ <-- wlan.upperLayerOut;
 }
 
 network Throughput
 {
     parameters:
         int numCli;
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203");
     submodules:
         cliHost[numCli]: ThroughputClient {
@@ -104,14 +106,13 @@ network Throughput
             parameters:
                 @display("p=350,350;r=,,#707070");
         }
-        ap: WirelessAPSimplified {
+        ap: AccessPoint {
             parameters:
                 @display("p=200,200;r=,,#707070");
+                wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
 }

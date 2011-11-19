@@ -24,9 +24,9 @@
 //# This documents the Ethernet model created by David Wu and refined by Andras
 //# Varga at CTIE, Monash University, Melbourne, Australia.
 //
-// The Ethernet model contains a MAC model (EtherMAC), LLC model (EtherLLC) as well
-// as a bus (EtherBus, for modelling coaxial \cable) and a hub (EtherHub) model.
-// A switch model (EtherSwitch) is also provided.
+// The Ethernet model contains a MAC model (~EtherMAC), LLC model (~EtherLLC) as well
+// as a bus (~EtherBus, for modelling coaxial cable) and a hub (~EtherHub) model.
+// A switch model (~EtherSwitch) is also provided.
 //
 // A few useful topics:
 //  - <a href="ether-overview.html">model overview</a>
@@ -37,15 +37,15 @@
 //  - click <i>selected topics</i> in the navigation frame to see more topics
 //
 // If you can't wait to see the model, start here:
-//  - the MixedLAN model contains hosts, switch, hub and bus;
-//  - the <a href="largenet.html">\LargeNet model</a> contains hundreds of
+//  - the ~MixedLAN model contains hosts, switch, hub and bus;
+//  - the <a href="largenet.html">LargeNet model</a> contains hundreds of
 //    computers, switches and hubs (numbers depend on model configuration in
 //    largenet.ini), and mixes all kinds of Ethernet technologies;
-//  - EtherHost is a sample node with an Ethernet NIC;
-//  - EtherSwitch, EtherBus, EtherHub model switching hub, repeating hub and
-//    the old coxial \cable;
-//  - basic compnents of the model: EtherMAC, EtherLLC/EtherEncap module types,
-//    MACRelayUnit (MACRelayUnitNP and MACRelayUnitPP), EtherFrame message type,
+//  - ~EtherHost is a sample node with an Ethernet NIC;
+//  - ~EtherSwitch, ~EtherBus, ~EtherHub model switching hub, repeating hub and
+//    the old coxial cable;
+//  - basic compnents of the model: ~EtherMAC, ~EtherLLC/~EtherEncap module types,
+//    ~IMACRelayUnit (~MACRelayUnitNP and ~MACRelayUnitPP), ~EtherFrame message type,
 //    MACAddress class
 //
 // Related documentation:
@@ -66,57 +66,28 @@
 //
 // The models supports various Ethernet frame types: Ethernet II, 803.2 with
 // LLC header, and 803.3 with LLC and SNAP headers. The corresponding classes are:
-// EthernetIIFrame, EtherFrameWithLLC and EtherFrameWithSNAP. They all class
-// from EtherFrame which only represents the basic MAC frame with source and
-// destination addresses. EtherMAC only deals with EtherFrames, and does not
+// ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP. They all class
+// from ~EtherFrame which only represents the basic MAC frame with source and
+// destination addresses. ~EtherMAC only deals with EtherFrames, and does not
 // care about the specific subclass.
 //
 //
-// <h3>Autoconfiguration</h3>
-//
-// In order to facilitate building large models, EtherMAC and other Ethernet model
-// components provide some degree of auto-configuration. Specifically, transmission
-// rate and half duplex/full duplex mode can be chosen automatically so that
-// connecting Ethernet MACs have matching settings. The purpose is similar to
-// Ethernet Auto-Negotiation; however the mechanism is NOT a model of
-// Auto-Negotiation (e.g. EtherBus and EtherHub also actively participate,
-// which obviously does not happen in a real Ethernet.)
-//
-// What it does:
-//  - the txrate parameters of EtherMAC represent the highest speed supported
-//    by that station, or 0 for full autoconfiguration. Autoconfig will choose
-//    the largest common denominator (the speed of the slowest station in the
-//    collision domain) for all stations. If all stations are set to auto
-//    txrate, 100Mb will be chosen, or 10Mb if there's a bus (EtherBus) in
-//    the collision domain.
-//  - the duplexEnabled parameter of EtherMAC means whether the station supports
-//    duplex operation. However, duplex operation will actually be chosen only
-//    if it's a DTE-to-DTE direct connection (there's no shared media like
-//    EtherHub or EtherBus) and both sides have duplexEnabled=true set.
-//
-// How it works:
-//
-// Auto-configuration occurs at the beginning of the simulation, by
-// Ethernet model components (EtherMAC, EtherHub and EtherBus) exchanging
-// EtherAutoconfig messages with each other. See description of EtherAutoconfig
-// for more info.
-//
 // <h3>MAC and higher layers</h3>
 //
-// MAC and LLC are implemented as separate modules (EtherMAC and
-// EtherLLC/EtherEncap) because encapsulation/decapsulation functionality
+// MAC and LLC are implemented as separate modules (~EtherMAC and
+// ~EtherLLC/~EtherEncap) because encapsulation/decapsulation functionality
 // is not always needed. (Switches don't do encapsulation/decapsulation.)
-// In switches, EtherMAC is used with MACRelayUnit.
+// In switches, ~EtherMAC is used with ~IMACRelayUnit.
 //
 //
-// <h3>EtherLLC and higher layers</h3>
+// <h3>~EtherLLC and higher layers</h3>
 //
-// The EtherLLC module can serve several applications (higher layer protocols),
+// The ~EtherLLC module can serve several applications (higher layer protocols),
 // and dispatch data to them. Higher layers are identified by DSAP.
 // See <a href="appreg.html">Application registration</a> for more info.
 //
-// EtherEncap doesn't have the functionality to dispatch to different
-// higher layers because in practice it'll always be used with IP.
+// ~EtherEncap doesn't have the functionality to dispatch to different
+// higher layers because in practice it'll always be used with ~IPv4.
 //
 //
 // @page eth-standards.html, Ethernet: Implemented Standards
@@ -133,28 +104,28 @@
 //
 // @page llc-app.html, Ethernet: Communication between LLC and Higher Layers
 //
-// Higher layers (applications or protocols) talk to the EtherLLC module.
+// Higher layers (applications or protocols) talk to the ~EtherLLC module.
 //
 // When a higher layer wants to send a packet via Ethernet, it just
-// passes the data packet (a cMessage or any subclass) to EtherLLC.
+// passes the data packet (a cMessage or any subclass) to ~EtherLLC.
 // The message kind has to be set to IEEE802CTRL_DATA.
 //
-// In general, if EtherLLC receives a packet from the higher layers,
+// In general, if ~EtherLLC receives a packet from the higher layers,
 // it interprets the message kind as a command. The commands include
 // IEEE802CTRL_DATA (send a frame), IEEE802CTRL_REGISTER_DSAP (register highher layer)
 // IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and IEEE802CTRL_SENDPAUSE
-// (send PAUSE frame) -- see EtherLLC for a more complete list.
+// (send PAUSE frame) -- see ~EtherLLC for a more complete list.
 //
 // The arguments to the command are NOT inside the data packet but
-// in a "control info" data structure of class Ieee802Ctrl, attached to
+// in a "control info" data structure of class ~Ieee802Ctrl, attached to
 // the packet. See controlInfo() method of cMessage (OMNeT++ 3.0).
 //
 // For example, to send a packet to a given MAC address and protocol
 // identifier, the application sets the data packet's message kind
 // to ETH_DATA ("please send this data packet" command),
-// fills in the Ieee802Ctrl structure with the destination MAC address and
+// fills in the ~Ieee802Ctrl structure with the destination MAC address and
 // the protocol identifier, adds the control info to the message, then sends
-// the packet to EtherLLC.
+// the packet to ~EtherLLC.
 //
 // When the command doesn't involve a data packet (e.g.
 // IEEE802CTRL_(DE)REGISTER_DSAP, IEEE802CTRL_SENDPAUSE), a dummy packet
@@ -187,35 +158,35 @@
 //
 // So that data arriving from the network can be dispatched to the
 // correct applications (higher layer protocols), applications
-// have to register themselves in EtherLLC. The registration
+// have to register themselves in ~EtherLLC. The registration
 // is done with the IEEE802CTRL_REGISTER_DSAP command
 // (see <a href="llc-app.html">communication between LLC and higher layers</a>)
 // which associates a SAP with the LLC port. Different applications
-// have to connect to different ports of EtherLLC.
+// have to connect to different ports of ~EtherLLC.
 //
 // The ETHERCTRL_REGISTER_DSAP/IEEE802CTRL_DEREGISTER_DSAP commands use only the
-// dsap field in the Ieee802Ctrl structure.
+// dsap field in the ~Ieee802Ctrl structure.
 //
 //
 // @page physical.html, Ethernet: Messaging on the Physical Layer
 //
-// Messages sent by EtherMAC mark the beginning of a transmission.
+// Messages sent by ~EtherMAC mark the beginning of a transmission.
 // The end of a transmission is not explicitly represented by a message,
-// but instead, the EtherMAC calculates it from the frame length and
-// the transmission rate. Frames are represented by EtherFrame.
+// but instead, the ~EtherMAC calculates it from the frame length and
+// the transmission rate. Frames are represented by ~EtherFrame.
 //
 // When frames collide, the transmission is aborted -- in this case
-// EtherMAC makes use of the modelled jam signals to figure out
+// ~EtherMAC makes use of the modelled jam signals to figure out
 // when colliding transmissions end.
 //
 // When a transmitting station senses a collision, it transmits a jam signal.
-// Jam signals are represented by a EtherJam message.
-// When EtherMAC received a jam signal, it knows that one transmission
+// Jam signals are represented by a ~EtherJam message.
+// When ~EtherMAC received a jam signal, it knows that one transmission
 // has ended in jamming -- thus when it receives as many jam messages
 // as colliding frames, it can be sure all transmissions have been aborted.
 //
 // Receiving a jam message marks the beginning (and not the end)
-// of a jam signal, so actually EtherMAC has to wait for the duration
+// of a jam signal, so actually ~EtherMAC has to wait for the duration
 // of the jamming before assuming the channel is free again.
 //
 //
@@ -230,15 +201,15 @@
 // another Pause frame to the transmitter with a timer value of zero,
 // allowing the transmitter to resume immediately.
 //
-// EtherMAC will properly respond to PAUSE frames it receives
-// (EtherPauseFrame class),
+// ~EtherMAC will properly respond to PAUSE frames it receives
+// (~EtherPauseFrame class),
 // however it will never send a PAUSE frame by itself. (For one thing,
 // it doesn't have an input buffer that can overflow.)
 //
-// EtherMAC, however, transmits PAUSE frames received by higher layers,
-// and EtherLLC can be instructed by a command to send a PAUSE frame to MAC.
+// ~EtherMAC, however, transmits PAUSE frames received by higher layers,
+// and ~EtherLLC can be instructed by a command to send a PAUSE frame to MAC.
 //
-// MACRelayUnit types (and thus EtherSwitch) currently implement a very simple
+// ~IMACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
 // scheme for sending PAUSE frames -- this can be refined if the need arises.
 //
 // For background on PAUSE, see e.g.
@@ -251,10 +222,10 @@
 //
 // @page largenet.html, LargeNet model description
 //
-// The LargeNet model demonstrates how one can put together models of large
-// LANs with little effort, making use of MAC auto-configuration.
+// The ~LargeNet model demonstrates how one can put together models of large
+// LANs with little effort.
 //
-// LargeNet models a large Ethernet campus backbone. As configured in the
+// ~LargeNet models a large Ethernet campus backbone. As configured in the
 // default omnetpp.ini, it contains altogether about 8000 computers
 // and 900 switches and hubs. This results in about 165MB process size
 // on my (32-bit) linux box when I run the simulation.
@@ -270,7 +241,7 @@
 //
 // Then there're several smaller LANs hanging off each backbone switch.
 // There're three types of LANs: small, medium and large (represented by
-// compound module types SmallLAN, MediumLAN, LargeLAN). A small LAN
+// compound module types ~SmallLAN, ~MediumLAN, ~LargeLAN). A small LAN
 // consists of a few computers on a hub (100Mb half duplex); a medium
 // LAN consists of a smaller switch with a hub on one of its port
 // (and computers on both); the large one also has a switch and a hub,
@@ -285,10 +256,10 @@
 // request-response based protocol such as SMB/CIFS (the Windows file
 // sharing protocol), HTTP, or a database client-server protocol.
 //
-// Every computer runs a client application (EtherAppCli) which connects
+// Every computer runs a client application (~EtherAppCli) which connects
 // to one of the servers. There's one server attached to switches A, B,
 // C and D each: serverA, serverB, serverC and serverD -- server selection
-// is configured in omnetpp.ini). The servers run EtherAppSrv.
+// is configured in omnetpp.ini). The servers run ~EtherAppSrv.
 // Clients periodically send a request to the server, and the request
 // packet contains how many bytes the client wants the server to send back
 // (this can mean one or more Ethernet frames, depending on the byte count).

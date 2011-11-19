@@ -21,12 +21,12 @@ cplusplus {{
 }}
 
 //
-// A message of the type RTPSenderControlMessage is created by an application to control
+// A message of the type ~RTPSenderControlMessage is created by an application to control
 // the behavior of an rtp sender module. With this class the application can send a command
 // string to the sender module like "PLAY" or "STOP". A message can have up to two float
 // parameters.
 //
-// Following commands are evaluated in RTPPayloadSender (although correct behavior must
+// Following commands are evaluated in ~RTPPayloadSender (although correct behavior must
 // be implemented in modules for certain payload types):
 //    - PLAY : start playing from current position
 //    - PAUSE : pause playing, stay at current position
@@ -37,9 +37,20 @@ cplusplus {{
 //    - SEEK_TIME : go to temporal position within the file (not allowed while playing)
 //    - SEEK_BYTE : go to data byte (not allowed while playing)
 //
+enum RTPSenderControlMessageCommands
+{
+    RTP_CONTROL_PLAY = 1;
+    RTP_CONTROL_PLAY_UNTIL_TIME = 2;
+    RTP_CONTROL_PLAY_UNTIL_BYTE = 3;
+    RTP_CONTROL_PAUSE = 4;
+    RTP_CONTROL_STOP = 5;
+    RTP_CONTROL_SEEK_TIME = 6;
+    RTP_CONTROL_SEEK_BYTE = 7;
+};
+
 packet RTPSenderControlMessage
 {
-    string command;
+    short command @enum(RTPSenderControlMessageCommands);
     float commandParameter1;
     float commandParameter2;
 };

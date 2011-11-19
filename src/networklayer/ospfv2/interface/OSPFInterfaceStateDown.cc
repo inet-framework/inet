@@ -24,42 +24,42 @@
 #include "OSPFInterfaceStateWaiting.h"
 #include "OSPFInterfaceStateLoopback.h"
 
-void OSPF::InterfaceStateDown::ProcessEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::InterfaceUp) {
-        OSPF::MessageHandler* messageHandler = intf->GetArea()->GetRouter()->GetMessageHandler();
-        messageHandler->StartTimer(intf->GetHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
-        messageHandler->StartTimer(intf->GetAcknowledgementTimer(), intf->GetAcknowledgementDelay());
-        switch (intf->GetType()) {
-            case OSPF::Interface::PointToPoint:
-            case OSPF::Interface::PointToMultiPoint:
-            case OSPF::Interface::Virtual:
-                ChangeState(intf, new OSPF::InterfaceStatePointToPoint, this);
+    if (event == OSPF::Interface::INTERFACE_UP) {
+        OSPF::MessageHandler* messageHandler = intf->getArea()->getRouter()->getMessageHandler();
+        messageHandler->startTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
+        messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
+        switch (intf->getType()) {
+            case OSPF::Interface::POINTTOPOINT:
+            case OSPF::Interface::POINTTOMULTIPOINT:
+            case OSPF::Interface::VIRTUAL:
+                changeState(intf, new OSPF::InterfaceStatePointToPoint, this);
                 break;
 
             case OSPF::Interface::NBMA:
-                if (intf->GetRouterPriority() == 0) {
-                    ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+                if (intf->getRouterPriority() == 0) {
+                    changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
-                    ChangeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->GetWaitTimer(), intf->GetRouterDeadInterval());
+                    changeState(intf, new OSPF::InterfaceStateWaiting, this);
+                    messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
 
-                    long neighborCount = intf->GetNeighborCount();
+                    long neighborCount = intf->getNeighborCount();
                     for (long i = 0; i < neighborCount; i++) {
-                        OSPF::Neighbor* neighbor = intf->GetNeighbor(i);
-                        if (neighbor->GetPriority() > 0) {
-                            neighbor->ProcessEvent(OSPF::Neighbor::Start);
+                        OSPF::Neighbor* neighbor = intf->getNeighbor(i);
+                        if (neighbor->getPriority() > 0) {
+                            neighbor->processEvent(OSPF::Neighbor::START);
                         }
                     }
                 }
                 break;
 
-            case OSPF::Interface::Broadcast:
-                if (intf->GetRouterPriority() == 0) {
-                    ChangeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            case OSPF::Interface::BROADCAST:
+                if (intf->getRouterPriority() == 0) {
+                    changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
                 } else {
-                    ChangeState(intf, new OSPF::InterfaceStateWaiting, this);
-                    messageHandler->StartTimer(intf->GetWaitTimer(), intf->GetRouterDeadInterval());
+                    changeState(intf, new OSPF::InterfaceStateWaiting, this);
+                    messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
                 }
                 break;
 
@@ -67,9 +67,9 @@ void OSPF::InterfaceStateDown::ProcessEvent(OSPF::Interface* intf, OSPF::Interfa
                 break;
         }
     }
-    if (event == OSPF::Interface::LoopIndication) {
-        intf->Reset();
-        ChangeState(intf, new OSPF::InterfaceStateLoopback, this);
+    if (event == OSPF::Interface::LOOP_INDICATION) {
+        intf->reset();
+        changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
 }
 

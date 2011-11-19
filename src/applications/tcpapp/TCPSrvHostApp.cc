@@ -20,17 +20,21 @@ Define_Module(TCPSrvHostApp);
 
 void TCPSrvHostApp::initialize()
 {
-    const char *address = par("address");
-    int port = par("port");
+    cSimpleModule::initialize();
+
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
 
     serverSocket.setOutputGate(gate("tcpOut"));
-    serverSocket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    serverSocket.readDataTransferModePar(*this);
+    serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     serverSocket.listen();
 }
 
 void TCPSrvHostApp::updateDisplay()
 {
-    if (!ev.isGUI()) return;
+    if (!ev.isGUI())
+        return;
 
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
@@ -47,6 +51,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
     else
     {
         TCPSocket *socket = socketMap.findSocketFor(msg);
+
         if (!socket)
         {
             // new connection -- create new socket object and server process
@@ -54,7 +59,8 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
             socket->setOutputGate(gate("tcpOut"));
 
             const char *serverThreadClass = par("serverThreadClass");
-            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
+            TCPServerThreadBase *proc =
+                    check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
 
             socket->setCallbackObject(proc);
             proc->init(this, socket);
@@ -63,6 +69,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
 
             updateDisplay();
         }
+
         socket->processMessage(msg);
     }
 }
@@ -81,5 +88,4 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     updateDisplay();
 }
-
 

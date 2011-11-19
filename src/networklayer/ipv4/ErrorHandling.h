@@ -22,9 +22,7 @@
 #ifndef __INET_ERRORHANDLING_H
 #define __INET_ERRORHANDLING_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPControlInfo.h"
 
 
 /**
@@ -35,6 +33,9 @@ class INET_API ErrorHandling: public cSimpleModule
 {
   protected:
     long numReceived;
+    long numHostUnreachable;
+    long numTimeExceeded;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

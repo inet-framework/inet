@@ -18,7 +18,7 @@
 
 
 #include "TCPTester.h"
-#include "IPControlInfo.h"
+#include "IPv4ControlInfo.h"
 
 TCPTesterBase::TCPTesterBase() : cSimpleModule(), tcpdump(ev)
 {
@@ -178,7 +178,7 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         {
             double d = cmd->delays[i];
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPControlInfo(*check_and_cast<IPControlInfo *>(seg->controlInfo())));
+            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->controlInfo())));
             if (d==0)
             {
                 bubble("forwarding after 0 delay");
@@ -266,7 +266,7 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         {
             double d = delay->doubleValue();
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPControlInfo(*check_and_cast<IPControlInfo *>(seg->controlInfo())));
+            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->controlInfo())));
             segcopy->setContextPointer((void *)fromA);
             scheduleAt(simTime()+d, segcopy);
         }

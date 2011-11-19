@@ -14,7 +14,7 @@
 
 
 cplusplus {{
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 #define LINK_STATE_MESSAGE      1
 
@@ -22,30 +22,30 @@ typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
 
 
-class noncobject IPAddress;
+class noncobject IPv4Address;
 
 //
-// Represents a link in the TED and in LinkStateMsg packets.
+// Represents a link in the ~TED and in ~LinkStateMsg packets.
 //
 struct TELinkStateInfo
 {
-    IPAddress advrouter; // routerId of originator of this link state entry
-    IPAddress linkid;    // identifies link within advrouter; set to peer's address
-    IPAddress local;     // address of local interface of this link
-    IPAddress remote;    // address of "gateway" to peer
+    IPv4Address advrouter; // routerId of originator of this link state entry
+    IPv4Address linkid;    // identifies link within advrouter; set to peer's address
+    IPv4Address local;     // address of local interface of this link
+    IPv4Address remote;    // address of "gateway" to peer
     double metric;       // link metric
     double MaxBandwidth; // maximum bandwidth (bps)
     double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
 
     simtime_t timestamp;    // time of originating this entry
     unsigned int sourceId;  // FIXME looks like this is the same as advrouter -- really needed?
-    unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
+    unsigned int messageId; // id assigned to originating ~LinkStateMsg (FIXME or?)
     bool state;             // false = down, true = up
 }
 
 
 //
-// Data structure supplied with NF_TED_CHANGE NotificationBoard notifications.
+// Data structure supplied with NF_TED_CHANGE ~NotificationBoard notifications.
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.
 //

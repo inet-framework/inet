@@ -51,10 +51,10 @@ void SCTPAssociation::cwndUpdateAfterSack()
 {
     for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
         SCTPPathVariables* path = iter->second;
-        if(path->fastRecoveryActive == false) {
+        if (path->fastRecoveryActive == false) {
 
             // ====== Retransmission required -> reduce congestion window ======
-            if(path->requiresRtx) {
+            if (path->requiresRtx) {
                 double decreaseFactor = 0.5;
 
                       sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack]\t" << path->remoteAddress
@@ -70,11 +70,11 @@ void SCTPAssociation::cwndUpdateAfterSack()
 
 
                  // ====== Fast Recovery ========================================
-                 if(state->fastRecoverySupported) {
+                 if (state->fastRecoverySupported) {
                     uint32 highestAckOnPath = state->lastTsnAck;
-                    for(SCTPQueue::PayloadQueue::iterator pq = retransmissionQ->payloadQueue.begin();
+                    for (SCTPQueue::PayloadQueue::iterator pq = retransmissionQ->payloadQueue.begin();
                          pq != retransmissionQ->payloadQueue.end(); pq++) {
-                         if( (chunkHasBeenAcked(pq->second) == true) &&
+                         if ( (chunkHasBeenAcked(pq->second) == true) &&
                               (tsnGt(pq->second->tsn, highestAckOnPath)) &&
                               (pq->second->getLastDestinationPath() == path) ) {
                              // T.D. 21.11.09: Only take care of TSNs on the same path!
@@ -82,8 +82,8 @@ void SCTPAssociation::cwndUpdateAfterSack()
                          }
                     }
                     /* this can ONLY become TRUE, when Fast Recovery IS supported */
-                    path->fastRecoveryActive         = true;
-                    path->fastRecoveryExitPoint  = highestAckOnPath;
+                    path->fastRecoveryActive = true;
+                    path->fastRecoveryExitPoint = highestAckOnPath;
                     path->fastRecoveryEnteringTime = simTime();
 
                     sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack] Entering Fast Recovery on path "
@@ -95,7 +95,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
         else {
             for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
                 SCTPPathVariables* path = iter->second;
-                if(path->fastRecoveryActive) {
+                if (path->fastRecoveryActive) {
                     sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack] Still in Fast Recovery on path "
                               << path->remoteAddress
                               << ", exit point is " << path->fastRecoveryExitPoint << endl;
@@ -115,7 +115,7 @@ void SCTPAssociation::updateFastRecoveryStatus(const uint32 lastTsnAck)
             if ( (tsnGt(lastTsnAck, path->fastRecoveryExitPoint)) ||
                   (lastTsnAck == path->fastRecoveryExitPoint)
             ) {
-                path->fastRecoveryActive     = false;
+                path->fastRecoveryActive = false;
                 path->fastRecoveryExitPoint = 0;
 
                 sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack] Leaving Fast Recovery on path "
@@ -221,7 +221,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
         }
 
         // ====== Reset PartialBytesAcked counter if no more outstanding bytes
-        if(path->outstandingBytes == 0) {
+        if (path->outstandingBytes == 0) {
             path->partialBytesAcked = 0;
         }
     }
@@ -242,12 +242,12 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
         path->cwnd = path->pmtu;
 
         sctpEV3 << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
-    path->partialBytesAcked         = 0;
+    path->partialBytesAcked = 0;
     recordCwndUpdate(path);
 
     // Leave Fast Recovery mode
     if (path->fastRecoveryActive == true) {
-        path->fastRecoveryActive     = false;
+        path->fastRecoveryActive = false;
         path->fastRecoveryExitPoint = 0;
     }
 }
@@ -255,7 +255,7 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
 
 void SCTPAssociation::cwndUpdateMaxBurst(SCTPPathVariables* path)
 {
-        if(path->cwnd > ((path->outstandingBytes + state->maxBurst * path->pmtu))) {
+        if (path->cwnd > ((path->outstandingBytes + state->maxBurst * path->pmtu))) {
             sctpEV3 << simTime()      << ":\tCC [cwndUpdateMaxBurst]\t" << path->remoteAddress
                     << "\tsst="       << path->ssthresh << " cwnd=" << path->cwnd
                     << "\tosb="       << path->outstandingBytes

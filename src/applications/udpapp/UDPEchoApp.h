@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Babos
+// Copyright (C) 2011 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,24 +20,26 @@
 #define __INET_UDPECHOAPP_H
 
 #include <vector>
-#include <omnetpp.h>
-
-#include "UDPBasicApp.h"
+#include "INETDefs.h"
+#include "UDPSocket.h"
 
 /**
  * UDP application. See NED for more info.
  */
-class UDPEchoApp : public UDPBasicApp
+class UDPEchoApp : public cSimpleModule
 {
-  protected:
-    virtual cPacket *createPacket();
-    virtual void processPacket(cPacket *msg);
+    protected:
+        UDPSocket socket;
+        int numEchoed;  // just for WATCH
+        static simsignal_t pkSignal;
 
-  protected:
-    virtual void initialize(int stage);
-    virtual void finish();
+    protected:
+        virtual int numInitStages() const {return 4;}
+        virtual void initialize(int stage);
+        virtual void handleMessage(cMessage *msg);
+        virtual void finish();
+        virtual void updateDisplay();
 };
 
 #endif
-
 

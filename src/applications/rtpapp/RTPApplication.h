@@ -19,6 +19,8 @@
 
 #include "INETDefs.h"
 
+#include "IPv4Address.h"
+
 /**
  * The class RTPApplication is just a very simple sample for an application
  * which uses RTP. It acts as a sender if the omnet parameter fileName is
@@ -30,21 +32,29 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * Constructor, with activity() stack size.
          */
-        RTPApplication() : cSimpleModule(32768) {}
+        RTPApplication() : cSimpleModule() {}
 
+    protected:
         /**
          * Reads the OMNeT++ parameters.
          */
-        virtual void initialize();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const {return 4;}
 
         /**
          * RTPApplication uses activity for message handling.
          * The behaviour is controlled by omnet parameters.
          */
-        virtual void activity();
+        virtual void handleMessage(cMessage* msg);
 
     protected:
-
+        enum SelfMsgKind
+        {
+            ENTER_SESSION,
+            START_TRANSMISSION,
+            STOP_TRANSMISSION,
+            LEAVE_SESSION
+        };
         /**
          * The CNAME of this participant.
          */
@@ -63,7 +73,7 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * The address of the unicast peer or of the multicast group.
          */
-        IPAddress _destinationAddress;
+        IPv4Address _destinationAddress;
 
         /**
          * One of the udp port used.
@@ -100,8 +110,9 @@ class INET_API RTPApplication : public cSimpleModule
          */
         simtime_t _sessionLeaveDelay;
 
+        uint32 ssrc;
+
+        bool isActiveSession;
 };
 
 #endif
-
-

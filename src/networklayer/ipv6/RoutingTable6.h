@@ -19,18 +19,20 @@
 #define __INET_ROUTINGTABLE6_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "IPv6Address.h"
-#include "IInterfaceTable.h"
 #include "NotificationBoard.h"
 
+class IInterfaceTable;
+class InterfaceEntry;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
  * on-link prefixes advertised by routers.
  */
-class INET_API IPv6Route : public cPolymorphic
+class INET_API IPv6Route : public cObject
 {
   public:
     /** Specifies where the route comes from */
@@ -72,7 +74,7 @@ class INET_API IPv6Route : public cPolymorphic
     void setInterfaceId(int interfaceId)  {_interfaceID = interfaceId;}
     void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
     void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
-    void setMetric(int metric)  {_metric = _metric;}
+    void setMetric(int metric)  {_metric = metric;}
 
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
@@ -82,7 +84,6 @@ class INET_API IPv6Route : public cPolymorphic
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
 };
-
 
 /**
  * Represents the IPv6 routing table and neighbour discovery data structures.
@@ -106,6 +107,12 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     NotificationBoard *nb; // cached pointer
 
     bool isrouter;
+
+#ifdef WITH_xMIPv6
+    bool ishome_agent; //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
+    bool ismobile_node; //added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
+    bool mipv6Support; // 4.9.07 - CB
+#endif /* WITH_xMIPv6 */
 
     // Destination Cache maps dest address to next hop and interfaceId.
     // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
@@ -140,6 +147,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     // internal
     virtual void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
 
+#ifdef WITH_xMIPv6
+    // internal
+    virtual void configureTunnelFromXML(cXMLElement* cfg);
+#endif /* WITH_xMIPv6 */
+
   protected:
     // displays summary above the icon
     virtual void updateDisplayString();
@@ -162,7 +174,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
   public:
     /** @name Interfaces */
@@ -177,6 +189,30 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * IP forwarding on/off
      */
     virtual bool isRouter() const {return isrouter;}
+
+#ifdef WITH_xMIPv6
+    /**
+     * Determine whether normal Router or Home Agent
+     */
+    bool isHomeAgent() const {return ishome_agent;}
+
+    /**
+     * Define whether normal Router or Home Agent.
+     */
+    void setIsHomeAgent(bool value) {ishome_agent = value;}
+
+    /**
+     * Determine whether a node is a Mobile Node or Correspondent Node:
+     * MN if TRUE or else a CN
+     */
+    bool isMobileNode() const {return ismobile_node;}
+
+    /**
+     * Define whether a node is a Mobile Node or Correspondent Node:
+     * MN if TRUE or else a CN
+     */
+    void setIsMobileNode(bool value) {ismobile_node = value;}
+#endif /* WITH_xMIPv6 */
 
     /** @name Routing functions */
     //@{
@@ -270,7 +306,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      */
     virtual void addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
                         unsigned int interfaceId, const IPv6Address& nextHop,
-                        int metric=0);
+                        int metric = 0);
 
     /**
      *  Adds a default route for a host. This method requires the RA's source
@@ -302,6 +338,58 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     virtual IPv6Route *getRoute(int i);
     //@}
 
+#ifdef WITH_xMIPv6
+    //================Added by Zarrar Yousaf ===================================
+
+    const IPv6Address& getDestinationAddress();
+    //void updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
+    //const IPv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
+    //const IPv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
+    const IPv6Address& getHomeAddress(); // NEW, 14.01.08 - CB
+
+    /**
+     * Check whether provided address is a HoA
+     */
+    bool isHomeAddress(const IPv6Address& addr);
+
+    /**
+     * Removes the current default routes for the given interface.
+     */
+    void removeDefaultRoutes(int interfaceID);
+
+    /**
+     * Removes all routes from the routing table.
+     */
+    void removeAllRoutes();
+
+    /**
+     * Removes all prefixes registered for the given interface.
+     */
+    void removePrefixes(int interfaceID);
+
+    /*
+     * Removes all destination cache entries for the specified interface
+     */
+    void purgeDestCacheForInterfaceID(int interfaceId);
+
+    /**
+     * Can be used to check whether this node supports MIPv6 or not
+     * (MN, MR, HA or CN).
+     */
+    bool hasMIPv6Support() { return mipv6Support; }
+
+    /**
+     * This method is used to define whether the node support MIPv6 or
+     * not (MN, MR, HA or CN).
+     */
+    void setMIPv6Support(bool value) { mipv6Support = value; }
+
+    /**
+     * Checks whether the provided address is in an on-link address
+     * with respect to the prefix advertisement list.
+     */
+    bool isOnLinkAddress(const IPv6Address& address); // update 11.9.07 - CB
+#endif /* WITH_xMIPv6 */
 };
 
 #endif

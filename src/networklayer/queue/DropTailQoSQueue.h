@@ -49,7 +49,7 @@ class INET_API DropTailQoSQueue : public PassiveQueueBase
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual bool enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg);
 
     /**
      * Redefined from PassiveQueueBase.
@@ -61,6 +61,10 @@ class INET_API DropTailQoSQueue : public PassiveQueueBase
      */
     virtual void sendOut(cMessage *msg);
 
+    /**
+     * Redefined from IPassiveQueue.
+     */
+    virtual bool isEmpty();
 };
 
 #endif

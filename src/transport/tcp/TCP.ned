@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2010 Thomas Reschka
+// Copyright (C) 2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,8 +19,13 @@
 
 package inet.transport.tcp;
 
+import inet.transport.ITCP;
+
+
 //
-// \TCP protocol implementation.
+// TCP protocol implementation.
+// See the ~ITCP for the TCP layer general informations.
+//
 // This implementation supports:
 //   - RFC  793 - Transmission Control Protocol
 //   - RFC  896 - Congestion Control in IP/TCP Internetworks
@@ -33,42 +39,38 @@ package inet.transport.tcp;
 //   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
 //                Algorithm for TCP
 //   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
-// Compatible with both IPv4 and IPv6.
 //
-// A \TCP segment is represented by the class TCPSegment.
+// This module is compatible with both ~IPv4 and ~IPv6.
+//
+// A TCP segment is represented by the class ~TCPSegment.
 //
 // <b>Communication with clients</b>
 //
-// For communication between client applications and TCP, the TcpCommandCode
-// and TcpStatusInd enums are used as message kinds, and TCPCommand
+// For communication between client applications and TCP, the ~TcpCommandCode
+// and ~TcpStatusInd enums are used as message kinds, and ~TCPCommand
 // and its subclasses are used as control info.
 //
 // To open a connection from a client app, send a cMessage to TCP with
-// TCP_C_OPEN_ACTIVE as message kind and a TCPOpenCommand object filled in
+// TCP_C_OPEN_ACTIVE as message kind and a ~TCPOpenCommand object filled in
 // and attached to it as control info. (The peer TCP will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
 // message kind.) With passive open, there's a possibility to cause the connection
 // "fork" on an incoming connection, leaving the original connection LISTENing
-// on the port (see the fork field in TCPOpenCommand).
+// on the port (see the fork field in ~TCPOpenCommand).
 //
 // The client app can send data by assigning the TCP_C_SEND message kind
-// and attaching a TCPSendCommand control info object to the data packet,
+// and attaching a ~TCPSendCommand control info object to the data packet,
 // and sending it to TCP. The server app will receive data as messages
-// with the TCP_I_DATA message kind and TCPSendCommand control info.
-// (Whether you'll receive the same or identical messages, or even whether
-// you'll receive data in the same sized chunks as sent depends on the
-// sendQueueClass and receiveQueueClass used, see below. With
-// TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue set, message objects
-// and even message boundaries are not preserved.)
+// with the TCP_I_DATA message kind and ~TCPSendCommand control info.
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
-// and TCPCommand control info.
+// and ~TCPCommand control info.
 //
 // TCP sends notifications to the application whenever there's a significant
 // change in the state of the connection: established, remote TCP closed,
 // closed, timed out, connection refused, connection reset, etc. These
 // notifications are also cMessages with message kind TCP_I_xxx
-// (TCP_I_ESTABLISHED, etc.) and TCPCommand as control info.
+// (TCP_I_ESTABLISHED, etc.) and ~TCPCommand as control info.
 //
 // One TCP module can serve several application modules, and several
 // connections per application. The <i>k</i>th application connects to TCP's
@@ -78,47 +80,21 @@ package inet.transport.tcp;
 //
 // <b>Sockets</b>
 //
-// The TCPSocket C++ class is provided to simplify managing \TCP connections
+// The TCPSocket C++ class is provided to simplify managing TCP connections
 // from applications. TCPSocket handles the job of assembling and sending
 // command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
 // the task of dealing with packets and notification messages coming from TCP.
 //
-// <b>Communication with the \IP layer</b>
+// <b>Communication with the IP layer</b>
 //
-// The TCP model relies on sending and receiving IPControlInfo objects
-// attached to \TCP segment objects as control info
+// The TCP model relies on sending and receiving ~IPv4ControlInfo objects
+// attached to TCP segment objects as control info
 // (see cMessage::setControlInfo()).
 //
 // <b>Configuring TCP</b>
 //
-// The module parameters sendQueueClass and receiveQueueClass should be
-// set the names of classes that manage the actual send and receive queues.
-// Currently you have two choices:
-//
-//   -# set them to "TCPVirtualDataSendQueue" and "TCPVirtualDataRcvQueue".
-//      These classes manage "virtual bytes", that is, only byte counts are
-//      transmitted over the \TCP connection and no actual data. cMessage
-//      contents, and even message boundaries are not preserved with these
-//      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over TCP, the receiver-side client will see a
-//      sequence of MSS-sized messages.
-//
-// It depends on the client (app) modules which sendQueue/rcvQueue they require.
-// For example, TCPGenericSrvApp needs message-based sendQueue/rcvQueue,
-// while TCPEchoApp or TCPSinkApp can work with any (but TCPEchoApp will
-// display different behaviour with both!) In the future, other send queue
-// and receive queue classes may be implemented, e.g. to allow transmission
-// of "raw bytes" (actual byte arrays).
-//
-//   -# use "TCPMsgBasedSendQueue" and "TCPMsgBasedRcvQueue", which transmit
-//      cMessage objects (and subclasses) over a \TCP connection. The same
-//      message object sequence that was sent by the client to the
-//      sender-side TCP entity will be reproduced on the receiver side.
-//      If a client sends a cMessage with length = 1 megabyte, the
-//      receiver-side client will receive the same message object (or a clone)
-//      after the TCP entities have completed simulating the transmission
-//      of 1 megabyte over the connection. This is a different behaviour
-//      from TCPVirtualDataSendQueue/RcvQueue.
+// The obsoleted sendQueueClass and receiveQueueClass parameters are removed!
+// You must set the dataTransferMode in ~TCPOpenCommand message.
 //
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled
 //      Limited Transmit algorithm (RFC 3042) integrated to TCPBaseAlg
@@ -131,13 +107,12 @@ package inet.transport.tcp;
 //      TCPBaseAlg (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl
 //      but not for DumbTCP).
 //
-// The \TCP flavour supported depends on the value of the tcpAlgorithmClass
-// module parameters, e.g. "TCPTahoe" or "TCPReno". In the future, other
+// The TCP flavour supported depends on the value of the tcpAlgorithmClass
+// module parameter, e.g. "TCPTahoe" or "TCPReno". In the future, other
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
-// Note that TCPOpenCommand allows sendQueueClass, receiveQueueClass and
-// tcpAlgorithmClass to be chosen per-connection.
+// Note that ~TCPOpenCommand allows tcpAlgorithmClass to be chosen per-connection.
 //
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
@@ -150,7 +125,7 @@ package inet.transport.tcp;
 // <b>Standards</b>
 //
 // The TCP module itself implements the following:
-//  - all RFC 793 \TCP states and state transitions
+//  - all RFC 793 TCP states and state transitions
 //  - connection setup and teardown as in RFC 793
 //  - generally, RFC 793 compliant segment processing
 //  - all socked commands (except RECEIVE) and indications
@@ -189,7 +164,7 @@ package inet.transport.tcp;
 //  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
-//  - \TCPTahoe (Fast Retransmit), \TCPReno (Fast Retransmit and Fast Recovery), \TCPNewReno (Fast Retransmit and Fast Recovery)
+//  - TCPTahoe (Fast Retransmit), TCPReno (Fast Retransmit and Fast Recovery), TCPNewReno (Fast Retransmit and Fast Recovery)
 //  - RFC 3390 - Increased Initial Window (optional) integrated to TCPBaseAlg
 //    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
 //    for DumbTCP).
@@ -205,7 +180,7 @@ package inet.transport.tcp;
 //    at the beginning. This means there's currently no flow control
 //    between TCP and the app.
 //  - all timeouts are precisely calculated: timer granularity (which is caused
-//    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
+//    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix TCP
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
 //
@@ -218,7 +193,7 @@ package inet.transport.tcp;
 //
 // <b>Tests</b>
 //
-// There are automated test cases (*.test files) for TCP -- see the Test
+// There are automated test cases (*.test files) for TCP -- see the <i>tests</i>
 // directory in the source distribution.
 //
 // Please also see ChangeLog.
@@ -236,15 +211,15 @@ simple TCP like ITCP
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
-        string sendQueueClass = default("TCPVirtualDataSendQueue"); // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
-        string receiveQueueClass = default("TCPVirtualDataRcvQueue"); // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
+        string sendQueueClass = default("");    // Obsolete!!!
+        string receiveQueueClass = default(""); // Obsolete!!!
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPControlInfo/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up);
         input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
         output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
 }

@@ -18,30 +18,42 @@
 
 package inet.applications.udpapp;
 
+import inet.applications.IUDPApp;
+
+
 //
-// Video stream server. To be used with UDPVideoStreamCli.
+// Video stream server. To be used with ~UDPVideoStreamCli.
 //
 // The server will wait for incoming "video streaming requests".
 // When a request arrives, it draws a random video stream size
 // using the videoSize parameter, and starts streaming to the client.
-// During streaming, it will send \UDP packets of size packetLen at every
-// waitInterval, until videoSize is reached. The parameters packetLen
-// and waitInterval can be set to constant values to create CBR traffic,
-// or to random values (e.g. waitInterval=uniform(1e-6, 1.01e-6)) to
+// During streaming, it will send UDP packets of size packetLen at every
+// sendInterval, until videoSize is reached. The parameters packetLen
+// and sendInterval can be set to constant values to create CBR traffic,
+// or to random values (e.g. sendInterval=uniform(1e-6, 1.01e-6)) to
 // accomodate jitter.
 //
 // The server can serve several clients, and several streams per client.
 //
-// @see UDPVideoStreamCli
+// Statistics:
 //
-simple UDPVideoStreamSvr like UDPApp
+// reqStreamBytes: statistic of bytelength of requested video streams.
+// sentPkBytes: statistic of sent packets and sent bytes.
+//
+// @see ~UDPVideoStreamCli
+//
+simple UDPVideoStreamSvr like IUDPApp
 {
     parameters:
-        int serverPort; // port to listen on
-        volatile double waitInterval @unit("s"); // interval between sending video stream packets
-        volatile int packetLen @unit("B");
-        volatile int videoSize @unit("B");
+        int localPort; // port to listen on
+        volatile double sendInterval @unit(s); // interval between sending video stream packets
+        volatile int packetLen @unit(B);  // length of a video packet in bytes
+        volatile int videoSize @unit(B);  // length of full a video stream in bytes
         @display("i=block/app");
+        @signal[sentPk](type=cPacket);
+        @signal[reqStreamBytes](type=long);
+        @statistic[reqStreamBytes](title="Requested stream bytes"; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

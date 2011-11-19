@@ -1,0 +1,264 @@
+%description:
+Testing TCP communication speed
+    TCP
+    TCP_NSC
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.world.radio.ChannelControl;
+import inet.mobility.models.StationaryMobility;
+import inet.mobility.models.CircleMobility;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.base.Sink;
+import inet.base.NotificationBoard;
+import inet.applications.ethernet.EtherAppCli;
+
+module Ieee80211NicAdhoc extends Ieee80211Nic
+{
+    parameters:
+        mgmtType = "Ieee80211MgmtAdhoc";
+}
+
+module ThroughputClient
+{
+    parameters:
+        int idx;
+        int maxCli;
+        int maxSrv;
+        @node();
+        @display("i=device/wifilaptop");
+    gates:
+        input radioIn @directIn;
+
+    submodules:
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=52,70");
+        }
+        cli: EtherAppCli {
+            parameters:
+                registerSAP = false;
+                destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
+                @display("b=40,24;p=180,60,col");
+        }
+        wlan: Ieee80211NicAdhoc {
+            parameters:
+                @display("p=112,134;q=queue");
+        }
+        mobility: CircleMobility {
+            parameters:
+                startAngle = 360deg * idx / maxCli;
+                @display("p=50,141");
+        }
+    connections allowunconnected:
+        wlan.radioIn <-- radioIn;
+        cli.out --> wlan.upperLayerIn;
+}
+
+module ThroughputServer
+{
+    parameters:
+        int idx;
+        int maxSrv;
+        @node();
+        @display("i=device/wifilaptop");
+    gates:
+        input radioIn @directIn;
+
+    submodules:
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=60,70");
+        }
+        sink: Sink {
+            parameters:
+                @display("p=210,68,col");
+        }
+        wlan: Ieee80211NicAdhoc {
+            parameters:
+                @display("p=120,158;q=queue");
+        }
+        mobility: StationaryMobility {
+            parameters:
+                initialX = 350m * (idx+1) / maxSrv;
+                @display("p=50,141");
+        }
+    connections allowunconnected:
+        wlan.radioIn <-- radioIn;
+        sink.in++ <-- wlan.upperLayerOut;
+}
+
+network Throughput
+{
+    parameters:
+        int numCli;
+        int numSrv;
+        @display("b=297,203");
+    submodules:
+        cliHost[numCli]: ThroughputClient {
+            parameters:
+                idx = index;
+                maxCli = numCli;
+                maxSrv = numSrv;
+                wlan.mac.address = "auto";
+                @display("r=,,#707070");
+        }
+        srvHost[numSrv]: ThroughputServer {
+            parameters:
+                idx = index;
+                maxSrv = numSrv;
+                wlan.mac.address = "20:00:00:00:00:0"+string(index);
+                @display("p=350,350;r=,,#707070");
+        }
+        channelControl: ChannelControl {
+            parameters:
+                @display("p=61,46");
+        }
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Throughput
+#cmdenv-output-file = omnetpp.log
+#debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+sim-time-limit = 100s
+**.vector-recording = false
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 400m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+
+**.debug = true
+**.coreDebug = false
+**.channelNumber = 0
+**.channelControl.numChannels = 1
+
+# positions
+**.mobility.cx = 200m
+**.mobility.cy = 200m
+**.mobility.r = 100m
+**.mobility.speed = 1 mps
+**.mobility.updateInterval = 100ms
+
+# channel physical parameters
+*.channelControl.carrierFrequency = 2.4GHz
+*.channelControl.pMax = 20mW
+*.channelControl.sat = -110dBm
+*.channelControl.alpha = 2
+
+# access point
+
+# nic settings
+**.mac.address = "auto"
+**.mac.maxQueueSize = 14
+**.mac.rtsThresholdBytes = 3000B
+**.mac.bitrate = 11Mbps
+**.wlan.mac.retryLimit = 7
+**.wlan.mac.cwMinData = 31
+**.wlan.mac.cwMinBroadcast = 31
+
+**.radio.bitrate = 11Mbps
+**.radio.transmitterPower = 20.0mW
+**.radio.thermalNoise = -110dBm
+**.radio.sensitivity = -85dBm
+**.radio.pathLossAlpha = 2
+**.radio.snirThreshold = 4dB
+
+# cli
+**.cli.reqLength = 1250B
+**.cli.respLength = 0
+**.cli.destStation = ""
+
+description = "10 host to 10 host on adhoc"
+Throughput.numCli = 10
+Throughput.numSrv = 10
+**.cli.sendInterval = 10ms
+
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 10 # count of client-server pairs
+rcvdBytes <-  11000000/8 # bytes
+expectedRate <- 52.0 # %
+maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
+unbalancedRate <- 5.0 # %
+# begin TEST:
+expectedRateMin <- expectedRate - maxDeviation
+expectedRateMax <- expectedRate + maxDeviation
+
+dataset <- loadDataset(scafile)
+
+cat("\nOMNETPP TEST RESULT:\n")
+
+sink <- dataset$scalars[grep("\\.srvHost\\[\\d\\]\\.sink", dataset$scalars$module),]
+#print(sink)
+secs <- (sink$value[sink$name == "rcvdPkBytes:count"] / sink$value[sink$name == "packetPerSec"])
+sinkRcvd <- sink[sink$name == "rcvdPkBytes:sum",]
+
+#print(sinkRcvd)
+cnt <- length(sinkRcvd$value)
+#print(cnt)
+
+cat("  IEEE80211 TEST RESULT:\n")
+
+sinkRcvd$rate <- sinkRcvd$value * 100 / (rcvdBytes * secs)
+
+avgValue <- sum(sinkRcvd$value) / length(sinkRcvd$value)
+sinkRcvd$urate <- (sinkRcvd$value - avgValue) * 100 / avgValue
+
+cat("    SPEED ")
+
+rate <- sum(sinkRcvd$value) * 100 / (rcvdBytes * max(secs))
+isGood <- (rate >= expectedRateMin) & (rate <= expectedRateMax)
+if(length(sinkRcvd$value) == linecount & isGood)
+{
+    cat("OK\n")
+} else {
+    cat("BAD: rate is", rate, "%, expected rate is", expectedRate, "%\n")
+    print(sinkRcvd)
+    cat("\n")
+}
+
+sinkRcvd$isGood <- (sinkRcvd$urate >= -unbalancedRate) & (sinkRcvd$urate <= unbalancedRate)
+
+#print(sinkRcvd)
+
+cat("    BALANCE ")
+
+if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
+{
+    cat("OK\n")
+} else {
+    cat("BAD:\n")
+#    print(sinkRcvd[!sinkRcvd$isGood,])
+    print(sinkRcvd)
+    cat("\n")
+}
+
+cat("END\n")
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT:
+  IEEE80211 TEST RESULT:
+    SPEED OK
+    BALANCE OK
+END
+
+%#--------------------------------------------------------------------------------------------------------------

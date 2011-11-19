@@ -9,44 +9,34 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-
-
-
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.rsvp_te.RSVP;
-import inet.networklayer.rsvp_te.SimpleClassifier;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
 import inet.nodes.inet.NetworkLayer;
-import inet.util.NAMTraceWriter;
+import inet.networklayer.ted.TED;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.rsvp_te.SimpleClassifier;
+import inet.networklayer.rsvp_te.RSVP;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.base.NotificationBoard;
 
 
 //
-// An \RSVP-TE capable router.
+// An RSVP-TE capable router.
 //
-// \RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. \RSVP uses transport protocols to route packets. TED is used
+// RSVP occupies the Transport layer; however, it is not a transport protocol
+// itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
-module RSVP_LSR
+module RSVP_LSR extends RSVP_ROUTER_BASE
 {
     parameters:
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
-        int namid = default(-1);
-        string peers;
-        string routerId = default("auto");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -88,7 +78,7 @@ module RSVP_LSR
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=88,329,row,90;q=l2queue");
         }
@@ -105,12 +95,6 @@ module RSVP_LSR
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
-        }
-        namTrace: NAMTraceWriter {
-            parameters:
-                namid = namid;
-                @display("p=70,270");
-
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;

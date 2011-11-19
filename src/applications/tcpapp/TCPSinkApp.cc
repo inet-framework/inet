@@ -13,44 +13,52 @@
 
 
 #include "TCPSinkApp.h"
+
 #include "TCPSocket.h"
-#include "TCPCommand_m.h"
 
 
 Define_Module(TCPSinkApp);
 
+simsignal_t TCPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
+
 void TCPSinkApp::initialize()
 {
-    const char *address = par("address");
-    int port = par("port");
+    cSimpleModule::initialize();
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
 
     bytesRcvd = 0;
     WATCH(bytesRcvd);
+    rcvdPkSignal = registerSignal("rcvdPk");
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.readDataTransferModePar(*this);
+    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     socket.listen();
 }
 
 void TCPSinkApp::handleMessage(cMessage *msg)
 {
-    if (msg->getKind()==TCP_I_PEER_CLOSED)
+    if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we close too
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {
-        bytesRcvd += PK(msg)->getByteLength();
+        cPacket *pk = PK(msg);
+        long packetLength = pk->getByteLength();
+        bytesRcvd += packetLength;
+        emit(rcvdPkSignal, pk);
         delete msg;
 
         if (ev.isGUI())
         {
             char buf[32];
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
-            getDisplayString().setTagArg("t",0,buf);
+            getDisplayString().setTagArg("t", 0, buf);
         }
     }
     else
@@ -62,6 +70,5 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 
 void TCPSinkApp::finish()
 {
-    recordScalar("bytesRcvd", bytesRcvd);
 }
 

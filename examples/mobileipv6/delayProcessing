@@ -1,0 +1,20 @@
+#! /bin/bash
+
+#if (grep "MN*" omnetpp.sca | awk '{print $2}'|grep "MN")
+#then
+grep "MN*.**.Home_Reg*" omnetpp.sca | awk '{print $4}' > HomeRegDelay.txt  # records delay (sec) for Home Registration
+grep "MN*.**.Return_Rou**" omnetpp.sca | awk '{print $4}' > RRDelay.txt # records delay (sec) for Return Routability Procedure
+grep "MN*.**.Correspondent_Reg*" omnetpp.sca | awk '{print $4}' > CNRegDelay.txt # records delay (sec) for Correspondent Registration Process
+grep "MN" omnetpp.sca| grep "ScanRequest_Time"| awk {'print $4'} > L2HO_AssocDelay.txt
+grep "MN" omnetpp.sca | grep "DAD_OK"| awk {'print $4'}> L2HO_CoADelay.txt
+
+#CoADelay=$(grep "MN" omnetpp.sca | grep "DAD_OK"| awk {'print $4'}) #> L2HO_CoADelay.txt
+#L2HODelay=$(grep "MN" omnetpp.sca| grep "ScanRequest_Time"| awk {'print $4'}) #> L2HO_CoADelay1.txt
+#echo "CoA delay is $CoADelay"
+#echo "L2HO Delay is $L2HODelay"
+
+#T1=$CoADelay
+#T2=$L2HODelay
+#echo "($T1 - $T2)"| bc >L2HODelay
+#echo "T3 is $T3"
+#fi

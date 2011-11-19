@@ -37,7 +37,7 @@ simple SnrEval80211
         double sensitivity @unit(dBm);
         @display("i=block/wrxtx");
     gates:
-        input uppergateIn @labels(Mac80211Pkt);
-        output uppergateOut;
+        input upperLayerIn @labels(Mac80211Pkt);
+        output upperLayerOut;
         input radioIn @labels(AirFrame); // to receive AirFrames
 }

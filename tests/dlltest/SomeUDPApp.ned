@@ -27,7 +27,7 @@ simple SomeUDPApp like UDPApp
         int localPort; // if -1, app doesn't bind in UDP
         int destPort;
         int messageLength; // (bits)
-        volatile double messageFreq; // should usually be a random value, e.g. exponential(1)
+        volatile double sendInterval; // should usually be a random value, e.g. exponential(1)
         string destAddresses; // list of \IP addresses, separated by spaces
     gates:
         input udpIn;

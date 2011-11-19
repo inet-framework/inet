@@ -14,26 +14,20 @@
 
 package inet.examples.mpls.testte_reroute;
 
-import inet.networklayer.extras.FailureManager;
-import inet.nodes.inet.StandardHost;
+import inet.world.scenario.ScenarioManager;
 import inet.nodes.mpls.RSVP_LSR;
-import inet.world.NAMTrace;
-import inet.world.ScenarioManager;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.extras.FailureManager;
 
 
 //
-// Example network to demonstrate \RSVP-TE.
+// Example network to demonstrate RSVP-TE.
 //
 // See the README file in the model directory for scenario description.
 //
 network RSVPTE4
 {
     submodules:
-        nam: NAMTrace {
-            parameters:
-                @display("p=152,280");
-
-        }
         LSR1: RSVP_LSR {
             parameters:
                 peers = "ppp0 ppp1";
@@ -112,19 +106,19 @@ network RSVPTE4
                 @display("p=500,50");
         }
     connections:
-        LSR1.pppg[0] <--> {  delay = 15ms; datarate = 600Kbps; } <--> LSR2.pppg[0];
-        LSR1.pppg[1] <--> {  delay = 5ms; datarate = 600Kbps; } <--> LSR3.pppg[0];
-        host2.pppg++ <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR1.pppg[2];
-        host1.pppg++ <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR1.pppg[3];
-        LSR2.pppg[1] <--> {  delay = 5ms; datarate = 600Kbps; } <--> LSR4.pppg[0];
-        LSR3.pppg[1] <--> {  delay = 5ms; datarate = 600Kbps; } <--> LSR4.pppg[2];
-        LSR4.pppg[1] <--> {  delay = 5ms; datarate = 600Kbps; } <--> LSR5.pppg[0];
-        LSR5.pppg[1] <--> {  delay = 10ms; datarate = 600Kbps; } <--> host3.pppg++;
-        LSR5.pppg[2] <--> {  delay = 10ms; datarate = 600Kbps; } <--> host4.pppg++;
-        LSR2.pppg[2] <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR6.pppg[0];
-        LSR5.pppg[3] <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR6.pppg[1];
-        LSR3.pppg[2] <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR7.pppg[0];
-        LSR5.pppg[4] <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR7.pppg[1];
-        host5.pppg++ <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR1.pppg[4];
+        LSR1.pppg[0] <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR1.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR3.pppg[0];
+        host2.pppg++ <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR1.pppg[2];
+        host1.pppg++ <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR1.pppg[3];
+        LSR2.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR3.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR4.pppg[2];
+        LSR4.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR5.pppg[0];
+        LSR5.pppg[1] <--> {  delay = 10ms; datarate = 600kbps; } <--> host3.pppg++;
+        LSR5.pppg[2] <--> {  delay = 10ms; datarate = 600kbps; } <--> host4.pppg++;
+        LSR2.pppg[2] <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR6.pppg[0];
+        LSR5.pppg[3] <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR6.pppg[1];
+        LSR3.pppg[2] <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR7.pppg[0];
+        LSR5.pppg[4] <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR7.pppg[1];
+        host5.pppg++ <--> {  delay = 10ms; datarate = 600kbps; } <--> LSR1.pppg[4];
 }
 

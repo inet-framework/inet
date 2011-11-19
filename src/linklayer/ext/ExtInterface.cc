@@ -24,10 +24,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
+
+#include "ExtInterface.h"
+
+#include "InterfaceEntry.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "ExtInterface.h"
-#include "IPSerializer.h"
+#include "IPv4Serializer.h"
+#include "opp_utils.h"
 
 
 Define_Module(ExtInterface);
@@ -35,9 +39,9 @@ Define_Module(ExtInterface);
 void ExtInterface::initialize(int stage)
 {
     // subscribe at scheduler for external messages
-    if(stage == 0)
+    if (stage == 0)
     {
-        if(dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL)
+        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL)
         {
             rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
             //device = ev.config()->getAsString("Capture", "device", "lo0");
@@ -52,32 +56,26 @@ void ExtInterface::initialize(int stage)
             // this simulation run works without external interface..
             connected = false;
         }
-    }
+        numSent = numRcvd = numDropped = 0;
+        WATCH(numSent);
+        WATCH(numRcvd);
+        WATCH(numDropped);
 
-    if (stage == 3)
+        // register our interface entry in RoutingTable
+        interfaceEntry = registerInterface();
+
+        // if not connected, make it gray
+        if (ev.isGUI() && !connected)
+        {
+            getDisplayString().setTagArg("i", 1, "#707070");
+            getDisplayString().setTagArg("i", 2, "100");
+        }
+    }
+    else if (stage == 3)
     {
         // update display string when addresses have been autoconfigured etc.
-        updateDisplayString();
-        return;
-    }
-
-    // all initialization is done in the first stage
-    if (stage != 0)
-        return;
-
-    numSent = numRcvd = numDropped = 0;
-    WATCH(numSent);
-    WATCH(numRcvd);
-    WATCH(numDropped);
-
-    // register our interface entry in RoutingTable
-    interfaceEntry = registerInterface();
-
-    // if not connected, make it gray
-    if (ev.isGUI() && !connected)
-    {
-        getDisplayString().setTagArg("i",1,"#707070");
-        getDisplayString().setTagArg("i",2,"100");
+        if (ev.isGUI())
+            updateDisplayString();
     }
 }
 
@@ -86,14 +84,7 @@ InterfaceEntry *ExtInterface::registerInterface()
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: our module name without special characters ([])
-    char *interfaceName = new char[strlen(getFullName())+1];
-    char *d=interfaceName;
-    for (const char *s=getFullName(); *s; s++)
-    if (isalnum(*s))
-        *d++ = *s;
-    *d = '\0';
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    e->setName(OPP_Global::stripnonalnum(getFullName()).c_str());
 
     e->setMtu(par("mtu"));
     e->setMulticast(true);
@@ -106,55 +97,55 @@ InterfaceEntry *ExtInterface::registerInterface()
 void ExtInterface::handleMessage(cMessage *msg)
 {
 
-    if(dynamic_cast<ExtFrame *>(msg) != NULL)
+    if (dynamic_cast<ExtFrame *>(msg) != NULL)
     {
         // incoming real packet from wire (captured by pcap)
         uint32 packetLength;
         ExtFrame *rawPacket = check_and_cast<ExtFrame *>(msg);
 
         packetLength = rawPacket->getDataArraySize();
-        for(uint32 i=0; i < packetLength; i++)
+        for (uint32 i=0; i < packetLength; i++)
             buffer[i] = rawPacket->getData(i);
 
-        IPDatagram *ipPacket = new IPDatagram("ip-from-wire");
-        IPSerializer().parse(buffer, packetLength, (IPDatagram *)ipPacket);
-        EV << "Delivering an IP packet from "
+        IPv4Datagram *ipPacket = new IPv4Datagram("ip-from-wire");
+        IPv4Serializer().parse(buffer, packetLength, (IPv4Datagram *)ipPacket);
+        EV << "Delivering an IPv4 packet from "
            << ipPacket->getSrcAddress()
            << " to "
            << ipPacket->getDestAddress()
            << " and length of"
            << ipPacket->getByteLength()
-           << " bytes to IP layer.\n";
+           << " bytes to IPv4 layer.\n";
         send(ipPacket, "netwOut");
         numRcvd++;
     }
     else
     {
-        memset(buffer, 0, 1<<16);
-        IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
+        memset(buffer, 0, sizeof(buffer));
+        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
 
         if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_SCTP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_TCP) &&
-            (ipPacket->getTransportProtocol() != IPPROTO_UDP))
+            (ipPacket->getTransportProtocol() != IP_PROT_SCTP) &&
+            (ipPacket->getTransportProtocol() != IP_PROT_TCP) &&
+            (ipPacket->getTransportProtocol() != IP_PROT_UDP))
         {
             EV << "Can not send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
             numDropped++;
-            delete(msg);
+            delete (msg);
             return;
         }
 
-        if(connected)
+        if (connected)
         {
             struct sockaddr_in addr;
-            addr.sin_family      = AF_INET;
+            addr.sin_family = AF_INET;
 #if !defined(linux) && !defined(_WIN32)
-            addr.sin_len         = sizeof(struct sockaddr_in);
+            addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-            addr.sin_port        = 0;
+            addr.sin_port = 0;
             addr.sin_addr.s_addr = htonl(ipPacket->getDestAddress().getInt());
-            int32 packetLength = IPSerializer().serialize(ipPacket,buffer, sizeof(buffer));
-            EV << "Delivering an IP packet from "
+            int32 packetLength = IPv4Serializer().serialize(ipPacket, buffer, sizeof(buffer));
+            EV << "Delivering an IPv4 packet from "
                << ipPacket->getSrcAddress()
                << " to "
                << ipPacket->getDestAddress()
@@ -170,35 +161,41 @@ void ExtInterface::handleMessage(cMessage *msg)
             numDropped++;
         }
     }
-    delete(msg);
+    delete (msg);
     if (ev.isGUI())
         updateDisplayString();
 }
 
 void ExtInterface::displayBusy()
 {
-    getDisplayString().setTagArg("i",1, "yellow");
-    gate("physOut")->getDisplayString().setTagArg("ls",0,"yellow");
-    gate("physOut")->getDisplayString().setTagArg("ls",1,"3");
+    getDisplayString().setTagArg("i", 1, "yellow");
+    gate("physOut")->getDisplayString().setTagArg("ls", 0, "yellow");
+    gate("physOut")->getDisplayString().setTagArg("ls", 1, "3");
 }
 
 void ExtInterface::displayIdle()
 {
-    getDisplayString().setTagArg("i",1,"");
-    gate("physOut")->getDisplayString().setTagArg("ls",0,"black");
-    gate("physOut")->getDisplayString().setTagArg("ls",1,"1");
+    getDisplayString().setTagArg("i", 1, "");
+    gate("physOut")->getDisplayString().setTagArg("ls", 0, "black");
+    gate("physOut")->getDisplayString().setTagArg("ls", 1, "1");
 }
 
 void ExtInterface::updateDisplayString()
 {
+    if (!ev.isGUI())
+        return;
+
+    const char *str;
     char buf[80];
-    if (ev.disable_tracing)
-        getDisplayString().setTagArg("t",0,"");
-    if(connected)
+
+    if (connected)
+    {
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
+        str = buf;
+    }
     else
-        sprintf(buf, "not connected");
-    getDisplayString().setTagArg("t", 0, buf);
+        str = "not connected";
+    getDisplayString().setTagArg("t", 0, str);
 }
 
 void ExtInterface::finish()

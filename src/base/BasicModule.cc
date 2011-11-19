@@ -33,8 +33,7 @@
  */
 void BasicModule::initialize(int stage)
 {
-    cModule *parent = findHost();
-    char tmp[8];
+    cModule *host = findHost(false);
 
     if (stage == 0)
     {
@@ -48,28 +47,29 @@ void BasicModule::initialize(int stage)
         else
             debug = false;
 
-
-        // get the logging name of the host
-        if (parent->hasPar("logName"))
-            loggingName = parent->par("logName").stringValue();
-        else
-            loggingName = parent->getName();
-        sprintf(&tmp[0], "[%d]", parent->getIndex());
-        loggingName += tmp;
-
-        // get a pointer to the NotificationBoard module
-        nb = NotificationBoardAccess().get();
+        if (host) {
+            // get the logging name of the host
+            if (host->hasPar("logName"))
+                loggingName = host->par("logName").stringValue();
+            else
+                loggingName = host->getName();
+            char tmp[8];
+            sprintf(&tmp[0], "[%d]", host->getIndex());
+            loggingName += tmp;
+        }
     }
 }
 
-cModule *BasicModule::findHost(void) const
+cModule *BasicModule::findHost(bool errorIfNotFound) const
 {
     cModule *mod;
-    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule())
-        if (mod->getSubmodule("notificationBoard"))
+    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule()) {
+        cProperties *properties = mod->getProperties();
+        if (properties && properties->getAsBool("node"))
             break;
-    if (!mod)
-        error("findHost(): host module not found (it should have a submodule named notificationBoard)");
+    }
+    if (errorIfNotFound && !mod)
+        error("findHost(): host module not found (it should have a property named node)");
 
     return mod;
 }

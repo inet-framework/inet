@@ -17,7 +17,7 @@
 
 
 #include "IPv6Datagram.h"
-#include "IPv6ExtensionHeaders_m.h"
+#include "IPv6ExtensionHeaders.h"
 
 
 Register_Class(IPv6Datagram);
@@ -30,12 +30,17 @@ std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
 
 IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
 {
+    if (this==&other) return *this;
+    clean();
     IPv6Datagram_Base::operator=(other);
+    copy(other);
+    return *this;
+}
 
+void IPv6Datagram::copy(const IPv6Datagram& other)
+{
     for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); ++i)
         addExtensionHeader((*i)->dup());
-
-    return *this;
 }
 
 void IPv6Datagram::setExtensionHeaderArraySize(unsigned int size)
@@ -52,7 +57,7 @@ IPv6ExtensionHeaderPtr& IPv6Datagram::getExtensionHeader(unsigned int k)
 {
     static IPv6ExtensionHeaderPtr null;
     if (k>=extensionHeaders.size())
-        return (null=NULL);
+        return (null = NULL);
     return extensionHeaders[k];
 }
 
@@ -81,53 +86,29 @@ int IPv6Datagram::calculateHeaderByteLength() const
     return len;
 }
 
-//---
-
-Register_Class(IPv6ExtensionHeader);
-
-
-IPProtocolId IPv6ExtensionHeader::getExtensionType() const
+IPv6ExtensionHeaderPtr IPv6Datagram::removeFirstExtensionHeader()
 {
-    // FIXME msg files don't yet support readonly attrs that can be
-    // redefined in subclasses, so for now we resort to the following
-    // unsafe and unextensible nasty solution
-    if (dynamic_cast<const IPv6HopByHopOptionsHeader*>(this)) {
-        return IP_PROT_IPv6EXT_HOP;
-    } else if (dynamic_cast<const IPv6RoutingHeader*>(this)) {
-        return IP_PROT_IPv6EXT_ROUTING;
-    } else if (dynamic_cast<const IPv6FragmentHeader*>(this)) {
-        return IP_PROT_IPv6EXT_FRAGMENT;
-    } else if (dynamic_cast<const IPv6DestinationOptionsHeader*>(this)) {
-        return IP_PROT_IPv6EXT_DEST;
-    } else if (dynamic_cast<const IPv6AuthenticationHeader*>(this)) {
-        return IP_PROT_IPv6EXT_AUTH;
-    } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
-        return IP_PROT_IPv6EXT_ESP;
-    } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::getExtensionType()", getClassName());
-    }
+    static IPv6ExtensionHeaderPtr null;
+    if ( extensionHeaders.size() == 0)
+        return (null = NULL);
+    IPv6ExtensionHeaderPtr eh = extensionHeaders.front();
+    extensionHeaders.erase( extensionHeaders.begin() );
+    return eh;
 }
 
-int IPv6ExtensionHeader::getByteLength() const
+IPv6Datagram::~IPv6Datagram()
 {
-    // FIXME msg files don't yet support readonly attrs that can be
-    // redefined in subclasses, so for now we resort to the following
-    // unsafe and unextensible nasty solution
-    if (dynamic_cast<const IPv6HopByHopOptionsHeader*>(this)) {
-        return 8; // FIXME verify
-    } else if (dynamic_cast<const IPv6RoutingHeader*>(this)) {
-        return 8; // FIXME verify
-    } else if (dynamic_cast<const IPv6FragmentHeader*>(this)) {
-        return 8;
-    } else if (dynamic_cast<const IPv6DestinationOptionsHeader*>(this)) {
-        return 8; // FIXME verify
-    } else if (dynamic_cast<const IPv6AuthenticationHeader*>(this)) {
-        return 8; // FIXME verify
-    } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
-        return 8; // FIXME verify
-    } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::getExtensionType()", getClassName());
-    }
+    clean();
 }
 
+void IPv6Datagram::clean()
+{
+    IPv6ExtensionHeaderPtr eh;
 
+    while ( ! extensionHeaders.empty() )
+    {
+        eh = extensionHeaders.back();
+        extensionHeaders.pop_back(); // remove pointer element from container
+        delete eh; // delete the header
+    }
+}

@@ -1,7 +1,7 @@
 /*
  * Diagram is in Graphviz dot format.
  *
- * To produce GIF image, try: dot -Tgif < NUD.dot >NUD.gif
+ * To produce GIF image, try: dot -Tgif < ND-tables.dot >ND-tables.gif
  */
 
 digraph NeighbourDiscoveryTables {

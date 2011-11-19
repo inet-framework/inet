@@ -21,19 +21,26 @@
 #ifndef __TCP_NSC_H
 #define __TCP_NSC_H
 
+#ifndef HAVE_NSC
+#error Please install NSC or disable 'TCP_NSC' feature
+#endif
+
+
 #include <map>
-#include <list>
-#include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
 
 #include <sim_interface.h> // NSC. We need this here to derive from classes
+
+#include "IPvXAddress.h"
+#include "TCPCommand_m.h"
 #include "TCP_NSC_Connection.h"
 
 // forward declarations:
 class TCPCommand;
 class TCPSegment;
+class TCP_NSC_SendQueue;
+class TCP_NSC_ReceiveQueue;
 
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
@@ -66,8 +73,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // internal utility functions:
 
     void changeAddresses(TCP_NSC_Connection &connP,
-        const TCP_NSC_Connection::SockPair &inetSockPairP,
-        const TCP_NSC_Connection::SockPair &nscSockPairP);
+            const TCP_NSC_Connection::SockPair &inetSockPairP,
+            const TCP_NSC_Connection::SockPair &nscSockPairP);
 
     // find a TCP_NSC_Connection by connection ID
     TCP_NSC_Connection *findAppConn(int connIdP);
@@ -113,11 +120,21 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // return original remote ip from mapped ip
     // assert if not exists in map
     // nscAddrP has IP in host byte order
-    IPvXAddress const & mapNsc2Remote(u_int32_t nscAddrP);
     // x == mapNsc2Remote(mapRemote2Nsc(x))
+    IPvXAddress const & mapNsc2Remote(u_int32_t nscAddrP);
 
     // send a connection established msg to application layer
     void sendEstablishedMsg(TCP_NSC_Connection &connP);
+
+    /**
+     * To be called from TCPConnection: create a new send queue.
+     */
+    virtual TCP_NSC_SendQueue* createSendQueue(TCPDataTransferMode transferModeP);
+
+    /**
+     * To be called from TCPConnection: create a new receive queue.
+     */
+    virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
 
   protected:
     typedef std::map<int,TCP_NSC_Connection> TcpAppConnMap; // connId-to-TCP_NSC_Connection
@@ -136,9 +153,6 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     INetStack *pStackM;
 
     cMessage *pNsiTimerM;
-
-    void decode_tcpip(const void *, int);
-    void decode_tcp(const void *, int);
 
   public:
     static bool testingS;    // switches between tcpEV and testingEV
@@ -159,24 +173,10 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     static const char * bufferSizeParamNameS; // name of buffersize parameter
 
     // statistics
-    cOutVector *sndWndVector;   // snd_wnd
-    cOutVector *rcvWndVector;   // rcv_wnd
-    cOutVector *rcvAdvVector;   // current advertised window (=rcv_avd)
     cOutVector *sndNxtVector;   // sent seqNo
     cOutVector *sndAckVector;   // sent ackNo
     cOutVector *rcvSeqVector;   // received seqNo
     cOutVector *rcvAckVector;   // received ackNo (= snd_una)
-    cOutVector *unackedVector;  // number of bytes unacknowledged
-
-    cOutVector *dupAcksVector;   // current number of received dupAcks
-    cOutVector *pipeVector;      // current sender's estimate of bytes outstanding in the network
-    cOutVector *sndSacksVector;  // number of sent Sacks
-    cOutVector *rcvSacksVector;  // number of received Sacks
-    cOutVector *rcvOooSegVector; // number of received out-of-order segments
-
-    cOutVector *sackedBytesVector;                // current number of received sacked bytes
-    cOutVector *tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
-    cOutVector *tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
 };
 
 #endif

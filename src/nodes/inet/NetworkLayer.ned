@@ -16,60 +16,57 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.nodes.inet;
 
-import inet.networklayer.arp.ARP;
-import inet.networklayer.ipv4.ErrorHandling;
-import inet.networklayer.ipv4.ICMP;
+import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.IGMP;
-import inet.networklayer.ipv4.IP;
+import inet.networklayer.ipv4.ICMP;
+import inet.networklayer.ipv4.ErrorHandling;
+import inet.networklayer.arp.ARP;
 
 
 //
-// Network layer of an \IP node.
+// Network layer of an IPv4 node.
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //
 module NetworkLayer
 {
     parameters:
-        bool proxyARP = default(true);
         @display("i=block/fork");
+        bool proxyARP = default(true);
     gates:
-        input ifIn[] @labels(IPDatagram);
-        input tcpIn @labels(TCPSegment,IPControlInfo/down);
-        input udpIn @labels(UDPPacket,IPControlInfo/down);
-        input sctpIn @labels(IPControlInfo/down,SCTPPacket);   //I.R.
-        input rsvpIn @labels(IPControlInfo/down);
-        input ospfIn @labels(IPControlInfo/down);
+        input ifIn[] @labels(IPv4Datagram);
+        input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
+        input udpIn @labels(UDPPacket,IPv4ControlInfo/down);
+        input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
+        input rsvpIn @labels(IPv4ControlInfo/down);
+        input ospfIn @labels(IPv4ControlInfo/down);
         input pingIn;
+        input manetIn;
         output ifOut[];
-        output tcpOut @labels(TCPSegment,IPControlInfo/up);
-        output udpOut @labels(UDPPacket,IPControlInfo/up);
-        output sctpOut @labels(IPControlInfo/up,SCTPPacket); //I.R.
-        output rsvpOut @labels(IPControlInfo/up);
-        output ospfOut @labels(IPControlInfo/up);
+        output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
+        output udpOut @labels(UDPPacket,IPv4ControlInfo/up);
+        output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
+        output rsvpOut @labels(IPv4ControlInfo/up);
+        output ospfOut @labels(IPv4ControlInfo/up);
         output pingOut;
+        output manetOut;
 
     submodules:
-        ip: IP {
+        ip: IPv4 {
             parameters:
-                timeToLive = 32;
-                multicastTimeToLive = 32;
-                fragmentTimeout = 60s;
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6";   //I.R.
+                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers
                 @display("p=85,95;q=queue");
             gates:
-                transportIn[7]; //I.R.
-                transportOut[7];
+                transportIn[8];
+                transportOut[8];
                 queueIn[sizeof(ifIn)];
         }
         arp: ARP {
             parameters:
                 proxyARP = proxyARP;
-                @display("p=163,206;q=pendingQueue");
+                @display("p=202,142;q=pendingQueue");
             gates:
                 nicOut[sizeof(ifOut)];
         }
@@ -79,12 +76,13 @@ module NetworkLayer
         }
         igmp: IGMP {
             parameters:
-                @display("p=160,122");
+                @display("p=85,30");
         }
         errorHandling: ErrorHandling {
             parameters:
                 @display("p=239,63");
         }
+
     connections allowunconnected:
         // transport Layer
         ip.transportOut[0] --> tcpOut;
@@ -105,8 +103,11 @@ module NetworkLayer
         ip.transportOut[5] --> ospfOut;
         ip.transportIn[5] <-- ospfIn;
 
-        ip.transportOut[6] --> sctpOut;     //I.R.
+        ip.transportOut[6] --> sctpOut;
         ip.transportIn[6] <-- sctpIn;
+
+        ip.transportOut[7] --> manetOut;
+        ip.transportIn[7] <-- manetIn;
 
         icmp.pingOut --> pingOut;
         icmp.pingIn <-- pingIn;
@@ -115,10 +116,11 @@ module NetworkLayer
 
         ip.queueOut --> arp.ipIn;
 
-        // L2 interfaces to IP and from ARP
+        for i=0..sizeof(ifIn)-1 {
+            ifIn[i] --> ip.queueIn[i];
+        }
         for i=0..sizeof(ifOut)-1 {
-            ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
-            ifOut[i] <-- { @display("m=s"); } <-- arp.nicOut[i];
+            arp.nicOut[i] --> ifOut[i];
         }
 }
 

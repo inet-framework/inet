@@ -14,7 +14,8 @@
 #ifndef __INET_TCPBASICCLIENTAPP_H
 #define __INET_TCPBASICCLIENTAPP_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPGenericCliAppBase.h"
 
 
@@ -27,6 +28,7 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     cMessage *timeoutMsg;
     bool earlySend;  // if true, don't wait with sendRequest() until established()
     int numRequestsToSend; // requests to send in this session
+    simtime_t stopTime;
 
     /** Utility: sends a request to the server */
     virtual void sendRequest();
@@ -36,8 +38,8 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     virtual ~TCPBasicClientApp();
 
   protected:
-    /** Redefined to schedule a connect(). */
-    virtual void initialize();
+    /** Redefined . */
+    virtual void initialize(int stage);
 
     /** Redefined. */
     virtual void handleTimer(cMessage *msg);
@@ -56,5 +58,4 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
 };
 
 #endif
-
 

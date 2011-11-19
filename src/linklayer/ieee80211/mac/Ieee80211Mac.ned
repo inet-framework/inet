@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mï¿½szï¿½ros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,14 +20,14 @@ package inet.linklayer.ieee80211.mac;
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
-// to be used in combination with the Ieee80211Radio module as the physical
-// layer. (The SnrEval80211 and Decider80211 modules should also work if
+// to be used in combination with the ~Ieee80211Radio module as the physical
+// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
 // per-packet bitrate setting gets implemented.)
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in Ieee80211Nic).
-// The base class for 802.11 frame messages is Ieee80211Frame, but this
-// module expects Ieee80211DataOrMgmtFrame (a subclass) from upper layers
+// typically in the 802.11 management module, see in ~Ieee80211Nic).
+// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
+// module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
 // (the management module). This module will assign the transmitter address
 // (address 2) and the frame sequence number/fragment number fields in the
 // frames; all other fields must already be filled when this module gets
@@ -58,17 +58,20 @@ simple Ieee80211Mac
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         string queueModule = default("");    // name of optional external queue module
-        int maxQueueSize; // max queue length in frames; only used if queueModule==""
+        int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
+        double basicBitrate @unit("bps") = default(2000000bps);
         int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
+        int cwMinMulticast = default(-1); // contention window for multicast messages, -1 means default
         int mtu = default(1500);
         @display("i=block/layer");
+        @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
+        @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
     gates:
-        input uppergateIn @labels(Ieee80211Frame);
-        output uppergateOut @labels(Ieee80211Frame);
-        input lowergateIn @labels(Ieee80211Frame);
-        output lowergateOut @labels(Ieee80211Frame);
+        input upperLayerIn @labels(Ieee80211Frame);
+        output upperLayerOut @labels(Ieee80211Frame);
+        input lowerLayerIn @labels(Ieee80211Frame);
+        output lowerLayerOut @labels(Ieee80211Frame);
 }

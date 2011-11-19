@@ -1,10 +1,12 @@
 //
-// Copyright (C) 2008 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// Documentation for these modules is at http://veins.car2x.org/
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,71 +15,71 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
 package inet.examples.traci_launchd;
 
+import inet.base.NotificationBoard;
 import inet.networklayer.autorouting.HostAutoConfigurator;
+import inet.networklayer.common.InterfaceTable;
+import inet.applications.traci.TraCIDemo;
+import inet.mobility.models.TraCIMobility;
+import inet.networklayer.ipv4.RoutingTable;
 import inet.transport.udp.UDP;
 import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.mobility.traci.TraCIMobility;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
-import inet.base.NotificationBoard;
-import inet.applications.traci.TraCIDemo;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 
 module Car
 {
     parameters:
+        @node();
 
-        @display("bgb=424,541");
     gates:
-        input radioIn;
+        input radioIn @directIn;
 
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=140,462;i=block/control");
+                @display("p=140,462");
         }
         ac_wlan: HostAutoConfigurator {
             @display("p=296,402");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=140,326;i=block/table");
+                @display("p=140,326");
+        }
+        app: TraCIDemo {
+            parameters:
+                @display("p=384,46");
         }
         mobility: TraCIMobility {
             parameters:
-                @display("p=60,459;i=block/cogwheel");
+                @display("p=60,459");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "";
                 routingFile = "";
-                @display("p=60,326;i=block/table");
+                @display("p=60,326");
         }
         udp: UDP {
             parameters:
-                @display("p=384,146;i=block/transport");
+                @display("p=384,146");
         }
         networkLayer: NetworkLayer {
             parameters:
                 proxyARP = false;
-                @display("p=304,327;i=block/fork;q=queue");
+                @display("p=304,327;q=queue");
             gates:
                 ifIn[1];
                 ifOut[1];
         }
-        wlan: Ieee80211NicAdhoc {
+        wlan: Ieee80211Nic {
             parameters:
-                @display("p=304,461;q=queue;i=block/ifcard");
-        }
-        app: TraCIDemo {
-            parameters:
-                @display("p=384,46;i=block/app");
+                @display("p=304,461;q=queue");
         }
     connections allowunconnected:
         udp.appOut++ --> app.udp$i;
@@ -86,8 +88,8 @@ module Car
         udp.ipOut --> networkLayer.udpIn;
         udp.ipIn <-- networkLayer.udpOut;
 
-        wlan.uppergateOut --> networkLayer.ifIn[0];
-        wlan.uppergateIn <-- networkLayer.ifOut[0];
+        wlan.upperLayerOut --> networkLayer.ifIn[0];
+        wlan.upperLayerIn <-- networkLayer.ifOut[0];
 
         radioIn --> wlan.radioIn;
 }

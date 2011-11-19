@@ -19,12 +19,11 @@
 
 package inet.examples.ipv6.demonetworketh;
 
-import inet.examples.ethernet.lans.ethernetline;
-import inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import inet.nodes.ipv6.Router6;
-import inet.nodes.ipv6.StandardHost6;
-import inet.util.TCPDump;
 import ned.DatarateChannel;
+import inet.util.TCPDump;
+import inet.nodes.ipv6.StandardHost6;
+import inet.nodes.ipv6.Router6;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 
 
 network DemoNetworkEth
@@ -35,6 +34,7 @@ network DemoNetworkEth
         channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
+            datarate = 10Mbps;
         }
     submodules:
         configurator: FlatNetworkConfigurator6;
@@ -45,9 +45,9 @@ network DemoNetworkEth
         linemonitor[n]: TCPDump;
     connections:
         for i=0..n-1 {
-// FIXME adjust to the new TCPDump module
-//            cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
-//            linemonitor[i].b <--> ethernetline <--> r1.ethg++;
+            // FIXME adjust to the new TCPDump module
+            //            cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
+            //            linemonitor[i].b <--> ethernetline <--> r1.ethg++;
             cli[i].ethg++ <--> ethernetline <--> r1.ethg++;
             srv[i].ethg++ <--> ethernetline <--> r2.ethg++;
         }

@@ -1,13 +1,12 @@
 //
-// TraCIScenarioManager - connects OMNeT++ to a TraCI server, manages hosts
-// Copyright (C) 2006 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +15,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
 #ifndef WORLD_TRACI_TRACISCENARIOMANAGER_H
@@ -31,7 +30,7 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "ChannelControl.h"
+#include "IChannelControl.h"
 #include "ModuleAccess.h"
 
 /**
@@ -204,7 +203,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		bool autoShutdownTriggered;
 		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
 
-		ChannelControl* cc;
+		IChannelControl* cc;
 
 		uint32_t getCurrentTimeMs(); /**< get current simulation time (in ms) */
 
@@ -278,10 +277,21 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
 
-class TraCIScenarioManagerAccess : public ModuleAccess<TraCIScenarioManager>
+class TraCIScenarioManagerAccess
 {
 	public:
-		TraCIScenarioManagerAccess() : ModuleAccess<TraCIScenarioManager>("manager") {};
+		TraCIScenarioManagerAccess() {
+			o = dynamic_cast<TraCIScenarioManager*>(simulation.getModuleByPath("manager"));
+			if (!o) throw cRuntimeError("Could not find a TraCIScenarioManager module named manager");
+		};
+
+		TraCIScenarioManager* get() {
+			return o;
+		}
+
+	protected:
+		TraCIScenarioManager* o;
+
 };
 
 #endif

@@ -1,10 +1,10 @@
 package inet.transport.rtp;
 
 //
-// Interface for \RTP Payload Senders.
+// Interface for RTP Payload Senders.
 //
-// These modules are internal to the RTP module; instances are created
-// and connected dynamically by RTPProfile.
+// These modules are internal to the ~RTP module; instances are created
+// and connected dynamically by ~RTPProfile.
 //
 moduleinterface IRTPPayloadSender
 {

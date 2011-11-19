@@ -18,52 +18,52 @@
 
 package inet.transport.sctp;
 
-simple SCTP
+import inet.transport.ISCTP;
+
+
+//
+// Implements the SCTP protocol.
+//
+simple SCTP like ISCTP
 {
-        parameters:
-        // ====== SCTP Association Parameters =================================
-        int numGapReports                   = default(3);
-        double rtoInitial @unit(s)          = default(3s);
-        double rtoMin @unit(s)              = default(1s);
-        double rtoMax @unit(s)              = default(60s);
-        double rtoAlpha                     = default(0.125);
-        double rtoBeta                      = default(0.250);
-        int maxBurst                        = default(4);
-        int assocMaxRetrans                 = default(10);
-        int pathMaxRetrans                  = default(5);
-        int maxInitRetrans                  = default(8);
-        double sackPeriod @unit(s)          = default(200ms);
-        int sackFrequency                   = default(2);
-        bool reactivatePrimaryPath          = default(false);
-        int sendQueueLimit                  = default(0);
+    parameters:
+        //#====== SCTP Association Parameters =================================
+        int numGapReports = default(3);
+        double rtoInitial @unit(s) = default(3s);
+        double rtoMin @unit(s) = default(1s);
+        double rtoMax @unit(s) = default(60s);
+        double rtoAlpha = default(0.125);
+        double rtoBeta = default(0.250);
+        int maxBurst = default(4);
+        int assocMaxRetrans = default(10);
+        int pathMaxRetrans = default(5);
+        int maxInitRetrans = default(8);
+        double sackPeriod @unit(s) = default(200ms);
+        int sackFrequency = default(2);
+        bool reactivatePrimaryPath = default(false);
+        int sendQueueLimit = default(0);
         double validCookieLifetime @unit(s) = default(10s);
 
-        // ====== Testing =====================================================
+        //#====== Testing =====================================================
 
-        // ====== Heartbeats ==================================================
-        bool enableHeartbeats                   = default(true);
-        double hbInterval @unit(s)              = default(30s);
+        //#====== Heartbeats ==================================================
+        bool enableHeartbeats = default(true);
+        double hbInterval @unit(s) = default(30s);
 
-        // ====== Nagle Algorithm =============================================
-        bool nagleEnabled                       = default(true);
-        int naglePoint                          = default(1468);
+        //#====== Nagle Algorithm =============================================
+        bool nagleEnabled = default(true);
+        int naglePoint = default(1468);
 
-        // ====== Congestion Control ==========================================
-        bool fastRecoverySupported              = default(true);
-        string sctpAlgorithmClass               = default("SCTPAlg");
-        int ccModule                            = default(0);           // RFC4960=0
+        //#====== Congestion Control ==========================================
+        bool fastRecoverySupported = default(true);
+        string sctpAlgorithmClass = default("SCTPAlg");
+        int ccModule = default(0);           // RFC4960=0
 
-        int ssModule                            = default(0);           // ROUND_ROBIN=0
-        int arwnd                               = default(65535);
-        int swsLimit                            = default(3000);        // Limit for SWS
-        bool udpEncapsEnabled                   = default(false);
-
-
-
-
-
-
-
+        int ssModule = default(0);           // ROUND_ROBIN=0
+        int arwnd = default(65535);
+        int swsLimit = default(3000);        // Limit for SWS
+        bool udpEncapsEnabled = default(false);
+        @display("i=block/wheelbarrow");
 
     gates:
         input from_appl[];
@@ -73,3 +73,4 @@ simple SCTP
         output to_ip;
         output to_ipv6;
 }
+

@@ -41,7 +41,7 @@
 #define MAX_REXMIT_COUNT       12   // 12 retries
 #define MIN_REXMIT_TIMEOUT    1.0   // 1s
 //#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
-#define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC 1122)
+#define MAX_REXMIT_TIMEOUT    240   // 2 * MSL (RFC 1122)
 #define MIN_PERSIST_TIMEOUT     5   //  5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 
@@ -61,7 +61,7 @@ TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
     // Jacobson's alg: srtt must be initialized to 0, rttvar to a value which
     // will yield rto = 3s initially.
     srtt = 0;
-    rttvar = 3.0/4.0;
+    rttvar = 3.0 / 4.0;
 
     numRtos = 0;
 
@@ -85,9 +85,9 @@ std::string TCPBaseAlgStateVariables::detailedInfo() const
 {
     std::stringstream out;
     out << TCPStateVariables::detailedInfo();
-    out << "snd_cwnd = " << snd_cwnd << "\n";
-    out << "rto = " << rexmit_timeout << "\n";
-    out << "persist_timeout = " << persist_timeout << "\n";
+    out << "snd_cwnd=" << snd_cwnd << "\n";
+    out << "rto=" << rexmit_timeout << "\n";
+    out << "persist_timeout=" << persist_timeout << "\n";
     // TBD add others too
     return out.str();
 }
@@ -182,10 +182,10 @@ void TCPBaseAlg::established(bool active)
     // If the SYN or SYN/ACK is
     // lost, the initial window used by a sender after a correctly
     // transmitted SYN MUST be one segment consisting of MSS bytes."
-    if (state->increased_IW_enabled && state->syn_rexmit_count==0)
+    if (state->increased_IW_enabled && state->syn_rexmit_count == 0)
     {
         state->snd_cwnd = std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380));
-        tcpEV << "Enabled Increased Initial Window, CWND is set to: " << state->snd_cwnd << "\n";
+        tcpEV << "Enabled Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }
     // RFC 2001, page 3:
     // " 1.  Initialization for a given connection sets cwnd to one segment
@@ -212,13 +212,13 @@ void TCPBaseAlg::connectionClosed()
 
 void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
 {
-    if (timer==rexmitTimer)
+    if (timer == rexmitTimer)
         processRexmitTimer(event);
-    else if (timer==persistTimer)
+    else if (timer == persistTimer)
         processPersistTimer(event);
-    else if (timer==delayedAckTimer)
+    else if (timer == delayedAckTimer)
         processDelayedAckTimer(event);
-    else if (timer==keepAliveTimer)
+    else if (timer == keepAliveTimer)
         processKeepAliveTimer(event);
     else
         throw cRuntimeError(timer, "unrecognized timer");
@@ -260,6 +260,7 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
     state->rexmit_timeout += state->rexmit_timeout;
     if (state->rexmit_timeout > MAX_REXMIT_TIMEOUT)
         state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
+
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 
     tcpEV << " to " << state->rexmit_timeout << "s, and cancelling RTT measurement\n";
@@ -268,6 +269,7 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
     state->rtseq_sendtime = 0;
 
     state->numRtos++;
+
     if (numRtosVector)
         numRtosVector->record(state->numRtos);
 
@@ -314,14 +316,17 @@ void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
     if (state->persist_factor == 0)
         state->persist_factor++;
     else if (state->persist_factor < 64)
-        state->persist_factor = state->persist_factor*2;
+        state->persist_factor = state->persist_factor * 2;
+
     state->persist_timeout = state->persist_factor * 1.5; // 1.5 is a factor for typical LAN connection [Stevens, W.R.: TCP/IP Ill. Vol. 1, chapter 22.2]
 
     // PERSIST timer is bounded to 5-60 seconds
     if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
         state->rexmit_timeout = MIN_PERSIST_TIMEOUT;
+
     if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
         state->rexmit_timeout = MAX_PERSIST_TIMEOUT;
+
     conn->scheduleTimeout(persistTimer, state->persist_timeout);
 
     // sending persist probe
@@ -370,38 +375,48 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     //
 
     // update smoothed RTT estimate (srtt) and variance (rttvar)
-    const double g = 0.125; // 1/8; (1-alpha) where alpha=7/8;
-    simtime_t newRTT = tAcked-tSent;
+    const double g = 0.125; // 1 / 8; (1 - alpha) where alpha == 7 / 8;
+    simtime_t newRTT = tAcked - tSent;
 
     simtime_t& srtt = state->srtt;
     simtime_t& rttvar = state->rttvar;
 
     simtime_t err = newRTT - srtt;
 
-    srtt += g*err;
-    rttvar += g*(fabs(err) - rttvar);
+    srtt += g * err;
+    rttvar += g * (fabs(err) - rttvar);
 
     // assign RTO (here: rexmit_timeout) a new value
-    simtime_t rto = srtt + 4*rttvar;
-    if (rto>MAX_REXMIT_TIMEOUT)
+    simtime_t rto = srtt + 4 * rttvar;
+
+    if (rto > MAX_REXMIT_TIMEOUT)
         rto = MAX_REXMIT_TIMEOUT;
-    else if (rto<MIN_REXMIT_TIMEOUT)
+    else if (rto < MIN_REXMIT_TIMEOUT)
         rto = MIN_REXMIT_TIMEOUT;
 
     state->rexmit_timeout = rto;
 
     // record statistics
-    tcpEV << "Measured RTT=" << (newRTT*1000) << "ms, updated SRTT=" << (srtt*1000)
-          << "ms, new RTO=" << (rto*1000) << "ms\n";
-    if (rttVector) rttVector->record(newRTT);
-    if (srttVector) srttVector->record(srtt);
-    if (rttvarVector) rttvarVector->record(rttvar);
-    if (rtoVector) rtoVector->record(rto);
+    tcpEV << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (srtt * 1000)
+          << "ms, new RTO=" << (rto * 1000) << "ms\n";
+
+    if (rttVector)
+        rttVector->record(newRTT);
+
+    if (srttVector)
+        srttVector->record(srtt);
+
+    if (rttvarVector)
+        rttvarVector->record(rttvar);
+
+    if (rtoVector)
+        rtoVector->record(rto);
 }
 
 void TCPBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
-    ASSERT (state->ts_enabled);
+    ASSERT(state->ts_enabled);
+
     // Note: The TS option is using uint32 values (ms precision) therefore we convert the current simTime also to a uint32 value (ms precision)
     // and then convert back to simtime_t to use rttMeasurementComplete() to update srtt and rttvar
     uint32 now = conn->convertSimtimeToTS(simTime());
@@ -422,7 +437,8 @@ bool TCPBaseAlg::sendData()
     // "b) a segment that can be sent is at least half the size of
     // the largest window ever advertised by the receiver"
 
-    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
+    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
+
     if (fullSegmentsOnly)
         tcpEV << "Nagle is enabled and there's unacked data: only full segments will be sent\n";
 
@@ -444,10 +460,11 @@ bool TCPBaseAlg::sendData()
         {
             // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
             if (state->increased_IW_enabled)
-                state->snd_cwnd = std::min (std::min (4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
+                state->snd_cwnd = std::min(std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
             else
                 state->snd_cwnd = state->snd_mss;
-            tcpEV << "Restarting idle connection, CWND is set to: " << state->snd_cwnd << "\n";
+
+            tcpEV << "Restarting idle connection, CWND is set to " << state->snd_cwnd << "\n";
         }
     }
 
@@ -522,11 +539,11 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     if (!state->ts_enabled)
     {
         // if round-trip time measurement is running, check if rtseq has been acked
-        if (state->rtseq_sendtime!=0 && seqLess(state->rtseq, state->snd_una))
+        if (state->rtseq_sendtime != 0 && seqLess(state->rtseq, state->snd_una))
         {
             // print value
             tcpEV << "Round-trip time measured on rtseq=" << state->rtseq << ": "
-                  << floor((simTime() - state->rtseq_sendtime)*1000+0.5) << "ms\n";
+                  << floor((simTime() - state->rtseq_sendtime) * 1000 + 0.5) << "ms\n";
 
             rttMeasurementComplete(state->rtseq_sendtime, simTime()); // update RTT variables with new value
 
@@ -540,7 +557,7 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     // (no data in flight), cancel the timer, otherwise restart the timer
     // with the current RTO value.
     //
-    if (state->snd_una==state->snd_max)
+    if (state->snd_una == state->snd_max)
     {
         if (rexmitTimer->isScheduled())
         {
@@ -568,7 +585,7 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     // If data sender received a non zero-sized window, check PERSIST timer.
     //  If PERSIST timer is scheduled, cancel PERSIST timer.
     //
-    if (state->snd_wnd==0) // received zero-sized window?
+    if (state->snd_wnd == 0) // received zero-sized window?
     {
         if (rexmitTimer->isScheduled())
         {
@@ -615,7 +632,7 @@ void TCPBaseAlg::receivedDuplicateAck()
 {
     tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
 
-    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
+    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
     if (state->dupacks < DUPTHRESH && state->limited_transmit_enabled) // DUPTRESH = 3
         conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
 
@@ -661,7 +678,7 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
     if (!state->ts_enabled)
     {
         // start round-trip time measurement (if not already running)
-        if (state->rtseq_sendtime==0)
+        if (state->rtseq_sendtime == 0)
         {
             // remember this sequence number and when it was sent
             state->rtseq = fromseq;
@@ -677,5 +694,6 @@ void TCPBaseAlg::restartRexmitTimer()
 {
     if (rexmitTimer->isScheduled())
         cancelEvent(rexmitTimer);
+
     startRexmitTimer();
 }

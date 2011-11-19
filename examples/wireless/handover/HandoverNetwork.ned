@@ -18,30 +18,26 @@
 
 package inet.examples.wireless.handover;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.wireless.WirelessAP;
-import inet.nodes.wireless.WirelessHost;
-import inet.world.ChannelControl;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.WirelessHost;
+import inet.nodes.wireless.AccessPoint;
+import inet.world.radio.ChannelControl;
 
 
 network HandoverNetwork
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
     submodules:
         host: WirelessHost {
             @display("p=50,130;r=,,#707070");
         }
-        ap1: WirelessAP {
+        ap1: AccessPoint {
             @display("p=100,200;r=,,#707070");
         }
-        ap2: WirelessAP {
+        ap2: AccessPoint {
             @display("p=500,200;r=,,#707070");
         }
-        channelcontrol: ChannelControl {
-            playgroundSizeX = playgroundSizeX;
-            playgroundSizeY = playgroundSizeY;
+        channelControl: ChannelControl {
             @display("p=60,50");
         }
         configurator: FlatNetworkConfigurator {

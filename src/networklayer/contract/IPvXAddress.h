@@ -18,19 +18,19 @@
 #ifndef __INET_IPVXADDRESS_H
 #define __INET_IPVXADDRESS_H
 
-#include <omnetpp.h>
 #include <string.h>
-#include "INETDefs.h"
-#include "IPAddress.h"
-#include "IPv6Address.h"
 
+#include "INETDefs.h"
+
+#include "IPv4Address.h"
+#include "IPv6Address.h"
 
 /**
  * Stores an IPv4 or an IPv6 address. This class should be used everywhere
- * in transport layer and up, to guarantee IPv4/IPv6 transparence.
+ * in transport layer and up, to guarantee IPv4/IPv6 transparency.
  *
  * Storage is efficient: an object occupies size of an IPv6 address
- * (128bits=16 bytes) plus a bool.
+ * (128 bits=16 bytes) plus a bool.
  */
 class INET_API IPvXAddress
 {
@@ -39,8 +39,6 @@ class INET_API IPvXAddress
     bool isv6;
 
   public:
-    /** name Constructors, destructor */
-    //@{
     /**
      * Constructor for IPv4 addresses.
      */
@@ -49,7 +47,7 @@ class INET_API IPvXAddress
     /**
      * Constructor for IPv4 addresses.
      */
-    IPvXAddress(const IPAddress& addr) {set(addr);}
+    IPvXAddress(const IPv4Address& addr) {set(addr);}
 
     /**
      * Constructor for IPv6 addresses.
@@ -57,7 +55,7 @@ class INET_API IPvXAddress
     IPvXAddress(const IPv6Address& addr) {set(addr);}
 
     /**
-     * Accepts string representations suuported by IPAddress (dotted decimal
+     * Accepts string representations suuported by IPv4Address (dotted decimal
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
@@ -72,10 +70,7 @@ class INET_API IPvXAddress
      * Destructor
      */
     ~IPvXAddress() {}
-    //@}
 
-    /** name Getters, setters */
-    //@{
     /**
      * Is this an IPv6 address?
      */
@@ -84,28 +79,35 @@ class INET_API IPvXAddress
     /**
      * Get IPv4 address. Throws exception if this is an IPv6 address.
      */
-    IPAddress get4() const {
+    IPv4Address get4() const
+    {
         if (isv6)
             throw cRuntimeError("IPvXAddress: cannot return IPv6 address %s as IPv4", str().c_str());
-        return IPAddress(d[0]);
+
+        return IPv4Address(d[0]);
     }
 
     /**
      * Get IPv6 address. Throws exception if this is an IPv4 address.
      */
-    IPv6Address get6() const {
-        if (!isv6)  {
-            if (d[0]==0) // allow null address to be returned as IPv6
+    IPv6Address get6() const
+    {
+        if (!isv6)
+        {
+            if (d[0] == 0) // allow null address to be returned as IPv6
                 return IPv6Address();
+
             throw cRuntimeError("IPvXAddress: cannot return IPv4 address %s as IPv6", str().c_str());
         }
+
         return IPv6Address(d[0], d[1], d[2], d[3]);
     }
 
     /**
      * Set to an IPv4 address.
      */
-    void set(const IPAddress& addr)  {
+    void set(const IPv4Address& addr)
+    {
         isv6 = false;
         d[0] = addr.getInt();
     }
@@ -113,42 +115,45 @@ class INET_API IPvXAddress
     /**
      * Set to an IPv6 address.
      */
-    void set(const IPv6Address& addr)  {
-        if (addr.isUnspecified()) {
+    void set(const IPv6Address& addr)
+    {
+        if (addr.isUnspecified())
+        {
             // we always represent nulls as IPv4 null
             isv6 = false; d[0] = 0;
             return;
         }
+
         isv6 = true;
-        uint32 *w = const_cast<IPv6Address&>(addr).words();
+        const uint32 *w = addr.words();
         d[0] = w[0]; d[1] = w[1]; d[2] = w[2]; d[3] = w[3];
     }
 
     /**
      * Assignment
      */
-    void set(const IPvXAddress& addr) {
+    void set(const IPvXAddress& addr)
+    {
         isv6 = addr.isv6;
         d[0] = addr.d[0];
-        if (isv6) {
+
+        if (isv6)
+        {
             d[1] = addr.d[1]; d[2] = addr.d[2]; d[3] = addr.d[3];
-         }
+        }
     }
 
     /**
-     * Accepts string representations supported by IPAddress (dotted decimal
+     * Accepts string representations supported by IPv4Address (dotted decimal
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
-    void set(const char *addr) {
-        if (!tryParse(addr))
-            throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
-    }
+    void set(const char *addr);
 
     /**
      * Assignment
      */
-    IPvXAddress& operator=(const IPAddress& addr) {set(addr); return *this;}
+    IPvXAddress& operator=(const IPv4Address& addr) {set(addr); return *this;}
 
     /**
      * Assignment
@@ -162,23 +167,43 @@ class INET_API IPvXAddress
 
     /**
      * Parses and assigns the given address and returns true if the string is
-     * recognized by IPAddress or IPv6Address, otherwise just returns false.
+     * recognized by IPv4Address or IPv6Address, otherwise just returns false.
      */
     bool tryParse(const char *addr);
 
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
      */
-    std::string str() const {return isv6 ? get6().str() : get4().str();}
-    //@}
+    std::string str() const
+    {
+        if (isv6)
+        {
+            return get6().str();
+        }
+        else if (d[0] == 0)
+        {
+            return std::string("<unspec>");
+        }
+        else
+        {
+            return get4().str();
+        }
+    }
 
-    /** name Comparison */
-    //@{
     /**
      * True if the structure has not been assigned any address yet.
      */
-    bool isUnspecified() const {
-        return !isv6 && d[0]==0;
+    bool isUnspecified() const
+    {
+        return !isv6 && d[0] == 0;
+    }
+
+    /**
+     * True if the stored address is a multicast address.
+     */
+    bool isMulticast() const
+    {
+        return isv6 ? get6().isMulticast() : get4().isMulticast();
     }
 
     /**
@@ -196,34 +221,37 @@ class INET_API IPvXAddress
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPAddress& addr) const {
-        return !isv6 && d[0]==addr.getInt();
+    bool equals(const IPv4Address& addr) const {
+        return !isv6 && d[0] == addr.getInt();
     }
 
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPv6Address& addr) const {
-        uint32 *w = const_cast<IPv6Address&>(addr).words();
-        return isv6 && d[0]==w[0] && d[1]==w[1] && d[2]==w[2] && d[3]==w[3];
+    bool equals(const IPv6Address& addr) const
+    {
+        const uint32 *w = addr.words();
+        return isv6 ? (d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0]) : (isUnspecified() && addr.isUnspecified());
     }
 
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPvXAddress& addr) const {
-        return (isv6 == addr.isv6) && (d[0]==addr.d[0]) && (!isv6 || (d[1]==addr.d[1] && d[2]==addr.d[2] && d[3]==addr.d[3]));
+    bool equals(const IPvXAddress& addr) const
+    {
+        return (isv6 == addr.isv6) && (d[0] == addr.d[0])
+                && (!isv6 || (d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1]));
     }
 
     /**
      * Returns equals(addr).
      */
-    bool operator==(const IPAddress& addr) const {return equals(addr);}
+    bool operator==(const IPv4Address& addr) const {return equals(addr);}
 
     /**
      * Returns !equals(addr).
      */
-    bool operator!=(const IPAddress& addr) const {return !equals(addr);}
+    bool operator!=(const IPv4Address& addr) const {return !equals(addr);}
 
     /**
      * Returns equals(addr).
@@ -248,15 +276,15 @@ class INET_API IPvXAddress
     /**
      * Compares two addresses.
      */
-    bool operator<(const IPvXAddress& addr) const {
-        if (isv6!=addr.isv6)
+    bool operator<(const IPvXAddress& addr) const
+    {
+        if (isv6 != addr.isv6)
             return !isv6;
         else if (!isv6)
-            return d[0]<addr.d[0];
+            return d[0] < addr.d[0];
         else
             return memcmp(&d, &addr.d, 16) < 0;  // this provides an ordering, though not surely the one one would expect
     }
-    //@}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPvXAddress& ip)
@@ -274,18 +302,19 @@ inline void doPacking(cCommBuffer *buf, const IPvXAddress& addr)
 
 inline void doUnpacking(cCommBuffer *buf, IPvXAddress& addr)
 {
-    if (buf->checkFlag()) {
+    if (buf->checkFlag())
+    {
         IPv6Address tmp;
         doUnpacking(buf, tmp);
         addr.set(tmp);
     }
-    else {
-        IPAddress tmp;
+    else
+    {
+        IPv4Address tmp;
         doUnpacking(buf, tmp);
         addr.set(tmp);
     }
 }
 
 #endif
-
 

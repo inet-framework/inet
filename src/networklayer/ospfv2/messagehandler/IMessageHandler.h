@@ -35,7 +35,7 @@ public:
     IMessageHandler(Router* containingRouter)  { router = containingRouter; }
     virtual ~IMessageHandler() {}
 
-    virtual void    ProcessPacket(OSPFPacket*, Interface* intf, Neighbor* neighbor) = 0;
+    virtual void processPacket(OSPFPacket*, Interface* intf, Neighbor* neighbor) = 0;
 };
 
 } // namespace OSPF

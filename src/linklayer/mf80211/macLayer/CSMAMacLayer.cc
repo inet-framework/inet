@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 
+#include "opp_utils.h"
 #include "CSMAMacLayer.h"
 #include "Ieee802Ctrl_m.h"
 #include "IInterfaceTable.h"
@@ -39,7 +40,7 @@ CSMAMacLayer::~CSMAMacLayer()
 
 void CSMAMacLayer::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MacBase::initialize(stage);
 
     if (stage == 0)
     {
@@ -63,16 +64,8 @@ void CSMAMacLayer::registerInterface()
 {
     InterfaceEntry *e = new InterfaceEntry();
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    // interface name: NIC module's name without special characters ([])
+    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     const char *addrstr = par("address");
     if (!strcmp(addrstr, "auto"))
@@ -263,7 +256,7 @@ MacPkt *CSMAMacLayer::encapsMsg(cPacket *netw)
  * messages in the queue, call handleUpperMsg in order to try to send
  * those now.
  */
-void CSMAMacLayer::receiveChangeNotification(int category, const cPolymorphic *details)
+void CSMAMacLayer::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

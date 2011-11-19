@@ -16,26 +16,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
 package inet.examples.inet.redtest;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.inet.Router;
+import inet.world.scenario.ScenarioManager;
+import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
-import inet.world.ChannelInstaller;
-import inet.world.ScenarioManager;
+import inet.nodes.inet.Router;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network REDTest
 {
-    submodules:
-        channelInstaller: ChannelInstaller {
-            parameters:
-                channelClass = "ThruputMeteringChannel";
-                channelAttrs = "format=b (u) #N";
-                @display("p=359,40");
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            thruputDisplayFormat = "b (u) #N";
         }
+    submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=179,40");
@@ -69,10 +66,10 @@ network REDTest
                 @display("p=420,195;i=device/laptop");
         }
     connections:
-        r1.pppg++ <--> {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
-        s1.pppg++ <--> {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
-        s2.pppg++ <--> {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
-        s3.pppg++ <--> {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
-        s4.pppg++ <--> {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
+        r1.pppg++ <--> C {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
+        s1.pppg++ <--> C {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
+        s2.pppg++ <--> C {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;
+        s3.pppg++ <--> C {  datarate = 10Mbps; delay = 4ms; } <--> r2.pppg++;
+        s4.pppg++ <--> C {  datarate = 10Mbps; delay = 5ms; } <--> r2.pppg++;
 }
 

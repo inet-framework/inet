@@ -75,7 +75,7 @@
  *
  * @see TCPReceiveQueue
  */
-class INET_API TCPSendQueue : public cPolymorphic
+class INET_API TCPSendQueue : public cObject
 {
   protected:
     TCPConnection *conn; // the connection that owns this queue
@@ -84,7 +84,7 @@ class INET_API TCPSendQueue : public cPolymorphic
     /**
      * Ctor.
      */
-    TCPSendQueue()  {conn=NULL;}
+    TCPSendQueue()  {conn = NULL;}
 
     /**
      * Virtual dtor.
@@ -98,7 +98,7 @@ class INET_API TCPSendQueue : public cPolymorphic
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first
-     * byte of app data should get. This is usually ISS+1 because SYN consumes
+     * byte of app data should get. This is usually ISS + 1 because SYN consumes
      * one byte in the sequence number space.
      *
      * init() may be called more than once; every call flushes the existing contents
@@ -155,5 +155,3 @@ class INET_API TCPSendQueue : public cPolymorphic
 };
 
 #endif
-
-

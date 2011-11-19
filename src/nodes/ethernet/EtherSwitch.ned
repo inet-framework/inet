@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,14 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-
 package inet.nodes.ethernet;
 
-import inet.linklayer.ethernet.EtherMAC;
-import inet.linklayer.etherswitch.MACRelayUnit;
-
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IEtherMAC;
 
 //
 // Model of an Ethernet switch.
@@ -30,6 +27,7 @@ import inet.linklayer.etherswitch.MACRelayUnit;
 // The duplexChannel attributes of the MACs must be set according to the
 // medium connected to the port; if collisions are possible (it's a bus or hub)
 // it must be set to false, otherwise it can be set to true.
+// By default used half duples CSMA/CD mac
 //
 // This model does not contain the spanning tree algorithm.
 //
@@ -39,19 +37,21 @@ module EtherSwitch
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
-                                                          // values are MACRelayUnitNP and MACRelayUnitPP
+        bool csmacdSupport = default(true);  // by default use CSMA/CD 
+        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
+                                                          // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        relayUnit: <relayUnitType> like MACRelayUnit {
+        relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=200,50");
             gates:
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        mac[sizeof(ethg)]: EtherMAC {
+        mac[sizeof(ethg)]: <macType> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 queueModule = "";
@@ -64,4 +64,3 @@ module EtherSwitch
             mac[i].phys <--> ethg[i];
         }
 }
-

@@ -14,12 +14,13 @@
 #ifndef __INET_TCPSRVHOSTAPP_H
 #define __INET_TCPSRVHOSTAPP_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 
 
-
+//forward declaration:
 class TCPServerThreadBase;
 
 /**
@@ -50,7 +51,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule
  *
  * @see TCPSrvHostApp
  */
-class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInterface
+class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSrvHostApp *hostmod;
@@ -58,7 +59,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
 
   protected:
     // internal: TCPSocket::CallbackInterface methods
-    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) {dataArrived(msg,urgent);}
+    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) {dataArrived(msg, urgent);}
     virtual void socketEstablished(int, void *)  {established();}
     virtual void socketPeerClosed(int, void *) {peerClosed();}
     virtual void socketClosed(int, void *) {closed();}
@@ -66,10 +67,10 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) {statusArrived(status);}
   public:
     // internal: called by TCPSrvHostApp after creating this module
-    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod=hostmodule; sock=socket;}
+    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod = hostmodule; sock = socket;}
 
   public:
-    TCPServerThreadBase()  {sock=NULL;}
+    TCPServerThreadBase()  {sock = NULL;}
     virtual ~TCPServerThreadBase() {}
 
     /** Returns the socket object */
@@ -82,7 +83,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
      * Schedule an event. Do not use getContextPointer() of cMessage, because
      * TCPServerThreadBase uses it for its own purposes.
      */
-    virtual void scheduleAt(simtime_t t, cMessage *msg)  {msg->setContextPointer(this); hostmod->scheduleAt(t,msg);}
+    virtual void scheduleAt(simtime_t t, cMessage *msg)  {msg->setContextPointer(this); hostmod->scheduleAt(t, msg);}
 
     /** Cancel an event */
     virtual void cancelEvent(cMessage *msg)  {hostmod->cancelEvent(msg);}
@@ -132,5 +133,4 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
 };
 
 #endif
-
 

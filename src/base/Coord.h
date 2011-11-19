@@ -22,127 +22,230 @@
 #define __INET_COORD_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
 #include "FWMath.h"
 
+
 /**
- * @brief Class for storing host positions
+ * @brief Class for storing 3D coordinates.
  *
- * Class for a double-tuple storing a position / two-dimensional
- * vector. Some comparison and basic arithmetic operators on Coord
- * structures are implemented.
+ * Some comparison and basic arithmetic operators are implemented.
  *
- * @ingroup support
+ * @ingroup utils
  * @author Christian Frank
  */
-class INET_API Coord : public cPolymorphic
+class INET_API Coord : public cObject
 {
- public:
-  /** @brief x and y coordinates of the position*/
-  double x,y;
+public:
+	/** @brief Constant with all values set to 0. */
+	static const Coord ZERO;
 
-  /** Initializes coordinates.*/
-  Coord(double _x=0, double _y=0) : x(_x), y(_y) {};
+public:
+    /** @name x, y and z coordinate of the position. */
+    /*@{*/
+    double x;
+    double y;
+    double z;
+    /*@}*/
 
+private:
+  void copy(const Coord& other) { x = other.x; y = other.y; z = other.z; }
 
-  /** Initializes coordinates.*/
-  Coord(const Coord& pos) {
-        x=pos.x;
-        y=pos.y;
-  }
+public:
+    /** @brief Default constructor. */
+    Coord()
+        : x(0.0), y(0.0), z(0.0) {}
 
-  /** Initializes coordinates.*/
-  Coord(const Coord* pos) {
-        x=pos->x;
-        y=pos->y;
-  }
+    /** @brief Initializes a coordinate. */
+    Coord(double x, double y, double z = 0.0)
+        : x(x), y(y), z(z) {}
 
-  std::string info() const {
+    /** @brief Initializes coordinate from other coordinate. */
+    Coord(const Coord& other)
+        : cObject(other) { copy(other); }
+
+    /** @brief Initializes coordinate from other coordinate. */
+    Coord(const Coord* other)
+        : cObject(*other) { copy(*other); }
+
+    /** @brief Returns a string with the value of the coordinate. */
+    std::string info() const {
         std::stringstream os;
-        os << "(" << x << "," << y << ")";
+        os << this;
         return os.str();
-  }
+    }
 
-  /** Adds two coordinate vectors.*/
-  friend Coord operator+(const Coord& a, const Coord& b) {
-        return Coord(a.x+b.x, a.y+b.y);
-  }
+    /** @brief Adds two coordinate vectors. */
+    friend Coord operator+(const Coord& a, const Coord& b) {
+        Coord tmp(a);
+        tmp += b;
+        return tmp;
+    }
 
-  /** Subtracts two coordinate vectors.*/
-  friend Coord operator-(const Coord& a, const Coord& b) {
-        return Coord(a.x-b.x, a.y-b.y);
-  }
+    /** @brief Subtracts two coordinate vectors. */
+    friend Coord operator-(const Coord& a, const Coord& b) {
+        Coord tmp(a);
+        tmp -= b;
+        return tmp;
+    }
 
-  /** Multiplies a coordinate vector by a real number.*/
-  friend Coord operator*(const Coord& a, double f) {
-        return Coord(a.x*f, a.y*f);
-  }
+    /** @brief Multiplies a coordinate vector by a real number. */
+    friend Coord operator*(const Coord& a, double f) {
+        Coord tmp(a);
+        tmp *= f;
+        return tmp;
+    }
 
-  /** Divides a coordinate vector by a real number.*/
-  friend Coord operator/(const Coord& a, double f) {
-        return Coord(a.x/f, a.y/f);
-  }
+    /** @brief Divides a coordinate vector by a real number. */
+    friend Coord operator/(const Coord& a, double f) {
+        Coord tmp(a);
+        tmp /= f;
+        return tmp;
+    }
 
-  /** Adds coordinate vector b to a.*/
-  const Coord& operator+=(const Coord& a) {
-        x+=a.x;
-        y+=a.y;
+    /**
+     * @brief Multiplies this coordinate vector by a real number.
+     */
+    Coord operator*=(double f) {
+        x *= f;
+        y *= f;
+        z *= f;
         return *this;
-  }
+    }
 
-  /** Assigns a this.*/
-  const Coord& operator=(const Coord& a) {
-        x=a.x;
-        y=a.y;
+    /**
+     * @brief Divides this coordinate vector by a real number.
+     */
+    Coord operator/=(double f) {
+        x /= f;
+        y /= f;
+        z /= f;
         return *this;
-  }
+    }
 
-  /** Subtracts coordinate vector b from a.*/
-  const Coord& operator-=(const Coord& a) {
-        x-=a.x;
-        y-=a.y;
+    /**
+     * @brief Adds coordinate vector 'a' to this.
+     */
+    Coord operator+=(const Coord& a) {
+        x += a.x;
+        y += a.y;
+        z += a.z;
         return *this;
-  }
+    }
 
-  /**
-   * Tests whether two coordinate vectors are equal. Because
-   * coordinates are of type double, this is done through the
-   * FWMath::close function.
-   */
-  friend bool operator==(const Coord& a, const Coord& b) {
-        return FWMath::close(a.x,b.x) && FWMath::close(a.y,b.y);
-  }
+    /**
+     * @brief Assigns coordinate vector 'other' to this.
+     *
+     * This operator can change the dimension of the coordinate.
+     */
+    Coord operator=(const Coord& other) {
+        if (this == &other) return this;
+        cObject::operator=(other);
+        copy(other);
+        return *this;
+    }
 
-  /**
-   * Tests whether two coordinate vectors are not equal. Negation of
-   * the operator==.
-   */
-  friend bool operator!=(const Coord& a, const Coord& b) {
+    /**
+     * @brief Subtracts coordinate vector 'a' from this.
+     */
+    Coord operator-=(const Coord& a) {
+        x -= a.x;
+        y -= a.y;
+        z -= a.z;
+        return *this;
+    }
+
+    /**
+     * @brief Tests whether two coordinate vectors are equal.
+     *
+     * Because coordinates are of type double, this is done through the
+     * FWMath::close function.
+     */
+    friend bool operator==(const Coord& a, const Coord& b) {
+        // FIXME: this implementation is not transitive
+        return FWMath::close(a.x, b.x) && FWMath::close(a.y, b.y) && FWMath::close(a.z, b.z);
+    }
+
+    /**
+     * @brief Tests whether two coordinate vectors are not equal.
+     *
+     * Negation of the operator==.
+     */
+    friend bool operator!=(const Coord& a, const Coord& b) {
         return !(a==b);
-  }
+    }
 
-  /**
-   * Returns the distance to const Coord& a
-   */
-  double distance(const Coord& a) const {
-        return sqrt(sqrdist(a));
-  }
+    /**
+     * @brief Returns the distance to Coord 'a'.
+     */
+    double distance(const Coord& a) const {
+        Coord dist(*this - a);
+        return dist.length();
+    }
 
-  /**
-   * Returns distance^2 to Coord a (omits square root).
-   */
-  double sqrdist(const Coord& a) const {
-        double dx=x-a.x;
-        double dy=y-a.y;
-        return dx*dx + dy*dy;
-  }
+    /**
+     * @brief Returns distance^2 to Coord 'a' (omits calling square root).
+     */
+    double sqrdist(const Coord& a) const {
+        Coord dist(*this - a);
+        return dist.squareLength();
+    }
 
+    /**
+     * @brief Returns the squared distance on a torus of this to Coord 'b' (omits calling square root).
+     */
+    double sqrTorusDist(const Coord& b, const Coord& size) const;
+
+    /**
+     * @brief Returns the square of the length of this Coords position vector.
+     */
+    double squareLength() const
+    {
+        return x * x + y * y + z * z;
+    }
+
+    /**
+     * @brief Returns the length of this Coords position vector.
+     */
+    double length() const
+    {
+        return sqrt(squareLength());
+    }
+
+    /**
+     * @brief Checks if this coordinate is inside a specified rectangle.
+     *
+     * @param lowerBound The upper bound of the rectangle.
+     * @param upperBound The lower bound of the rectangle.
+     */
+    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const {
+        return  lowerBound.x <= x && x <= upperBound.x &&
+                lowerBound.y <= y && y <= upperBound.y &&
+                lowerBound.z <= z && z <= upperBound.z;
+    }
+
+    /**
+     * @brief Returns the minimal coordinates.
+     */
+    Coord min(const Coord& a) {
+        return Coord(this->x < a.x ? this->x : a.x,
+                     this->y < a.y ? this->y : a.y,
+                     this->z < a.z ? this->z : a.z);
+    }
+
+    /**
+     * @brief Returns the maximal coordinates.
+     */
+    Coord max(const Coord& a) {
+        return Coord(this->x > a.x ? this->x : a.x,
+                     this->y > a.y ? this->y : a.y,
+                     this->z > a.z ? this->z : a.z);
+    }
 };
+
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
-    return os << "(" << coord.x << "," << coord.y << ")";
+    return os << "(" << coord.x << "," << coord.y << "," << coord.z << ")";
 }
 
 #endif
-

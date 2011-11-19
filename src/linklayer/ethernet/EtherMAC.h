@@ -18,16 +18,10 @@
 #ifndef __INET_ETHERMAC_H
 #define __INET_ETHERMAC_H
 
-#include <stdio.h>
-#include <string.h>
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
+
 #include "EtherMACBase.h"
 
-// Length of autoconfig period: should be larger than delays
-#define AUTOCONFIG_PERIOD  0.001  /* well more than 4096 bit times at 10Mb */
 
 class IPassiveQueue;
 
@@ -42,45 +36,38 @@ class INET_API EtherMAC : public EtherMACBase
 
   protected:
     virtual void initialize();
-    virtual void initializeTxrate();
+    virtual void initializeFlags();
+    virtual void initializeStatistics();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
   protected:
-    // parameters for autoconfig
-    bool autoconfigInProgress; // true if autoconfig is currently ongoing
-    double lowestTxrateSuggested;
-    bool duplexVetoed;
-
     // states
     int  backoffs;          // Value of backoff for exponential back-off algorithm
     int  numConcurrentTransmissions; // number of colliding frames -- we must receive this many jams
 
     // other variables
-    EtherFrame *frameBeingReceived;
+    EtherTraffic *frameBeingReceived;
     cMessage *endRxMsg, *endBackoffMsg, *endJammingMsg;
 
     // statistics
     simtime_t totalCollisionTime;      // total duration of collisions on channel
     simtime_t totalSuccessfulRxTxTime; // total duration of successful transmissions on channel
-    simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
+    simtime_t channelBusySince;  // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
     unsigned long numCollisions;       // collisions (NOT number of collided frames!) sensed
     unsigned long numBackoffs;         // number of retransmissions
-    cOutVector numCollisionsVector;
-    cOutVector numBackoffsVector;
+    static simsignal_t collisionSignal;
+    static simsignal_t backoffSignal;
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndRxPeriod();
     virtual void handleEndBackoffPeriod();
     virtual void handleEndJammingPeriod();
 
-    // setup, autoconfig
-    virtual void startAutoconfig();
-    virtual void handleAutoconfigMessage(cMessage *msg);
     virtual void printState();
 
     // helpers
@@ -91,8 +78,10 @@ class INET_API EtherMAC : public EtherMACBase
 
     // notifications
     virtual void updateHasSubcribers();
+
+    // model change related functions
+    virtual void refreshConnection(bool connected);
 };
 
 #endif
-
 

@@ -16,118 +16,86 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.nodes.ipv6;
 
+import inet.transport.IUDP;
+import inet.transport.ITCP;
+import inet.transport.ISCTP;
 import inet.applications.pingapp.PingApp;
-import inet.applications.tcpapp.TCPApp;
-import inet.applications.udpapp.UDPApp;
-import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv6.RoutingTable6;
-import inet.transport.tcp.ITCP;
-import inet.transport.udp.UDP;
+import inet.applications.IUDPApp;
+import inet.applications.ITCPApp;
+import inet.applications.ISCTPApp;
 
 
 //
-// \IPv6 host with TCP, UDP layers and applications.
+// IPv6 host with TCP, SCTP and UDP layers and applications.
+// see ~StandardHost for configuration.
 //
-module StandardHost6
+module StandardHost6 extends NodeBase6
 {
     parameters:
-        @node();
-        @labels(node,ethernet-node);
-        int numTcpApps = default(0);
-        int numUdpApps = default(0);
-        string tcpAppType = default("");
-        string udpAppType = default("");
-        string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
-        @display("i=device/laptop");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
+        @display("i=device/pc2");
+        int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].typename="TCPEchoApp" syntax
+        int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
+        int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
+        string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string udpType = default(firstAvailable("UDP","UDP_None"));
+        string sctpType = default(firstAvailable("SCTP","SCTP_None"));
+        IPForward = default(false);  // disable routing by default
     submodules:
-        notificationBoard: NotificationBoard {
+        tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
-                @display("p=60,70");
+                @display("p=186,54");
         }
-        interfaceTable: InterfaceTable {
+        tcp: <tcpType> like ITCP if numTcpApps>0 {
             parameters:
-                @display("p=60,150");
+                @display("p=186,141");
         }
-        routingTable6: RoutingTable6 {
+        udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
-                isRouter = false;
-                @display("p=60,230");
+                @display("p=336,54");
         }
-        tcpApp[numTcpApps]: <tcpAppType> like TCPApp {
+        udp: <udpType> like IUDP if numUdpApps>0 {
             parameters:
-                @display("p=163,67");
+                @display("p=336,141");
         }
-        tcp: <tcpType> like ITCP {
+        sctpApp[numSctpApps]: <> like ISCTPApp {
             parameters:
-                @display("p=163,154");
+                @display("p=501,54");
         }
-        udpApp[numUdpApps]: <udpAppType> like UDPApp {
-            parameters:
-                @display("p=272,67");
-        }
-        udp: UDP {
-            parameters:
-                @display("p=272,154");
+        sctp: <sctpType> like ISCTP if numSctpApps>0 {
+            @display("p=501,141");
         }
         pingApp: PingApp {
             parameters:
-                @display("p=343,200");
+                @display("p=501,230");
         }
-        networkLayer: NetworkLayer6 {
-            parameters:
-                @display("p=248,247;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
-        }
-        ppp[sizeof(pppg)]: PPPInterface {
-            parameters:
-                @display("p=205,350,row,90;q=txQueue");
-        }
-        eth[sizeof(ethg)]: EthernetInterface {
-            parameters:
-                @display("p=240,350,row,90;q=txQueue");
-        }
+
     connections allowunconnected:
         for i=0..numTcpApps-1 {
             tcpApp[i].tcpOut --> tcp.appIn++;
             tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        tcp.ipv6Out --> networkLayer.tcpIn;
-        tcp.ipv6In <-- networkLayer.tcpOut;
+        tcp.ipv6Out --> networkLayer.tcpIn if numTcpApps>0;
+        tcp.ipv6In <-- networkLayer.tcpOut if numTcpApps>0;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;
             udpApp[i].udpIn <-- udp.appOut++;
         }
 
-        udp.ipv6Out --> networkLayer.udpIn;
-        udp.ipv6In <-- networkLayer.udpOut;
+        udp.ipv6Out --> networkLayer.udpIn if numUdpApps>0;
+        udp.ipv6In <-- networkLayer.udpOut if numUdpApps>0;
+
+        for i=0..numSctpApps-1 {
+            sctpApp[i].sctpOut --> sctp.from_appl++;
+            sctp.to_appl++ --> sctpApp[i].sctpIn;
+        }
+        sctp.to_ipv6 --> networkLayer.sctpIn if numSctpApps>0;
+        networkLayer.sctpOut --> sctp.from_ipv6 if numSctpApps>0;
 
         networkLayer.pingOut --> pingApp.pingv6In;
         networkLayer.pingIn <-- pingApp.pingv6Out;
-
-        // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
-        }
-
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
-        }
 }
 

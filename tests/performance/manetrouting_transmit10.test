@@ -1,0 +1,247 @@
+%description:
+Testing manetrouting with AODVUU routing protocol, UDP forwarding
+    manetrouting AODVUU UDP
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.AdhocHost;
+import inet.world.radio.ChannelControl;
+
+
+// 
+// Example network for testing aodv routing. Contains
+// fixed and mobile nodes. Mobile nodes are not moving,
+// but are scattered randomly on the playground.
+//
+network Net80211_aodv_test
+{
+    parameters:
+        int numHosts;
+        int distance @unit(m) = default(350m);
+    submodules:
+        senderhost: AdhocHost {
+            parameters:
+                mobility.initialX = 1m;
+                mobility.initialY = 200m;
+                mobility.initialZ = 0m;
+                @display("i=device/pocketpc_s;r=,,#707070");
+        }
+        rcvrhost: AdhocHost {
+            parameters:
+                mobility.initialX = 1m + (numHosts+1) * distance;
+                mobility.initialY = 200m;
+                mobility.initialZ = 0m;
+                @display("i=device/pocketpc_s;r=,,#707070");
+        }
+        host[numHosts]: AdhocHost {
+            parameters:
+                mobility.initialX = 1m + (index+1) * distance;
+                mobility.initialY = 200m;
+                mobility.initialZ = 0m;
+                @display("i=device/pocketpc_s;r=,,#707070");
+        }
+        channelControl: ChannelControl {
+            parameters:
+                @display("p=60,50;i=misc/sun");
+        }
+        configurator: FlatNetworkConfigurator {
+            parameters:
+                networkAddress = "145.236.0.0";
+                netmask = "255.255.0.0";
+                @display("p=181,51;i=block/cogwheel_s");
+        }
+    connections allowunconnected:
+}
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+#debug-on-errors = true
+record-eventlog = false
+sim-time-limit = 101s
+seed-0-mt = 5
+network = Net80211_aodv_test
+
+cmdenv-express-mode = false
+tkenv-plugin-path = ../../../etc/plugins
+
+description = "Aodv Simple test"
+
+#**.drawCoverage=false
+*.numHosts = 10
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 4000m
+**.constraintAreaMaxY = 300m
+**.constraintAreaMaxZ = 0m
+
+# mobility
+**.mobility.initFromDisplayString = false
+
+**.host*.mobilityType = "StationaryMobility"
+**.*host.mobilityType = "StationaryMobility"
+
+# udp apps (on)
+**.senderhost.numUdpApps = 1
+**.senderhost.udpApp[*].typename = "UDPBasicBurst"
+
+**.udpApp[0].destAddresses = "rcvrhost"
+**.udpApp[0].localPort = 1234
+**.udpApp[0].destPort = 1234
+**.udpApp[0].messageLength = 512B  #
+**.udpApp[0].sendInterval = 10s + uniform(-0.001s,0.001s)
+**.udpApp[0].burstDuration = 0
+**.udpApp[0].chooseDestAddrMode = "perBurst"
+**.udpApp[0].sleepDuration = 1s
+# **.udpApp[0].burstDuration = uniform(1s,4s,1)
+# **.udpApp[0].stopTime = uniform(20s,40s,1)
+**.udpApp[0].stopTime = 0s
+##**.udpApp[0].startTime = uniform(0s,4s,1)
+**.udpApp[0].startTime = 10s
+**.udpApp[0].delayLimit = 20s
+**.udpApp[0].destAddrRNG = 0
+
+**.rcvrhost.udpApp[*].typename = "UDPSink"
+**.rcvrhost.numUdpApps = 1
+**.rcvrhost.udpApp[0].localPort = 1234
+
+# tcp apps (off)
+**.numTcpApps = 0
+
+# ping app (senderhost pinged by others)
+# ping app (off)
+**.pingApp.count = 0
+**.pingApp.startTime = 1s
+**.pingApp.stopTime = 0
+**.pingApp.printPing = true
+
+# tcp settings
+**.tcp.mss = 1024
+**.tcp.advertisedWindow = 14336  # 14*mss
+#**.tcp.sendQueueClass = "TCPMsgBasedSendQueue"
+#**.tcp.receiveQueueClass = "TCPMsgBasedRcvQueue"
+**.tcp.tcpAlgorithmClass = "TCPReno"
+**.tcp.recordStats = true
+
+# ip settings
+**.ip.procDelay = 10us
+# **.IPForward=false
+
+
+######################################################################
+# manet routing
+**.routingProtocol = "AODVUU"
+#######################################################
+
+# nic settings
+**.wlan*.mac.EDCA = false
+**.wlan*.mgmt.frameCapacity = 10
+**.wlan*.mac.maxQueueSize = 14
+**.wlan*.mac.rtsThresholdBytes = 3000B
+**.wlan*.mac.bitrate = 54Mbps
+**.wlan*.mac.basicBitrate = 6Mbps  # 24Mbps
+**.wlan*.mac.retryLimit = 7
+**.wlan*.mac.cwMinData = 31
+**.wlan*.mac.cwMinBroadcast = 31
+
+# channel physical parameters
+*.channelControl.pMax = 2.0mW
+
+**.wlan*.radio.transmitterPower=2.0mW
+**.wlan*.radio.bitrate=54Mbps
+**.wlan*.radio.sensitivity=-90dBm
+**.wlan*.radio.berTableFile="per_table_80211g_Trivellato.dat"
+
+
+**.broadCastDelay=uniform(0s,0.005s)
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+#TEST parameters
+scafile <- 'results/General-0.sca'
+linecount <- 1
+packets <- 10.0
+
+# begin TEST:
+
+dataset <- loadDataset(scafile)
+
+cat("\nOMNETPP TEST RESULT:\n")
+
+cat("\n  MANETROUTING UDP TEST RESULT:\n")
+
+cat("\n    CHECKS SENT PACKETS:\n")
+
+x <- dataset$scalars[dataset$scalars$name == "sentPkBytes:count",]
+xx <- x[grep("\\.senderhost\\.udpApp\\[0\\]",x$module),]
+
+if(length(xx$value) != linecount)
+{
+    cat("      LINECOUNT INCORRECT\n")
+    print(xx)
+} else {
+    cat("      LINECOUNT CORRECT\n")
+
+    if(max(xx$value) != packets)
+    {
+        cat("      NUMBER OF PACKETS INCORRECT\n")
+        print(xx)
+    } else {
+        cat("      NUMBER OF PACKETS CORRECT\n")
+    }
+}
+
+cat("\n    CHECKS RECEIVED PACKETS:\n")
+
+x <- dataset$scalars[dataset$scalars$name == "rcvdPkBytes:count",]
+xx <- x[grep("\\.rcvrhost\\.udpApp\\[0\\]",x$module),]
+
+if(length(xx$value) != linecount)
+{
+    cat("      LINECOUNT INCORRECT\n")
+    print(xx)
+} else {
+    cat("      LINECOUNT CORRECT\n")
+
+    if(max(xx$value) < packets -1)         #   one packet different is acceptable.
+    {
+        cat("      NUMBER OF PACKETS INCORRECT\n")
+        print(xx)
+    } else {
+        cat("      NUMBER OF PACKETS CORRECT\n")
+    }
+}
+
+cat("\n")
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT:
+
+  MANETROUTING UDP TEST RESULT:
+
+    CHECKS SENT PACKETS:
+      LINECOUNT CORRECT
+      NUMBER OF PACKETS CORRECT
+
+    CHECKS RECEIVED PACKETS:
+      LINECOUNT CORRECT
+      NUMBER OF PACKETS CORRECT
+
+%#--------------------------------------------------------------------------------------------------------------

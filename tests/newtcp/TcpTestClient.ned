@@ -23,8 +23,8 @@
 simple TcpTestClient like TCPApp
 {
     parameters:
-        string address;
-        int port;
+        string localAddress;
+        int localPort;
         bool active;
         string connectAddress;
         int connectPort;
