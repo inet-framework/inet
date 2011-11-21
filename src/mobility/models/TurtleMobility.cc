@@ -56,6 +56,7 @@ void TurtleMobility::initializePosition()
 
     // a dirty trick to extract starting position out of the script
     // (start doing it, but then rewind to the beginning)
+    nextChange = 0;
     resumeScript();
     targetPosition = lastPosition;
     nextChange = simTime();
@@ -100,6 +101,7 @@ void TurtleMobility::resumeScript()
 
 void TurtleMobility::executeStatement(cXMLElement *stmt)
 {
+    ASSERT(nextChange != -1);
     const char *tag = stmt->getTagName();
 
     EV << "doing <" << tag << ">\n";

@@ -40,7 +40,7 @@ void RandomWPMobility::setTargetPosition()
     if (nextMoveIsWait)
     {
         simtime_t waitTime = par("waitTime");
-        nextChange += waitTime;
+        nextChange = simTime() + waitTime;
     }
     else
     {
@@ -48,7 +48,7 @@ void RandomWPMobility::setTargetPosition()
         double speed = par("speed");
         double distance = lastPosition.distance(targetPosition);
         simtime_t travelTime = distance / speed;
-        nextChange += travelTime;
+        nextChange = simTime() + travelTime;
     }
     nextMoveIsWait = !nextMoveIsWait;
 }
