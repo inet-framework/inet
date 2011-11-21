@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,9 +14,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+// @author Zoltan Bojthe
+//
 
 
 #include "ResultFilters.h"
+
+#include "Coord.h"
+#include "IMobility.h"
 
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
@@ -29,7 +34,6 @@ void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
     }
 }
 
-//---
 
 Register_ResultFilter("messageTSAge", MessageTSAgeFilter);
 
@@ -42,3 +46,42 @@ void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
     }
 }
 
+
+Register_ResultFilter("mobilityPos", MobilityPosFilter);
+
+void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+{
+    IMobility *module = dynamic_cast<IMobility *>(object);
+    if (module)
+    {
+        Coord coord = module->getCurrentPosition();
+        fire(this, t, &coord);
+    }
+}
+
+
+Register_ResultFilter("xCoord", XCoordFilter);
+
+void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+{
+    if (dynamic_cast<Coord *>(object))
+        fire(this, t, ((Coord *)object)->x);
+}
+
+
+Register_ResultFilter("yCoord", YCoordFilter);
+
+void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+{
+    if (dynamic_cast<Coord *>(object))
+        fire(this, t, ((Coord *)object)->y);
+}
+
+
+Register_ResultFilter("zCoord", ZCoordFilter);
+
+void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+{
+    if (dynamic_cast<Coord *>(object))
+        fire(this, t, ((Coord *)object)->z);
+}

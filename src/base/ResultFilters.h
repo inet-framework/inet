@@ -41,4 +41,41 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
+/**
+ * Filter that expects an IMobility and outputs its current coordinate
+ */
+class INET_API MobilityPosFilter : public cObjectResultFilter
+{
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
+
+/**
+ * Filter that expects a Coord and outputs its X coordinate
+ */
+class INET_API XCoordFilter : public cObjectResultFilter
+{
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
+
+/**
+ * Filter that expects a Coord and outputs its Y coordinate
+ */
+class INET_API YCoordFilter : public cObjectResultFilter
+{
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
+
+/**
+ * Filter that expects a Coord and outputs its Z coordinate
+ */
+class INET_API ZCoordFilter : public cObjectResultFilter
+{
+    public:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
+
+
 #endif
