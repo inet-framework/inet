@@ -176,9 +176,11 @@ void Ns2MotionMobility::setTargetPosition()
     const Ns2MotionFile::Line& vec = ns2File->lines[vecpos];
     double time = vec[0];
     simtime_t now = simTime();
-    if ((time-now)>updateInterval)
+    // TODO: this code is dubious at best
+    if (now < time)
     {
         nextChange = time;
+        targetPosition = lastPosition;
     }
     else
     {
@@ -187,7 +189,7 @@ void Ns2MotionMobility::setTargetPosition()
         double speed = vec[3];
         double distance = lastPosition.distance(targetPosition);
         double travelTime = distance / speed;
-        nextChange += travelTime;
+        nextChange = now + travelTime;
         vecpos++;
     }
     EV << "TARGET: t=" << nextChange << " (" << targetPosition.x << "," << targetPosition.y << ")\n";
