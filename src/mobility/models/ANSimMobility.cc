@@ -90,7 +90,9 @@ void ANSimMobility::setTargetPosition()
     nextPositionChange = findNextPositionChange(nextPositionChange);
     if (!nextPositionChange)
     {
+        nextChange = -1;
         stationary = true;
+        targetPosition = lastPosition;
         return;
     }
 

@@ -70,7 +70,9 @@ void BonnMotionMobility::setTargetPosition()
     const BonnMotionFile::Line& vec = *lines;
     if (currentLine + (is3D ? 3 : 2) >= (int)vec.size())
     {
+        nextChange = -1;
         stationary = true;
+        targetPosition = lastPosition;
         return;
     }
     nextChange = vec[currentLine];
