@@ -40,7 +40,7 @@ void LinearMobility::initialize(int stage)
         speed = par("speed");
         angle = fmod((double)par("angle"), 360);
         acceleration = par("acceleration");
-        stationary = (speed == 0);
+        stationary = (speed == 0) && (acceleration == 0.0);
     }
 }
 
