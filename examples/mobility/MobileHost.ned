@@ -32,6 +32,9 @@ module MobileHost
         string mobilityType = default("StationaryMobility");
         @node();
         @display("i=device/pocketpc_s");
+        @statistic[coordX](title="coord X";source="xCoord(mobilityPos(mobilityStateChanged))";record=vector; interpolationmode=linear);
+        @statistic[coordY](title="coord Y";source="yCoord(mobilityPos(mobilityStateChanged))";record=vector; interpolationmode=linear);
+        //@statistic[coordZ](title="coord Z";source="zCoord(mobilityPos(mobilityStateChanged))";record=vector; interpolationmode=linear);
     submodules:
         mobility: <mobilityType> like IMobility;
 }
