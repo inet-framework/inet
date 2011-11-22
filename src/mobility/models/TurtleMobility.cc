@@ -56,7 +56,7 @@ void TurtleMobility::initializePosition()
 
     // a dirty trick to extract starting position out of the script
     // (start doing it, but then rewind to the beginning)
-    nextChange = 0;
+    nextChange = simTime();
     resumeScript();
     targetPosition = lastPosition;
     nextChange = simTime();
@@ -83,20 +83,21 @@ void TurtleMobility::move()
  */
 void TurtleMobility::resumeScript()
 {
-    if (!nextStatement)
-    {
-        stationary = true;
-        return;
-    }
+    simtime_t now = simTime();
 
-    simtime_t now = nextChange;
-
-    // interpret statement
-    while (nextStatement && nextChange == now)
-    {
-        executeStatement(nextStatement);
-        gotoNextStatement();
-    }
+    do {
+        if (nextStatement != NULL)
+        {
+            executeStatement(nextStatement);
+            gotoNextStatement();
+        }
+        else
+        {
+            nextChange = -1;
+            stationary = true;
+            targetPosition = lastPosition;
+        }
+    } while (nextChange == now);
 }
 
 void TurtleMobility::executeStatement(cXMLElement *stmt)
