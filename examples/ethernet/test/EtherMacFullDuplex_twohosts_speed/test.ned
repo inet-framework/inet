@@ -9,7 +9,7 @@ module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
         csmacdSupport = false;
-        queueType = "DropTailQueue";
+        queueType = "EthDropTailQoSQueue";
 }
 
 network SpeedTest

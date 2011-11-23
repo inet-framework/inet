@@ -16,8 +16,9 @@ import inet.nodes.ethernet.EtherSwitch;
 module EtherHostQ extends EtherHost
 {
     parameters:
-        queueType = "DropTailQueue";
+        queueType = "EthDropTailQoSQueue";
 }
+
 
 //
 // Sample Ethernet LAN: hosts connected via switch

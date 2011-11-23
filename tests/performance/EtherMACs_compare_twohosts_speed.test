@@ -33,12 +33,12 @@ network CompareMACs
         }
         host_eq_1_F_A: EtherHost {
             parameters:
-                queueType = "DropTailQueue";
+                queueType = "EthDropTailQoSQueue";
                 @display("p=70,140");
         }
         host_eq_1_F_B: EtherHost {
             parameters:
-                queueType = "DropTailQueue";
+                queueType = "EthDropTailQoSQueue";
                 @display("p=210,140");
         }
         host_iq_2_F_A: EtherHost {
@@ -53,13 +53,13 @@ network CompareMACs
         }
         host_eq_2_F_A: EtherHost {
             parameters:
-                queueType = "DropTailQueue";
+                queueType = "EthDropTailQoSQueue";
                 macType = "EtherMACFullDuplex";
                 @display("p=70,280");
         }
         host_eq_2_F_B: EtherHost {
             parameters:
-                queueType = "DropTailQueue";
+                queueType = "EthDropTailQoSQueue";
                 macType = "EtherMACFullDuplex";
                 @display("p=210,280");
         }

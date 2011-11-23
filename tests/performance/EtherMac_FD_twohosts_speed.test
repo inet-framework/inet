@@ -17,7 +17,7 @@ import inet.nodes.ethernet.EtherHost;
 module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
-        queueType = "DropTailQueue";
+        queueType = "EthDropTailQoSQueue";
         macType = "EtherMAC";
         mac.duplexEnabled = true;
 }
