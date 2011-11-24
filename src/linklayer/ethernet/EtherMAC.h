@@ -53,7 +53,7 @@ class INET_API EtherMAC : public EtherMACBase
     // statistics
     simtime_t totalCollisionTime;      // total duration of collisions on channel
     simtime_t totalSuccessfulRxTxTime; // total duration of successful transmissions on channel
-    simtime_t channelBusySince;  // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
+    simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
     unsigned long numCollisions;       // collisions (NOT number of collided frames!) sensed
     unsigned long numBackoffs;         // number of retransmissions
     static simsignal_t collisionSignal;

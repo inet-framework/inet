@@ -74,11 +74,11 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     struct EtherDescr
     {
-        double      txrate;
-        int         maxFramesInBurst;
-        int64       maxBytesInBurst;      // with IFG and external datas
-        int64       frameMinBytes;        // minimal frame length
-        int64       frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
+        double        txrate;
+        unsigned int  maxFramesInBurst;
+        int64         maxBytesInBurst;      // with IFG and external datas
+        int64         frameMinBytes;        // minimal frame length
+        int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
         const_simtime_t   halfBitTime;          // transmission time of a half bit
         const_simtime_t   slotTime;             // slot time
         const_simtime_t   shortestFrameDuration; // precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
