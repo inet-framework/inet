@@ -59,6 +59,8 @@ class INET_API EtherMAC : public EtherMACBase
     static simsignal_t collisionSignal;
     static simsignal_t backoffSignal;
 
+    // helpers
+
     // event handlers
     virtual void handleEndIFGPeriod();
     virtual void handleEndPausePeriod();
@@ -79,9 +81,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual bool checkAndScheduleEndPausePeriod();
     virtual void beginSendFrames();
-
-
-    // helpers
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete(EtherTraffic *frame);

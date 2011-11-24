@@ -216,6 +216,8 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     // finish
     virtual void finish();
 
+    // event handlers
+
     // helpers
     virtual void fireChangeNotification(int type, cPacket *msg);
     virtual void getNextFrameFromQueue();

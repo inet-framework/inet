@@ -369,7 +369,6 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
 }
 
-
 void EtherMAC::handleEndIFGPeriod()
 {
     if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)

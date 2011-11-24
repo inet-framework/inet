@@ -47,6 +47,7 @@ import inet.linklayer.IEtherMAC;
 // - 10Mb Ethernet (full duplex mode)
 // - 100Mb Ethernet (full duplex mode)
 // - 1Gb Ethernet (full duplex mode)
+// - 10Gb Ethernet (full duplex mode)
 //
 // Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
@@ -149,7 +150,9 @@ simple EtherMACFullDuplex like IEtherMAC
         @statistic[droppedPkBytesIfaceDown](title="Dropped msg Iface down"; record=sum,count,vector);
         @statistic[droppedPkBytesBitError](title="Dropped bytes bit error"; record=sum,count,vector);
         @statistic[droppedPkBytesNotForUs](title="Dropped bytes not for us"; record=sum,count,vector);
+
         @statistic[passedUpPkBytes](title="Passed bytes to higher layer"; record=sum,count,vector);
+
         @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector);
         @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector);
         @statistic[rxPkBytesFromHL](title="Received bytes from higher layer"; record=sum,count,vector);

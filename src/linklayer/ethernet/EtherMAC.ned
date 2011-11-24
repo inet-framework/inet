@@ -32,6 +32,7 @@ import inet.linklayer.IEtherMAC;
 // - 10Mb Ethernet bus or twisted pair
 // - 100Mb Ethernet duplex or half-duplex
 // - 1Gb Ethernet
+// - 10Gb Ethernet
 //
 // Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)

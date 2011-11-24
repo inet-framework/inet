@@ -238,7 +238,7 @@ void EtherMACBase::initializeFlags()
 
     WATCH(connected);
 
-    // TODO: this should be settable from the gui
+    // TODO: this should be set from the GUI
     // initialize disabled flag
     // Note: it is currently not supported to enable a disabled MAC at runtime.
     // Difficulties: (1) autoconfig (2) how to pick up channel state (free, tx, collision etc)
@@ -621,3 +621,4 @@ void EtherMACBase::receiveChangeNotification(int category, const cObject *)
     if (category == NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();
 }
+
