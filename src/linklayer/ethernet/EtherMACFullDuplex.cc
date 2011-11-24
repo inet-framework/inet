@@ -225,7 +225,7 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
     if (NULL == curTxFrame)
         error("End of IFG and no frame to transmit");
 
-    // End of IFG period, okay to transmit, if Rx idle OR duplexMode
+    // End of IFG period, okay to transmit
     EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
