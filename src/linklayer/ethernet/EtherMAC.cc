@@ -797,6 +797,7 @@ void EtherMAC::scheduleEndIFGPeriod()
 
     if (frameBursting
             && (simTime() == lastTxFinishTime)
+            && (framesSentInBurst > 0)
             && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
             && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
                     <= curEtherDescr->maxBytesInBurst)
