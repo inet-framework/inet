@@ -55,18 +55,7 @@ void EtherMACFullDuplex::initializeFlags()
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
-    {
-        EV << "Self-message " << msg << " received\n";
-
-        if (msg == endTxMsg)
-            handleEndTxPeriod();
-        else if (msg == endIFGMsg)
-            handleEndIFGPeriod();
-        else if (msg == endPauseMsg)
-            handleEndPausePeriod();
-        else
-            throw cRuntimeError(this, "Unknown self message received!");
-    }
+        handleSelfMessage(msg);
     else
     {
         if (!connected)
@@ -83,6 +72,20 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
 
     if (ev.isGUI())
         updateDisplayString();
+}
+
+void EtherMACFullDuplex::handleSelfMessage(cMessage *msg)
+{
+    EV << "Self-message " << msg << " received\n";
+
+    if (msg == endTxMsg)
+        handleEndTxPeriod();
+    else if (msg == endIFGMsg)
+        handleEndIFGPeriod();
+    else if (msg == endPauseMsg)
+        handleEndPausePeriod();
+    else
+        throw cRuntimeError(this, "Unknown self message received!");
 }
 
 void EtherMACFullDuplex::startFrameTransmission()
