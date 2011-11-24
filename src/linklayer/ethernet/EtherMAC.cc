@@ -219,7 +219,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
                 txQueue.innerQueue->queue.insert(frame);
         }
 
-        if (NULL == curTxFrame && !txQueue.innerQueue->queue.empty())
+        if (!curTxFrame && !txQueue.innerQueue->queue.empty())
             curTxFrame = (EtherFrame*)txQueue.innerQueue->queue.pop();
     }
 
