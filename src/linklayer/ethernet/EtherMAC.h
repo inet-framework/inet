@@ -60,33 +60,35 @@ class INET_API EtherMAC : public EtherMACBase
     static simsignal_t backoffSignal;
 
     // event handlers
-    virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(EtherTraffic *msg);
-    virtual void processMessageWhenNotConnected(cMessage *msg);
-    virtual void processMessageWhenDisabled(cMessage *msg);
-    virtual void processPauseCommand(int pauseUnits);
     virtual void handleEndIFGPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndRxPeriod();
     virtual void handleEndBackoffPeriod();
     virtual void handleEndJammingPeriod();
+    virtual void handleRetransmission();
+
+    // helpers
+    virtual void processFrameFromUpperLayer(EtherFrame *msg);
+    virtual void processMsgFromNetwork(EtherTraffic *msg);
+    virtual void processMessageWhenNotConnected(cMessage *msg);
+    virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndTxPeriod(cPacket *);
+    virtual void scheduleEndRxPeriod(cPacket *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual bool checkAndScheduleEndPausePeriod();
     virtual void beginSendFrames();
 
-    virtual void printState();
 
     // helpers
-    virtual void scheduleEndRxPeriod(cPacket *);
     virtual void sendJamSignal();
-    virtual void handleRetransmission();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete(EtherTraffic *frame);
     virtual void prepareTxFrame(EtherFrame *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);
+    virtual void processPauseCommand(int pauseUnits);
+    virtual void printState();
 
     // notifications
     virtual void updateHasSubcribers();
