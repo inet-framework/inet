@@ -62,6 +62,7 @@ class INET_API EtherMAC : public EtherMACBase
     // helpers
 
     // event handlers
+    virtual void handleSelfMessage(cMessage *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleEndTxPeriod();

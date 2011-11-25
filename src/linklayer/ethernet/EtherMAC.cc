@@ -109,39 +109,16 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
     EtherMACBase::calculateParameters(errorWhenAsymmetric);
 }
 
-void EtherMAC::handleMessage(cMessage *msg)
+void EtherMAC::handleSelfMessage(cMessage *msg)
 {
-    if (dataratesDiffer)
-        calculateParameters(true);
+    // Process different self-messages (timer signals)
+    EV << "Self-message " << msg << " received\n";
 
-    printState();
-
-    // some consistency check
-    if (!duplexMode && transmitState == TRANSMITTING_STATE && receiveState != RX_IDLE_STATE)
-        error("Inconsistent state -- transmitting and receiving at the same time");
-
-    if (!msg->isSelfMessage())
+    switch (msg->getKind())
     {
-        // either frame from upper layer, or frame/jam signal from the network
-        if (!connected)
-            processMessageWhenNotConnected(msg);
-        else if (disabled)
-            processMessageWhenDisabled(msg);
-        else if (msg->getArrivalGate() == gate("upperLayerIn"))
-            processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
-        else
-            processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
-    }
-    else
-    {
-        // Process different self-messages (timer signals)
-        EV << "Self-message " << msg << " received\n";
-
-        switch (msg->getKind())
-        {
-            case ENDIFG:
-                handleEndIFGPeriod();
-                break;
+        case ENDIFG:
+            handleEndIFGPeriod();
+            break;
 
             case ENDTRANSMISSION:
                 handleEndTxPeriod();
@@ -167,10 +144,33 @@ void EtherMAC::handleMessage(cMessage *msg)
                 error("self-message with unexpected message kind %d", msg->getKind());
         }
     }
+
+void EtherMAC::handleMessage(cMessage *msg)
+{
+    if (dataratesDiffer)
+        calculateParameters(true);
+
     printState();
+
+    // some consistency check
+    if (!duplexMode && transmitState == TRANSMITTING_STATE && receiveState != RX_IDLE_STATE)
+        error("Inconsistent state -- transmitting and receiving at the same time");
+
+    if (msg->isSelfMessage())
+        handleSelfMessage(msg);
+    else if (!connected)
+        processMessageWhenNotConnected(msg);
+    else if (disabled)
+        processMessageWhenDisabled(msg);
+    else if (msg->getArrivalGate() == gate("upperLayerIn"))
+        processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
+    else
+        processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
 
     if (ev.isGUI())
         updateDisplayString();
+    printState();
+
 }
 
 
