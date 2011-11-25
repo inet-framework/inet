@@ -230,8 +230,15 @@ void EtherMACFullDuplex::handleEndTxPeriod()
         nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
     }
 
-    if (checkAndScheduleEndPausePeriod())
+    if (pauseUnitsRequested > 0)
+    {
+        // if we received a PAUSE frame recently, go into PAUSE state
+        EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
+
+        scheduleEndPausePeriod(pauseUnitsRequested);
+        pauseUnitsRequested = 0;
         return;
+    }
 
     // we only get here if transmission has finished successfully, without collision
     if (transmitState != TRANSMITTING_STATE)
@@ -437,21 +444,6 @@ void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
-}
-
-bool EtherMACFullDuplex::checkAndScheduleEndPausePeriod()
-{
-    if (pauseUnitsRequested > 0)
-    {
-        // if we received a PAUSE frame recently, go into PAUSE state
-        EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
-
-        scheduleEndPausePeriod(pauseUnitsRequested);
-        pauseUnitsRequested = 0;
-        return true;
-    }
-
-    return false;
 }
 
 void EtherMACFullDuplex::beginSendFrames()

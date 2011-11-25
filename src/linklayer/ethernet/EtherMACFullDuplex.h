@@ -59,7 +59,6 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndTxPeriod(cPacket *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
-    virtual bool checkAndScheduleEndPausePeriod();
     virtual void beginSendFrames();
     virtual void frameReceptionComplete(EtherTraffic *frame);
     virtual void prepareTxFrame(EtherFrame *frame);
