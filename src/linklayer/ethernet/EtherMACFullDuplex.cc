@@ -54,6 +54,9 @@ void EtherMACFullDuplex::initializeFlags()
 
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
+    if (dataratesDiffer)
+        calculateParameters(true);
+
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
     else if (!connected)

@@ -118,6 +118,8 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     bool disabled;                  // true if the MAC is disabled, defined by the user
     bool promiscuous;               // if true, passes up all received frames
 
+    bool dataratesDiffer;         // true when tx rate and rx rate differ (configuration error, or between datarate change of tx/rx channels)
+
     // MAC operation modes and parameters
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
     bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
@@ -210,7 +212,13 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     // helpers
     virtual bool checkDestinationAddress(EtherFrame *frame);
-    virtual void calculateParameters();
+
+    /**
+     * Calculates datarates, etc. Verify the same settings on in/out channels, and throw error
+     * when differs and the parameter errorWhenAsymmetric is true.
+     */
+    virtual void calculateParameters(bool errorWhenAsymmetric);
+
     virtual void printParameters();
 
     // finish
@@ -221,6 +229,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     // helpers
     virtual void fireChangeNotification(int type, cPacket *msg);
     virtual void getNextFrameFromQueue();
+    virtual void ifDown();
 
     // display
     virtual void updateDisplayString();
@@ -232,7 +241,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
-    virtual void refreshConnection(bool connected);
+    virtual void refreshConnection();
 };
 
 #endif

@@ -155,7 +155,7 @@ void EtherMACBase::initialize()
 
     registerInterface(); // needs MAC address
 
-    calculateParameters();
+    calculateParameters(true);
 
     lastTxFinishTime = -1.0; // never equals with current simtime.
 
@@ -329,65 +329,68 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
 
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection(true);
+            refreshConnection();
     }
     else if (dynamic_cast<cPostPathCutNotification *>(obj))
     {
         cPostPathCutNotification *gcobj = (cPostPathCutNotification *)obj;
 
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection(false);
+            refreshConnection();
     }
     else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj))
     {
         cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
         if (transmissionChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
-            refreshConnection(true);
+            refreshConnection();
     }
 }
 
-void EtherMACBase::refreshConnection(bool connected_par)
+void EtherMACBase::ifDown()
+{
+    // cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
+    cancelEvent(endTxMsg);
+    cancelEvent(endIFGMsg);
+    cancelEvent(endPauseMsg);
+
+    if (curTxFrame)
+    {
+        delete curTxFrame;
+        curTxFrame = NULL;
+        lastTxFinishTime = simTime() - 1.0;  // never equals with current simtime. for Burst mode.
+    }
+
+    if (txQueue.extQueue)
+    {
+        // Clear external queue: send a request, and received packet will be deleted in handleMessage()
+        if (0 == txQueue.extQueue->getNumPendingRequests())
+            txQueue.extQueue->requestPacket();
+    }
+    else
+    {
+        //Clear inner queue
+        while (!txQueue.innerQueue->queue.empty())
+        {
+            cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->queue.pop());
+            EV << "Interface is not connected, dropping packet " << msg << endl;
+            numDroppedIfaceDown++;
+            emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
+            delete msg;
+        }
+    }
+
+    transmitState = TX_IDLE_STATE;
+    receiveState = RX_IDLE_STATE;
+}
+
+void EtherMACBase::refreshConnection()
 {
     Enter_Method_Silent();
 
-    calculateParameters();
+    calculateParameters(false);
 
     if (!connected)
-    {
-        // cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
-        cancelEvent(endTxMsg);
-        cancelEvent(endIFGMsg);
-        cancelEvent(endPauseMsg);
-
-        if (curTxFrame)
-        {
-            delete curTxFrame;
-            curTxFrame = NULL;
-            lastTxFinishTime = simTime();
-        }
-
-        if (txQueue.extQueue)
-        {
-            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
-            if (0 == txQueue.extQueue->getNumPendingRequests())
-                txQueue.extQueue->requestPacket();
-        }
-        else
-        {
-            //Clear inner queue
-            while (!txQueue.innerQueue->queue.empty())
-            {
-                cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->queue.pop());
-                EV << "Interface is not connected, dropping packet " << msg << endl;
-                numDroppedIfaceDown++;
-                emit(droppedPkBytesIfaceDownSignal, msg->isPacket() ? (long)(((cPacket*)msg)->getByteLength()) : 0L);
-                delete msg;
-            }
-        }
-
-        transmitState = TX_IDLE_STATE;
-        receiveState = RX_IDLE_STATE;
-    }
+        ifDown();
 }
 
 bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
@@ -408,7 +411,7 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
     return true;
 }
 
-void EtherMACBase::calculateParameters()
+void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
 {
     ASSERT(physInGate == gate("phys$i"));
     ASSERT(physOutGate == gate("phys$o"));
@@ -417,58 +420,59 @@ void EtherMACBase::calculateParameters()
     cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
 
     connected = (outTrChannel != NULL) && (inTrChannel != NULL);
+    double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
+    double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
 
     if (!connected)
     {
         curEtherDescr = &nullEtherDescr;
         carrierExtension = false;
-
+        dataratesDiffer = (outTrChannel != NULL) || (inTrChannel != NULL);
         if (transmissionChannel)
             transmissionChannel->forceTransmissionFinishTime(SimTime());
 
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
         interfaceEntry->setDatarate(0);
-        return;
     }
-
-    if (outTrChannel && !transmissionChannel)
-        outTrChannel->subscribe(POST_MODEL_CHANGE, this);
-
-    transmissionChannel = outTrChannel;
-    carrierExtension = false; // FIXME
-    double txRate = transmissionChannel->getNominalDatarate();
-    double rxRate = inTrChannel->getNominalDatarate();
-
-    if (txRate != rxRate)
+    else
     {
-        if (!initialized())
-        {
-            throw cRuntimeError(this, "The input/output datarates are differs (%g / %g bps)",
-                                rxRate, txRate);
-        }
-        else
-        {
-            ev << "The input/output datarates are differs (" << rxRate << " / " << txRate
-                    << " bps), input rate changed to " << txRate << "bps.\n";
-            inTrChannel->par("datarate").setDoubleValue(txRate);
-        }
+        if (outTrChannel && !transmissionChannel)
+            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
+        transmissionChannel = outTrChannel;
+        dataratesDiffer = (txRate != rxRate);
     }
 
-    // Check valid speeds
-    for (int i = 0; i < NUM_OF_ETHERDESCRS; i++)
+    if (dataratesDiffer)
     {
-        if (txRate == etherDescrs[i].txrate)
-        {
-            curEtherDescr = &etherDescrs[i];
-            interfaceEntry->setDown(false);
-            interfaceEntry->setDatarate(txRate);
-            return;
-        }
+        if (errorWhenAsymmetric)
+            throw cRuntimeError(this, "The input/output datarates differ (%g / %g bps)", rxRate, txRate);
+
+        // When the datarate of the connected channels change at runtime, we'll receive
+        // two separate notifications (one for the rx channel and one for the tx one),
+        // so we cannot immediately raise an error when they differ. Rather, we'll need
+        // to verify at the next opportunity (event) that the two datarates have eventually
+        // been set to the same value.
+        //
+        EV << "The input/output datarates differ (" << rxRate << " / " << txRate << "bps).\n";
     }
 
-    throw cRuntimeError(this, "Invalid transmission rate %g on channel %s at %s modul",
-                        txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+    if (connected)
+    {
+        // Check valid speeds
+        for (int i = 0; i < NUM_OF_ETHERDESCRS; i++)
+        {
+            if (txRate == etherDescrs[i].txrate)
+            {
+                curEtherDescr = &etherDescrs[i];
+                interfaceEntry->setDown(false);
+                interfaceEntry->setDatarate(txRate);
+                return;
+            }
+        }
+        throw cRuntimeError(this, "Invalid transmission rate %g on channel %s at %s modul",
+                    txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+	}
 }
 
 void EtherMACBase::printParameters()

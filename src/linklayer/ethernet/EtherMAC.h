@@ -71,6 +71,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void handleRetransmission();
 
     // helpers
+    virtual void calculateParameters(bool errorWhenAsymmetric);
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
     virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void processMessageWhenNotConnected(cMessage *msg);
@@ -87,13 +88,12 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void prepareTxFrame(EtherFrame *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processPauseCommand(int pauseUnits);
+    virtual void ifDown();
+
     virtual void printState();
 
     // notifications
     virtual void updateHasSubcribers();
-
-    // model change related functions
-    virtual void refreshConnection(bool connected);
 };
 
 #endif

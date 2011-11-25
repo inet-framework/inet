@@ -93,24 +93,27 @@ void EtherMAC::initializeFlags()
     physInGate->setDeliverOnReceptionStart(true);
 }
 
-void EtherMAC::refreshConnection(bool connected_par)
+void EtherMAC::ifDown()
 {
-    Enter_Method_Silent();
+    delete frameBeingReceived;
+    frameBeingReceived = NULL;
+    cancelEvent(endRxMsg);
+    cancelEvent(endBackoffMsg);
+    cancelEvent(endJammingMsg);
 
-    EtherMACBase::refreshConnection(connected_par);
+    EtherMACBase::ifDown();
+}
 
-    if (!connected)
-    {
-        delete frameBeingReceived;
-        frameBeingReceived = NULL;
-        cancelEvent(endRxMsg);
-        cancelEvent(endBackoffMsg);
-        cancelEvent(endJammingMsg);
-    }
+void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
+{
+    EtherMACBase::calculateParameters(errorWhenAsymmetric);
 }
 
 void EtherMAC::handleMessage(cMessage *msg)
 {
+    if (dataratesDiffer)
+        calculateParameters(true);
+
     printState();
 
     // some consistency check
