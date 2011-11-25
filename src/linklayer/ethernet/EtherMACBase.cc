@@ -71,7 +71,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME,
         0,
         0.5 / FAST_ETHERNET_TXRATE,
-        512.0 / ETHERNET_TXRATE,
+        512.0 / FAST_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME / FAST_ETHERNET_TXRATE
     },
     {
