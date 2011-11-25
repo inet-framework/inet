@@ -93,6 +93,22 @@ void EtherMAC::initializeFlags()
     physInGate->setDeliverOnReceptionStart(true);
 }
 
+void EtherMAC::refreshConnection(bool connected_par)
+{
+    Enter_Method_Silent();
+
+    EtherMACBase::refreshConnection(connected_par);
+
+    if (!connected)
+    {
+        delete frameBeingReceived;
+        frameBeingReceived = NULL;
+        cancelEvent(endRxMsg);
+        cancelEvent(endBackoffMsg);
+        cancelEvent(endJammingMsg);
+    }
+}
+
 void EtherMAC::handleMessage(cMessage *msg)
 {
     printState();
@@ -633,22 +649,6 @@ void EtherMAC::finish()
     recordScalar("rx channel collision (%)", 100*(totalCollisionTime/t));
     recordScalar("collisions",     numCollisions);
     recordScalar("backoffs",       numBackoffs);
-}
-
-void EtherMAC::refreshConnection(bool connected_par)
-{
-    Enter_Method_Silent();
-
-    EtherMACBase::refreshConnection(connected_par);
-
-    if (!connected)
-    {
-        delete frameBeingReceived;
-        frameBeingReceived = NULL;
-        cancelEvent(endRxMsg);
-        cancelEvent(endBackoffMsg);
-        cancelEvent(endJammingMsg);
-    }
 }
 
 void EtherMAC::updateHasSubcribers()
