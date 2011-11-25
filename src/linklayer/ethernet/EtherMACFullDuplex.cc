@@ -107,7 +107,9 @@ void EtherMACFullDuplex::startFrameTransmission()
     EV << "Starting transmission of " << frame << endl;
     emit(packetSentToLowerSignal, frame);
     send(frame, physOutGate);
-    scheduleEndTxPeriod(frame);
+
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    transmitState = TRANSMITTING_STATE;
 }
 
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
@@ -427,13 +429,6 @@ void EtherMACFullDuplex::scheduleEndIFGPeriod()
         transmitState = WAIT_IFG_STATE;
         scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
     }
-}
-
-void EtherMACFullDuplex::scheduleEndTxPeriod(cPacket *frame)
-{
-
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
-    transmitState = TRANSMITTING_STATE;
 }
 
 void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
