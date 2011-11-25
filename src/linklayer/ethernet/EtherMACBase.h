@@ -156,8 +156,6 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
 
     // statistics
-    int  framesSentInBurst;            // Number of frames send out in current frame burst
-    int  bytesSentInBurst;             // Number of bytes transmitted in current frame burst
     unsigned long numFramesSent;
     unsigned long numFramesReceivedOK;
     unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble

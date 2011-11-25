@@ -251,16 +251,10 @@ void EtherMACBase::initializeFlags()
 
 void EtherMACBase::initializeStatistics()
 {
-    framesSentInBurst = 0;
-    bytesSentInBurst = 0;
-
     numFramesSent = numFramesReceivedOK = numBytesSent = numBytesReceivedOK = 0;
     numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
     numFramesFromHL = numDroppedIfaceDown = 0;
     numPauseFramesRcvd = numPauseFramesSent = 0;
-
-    WATCH(framesSentInBurst);
-    WATCH(bytesSentInBurst);
 
     WATCH(numFramesSent);
     WATCH(numFramesReceivedOK);

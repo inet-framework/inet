@@ -73,6 +73,12 @@ void EtherMAC::initializeStatistics()
 {
     EtherMACBase::initializeStatistics();
 
+    framesSentInBurst = 0;
+    bytesSentInBurst = 0;
+
+    WATCH(framesSentInBurst);
+    WATCH(bytesSentInBurst);
+
     // initialize statistics
     totalCollisionTime = 0.0;
     totalSuccessfulRxTxTime = 0.0;
@@ -101,6 +107,8 @@ void EtherMAC::ifDown()
     cancelEvent(endRxMsg);
     cancelEvent(endBackoffMsg);
     cancelEvent(endJammingMsg);
+    bytesSentInBurst = 0;
+    framesSentInBurst = 0;
 
     EtherMACBase::ifDown();
 }
