@@ -719,9 +719,7 @@ void EtherMAC::prepareTxFrame(EtherFrame *frame)
     if (frame->getSrc().isUnspecified())
         frame->setSrc(address);
 
-    // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->setOrigByteLength(frame->getByteLength());
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
     bool inBurst = frameBursting && framesSentInBurst;
     int64 minFrameLength =
             inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
@@ -730,6 +728,8 @@ void EtherMAC::prepareTxFrame(EtherFrame *frame)
     {
         frame->setByteLength(minFrameLength);
     }
+    // add preamble and SFD (Starting Frame Delimiter), then send out
+    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 }
 
 void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
