@@ -56,19 +56,16 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
+    else if (!connected)
+        processMessageWhenNotConnected(msg);
+    else if (disabled)
+        processMessageWhenDisabled(msg);
+    else if (msg->getArrivalGate() == gate("upperLayerIn"))
+        processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
+    else if (msg->getArrivalGate() == gate("phys$i"))
+        processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
     else
-    {
-        if (!connected)
-            processMessageWhenNotConnected(msg);
-        else if (disabled)
-            processMessageWhenDisabled(msg);
-        else if (msg->getArrivalGate() == gate("upperLayerIn"))
-            processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
-        else if (msg->getArrivalGate() == gate("phys$i"))
-            processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
-        else
-            throw cRuntimeError(this, "Message received from unknown gate!");
-    }
+        throw cRuntimeError(this, "Message received from unknown gate!");
 
     if (ev.isGUI())
         updateDisplayString();
@@ -423,12 +420,10 @@ void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
     ASSERT(curTxFrame);
 
-    {
-        EtherPadding gap;
-        gap.setBitLength(INTERFRAME_GAP_BITS);
-        transmitState = WAIT_IFG_STATE;
-        scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
-    }
+    EtherPadding gap;
+    gap.setBitLength(INTERFRAME_GAP_BITS);
+    transmitState = WAIT_IFG_STATE;
+    scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
 }
 
 void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
