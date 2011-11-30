@@ -75,6 +75,20 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         MIN_ETHERNET_FRAME,
         MIN_ETHERNET_FRAME
+    },
+    {
+        FOURTY_GIGABIT_ETHERNET_TXRATE,
+        0,
+        0,
+        MIN_ETHERNET_FRAME,
+        MIN_ETHERNET_FRAME
+    },
+    {
+        HUNDRED_GIGABIT_ETHERNET_TXRATE,
+        0,
+        0,
+        MIN_ETHERNET_FRAME,
+        MIN_ETHERNET_FRAME
     }
 };
 

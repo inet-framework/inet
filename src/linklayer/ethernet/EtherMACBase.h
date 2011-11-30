@@ -69,7 +69,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable, public c
 
     enum
     {
-        NUM_OF_ETHERDESCRS = 4
+        NUM_OF_ETHERDESCRS = 6
     };
 
     struct EtherDescr
