@@ -144,7 +144,7 @@ simple EtherMAC like IEtherMAC
         @display("i=block/rxtx");
         @statistic[txPkBytes](title="TX bytes"; record=sum,count,vector);
         @statistic[rxPkBytesOk](title="RX bytes"; record=sum,count,vector);
-        @statistic[passedUpPkBytes](title="Passed up packet bytes to higher layer"; record=sum,count,vector);
+        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector);
         @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector);
         @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector);
         @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; record=sum,count,vector);

@@ -751,8 +751,6 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
         return;
 
     numFramesPassedToHL++;
-    emit(passedUpPkBytesSignal, curBytes);
-
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
     send(frame, "upperLayerOut");
