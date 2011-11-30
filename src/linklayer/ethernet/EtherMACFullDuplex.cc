@@ -186,19 +186,6 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 {
     EV << "Received frame from network: " << msg << endl;
 
-    // detect cable length violation in half-duplex mode
-    if (!duplexMode)
-    {
-        if (simTime() - msg->getSendingTime() >= curEtherDescr->shortestFrameDuration)
-        {
-            error("very long frame propagation time detected, "
-                  "maybe cable exceeds maximum allowed length? "
-                  "(%lgs corresponds to an approx. %lgm cable)",
-                  SIMTIME_STR(simTime() - msg->getSendingTime()),
-                  SIMTIME_STR((simTime() - msg->getSendingTime()) * SPEED_OF_LIGHT_IN_CABLE));
-        }
-    }
-
     if (dynamic_cast<EtherPadding *>(msg))
     {
         frameReceptionComplete(msg);
