@@ -78,7 +78,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processMessageWhenNotConnected(cMessage *msg);
     virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void scheduleEndIFGPeriod();
-    virtual void scheduleEndTxPeriod(cPacket *);
+    virtual void scheduleEndTxPeriod(EtherFrame *);
     virtual void scheduleEndRxPeriod(cPacket *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual bool checkAndScheduleEndPausePeriod();

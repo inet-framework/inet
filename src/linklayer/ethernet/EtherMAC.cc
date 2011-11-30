@@ -815,7 +815,7 @@ void EtherMAC::scheduleEndIFGPeriod()
     }
 }
 
-void EtherMAC::scheduleEndTxPeriod(cPacket *frame)
+void EtherMAC::scheduleEndTxPeriod(EtherFrame *frame)
 {
     // update burst variables
     if (frameBursting)
