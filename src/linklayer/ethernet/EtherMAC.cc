@@ -418,7 +418,20 @@ void EtherMAC::startFrameTransmission()
 
     EtherFrame *frame = curTxFrame->dup();
 
-    prepareTxFrame(frame);
+    if (frame->getSrc().isUnspecified())
+        frame->setSrc(address);
+
+    frame->setOrigByteLength(frame->getByteLength());
+    bool inBurst = frameBursting && framesSentInBurst;
+    int64 minFrameLength =
+            inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+
+    if (frame->getByteLength() < minFrameLength)
+    {
+        frame->setByteLength(minFrameLength);
+    }
+    // add preamble and SFD (Starting Frame Delimiter), then send out
+    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 
     if (ev.isGUI())
         updateConnectionColor(TRANSMITTING_STATE);
@@ -715,24 +728,6 @@ void EtherMAC::frameReceptionComplete(EtherTraffic *frame)
     {
         processReceivedDataFrame((EtherFrame *)frame);
     }
-}
-
-void EtherMAC::prepareTxFrame(EtherFrame *frame)
-{
-    if (frame->getSrc().isUnspecified())
-        frame->setSrc(address);
-
-    frame->setOrigByteLength(frame->getByteLength());
-    bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength =
-            inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
-
-    if (frame->getByteLength() < minFrameLength)
-    {
-        frame->setByteLength(minFrameLength);
-    }
-    // add preamble and SFD (Starting Frame Delimiter), then send out
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 }
 
 void EtherMAC::processReceivedDataFrame(EtherFrame *frame)

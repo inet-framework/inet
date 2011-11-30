@@ -94,7 +94,18 @@ void EtherMACFullDuplex::startFrameTransmission()
 
     EtherFrame *frame = curTxFrame->dup();
 
-    prepareTxFrame(frame);
+    if (frame->getSrc().isUnspecified())
+        frame->setSrc(address);
+
+    // add preamble and SFD (Starting Frame Delimiter), then send out
+    frame->setOrigByteLength(frame->getByteLength());
+    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
+    int64 minFrameLength = curEtherDescr->frameMinBytes;
+
+    if (frame->getByteLength() < minFrameLength)
+    {
+        frame->setByteLength(minFrameLength);
+    }
 
     if (hasSubscribers)
     {
@@ -341,22 +352,6 @@ void EtherMACFullDuplex::frameReceptionComplete(EtherTraffic *frame)
     else
     {
         processReceivedDataFrame((EtherFrame *)frame);
-    }
-}
-
-void EtherMACFullDuplex::prepareTxFrame(EtherFrame *frame)
-{
-    if (frame->getSrc().isUnspecified())
-        frame->setSrc(address);
-
-    // add preamble and SFD (Starting Frame Delimiter), then send out
-    frame->setOrigByteLength(frame->getByteLength());
-    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
-    int64 minFrameLength = curEtherDescr->frameMinBytes;
-
-    if (frame->getByteLength() < minFrameLength)
-    {
-        frame->setByteLength(minFrameLength);
     }
 }
 

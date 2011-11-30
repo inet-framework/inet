@@ -86,7 +86,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete(EtherTraffic *frame);
-    virtual void prepareTxFrame(EtherFrame *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processPauseCommand(int pauseUnits);
     virtual void ifDown();
