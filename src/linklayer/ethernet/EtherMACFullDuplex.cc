@@ -228,13 +228,6 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
     // End of IFG period, okay to transmit
     EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
 
-    // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && curTxFrame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
-    {
-        EV << "Performing carrier extension of small frame\n";
-        curTxFrame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
-    }
-
     startFrameTransmission();
 }
 
@@ -251,7 +244,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
         return;
 
     // we only get here if transmission has finished successfully, without collision
-    if (transmitState != TRANSMITTING_STATE || (!duplexMode && receiveState != RX_IDLE_STATE))
+    if (transmitState != TRANSMITTING_STATE)
         error("End of transmission, and incorrect state detected");
 
     if (NULL == curTxFrame)
@@ -360,9 +353,7 @@ void EtherMACFullDuplex::prepareTxFrame(EtherFrame *frame)
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->setOrigByteLength(frame->getByteLength());
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
-    bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength =
-            inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+    int64 minFrameLength = curEtherDescr->frameMinBytes;
 
     if (frame->getByteLength() < minFrameLength)
     {
@@ -433,27 +424,9 @@ void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
     ASSERT(curTxFrame);
 
-    if (frameBursting
-            && (simTime() == lastTxFinishTime)
-            && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-            && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
-                    <= curEtherDescr->maxBytesInBurst)
-       )
-    {
-        EtherPadding *gap = new EtherPadding("IFG");
-        gap->setBitLength(INTERFRAME_GAP_BITS);
-        bytesSentInBurst += gap->getByteLength();
-        send(gap, physOutGate);
-        transmitState = SEND_IFG_STATE;
-        scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
-        // FIXME Check collision?
-    }
-    else
     {
         EtherPadding gap;
         gap.setBitLength(INTERFRAME_GAP_BITS);
-        bytesSentInBurst = 0;
-        framesSentInBurst = 0;
         transmitState = WAIT_IFG_STATE;
         scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
     }
@@ -461,12 +434,6 @@ void EtherMACFullDuplex::scheduleEndIFGPeriod()
 
 void EtherMACFullDuplex::scheduleEndTxPeriod(cPacket *frame)
 {
-    // update burst variables
-    if (frameBursting)
-    {
-        bytesSentInBurst += frame->getByteLength();
-        framesSentInBurst++;
-    }
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
