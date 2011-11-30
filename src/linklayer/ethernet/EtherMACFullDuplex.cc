@@ -201,7 +201,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
     if (dynamic_cast<EtherPadding *>(msg))
     {
-        frameReceptionComplete(msg);
+        delete msg;
         return;
     }
 
@@ -217,7 +217,23 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
     }
 
     if (checkDestinationAddress(frame))
-        frameReceptionComplete(frame);
+    {
+        int pauseUnits;
+        EtherPauseFrame *pauseFrame;
+
+        if ((pauseFrame = dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
+        {
+            pauseUnits = pauseFrame->getPauseTime();
+            delete frame;
+            numPauseFramesRcvd++;
+            emit(rxPausePkUnitsSignal, pauseUnits);
+            processPauseCommand(pauseUnits);
+        }
+        else
+        {
+            processReceivedDataFrame((EtherFrame *)frame);
+        }
+    }
 }
 
 void EtherMACFullDuplex::handleEndIFGPeriod()
@@ -330,29 +346,6 @@ void EtherMACFullDuplex::handleEndPausePeriod()
 
     EV << "Pause finished, resuming transmissions\n";
     beginSendFrames();
-}
-
-void EtherMACFullDuplex::frameReceptionComplete(EtherTraffic *frame)
-{
-    int pauseUnits;
-    EtherPauseFrame *pauseFrame;
-
-    if ((pauseFrame = dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
-    {
-        pauseUnits = pauseFrame->getPauseTime();
-        delete frame;
-        numPauseFramesRcvd++;
-        emit(rxPausePkUnitsSignal, pauseUnits);
-        processPauseCommand(pauseUnits);
-    }
-    else if ((dynamic_cast<EtherPadding*>(frame)) != NULL)
-    {
-        delete frame;
-    }
-    else
-    {
-        processReceivedDataFrame((EtherFrame *)frame);
-    }
 }
 
 void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
