@@ -470,9 +470,9 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
                 return;
             }
         }
-        throw cRuntimeError(this, "Invalid transmission rate %g on channel %s at %s modul",
+        throw cRuntimeError(this, "Invalid transmission rate %g bps on channel %s at module %s",
                     txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
-	}
+    }
 }
 
 void EtherMACBase::printParameters()

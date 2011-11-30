@@ -169,10 +169,9 @@ void EtherMAC::handleMessage(cMessage *msg)
 
     if (ev.isGUI())
         updateDisplayString();
+
     printState();
-
 }
-
 
 void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
@@ -427,9 +426,8 @@ void EtherMAC::startFrameTransmission()
             inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
 
     if (frame->getByteLength() < minFrameLength)
-    {
         frame->setByteLength(minFrameLength);
-    }
+
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 
@@ -709,12 +707,9 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete(EtherTraffic *frame)
 {
-    int pauseUnits;
-    EtherPauseFrame *pauseFrame;
-
-    if ((pauseFrame = dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
+    if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
     {
-        pauseUnits = pauseFrame->getPauseTime();
+        int pauseUnits = ((EtherPauseFrame*)frame)->getPauseTime();
         delete frame;
         numPauseFramesRcvd++;
         emit(rxPausePkUnitsSignal, pauseUnits);

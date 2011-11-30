@@ -218,12 +218,9 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
     if (checkDestinationAddress(frame))
     {
-        int pauseUnits;
-        EtherPauseFrame *pauseFrame;
-
-        if ((pauseFrame = dynamic_cast<EtherPauseFrame*>(frame)) != NULL)
+        if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
         {
-            pauseUnits = pauseFrame->getPauseTime();
+            int pauseUnits = ((EtherPauseFrame*)frame)->getPauseTime();
             delete frame;
             numPauseFramesRcvd++;
             emit(rxPausePkUnitsSignal, pauseUnits);
