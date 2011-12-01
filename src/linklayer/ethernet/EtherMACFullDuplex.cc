@@ -185,6 +185,15 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 
     totalSuccessfulRxTime += frame->getDuration();
 
+    // bit errors
+    if (frame->hasBitError())
+    {
+        numDroppedBitError++;
+        emit(dropPkBitErrorSignal, frame);
+        delete frame;
+        return;
+    }
+
     if (!dropFrameNotForUs(frame))
     {
         if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
@@ -298,15 +307,6 @@ void EtherMACFullDuplex::handleEndPausePeriod()
 void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
 {
     emit(packetReceivedFromLowerSignal, frame);
-
-    // bit errors
-    if (frame->hasBitError())
-    {
-        numDroppedBitError++;
-        emit(dropPkBitErrorSignal, frame);
-        delete frame;
-        return;
-    }
 
     // restore original byte length (strip preamble and SFD and external bytes)
     frame->setByteLength(frame->getOrigByteLength());
