@@ -132,7 +132,7 @@ simple EtherMAC like IEtherMAC
         string address = default("auto");  // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        bool duplexEnabled = default(true);   // whether duplex mode can be enabled or not; whether
+        bool duplexMode = default(true);   // whether duplex mode can be enabled or not; whether
                                 // MAC will actually use duplex mode depends on the result
                                 // of the auto-configuration process (duplex is only
                                 // possible with DTE-to-DTE connection).

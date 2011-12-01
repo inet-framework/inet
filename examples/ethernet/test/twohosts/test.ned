@@ -26,12 +26,12 @@ network SpeedTest
     submodules:
         host_10_H_A: EtherHost {
             parameters:
-                mac.duplexEnabled = false;
+                mac.duplexMode = false;
                 @display("p=70,70");
         }
         host_10_H_B: EtherHost {
             parameters:
-                mac.duplexEnabled = false;
+                mac.duplexMode = false;
                 @display("p=210,70");
         }
         host_10_F_A: EtherHost {
@@ -44,12 +44,12 @@ network SpeedTest
         }
         host_100_H_A: EtherHost {
             parameters:
-                mac.duplexEnabled = false;
+                mac.duplexMode = false;
                 @display("p=70,210");
         }
         host_100_H_B: EtherHost {
             parameters:
-                mac.duplexEnabled = false;
+                mac.duplexMode = false;
                 @display("p=210,210");
         }
         host_100_F_A: EtherHost {

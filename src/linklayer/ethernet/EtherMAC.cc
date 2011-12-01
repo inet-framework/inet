@@ -100,7 +100,7 @@ void EtherMAC::initializeFlags()
 {
     EtherMACBase::initializeFlags();
 
-    duplexMode = par("duplexEnabled").boolValue();
+    duplexMode = par("duplexMode").boolValue();
     frameBursting = !duplexMode && par("frameBursting").boolValue();
     physInGate->setDeliverOnReceptionStart(true);
 }
