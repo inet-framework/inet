@@ -148,6 +148,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
 
     cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
+    cGate *upperLayerInGate;        // pointer to the "upperLayerIn" gate
 
     // notification stuff
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable

@@ -114,6 +114,7 @@ EtherMACBase::EtherMACBase()
     transmissionChannel = NULL;
     physInGate = NULL;
     physOutGate = NULL;
+    upperLayerInGate = NULL;
     interfaceEntry = NULL;
     curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
@@ -132,6 +133,7 @@ void EtherMACBase::initialize()
 {
     physInGate = gate("phys$i");
     physOutGate = gate("phys$o");
+    upperLayerInGate = gate("upperLayerIn");
     transmissionChannel = NULL;
     interfaceEntry = NULL;
     curTxFrame = NULL;

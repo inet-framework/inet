@@ -195,9 +195,9 @@ void EtherMAC::handleMessage(cMessage *msg)
         processMessageWhenNotConnected(msg);
     else if (disabled)
         processMessageWhenDisabled(msg);
-    else if (msg->getArrivalGate() == gate("upperLayerIn"))
+    else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
-    else if (msg->getArrivalGate() == gate("phys$i"))
+    else if (msg->getArrivalGate() == physInGate)
         processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate");
