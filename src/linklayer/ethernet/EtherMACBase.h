@@ -125,7 +125,6 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     // MAC operation modes and parameters
     // TODO: some of these parameters do not have any meaning for EtherMACFullDuplex, they should rather be in EtherMAC instead
     bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
-    bool carrierExtension;          // carrier extension on/off (Gigabit Ethernet)
 
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
     simtime_t lastTxFinishTime;     // time of finish last transmission

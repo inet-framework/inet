@@ -129,10 +129,8 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
 
         if (curEtherDescr.txrate == GIGABIT_ETHERNET_TXRATE)
         {
-            carrierExtension = par("carrierExtension").boolValue();
-            curEtherDescr.frameMinBytes = carrierExtension ? GIGABIT_MIN_FRAME_BYTES_WITH_EXT : MIN_ETHERNET_FRAME_BYTES;
-            EV << "Half duplex Gigabit Ethernet, carrier extension "
-               << (carrierExtension ? "enabled" : "disabled") << endl;
+            curEtherDescr.frameMinBytes = GIGABIT_MIN_FRAME_BYTES_WITH_EXT;
+            EV << "Half duplex Gigabit Ethernet, carrier extension enabled" << endl;
         }
         slotTime = ((curEtherDescr.txrate >= GIGABIT_ETHERNET_TXRATE) ? 4096 : 512 ) / curEtherDescr.txrate;
     }

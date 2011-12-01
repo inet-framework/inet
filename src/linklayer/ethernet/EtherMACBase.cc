@@ -407,7 +407,6 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
     if (!connected)
     {
         curEtherDescr = nullEtherDescr;
-        carrierExtension = false;
         dataratesDiffer = (outTrChannel != NULL) || (inTrChannel != NULL);
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
@@ -461,7 +460,6 @@ void EtherMACBase::printParameters()
        << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 1
     EV << "bitTime: " << 1.0 / curEtherDescr.txrate << endl;
-    EV << "carrierExtension: " << carrierExtension << endl;
     EV << "frameBursting: " << frameBursting << endl;
     EV << "slotTime: " << 512.0 / curEtherDescr.txrate << endl;
     EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.txrate << endl;
