@@ -381,9 +381,6 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
 
 void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
 {
-    ASSERT(physInGate == gate("phys$i"));
-    ASSERT(physOutGate == gate("phys$o"));
-
     cChannel *outTrChannel = physOutGate->findTransmissionChannel();
     cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
     connected = (outTrChannel != NULL) && (inTrChannel != NULL);
