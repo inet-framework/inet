@@ -368,8 +368,25 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     // If not set to promiscuous = on, then checks if received frame contains destination MAC address
     // matching port's MAC address, also checks if broadcast bit is set
 
+    if (frame->getDest().equals(address))
+        return false;
+
+    if (frame->getDest().isBroadcast())
+        return false;
+
+    bool isPause = (dynamic_cast<EtherPauseFrame *>(frame) != NULL);
+
+    if (!isPause && promiscuous)
+        return false;
+
+    if (isPause && frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
+        return false;
+
     // TODO: why don't we check here if a multicast message is really for us? where is that done?
-    if (promiscuous || frame->getDest().isBroadcast() || frame->getDest().isMulticast() || frame->getDest().equals(address))
+    // FIXME: Checking of !isPause in next line is a hack.
+    //        Without this condition EtherMAC* accepts and processes all received PAUSE frames to any foreign dest multicast address, too.
+    //        Currently we drops all received PAUSE frames to sent to all multicast addresses except MULTICAST_PAUSE_ADDRESS.
+    if (frame->getDest().isMulticast() && !isPause)
         return false;
 
     EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";

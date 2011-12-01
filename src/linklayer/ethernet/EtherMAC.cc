@@ -744,25 +744,30 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete()
 {
-    EtherTraffic *frame = frameBeingReceived;
+    EtherTraffic *msg = frameBeingReceived;
     frameBeingReceived = NULL;
 
-    if ((dynamic_cast<EtherIFG*>(frame)) != NULL)
+    if ((dynamic_cast<EtherIFG*>(msg)) != NULL)
     {
-        delete frame;
+        delete msg;
         return;
     }
 
-    emit(packetReceivedFromLowerSignal, frame);
+    emit(packetReceivedFromLowerSignal, msg);
 
     // bit errors
-    if (frame->hasBitError())
+    if (msg->hasBitError())
     {
         numDroppedBitError++;
-        emit(dropPkBitErrorSignal, frame);
-        delete frame;
+        emit(dropPkBitErrorSignal, msg);
+        delete msg;
         return;
     }
+
+    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+
+    if (dropFrameNotForUs(frame))
+        return;
 
     if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
     {
@@ -788,9 +793,6 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
-
-    if (dropFrameNotForUs(frame))
-        return;
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
