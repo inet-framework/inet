@@ -181,6 +181,8 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, I
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
     IPv6Datagram *datagram = ctrl->removeOrigDatagram();
+    take(transportPacket);
+    take(datagram);
     datagram->encapsulate(transportPacket);
     sendErrorMessage(datagram, type, code);
 }
