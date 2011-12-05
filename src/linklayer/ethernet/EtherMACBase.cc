@@ -45,6 +45,7 @@ const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
     0,
     0,
     0,
+    0,
     0.0
 };
 
@@ -57,6 +58,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         MIN_ETHERNET_FRAME_BYTES,
+        MIN_ETHERNET_FRAME_BYTES,
         2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -66,6 +68,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         MIN_ETHERNET_FRAME_BYTES,
+        MIN_ETHERNET_FRAME_BYTES,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -74,6 +77,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         MAX_PACKETBURST,
         GIGABIT_MAX_BURST_BYTES,
+        GIGABIT_MIN_FRAME_BYTES_WITH_EXT,
         MIN_ETHERNET_FRAME_BYTES,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
@@ -83,6 +87,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
+        -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
         0.0
     },
@@ -92,6 +97,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
+        -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
         0.0
     },
@@ -101,6 +107,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
+        -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
         0.0
     }

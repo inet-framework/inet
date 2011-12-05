@@ -124,14 +124,9 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
 
     if (connected && !duplexMode)
     {
-        if (curEtherDescr.txrate >= FAST_GIGABIT_ETHERNET_TXRATE)
-            error("The fast gigabit ethernet supports only the full duplex connections");
+        if (curEtherDescr.halfDuplexFrameMinBytes < 0.0)
+            error("The %g bps ethernet supports only the full duplex connections", curEtherDescr.txrate);
 
-        if (curEtherDescr.txrate == GIGABIT_ETHERNET_TXRATE)
-        {
-            curEtherDescr.frameMinBytes = GIGABIT_MIN_FRAME_BYTES_WITH_EXT;
-            EV << "Half duplex Gigabit Ethernet, carrier extension enabled" << endl;
-        }
         slotTime = ((curEtherDescr.txrate >= GIGABIT_ETHERNET_TXRATE) ? 4096 : 512 ) / curEtherDescr.txrate;
     }
     else
@@ -457,7 +452,7 @@ void EtherMAC::startFrameTransmission()
 
     frame->setOrigByteLength(frame->getByteLength());
     bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength = inBurst ? curEtherDescr.frameInBurstMinBytes : curEtherDescr.frameMinBytes;
+    int64 minFrameLength = duplexMode ? curEtherDescr.frameMinBytes : (inBurst ? curEtherDescr.frameInBurstMinBytes : curEtherDescr.halfDuplexFrameMinBytes);
 
     if (frame->getByteLength() < minFrameLength)
         frame->setByteLength(minFrameLength);
