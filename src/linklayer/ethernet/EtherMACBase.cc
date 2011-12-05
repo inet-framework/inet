@@ -46,6 +46,7 @@ const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
     0,
     0,
     0,
+    0.0,
     0.0
 };
 
@@ -59,6 +60,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
+        512 / ETHERNET_TXRATE,
         2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -69,6 +71,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
+        512 / FAST_ETHERNET_TXRATE,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -79,6 +82,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         GIGABIT_MAX_BURST_BYTES,
         GIGABIT_MIN_FRAME_BYTES_WITH_EXT,
         MIN_ETHERNET_FRAME_BYTES,
+        4096 / GIGABIT_ETHERNET_TXRATE,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -89,6 +93,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
+        0.0,
         0.0
     },
     {
@@ -99,6 +104,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
+        0.0,
         0.0
     },
     {
@@ -109,6 +115,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         -1,  // half duplex is not supported
         MIN_ETHERNET_FRAME_BYTES,
+        0.0,
         0.0
     }
 };
@@ -482,7 +489,7 @@ void EtherMACBase::printParameters()
 #if 1
     EV << "bitTime: " << 1.0 / curEtherDescr.txrate << endl;
     EV << "frameBursting: " << frameBursting << endl;
-    EV << "slotTime: " << 512.0 / curEtherDescr.txrate << endl;
+    EV << "slotTime: " << curEtherDescr.slotTime << endl;
     EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.txrate << endl;
     EV << endl;
 #endif

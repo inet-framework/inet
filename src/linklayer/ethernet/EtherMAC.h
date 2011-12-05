@@ -59,7 +59,6 @@ class INET_API EtherMAC : public EtherMACBase
     unsigned long numBackoffs;         // number of retransmissions
     unsigned int  framesSentInBurst;   // Number of frames send out in current frame burst
     long bytesSentInBurst;             // Number of bytes transmitted in current frame burst
-    double slotTime;                   // slot time for half-duplex mode
 
     struct PkIdRxTime
     {

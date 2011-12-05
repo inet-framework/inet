@@ -126,12 +126,6 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
     {
         if (curEtherDescr.halfDuplexFrameMinBytes < 0.0)
             error("The %g bps ethernet supports only the full duplex connections", curEtherDescr.txrate);
-
-        slotTime = ((curEtherDescr.txrate >= GIGABIT_ETHERNET_TXRATE) ? 4096 : 512 ) / curEtherDescr.txrate;
-    }
-    else
-    {
-        slotTime = 0.0;
     }
 }
 
@@ -652,7 +646,7 @@ void EtherMAC::handleRetransmission()
     int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffrange-1);
 
-    scheduleAt(simTime() + slotNumber * slotTime, endBackoffMsg);
+    scheduleAt(simTime() + slotNumber *curEtherDescr.slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
 
     numBackoffs++;

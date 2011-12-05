@@ -80,6 +80,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
         int64         maxBytesInBurst;      // with IFG and external datas
         int64         halfDuplexFrameMinBytes;   // minimal frame length in half duplex mode, half duplex not supported when smaller than 0
         int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
+        double        slotTime;             // slot time
         double        maxPropagationDelay;  // used for detecting longer cables than allowed
     };
 
