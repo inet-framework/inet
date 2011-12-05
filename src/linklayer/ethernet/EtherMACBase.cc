@@ -39,6 +39,7 @@ int64       otherFrameMinBytes;     // minimal frame length in burst mode, after
 
 const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
 {
+    0.0,
     0,
     0,
     0,
@@ -50,6 +51,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
 {
     {
         ETHERNET_TXRATE,
+        0.5 / ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
@@ -57,6 +59,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     },
     {
         FAST_ETHERNET_TXRATE,
+        0.5 / FAST_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
@@ -64,6 +67,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     },
     {
         GIGABIT_ETHERNET_TXRATE,
+        0.5 / GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         MAX_PACKETBURST,
         GIGABIT_MAX_BURST_BYTES,
@@ -71,6 +75,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
+        0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
@@ -78,6 +83,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     },
     {
         FOURTY_GIGABIT_ETHERNET_TXRATE,
+        0.5 / FOURTY_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
@@ -85,6 +91,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     },
     {
         HUNDRED_GIGABIT_ETHERNET_TXRATE,
+        0.5 / HUNDRED_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,

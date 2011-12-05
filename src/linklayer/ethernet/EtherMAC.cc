@@ -374,7 +374,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
     else if (receiveState == RECEIVING_STATE
             && !isJam
-            && endRxMsg->getArrivalTime() - simTime() < 0.5 / curEtherDescr.txrate)
+            && endRxMsg->getArrivalTime() - simTime() < curEtherDescr.halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
