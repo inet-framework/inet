@@ -73,9 +73,10 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     struct EtherDescr
     {
         double        txrate;
+        int64         frameMinBytes;        // minimal frame length
+        //for half duplex:
         unsigned int  maxFramesInBurst;
         int64         maxBytesInBurst;      // with IFG and external datas
-        int64         frameMinBytes;        // minimal frame length
         int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
     };
 

@@ -50,44 +50,44 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
 {
     {
         ETHERNET_TXRATE,
-        0,
-        0,
         MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
         MIN_ETHERNET_FRAME_BYTES
     },
     {
         FAST_ETHERNET_TXRATE,
-        0,
-        0,
         MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
         MIN_ETHERNET_FRAME_BYTES
     },
     {
         GIGABIT_ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME_BYTES,
         MAX_PACKETBURST,
         GIGABIT_MAX_BURST_BYTES,
-        MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
-        0,
-        0,
         MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
         MIN_ETHERNET_FRAME_BYTES
     },
     {
         FOURTY_GIGABIT_ETHERNET_TXRATE,
-        0,
-        0,
         MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
         MIN_ETHERNET_FRAME_BYTES
     },
     {
         HUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0,
-        0,
         MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
         MIN_ETHERNET_FRAME_BYTES
     }
 };
