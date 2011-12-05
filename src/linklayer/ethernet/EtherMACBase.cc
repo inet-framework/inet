@@ -92,7 +92,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         -1,  // half duplex is not supported
-        MIN_ETHERNET_FRAME_BYTES,
+        0,
         0.0,
         0.0
     },
@@ -103,7 +103,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         -1,  // half duplex is not supported
-        MIN_ETHERNET_FRAME_BYTES,
+        0,
         0.0,
         0.0
     },
@@ -114,7 +114,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         -1,  // half duplex is not supported
-        MIN_ETHERNET_FRAME_BYTES,
+        0,
         0.0,
         0.0
     }
