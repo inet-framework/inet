@@ -79,6 +79,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
         unsigned int  maxFramesInBurst;
         int64         maxBytesInBurst;      // with IFG and external datas
         int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
+        double        maxPropagationDelay;  // used for detecting longer cables than allowed
     };
 
     class InnerQueue

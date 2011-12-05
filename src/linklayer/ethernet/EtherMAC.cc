@@ -322,7 +322,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime() - msg->getSendingTime() >= curEtherDescr.frameMinBytes / curEtherDescr.txrate)
+        if (simTime() - msg->getSendingTime() >= curEtherDescr.maxPropagationDelay)
         {
             error("very long frame propagation time detected, "
                   "maybe cable exceeds maximum allowed length? "

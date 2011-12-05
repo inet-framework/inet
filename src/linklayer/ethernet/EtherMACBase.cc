@@ -44,7 +44,8 @@ const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
     0,
     0,
     0,
-    0
+    0,
+    0.0
 };
 
 const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
@@ -55,7 +56,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         FAST_ETHERNET_TXRATE,
@@ -63,7 +65,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         GIGABIT_ETHERNET_TXRATE,
@@ -71,7 +74,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         MAX_PACKETBURST,
         GIGABIT_MAX_BURST_BYTES,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
@@ -79,7 +83,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        0.0
     },
     {
         FOURTY_GIGABIT_ETHERNET_TXRATE,
@@ -87,7 +92,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        0.0
     },
     {
         HUNDRED_GIGABIT_ETHERNET_TXRATE,
@@ -95,7 +101,8 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        MIN_ETHERNET_FRAME_BYTES
+        MIN_ETHERNET_FRAME_BYTES,
+        0.0
     }
 };
 
