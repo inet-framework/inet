@@ -92,3 +92,19 @@ Define_NED_Function2(nedf_moduleListByNedType,
         "See cTopology::extractByNedTypeName()."
 );
 
+cNEDValue nedf_select(cComponent *context, cNEDValue argv[], int argc)
+{
+    long index = argv[0];
+    if (index < 0)
+        throw cRuntimeError("select(): negative index %ld", index);
+    if (index >= argc-1)
+        throw cRuntimeError("select(): index=%ld is too large", index, argc-1);
+    return argv[index+1];
+}
+
+Define_NED_Function2(nedf_select,
+        "any select(int index, ...)",
+        "misc",
+        "Returns the <index>th item from the rest of the argument list; numbering starts from 0."
+);
+
