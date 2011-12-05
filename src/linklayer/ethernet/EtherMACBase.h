@@ -142,7 +142,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
     static const EtherDescr nullEtherDescr;
 
-    EtherDescr curEtherDescr;       // Current Ethernet Constants (eg txrate, ...)
+    const EtherDescr *curEtherDescr;       // Current Ethernet Constants (eg txrate, ...)
 
     cChannel *transmissionChannel;  // transmission channel
 
@@ -198,7 +198,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
 
     virtual MACAddress getMACAddress() {return address;}
 
-    double getTxRate() { return curEtherDescr.txrate; }
+    double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
 
   protected:

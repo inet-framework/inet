@@ -124,8 +124,8 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
 
     if (connected && !duplexMode)
     {
-        if (curEtherDescr.halfDuplexFrameMinBytes < 0.0)
-            error("The %g bps ethernet supports only the full duplex connections", curEtherDescr.txrate);
+        if (curEtherDescr->halfDuplexFrameMinBytes < 0.0)
+            error("The %g bps ethernet supports only the full duplex connections", curEtherDescr->txrate);
     }
 }
 
@@ -311,7 +311,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime() - msg->getSendingTime() >= curEtherDescr.maxPropagationDelay)
+        if (simTime() - msg->getSendingTime() >= curEtherDescr->maxPropagationDelay)
         {
             error("very long frame propagation time detected, "
                   "maybe cable exceeds maximum allowed length? "
@@ -363,7 +363,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
     else if (receiveState == RECEIVING_STATE
             && !isJam
-            && endRxMsg->getArrivalTime() - simTime() < curEtherDescr.halfBitTime)
+            && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -446,7 +446,7 @@ void EtherMAC::startFrameTransmission()
 
     frame->setOrigByteLength(frame->getByteLength());
     bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength = duplexMode ? curEtherDescr.frameMinBytes : (inBurst ? curEtherDescr.frameInBurstMinBytes : curEtherDescr.halfDuplexFrameMinBytes);
+    int64 minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     if (frame->getByteLength() < minFrameLength)
         frame->setByteLength(minFrameLength);
@@ -646,7 +646,7 @@ void EtherMAC::handleRetransmission()
     int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffrange-1);
 
-    scheduleAt(simTime() + slotNumber *curEtherDescr.slotTime, endBackoffMsg);
+    scheduleAt(simTime() + slotNumber *curEtherDescr->slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
 
     numBackoffs++;
@@ -820,9 +820,9 @@ void EtherMAC::scheduleEndIFGPeriod()
     if (frameBursting
             && (simTime() == lastTxFinishTime)
             && (framesSentInBurst > 0)
-            && (framesSentInBurst < curEtherDescr.maxFramesInBurst)
+            && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
             && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
-                    <= curEtherDescr.maxBytesInBurst)
+                    <= curEtherDescr->maxBytesInBurst)
        )
     {
         EtherIFG *gap = new EtherIFG("IFG");

@@ -138,7 +138,7 @@ simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
 EtherMACBase::EtherMACBase()
 {
     lastTxFinishTime = -1.0; // never equals with current simtime.
-    curEtherDescr = nullEtherDescr;
+    curEtherDescr = &nullEtherDescr;
     transmissionChannel = NULL;
     physInGate = NULL;
     physOutGate = NULL;
@@ -434,7 +434,7 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
 
     if (!connected)
     {
-        curEtherDescr = nullEtherDescr;
+        curEtherDescr = &nullEtherDescr;
         dataratesDiffer = (outTrChannel != NULL) || (inTrChannel != NULL);
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
@@ -469,7 +469,7 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
         {
             if (txRate == etherDescrs[i].txrate)
             {
-                curEtherDescr = etherDescrs[i];
+                curEtherDescr = &(etherDescrs[i]);
                 interfaceEntry->setDown(false);
                 interfaceEntry->setDatarate(txRate);
                 return;
@@ -484,13 +484,13 @@ void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
-       << "txrate: " << curEtherDescr.txrate << ", "
+       << "txrate: " << curEtherDescr->txrate << ", "
        << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 1
-    EV << "bitTime: " << 1.0 / curEtherDescr.txrate << endl;
+    EV << "bitTime: " << 1.0 / curEtherDescr->txrate << endl;
     EV << "frameBursting: " << frameBursting << endl;
-    EV << "slotTime: " << curEtherDescr.slotTime << endl;
-    EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.txrate << endl;
+    EV << "slotTime: " << curEtherDescr->slotTime << endl;
+    EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl;
     EV << endl;
 #endif
 }
