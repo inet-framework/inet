@@ -275,7 +275,7 @@ AirFrame *Radio::encapsulatePacket(cPacket *frame)
     ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
 
     // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
-    if (ctrl && ctrl->getAdativeSensitivity()) updateSensitivity(ctrl->getBitrate());
+    if (ctrl && ctrl->getAdaptiveSensitivity()) updateSensitivity(ctrl->getBitrate());
     AirFrame *airframe = createAirFrame();
     airframe->setName(frame->getName());
     airframe->setPSend(transmitterPower);

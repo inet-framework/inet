@@ -799,7 +799,7 @@ void Ieee80211NewMac::handleCommand(cMessage *msg)
 // Dynamic power
             PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
             if (phyControlInfo)
-                phyControlInfo->setAdativeSensitivity(true);
+                phyControlInfo->setAdaptiveSensitivity(true);
 // end dynamic power
 */
             sendDown(msg);
