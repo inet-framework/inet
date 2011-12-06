@@ -34,6 +34,7 @@ module EthernetInterface like IWiredNic
 {
     parameters:
         bool csmacdSupport = default(false);  // by default no CSMA/CD so only only point-to-point duplex links are supported.
+        bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~EthDropTailQoSQueue, ~REDQueue, or empty for use internal queue
         int numOutputHooks = default(0);
@@ -58,6 +59,7 @@ module EthernetInterface like IWiredNic
         }
         encap: EtherEncap {
             parameters:
+                useSNAP = useSNAP;
                 @display("p=143,151");
         }
     connections:
@@ -82,3 +84,4 @@ module EthernetInterface like IWiredNic
         }
         outputHook[numOutputHooks-1].out --> encap.upperLayerIn if numOutputHooks > 0;
 }
+

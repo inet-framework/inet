@@ -41,6 +41,7 @@ class INET_API EtherEncap : public cSimpleModule
     static simsignal_t rcvdPkBytesFromHLSignal;
     static simsignal_t rcvdPkBytesFromMACSignal;
     static simsignal_t sentPauseSignal;
+    bool useSNAP;               // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
 
   protected:
     virtual void initialize();

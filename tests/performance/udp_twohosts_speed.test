@@ -30,12 +30,21 @@ network UdpClientServer
             parameters:
                 @display("p=181,67;i=device/pc2");
         }
+        host1snap: StandardHost {
+            parameters:
+                @display("p=53,67;i=device/pc3");
+        }
+        host2snap: StandardHost {
+            parameters:
+                @display("p=181,67;i=device/pc2");
+        }
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=109,142");
         }
     connections:
         host1.ethg++ <--> C <--> host2.ethg++;
+        host1snap.ethg++ <--> C <--> host2snap.ethg++;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -59,9 +68,13 @@ sim-time-limit = 20s
 **.udpApp[0].stopTime = 17s
 **.host1.udpApp[0].destAddresses = "host2"
 **.host2.udpApp[0].destAddresses = "host1"
+**.host1snap.udpApp[0].destAddresses = "host2snap"
+**.host2snap.udpApp[0].destAddresses = "host1snap"
 **.udpApp[0].messageLength = 1000 bytes
 **.udpApp[1].typename = "UDPEchoApp"
 **.udpApp[1].localPort = 1234
+
+**.host*snap.eth[*].useSNAP = true
 
 *.configurator.networkAddress = "192.168.1.0"
 
@@ -75,7 +88,7 @@ library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
 scafile <- 'results/General-0.sca'
-linecount <- 2
+linecount <- 4
 sentPk   <- 10000
 echoedPk <-  9990
 
@@ -85,7 +98,7 @@ dataset <- loadDataset(scafile)
 
 cat("\nOMNETPP TEST RESULT:\n")
 
-udpApp <- dataset$scalars[grep("\\.host\\d\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
+udpApp <- dataset$scalars[grep("\\.host\\d\\w*\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
 udpSent <- udpApp[udpApp$name == "sentPkBytes:sum",]
 udpRcvd <- udpApp[udpApp$name == "echoedPk:count",]
 

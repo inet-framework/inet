@@ -98,8 +98,8 @@ packet EthernetIIFrame extends EtherFrame
 //
 packet EtherFrameWithLLC extends EtherFrame
 {
-    int ssap;
     int dsap;
+    int ssap;
     int control;
 }
 
@@ -107,16 +107,19 @@ packet EtherFrameWithLLC extends EtherFrame
 //
 // Ethernet frame with 802.3 LLC and SNAP headers.
 //
-// The fields ssap, dsap and control are not included in the class because
-// they are always set to fixed values: 0xAA, 0xAA, 0x03.
+// The ssap, dsap and control LLC fields are set to fixed values in the
+// frame: 0xAA, 0xAA, 0x03.
 //
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1)+
 // orgCode(3)+localCode(2) = 22 bytes
 //
-packet EtherFrameWithSNAP extends EtherFrame
+packet EtherFrameWithSNAP extends EtherFrameWithLLC
 {
-    long orgCode;  // SNAP organization code, 0 for IP and ARP
-    int localcode; // SNAP local code (stores ~EtherType for IP and ARP)
+    dsap = 0xAA;
+    ssap = 0xAA;
+    control = 0x03;
+    int orgCode;   // organizationally unique identifier (OUI); 0 for protocols that have an EtherType (ARP, IPv4, IPv6, etc.)
+    int localcode; // protocol identifier (PID); stores ~EtherType if orgCode is 0
 }
 
 
