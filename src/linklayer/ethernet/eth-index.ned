@@ -16,19 +16,21 @@
 //
 
 
-//# @-titlepage (would conflict with main titlepage)
-//# <h1>Ethernet Model Documentation</h1>
 //
-// @page eth-index.html, Ethernet Model -- Start Page
+// @page eth-index.html, Ethernet Model Index
 //
-//# This documents the Ethernet model created by David Wu and refined by Andras
-//# Varga at CTIE, Monash University, Melbourne, Australia.
-//
-// The Ethernet model contains a MAC model (~EtherMAC), LLC model (~EtherLLC) as well
-// as a bus (~EtherBus, for modelling coaxial cable) and a hub (~EtherHub) model.
-// A switch model (~EtherSwitch) is also provided.
+// The Ethernet model contains MAC models (a full-featured ~EtherMAC,
+// and a simplified, duplex-only ~EtherMACFullDuplex);
+// encapsulation/decapsulation models (~EtherEncap, ~EtherLLC);
+// bus and hub models ((~EtherBus for modelling coaxial cable, and ~EtherHub);
+// a switch model (~EtherSwitch) with various relay units (~IMACRelayUnit,
+// ~MACRelayUnitNP and ~MACRelayUnitPP); some traffic generators
+// (~EtherTrafGen, ~EtherAppCli/~EtherAppSrv); and example host models
+// (~EtherHost, ~EtherHost2). In INET hosts, an Ethernet interface is
+// represented by ~EthernetInterface.
 //
 // A few useful topics:
+//  - ~MixedLAN is an example model that contains hosts, a switch, a hub and a bus
 //  - <a href="ether-overview.html">model overview</a>
 //  - <a href="eth-standards.html">implemented standards</a>
 //  - <a href="llc-app.html">communication between LLC and higher layers</a>
@@ -36,40 +38,36 @@
 //  - <a href="physical.html">physical layer messaging</a>
 //  - click <i>selected topics</i> in the navigation frame to see more topics
 //
-// If you can't wait to see the model, start here:
-//  - the ~MixedLAN model contains hosts, switch, hub and bus;
-//  - the <a href="largenet.html">LargeNet model</a> contains hundreds of
-//    computers, switches and hubs (numbers depend on model configuration in
-//    largenet.ini), and mixes all kinds of Ethernet technologies;
-//  - ~EtherHost is a sample node with an Ethernet NIC;
-//  - ~EtherSwitch, ~EtherBus, ~EtherHub model switching hub, repeating hub and
-//    the old coxial cable;
-//  - basic compnents of the model: ~EtherMAC, ~EtherLLC/~EtherEncap module types,
-//    ~IMACRelayUnit (~MACRelayUnitNP and ~MACRelayUnitPP), ~EtherFrame message type,
-//    MACAddress class
-//
-// Related documentation:
-//   - <a href="../doxy/index.html" target="_top">C++ source documentation</a>
-//
-//
 //
 // @page ether-overview.html, Ethernet Model Overview
 //
 // <h3>Data packets and Ethernet frames</h3>
 //
-// Ethernet frames carry data packets as encapsulated cMessage objects.
-// Data packets can be of any message type (cMessage or cMessage subclass).
+// Ethernet frames carry data packets as encapsulated cPacket objects.
+// Data packets can be of any message type (cPacket or cPacket subclass).
 //
 // The model encapsulates data packets in Ethernet frames using the <tt>encapsulate()</tt>
-// method of cMessage. Encapsulate() updates the length of the Ethernet frame too,
+// method of cPacket. Encapsulate() updates the length of the Ethernet frame too,
 // so the model doesn't have to take care of that.
 //
 // The models supports various Ethernet frame types: Ethernet II, 803.2 with
 // LLC header, and 803.3 with LLC and SNAP headers. The corresponding classes are:
-// ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP. They all class
+// ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP. They all subclass
 // from ~EtherFrame which only represents the basic MAC frame with source and
-// destination addresses. ~EtherMAC only deals with EtherFrames, and does not
-// care about the specific subclass.
+// destination addresses. ~EtherMAC and ~EtherMACFullDuplex only deal with EtherFrames,
+// and do not care about the specific subclass.
+//
+//
+// @page eth-standards.html, Ethernet: Implemented Standards
+//
+// The Ethernet model operates according to the following standards:
+// - Gigabit Ethernet: IEEE 802.3z-1998
+// - Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
+// - Fast Ethernet: IEEE 802.3u-1995
+// - Ethernet: IEEE 802.3-1998
+//
+// Note: switches don't implement the Spanning Tree Protocol. You need to
+// avoid cycles in the LAN topology.
 //
 //
 // <h3>MAC and higher layers</h3>
@@ -90,24 +88,13 @@
 // higher layers because in practice it'll always be used with ~IPv4.
 //
 //
-// @page eth-standards.html, Ethernet: Implemented Standards
-//
-// The Ethernet model operates according to the following standards:
-// - Gigabit Ethernet: IEEE 802.3z-1998
-// - Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
-// - Fast Ethernet: IEEE 802.3u-1995
-// - Ethernet: IEEE 802.3-1998
-//
-// Note: switches don't implement the Spanning Tree Protocol. You need to
-// avoid cycles in the LAN topology.
-//
-//
 // @page llc-app.html, Ethernet: Communication between LLC and Higher Layers
 //
-// Higher layers (applications or protocols) talk to the ~EtherLLC module.
+// Higher layers (applications or protocols) talk to the ~EtherLLC module
+// in the following way.
 //
 // When a higher layer wants to send a packet via Ethernet, it just
-// passes the data packet (a cMessage or any subclass) to ~EtherLLC.
+// passes the data packet (a cPacket or any subclass) to ~EtherLLC.
 // The message kind has to be set to IEEE802CTRL_DATA.
 //
 // In general, if ~EtherLLC receives a packet from the higher layers,
@@ -116,9 +103,8 @@
 // IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and IEEE802CTRL_SENDPAUSE
 // (send PAUSE frame) -- see ~EtherLLC for a more complete list.
 //
-// The arguments to the command are NOT inside the data packet but
-// in a "control info" data structure of class ~Ieee802Ctrl, attached to
-// the packet. See controlInfo() method of cMessage (OMNeT++ 3.0).
+// The arguments to the command are in an ~Ieee802Ctrl control info object,
+// attached to the packet (see the getControlInfo() method of cPacket.)
 //
 // For example, to send a packet to a given MAC address and protocol
 // identifier, the application sets the data packet's message kind
@@ -130,25 +116,6 @@
 // When the command doesn't involve a data packet (e.g.
 // IEEE802CTRL_(DE)REGISTER_DSAP, IEEE802CTRL_SENDPAUSE), a dummy packet
 // (empty cMessage) is used.
-//
-// <h3>Rationale</h3>
-//
-// The alternative of the above communications would be:
-// - adding the parameters such as destination address into the data
-//   packet. This would be a poor solution since it would make the
-//   higher layers specific to the Ethernet model.
-// - encapsulating a data packet into an <i>interface packet</i> which
-//   contains the destination address and other parameters. The
-//   disadvantages of this approach is the overhead associated with
-//   creating and destroying the interface packets.
-//
-// Using a control structure is more efficient than the interface packet
-// approach, because the control structure can be created once inside
-// the higher layer and be reused for every packet.
-//
-// It may also appear to be more intuitive in Tkenv because one can observe
-// data packets travelling between the higher layer and Ethernet
-// modules -- as opposed to "interface" packets.
 //
 //
 // @page appreg.html, EtherLLC: SAP Registration
@@ -164,8 +131,8 @@
 // which associates a SAP with the LLC port. Different applications
 // have to connect to different ports of ~EtherLLC.
 //
-// The ETHERCTRL_REGISTER_DSAP/IEEE802CTRL_DEREGISTER_DSAP commands use only the
-// dsap field in the ~Ieee802Ctrl structure.
+// The ETHERCTRL_REGISTER_DSAP and IEEE802CTRL_DEREGISTER_DSAP commands use
+// only the dsap field in the ~Ieee802Ctrl structure.
 //
 //
 // @page physical.html, Ethernet: Messaging on the Physical Layer
@@ -189,6 +156,11 @@
 // of a jam signal, so actually ~EtherMAC has to wait for the duration
 // of the jamming before assuming the channel is free again.
 //
+// In burst mode, filled inter-frame gaps are represented with EtherIFG
+// packets.
+//
+// Carrier extension is modelled by simply adding to the frame length,
+// using the addBitLength() method of cPacket.
 //
 //
 // @page ether-pause.html, Ethernet: PAUSE handling
@@ -198,24 +170,19 @@
 // of 512 bit-times, that specifies how long the transmitter should
 // remain quiet. If the receiver becomes uncongested before the
 // transmitter's pause timer expires, the receiver may elect to send
-// another Pause frame to the transmitter with a timer value of zero,
+// another PAUSE frame to the transmitter with a timer value of zero,
 // allowing the transmitter to resume immediately.
 //
 // ~EtherMAC will properly respond to PAUSE frames it receives
-// (~EtherPauseFrame class),
-// however it will never send a PAUSE frame by itself. (For one thing,
-// it doesn't have an input buffer that can overflow.)
+// (~EtherPauseFrame class), but it will never send a PAUSE frame by itself.
+// (For one thing, it doesn't have an input buffer that can overflow.)
 //
 // ~EtherMAC, however, transmits PAUSE frames received by higher layers,
-// and ~EtherLLC can be instructed by a command to send a PAUSE frame to MAC.
+// and ~EtherLLC and ~EtherEncap can be instructed by a command to send
+// a PAUSE frame to MAC.
 //
 // ~IMACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
 // scheme for sending PAUSE frames -- this can be refined if the need arises.
-//
-// For background on PAUSE, see e.g.
-// http://www.computer.org/proceedings/lcn/0309/03090160abs.htm,
-// http://www.nwfusion.com/netresources/0913flow.html, and
-// http://www.nwfusion.com/netresources/0913flow2.html.
 //
 
 
