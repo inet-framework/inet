@@ -26,6 +26,9 @@ import inet.nodes.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 
 
+//
+// A 100Mb/s Ethernet cable. Part of ~LargeNet.
+//
 channel cable extends DatarateChannel
 {
     parameters:
@@ -35,7 +38,7 @@ channel cable extends DatarateChannel
 
 
 //
-// Several hosts on an Ethernet hub
+// Several hosts on an Ethernet hub; part of ~LargeNet.
 //
 module SmallLAN
 {
@@ -60,7 +63,7 @@ module SmallLAN
 
 
 //
-// Several hosts and an Ethernet hub on a switch
+// Several hosts and an Ethernet hub on a switch; part of ~LargeNet.
 //
 module MediumLAN
 {
@@ -101,7 +104,7 @@ module MediumLAN
 
 //
 // Several hosts and an Ethernet hub on a switch. One port of the hub
-// connect to a 10Base2 segment.
+// connect to a 10Base2 segment. Part of ~LargeNet.
 //
 module LargeLAN
 {
