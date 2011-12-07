@@ -618,8 +618,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 #endif /* WITH_xMIPv6 */
     else if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message*>(packet))
     {
-        EV << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        send(packet, "icmpOut");
+        handleReceivedICMP(dynamic_cast<ICMPv6Message*>(packet));
     }//Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6)
     {
@@ -661,29 +660,25 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 {
-    switch (msg->getType())
-    {
-        case ICMPv6_REDIRECT:  // TODO implement redirect handling
-        case ICMPv6_DESTINATION_UNREACHABLE:
-        case ICMPv6_PACKET_TOO_BIG:
-        case ICMPv6_TIME_EXCEEDED:
-        case ICMPv6_PARAMETER_PROBLEM: {
-            // ICMP errors are delivered to the appropriate higher layer protocols
-            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
-            int protocol = bogusPacket->getTransportProtocol();
-            int gateindex = mapping.getOutputGateForProtocol(protocol);
-            send(msg, "transportOut", gateindex);
-            break;
-        }
-        default: {
-            // all others are delivered to ICMP:
-            // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
-            // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
-            // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
-            int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
-            send(msg, "transportOut", gateindex);
-        }
-    }
+	int type = msg->getType();
+	if (type < 128)
+	{
+        // ICMP errors are delivered to the appropriate higher layer protocols
+        EV << "ICMPv6 packet: passing it to higher layer\n";
+        IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
+        int protocol = bogusPacket->getTransportProtocol();
+        int gateindex = mapping.getOutputGateForProtocol(protocol);
+        send(msg, "transportOut", gateindex);
+	}
+	else
+	{
+        // all others are delivered to ICMP:
+        // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
+        // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
+        // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
+        EV << "ICMPv6 packet: passing it to ICMPv6 module\n";
+        send(msg, "icmpOut");
+	}
 }
 
 cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
