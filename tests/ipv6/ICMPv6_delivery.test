@@ -1,0 +1,44 @@
+%description:
+Test for bug #473: ICMPv6 error messages are delivered to the transport layer protocol
+that initiated the packet causing the error.
+
+NClientsEth example network is used, with one client.
+The client sends an UDP datagram to an unopened port of the
+server. The server generates an Destination Unreachable ICMPv6
+error that should be received by the client application in the
+form of an error indication.
+
+%inifile: {}.ini
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.ipv6.nclients.NClientsEth
+sim-time-limit=15s
+cmdenv-express-mode=false
+
+# number of client computers
+*.n = 1
+
+# udp apps
+**.cli[*].numUdpApps = 1
+**.cli[*].udpApp[*].typename = "UDPBasicApp"
+**.cli[*].udpApp[0].destAddresses = "aaaa:2:1::aaa:ff:fe00:8" # "srv" does not work
+**.cli[*].udpApp[0].destPort = 1000
+**.cli[*].udpApp[0].messageLength = 100B
+
+**.cli[*].udpApp[0].startTime = 10s
+**.cli[*].udpApp[0].stopTime = 11s
+**.cli[*].udpApp[0].sendInterval = 10s
+
+**.srv.numUdpApps = 1
+**.srv.udpApp[*].typename = "UDPSink"
+**.srv.udpApp[0].localPort = 1001
+
+# Ethernet NIC configuration
+**.eth[*].queueType = "DropTailQueue" # in routers
+**.eth[*].queue.frameCapacity = 10  # in routers
+**.eth[*].mac.duplexEnabled = true
+
+%contains: stdout
+ICMPv6 packet: passing it to higher layer
+%contains: stdout
+Ignoring UDP error report
