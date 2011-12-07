@@ -32,55 +32,18 @@ $DN = `dirname $0`;
 chomp $DN;
 #print "DN='$DN'\n";
 
-chdir "$DN/..";
+chdir "$DN/../..";
 
 $INETROOT=`pwd`;
 chomp $INETROOT;
 #print "INETROOT='$INETROOT'\n";
 
-print '#!/bin/sh
-cd `dirname $0`/..
-INETROOT=`pwd`
-
-echo "[General]
-cmdenv-express-mode = true
-record-eventlog = false
-cpu-time-limit = 3s" >tmp.ini
-
-run() {
-  cd $INETROOT/`dirname $1`
-  echo "
-========================================================
-<!!> Running: $1  $2
---------------------------------------------------------
-"
-  $INETROOT/src/run_inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
-
-  ret="$?"
-  retstr="OK"
-
-  if [ $ret \> 127 ] ; then
-    echo "<!!> Error - Simulation crashed, return value is $ret"
-    retstr="CRASH"
-  elif [ $ret != 0 ] ; then
-    echo "<!!> Error - Simulation has an error, return value is $ret"
-    retstr="ERROR"
-  fi
-
-  echo "
---------------------------------------------------------
-<!!> Finished: $1  $2 : return value: $retstr ($ret)
-========================================================
-"
-}
-
-';
 
 @inifiles = sort `find examples -name '*.ini'`;
 
 die("Not found ini files\n") if ($#inifiles lt 0);
 
-#print "=====================================\n",@inifiles,"=========================================7\n";
+#print "=====================================\n",@inifiles,"=========================================\n";
 
 @runs = ();
 
@@ -105,8 +68,10 @@ foreach $fname (@inifiles)
     foreach $conf (@configs)
     {
         ($cfg,$comm) = ($conf =~ /^\[Config (\w+)\]\s*(\#.*)?$/g);
-        $run = "$fname  $cfg";
-        $x = "run $run";
+        ($dir,$fnameonly) = ($fname =~ /(.*)[\/\\](.*)/);
+
+        $run = "/$dir, -f $fnameonly -c $cfg"; # intentionally no "-r 0" -- test should do all runs if fits into the time limit...
+        $x = "$run";
 
         if ($comm =~ /\b__interactive__\b/i)
         {
@@ -115,7 +80,7 @@ foreach $fname (@inifiles)
 
         if (length($skiplist{$run}))
         {
-            $x = "# run $run   ".$skiplist{$run};
+            $x = "# $run   ".$skiplist{$run};
         }
 
         print "$x\n";
