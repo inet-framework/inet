@@ -9,8 +9,8 @@ void enqueue(TCPMsgBasedSendQueue *q, const char *msgname, ulong numBytes)
 {
     ev << "enqueue(\"" << msgname << "\", " << numBytes << "): ";
 
-    cMessage *msg = new cMessage(msgname);
-    msg->setLength(numBytes*8);
+    cPacket *msg = new cPacket(msgname);
+    msg->setByteLength(numBytes);
     q->enqueueAppData(msg);
 
     ev << q->info() <<"\n";
@@ -23,10 +23,10 @@ void createSegmentWithBytes(TCPMsgBasedSendQueue *q, uint32 fromSeq, uint32 toSe
     ulong numBytes = toSeq-fromSeq;
     TCPSegment *tcpseg = q->createSegmentWithBytes(fromSeq, numBytes);
 
-    for (int i=0; i<tcpseg->payloadArraySize(); i++)
+    for (int i=0; i<tcpseg->getPayloadArraySize(); i++)
     {
-        TCPPayloadMessage& payload = tcpseg->payload(i);
-        ev << (i?", ":" ") << payload.msg->name() << " .." << payload.endSequenceNo;
+        TCPPayloadMessage& payload = tcpseg->getPayload(i);
+        ev << (i?", ":" ") << payload.msg->getName() << " .." << payload.endSequenceNo;
     }
     ev << "\n";
 

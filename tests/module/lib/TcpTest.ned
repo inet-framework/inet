@@ -1,4 +1,6 @@
+package module_.lib;
 
+import inet.transport.tcp.TCP;
 
 
 network TcpTestNet1
@@ -7,29 +9,24 @@ network TcpTestNet1
         bool testing;
     submodules:
         cli: TcpTestClient {
-            parameters:
-                @display("p=95,95");
+            @display("p=95,95");
         }
         tcpcli: TCP {
-            parameters:
-                @display("p=95,178");
+            @display("p=95,178");
         }
         tcpsrv: TCP {
-            parameters:
-                @display("p=302,178");
+            @display("p=302,178");
         }
         srv: TcpTestClient {
-            parameters:
-                @display("p=303,96");
+            @display("p=303,96");
         }
         tcptester: TCPScriptableTester {
-            parameters:
-                @display("p=198,178");
+            @display("p=198,178");
         }
     connections:
-        cli.tcpOut --> tcpcli.from_appl++;
+        cli.tcpOut --> tcpcli.appIn++;
         cli.tcpIn <-- tcpcli.appOut++;
-        srv.tcpOut --> tcpsrv.from_appl++;
+        srv.tcpOut --> tcpsrv.appIn++;
         srv.tcpIn <-- tcpsrv.appOut++;
 
         tcpcli.ipOut --> {  delay = 1ms; } --> tcptester.in1;
@@ -45,34 +42,30 @@ network TcpTestNet2
         bool testing;
     submodules:
         cli: TcpTestClient {
-            parameters:
-                @display("p=95,95");
+            @display("p=95,95");
         }
         tcpcli: TCP {
-            parameters:
-                @display("p=95,178");
+            @display("p=95,178");
         }
         tcpsrv: TCP {
-            parameters:
-                @display("p=302,178");
+            @display("p=302,178");
         }
         srv: TcpTestClient {
-            parameters:
-                @display("p=303,96");
+            @display("p=303,96");
         }
         tcptester: TCPRandomTester {
-            parameters:
-                @display("p=198,178");
+            @display("p=198,178");
         }
     connections:
-        cli.tcpOut --> tcpcli.from_appl++;
+        cli.tcpOut --> tcpcli.appIn++;
         cli.tcpIn <-- tcpcli.appOut++;
-        srv.tcpOut --> tcpsrv.from_appl++;
+        srv.tcpOut --> tcpsrv.appIn++;
         srv.tcpIn <-- tcpsrv.appOut++;
 
         tcpcli.ipOut --> tcptester.in1;
         tcpcli.ipIn <-- tcptester.out1;
-        tcptester.out2 --> {  delay = 1ms; datarate = 1000000; } --> tcpsrv.ipIn;
-        tcptester.in2 <-- {  delay = 1ms; datarate = 1000000; } <-- tcpsrv.ipOut;
+        tcptester.out2 --> {  delay = 1ms; datarate = 1Mbps; } --> tcpsrv.ipIn;
+        tcptester.in2 <-- {  delay = 1ms; datarate = 1Mbps; } <-- tcpsrv.ipOut;
 }
+
 

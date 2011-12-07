@@ -17,10 +17,15 @@
 //
 
 
+package module_.lib;
+
+import inet.applications.ITCPApp;
+
+
 //
 // \TCP client application for testing the TCP model.
 //
-simple TcpTestClient like TCPApp
+simple TcpTestClient like ITCPApp
 {
     parameters:
         string localAddress;

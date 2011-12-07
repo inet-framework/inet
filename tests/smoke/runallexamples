@@ -1,5 +1,5 @@
 #!/bin/sh
-cd `dirname $0`/..
+cd `dirname $0`/../..
 INETROOT=`pwd`
 
 echo "[General]
@@ -58,21 +58,21 @@ run examples/ethernet/lans/twoHosts.ini  TwoHosts1
 run examples/ethernet/arptest/omnetpp.ini  ARPTest
 run examples/adhoc/mf80211/omnetpp.ini  Ping1
 # skipping interactive config: run examples/adhoc/mf80211/omnetpp.ini  Ping2
-run examples/adhoc/mobility/omnetpp.ini  LinearMobility
-run examples/adhoc/mobility/omnetpp.ini  MassMobility
-run examples/adhoc/mobility/omnetpp.ini  RandomWPMobility
-run examples/adhoc/mobility/omnetpp.ini  CircleMobility
-run examples/adhoc/mobility/omnetpp.ini  RectangleMobility
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility1
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility2
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility3
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility4
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility5
-run examples/adhoc/mobility/omnetpp.ini  TurtleMobility6
-run examples/adhoc/mobility/omnetpp.ini  ANSimMobility
-run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility1
-run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility2
-run examples/adhoc/ieee80211/omnetpp.ini  Ping1
+run examples/mobility/omnetpp.ini  LinearMobility
+run examples/mobility/omnetpp.ini  MassMobility
+run examples/mobility/omnetpp.ini  RandomWPMobility
+run examples/mobility/omnetpp.ini  CircleMobility
+run examples/mobility/omnetpp.ini  RectangleMobility
+run examples/mobility/omnetpp.ini  TurtleMobility1
+run examples/mobility/omnetpp.ini  TurtleMobility2
+run examples/mobility/omnetpp.ini  TurtleMobility3
+run examples/mobility/omnetpp.ini  TurtleMobility4
+run examples/mobility/omnetpp.ini  TurtleMobility5
+run examples/mobility/omnetpp.ini  TurtleMobility6
+run examples/mobility/omnetpp.ini  ANSimMobility
+run examples/mobility/omnetpp.ini  BonnMotionMobility1
+run examples/mobility/omnetpp.ini  BonnMotionMobility2
+run examples/ieee80211/omnetpp.ini  Ping1
 # skipping interactive config: run examples/adhoc/ieee80211/omnetpp.ini  Ping2
 run examples/mpls/testte_tunnel/omnetpp.ini General
 run examples/mpls/net37/omnetpp.ini General

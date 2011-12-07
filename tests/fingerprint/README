@@ -1,0 +1,16 @@
+This folder contains fingerprint-based tests for various models.
+
+When a fingerprint test passes, that indicates that with very high
+probability, the simulation has followed the same trajectory as when
+the fingerprint was recorded, i.e. the times and modules of the events
+were the same. That is, a passing fingerprint tests means that the
+simulation model logic works the same as before.
+
+However, a passing test does not guarantee that e.g. result recording
+has not changed.
+
+Fingerprints are fragile to NED changes and parameter value changes.
+
+When a fingerprint test fails, the simulation's correctness has to be
+verified by some other means, and the fingerprints in the tests
+updated.

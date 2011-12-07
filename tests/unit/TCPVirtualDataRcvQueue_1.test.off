@@ -18,10 +18,10 @@ void insertSegment(TCPVirtualDataRcvQueue *q, uint32 beg, uint32 end)
 void extractBytesUpTo(TCPVirtualDataRcvQueue *q, uint32 seq)
 {
     ev << "extractUpTo(" << seq << "):";
-    cMessage *msg;
+    cPacket *msg;
     while ((msg=q->extractBytesUpTo(seq))!=NULL)
     {
-        ev << " msglen=" << (msg->length()>>3);
+        ev << " msglen=" << (msg->getByteLength()>>3);
         delete msg;
     }
     ev << " --> " << q->info() <<"\n";

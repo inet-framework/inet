@@ -41,20 +41,20 @@ call %~dp0\runexample1 examples\ethernet\lans  twoHosts.ini  TwoHosts1
 call %~dp0\runexample1 examples\ethernet\arptest  omnetpp.ini  ARPTest
 call %~dp0\runexample1 examples\adhoc\mf80211  omnetpp.ini  Ping1
 :: skipping interactive config: call %~dp0\runexample1 examples\adhoc\mf80211  omnetpp.ini  Ping2
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  LinearMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  MassMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  RandomWPMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  CircleMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  RectangleMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility1
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility2
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility3
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility4
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility5
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  TurtleMobility6
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  ANSimMobility
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  BonnMotionMobility1
-call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  BonnMotionMobility2
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  LinearMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  MassMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  RandomWPMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  CircleMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  RectangleMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility1
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility2
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility3
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility4
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility5
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  TurtleMobility6
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  ANSimMobility
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  BonnMotionMobility1
+call %~dp0\runexample1 examples\mobility  omnetpp.ini  BonnMotionMobility2
 call %~dp0\runexample1 examples\adhoc\ieee80211  omnetpp.ini  Ping1
 :: skipping interactive config: call %~dp0\runexample1 examples\adhoc\ieee80211  omnetpp.ini  Ping2
 call %~dp0\runexample1 examples\mpls\testte_tunnel  omnetpp.ini General
