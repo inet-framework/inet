@@ -123,7 +123,7 @@ int MACAddress::compareTo(const MACAddress& other) const
 
 InterfaceToken MACAddress::formInterfaceIdentifier() const
 {
-    uint32 high = (address>>16)|0xff;
+    uint32 high = ((address>>16)|0xff)^0x02000000;
     uint32 low = (0xfe<<24)|(address&0xffffff);
     return InterfaceToken(low, high, 64);
 }
