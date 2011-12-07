@@ -1,0 +1,30 @@
+%description:
+Test MACAddress::formInterfaceIdentifier()
+
+%includes:
+#include "MACAddress.h"
+#include "InterfaceToken.h"
+#include <iomanip>
+
+static std::ostream& operator<<(std::ostream& os, const InterfaceToken& token)
+{
+    return os << "InterfaceToken(" << std::hex << std::setw(8) << std::setfill('0')
+                                   << token.normal() << ","
+                                   << token.low() << ","
+                                   << std::dec << token.length() << ")";
+}
+
+%global:
+#define P(X)  ev << X << "-->" << MACAddress(X).formInterfaceIdentifier() << "\n"
+
+%activity:
+P("00:00:00:00:00:00");
+P("AA:BB:CC:DD:EE:FF");
+P("00:21:6b:39:db:48");
+ev << ".\n";
+
+%contains: stdout
+00:00:00:00:00:00-->InterfaceToken(020000ff,fe000000,64)
+AA:BB:CC:DD:EE:FF-->InterfaceToken(a8bbccff,feddeeff,64)
+00:21:6b:39:db:48-->InterfaceToken(02216bff,fe39db48,64)
+.
