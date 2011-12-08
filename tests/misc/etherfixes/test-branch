@@ -26,7 +26,7 @@ COMMAND=./print-fingerprints
 # the label (actually, branch) names added to commits where command output changes
 LABEL=fingerprint-change
 
-INET_ROOT=../..
+INET_ROOT=../../..
 
 # get the list of commits
 commits=`git rev-list --reverse $STARTREV..$ENDREV || exit 1`

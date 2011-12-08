@@ -3,7 +3,7 @@
 # Run the ethernet test simulations, and grep the scenario line, errors and fingerprints
 #
 
-INET_ROOT=../..
+INET_ROOT=../../..
 
 #opp_run -l $INET_ROOT/src/inet -n $INET_ROOT/src:. -u Cmdenv -r 1 -x General -g
 

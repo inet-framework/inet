@@ -1,0 +1,5 @@
+Scripts that were used to test commits on the topic/etherfixes branch in Dec 2011.
+
+See commits
+987c6c9dc 2011-12-08 ethernet: checkin of scripts used for regression testing of commits on the etherfixes branch
+5f47bd5a3 2011-12-08 ethernet: ChangeLog: document recent changes
