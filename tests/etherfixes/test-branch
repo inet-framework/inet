@@ -1,0 +1,69 @@
+#! /bin/bash
+#
+# For testing commits on a branch.
+#
+# The script loops through all commits in a branch (or between two given commits),
+# checks out each, builds INET, and launches a script that runs some simulations.
+# The output of the simulations MUST NOT change for commits that are just refactoring,
+# fix an unrelated bug, or introduce an unrelated new feature.
+#
+# The commits that change the output of the simulations are tagged in git, so they
+# can be viewed using "gitk --all".
+#
+# The script run by default is a "print-fingerprints" script that runs a series of
+# simulations, and greps the error messages and fingerprint messages from them.
+# So, effectively the script checks which commits change the fingerprint. The
+# fingerprint change then must be justified by the changes in the commit.
+#
+
+# range of commits to test; edit to your needs
+ENDREV=topic/etherfixes
+STARTREV=integration
+
+# the command to run on each commit
+COMMAND=./print-fingerprints
+
+# the label (actually, branch) names added to commits where command output changes
+LABEL=fingerprint-change
+
+INET_ROOT=../..
+
+# get the list of commits
+commits=`git rev-list --reverse $STARTREV..$ENDREV || exit 1`
+
+# make clean
+(cd .. && make cleanall)
+rm -rf work
+mkdir work
+
+echo > work/.lastoutput
+
+i=0
+for commit in $commits; do
+    (( i += 1 ))
+
+    echo
+    echo ---------------------------------------------------
+    echo -n $i ": "
+    git log -n 1 --pretty=oneline $commit | cat || exit 1
+    git checkout -q $commit || exit 1
+
+    git branch -d "$LABEL-$i" 2>/dev/null
+
+    echo "Building..."
+    (cd $INET_ROOT && make makefiles)
+    (cd $INET_ROOT && make -j2) > work/build.$i.$commit 2>&1 || continue  # skip checks on build error
+
+    echo "Collecting fingerprints..."
+    $COMMAND > work/output.$i.$commit || exit 1
+
+    if diff work/output.$i.$commit work/.lastoutput > /dev/null; then
+        echo "script output unchanged"
+    else
+        echo "CHANGE DETECTED! Tagging with '$LABEL-$i'"
+        git branch -f "$LABEL-$i"
+    fi
+
+    cp work/output.$i.$commit work/.lastoutput
+done
+

@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Run the ethernet test simulations, and grep the scenario line, errors and fingerprints
+#
+
+INET_ROOT=../..
+
+#opp_run -l $INET_ROOT/src/inet -n $INET_ROOT/src:. -u Cmdenv -r 1 -x General -g
+
+simulate() {
+    name=$1
+    numruns=$2
+    for (( i=0; i<$numruns; i++ )); do
+        echo
+        echo "Running $name/$i: "
+        opp_run -l $INET_ROOT/src/inet -n $INET_ROOT/src:. -u Cmdenv -f omnetpp-$name.ini -r $i | grep -E '<!>|Scenario:'
+    done
+}
+
+simulate twohosts 48
+simulate switch 12
+simulate hub 12
+
