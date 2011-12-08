@@ -1,0 +1,13 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+ethernet,                            -f omnetpp-switch.ini -r 0,                   ,                 de7a-d884
+ethernet,                            -f omnetpp-switch.ini -r 1,                   ,                 9b85-8146
+ethernet,                            -f omnetpp-switch.ini -r 2,                   ,                 4235-f962
+ethernet,                            -f omnetpp-switch.ini -r 3,                   ,                 2bf4-03c6
+ethernet,                            -f omnetpp-switch.ini -r 4,                   ,                 ae0b-96e8
+ethernet,                            -f omnetpp-switch.ini -r 5,                   ,                 e641-1347
+ethernet,                            -f omnetpp-switch.ini -r 6,                   ,                 2d98-2cc1
+ethernet,                            -f omnetpp-switch.ini -r 7,                   ,                 7efb-205b
+ethernet,                            -f omnetpp-switch.ini -r 8,                   ,                 12b4-5912
+ethernet,                            -f omnetpp-switch.ini -r 9,                   ,                 b2a1-4303
+ethernet,                            -f omnetpp-switch.ini -r 10,                  ,                 99f0-3eba
+ethernet,                            -f omnetpp-switch.ini -r 11,                  ,                 a4ac-2b6a
