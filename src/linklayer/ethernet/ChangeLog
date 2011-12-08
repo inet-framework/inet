@@ -1,5 +1,70 @@
-2011-07-05  Zoltan Bojthe
-    * Added EtherFrameClassifier for QoS queues.
+2011-12-08  Zoltan Bojthe
+
+    * fixes for PAUSE frames: set dest address to MULTICAST_PAUSE_ADDRESS
+      if it was unspecified
+
+    * MACRelayUnitNP/PP: calculate PAUSE finish times based on the txrate
+      of the corresponding ports
+
+    * Added EtherFrameClassifier for QoS queues
+
+    * EthernetInterface:
+      - moved queue module to between EtherEncap and EtherMAC modules;
+      - use QoS queue
+      - use empty string instead of "NoQueue" to select the internal queue
+
+    * EtherMAC, EtherMACFullDuplex, EtherMACBase:
+      - implemented 40G, 100G Ethernet
+      - the "duplexEnabled" parameter was renamed to "duplexMode"
+      - EtherMACFullDuplex now throws an error when you try to configure it
+        to be half-duplex
+      - the "carrierExtension" NED parameter was removed (as it is not really
+        an option: it is mandatory for Gigabit Ethernet in half duplex mode)
+      - refactoring: moved several functions from EtherMACBase to EtherMAC/
+        EtherMACFullDuplex for readability, and simplified  EtherMACFullDuplex
+        by removing halfduplex-related code
+      - bugfix: do not count PREAMBLE and SFX into the frame length when
+        padding frames to the minimal length
+      - bugfix: slot time for Fast Ethernet and Gigabit Ethernet was wrong
+      - bugfix: the original inner queue stored the PAUSE frames in reverse
+        order at the top of queue; we now cQueue with compare function as
+        a priority queue
+      - bugfix: when a transmission was finished, and a PAUSE frame had
+        been received during the transmission, then the sent frame was not
+        deleted but retransmitted when the PAUSE time elapsed
+      - bugfix for EtherMACFullDuplex: PAUSE frames with bit errors were
+        not discarded
+      - emit only one signal when sending up a frame (removed passedUpPkBytes
+        signal)
+      - changed emitted values in most signals: emit packet objects instead of
+        byte counts
+      - removed NotificationBoard support (one can use signals instead
+        where needed)
+      - do not calculate txrate-related parameters when module is not connected
+      - added more error detections
+      - fixes for dest address check on received messages (will need to be
+        revised when implementing management of multicast address)
+      - changed maximum cable length violation limits to be based on meters
+      - some fixes for reconnecting (incomplete)
+
+    * Ethernet.h: renamed some constants for readability
+
+    * Renamed EtherPadding message to EtherIFG
+
+    * Added SNAP support (also added TODO notes to linklayer/ieee80211, and
+      networklayer/arp|ipv6|manetrouting that they should set the etherType)
+
+    * ARP: set correct etherType on outgoing packets
+
+    * bugfix: buffer was too small for some sprintf() statements
+
+    * added missing @labels to NED files
+
+    * EtherBus: bugfix (used tap[-1] if only one node was connected)
+
+    * added examples
+
+    * comments editing, code styling, optimizations, added TODOs
 
 2008-07-26  Andras Varga
 
