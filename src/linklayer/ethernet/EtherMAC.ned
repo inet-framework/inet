@@ -140,6 +140,7 @@ simple EtherMAC like IEtherMAC
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
         bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
+        bool carrierExtension = default(true);  // enable/disable carrier extension on half duplex Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
         @statistic[txPkBytes](title="TX bytes"; record=sum,count,vector);

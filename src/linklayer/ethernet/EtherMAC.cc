@@ -107,6 +107,25 @@ void EtherMAC::ifDown()
 void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
 {
     EtherMACBase::calculateParameters(errorWhenAsymmetric);
+
+    if (!duplexMode)
+    {
+        if (curEtherDescr.txrate >= FAST_GIGABIT_ETHERNET_TXRATE)
+            error("The fast gigabit ethernet supports only the full duplex connections");
+
+        if (curEtherDescr.txrate == GIGABIT_ETHERNET_TXRATE)
+        {
+            carrierExtension = par("carrierExtension").boolValue();
+            curEtherDescr.frameMinBytes = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
+            EV << "Half duplex Gigabit Ethernet, carrier extension "
+               << (carrierExtension ? "enabled" : "disabled") << endl;
+        }
+        slotTime = ((curEtherDescr.txrate >= GIGABIT_ETHERNET_TXRATE) ? 4096 : 512 ) / curEtherDescr.txrate;
+    }
+    else
+    {
+        slotTime = 0.0;
+    }
 }
 
 void EtherMAC::handleSelfMessage(cMessage *msg)
@@ -258,7 +277,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime() - msg->getSendingTime() >= curEtherDescr->shortestFrameDuration)
+        if (simTime() - msg->getSendingTime() >= curEtherDescr.frameMinBytes / curEtherDescr.txrate)
         {
             error("very long frame propagation time detected, "
                   "maybe cable exceeds maximum allowed length? "
@@ -314,7 +333,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     }
     else if (receiveState == RECEIVING_STATE
             && dynamic_cast<EtherJam*>(msg) == NULL
-            && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
+            && endRxMsg->getArrivalTime() - simTime() < 0.5 / curEtherDescr.txrate)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -400,13 +419,6 @@ void EtherMAC::handleEndIFGPeriod()
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
     EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
 
-    // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && curTxFrame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
-    {
-        EV << "Performing carrier extension of small frame\n";
-        curTxFrame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
-    }
-
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
 
     // send frame to network
@@ -424,8 +436,7 @@ void EtherMAC::startFrameTransmission()
 
     frame->setOrigByteLength(frame->getByteLength());
     bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength =
-            inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->frameMinBytes;
+    int64 minFrameLength = inBurst ? curEtherDescr.frameInBurstMinBytes : curEtherDescr.frameMinBytes;
 
     if (frame->getByteLength() < minFrameLength)
         frame->setByteLength(minFrameLength);
@@ -613,9 +624,8 @@ void EtherMAC::handleRetransmission()
     EV << "Executing backoff procedure\n";
     int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffrange-1);
-    simtime_t backofftime = slotNumber * curEtherDescr->slotTime;
 
-    scheduleAt(simTime() + backofftime, endBackoffMsg);
+    scheduleAt(simTime() + slotNumber * slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
 
     numBackoffs++;
@@ -791,9 +801,9 @@ void EtherMAC::scheduleEndIFGPeriod()
     if (frameBursting
             && (simTime() == lastTxFinishTime)
             && (framesSentInBurst > 0)
-            && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
+            && (framesSentInBurst < curEtherDescr.maxFramesInBurst)
             && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
-                    <= curEtherDescr->maxBytesInBurst)
+                    <= curEtherDescr.maxBytesInBurst)
        )
     {
         EtherPadding *gap = new EtherPadding("IFG");

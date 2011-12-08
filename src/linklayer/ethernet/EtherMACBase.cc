@@ -35,9 +35,6 @@ int         maxFramesInBurst;
 int64       maxBytesInBurst;
 int64       frameMinBytes;
 int64       otherFrameMinBytes;     // minimal frame length in burst mode, after first frame
-simtime_t   halfBitTime;          // transmission time of a half bit
-simtime_t   slotTime;             // slot time
-simtime_t   shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
 */
 
 const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
@@ -46,10 +43,7 @@ const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr =
     0,
     0,
     0,
-    0,
-    0.0,
-    0.0,
-    0.0
+    0
 };
 
 const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
@@ -59,40 +53,28 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         0,
         0,
         MIN_ETHERNET_FRAME,
-        0,
-        0.5 / ETHERNET_TXRATE,
-        512.0 / ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME / ETHERNET_TXRATE
+        MIN_ETHERNET_FRAME
     },
     {
         FAST_ETHERNET_TXRATE,
         0,
         0,
         MIN_ETHERNET_FRAME,
-        0,
-        0.5 / FAST_ETHERNET_TXRATE,
-        512.0 / FAST_ETHERNET_TXRATE,
-        MIN_ETHERNET_FRAME / FAST_ETHERNET_TXRATE
+        MIN_ETHERNET_FRAME
     },
     {
         GIGABIT_ETHERNET_TXRATE,
         MAX_PACKETBURST,
         GIGABIT_MAX_BURST_BYTES,
-        GIGABIT_MIN_FRAME_WITH_EXT,
         MIN_ETHERNET_FRAME,
-        0.5 / GIGABIT_ETHERNET_TXRATE,
-        4096.0 / GIGABIT_ETHERNET_TXRATE,
-        GIGABIT_MIN_FRAME_WITH_EXT / GIGABIT_ETHERNET_TXRATE
+        MIN_ETHERNET_FRAME
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
-        MAX_PACKETBURST,
-        GIGABIT_MAX_BURST_BYTES,
-        GIGABIT_MIN_FRAME_WITH_EXT,
+        0,
+        0,
         MIN_ETHERNET_FRAME,
-        0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
-        4096.0 / GIGABIT_ETHERNET_TXRATE,
-        GIGABIT_MIN_FRAME_WITH_EXT / FAST_GIGABIT_ETHERNET_TXRATE
+        MIN_ETHERNET_FRAME
     }
 };
 
@@ -119,7 +101,7 @@ bool EtherMACBase::MacQueue::isEmpty()
 EtherMACBase::EtherMACBase()
 {
     lastTxFinishTime = -1.0; // never equals with current simtime.
-    curEtherDescr = &nullEtherDescr;
+    curEtherDescr = nullEtherDescr;
     transmissionChannel = NULL;
     physInGate = NULL;
     physOutGate = NULL;
@@ -415,19 +397,17 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
 
     cChannel *outTrChannel = physOutGate->findTransmissionChannel();
     cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
-
     connected = (outTrChannel != NULL) && (inTrChannel != NULL);
     double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
     double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
 
     if (!connected)
     {
-        curEtherDescr = &nullEtherDescr;
+        curEtherDescr = nullEtherDescr;
         carrierExtension = false;
         dataratesDiffer = (outTrChannel != NULL) || (inTrChannel != NULL);
         if (transmissionChannel)
             transmissionChannel->forceTransmissionFinishTime(SimTime());
-
         transmissionChannel = NULL;
         interfaceEntry->setDown(true);
         interfaceEntry->setDatarate(0);
@@ -461,7 +441,7 @@ void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
         {
             if (txRate == etherDescrs[i].txrate)
             {
-                curEtherDescr = &etherDescrs[i];
+                curEtherDescr = etherDescrs[i];
                 interfaceEntry->setDown(false);
                 interfaceEntry->setDatarate(txRate);
                 return;
@@ -476,14 +456,14 @@ void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
-       << "txrate: " << curEtherDescr->txrate << ", "
+       << "txrate: " << curEtherDescr.txrate << ", "
        << (duplexMode ? "full-duplex" : "half-duplex") << endl;
-#if 0
-    EV << "bitTime: " << bitTime << endl;
+#if 1
+    EV << "bitTime: " << 1.0 / curEtherDescr.txrate << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
     EV << "frameBursting: " << frameBursting << endl;
-    EV << "slotTime: " << slotTime << endl;
-    EV << "interFrameGap: " << interFrameGap << endl;
+    EV << "slotTime: " << 512.0 / curEtherDescr.txrate << endl;
+    EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.txrate << endl;
     EV << endl;
 #endif
 }

@@ -98,12 +98,9 @@ void EtherMACFullDuplex::startFrameTransmission()
         frame->setSrc(address);
 
     frame->setOrigByteLength(frame->getByteLength());
-    int64 minFrameLength = curEtherDescr->frameMinBytes;
 
-    if (frame->getByteLength() < minFrameLength)
-    {
-        frame->setByteLength(minFrameLength);
-    }
+    if (frame->getByteLength() < curEtherDescr.frameMinBytes)
+        frame->setByteLength(curEtherDescr.frameMinBytes);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
