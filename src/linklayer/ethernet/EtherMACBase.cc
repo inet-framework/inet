@@ -245,7 +245,7 @@ void EtherMACBase::initializeFlags()
     promiscuous = par("promiscuous");
     WATCH(promiscuous);
 
-    frameBursting = par("frameBursting");
+    frameBursting = false;
     WATCH(frameBursting);
 }
 
