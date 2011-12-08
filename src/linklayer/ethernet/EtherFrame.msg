@@ -1,4 +1,3 @@
-
 //
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
 //
@@ -45,11 +44,11 @@ packet EtherTraffic
 //
 packet EtherJam extends EtherTraffic
 {
-    long abortedPkTreeID = 0;  // this field stores the packetTreeId of aborted packet
+    long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
 }
 
 //
-// Represents filled Interframe gap in burst mode.
+// Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //
 packet EtherIFG extends EtherTraffic

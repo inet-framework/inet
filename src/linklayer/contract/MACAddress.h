@@ -39,13 +39,13 @@ class INET_API MACAddress
     static unsigned int autoAddressCtr; // global counter for generateAutoAddress()
 
   public:
-    /** Returns the unspecified (null) MAC address */
+    /** The unspecified MAC address, 00:00:00:00:00:00 */
     static const MACAddress UNSPECIFIED_ADDRESS;
 
-    /** Returns the broadcast (ff:ff:ff:ff:ff:ff) MAC address */
+    /** The broadcast MAC address, ff:ff:ff:ff:ff:ff */
     static const MACAddress BROADCAST_ADDRESS;
 
-    /** Returns the special multicast pause (01:80:C2:00:00:01) MAC address */
+    /** The special multicast PAUSE MAC address, 01:80:C2:00:00:01 */
     static const MACAddress MULTICAST_PAUSE_ADDRESS;
 
     /**
@@ -54,7 +54,7 @@ class INET_API MACAddress
     MACAddress() { address = 0; }
 
     /**
-     * Initializes the address from a 48-bit integer
+     * Initializes the address from the lower 48 bits of the 64-bit argument
      */
     MACAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
 
