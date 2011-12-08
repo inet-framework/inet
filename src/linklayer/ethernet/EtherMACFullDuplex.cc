@@ -35,6 +35,8 @@ EtherMACFullDuplex::EtherMACFullDuplex()
 void EtherMACFullDuplex::initialize()
 {
     EtherMACBase::initialize();
+    if (!par("duplexMode").boolValue())
+        throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
 
     beginSendFrames();
 }

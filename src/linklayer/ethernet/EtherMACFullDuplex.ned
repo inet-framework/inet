@@ -139,6 +139,7 @@ simple EtherMACFullDuplex like IEtherMAC
         string address = default("auto");        // MAC address as hex string (12 hex digits), or
                                                  // "auto". "auto" values will be replaced by
                                                  // a generated MAC address in init stage 0.
+        bool duplexMode = default(true);         // must be set to "true", as EtherMACFullDuplex does not support half duplex operation (parameter is present to reduce the risk of accidental misconfiguration)
         int txQueueLimit = default(1000);        // maximum number of frames queued up for transmission;
                                                  // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");        // name of optional external queue module

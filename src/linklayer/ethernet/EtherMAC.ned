@@ -29,10 +29,12 @@ import inet.linklayer.IEtherMAC;
 // that.
 //
 // Supported variations:
-// - 10Mb Ethernet bus or twisted pair
-// - 100Mb Ethernet duplex or half-duplex
-// - 1Gb Ethernet
+// - 10Mb Ethernet (duplex and half-duplex, coaxial cable or twisted pair)
+// - 100Mb Ethernet (duplex and half-duplex)
+// - 1Gb Ethernet (duplex and half-duplex)
 // - 10Gb Ethernet
+// - 40Gb Ethernet
+// - 100Gb Ethernet
 //
 // Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
@@ -132,10 +134,7 @@ simple EtherMAC like IEtherMAC
         string address = default("auto");  // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        bool duplexMode = default(true);   // whether duplex mode can be enabled or not; whether
-                                // MAC will actually use duplex mode depends on the result
-                                // of the auto-configuration process (duplex is only
-                                // possible with DTE-to-DTE connection).
+        bool duplexMode = default(true);  // selects full duplex (true) or half duplex (false) operation
         int txQueueLimit = default(1000); // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule = default("");    // name of optional external queue module
