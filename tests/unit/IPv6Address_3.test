@@ -16,7 +16,7 @@ for (int i=0; i<=128; i++)
 ev << ".\n";
 
 %contains: stdout
-0  ::0
+0  <unspec>
 1  8000::
 2  c000::
 3  e000::

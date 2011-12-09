@@ -47,7 +47,7 @@ This is a multicast address.
 ff00:1111:2222:3300:fe44:a555:6666:7777
 2
 This is an unspecified address.
-::0
+<unspec>
 0
 This is a loopback address.
 ::1
