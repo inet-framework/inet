@@ -21,7 +21,7 @@ cmdenv-express-mode=false
 # udp apps
 **.cli[*].numUdpApps = 1
 **.cli[*].udpApp[*].typename = "UDPBasicApp"
-**.cli[*].udpApp[0].destAddresses = "aaaa:2:1::aaa:ff:fe00:8" # "srv" does not work
+**.cli[*].udpApp[0].destAddresses = "aaaa:2:1::8aa:ff:fe00:8" # "srv" does not work
 **.cli[*].udpApp[0].destPort = 1000
 **.cli[*].udpApp[0].messageLength = 100B
 
