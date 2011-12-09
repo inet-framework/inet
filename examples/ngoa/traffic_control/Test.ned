@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2011 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
