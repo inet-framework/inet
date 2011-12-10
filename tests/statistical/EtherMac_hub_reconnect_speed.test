@@ -1,22 +1,24 @@
 %description:
-Testing Ethernet communication on EtherHub with 100MBps.
+Testing Ethernet communication on EtherHub with 100MBps, with disconnecting and reconnecting some hosts.
 Simulation has 5 pairs of hosts that communicate with each other.
 All hosts use EtherMAC implementation with half duplex mode.
 All hosts have same ethernet configurations.
-All hosts send requests and responses to requests for its pair, too.
+All hosts send requests and also reply to requests sent to them.
 
 checks:
- - the idle state of rx is less than or equals to 4% in all hosts
- - the utilization state of rx is more than or equals to 96% in all hosts
+ - the idle state of rx is less than or equals to 6.5% in all hosts
+ - the utilization state of rx is more than or equals to 93% in all hosts
 
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHost;
 import inet.linklayer.ethernet.EtherHub;
+import inet.nodes.ethernet.EtherHost;
+import inet.world.scenario.ScenarioManager;
+import ned.DatarateChannel;
+
 
 module EtherHostQ extends EtherHost
 {
@@ -32,7 +34,7 @@ network SpeedTest
     types:
         channel C100 extends DatarateChannel
         {
-            delay = 0s;
+            delay = 0.1us;
             datarate = 100Mbps;
         }
     submodules:
@@ -82,6 +84,9 @@ network SpeedTest
             gates:
                 ethg[10];
         }
+        scenarioManager: ScenarioManager {
+            @display("p=184,180");
+        }
     connections:
         hub.ethg++ <--> C100 <--> host_1_H_A.ethg;
         hub.ethg++ <--> C100 <--> host_1_H_B.ethg;
@@ -96,15 +101,100 @@ network SpeedTest
 }
 
 %#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <at t="1.4">
+        <disconnect src-module="host_1_H_A" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[0]" />
+    </at>
+    <at t="1.5">
+        <connect src-module="host_1_H_A" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[0]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+
+    <at t="1.6">
+        <disconnect src-module="host_3_H_A" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[4]" />
+    </at>
+    <at t="1.7">
+        <connect src-module="host_3_H_A" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[4]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+
+    <at t="1.8">
+        <disconnect src-module="host_5_H_B" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[9]" />
+    </at>
+    <at t="1.9">
+        <connect src-module="host_5_H_B" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[9]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+
+    <at t="3.4">
+        <disconnect src-module="host_1_H_A" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[0]" />
+    </at>
+    <at t="3.5">
+        <connect src-module="host_1_H_A" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[0]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+
+    <at t="3.6">
+        <disconnect src-module="host_3_H_A" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[4]" />
+    </at>
+    <at t="3.7">
+        <connect src-module="host_3_H_A" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[4]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+
+    <at t="3.8">
+        <disconnect src-module="host_5_H_B" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[9]" />
+    </at>
+    <at t="3.9">
+        <connect src-module="host_5_H_B" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[9]"
+                 channel-type="ned.DatarateChannel">
+            <param name="datarate" value="100Mbps" />
+            <param name="delay" value="0.1us" />
+        </connect>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
-sim-time-limit = 5s
+sim-time-limit = 5.2s
 
 tkenv-plugin-path = ../../../etc/plugins
 #record-eventlog = true
 **.vector-recording = false
 
 network = SpeedTest
+
+**.scenarioManager.script = xmldoc("scenario.xml")
 
 *.host_1_H_A.cli.destAddress = "host_1_H_B"
 *.host_1_H_B.cli.destAddress = "host_1_H_A"
@@ -128,7 +218,7 @@ network = SpeedTest
 
 *.host_*_H_*.mac.duplexMode = false
 
-*.host_*_H_*.cli.sendInterval  = 0.1ms        # 10.000 / speed [ / nodecount when halfduplex]
+*.host_*_H_*.cli.sendInterval  = 0.1ms        # 10.000 / speed [ / nodecount, when halfduplex]
 
 **.mac.address = "auto"
 
@@ -146,8 +236,8 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 scafile <- 'results/General-0.sca'
 linecount <- 10
-idlelimit <- 4.0
-usedlimit <- 96.0
+idlelimit <- 6.5
+usedlimit <- 93.0
 
 # begin TEST:
 
