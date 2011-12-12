@@ -106,7 +106,7 @@ void IPv6::endService(cPacket *msg)
         {
             // address is not tentative anymore - send out datagram
             numForwarded++;
-            sendDatagramToOutput(sDgram->datagram, sDgram->ie, sDgram->macAddr);
+            fragmentAndSend(sDgram->datagram, sDgram->ie, sDgram->macAddr, sDgram->fromHL);
             delete sDgram;
         }
     }
@@ -175,7 +175,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, NULL, false);
     else
-        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
+        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram), false);
 }
 
 void IPv6::handleMessageFromHL(cPacket *msg)
@@ -201,28 +201,13 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
-    // possibly fragment (in IPv6, only the source node does that), then route it
-    fragmentAndRoute(datagram, destIE);
-}
-
-void IPv6::fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE)
-{
-/*
-FIXME implement fragmentation here.
-   1. determine output interface
-   2. compare packet size with interface MTU
-   3. if bigger, do fragmentation
-         int mtu = ift->interfaceByPortNo(outputGateIndex)->getMTU();
-*/
-    EV << "fragmentation not implemented yet\n";
-
     // route packet
     if (destIE != NULL)
-        sendDatagramToOutput(datagram, destIE, MACAddress::BROADCAST_ADDRESS); // FIXME what MAC address to use?
+        fragmentAndSend(datagram, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
     else if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, destIE, true);
     else
-        routeMulticastPacket(datagram, destIE, NULL);
+        routeMulticastPacket(datagram, destIE, NULL, true);
 }
 
 void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
@@ -407,6 +392,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             sDgram->datagram = datagram;
             sDgram->ie = ie;
             sDgram->macAddr = macAddr;
+            sDgram->fromHL = fromHL;
             queue.insert(sDgram);
             return;
         }
@@ -416,10 +402,10 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 
     // send out datagram
     numForwarded++;
-    sendDatagramToOutput(datagram, ie, macAddr);
+    fragmentAndSend(datagram, ie, macAddr, fromHL);
 }
 
-void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
+void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE, bool fromHL)
 {
     const IPv6Address& destAddr = datagram->getDestAddress();
 
@@ -466,7 +452,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     {
         InterfaceEntry *ie = ift->getInterface(i);
         if (fromIE != ie)
-            sendDatagramToOutput((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS);
+            fragmentAndSend((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS, fromHL);
     }
     delete datagram;
 
@@ -534,7 +520,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
                 // send
                 IPv6Address nextHopAddr = routes[i].gateway;
-                sendDatagramToOutput(datagramCopy, outputGateIndex, macAddr);
+                fragmentAndSend(datagramCopy, outputGateIndex, macAddr, fromHL);
             }
         }
 
@@ -546,12 +532,12 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
 void IPv6::localDeliver(IPv6Datagram *datagram)
 {
-/* FIXME revise and complete defragmentation
     // Defragmentation. skip defragmentation if datagram is not fragmented
-    if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
+	IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader*>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+	if (fh)
     {
-        EV << "Datagram fragment: offset=" << datagram->getFragmentOffset()
-           << ", MORE=" << (datagram->getMoreFragments() ? "true" : "false") << ".\n";
+        EV << "Datagram fragment: offset=" << fh->getFragmentOffset()
+           << ", MORE=" << (fh->getMoreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
         if (simTime() >= lastCheckTime + 10)
@@ -560,7 +546,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
             fragbuf.purgeStaleFragments(simTime()-FRAGMENT_TIMEOUT);
         }
 
-        datagram = fragbuf.addFragment(datagram, simTime());
+        datagram = fragbuf.addFragment(datagram, fh, simTime());
         if (!datagram)
         {
             EV << "No complete datagram yet.\n";
@@ -568,7 +554,6 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         }
         EV << "This fragment completes the datagram.\n";
     }
-*/
 
 #ifdef WITH_xMIPv6
     // #### 29.08.07 - CB
@@ -761,6 +746,61 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     // setting IP options is currently not supported
 
     return datagram;
+}
+
+void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
+{
+    int mtu = ie->getMTU();
+
+    // check if datagram does not require fragmentation
+    if (datagram->getByteLength() <= mtu)
+    {
+        sendDatagramToOutput(datagram, ie, nextHopAddr);
+        return;
+    }
+
+    // routed datagrams are not fragmented
+    if (!fromHL)
+    {
+        // FIXME check for multicast datagrams, how many ICMP error should be sent
+        icmp->sendErrorMessage(datagram, ICMPv6_PACKET_TOO_BIG, 0); // TODO set MTU
+        return;
+    }
+
+    // create and send fragments
+    int headerLength = datagram->calculateUnfragmentableHeaderByteLength();
+    int payloadLength = datagram->getByteLength() - headerLength;
+    int fragmentLength = ((mtu - headerLength - 8) / 8) * 8;
+    ASSERT(fragmentLength > 0);
+
+    int noOfFragments = (payloadLength + fragmentLength - 1)/ fragmentLength;
+    EV << "Breaking datagram into " << noOfFragments << " fragments\n";
+    std::string fragMsgName = datagram->getName();
+    fragMsgName += "-frag";
+
+    unsigned int identification = curFragmentId++;
+    cPacket *encapsulatedPacket = datagram->decapsulate();
+    for (int offset=0; offset<payloadLength; offset+=fragmentLength)
+    {
+        bool lastFragment = (offset+fragmentLength >= payloadLength);
+        int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
+
+        IPv6FragmentHeader *fh = new IPv6FragmentHeader();
+        fh->setIdentification(identification);
+        fh->setFragmentOffset(offset);
+        fh->setMoreFragments(!lastFragment);
+
+        IPv6Datagram *fragment = (IPv6Datagram *) datagram->dup();
+        if (offset == 0)
+            fragment->encapsulate(encapsulatedPacket);
+        fragment->setName(fragMsgName.c_str());
+        fragment->addExtensionHeader(fh);
+        fragment->setByteLength(headerLength + fh->getByteLength() + thisFragmentLength);
+
+        sendDatagramToOutput(fragment, ie, nextHopAddr);
+    }
+
+    delete datagram;
 }
 
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)

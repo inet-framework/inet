@@ -55,7 +55,7 @@ class INET_API IPv6FragBuf
     {
         ReassemblyBuffer buf;  // reassembly buffer
         IPv6Datagram *datagram;  // the actual datagram
-        simtime_t lastupdate;  // last time a new fragment arrived
+        simtime_t createdAt;  // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
     // we use std::map for fast lookup by datagram Id

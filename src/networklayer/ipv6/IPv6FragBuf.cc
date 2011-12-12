@@ -58,6 +58,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
         // this is the first fragment of that datagram, create reassembly buffer for it
         buf = &bufs[key];
         buf->datagram = NULL;
+        buf->createdAt = now;
     }
     else
     {
@@ -65,17 +66,45 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
         buf = &(i->second);
     }
 
-    // add fragment into reassembly buffer
-    // FIXME next lines aren't correct: check 4.5 of RFC 2460 regarding Unfragmentable part, Fragmentable part, etc
-    int bytes = datagram->getByteLength() - datagram->calculateHeaderByteLength();
-    bool isComplete = buf->buf.addFragment(fh->getFragmentOffset(),
-                                           fh->getFragmentOffset() + bytes,
-                                           !fh->getMoreFragments());
+    int fragmentLength = datagram->calculateFragmentLength();
+    unsigned short offset = fh->getFragmentOffset();
+    bool moreFragments = fh->getMoreFragments();
 
-    // store datagram. Only one fragment carries the actual modelled
-    // content (getEncapsulatedPacket()), other (empty) ones are only
-    // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->getEncapsulatedPacket())
+    // RFC 2460 4.5:
+	// If the length of a fragment, as derived from the fragment packet's
+	// Payload Length field, is not a multiple of 8 octets and the M flag
+	// of that fragment is 1, then that fragment must be discarded and an
+	// ICMP Parameter Problem, Code 0, message should be sent to the
+	// source of the fragment, pointing to the Payload Length field of
+	// the fragment packet.
+    if (moreFragments && (fragmentLength % 8) != 0)
+    {
+        icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
+        return NULL;
+    }
+
+    // RFC 2460 4.5:
+	// If the length and offset of a fragment are such that the Payload
+	// Length of the packet reassembled from that fragment would exceed
+	// 65,535 octets, then that fragment must be discarded and an ICMP
+	// Parameter Problem, Code 0, message should be sent to the source of
+	// the fragment, pointing to the Fragment Offset field of the
+	// fragment packet.
+    if (offset + fragmentLength > 65535)
+    {
+        icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
+        return NULL;
+    }
+
+    // add fragment to buffer
+    bool isComplete = buf->buf.addFragment(offset,
+                                           offset+fragmentLength,
+                                           !moreFragments);
+
+    // Store the first fragment. The first fragment contains the whole
+    // encapsulated payload, and extension headers of the
+    // original datagram.
+    if (offset == 0)
     {
         delete buf->datagram;
         buf->datagram = datagram;
@@ -90,19 +119,30 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPv6Datagram *ret = buf->datagram;
-        ret->setByteLength(ret->calculateHeaderByteLength()+buf->buf.getTotalLength()); // FIXME cf with 4.5 of RFC 2460
-        //TODO: remove extension header IPv6FragmentHeader; maybe not here but when datagram gets inserted into the reassembly buffer --Andras
+        ASSERT(ret);
+        ret->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
+        ret->setByteLength(ret->calculateUnfragmentableHeaderByteLength()+buf->buf.getTotalLength());
         bufs.erase(i);
         return ret;
     }
     else
     {
         // there are still missing fragments
-        buf->lastupdate = now;
         return NULL;
     }
 }
 
+/*
+ *    If insufficient fragments are received to complete reassembly of a
+      packet within 60 seconds of the reception of the first-arriving
+      fragment of that packet, reassembly of that packet must be
+      abandoned and all the fragments that have been received for that
+      packet must be discarded.  If the first fragment (i.e., the one
+      with a Fragment Offset of zero) has been received, an ICMP Time
+      Exceeded -- Fragment Reassembly Time Exceeded message should be
+      sent to the source of that fragment.
+ *
+ */
 void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
@@ -114,11 +154,14 @@ void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
     {
         // if too old, remove it
         DatagramBuffer& buf = i->second;
-        if (buf.lastupdate < lastupdate)
+        if (buf.createdAt < lastupdate)
         {
-            // send ICMP error
-            EV << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
-            icmpModule->sendErrorMessage(buf.datagram, ICMPv6_TIME_EXCEEDED, 0);
+            if (buf.datagram)
+            {
+				// send ICMP error
+				EV << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
+				icmpModule->sendErrorMessage(buf.datagram, ICMPv6_TIME_EXCEEDED, 0);
+            }
 
             // delete
             Buffers::iterator oldi = i++;
