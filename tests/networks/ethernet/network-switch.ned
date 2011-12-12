@@ -1,4 +1,4 @@
-package inet.tests.fingerprint.ethernet;
+package inet.tests.ethernet;
 
 import inet.nodes.ethernet.EtherHost2;
 import inet.nodes.ethernet.EtherSwitch;

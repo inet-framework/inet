@@ -1,4 +1,4 @@
-package inet.tests.fingerprint.ethernet;
+package inet.tests.ethernet;
 
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost2;

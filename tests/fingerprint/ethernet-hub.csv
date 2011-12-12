@@ -1,13 +1,13 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-ethernet,                            -f omnetpp-hub.ini -r 0,                      ,                 6610-83b8
-ethernet,                            -f omnetpp-hub.ini -r 1,                      ,                 ccad-09ff
-ethernet,                            -f omnetpp-hub.ini -r 2,                      ,                 6ed0-7b79
-ethernet,                            -f omnetpp-hub.ini -r 3,                      ,                 48a5-7210
-ethernet,                            -f omnetpp-hub.ini -r 4,                      ,                 36e1-287e
-ethernet,                            -f omnetpp-hub.ini -r 5,                      ,                 dcdd-c4f1
-ethernet,                            -f omnetpp-hub.ini -r 6,                      ,                 cfcb-17b6
-ethernet,                            -f omnetpp-hub.ini -r 7,                      ,                 70bf-7b6f
-ethernet,                            -f omnetpp-hub.ini -r 8,                      ,                 12d5-c4af
-ethernet,                            -f omnetpp-hub.ini -r 9,                      ,                 9393-376b
-ethernet,                            -f omnetpp-hub.ini -r 10,                     ,                 2480-c965
-ethernet,                            -f omnetpp-hub.ini -r 11,                     ,                 5052-cc00
+# workingdir,                        args,                                         simtimelimit,     fingerprint
+.,                                   -f ethernet-hub.ini -r 0,                     ,                 6610-83b8
+.,                                   -f ethernet-hub.ini -r 1,                     ,                 ccad-09ff
+.,                                   -f ethernet-hub.ini -r 2,                     ,                 6ed0-7b79
+.,                                   -f ethernet-hub.ini -r 3,                     ,                 48a5-7210
+.,                                   -f ethernet-hub.ini -r 4,                     ,                 36e1-287e
+.,                                   -f ethernet-hub.ini -r 5,                     ,                 dcdd-c4f1
+.,                                   -f ethernet-hub.ini -r 6,                     ,                 cfcb-17b6
+.,                                   -f ethernet-hub.ini -r 7,                     ,                 70bf-7b6f
+.,                                   -f ethernet-hub.ini -r 8,                     ,                 12d5-c4af
+.,                                   -f ethernet-hub.ini -r 9,                     ,                 9393-376b
+.,                                   -f ethernet-hub.ini -r 10,                    ,                 2480-c965
+.,                                   -f ethernet-hub.ini -r 11,                    ,                 5052-cc00
