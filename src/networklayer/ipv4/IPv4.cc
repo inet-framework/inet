@@ -612,6 +612,15 @@ cPacket *IPv4::decapsulateIP(IPv4Datagram *datagram)
 
 void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
+    // hop counter check
+    if (datagram->getTimeToLive() <= 0)
+    {
+        // drop datagram, destruction responsibility in ICMP
+        EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
+        icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
+        return;
+    }
+
     int mtu = ie->getMTU();
 
     // check if datagram does not require fragmentation
@@ -734,15 +743,6 @@ IPv4Datagram *IPv4::createIPv4Datagram(const char *name)
 
 void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
-    // hop counter check
-    if (datagram->getTimeToLive() <= 0)
-    {
-        // drop datagram, destruction responsibility in ICMP
-        EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
-        return;
-    }
-
     // send out datagram to ARP, with control info attached
     IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
     routingDecision->setInterfaceId(ie->getInterfaceId());
