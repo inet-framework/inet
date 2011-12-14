@@ -182,7 +182,8 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     /** @name Routing functions (query the route table) */
     //@{
     /**
-     * Checks if the address is a local broadcast one, i.e. 192.168.0.255/24
+     * Checks if the address is a local network broadcast address, i.e. one of the broadcast
+     * addresses derived from the interface addresses and netmasks.
      */
     virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const;
 

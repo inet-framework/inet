@@ -45,11 +45,11 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     int numSent;
     static simsignal_t sentPkSignal;
 
+  protected:
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
     virtual void sendPacket();
 
-  protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

@@ -225,7 +225,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
-        IPv4Datagram *datagram = check_and_cast  <IPv4Datagram *>(msg);
+        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
         // Dsr routing, Dsr is a HL protocol and send IPv4Datagram
         dsrFillDestIE(datagram, destIE, nextHopAddress);
         if (!nextHopAddress.isUnspecified())
@@ -315,7 +315,8 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
             reassembleAndDeliver(datagram);
         }
         else
-        { // send limited broadcast packet
+        {
+            // broadcast packet from higher layer: send limited broadcast packet
             if (destIE!=NULL)
             {
                 if (datagram->getSrcAddress().isUnspecified())

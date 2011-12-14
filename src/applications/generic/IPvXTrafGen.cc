@@ -133,7 +133,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
         // send, then reschedule next sending
         sendPacket();
 
-        simtime_t d = simTime()+(double)par("sendInterval");
+        simtime_t d = simTime() + par("sendInterval").doubleValue();
         if ((!numPackets || numSent<numPackets) && (stopTime == 0 || stopTime > d))
             scheduleAt(d, msg);
         else

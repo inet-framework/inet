@@ -120,7 +120,6 @@ void ARP::initialize(int stage)
             entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         }
     }
-
 }
 
 void ARP::finish()
