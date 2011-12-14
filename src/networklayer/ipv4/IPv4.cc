@@ -327,6 +327,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
                 for (int i = 0; i<ift->getNumInterfaces(); i++)
                 {
                     InterfaceEntry *ie = ift->getInterface(i);
+                    //FIXME bug #458: If no outgoing interface is specified, and forceBroadcast parameter is true, the datagram should be delivered locally too.
                     if (!ie->isLoopback())
                     {
                         IPv4Datagram * dataAux = datagram->dup();
