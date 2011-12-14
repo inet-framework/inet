@@ -621,15 +621,8 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
         return;
     }
 
-    int headerLength = datagram->getHeaderLength();
-    int payload = datagram->getByteLength() - headerLength;
-
-    int noOfFragments =
-        int(ceil((float(payload)/mtu) /
-        (1-float(headerLength)/mtu) ) ); // FIXME ???
-
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
-    if (datagram->getDontFragment() && noOfFragments>1)
+    if (datagram->getDontFragment())
     {
         EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
@@ -637,33 +630,35 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
         return;
     }
 
-    // create and send fragments
+    int headerLength = datagram->getHeaderLength();
+    int payloadLength = datagram->getByteLength() - headerLength;
+    int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
+    int offsetBase = datagram->getFragmentOffset();
+
+    int noOfFragments = (payloadLength + fragmentLength - 1)/ fragmentLength;
     EV << "Breaking datagram into " << noOfFragments << " fragments\n";
+
+    // create and send fragments
     std::string fragMsgName = datagram->getName();
     fragMsgName += "-frag";
 
-    // FIXME revise this!
-    for (int i=0; i<noOfFragments; i++)
+    for (int offset=0; offset < payloadLength; offset+=fragmentLength)
     {
+        bool lastFragment = (offset+fragmentLength >= payloadLength);
+        // length equal to fragmentLength, except for last fragment;
+        int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
+
         // FIXME is it ok that full encapsulated packet travels in every datagram fragment?
         // should better travel in the last fragment only. Cf. with reassembly code!
         IPv4Datagram *fragment = (IPv4Datagram *) datagram->dup();
         fragment->setName(fragMsgName.c_str());
 
-        // total_length equal to mtu, except for last fragment;
         // "more fragments" bit is unchanged in the last fragment, otherwise true
-        if (i != noOfFragments-1)
-        {
+        if (!lastFragment)
             fragment->setMoreFragments(true);
-            fragment->setByteLength(mtu);
-        }
-        else
-        {
-            // size of last fragment
-            int bytes = datagram->getByteLength() - (noOfFragments-1) * (mtu - datagram->getHeaderLength());
-            fragment->setByteLength(bytes);
-        }
-        fragment->setFragmentOffset( i*(mtu - datagram->getHeaderLength()) );
+
+        fragment->setByteLength(headerLength + thisFragmentLength);
+        fragment->setFragmentOffset(offsetBase + offset);
 
         sendDatagramToOutput(fragment, ie, nextHopAddr);
     }

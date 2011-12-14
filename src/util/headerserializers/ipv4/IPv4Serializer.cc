@@ -75,7 +75,12 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
     ip->ip_v = dgram->getVersion();
     ip->ip_tos = dgram->getDiffServCodePoint();
     ip->ip_id = htons(dgram->getIdentification());
-    ip->ip_off = htons(dgram->getFragmentOffset());
+    uint16_t ip_off = dgram->getFragmentOffset()/8;
+    if (dgram->getMoreFragments())
+        ip_off |= IP_MF;
+    if (dgram->getDontFragment())
+        ip_off |= IP_DF;
+    ip->ip_off = htons(ip_off);
     ip->ip_ttl = dgram->getTimeToLive();
     ip->ip_p = dgram->getTransportProtocol();
     ip->ip_src.s_addr = htonl(dgram->getSrcAddress().getInt());
@@ -144,9 +149,10 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     dest->setTransportProtocol(ip->ip_p);
     dest->setTimeToLive(ip->ip_ttl);
     dest->setIdentification(ntohs(ip->ip_id));
-    dest->setMoreFragments((ip->ip_off) & !IP_OFFMASK & IP_MF);
-    dest->setDontFragment((ip->ip_off) & !IP_OFFMASK & IP_DF);
-    dest->setFragmentOffset((ntohs(ip->ip_off)) & IP_OFFMASK);
+    uint16_t ip_off = ntohs(ip->ip_off);
+    dest->setMoreFragments((ip_off & IP_MF) != 0);
+    dest->setDontFragment((ip_off & IP_DF) != 0);
+    dest->setFragmentOffset((ntohs(ip->ip_off) & IP_OFFMASK)*8);
     dest->setDiffServCodePoint(ip->ip_tos);
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;

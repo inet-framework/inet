@@ -136,7 +136,7 @@ packet IPv4Datagram
     int identification;
     bool moreFragments;
     bool dontFragment;
-    int fragmentOffset;
+    int fragmentOffset;         // bytes, must be multiple of 8
     unsigned char diffServCodePoint;
 
     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
