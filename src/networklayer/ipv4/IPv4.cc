@@ -145,14 +145,25 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     // check for header biterror
     if (datagram->hasBitError())
     {
+        // IPv4 protocol has chksum of header only. The encapsulated protocols can detect bit errors in payload only.
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
+        //TODO case of more than 1 bit error?
         double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getByteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
+        }
+        else
+        {
+            cPacket *encap = datagram->getEncapsulatedPacket();
+            if (encap)
+            {
+                encap->setBitError(true);
+                datagram->setBitError(false);
+            }
         }
     }
 
@@ -536,6 +547,10 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     // decapsulate transport packet
     InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cPacket *packet = datagram->decapsulate();
+    ASSERT(packet != NULL);
+
+    if (datagram->hasBitError())    // the payload has bit error if datagram has bit error here.
+        packet->setBitError(true);
 
     // create and fill in control info
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
