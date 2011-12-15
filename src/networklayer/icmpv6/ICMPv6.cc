@@ -19,6 +19,8 @@
 #include "INETDefs.h"
 
 #include "ICMPv6.h"
+#include "InterfaceTableAccess.h"
+#include "IPv6InterfaceData.h"
 
 
 Define_Module(ICMPv6);
@@ -85,6 +87,27 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
         error("Unknown message type received.\n");
 }
 
+/*
+ * RFC 4443 4.2:
+ *
+ * Every node MUST implement an ICMPv6 Echo responder function that
+ * receives Echo Requests and originates corresponding Echo Replies.  A
+ * node SHOULD also implement an application-layer interface for
+ * originating Echo Requests and receiving Echo Replies, for diagnostic
+ * purposes.
+ *
+ * The source address of an Echo Reply sent in response to a unicast
+ * Echo Request message MUST be the same as the destination address of
+ * that Echo Request message.
+ *
+ * An Echo Reply SHOULD be sent in response to an Echo Request message
+ * sent to an IPv6 multicast or anycast address.  In this case, the
+ * source address of the reply MUST be a unicast address belonging to
+ * the interface on which the Echo Request message was received.
+ *
+ * The data received in the ICMPv6 Echo Request message MUST be returned
+ * entirely and unmodified in the ICMPv6 Echo Reply message.
+ */
 void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 {
     //Create an ICMPv6 Reply Message
@@ -93,15 +116,24 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->setType(ICMPv6_ECHO_REPLY);
     reply->encapsulate(request->decapsulate());
 
-    // TBD check what to do if dest was multicast etc?
     IPv6ControlInfo *ctrl
  = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
-    //set Msg's source addr as the dest addr of request msg.
-    replyCtrl->setSrcAddr(ctrl->getDestAddr());
-    //set Msg's dest addr as the source addr of request msg.
     replyCtrl->setDestAddr(ctrl->getSrcAddr());
+
+    if (ctrl->getDestAddr().isMulticast() /*TODO check for anycast too*/)
+    {
+        IInterfaceTable *it = InterfaceTableAccess().get();
+        IPv6InterfaceData *ipv6Data = it->getInterfaceById(ctrl->getInterfaceId())->ipv6Data();
+        replyCtrl->setSrcAddr(ipv6Data->getPreferredAddress());
+        // TODO implement default address selection properly.
+        //      According to RFC 3484, the source address to be used
+        //      depends on the destination address
+    }
+    else
+        replyCtrl->setSrcAddr(ctrl->getDestAddr());
+
     reply->setControlInfo(replyCtrl);
 
     delete request;
