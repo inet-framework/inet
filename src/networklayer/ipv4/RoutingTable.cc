@@ -220,6 +220,7 @@ void RoutingTable::invalidateCache()
 {
     routingCache.clear();
     localAddresses.clear();
+    localBroadcastAddresses.clear();
 }
 
 void RoutingTable::printRoutingTable() const
