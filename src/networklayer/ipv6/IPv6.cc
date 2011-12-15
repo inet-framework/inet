@@ -26,16 +26,13 @@
 #include "ICMPv6Access.h"
 #include "IPv6NeighbourDiscoveryAccess.h"
 
-#ifdef WITH_xMIPv6
-#include "IPv6TunnelingAccess.h"
-#endif /* WITH_xMIPv6 */
-
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "ICMPv6Message_m.h"
 
 #ifdef WITH_xMIPv6
+#include "IPv6TunnelingAccess.h"
 #include "MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
 
@@ -114,22 +111,15 @@ void IPv6::endService(cPacket *msg)
 #endif /* WITH_xMIPv6 */
 
     if (msg->getArrivalGate()->isName("transportIn")
-#ifdef WITH_xMIPv6
-            || (msg->getArrivalGate()->isName("upperTunnelingIn")) // for tunneling support-CB
-#endif /* WITH_xMIPv6 */
             || (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg))
             || (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)) //Added this for ICMP msgs from ICMP module-WEI
 #ifdef WITH_xMIPv6
+            || (msg->getArrivalGate()->isName("upperTunnelingIn")) // for tunneling support-CB
             || (msg->getArrivalGate()->isName("xMIPv6In") && dynamic_cast<MobilityHeader*>(msg)) // Zarrar
 #endif /* WITH_xMIPv6 */
        )
     {
-#ifndef WITH_xMIPv6
-        // packet from upper layers or ND: encapsulate and send out
-#else /* WITH_xMIPv6 */
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
-#endif /* WITH_xMIPv6 */
-
         handleMessageFromHL( msg );
     }
     else
@@ -154,18 +144,10 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     // check for header biterror
     if (datagram->hasBitError())
     {
-        EV << "bit error\n"; return; // revise!
-/*FIXME revise
-        // probability of bit error in header = size of header / size of total message
-        // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getByteLength();
-        if (dblrand() <= relativeHeaderLength)
-        {
-            EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
-            icmp->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
-            return;
-        }
-*/
+        // Intentionally do nothing.
+        // 1. IPv6 header does not contain checksum for the header fields, each field is
+        //    validated when they are processed.
+        // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
     }
 
     // remove control info
@@ -215,11 +197,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
-#ifndef WITH_xMIPv6
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
-#else /* WITH_xMIPv6 */
-    EV << "Routing datagram '" << datagram->getName() << "' with dest=" << destAddress << ":\n";
-#endif /* WITH_xMIPv6 */
 
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress))
@@ -321,14 +299,11 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             // otherwise we can search for everything
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
-    //else
-        //interfaceId = -1;
 
     if (interfaceId > ift->getNumInterfaces())
     {
         // a virtual tunnel interface provides a path to the destination: do tunneling
         EV << "tunneling: src addr=" << datagram->getSrcAddress() << ", dest addr=" << destAddress << std::endl;
-        //EV << "sending datagram to encapsulation..." << endl;
         send(datagram, "lowerTunnelingOut");
         return;
     }
@@ -344,11 +319,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     ASSERT(ie!=NULL);
     EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
 
-#ifndef WITH_xMIPv6
     ASSERT(!nextHop.isUnspecified());
-#else /* WITH_xMIPv6 */
-    ASSERT(!nextHop.isUnspecified() && ie!=NULL);
-#endif /* WITH_xMIPv6 */
 
 #ifdef WITH_xMIPv6
      if (rt->isMobileNode())
@@ -595,15 +566,11 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     {
         int gateindex = mapping.getOutputGateForProtocol(protocol);
 
-#ifndef WITH_xMIPv6
-        EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
-        //TODO: Indication of forward progress
-        send(packet, "transportOut", gateindex);
-#else /* WITH_xMIPv6 */
         // 21.9.07 - CB
         cGate* outGate = gate("transportOut", gateindex);
         if (!outGate->isConnected())
         {
+            // TODO send ICMP Destination Unreacheable error
             EV << "Transport layer gate not connected - dropping packet!\n";
             delete packet;
         }
@@ -613,8 +580,6 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
             //TODO: Indication of forward progress
             send(packet, outGate);
         }
-#endif /* WITH_xMIPv6 */
-
     }
 }
 
@@ -691,9 +656,7 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 #else /* WITH_xMIPv6 */
-            // throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
-            //          src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
-            delete datagram;
+           delete datagram;
             return NULL;
 #endif /* WITH_xMIPv6 */
 
