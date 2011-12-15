@@ -94,7 +94,7 @@ simple REDQueue like IOutputQueue
         @signal[dequeuePk](type=cMessage);
         @signal[dropPkByQueue](type=cMessage);
         @signal[queueingTime](type=simtime_t; unit=s);
-        @signal[queueLength](type=long; interpolationmode=sample-hold);
+        @signal[queueLength](type=long);
         @signal[earlyDropPkByQueue](type=cMessage);
         @signal[avgQueueLength](type="double");
         @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; source="packetBytes(earlyDropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none;);

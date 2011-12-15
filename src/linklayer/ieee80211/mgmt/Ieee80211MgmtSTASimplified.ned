@@ -41,7 +41,7 @@ simple Ieee80211MgmtSTASimplified like IIeee80211Mgmt
         @signal[dequeuePk](type=cMessage);
         @signal[dropPkByQueue](type=cMessage);
         @signal[queueingTime](type=simtime_t; unit=s);
-        @signal[dataQueueLen](type=long; interpolationmode=sample-hold);  // number of stored packets
+        @signal[dataQueueLen](type=long);  // number of stored packets
         @statistic[dataQueueLen](title="data queue length"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[dropPkByQueue](title="packets dropped by queue"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:

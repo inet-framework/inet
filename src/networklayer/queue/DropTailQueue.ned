@@ -31,7 +31,7 @@ simple DropTailQueue like IOutputQueue
         @signal[dequeuePk](type=cMessage);
         @signal[dropPkByQueue](type=cMessage);
         @signal[queueingTime](type=simtime_t; unit=s);
-        @signal[queueLength](type=long; interpolationmode=sample-hold);
+        @signal[queueLength](type=long);
         @statistic[queueLength](title="Used queue length"; record=timeavg,vector; interpolationmode=sample-hold);
     gates:
         input in;
