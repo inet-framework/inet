@@ -79,6 +79,7 @@ class INET_API ARP : public cSimpleModule
 
     ARPCache arpCache;
     static ARPCache globalArpCache;
+    static int globalArpCacheRefCnt;
 
     cQueue pendingQueue; // outbound packets waiting for ARP resolution
     int nicOutBaseGateId;  // id of the nicOut[0] gate
@@ -87,7 +88,7 @@ class INET_API ARP : public cSimpleModule
     IRoutingTable *rt;  // for Proxy ARP
 
   public:
-    ARP() {}
+    ARP();
     virtual ~ARP();
     int numInitStages() const {return 5;}
     const MACAddress getDirectAddressResolution(const IPv4Address &) const;

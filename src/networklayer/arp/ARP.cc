@@ -51,15 +51,26 @@ static std::ostream& operator<<(std::ostream& out, const ARP::ARPCacheEntry& e)
 }
 
 ARP::ARPCache ARP::globalArpCache;
+int ARP::globalArpCacheRefCnt = 0;
 
 Define_Module(ARP);
+
+ARP::ARP()
+{
+    if (++globalArpCacheRefCnt == 1)
+    {
+        if (!globalArpCache.empty())
+            throw cRuntimeError("Global ARP cache not empty, model error in previous run?");
+    }
+
+    ift = NULL;
+    rt = NULL;
+}
 
 void ARP::initialize(int stage)
 {
     if (stage==0)
     {
-        globalArpCache.clear();
-
         sentReqSignal = registerSignal("sentReq");
         sentReplySignal = registerSignal("sentReply");
         initiatedResolutionSignal = registerSignal("initiatedResolution");
@@ -114,8 +125,6 @@ void ARP::initialize(int stage)
 
 void ARP::finish()
 {
-    if (globalARP)
-        return;
 }
 
 ARP::~ARP()
@@ -126,6 +135,10 @@ ARP::~ARP()
         delete (*i).second;
         arpCache.erase(i);
     }
+
+    if (--globalArpCacheRefCnt != 0)
+        return;
+
     while (!globalArpCache.empty())
     {
         ARPCache::iterator i = globalArpCache.begin();
