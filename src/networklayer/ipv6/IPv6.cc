@@ -375,31 +375,6 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
     EV << "link-layer address: " << macAddr << "\n";
 
-    // set datagram source address if not yet set
-    if (datagram->getSrcAddress().isUnspecified())
-    {
-        const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
-        ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
-        datagram->setSrcAddress(srcAddr);
-
-#ifdef WITH_xMIPv6
-        // if the datagram has a tentative address as source we have to reschedule it
-        // as it can not be sent before the address' tentative status is cleared - CB
-        if (ie->ipv6Data()->isTentativeAddress(srcAddr))
-        {
-            EV << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
-            ScheduledDatagram* sDgram = new ScheduledDatagram();
-            sDgram->datagram = datagram;
-            sDgram->ie = ie;
-            sDgram->macAddr = macAddr;
-            sDgram->fromHL = fromHL;
-            queue.insert(sDgram);
-            return;
-        }
-#endif /* WITH_xMIPv6 */
-
-    }
-
     // send out datagram
     numForwarded++;
     fragmentAndSend(datagram, ie, macAddr, fromHL);
@@ -451,7 +426,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (fromIE != ie)
+        if (fromIE != ie && !ie->isLoopback())
             fragmentAndSend((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS, fromHL);
     }
     delete datagram;
@@ -750,6 +725,31 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
 
 void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
 {
+	// ensure source address is filled
+	if (fromHL && datagram->getSrcAddress().isUnspecified() &&
+			!datagram->getDestAddress().isSolicitedNodeMulticastAddress())
+	{
+		// source address can be unspecified during DAD
+		const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+		ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
+		datagram->setSrcAddress(srcAddr);
+	#ifdef WITH_xMIPv6
+		// if the datagram has a tentative address as source we have to reschedule it
+		// as it can not be sent before the address' tentative status is cleared - CB
+		if (ie->ipv6Data()->isTentativeAddress(srcAddr))
+		{
+			EV << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
+			ScheduledDatagram* sDgram = new ScheduledDatagram();
+			sDgram->datagram = datagram;
+			sDgram->ie = ie;
+			sDgram->macAddr = nextHopAddr;
+			sDgram->fromHL = fromHL;
+			queue.insert(sDgram);
+			return;
+		}
+	#endif /* WITH_xMIPv6 */
+	}
+
     int mtu = ie->getMTU();
 
     // check if datagram does not require fragmentation

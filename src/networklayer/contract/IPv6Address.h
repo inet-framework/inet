@@ -253,6 +253,10 @@ class INET_API IPv6Address
             return IPv6Address(*this).setPrefix(SOLICITED_NODE_PREFIX, 104);
         };
 
+        bool isSolicitedNodeMulticastAddress() const {
+            return matches(SOLICITED_NODE_PREFIX, 104);
+        }
+
         /**
          * Returns the subnet-router anycast address for this address by
          * setting its suffix (the last 128-prefixLength bits) to all-zeroes.
