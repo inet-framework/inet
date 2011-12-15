@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/inet/chatApp/results/TestChat2Nodes-*.vec"/>
+    <inputs name="/inet/examples/inet/chatApp/results/TestChat2Nodes-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Bursts">
+      <items xsi:type="scave:Add" filterPattern="module(*.udpApp[0]) AND name(bDuration:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Duration: looks like a power law?"/>
+    </datasets>
+    <datasets name="Burst Interval">
+      <items xsi:type="scave:Add" filterPattern="module(*.udpApp[0]) AND name(bInterval:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Interval: looks like a power law?"/>
+    </datasets>
+    <datasets name="Size">
+      <items xsi:type="scave:Add" filterPattern="module(*.udpApp[0]) AND name(messageSize:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Size: almost weibull">
+        <properties name="Hist.Data" value="Cdf"/>
+      </items>
+    </datasets>
+    <datasets name="SendInterval">
+      <items xsi:type="scave:Add" filterPattern="module(*.udpApp[0]) AND name(sendInterval:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Another weibull +/-">
+        <properties name="Hist.Data" value="Cdf"/>
+      </items>
+    </datasets>
+    <datasets name="Sessions">
+      <items xsi:type="scave:Add" filterPattern="name(*Sessions:histogram:count)"/>
+      <items xsi:type="scave:BarChart" name=""/>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1 //@datasets/@datasets.1/@items.1 //@datasets/@datasets.2/@items.1 //@datasets/@datasets.3/@items.1 //@datasets/@datasets.4/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

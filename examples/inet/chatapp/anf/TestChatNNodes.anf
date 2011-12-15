@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/inet/chatApp/results/TestChatNNodes-*.vec"/>
+    <inputs name="/inet/examples/inet/chatApp/results/TestChatNNodes-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Sessions">
+      <items xsi:type="scave:Add" filterPattern="name(*Sessions:histogram:count)"/>
+      <items xsi:type="scave:BarChart" name="Almost every starte session has an answer"/>
+    </datasets>
+    <datasets name="BurstDuration">
+      <items xsi:type="scave:Add" filterPattern="module(*.udpApp[0]) AND name(bDuration:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Burst Duration">
+        <properties name="Hist.Data" value="Count"/>
+      </items>
+    </datasets>
+    <datasets name="TargetStats">
+      <items xsi:type="scave:Add" filterPattern="name(targetStatisticsSignal:histogram) AND module(*.host[0].*) " type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="">
+        <properties name="Hist.Data" value="Pdf"/>
+      </items>
+    </datasets>
+    <datasets name="Binterval">
+      <items xsi:type="scave:Add" filterPattern="name(bInterval:histogram)" type="HISTOGRAM"/>
+      <items xsi:type="scave:HistogramChart" name="Burst Interval">
+        <properties name="Hist.Data" value="Pdf"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1 //@datasets/@datasets.1/@items.1 //@datasets/@datasets.2/@items.1 //@datasets/@datasets.3/@items.1"/>
+  </chartSheets>
+</scave:Analysis>
