@@ -39,6 +39,7 @@ void MassMobility::initialize(int stage)
     EV << "initializing MassMobility stage " << stage << endl;
     if (stage == 0)
     {
+        angle = par("startAngle").doubleValue();
         changeIntervalParameter = &par("changeInterval");
         changeAngleByParameter = &par("changeAngleBy");
         speedParameter = &par("speed");
