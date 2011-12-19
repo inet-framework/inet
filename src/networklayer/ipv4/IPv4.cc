@@ -575,7 +575,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     else if (protocol==IP_PROT_IP)
     {
         // tunnelled IP packets are handled separately
-        send(packet, "preRoutingOut");
+        send(packet, "preRoutingOut");  //FIXME There is no "preRoutingOut" gate in the IPv4 module.
     }
     else if (protocol==IP_PROT_DSR)
     {
