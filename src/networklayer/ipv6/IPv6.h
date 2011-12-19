@@ -156,13 +156,13 @@ class INET_API IPv6 : public QueueBase
      */
     virtual void endService(cPacket *msg);
 
-#ifdef WITH_xMIPv6
     /**
      * Determines the correct interface for the specified destination address.
      */
     bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
             IPv6Datagram* datagram);
 
+#ifdef WITH_xMIPv6
     /**
      * Process the extension headers of the datagram.
      * Returns true if all have been processed successfully and false if errors occured

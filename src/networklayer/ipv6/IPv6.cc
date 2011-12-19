@@ -243,43 +243,10 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
 
     // routing
-#ifndef WITH_xMIPv6
-    // first try destination cache
-    int interfaceId;
-    IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
-    if (interfaceId==-1)
-    {
-        // address not in destination cache: do longest prefix match in routing table
-        const IPv6Route *route = rt->doLongestPrefixMatch(destAddress);
-        if (!route)
-        {
-            if (rt->isRouter())
-            {
-                EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
-                numUnroutable++;
-                icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
-            }
-            else // host
-            {
-                EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                send(datagram, "ndOut");
-            }
-            return;
-        }
-        interfaceId = route->getInterfaceId();
-        nextHop = route->getNextHop();
-        if (nextHop.isUnspecified())
-            nextHop = destAddress;  // next hop is the host itself
-
-        // add result into destination cache
-        rt->updateDestCache(destAddress, nextHop, interfaceId);
-    }
-#else /* WITH_xMIPv6 */
     int interfaceId = -1;
     IPv6Address nextHop;
 
-    // restructured code from below due for mobility - CB
-
+#ifdef WITH_xMIPv6
     // tunneling support - CB
     // check if destination is covered by tunnel lists
     if ((datagram->getTransportProtocol() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
@@ -307,13 +274,13 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         send(datagram, "lowerTunnelingOut");
         return;
     }
+#endif /* WITH_xMIPv6 */
 
     if (interfaceId == -1)
         if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram) )
             // no interface found; sent to ND or to ICMP for error processing
             //opp_error("No interface found!");//return;
             return; // don't raise error if sent to ND or ICMP!
-#endif /* WITH_xMIPv6 */
 
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie!=NULL);
@@ -790,7 +757,6 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
 
-#ifdef WITH_xMIPv6
 bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
                                     int& interfaceId, IPv6Datagram* datagram)
 {
@@ -831,6 +797,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
     return true;
 }
 
+#ifdef WITH_xMIPv6
 bool IPv6::processExtensionHeaders(IPv6Datagram* datagram)
 {
     int noExtHeaders = datagram->getExtensionHeaderArraySize();
