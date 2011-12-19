@@ -43,6 +43,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
         IRoutingTable *rt;
         IPv4Address address;
         bool usesDefaultRoute;
+        bool ipForwardEnabled;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
