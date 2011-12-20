@@ -48,11 +48,11 @@ simple SCTPClient like ISCTPApp
         string newPrimary = default("");
         bool finishEndsSimulation = default(false);
         @signal[sentPk](type=SCTPSimpleMessage);
-        @signal[sentEchoedPk](type=SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);
+        @signal[echoedPk](type=SCTPSimpleMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentEchoedPkBytes](title="Sent packet bytes"; source="packetBytes(sentEchoedPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
         input sctpIn;

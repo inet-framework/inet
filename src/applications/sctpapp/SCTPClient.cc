@@ -35,7 +35,7 @@ Define_Module(SCTPClient);
 
 simsignal_t SCTPClient::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPClient::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::sentEchoedPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::echoedPkSignal = SIMSIGNAL_NULL;
 
 void SCTPClient::initialize()
 {
@@ -50,7 +50,7 @@ void SCTPClient::initialize()
 
     sentPkSignal = registerSignal("sentPk");
     rcvdPkSignal = registerSignal("rcvdPk");
-    sentEchoedPkSignal = registerSignal("sentEchoedPk");
+    echoedPkSignal = registerSignal("echoedPk");
 
     // parameters
     const char *addressesString = par("localAddress");
@@ -290,7 +290,7 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
         delete msg;
         cPacket* cmsg = new cPacket("SVData");
         echoedBytesSent += smsg->getByteLength();
-        emit(sentEchoedPkSignal, smsg);
+        emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;

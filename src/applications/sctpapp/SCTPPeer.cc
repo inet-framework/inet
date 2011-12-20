@@ -36,7 +36,7 @@
 Define_Module(SCTPPeer);
 
 simsignal_t SCTPPeer::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPPeer::sentEchoedPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPPeer::echoedPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
 
 SCTPPeer::SCTPPeer()
@@ -77,7 +77,7 @@ void SCTPPeer::initialize()
     WATCH(numRequestsToSend);
 
     sentPkSignal = registerSignal("sentPk");
-    sentEchoedPkSignal = registerSignal("sentEchoedPk");
+    echoedPkSignal = registerSignal("echoedPk");
     rcvdPkSignal = registerSignal("rcvdPk");
 
     // parameters
@@ -689,7 +689,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
         cPacket* cmsg = new cPacket("SVData");
         echoedBytesSent += smsg->getByteLength();
-        emit(sentEchoedPkSignal, smsg);
+        emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;

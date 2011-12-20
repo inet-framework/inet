@@ -79,7 +79,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void sendRequest(bool last = true);
         int32 ssn;
         static simsignal_t sentPkSignal;
-        static simsignal_t sentEchoedPkSignal;
+        static simsignal_t echoedPkSignal;
         static simsignal_t rcvdPkSignal;
 
     public:

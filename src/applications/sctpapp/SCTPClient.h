@@ -51,7 +51,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
 
         static simsignal_t sentPkSignal;
         static simsignal_t rcvdPkSignal;
-        static simsignal_t sentEchoedPkSignal;
+        static simsignal_t echoedPkSignal;
 
         bool ordered;
         bool sendAllowed;
