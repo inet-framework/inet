@@ -185,7 +185,7 @@ void VoIPSinkApp::closeConnection()
         curConn.offline = true;
         avcodec_close(curConn.decCtx);
         curConn.outFile.close();
-        emit(connStateSignal, 0);
+        emit(connStateSignal, -1L); // so that sum() yields the number of active sessions
     }
 }
 
