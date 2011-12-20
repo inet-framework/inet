@@ -47,7 +47,7 @@ simple MACRelayUnitPP like IMACRelayUnit
         @display("i=block/switch");
         @statistic[processedBytes](title="Processed bytes"; record=sum,count,vector);
         @statistic[droppedBytes](title="Processed bytes"; record=sum,count,vector);
-        @statistic[usedBufferBytes](title="Used buffer bytes"; record=max,timeavg,vector);
+        @statistic[usedBufferBytes](title="used buffer bytes"; record=max,timeavg,vector; unit=B; interpolationmode=none);
     gates:
         input lowerLayerIn[] @labels(EtherFrame);
         output lowerLayerOut[] @labels(EtherFrame);
