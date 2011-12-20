@@ -141,14 +141,11 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
 
 void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 {
-    // check for header biterror
-    if (datagram->hasBitError())
-    {
-        // Intentionally do nothing.
-        // 1. IPv6 header does not contain checksum for the header fields, each field is
-        //    validated when they are processed.
-        // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
-    }
+    // Do not handle header biterrors, because
+    // 1. IPv6 header does not contain checksum for the header fields, each field is
+    //    validated when they are processed.
+    // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
+    ASSERT(!datagram->hasBitError());
 
     // remove control info
     delete datagram->removeControlInfo();
