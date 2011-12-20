@@ -735,6 +735,7 @@ void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
     connP.fillStatusInfo(*statusInfo);
     msgP->setControlInfo(statusInfo);
+    msgP->setKind(TCP_I_STATUS);
     send(msgP, "appOut", connP.appGateIndexM);
 }
 

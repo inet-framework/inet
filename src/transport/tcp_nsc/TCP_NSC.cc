@@ -1068,6 +1068,7 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
 */
 
     msgP->setControlInfo(statusInfo);
+    msgP->setKind(TCP_I_STATUS);
     send(msgP, "appOut", connP.appGateIndexM);
 }
 

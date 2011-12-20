@@ -284,5 +284,6 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
 
     msg->setControlInfo(statusInfo);
+    msg->setKind(TCP_I_STATUS);
     sendToApp(msg);
 }
