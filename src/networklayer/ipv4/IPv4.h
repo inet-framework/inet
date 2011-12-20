@@ -67,7 +67,7 @@ class INET_API IPv4 : public QueueBase
     // statistics
     int numMulticast;
     int numLocalDeliver;
-    int numDropped;
+    int numDropped;  // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
     int numUnroutable;
     int numForwarded;
 

@@ -282,6 +282,15 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
         EV << "local delivery\n";
         if (datagram->getSrcAddress().isUnspecified())
             datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
+
+        if(fromHL && datagram->getDontFragment() && datagram->getByteLength() > destIE->getMTU())
+        {
+            EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
+            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_FRAGMENTATION_NEEDED);
+            numDropped++;
+            return;
+        }
+
         numLocalDeliver++;
         reassembleAndDeliver(datagram);
         return;
@@ -618,6 +627,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
         // drop datagram, destruction responsibility in ICMP
         EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
+        numDropped++;
         return;
     }
 
@@ -636,6 +646,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
         EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
                                                      ICMP_FRAGMENTATION_ERROR_CODE);
+        numDropped++;
         return;
     }
 
