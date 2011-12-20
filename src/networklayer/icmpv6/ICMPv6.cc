@@ -179,15 +179,20 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     else if (type == ICMPv6_PARAMETER_PROBLEM) errorMsg = createParamProblemMsg(code);
     else error("Unknown ICMPv6 error type\n");
 
+    // Encapsulate the original datagram, but the whole ICMPv6 error
+    // packet cannot be larger than the minimum IPv6 MTU (RFC 4443 2.4. (c)).
+    // NOTE: since we just overwrite the errorMsg length without actually
+    // truncating origDatagram, one can get "packet length became negative"
+    // error when decapsulating the origDatagram on the receiver side.
+    // A workaround is to avoid decapsulation, or to manually set the
+    // errorMessage length to be larger than the encapsulated message.
     errorMsg->encapsulate(origDatagram);
+    if (errorMsg->getByteLength() + IPv6_HEADER_BYTES > IPv6_MIN_MTU)
+        errorMsg->setByteLength(IPv6_MIN_MTU - IPv6_HEADER_BYTES);
 
     // debugging information
     EV << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
        << " type=" << type << " code=" << code << endl;
-
-    // ICMP message length: the internet header plus the first 8 bytes of
-    // the original datagram's data is returned to the sender
-    //errorMessage->setByteLength(4 + origDatagram->getHeaderLength() + 8); FIXME What is this for?
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
