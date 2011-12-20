@@ -599,7 +599,8 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         else
         {
             EV << "L3 Protocol not connected. discarding packet" << endl;
-            delete (packet);
+            IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(packet->removeControlInfo());
+            icmpAccess.get()->sendErrorMessage(packet, ctrl, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
     }
 }
