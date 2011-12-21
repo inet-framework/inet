@@ -35,11 +35,11 @@ using std::cout;
 
 Define_Module(PingApp);
 
-simsignal_t PingApp::endToEndDelaySignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::dropSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::outOfOrderArrivalSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingTxSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingRxSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::rttSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::numLostSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
 void PingApp::initialize(int stage)
 {
@@ -69,15 +69,15 @@ void PingApp::initialize(int stage)
     WATCH(expectedReplySeqNo);
 
     // statistics
-    delayStat.setName("pingRTT");
-    endToEndDelaySignal = registerSignal("endToEndDelay");
-    dropSignal = registerSignal("drop");
-    outOfOrderArrivalSignal = registerSignal("outOfOrderArrival");
-    pingTxSignal = registerSignal("pingTx");
-    pingRxSignal = registerSignal("pingRx");
+    rttStat.setName("pingRTT");
+    rttSignal = registerSignal("rtt");
+    numLostSignal = registerSignal("numLost");
+    outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+    pingTxSeqSignal = registerSignal("pingTxSeq");
+    pingRxSeqSignal = registerSignal("pingRxSeq");
 
-    dropCount = outOfOrderArrivalCount = numPongs = 0;
-    WATCH(dropCount);
+    lossCount = outOfOrderArrivalCount = numPongs = 0;
+    WATCH(lossCount);
     WATCH(outOfOrderArrivalCount);
     WATCH(numPongs);
 
@@ -129,7 +129,7 @@ void PingApp::sendPing()
     msg->setByteLength(packetSize);
 
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
-    emit(pingTxSignal, sendSeqNo);
+    emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
 }
 
@@ -222,12 +222,12 @@ void PingApp::processPingResponse(PingPayload *msg)
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 {
     EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
-    emit(pingRxSignal, seqNo);
+    emit(pingRxSeqSignal, seqNo);
 
-	numPongs++;
+    numPongs++;
 
-    delayStat.collect(rtt);
-    emit(endToEndDelaySignal, rtt);
+    rttStat.collect(rtt);
+    emit(rttSignal, rtt);
 
     if (seqNo == expectedReplySeqNo)
     {
@@ -238,20 +238,23 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     {
         EV << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
 
-        // jump in the sequence: count pings in gap as lost
+        // jump in the sequence: count pings in gap as lost for now
+        // (if they arrive later, we'll decrement back the loss counter)
         long jump = seqNo - expectedReplySeqNo;
-        dropCount += jump;
-        emit(dropSignal, jump);
+        lossCount += jump;
+        emit(numLostSignal, lossCount);
 
         // expect sequence numbers to continue from here
         expectedReplySeqNo = seqNo+1;
     }
     else // seqNo < expectedReplySeqNo
     {
-        // ping arrived too late: count as out of order arrival
+        // ping reply arrived too late: count as out-of-order arrival (not loss after all)
         EV << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
-        emit(outOfOrderArrivalSignal, rtt);
+        lossCount--;
+        emit(outOfOrderArrivalsSignal, outOfOrderArrivalCount);
+        emit(numLostSignal, lossCount);
     }
 }
 
@@ -260,16 +263,14 @@ void PingApp::finish()
     if (sendSeqNo==0)
     {
         if (printPing)
-        	EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+            EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         recordScalar("Pings sent", sendSeqNo);
         return;
     }
 
     // record statistics
-    recordScalar("Pings outstanding at end", sendSeqNo-expectedReplySeqNo);
-
-    recordScalar("Ping drop rate (%)", 100 * dropCount / (double)sendSeqNo);
-    recordScalar("Ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
+    recordScalar("ping loss rate (%)", 100 * lossCount / (double)sendSeqNo);
+    recordScalar("ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
 
     // print it to stdout as well
     if (printPing)
@@ -278,10 +279,10 @@ void PingApp::finish()
         cout << "\t" << getFullPath() << endl;
         cout << "--------------------------------------------------------" << endl;
 
-        cout << "sent: " << sendSeqNo << "   drop rate (%): " << (100 * dropCount / (double) sendSeqNo) << endl;
-        cout << "round-trip min/avg/max (ms): " << (delayStat.getMin() * 1000.0) << "/"
-             << (delayStat.getMean() * 1000.0) << "/" << (delayStat.getMax() * 1000.0) << endl;
-        cout << "stddev (ms): " << (delayStat.getStddev() * 1000.0) << "   variance:" << delayStat.getVariance() << endl;
+        cout << "sent: " << sendSeqNo << "   loss rate (%): " << (100 * lossCount / (double) sendSeqNo) << endl;
+        cout << "round-trip min/avg/max (ms): " << (rttStat.getMin() * 1000.0) << "/"
+             << (rttStat.getMean() * 1000.0) << "/" << (rttStat.getMax() * 1000.0) << endl;
+        cout << "stddev (ms): " << (rttStat.getStddev() * 1000.0) << "   variance:" << rttStat.getVariance() << endl;
         cout << "--------------------------------------------------------" << endl;
     }
 }

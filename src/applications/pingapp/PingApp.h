@@ -61,13 +61,13 @@ class INET_API PingApp : public cSimpleModule
     long expectedReplySeqNo;
 
     // statistics
-    cStdDev delayStat;
-    static simsignal_t endToEndDelaySignal;
-    static simsignal_t dropSignal;
-    static simsignal_t outOfOrderArrivalSignal;
-    static simsignal_t pingTxSignal;
-    static simsignal_t pingRxSignal;
-    long dropCount;
+    cStdDev rttStat;
+    static simsignal_t rttSignal;
+    static simsignal_t numLostSignal;
+    static simsignal_t outOfOrderArrivalsSignal;
+    static simsignal_t pingTxSeqSignal;
+    static simsignal_t pingRxSeqSignal;
+    long lossCount;
     long outOfOrderArrivalCount;
     long numPongs;
 };

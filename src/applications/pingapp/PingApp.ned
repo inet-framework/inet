@@ -54,16 +54,16 @@ simple PingApp
         double stopTime @unit("s") = default(0s); // time of finish sending, 0 means forever
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
-        @signal[endToEndDelay](type=simtime_t; unit=s);
-        @signal[drop];
-        @signal[outOfOrderArrival];
-        @signal[pingTx];
-        @signal[pingRx];
-        @statistic[endToEndDelay](title="delay"; unit=s; record=histogram,stats,vector; interpolationmode=none);
-        @statistic[drop](title="dropped packets";record=count,vector; interpolationmode=none);
-        @statistic[outOfOrderArrival](title="Out of order arrival packets";record=count,vector; interpolationmode=none);
-        @statistic[pingTx](title="sent ping seq.no.";record=count,vector; interpolationmode=none);
-        @statistic[pingRx](title="received ping seq.no.";record=count,vector; interpolationmode=none);
+        @signal[rtt](type=simtime_t);
+        @signal[numLost](type=long);
+        @signal[outOfOrderArrivals](type=long);
+        @signal[pingTxSeq](type=long);
+        @signal[pingRxSeq](type=long);
+        @statistic[rtt](title="ping round-trip time"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[numLost](title="pings lost";record=last,vector; interpolationmode=none);
+        @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals";record=last,vector; interpolationmode=none);
+        @statistic[pingTxSeq](title="ping tx seq";record=count,vector; interpolationmode=none);
+        @statistic[pingRxSeq](title="ping rx seq";record=count,vector; interpolationmode=none);
     gates:
         input pingIn;
         output pingOut;
