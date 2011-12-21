@@ -102,8 +102,6 @@ void EtherMACFullDuplex::startFrameTransmission()
     if (frame->getSrc().isUnspecified())
         frame->setSrc(address);
 
-    frame->setOrigByteLength(frame->getByteLength());
-
     if (frame->getByteLength() < curEtherDescr->frameMinBytes)
         frame->setByteLength(curEtherDescr->frameMinBytes);
 
@@ -121,6 +119,11 @@ void EtherMACFullDuplex::startFrameTransmission()
 
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 {
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
+        throw cRuntimeError("Ethernet frame too short, must be at least 64 bytes (padding should be done at encapsulation)");
+
+    frame->setFrameByteLength(frame->getByteLength());
+
     EV << "Received frame from upper layer: " << frame << endl;
 
     emit(packetReceivedFromUpperSignal, frame);
@@ -310,8 +313,8 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
 {
     emit(packetReceivedFromLowerSignal, frame);
 
-    // restore original byte length (strip preamble and SFD and external bytes)
-    frame->setByteLength(frame->getOrigByteLength());
+    // strip physical layer overhead (preamble, SFD) from frame
+    frame->setByteLength(frame->getFrameByteLength());
 
     // statistics
     unsigned long curBytes = frame->getByteLength();

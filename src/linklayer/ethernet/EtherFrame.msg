@@ -64,9 +64,11 @@ packet EtherIFG extends EtherTraffic
 // subclasses: ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP.
 //
 // Source and destination MAC address are stored in data members.
-// Other fields include:
-//  - preamble: not stored (only contributes length)
-//  - length: stored in cPacket length, not stored explicitly
+// Other Ethernet header fields include:
+//  - preamble: not stored (only contributes to length)
+//  - length: stored in cPacket byteLength; during tranmission, cPacket byteLength
+//    includes pyhsical layer overhead and the frameByteLength field stores the
+//    actual frame length
 //  - payload: stored a encapsulated packet (cPacket::encapsulate())
 //  - crc: represented by cPacket::hasBitError()
 //
@@ -74,7 +76,7 @@ packet EtherFrame extends EtherTraffic
 {
     MACAddress dest;
     MACAddress src;
-    int origByteLength;
+    int frameByteLength;  // frame length without physical layer overhead (preamble, SFD, carrier extension); used by MAC layer
 }
 
 
