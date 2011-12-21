@@ -142,18 +142,18 @@ simple EtherMAC like IEtherMAC
         int mtu = default(1500);
         @display("i=block/rxtx");
 
-        @signal[txPk](type=cPacket);
-        @signal[rxPkOk](type=cPacket);
+        @signal[txPk](type=EtherFrame);
+        @signal[rxPkOk](type=EtherFrame);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
-        @signal[rxPkFromHL](type=cPacket);
-        @signal[dropPkNotForUs](type=cPacket);
-        @signal[dropPkBitError](type=cPacket);
+        @signal[rxPkFromHL](type=EtherFrame);
+        @signal[dropPkNotForUs](type=EtherFrame);
+        @signal[dropPkBitError](type=EtherFrame);
         @signal[dropPkIfaceDown](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetSentToLower](type=EtherFrame);
+        @signal[packetReceivedFromLower](type=EtherFrame);
+        @signal[packetSentToUpper](type=EtherFrame);
+        @signal[packetReceivedFromUpper](type=EtherFrame);
         @signal[collision](type=long);
         @signal[backoff](type=long);
 
