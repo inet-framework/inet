@@ -56,13 +56,17 @@ simple Radio like IRadio
         double usage_radio_sleep @unit(mA) = default(-1mA); // disable battery registration
         double usage_radio_send @unit(mA) = default(-1mA); // disable battery registration
         // misc
-        bool drawCoverage = default(true);  // draw the cverage area in Tkenv
+        bool drawCoverage = default(true);  // draw the coverage area in Tkenv
         int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
 
-        @statistic[bitrate](title="Bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold; );
-        @statistic[channelNo](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
-        @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
-        @statistic[lossRate](title="Packet loss rate"; record=timeavg,vector; interpolationmode=sample-hold; );
+        @signal[bitrate](type="double";unit=bps); // current transmit bitrate
+        @signal[channelNo](type=long);
+        @signal[radioState](type=long);  // enum
+        @signal[lossRate](type="double"); // 0..1; percentage of frames received incorrectly in the last period
+        @statistic[bitrate](title="tx bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold;unit=bps);
+        @statistic[channelNo](title="channel no"; record=histogram,vector; interpolationmode=sample-hold);
+        @statistic[radioState](title="radio state (enum)"; record=count,vector; interpolationmode=sample-hold);
+        @statistic[lossRate](title="packet loss rate"; record=min,max,timeavg,vector; interpolationmode=backward-sample-hold);
     gates:
         input upperLayerIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output upperLayerOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
