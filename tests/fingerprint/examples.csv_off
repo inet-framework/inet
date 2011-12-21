@@ -1,0 +1,37 @@
+# workingdir,                        args,                                            simtimelimit,  fingerprint
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                    -1s,           0   ,# [Config Ping2] # __interactive__
+/examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0,                    -1s,           0   ,# [Config Ping2] # __interactive__
+/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                1000s,           0
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                1000s,           0
+/examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                  77.77s,        0   ,# pcap devices not supported
+/examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,         77.77s,        0   ,# pcap devices not supported
+/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 77.77s,     0   ,# pcap devices not supported
+/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,           77.77s,        0   ,# pcap devices not supported
+/examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                  77.77s,        0   ,# pcap devices not supported
+/examples/ethernet/lans/,            -f defaults.ini -c General -r 0,                 77.77s,        0   ,# Error: Network `' or `inet.examples.ethernet.lans.' not found, check .ini and .ned files.
+/examples/httptools/socket/tenserverssocket/, -f zipf.ini -c General -r 0,          50000s,          0   ,# <!> Error during startup: Obsolete section name [Cmdenv] found, please convert the ini file to 4.x format.
+/examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             0
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,            0   ,# <!> Error in module (TCP_NSC) ClientServer.client1.tcp (id=13) during network initialization: The loading of 'libfreebsd5.3.so' NSC stack is unsuccessful: libfreebsd5.3.so: cannot open shared object file: No such file or directory. Check the LD_LIBRARY_PATH or stackname!
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,            0   ,# <!> Error in module (TCP_NSC) ClientServer.client1.tcp (id=13) during network initialization: The loading of 'libfreebsd5.3.so' NSC stack is unsuccessful: libfreebsd5.3.so: cannot open shared object file: No such file or directory. Check the LD_LIBRARY_PATH or stackname!
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,            0   ,# <!> Error in module (TCP_NSC) ClientServer.server.tcp (id=29) during network initialization: The loading of 'liblwip.so' NSC stack is unsuccessful: liblwip.so: cannot open shared object file: No such file or directory. Check the LD_LIBRARY_PATH or stackname!
+/examples/ipv6/nclients/,            -f omnetpp.ini -c General -r 0,                1000s,           0
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             25s,             0   ,# runtime error
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c General -r 0,                40s,             2d61-34bf    ,# doesn't have a fix fingerprint value
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    1000s,           0   ,# CPU time limit
+/examples/mobility/,                 -f omnetpp.ini -c CircleMobility -r 0,         5000s,           0   ,# <!> Error: No such config: CircleMobility.
+/examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0   ,# ERROR (zero time simulated)
+/examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0   ,# ERROR (zero time simulated)
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50000s,          0   ,# <!> Error in module (LDP) LDPTEST.LSR1.ldp (id=16) at event #26372, t=6.20389140541: Model error: ASSERT: condition uit == fecUp.end() false in function processLABEL_REQUEST, networklayer/ldp/LDP.cc line 955.
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                50000s,          0   ,# <!> Error in module (RSVP) RSVPTE4.LSR1.rsvp (id=22) at event #3, t=0: Model error: not a local peer: 10.1.1.1.
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50000s,          0
+/examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50000s,          0
+/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1000s,           0   ,# <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            cfd6-17f0    ,# doesn't have a fix fingerprint value
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 3s,             0   ,# CPU time limit
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 3s,             0   ,# CPU time limit
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,               77.77s,        0   ,# [Config NHosts] # __interactive__
+/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                    77.77s,        0   ,# [Config Ping2] # __interactive__
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,     77.77s,        0   ,# [Config Streaming2] # __interactive__
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,          77.77s,        0   ,# <!> Error in module (RoutingTable) Synchronized.node[0].routingTable (id=36) during network initialization: Error opening routing table file `node0.mrt'.
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,             77.77s,        0   ,# <!> Error in module (RoutingTable) Synchronized.node[0].routingTable (id=36) during network initialization: Error opening routing table file `node0.mrt'.
+

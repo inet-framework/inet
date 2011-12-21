@@ -74,11 +74,11 @@ foreach $fname (@inifiles)
 
         $run = "/".$dir.'/'.",";
         $run .= (' 'x(36-length $run)).' ';
-        $run .= "-f $fnameonly -c $cfg -r 0";#.",";
-#        $run .= (' 'x(83-length $run)).' ';
-#        $run .= '---100s'.",";
-#        $run .= (' 'x(100-length $run)).' ';
-#        $run .= '0'; # intentionally no "-r 0" -- test should do all runs if fits into the time limit...
+        $run .= "-f $fnameonly -c $cfg -r 0".",";
+        $run .= (' 'x(83-length $run)).' ';
+        $run .= '---100s'.",";
+        $run .= (' 'x(100-length $run)).' ';
+        $run .= '0'; # intentionally no "-r 0" -- test should do all runs if fits into the time limit...
 
         $x = "$run";
 
