@@ -59,7 +59,7 @@ simple Radio like IRadio
         bool drawCoverage = default(true);  // draw the cverage area in Tkenv
         int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
 
-        @statistic[bitrate](title="Bitrate"; record=timeavg,vector; interpolationmode=sample-hold; );
+        @statistic[bitrate](title="Bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold; );
         @statistic[channelNo](title="Channel no"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
         @statistic[radioState](title="Radio state (enum)"; record=histogram,vector; interpolationmode=sample-hold; ); //vector
         @statistic[lossRate](title="Packet loss rate"; record=timeavg,vector; interpolationmode=sample-hold; );
