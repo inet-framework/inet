@@ -50,7 +50,6 @@ simple VoIPSinkApp like IUDPApp
         @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[lostSamples](title="lost samples"; interpolationmode=none; record=vector,stats);
         @statistic[lostPackets](title="lost packets"; interpolationmode=none; record=vector,stats);
-        @statistic[droppedBytes](title="dropped bytes"; interpolationmode=none; unit=B; record=vector,stats);
         @statistic[packetHasVoice](title="voice or silence packet"; record=mean,vector; interpolationmode=none);
         @statistic[delay](title="delay"; unit=s; record=vector,histogram; interpolationmode=none);
         @statistic[numActiveSessions](title="number of active sessions"; source="sum(connState)"; record=max,timeavg,vector; interpolationmode=sample-hold;);
