@@ -745,18 +745,18 @@ void EtherMAC::frameReceptionComplete()
         return;
     }
 
-    emit(packetReceivedFromLowerSignal, msg);
+    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+
+    emit(packetReceivedFromLowerSignal, frame);
 
     // bit errors
-    if (msg->hasBitError())
+    if (frame->hasBitError())
     {
         numDroppedBitError++;
-        emit(dropPkBitErrorSignal, msg);
+        emit(dropPkBitErrorSignal, frame);
         delete msg;
         return;
     }
-
-    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
     if (dropFrameNotForUs(frame))
         return;
