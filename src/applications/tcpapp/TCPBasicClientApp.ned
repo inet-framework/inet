@@ -112,7 +112,7 @@ simple TCPBasicClientApp like ITCPApp
         @signal[connect](type=long);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[connect](title="Connections"; record=sum,timeavg,vector; interpolationmode=sample-hold;);
     gates:
         input tcpIn @labels(TCPCommand/up);

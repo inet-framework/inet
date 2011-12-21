@@ -53,7 +53,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         @signal[dropPkByQueue](type=cMessage);
         @signal[queueingTime](type=simtime_t; unit=s);
         @signal[dataQueueLen](type=long; interpolationmode=sample-hold);  // number of stored packets
-        @statistic[dataQueueLen](title="data queue length"; record=histogram,vector; interpolationmode=sample-hold);
+        @statistic[dataQueueLen](title="data queue length"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[dropPkByQueue](title="packets dropped by queue"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input upperLayerIn; // from ~IMACRelayUnit; can be left unconnected

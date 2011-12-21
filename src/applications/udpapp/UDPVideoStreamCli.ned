@@ -44,7 +44,7 @@ simple UDPVideoStreamCli like IUDPApp
         @display("i=block/app");
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="End-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="End-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

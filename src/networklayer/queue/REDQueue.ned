@@ -99,7 +99,7 @@ simple REDQueue like IOutputQueue
         @signal[avgQueueLength](type="double");
         @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; source="packetBytes(earlyDropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none;);
         @statistic[avgQueueLength](title="Avg queue length"; record=stats,vector);
-        @statistic[queueLength](title="Queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
+        @statistic[queueLength](title="Queue length"; record=timeavg,vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;
