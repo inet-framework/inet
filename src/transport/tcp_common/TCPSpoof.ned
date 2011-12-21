@@ -40,7 +40,7 @@ simple TCPSpoof like ITCP
         double t @unit("s"); // simulation time to send at
         @display("i=block/square");
         @signal[sentPk](type=cPacket);
-        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
         output ipOut @labels(TCPSegment,IPv4ControlInfo/down);

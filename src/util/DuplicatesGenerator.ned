@@ -35,9 +35,9 @@ simple DuplicatesGenerator like IHook
         @signal[rcvdPk](type=cMessage);
         @signal[sentPk](type=cMessage);
         @signal[duplPk](type=cMessage);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[duplPkBytes](title="Duplicated packet bytes"; source="packetBytes(duplPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[duplPk](title="packets duplicated"; source=duplPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in;
         output out;

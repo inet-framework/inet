@@ -37,19 +37,19 @@ import inet.applications.IUDPApp;
 // chooseDestAddrMode parameter. The destAddrRNG parameter controls which
 // (local) RNG is used for randomized address selection.
 // The own addresses will be ignored.
-// 
-// An address may be given in the dotted decimal notation, or with the module 
+//
+// An address may be given in the dotted decimal notation, or with the module
 // name. (The IPvXAddressResolver class is used to resolve the address.)
 // You can use the "Broadcast" string as address for sending broadcast messages.
 //
-// INET also defines several NED functions that can be useful: 
+// INET also defines several NED functions that can be useful:
 //    - moduleListByPath("pattern",...):
 //          Returns a space-separated list of the modulenames.
 //          All modules whole getFullPath() matches one of the pattern parameters will get included.
 //          The patterns may contain wilcards in the same syntax as in ini files.
 //          See cTopology::extractByModulePath() function
 //          example: destaddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
-//    - moduleListByNedType("fully.qualified.ned.type",...): 
+//    - moduleListByNedType("fully.qualified.ned.type",...):
 //          Returns a space-separated list of the modulenames with the given NED type(s).
 //          All modules whose getNedTypeName() is listed in the given parameters will get included.
 //          The NED type name is fully qualified.
@@ -60,12 +60,12 @@ import inet.applications.IUDPApp;
 //
 // <b>Bursts:</b>
 //
-// The first burst starts at startTime. Bursts start by immediately sending 
-// a packet; subsequent packets are sent at sendInterval intervals. The 
+// The first burst starts at startTime. Bursts start by immediately sending
+// a packet; subsequent packets are sent at sendInterval intervals. The
 // sendInterval parameter can be a random value, e.g. exponential(10ms).
 // A constant interval with jitter can be specified as 1s+uniform(-0.01s,0.01s)
 // or uniform(0.99s,1.01s). The length of the burst is controlled by the
-// burstDuration parameter. (Note that if sendInterval is greater than 
+// burstDuration parameter. (Note that if sendInterval is greater than
 // burstDuration, the burst will consist of one packet only.) The time between
 // burst is the sleepDuration parameter; this can be zero (zero is not
 // allowed for sendInterval.) The zero burstDuration is implemented as infinity.
@@ -90,12 +90,12 @@ import inet.applications.IUDPApp;
 //
 // Statistics are collected on outgoing packets:
 //  - sentPk: packet object
-// 
+//
 // Statistics are collected on incoming packets:
 //  - outOfOrderPk: statistics of out of order packets.
 //        The packet is out of order, when has msgId and sourceId parameters and module
 //        received bigger msgId from same sourceID.
-//  - dropPk: statistics of dropped packets. 
+//  - dropPk: statistics of dropped packets.
 //        The packet is dropped when not out-of-order packet and delay time is larger than
 //        delayLimit parameter. The delayLimit=0 is infinity.
 //  - rcvdPk: statistics of not dropped, not out-of-order packets.
@@ -121,10 +121,10 @@ simple UDPBasicBurst like IUDPApp
         @signal[rcvdPk](type=cPacket);
         @signal[dropPk](type=cPacket);
         @signal[outOfOrderPk](type=cPacket);
-        @statistic[sentPkBytes](title="packets sent"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[rcvdPkBytes](title="packets received"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[dropPkBytes](title="packets dropped"; source="packetBytes(dropPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[outOfOrderPkBytes](title="packets received out of order"; source="packetBytes(outOfOrderPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[outOfOrderPk](title="packets received out of order"; source=outOfOrderPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
 
     gates:

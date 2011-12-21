@@ -45,14 +45,14 @@ simple VoIPSinkApp like IUDPApp
         @signal[packetHasVoice](type=long);  // 1:YES,0:NO
         @signal[connState](type=long);  // 1:OPEN_CONN,0:CLOSE_CONN
         @signal[delay](type=simtime_t);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[dropPkBytes](title="Dropped packet bytes"; source="packetBytes(dropPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[lostSamples](title="lost samples"; interpolationmode=none; record=vector,stats);
         @statistic[lostPackets](title="lost packets"; interpolationmode=none; record=vector,stats);
         @statistic[droppedBytes](title="dropped bytes"; interpolationmode=none; unit=B; record=vector,stats);
         @statistic[packetHasVoice](title="Voice/Silent"; record=vector,stats; interpolationmode=none);
         @statistic[connState](title="Connection state"; interpolationmode=sample-hold; record=vector,stats);
-        @statistic[delay](title="delay"; unit=s; record=vector,stats; interpolationmode=none);
+        @statistic[delay](title="delay"; unit=s; record=vector,histogram; interpolationmode=none);
         @display("i=block/arrival");
     gates:
         input udpIn;

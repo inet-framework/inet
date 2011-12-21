@@ -20,7 +20,7 @@ package inet.applications.ethernet;
 //
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts Ieee80211Ctrl control info
-// on the packets. It should be connected directly to ~EtherEncap or 
+// on the packets. It should be connected directly to ~EtherEncap or
 // an Ieee802NicXXX module.
 //
 simple EtherTrafGen
@@ -36,8 +36,8 @@ simple EtherTrafGen
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
-        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input in @labels(Ieee802Ctrl/up);

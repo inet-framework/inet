@@ -60,7 +60,7 @@ simple TCPSinkApp like ITCPApp
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/sink");
         @signal[rcvdPk](type=cPacket);
-        @statistic[rcvdPkBytes](title="Received packet bytes"; source="packetBytes(rcvdPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,stats,vector; interpolationmode=none);
     gates:
         input tcpIn @labels(TCPCommand/up);

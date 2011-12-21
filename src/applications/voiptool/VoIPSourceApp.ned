@@ -51,7 +51,7 @@ simple VoIPSourceApp like IUDPApp
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
         @signal[sentPk](type=VoIPPacket);
-        @statistic[sentPkBytes](title="Sent packet bytes"; source="packetBytes(sentPk)"; unit=B; record=count,sum,vector; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:
         input udpIn;

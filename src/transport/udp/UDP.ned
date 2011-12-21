@@ -41,7 +41,7 @@ import inet.transport.IUDP;
 // attached with srcPort filled in.
 //
 // When UDP receives an ICMP error (~ICMPMessage or ~ICMPv6Message)
-// that refers to an UDP socket, it reports the error to the corresponding 
+// that refers to an UDP socket, it reports the error to the corresponding
 // application by sending a message with kind UDP_I_ERROR.
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
@@ -60,8 +60,8 @@ simple UDP like IUDP
         @signal[passedUpPk](type=cPacket);
         @signal[droppedPkWrongPort](type=cPacket);
         @signal[droppedPkBadChecksum](type=cPacket);
-        @statistic[sentPk](title="packets sent"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[rcvdPk](title="packets received"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed up"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; record=count,"vector(count)"; interpolationmode=none);
