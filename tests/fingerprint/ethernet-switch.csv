@@ -11,3 +11,15 @@ ethernet,                            -f omnetpp-switch.ini -r 8,                
 ethernet,                            -f omnetpp-switch.ini -r 9,                   ,                 b2a1-4303
 ethernet,                            -f omnetpp-switch.ini -r 10,                  ,                 99f0-3eba
 ethernet,                            -f omnetpp-switch.ini -r 11,                  ,                 a4ac-2b6a
+ethernet,                            -f omnetpp-switch.ini -r 12,                  ,                 e84b-d63e
+ethernet,                            -f omnetpp-switch.ini -r 13,                  ,                 aa73-a29a
+ethernet,                            -f omnetpp-switch.ini -r 14,                  ,                 5c4a-7e4f
+ethernet,                            -f omnetpp-switch.ini -r 15,                  ,                 99cf-ead6
+ethernet,                            -f omnetpp-switch.ini -r 16,                  ,                 bf99-be75
+ethernet,                            -f omnetpp-switch.ini -r 17,                  ,                 7b3e-181a
+ethernet,                            -f omnetpp-switch.ini -r 18,                  ,                 4f1a-6b32
+ethernet,                            -f omnetpp-switch.ini -r 19,                  ,                 b90b-7c31
+ethernet,                            -f omnetpp-switch.ini -r 20,                  ,                 4742-6bdf
+ethernet,                            -f omnetpp-switch.ini -r 21,                  ,                 35e2-b3e9
+ethernet,                            -f omnetpp-switch.ini -r 22,                  ,                 a5e0-2f79
+ethernet,                            -f omnetpp-switch.ini -r 23,                  ,                 fff6-bcc7
