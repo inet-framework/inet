@@ -35,8 +35,6 @@ void TCPGenericCliAppBase::initialize(int stage)
     rcvdPkSignal = registerSignal("rcvdPk");
     sentPkSignal = registerSignal("sentPk");
 
-    emit(connectSignal, 0L);
-
     WATCH(numSessions);
     WATCH(numBroken);
     WATCH(packetsSent);
@@ -87,7 +85,7 @@ void TCPGenericCliAppBase::close()
     setStatusString("closing");
     EV << "issuing CLOSE command\n";
     socket.close();
-    emit(connectSignal, 0L);
+    emit(connectSignal, -1L);
 }
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
@@ -162,7 +160,5 @@ void TCPGenericCliAppBase::finish()
     EV << modulePath << ": opened " << numSessions << " sessions\n";
     EV << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     EV << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
-
-    recordScalar("number of sessions", numSessions);
 }
 

@@ -109,11 +109,12 @@ simple TCPBasicClientApp like ITCPApp
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @signal[connect](type=long);
+        @signal[connect](type=long);  // 1 for open, -1 for close
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
-        @statistic[connect](title="Connections"; record=sum,timeavg,vector; interpolationmode=sample-hold;);
+        @statistic[numActiveSessions](title="number of active sessions"; source="sum(connect)"; record=max,timeavg,vector; interpolationmode=sample-hold);
+        @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
