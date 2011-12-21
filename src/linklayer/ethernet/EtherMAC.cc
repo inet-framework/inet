@@ -461,7 +461,6 @@ void EtherMAC::startFrameTransmission()
     if (ev.isGUI())
         updateConnectionColor(TRANSMITTING_STATE);
 
-    emit(packetSentToLowerSignal, frame);
     currentSendPkTreeID = frame->getTreeId();
     send(frame, physOutGate);
 
@@ -513,6 +512,8 @@ void EtherMAC::handleEndTxPeriod()
 
     if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
+
+    emit(packetSentToLowerSignal, curTxFrame);  //consider: emit with start time of frame
 
     if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {

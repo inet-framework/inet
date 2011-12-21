@@ -110,7 +110,6 @@ void EtherMACFullDuplex::startFrameTransmission()
 
     // send
     EV << "Starting transmission of " << frame << endl;
-    emit(packetSentToLowerSignal, frame);
     send(frame, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
@@ -238,6 +237,8 @@ void EtherMACFullDuplex::handleEndTxPeriod()
 
     if (NULL == curTxFrame)
         error("Frame under transmission cannot be found");
+
+    emit(packetSentToLowerSignal, curTxFrame);  //consider: emit with start time of frame
 
     if (dynamic_cast<EtherPauseFrame*>(curTxFrame) != NULL)
     {
