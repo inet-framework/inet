@@ -154,8 +154,8 @@ simple EtherMAC like IEtherMAC
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[collision](type=long; interpolationmode=none);
-        @signal[backoff](type=long; interpolationmode=none);
+        @signal[collision](type=long);
+        @signal[backoff](type=long);
 
         @statistic[txPkBytes](title="TX bytes"; source="packetBytes(txPk)"; unit=B; record=sum,count,vector; interpolationmode=none);
         @statistic[rxPkBytesOk](title="RX bytes"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector; interpolationmode=none);

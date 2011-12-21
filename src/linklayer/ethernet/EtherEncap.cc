@@ -25,9 +25,9 @@
 
 Define_Module(EtherEncap);
 
-simsignal_t EtherEncap::rcvdPkBytesFromHLSignal = SIMSIGNAL_NULL;
-simsignal_t EtherEncap::rcvdPkBytesFromMACSignal = SIMSIGNAL_NULL;
-simsignal_t EtherEncap::sentPauseSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::encapPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::decapPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::pauseSentSignal = SIMSIGNAL_NULL;
 
 void EtherEncap::initialize()
 {
@@ -37,9 +37,9 @@ void EtherEncap::initialize()
     totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
     useSNAP = par("useSNAP").boolValue();
 
-    rcvdPkBytesFromHLSignal = registerSignal("rcvdPkBytesFromHL");
-    rcvdPkBytesFromMACSignal = registerSignal("rcvdPkBytesFromMAC");
-    sentPauseSignal = registerSignal("sentPause");
+    encapPkSignal = registerSignal("encapPk");
+    decapPkSignal = registerSignal("decapPk");
+    pauseSentSignal = registerSignal("pauseSent");
 
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
@@ -89,7 +89,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)msg->getByteLength(), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;
-    emit(rcvdPkBytesFromHLSignal, (long)(msg->getByteLength()));
+    emit(encapPkSignal, msg);
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
@@ -132,9 +132,6 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 
 void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 {
-    totalFromMAC++;
-    emit(rcvdPkBytesFromMACSignal, (long)(frame->getByteLength()));
-
     // decapsulate and attach control info
     cPacket *higherlayermsg = frame->decapsulate();
 
@@ -150,6 +147,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 
     EV << "Decapsulating frame `" << frame->getName() <<"', passing up contained "
           "packet `" << higherlayermsg->getName() << "' to higher layer\n";
+
+    totalFromMAC++;
+    emit(decapPkSignal, higherlayermsg);
 
     // pass up to higher layers.
     send(higherlayermsg, "upperLayerOut");
@@ -180,7 +180,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     send(frame, "lowerLayerOut");
     delete msg;
 
-    emit(sentPauseSignal, pauseUnits);
+    emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
 }
 

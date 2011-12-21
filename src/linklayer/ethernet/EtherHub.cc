@@ -20,7 +20,7 @@
 
 Define_Module(EtherHub);
 
-simsignal_t EtherHub::pkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t EtherHub::pkSignal = SIMSIGNAL_NULL;
 
 static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 {
@@ -33,7 +33,7 @@ void EtherHub::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
-    pkBytesSignal = registerSignal("pkBytes");
+    pkSignal = registerSignal("pk");
 
     ports = gateSize("ethg");
 
@@ -65,7 +65,7 @@ void EtherHub::handleMessage(cMessage *msg)
     EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;
-    emit(pkBytesSignal, (long)(PK(msg)->getByteLength()));
+    emit(pkSignal, msg);
 
     if (ports <= 1)
     {

@@ -25,9 +25,8 @@ package inet.linklayer.ethernet;
 // to every other port.
 //
 // Messages are not interpreted by the hub model in any way, thus the hub
-// model is not specific to Ethernet in any way. Messages may
-// represent anything, from the beginning of a frame transmission to
-// end (or abortion) of transmission.
+// model is not specific to Ethernet. Messages may represent anything, from
+// the beginning of a frame transmission to end (or abortion) of transmission.
 //
 simple EtherHub
 {
@@ -35,7 +34,8 @@ simple EtherHub
         @node();
         @labels(node,ethernet-node);
         @display("i=device/hub");
-        @statistic[pkBytes](title="Handled packet bytes";record=count,sum,vector);
+        @signal[pk](type=cMessage);
+        @statistic[pk](title="packets"; source=pk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
 }
