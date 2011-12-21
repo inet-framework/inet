@@ -522,7 +522,7 @@ void EtherMAC::handleEndTxPeriod()
     }
     else
     {
-        unsigned long curBytes = curTxFrame->getByteLength();
+        unsigned long curBytes = curTxFrame->getFrameByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
         emit(txPkSignal, curTxFrame);
