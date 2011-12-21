@@ -1692,7 +1692,7 @@ void IPv6NeighbourDiscovery::createRATimer(InterfaceEntry *ie)
     }*/
     // update 23.10.07 - CB
 
-    if ( isConnectedToWirelessAP(ie) )
+    if ( canServeWirelessNodes(ie) )
     {
         EV << "This Interface is connected to a WLAN AP, hence using MIPv6 Default Values"<<endl;
         simtime_t minRAInterval = par("minIntervalBetweenRAs"); //reading from the omnetpp.ini (ZY 23.07.09)
@@ -2674,29 +2674,41 @@ void IPv6NeighbourDiscovery::invalidateNeigbourCache()
     neighbourCache.invalidateAllEntries();
 }
 
-bool IPv6NeighbourDiscovery::isConnectedToWirelessAP(InterfaceEntry *ie)
+bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
 {
-    //EV<<"Determination of whether an interface is connected to a WLAN AP or not."<<endl;
+    if (isWirelessInterface(ie))
+        return true;
+
+    // check if this interface is directly connected to an AccessPoint.
     cModule* node = findContainingNode(this);
     cGate* gate = node->gate(ie->getNodeOutputGateId());
-    ASSERT(gate != NULL); //to make sure that the gate exists
-    // TODO generalize
-
+    ASSERT(gate != NULL);
     cGate* connectedGate = gate->getNextGate();
     if (connectedGate != NULL)
     {
-        cModule* ownerModule = connectedGate->getOwnerModule();
-        ASSERT(isNode(ownerModule));
-
-        cModule* wlanMAC = ownerModule->getSubmodule("relayUnit");
-        if (wlanMAC != NULL)
+        cModule* connectedNode = connectedGate->getOwnerModule();
+        ASSERT(isNode(connectedNode));
+        if (isWirelessAccessPoint(connectedNode))
             return true;
-
-        wlanMAC = ownerModule->getSubmodule("wlan"); //to search for a "wlan" module which, in the INET fw scheme of things, resides inside a WLAN AP
-        return wlanMAC != NULL;
     }
 
+    // FIXME The AccessPoint can be connected to this router via Ethernet switches and/or hubs.
+
     return false;
+}
+
+bool IPv6NeighbourDiscovery::isWirelessInterface(const InterfaceEntry *ie)
+{
+    // TODO should be a flag in the InterfaceEntry
+    return (strncmp("wlan", ie->getName(), 4) == 0);
+}
+
+bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule* module)
+{
+    // AccessPoint is defined as a node containing "relayUnit" and
+    // "wlan" submodules
+    return (isNode(module) && module->getSubmodule("relayUnit") &&
+            (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan")));
 }
 #endif /* WITH_xMIPv6 */
 
