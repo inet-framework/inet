@@ -51,8 +51,8 @@ simple PingApp
         double hopLimit = default(32); // TTL or hopLimit for IP packets
         double count = default(0); // stop after count ping requests, 0 means continuously
         double startTime @unit("s") = default(uniform(0s,this.sendInterval)); // send first ping at startTime
-        double stopTime @unit("s") = default(0s); // time of finish sending, 0 means forever
-        bool printPing = default(true); // dump on stdout
+        double stopTime @unit("s") = default(0s); // time to finish sending, 0 means forever
+        bool printPing = default(false); // log to stdout
         @display("i=block/app");
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);
