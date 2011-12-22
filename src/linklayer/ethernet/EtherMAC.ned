@@ -104,41 +104,21 @@ import inet.linklayer.IEtherMAC;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// <b>Statistics</b>
-//
-// Output vectors:
-// - txPkBytes: bytes sent, including Ethernet frame fields (but excluding preamble and SFD)
-// - rxPkBytesOK: total bytes received  without collision or CRC error,
-//   including Ethernet frame fields (but excluding preamble and SFD)
-// - passedUpPkBytes: number of bytes of frames actually passed up to higher layer
-// - txPausePkUnits: number of PAUSE frames sent out
-// - rxPausePkUnits: number of PAUSE frames received from network
-// - rxPkBytesFromHL: number of bytes of frames received from higher layer
-// - collision: number of collisions (NOT number of collided frames!) sensed
-// - backoff: number of retransmissions
-// - droppedPkBytesIfaceDown: number of bytes of frames from higher layer dropped
-// - droppedPkBytesBitError: number of bytes of frames dropped because of bit errors
-// - droppedPkBytesNotForUs: number of bytes of frames dropped because destination address didn't match
-//
-// Output scalars (written in the finish() function) include the final values of
-// the above variables and throughput.
-//
 // @see ~EtherMACFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLLC
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
 simple EtherMAC like IEtherMAC
 {
     parameters:
-        bool promiscuous = default(false); // if true, all packets are received, otherwise only the
-                                // ones with matching destination MAC address
-        string address = default("auto");  // MAC address as hex string (12 hex digits), or
-                                // "auto". "auto" values will be replaced by
-                                // a generated MAC address in init stage 0.
-        bool duplexMode = default(true);  // selects full duplex (true) or half duplex (false) operation
-        int txQueueLimit = default(1000); // maximum number of frames queued up for transmission;
-                                // additional frames are dropped. Only used if queueModule==""
-        string queueModule = default("");    // name of optional external queue module
-        bool frameBursting = default(true);     // enable/disable frame bursting mode in Gigabit Ethernet
+        bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
+                                            // ones with matching destination MAC address
+        string address = default("auto");   // MAC address as hex string (12 hex digits), or
+                                            // "auto". "auto" values will be replaced by
+                                            // a generated MAC address in init stage 0.
+        bool duplexMode = default(true);    // selects full duplex (true) or half duplex (false) operation
+        int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue (only used if queueModule==""); additional frames cause a runtime error
+        string queueModule = default("");   // name of optional external queue module
+        bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu = default(1500);
         @display("i=block/rxtx");
 
@@ -157,17 +137,18 @@ simple EtherMAC like IEtherMAC
         @signal[collision](type=long);
         @signal[backoff](type=long);
 
-        @statistic[txPkBytes](title="TX bytes"; source="packetBytes(txPk)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[rxPkBytesOk](title="RX bytes"; source="packetBytes(rxPkOk)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[passedUpPkBytes](title="Passed bytes to higher layer";source="packetBytes(packetSentToUpper)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[txPausePkUnits](title="Sent pause"; record=count,stats,vector; interpolationmode=none);
-        @statistic[rxPausePkUnits](title="Received pause"; record=count,stats,vector; interpolationmode=none);
-        @statistic[rxPkBytesFromHL](title="Received packet bytes from higher layer"; source="packetBytes(rxPkFromHL)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[collision](title="Collision"; record=count,vector; interpolationmode=none);
-        @statistic[backoff](title="Backoff"; record=count,vector; interpolationmode=none);
-        @statistic[droppedPkBytesIfaceDown](title="Dropped packet bytes Iface down"; source="packetBytes(dropPkIfaceDown)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[droppedPkBytesBitError](title="Dropped packet bytes bit error"; source="packetBytes(dropPkBitError)"; unit=B; record=sum,count,vector; interpolationmode=none);
-        @statistic[droppedPkBytesNotForUs](title="Dropped packet bytes not for us"; source="packetBytes(dropPkNotForUs)"; unit=B; record=sum,count,vector; interpolationmode=none);
+        @statistic[txPk](title="packets transmitted"; source=txPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[txPausePkUnits](title="pause units sent"; record=count,sum,vector; interpolationmode=none);
+        @statistic[rxPausePkUnits](title="pause units received"; record=count,sum,vector; interpolationmode=none);
+        @statistic[rxPkFromHL](title="packet bytes from higher layer"; source=rxPkFromHL; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[droppedPkIfaceDown](title="packets dropped/interface down"; source=dropPkIfaceDown; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[droppedPkBitError](title="packets dropped/bit error"; source=dropPkBitError; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[droppedPkNotForUs](title="packets dropped/not for us"; source=dropPkNotForUs; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[collision](title="collision"; record=count,vector; interpolationmode=none);
+        @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
+
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
         output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
