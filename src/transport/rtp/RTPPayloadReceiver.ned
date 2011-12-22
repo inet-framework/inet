@@ -22,7 +22,8 @@ simple RTPPayloadReceiver like IRTPPayloadReceiver
     parameters:
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
-        @statistic[packetArrival](title="Packet arrival";record=vector,vector);
+        @signal[rcvdPkRtpTimestamp](type=simtime_t;unit=s);
+        @statistic[rcvdPkRtpTimestamp](title="received packet RTP timestamp"; record=vector);
 
     gates:
         input profileIn @labels(RTPInnerPacket);
