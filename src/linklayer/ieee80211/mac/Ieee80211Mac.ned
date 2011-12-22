@@ -57,7 +57,7 @@ simple Ieee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string queueModule = default("");    // name of optional external queue module
+        string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
         double basicBitrate @unit("bps") = default(2000000bps);
@@ -67,8 +67,8 @@ simple Ieee80211Mac
         int cwMinMulticast = default(-1); // contention window for multicast messages, -1 means default
         int mtu = default(1500);
         @display("i=block/layer");
-        @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
-        @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
+        @statistic[state](title="state"; record=vector; interpolationmode=sample-hold); // ENUM!!
+        @statistic[radioState](title="radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
     gates:
         input upperLayerIn @labels(Ieee80211Frame);
         output upperLayerOut @labels(Ieee80211Frame);
