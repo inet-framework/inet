@@ -98,7 +98,7 @@ void TCPSessionApp::count(cMessage *msg)
     else
     {
         indicationsRcvd++;
-        emit(recvIndicationsSignal, msg->getKind());
+        emit(recvIndicationsSignal, msg);
     }
 }
 
