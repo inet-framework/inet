@@ -38,8 +38,8 @@ class AudioOutFile
     AudioOutFile() : opened(false), audio_st(NULL), oc(NULL) {};
     ~AudioOutFile();
 
-    bool open(const char *resultFile, int sampleRate, short int sampleBits);
-    bool write(void *inbuf, int inbytes);
+    void open(const char *resultFile, int sampleRate, short int sampleBits);
+    void write(void *inbuf, int inbytes);
     bool close();
     bool isOpen() const { return opened; }
 

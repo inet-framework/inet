@@ -56,10 +56,9 @@ class VoIPSinkApp : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    virtual bool createConnect(VoIPPacket *vp);
-    virtual bool checkConnect(VoIPPacket *vp);
+    virtual void createConnection(VoIPPacket *vp);
+    virtual void checkSourceAndParameters(VoIPPacket *vp);
     virtual void closeConnection();
-    virtual void handleVoIPMessage(VoIPPacket *vp);
     virtual void decodePacket(VoIPPacket *vp);
     static void initSignals();
 
@@ -68,7 +67,7 @@ class VoIPSinkApp : public cSimpleModule
       public:
         Connection() : offline(true), oc(NULL), fmt(NULL), audio_st(NULL), decCtx(NULL), pCodecDec(NULL) {}
         void addAudioStream(enum CodecID codec_id);
-        bool openAudio(const char *fileName);
+        void openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);
         void writeLostSamples(int sampleCount);
         void closeAudio();
@@ -89,6 +88,10 @@ class VoIPSinkApp : public cSimpleModule
         AVCodecContext *decCtx;
         AVCodec *pCodecDec;
         AudioOutFile outFile;
+        IPvXAddress srcAddr;
+        int srcPort;
+        IPvXAddress destAddr;
+        int destPort;
     };
 
   protected:

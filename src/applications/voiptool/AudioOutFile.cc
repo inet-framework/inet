@@ -40,7 +40,7 @@ void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short i
     audio_st = st;
 }
 
-bool AudioOutFile::open(const char *resultFile, int sampleRate, short int sampleBits)
+void AudioOutFile::open(const char *resultFile, int sampleRate, short int sampleBits)
 {
     ASSERT(!opened);
 
@@ -102,14 +102,11 @@ bool AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
 
     // write the stream header
     av_write_header(oc);
-
-    return true;
 }
 
-bool AudioOutFile::write(void *decBuf, int pktBytes)
+void AudioOutFile::write(void *decBuf, int pktBytes)
 {
-    if (!opened)
-        return false;
+    ASSERT(opened);
 
     AVCodecContext *c = audio_st->codec;
     uint8_t outbuf[pktBytes + FF_MIN_BUFFER_SIZE];
@@ -134,7 +131,6 @@ bool AudioOutFile::write(void *decBuf, int pktBytes)
     // write the compressed frame into the media file
     if (av_interleaved_write_frame(oc, &pkt) != 0)
         throw cRuntimeError("Error while writing audio frame");
-    return true;
 }
 
 bool AudioOutFile::close()

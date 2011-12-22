@@ -307,7 +307,8 @@ VoIPPacket* VoIPSourceApp::generatePacket()
         if (outByteCount <= 0)
             error("avcodec_encode_audio() error: %d", outByteCount);
 
-        outFile.write(sampleBuffer.readPtr(), samples * bitsPerInSample/8);
+        if (outFile.isOpen())
+            outFile.write(sampleBuffer.readPtr(), samples * bitsPerInSample/8);
         sampleBuffer.notifyRead(samples * bitsPerInSample/8);
     }
 
