@@ -90,6 +90,7 @@ simple REDQueue like IOutputQueue
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
         @display("i=block/queue");
+
         @signal[enqueuePk](type=cMessage);
         @signal[dequeuePk](type=cMessage);
         @signal[dropPkByQueue](type=cMessage);
@@ -97,9 +98,11 @@ simple REDQueue like IOutputQueue
         @signal[queueLength](type=long);
         @signal[earlyDropPkByQueue](type=cMessage);
         @signal[avgQueueLength](type="double");
-        @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; source="packetBytes(earlyDropPkByQueue)"; unit=B; record=count,sum,vector; interpolationmode=none;);
-        @statistic[avgQueueLength](title="Avg queue length"; record=stats,vector);
-        @statistic[queueLength](title="Queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
+        @statistic[dropPk](title="dropped packets"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[earlyDropPk](title="early dropped packets"; source=earlyDropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[avgQueueLength](title="avg queue length"; record=last,vector);
+        @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;
