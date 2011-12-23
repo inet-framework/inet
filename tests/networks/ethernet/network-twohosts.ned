@@ -1,5 +1,6 @@
 package inet.tests.ethernet;
 
+import inet.base.DurationRecorder;
 import inet.nodes.ethernet.EtherHost2;
 import ned.DatarateChannel;
 
@@ -16,6 +17,7 @@ network TwoHosts
             parameters:
                 @display("p=334,80");
         }
+        d: DurationRecorder;
     connections:
         hostA.ethg <--> DatarateChannel <--> hostB.ethg;
 }

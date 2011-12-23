@@ -1,5 +1,6 @@
 package inet.tests.ethernet;
 
+import inet.base.DurationRecorder;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost2;
 import ned.DatarateChannel;
@@ -25,6 +26,7 @@ network HostsWithHub
             parameters:
                 @display("p=204,80");
         }
+        d: DurationRecorder;
     connections:
         hub.ethg++ <--> DatarateChannel <--> hostA.ethg;
         hub.ethg++ <--> DatarateChannel <--> hostB.ethg;

@@ -1,0 +1,3 @@
+#!/bin/sh
+cd ethernet
+opp_run -n /home/andras/inet/src:/home/andras/inet/examples:/home/andras/inet/tests/statistical2 -l /home/andras/inet/src/inet -u Cmdenv $*
