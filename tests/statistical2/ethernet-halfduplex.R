@@ -1,6 +1,27 @@
 #! /usr/bin/env Rscript
 
-# full-duplex, two hosts
+#
+# Verify data rates for half-duplex ethernet, two hosts
+#
+# References:
+#
+# "Ethernet: Distributed Packet Switching for Local Computer Networks",
+# Robert M. Metcalfe and David R. Boggs, CSL·75·7 May 1975.
+# http://ethernethistory.typepad.com/papers/EthernetPaper.pdf
+#
+# "Measured Performance of an Ethernet Local Network",
+# John F. Shoch and Jon A. Hupp, February 1980, Xerox Corporation 1980.
+# http://ethernethistory.typepad.com/papers/EthernetPerformance.pdf
+#
+# "Performance  Characteristics of 2 Ethernets: an Experimental Study"
+# Timothy A. Gonsalves. Technical Report: CSL-TR-87-317. March 1987.
+# http://www.cs.utsa.edu/faculty/boppana/courses/cnet-common/eth-gonsalves-sigmetrics85.pdf
+#
+# "Performance Evaluation of Different Ethernet LANs Connected by Switches and Hubs",
+# Ikram Ud Din, Saeed Mahfooz, Muhammad Adnan. European Journal of Scientific Research,
+# ISSN 1450-216X Vol.37 No.3 (2009), pp.461-470.
+# http://www.eurojournals.com/ejsr_37_3_11.pdf
+#
 
 require('omnetpp')
 
@@ -46,11 +67,10 @@ print(sum(rcvdPacketRate) / expectedPacketRate)
 
 if (all(fullDuplex==0)) {
     cat("ERROR: half duplex: TODO\n")
-    
-} else {
-    print(fullDuplex)
-    cat("ERROR: fullDuplex[] is messed up\n")
-}
 
-#cat( expectedPacketRate) 
-#cat( rcvdPacketRate) 
+} else {
+    cat("ERROR: this script expects all MACs to be configured as half duplex\n")
+    print(fullDuplex)
+
+#cat( expectedPacketRate)
+#cat( rcvdPacketRate)

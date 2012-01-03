@@ -1,6 +1,17 @@
 #! /usr/bin/env Rscript
 
-# full-duplex, two hosts
+#
+# Verify data rates for full-duplex ethernet, two hosts.
+#
+# References:
+#
+# "Maximum Packet Rates for Full-Duplex Ethernet", Scott Karlin and
+# Larry Peterson. Technical Report TR–645–02. February 14, 2002.
+#
+# "Gigabit Ethernet - TCP/IP: Maximum Ethernet frames and data throughput
+# rate calculations." Network Security Toolkit (NST) Wiki, NST-2011.
+# http://wiki.networksecuritytoolkit.org/nstwiki/index.php/File:Gigabit_ethernet_tcpip.png
+#
 
 require('omnetpp')
 
@@ -28,13 +39,10 @@ if (all(fullDuplex==1)) {
         print(rcvdPacketRate)
         cat("FAIL\n")
     }
-} else if (all(fullDuplex==0)) {
-    cat("ERROR: half duplex: TODO\n")
-    #TODO
 } else {
+    cat("ERROR: this script expects all MACs to be configured as full duplex\n")
     print(fullDuplex)
-    cat("ERROR: fullDuplex[] is messed up\n")
 }
 
-#cat( expectedPacketRate) 
-#cat( rcvdPacketRate) 
+#cat( expectedPacketRate)
+#cat( rcvdPacketRate)
