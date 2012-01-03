@@ -272,7 +272,7 @@ void xMIPv6::processMobilityMessage(MobilityHeader* mipv6Msg, IPv6ControlInfo* c
     }
 }
 
-void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, IPv6Address& CoA)
+void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA)
 {
     Enter_Method_Silent(); // can be called by NeighborDiscovery module
 

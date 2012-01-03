@@ -797,7 +797,13 @@ void IPv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
         }
 
         //Before we can use this address, we MUST initiate DAD first.
-        initiateDAD(linkLocalAddr, ie);
+        if (ie->ipv6Data()->isTentativeAddress(linkLocalAddr))
+        {
+            if (ie->ipv6Data()->getDupAddrDetectTransmits() > 0)
+                initiateDAD(linkLocalAddr, ie);
+            else
+                makeTentativeAddressPermanent(linkLocalAddr, ie);
+        }
     }
     delete timerMsg;
 }
@@ -865,94 +871,101 @@ void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
     else
     {
         bubble("Max number of DAD messages for interface sent. Address is unique.");
-        ie->ipv6Data()->permanentlyAssign(tentativeAddr);
         dadList.erase(dadEntry);
         EV << "delete dadEntry and msg\n";
         delete dadEntry;
         delete msg;
 
-#ifdef WITH_xMIPv6
-        ie->ipv6Data()->setDADInProgress(false);
-
-        // update 28.09.07 - CB
-        // after the link-local address was verified to be unique
-        // we can assign the address and initiate the MIPv6 protocol
-        // in case there are any pending entries in the list
-        DADGlobalList::iterator it = dadGlobalList.find(ie);
-        if ( it != dadGlobalList.end() )
-        {
-            DADGlobalEntry& entry = it->second;
-
-            ie->ipv6Data()->assignAddress(entry.addr, false, simTime()+entry.validLifetime,
-                    simTime()+entry.preferredLifetime, entry.hFlag);
-
-            // moved from processRAPrefixInfoForAddrAutoConf()
-            // we can remove the old CoA now
-            if ( !entry.CoA.isUnspecified() )
-                ie->ipv6Data()->removeAddress(entry.CoA);
-
-            // set addresses on this interface to tentative=false
-            for (int i = 0; i < ie->ipv6Data()->getNumAddresses(); i++)
-            {
-                // TODO improve this code so that only addresses are permanently assigned
-                // which are formed based on the new prefix from the RA
-                IPv6Address addr = ie->ipv6Data()->getAddress(i);
-                ie->ipv6Data()->permanentlyAssign(addr);
-            }
-
-            // if we have MIPv6 protocols on this node we will eventually have to
-            // call some appropriate methods
-            if (rt6->isMobileNode())
-            {
-                if (entry.hFlag == false) // if we are not in the home network, send BUs
-                      mipv6->initiateMIPv6Protocol(ie, tentativeAddr);
-                  /*
-                else if ( entry.returnedHome ) // if we are again in the home network
-                  {
-                      ASSERT(entry.CoA.isUnspecified() == false);
-                      mipv6->returningHome(entry.CoA, ie); // initiate the returning home procedure
-                  }*/
-            }
-
-            dadGlobalList.erase(it->first);
-        }
-
-        // an optimization to make sure that the access router on the link gets our L2 address
-        //sendUnsolicitedNA(ie);
-
-        // =================================Start: Zarrar Yousaf 08.07.07 ===============================================
-        /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the FlatNetworkConfigurator6 assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
-        */
-        if (rt6->isRouter() && !(ie->isLoopback()))
-        {
-            for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
-            {
-                IPv6Address globalAddress = ie->ipv6Data()->autoConfRouterGlobalScopeAddress(i);
-                ie->ipv6Data()->assignAddress(globalAddress, false, 0, 0);
-                // ie->ipv6Data()->deduceAdvPrefix(); //commented out but the above two statements can be replaced with this single statement. But i am using the above two statements for clarity reasons.
-            }
-        }
-        // ==================================End: Zarrar Yousaf 08.07.07===========================================
-#endif /* WITH_xMIPv6 */
-
-        /*RFC 2461: Section 6.3.7 2nd Paragraph
-        Before a host sends an initial solicitation, it SHOULD delay the
-        transmission for a random amount of time between 0 and
-        MAX_RTR_SOLICITATION_DELAY.  This serves to alleviate congestion when
-        many hosts start up on a link at the same time, such as might happen
-        after recovery from a power failure.*/
-        //TODO: Placing these operations here means fast router solicitation is
-        //not adopted. Will relocate.
-        if (ie->ipv6Data()->getAdvSendAdvertisements() == false)
-        {
-            EV << "creating router discovery message timer\n";
-            cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
-            rtrDisMsg->setContextPointer(ie);
-            simtime_t interval = uniform(0, ie->ipv6Data()->_getMaxRtrSolicitationDelay()); // random delay
-            scheduleAt(simTime()+interval, rtrDisMsg);
-        }
+        makeTentativeAddressPermanent(tentativeAddr, ie);
     }
 }
+
+void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& tentativeAddr, InterfaceEntry *ie)
+{
+    ie->ipv6Data()->permanentlyAssign(tentativeAddr);
+
+#ifdef WITH_xMIPv6
+    ie->ipv6Data()->setDADInProgress(false);
+
+    // update 28.09.07 - CB
+    // after the link-local address was verified to be unique
+    // we can assign the address and initiate the MIPv6 protocol
+    // in case there are any pending entries in the list
+    DADGlobalList::iterator it = dadGlobalList.find(ie);
+    if ( it != dadGlobalList.end() )
+    {
+        DADGlobalEntry& entry = it->second;
+
+        ie->ipv6Data()->assignAddress(entry.addr, false, simTime()+entry.validLifetime,
+                simTime()+entry.preferredLifetime, entry.hFlag);
+
+        // moved from processRAPrefixInfoForAddrAutoConf()
+        // we can remove the old CoA now
+        if ( !entry.CoA.isUnspecified() )
+            ie->ipv6Data()->removeAddress(entry.CoA);
+
+        // set addresses on this interface to tentative=false
+        for (int i = 0; i < ie->ipv6Data()->getNumAddresses(); i++)
+        {
+            // TODO improve this code so that only addresses are permanently assigned
+            // which are formed based on the new prefix from the RA
+            IPv6Address addr = ie->ipv6Data()->getAddress(i);
+            ie->ipv6Data()->permanentlyAssign(addr);
+        }
+
+        // if we have MIPv6 protocols on this node we will eventually have to
+        // call some appropriate methods
+        if (rt6->isMobileNode())
+        {
+            if (entry.hFlag == false) // if we are not in the home network, send BUs
+                  mipv6->initiateMIPv6Protocol(ie, tentativeAddr);
+              /*
+            else if ( entry.returnedHome ) // if we are again in the home network
+              {
+                  ASSERT(entry.CoA.isUnspecified() == false);
+                  mipv6->returningHome(entry.CoA, ie); // initiate the returning home procedure
+              }*/
+        }
+
+        dadGlobalList.erase(it->first);
+    }
+
+    // an optimization to make sure that the access router on the link gets our L2 address
+    //sendUnsolicitedNA(ie);
+
+    // =================================Start: Zarrar Yousaf 08.07.07 ===============================================
+    /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the FlatNetworkConfigurator6 assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
+    */
+    if (rt6->isRouter() && !(ie->isLoopback()))
+    {
+        for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
+        {
+            IPv6Address globalAddress = ie->ipv6Data()->autoConfRouterGlobalScopeAddress(i);
+            ie->ipv6Data()->assignAddress(globalAddress, false, 0, 0);
+            // ie->ipv6Data()->deduceAdvPrefix(); //commented out but the above two statements can be replaced with this single statement. But i am using the above two statements for clarity reasons.
+        }
+    }
+    // ==================================End: Zarrar Yousaf 08.07.07===========================================
+#endif /* WITH_xMIPv6 */
+
+    /*RFC 2461: Section 6.3.7 2nd Paragraph
+    Before a host sends an initial solicitation, it SHOULD delay the
+    transmission for a random amount of time between 0 and
+    MAX_RTR_SOLICITATION_DELAY.  This serves to alleviate congestion when
+    many hosts start up on a link at the same time, such as might happen
+    after recovery from a power failure.*/
+    //TODO: Placing these operations here means fast router solicitation is
+    //not adopted. Will relocate.
+    if (ie->ipv6Data()->getAdvSendAdvertisements() == false)
+    {
+        EV << "creating router discovery message timer\n";
+        cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
+        rtrDisMsg->setContextPointer(ie);
+        simtime_t interval = uniform(0, ie->ipv6Data()->_getMaxRtrSolicitationDelay()); // random delay
+        scheduleAt(simTime()+interval, rtrDisMsg);
+    }
+}
+
 
 IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
 {

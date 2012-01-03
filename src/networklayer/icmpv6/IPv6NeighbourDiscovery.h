@@ -250,6 +250,12 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          */
         virtual void processDADTimeout(cMessage *msg);
 
+        /**
+         * Permanently assign the given address for the given interface entry.
+         * To be called after successful DAD.
+         */
+        virtual void makeTentativeAddressPermanent(const IPv6Address& tentativeAddr, InterfaceEntry *ie);
+
         /************Address Autoconfiguration Stuff***************************/
         /**
          *  as it is not possbile to explicitly define RFC 2462. ND is the next
