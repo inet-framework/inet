@@ -26,9 +26,7 @@
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
 
-#ifdef WITH_xMIPv6
 #include "IPv6TunnelingAccess.h"
-#endif /* WITH_xMIPv6 */
 
 Define_Module(RoutingTable6);
 
@@ -181,11 +179,8 @@ void RoutingTable6::parseXMLConfigFile()
 
                 configureInterfaceFromXML(ie, ifTag);
             }
-
-#ifdef WITH_xMIPv6
             else if (opp_strcmp(ifTag->getTagName(), "tunnel")==0)
                 configureTunnelFromXML(ifTag);
-#endif /* WITH_xMIPv6 */
         }
     }
 }
@@ -385,7 +380,6 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     }
 }
 
-#ifdef WITH_xMIPv6
 void RoutingTable6::configureTunnelFromXML(cXMLElement* cfg)
 {
     IPv6Tunneling* tunneling = IPv6TunnelingAccess().get();
@@ -413,7 +407,6 @@ void RoutingTable6::configureTunnelFromXML(cXMLElement* cfg)
         tunneling->createTunnel(IPv6Tunneling::NORMAL, entry, exit, trigger);
     }
 }
-#endif /* WITH_xMIPv6 */
 
 InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
 {

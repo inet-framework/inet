@@ -104,6 +104,7 @@
                        inet.networklayer.ipv6
                        inet.networklayer.autorouting.ipv6
                        inet.networklayer.icmpv6
+                       inet.networklayer.ipv6tunneling
                        inet.nodes.ipv6
                       "
         extraSourceFolders = ""
@@ -132,7 +133,6 @@
         requires = "IPv6"
         labels = "protocols"
         nedPackages = "
-                       inet.networklayer.ipv6tunneling
                        inet.networklayer.xmipv6
                        inet.nodes.xmipv6
                       "

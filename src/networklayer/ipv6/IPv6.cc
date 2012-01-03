@@ -31,8 +31,8 @@
 #include "Ieee802Ctrl_m.h"
 #include "ICMPv6Message_m.h"
 
-#ifdef WITH_xMIPv6
 #include "IPv6TunnelingAccess.h"
+#ifdef WITH_xMIPv6
 #include "MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
 
@@ -53,9 +53,7 @@ void IPv6::initialize()
     nd = IPv6NeighbourDiscoveryAccess().get();
     icmp = ICMPv6Access().get();
 
-#ifdef WITH_xMIPv6
     tunneling = IPv6TunnelingAccess().get();
-#endif /* WITH_xMIPv6 */
 
     mapping.parseProtocolMapping(par("protocolMapping"));
 
@@ -113,8 +111,8 @@ void IPv6::endService(cPacket *msg)
     if (msg->getArrivalGate()->isName("transportIn")
             || (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg))
             || (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)) //Added this for ICMP msgs from ICMP module-WEI
-#ifdef WITH_xMIPv6
             || (msg->getArrivalGate()->isName("upperTunnelingIn")) // for tunneling support-CB
+#ifdef WITH_xMIPv6
             || (msg->getArrivalGate()->isName("xMIPv6In") && dynamic_cast<MobilityHeader*>(msg)) // Zarrar
 #endif /* WITH_xMIPv6 */
        )
@@ -263,6 +261,9 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             // otherwise we can search for everything
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
+#else
+    interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL);
+#endif /* WITH_xMIPv6 */
 
     if (interfaceId > ift->getNumInterfaces())
     {
@@ -271,7 +272,6 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         send(datagram, "lowerTunnelingOut");
         return;
     }
-#endif /* WITH_xMIPv6 */
 
     if (interfaceId == -1)
         if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram) )
@@ -518,13 +518,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6)
     {
         EV << "Tunnelled IP datagram\n";
-
-#ifndef WITH_xMIPv6
-        // FIXME handle tunnelling
-        error("tunnelling not yet implemented");
-#else /* WITH_xMIPv6 */
         send(packet, "upperTunnelingOut");
-#endif /* WITH_xMIPv6 */
     }
     else
     {

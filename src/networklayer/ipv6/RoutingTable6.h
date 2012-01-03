@@ -147,10 +147,8 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     // internal
     virtual void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
 
-#ifdef WITH_xMIPv6
     // internal
     virtual void configureTunnelFromXML(cXMLElement* cfg);
-#endif /* WITH_xMIPv6 */
 
   protected:
     // displays summary above the icon

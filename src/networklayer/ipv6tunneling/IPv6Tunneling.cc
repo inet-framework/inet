@@ -41,9 +41,11 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
-#include "MobilityHeader_m.h" // for HA Option header
 #include "RoutingTable6Access.h"
+#ifdef WITH_xMIPv6
+#include "MobilityHeader_m.h" // for HA Option header
 #include "xMIPv6Access.h"
+#endif
 
 #include <algorithm>
 
@@ -384,6 +386,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
     // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
     delete dgram->removeControlInfo();
 
+#ifdef WITH_xMIPv6
     if ((tunnels[vIfIndex].tunnelType == T2RH) || (tunnels[vIfIndex].tunnelType == HA_OPT))
     {
         // pseudo-tunnel for Type 2 Routing Header
@@ -468,6 +471,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
     }
     else
     {
+#endif // WITH_xMIPv6
         // normal tunnel - just modify controlInfo and send
         // datagram back to IPv6 module for encapsulation
 
@@ -479,7 +483,9 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
 
         dgram->setControlInfo(controlInfo);
         send(dgram, "upperLayerOut");
+#ifdef WITH_xMIPv6
     }
+#endif
 }
 
 void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
@@ -488,13 +494,11 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
     // just update controlInfo
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(dgram->removeControlInfo());
 
-    // Alain Tigyo, 21.03.2008
-    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
-
+#ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel
     // where the exit point is equal to the packets source
     // 11.9.07 - CB
-    if (!isTunnelExit(controlInfo->getSrcAddr()))
+    if (rt->isHomeAgent() && !isTunnelExit(controlInfo->getSrcAddr()))
     {
         /*RFC 3775, 10.4.5
           Otherwise, when a home agent decapsulates a tunneled packet from
@@ -511,6 +515,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
         delete dgram;
         return;
     }
+#endif
 
     // FIX: we leave the interface Id to it's previous value to make sure
     // that later processing knowns from which interface the datagram came from
@@ -520,8 +525,10 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
 
     send(dgram, "linkLayerOut");
 
+#ifdef WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
+    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     if (rt->isMobileNode() && (controlInfo->getSrcAddr() == ie->ipv6Data()->getHomeAgentAddress())
             && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {
@@ -533,6 +540,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
 
         mipv6->triggerRouteOptimization(dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
     }
+#endif
 }
 
 int IPv6Tunneling::lookupTunnels(const IPv6Address& dest)
