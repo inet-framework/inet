@@ -45,7 +45,7 @@ int getLevel(const IPvXAddress& addr)
         //Addresses usable with SCTP, but not as destination or source address
         if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("0.0.0.0"), IPv4Address("255.0.0.0")) ||
             addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("224.0.0.0"), IPv4Address("240.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("198.18.0.0"), IPv4Address("255.255.255.0")) ||
+            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("198.18.0.0"), IPv4Address("255.255.255.0")) ||     //FIXME in RFC 5735: 198.18.0.0/15
             addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.88.99.0"), IPv4Address("255.255.255.0")))
             return 0;
 
