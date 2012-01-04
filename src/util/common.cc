@@ -31,14 +31,27 @@ int getLevel(const IPvXAddress& addr)
 {
     if (addr.isIPv6())
     {
-        if (addr.get6().getScope()==IPv6Address::UNSPECIFIED || addr.get6().getScope()==IPv6Address::MULTICAST)
-            return 0;
-        if (addr.get6().getScope()==IPv6Address::LOOPBACK)
-            return 1;
-        if (addr.get6().getScope()==IPv6Address::LINK)
-            return 2;
-        if (addr.get6().getScope()==IPv6Address::SITE)
-            return 3;
+        switch(addr.get6().getScope())
+        {
+            case IPv6Address::UNSPECIFIED:
+            case IPv6Address::MULTICAST:
+                return 0;
+
+            case IPv6Address::LOOPBACK:
+                return 1;
+
+            case IPv6Address::LINK:
+                return 2;
+
+            case IPv6Address::SITE:
+                return 3;
+
+            case IPv6Address::GLOBAL:
+                return 4;
+
+            default:
+                throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.get6().getScope()));
+        }
     }
     else
     {
