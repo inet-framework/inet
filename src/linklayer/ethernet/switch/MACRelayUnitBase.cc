@@ -312,9 +312,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
         frame->setDest(MACAddress::MULTICAST_PAUSE_ADDRESS);
         frame->setPauseTime(pauseUnits);
 
-        frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
-        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-            frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
+        frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
         send(frame, gate);
         pauseFinished[portno] = simTime() + ((double)PAUSE_UNIT_BITS) * pauseUnits / destModule->getTxRate();
