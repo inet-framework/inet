@@ -65,6 +65,8 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     delete frame;
     ASSERT(payload!=NULL);
     ethframe->encapsulate(payload);
+    if (ethframe->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
+        ethframe->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
     // done
     return ethframe;
