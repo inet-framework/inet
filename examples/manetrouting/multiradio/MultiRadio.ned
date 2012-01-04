@@ -16,7 +16,7 @@
 // 
 package inet.examples.manetrouting.multiradio;
 
-import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
 import inet.world.radio.ChannelControl;
 
@@ -35,7 +35,7 @@ network MultiRadio
         channelControl: ChannelControl {
             @display("p=83,15");
         }
-        networkConfigurator: NetworkConfigurator {
+        networkConfigurator: FlatNetworkConfigurator {
             @display("p=253,15");
         }
         mobileHost[numHosts]: AdhocHost {
@@ -43,5 +43,3 @@ network MultiRadio
         }
     connections allowunconnected:
 }
-
-
