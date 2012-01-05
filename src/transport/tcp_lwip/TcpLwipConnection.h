@@ -55,23 +55,10 @@ class INET_API TcpLwipConnection
         cOutVector sndWndVector;   // snd_wnd
         cOutVector sndSeqVector;   // sent seqNo
         cOutVector sndAckVector;   // sent ackNo
-        cOutVector sndSacksVector;  // number of sent Sacks
 
         cOutVector rcvWndVector;   // rcv_wnd
         cOutVector rcvSeqVector;   // received seqNo
-        cOutVector rcvAdvVector;   // current advertised window (=rcv_avd)
         cOutVector rcvAckVector;   // received ackNo (= snd_una)
-        cOutVector rcvSacksVector;  // number of received Sacks
-
-        cOutVector unackedVector;  // number of bytes unacknowledged
-
-        cOutVector dupAcksVector;   // current number of received dupAcks
-        cOutVector pipeVector;      // current sender's estimate of bytes outstanding in the network
-        cOutVector rcvOooSegVector; // number of received out-of-order segments
-
-        cOutVector sackedBytesVector;        // current number of received sacked bytes
-        cOutVector tcpRcvQueueBytesVector;   // current amount of used bytes in tcp receive queue
-        cOutVector tcpRcvQueueDropsVector;   // number of drops in tcp receive queue
     };
 
     // prevent copy constructor:

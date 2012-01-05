@@ -39,23 +39,10 @@ TcpLwipConnection::Stats::Stats()
     sndWndVector("send window"),
     sndSeqVector("sent seq"),
     sndAckVector("sent ack"),
-    sndSacksVector("sent sacks"),
 
     rcvWndVector("receive window"),
     rcvSeqVector("rcvd seq"),
-    rcvAdvVector("advertised window"),
-    rcvAckVector("rcvd ack"),
-    rcvSacksVector("rcvd sacks"),
-
-    unackedVector("unacked bytes"),
-
-    dupAcksVector("rcvd dupAcks"),
-    pipeVector("pipe"),
-    rcvOooSegVector("rcvd oooseg"),
-
-    sackedBytesVector("rcvd sackedBytes"),
-    tcpRcvQueueBytesVector("tcpRcvQueueBytes"),
-    tcpRcvQueueDropsVector("tcpRcvQueueDrops")
+    rcvAckVector("rcvd ack")
 {
 }
 
