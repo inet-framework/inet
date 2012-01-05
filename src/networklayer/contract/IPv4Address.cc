@@ -130,6 +130,38 @@ char IPv4Address::getIPClass() const
         return '?';
 }
 
+IPv4Address::AddressCategory IPv4Address::getAddressCategory() const
+{
+    if (isUnspecified())
+        return UNSPECIFIED;        // 0.0.0.0
+    if ((addr & 0xFF000000u) == 0)
+        return THIS_NETWORK;       // 0.0.0.0/8
+    if ((addr & 0xFF000000u) == 0x7F000000u)
+        return LOOPBACK;           // 127.0.0.0/8
+    if (isMulticast())
+        return MULTICAST;          // 224.0.0.0/4
+    if (addr == 0xFFFFFFFFu)
+        return BROADCAST;          // 255.255.255.255/32
+    uint32 addr24 = addr & 0xFFFFFF00u;
+    if (addr24 == 0xC0000000u)
+        return IETF;               // 192.0.0.0/24
+    if ((addr24 == 0xC0000200u) || (addr24 == 0xC6336400u) || (addr24 == 0xCB007100u))
+        return TEST_NET;           // 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24
+    if (addr24 == 0xC0586300u)
+        return IPv6_TO_IPv4_RELAY; // 192.88.99.0/24
+    if ((addr & 0xFFFE0000u) == 0xC6120000u)
+        return BENCHMARK;          // 198.18.0.0/15
+    if ((addr & 0xF0000000u) == 0xF0000000u)
+        return RESERVED;           // 240.0.0.0/4
+    if ((addr & 0xFFFF0000u) == 0xA9FE0000u)
+        return LINKLOCAL;          // 169.254.0.0/16
+    if (((addr & 0xFF000000u) == 0x0A000000u)
+            || ((addr & 0xFFF00000u) == 0xAC100000u)
+            || ((addr & 0xFFFF0000u) == 0xC0A80000u))
+        return PRIVATE_NETWORK;    // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+    return GLOBAL;
+}
+
 IPv4Address IPv4Address::getNetwork() const
 {
     switch (getIPClass())

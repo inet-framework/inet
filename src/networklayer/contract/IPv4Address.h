@@ -52,6 +52,47 @@ class INET_API IPv4Address
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
 
   public:
+    /**
+     * IPv4 address category
+     *
+     * RFC 5735               Special Use IPv4 Addresses           January 2010
+     * 4.  Summary Table
+     * Address Block       Present Use                Reference
+     * ------------------------------------------------------------------
+     * 0.0.0.0/8           "This" Network             RFC 1122, Section 3.2.1.3
+     * 10.0.0.0/8          Private-Use Networks       RFC 1918
+     * 127.0.0.0/8         Loopback                   RFC 1122, Section 3.2.1.3
+     * 169.254.0.0/16      Link Local                 RFC 3927
+     * 172.16.0.0/12       Private-Use Networks       RFC 1918
+     * 192.0.0.0/24        IETF Protocol Assignments  RFC 5736
+     * 192.0.2.0/24        TEST-NET-1                 RFC 5737
+     * 192.88.99.0/24      6to4 Relay Anycast         RFC 3068
+     * 192.168.0.0/16      Private-Use Networks       RFC 1918
+     * 198.18.0.0/15       Network Interconnect
+     *                     Device Benchmark Testing   RFC 2544
+     * 198.51.100.0/24     TEST-NET-2                 RFC 5737
+     * 203.0.113.0/24      TEST-NET-3                 RFC 5737
+     * 224.0.0.0/4         Multicast                  RFC 3171
+     * 240.0.0.0/4         Reserved for Future Use    RFC 1112, Section 4
+     * 255.255.255.255/32  Limited Broadcast          RFC 919, Section 7; RFC 922, Section 7
+     */
+    enum AddressCategory
+    {
+        UNSPECIFIED,        // 0.0.0.0
+        THIS_NETWORK,       // 0.0.0.0/8
+        LOOPBACK,           // 127.0.0.0/8
+        MULTICAST,          // 224.0.0.0/4
+        BROADCAST,          // 255.255.255.255/32
+        IETF,               // 192.0.0.0/24
+        TEST_NET,           // 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24
+        IPv6_TO_IPv4_RELAY, // 192.88.99.0/24
+        BENCHMARK,          // 198.18.0.0/15
+        RESERVED,           // 240.0.0.0/4
+        LINKLOCAL,          // 169.254.0.0/16
+        PRIVATE_NETWORK,    // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+        GLOBAL
+    };
+
     /** @name Predefined addresses */
     //@{
     static const IPv4Address UNSPECIFIED_ADDRESS; ///< 0.0.0.0
@@ -158,6 +199,11 @@ class INET_API IPv4Address
      * or '?' (returned when the address begins with at least five 1 bits.)
      */
     char getIPClass() const;
+
+    /**
+     * Get the IPv4 address category.
+     */
+    AddressCategory getAddressCategory() const;
 
     /**
      * Returns true if this address is in the multicast address range,
