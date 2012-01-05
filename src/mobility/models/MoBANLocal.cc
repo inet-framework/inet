@@ -81,7 +81,7 @@ void MoBANLocal::setTargetPosition()
 			z = uniform(-radius, radius);
 		}
 
-		targetPosition = referencePosition + new Coord(x, y, z);
+		targetPosition = referencePosition + Coord(x, y, z);
 	    Coord positionDelta = targetPosition - lastPosition;
 	    double distance = positionDelta.length();
 	    nextChange = simTime() + distance / speed;

@@ -64,10 +64,6 @@ public:
     Coord(const Coord& other)
         : cObject(other) { copy(other); }
 
-    /** @brief Initializes coordinate from other coordinate. */
-    Coord(const Coord* other)
-        : cObject(*other) { copy(*other); }
-
     /** @brief Returns a string with the value of the coordinate. */
     std::string info() const {
         std::stringstream os;
