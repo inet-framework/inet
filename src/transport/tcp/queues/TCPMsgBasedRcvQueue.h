@@ -32,8 +32,14 @@
 class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
 {
   protected:
-    typedef std::map<uint32, cPacket *> PayloadList;
-    PayloadList payloadList;
+    struct PayloadItem
+    {
+        uint32  seqNo;
+        cPacket *packet;
+        PayloadItem(uint32  _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
+    };
+    typedef std::list<PayloadItem> PayloadList;
+    PayloadList payloadList;    // sorted list, used the sequence number comparators
 
   public:
     /**

@@ -120,15 +120,14 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
  */
 class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
 {
-  public:
-    class SeqCmpLess
-    {
-      public:
-        bool operator()(uint32 a, uint32 b) const { return seqLess(a, b); }
-    };
-
   protected:
-    typedef std::map<uint32, cPacket *, SeqCmpLess> PayloadList;
+    struct PayloadItem
+    {
+        uint32  seqNo;
+        cPacket *packet;
+        PayloadItem(uint32  _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
+    };
+    typedef std::list<PayloadItem> PayloadList;
     PayloadList payloadListM;
     bool isValidSeqNoM;
     uint32 lastExtractedSeqNoM;

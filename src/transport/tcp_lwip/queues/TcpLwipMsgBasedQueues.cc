@@ -200,12 +200,10 @@ TcpLwipMsgBasedReceiveQueue::TcpLwipMsgBasedReceiveQueue()
 
 TcpLwipMsgBasedReceiveQueue::~TcpLwipMsgBasedReceiveQueue()
 {
-    PayloadList::iterator i;
-
-    while ((i = payloadListM.begin()) != payloadListM.end())
+    while (!payloadListM.empty())
     {
-        delete i->second;
-        payloadListM.erase(i);
+        delete payloadListM.front().packet;
+        payloadListM.pop_front();
     }
 }
 
@@ -218,12 +216,10 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
     isValidSeqNoM = false;
     lastExtractedSeqNoM = 0;
 
-    PayloadList::iterator i;
-
-    while ((i = payloadListM.begin()) != payloadListM.end())
+    while (!payloadListM.empty())
     {
-        delete i->second;
-        payloadListM.erase(i);
+        delete payloadListM.front().packet;
+        payloadListM.pop_front();
     }
 }
 
@@ -239,21 +235,26 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(
     cPacket *msg;
     uint32 endSeqNo;
 
+    PayloadList::iterator i = payloadListM.begin();
     while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL)
     {
         if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo)
                 && (!isValidSeqNoM || seqLess(lastExtractedSeqNoM, endSeqNo)))
         {
+            while (i != payloadListM.end() && seqLess(i->seqNo, endSeqNo))
+                ++i;
+
             // insert, avoiding duplicates
-            PayloadList::iterator i = payloadListM.find(endSeqNo);
-
-            if (i != payloadListM.end())
+            if (i != payloadListM.end() && i->seqNo == endSeqNo)
             {
-                ASSERT(msg->getByteLength() == i->second->getByteLength());
-                delete i->second;
+                ASSERT(msg->getByteLength() == i->packet->getByteLength());
+                delete msg;
             }
-
-            payloadListM[endSeqNo] = msg;
+            else
+            {
+                i = payloadListM.insert(i,PayloadItem(endSeqNo, msg));
+                ASSERT(seqLE(payloadListM.front().seqNo, payloadListM.back().seqNo));
+            }
         }
         else
         {
@@ -286,22 +287,22 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     uint32 lastSeqNo = firstSeqNo + bytesInQueueM;
 
     // remove old messages
-    while ( (! payloadListM.empty()) && seqLE(payloadListM.begin()->first, firstSeqNo))
+    while ( (! payloadListM.empty()) && seqLE(payloadListM.front().seqNo, firstSeqNo))
     {
-        EV << "Remove old payload MSG: seqno=" << payloadListM.begin()->first
-           << ", len=" << payloadListM.begin()->second->getByteLength() << endl;
-        delete payloadListM.begin()->second;
+        EV << "Remove old payload MSG: seqno=" << payloadListM.front().seqNo
+           << ", len=" << payloadListM.front().packet->getByteLength() << endl;
+        delete payloadListM.front().packet;
         payloadListM.erase(payloadListM.begin());
     }
 
     // pass up payload messages, in sequence number order
     if (! payloadListM.empty())
     {
-        uint32 endSeqNo = payloadListM.begin()->first;
+        uint32 endSeqNo = payloadListM.front().seqNo;
 
         if (seqLE(endSeqNo, lastSeqNo))
         {
-            dataMsg = payloadListM.begin()->second;
+            dataMsg = payloadListM.front().packet;
             uint32 dataLength = dataMsg->getByteLength();
 
             ASSERT(endSeqNo - dataLength == firstSeqNo);
