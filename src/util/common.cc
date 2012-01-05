@@ -55,27 +55,35 @@ int getLevel(const IPvXAddress& addr)
     }
     else
     {
-        //Addresses usable with SCTP, but not as destination or source address
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("0.0.0.0"), IPv4Address("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("224.0.0.0"), IPv4Address("240.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("198.18.0.0"), IPv4Address("255.255.255.0")) ||     //FIXME in RFC 5735: 198.18.0.0/15
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.88.99.0"), IPv4Address("255.255.255.0")))
-            return 0;
+        switch(addr.get4().getAddressCategory())
+        {
+            case IPv4Address::UNSPECIFIED:
+            case IPv4Address::THIS_NETWORK:
+            case IPv4Address::MULTICAST:
+            case IPv4Address::BENCHMARK:
+            case IPv4Address::IPv6_TO_IPv4_RELAY:
+                return 0;
 
-        //Loopback
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("127.0.0.0"), IPv4Address("255.0.0.0")))
-        return 1;
+            case IPv4Address::LOOPBACK:
+                return 1;
 
-        //Link-local
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("169.254.0.0"), IPv4Address("255.255.0.0")))
-            return 2;
+            case IPv4Address::LINKLOCAL:
+                return 2;
 
-        //Private
-        if (addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("10.0.0.0"), IPv4Address("255.0.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("172.16.0.0"), IPv4Address("255.240.0.0")) ||
-            addr.get4().maskedAddrAreEqual(addr.get4(), IPv4Address("192.168.0.0"), IPv4Address("255.255.0.0")))
-            return 3;
-     }
-    //Global
-    return 4;
+            case IPv4Address::PRIVATE_NETWORK:
+                return 3;
+
+            case IPv4Address::GLOBAL:
+            case IPv4Address::BROADCAST:
+                return 4;
+
+            case IPv4Address::IETF:
+            case IPv4Address::TEST_NET:
+            case IPv4Address::RESERVED:
+                return 4;         //need revision: is this good return value for these?
+
+            default:
+                throw cRuntimeError("Unknown IPv4 address category: %d", (int)(addr.get4().getAddressCategory()));
+        }
+    }
 }
