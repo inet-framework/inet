@@ -609,12 +609,12 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src)==NULL)
         {
-
+            delete datagram;
+            delete controlInfo;
 #ifndef WITH_xMIPv6
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 #else /* WITH_xMIPv6 */
-           delete datagram;
             return NULL;
 #endif /* WITH_xMIPv6 */
 
