@@ -91,8 +91,6 @@ class INET_API TCP_NSC_Connection
     void abort();
     void send(cPacket *msgP);
     void do_SEND();
-    INetStreamSocket* getSocket();
-    void do_checkedclose();
 
   public:
     int connIdM;
