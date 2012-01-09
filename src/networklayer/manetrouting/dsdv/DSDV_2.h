@@ -53,6 +53,7 @@ class INET_API DSDV_2 : public cSimpleModule
     InterfaceEntry *interface80211ptr;
     int interfaceId;
     unsigned int sequencenumber;
+    simtime_t timeToLiveRoutingEntry;
 
   protected:
     simtime_t hellomsgperiod_DSDV;
@@ -68,6 +69,24 @@ class INET_API DSDV_2 : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
+};
+
+/**
+ * IPv4 route used by the DSDV protocol (DSDV_2 module).
+ */
+class INET_API DSDVIPv4Route : public IPv4Route
+{
+    protected:
+        unsigned int sequencenumber; // originated from destination. Ensures loop freeness.
+        simtime_t expiryTime;  // time the routing entry is valid until
+
+    public:
+        virtual bool isValid() const { return expiryTime == 0 || expiryTime > simTime(); }
+
+        simtime_t getExpiryTime() const {return expiryTime;}
+        void setExpiryTime(simtime_t time) {expiryTime = time;}
+        void setSequencenumber(int i) {sequencenumber = i;}
+        unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
 #endif

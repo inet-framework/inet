@@ -171,15 +171,15 @@ class INET_API IRoutingTable
     virtual bool deleteRoute(const IPv4Route *entry) = 0;
 
     /**
+     *  Deletes invalid entries from routing table.
+     */
+    virtual void purge() = 0;
+
+    /**
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<IPv4Address> gatherAddresses() const = 0;
     //@}
-   // Dsdv time to live test entry
-    virtual void setTimeToLiveRoutingEntry(simtime_t a) = 0;
-    virtual simtime_t getTimeToLiveRoutingEntry() = 0;
-    virtual void dsdvTestAndDelete() = 0;
-    virtual const bool testValidity(const IPv4Route *entry) const = 0;
 };
 
 #endif

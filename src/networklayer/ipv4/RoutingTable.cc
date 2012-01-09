@@ -45,8 +45,6 @@ std::ostream& operator<<(std::ostream& os, const IPv4Route& e)
 
 RoutingTable::RoutingTable()
 {
- // DSDV
-    timetolive_routing_entry = timetolive_routing_entry.getMaxTime();
 }
 
 RoutingTable::~RoutingTable()
@@ -339,17 +337,16 @@ bool RoutingTable::isLocalMulticastAddress(const IPv4Address& dest) const
     return false;
 }
 
-void RoutingTable::dsdvTestAndDelete()
+void RoutingTable::purge()
 {
-     if (timetolive_routing_entry==timetolive_routing_entry.getMaxTime())
-           return;
      for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
      {
 
            IPv4Route *e = *i;
            if (this->isLocalAddress(e->getHost()))
                      continue;
-           if (((e->getHost()).str() != "*") && ((e->getHost()).str() != "<unspec>") && ((e->getHost()).str() != "127.0.0.1") && (simTime()-(e->getInstallTime()))>timetolive_routing_entry){
+           if (!e->isValid())
+           {
                 //EV << "Routes ends at" << routes.end() <<"\n";
                 deleteRoute(e);
                 //EV << "After deleting Routes ends at" << routes.end() <<"\n";
@@ -357,20 +354,6 @@ void RoutingTable::dsdvTestAndDelete()
                 i--;
            }
       }
-
-}
-
-const bool RoutingTable::testValidity(const IPv4Route *entry) const
-{
-     if (timetolive_routing_entry==timetolive_routing_entry.getMaxTime())
-           return true;
-     if (this->isLocalAddress(entry->getHost()))
-           return true;
-     if (((entry->getHost()).str() != "*") && ((entry->getHost()).str() != "<unspec>") && ((entry->getHost()).str() != "127.0.0.1") && (simTime()-(entry->getInstallTime()))>timetolive_routing_entry){
-                return false;
-      }
-      return true;
-
 }
 
 const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) const
@@ -380,7 +363,7 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
     RoutingCache::iterator it = routingCache.find(dest);
     if (it != routingCache.end())
     {
-        if (it->second==NULL || testValidity(it->second))
+        if (it->second==NULL || it->second->isValid())
             return it->second;
     }
 
@@ -390,7 +373,7 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
         const IPv4Route *e = *i;
-        if (testValidity(e))
+        if (e->isValid())
         {
             if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask())) // match
             {

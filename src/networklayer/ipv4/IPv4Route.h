@@ -61,12 +61,6 @@ class INET_API IPv4Route : public cObject
     RouteType type;     ///< direct or remote
     RouteSource source; ///< manual, routing prot, etc.
     int metric;         ///< Metric ("cost" to reach the destination)
-// DSDV protocol
-    //Originated from destination.Ensures loop freeness.
-    unsigned int sequencenumber;
-    //Time of routing table entry creation
-    simtime_t installtime;
-
 
   private:
     // copying not supported: following are private and also left undefined
@@ -78,6 +72,9 @@ class INET_API IPv4Route : public cObject
     virtual ~IPv4Route() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
+
+    /** test validity of route entry, e.g. check expiry */
+    virtual bool isValid() const { return true; }
 
     void setHost(IPv4Address host)  {this->host = host;}
     void setNetmask(IPv4Address netmask)  {this->netmask = netmask;}
@@ -110,11 +107,6 @@ class INET_API IPv4Route : public cObject
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
-
-    simtime_t getInstallTime() const {return installtime;}
-    void setInstallTime(simtime_t time) {installtime = time;}
-    void setSequencenumber(int i) {sequencenumber = i;}
-    unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
 #endif // __INET_IPv4ROUTE_H

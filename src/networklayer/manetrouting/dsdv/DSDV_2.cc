@@ -53,7 +53,7 @@ void DSDV_2::initialize(int stage)
 
         // schedules a random periodic event: the hello message broadcast from DSDV module
         rt = RoutingTableAccess().get();
-        rt->setTimeToLiveRoutingEntry(par("timetolive_routing_entry"));
+        timeToLiveRoutingEntry = par("timetolive_routing_entry").doubleValue();
 
         //reads from omnetpp.ini
         hellomsgperiod_DSDV = (simtime_t) par("hellomsgperiod_DSDV");
@@ -130,7 +130,7 @@ void DSDV_2::handleMessage(cMessage *msg)
             if (!rt)
                 rt = RoutingTableAccess().get();
 
-            rt->dsdvTestAndDelete();
+            rt->purge();
 
             // count non-loopback interfaces
             // int numIntf = 0;
@@ -318,10 +318,13 @@ void DSDV_2::handleMessage(cMessage *msg)
 
 
 
-            const IPv4Route *entrada_routing = rt->findBestMatchingRoute(src);
+            const IPv4Route *_entrada_routing = rt->findBestMatchingRoute(src);
+            const DSDVIPv4Route *entrada_routing = dynamic_cast<const DSDVIPv4Route *>(_entrada_routing);
 
             //Tests if the DSDV hello message that arrived is useful
-            if (entrada_routing == NULL || (entrada_routing != NULL && (msgsequencenumber>(entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
+            if (_entrada_routing == NULL
+                    || (_entrada_routing != NULL && _entrada_routing->getNetmask() != IPv4Address::ALLONES_ADDRESS)
+                    || (entrada_routing != NULL && (msgsequencenumber>(entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
             {
 
                 //remove old entry
@@ -330,8 +333,8 @@ void DSDV_2::handleMessage(cMessage *msg)
 
                 //adds new information to routing table according to information in hello message
                 {
-                    IPv4Address netmask = IPv4Address(par("netmask").stringValue());
-                    IPv4Route *e = new IPv4Route();
+                    IPv4Address netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address(par("netmask").stringValue());
+                    DSDVIPv4Route *e = new DSDVIPv4Route();
                     e->setHost(src);
                     e->setNetmask(netmask);
                     e->setGateway(next);
@@ -340,7 +343,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setSource(IPv4Route::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);
-                    e->setInstallTime(simTime());
+                    e->setExpiryTime(simTime()+timeToLiveRoutingEntry);
                     rt->addRoute(e);
                 }
 

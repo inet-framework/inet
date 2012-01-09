@@ -268,13 +268,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool isThisInterfaceRegistered(InterfaceEntry *);
 
 //
-// DSDV routines
-//
-//
-    virtual void setTimeToLiveRoutingEntry(simtime_t a) {inet_rt->setTimeToLiveRoutingEntry(a);}
-    virtual simtime_t getTimeToLiveRoutingEntry()  const {return inet_rt->getTimeToLiveRoutingEntry();}
-
-//
 //     Access to the node position
 //
     virtual double getXPos();

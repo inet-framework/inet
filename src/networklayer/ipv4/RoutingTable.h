@@ -80,8 +80,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     IPv4Address routerId;
     bool IPForward;
 
-    // DSDV parameters
-    simtime_t timetolive_routing_entry;
     //
     // Routes:
     //
@@ -266,19 +264,18 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual bool deleteRoute(const IPv4Route *entry);
 
     /**
+     *  Deletes invalid entries from routing table.
+     */
+    virtual void purge();
+
+    /**
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<IPv4Address> gatherAddresses() const;
     //@}
-    // helper for addRoute()
+
+    // helper for sorting routing table, used by addRoute()
     static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
-
-    virtual void setTimeToLiveRoutingEntry(simtime_t a){timetolive_routing_entry = a;}
-    virtual simtime_t getTimeToLiveRoutingEntry(){return timetolive_routing_entry;}
-    // Dsdv time to live test entry
-    virtual void dsdvTestAndDelete();
-    virtual const bool testValidity(const IPv4Route *entry) const;
-
 };
 
 #endif
