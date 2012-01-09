@@ -529,7 +529,7 @@ void RoutingTable::addRoute(const IPv4Route *entry)
     if (entry->getHost().isUnspecified() != entry->getNetmask().isUnspecified())
         error("addRoute(): to add a default route, set both host and netmask to zero");
 
-    if (entry->getHost().doAnd(entry->getNetmask().isUnspecified()).getInt() != 0)
+    if ((entry->getHost().getInt() & ~entry->getNetmask().getInt()) != 0)
         error("addRoute(): suspicious route: host %s has 1-bits outside netmask %s",
               entry->getHost().str().c_str(), entry->getNetmask().str().c_str());
 
