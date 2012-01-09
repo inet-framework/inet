@@ -716,7 +716,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
 
     // The default mask is for manet routing is  IPv4Address::ALLONES_ADDRESS
     if (netm==0)
-        netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address((uint32_t)dst).getNetworkMask().getInt();
+        netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceWlanByAddress(iface);
     IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
@@ -817,7 +817,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     IPv4Address netmask((uint32_t)netm);
     IPv4Address gateway((uint32_t)gtwy);
     if (netm==0)
-        netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address((uint32_t)dst).getNetworkMask().getInt();
+        netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceEntry(index);
     IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
@@ -1254,7 +1254,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     IPv4Address netmask((uint32_t)mask);
     IPv4Address gateway((uint32_t)nextHop);
     if (mask==(Uint128)0)
-        netmask = desAddress.getNetworkMask().getInt();
+        netmask = IPv4Address::ALLONES_ADDRESS;
     InterfaceEntry *ie = getInterfaceEntry(ifaceIndex);
     IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
 

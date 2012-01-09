@@ -187,7 +187,7 @@ void NS_CLASS initialize(int stage)
             if (!isInMacLayer())
             {
                 DEV_NR(i).netmask.s_addr =
-                    getInterfaceEntry(i)->ipv4Data()->getIPAddress().getNetworkMask().getInt();
+                    getInterfaceEntry(i)->ipv4Data()->getNetmask().getInt();
                 DEV_NR(i).ipaddr.s_addr =
                     getInterfaceEntry(i)->ipv4Data()->getIPAddress().getInt();
             }
