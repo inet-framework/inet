@@ -252,7 +252,7 @@
         id="Ethernet_examples"
         name="Ethernet examples"
         description = "Examples for Ethernet"
-        requires = "Ethernet IPv4"
+        requires = "Ethernet IPv4 TCP_INET"
         labels = "protocols"
         nedPackages = "
                        inet.examples.ethernet
