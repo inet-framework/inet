@@ -318,29 +318,17 @@ void DSDV_2::handleMessage(cMessage *msg)
 
 
 
-            IPv4Route *entrada_routing = const_cast<IPv4Route *> (rt->findBestMatchingRoute(src));
+            const IPv4Route *entrada_routing = rt->findBestMatchingRoute(src);
 
             //Tests if the DSDV hello message that arrived is useful
             if (entrada_routing == NULL || (entrada_routing != NULL && (msgsequencenumber>(entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
             {
 
-                //changes information that exists in routing table according to information in hello message
+                //remove old entry
                 if (entrada_routing != NULL)
-                {
-                    IPv4Address netmask = IPv4Address(par("netmask").stringValue()); //reads from omnetpp.ini
-                    entrada_routing->setHost(src);
-                    entrada_routing->setNetmask(netmask);
-                    entrada_routing->setGateway(next);
-                    entrada_routing->setInterface(interface80211ptr);
-                    entrada_routing->setType(IPv4Route::REMOTE);
-                    entrada_routing->setSource(IPv4Route::MANET);
-                    entrada_routing->setMetric(numHops);
-                    entrada_routing->setSequencenumber(msgsequencenumber);
-                    entrada_routing->setInstallTime(simTime());
+                    rt->deleteRoute(entrada_routing);
 
-                }
                 //adds new information to routing table according to information in hello message
-                else
                 {
                     IPv4Address netmask = IPv4Address(par("netmask").stringValue());
                     IPv4Route *e = new IPv4Route();
@@ -355,6 +343,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setInstallTime(simTime());
                     rt->addRoute(e);
                 }
+
 #ifdef      NOforwardHello
                 recHello->setNextIPAddress(source);
                 numHops++;
@@ -411,6 +400,4 @@ void DSDV_2::handleMessage(cMessage *msg)
         error("Message not supported %s", msg->getName());
     }
 }
-
-
 

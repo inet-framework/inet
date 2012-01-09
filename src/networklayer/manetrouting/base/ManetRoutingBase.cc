@@ -656,7 +656,6 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
 
     /* Add route to kernel routing table ... */
     IPv4Address desAddress((uint32_t)dst);
-    IPv4Route *entry = NULL;
     if (!createInternalStore && routesVector)
     {
         delete routesVector;
@@ -690,6 +689,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         return;
 
     bool found = false;
+    const IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         const IPv4Route *e = inet_rt->getRoute(i-1);
@@ -703,17 +703,13 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
             else
             {
                 found = true;
-                entry = const_cast<IPv4Route*>(e);
+                oldentry = e;
             }
         }
     }
 
-
     if (del_entry)
         return;
-
-    if (!found)
-        entry = new   IPv4Route();
 
     IPv4Address netmask((uint32_t)netm);
     IPv4Address gateway((uint32_t)gtwy);
@@ -721,6 +717,25 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     // The default mask is for manet routing is  IPv4Address::ALLONES_ADDRESS
     if (netm==0)
         netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address((uint32_t)dst).getNetworkMask().getInt();
+
+    InterfaceEntry *ie = getInterfaceWlanByAddress(iface);
+    IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
+    IPv4Route::RouteSource routeSource = usetManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+
+    if (found)
+    {
+        if (oldentry->getHost() == desAddress
+                && oldentry->getNetmask() == netmask
+                && oldentry->getGateway() == gateway
+                && oldentry->getMetric() == hops
+                && oldentry->getInterface() == ie
+                && oldentry->getType() == routeType
+                && oldentry->getSource() == routeSource)
+            return;
+        inet_rt->deleteRoute(oldentry);
+    }
+
+    IPv4Route *entry = new IPv4Route();
 
     /// Destination
     entry->setHost(desAddress);
@@ -732,22 +747,15 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     entry->setMetric(hops);
     /// Interface name and pointer
 
-    entry->setInterface(getInterfaceWlanByAddress(iface));
+    entry->setInterface(ie);
 
     /// Route type: Direct or Remote
-    if (entry->getGateway().isUnspecified())
-        entry->setType(IPv4Route::DIRECT);
-    else
-        entry->setType(IPv4Route::REMOTE);
+    entry->setType(routeType);
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
-    if (usetManetLabelRouting)
-        entry->setSource(IPv4Route::MANET);
-    else
-        entry->setSource(IPv4Route::MANET2);
+    entry->setSource(routeSource);
 
-    if (!found)
-        inet_rt->addRoute(entry);
+    inet_rt->addRoute(entry);
 }
 
 // This methods use the nic index to identify the output nic.
@@ -765,7 +773,6 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
 
     /* Add route to kernel routing table ... */
     IPv4Address desAddress((uint32_t)dst);
-    IPv4Route *entry = NULL;
     if (!createInternalStore && routesVector)
     {
          delete routesVector;
@@ -783,7 +790,9 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     }
     if (mac_layer_)
         return;
+
     bool found = false;
+    const IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         const IPv4Route *e = inet_rt->getRoute(i-1);
@@ -797,22 +806,37 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
             else
             {
                 found = true;
-                entry = const_cast<IPv4Route*>(e);
+                oldentry = e;
             }
         }
     }
 
-
     if (del_entry)
         return;
-
-    if (!found)
-        entry = new   IPv4Route();
 
     IPv4Address netmask((uint32_t)netm);
     IPv4Address gateway((uint32_t)gtwy);
     if (netm==0)
         netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address((uint32_t)dst).getNetworkMask().getInt();
+
+    InterfaceEntry *ie = getInterfaceEntry(index);
+    IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
+    IPv4Route::RouteSource routeSource = usetManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+
+    if (found)
+    {
+        if (oldentry->getHost() == desAddress
+                && oldentry->getNetmask() == netmask
+                && oldentry->getGateway() == gateway
+                && oldentry->getMetric() == hops
+                && oldentry->getInterface() == ie
+                && oldentry->getType() == routeType
+                && oldentry->getSource() == routeSource)
+            return;
+        inet_rt->deleteRoute(oldentry);
+    }
+
+    IPv4Route *entry = new IPv4Route();
 
     /// Destination
     entry->setHost(desAddress);
@@ -839,9 +863,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     else
         entry->setSource(IPv4Route::MANET2);
 
-
-    if (!found)
-        inet_rt->addRoute(entry);
+    inet_rt->addRoute(entry);
 }
 
 
@@ -1182,7 +1204,6 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
 
     /* Add route to kernel routing table ... */
     IPv4Address desAddress((uint32_t)destination);
-    IPv4Route *entry = NULL;
     bool del_entry = (nextHop == (Uint128)0);
 
     if (!createInternalStore && routesVector)
@@ -1208,6 +1229,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
         return false;
 
     bool found = false;
+    const IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         const IPv4Route *e = inet_rt->getRoute(i-1);
@@ -1221,7 +1243,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
             else
             {
                 found = true;
-                entry = const_cast<IPv4Route*>(e);
+                oldentry = e;
             }
         }
     }
@@ -1229,13 +1251,27 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     if (del_entry)
         return true;
 
-    if (!found)
-        entry = new   IPv4Route();
-
     IPv4Address netmask((uint32_t)mask);
     IPv4Address gateway((uint32_t)nextHop);
     if (mask==(Uint128)0)
         netmask = desAddress.getNetworkMask().getInt();
+    InterfaceEntry *ie = getInterfaceEntry(ifaceIndex);
+    IPv4Route::RouteType routeType = gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE;
+
+    if (found)
+    {
+        if (oldentry->getHost() == desAddress
+                && oldentry->getNetmask() == netmask
+                && oldentry->getGateway() == gateway
+                && oldentry->getMetric() == hops
+                && oldentry->getInterface() == ie
+                && oldentry->getType() == routeType
+                && oldentry->getSource() == IPv4Route::MANUAL)
+            return true;
+        inet_rt->deleteRoute(oldentry);
+    }
+
+    IPv4Route *entry = new IPv4Route();
 
     /// Destination
     entry->setHost(desAddress);
@@ -1247,21 +1283,15 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     entry->setMetric(hops);
     /// Interface name and pointer
 
-    entry->setInterface(getInterfaceEntry(ifaceIndex));
+    entry->setInterface(ie);
 
-    /// Route type: Direct or Remote
-    if (entry->getGateway().isUnspecified())
-        entry->setType(IPv4Route::DIRECT);
-    else
-        entry->setType(IPv4Route::REMOTE);
+    entry->setType(routeType);
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
     entry->setSource(IPv4Route::MANUAL);
 
-    if (!found)
-        inet_rt->addRoute(entry);
+    inet_rt->addRoute(entry);
     return true;
-
 }
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &nextHop, const char *ifaceName, const int &hops, const Uint128 &mask)

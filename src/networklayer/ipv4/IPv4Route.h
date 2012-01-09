@@ -28,7 +28,7 @@ class InterfaceEntry;
 /**
  * IPv4 route in IRoutingTable.
  *
- * @see IRoutingTable, IRoutingTable
+ * @see IRoutingTable, RoutingTable
  */
 class INET_API IPv4Route : public cObject
 {
