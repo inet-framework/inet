@@ -390,7 +390,7 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
             if (it->second->getSource()==IPv4Route::MANET)
             {
                 if (IPv4Address::maskedAddrAreEqual(dest, it->second->getHost(), IPv4Address::ALLONES_ADDRESS))
-        return it->second;
+                    return it->second;
             }
             else
                 return it->second;
@@ -411,7 +411,7 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
                 bestRoute = e;
                 longestNetmask = e->getNetmask().getInt();
             }
-    }
+        }
     }
 
     if (bestRoute && bestRoute->getSource()==IPv4Route::MANET && bestRoute->getHost()!=dest)
