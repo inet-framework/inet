@@ -399,17 +399,15 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     const IPv4Route *bestRoute = NULL;
-    uint32 longestNetmask = 0;
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
-        IPv4Route *e = *i;
+        const IPv4Route *e = *i;
         if (testValidity(e))
         {
-            if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) && // match
-                (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
+            if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask())) // match
             {
                 bestRoute = e;
-                longestNetmask = e->getNetmask().getInt();
+                break;
             }
         }
     }
