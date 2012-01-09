@@ -380,22 +380,10 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
     RoutingCache::iterator it = routingCache.find(dest);
     if (it != routingCache.end())
     {
-        if (it->second==NULL)
-        {
-              routingCache.clear();
-              localAddresses.clear();
-        }
-        else if (testValidity(it->second))
-        {
-            if (it->second->getSource()==IPv4Route::MANET)
-            {
-                if (IPv4Address::maskedAddrAreEqual(dest, it->second->getHost(), IPv4Address::ALLONES_ADDRESS))
-                    return it->second;
-            }
-            else
-                return it->second;
-        }
+        if (it->second==NULL || testValidity(it->second))
+            return it->second;
     }
+
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     const IPv4Route *bestRoute = NULL;
@@ -409,25 +397,6 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
                 bestRoute = e;
                 break;
             }
-        }
-    }
-
-    if (bestRoute && bestRoute->getSource()==IPv4Route::MANET && bestRoute->getHost()!=dest)
-    {
-        bestRoute = NULL;
-        /* in this case we must find the mask must be 255.255.255.255 route */
-        for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
-        {
-           IPv4Route *e = *i;
-           if (testValidity(e))
-           {
-              if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), IPv4Address::ALLONES_ADDRESS) && // match
-               (!bestRoute || e->getNetmask().getInt()>longestNetmask))  // longest so far
-              {
-                 bestRoute = e;
-                 longestNetmask = e->getNetmask().getInt();
-              }
-           }
         }
     }
 
