@@ -86,7 +86,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // Routes:
     //
     typedef std::vector<IPv4Route *> RouteVector;
-    RouteVector routes;          // Unicast route array
+    RouteVector routes;          // Unicast route array, sorted by netmask desc, host asc, metric asc
     RouteVector multicastRoutes; // Multicast route array
 
     // routing cache: maps destination address to the route
@@ -270,6 +270,9 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      */
     virtual std::vector<IPv4Address> gatherAddresses() const;
     //@}
+    // helper for addRoute()
+    static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
+
     virtual void setTimeToLiveRoutingEntry(simtime_t a){timetolive_routing_entry = a;}
     virtual simtime_t getTimeToLiveRoutingEntry(){return timetolive_routing_entry;}
     // Dsdv time to live test entry

@@ -509,6 +509,20 @@ const IPv4Route *RoutingTable::findRoute(const IPv4Address& target, const IPv4Ad
     return NULL;
 }
 
+bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
+{
+    // helper for sort() in addRoute(). We want routes with longer
+    // prefixes to be at front, so we compare them as "less".
+    // For metric, a smaller value is better (we report that as "less").
+    if (a->getNetmask() != b->getNetmask())
+        return a->getNetmask() > b->getNetmask();
+
+    if (a->getHost() != b->getHost())
+        return a->getHost() < b->getHost();
+
+    return a->getMetric() < b->getMetric();
+}
+
 void RoutingTable::addRoute(const IPv4Route *entry)
 {
     Enter_Method("addRoute(...)");
@@ -530,8 +544,13 @@ void RoutingTable::addRoute(const IPv4Route *entry)
         deleteRoute(getDefaultRoute());
 
     // add to tables
+    // we keep entries sorted by netmask desc, metric asc in routeList, so that we can
+    // stop at the first match when doing the longest netmask matching
     if (!entry->getHost().isMulticast())
-        routes.push_back(const_cast<IPv4Route*>(entry));
+    {
+        RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), entry, routeLessThan);
+        routes.insert(pos, const_cast<IPv4Route*>(entry));
+    }
     else
         multicastRoutes.push_back(const_cast<IPv4Route*>(entry));
 
@@ -609,7 +628,8 @@ void RoutingTable::updateNetmaskRoutes()
             route->setGateway(IPv4Address());
             route->setMetric(ie->ipv4Data()->getMetric());
             route->setInterface(ie);
-            routes.push_back(route);
+            RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
+            routes.insert(pos, route);
         }
     }
 
