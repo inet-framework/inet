@@ -865,13 +865,13 @@ void OSPF::Router::rebuildRoutingTable()
     routingTable.assign(newTable.begin(), newTable.end());
 
     RoutingTableAccess routingTableAccess;
-    std::vector<const IPv4Route*> eraseEntries;
+    std::vector<IPv4Route*> eraseEntries;
     IRoutingTable* simRoutingTable = routingTableAccess.get();
     unsigned long routingEntryNumber = simRoutingTable->getNumRoutes();
     // remove entries from the IPv4 routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
-        const IPv4Route *entry = simRoutingTable->getRoute(i);
-        const OSPF::RoutingTableEntry* ospfEntry = dynamic_cast<const OSPF::RoutingTableEntry*>(entry);
+        IPv4Route *entry = simRoutingTable->getRoute(i);
+        OSPF::RoutingTableEntry* ospfEntry = dynamic_cast<OSPF::RoutingTableEntry*>(entry);
         if (ospfEntry != NULL) {
             eraseEntries.push_back(entry);
         }

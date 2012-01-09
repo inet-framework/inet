@@ -22,12 +22,13 @@
 #include "IPv4Route.h"
 
 #include "InterfaceEntry.h"
+#include "IRoutingTable.h"
 
 
 IPv4Route::IPv4Route()
 {
+    rt = NULL;
     interfacePtr = NULL;
-
     metric = 0;
     type = DIRECT;
     source = MANUAL;
@@ -69,3 +70,8 @@ const char *IPv4Route::getInterfaceName() const
     return interfacePtr ? interfacePtr->getName() : "";
 }
 
+void IPv4Route::changed(int fieldCode)
+{
+    if (rt)
+        rt->routeChanged(this, fieldCode);
+}

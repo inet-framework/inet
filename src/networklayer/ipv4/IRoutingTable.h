@@ -95,7 +95,7 @@ class INET_API IRoutingTable
     /**
      * The routing function.
      */
-    virtual const IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const = 0;
+    virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const = 0;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -140,32 +140,37 @@ class INET_API IRoutingTable
     virtual int getNumRoutes() const = 0;
 
     /**
-     * Returns the kth route. The returned route cannot be modified;
-     * you must delete and re-add it instead. This rule is emphasized
-     * by returning a const pointer.
+     * Returns the kth route.
      */
-    virtual const IPv4Route *getRoute(int k) const = 0;
+    virtual IPv4Route *getRoute(int k) const = 0;
 
     /**
      * Finds and returns the default route, or NULL if it doesn't exist
      */
-    virtual const IPv4Route *getDefaultRoute() const = 0;
+    virtual IPv4Route *getDefaultRoute() const = 0;
 
     /**
      * Adds a route to the routing table. Note that once added, routes
      * cannot be modified; you must delete and re-add them instead.
      */
-    virtual void addRoute(const IPv4Route *entry) = 0;
+    virtual void addRoute(IPv4Route *entry) = 0;
+
+    /**
+     * Removes the given route from the routing table, and returns it.
+     * NULL is returned of the route was not in the routing table.
+     */
+    virtual IPv4Route *removeRoute(IPv4Route *entry) = 0;
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(const IPv4Route *entry) = 0;
+    virtual bool deleteRoute(IPv4Route *entry) = 0;
 
     /**
-     *  Deletes invalid entries from routing table.
+     * Deletes invalid routes from the routing table. Invalid routes are those
+     * where the isValid() method returns false.
      */
     virtual void purge() = 0;
 
@@ -173,6 +178,13 @@ class INET_API IRoutingTable
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<IPv4Address> gatherAddresses() const = 0;
+
+    /**
+     * To be called from route objects whenever a field changes. Used for
+     * maintaining internal data structures and firing "routing table changed"
+     * notifications.
+     */
+    virtual void routeChanged(IPv4Route *entry, int fieldCode) = 0;
     //@}
 };
 

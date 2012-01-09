@@ -217,7 +217,7 @@ void TED::rebuildRoutingTable()
     int j = 0;
     for (int i = 0; i < n; i++)
     {
-        const IPv4Route *entry = rt->getRoute(j);
+        IPv4Route *entry = rt->getRoute(j);
         if (entry->getHost().isMulticast())
         {
             ++j;

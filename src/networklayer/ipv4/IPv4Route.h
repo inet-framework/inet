@@ -24,6 +24,7 @@
 #include "IPv4Address.h"
 
 class InterfaceEntry;
+class IRoutingTable;
 
 /**
  * IPv4 route in IRoutingTable.
@@ -54,18 +55,25 @@ class INET_API IPv4Route : public cObject
     };
 
   protected:
+    IRoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
     IPv4Address host;     ///< Destination
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteType type;     ///< direct or remote
-    RouteSource source; ///< manual, routing prot, etc.
-    int metric;         ///< Metric ("cost" to reach the destination)
+    RouteType type;       ///< direct or remote
+    RouteSource source;   ///< manual, routing prot, etc.
+    int metric;           ///< Metric ("cost" to reach the destination)
+
+  public:
+    enum {F_HOST, F_NETMASK, F_GATEWAY, F_IFACE, F_TYPE, F_SOURCE, F_METRIC, F_LAST}; // field codes for changed()
 
   private:
     // copying not supported: following are private and also left undefined
     IPv4Route(const IPv4Route& obj);
     IPv4Route& operator=(const IPv4Route& obj);
+
+  protected:
+    void changed(int fieldCode);
 
   public:
     IPv4Route();
@@ -73,16 +81,20 @@ class INET_API IPv4Route : public cObject
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
+    /** To be called by the routing table when this route is added or removed from it */
+    virtual void setRoutingTable(IRoutingTable *rt) {this->rt = rt;}
+    IRoutingTable *getRoutingTable() {return rt;}
+
     /** test validity of route entry, e.g. check expiry */
     virtual bool isValid() const { return true; }
 
-    void setHost(IPv4Address host)  {this->host = host;}
-    void setNetmask(IPv4Address netmask)  {this->netmask = netmask;}
-    void setGateway(IPv4Address gateway)  {this->gateway = gateway;}
-    void setInterface(InterfaceEntry *interfacePtr)  {this->interfacePtr = interfacePtr;}
-    void setType(RouteType type)  {this->type = type;}
-    void setSource(RouteSource source)  {this->source = source;}
-    void setMetric(int metric)  {this->metric = metric;}
+    virtual void setHost(IPv4Address _host)  { if (host != _host) {host = _host; changed(F_HOST);} }
+    virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
+    virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
+    virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
+    virtual void setType(RouteType _type)  { if (type != _type) {type = _type; changed(F_TYPE);} }
+    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Destination address prefix to match */
     IPv4Address getHost() const {return host;}

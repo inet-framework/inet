@@ -88,7 +88,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     RouteVector multicastRoutes; // Multicast route array
 
     // routing cache: maps destination address to the route
-    typedef std::map<IPv4Address, const IPv4Route *> RoutingCache;
+    typedef std::map<IPv4Address, IPv4Route *> RoutingCache;
     mutable RoutingCache routingCache;
 
     // local addresses cache (to speed up isLocalAddress())
@@ -115,6 +115,16 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
 
     // invalidates routing cache and local addresses cache
     virtual void invalidateCache();
+
+    // helper for sorting routing table, used by addRoute()
+    static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
+
+    // helper functions:
+    bool deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry);
+    bool deleteInvalidRoutesFrom(RoutingTable::RouteVector &vector);
+
+    void internalAddRoute(IPv4Route *entry);
+    IPv4Route *internalRemoveRoute(IPv4Route *entry);
 
   public:
     RoutingTable();
@@ -172,6 +182,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Checks if the address is a local one, i.e. one of the host's.
      */
     virtual bool isLocalAddress(const IPv4Address& dest) const;
+
     /** @name Routing functions (query the route table) */
     //@{
     /**
@@ -183,7 +194,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     /**
      * The routing function.
      */
-    virtual const IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const;
+    virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -228,32 +239,37 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual int getNumRoutes() const;
 
     /**
-     * Returns the kth route. The returned route cannot be modified;
-     * you must delete and re-add it instead. This rule is emphasized
-     * by returning a const pointer.
+     * Returns the kth route.
      */
-    virtual const IPv4Route *getRoute(int k) const;
+    virtual IPv4Route *getRoute(int k) const;
 
     /**
      * Finds and returns the default route, or NULL if it doesn't exist
      */
-    virtual const IPv4Route *getDefaultRoute() const;
+    virtual IPv4Route *getDefaultRoute() const;
 
     /**
      * Adds a route to the routing table. Note that once added, routes
      * cannot be modified; you must delete and re-add them instead.
      */
-    virtual void addRoute(const IPv4Route *entry);
+    virtual void addRoute(IPv4Route *entry);
+
+    /**
+     * Removes the given route from the routing table, and returns it.
+     * NULL is returned of the route was not in the routing table.
+     */
+    virtual IPv4Route *removeRoute(IPv4Route *entry);
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(const IPv4Route *entry);
+    virtual bool deleteRoute(IPv4Route *entry);
 
     /**
-     *  Deletes invalid entries from routing table.
+     * Deletes invalid routes from the routing table. Invalid routes are those
+     * where the isValid() method returns false.
      */
     virtual void purge();
 
@@ -261,15 +277,14 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<IPv4Address> gatherAddresses() const;
+
+/**
+     * To be called from route objects whenever a field changes. Used for
+     * maintaining internal data structures and firing "routing table changed"
+     * notifications.
+     */
+    virtual void routeChanged(IPv4Route *entry, int fieldCode);
     //@}
-
-    // helper for sorting routing table, used by addRoute()
-    static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
-
-  protected:
-    // helper functions:
-    bool deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry);
-    bool deleteInvalidRoutesFrom(RoutingTable::RouteVector &vector);
 };
 
 #endif

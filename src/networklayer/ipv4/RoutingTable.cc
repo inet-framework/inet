@@ -320,7 +320,7 @@ bool RoutingTable::isLocalAddress(const IPv4Address& dest) const
 // JcM add: check if the dest addr is local network broadcast
 bool RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
 {
-    Enter_Method("isLocalBroadcastAddress(%x)", dest.getInt()); // note: str().c_str() too slow here
+    Enter_Method("isLocalBroadcastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     if (localBroadcastAddresses.empty())
     {
@@ -385,7 +385,7 @@ void RoutingTable::purge()
     }
 }
 
-const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) const
+IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
@@ -398,15 +398,15 @@ const IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) co
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
-    const IPv4Route *bestRoute = NULL;
+    IPv4Route *bestRoute = NULL;
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
-        const IPv4Route *e = *i;
+        IPv4Route *e = *i;
         if (e->isValid())
         {
             if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask())) // match
             {
-                bestRoute = e;
+                bestRoute = const_cast<IPv4Route *>(e);
                 break;
             }
         }
@@ -459,7 +459,7 @@ int RoutingTable::getNumRoutes() const
     return routes.size()+multicastRoutes.size();
 }
 
-const IPv4Route *RoutingTable::getRoute(int k) const
+IPv4Route *RoutingTable::getRoute(int k) const
 {
     if (k < (int)routes.size())
         return routes[k];
@@ -469,7 +469,7 @@ const IPv4Route *RoutingTable::getRoute(int k) const
     return NULL;
 }
 
-const IPv4Route *RoutingTable::getDefaultRoute() const
+IPv4Route *RoutingTable::getDefaultRoute() const
 {
     // if exists default route entry, it is the last valid entry
     for (RouteVector::const_reverse_iterator i=routes.rbegin(); i!=routes.rend() && (*i)->getNetmask().isUnspecified(); ++i)
@@ -494,10 +494,8 @@ bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
     return a->getMetric() < b->getMetric();
 }
 
-void RoutingTable::addRoute(const IPv4Route *entry)
+void RoutingTable::internalAddRoute(IPv4Route *entry)
 {
-    Enter_Method("addRoute(...)");
-
     // check for null address and default route
     if (entry->getHost().isUnspecified() != entry->getNetmask().isUnspecified())
         error("addRoute(): to add a default route, set both host and netmask to zero");
@@ -513,7 +511,7 @@ void RoutingTable::addRoute(const IPv4Route *entry)
     // if this is a default route, remove old default route (we're replacing it)
     if (entry->getNetmask().isUnspecified())
     {
-        const IPv4Route *oldDefaultRoute = getDefaultRoute();
+        IPv4Route *oldDefaultRoute = getDefaultRoute();
         if (oldDefaultRoute != NULL)
             deleteRoute(oldDefaultRoute);
     }
@@ -524,10 +522,19 @@ void RoutingTable::addRoute(const IPv4Route *entry)
     if (!entry->getHost().isMulticast())
     {
         RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), entry, routeLessThan);
-        routes.insert(pos, const_cast<IPv4Route*>(entry));
+        routes.insert(pos, entry);
     }
     else
-        multicastRoutes.push_back(const_cast<IPv4Route*>(entry));
+        multicastRoutes.push_back(entry);
+
+    entry->setRoutingTable(this);
+}
+
+void RoutingTable::addRoute(IPv4Route *entry)
+{
+    Enter_Method("addRoute(...)");
+
+    internalAddRoute(entry);
 
     invalidateCache();
     updateDisplayString();
@@ -535,32 +542,68 @@ void RoutingTable::addRoute(const IPv4Route *entry)
     nb->fireChangeNotification(NF_IPv4_ROUTE_ADDED, entry);
 }
 
-
-bool RoutingTable::deleteRoute(const IPv4Route *entry)
+IPv4Route *RoutingTable::internalRemoveRoute(IPv4Route *entry)
 {
-    Enter_Method("deleteRoute(...)");
-
     RouteVector::iterator i = std::find(routes.begin(), routes.end(), entry);
     if (i!=routes.end())
     {
-        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         routes.erase(i);
-        delete entry;
-        invalidateCache();
-        updateDisplayString();
-        return true;
+        entry->setRoutingTable(NULL);
+        return entry;
     }
     i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
     if (i!=multicastRoutes.end())
     {
-        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         multicastRoutes.erase(i);
-        delete entry;
+        entry->setRoutingTable(NULL);
+        return entry;
+    }
+    return NULL;
+}
+
+IPv4Route *RoutingTable::removeRoute(IPv4Route *entry)
+{
+    Enter_Method("removeRoute(...)");
+
+    entry = internalRemoveRoute(entry);
+
+    if (entry != NULL)
+    {
         invalidateCache();
         updateDisplayString();
-        return true;
+        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry);
     }
-    return false;
+    return entry;
+}
+
+bool RoutingTable::deleteRoute(IPv4Route *entry)
+{
+    Enter_Method("deleteRoute(...)");
+
+    entry = internalRemoveRoute(entry);
+
+    if (entry != NULL)
+    {
+        invalidateCache();
+        updateDisplayString();
+        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry);
+        delete entry;
+    }
+    return entry != NULL;
+}
+
+void RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
+{
+    if (fieldCode==IPv4Route::F_HOST || fieldCode==IPv4Route::F_NETMASK || fieldCode==IPv4Route::F_METRIC) // our data structures depend on these fields
+    {
+        entry = internalRemoveRoute(entry);
+        ASSERT(entry != NULL);  // failure means inconsistency: route was not found in this routing table
+        internalAddRoute(entry);
+
+        invalidateCache();
+        updateDisplayString();
+    }
+    nb->fireChangeNotification(NF_IPv4_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
 }
 
 void RoutingTable::updateNetmaskRoutes()

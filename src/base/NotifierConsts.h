@@ -72,8 +72,10 @@ enum
     // layer 3 - IPv4
     NF_IPv4_ROUTE_ADDED,
     NF_IPv4_ROUTE_DELETED,
+    NF_IPv4_ROUTE_CHANGED,
     NF_IPv6_ROUTE_ADDED,
     NF_IPv6_ROUTE_DELETED,
+    NF_IPv6_ROUTE_CHANGED,
 
     // layer 3 - IPv6
     NF_IPv6_HANDOVER_OCCURRED,

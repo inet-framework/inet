@@ -49,8 +49,10 @@ const char *notificationCategoryName(int category)
 
         case NF_IPv4_ROUTE_ADDED: return "IPv4-ROUTE-ADD";
         case NF_IPv4_ROUTE_DELETED: return "IPv4-ROUTE-DEL";
+        case NF_IPv4_ROUTE_CHANGED: return "IPv4-ROUTE-CHG";
         case NF_IPv6_ROUTE_ADDED: return "IPv6-ROUTE-ADD";
         case NF_IPv6_ROUTE_DELETED: return "IPv6-ROUTE-DEL";
+        case NF_IPv6_ROUTE_CHANGED: return "IPv6-ROUTE-CHG";
 
         case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
         case NF_MIPv6_RO_COMPLETED: return "MIPv6 RO COMPLETED";
