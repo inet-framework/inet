@@ -1213,6 +1213,8 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     }
     else if (createInternalStore && routesVector)
     {
+         //FIXME netmask not stored in internal routesVector, only stored in inet routing table
+         // Is the netmask always ALLONES? If yes, do remove mask parameter...
          RouteMap::iterator it = routesVector->find(destination);
          if (it != routesVector->end())
              routesVector->erase(it);
@@ -1230,12 +1232,15 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
 
     bool found = false;
     const IPv4Route *oldentry = NULL;
+
+    //TODO the entries with ALLONES netmasks stored at the begin of inet route entry vector,
+    // let optimise next search!
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         const IPv4Route *e = inet_rt->getRoute(i-1);
-        if (desAddress == e->getHost())
+        if (desAddress == e->getHost())     // FIXME netmask checking?
         {
-            if (del_entry && !found)
+            if (del_entry && !found)    // FIXME The 'found' never set to true when 'del_entry' is true
             {
                 if (!inet_rt->deleteRoute(e))
                     opp_error("ManetRoutingBase::setRoute can't delete route entry");
