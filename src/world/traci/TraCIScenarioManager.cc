@@ -273,18 +273,6 @@ void TraCIScenarioManager::init_traci() {
 	}
 
 	{
-		// subscribe to list of vehicle ids
-		uint32_t beginTime = 0;
-		uint32_t endTime = 0x7FFFFFFF;
-		std::string objectId = "";
-		uint8_t variableNumber = 1;
-		uint8_t variable1 = ID_LIST;
-		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_VEHICLE_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1);
-		processSubcriptionResult(buf);
-		ASSERT(buf.eof());
-	}
-
-	{
 		// subscribe to list of departed and arrived vehicles, as well as simulation time
 		uint32_t beginTime = 0;
 		uint32_t endTime = 0x7FFFFFFF;
@@ -294,6 +282,18 @@ void TraCIScenarioManager::init_traci() {
 		uint8_t variable2 = VAR_ARRIVED_VEHICLES_IDS;
 		uint8_t variable3 = VAR_TIME_STEP;
 		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_SIM_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1 << variable2 << variable3);
+		processSubcriptionResult(buf);
+		ASSERT(buf.eof());
+	}
+
+	{
+		// subscribe to list of vehicle ids
+		uint32_t beginTime = 0;
+		uint32_t endTime = 0x7FFFFFFF;
+		std::string objectId = "";
+		uint8_t variableNumber = 1;
+		uint8_t variable1 = ID_LIST;
+		TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_VEHICLE_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1);
 		processSubcriptionResult(buf);
 		ASSERT(buf.eof());
 	}
@@ -545,6 +545,7 @@ bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string 
 	bool success = false;
 	TraCIBuffer buf = queryTraCIOptional(CMD_ADDVEHICLE, TraCIBuffer() << vehicleId << vehicleTypeId << routeId << laneId << emitPosition << emitSpeed, success);
 	ASSERT(buf.eof());
+	if (success) activeVehicleCount++;
 	return success;
 }
 
@@ -786,6 +787,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			ASSERT(varType == TYPE_STRINGLIST);
 			uint32_t count; buf >> count;
 			MYDEBUG << "TraCI reports " << count << " active vehicles." << endl;
+			ASSERT(count == activeVehicleCount);
 			std::set<std::string> drivingVehicles;
 			for (uint32_t i = 0; i < count; ++i) {
 				std::string idstring; buf >> idstring;
