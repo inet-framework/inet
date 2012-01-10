@@ -16,12 +16,14 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,            0   ,# <!> Error in module (TCP_NSC) ClientServer.server.tcp (id=29) during network initialization: The loading of 'liblwip.so' NSC stack is unsuccessful: liblwip.so: cannot open shared object file: No such file or directory. Check the LD_LIBRARY_PATH or stackname!
 /examples/ipv6/nclients/,            -f omnetpp.ini -c General -r 0,                1000s,           0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             25s,             0   ,# runtime error
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            25s,             0   ,# runtime error: cannot resolve module type `NetworkConfigurator'
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c General -r 0,                40s,             2d61-34bf    ,# doesn't have a fix fingerprint value
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    1000s,           0   ,# CPU time limit
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility -r 0,         5000s,           0   ,# <!> Error: No such config: CircleMobility.
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0   ,# ERROR (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0   ,# ERROR (zero time simulated)
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50000s,          0   ,# <!> Error in module (LDP) LDPTEST.LSR1.ldp (id=16) at event #26372, t=6.20389140541: Model error: ASSERT: condition uit == fecUp.end() false in function processLABEL_REQUEST, networklayer/ldp/LDP.cc line 955.
+/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                1s,              0   ,# runtime error: cannot resolve module type `NetworkConfigurator'
 /examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                50000s,          0   ,# <!> Error in module (RSVP) RSVPTE4.LSR1.rsvp (id=22) at event #3, t=0: Model error: not a local peer: 10.1.1.1.
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50000s,          0
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50000s,          0

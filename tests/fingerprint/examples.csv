@@ -1,8 +1,8 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           8197-c3e1
-/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            cd7a-eafb
-/examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0,             1000s,           5f07-ae02
-/examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                  2000s,           639c-570e
+/examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           621c-2640
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            0cad-2371
+/examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0,             1000s,           a867-4a02
+/examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                  2000s,           2613-a4ed
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           05bd-2537
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           f019-995f
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           a8f2-f6e9
@@ -106,7 +106,6 @@
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            b6cf-2d75
 /examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            ef6d-8002
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             0c9c-28e0
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            25s,             2f31-3232
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,                10s,             9905-ee02
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             05c2-e365
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
@@ -142,7 +141,6 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          5f8d-4970
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          5f8d-4970
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          122f-0d91
-/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                1s,              5bcd-79ca
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             b44d-340d
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             44d8-e593
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1000s,           526c-f918
@@ -161,12 +159,11 @@
 /examples/voiptool/VoIPToolTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              409e-973a
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           68bc-efed
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7879-1960
-/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            a6be-a1a1
-/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  200s,            bd31-da8b
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             35e1-410d
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            5e1d-35c7
+/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  200s,            0626-19cd
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             6674-a1c0
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       1000s,           3d64-78f9
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            1000s,           44b9-299e
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          1000s,           5cee-e02f
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             36f7-cb04
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             39ea-2016
-
