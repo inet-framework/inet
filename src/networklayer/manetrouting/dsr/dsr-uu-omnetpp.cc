@@ -761,17 +761,10 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
     {
         Enter_Method("Dsr Link Break");
         Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
-#if OMNETPP_VERSION > 0x0400
         if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
             dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
         else
             return;
-#else
-if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedMsg()))
-    dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedMsg());
-else
-    return;
-#endif
         if (!get_confval(UseNetworkLayerAck))
         {
             packetFailed(dgram);
@@ -786,19 +779,9 @@ else
             if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details)))
             {
                 Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
-#if OMNETPP_VERSION > 0x0400
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
-#else
-if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedMsg()))
-#endif
                 {
-
-#if OMNETPP_VERSION > 0x0400
                     DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedPacket());
-#else
-DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedMsg());
-#endif
-
                     DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
                     take(p);
                     EV << "####################################################\n";

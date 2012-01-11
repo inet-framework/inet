@@ -17,8 +17,6 @@
 
 #include "NetAnimTrace.h"
 
-#if OMNETPP_VERSION >= 0x0401
-
 Define_Module(NetAnimTrace);
 
 simsignal_t NetAnimTrace::messageSentSignal = SIMSIGNAL_NULL;
@@ -207,8 +205,4 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
         throw cRuntimeError("invalid layout `%s' in `p' tag of display string", layout);
     }
 }
-
-#endif  // OMNETPP_VERSION
-
-
 

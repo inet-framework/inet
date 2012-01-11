@@ -21,15 +21,7 @@
 #include <fstream>
 #include <INETDefs.h>
 
-#if OMNETPP_VERSION < 0x0401
 
-class INET_API NetAnimTrace : public cSimpleModule
-{
-  protected:
-    virtual void initialize() {error("This module requires at least OMNeT++ 4.1");}
-};
-
-#else
 
 /**
  * Records a NetAnim trace. See NED file for more information.
@@ -52,8 +44,6 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     virtual void addNode(cModule *mod);
     virtual void addLink(cGate *gate);
 };
-
-#endif // OMNETPP_VERSION
 
 #endif  // header guard
 

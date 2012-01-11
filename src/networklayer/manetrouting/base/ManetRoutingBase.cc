@@ -903,11 +903,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
         if (details==NULL)
             return;
         Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
-#if OMNETPP_VERSION > 0x0400
         cPacket * pktAux = frame->getEncapsulatedPacket();
-#else
-        cPacket * pktAux = frame->getEncapsulatedMsg();
-#endif
         if (!mac_layer_ && pktAux!=NULL)
         {
             cPacket *pkt = pktAux->dup();

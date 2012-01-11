@@ -69,11 +69,7 @@ void Ieee80211MgmtAdhocWithEtx::handleDataFrame(Ieee80211DataFrame *frame)
     ///
     /// If it's a ETX packet to send to the appropriate module
     ///
-#if OMNETPP_VERSION > 0x0400
     if (dynamic_cast<ETXBasePacket*>(frame->getEncapsulatedPacket()))
-#else
-    if (dynamic_cast<ETXBasePacket*>(frame->getEncapsulatedMsg()))
-#endif
     {
         if (ETXProcess)
         {

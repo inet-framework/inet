@@ -408,11 +408,7 @@ void NS_CLASS __re_send(RE *re)
     int i;
 
 #ifdef OMNETPP
-#if OMNETPP_VERSION > 0x0400
     cPacket * pkt = dynamic_cast<cPacket *> (re->getEncapsulatedPacket());
-#else
-    cPacket * pkt = dynamic_cast<cPacket *> (re->getEncapsulatedMsg());
-#endif
     if (pkt)
     {
         re->setByteLength(pkt->getByteLength());

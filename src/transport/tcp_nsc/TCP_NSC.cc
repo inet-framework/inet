@@ -756,11 +756,6 @@ void TCP_NSC::wakeup()
 
 void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
 {
-#if OMNETPP_VERSION < 0x0400
-    simtime_t t = simTime();
-    *sec = (unsigned int)(t);
-    *usec = (unsigned int)((t - *sec) * 1000000 + 0.5);
-#else
 #ifdef USE_DOUBLE_SIMTIME
     double t = simTime().dbl();
     *sec = (unsigned int)(t);
@@ -780,7 +775,6 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
 
     *secP = secs;
     *usecP = usecs;
-#endif
 #endif
 
     tcpEV << this << ": gettime(" << *secP << "," << *usecP << ") called\n";
