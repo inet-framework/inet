@@ -244,7 +244,7 @@ void TraCIScenarioManager::init_traci() {
 		uint32_t apiVersion = version.first;
 		std::string serverVersion = version.second;
 
-		if (apiVersion == 2) {
+		if ((apiVersion == 2) || (apiVersion == 3)) {
 			MYDEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
 		}
 		else {
