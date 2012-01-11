@@ -444,10 +444,9 @@ const IPv4Route *RoutingTable::getRoute(int k) const
 
 const IPv4Route *RoutingTable::getDefaultRoute() const
 {
-    int n = (int)routes.size();
-    for (int i=0; i<n; i++)
-        if (routes[i]->getNetmask().isUnspecified())
-            return routes[i];
+    // if exists default route entry, it is the last entry
+    if (!routes.empty() && routes.back()->getNetmask().isUnspecified())
+        return routes.back();
     return NULL;
 }
 
