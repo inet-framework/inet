@@ -405,6 +405,8 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 
         if (!ctrl4->getDestAddr().isMulticast())
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+        else
+            delete udpPacket;   // drop multicast packet
     }
     else
 #endif
@@ -418,6 +420,8 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 
         if (!ctrl6->getDestAddr().isMulticast())
             icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+        else
+            delete udpPacket;   // drop multicast packet
     }
     else
 #endif
