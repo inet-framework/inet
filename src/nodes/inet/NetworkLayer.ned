@@ -44,7 +44,7 @@ module NetworkLayer
         input ospfIn @labels(IPv4ControlInfo/down);
         input pingIn;
         input manetIn;
-        output ifOut[];
+        output ifOut[] @labels(IPv4Datagram);
         output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
         output udpOut @labels(UDPPacket,IPv4ControlInfo/up);
         output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
@@ -76,7 +76,7 @@ module NetworkLayer
         }
         igmp: IGMP {
             parameters:
-                @display("p=85,30");
+                @display("p=39,33");
         }
         errorHandling: ErrorHandling {
             parameters:
@@ -85,11 +85,11 @@ module NetworkLayer
 
     connections allowunconnected:
         // transport Layer
-        ip.transportOut[0] --> tcpOut;
-        ip.transportIn[0] <-- tcpIn;
+        ip.transportOut[0] --> { @display("m=n"); } --> tcpOut;
+        ip.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
 
-        ip.transportOut[1] --> udpOut;
-        ip.transportIn[1] <-- udpIn;
+        ip.transportOut[1] --> { @display("m=n"); } --> udpOut;
+        ip.transportIn[1] <-- { @display("m=n"); } <-- udpIn;
 
         ip.transportOut[2] --> icmp.localIn;
         ip.transportIn[2] <-- icmp.sendOut;
@@ -97,30 +97,30 @@ module NetworkLayer
         ip.transportOut[3] --> igmp.localIn;
         ip.transportIn[3] <-- igmp.sendOut;
 
-        ip.transportOut[4] --> rsvpOut;
-        ip.transportIn[4] <-- rsvpIn;
+        ip.transportOut[4] --> { @display("m=n"); } --> rsvpOut;
+        ip.transportIn[4] <-- { @display("m=n"); } <-- rsvpIn;
 
-        ip.transportOut[5] --> ospfOut;
-        ip.transportIn[5] <-- ospfIn;
+        ip.transportOut[5] --> { @display("m=n"); } --> ospfOut;
+        ip.transportIn[5] <-- { @display("m=n"); } <-- ospfIn;
 
-        ip.transportOut[6] --> sctpOut;
-        ip.transportIn[6] <-- sctpIn;
+        ip.transportOut[6] --> { @display("m=n"); } --> sctpOut;
+        ip.transportIn[6] <-- { @display("m=n"); } <-- sctpIn;
 
-        ip.transportOut[7] --> manetOut;
-        ip.transportIn[7] <-- manetIn;
+        ip.transportOut[7] --> { @display("m=n"); } --> manetOut;
+        ip.transportIn[7] <-- { @display("m=n"); } <-- manetIn;
 
-        icmp.pingOut --> pingOut;
-        icmp.pingIn <-- pingIn;
+        icmp.pingOut --> { @display("m=n"); } --> pingOut;
+        icmp.pingIn <-- { @display("m=n"); } <-- pingIn;
 
         icmp.errorOut --> errorHandling.in;
 
         ip.queueOut --> arp.ipIn;
 
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> ip.queueIn[i];
+            ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> ifOut[i];
+            arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }
 
