@@ -45,6 +45,8 @@ std::ostream& operator<<(std::ostream& os, const IPv4Route& e)
 
 RoutingTable::RoutingTable()
 {
+    ift = NULL;
+    nb = NULL;
 }
 
 RoutingTable::~RoutingTable()
