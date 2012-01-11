@@ -491,8 +491,12 @@ void RoutingTable::addRoute(const IPv4Route *entry)
         error("addRoute(): interface cannot be NULL");
 
     // if this is a default route, remove old default route (we're replacing it)
-    if (entry->getNetmask().isUnspecified() && getDefaultRoute()!=NULL)
-        deleteRoute(getDefaultRoute());
+    if (entry->getNetmask().isUnspecified())
+    {
+        const IPv4Route *oldDefaultRoute = getDefaultRoute();
+        if (oldDefaultRoute != NULL)
+            deleteRoute(oldDefaultRoute);
+    }
 
     // add to tables
     // we keep entries sorted by netmask desc, metric asc in routeList, so that we can
