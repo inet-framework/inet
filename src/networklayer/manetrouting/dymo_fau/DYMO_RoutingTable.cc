@@ -24,7 +24,7 @@
 #include "DYMO.h"
 
 
-DYMO_RoutingTable::DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr)
+DYMO_RoutingTable::DYMO_RoutingTable(DYMO* host, const IPv4Address& myAddr)
 {
     // get our host module
     if (!host) throw std::runtime_error("No parent module found");
@@ -138,7 +138,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
         {
             routeVector.erase(iter);
             Uint128 dest(entry->routeAddress.getInt());
-            (dynamic_cast <DYMO*> (dymoProcess))->omnet_chg_rte(dest, dest, dest, 0, true);
+            dymoProcess->omnet_chg_rte(dest, dest, dest, 0, true);
             //updateDisplayString();
             delete entry;
             return;
@@ -228,12 +228,11 @@ void DYMO_RoutingTable::maintainAssociatedRoutingEntryFor(DYMO_RoutingEntry* ent
         // entry is valid
         Uint128 mask(IPv4Address::ALLONES_ADDRESS.getInt());
         Uint128 gtw(entry->routeNextHopAddress.getInt());
-        (dynamic_cast <DYMO*> (dymoProcess))->setIpEntry(dest, gtw, mask, entry->routeDist);
-
+        dymoProcess->setIpEntry(dest, gtw, mask, entry->routeDist);
     }
     else
     {
-        (dynamic_cast <DYMO*> (dymoProcess))->deleteIpEntry(dest);
+        dymoProcess->deleteIpEntry(dest);
     }
 }
 

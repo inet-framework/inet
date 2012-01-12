@@ -34,7 +34,7 @@
 class DYMO_RoutingTable : public cObject
 {
   public:
-    DYMO_RoutingTable(cObject* host, const IPv4Address& myAddr);
+    DYMO_RoutingTable(DYMO* host, const IPv4Address& myAddr);
     virtual ~DYMO_RoutingTable();
 
     /** @brief inherited from cObject */
@@ -69,7 +69,7 @@ class DYMO_RoutingTable : public cObject
   private:
     typedef std::vector<DYMO_RoutingEntry *> RouteVector;
     RouteVector routeVector;
-    cObject * dymoProcess;
+    DYMO *dymoProcess;
     /**
      * add or delete network layer routing table entry for given DYMO routing table entry, based on whether it's valid
      */
