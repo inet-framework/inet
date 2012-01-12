@@ -151,6 +151,11 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      */
     virtual void printRoutingTable() const;
 
+    /**
+     * Returns the host or router this routing table lives in.
+     */
+    virtual cModule *getHostModule();
+
     /** @name Interfaces */
     //@{
     virtual void configureInterfaceForIPv4(InterfaceEntry *ie);

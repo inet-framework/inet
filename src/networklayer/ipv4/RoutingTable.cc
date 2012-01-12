@@ -198,6 +198,11 @@ void RoutingTable::receiveChangeNotification(int category, const cObject *detail
     }
 }
 
+cModule *RoutingTable::getHostModule()
+{
+    return findContainingNode(this);
+}
+
 bool RoutingTable::deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry)
 {
     bool deleted = false;

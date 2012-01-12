@@ -113,6 +113,11 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void receiveChangeNotification(int category, const cObject *details);
 
     /**
+     * Returns the host or router this interface table lives in.
+     */
+    virtual cModule *getHostModule();
+
+    /**
      * Adds an interface. The second argument should be a module which belongs
      * to the physical interface (e.g. PPP or EtherMac) -- it will be used
      * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),

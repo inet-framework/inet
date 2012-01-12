@@ -52,6 +52,11 @@ class INET_API IRoutingTable
      */
     virtual void printRoutingTable() const = 0;
 
+    /**
+     * Returns the host or router this routing table lives in.
+     */
+    virtual cModule *getHostModule() = 0;
+
     /** @name Interfaces */
     //@{
     virtual void configureInterfaceForIPv4(InterfaceEntry *ie) = 0;

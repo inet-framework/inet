@@ -48,6 +48,11 @@ class INET_API IInterfaceTable
     virtual std::string getFullPath() const = 0;
 
     /**
+     * Returns the host or router this interface table lives in.
+     */
+    virtual cModule *getHostModule() = 0;
+
+    /**
      * Adds an interface. The second argument should be a module which belongs
      * to the physical interface (e.g. PPP or EtherMac) -- it will be used
      * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),
