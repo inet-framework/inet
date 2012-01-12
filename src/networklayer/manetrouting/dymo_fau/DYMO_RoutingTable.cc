@@ -61,7 +61,7 @@ std::string DYMO_RoutingTable::info() const
     ss << getNumRoutes() << " entries";
 
     int broken = 0;
-    for (std::vector<DYMO_RoutingEntry *>::const_iterator iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (RouteVector::const_iterator iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         DYMO_RoutingEntry* e = *iter;
         if (e->routeBroken) broken++;
@@ -69,7 +69,7 @@ std::string DYMO_RoutingTable::info() const
     ss << " (" << broken << " broken)";
 
     ss << " {" << std::endl;
-    for (std::vector<DYMO_RoutingEntry *>::const_iterator iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (RouteVector::const_iterator iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         DYMO_RoutingEntry* e = *iter;
         ss << "  " << *e << std::endl;
@@ -131,7 +131,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
 //  }
 
     // update DYMO routingTable
-    std::vector<DYMO_RoutingEntry *>::iterator iter;
+    RouteVector::iterator iter;
     for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         if (entry == *iter)
@@ -154,7 +154,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
 //=================================================================================================
 void DYMO_RoutingTable::maintainAssociatedRoutingTable()
 {
-    std::vector<DYMO_RoutingEntry *>::iterator iter;
+    RouteVector::iterator iter;
     for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         maintainAssociatedRoutingEntryFor(*iter);
@@ -168,7 +168,7 @@ void DYMO_RoutingTable::maintainAssociatedRoutingTable()
 DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
 {
 
-    std::vector<DYMO_RoutingEntry *>::iterator iter;
+    RouteVector::iterator iter;
 
     for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
@@ -189,7 +189,7 @@ DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
 //=================================================================================================
 DYMO_RoutingEntry* DYMO_RoutingTable::getForAddress(IPv4Address addr)
 {
-    std::vector<DYMO_RoutingEntry *>::iterator iter;
+    RouteVector::iterator iter;
 
     int longestPrefix = 0;
     DYMO_RoutingEntry* longestPrefixEntry = 0;
