@@ -1188,11 +1188,8 @@ void DYMO::packetFailed(IPv4Datagram *dgram)
 
 void DYMO::processLinkBreak(const cObject *details)
 {
-    IPv4Datagram  *dgram = NULL;
-    if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details)))
-        dgram = check_and_cast<IPv4Datagram *>(details);
-    else
-        return;
-    packetFailed(dgram);
+    IPv4Datagram  *dgram = dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details));
+    if (dgram)
+        packetFailed(dgram);
 }
 
