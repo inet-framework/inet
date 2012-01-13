@@ -415,7 +415,7 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPv4Address& dest) con
     for (RouteVector::const_iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
     {
         const IPv4Route *e = *i;
-        if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()))
+        if (e->isValid() && IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()))
         {
             MulticastRoute r;
             r.interf = e->getInterface();
@@ -444,9 +444,12 @@ const IPv4Route *RoutingTable::getRoute(int k) const
 
 const IPv4Route *RoutingTable::getDefaultRoute() const
 {
-    // if exists default route entry, it is the last entry
-    if (!routes.empty() && routes.back()->getNetmask().isUnspecified())
-        return routes.back();
+    // if exists default route entry, it is the last valid entry
+    for (RouteVector::const_reverse_iterator i=routes.rbegin(); i!=routes.rend() && (*i)->getNetmask().isUnspecified(); ++i)
+    {
+        if ((*i)->isValid())
+            return *i;
+    }
     return NULL;
 }
 
@@ -455,8 +458,11 @@ const IPv4Route *RoutingTable::findRoute(const IPv4Address& target, const IPv4Ad
 {
     int n = getNumRoutes();
     for (int i=0; i<n; i++)
-        if (routeMatches(getRoute(i), target, netmask, gw, metric, dev))
-            return getRoute(i);
+    {
+        const IPv4Route *e = getRoute(i);
+        if (e->isValid() && routeMatches(e, target, netmask, gw, metric, dev))
+            return e;
+    }
     return NULL;
 }
 
