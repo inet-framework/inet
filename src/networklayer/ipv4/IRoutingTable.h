@@ -149,12 +149,6 @@ class INET_API IRoutingTable
     /**
      * Finds and returns the default route, or NULL if it doesn't exist
      */
-    virtual const IPv4Route *findRoute(const IPv4Address& target, const IPv4Address& netmask,
-        const IPv4Address& gw, int metric = 0, const char *dev = NULL) const = 0;
-
-    /**
-     * Finds and returns the default route, or NULL if it doesn't exist
-     */
     virtual const IPv4Route *getDefaultRoute() const = 0;
 
     /**

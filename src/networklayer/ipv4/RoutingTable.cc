@@ -502,19 +502,6 @@ const IPv4Route *RoutingTable::getDefaultRoute() const
     return NULL;
 }
 
-const IPv4Route *RoutingTable::findRoute(const IPv4Address& target, const IPv4Address& netmask,
-    const IPv4Address& gw, int metric, const char *dev) const
-{
-    int n = getNumRoutes();
-    for (int i=0; i<n; i++)
-    {
-        const IPv4Route *e = getRoute(i);
-        if (e->isValid() && routeMatches(e, target, netmask, gw, metric, dev))
-            return e;
-    }
-    return NULL;
-}
-
 bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
 {
     // helper for sort() in addRoute(). We want routes with longer
@@ -596,25 +583,6 @@ bool RoutingTable::deleteRoute(const IPv4Route *entry)
         return true;
     }
     return false;
-}
-
-
-bool RoutingTable::routeMatches(const IPv4Route *entry,
-    const IPv4Address& target, const IPv4Address& nmask,
-    const IPv4Address& gw, int metric, const char *dev) const
-{
-    if (!target.isUnspecified() && !target.equals(entry->getHost()))
-        return false;
-    if (!nmask.isUnspecified() && !nmask.equals(entry->getNetmask()))
-        return false;
-    if (!gw.isUnspecified() && !gw.equals(entry->getGateway()))
-        return false;
-    if (metric && metric!=entry->getMetric())
-        return false;
-    if (dev && strcmp(dev, entry->getInterfaceName()))
-        return false;
-
-    return true;
 }
 
 void RoutingTable::updateNetmaskRoutes()

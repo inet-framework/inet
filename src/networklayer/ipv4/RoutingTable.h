@@ -101,11 +101,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // set IPv4 address etc on local loopback
     virtual void configureLoopbackForIPv4();
 
-    // check if a route table entry corresponds to the following parameters
-    virtual bool routeMatches(const IPv4Route *entry,
-        const IPv4Address& target, const IPv4Address& nmask, const IPv4Address& gw,
-        int metric, const char *dev) const;
-
     // set router Id
     virtual void configureRouterId();
 
@@ -238,12 +233,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * by returning a const pointer.
      */
     virtual const IPv4Route *getRoute(int k) const;
-
-    /**
-     * Finds the first route with the given parameters.
-     */
-    virtual const IPv4Route *findRoute(const IPv4Address& target, const IPv4Address& netmask,
-        const IPv4Address& gw, int metric = 0, const char *dev = NULL) const;
 
     /**
      * Finds and returns the default route, or NULL if it doesn't exist
