@@ -73,7 +73,6 @@ class QueueElement : public cPacket
     unsigned int destAddr;
     unsigned int srcAddr;
     DYMO_Packet* obj;
-
 };
 
 //===========================================================================================
@@ -175,7 +174,7 @@ class DYMO : public ManetRoutingBase
     // MEMBER VARIABLES
     //===============================================================================
     /** @brief pointer to the routing table */
-    DYMO_RoutingTable * dymo_routingTable;
+    DYMO_RoutingTable *dymo_routingTable;
 
     /** @brief runs after the node has lost its OwnSeqNum. When either ownSeqNumLossTimeout or ownSeqNumLossTimeoutMax expires, the resumes participation in DYMO */
     DYMO_Timer* ownSeqNumLossTimeout;

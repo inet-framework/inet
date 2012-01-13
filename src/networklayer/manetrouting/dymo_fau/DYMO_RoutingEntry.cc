@@ -20,19 +20,23 @@
 #include "DYMO_RoutingEntry.h"
 #include "DYMO.h"
 
-DYMO_RoutingEntry::DYMO_RoutingEntry(DYMO* dymo) : routeAgeMin(dymo, "routeAgeMin"), routeAgeMax(dymo, "routeAgeMax"), routeNew(dymo, "routeNew"), routeUsed(dymo, "routeUsed"), routeDelete(dymo, "routeDelete"), routingEntry(0), dymo(dymo)
+DYMO_RoutingEntry::DYMO_RoutingEntry(DYMO* dymo) :
+    routeAgeMin(dymo, "routeAgeMin"),
+    routeAgeMax(dymo, "routeAgeMax"),
+    routeNew(dymo, "routeNew"),
+    routeUsed(dymo, "routeUsed"),
+    routeDelete(dymo, "routeDelete"),
+    routingEntry(0),
+    dymo(dymo)
 {
-
 }
 
 DYMO_RoutingEntry::~DYMO_RoutingEntry()
 {
-
 }
 
 std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& o)
 {
-
     os << "[ ";
     os << "destination address: " << o.routeAddress;
 

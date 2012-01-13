@@ -79,7 +79,6 @@ class DYMO_Timer : public cObject
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
-
 };
 
 std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
