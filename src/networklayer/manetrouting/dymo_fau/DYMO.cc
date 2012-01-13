@@ -123,7 +123,6 @@ void DYMO::initialize(int aStage)
     }
 }
 
-
 void DYMO::finish()
 {
     recordScalar("totalPacketsSent", totalPacketsSent);
@@ -169,7 +168,6 @@ void DYMO::finish()
 
 DYMO::~DYMO()
 {
-
     if (dymo_routingTable)
         delete dymo_routingTable;
 
@@ -179,7 +177,6 @@ DYMO::~DYMO()
         delete ownSeqNumLossTimeout;
     if (ownSeqNumLossTimeoutMax)
         delete ownSeqNumLossTimeoutMax;
-
 
     if (rateLimiterRREQ)
         delete rateLimiterRREQ;
@@ -201,7 +198,6 @@ void DYMO::handleMessage(cMessage* apMsg)
     }
     else
     {
-
         if (dynamic_cast<ControlManetRouting *>(apMsg))
         {
             ControlManetRouting * control = check_and_cast <ControlManetRouting *> (apMsg);
@@ -220,7 +216,6 @@ void DYMO::handleMessage(cMessage* apMsg)
         }
         else if (dynamic_cast<UDPPacket *>(apMsg))
         {
-
             udpPacket = check_and_cast<UDPPacket*>(apMsg);
             if (udpPacket->getDestinationPort() != DYMO_PORT)
             {
@@ -312,8 +307,6 @@ void DYMO::processPacket(const IPv4Datagram* datagram)
     queuedDataPackets->queuePacket(datagram);
 }
 
-
-
 void DYMO::handleLowerMsg(cPacket* apMsg)
 {
     /**
@@ -361,8 +354,6 @@ void DYMO::handleLowerRM(DYMO_RM *routingMsg)
         handleLowerRMForRelay(routingMsg);
         return;
     }
-
-
 }
 
 uint32_t DYMO::getNextHopAddress(DYMO_RM *routingMsg)
@@ -387,7 +378,6 @@ InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 
     int interfaceId = controlInfo->getInterfaceId();
     if (interfaceId == -1) error("received packet's UDPControlInfo did not have information on interfaceId");
-
 
     InterfaceEntry* srcIf = NULL;
 
@@ -432,7 +422,6 @@ void DYMO::handleLowerRMForMe(DYMO_RM *routingMsg)
 
 void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
 {
-
     /** current node is not the message destination -> find route to destination **/
     ev << "current node is not the message destination -> find route to destination" << endl;
 
@@ -713,15 +702,12 @@ void DYMO::handleSelfMsg(cMessage* apMsg)
                 break;
             }
         }
-
     }
     else error("unknown message type");
-
 }
 
 void DYMO::sendDown(cPacket* apMsg, int destAddr)
 {
-
     // all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01)
     simtime_t jitter = dblrand() * MAXJITTER;
 
@@ -983,7 +969,6 @@ bool DYMO::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool 
     // loop-possible or inferior?
     if (ab.getSeqNum() == (int)entry->routeSeqNum)
     {
-
         int nodeDist = ab.hasDist() ? (ab.getDist() + 1) : 0; // incremented by one, because draft -10 says to first increment, then compare
         int routeDist = entry->routeDist;
 
@@ -995,7 +980,6 @@ bool DYMO::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool 
         // inferior?
         if (nodeDist > routeDist) return false;
         if ((nodeDist == routeDist) && (!entry->routeBroken) && (isRREQ)) return false;
-
     }
 
     // superior
@@ -1054,7 +1038,6 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
             datagrams.pop_front();
             sendICMP(dgram);
         }
-
 
         // clean up outstandingRREQList
         outstandingRREQList.del(&outstandingRREQ);
@@ -1116,7 +1099,6 @@ DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
 
     for (unsigned int i = 0; i < additional_nodes.size(); i++)
     {
-
         // TODO: not specified in draft, but seems to make sense
         if (additional_nodes[i].getAddress()==myAddr) return NULL;
 
@@ -1178,12 +1160,9 @@ cModule* DYMO::getRouterByAddress(IPv4Address address)
     return dynamic_cast<cModule*>(simulation.getModule(address.getInt() - AUTOASSIGN_ADDRESS_BASE.getInt()));
 }
 
-
-
 /* Called for packets whose delivery fails at the link layer */
 void DYMO::packetFailed(IPv4Datagram *dgram)
 {
-
     /* We don't care about link failures for broadcast or non-data packets */
     if (dgram->getDestAddress() == IPv4Address::ALLONES_ADDRESS || dgram->getDestAddress() == LL_MANET_ROUTERS)
     {
@@ -1207,7 +1186,6 @@ void DYMO::packetFailed(IPv4Datagram *dgram)
     dymo_routingTable->maintainAssociatedRoutingTable();
 }
 
-
 void DYMO::processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
@@ -1217,5 +1195,4 @@ void DYMO::processLinkBreak(const cObject *details)
         return;
     packetFailed(dgram);
 }
-
 
