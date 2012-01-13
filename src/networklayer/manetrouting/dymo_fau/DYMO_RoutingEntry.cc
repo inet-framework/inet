@@ -26,7 +26,6 @@ DYMO_RoutingEntry::DYMO_RoutingEntry(DYMO* dymo) :
     routeNew(dymo, "routeNew"),
     routeUsed(dymo, "routeUsed"),
     routeDelete(dymo, "routeDelete"),
-    routingEntry__(0),
     dymo(dymo)
 {
 }
