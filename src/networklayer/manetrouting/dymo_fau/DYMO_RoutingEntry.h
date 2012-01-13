@@ -72,7 +72,7 @@ class DYMO_RoutingEntry
     DYMO_Timer routeDelete; /**< After the ROUTE_DELETE timeout, the routing table entry should be deleted. */
     /*@}*/
 
-    IPv4Route* routingEntry; /**< Forwarding Route (entry in standard OMNeT++ routingTable) */
+    IPv4Route* routingEntry__; /**< Forwarding Route (entry in standard OMNeT++ routingTable) */
 
   protected:
     DYMO* dymo; /**< DYMO module */
