@@ -265,6 +265,11 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
 
     // helper for sorting routing table, used by addRoute()
     static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
+
+  protected:
+    // helper functions:
+    bool deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry);
+    bool deleteInvalidRoutesFrom(RoutingTable::RouteVector &vector);
 };
 
 #endif

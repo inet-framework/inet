@@ -198,42 +198,32 @@ void RoutingTable::receiveChangeNotification(int category, const cObject *detail
     }
 }
 
-void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
+bool RoutingTable::deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry)
 {
     bool deleted = false;
-    RouteVector::iterator it;
-
-    it = routes.begin();
-    while (it != routes.end())
+    RouteVector::iterator it = vector.begin();
+    while (it != vector.end())
     {
         IPv4Route *route = *it;
         if (route->getInterface() == entry)
         {
             nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route); // rather: going to be deleted
-            it = routes.erase(it);
+            it = vector.erase(it);
             delete route;
             deleted = true;
         }
         else
             ++it;
     }
+    return deleted;
+}
 
-    it = multicastRoutes.begin();
-    while (it != multicastRoutes.end())
-    {
-        IPv4Route *route = *it;
-        if (route->getInterface() == entry)
-        {
-            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route); // rather: going to be deleted
-            it = multicastRoutes.erase(it);
-            delete route;
-            deleted = true;
-        }
-        else
-            ++it;
-    }
+void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
+{
+    bool d1 = deleteInterfaceRoutesFrom(routes, entry);
+    bool d2 = deleteInterfaceRoutesFrom(multicastRoutes, entry);
 
-    if (deleted)
+    if (d1 || d2)
     {
         invalidateCache();
         updateDisplayString();
@@ -363,44 +353,32 @@ bool RoutingTable::isLocalMulticastAddress(const IPv4Address& dest) const
     return false;
 }
 
+bool RoutingTable::deleteInvalidRoutesFrom(RoutingTable::RouteVector &vector)
+{
+    bool deleted = false;
+    RouteVector::iterator it = vector.begin();
+    while (it != vector.end())
+    {
+        IPv4Route *route = *it;
+        if (route->isValid())
+            ++it;
+        else
+        {
+            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route); // rather: going to be deleted
+            it = vector.erase(it);
+            delete route;
+            deleted = true;
+        }
+    }
+    return deleted;
+}
+
 void RoutingTable::purge()
 {
-    RouteVector::iterator i;
-    bool deleted = false;
+    bool d1 = deleteInvalidRoutesFrom(routes);
+    bool d2 = deleteInvalidRoutesFrom(multicastRoutes);
 
-    i = routes.begin();
-    while (i != routes.end())
-    {
-        IPv4Route *e = *i;
-        if (e->isValid())
-            ++i;
-        else
-        {
-            EV << "Deleting entry ip=" << e->getHost().str() << "\n";
-            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, e); // rather: going to be deleted
-            i = routes.erase(i);
-            delete e;
-            deleted = true;
-        }
-    }
-
-    i = multicastRoutes.begin();
-    while (i != multicastRoutes.end())
-    {
-        IPv4Route *e = *i;
-        if (e->isValid())
-            ++i;
-        else
-        {
-            EV << "Deleting entry ip=" << e->getHost().str() << "\n";
-            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, e); // rather: going to be deleted
-            i = multicastRoutes.erase(i);
-            delete e;
-            deleted = true;
-        }
-    }
-
-    if (deleted)
+    if (d1 || d2)
     {
         invalidateCache();
         updateDisplayString();
