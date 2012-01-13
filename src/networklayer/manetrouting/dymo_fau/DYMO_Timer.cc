@@ -57,11 +57,7 @@ std::string DYMO_Timer::detailedInfo() const
 
 bool DYMO_Timer::isRunning()
 {
-    if (active && (expiresAt > simTime()))
-    {
-        return true;
-    }
-    return false;
+    return active && (expiresAt > simTime());
 }
 
 bool DYMO_Timer::isExpired()
