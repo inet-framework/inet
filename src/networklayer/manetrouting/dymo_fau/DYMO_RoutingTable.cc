@@ -27,13 +27,13 @@
 DYMO_RoutingTable::DYMO_RoutingTable(DYMO* host, const IPv4Address& myAddr)
 {
     // get our host module
-    if (!host) throw std::runtime_error("No parent module found");
+    if (!host) throw cRuntimeError("No parent module found");
 
     dymoProcess = host;
 
     // get our routing table
     // routingTable = IPvXAddressResolver().routingTableOf(host);
-    // if (!routingTable) throw std::runtime_error("No routing table found");
+    // if (!routingTable) throw cRuntimeError("No routing table found");
 
     // get our interface table
     // IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(host);
@@ -145,7 +145,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
         }
     }
 
-    throw std::runtime_error("unknown routing entry requested to be deleted");
+    throw cRuntimeError("unknown routing entry requested to be deleted");
 }
 
 //=================================================================================================
