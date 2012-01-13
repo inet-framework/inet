@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2011-2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
 //
 // This program is free software; you can redistribute it and/or
@@ -17,33 +17,20 @@
 //
 
 
-
 package inet.linklayer.etherswitch;
 
 //
-// Implementation of MACRelayUnitNP with traffic control (TC) before
-// dispatcing frames to output ports. For details other than traffic
-// control, refer to MACRelayUnitNP.
-//
-// <b>Traffic Control</b>
-//
-// To model a switching node at the headend of shared access networks
-// like an optical line termination (OLT) in passive optical networks
-// (PONs) or a cable modem termination system (CMTS) in cable
-// networks, classification of frames (e.g., based on MAC addresses or
-// the PCP field of IEEE 802.1Q Tag) and traffic control per class are
-// required. Currently, traffic shaping based on the well-known token
-// bucket filter (TBF) is implemented to control both mean
-// rate/maximum burst and peak rate/MTU through dual TBFs.
+// Implementation of MACRelayUnitNP with VLAN capability.
+// For details other than traffic control, refer to MACRelayUnitNP.
 //
 // @see MACRelayUnitNP
 //
-simple MACRelayUnitNPWithTC like MACRelayUnit
+simple MACRelayUnitNPWithVLAN like MACRelayUnit
 {
     parameters:
         string addressTableFile = default("");  // see MACRelayUnit
         int addressTableSize = default(100); // see MACRelayUnit
-        double agingTime @unit("s") = default(120s); // see MACRelayUnit
+        double agingTime @unit("s") = default(300.0s); // recommended by IEEE 802.1Q; see MACRelayUnit
         int numCPUs = default(1);  // number of CPUs
         double processingTime @unit("s") = default(0s);  // processing time of one frame
         int bufferSize @unit("B") = default(1MiB);  // memory

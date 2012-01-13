@@ -24,7 +24,7 @@ network R37orig
         channel line extends DatarateChannel
         {
             delay = 15ms;
-            datarate = 60Kbps;
+            datarate = 60kbps;
         }
     submodules:
         configurator: NetworkConfigurator;

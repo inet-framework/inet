@@ -65,7 +65,7 @@ simple TCPSessionApp like TCPApp
         int connectPort = default(1000);
         double tOpen @unit("s") = default(1s);
         double tSend @unit("s") = default(1s);
-        int sendBytes @unit("B") = default(1MB);
+        int sendBytes @unit("B") = default(1MiB);
         string sendScript = default("");
         double tClose @unit("s") = default(2s);
         @display("i=block/app");

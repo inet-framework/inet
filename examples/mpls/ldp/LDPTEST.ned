@@ -27,17 +27,17 @@ network LDPTEST
     types:
         channel C5 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 5us;
         }
         channel C10 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 10us;
         }
         channel C15 extends DatarateChannel
         {
-            datarate = 600Kbps;
+            datarate = 600kbps;
             delay = 15us;
         }
     submodules:
