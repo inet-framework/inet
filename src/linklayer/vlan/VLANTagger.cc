@@ -51,7 +51,7 @@ void VLANTagger::initialize()
     else
     {
         vidSet.clear();
-        std::string vids = (std::string) par("vidSet");
+        std::string vids = par("vidSet").stdstringValue();
         if (vids.size() > 0)
         {
             // parse 'vids' and add results into 'vidSet'
@@ -61,7 +61,7 @@ void VLANTagger::initialize()
             {
                 idx2 = vids.find(' ', idx1);
                 vidSet.push_back(atoi((vids.substr(idx1, idx2)).c_str()));
-                if (idx2 != string::npos)
+                if (idx2 != std::string::npos)
                 {
                     idx1 = vids.find_first_not_of(' ', idx2 + 1);
                 }

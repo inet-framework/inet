@@ -20,6 +20,11 @@
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
+#include "VLANTagger.h"
+
+
+#define MAX_LINE 100
+
 
 Define_Module( MACRelayUnitNPWithVLAN);
 
@@ -80,7 +85,7 @@ void MACRelayUnitNPWithVLAN::initialize()
 {
     MACRelayUnitNP::initialize();
 
-    int gateSize = this->gateSize();
+    int gateSize = this->gateSize("lowerLayerIn");
 //    VLANTagger **tagger = new VLANTagger*[gateSize];
     for (int i = 0; i < gateSize; i++)
     {
@@ -91,7 +96,7 @@ void MACRelayUnitNPWithVLAN::initialize()
         std::vector<VID> vids;
         if (tagger->isTagged() == false)
         {
-            vids.push_vector(tagger->getPvid());
+            vids.push_back(tagger->getPvid());
         }
         else
         {
@@ -117,7 +122,7 @@ void MACRelayUnitNPWithVLAN::initialize()
             {
                 // update existing entry in VLAN registration table
                 EV << "Updating entry in VLAN registration table: " << vids[j] << " --> port" << i << endl;
-                VLANRegistrationTable& entry = iter->second;
+                PortMap& entry = iter->second;
                 entry.push_back(portStatus);
             }
         }
@@ -153,7 +158,7 @@ void MACRelayUnitNPWithVLAN::handleAndDispatchFrame(EtherFrame *frame, int input
     if (outputport >= 0)
     {
         EV << "Sending frame " << vlanFrame << " with dest address " << vlanFrame->getDest() << " to port "
-                        << outputport << endl;
+           << outputport << endl;
         send(vlanFrame, "lowerLayerOut", outputport);
     }
     else
@@ -181,7 +186,7 @@ void MACRelayUnitNPWithVLAN::broadcastFrame(EtherFrame *frame, int inputport)
         {
             if ((i != inputport) && (portMap[i]->registration == Fixed))
             {
-                send((EthernetIIFrameWithVLAN*) vlanframe->dup(), "lowerLayerOut", i);
+                send((EthernetIIFrameWithVLAN*) vlanFrame->dup(), "lowerLayerOut", i);
             }
         }
     }
@@ -194,9 +199,8 @@ void MACRelayUnitNPWithVLAN::printAddressTable()
     EV << "Address Table (" << addresstable.size() << " entries):\n";
     for (iter = addresstable.begin(); iter != addresstable.end(); ++iter)
     {
-        EV
-                << "  " << iter->first << " --> vid" << iter - second.vid << " --> port" << iter->second.portno
-                        << (iter->second.insertionTime + agingTime <= simTime() ? " (aged)" : "") << endl;
+        EV << "  " << iter->first << " --> vid" << iter->second.vid << " --> port" << iter->second.portno
+           << (iter->second.insertionTime + agingTime <= simTime() ? " (aged)" : "") << endl;
     }
 }
 
@@ -208,9 +212,8 @@ void MACRelayUnitNPWithVLAN::removeAgedEntriesFromTable()
         VLANAddressEntry& entry = cur->second;
         if (entry.insertionTime + agingTime <= simTime())
         {
-            EV
-                    << "Removing aged entry from Address Table: " << cur->first << " --> vid" << cur->second.vid
-                            << " --> port" << cur->second.portno << "\n";
+            EV << "Removing aged entry from Address Table: " << cur->first << " --> vid" << cur->second.vid
+               << " --> port" << cur->second.portno << "\n";
             addresstable.erase(cur);
         }
     }
@@ -244,13 +247,12 @@ void MACRelayUnitNPWithVLAN::updateVLANTableWithAddress(MACAddress& address, VID
     {
         for (VLANAddressTable::iterator iter = range.first; iter != range.second; ++iter)
         {
-            if ((vid == it->entry.vid) && (portno == it->entry.portno))
+            if ((vid == iter->second.vid) && (portno == iter->second.portno))
             {
                 // update the existing entry
-                EV
-                        << "Updating entry in Address Table: " << address << "--> vid" << vid << " --> port" << portno
-                                << "\n";
-                VLANAddressEntry& entry = it->entry;
+                EV << "Updating entry in Address Table: " << address << "--> vid" << vid << " --> port" << portno
+                   << "\n";
+                VLANAddressEntry& entry = iter->second;
                 entry.vid = vid;
                 entry.portno = portno;
                 entry.insertionTime = simTime();
@@ -280,7 +282,7 @@ void MACRelayUnitNPWithVLAN::updateVLANTableWithAddress(MACAddress& address, VID
         entry.vid = vid;
         entry.portno = portno;
         entry.insertionTime = simTime();
-        addresstable[address] = entry;
+        addresstable.insert(std::pair<MACAddress, VLANAddressEntry>(address, entry));
     }
 }
 
@@ -291,7 +293,7 @@ int MACRelayUnitNPWithVLAN::getPortForVLANAddress(MACAddress& address, VID vid)
 
     if (range.first != range.second)
     {
-        for (iter = range.first; iter != ret.second; it++)
+        for (iter = range.first; iter != range.second; iter++)
         {
             if (vid == iter->second.vid)
             {
@@ -361,7 +363,7 @@ void MACRelayUnitNPWithVLAN::readAddressTable(const char* fileName)
         entry.vid = atoi(vid);
         entry.portno = atoi(portno);
         entry.insertionTime = 0;
-        addresstable.insert(std::pair<MACAddress, VLANAddressEntry>(MACAddress(hexaddress), entry)) = entry;
+        addresstable.insert(std::pair<MACAddress, VLANAddressEntry>(MACAddress(hexaddress), entry));
 
         // Garbage collection before next iteration
         delete[] line;

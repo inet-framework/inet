@@ -20,8 +20,10 @@
 #define __INET_MACRELAYUNITNPWITHVLAN_H
 
 
+#include <vector>
 #include "MACRelayUnitNP.h"
 #include "VLAN.h"
+
 
 //class EtherFrame;
 class EthernetIIFrameWithVLAN;
@@ -166,16 +168,16 @@ class INET_API MACRelayUnitNPWithVLAN : public MACRelayUnitNP
     * Prints contents of address table on ev.
     */
    virtual void printAddressTable();
-//
-//    /**
-//     * Utility function: throws out all aged entries from table.
-//     */
-//    virtual void removeAgedEntriesFromTable();
-//
-//    /**
-//     * Utility function: throws out oldest (not necessarily aged) entry from table.
-//     */
-//    virtual void removeOldestTableEntry();
+
+   /**
+    * Utility function: throws out all aged entries from table.
+    */
+   virtual void removeAgedEntriesFromTable();
+
+   /**
+    * Utility function: throws out oldest (not necessarily aged) entry from table.
+    */
+   virtual void removeOldestTableEntry();
 //
 //    /**
 //     * Utility function (for use by subclasses) to send a flow control
