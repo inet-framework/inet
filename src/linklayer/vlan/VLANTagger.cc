@@ -86,9 +86,9 @@ void VLANTagger::handleMessage(cMessage *msg)
             if (dynamic_cast<EthernetIIFrameWithVLAN *>(msg) != NULL)
             {
                 VID vid = dynamic_cast<EthernetIIFrameWithVLAN *>(msg)->getVid();
-                if ((vid == 0) || (vid == 4095))    // 0 (null VID) or 4095 (xFFF; reserved VID) is not allowed
+                if ((vid == 0) || (vid == 4095))
                 {
-                    EV << "";
+                    EV << "VID of 0 (null) or 4095 (reserved) is not allowed.\n";
                     delete msg;
                 }
                 else
@@ -99,7 +99,7 @@ void VLANTagger::handleMessage(cMessage *msg)
             }
             else
             {
-                EV << "Tagged port cannot receive a frame without a VLAN tag. Drop.";
+                EV << "Tagged port cannot receive a frame without a VLAN tag. Drop.\n";
                 delete msg;
             }
         }
@@ -107,13 +107,20 @@ void VLANTagger::handleMessage(cMessage *msg)
         {
             if (dynamic_cast<EthernetIIFrame *>(msg) != NULL)
             {
-                TagFrame(check_and_cast<EthernetIIFrame *>(msg));
-                // processTaggedFrame(msg);
-                send(msg, "relayg$o");
+            	MACAddress address = ((EthernetIIFrame *)msg)->getDest();
+                EthernetIIFrameWithVLAN *vlanFrame = TagFrame((EthernetIIFrame *)msg);
+                if (vlanFrame != NULL)
+                {
+                	send(vlanFrame, "relayg$o");
+                }
+                else
+                {
+                	EV << "There is no VID registered/learned for MAC address:" << address << endl;
+                }
             }
             else
             {
-                EV << "Untagged port cannot receive a frame with a VLAN tag. Drop.";
+                EV << "Untagged port cannot receive a frame with a VLAN tag. Drop.\n";
                 delete msg;
             }
         }
@@ -149,21 +156,33 @@ void VLANTagger::handleMessage(cMessage *msg)
 
 EthernetIIFrameWithVLAN *VLANTagger::TagFrame(EthernetIIFrame *frame)
 {
-    EthernetIIFrameWithVLAN *vlanFrame = new EthernetIIFrameWithVLAN;
-    vlanFrame->setDest(frame->getDest());
-    vlanFrame->setSrc(frame->getSrc());
-    vlanFrame->setEtherType(frame->getEtherType());
+	int vid;
+
     if (dynamicTagging == true)
     {
-        // TODO: dynamic tagging based on the VLAN address table
+        // dynamic tagging based on the VLAN address table
+    	vid = relay->getVIDForMACAddress(frame->getDest());
 
-        vlanFrame->setVid(0);
+        // TODO: Extend to the case of multiple VIDs for a given MAC address
     }
     else
     {
-        // static VLAN tagging
-        vlanFrame->setVid(pvid);
+        // static tagging based on PVID
+        vid = pvid;
     }
+
+	if (vid < 0)
+	{
+		// cannot find a VID for the given MAC address
+		delete frame;
+		return NULL;
+	}
+
+	EthernetIIFrameWithVLAN *vlanFrame = new EthernetIIFrameWithVLAN;
+    vlanFrame->setDest(frame->getDest());
+    vlanFrame->setSrc(frame->getSrc());
+	vlanFrame->setVid(VID(vid));
+    vlanFrame->setEtherType(frame->getEtherType());
     vlanFrame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_VLAN_TAG_LENGTH);
     cPacket * temp = frame->decapsulate();
     if (temp != NULL)
@@ -176,4 +195,3 @@ EthernetIIFrame *VLANTagger::UntagFrame(EthernetIIFrameWithVLAN *vlanFrame)
 {
     return check_and_cast<EthernetIIFrame *>(vlanFrame);
 }
-

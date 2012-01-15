@@ -317,6 +317,21 @@ int MACRelayUnitNPWithVLAN::getPortForVLANAddress(MACAddress& address, VID vid)
     return -1;
 }
 
+int MACRelayUnitNPWithVLAN::getVIDForMACAddress(MACAddress address)
+{
+    VLANAddressTable::iterator iter = addresstable.find(address);
+
+    // TODO: Extend to the case of multiple VIDs for a given MAC address
+
+    if (iter != addresstable.end())
+    {
+    	return iter->second.vid;
+    }
+
+    // failed to get a vid
+    return -1;
+}
+
 void MACRelayUnitNPWithVLAN::readAddressTable(const char* fileName)
 {
     FILE *fp = fopen(fileName, "r");

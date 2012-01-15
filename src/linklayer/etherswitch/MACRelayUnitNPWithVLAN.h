@@ -192,7 +192,7 @@ class INET_API MACRelayUnitNPWithVLAN : public MACRelayUnitNP
     * classes to provide bridge learning and relaying operations with VLAN IDs.
     *---------------------------------------------------------------------------
     */
-   /** @name Newly defined virtual member functions. */
+   /** @name Newly defined virtual member functions for internal use. */
    //@{
    /**
     * Returns output port for address, or -1 if unknown.
@@ -203,6 +203,20 @@ class INET_API MACRelayUnitNPWithVLAN : public MACRelayUnitNP
     * Enters address into VLAN address table (i.e., the 'Filtering Database' in the IEEE 802.1Q standard).
     */
    virtual void updateVLANTableWithAddress(MACAddress& address, VID vid, int portno);
+   //@}
+
+   /**
+    *---------------------------------------------------------------------------
+    * Define new virtual member functions to provide services to other modules.
+    *---------------------------------------------------------------------------
+    */
+  public:
+   /** @name Newly defined virtual member functions for other modules. */
+   //@{
+   /**
+    * Returns vid for address, or -1 if unknown.
+    */
+   virtual int getVIDForMACAddress(MACAddress address);
    //@}
 };
 
