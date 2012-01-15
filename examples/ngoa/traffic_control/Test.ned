@@ -78,10 +78,10 @@ network Test
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
-			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
+			host[i*n+j].ethg[0] <--> { delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
 		}
 		for i=0..N-1 {
-			onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
+			onu[i].ethg[n] <--> { delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
         }
-        olt.ethg[N] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        olt.ethg[N] <--> { delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
 }

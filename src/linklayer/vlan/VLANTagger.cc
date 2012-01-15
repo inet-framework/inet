@@ -78,7 +78,7 @@ void VLANTagger::handleMessage(cMessage *msg)
         error("No self message in VLANTagger.");
     }
     
-    if (msg->getArrivalGateId() == findGate("ethg$i"))
+    if (msg->getArrivalGateId() == findGate("macg$i"))
     {
         // ingress rule checking
         if (tagged)
