@@ -1161,7 +1161,7 @@ cModule* DYMO::getRouterByAddress(IPv4Address address)
 }
 
 /* Called for packets whose delivery fails at the link layer */
-void DYMO::packetFailed(IPv4Datagram *dgram)
+void DYMO::packetFailed(const IPv4Datagram *dgram)
 {
     /* We don't care about link failures for broadcast or non-data packets */
     if (dgram->getDestAddress() == IPv4Address::ALLONES_ADDRESS || dgram->getDestAddress() == LL_MANET_ROUTERS)
@@ -1188,7 +1188,7 @@ void DYMO::packetFailed(IPv4Datagram *dgram)
 
 void DYMO::processLinkBreak(const cObject *details)
 {
-    IPv4Datagram  *dgram = dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details));
+    const IPv4Datagram *dgram = dynamic_cast<const IPv4Datagram *>(details);
     if (dgram)
         packetFailed(dgram);
 }

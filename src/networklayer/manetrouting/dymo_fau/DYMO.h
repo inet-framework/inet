@@ -264,7 +264,7 @@ class DYMO : public ManetRoutingBase
     virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
 
     virtual void processLinkBreak(const cObject *details);
-    void packetFailed(IPv4Datagram *dgram);
+    void packetFailed(const IPv4Datagram *dgram);
 
 };
 
