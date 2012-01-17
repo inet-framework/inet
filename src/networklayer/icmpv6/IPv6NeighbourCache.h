@@ -36,10 +36,12 @@
  * module is free to manipulate the contents of the Neighbour entries
  * as it pleases.
  *
- * NOTE: we don't keep a separate Default Router List, the Neighbour
- * Cache serves that purpose too. Removing an entry from the
- * Default Router List in our case is done by setting the isDefaultRouter
- * flag of the entry to false.
+ * NOTE: IPv6NeighbourCache also stores the Default Router List.
+ * A router becomes a default router by calling
+ * getDefaultRouterList().add(router) and stops to be a default router
+ * after getDefaultRouterList().remove(router) has been called.
+ * References to default routers are stored in a circular list to
+ * ease round-robin selection.
  */
 class INET_API IPv6NeighbourCache
 {
@@ -71,7 +73,6 @@ class INET_API IPv6NeighbourCache
         const Key *nceKey; //store a pointer back to the key that links to this NCE.-WEI
         MACAddress macAddress;
         bool isRouter;
-        bool isDefaultRouter; // is it on the Default Router List?
         bool isHomeAgent;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
 
         // Neighbour Unreachability Detection variables
@@ -97,6 +98,13 @@ class INET_API IPv6NeighbourCache
         // we bump into a router entry (as nexthop in dest cache, or during
         // default router selection
         simtime_t routerExpiryTime;   // time when router lifetime expires
+
+        // for double-linked list of default routers, see DefaultRouterList
+        Neighbour *prevDefaultRouter;
+        Neighbour *nextDefaultRouter;
+        // is it on the Default Router List?
+        bool isDefaultRouter() const { return prevDefaultRouter && nextDefaultRouter; }
+
     };
 
     // Design note: we could have polymorphic entries in the neighbour cache
@@ -110,9 +118,43 @@ class INET_API IPv6NeighbourCache
     typedef std::map<Key,Neighbour> NeighbourMap;
     typedef NeighbourMap::iterator iterator;
 
+    // cyclic double-linked list of default routers
+    class DefaultRouterList
+    {
+        public:
+        class iterator
+        {
+            friend class DefaultRouterList;
+            private:
+                Neighbour *start;
+                Neighbour *current;
+                iterator(Neighbour *start) : start(start), current(start) {}
+            public:
+                iterator(const iterator &other) : start(other.start), current(other.current) {}
+                Neighbour& operator*() { return *current; }
+                iterator& operator++() /*prefix*/ { current=current->nextDefaultRouter==start?NULL:current->nextDefaultRouter; return *this; }
+                iterator operator++(int) /*postfix*/ { iterator tmp(*this); operator++(); return tmp; }
+                bool operator==(const iterator &rhs) const { return current == rhs.current; }
+                bool operator!=(const iterator &rhs) const { return !(*this==rhs); }
+        };
+
+        private:
+            Neighbour *head;
+        public:
+            DefaultRouterList() : head(NULL) {}
+            void clear() { head = NULL; }
+            Neighbour *getHead() const { return head; }
+            void setHead(Neighbour &router) { ASSERT(router.isDefaultRouter()); head = &router; }
+            void add(Neighbour &router);
+            void remove(Neighbour &router);
+            iterator begin() { return iterator(head); }
+            iterator end() { return iterator(NULL); }
+    };
+
   protected:
     cSimpleModule &neighbourDiscovery; // for cancelAndDelete() calls
     NeighbourMap neighbourMap;
+    DefaultRouterList defaultRouterList;
 
   public:
     IPv6NeighbourCache(cSimpleModule &neighbourDiscovery);
@@ -123,6 +165,8 @@ class INET_API IPv6NeighbourCache
 
     /** Experimental code. */
     virtual const Key *lookupKeyAddr(Key& key);
+
+    DefaultRouterList &getDefaultRouterList() { return defaultRouterList; }
 
     /** For iteration on the internal std::map */
     iterator begin()  {return neighbourMap.begin();}

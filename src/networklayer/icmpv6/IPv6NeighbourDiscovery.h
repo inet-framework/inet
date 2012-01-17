@@ -53,6 +53,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         typedef std::vector<cMessage*> MsgPtrVector;
         typedef IPv6NeighbourCache::Key Key; //for convenience
         typedef IPv6NeighbourCache::Neighbour Neighbour;  // for convenience
+        typedef IPv6NeighbourCache::DefaultRouterList DefaultRouterList; // for convenience
 
     public:
         IPv6NeighbourDiscovery();

@@ -549,40 +549,6 @@ IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
     The policy for selecting routers from the Default Router List is as
     follows:*/
 
-    IPv6Address routerAddr;
-    //Cycle through all entries in the neighbour cache entry.
-    for (IPv6NeighbourCache::iterator it = neighbourCache.begin(); it != neighbourCache.end(); it++)
-    {
-        Key key = it->first;
-        Neighbour nce = it->second;
-        bool routerExpired = false;
-
-        if (nce.isDefaultRouter)
-        {
-            if (simTime()>nce.routerExpiryTime)
-            {
-                EV << "Found an expired default router. Deleting entry...\n";
-                neighbourCache.remove(key.address, key.interfaceID);
-                routerExpired = true;
-            }
-        }
-
-        if (routerExpired == false)
-        {
-            if (nce.reachabilityState == IPv6NeighbourCache::REACHABLE ||
-                nce.reachabilityState == IPv6NeighbourCache::STALE ||
-                nce.reachabilityState == IPv6NeighbourCache::DELAY)//TODO: Need to improve this algorithm!
-            {
-                EV << "Found a router in the neighbour cache(default router list).\n";
-                outIfID = key.interfaceID;
-
-                if (routerExpired == false)
-                    return key.address;
-            }
-        }
-    }
-    EV << "No suitable routers found.\n";
-
     /*1) Routers that are reachable or probably reachable (i.e., in any state
     other than INCOMPLETE) SHOULD be preferred over routers whose reachability
     is unknown or suspect (i.e., in the INCOMPLETE state, or for which no Neighbor
@@ -590,6 +556,26 @@ IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
     router or cycle through the router list in a round-robin fashion as long as
     it always returns a reachable or a probably reachable router when one is
     available.*/
+    DefaultRouterList &defaultRouters = neighbourCache.getDefaultRouterList();
+    for (DefaultRouterList::iterator it = defaultRouters.begin(); it != defaultRouters.end();)
+    {
+        Neighbour &nce = *it;
+        if (simTime() > nce.routerExpiryTime)
+        {
+            EV << "Found an expired default router. Deleting entry...\n";
+            ++it;
+            neighbourCache.remove(nce.nceKey->address, nce.nceKey->interfaceID);
+            continue;
+        }
+        if (nce.reachabilityState != IPv6NeighbourCache::INCOMPLETE)
+        {
+            EV << "Found a probably reachable router in the default router list.\n";
+            defaultRouters.setHead(*nce.nextDefaultRouter);
+            outIfID = nce.nceKey->interfaceID;
+            return nce.nceKey->address;
+        }
+        ++it;
+    }
 
     /*2) When no routers on the list are known to be reachable or probably
     reachable, routers SHOULD be selected in a round-robin fashion, so that
@@ -601,9 +587,18 @@ IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
     A request for a default router is made in conjunction with the sending of a
     packet to a router, and the selected router will be probed for reachability
     as a side effect.*/
+    Neighbour *defaultRouter = defaultRouters.getHead();
+    if (defaultRouter != NULL)
+    {
+        EV << "Found a router in the neighbour cache (default router list).\n";
+        defaultRouters.setHead(*defaultRouter->nextDefaultRouter);
+        outIfID = defaultRouter->nceKey->interfaceID;
+        return defaultRouter->nceKey->address;
+    }
 
-    outIfID = -1; //nothing found yet
-    return IPv6Address();
+    EV << "No suitable routers found.\n";
+    outIfID = -1;
+    return IPv6Address::UNSPECIFIED_ADDRESS;
 }
 
 void IPv6NeighbourDiscovery::timeoutPrefixEntry(const IPv6Address& destPrefix,
@@ -2348,6 +2343,8 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
         //- It sets the IsRouter flag in the cache entry based on the Router
         //  flag in the received advertisement.
         nce->isRouter = naRouterFlag;
+        if (nce->isDefaultRouter() && !nce->isRouter)
+            neighbourCache.getDefaultRouterList().remove(*nce);
 
         //- It sends any packets queued for the neighbour awaiting address
         //  resolution.
@@ -2452,13 +2449,16 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
         EV << "Updating NCE's router flag to " << naRouterFlag << endl;
         nce->isRouter = naRouterFlag;
 
-        //TODO: To be implemented
         /*In those cases where the IsRouter flag changes from TRUE to FALSE as a
         result of this update, the node MUST remove that router from the Default
         Router List and update the Destination Cache entries for all destinations
         using that neighbor as a router as specified in Section 7.3.3. This is
         needed to detect when a node that is used as a router stops forwarding
         packets due to being configured as a host.*/
+        if (nce->isDefaultRouter() && !nce->isRouter)
+            neighbourCache.getDefaultRouterList().remove(*nce);
+
+        //TODO: remove destination cache entries
     }
 }
 
@@ -2647,7 +2647,7 @@ void IPv6NeighbourDiscovery::routersUnreachabilityDetection(const InterfaceEntry
 
     for (IPv6NeighbourCache::iterator it = neighbourCache.begin(); it != neighbourCache.end(); )
     {
-        if ((*it).first.interfaceID == ie->getInterfaceId() && it->second.isDefaultRouter)
+        if ((*it).first.interfaceID == ie->getInterfaceId() && it->second.isDefaultRouter())
         {
             // update 14.9.07 - CB
             IPv6Address rtrLnkAddress = (*it).first.address;
