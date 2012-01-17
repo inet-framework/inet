@@ -249,6 +249,10 @@ void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
     //FIXME TBD fill in the rest
 
     assignRequiredNodeAddresses(ie);
+
+    // add link-local prefix to each interface according to RFC 4861 5.1
+    if (!ie->isLoopback())
+        addStaticRoute(IPv6Address::LINKLOCAL_PREFIX, 10, ie->getInterfaceId(), IPv6Address::UNSPECIFIED_ADDRESS);
 }
 
 void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
