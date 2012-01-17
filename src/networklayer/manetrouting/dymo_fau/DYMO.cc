@@ -179,22 +179,17 @@ void DYMO::finish()
 
 DYMO::~DYMO()
 {
-    if (dymo_routingTable)
-        delete dymo_routingTable;
+    delete dymo_routingTable;
 
     outstandingRREQList.delAll();
 
-    if (ownSeqNumLossTimeout)
-        delete ownSeqNumLossTimeout;
-    if (ownSeqNumLossTimeoutMax)
-        delete ownSeqNumLossTimeoutMax;
+    delete ownSeqNumLossTimeout;
+    delete ownSeqNumLossTimeoutMax;
 
-    if (rateLimiterRREQ)
-        delete rateLimiterRREQ;
+    delete rateLimiterRREQ;
 
     // IPv4* ipLayer = queuedDataPackets->getIpLayer();
-    if (queuedDataPackets)
-        delete queuedDataPackets;
+    delete queuedDataPackets;
 }
 
 void DYMO::handleMessage(cMessage* apMsg)
