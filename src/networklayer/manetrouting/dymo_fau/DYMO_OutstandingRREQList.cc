@@ -84,9 +84,19 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getExpired()
 {
     for (std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
     {
-        if ((*iter)->wait_time->isExpired()) return *iter;
+        if ((*iter)->wait_time->stopWhenExpired()) return *iter;
     }
     return 0;
+}
+
+bool DYMO_OutstandingRREQList::hasActive() const
+{
+    for (std::vector<DYMO_OutstandingRREQ*>::const_iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
+    {
+        if ((*iter)->wait_time->isActive())
+            return true;
+    }
+    return false;
 }
 
 void DYMO_OutstandingRREQList::add(DYMO_OutstandingRREQ* outstandingRREQ)

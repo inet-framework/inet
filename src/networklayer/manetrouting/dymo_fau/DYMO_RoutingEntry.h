@@ -77,6 +77,7 @@ class DYMO_RoutingEntry
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& e);
+    bool hasActiveTimer() { return routeAgeMin.isActive() || routeAgeMax.isActive() || routeNew.isActive() || routeUsed.isActive() || routeDelete.isActive(); }
 };
 
 #endif

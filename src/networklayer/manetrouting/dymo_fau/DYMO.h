@@ -178,6 +178,8 @@ class DYMO : public ManetRoutingBase
     /** @brief pointer to the routing table */
     DYMO_RoutingTable *dymo_routingTable;
 
+    cMessage* timerMsg; // timer self message, used for DYMO_Timer
+
     /** @brief runs after the node has lost its OwnSeqNum. When either ownSeqNumLossTimeout or ownSeqNumLossTimeoutMax expires, the resumes participation in DYMO */
     DYMO_Timer* ownSeqNumLossTimeout;
 
@@ -267,7 +269,7 @@ class DYMO : public ManetRoutingBase
 
     virtual void processLinkBreak(const cObject *details);
     void packetFailed(const IPv4Datagram *dgram);
-
+    void rescheduleTimer();
 };
 
 #endif

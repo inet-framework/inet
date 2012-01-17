@@ -66,6 +66,8 @@ class DYMO_OutstandingRREQList : public cObject
      */
     DYMO_OutstandingRREQ* getExpired();
 
+    bool hasActive() const;
+
     void add(DYMO_OutstandingRREQ* outstandingRREQ);
 
     void del(DYMO_OutstandingRREQ* outstandingRREQ);

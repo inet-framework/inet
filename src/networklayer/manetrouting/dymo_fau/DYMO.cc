@@ -131,6 +131,7 @@ void DYMO::initialize(int aStage)
         // setSendToICMP(true);
         myAddr = getAddress().toUint();
         linkLayerFeeback();
+        timerMsg = new cMessage("DYMO_scheduler");
     }
 }
 
@@ -175,6 +176,9 @@ void DYMO::finish()
     delete queuedDataPackets;
     queuedDataPackets = NULL;
     // ipLayer->unregisterHook(0, this);
+
+    cancelAndDelete(timerMsg);
+    timerMsg = NULL;
 }
 
 DYMO::~DYMO()
@@ -190,6 +194,14 @@ DYMO::~DYMO()
 
     // IPv4* ipLayer = queuedDataPackets->getIpLayer();
     delete queuedDataPackets;
+
+    cancelAndDelete(timerMsg);
+}
+
+void DYMO::rescheduleTimer()
+{
+    if (!timerMsg->isScheduled())
+        scheduleAt(simTime()+1.0, timerMsg);
 }
 
 void DYMO::handleMessage(cMessage* apMsg)
@@ -236,6 +248,7 @@ void DYMO::handleMessage(cMessage* apMsg)
                 // local address delete packet
                 delete msg_aux;
                 delete controlInfo;
+                delete apMsg;
                 return;
             }
             msg_aux->setControlInfo(controlInfo);
@@ -309,6 +322,7 @@ void DYMO::processPacket(const IPv4Datagram* datagram)
         outstandingRREQ->destAddr = destAddr.getInt();
         outstandingRREQ->creationTime = simTime();
         outstandingRREQList.add(outstandingRREQ);
+        rescheduleTimer();
     }
     queuedDataPackets->queuePacket(datagram);
 }
@@ -594,6 +608,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
             // start delete timer
             // TODO: not specified in draft, but seems to make sense
             entry->routeDelete.start(ROUTE_DELETE_TIMEOUT);
+            rescheduleTimer();
 
             // update unreachableNode.SeqNum
             // TODO: not specified in draft, but seems to make sense
@@ -654,60 +669,67 @@ void DYMO::handleLowerUERR(DYMO_UERR *my_uerr)
 void DYMO::handleSelfMsg(cMessage* apMsg)
 {
     ev << "handle self message" << endl;
-    if (dynamic_cast<DYMO_Timeout*>(apMsg) != NULL)
+    if (apMsg == timerMsg)
     {
+        bool hasActive = false;
+
         // Something timed out. Let's find out what.
 
         // Maybe it's a ownSeqNumLossTimeout
-        if (ownSeqNumLossTimeout->isExpired() || ownSeqNumLossTimeoutMax->isExpired())
+        if (ownSeqNumLossTimeout->stopWhenExpired() || ownSeqNumLossTimeoutMax->stopWhenExpired())
         {
             ownSeqNumLossTimeout->cancel();
             ownSeqNumLossTimeoutMax->cancel();
             ownSeqNum = 1;
         }
+        hasActive = ownSeqNumLossTimeout->isActive() || ownSeqNumLossTimeoutMax->isActive();
 
         // Maybe it's a outstanding RREQ
-        DYMO_OutstandingRREQ* outstandingRREQ = outstandingRREQList.getExpired();
-        if (outstandingRREQ)
-        {
+        DYMO_OutstandingRREQ* outstandingRREQ;
+        while ((outstandingRREQ = outstandingRREQList.getExpired()) != NULL )
             handleRREQTimeout(*outstandingRREQ);
-        }
+
+        if (!hasActive)
+            hasActive = outstandingRREQList.hasActive();
 
         // Maybe it's a DYMO_RoutingEntry
-        for (int i = 0; i < dymo_routingTable->getNumRoutes(); i++)
+        for (int i = 0; i < dymo_routingTable->getNumRoutes(); )
         {
             DYMO_RoutingEntry *entry = dymo_routingTable->getRoute(i);
-            if (entry->routeAgeMin.isExpired())
-            {
-                break;
-            }
-            if (entry->routeAgeMax.isExpired())
-            {
-                dymo_routingTable->deleteRoute(entry);
-                break; // if other timeouts also expired, they will have gotten their own DYMO_Timeout scheduled, so it's ok to stop here
-            }
-            if (entry->routeNew.isExpired())
-            {
-                if (!entry->routeUsed.isRunning())
-                {
-                    entry->routeDelete.start(ROUTE_DELETE_TIMEOUT);
-                }
-                break;
-            }
-            if (entry->routeUsed.isExpired())
-            {
-                if (!entry->routeNew.isRunning())
-                {
-                    entry->routeDelete.start(ROUTE_DELETE_TIMEOUT);
-                }
-                break;
-            }
-            if (entry->routeDelete.isExpired())
+            bool deleted = false;
+
+            entry->routeAgeMin.stopWhenExpired();
+
+            if (entry->routeAgeMax.stopWhenExpired())
             {
                 dymo_routingTable->deleteRoute(entry);
-                break;
+                // if other timeouts also expired, they will have gotten their own DYMO_Timeout scheduled, so it's ok to stop here
+                deleted = true;
+            }
+            else
+            {
+                bool routeNewStopped = entry->routeNew.stopWhenExpired();
+                bool routeUsedStopped = entry->routeUsed.stopWhenExpired();
+
+                if ((routeNewStopped || routeUsedStopped) && !(entry->routeUsed.isRunning() || entry->routeNew.isRunning()))
+                    entry->routeDelete.start(ROUTE_DELETE_TIMEOUT);
+
+                if (entry->routeDelete.stopWhenExpired())
+                {
+                    dymo_routingTable->deleteRoute(entry);
+                    deleted = true;
+                }
+            }
+
+            if (!deleted)
+            {
+                if (!hasActive)
+                    hasActive = entry->hasActiveTimer();
+                i++;
             }
         }
+        if (hasActive)
+            rescheduleTimer();
     }
     else error("unknown message type");
 }
@@ -958,6 +980,7 @@ void DYMO::updateRouteLifetimes(unsigned int targetAddr)
 
     entry->routeUsed.start(ROUTE_USED_TIMEOUT);
     entry->routeDelete.cancel();
+    rescheduleTimer();
 
     dymo_routingTable->maintainAssociatedRoutingTable();
     ev << "lifetimes of route to destination node " << targetAddr << " are up to date "  << endl;
@@ -1082,6 +1105,8 @@ bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ
     entry->routeNew.start(ROUTE_NEW_TIMEOUT);
     entry->routeUsed.cancel();
     entry->routeDelete.cancel();
+
+    rescheduleTimer();
 
     dymo_routingTable->maintainAssociatedRoutingTable();
 

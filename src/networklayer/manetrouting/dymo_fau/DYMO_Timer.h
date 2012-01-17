@@ -26,6 +26,7 @@
 #include "DYMO_Timeout_m.h"
 
 //===========================================================================================
+// FIXME obsolete
 // simple, OMNeT++-aware timer class.
 // Starting a DYMO_Timer will schedule a DYMO_Timeout cMessage to be sent to the parent when
 // the timer exires. Warning: This cMessage is recycled for every iteration - do not delete!
@@ -38,7 +39,7 @@ class DYMO_Timer : public cObject
      * @param name helps differentiate DYMO_Timer instances
      * @param interval sets the default interval after which to expire the DYMO_Timer
      */
-    DYMO_Timer(cSimpleModule* parent, std::string name, simtime_t interval = 0);
+    DYMO_Timer(cSimpleModule* parent, const char *name, simtime_t interval = 0);
 
     ~DYMO_Timer();
 
@@ -52,19 +53,18 @@ class DYMO_Timer : public cObject
     virtual std::string detailedInfo() const;
 
     /** @brief returns whether the given timeout was started, but is not yet expired */
-    bool isRunning();
+    bool isRunning() const;
 
-    /** @brief returns whether the given timeout is to be considered expired */
-    bool isExpired();
+    bool isActive() const { return active; }
+
+    /** @brief stop timer when it active and expired, returns whether the given timeout is to be considered expired */
+    bool stopWhenExpired();
 
     /** @brief (re-)starts the timeout */
     void start(simtime_t interval = 0);
 
     /** @brief cancels the timeout */
     void cancel();
-
-    /** @brief checks if the given cMessage is associated with this DYMO_Timer */
-    bool owns(const cMessage* message) const;
 
     /** @brief returns the last set interval of this timer */
     simtime_t getInterval() const;
@@ -73,7 +73,6 @@ class DYMO_Timer : public cObject
     cSimpleModule* parent; /**< cSimpleModule that will receive cMessage instances that indicate timeouts */
     char* name; /**< descriptive name */
     simtime_t interval; /**< last set interval after which to expire this DYMO_Timer */
-    DYMO_Timeout* message; /**< cMessage to be scheduled to remind simulation core of timeout */
     simtime_t expiresAt; /**< point in simulation time from where on this DYMO_Timer will be considered expired */
     bool active; /**< false if this DYMO_Timer is not currently active */
 
