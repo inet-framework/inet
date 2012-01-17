@@ -84,6 +84,8 @@ class DYMO : public ManetRoutingBase
     int numInitStages() const  {return 5;}
     void initialize(int);
     void finish();
+
+    DYMO();
     ~DYMO();
 
     /** @brief Function called whenever a message arrives at the module */

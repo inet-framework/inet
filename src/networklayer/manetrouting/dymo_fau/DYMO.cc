@@ -42,6 +42,17 @@ const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are dela
 const IPv4Address LL_MANET_ROUTERS = "224.0.0.90"; /**< Link-local multicast address of all MANET routers (TBD) */
 }
 
+DYMO::DYMO()
+{
+    dymo_routingTable = NULL;
+    timerMsg = NULL;
+    ownSeqNumLossTimeout = NULL;
+    ownSeqNumLossTimeoutMax = NULL;
+    queuedDataPackets = NULL;
+    rateLimiterRREQ = NULL;
+    DYMO_INTERFACES = NULL;
+}
+
 void DYMO::initialize(int aStage)
 {
     cSimpleModule::initialize(aStage);
