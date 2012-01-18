@@ -280,15 +280,22 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
     if (rt->isLocalAddress(destAddr))
     {
         EV << "local delivery\n";
-        if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
 
-        if(fromHL && datagram->getDontFragment() && datagram->getByteLength() > destIE->getMTU())
+        if (fromHL)
         {
-            EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_FRAGMENTATION_NEEDED);
-            numDropped++;
-            return;
+            if (destIE)
+                EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
+
+            if (datagram->getSrcAddress().isUnspecified())
+                datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
+
+            if (datagram->getDontFragment() && datagram->getByteLength() > ift->getFirstLoopbackInterface()->getMTU())
+            {
+                EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
+                icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_FRAGMENTATION_NEEDED);
+                numDropped++;
+                return;
+            }
         }
 
         numLocalDeliver++;
@@ -303,7 +310,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
         {
             EV << "limited broadcast received \n";
             if (datagram->getSrcAddress().isUnspecified())
-                datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
+                throw cRuntimeError("Received broadcast datagram '%s' without source address filled in", datagram->getName());
             numLocalDeliver++;
             reassembleAndDeliver(datagram);
         }
