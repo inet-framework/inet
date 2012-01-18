@@ -27,7 +27,7 @@ std::string intToString(int i)
   return str;
 }
 
-int getLevel(const IPvXAddress& addr)
+int getAddressLevel(const IPvXAddress& addr)
 {
     if (addr.isIPv6())
     {
@@ -60,8 +60,12 @@ int getLevel(const IPvXAddress& addr)
             case IPv4Address::UNSPECIFIED:
             case IPv4Address::THIS_NETWORK:
             case IPv4Address::MULTICAST:
+            case IPv4Address::BROADCAST:
             case IPv4Address::BENCHMARK:
             case IPv4Address::IPv6_TO_IPv4_RELAY:
+            case IPv4Address::IETF:
+            case IPv4Address::TEST_NET:
+            case IPv4Address::RESERVED:
                 return 0;
 
             case IPv4Address::LOOPBACK:
@@ -74,13 +78,7 @@ int getLevel(const IPvXAddress& addr)
                 return 3;
 
             case IPv4Address::GLOBAL:
-            case IPv4Address::BROADCAST:
                 return 4;
-
-            case IPv4Address::IETF:
-            case IPv4Address::TEST_NET:
-            case IPv4Address::RESERVED:
-                return 4;         //need revision: is this good return value for these?
 
             default:
                 throw cRuntimeError("Unknown IPv4 address category: %d", (int)(addr.get4().getAddressCategory()));

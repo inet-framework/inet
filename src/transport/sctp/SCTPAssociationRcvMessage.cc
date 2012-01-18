@@ -411,11 +411,11 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             {
                 adv = localAddressList;
             }
-            int rlevel = getLevel(remoteAddr);
+            int rlevel = getAddressLevel(remoteAddr);
             if (rlevel>0)
                 for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
                 {
-                    if (getLevel((*i))>=rlevel)
+                    if (getAddressLevel((*i))>=rlevel)
                     {
                         sctpMain->addLocalAddress(this, (*i));
                         state->localAddresses.push_back((*i));

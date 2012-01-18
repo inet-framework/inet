@@ -26,7 +26,7 @@
 
 std::string intToString(int i);
 
-int getLevel(const IPvXAddress& addr);
+int getAddressLevel(const IPvXAddress& addr);
 
 #endif
 
