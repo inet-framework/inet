@@ -85,17 +85,11 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     }
     else if (buf->datagram->getEncapsulatedPacket() == NULL && datagram->getEncapsulatedPacket() != NULL)
     {
-        if (buf->datagram->hasBitError())
-            datagram->getEncapsulatedPacket()->setBitError(true);
         delete buf->datagram;
         buf->datagram = datagram;
     }
     else
     {
-        cPacket *bufPacket = buf->datagram->getEncapsulatedPacket() ? buf->datagram->getEncapsulatedPacket() : buf->datagram;
-        cPacket *curPacket = datagram->getEncapsulatedPacket() ? datagram->getEncapsulatedPacket() : datagram;
-        if (curPacket->hasBitError())
-            bufPacket->setBitError(true);
         delete datagram;
     }
 
