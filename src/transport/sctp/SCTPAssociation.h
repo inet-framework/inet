@@ -589,6 +589,9 @@ class INET_API SCTPAssociation : public cObject
         /** Utility: returns name of SCTP_I_xxx constants */
         static const char* indicationName(const int32 code);
 
+        /** Utility: return IPv4 or IPv6 address level */
+        static int getAddressLevel(const IPvXAddress& addr);
+
         /* @name Various getters */
         //@{
         inline int32 getFsmState() const { return fsm->getState(); };

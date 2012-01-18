@@ -22,11 +22,7 @@
 
 #include <string>
 
-#include "IPvXAddress.h"
-
 std::string intToString(int i);
-
-int getAddressLevel(const IPvXAddress& addr);
 
 #endif
 
