@@ -443,8 +443,9 @@ void SCTPAssociation::sendInit()
         sctpEV3<<"level of remote address="<<rlevel<<"\n";
         for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
         {
-            sctpEV3<<"level of address "<<(*i)<<" = "<<getAddressLevel((*i))<<"\n";
-            if (getAddressLevel((*i))>=rlevel)
+            int addressLevel = getAddressLevel(*i);
+            sctpEV3<<"level of address "<<(*i)<<" = "<<addressLevel<<"\n";
+            if (addressLevel>=rlevel)
             {
                 initChunk->setAddressesArraySize(addrNum+1);
                 initChunk->setAddresses(addrNum++, (*i));
@@ -454,7 +455,7 @@ void SCTPAssociation::sendInit()
                 if (localAddr.get4().getInt()==0)
                     localAddr = (*i);
             }
-            else if (rlevel==4 && getAddressLevel((*i))==3 && friendly)
+            else if (rlevel==4 && addressLevel==3 && friendly)
             {
                 sctpMain->addLocalAddress(this, (*i));
                 state->localAddresses.push_back((*i));
