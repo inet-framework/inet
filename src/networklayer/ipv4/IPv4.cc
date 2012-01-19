@@ -158,7 +158,9 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         delete datagram->removeControlInfo(); // delete all control message except the last
 
     // route packet
-    if (datagram->getDestAddress().isMulticast())
+    if (fromIE->isLoopback())
+        reassembleAndDeliver(datagram);
+    else if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, NULL, fromIE);
     else
         routePacket(datagram, NULL, false, NULL);
@@ -293,21 +295,17 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
             if (destIE)
                 EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
 
-            if (datagram->getSrcAddress().isUnspecified())
-                datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
-
-            if (datagram->getDontFragment() && datagram->getByteLength() > ift->getFirstLoopbackInterface()->getMTU())
-            {
-                EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-                icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_FRAGMENTATION_NEEDED);
-                numDropped++;
-                return;
-            }
+            destIE = ift->getFirstLoopbackInterface();
+            ASSERT(destIE);
+            fragmentAndSend(datagram, destIE, destAddr);
         }
-
-        reassembleAndDeliver(datagram);
+        else
+        {
+            reassembleAndDeliver(datagram);
+        }
         return;
     }
+
     // JcM Fix: broadcast limited address 255.255.255.255 or network broadcast, i.e. 192.168.0.255/24
     if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
     {
@@ -760,6 +758,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4
     if (ie->isLoopback())
     {
         // no interface module for loopback, forward packet internally
+        // FIXME shouldn't be arrival(datagram) ?
         handlePacketFromNetwork(datagram, ie);
     }
     else
