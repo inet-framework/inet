@@ -157,9 +157,6 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     else if (datagram->getMoreFragments())
         delete datagram->removeControlInfo(); // delete all control message except the last
 
-    // hop counter decrement; FIXME but not if it will be locally delivered
-    datagram->setTimeToLive(datagram->getTimeToLive()-1);
-
     // route packet
     if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, NULL, fromIE);
@@ -627,8 +624,12 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     if (datagram->getSrcAddress().isUnspecified())
         datagram->setSrcAddress(ie->ipv4Data()->getIPAddress());
 
+    // hop counter decrement; but not if it will be locally delivered
+    if (!ie->isLoopback())
+        datagram->setTimeToLive(datagram->getTimeToLive()-1);
+
     // hop counter check
-    if (datagram->getTimeToLive() <= 0)
+    if (datagram->getTimeToLive() < 0)
     {
         // drop datagram, destruction responsibility in ICMP
         EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
