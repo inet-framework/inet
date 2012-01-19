@@ -313,45 +313,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
     // JcM Fix: broadcast limited address 255.255.255.255 or network broadcast, i.e. 192.168.0.255/24
     if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
     {
-        // check if local
-        if (!fromHL)
-        {
-            EV << "limited broadcast received \n";
-            if (datagram->getSrcAddress().isUnspecified())
-                throw cRuntimeError("Received broadcast datagram '%s' without source address filled in", datagram->getName());
-            reassembleAndDeliver(datagram);
-        }
-        else
-        {
-            // broadcast packet from higher layer: send limited broadcast packet
-            if (destIE!=NULL)
-            {
-                if (datagram->getSrcAddress().isUnspecified())
-                     datagram->setSrcAddress(destIE->ipv4Data()->getIPAddress());
-                fragmentAndSend(datagram, destIE, IPv4Address::ALLONES_ADDRESS);
-            }
-            else if (forceBroadcast)
-            {
-                for (int i = 0; i<ift->getNumInterfaces(); i++)
-                {
-                    InterfaceEntry *ie = ift->getInterface(i);
-                    //FIXME bug #458: If no outgoing interface is specified, and forceBroadcast parameter is true, the datagram should be delivered locally too.
-                    if (!ie->isLoopback())
-                    {
-                        IPv4Datagram * dataAux = datagram->dup();
-                        if (dataAux->getSrcAddress().isUnspecified())
-                             dataAux->setSrcAddress(ie->ipv4Data()->getIPAddress());
-                        fragmentAndSend(dataAux, ie, IPv4Address::ALLONES_ADDRESS);
-                    }
-                }
-                delete datagram;
-            }
-            else
-            {
-                numDropped++;
-                delete datagram;
-            }
-        }
+        routeLocalBroadcastPacket(datagram, destIE, fromHL);
         return;
     }
 
@@ -441,6 +403,50 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
 
     fragmentAndSend(datagram, destIE, nextHopAddr);
 }
+
+void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
+{
+    // check if local
+    if (!fromHL)
+    {
+        EV << "limited broadcast received \n";
+        if (datagram->getSrcAddress().isUnspecified())
+            throw cRuntimeError("Received broadcast datagram '%s' without source address filled in", datagram->getName());
+        reassembleAndDeliver(datagram);
+    }
+    else
+    {
+        // broadcast packet from higher layer: send limited broadcast packet
+        if (destIE!=NULL)
+        {
+            if (datagram->getSrcAddress().isUnspecified())
+                datagram->setSrcAddress(destIE->ipv4Data()->getIPAddress());
+            fragmentAndSend(datagram, destIE, IPv4Address::ALLONES_ADDRESS);
+        }
+        else if (forceBroadcast)
+        {
+            for (int i = 0; i<ift->getNumInterfaces(); i++)
+            {
+                InterfaceEntry *ie = ift->getInterface(i);
+                //FIXME bug #458: If no outgoing interface is specified, and forceBroadcast parameter is true, the datagram should be delivered locally too.
+                if (!ie->isLoopback())
+                {
+                    IPv4Datagram * dataAux = datagram->dup();
+                    if (dataAux->getSrcAddress().isUnspecified())
+                    dataAux->setSrcAddress(ie->ipv4Data()->getIPAddress());
+                    fragmentAndSend(dataAux, ie, IPv4Address::ALLONES_ADDRESS);
+                }
+            }
+            delete datagram;
+        }
+        else
+        {
+            numDropped++;
+            delete datagram;
+        }
+    }
+}
+
 
 void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {

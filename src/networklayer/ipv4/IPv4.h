@@ -133,6 +133,10 @@ class INET_API IPv4 : public QueueBase
     virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr);
 
     /**
+     */
+    virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL);
+
+    /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
     virtual void routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
