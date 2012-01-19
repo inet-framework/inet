@@ -417,14 +417,11 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *des
         }
         else if (forceBroadcast)
         {
+            // forward to each interface including loopback
             for (int i = 0; i<ift->getNumInterfaces(); i++)
             {
                 InterfaceEntry *ie = ift->getInterface(i);
-                //FIXME bug #458: If no outgoing interface is specified, and forceBroadcast parameter is true, the datagram should be delivered locally too.
-                if (!ie->isLoopback())
-                {
-                    fragmentAndSend(datagram->dup(), ie, IPv4Address::ALLONES_ADDRESS);
-                }
+                fragmentAndSend(datagram->dup(), ie, IPv4Address::ALLONES_ADDRESS);
             }
             delete datagram;
         }
