@@ -658,6 +658,13 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
         return;
     }
 
+    // optimization: do not fragment and reassemble on the loopback interface
+    if (ie->isLoopback())
+    {
+        sendDatagramToOutput(datagram, ie, nextHopAddr);
+        return;
+    }
+
     int headerLength = datagram->getHeaderLength();
     int payloadLength = datagram->getByteLength() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
@@ -762,14 +769,20 @@ IPv4Datagram *IPv4::createIPv4Datagram(const char *name)
 
 void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
-    // send out datagram to ARP, with control info attached
-    IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
-    routingDecision->setInterfaceId(ie->getInterfaceId());
-    routingDecision->setNextHopAddr(nextHopAddr);
-    datagram->setControlInfo(routingDecision);
-
-    send(datagram, queueOutGate);
-
+    if (ie->isLoopback())
+    {
+        // no interface module for loopback, forward packet internally
+        handlePacketFromNetwork(datagram, ie);
+    }
+    else
+    {
+        // send out datagram to ARP, with control info attached
+        IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
+        routingDecision->setInterfaceId(ie->getInterfaceId());
+        routingDecision->setNextHopAddr(nextHopAddr);
+        datagram->setControlInfo(routingDecision);
+        send(datagram, queueOutGate);
+    }
 }
 
 void IPv4::dsrFillDestIE(IPv4Datagram *datagram, InterfaceEntry *&destIE, IPv4Address &nextHopAddress)
