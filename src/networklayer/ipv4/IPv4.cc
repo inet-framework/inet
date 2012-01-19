@@ -221,41 +221,40 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     }
 
     // encapsulate and send
-    InterfaceEntry *destIE = NULL; // will be filled in by encapsulate() or dsrFillDestIE
-    IPv4Address nextHopAddress;
-    IPv4Address *nextHopAddressPtr = NULL;
-
-    // if HL sends an IPv4Datagram, route the packet
+    IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *>(msg);
+    IPv4ControlInfo *controlInfo = NULL;
     //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
-    if (dynamic_cast<IPv4Datagram *>(msg))
+    if (datagram) // if HL sends an IPv4Datagram, route the packet
     {
-        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
         // Dsr routing, Dsr is a HL protocol and send IPv4Datagram
-        dsrFillDestIE(datagram, destIE, nextHopAddress);
-        if (!nextHopAddress.isUnspecified())
-            nextHopAddressPtr = &nextHopAddress;
-        if (!datagram->getDestAddress().isMulticast())
-            routePacket(datagram, destIE, true, nextHopAddressPtr);
-        else
-            routeMulticastPacket(datagram, destIE, NULL);
-        return;
+        if (datagram->getTransportProtocol()==IP_PROT_DSR)
+        {
+            controlInfo = check_and_cast<IPv4ControlInfo*>(datagram->removeControlInfo());
+        }
+    }
+    else
+    {
+        // encapsulate
+        controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
+        datagram = encapsulate(msg, controlInfo);
     }
 
-    // encapsulate and send
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-    IPv4Datagram *datagram = encapsulate(msg, controlInfo);
-    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
-    nextHopAddress = controlInfo->getNextHopAddr();
+    // extract requested interface and next hop
+    InterfaceEntry *destIE = NULL;
+    IPv4Address nextHopAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+    if (controlInfo!=NULL)
+    {
+        destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
+        nextHopAddress = controlInfo->getNextHopAddr();
+    }
 
     delete controlInfo;
-    if (!nextHopAddress.isUnspecified())
-        nextHopAddressPtr = &nextHopAddress;
 
-    // route packet
+    // send
     if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, destIE, NULL);
     else
-        routePacket(datagram, destIE, true, nextHopAddressPtr);
+        routePacket(datagram, destIE, true, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
 }
 
 void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
@@ -771,25 +770,6 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4
         datagram->setControlInfo(routingDecision);
         send(datagram, queueOutGate);
     }
-}
-
-void IPv4::dsrFillDestIE(IPv4Datagram *datagram, InterfaceEntry *&destIE, IPv4Address &nextHopAddress)
-{
-
-    nextHopAddress = IPv4Address::UNSPECIFIED_ADDRESS;
-
-    if (datagram->getTransportProtocol()!=IP_PROT_DSR)
-        return; // Not Dsr packet
-
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(datagram->removeControlInfo());
-    if (controlInfo==NULL)
-        return; // Not contolInfo
-
-    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
-
-    nextHopAddress = controlInfo->getNextHopAddr();
-    delete controlInfo;
-
 }
 
 #ifdef WITH_MANET

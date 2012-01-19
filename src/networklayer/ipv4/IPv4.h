@@ -161,8 +161,6 @@ class INET_API IPv4 : public QueueBase
     virtual void controlMessageToManetRouting(int, IPv4Datagram *datagram);
 #endif
 
-    virtual void dsrFillDestIE(IPv4Datagram *, InterfaceEntry *&destIE, IPv4Address &nextHopAddress);
-
   public:
     IPv4() {}
 
