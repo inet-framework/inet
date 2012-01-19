@@ -406,8 +406,6 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *des
     if (!fromHL)
     {
         EV << "limited broadcast received \n";
-        if (datagram->getSrcAddress().isUnspecified())
-            throw cRuntimeError("Received broadcast datagram '%s' without source address filled in", datagram->getName());
         reassembleAndDeliver(datagram);
     }
     else
@@ -528,6 +526,9 @@ void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, 
 
 void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 {
+    if (datagram->getSrcAddress().isUnspecified())
+        EV << "Received datagram '%s' without source address filled in" << datagram->getName() << "\n";
+
     // reassemble the packet (if fragmented)
     if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
     {
