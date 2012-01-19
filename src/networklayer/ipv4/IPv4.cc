@@ -298,7 +298,6 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
             }
         }
 
-        numLocalDeliver++;
         reassembleAndDeliver(datagram);
         return;
     }
@@ -311,7 +310,6 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
             EV << "limited broadcast received \n";
             if (datagram->getSrcAddress().isUnspecified())
                 throw cRuntimeError("Received broadcast datagram '%s' without source address filled in", datagram->getName());
-            numLocalDeliver++;
             reassembleAndDeliver(datagram);
         }
         else
@@ -571,6 +569,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     {
         // incoming ICMP packets are handled specially
         handleReceivedICMP(check_and_cast<ICMPMessage *>(packet));
+        numLocalDeliver++;
     }
     else if (protocol==IP_PROT_IP)
     {
@@ -595,6 +594,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         if (gate("transportOut", gateindex)->isPathOK())
         {
             send(packet, "transportOut", gateindex);
+            numLocalDeliver++;
         }
         else
         {
