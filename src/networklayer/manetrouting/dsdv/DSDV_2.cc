@@ -318,8 +318,8 @@ void DSDV_2::handleMessage(cMessage *msg)
 
 
 
-            const IPv4Route *_entrada_routing = rt->findBestMatchingRoute(src);
-            const DSDVIPv4Route *entrada_routing = dynamic_cast<const DSDVIPv4Route *>(_entrada_routing);
+            IPv4Route *_entrada_routing = rt->findBestMatchingRoute(src);
+            DSDVIPv4Route *entrada_routing = dynamic_cast<DSDVIPv4Route *>(_entrada_routing);
 
             //Tests if the DSDV hello message that arrived is useful
             if (_entrada_routing == NULL

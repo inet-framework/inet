@@ -213,7 +213,7 @@ void ManetRoutingBase::registerRoutingModule()
     bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
     if (manetPurgeRoutingTables && !mac_layer_)
     {
-        const IPv4Route *entry;
+        IPv4Route *entry;
         // clean the route table wlan interface entry
         for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
         {
@@ -689,10 +689,10 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         return;
 
     bool found = false;
-    const IPv4Route *oldentry = NULL;
+    IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
-        const IPv4Route *e = inet_rt->getRoute(i-1);
+        IPv4Route *e = inet_rt->getRoute(i-1);
         if (desAddress == e->getHost())
         {
             if (del_entry && !found)
@@ -792,10 +792,10 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         return;
 
     bool found = false;
-    const IPv4Route *oldentry = NULL;
+    IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
-        const IPv4Route *e = inet_rt->getRoute(i-1);
+        IPv4Route *e = inet_rt->getRoute(i-1);
         if (desAddress == e->getHost())
         {
             if (del_entry && !found)
@@ -898,7 +898,7 @@ void ManetRoutingBase::omnet_clean_rte()
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
 
-    const IPv4Route *entry;
+    IPv4Route *entry;
     if (mac_layer_)
         return;
     // clean the route table wlan interface entry
@@ -1231,13 +1231,13 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
         return false;
 
     bool found = false;
-    const IPv4Route *oldentry = NULL;
+    IPv4Route *oldentry = NULL;
 
     //TODO the entries with ALLONES netmasks stored at the begin of inet route entry vector,
     // let optimise next search!
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
-        const IPv4Route *e = inet_rt->getRoute(i-1);
+        IPv4Route *e = inet_rt->getRoute(i-1);
         if (desAddress == e->getHost())     // FIXME netmask checking?
         {
             if (del_entry && !found)    // FIXME The 'found' never set to true when 'del_entry' is true

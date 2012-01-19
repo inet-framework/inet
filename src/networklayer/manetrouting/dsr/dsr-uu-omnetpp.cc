@@ -437,7 +437,7 @@ void DSRUU::initialize(int stage)
         bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
         if (manetPurgeRoutingTables)
         {
-            const IPv4Route *entry;
+            IPv4Route *entry;
             // clean the route table wlan interface entry
             for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
             {
