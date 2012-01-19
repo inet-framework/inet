@@ -1538,7 +1538,7 @@ int  DYMOUM::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint1
 bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128& gw)
 {
     int distance = 1000;
-    for (AddressGroupIterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
         struct in_addr destAddr;
         destAddr.s_addr = *it;
