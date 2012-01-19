@@ -223,7 +223,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     // encapsulate and send
     InterfaceEntry *destIE = NULL; // will be filled in by encapsulate() or dsrFillDestIE
     IPv4Address nextHopAddress;
-    IPv4Address *nextHopAddressPrt = NULL;
+    IPv4Address *nextHopAddressPtr = NULL;
 
     // if HL sends an IPv4Datagram, route the packet
     //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
@@ -233,9 +233,9 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         // Dsr routing, Dsr is a HL protocol and send IPv4Datagram
         dsrFillDestIE(datagram, destIE, nextHopAddress);
         if (!nextHopAddress.isUnspecified())
-            nextHopAddressPrt = &nextHopAddress;
+            nextHopAddressPtr = &nextHopAddress;
         if (!datagram->getDestAddress().isMulticast())
-            routePacket(datagram, destIE, true, nextHopAddressPrt);
+            routePacket(datagram, destIE, true, nextHopAddressPtr);
         else
             routeMulticastPacket(datagram, destIE, NULL);
         return;
@@ -247,13 +247,13 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     nextHopAddress = controlInfo->getNextHopAddr();
     delete controlInfo;
     if (!nextHopAddress.isUnspecified())
-        nextHopAddressPrt = &nextHopAddress;
+        nextHopAddressPtr = &nextHopAddress;
 
     // route packet
     if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, destIE, NULL);
     else
-        routePacket(datagram, destIE, true, nextHopAddressPrt);
+        routePacket(datagram, destIE, true, nextHopAddressPtr);
 }
 
 void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
