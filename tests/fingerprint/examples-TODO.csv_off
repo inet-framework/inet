@@ -29,6 +29,7 @@
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50000s,          0
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1000s,           0   ,# <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            cfd6-17f0    ,# doesn't have a fix fingerprint value
+/examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0,                1000s,           2802-b70e    ,# doesn't have a fix fingerprint value
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 3s,             0   ,# CPU time limit
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 3s,             0   ,# CPU time limit
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,               77.77s,        0   ,# [Config NHosts] # __interactive__

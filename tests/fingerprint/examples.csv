@@ -146,7 +146,6 @@
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1000s,           526c-f918
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            4c89-d1f4
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            547e-7401
-/examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0,                1000s,           2802-b70e
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            4493-d000
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                500s,            d609-7d19
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            8295-b52f
