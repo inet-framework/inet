@@ -17,9 +17,10 @@
 // @author: Zoltan Bojthe
 
 
-#include <list>
-
 #include "WeightedTopology.h"
+
+
+#if OMNETPP_VERSION < 0x0403
 
 
 void WeightedTopology::calculateWeightedSingleShortestPathsTo(Node *_target)
@@ -31,12 +32,12 @@ void WeightedTopology::calculateWeightedSingleShortestPathsTo(Node *_target)
     // clean path infos
     for (int i=0; i<num_nodes; i++)
     {
-       nodev[i].known = false;
-       nodev[i].dist = INFINITY;
-       nodev[i].out_path = NULL;
+       ((WNode *)nodev)[i].known = false;
+       ((WNode *)nodev)[i].dist = INFINITY;
+       ((WNode *)nodev)[i].out_path = NULL;
     }
 
-    target->dist = 0;
+    ((WNode *)target)->dist = 0;
 
     std::list<Node*> q;
 
@@ -60,20 +61,20 @@ void WeightedTopology::calculateWeightedSingleShortestPathsTo(Node *_target)
            double linkWeight = dest->getLinkIn(i)->getWeight();
            ASSERT(linkWeight > 0.0);
 
-           double newdist = dest->dist + linkWeight;
+           double newdist = ((WNode *)dest)->dist + linkWeight;
            if (dest != target)
                newdist += dest->getWeight();  // dest is not the target, uses weight of dest node as price of routing (infinity means dest node doesn't route between interfaces)
-           if (newdist != INFINITY && src->dist > newdist)  // it's a valid shorter path from src to target node
+           if (newdist != INFINITY && ((WNode *)src)->dist > newdist)  // it's a valid shorter path from src to target node
            {
-               if (src->dist != INFINITY)
+               if (((WNode *)src)->dist != INFINITY)
                    q.remove(src);   // src is in the queue
-               src->dist = newdist;
-               src->out_path = dest->in_links[i];
+               ((WNode *)src)->dist = newdist;
+               ((WNode *)src)->out_path = ((WNode *)dest)->in_links[i];
 
                // insert src node to ordered list
                std::list<Node*>::iterator it;
                for (it = q.begin(); it != q.end(); ++it)
-                   if ((*it)->dist > newdist)
+                   if (((WNode *)(*it))->dist > newdist)
                        break;
                q.insert(it, src);
            }
@@ -81,3 +82,4 @@ void WeightedTopology::calculateWeightedSingleShortestPathsTo(Node *_target)
     }
 }
 
+#endif // OMNETPP_VERSION < 0x0403

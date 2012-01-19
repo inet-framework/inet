@@ -16,6 +16,7 @@
 //
 // @author: Zoltan Bojthe
 
+
 #ifndef __INET_INETTOPOLOGY_H
 #define __INET_INETTOPOLOGY_H
 
@@ -24,9 +25,36 @@
 
 /**
  * expands cTopology with weighted shortest path finder algorithm
+ *
+ * The cTopology::calculateWeightedSingleShortestPathsTo() implements in OMNeT 4.3
  */
+#if OMNETPP_VERSION >= 0x0403
+typedef cTopology WeightedTopology;
+#else
 class INET_API WeightedTopology : public cTopology
 {
+    private:
+        /** copy from cTopology:Node */
+        class WNode
+        {
+            friend class WeightedTopology;
+
+          private:
+            int module_id;
+            double wgt;
+            bool enabl;
+
+            int num_in_links;
+            Link **in_links;
+            int num_out_links;
+            Link *out_links;
+
+            // variables used by the shortest-path algorithms
+            bool known;
+            double dist;
+            Link *out_path;
+        };
+
     public:
         /**
          * Constructor.
@@ -41,5 +69,6 @@ class INET_API WeightedTopology : public cTopology
         void calculateWeightedSingleShortestPathsTo(Node *target);
 };
 
-#endif  // __INET_INETTOPOLOGY_H
+#endif  // OMNETPP_VERSION < 0x0403
 
+#endif  // __INET_INETTOPOLOGY_H

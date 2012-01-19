@@ -22,7 +22,10 @@
 #include "FlatNetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
+
+#if OMNETPP_VERSION < 0x0403
 #include "WeightedTopology.h"
+#endif
 
 
 Define_Module(FlatNetworkConfigurator);
@@ -32,7 +35,11 @@ void FlatNetworkConfigurator::initialize(int stage)
 {
     if (stage==2)
     {
+#if OMNETPP_VERSION < 0x0403
         WeightedTopology topo("topo");
+#else
+        cTopology topo("topo");
+#endif
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]
 
         // extract topology into the cTopology object, then fill in
