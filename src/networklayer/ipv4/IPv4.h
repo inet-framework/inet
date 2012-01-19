@@ -84,7 +84,7 @@ class INET_API IPv4 : public QueueBase
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
-    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPv4ControlInfo *controlInfo);
+    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, IPv4ControlInfo *controlInfo);
 
     /**
      * Creates a blank IPv4 datagram. Override when subclassing IPv4Datagram is needed

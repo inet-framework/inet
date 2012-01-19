@@ -243,8 +243,10 @@ void IPv4::handleMessageFromHL(cPacket *msg)
 
     // encapsulate and send
     IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-    IPv4Datagram *datagram = encapsulate(msg, destIE, controlInfo);
+    IPv4Datagram *datagram = encapsulate(msg, controlInfo);
+    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
     nextHopAddress = controlInfo->getNextHopAddr();
+
     delete controlInfo;
     if (!nextHopAddress.isUnspecified())
         nextHopAddressPtr = &nextHopAddress;
@@ -698,7 +700,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     delete datagram;
 }
 
-IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPv4ControlInfo *controlInfo)
+IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *controlInfo)
 {
     IPv4Datagram *datagram = createIPv4Datagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
@@ -707,9 +709,6 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
     // set source and destination address
     IPv4Address dest = controlInfo->getDestAddr();
     datagram->setDestAddress(dest);
-
-    // IP_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
 
     IPv4Address src = controlInfo->getSrcAddr();
 
