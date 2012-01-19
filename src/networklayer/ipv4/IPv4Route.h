@@ -54,7 +54,7 @@ class INET_API IPv4Route : public cObject
         MANET2,       ///< managed by manet, search approximate address
     };
 
-  protected:
+  private:
     IRoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
     IPv4Address dest;     ///< Destination
     IPv4Address netmask;  ///< Route mask

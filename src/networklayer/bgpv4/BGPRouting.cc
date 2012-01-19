@@ -260,9 +260,9 @@ void BGPRouting::processMessage(const BGPUpdateMessage& msg)
     const unsigned char         length = msg.getNLRI().length;
     unsigned int                ASValueCount = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
 
-    entry->setDestinationID(msg.getNLRI().prefix);
+    entry->setDestination(msg.getNLRI().prefix);
     netMask.keepFirstBits(32-length);
-    entry->setAddressMask(netMask);
+    entry->setNetmask(netMask);
     for (unsigned int j=0; j < ASValueCount; j++)
     {
         entry->addAS(msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValue(j));
@@ -557,8 +557,8 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
         if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT")
         {
             BGP::RoutingTableEntry* entry = new BGP::RoutingTableEntry();
-            entry->setDestinationID((*ASConfigIt)->getAttribute("Address"));
-            entry->setAddressMask((*ASConfigIt)->getAttribute("Netmask"));
+            entry->setDestination((*ASConfigIt)->getAttribute("Address"));
+            entry->setNetmask((*ASConfigIt)->getAttribute("Netmask"));
             if (nodeName == "DenyRouteIN")
             {
                 _prefixListIN.push_back(entry);

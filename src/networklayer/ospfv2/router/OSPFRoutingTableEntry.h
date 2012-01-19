@@ -44,8 +44,6 @@ public:
 
 private:
     RoutingDestinationType  destinationType;
-    // destinationID is IPv4Route::host
-    // addressMask is IPv4Route::netmask
     OSPFOptions             optionalCapabilities;
     AreaID                  area;
     RoutingPathType         pathType;
@@ -66,10 +64,6 @@ public:
 
     void                   setDestinationType(RoutingDestinationType type)  { destinationType = type; }
     RoutingDestinationType getDestinationType() const  { return destinationType; }
-    void                   setDestinationID(IPv4Address destID)  { dest = destID; }
-    IPv4Address              getDestinationID() const  { return dest; }
-    void                   setAddressMask(IPv4Address destMask)  { netmask = destMask; }
-    IPv4Address              getAddressMask() const  { return netmask; }
     void                   setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
     OSPFOptions            getOptionalCapabilities() const  { return optionalCapabilities; }
     void                   setArea(AreaID source)  { area = source; }
@@ -98,8 +92,8 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     type2Cost(0),
     linkStateOrigin(NULL)
 {
-    netmask = 0xFFFFFFFF;
-    source = IPv4Route::OSPF;
+    setNetmask(0xFFFFFFFF);
+    setSource(IPv4Route::OSPF);
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 
@@ -113,13 +107,13 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     linkStateOrigin(entry.linkStateOrigin),
     nextHops(entry.nextHops)
 {
-    dest = entry.dest;
-    netmask = entry.netmask;
-    gateway = entry.gateway;
-    interfacePtr = entry.interfacePtr;
-    type = entry.type;
-    source = entry.source;
-    metric = entry.metric;
+    setDestination(entry.getDestination());
+    setNetmask(entry.getNetmask());
+    setGateway(entry.getGateway());
+    setInterface(entry.getInterface());
+    setType(entry.getType());
+    setSource(entry.getSource());
+    setMetric(entry.getMetric());
 }
 
 inline void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
@@ -127,9 +121,9 @@ inline void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
     pathType = type;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
-        metric = cost + type2Cost * 1000;
+        setMetric(cost + type2Cost * 1000);
     } else {
-        metric = cost;
+        setMetric(cost);
     }
 }
 
@@ -138,9 +132,9 @@ inline void OSPF::RoutingTableEntry::setCost(Metric pathCost)
     cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
-        metric = cost + type2Cost * 1000;
+        setMetric(cost + type2Cost * 1000);
     } else {
-        metric = cost;
+        setMetric(cost);
     }
 }
 
@@ -149,9 +143,9 @@ inline void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
     type2Cost = pathCost;
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
-        metric = cost + type2Cost * 1000;
+        setMetric(cost + type2Cost * 1000);
     } else {
-        metric = cost;
+        setMetric(cost);
     }
 }
 
@@ -160,7 +154,7 @@ inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
     if (nextHops.size() == 0) {
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterfaceById(hop.ifIndex);
 
-        interfacePtr = routingInterface;
+        setInterface(routingInterface);
         //gateway = ulongFromIPv4Address(hop.hopAddress); // TODO: verify this isn't necessary
     }
     nextHops.push_back(hop);
@@ -182,8 +176,8 @@ inline bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) 
     }
 
     return ((destinationType == entry.destinationType) &&
-            (dest == entry.dest) &&
-            (netmask == entry.netmask) &&
+            (getDestination() == entry.getDestination()) &&
+            (getNetmask() == entry.getNetmask()) &&
             (optionalCapabilities == entry.optionalCapabilities) &&
             (area == entry.area) &&
             (pathType == entry.pathType) &&
@@ -195,9 +189,9 @@ inline bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) 
 inline std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry)
 {
     out << "Destination: "
-        << entry.getDestinationID().str()
+        << entry.getDestination().str()
         << "/"
-        << entry.getAddressMask().str()
+        << entry.getNetmask().str()
         << " (";
     if (entry.getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";

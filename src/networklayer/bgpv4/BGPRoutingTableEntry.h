@@ -33,10 +33,10 @@ public:
     RoutingTableEntry(const IPv4Route* entry);
     virtual ~RoutingTableEntry(void) {}
 
-    void            setDestinationID(IPv4Address destID)              { dest = destID; }
-    IPv4Address       getDestinationID(void) const                    { return dest; }
-    void            setAddressMask(IPv4Address destMask)              { netmask = destMask; }
-    IPv4Address       getAddressMask(void) const                      { return netmask; }
+//    void            setDestinationID(IPv4Address destID)              { dest = destID; }
+//    IPv4Address       getDestinationID(void) const                    { return dest; }
+//    void            setAddressMask(IPv4Address destMask)              { netmask = destMask; }
+//    IPv4Address       getAddressMask(void) const                      { return netmask; }
     void            setNextHop(NextHop hop)                         { _nextHop = hop; }
     NextHop         getNextHop(void) const                          { return _nextHop; }
     void            setPathType(RoutingPathType type)               { _pathType = type; }
@@ -58,28 +58,28 @@ public:
 inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
     IPv4Route(), _pathType(BGP::Incomplete)
 {
-    netmask = 0xFFFFFFFF;
-    metric = BGP::DEFAULT_COST;
-    source = IPv4Route::BGP;
+    setNetmask(0xFFFFFFFF);
+    setMetric(BGP::DEFAULT_COST);
+    setSource(IPv4Route::BGP);
 }
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
 {
-    dest = entry->getDestination();
-    netmask = entry->getNetmask();
-    gateway = entry->getGateway();
-    interfacePtr = entry->getInterface();
-    type = entry->getType();
-    metric = BGP::DEFAULT_COST;
-    source = IPv4Route::BGP;
+    setDestination(entry->getDestination());
+    setNetmask(entry->getNetmask());
+    setGateway(entry->getGateway());
+    setInterface(entry->getInterface());
+    setType(entry->getType());
+    setMetric(BGP::DEFAULT_COST);
+    setSource(IPv4Route::BGP);
 }
 
 inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry)
 {
     out << "BGP - Destination: "
-        << entry.getDestinationID().str()
+        << entry.getDestination().str()
         << '/'
-        << entry.getAddressMask().str()
+        << entry.getNetmask().str()
         << " , PathType: ";
     switch (entry.getPathType()) {
         case BGP::EGP:          out << "EGP";           break;
