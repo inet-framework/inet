@@ -256,12 +256,11 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         routePacket(datagram, destIE, true, nextHopAddressPrt);
 }
 
-void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr)
+void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
 {
-    // TBD add option handling code here
-
     if (datagram->getOptionCode()==IPOPTION_STRICT_SOURCE_ROUTING || datagram->getOptionCode()==IPOPTION_LOOSE_SOURCE_ROUTING)
     {
+        // FIXME this is loose source routing
         IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
         if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
         {
@@ -271,6 +270,12 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
             datagram->setDestAddress(nextRouteAddress);
         }
     }
+    // TODO process other options
+}
+
+void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr)
+{
+    processIPv4Options(datagram, fromHL);
 
     IPv4Address destAddr = datagram->getDestAddress();
 

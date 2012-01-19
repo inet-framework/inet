@@ -120,6 +120,11 @@ class INET_API IPv4 : public QueueBase
     virtual void handleReceivedICMP(ICMPMessage *msg);
 
     /**
+     * Process IPv4 options of the incoming or outgoing IP datagram.
+     */
+    virtual void processIPv4Options(IPv4Datagram *datagram, bool fromHL);
+
+    /**
      * Performs routing. Based on the routing decision, it dispatches to
      * reassembleAndDeliver() for local packets, to fragmentAndSend() for forwarded packets,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
