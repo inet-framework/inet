@@ -698,14 +698,6 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     delete datagram;
 }
 
-IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
-{
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(transportPacket->removeControlInfo());
-    IPv4Datagram *datagram = encapsulate(transportPacket, destIE, controlInfo);
-    delete controlInfo;
-    return datagram;
-}
-
 IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPv4ControlInfo *controlInfo)
 {
     IPv4Datagram *datagram = createIPv4Datagram(transportPacket->getName());

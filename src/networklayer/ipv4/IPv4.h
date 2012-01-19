@@ -81,12 +81,6 @@ class INET_API IPv4 : public QueueBase
 
     /**
      * Encapsulate packet coming from higher layers into IPv4Datagram, using
-     * the control info attached to the packet.
-     */
-    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
-
-    /**
-     * Encapsulate packet coming from higher layers into IPv4Datagram, using
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
