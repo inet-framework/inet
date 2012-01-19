@@ -101,7 +101,7 @@ class INET_API IPv4 : public QueueBase
      * Handle IPv4Datagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
-    virtual void handlePacketFromNetwork(IPv4Datagram *datagram);
+    virtual void handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromIE);
 
     /**
      * Handle messages (typically packets to be send in IPv4) from transport or ICMP.

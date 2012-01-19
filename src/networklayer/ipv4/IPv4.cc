@@ -112,7 +112,8 @@ void IPv4::endService(cPacket *msg)
     else
     {
         IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(msg);
-        handlePacketFromNetwork(dgram);
+        InterfaceEntry *fromIE = getSourceInterfaceFrom(dgram);
+        handlePacketFromNetwork(dgram, fromIE);
     }
 
     if (ev.isGUI())
@@ -125,8 +126,11 @@ InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *msg)
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
-void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram)
+void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
+    ASSERT(datagram);
+    ASSERT(fromIE);
+
     //
     // "Prerouting"
     //
@@ -157,10 +161,10 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram)
     datagram->setTimeToLive(datagram->getTimeToLive()-1);
 
     // route packet
-    if (!datagram->getDestAddress().isMulticast())
-        routePacket(datagram, NULL, false, NULL);
+    if (datagram->getDestAddress().isMulticast())
+        routeMulticastPacket(datagram, NULL, fromIE);
     else
-        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
+        routePacket(datagram, NULL, false, NULL);
 }
 
 void IPv4::handleARP(ARPPacket *msg)
@@ -246,10 +250,10 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         nextHopAddressPrt = &nextHopAddress;
 
     // route packet
-    if (!datagram->getDestAddress().isMulticast())
-        routePacket(datagram, destIE, true, nextHopAddressPrt);
-    else
+    if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, destIE, NULL);
+    else
+        routePacket(datagram, destIE, true, nextHopAddressPrt);
 }
 
 void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr)
