@@ -404,7 +404,7 @@ void Established::entry()
                 continue;
             }
             BGPEntry = new BGP::RoutingTableEntry(rtEntry);
-            std::string entryh = rtEntry->getHost().str();
+            std::string entryh = rtEntry->getDestination().str();
             std::string entryn = rtEntry->getNetmask().str();
             BGPEntry->addAS(session._info.ASValue);
             session.updateSendProcess(BGPEntry);

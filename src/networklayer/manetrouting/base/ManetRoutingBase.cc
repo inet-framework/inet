@@ -693,7 +693,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         IPv4Route *e = inet_rt->getRoute(i-1);
-        if (desAddress == e->getHost())
+        if (desAddress == e->getDestination())
         {
             if (del_entry && !found)
             {
@@ -724,7 +724,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
 
     if (found)
     {
-        if (oldentry->getHost() == desAddress
+        if (oldentry->getDestination() == desAddress
                 && oldentry->getNetmask() == netmask
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
@@ -738,7 +738,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     IPv4Route *entry = new IPv4Route();
 
     /// Destination
-    entry->setHost(desAddress);
+    entry->setDestination(desAddress);
     /// Route mask
     entry->setNetmask(netmask);
     /// Next hop
@@ -796,7 +796,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         IPv4Route *e = inet_rt->getRoute(i-1);
-        if (desAddress == e->getHost())
+        if (desAddress == e->getDestination())
         {
             if (del_entry && !found)
             {
@@ -825,7 +825,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
 
     if (found)
     {
-        if (oldentry->getHost() == desAddress
+        if (oldentry->getDestination() == desAddress
                 && oldentry->getNetmask() == netmask
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
@@ -839,7 +839,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     IPv4Route *entry = new IPv4Route();
 
     /// Destination
-    entry->setHost(desAddress);
+    entry->setDestination(desAddress);
     /// Route mask
     entry->setNetmask(netmask);
     /// Next hop
@@ -884,7 +884,7 @@ Uint128 ManetRoutingBase::omnet_exist_rte(Uint128 dst)
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         e = inet_rt->getRoute(i-1);
-        if (desAddress == e->getHost())
+        if (desAddress == e->getDestination())
             return e->getGateway().getInt();
     }
     return (Uint128)IPv4Address::ALLONES_ADDRESS;
@@ -1238,7 +1238,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
     {
         IPv4Route *e = inet_rt->getRoute(i-1);
-        if (desAddress == e->getHost())     // FIXME netmask checking?
+        if (desAddress == e->getDestination())     // FIXME netmask checking?
         {
             if (del_entry && !found)    // FIXME The 'found' never set to true when 'del_entry' is true
             {
@@ -1265,7 +1265,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
 
     if (found)
     {
-        if (oldentry->getHost() == desAddress
+        if (oldentry->getDestination() == desAddress
                 && oldentry->getNetmask() == netmask
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
@@ -1279,7 +1279,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     IPv4Route *entry = new IPv4Route();
 
     /// Destination
-    entry->setHost(desAddress);
+    entry->setDestination(desAddress);
     /// Route mask
     entry->setNetmask(netmask);
     /// Next hop

@@ -84,7 +84,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // Routes:
     //
     typedef std::vector<IPv4Route *> RouteVector;
-    RouteVector routes;          // Unicast route array, sorted by netmask desc, host asc, metric asc
+    RouteVector routes;          // Unicast route array, sorted by netmask desc, dest asc, metric asc
     RouteVector multicastRoutes; // Multicast route array
 
     // routing cache: maps destination address to the route

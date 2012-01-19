@@ -317,7 +317,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
             if (!IPv4Address::isWellFormed(str))
                 throw cRuntimeError("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IPv4 address", str);
 
-            e->setHost(IPv4Address(str));
+            e->setDestination(IPv4Address(str));
         }
 
         // 2nd entry: Gateway

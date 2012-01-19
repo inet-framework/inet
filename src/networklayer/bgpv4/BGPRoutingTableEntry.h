@@ -33,8 +33,8 @@ public:
     RoutingTableEntry(const IPv4Route* entry);
     virtual ~RoutingTableEntry(void) {}
 
-    void            setDestinationID(IPv4Address destID)              { host = destID; }
-    IPv4Address       getDestinationID(void) const                    { return host; }
+    void            setDestinationID(IPv4Address destID)              { dest = destID; }
+    IPv4Address       getDestinationID(void) const                    { return dest; }
     void            setAddressMask(IPv4Address destMask)              { netmask = destMask; }
     IPv4Address       getAddressMask(void) const                      { return netmask; }
     void            setNextHop(NextHop hop)                         { _nextHop = hop; }
@@ -65,7 +65,7 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
 {
-    host = entry->getHost();
+    dest = entry->getDestination();
     netmask = entry->getNetmask();
     gateway = entry->getGateway();
     interfacePtr = entry->getInterface();

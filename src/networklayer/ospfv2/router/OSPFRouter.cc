@@ -1548,7 +1548,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     for (unsigned long i = 0; i < routingEntryNumber; i++)
     {
         const IPv4Route *entry = simRoutingTable->getRoute(i);
-        if ((entry->getHost().getInt() & entry->getNetmask().getInt()) ==
+        if ((entry->getDestination().getInt() & entry->getNetmask().getInt()) ==
             (ulongFromIPv4Address(networkAddress) & externalRouteContents.getNetworkMask().getInt()))
         {
             inRoutingTable = true;
@@ -1558,7 +1558,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     if (!inRoutingTable)
     {
         IPv4Route* entry = new IPv4Route;
-        entry->setHost(ulongFromIPv4Address(networkAddress));
+        entry->setDestination(ulongFromIPv4Address(networkAddress));
         entry->setNetmask(externalRouteContents.getNetworkMask());
         entry->setInterface(InterfaceTableAccess().get()->getInterfaceById(ifIndex));
         entry->setType(IPv4Route::REMOTE);
@@ -1608,7 +1608,7 @@ void OSPF::Router::addExternalRouteInIPTable(IPv4Address networkAddress, const O
 
     // add the external route to the IPv4 routing table if it was not added by another module
     for (int i = 1; i < routingEntryNumber; i++) {
-        if (simRoutingTable->getRoute(i)->getHost().getInt() == ulongFromIPv4Address(networkAddress))
+        if (simRoutingTable->getRoute(i)->getDestination().getInt() == ulongFromIPv4Address(networkAddress))
         {
             inRoutingTable = true;
             break;
@@ -1618,7 +1618,7 @@ void OSPF::Router::addExternalRouteInIPTable(IPv4Address networkAddress, const O
     if (!inRoutingTable)
     {
         IPv4Route* entry = new IPv4Route();
-        entry->setHost(ulongFromIPv4Address(networkAddress));
+        entry->setDestination(ulongFromIPv4Address(networkAddress));
         entry->setNetmask(externalRouteContents.getNetworkMask());
         entry->setInterface(simInterfaceTable->getInterfaceById(ifIndex));
         entry->setType(IPv4Route::DIRECT);

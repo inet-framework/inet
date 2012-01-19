@@ -404,7 +404,7 @@ IPv4Route *RoutingTable::findBestMatchingRoute(const IPv4Address& dest) const
         IPv4Route *e = *i;
         if (e->isValid())
         {
-            if (IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask())) // match
+            if (IPv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) // match
             {
                 bestRoute = const_cast<IPv4Route *>(e);
                 break;
@@ -442,7 +442,7 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPv4Address& dest) con
     for (RouteVector::const_iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
     {
         const IPv4Route *e = *i;
-        if (e->isValid() && IPv4Address::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()))
+        if (e->isValid() && IPv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask()))
         {
             MulticastRoute r;
             r.interf = e->getInterface();
@@ -488,8 +488,8 @@ bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
     if (a->getNetmask() != b->getNetmask())
         return a->getNetmask() > b->getNetmask();
 
-    if (a->getHost() != b->getHost())
-        return a->getHost() < b->getHost();
+    if (a->getDestination() != b->getDestination())
+        return a->getDestination() < b->getDestination();
 
     return a->getMetric() < b->getMetric();
 }
@@ -497,12 +497,12 @@ bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
 void RoutingTable::internalAddRoute(IPv4Route *entry)
 {
     // check for null address and default route
-    if (entry->getHost().isUnspecified() != entry->getNetmask().isUnspecified())
-        error("addRoute(): to add a default route, set both host and netmask to zero");
+    if (entry->getDestination().isUnspecified() != entry->getNetmask().isUnspecified())
+        error("addRoute(): to add a default route, set both destination and netmask to zero");
 
-    if ((entry->getHost().getInt() & ~entry->getNetmask().getInt()) != 0)
-        error("addRoute(): suspicious route: host %s has 1-bits outside netmask %s",
-              entry->getHost().str().c_str(), entry->getNetmask().str().c_str());
+    if ((entry->getDestination().getInt() & ~entry->getNetmask().getInt()) != 0)
+        error("addRoute(): suspicious route: destination %s has 1-bits outside netmask %s",
+              entry->getDestination().str().c_str(), entry->getNetmask().str().c_str());
 
     // check that the interface exists
     if (!entry->getInterface())
@@ -519,7 +519,7 @@ void RoutingTable::internalAddRoute(IPv4Route *entry)
     // add to tables
     // we keep entries sorted by netmask desc, metric asc in routeList, so that we can
     // stop at the first match when doing the longest netmask matching
-    if (!entry->getHost().isMulticast())
+    if (!entry->getDestination().isMulticast())
     {
         RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), entry, routeLessThan);
         routes.insert(pos, entry);
@@ -594,7 +594,7 @@ bool RoutingTable::deleteRoute(IPv4Route *entry)
 
 void RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
 {
-    if (fieldCode==IPv4Route::F_HOST || fieldCode==IPv4Route::F_NETMASK || fieldCode==IPv4Route::F_METRIC) // our data structures depend on these fields
+    if (fieldCode==IPv4Route::F_DESTINATION || fieldCode==IPv4Route::F_NETMASK || fieldCode==IPv4Route::F_METRIC) // our data structures depend on these fields
     {
         entry = internalRemoveRoute(entry);
         ASSERT(entry != NULL);  // failure means inconsistency: route was not found in this routing table
@@ -622,7 +622,7 @@ void RoutingTable::updateNetmaskRoutes()
             IPv4Route *route = new IPv4Route();
             route->setType(IPv4Route::DIRECT);
             route->setSource(IPv4Route::IFACENETMASK);
-            route->setHost(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
+            route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPv4Address());
             route->setMetric(ie->ipv4Data()->getMetric());

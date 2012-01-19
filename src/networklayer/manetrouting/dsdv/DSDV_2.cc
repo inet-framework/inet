@@ -335,7 +335,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                 {
                     IPv4Address netmask = IPv4Address::ALLONES_ADDRESS; // IPv4Address(par("netmask").stringValue());
                     DSDVIPv4Route *e = new DSDVIPv4Route();
-                    e->setHost(src);
+                    e->setDestination(src);
                     e->setNetmask(netmask);
                     e->setGateway(next);
                     e->setInterface(interface80211ptr);

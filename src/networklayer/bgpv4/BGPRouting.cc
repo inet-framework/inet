@@ -314,7 +314,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
     }
 
     //Don't add the route if it exists in IPv4 routing table except if the msg come from IGP session
-    int indexIP = isInIPTable(_rt, entry->getHost());
+    int indexIP = isInIPTable(_rt, entry->getDestination());
     if (indexIP != -1 && _rt->getRoute(indexIP)->getSource() != IPv4Route::BGP )
     {
         if (_BGPSessions[sessionIndex]->getType() != BGP::IGP )
@@ -324,7 +324,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
         else
         {
             IPv4Route* newEntry = new IPv4Route;
-            newEntry->setHost(_rt->getRoute(indexIP)->getHost());
+            newEntry->setDestination(_rt->getRoute(indexIP)->getDestination());
             newEntry->setNetmask(_rt->getRoute(indexIP)->getNetmask());
             newEntry->setGateway(_rt->getRoute(indexIP)->getGateway());
             newEntry->setInterface(_rt->getRoute(indexIP)->getInterface());
@@ -340,14 +340,14 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
 
     if (_BGPSessions[sessionIndex]->getType() == BGP::EGP)
     {
-        std::string entryh = entry->getHost().str();
+        std::string entryh = entry->getDestination().str();
         std::string entryn = entry->getNetmask().str();
         _rt->addRoute(entry);
         //insertExternalRoute on OSPF ExternalRoutingTable if OSPF exist on this BGP router
         if (ospfExist(_rt))
         {
             OSPF::IPv4AddressRange  OSPFnetAddr;
-            OSPFnetAddr.address = ipv4AddressFromULong(entry->getHost().getInt());
+            OSPFnetAddr.address = ipv4AddressFromULong(entry->getDestination().getInt());
             OSPFnetAddr.mask = ipv4AddressFromULong(entry->getNetmask().getInt());
             OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
             ospf->insertExternalRoute(entry->getInterfaceName(), OSPFnetAddr);
@@ -432,7 +432,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
             content.getOrigin().setValue((*sessionIt).second->getType());
             content.getNextHop().setValue(iftEntry->ipv4Data()->getIPAddress());
             IPv4Address netMask = entry->getNetmask();
-            NLRI.prefix = entry->getHost().doAnd(netMask);
+            NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char) netMask.getNetmaskLength();
             {
                 BGPUpdateMessage* updateMsg = new BGPUpdateMessage("BGPUpdate");
@@ -449,7 +449,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
 bool BGPRouting::checkExternalRoute(const IPv4Route* route)
 {
     IPv4Address OSPFRoute;
-    OSPFRoute = ipv4AddressFromULong(route->getHost().getInt());
+    OSPFRoute = ipv4AddressFromULong(route->getDestination().getInt());
     OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
     bool returnValue = ospf->checkExternalRoute(OSPFRoute);
     simulation.setContext(this);
@@ -735,8 +735,8 @@ bool BGPRouting::deleteBGPRoutingEntry(BGP::RoutingTableEntry* entry){
     for (std::vector<BGP::RoutingTableEntry*>::iterator it = _BGPRoutingTable.begin();
          it != _BGPRoutingTable.end(); it++)
     {
-        if (((*it)->getHost().getInt() & (*it)->getNetmask().getInt()) ==
-            (entry->getHost().getInt() & entry->getNetmask().getInt()))
+        if (((*it)->getDestination().getInt() & (*it)->getNetmask().getInt()) ==
+            (entry->getDestination().getInt() & entry->getNetmask().getInt()))
         {
             _BGPRoutingTable.erase(it);
             _rt->deleteRoute(entry);
@@ -752,7 +752,7 @@ int BGPRouting::isInIPTable(IRoutingTable* rtTable, IPv4Address addr)
     for (int i = 0; i < rtTable->getNumRoutes(); i++)
     {
         const IPv4Route* entry = rtTable->getRoute(i);
-        if (entry->getHost().getInt() == addr.getInt())
+        if (entry->getDestination().getInt() == addr.getInt())
         {
             return i;
         }
@@ -780,8 +780,8 @@ unsigned long BGPRouting::isInTable(std::vector<BGP::RoutingTableEntry*> rtTable
     for (unsigned long i = 0; i < rtTable.size(); i++)
     {
         BGP::RoutingTableEntry* entryCur = rtTable[i];
-        if ((entry->getHost().getInt() & entry->getNetmask().getInt()) ==
-            (entryCur->getHost().getInt() & entryCur->getNetmask().getInt()))
+        if ((entry->getDestination().getInt() & entry->getNetmask().getInt()) ==
+            (entryCur->getDestination().getInt() & entryCur->getNetmask().getInt()))
         {
             return i;
         }

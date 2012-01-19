@@ -80,7 +80,7 @@ void TED::initialize(int stage)
                 break;
         }
         ASSERT(rentry);
-        IPv4Address linkid = rentry->getHost();
+        IPv4Address linkid = rentry->getDestination();
         IPv4Address remote = rentry->getGateway();
         ASSERT(!remote.isUnspecified());
 
@@ -218,7 +218,7 @@ void TED::rebuildRoutingTable()
     for (int i = 0; i < n; i++)
     {
         IPv4Route *entry = rt->getRoute(j);
-        if (entry->getHost().isMulticast())
+        if (entry->getDestination().isMulticast())
         {
             ++j;
         }
@@ -258,7 +258,7 @@ void TED::rebuildRoutingTable()
         ASSERT(isLocalPeer(V[nHop].node));
 
         IPv4Route *entry = new IPv4Route;
-        entry->setHost(V[i].node);
+        entry->setDestination(V[i].node);
 
         if (V[i].node == V[nHop].node)
         {
@@ -276,7 +276,7 @@ void TED::rebuildRoutingTable()
         entry->setNetmask(0xffffffff);
         entry->setMetric(0);
 
-        EV << "  inserting route: host=" << entry->getHost() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
+        EV << "  inserting route: dest=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
 
         rt->addRoute(entry);
     }
@@ -287,7 +287,7 @@ void TED::rebuildRoutingTable()
     {
         IPv4Route *entry = new IPv4Route;
 
-        entry->setHost(getPeerByLocalAddress(interfaceAddrs[i]));
+        entry->setDestination(getPeerByLocalAddress(interfaceAddrs[i]));
         entry->setGateway(IPv4Address());
         entry->setType(entry->DIRECT);
         entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
@@ -296,7 +296,7 @@ void TED::rebuildRoutingTable()
         entry->setNetmask(0xffffffff);
         entry->setMetric(0); // XXX FIXME what's that?
 
-        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getHost() << " interface=" << entry->getInterfaceName() << "\n";
+        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
 
         rt->addRoute(entry);
     }

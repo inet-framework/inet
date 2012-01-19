@@ -66,8 +66,8 @@ public:
 
     void                   setDestinationType(RoutingDestinationType type)  { destinationType = type; }
     RoutingDestinationType getDestinationType() const  { return destinationType; }
-    void                   setDestinationID(IPv4Address destID)  { host = destID; }
-    IPv4Address              getDestinationID() const  { return host; }
+    void                   setDestinationID(IPv4Address destID)  { dest = destID; }
+    IPv4Address              getDestinationID() const  { return dest; }
     void                   setAddressMask(IPv4Address destMask)  { netmask = destMask; }
     IPv4Address              getAddressMask() const  { return netmask; }
     void                   setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
@@ -113,7 +113,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     linkStateOrigin(entry.linkStateOrigin),
     nextHops(entry.nextHops)
 {
-    host = entry.host;
+    dest = entry.dest;
     netmask = entry.netmask;
     gateway = entry.gateway;
     interfacePtr = entry.interfacePtr;
@@ -182,7 +182,7 @@ inline bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) 
     }
 
     return ((destinationType == entry.destinationType) &&
-            (host == entry.host) &&
+            (dest == entry.dest) &&
             (netmask == entry.netmask) &&
             (optionalCapabilities == entry.optionalCapabilities) &&
             (area == entry.area) &&

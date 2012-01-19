@@ -76,9 +76,9 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         IRoutingTable *rt = check_and_cast<IRoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++)
         {
-            IPv4Address host = rt->getRoute(i)->getHost();
+            IPv4Address dest = rt->getRoute(i)->getDestination();
 
-            if (host.isMulticast())
+            if (dest.isMulticast())
                 continue;
 
             if (rt->getRoute(i)->getInterface()->isLoopback())
@@ -91,9 +91,9 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             std::ostringstream line;
 
             line << std::left;
-            IPv4Address dest = compat ? host.doAnd(netmask) : host;
+            IPv4Address prefix = compat ? dest.doAnd(netmask) : dest;  // typically dest in routes is already masked, so this is a no-op
             line.width(16);
-            if (dest.isUnspecified()) line << "0.0.0.0"; else line << dest;
+            if (prefix.isUnspecified()) line << "0.0.0.0"; else line << prefix;
 
             line.width(16);
             if (gateway.isUnspecified()) line << "0.0.0.0"; else line << gateway;

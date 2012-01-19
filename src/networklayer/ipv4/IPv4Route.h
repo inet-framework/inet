@@ -56,7 +56,7 @@ class INET_API IPv4Route : public cObject
 
   protected:
     IRoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
-    IPv4Address host;     ///< Destination
+    IPv4Address dest;     ///< Destination
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
@@ -65,7 +65,7 @@ class INET_API IPv4Route : public cObject
     int metric;           ///< Metric ("cost" to reach the destination)
 
   public:
-    enum {F_HOST, F_NETMASK, F_GATEWAY, F_IFACE, F_TYPE, F_SOURCE, F_METRIC, F_LAST}; // field codes for changed()
+    enum {F_DESTINATION, F_NETMASK, F_GATEWAY, F_IFACE, F_TYPE, F_SOURCE, F_METRIC, F_LAST}; // field codes for changed()
 
   private:
     // copying not supported: following are private and also left undefined
@@ -88,7 +88,7 @@ class INET_API IPv4Route : public cObject
     /** test validity of route entry, e.g. check expiry */
     virtual bool isValid() const { return true; }
 
-    virtual void setHost(IPv4Address _host)  { if (host != _host) {host = _host; changed(F_HOST);} }
+    virtual void setDestination(IPv4Address _dest)  { if (dest != _dest) {dest = _dest; changed(F_DESTINATION);} }
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
@@ -97,7 +97,7 @@ class INET_API IPv4Route : public cObject
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Destination address prefix to match */
-    IPv4Address getHost() const {return host;}
+    IPv4Address getDestination() const {return dest;}
 
     /** Represents length of prefix to match */
     IPv4Address getNetmask() const {return netmask;}
