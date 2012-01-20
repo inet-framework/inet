@@ -149,13 +149,11 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         }
     }
 
-    // remove control info
-    if (datagram->getTransportProtocol()!=IP_PROT_DSR && datagram->getTransportProtocol()!=IP_PROT_MANET)
-    {
+    // remove control info, but keep the one on the last fragment of DSR and MANET datagrams
+    int protocol = datagram->getTransportProtocol();
+    bool isManetDatagram = protocol == IP_PROT_MANET || protocol == IP_PROT_DSR;
+    if (!isManetDatagram || datagram->getMoreFragments())
         delete datagram->removeControlInfo();
-    }
-    else if (datagram->getMoreFragments())
-        delete datagram->removeControlInfo(); // delete all control message except the last
 
     // route packet
     IPv4Address &destAddr = datagram->getDestAddress();
