@@ -166,7 +166,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         routeMulticastPacket(datagram, NULL, fromIE);
     else
     {
-        processIPv4Options(datagram, false);
+        processIPv4Options(datagram);
 #ifdef WITH_MANET
         if (manetRouting)
             sendRouteUpdateMessageToManet(datagram);
@@ -285,7 +285,6 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         routeMulticastPacket(datagram, destIE, NULL);
     else
     {
-        // processIPv4Options(datagram, true);
 #ifdef WITH_MANET
         if (manetRouting)
             sendRouteUpdateMessageToManet(datagram);
@@ -308,12 +307,12 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     }
 }
 
-void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
+void IPv4::processIPv4Options(IPv4Datagram *datagram)
 {
     if (datagram->getOptionCode()==IPOPTION_STRICT_SOURCE_ROUTING || datagram->getOptionCode()==IPOPTION_LOOSE_SOURCE_ROUTING)
     {
         // FIXME this is loose source routing
-        if (!fromHL && rt->isLocalAddress(datagram->getDestAddress()))
+        if (rt->isLocalAddress(datagram->getDestAddress()))
         {
             IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
             if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
