@@ -128,7 +128,7 @@ class INET_API IPv4 : public QueueBase
 
     /**
      */
-    virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL);
+    virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().

@@ -158,12 +158,37 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         delete datagram->removeControlInfo(); // delete all control message except the last
 
     // route packet
+    IPv4Address &destAddr = datagram->getDestAddress();
     if (fromIE->isLoopback())
         reassembleAndDeliver(datagram);
-    else if (datagram->getDestAddress().isMulticast())
+    else if (destAddr.isMulticast())
         routeMulticastPacket(datagram, NULL, fromIE);
     else
-        routePacket(datagram, NULL, false, NULL);
+    {
+        processIPv4Options(datagram, false);
+#ifdef WITH_MANET
+        controlMessageToManetRouting(MANET_ROUTE_UPDATE, datagram);
+#endif
+        // check for local delivery
+        if (rt->isLocalAddress(destAddr))
+        {
+            EV << "local delivery\n";
+            reassembleAndDeliver(datagram);
+        }
+        else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
+        {
+            EV << "broadcast received\n";
+            reassembleAndDeliver(datagram);
+        }
+        else if (!rt->isIPForwardingEnabled())
+        {
+            EV << "forwarding off, dropping packet\n";
+            numDropped++;
+            delete datagram;
+        }
+        else
+            routePacket(datagram, NULL, false, NULL);
+    }
 }
 
 void IPv4::handleARP(ARPPacket *msg)
@@ -250,10 +275,31 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     delete controlInfo;
 
     // send
+    IPv4Address &destAddr = datagram->getDestAddress();
     if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, destIE, NULL);
     else
-        routePacket(datagram, destIE, true, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
+    {
+        // processIPv4Options(datagram, true);
+#ifdef WITH_MANET
+        controlMessageToManetRouting(MANET_ROUTE_UPDATE, datagram);
+#endif
+        // check for local delivery
+        if (rt->isLocalAddress(destAddr))
+        {
+            EV << "local delivery\n";
+            if (destIE)
+                EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
+
+            destIE = ift->getFirstLoopbackInterface();
+            ASSERT(destIE);
+            fragmentAndSend(datagram, destIE, destAddr);
+        }
+        else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
+            routeLocalBroadcastPacket(datagram, destIE);
+        else
+            routePacket(datagram, destIE, true, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
+    }
 }
 
 void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
@@ -278,52 +324,9 @@ void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
 
 void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr)
 {
-    processIPv4Options(datagram, fromHL);
-
     IPv4Address destAddr = datagram->getDestAddress();
 
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
-
-#ifdef WITH_MANET
-    controlMessageToManetRouting(MANET_ROUTE_UPDATE, datagram);
-#endif
-
-    // check for local delivery
-    if (rt->isLocalAddress(destAddr))
-    {
-        EV << "local delivery\n";
-
-        if (fromHL)
-        {
-            if (destIE)
-                EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
-
-            destIE = ift->getFirstLoopbackInterface();
-            ASSERT(destIE);
-            fragmentAndSend(datagram, destIE, destAddr);
-        }
-        else
-        {
-            reassembleAndDeliver(datagram);
-        }
-        return;
-    }
-
-    // JcM Fix: broadcast limited address 255.255.255.255 or network broadcast, i.e. 192.168.0.255/24
-    if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
-    {
-        routeLocalBroadcastPacket(datagram, destIE, fromHL);
-        return;
-    }
-
-    // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
-    if (!fromHL && !rt->isIPForwardingEnabled())
-    {
-        EV << "forwarding off, dropping packet\n";
-        numDropped++;
-        delete datagram;
-        return;
-    }
 
     IPv4Address nextHopAddr;
     // if output port was explicitly requested, use that, otherwise use IPv4 routing
@@ -399,36 +402,29 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
     fragmentAndSend(datagram, destIE, nextHopAddr);
 }
 
-void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
+void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE)
 {
-    // check if local
-    if (!fromHL)
+    // The destination address is 255.255.255.255 or local subnet broadcast address.
+    // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
+    // and mapped to the broadcast MAC address.
+    if (destIE!=NULL)
     {
-        EV << "limited broadcast received \n";
-        reassembleAndDeliver(datagram);
+        fragmentAndSend(datagram, destIE, IPv4Address::ALLONES_ADDRESS);
+    }
+    else if (forceBroadcast)
+    {
+        // forward to each interface including loopback
+        for (int i = 0; i<ift->getNumInterfaces(); i++)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            fragmentAndSend(datagram->dup(), ie, IPv4Address::ALLONES_ADDRESS);
+        }
+        delete datagram;
     }
     else
     {
-        // broadcast packet from higher layer: send limited broadcast packet
-        if (destIE!=NULL)
-        {
-            fragmentAndSend(datagram, destIE, IPv4Address::ALLONES_ADDRESS);
-        }
-        else if (forceBroadcast)
-        {
-            // forward to each interface including loopback
-            for (int i = 0; i<ift->getNumInterfaces(); i++)
-            {
-                InterfaceEntry *ie = ift->getInterface(i);
-                fragmentAndSend(datagram->dup(), ie, IPv4Address::ALLONES_ADDRESS);
-            }
-            delete datagram;
-        }
-        else
-        {
-            numDropped++;
-            delete datagram;
-        }
+        numDropped++;
+        delete datagram;
     }
 }
 
