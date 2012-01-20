@@ -87,30 +87,32 @@ class INET_API IRoutingTable
     /** @name Routing functions (query the route table) */
     //@{
     /**
-     * Checks if the address is a local network broadcast address, i.e. one of the broadcast
-     * addresses derived from the interface addresses and netmasks.
+     * Checks if the address is a local network broadcast address, i.e. one of the
+     * broadcast addresses derived from the interface addresses and netmasks.
      */
     virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const = 0;
 
     /**
-     * The routing function.
+     * The routing function. Performs longest prefix match for the given
+     * destination address, and returns the resulting route. Returns NULL
+     * if there is no matching route.
      */
     virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const = 0;
 
     /**
      * Convenience function based on findBestMatchingRoute().
      *
-     * Returns the interface Id to send the packets with dest as
-     * destination address, or -1 if destination is not in routing table.
+     * Returns the output interface for the packets with dest as destination
+     * address, or NULL if the destination is not in routing table.
      */
     virtual InterfaceEntry *getInterfaceForDestAddr(const IPv4Address& dest) const = 0;
 
     /**
      * Convenience function based on findBestMatchingRoute().
      *
-     * Returns the gateway to send the destination. Returns null address
-     * if the destination is not in routing table or there is
-     * no gateway (local delivery).
+     * Returns the gateway for the destination address. Returns the unspecified
+     * address if the destination is not in routing table or the gateway field
+     * is not filled in in the route.
      */
     virtual IPv4Address getGatewayForDestAddr(const IPv4Address& dest) const = 0;
     //@}
@@ -150,8 +152,9 @@ class INET_API IRoutingTable
     virtual IPv4Route *getDefaultRoute() const = 0;
 
     /**
-     * Adds a route to the routing table. Note that once added, routes
-     * cannot be modified; you must delete and re-add them instead.
+     * Adds a route to the routing table. Routes are allowed to be modified
+     * while in the routing table. (There is a notification mechanism that
+     * allows routing table internals to be updated on a routing entry change.)
      */
     virtual void addRoute(IPv4Route *entry) = 0;
 
@@ -163,7 +166,7 @@ class INET_API IRoutingTable
 
     /**
      * Deletes the given route from the routing table.
-     * Returns true if the route was deleted correctly, false if it was
+     * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
     virtual bool deleteRoute(IPv4Route *entry) = 0;
