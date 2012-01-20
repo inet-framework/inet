@@ -261,13 +261,16 @@ void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
     if (datagram->getOptionCode()==IPOPTION_STRICT_SOURCE_ROUTING || datagram->getOptionCode()==IPOPTION_LOOSE_SOURCE_ROUTING)
     {
         // FIXME this is loose source routing
-        IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
-        if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
+        if (!fromHL && rt->isLocalAddress(datagram->getDestAddress()))
         {
-            IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4);
-            rtOpt.setNextAddressPtr(rtOpt.getNextAddressPtr()+4);
-            datagram->setSrcAddress(rt->getRouterId());
-            datagram->setDestAddress(nextRouteAddress);
+            IPv4SourceRoutingOption rtOpt = datagram->getSourceRoutingOption();
+            if (rtOpt.getNextAddressPtr()<rtOpt.getLastAddressPtr())
+            {
+                IPv4Address nextRouteAddress = rtOpt.getRecordAddress(rtOpt.getNextAddressPtr()/4);
+                rtOpt.setNextAddressPtr(rtOpt.getNextAddressPtr()+4);
+                datagram->setSrcAddress(rt->getRouterId()); // FIXME: should be outgoing IF address
+                datagram->setDestAddress(nextRouteAddress);
+            }
         }
     }
     // TODO process other options
