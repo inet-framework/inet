@@ -189,7 +189,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
             delete datagram;
         }
         else
-            routePacket(datagram, NULL, NULL);
+            routeUnicastPacket(datagram, NULL, NULL);
     }
 }
 
@@ -304,7 +304,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
             routeLocalBroadcastPacket(datagram, destIE);
         else
-            routePacket(datagram, destIE, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
+            routeUnicastPacket(datagram, destIE, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
     }
 }
 
@@ -328,7 +328,7 @@ void IPv4::processIPv4Options(IPv4Datagram *datagram, bool fromHL)
     // TODO process other options
 }
 
-void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address* nextHopAddrPtr)
+void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address* nextHopAddrPtr)
 {
     IPv4Address destAddr = datagram->getDestAddress();
 
@@ -347,63 +347,47 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Addre
         {
             // if the interface is broadcast we must search the next hop
             const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
-            if (re!=NULL && re->getSource() == IPv4Route::MANET && re->getDestination()!=destAddr)
-                re = NULL;
-            if (re && destIE == re->getInterface())
+            if (re && (re->getSource() != IPv4Route::MANET || re->getDestination()==destAddr) &&
+                    re->getInterface() == destIE)
                 nextHopAddr = re->getGateway();
         }
     }
     else
     {
         // use IPv4 routing (lookup in routing table)
+        //    FIXME MANET routes should use 255.255.255.255 netmask,
+        //          to eliminate the equality check below.
         const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
-
-        if (re!=NULL && re->getSource() == IPv4Route::MANET)
+        if (re && (re->getSource() != IPv4Route::MANET || re->getDestination() == destAddr))
         {
-           // special case the address must agree
-           if (re->getDestination()!=destAddr)
-               re = NULL;
+            destIE = re->getInterface();
+            nextHopAddr = re->getGateway();
         }
-
-        // error handling: destination address does not exist in routing table:
-        // notify ICMP, throw packet away and continue
-        if (re==NULL)
-        {
-#ifdef WITH_MANET
-            if (manetRouting)
-            {
-               sendNoRouteMessageToManet(datagram);
-               return;
-            }
-#endif
-            EV << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
-            numUnroutable++;
-            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
-            return;
-        }
-
-        // extract interface and next-hop address from routing table entry
-        destIE = re->getInterface();
-        nextHopAddr = re->getGateway();
     }
 
-    // default: send datagram to fragmentation
-    EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
-    numForwarded++;
-
-    //
-    // fragment and send the packet
-    //
-    if (datagram->getTransportProtocol()==IP_PROT_MANET)
+    if (!destIE) // no route found
     {
 #ifdef WITH_MANET
-       delete datagram->removeControlInfo();
-#else
-       throw cRuntimeError(this, "MANET protocol packet received, but MANET routing support is not available.");
+            if (manetRouting)
+               sendNoRouteMessageToManet(datagram);
+            else
+            {
+#endif
+                EV << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+                numUnroutable++;
+                icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
+#ifdef WITH_MANET
+            }
 #endif
     }
-
-    fragmentAndSend(datagram, destIE, nextHopAddr);
+    else // fragment and send
+    {
+        EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
+        if (datagram->getTransportProtocol()==IP_PROT_MANET) // FIXME ???
+           delete datagram->removeControlInfo();
+        numForwarded++;
+        fragmentAndSend(datagram, destIE, nextHopAddr);
+    }
 }
 
 void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE)
