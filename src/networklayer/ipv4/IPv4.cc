@@ -159,6 +159,9 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
 
     // route packet
     IPv4Address &destAddr = datagram->getDestAddress();
+
+    EV << "Received datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
+
     if (fromIE->isLoopback())
         reassembleAndDeliver(datagram);
     else if (destAddr.isMulticast())
@@ -276,6 +279,9 @@ void IPv4::handleMessageFromHL(cPacket *msg)
 
     // send
     IPv4Address &destAddr = datagram->getDestAddress();
+
+    EV << "Sending datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
+
     if (datagram->getDestAddress().isMulticast())
         routeMulticastPacket(datagram, destIE, NULL);
     else
