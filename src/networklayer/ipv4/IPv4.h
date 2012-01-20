@@ -119,14 +119,14 @@ class INET_API IPv4 : public QueueBase
     virtual void processIPv4Options(IPv4Datagram *datagram, bool fromHL);
 
     /**
-     * Performs routing. Based on the routing decision, it dispatches to
-     * reassembleAndDeliver() for local packets, to fragmentAndSend() for forwarded packets,
-     * to handleMulticastPacket() for multicast packets, or drops the packet if
-     * it's unroutable or forwarding is off.
+     * Performs unicast routing. Based on the routing decision, it sends the
+     * datagram through the outgoing interface.
      */
-    virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool fromHL, IPv4Address* nextHopAddrPtr);
+    virtual void routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address* nextHopAddrPtr);
 
     /**
+     * Broadcasts the datagram on the specified interface.
+     * When destIE is NULL, the datagram is broadcasted on each interface.
      */
     virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE);
 
