@@ -532,22 +532,17 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 
     // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
-    cPacket *packet = NULL;
-    if (protocol!=IP_PROT_DSR)
-    {
-        packet = decapsulateIP(datagram);
-    }
 
     if (protocol==IP_PROT_ICMP)
     {
         // incoming ICMP packets are handled specially
-        handleReceivedICMP(check_and_cast<ICMPMessage *>(packet));
+        handleReceivedICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram)));
         numLocalDeliver++;
     }
     else if (protocol==IP_PROT_IP)
     {
         // tunnelled IP packets are handled separately
-        send(packet, "preRoutingOut");  //FIXME There is no "preRoutingOut" gate in the IPv4 module.
+        send(decapsulate(datagram), "preRoutingOut");  //FIXME There is no "preRoutingOut" gate in the IPv4 module.
     }
     else if (protocol==IP_PROT_DSR)
     {
@@ -567,19 +562,18 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 
         if (gate("transportOut", gateindex)->isPathOK())
         {
-            send(packet, "transportOut", gateindex);
+            send(decapsulate(datagram), "transportOut", gateindex);
             numLocalDeliver++;
         }
         else
         {
             EV << "L3 Protocol not connected. discarding packet" << endl;
-            IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(packet->removeControlInfo());
-            icmpAccess.get()->sendErrorMessage(packet, ctrl, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
     }
 }
 
-cPacket *IPv4::decapsulateIP(IPv4Datagram *datagram)
+cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 {
     // decapsulate transport packet
     InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);

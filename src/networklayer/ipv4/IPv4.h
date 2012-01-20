@@ -144,7 +144,7 @@ class INET_API IPv4 : public QueueBase
     /**
      * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
      */
-    virtual cPacket *decapsulateIP(IPv4Datagram *datagram);
+    virtual cPacket *decapsulate(IPv4Datagram *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
