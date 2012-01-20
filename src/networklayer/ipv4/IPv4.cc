@@ -168,7 +168,8 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     {
         processIPv4Options(datagram, false);
 #ifdef WITH_MANET
-        controlMessageToManetRouting(MANET_ROUTE_UPDATE, datagram);
+        if (manetRouting)
+            sendRouteUpdateMessageToManet(datagram);
 #endif
         // check for local delivery
         if (rt->isLocalAddress(destAddr))
@@ -286,7 +287,8 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     {
         // processIPv4Options(datagram, true);
 #ifdef WITH_MANET
-        controlMessageToManetRouting(MANET_ROUTE_UPDATE, datagram);
+        if (manetRouting)
+            sendRouteUpdateMessageToManet(datagram);
 #endif
         // check for local delivery
         if (rt->isLocalAddress(destAddr))
@@ -370,7 +372,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
 #ifdef WITH_MANET
             if (manetRouting)
             {
-               controlMessageToManetRouting(MANET_ROUTE_NOROUTE, datagram);
+               sendNoRouteMessageToManet(datagram);
                return;
             }
 #endif
@@ -395,9 +397,7 @@ void IPv4::routePacket(IPv4Datagram *datagram, InterfaceEntry *destIE, bool from
     if (datagram->getTransportProtocol()==IP_PROT_MANET)
     {
 #ifdef WITH_MANET
-       //  check control Info
-       if (datagram->getControlInfo())
-             delete datagram->removeControlInfo();
+       delete datagram->removeControlInfo();
 #else
        throw cRuntimeError(this, "MANET protocol packet received, but MANET routing support is not available.");
 #endif
@@ -570,7 +570,8 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     {
 #ifdef WITH_MANET
         // If the protocol is Dsr Send directely the datagram to manet routing
-        controlMessageToManetRouting(MANET_ROUTE_NOROUTE, datagram);
+        if (manetRouting)
+            sendToManet(datagram);
 #else
         throw cRuntimeError(this, "DSR protocol packet received, but MANET routing support is not available.");
 #endif
@@ -776,42 +777,40 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4
 }
 
 #ifdef WITH_MANET
-void IPv4::controlMessageToManetRouting(int code, IPv4Datagram *datagram)
+void IPv4::sendRouteUpdateMessageToManet(IPv4Datagram *datagram)
 {
-    ControlManetRouting *control;
-    if (!manetRouting)
-            return;
-
-    if (datagram->getTransportProtocol()==IP_PROT_DSR)
+    if (datagram->getTransportProtocol() != IP_PROT_DSR) // Dsr don't use update code, the Dsr datagram is the update.
     {
-        if (code==MANET_ROUTE_NOROUTE)
-        {
-            int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
-            send(datagram, "transportOut", gateindex);
-        }
-        return; // Dsr don't use update code, the Dsr datagram is the update.
-    }
-
-    control = new ControlManetRouting();
-    control->setOptionCode(code);
-
-    switch (code)
-    {
-    case MANET_ROUTE_UPDATE:
+        ControlManetRouting *control = new ControlManetRouting();
+        control->setOptionCode(MANET_ROUTE_UPDATE);
         control->setSrcAddress(datagram->getSrcAddress());
         control->setDestAddress(datagram->getDestAddress());
-        break;
-    case MANET_ROUTE_NOROUTE:
+        sendToManet(control);
+    }
+}
+
+void IPv4::sendNoRouteMessageToManet(IPv4Datagram *datagram)
+{
+    if (datagram->getTransportProtocol()==IP_PROT_DSR)
+    {
+        sendToManet(datagram);
+    }
+    else
+    {
+        ControlManetRouting *control = new ControlManetRouting();
+        control->setOptionCode(MANET_ROUTE_NOROUTE);
         control->setSrcAddress(datagram->getSrcAddress());
         control->setDestAddress(datagram->getDestAddress());
         control->encapsulate(datagram);
-        break;
-    default:
-        delete control;
-        return;
+        sendToManet(control);
     }
+}
+
+void IPv4::sendToManet(cPacket *packet)
+{
+    ASSERT(manetRouting);
     int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
-    send(control, "transportOut", gateindex);
+    send(packet, "transportOut", gateindex);
 }
 #endif
 
