@@ -53,7 +53,7 @@ void DSDV_2::initialize(int stage)
 
         // schedules a random periodic event: the hello message broadcast from DSDV module
         rt = RoutingTableAccess().get();
-        timeToLiveRoutingEntry = par("timetolive_routing_entry").doubleValue();
+        routeLifetime = par("routeLifetime").doubleValue();
 
         //reads from omnetpp.ini
         hellomsgperiod_DSDV = (simtime_t) par("hellomsgperiod_DSDV");
@@ -343,7 +343,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setSource(IPv4Route::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);
-                    e->setExpiryTime(simTime()+timeToLiveRoutingEntry);
+                    e->setExpiryTime(simTime()+routeLifetime);
                     rt->addRoute(e);
                 }
 

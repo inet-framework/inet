@@ -53,7 +53,7 @@ class INET_API DSDV_2 : public cSimpleModule
     InterfaceEntry *interface80211ptr;
     int interfaceId;
     unsigned int sequencenumber;
-    simtime_t timeToLiveRoutingEntry;
+    simtime_t routeLifetime;
 
   protected:
     simtime_t hellomsgperiod_DSDV;
