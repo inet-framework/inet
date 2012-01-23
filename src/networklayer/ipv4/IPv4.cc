@@ -126,6 +126,13 @@ InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *msg)
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
+bool IPv4::receivedOnTheShortestPath(IPv4Datagram *datagram)
+{
+    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
+    InterfaceEntry *shortestPathIE = rt->getInterfaceForDestAddr(datagram->getSrcAddress());
+    return (shortestPathIE==NULL || fromIE==shortestPathIE);
+}
+
 void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
     ASSERT(datagram);
@@ -161,9 +168,39 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     EV << "Received datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     if (fromIE->isLoopback())
+    {
         reassembleAndDeliver(datagram);
+    }
     else if (destAddr.isMulticast())
-        routeMulticastPacket(datagram, NULL, fromIE);
+    {
+        if (!receivedOnTheShortestPath(datagram))
+        {
+            // DVMRP: process datagram only if sent locally or arrived on the shortest
+            // route (provided routing table already contains srcAddr); otherwise
+            // discard and continue.
+            // FIXME count dropped
+            EV << "Packet dropped.\n";
+            delete datagram;
+        }
+        else
+        {
+            // check for local delivery
+            // TODO add loopback to multicast routes instead of this special case
+            if (rt->isLocalMulticastAddress(destAddr))
+            {
+                IPv4Datagram *datagramCopy = (IPv4Datagram *) datagram->dup();
+                // FIXME code from the MPLS model: set packet dest address to routerId (???)
+                datagramCopy->setDestAddress(rt->getRouterId());
+                reassembleAndDeliver(datagramCopy);
+            }
+
+            // don't forward if IP forwarding is off, or if dest address is link-scope
+            if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
+                delete datagram;
+            else
+                routeMulticastPacket(datagram, NULL, fromIE);
+        }
+    }
     else
     {
         processIPv4Options(datagram);
@@ -419,73 +456,22 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *des
 void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {
     IPv4Address destAddr = datagram->getDestAddress();
+    ASSERT(destAddr.isMulticast());
+
     EV << "Routing multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
-    // DVMRP: process datagram only if sent locally or arrived on the shortest
-    // route (provided routing table already contains srcAddr); otherwise
-    // discard and continue.
-    InterfaceEntry *shortestPathIE = rt->getInterfaceForDestAddr(datagram->getSrcAddress());
-    if (fromIE!=NULL && shortestPathIE!=NULL && fromIE!=shortestPathIE)
-    {
-        // FIXME count dropped
-        EV << "Packet dropped.\n";
-        delete datagram;
-        return;
-    }
-
-    // if received from the network...
-    if (fromIE!=NULL)
-    {
-        // check for local delivery
-        if (rt->isLocalMulticastAddress(destAddr))
-        {
-            IPv4Datagram *datagramCopy = (IPv4Datagram *) datagram->dup();
-
-            // FIXME code from the MPLS model: set packet dest address to routerId (???)
-            datagramCopy->setDestAddress(rt->getRouterId());
-
-            reassembleAndDeliver(datagramCopy);
-        }
-
-        // don't forward if IP forwarding is off
-        if (!rt->isIPForwardingEnabled())
-        {
-            delete datagram;
-            return;
-        }
-
-        // don't forward if dest address is link-scope
-        if (destAddr.isLinkLocalMulticast())
-        {
-            delete datagram;
-            return;
-        }
-
-    }
-
     // routed explicitly via IP_MULTICAST_IF
     if (destIE!=NULL)
     {
-        ASSERT(datagram->getDestAddress().isMulticast());
-
         EV << "multicast packet explicitly routed via output interface " << destIE->getName() << endl;
-        fragmentAndSend(datagram, destIE, datagram->getDestAddress());
-
-        return;
-    }
-
-    // now: routing
-    MulticastRoutes routes = rt->getMulticastRoutesFor(destAddr);
-    if (routes.size()==0)
-    {
-        // no destination: delete datagram
-        delete datagram;
+        fragmentAndSend(datagram, destIE, destAddr);
     }
     else
     {
         // copy original datagram for multiple destinations
+        MulticastRoutes routes = rt->getMulticastRoutesFor(destAddr);
         for (unsigned int i=0; i<routes.size(); i++)
         {
             InterfaceEntry *destIE = routes[i].interf;

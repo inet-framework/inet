@@ -79,6 +79,10 @@ class INET_API IPv4 : public QueueBase
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
 
+    // utility: true if the incoming interface is the same as the
+    //          outgoing interface of the shortest path to the source
+    virtual bool receivedOnTheShortestPath(IPv4Datagram *datagram);
+
     /**
      * Encapsulate packet coming from higher layers into IPv4Datagram, using
      * the given control info. Override if you subclassed controlInfo and/or
