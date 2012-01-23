@@ -226,7 +226,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
             delete datagram;
         }
         else
-            routeUnicastPacket(datagram, NULL, NULL);
+            routeUnicastPacket(datagram, NULL/*destIE*/, IPv4Address::UNSPECIFIED_ADDRESS);
     }
 }
 
@@ -340,7 +340,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
             routeLocalBroadcastPacket(datagram, destIE);
         else
-            routeUnicastPacket(datagram, destIE, nextHopAddress.isUnspecified() ? NULL : &nextHopAddress /*???*/);
+            routeUnicastPacket(datagram, destIE, nextHopAddress);
     }
 }
 
@@ -364,7 +364,7 @@ void IPv4::processIPv4Options(IPv4Datagram *datagram)
     // TODO process other options
 }
 
-void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address* nextHopAddrPtr)
+void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address destNextHopAddr)
 {
     IPv4Address destAddr = datagram->getDestAddress();
 
@@ -376,8 +376,8 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IP
     {
         EV << "using manually specified output interface " << destIE->getName() << "\n";
         // and nextHopAddr remains unspecified
-        if (manetRouting && nextHopAddrPtr)
-           nextHopAddr = *nextHopAddrPtr;  // Manet DSR routing explicit route
+        if (manetRouting && !destNextHopAddr.isUnspecified())
+           nextHopAddr = destNextHopAddr;  // Manet DSR routing explicit route
         // special case ICMP reply
         else if (destIE->isBroadcast())
         {
