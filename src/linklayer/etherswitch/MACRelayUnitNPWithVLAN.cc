@@ -81,49 +81,53 @@ static char *fgetline(FILE *fp)
 //    delete [] endProcEvents;
 //}
 
-void MACRelayUnitNPWithVLAN::initialize()
+void MACRelayUnitNPWithVLAN::initialize(int stage)
 {
-    MACRelayUnitNP::initialize();
-
-    int gateSize = this->gateSize("lowerLayerIn");
-//    VLANTagger **tagger = new VLANTagger*[gateSize];
-    for (int i = 0; i < gateSize; i++)
+    if (stage == 0)
     {
-        // access to the tagger module to initialize a VLAN registration table
-        cModule *taggerModule = getParentModule()->getSubmodule("tagger", i);
-        VLANTagger *tagger = check_and_cast<VLANTagger *>(taggerModule);
-
-        std::vector<VID> vids;
-        if (tagger->isTagged() == false)
+        MACRelayUnitNP::initialize();
+    }
+    else if (stage == 1) // to make sure the following is executed after the normal initialization of other modules (esp. VLANTagger)
+    {
+        int gateSize = this->gateSize("lowerLayerIn");
+        for (int i = 0; i < gateSize; i++)
         {
-            vids.push_back(tagger->getPvid());
-        }
-        else
-        {
-            vids = tagger->getVidSet();
-        }
+            // access to the tagger module to initialize a VLAN registration table
+            cModule *taggerModule = getParentModule()->getSubmodule("tagger", i);
+            VLANTagger *tagger = check_and_cast<VLANTagger *>(taggerModule);
 
-        for (unsigned int j = 0; j < vids.size(); j++)
-        {
-            PortMap portMap;
-            PortStatus *portStatus = new PortStatus();
-            portStatus->registration = Fixed;
-            portStatus->tagged = tagger->isTagged();
-
-            VLANRegistrationTable::iterator iter = vlanTable.find(vids[j]);
-            if (iter == vlanTable.end())
+            std::vector<VID> vids;
+            if (tagger->isTagged() == false)
             {
-                // add new entry
-                EV << "Adding entry to VLAN registration table: " << vids[j] << " --> port" << i << endl;
-                portMap.push_back(portStatus);
-                vlanTable[vids[j]] = portMap;
+                vids.push_back(tagger->getPvid());
             }
             else
             {
-                // update existing entry in VLAN registration table
-                EV << "Updating entry in VLAN registration table: " << vids[j] << " --> port" << i << endl;
-                PortMap& entry = iter->second;
-                entry.push_back(portStatus);
+                vids = tagger->getVidSet();
+            }
+
+            for (unsigned int j = 0; j < vids.size(); j++)
+            {
+                PortMap portMap;
+                PortStatus *portStatus = new PortStatus();
+                portStatus->registration = Fixed;
+                portStatus->tagged = tagger->isTagged();
+
+                VLANRegistrationTable::iterator iter = vlanTable.find(vids[j]);
+                if (iter == vlanTable.end())
+                {
+                    // add new entry
+                    EV << "Adding entry to VLAN registration table: " << vids[j] << " --> port" << i << endl;
+                    portMap.push_back(portStatus);
+                    vlanTable[vids[j]] = portMap;
+                }
+                else
+                {
+                    // update existing entry in VLAN registration table
+                    EV << "Updating entry in VLAN registration table: " << vids[j] << " --> port" << i << endl;
+                    PortMap& entry = iter->second;
+                    entry.push_back(portStatus);
+                }
             }
         }
     }
@@ -177,6 +181,15 @@ void MACRelayUnitNPWithVLAN::broadcastFrame(EtherFrame *frame, int inputport)
 
     if (iter == vlanTable.end())
     {
+        EV << getFullPath() << ": The contents of the vlanTable:" << endl;
+        for (VLANRegistrationTable::iterator vid_it = vlanTable.begin(); vid_it != vlanTable.end(); vid_it++)
+        {
+            EV << "VID: " << vid_it->first << endl;
+            for (unsigned int i = 0; i < vid_it->second.size(); i++)
+            {
+                EV << "- Port " << i << ": " << vid_it->second[i]->registration << ", " << (vid_it->second[i]->tagged ? "tagged" : "untagged") << endl;
+            }
+        }
         error("There is an error in VLAN configuration.");
     }
     else

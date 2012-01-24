@@ -25,8 +25,16 @@
 							<builder buildPath="${ProjDirPath}" id="org.omnetpp.cdt.gnu.builder.debug.1196086938" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.414982452" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1406305899" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.include.paths.486227038" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.486227038" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.6"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/backward"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/x86_64-linux-gnu"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu"/>
+									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.6.1/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.6.1/include-fixed"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/home/kks/omnetpp/src/common"/>
+									<listOptionValue builtIn="false" value="/home/kks/omnetpp/include/platdep"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

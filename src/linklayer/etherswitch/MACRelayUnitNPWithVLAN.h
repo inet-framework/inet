@@ -99,7 +99,15 @@ class INET_API MACRelayUnitNPWithVLAN : public MACRelayUnitNP
   protected:
     /** @name Redefined MACRelayUnitNP member functions. */
     //@{
-    virtual void initialize();
+    /**
+     * For multi-stage initialization
+     */
+    virtual void initialize(int stage);
+
+    /**
+     * For multi-stage initialization
+     */
+    virtual int numInitStages() const {return 2;}
 
 //    /**
 //     * Calls handleIncomingFrame() for frames arrived from outside,
