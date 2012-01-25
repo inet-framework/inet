@@ -419,8 +419,6 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IP
     else // fragment and send
     {
         EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
-        if (datagram->getTransportProtocol()==IP_PROT_MANET) // FIXME ???
-           delete datagram->removeControlInfo();
         numForwarded++;
         fragmentAndSend(datagram, destIE, nextHopAddr);
     }
@@ -731,6 +729,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4
     else
     {
         // send out datagram to ARP, with control info attached
+        delete datagram->removeControlInfo();
         IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
         routingDecision->setInterfaceId(ie->getInterfaceId());
         routingDecision->setNextHopAddr(nextHopAddr);
