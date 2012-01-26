@@ -168,6 +168,8 @@ void PingApp::processPingResponse(PingPayload *msg)
     IPvXAddress src, dest;
     int msgHopCount = -1;
 
+    ASSERT(msg->getOriginatorId() == getId());  // ICMP module error
+
     if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();

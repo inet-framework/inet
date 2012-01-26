@@ -18,6 +18,9 @@
 
 package inet.applications.pingapp;
 
+import inet.applications.IPingApp;
+
+
 //
 // Generates ping requests and calculates the packet loss and round trip
 // parameters of the replies.
@@ -41,7 +44,7 @@ package inet.applications.pingapp;
 //
 // @see ~PingPayload, ~ICMP, ~ICMPv6
 //
-simple PingApp
+simple PingApp like IPingApp
 {
     parameters:
         string destAddr = default(""); // destination address
@@ -60,14 +63,14 @@ simple PingApp
         @signal[pingTxSeq](type=long);
         @signal[pingRxSeq](type=long);
         @statistic[rtt](title="ping round-trip time"; unit=s; record=histogram,vector; interpolationmode=none);
-        @statistic[numLost](title="pings lost";record=last,vector; interpolationmode=none);
-        @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals";record=last,vector; interpolationmode=none);
-        @statistic[pingTxSeq](title="ping tx seq";record=count,vector; interpolationmode=none);
-        @statistic[pingRxSeq](title="ping rx seq";record=count,vector; interpolationmode=none);
+        @statistic[numLost](title="pings lost"; record=last,vector; interpolationmode=none);
+        @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals"; record=last,vector; interpolationmode=none);
+        @statistic[pingTxSeq](title="ping tx seq"; record=count,vector; interpolationmode=none);
+        @statistic[pingRxSeq](title="ping rx seq"; record=count,vector; interpolationmode=none);
     gates:
-        input pingIn;
-        output pingOut;
-        input pingv6In;
-        output pingv6Out;
+        input pingIn @labels(PingPayload/up);
+        output pingOut @labels(PingPayload/down);
+        input pingv6In @labels(PingPayload/up);
+        output pingv6Out @labels(PingPayload/down);
 }
 

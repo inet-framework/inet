@@ -29,7 +29,7 @@
 
 class IPv4Datagram;
 class IPv4ControlInfo;
-
+class PingPayload;
 
 /**
  * ICMP module.
@@ -38,12 +38,15 @@ class INET_API ICMP : public cSimpleModule
 {
   protected:
     RoutingTableAccess routingTableAccess;
+    typedef std::map<long,int> PingMap;
+    PingMap pingMap;
 
+  protected:
     virtual void processICMPMessage(ICMPMessage *);
     virtual void errorOut(ICMPMessage *);
     virtual void processEchoRequest(ICMPMessage *);
     virtual void processEchoReply(ICMPMessage *);
-    virtual void sendEchoRequest(cPacket *);
+    virtual void sendEchoRequest(PingPayload *);
     virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
     virtual void sendToIP(ICMPMessage *msg);
 
@@ -65,7 +68,6 @@ class INET_API ICMP : public cSimpleModule
 
   protected:
     virtual void handleMessage(cMessage *msg);
-
 };
 
 #endif

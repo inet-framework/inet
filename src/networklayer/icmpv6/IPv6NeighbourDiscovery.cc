@@ -19,6 +19,8 @@
 #include "IPv6NeighbourDiscovery.h"
 
 #include "ICMPv6Access.h"
+#include "IPv6ControlInfo.h"
+#include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
 #include "RoutingTable6Access.h"

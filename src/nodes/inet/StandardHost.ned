@@ -18,13 +18,13 @@
 
 package inet.nodes.inet;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
-import inet.transport.ISCTP;
-import inet.applications.pingapp.PingApp;
-import inet.applications.IUDPApp;
-import inet.applications.ITCPApp;
+import inet.applications.IPingApp;
 import inet.applications.ISCTPApp;
+import inet.applications.ITCPApp;
+import inet.applications.IUDPApp;
+import inet.transport.ISCTP;
+import inet.transport.ITCP;
+import inet.transport.IUDP;
 
 
 //
@@ -51,6 +51,7 @@ module StandardHost extends NodeBase
         int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].typename="TCPEchoApp" syntax
         int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
         int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
+        int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
         string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
@@ -80,7 +81,7 @@ module StandardHost extends NodeBase
         sctp: <sctpType> like ISCTP if numSctpApps>0 {
             @display("p=501,141");
         }
-        pingApp: PingApp {
+        pingApp[numPingApps]: <default("PingApp")> like IPingApp {
             parameters:
                 @display("p=501,230");
         }
@@ -108,6 +109,8 @@ module StandardHost extends NodeBase
         sctp.to_ip --> networkLayer.sctpIn if numSctpApps>0;
         networkLayer.sctpOut --> sctp.from_ip if numSctpApps>0;
 
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
+        for i=0..numPingApps-1 {
+            networkLayer.pingOut++ --> pingApp[i].pingIn;
+            networkLayer.pingIn++ <-- pingApp[i].pingOut;
+        }
 }

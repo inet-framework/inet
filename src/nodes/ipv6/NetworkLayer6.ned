@@ -52,8 +52,8 @@ module NetworkLayer6
         output rsvpOut @labels(IPv6ControlInfo/up);
         input ospfIn @labels(IPv6ControlInfo/down);
         output ospfOut @labels(IPv6ControlInfo/up);
-        input pingIn;
-        output pingOut;
+        input pingIn[];
+        output pingOut[];
     submodules:
         ipv6: IPv6 {
             parameters:
@@ -116,8 +116,12 @@ module NetworkLayer6
         icmpv6.errorOut --> ipv6ErrorHandling.in;
 
         // ICMPv6 to ping I/O
-        icmpv6.pingOut --> pingOut;
-        icmpv6.pingIn <-- pingIn;
+        for i=0..sizeof(pingOut)-1 {
+            icmpv6.pingOut++ --> { @display("m=n"); } --> pingOut[i];
+        }
+        for i=0..sizeof(pingIn)-1 {
+            icmpv6.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
+        }
 
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;

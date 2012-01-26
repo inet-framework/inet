@@ -36,8 +36,8 @@ simple ICMPv6
     gates:
         input ipv6In;
         output ipv6Out;
-        input pingIn; // ping requests from app
-        output pingOut;
+        input pingIn[]; // ping requests from app
+        output pingOut[];
         output errorOut;  // for errors
 }
 

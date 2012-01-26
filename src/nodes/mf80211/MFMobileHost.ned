@@ -17,17 +17,17 @@
 
 package inet.nodes.mf80211;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.mobility.IMobility;
-import inet.linklayer.mf80211.Nic80211;
-import inet.base.NotificationBoard;
-import inet.applications.pingapp.PingApp;
-import inet.applications.IUDPApp;
+import inet.applications.IPingApp;
 import inet.applications.ITCPApp;
+import inet.applications.IUDPApp;
+import inet.base.NotificationBoard;
+import inet.linklayer.mf80211.Nic80211;
+import inet.mobility.IMobility;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.nodes.inet.NetworkLayer;
+import inet.transport.ITCP;
+import inet.transport.IUDP;
 
 
 //
@@ -47,6 +47,7 @@ module MFMobileHost
         @labels(node);
         int numTcpApps = default(0);
         int numUdpApps = default(0);
+        int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
         // string tcpAppType = default(""); // Obsolete
         // string udpAppType = default(""); // Obsolete
         bool IPForward = default(false);
@@ -88,7 +89,7 @@ module MFMobileHost
             parameters:
                 @display("p=272,154");
         }
-        pingApp: PingApp {
+        pingApp[numPingApps]: <default("PingApp")> like IPingApp {
             parameters:
                 @display("p=343,200");
         }
@@ -125,8 +126,10 @@ module MFMobileHost
         udp.ipOut --> networkLayer.udpIn;
         udp.ipIn <-- networkLayer.udpOut;
 
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
+        for i=0..numPingApps-1 {
+            networkLayer.pingOut++ --> pingApp[i].pingIn;
+            networkLayer.pingIn++ <-- pingApp[i].pingOut;
+        }
 
         // connections to network outside
         radioIn --> wlan.radioIn;

@@ -24,6 +24,7 @@
 
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
+#include "PingPayload_m.h"
 
 Define_Module(ICMP);
 
@@ -42,7 +43,7 @@ void ICMP::handleMessage(cMessage *msg)
     // request from application
     if (!strcmp(arrivalGate->getName(), "pingIn"))
     {
-        sendEchoRequest(PK(msg));
+        sendEchoRequest(check_and_cast<PingPayload *>(msg));
         return;
     }
 }
@@ -192,14 +193,26 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 void ICMP::processEchoReply(ICMPMessage *reply)
 {
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(reply->removeControlInfo());
-    cPacket *payload = reply->decapsulate();
+    PingPayload *payload = check_and_cast<PingPayload *>(reply->decapsulate());
     payload->setControlInfo(ctrl);
     delete reply;
-    send(payload, "pingOut");
+    long originatorId = payload->getOriginatorId();
+    PingMap::iterator i = pingMap.find(originatorId);
+    if (i != pingMap.end())
+        send(payload, "pingOut", i->second);
+    else
+    {
+        EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
+        delete payload;
+    }
 }
 
-void ICMP::sendEchoRequest(cPacket *msg)
+void ICMP::sendEchoRequest(PingPayload *msg)
 {
+    cGate *arrivalGate = msg->getArrivalGate();
+    int i = arrivalGate->getIndex();
+    pingMap[msg->getOriginatorId()] = i;
+
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_ICMP);
     ICMPMessage *request = new ICMPMessage(msg->getName());

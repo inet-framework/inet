@@ -42,7 +42,7 @@ module NetworkLayer
         input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
         input rsvpIn @labels(IPv4ControlInfo/down);
         input ospfIn @labels(IPv4ControlInfo/down);
-        input pingIn;
+        input pingIn[];
         input manetIn;
         output ifOut[] @labels(IPv4Datagram);
         output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
@@ -50,7 +50,7 @@ module NetworkLayer
         output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
         output rsvpOut @labels(IPv4ControlInfo/up);
         output ospfOut @labels(IPv4ControlInfo/up);
-        output pingOut;
+        output pingOut[];
         output manetOut;
 
     submodules:
@@ -109,8 +109,12 @@ module NetworkLayer
         ip.transportOut[7] --> { @display("m=n"); } --> manetOut;
         ip.transportIn[7] <-- { @display("m=n"); } <-- manetIn;
 
-        icmp.pingOut --> { @display("m=n"); } --> pingOut;
-        icmp.pingIn <-- { @display("m=n"); } <-- pingIn;
+        for i=0..sizeof(pingOut)-1 {
+            icmp.pingOut++ --> { @display("m=n"); } --> pingOut[i];
+        }
+        for i=0..sizeof(pingIn)-1 {
+            icmp.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
+        }
 
         icmp.errorOut --> errorHandling.in;
 
