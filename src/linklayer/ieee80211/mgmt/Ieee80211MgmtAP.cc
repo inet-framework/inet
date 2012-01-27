@@ -83,34 +83,34 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 {
-#ifdef WITH_ETHERNET
-    // must be an EtherFrame frame arriving from MACRelayUnit, that is,
+    // must be an EtherFrame or Ieee80211DataFrame frame arriving from MACRelayUnit, that is,
     // bridged from another interface of the AP (probably Ethernet).
-    EtherFrame *etherframe = check_and_cast<EtherFrame *>(msg);
+    Ieee80211DataFrame *frame = NULL;
 
-    // check we really have a STA with that dest address
-    const MACAddress& macAddr = etherframe->getDest();
-#else
-    Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(msg);
-
-    const MACAddress& macAddr = frame->getReceiverAddress();
+#ifdef WITH_ETHERNET
+    EtherFrame *etherframe = dynamic_cast<EtherFrame *>(msg);
+    if (etherframe)
+    {
+        frame = convertFromEtherFrame(etherframe);
+    }
+    else
 #endif
+    {
+        frame = check_and_cast<Ieee80211DataFrame *>(msg);
+    }
 
+    MACAddress macAddr = frame->getReceiverAddress();
     if (!macAddr.isMulticast())
     {
         STAList::iterator it = staList.find(macAddr);
         if (it==staList.end() || it->second.status!=ASSOCIATED)
         {
             EV << "STA with MAC address " << macAddr << " not associated with this AP, dropping frame\n";
-            delete msg; // XXX count drops?
+            delete frame; // XXX count drops?
             return;
         }
     }
 
-#ifdef WITH_ETHERNET
-    // convert Ethernet frame
-    Ieee80211DataFrame *frame = convertFromEtherFrame(etherframe);
-#endif
     sendOrEnqueue(frame);
 }
 
