@@ -15,7 +15,7 @@
 #ifndef __INET_RSVPCLASSIFIER_H
 #define __INET_RSVPCLASSIFIER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IntServ.h"
 #include "IClassifier.h"

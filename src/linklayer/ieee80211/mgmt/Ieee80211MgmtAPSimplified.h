@@ -18,7 +18,8 @@
 #ifndef IEEE80211_MGMT_SIMPLIFIEDAP_H
 #define IEEE80211_MGMT_SIMPLIFIEDAP_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 

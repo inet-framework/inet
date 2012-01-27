@@ -20,9 +20,10 @@
 #ifndef DYMO_ROUTINGENTRY_H
 #define DYMO_ROUTINGENTRY_H
 
-#include <omnetpp.h>
 #include <string.h>
 #include <sstream>
+
+#include "INETDefs.h"
 
 #include <IPv4Address.h>
 #include <InterfaceTable.h>

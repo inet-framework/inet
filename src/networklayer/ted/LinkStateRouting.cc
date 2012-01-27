@@ -12,8 +12,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include <omnetpp.h>
 #include <algorithm>
+
+#include "INETDefs.h"
 
 #include "LinkStateRouting.h"
 #include "IPv4ControlInfo.h"

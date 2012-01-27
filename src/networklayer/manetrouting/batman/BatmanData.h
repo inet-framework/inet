@@ -10,9 +10,12 @@
 #include <set>
 #include <vector>
 #include <map>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "ManetRoutingBase.h"
 #include "BatmanMsg_m.h"
+
 #define TYPE_OF_WORD uint64_t /* you should choose something big, if you don't want to waste cpu */
 #define WORD_BIT_SIZE  (sizeof(TYPE_OF_WORD)*8)
 

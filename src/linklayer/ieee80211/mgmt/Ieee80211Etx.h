@@ -19,7 +19,8 @@
 #ifndef IEEE80211_ETX_ADHOC_H
 #define IEEE80211_ETX_ADHOC_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "uint128.h"
 #include "IInterfaceTable.h"
 #include "ETXPacket_m.h"

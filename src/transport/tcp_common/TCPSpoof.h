@@ -14,8 +14,8 @@
 #ifndef __INET_TCPSPOOF_H
 #define __INET_TCPSPOOF_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "TCPSegment.h"
 #include "IPvXAddressResolver.h"
 

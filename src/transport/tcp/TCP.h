@@ -21,9 +21,10 @@
 
 #include <map>
 #include <set>
-#include <omnetpp.h>
-#include "IPvXAddress.h"
 
+#include "INETDefs.h"
+
+#include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 
 // Forward declarations:

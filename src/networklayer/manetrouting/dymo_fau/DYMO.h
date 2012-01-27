@@ -20,7 +20,7 @@
 #ifndef DYMO_H
 #define DYMO_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv4Address.h"
 #include "IPv4.h"

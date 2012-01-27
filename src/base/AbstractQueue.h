@@ -18,7 +18,6 @@
 #ifndef __INET_ABSTRACTQUEUE_H
 #define __INET_ABSTRACTQUEUE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 

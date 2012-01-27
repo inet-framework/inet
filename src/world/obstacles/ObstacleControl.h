@@ -23,8 +23,8 @@
 
 #include <list>
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "Coord.h"
 #include "world/obstacles/Obstacle.h"

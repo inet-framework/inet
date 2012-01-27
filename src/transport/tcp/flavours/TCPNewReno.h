@@ -18,7 +18,8 @@
 #ifndef __INET_TCPNEWRENO_H
 #define __INET_TCPNEWRENO_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPTahoeRenoFamily.h"
 
 

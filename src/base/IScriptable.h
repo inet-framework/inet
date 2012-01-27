@@ -18,7 +18,6 @@
 #ifndef ISCRIPTABLE_H
 #define ISCRIPTABLE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 

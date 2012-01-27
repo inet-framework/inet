@@ -14,8 +14,9 @@
 
 #include <vector>
 #include <string>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "TCPSocket.h"
 
 

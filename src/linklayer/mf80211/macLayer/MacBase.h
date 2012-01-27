@@ -24,8 +24,8 @@
 #ifndef MACBASE_H
 #define MACBASE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "NotifierConsts.h"
 
 class NotificationBoard;

@@ -18,7 +18,8 @@
 #ifndef __INET_TCPNOCONGESTIONCONTROL_H
 #define __INET_TCPNOCONGESTIONCONTROL_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPBaseAlg.h"
 
 

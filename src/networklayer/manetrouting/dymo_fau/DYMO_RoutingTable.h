@@ -20,14 +20,12 @@
 #ifndef DYMO_ROUTINGTABLE_H
 #define DYMO_ROUTINGTABLE_H
 
-#include <omnetpp.h>
 #include <vector>
+
 #include "INETDefs.h"
 
 #include "NotificationBoard.h"
-
 #include "DYMO_RoutingEntry.h"
-
 #include "IRoutingTable.h"
 
 /**

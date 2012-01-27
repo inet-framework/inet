@@ -20,8 +20,6 @@
 
 #include "BasicBattery.h"
 
-//#undef EV
-//#define EV (ev.isDisabled()||!mDebug) ? std::cout : ev ==> EV is now part of <omnetpp.h>
 
 Define_Module( BasicBattery );
 

@@ -12,9 +12,11 @@
 
 /*-------------------------------------------------------------------*/
 
-#include <omnetpp.h>
 #include <map>
 #include <vector>
+
+#include "INETDefs.h"
+
 
 #define LWMPLS_OUTPUT_LABEL 0
 #define LWMPLS_INPUT_LABEL  1

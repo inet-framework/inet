@@ -18,8 +18,10 @@
 #ifndef __INET_BGPSESSION_H
 #define __INET_BGPSESSION_H
 
-#include <omnetpp.h>
 #include <vector>
+
+#include "INETDefs.h"
+
 #include "BGPCommon.h"
 #include "TCPSocket.h"
 #include "BGPRouting.h"

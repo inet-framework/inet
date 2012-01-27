@@ -16,7 +16,6 @@
 //
 
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 class INET_API Join : public cSimpleModule

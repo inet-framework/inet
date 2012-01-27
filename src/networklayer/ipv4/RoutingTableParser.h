@@ -30,7 +30,8 @@
 #ifndef __INET_ROUTINGTABLEPARSER_H
 #define __INET_ROUTINGTABLEPARSER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "RoutingTable.h"
 
 /**

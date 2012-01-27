@@ -16,9 +16,11 @@
 #ifndef __INET_LIBTABLE_H
 #define __INET_LIBTABLE_H
 
-#include <omnetpp.h>
 #include <vector>
 #include <string>
+
+#include "INETDefs.h"
+
 #include "ConstType.h"
 #include "IPv4Address.h"
 #include "IPv4Datagram.h"

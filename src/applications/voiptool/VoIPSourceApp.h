@@ -29,7 +29,7 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

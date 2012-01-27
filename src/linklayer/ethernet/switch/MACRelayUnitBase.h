@@ -19,9 +19,11 @@
 #ifndef __INET_MACRELAYUNITBASE_H
 #define __INET_MACRELAYUNITBASE_H
 
-#include <omnetpp.h>
 #include <map>
 #include <string>
+
+#include "INETDefs.h"
+
 #include "MACAddress.h"
 
 class EtherFrame;

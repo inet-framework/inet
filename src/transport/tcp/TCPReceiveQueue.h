@@ -19,7 +19,8 @@
 #ifndef __INET_TCPRECEIVEQUEUE_H
 #define __INET_TCPRECEIVEQUEUE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPConnection.h"
 
 

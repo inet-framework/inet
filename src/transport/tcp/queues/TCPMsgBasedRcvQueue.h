@@ -20,7 +20,9 @@
 
 #include <map>
 #include <string>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "TCPSegment.h"
 #include "TCPVirtualDataRcvQueue.h"
 

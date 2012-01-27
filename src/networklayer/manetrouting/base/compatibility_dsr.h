@@ -6,7 +6,8 @@
 //#include <sys/time.h>
 //#include <sys/types.h>
 //#endif
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;

@@ -21,7 +21,7 @@
 
 #include <stack>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "LineSegmentsMobilityBase.h"
 

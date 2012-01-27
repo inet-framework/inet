@@ -19,7 +19,8 @@
 #ifndef __PLAINSCTP_H
 #define __PLAINSCTP_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPAlgorithm.h"
 
 

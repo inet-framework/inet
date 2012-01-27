@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #define PACK_STRUCT_STRUCT __attribute__ (( __packed__ ))
 #define LWIP_PLATFORM_ASSERT(c) assert(c)

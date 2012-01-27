@@ -20,10 +20,11 @@
 
 #define WANT_WINSOCK2
 
-#include <platdep/sockets.h>
 #include <stdio.h>
 #include <string.h>
-#include <omnetpp.h>
+
+#include <platdep/sockets.h>
+#include "INETDefs.h"
 
 #include "ExtInterface.h"
 

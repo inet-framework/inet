@@ -35,8 +35,10 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <omnetpp.h>
 #include <fstream>
+
+#include "INETDefs.h"
+
 #include "HttpLogdefs.h"
 #include "HttpUtils.h"
 #include "HttpRandom.h"

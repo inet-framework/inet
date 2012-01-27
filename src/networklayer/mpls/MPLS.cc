@@ -13,8 +13,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include <omnetpp.h>
 #include <string.h>
+
+#include "INETDefs.h"
 
 #include "MPLS.h"
 #include "Utils.h"

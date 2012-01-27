@@ -21,7 +21,8 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPv6ErrorHandling.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"

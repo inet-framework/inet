@@ -18,7 +18,8 @@
 #ifndef __SCTPALGORITHM_H
 #define __SCTPALGORITHM_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPAssociation.h"
 #include "SCTPQueue.h"
 

@@ -19,7 +19,8 @@
 #ifndef __SCTPSERVER_H_
 #define __SCTPSERVER_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
 

@@ -21,7 +21,9 @@
 #include <vector>
 #include <map>
 #include <list>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IPv4InterfaceData.h"
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"

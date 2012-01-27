@@ -15,7 +15,8 @@
 #ifndef __INET_LINKSTATEROUTING_H
 #define __INET_LINKSTATEROUTING_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "NotificationBoard.h"
 #include "LinkStatePacket_m.h"
 #include "IntServ.h"

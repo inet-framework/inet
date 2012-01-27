@@ -22,7 +22,7 @@
 #define BASIC_BATTERY_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 // INCLUDES for access to the Notification board (publish energy)
 #include "NotifierConsts.h"

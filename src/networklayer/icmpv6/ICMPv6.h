@@ -20,7 +20,7 @@
 #ifndef __ICMPv6_H__
 #define __ICMPv6_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv6Datagram.h"
 #include "ICMPv6Message_m.h"

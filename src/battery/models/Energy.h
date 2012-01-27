@@ -16,7 +16,8 @@
 #define ENERGY_H
 
 // SYSTEM INCLUDES
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 
 class Energy : public cObject
 {

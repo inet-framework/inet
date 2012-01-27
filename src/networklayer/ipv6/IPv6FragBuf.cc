@@ -16,9 +16,11 @@
 //
 
 
-#include <omnetpp.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "INETDefs.h"
+
 #include "IPv6FragBuf.h"
 #include "ICMPv6.h"
 #include "ICMPv6Message_m.h"  // for TIME_EXCEEDED

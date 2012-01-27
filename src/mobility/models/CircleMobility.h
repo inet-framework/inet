@@ -19,7 +19,7 @@
 #ifndef CIRCLE_MOBILITY_H
 #define CIRCLE_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "MovingMobilityBase.h"
 

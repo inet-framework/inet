@@ -19,7 +19,7 @@
 #ifndef LINE_SEGMENTS_MOBILITY_BASE_H
 #define LINE_SEGMENTS_MOBILITY_BASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "MovingMobilityBase.h"
 

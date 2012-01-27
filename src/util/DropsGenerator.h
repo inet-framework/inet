@@ -19,9 +19,9 @@
 #ifndef __INET_DROPSGENERATOR_H
 #define __INET_DROPSGENERATOR_H
 
-#include <omnetpp.h>
-#include "INETDefs.h"
 #include <vector>
+
+#include "INETDefs.h"
 
 
 /**

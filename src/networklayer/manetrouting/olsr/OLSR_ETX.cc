@@ -35,7 +35,8 @@
 #include <math.h>
 #include <limits.h>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "UDPPacket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"

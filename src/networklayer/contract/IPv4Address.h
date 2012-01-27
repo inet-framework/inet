@@ -26,9 +26,9 @@
 #ifndef __INET_IPADDRESS_H
 #define __INET_IPADDRESS_H
 
-#include <omnetpp.h>
 #include <iostream>
 #include <string>
+
 #include "INETDefs.h"
 
 

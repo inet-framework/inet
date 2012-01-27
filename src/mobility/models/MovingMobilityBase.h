@@ -23,7 +23,7 @@
 #ifndef MOVING_MOBILITY_BASE_H
 #define MOVING_MOBILITY_BASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "MobilityBase.h"
 
@@ -32,7 +32,7 @@
  * @brief Base class for moving mobility modules. Periodically emits a signal with the current mobility state.
  *
  * @ingroup mobility
- * @author Levent Mészáros
+ * @author Levente Meszaros
  */
 class INET_API MovingMobilityBase : public MobilityBase
 {

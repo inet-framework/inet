@@ -15,7 +15,8 @@
 #ifndef __INET_TEDACCESS_H
 #define __INET_TEDACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "TED.h"
 

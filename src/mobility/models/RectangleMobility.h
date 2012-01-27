@@ -19,7 +19,7 @@
 #ifndef RECTANGLE_MOBILITY_H
 #define RECTANGLE_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "MovingMobilityBase.h"
 

@@ -19,7 +19,8 @@
 #ifndef __INET_TCPSOCKET_H
 #define __INET_TCPSOCKET_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPCommand_m.h"
 #include "IPvXAddress.h"
 

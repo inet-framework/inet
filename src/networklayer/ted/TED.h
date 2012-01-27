@@ -15,7 +15,8 @@
 #ifndef __INET_TED_H
 #define __INET_TED_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TED_m.h"
 #include "IntServ.h"
 

@@ -19,7 +19,7 @@
 #ifndef AN_SIM_MOBILITY_H
 #define AN_SIM_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "LineSegmentsMobilityBase.h"
 

@@ -33,7 +33,9 @@
 #include <string.h>
 #include <set>
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "uint128.h"
 
 typedef Uint128 nsaddr_t;

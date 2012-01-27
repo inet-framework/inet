@@ -26,8 +26,9 @@
 #ifndef __OLSR_state_h__
 #define __OLSR_state_h__
 
+#include "INETDefs.h"
+
 #include "OLSR_repositories.h"
-#include <omnetpp.h>
 
 /// This class encapsulates all data structures needed for maintaining internal state of an OLSR node.
 class OLSR_state : public cObject

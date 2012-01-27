@@ -20,7 +20,9 @@
 #define DYMO_Timer_H
 
 #include <iostream>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "DYMO_Timeout_m.h"
 
 //===========================================================================================

@@ -19,8 +19,9 @@
 #define __INET_INTERFACETABLE_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
+
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
 #include "NotificationBoard.h"

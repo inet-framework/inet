@@ -21,7 +21,7 @@
 #ifndef  BASIC_DECIDER_H
 #define  BASIC_DECIDER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "BasicModule.h"
 #include "AirFrame_m.h"
@@ -53,7 +53,7 @@
  *
  * @ingroup decider
  * @ingroup basicModules
- * @author Marc Löbbers, Daniel Willkomm
+ * @author Marc Loebbers, Daniel Willkomm
  */
 class INET_API BasicDecider : public BasicModule
 {

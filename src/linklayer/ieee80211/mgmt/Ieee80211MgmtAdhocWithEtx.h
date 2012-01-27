@@ -18,7 +18,8 @@
 #ifndef IEEE80211_MGMT_ADHOC_ETX_H
 #define IEEE80211_MGMT_ADHOC_ETX_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "Ieee80211MgmtAdhoc.h"
 #include "Ieee80211Etx.h"
 

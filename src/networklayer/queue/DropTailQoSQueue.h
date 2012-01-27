@@ -19,7 +19,8 @@
 #ifndef __INET_DROPTAILQOSQUEUE_H
 #define __INET_DROPTAILQOSQUEUE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "PassiveQueueBase.h"
 #include "IQoSClassifier.h"
 

@@ -18,7 +18,8 @@
 #ifndef __INET_TCPSENDQUEUE_H
 #define __INET_TCPSENDQUEUE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 

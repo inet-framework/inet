@@ -1,7 +1,7 @@
 /* -*- mode:c++ -*- ********************************************************
  * file:        IMobility.h
  *
- * author:      Levente Mészáros
+ * author:      Levente Meszaros
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -23,7 +23,7 @@
 #ifndef IMOBILITY_H
 #define IMOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "Coord.h"
 
@@ -32,7 +32,7 @@
  * @brief Abstract base class defining the public interface that must be provided by all mobility modules.
  *
  * @ingroup mobility
- * @author Levente Mészáros
+ * @author Levente Mï¿½szï¿½ros
  */
 class INET_API IMobility
 {

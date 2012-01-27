@@ -19,7 +19,8 @@
 #ifndef __IPv6_H__
 #define __IPv6_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "QueueBase.h"
 #include "RoutingTable6.h"
 #include "ICMPv6.h"

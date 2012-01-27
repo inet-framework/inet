@@ -19,7 +19,6 @@
 #ifndef __INET_THRUPUTMETER_H
 #define __INET_THRUPUTMETER_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 

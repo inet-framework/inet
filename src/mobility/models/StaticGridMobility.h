@@ -20,7 +20,7 @@
 #ifndef STATIC_GRID_MOBILITY_H
 #define STATIC_GRID_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "StationaryMobility.h"
 

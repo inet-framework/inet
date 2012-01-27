@@ -17,7 +17,8 @@
 #define __INET_MPLSMODULE_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "MPLSPacket.h"
 #include "IPv4Datagram.h"

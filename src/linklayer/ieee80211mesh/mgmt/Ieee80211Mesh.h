@@ -19,7 +19,8 @@
 #ifndef IEEE80211_MESH_ADHOC_H
 #define IEEE80211_MESH_ADHOC_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "Ieee80211MgmtBase.h"
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"

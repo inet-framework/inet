@@ -47,7 +47,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "Coord.h"
 

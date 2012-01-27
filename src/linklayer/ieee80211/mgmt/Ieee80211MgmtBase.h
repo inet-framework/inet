@@ -18,7 +18,8 @@
 #ifndef IEEE80211_MGMT_BASE_H
 #define IEEE80211_MGMT_BASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "MACAddress.h"
 #include "PassiveQueueBase.h"
 #include "NotificationBoard.h"

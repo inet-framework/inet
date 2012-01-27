@@ -13,10 +13,11 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include <omnetpp.h>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+
+#include "INETDefs.h"
 
 #include "LDP.h"
 

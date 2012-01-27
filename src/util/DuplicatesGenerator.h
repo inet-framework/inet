@@ -19,9 +19,9 @@
 #ifndef __INET_DUPLICATESGENERATOR_H
 #define __INET_DUPLICATESGENERATOR_H
 
-#include <omnetpp.h>
-#include "INETDefs.h"
 #include <vector>
+
+#include "INETDefs.h"
 
 
 /**

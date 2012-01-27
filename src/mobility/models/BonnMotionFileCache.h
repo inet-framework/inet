@@ -22,8 +22,6 @@
 #include <list>
 #include <vector>
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
 
 

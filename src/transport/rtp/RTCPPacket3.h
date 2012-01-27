@@ -21,7 +21,7 @@
 #ifndef __INET_RTCPPACKET3_H_
 #define __INET_RTCPPACKET3_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "RTCPPacket3_m.h"
 

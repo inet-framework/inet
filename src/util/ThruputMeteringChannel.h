@@ -18,7 +18,6 @@
 #ifndef __INET_THRUPUTMETERINGCHANNEL_H
 #define __INET_THRUPUTMETERINGCHANNEL_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 /**

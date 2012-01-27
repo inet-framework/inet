@@ -26,13 +26,15 @@
 #ifndef __FREE_SPACE_MODEL_H__
 #define __FREE_SPACE_MODEL_H__
 
-#include <omnetpp.h>
-#include "INETDefs.h"
-#include "FWMath.h"
-#include "IReceptionModel.h"
 #include <list>
 #include <string>
 #include <math.h>
+
+#include "INETDefs.h"
+
+#include "FWMath.h"
+#include "IReceptionModel.h"
+
 using namespace std;
 
 /**

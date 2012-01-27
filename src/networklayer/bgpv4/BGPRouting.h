@@ -18,7 +18,8 @@
 #ifndef __INET_BGPROUTING_H
 #define __INET_BGPROUTING_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 #include "RoutingTableAccess.h"

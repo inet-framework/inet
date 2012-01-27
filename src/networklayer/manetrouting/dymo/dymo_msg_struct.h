@@ -27,7 +27,8 @@
 #include  <string.h>
 #include "compatibility.h"
 #include "uint128.h"
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 //#define STATIC_BLOCK
 #define STATIC_BLOCK_SIZE 600

@@ -16,7 +16,8 @@
 #define __INET_RSVP_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "IScriptable.h"
 #include "IntServ.h"

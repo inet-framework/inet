@@ -24,8 +24,8 @@
 #ifndef __IPv6ERRORHANDLING_H__
 #define __IPv6ERRORHANDLING_H__
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IPv6ControlInfo.h"
 #include "ICMPv6Message_m.h"
 

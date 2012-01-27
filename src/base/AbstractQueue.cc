@@ -16,7 +16,8 @@
 //
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "AbstractQueue.h"
 
 

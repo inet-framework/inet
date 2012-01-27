@@ -20,7 +20,6 @@
 #ifndef WORLD_ANNOTATION_ANNOTATIONDUMMY_H
 #define WORLD_ANNOTATION_ANNOTATIONDUMMY_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 /**

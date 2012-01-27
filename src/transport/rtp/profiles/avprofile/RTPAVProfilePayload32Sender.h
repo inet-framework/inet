@@ -19,7 +19,7 @@
 #ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 #define __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "RTPPayloadSender.h"
 

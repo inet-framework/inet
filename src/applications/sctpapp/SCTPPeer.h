@@ -18,7 +18,8 @@
 #ifndef __SCTPPEER_H_
 #define __SCTPPEER_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
 

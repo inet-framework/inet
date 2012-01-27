@@ -19,7 +19,9 @@
 #define __INET_OSPFROUTING_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
 #include "OSPFPacket_m.h"

@@ -18,7 +18,8 @@
 #ifndef __INETMANET_POWERCONTROLMANAGER_H_
 #define __INETMANET_POWERCONTROLMANAGER_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "PowerControlMessages_m.h"
 
 class IPowerControl;

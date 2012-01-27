@@ -19,7 +19,7 @@
 #ifndef GAUSS_MARKOV_MOBILITY_H
 #define GAUSS_MARKOV_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "LineSegmentsMobilityBase.h"
 

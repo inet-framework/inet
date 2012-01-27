@@ -21,7 +21,9 @@
 
 
 #include <map>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "TCPSocket.h"
 
 

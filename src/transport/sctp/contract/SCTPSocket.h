@@ -20,7 +20,7 @@
 #define __SCTPSOCKET_H
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPvXAddress.h"
 #include "SCTPAssociation.h"

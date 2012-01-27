@@ -23,7 +23,9 @@
 #include <string.h>
 #include <list>
 #include <map>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "IPv4Address.h"
 #include "IPv4ControlInfo_m.h"
 #include "IPv4Datagram.h"

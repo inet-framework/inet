@@ -15,7 +15,7 @@
 #ifndef __INET_ICLASSIFIER_H
 #define __INET_ICLASSIFIER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv4Datagram.h"
 #include "LIBTable.h"

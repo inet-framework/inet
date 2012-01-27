@@ -17,7 +17,8 @@
 //
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SomeUDPApp.h"
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"

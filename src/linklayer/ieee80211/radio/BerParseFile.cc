@@ -20,9 +20,11 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "BerParseFile.h"
-#include <omnetpp.h>
 #include <algorithm>
+
+#include "INETDefs.h"
+
+#include "BerParseFile.h"
 
 void BerParseFile::clearBerTable()
 {

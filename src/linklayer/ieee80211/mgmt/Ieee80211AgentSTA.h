@@ -19,7 +19,9 @@
 #define IEEE80211_AGENT_STA_H
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "Ieee80211Primitives_m.h"
 #include "NotificationBoard.h"
 

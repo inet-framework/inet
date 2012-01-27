@@ -32,7 +32,8 @@
 #ifndef __INET_HTTPBROWSERBASE_H
 #define __INET_HTTPBROWSERBASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "HttpNodeBase.h"
 
 #define MSGKIND_START_SESSION    0

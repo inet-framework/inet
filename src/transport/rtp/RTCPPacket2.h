@@ -20,7 +20,7 @@
 #ifndef __INET_RTCPPACKET2_H_
 #define __INET_RTCPPACKET2_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "RTCPPacket2_m.h"
 

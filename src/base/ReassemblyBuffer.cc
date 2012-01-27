@@ -16,9 +16,11 @@
 //
 
 
-#include <omnetpp.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "INETDefs.h"
+
 #include "ReassemblyBuffer.h"
 
 

@@ -21,7 +21,7 @@
 #ifndef  DECIDER_80211_H
 #define  DECIDER_80211_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include <BasicDecider.h>
 
@@ -37,7 +37,7 @@
  *
  *
  * @ingroup decider
- * @author Marc Löbbers, David Raguin
+ * @author Marc Loebbers, David Raguin
  */
 class INET_API Decider80211 : public BasicDecider
 {

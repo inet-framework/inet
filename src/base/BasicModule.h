@@ -22,7 +22,8 @@
 #ifndef BASIC_MODULE_H
 #define BASIC_MODULE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 

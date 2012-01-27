@@ -18,8 +18,8 @@
 #ifndef __INET_IINTERFACETABLE_H
 #define __INET_IINTERFACETABLE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "InterfaceEntry.h"  // not strictly required, but clients will need it anyway
 
 

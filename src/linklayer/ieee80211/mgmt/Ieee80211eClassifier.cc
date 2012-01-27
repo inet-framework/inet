@@ -17,7 +17,8 @@
 //
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "Ieee80211eClassifier.h"
 #ifdef WITH_IPv4
   #include "IPv4Datagram.h"

@@ -19,8 +19,8 @@
 #ifndef __SCTPQUEUE_H
 #define __SCTPQUEUE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IPvXAddress.h"
 #include "SCTP.h"
 

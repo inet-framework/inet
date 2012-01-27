@@ -19,7 +19,7 @@
 #ifndef DYMO_TOKENBUCKET_H
 #define DYMO_TOKENBUCKET_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IPv4Address.h"
 #include "IInterfaceTable.h"

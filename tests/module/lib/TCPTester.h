@@ -19,7 +19,8 @@
 #ifndef __TCPTESTER_H
 #define __TCPTESTER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPv4Address.h"
 #include "IPv4Datagram_m.h"
 #include "TCPSegment.h"

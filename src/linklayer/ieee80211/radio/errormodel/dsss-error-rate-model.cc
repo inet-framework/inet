@@ -17,9 +17,12 @@
  *
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
-#include <omnetpp.h>
-#include "dsss-error-rate-model.h"
+
 #include <math.h>
+
+#include "INETDefs.h"
+
+#include "dsss-error-rate-model.h"
 
 #ifndef ENABLE_GSL
 const double DsssErrorRateModel::WLAN_SIR_PERFECT = 10.0;

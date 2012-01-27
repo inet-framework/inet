@@ -15,9 +15,11 @@
 #ifndef INET_SIMPLE_BATTERY_H
 #define INET_SIMPLE_BATTERY_H
 
-#include <omnetpp.h>
 #include <vector>
 #include <map>
+
+#include "INETDefs.h"
+
 #include "BasicBattery.h"
 
 /**

@@ -20,8 +20,10 @@
 #ifndef __SCTPSENDSTREAM_H
 #define __SCTPSENDSTREAM_H
 
-#include <omnetpp.h>
 #include <list>
+
+#include "INETDefs.h"
+
 #include "SCTPAssociation.h"
 #include "SCTPQueue.h"
 

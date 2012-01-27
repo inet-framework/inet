@@ -15,7 +15,8 @@
 #ifndef __INET_RSVPACCESS_H
 #define __INET_RSVPACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "RSVP.h"
 

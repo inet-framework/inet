@@ -29,9 +29,11 @@
 #ifndef __OLSR_rtable_h__
 #define __OLSR_rtable_h__
 
-#include "OLSR_repositories.h"
-#include <omnetpp.h>
 #include <map>
+
+#include "INETDefs.h"
+
+#include "OLSR_repositories.h"
 
 ///
 /// \brief Defines rtable_t as a map of OLSR_rt_entry, whose key is the destination address.

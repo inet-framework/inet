@@ -47,7 +47,7 @@
 #include <vector>
 #include <iostream>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "LineSegmentsMobilityBase.h"
 #include "Posture.h"

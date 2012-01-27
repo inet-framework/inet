@@ -33,7 +33,9 @@
 
 #include <exception>
 #include <string>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "HttpUtils.h"
 
 enum DISTR_TYPE {dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf};

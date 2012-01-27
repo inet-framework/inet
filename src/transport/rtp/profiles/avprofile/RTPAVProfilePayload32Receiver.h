@@ -23,7 +23,7 @@
 #ifndef __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
 #define __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "RTPPayloadReceiver.h"
 

@@ -29,7 +29,7 @@
 #ifndef __OLSR_ETX_parameter_h__
 #define __OLSR_ETX_parameter_h__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #define OLSR_ETX_CAPPROBE_PACKET_SIZE 1000
 #define CAPPROBE_MAX_ARRAY              16

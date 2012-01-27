@@ -18,7 +18,7 @@
 #ifndef BONN_MOTION_MOBILITY_H
 #define BONN_MOTION_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "LineSegmentsMobilityBase.h"
 #include "BonnMotionFileCache.h"

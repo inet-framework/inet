@@ -19,7 +19,8 @@
 #ifndef __INET_ROUTING_TABLE6_ACCESS_H
 #define __INET_ROUTING_TABLE6_ACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "RoutingTable6.h"
 

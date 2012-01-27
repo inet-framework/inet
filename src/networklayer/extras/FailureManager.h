@@ -18,7 +18,7 @@
 #ifndef FAILUREMANAGER_H
 #define FAILUREMANAGER_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "IScriptable.h"
 

@@ -16,7 +16,8 @@
 #ifndef __INET_LIB_TABLE_ACCESS_H
 #define __INET_LIB_TABLE_ACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "LIBTable.h"
 

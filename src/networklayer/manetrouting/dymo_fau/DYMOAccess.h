@@ -20,7 +20,7 @@
 #define DYMOACCESS_H
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "ModuleAccess.h"
 

@@ -19,9 +19,11 @@
 #ifndef __INET_NOTIFICATIONBOARD_H
 #define __INET_NOTIFICATIONBOARD_H
 
-#include <omnetpp.h>
 #include <map>
 #include <vector>
+
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "INotifiable.h"
 #include "NotifierConsts.h"

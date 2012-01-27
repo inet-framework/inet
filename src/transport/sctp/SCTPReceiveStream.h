@@ -19,7 +19,8 @@
 #ifndef __SCTPRECEIVESTREAM_H
 #define __SCTPRECEIVESTREAM_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "SCTPQueue.h"
 
 

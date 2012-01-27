@@ -19,7 +19,7 @@
 #ifndef STATIONARY_MOBILITY_H
 #define STATIONARY_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "MobilityBase.h"
 

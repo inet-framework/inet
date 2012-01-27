@@ -24,8 +24,8 @@
 #ifndef WIRELESSMACBASE_H
 #define WIRELESSMACBASE_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "NotifierConsts.h"
 
 class NotificationBoard;

@@ -20,7 +20,8 @@
 #ifndef __INET_INTERFACETABLEACCESS_H
 #define __INET_INTERFACETABLEACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "IInterfaceTable.h"
 

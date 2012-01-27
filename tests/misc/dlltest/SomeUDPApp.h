@@ -22,7 +22,9 @@
 #define __SOMEUDPAPP_H__
 
 #include <vector>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
+
 #include "UDPAppBase.h"
 
 

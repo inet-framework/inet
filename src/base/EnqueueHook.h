@@ -19,7 +19,6 @@
 #ifndef __INET_ENQUEUEHOOK_H
 #define __INET_ENQUEUEHOOK_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 /**

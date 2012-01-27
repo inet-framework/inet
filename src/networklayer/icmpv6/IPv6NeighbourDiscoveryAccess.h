@@ -19,7 +19,8 @@
 #ifndef IPV6NEIGHBOURDISCOVERYACCESS_H
 #define IPV6NEIGHBOURDISCOVERYACCESS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "IPv6NeighbourDiscovery.h"
 

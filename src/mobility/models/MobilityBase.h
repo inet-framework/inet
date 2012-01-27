@@ -23,7 +23,7 @@
 #ifndef MOBILITY_BASE_H
 #define MOBILITY_BASE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include "Coord.h"
 #include "BasicModule.h"

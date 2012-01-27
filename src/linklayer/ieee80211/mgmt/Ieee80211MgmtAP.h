@@ -18,8 +18,10 @@
 #ifndef IEEE80211_MGMT_AP_H
 #define IEEE80211_MGMT_AP_H
 
-#include <omnetpp.h>
 #include <map>
+
+#include "INETDefs.h"
+
 #include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 

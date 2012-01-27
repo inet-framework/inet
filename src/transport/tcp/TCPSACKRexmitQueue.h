@@ -18,7 +18,8 @@
 #ifndef __INET_TCPSACKREXMITQUEUE_H
 #define __INET_TCPSACKREXMITQUEUE_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 

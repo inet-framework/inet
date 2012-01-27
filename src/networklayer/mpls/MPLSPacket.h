@@ -17,7 +17,7 @@
 #define __INET_MPLSPACKET_H
 
 #include <stack>
-#include <omnetpp.h>
+
 #include "INETDefs.h"
 
 /**

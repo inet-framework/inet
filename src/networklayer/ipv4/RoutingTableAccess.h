@@ -22,7 +22,8 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "IRoutingTable.h"
 

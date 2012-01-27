@@ -20,8 +20,8 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IPvXAddress.h"
 #include "TCP.h"
 #include "TCPSegment.h"

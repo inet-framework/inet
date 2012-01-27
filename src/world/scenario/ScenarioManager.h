@@ -18,8 +18,8 @@
 #ifndef SCENARIOMANAGER_H
 #define SCENARIOMANAGER_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IScriptable.h"
 
 

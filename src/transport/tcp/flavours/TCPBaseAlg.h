@@ -19,7 +19,8 @@
 #ifndef __INET_TCPBASEALG_H
 #define __INET_TCPBASEALG_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPAlgorithm.h"
 
 

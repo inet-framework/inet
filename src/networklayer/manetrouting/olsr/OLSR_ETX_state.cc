@@ -24,7 +24,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include <OLSR_ETX_state.h>
 #include <OLSR_ETX.h>
 

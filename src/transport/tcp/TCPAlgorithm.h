@@ -19,7 +19,8 @@
 #ifndef __INET_TCPALGORITHM_H
 #define __INET_TCPALGORITHM_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 

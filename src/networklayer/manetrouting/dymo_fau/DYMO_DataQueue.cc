@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "DYMO_DataQueue.h"
 #include "IPv4InterfaceData.h"
 #include "Ieee802Ctrl_m.h"

@@ -18,7 +18,8 @@
 #ifndef IEEE80211_MGMT_STA_H
 #define IEEE80211_MGMT_STA_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "Ieee80211MgmtBase.h"
 #include "NotificationBoard.h"
 #include "Ieee80211Primitives_m.h"

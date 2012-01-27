@@ -19,7 +19,8 @@
 #ifndef __ICMPv6ACCESS_H__
 #define __ICMPv6ACCESS_H__
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "ModuleAccess.h"
 #include "ICMPv6.h"
 

@@ -20,7 +20,8 @@
  * summary information to Battery Stats module.
  */
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "RadioState.h"
 #include "InetSimpleBattery.h"
 #include "Energy.h"

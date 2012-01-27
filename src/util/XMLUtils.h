@@ -1,7 +1,8 @@
 #ifndef __INET_XMLUTILS_H
 #define __INET_XMLUTILS_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "IPv4Address.h"
 
 const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name);

@@ -19,7 +19,7 @@
 #ifndef CHIANG_MOBILITY_H
 #define CHIANG_MOBILITY_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 #include <LineSegmentsMobilityBase.h>
 

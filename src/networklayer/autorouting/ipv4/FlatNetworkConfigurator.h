@@ -18,8 +18,8 @@
 #ifndef __INET_FLATNETWORKCONFIGURATOR_H
 #define __INET_FLATNETWORKCONFIGURATOR_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
 #include "IPv4Address.h"
 
 class IInterfaceTable;
