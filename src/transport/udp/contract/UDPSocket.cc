@@ -15,6 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "IInterfaceTable.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo.h"
 
@@ -147,6 +150,47 @@ void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfa
     sendToUDP(msg);
 }
 
+void UDPSocket::joinLocalMulticastGroups()
+{
+    IInterfaceTable *ift = InterfaceTableAccess().get();
+    unsigned int numOfAddresses = 0;
+    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+#ifdef WITH_IPv4
+        numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
+#endif
+    }
+
+    if (numOfAddresses > 0)
+    {
+        UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
+        ctrl->setSockId(sockId);
+        ctrl->setMulticastAddrArraySize(numOfAddresses);
+        ctrl->setInterfaceIdArraySize(numOfAddresses);
+
+        unsigned int k = 0;
+        for (int i=0; i<ift->getNumInterfaces(); ++i)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            int interfaceId = ie->getInterfaceId();
+#ifdef WITH_IPv4
+            const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
+            for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+            {
+                ctrl->setMulticastAddr(k, addresses[j]);
+                ctrl->setInterfaceId(k, interfaceId);
+            }
+#endif
+        }
+
+        cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);
+        msg->setControlInfo(ctrl);
+        sendToUDP(msg);
+    }
+}
+
+
 void UDPSocket::leaveMulticastGroup(const IPvXAddress& multicastAddr)
 {
     cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);
@@ -157,6 +201,50 @@ void UDPSocket::leaveMulticastGroup(const IPvXAddress& multicastAddr)
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
+
+void UDPSocket::leaveLocalMulticastGroups()
+{
+    IInterfaceTable *ift = InterfaceTableAccess().get();
+    unsigned int numOfAddresses = 0;
+    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+#ifdef WITH_IPv4
+        numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
+#endif
+#ifdef WITH_IPv6
+        // TODO
+#endif
+    }
+
+    if (numOfAddresses > 0)
+    {
+        UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
+        ctrl->setSockId(sockId);
+        ctrl->setMulticastAddrArraySize(numOfAddresses);
+
+        unsigned int k = 0;
+        for (int i=0; i<ift->getNumInterfaces(); ++i)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+#ifdef WITH_IPv4
+            const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
+            for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+            {
+                ctrl->setMulticastAddr(k, addresses[j]);
+            }
+#endif
+#ifdef WITH_IPv6
+            // TODO
+#endif
+        }
+
+        cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);
+        msg->setControlInfo(ctrl);
+        sendToUDP(msg);
+    }
+}
+
 
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {

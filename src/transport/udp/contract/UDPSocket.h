@@ -142,10 +142,22 @@ class INET_API UDPSocket
     void joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId=-1);
 
     /**
-     * Causes the socket to socket leave the given multicast group, i.e. UDP packets
+     * Joins the socket to each multicast group that are registered with
+     * any of the interfaces.
+     */
+    void joinLocalMulticastGroups();
+
+    /**
+     * Causes the socket to leave the given multicast group, i.e. UDP packets
      * arriving to the given multicast address will no longer passed up to the socket.
      */
     void leaveMulticastGroup(const IPvXAddress& multicastAddr);
+
+    /**
+     * Causes the socket to leave each multicast groups that are registered with
+     * any of the interfaces.
+     */
+    void leaveLocalMulticastGroups();
 
     /**
      * Sends a data packet to the given address and port.
