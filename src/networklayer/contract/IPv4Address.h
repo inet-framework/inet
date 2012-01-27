@@ -206,6 +206,12 @@ class INET_API IPv4Address
     AddressCategory getAddressCategory() const;
 
     /**
+     * Returns true if this address is the limited broadcast address,
+     * i.e. 255.255.255.255.
+     */
+    bool isLimitedBroadcastAddress() const {return addr == 0xFFFFFFFF; }
+
+    /**
      * Returns true if this address is in the multicast address range,
      * 224.0.0.0 thru 239.255.255.255, that is, it's a class D address.
      */

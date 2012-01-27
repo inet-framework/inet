@@ -207,7 +207,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         {
             reassembleAndDeliver(datagram);
         }
-        else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
+        else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
         {
             EV << "Broadcast received\n";
             reassembleAndDeliver(datagram);
@@ -330,7 +330,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
             ASSERT(destIE);
             fragmentAndSend(datagram, destIE, destAddr);
         }
-        else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
+        else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
             routeLocalBroadcastPacket(datagram, destIE);
         else
             routeUnicastPacket(datagram, destIE, nextHopAddress);
