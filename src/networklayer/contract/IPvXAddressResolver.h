@@ -21,7 +21,9 @@
 
 
 #include <vector>
+
 #include "INETDefs.h"
+
 #include "IPvXAddress.h"
 
 // Forward declarations:
@@ -55,6 +57,8 @@ class INET_API IPvXAddressResolver
     virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift);
     // internal
     //virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift, int scope);
+    // internal
+    virtual IPv4Address getInterfaceIPv4Address(InterfaceEntry *ie);
     // internal
     virtual IPv6Address getInterfaceIPv6Address(InterfaceEntry *ie);
 

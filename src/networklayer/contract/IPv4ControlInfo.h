@@ -20,7 +20,7 @@
 
 #include "IPv4ControlInfo_m.h"
 
-#include "IPv4Datagram.h"
+class IPv4Datagram;
 
 /**
  * Control information for sending/receiving packets over IPv4.
@@ -34,7 +34,7 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base
 
   private:
     void copy(const IPv4ControlInfo& other);
-    void clean() { this->dropAndDelete(dgram); }
+    void clean();
 
   public:
     IPv4ControlInfo() : IPv4ControlInfo_Base() {dgram = NULL;}

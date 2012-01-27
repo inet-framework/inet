@@ -21,12 +21,11 @@
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "IPv4ControlInfo.h"
-
-#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
-#endif
 
+#ifdef WITH_IPv4
 #include "IPv4Datagram.h"
+#endif
 
 #ifdef WITH_UDP
 #include "UDPControlInfo_m.h"
@@ -184,7 +183,6 @@ void SCTP::handleMessage(cMessage *msg)
         }
         if (msg->arrivedOn("from_ip"))
         {
-#ifdef WITH_IPv4
             if (par("udpEncapsEnabled"))
             {
                 std::cout<<"Size of SCTPMSG="<<sctpmsg->getByteLength()<<"\n";
@@ -207,19 +205,12 @@ void SCTP::handleMessage(cMessage *msg)
                 srcAddr = controlInfo->getSrcAddr();
                 destAddr = controlInfo->getDestAddr();
             }
-#else
-        throw cRuntimeError("INET compiled without IPv4 features!");
-#endif
         }
         else
         {
-#ifdef WITH_IPv6
             IPv6ControlInfo *controlInfoV6 = check_and_cast<IPv6ControlInfo *>(msg->removeControlInfo());
             srcAddr = controlInfoV6->getSrcAddr();
             destAddr = controlInfoV6->getDestAddr();
-#else
-        throw cRuntimeError("INET compiled without IPv6 features!");
-#endif
         }
 
 

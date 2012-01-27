@@ -22,10 +22,8 @@
 
 #include "IInterfaceTable.h"
 #include "IPvXAddressResolver.h"
-#ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #include "RoutingTable6.h"
-#endif
 
 // FIXME UPDATE DOCU!!!!!!!
 

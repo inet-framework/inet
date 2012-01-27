@@ -16,13 +16,16 @@
 //
 
 #include "IPv6ControlInfo.h"
-#include "IPv6Datagram.h"
 
+#ifdef WITH_IPv6
+#include "IPv6Datagram.h"
+#endif
 
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
+#ifdef WITH_IPv6
     dgram = other.dgram;
-    if(dgram)
+    if (dgram)
     {
         dgram = dgram->dup();
         take(dgram);
@@ -30,6 +33,7 @@ void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 
     for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); i++)
         extensionHeaders.push_back((*i)->dup());
+#endif
 }
 
 IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
@@ -43,6 +47,7 @@ IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
 
 void IPv6ControlInfo::clean()
 {
+#ifdef WITH_IPv6
     dropAndDelete(dgram);
 
     while ( ! extensionHeaders.empty() )
@@ -51,6 +56,7 @@ void IPv6ControlInfo::clean()
         extensionHeaders.pop_back();
         delete eh;
     }
+#endif
 }
 
 IPv6ControlInfo::~IPv6ControlInfo()
@@ -60,15 +66,20 @@ IPv6ControlInfo::~IPv6ControlInfo()
 
 void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
 {
+#ifdef WITH_IPv6
     if (dgram)
         throw cRuntimeError(this, "IPv6ControlInfo::setOrigDatagram(): a datagram is already attached");
 
     dgram = d;
     take(dgram);
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }
 
 IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
 {
+#ifdef WITH_IPv6
     if (!dgram)
         throw cRuntimeError(this, "IPv6ControlInfo::removeOrigDatagram(): no datagram attached "
                   "(already removed, or maybe this IPv6ControlInfo does not come "
@@ -78,6 +89,9 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
     drop(dgram);
     dgram = NULL;
     return ret;
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }
 
 unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const
@@ -103,6 +117,7 @@ void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHead
 
 void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
 {
+#ifdef WITH_IPv6
     ASSERT(eh);
     if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size())
     {
@@ -112,6 +127,9 @@ void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
 
     // insert at position atPos, shift up the rest of the array
     extensionHeaders.insert(extensionHeaders.begin()+atPos, eh);
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }
 
 IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
@@ -119,8 +137,12 @@ IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
     if (extensionHeaders.empty())
         return NULL;
 
+#ifdef WITH_IPv6
     ExtensionHeaders::iterator first = extensionHeaders.begin();
     IPv6ExtensionHeader* ret = *first;
     extensionHeaders.erase(first);
     return ret;
+#else
+    throw cRuntimeError("INET compiled without IPv6 features!");
+#endif
 }

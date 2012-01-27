@@ -20,14 +20,8 @@
 #include "IPvXTrafGen.h"
 
 #include "IPvXAddressResolver.h"
-
-#ifdef WITH_IPv4
 #include "IPv4ControlInfo.h"
-#endif
-
-#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
-#endif
 
 
 Define_Module(IPvXTrafGen);
@@ -94,30 +88,21 @@ void IPvXTrafGen::sendPacket()
 
     if (!destAddr.isIPv6())
     {
-#ifdef WITH_IPv4
         // send to IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
         gate = "ipOut";
-
-#else
-        throw cRuntimeError("INET compiled without IPv4 features!");
-#endif
     }
     else
     {
-#ifdef WITH_IPv6
         // send to IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setDestAddr(destAddr.get6());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
         gate = "ipv6Out";
-#else
-        throw cRuntimeError("INET compiled without IPv6 features!");
-#endif
     }
     EV << "Sending packet: ";
     printPacket(payload);

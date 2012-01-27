@@ -16,7 +16,10 @@
 //
 
 #include "IPv4ControlInfo.h"
+
+#ifdef WITH_IPv4
 #include "IPv4Datagram.h"
+#endif
 
 IPv4ControlInfo::~IPv4ControlInfo()
 {
@@ -32,28 +35,47 @@ IPv4ControlInfo& IPv4ControlInfo::operator=(const IPv4ControlInfo& other)
     return *this;
 }
 
+void IPv4ControlInfo::clean()
+{
+#ifdef WITH_IPv4
+    dropAndDelete(dgram);
+#else
+    if(dgram)
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
+}
+
 void IPv4ControlInfo::copy(const IPv4ControlInfo& other)
 {
     dgram = other.dgram;
 
     if(dgram)
     {
+#ifdef WITH_IPv4
         dgram = dgram->dup();
         take(dgram);
+#else
+        throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
     }
 }
 
 void IPv4ControlInfo::setOrigDatagram(IPv4Datagram *d)
 {
+#ifdef WITH_IPv4
     if (dgram)
         throw cRuntimeError(this, "IPv4ControlInfo::setOrigDatagram(): a datagram is already attached");
 
     dgram = d;
     take(dgram);
+#else
+    throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
 }
 
 IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
 {
+#ifdef WITH_IPv4
     if (!dgram)
         throw cRuntimeError(this, "IPv4ControlInfo::removeOrigDatagram(): no datagram attached "
                   "(already removed, or maybe this IPv4ControlInfo does not come "
@@ -63,5 +85,8 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     drop(dgram);
     dgram = NULL;
     return ret;
+#else
+    throw cRuntimeError("INET compiled without IPv4 features!");
+#endif
 }
 

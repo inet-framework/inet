@@ -23,11 +23,12 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
+#include "IPv4ControlInfo.h"
+#include "IPv6ControlInfo.h"
 
 #ifdef WITH_IPv4
 #include "ICMPAccess.h"
 #include "ICMPMessage_m.h"
-#include "IPv4ControlInfo.h"
 #include "IPv4Datagram_m.h"
 #include "IPv4InterfaceData.h"
 #endif
@@ -35,7 +36,6 @@
 #ifdef WITH_IPv6
 #include "ICMPv6Access.h"
 #include "ICMPv6Message_m.h"
-#include "IPv6ControlInfo.h"
 #include "IPv6Datagram_m.h"
 #include "IPv6InterfaceData.h"
 #endif
@@ -256,7 +256,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int ttl;
 
     cObject *ctrl = udpPacket->removeControlInfo();
-#ifdef WITH_IPv4
     if (dynamic_cast<IPv4ControlInfo *>(ctrl)!=NULL)
     {
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
@@ -267,10 +266,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrl4->getDestAddr().isMulticast();
         isBroadcast = ctrl4->getDestAddr() == IPv4Address::ALLONES_ADDRESS;  // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
-    else
-#endif
-#ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         srcAddr = ctrl6->getSrcAddr();
@@ -280,9 +276,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrl6->getDestAddr().isMulticast();
         isBroadcast = false;  // IPv6 has no broadcast, just various multicasts
     }
-    else
-#endif
-    if (ctrl == NULL)
+    else if (ctrl == NULL)
     {
         error("(%s)%s arrived from lower layer without control info",
                 udpPacket->getClassName(), udpPacket->getName());
@@ -402,38 +396,46 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
-#ifdef WITH_IPv4
     if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL)
     {
-        if (!icmp)
-            icmp = ICMPAccess().get();
 
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
 
         if (!ctrl4->getDestAddr().isMulticast())
+        {
+#ifdef WITH_IPv4
+            if (!icmp)
+                icmp = ICMPAccess().get();
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+#endif
+        }
         else
             delete udpPacket;   // drop multicast packet
     }
-    else
-#endif
-#ifdef WITH_IPv6
-    if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
     {
-        if (!icmpv6)
-            icmpv6 = ICMPv6Access().get();
-
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
 
         if (!ctrl6->getDestAddr().isMulticast())
+        {
+#ifdef WITH_IPv6
+            if (!icmpv6)
+                icmpv6 = ICMPv6Access().get();
             icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+#endif
+        }
         else
             delete udpPacket;   // drop multicast packet
     }
-    else
-#endif
+    else if (ctrl == NULL)
     {
-        error("(%s)%s arrived from lower layer without control info", udpPacket->getClassName(), udpPacket->getName()); //FIXME rather: with unrecognized control info
+        error("(%s)%s arrived from lower layer without control info",
+                udpPacket->getClassName(), udpPacket->getName());
+    }
+    else
+    {
+        error("(%s)%s arrived from lower layer with unrecognized control info %s",
+                udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
     }
 }
 
@@ -659,7 +661,6 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
 
     if (!destAddr.isIPv6())
     {
-#ifdef WITH_IPv4
         // send to IPv4
         EV << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
@@ -672,13 +673,9 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
-#else
-        throw cRuntimeError("Cannot send packet over IPv4: INET compiled without the IPv4 feature");
-#endif
     }
     else
     {
-#ifdef WITH_IPv6
         // send to IPv6
         EV << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
@@ -691,9 +688,6 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipv6Out");
-#else
-        throw cRuntimeError("Cannot send packet over IPv6: INET compiled without the IPv6 feature");
-#endif
     }
     numSent++;
 }

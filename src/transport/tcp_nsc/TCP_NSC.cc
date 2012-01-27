@@ -21,15 +21,8 @@
 #include "TCP_NSC.h"
 
 #include "headers/defs.h"   // for endian macros
-
-#ifdef WITH_IPv4
 #include "IPv4ControlInfo.h"
-#endif
-
-#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
-#endif
-
 #include "headers/tcp.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
@@ -294,7 +287,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-#ifdef WITH_IPv4
     if (dynamic_cast<IPv4ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpsegP->removeControlInfo();
@@ -303,8 +295,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         delete controlInfo;
     }
     else
-#endif
-#ifdef WITH_IPv6
     if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
@@ -330,7 +320,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         }
     }
     else
-#endif
     {
         error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
@@ -836,7 +825,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     if (!dest.isIPv6())
     {
-#ifdef WITH_IPv4
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -845,13 +833,9 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipOut";
-#else
-        throw cRuntimeError("INET compiled without IPv4 features!");
-#endif
     }
     else
     {
-#ifdef WITH_IPv6
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
@@ -860,9 +844,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipv6Out";
-#else
-        throw cRuntimeError("INET compiled without IPv6 features!");
-#endif
     }
 
     if (conn)

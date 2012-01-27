@@ -17,17 +17,18 @@
 
 
 #include "TCP.h"
+
+#include "IPv4ControlInfo.h"
+#include "IPv6ControlInfo.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 
 #ifdef WITH_IPv4
-#include "IPv4ControlInfo.h"
 #include "ICMPMessage_m.h"
 #endif
 
 #ifdef WITH_IPv6
-#include "IPv6ControlInfo.h"
 #include "ICMPv6Message_m.h"
 #endif
 
@@ -134,7 +135,6 @@ void TCP::handleMessage(cMessage *msg)
             // get src/dest addresses
             IPvXAddress srcAddr, destAddr;
 
-#ifdef WITH_IPv4
             if (dynamic_cast<IPv4ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
                 IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpseg->removeControlInfo();
@@ -142,10 +142,7 @@ void TCP::handleMessage(cMessage *msg)
                 destAddr = controlInfo->getDestAddr();
                 delete controlInfo;
             }
-            else
-#endif
-#ifdef WITH_IPv6
-            if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
+            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
                 IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->getSrcAddr();
@@ -153,7 +150,6 @@ void TCP::handleMessage(cMessage *msg)
                 delete controlInfo;
             }
             else
-#endif
             {
                 error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }
