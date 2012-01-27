@@ -50,8 +50,8 @@ class INET_API UDP : public cSimpleModule
         bool onlyLocalPortIsSet;
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
-        ushort localPort;
-        ushort remotePort;
+        int localPort;
+        int remotePort;
         bool isBroadcast;
         int multicastOutputInterfaceId;
         int ttl;
