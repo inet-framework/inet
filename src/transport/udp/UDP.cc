@@ -183,10 +183,17 @@ void UDP::processCommandFromApp(cMessage *msg)
                 setTimeToLive(ctrl->getSockId(), ((UDPSetBroadcastCommand*)ctrl)->getBroadcast());
             else if (dynamic_cast<UDPSetMulticastInterfaceCommand*>(ctrl))
                 setMulticastOutputInterface(ctrl->getSockId(), ((UDPSetMulticastInterfaceCommand*)ctrl)->getInterfaceId());
-            else if (dynamic_cast<UDPJoinMulticastGroupCommand*>(ctrl))
-                joinMulticastGroup(ctrl->getSockId(), ((UDPJoinMulticastGroupCommand*)ctrl)->getMulticastAddr(), ((UDPJoinMulticastGroupCommand*)ctrl)->getInterfaceId());
-            else if (dynamic_cast<UDPLeaveMulticastGroupCommand*>(ctrl))
-                leaveMulticastGroup(ctrl->getSockId(), ((UDPLeaveMulticastGroupCommand*)ctrl)->getMulticastAddr());
+            else if (dynamic_cast<UDPJoinMulticastGroupsCommand*>(ctrl))
+            {
+                UDPJoinMulticastGroupsCommand *cmd = (UDPJoinMulticastGroupsCommand*)ctrl;
+                joinMulticastGroups(cmd->getSockId(), cmd->getMulticastAddrArrayPtr(), cmd->getMulticastAddrArraySize(),
+                                            cmd->getInterfaceIdArrayPtr(), cmd->getInterfaceIdArraySize());
+            }
+            else if (dynamic_cast<UDPLeaveMulticastGroupsCommand*>(ctrl))
+            {
+                UDPLeaveMulticastGroupsCommand *cmd = (UDPLeaveMulticastGroupsCommand*)ctrl;
+                leaveMulticastGroups(cmd->getSockId(), cmd->getMulticastAddrArrayPtr(), cmd->getMulticastAddrArraySize());
+            }
             else
                 throw cRuntimeError("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
@@ -722,26 +729,32 @@ void UDP::setMulticastOutputInterface(int sockId, int interfaceId)
     sd->multicastOutputInterfaceId = interfaceId;
 }
 
-void UDP::joinMulticastGroup(int sockId, const IPvXAddress& multicastAddr, int interfaceId)
+void UDP::joinMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen,
+                                const int *interfaceIds, unsigned int interfaceIdsLen)
 {
     SockDesc *sd = getSocketById(sockId);
-    ASSERT(multicastAddr.isMulticast());
-    sd->multicastAddrs[multicastAddr] = interfaceId;
+    for (unsigned int k = 0; k < multicastAddressesLen; ++k)
+    {
+        const IPvXAddress &multicastAddr = multicastAddresses[k];
+        int interfaceId = interfaceIds && k < interfaceIdsLen ? interfaceIds[k] : -1;
+        ASSERT(multicastAddr.isMulticast());
+        sd->multicastAddrs[multicastAddr] = interfaceId;
 
-    // add the multicast address to the selected interface or all interfaces
-    IInterfaceTable *ift = InterfaceTableAccess().get(this);
-    if (interfaceId != -1)
-    {
-        InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
-        if (!ie)
-            error("Interface id=%d does not exist", interfaceId);
-        addMulticastAddressToInterface(ie, multicastAddr);
-    }
-    else
-    {
-        int n = ift->getNumInterfaces();
-        for (int i = 0; i < n; i++)
-            addMulticastAddressToInterface(ift->getInterface(i), multicastAddr);
+        // add the multicast address to the selected interface or all interfaces
+        IInterfaceTable *ift = InterfaceTableAccess().get(this);
+        if (interfaceId != -1)
+        {
+            InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+            if (!ie)
+                error("Interface id=%d does not exist", interfaceId);
+            addMulticastAddressToInterface(ie, multicastAddr);
+        }
+        else
+        {
+            int n = ift->getNumInterfaces();
+            for (int i = 0; i < n; i++)
+                addMulticastAddressToInterface(ift->getInterface(i), multicastAddr);
+        }
     }
 }
 
@@ -761,10 +774,11 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& 
     }
 }
 
-void UDP::leaveMulticastGroup(int sockId, const IPvXAddress& multicastAddr)
+void UDP::leaveMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen)
 {
     SockDesc *sd = getSocketById(sockId);
-    sd->multicastAddrs.erase(multicastAddr);
+    for (unsigned int i = 0; i < multicastAddressesLen; ++i)
+        sd->multicastAddrs.erase(multicastAddresses[i]);
     // note: we cannot remove the address from the interface, because someone else may still use it
 }
 

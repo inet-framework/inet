@@ -204,28 +204,34 @@ class UDPSetMulticastInterfaceCommand extends UDPSetOptionCommand
 }
 
 //
-// Control info for letting an UDP socket join a multicast group.
+// Control info for letting an UDP socket join multicast groups.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
+// The address-interfaceId pairs are passed as two separate arrays.
+// When there are less interfaceIds than multicast addresses,
+// then -1 is assumed (meaning join on all interfaces).
+//
 // @see ~UDPCommandCode
 //
-class UDPJoinMulticastGroupCommand extends UDPSetOptionCommand
+class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    IPvXAddress multicastAddr;
-    int interfaceId;
+    @customize(true);
+    IPvXAddress multicastAddr[];
+    int interfaceId[];
 }
 
 //
 //
-// Control info for letting an UDP socket leave a multicast group.
+// Control info for letting an UDP socket leave multicast groups.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
 // @see ~UDPCommandCode
 //
-class UDPLeaveMulticastGroupCommand extends UDPSetOptionCommand
+class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    IPvXAddress multicastAddr;
+    @customize(true);
+    IPvXAddress multicastAddr[];
 }
 

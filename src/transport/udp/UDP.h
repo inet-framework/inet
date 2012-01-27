@@ -22,7 +22,7 @@
 
 #include <map>
 #include <list>
-#include "UDPControlInfo_m.h"
+#include "UDPControlInfo.h"
 
 class IPv4ControlInfo;
 class IPv6ControlInfo;
@@ -97,8 +97,9 @@ class INET_API UDP : public cSimpleModule
     virtual void setTimeToLive(int sockId, int ttl);
     virtual void setBroadcast(int sockId, bool broadcast);
     virtual void setMulticastOutputInterface(int sockId, int interfaceId);
-    virtual void joinMulticastGroup(int sockId, const IPvXAddress& multicastAddr, int interfaceId = -1);
-    virtual void leaveMulticastGroup(int sockId, const IPvXAddress& multicastAddr);
+    virtual void joinMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen,
+                                             const int *interfaceIds = NULL, unsigned int interfaceIdsLen = 0);
+    virtual void leaveMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen);
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& multicastAddr);
 
     // ephemeral port

@@ -16,7 +16,7 @@
 //
 
 #include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
+#include "UDPControlInfo.h"
 
 
 UDPSocket::UDPSocket()
@@ -136,21 +136,24 @@ void UDPSocket::setMulticastOutputInterface(int interfaceId)
 
 void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId)
 {
-    cMessage *msg = new cMessage("JoinMulticastGroup", UDP_C_SETOPTION);
-    UDPJoinMulticastGroupCommand *ctrl = new UDPJoinMulticastGroupCommand();
+    cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);
+    UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
     ctrl->setSockId(sockId);
-    ctrl->setMulticastAddr(multicastAddr);
-    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddrArraySize(1);
+    ctrl->setMulticastAddr(0, multicastAddr);
+    ctrl->setInterfaceIdArraySize(1);
+    ctrl->setInterfaceId(0, interfaceId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
 
 void UDPSocket::leaveMulticastGroup(const IPvXAddress& multicastAddr)
 {
-    cMessage *msg = new cMessage("LeaveMulticastGroup", UDP_C_SETOPTION);
-    UDPLeaveMulticastGroupCommand *ctrl = new UDPLeaveMulticastGroupCommand();
+    cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);
+    UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
     ctrl->setSockId(sockId);
-    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setMulticastAddrArraySize(1);
+    ctrl->setMulticastAddr(0, multicastAddr);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
