@@ -185,14 +185,8 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         else
         {
             // check for local delivery
-            // TODO add loopback to multicast routes instead of this special case
             if (rt->isLocalMulticastAddress(destAddr))
-            {
-                IPv4Datagram *datagramCopy = (IPv4Datagram *) datagram->dup();
-                // FIXME code from the MPLS model: set packet dest address to routerId (???)
-                datagramCopy->setDestAddress(rt->getRouterId());
-                reassembleAndDeliver(datagramCopy);
-            }
+                reassembleAndDeliver(datagram->dup());
 
             // don't forward if IP forwarding is off, or if dest address is link-scope
             if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
