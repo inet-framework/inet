@@ -211,12 +211,11 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         // check for local delivery
         if (rt->isLocalAddress(destAddr))
         {
-            EV << "local delivery\n";
             reassembleAndDeliver(datagram);
         }
         else if (destAddr == IPv4Address::ALLONES_ADDRESS || rt->isLocalBroadcastAddress(destAddr))
         {
-            EV << "broadcast received\n";
+            EV << "Broadcast received\n";
             reassembleAndDeliver(datagram);
         }
         else if (!rt->isIPForwardingEnabled())
@@ -489,6 +488,8 @@ void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, 
 
 void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 {
+    EV << "Local delivery\n";
+
     if (datagram->getSrcAddress().isUnspecified())
         EV << "Received datagram '%s' without source address filled in" << datagram->getName() << "\n";
 
