@@ -42,9 +42,15 @@ struct IChannelControl::RadioEntry {
     int channel;
     Coord pos; // cached radio position
 
+    struct Compare {
+        bool operator() (const RadioRef &lhs, const RadioRef &rhs) const {
+            ASSERT(lhs && rhs);
+            return lhs->radioModule->getId() < rhs->radioModule->getId();
+        }
+    };
     // we cache neighbors set in an std::vector, because std::set iteration is slow;
     // std::vector is created and updated on demand
-    std::set<RadioRef> neighbors; // cached neighbor list
+    std::set<RadioRef, Compare> neighbors; // cached neighbor list
     std::vector<RadioRef> neighborList;
     bool isNeighborListValid;
 };
