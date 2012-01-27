@@ -25,16 +25,23 @@ Define_Module(UDPSink);
 simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 
-void UDPSink::initialize()
+void UDPSink::initialize(int stage)
 {
-    numReceived = 0;
-    WATCH(numReceived);
-    rcvdPkSignal = registerSignal("rcvdPk");
+    if (stage == 0)
+    {
+        numReceived = 0;
+        WATCH(numReceived);
+        rcvdPkSignal = registerSignal("rcvdPk");
 
-    socket.setOutputGate(gate("udpOut"));
+        socket.setOutputGate(gate("udpOut"));
 
-    int localPort = par("localPort");
-    socket.bind(localPort);
+        int localPort = par("localPort");
+        socket.bind(localPort);
+    }
+    else if (stage == 3)
+    {
+        socket.joinLocalMulticastGroups();
+    }
 }
 
 void UDPSink::handleMessage(cMessage *msg)

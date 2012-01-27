@@ -41,6 +41,10 @@ void UDPEchoApp::initialize(int stage)
         if (ev.isGUI())
             updateDisplay();
     }
+    else if (stage == 3)
+    {
+        socket.joinLocalMulticastGroups();
+    }
 }
 
 void UDPEchoApp::handleMessage(cMessage *msg)

@@ -58,6 +58,7 @@ void UDPBasicApp::initialize(int stage)
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
+    socket.joinLocalMulticastGroups();
 
     stopTime = par("stopTime").doubleValue();
     simtime_t startTime = par("startTime").doubleValue();
