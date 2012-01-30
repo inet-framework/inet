@@ -118,11 +118,6 @@ class INET_API IPv4 : public QueueBase
     virtual void handleReceivedICMP(ICMPMessage *msg);
 
     /**
-     * Process IPv4 options of the incoming or outgoing IP datagram.
-     */
-    virtual void processIPv4Options(IPv4Datagram *datagram);
-
-    /**
      * Performs unicast routing. Based on the routing decision, it sends the
      * datagram through the outgoing interface.
      */
