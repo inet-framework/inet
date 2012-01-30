@@ -1,3 +1,32 @@
+2012-01-30  Tamas Borbely
+
+	IPOption values are changed, so they conform to the IP option types
+	specified in RFC 791.
+
+	IPv4: removed loose and strict source routing processing. These
+	options are not used in the INET codebase, and the implementation
+	did not work anyway. Moreover use of these options is deprecated,
+	because they are causing security vulnerabilities.
+
+2012-01-27  Tamas Borbely
+
+	Fix: IPv4 does not change the destination address of locally delivered
+	multicast datagrams. (It was overwritten with a local address before.)
+
+2012-01-19  Tamas Borbely
+
+	IPv4: report numLocalDeliver correctly.
+
+	IPv4 accepts datagrams with unspecified source address. Needed for
+	supporting e.g. DHCP.
+
+	IPv4 fix: broadcast messages sent by the higher layer are forwarded to
+	the loopback interface, so applications on the same node will receive it.
+
+	IPv4: packets sent by a higher layer protocol to a local address
+	are forwarded to the loopback interface internally. Therefore
+	the MTU of the loopback interface has effect.
+
 2012-01-20  Andras Varga
 
 	RoutingTable: documentation refined
