@@ -1,3 +1,19 @@
+2012-01-27  Tamas Borbely
+
+	UDP: generalize UDPJoinMulticastGroupCommand and
+	UPDLeaveMulticastGroupCommand. The new commands
+	(UDPJoinMulticastGroupsCommand and UDPLeaveMulticastGroupsCommand)
+	accept more than one multicast groups.
+
+	added two methods to UDPSocket:
+	 - joinLocalMulticastGroups() joins to multicast groups
+	   that are accepted by any interface.
+	 - leaveLocalMulticastGroups() leaves all multicast groups.
+
+	Fix: C++ type of ports in SocketDesc changed to int.
+	They should be wide enough to store valid port values +
+	the unspecified port value.
+
 2012-01-11  Zoltan Bojthe
 
 	fix for bug #516: UDP leaks multicast
