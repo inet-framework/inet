@@ -83,7 +83,7 @@ class INET_API IPv4Route : public cObject
 
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IRoutingTable *rt) {this->rt = rt;}
-    IRoutingTable *getRoutingTable() {return rt;}
+    IRoutingTable *getRoutingTable() const {return rt;}
 
     /** test validity of route entry, e.g. check expiry */
     virtual bool isValid() const { return true; }
