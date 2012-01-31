@@ -496,7 +496,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
      char buf[30];
 
 #ifdef WITH_IPv4
-    cMessage *encapmsg = dgram->getEncapsulatedPacket();
+    cPacket *encapmsg = dgram->getEncapsulatedPacket();
 
 #ifdef WITH_TCP_COMMON
     if (dynamic_cast<TCPSegment *>(encapmsg))
@@ -558,7 +558,7 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, cons
      char buf[30];
 
 #ifdef WITH_IPv6
-    cMessage *encapmsg = dgram->getEncapsulatedPacket();
+    cPacket *encapmsg = dgram->getEncapsulatedPacket();
 
 #ifdef WITH_TCP_COMMON
     if (dynamic_cast<TCPSegment *>(encapmsg))
