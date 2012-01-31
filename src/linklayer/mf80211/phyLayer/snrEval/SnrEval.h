@@ -129,11 +129,17 @@ class INET_API SnrEval : public BasicSnrEval
      */
     SnrStruct snrInfo;
 
+    struct Compare {
+        bool operator() (AirFrame* const &lhs, AirFrame* const &rhs) const {
+            ASSERT(lhs && rhs);
+            return lhs->getId() < rhs->getId();
+        }
+    };
     /**
      * @brief Typedef used to store received messages together with
      * receive power.
      */
-    typedef std::map<AirFrame*,double> RecvBuff;
+    typedef std::map<AirFrame*, double, Compare> RecvBuff;
 
     /**
      * @brief State: A buffer to store a pointer to a message and the related
