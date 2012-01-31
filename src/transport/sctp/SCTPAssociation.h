@@ -120,13 +120,6 @@ enum SCTPChunkTypes
 };
 
 
-enum SCTPFlags
-{
-    COMPLETE_MESG_UNORDERED = 1,
-    COMPLETE_MESG_ORDERED   = 0
-};
-
-
 enum SCTPParameterTypes
 {
     UNRECOGNIZED_PARAMETER          = 8,

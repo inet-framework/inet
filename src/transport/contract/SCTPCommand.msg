@@ -17,9 +17,12 @@
 
 
 cplusplus {{
+#include <vector>
+
 #include "IPvXAddress.h"
-#include "SCTPAssociation.h"
 #include "SCTPCommand.h"
+
+typedef std::vector<IPvXAddress> AddressVector;
 }}
 
 

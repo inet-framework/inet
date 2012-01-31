@@ -19,17 +19,17 @@
 #ifndef __SCTPSOCKET_H
 #define __SCTPSOCKET_H
 
+#include <vector>
 
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
-#include "SCTPAssociation.h"
 
 
 class SCTPStatusInfo;
 class SCTP;
 
-
+typedef std::vector<IPvXAddress> AddressVector;
 
 
 class  INET_API SCTPSocket

@@ -69,6 +69,12 @@ enum SctpStatusInd
     SCTP_I_SENDQUEUE_ABATED     = 15
 };
 
+enum SCTPFlags
+{
+    COMPLETE_MESG_UNORDERED = 1,
+    COMPLETE_MESG_ORDERED   = 0
+};
+
 
 //
 // Currently not in use.
