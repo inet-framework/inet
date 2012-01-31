@@ -142,7 +142,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
     else
         openCmd->setAssocId(getNewConnId());
     openCmd->setFork(fork);
-   openCmd->setInboundStreams(inboundStreams);
+    openCmd->setInboundStreams(inboundStreams);
     openCmd->setOutboundStreams(outboundStreams);
     openCmd->setNumRequests(requests);
     openCmd->setMessagesToPush(messagesToPush);
@@ -155,7 +155,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
 
 void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests)
 {
-sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
+    sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
     if (oneToOne && sockstate!=NOT_BOUND && sockstate!=CLOSED)
         throw cRuntimeError( "SCTPSocket::connect(): connect() or listen() already called");
 
@@ -177,7 +177,7 @@ sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
     openCmd->setOutboundStreams(outboundStreams);
-   openCmd->setOutboundStreams(inboundStreams);
+    openCmd->setInboundStreams(inboundStreams);
     openCmd->setNumRequests(numRequests);
     msg->setControlInfo(openCmd);
     sendToSCTP(msg);
