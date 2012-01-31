@@ -30,6 +30,7 @@ void Ieee80211MgmtAPBase::initialize(int stage)
     if (stage==0)
     {
         hasRelayUnit = gate("upperLayerOut")->getPathEndGate()->isConnected();
+        convertToEtherFrameFlag = par("convertToEtherFrame").boolValue();
         WATCH(hasRelayUnit);
     }
 }
@@ -50,10 +51,19 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     sendOrEnqueue(frame);
 }
 
+void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
+{
+    cPacket *outFrame = frame;
+    if (convertToEtherFrameFlag)
+        outFrame = convertToEtherFrame(frame);
+    send(outFrame, "upperLayerOut");
+}
+
 EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 {
-#ifdef WITH_ETHERNET
     Ieee80211DataFrameWithSNAP *frame = check_and_cast<Ieee80211DataFrameWithSNAP *>(frame_);
+
+#ifdef WITH_ETHERNET
     // create a matching ethernet frame
     EthernetIIFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());

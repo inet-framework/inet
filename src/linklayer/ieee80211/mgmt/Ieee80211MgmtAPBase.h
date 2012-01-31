@@ -36,6 +36,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
 {
   protected:
     bool hasRelayUnit;
+    bool convertToEtherFrameFlag;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -56,11 +57,20 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     virtual Ieee80211DataFrame *convertFromEtherFrame(EtherFrame *ethframe);
 
     /**
-     * Utility function: converts the given frame to EtherFrame, deleting the
-     * original frame. This function is needed for LAN bridging functionality:
-     * MACRelayUnit deals with EtherFrames.
+     * Utility function: converts Ieee80211Frame to EtherFrame. This is needed
+     * because MACRelayUnit which we use for LAN bridging functionality deals
+     * with EtherFrames.
      */
     virtual EtherFrame *convertToEtherFrame(Ieee80211DataFrame *frame);
+
+    /**
+     * Utility function: send a frame to upperLayerOut.
+     * If convertToEtherFrameFlag is true, converts the given frame to EtherFrame, deleting the
+     * original frame, and send the converted frame.
+     * This function is needed for LAN bridging functionality:
+     * MACRelayUnit deals with EtherFrames.
+     */
+    virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
 };
 
 #endif

@@ -178,13 +178,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         EV << "Handling multicast frame\n";
 
         if (hasRelayUnit)
-        {
-#ifdef WITH_ETHERNET
-            send(convertToEtherFrame(frame->dup()), "upperLayerOut");
-#else
-            send(frame->dup(), "upperLayerOut");
-#endif
-        }
+            sendToUpperLayer(frame->dup());
 
         distributeReceivedDataFrame(frame);
         return;
@@ -196,13 +190,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     {
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
         if (hasRelayUnit)
-        {
-#ifdef WITH_ETHERNET
-            send(convertToEtherFrame(frame), "upperLayerOut");
-#else
-            send(frame, "upperLayerOut");
-#endif
-        }
+            sendToUpperLayer(frame);
         else
         {
             EV << "Frame's destination address is not in our STA list -- dropping frame\n";
