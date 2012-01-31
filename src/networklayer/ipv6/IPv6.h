@@ -84,7 +84,7 @@ class INET_API IPv6 : public QueueBase
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
-    virtual IPv6Datagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
+    virtual IPv6Datagram *encapsulate(cPacket *transportPacket, IPv6ControlInfo *ctrlInfo);
 
     /**
      * Handle IPv6Datagram messages arriving from lower layer.

@@ -165,9 +165,12 @@ void IPv6::handleMessageFromHL(cPacket *msg)
         return;
     }
 
+    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(msg->removeControlInfo());
     // encapsulate upper-layer packet into IPv6Datagram
-    InterfaceEntry *destIE; // to be filled in by encapsulate()
-    IPv6Datagram *datagram = encapsulate(msg, destIE);
+    // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
+    InterfaceEntry *destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
+    IPv6Datagram *datagram = encapsulate(msg, controlInfo);
+    delete controlInfo;
 
 #ifdef WITH_xMIPv6
     if (datagram == NULL)
@@ -591,14 +594,9 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     return packet;
 }
 
-IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
+IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *controlInfo)
 {
-    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
-
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
-
-    // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
 
     // set source and destination address
     IPv6Address dest = controlInfo->getDestAddr();
@@ -637,8 +635,6 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
         datagram->addExtensionHeader(extHeader);
         // EV << "Move extension header to datagram." << endl;
     }
-
-    delete controlInfo;
 
     datagram->setByteLength(datagram->calculateHeaderByteLength());
     datagram->encapsulate(transportPacket);
