@@ -356,7 +356,6 @@ class OLSR_IfaceAssocTupleTimer : public OLSR_Timer
 /// internal state.
 ///
 
-typedef std::set<OLSR_Timer *> TimerPendingList;
 typedef std::multimap <simtime_t, OLSR_Timer *> TimerQueue;
 
 
