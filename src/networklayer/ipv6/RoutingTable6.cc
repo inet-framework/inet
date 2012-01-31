@@ -741,15 +741,6 @@ IPv6Route *RoutingTable6::getRoute(int i)
 #ifdef WITH_xMIPv6
 //#####Added by Zarrar Yousaf##################################################################
 
-const IPv6Address& RoutingTable6::getDestinationAddress()
-{
-    DestCache::iterator it;
-    for (it = destCache.begin(); it != destCache.end(); ++it)
-        return it -> first;
-
-    return IPv6Address::UNSPECIFIED_ADDRESS; // in case we do not find anything - CB
-}
-
 const IPv6Address& RoutingTable6::getHomeAddress()
 {
     for (int i=0; i<ift->getNumInterfaces(); ++i)

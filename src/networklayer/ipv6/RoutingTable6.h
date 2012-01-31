@@ -340,7 +340,6 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
 #ifdef WITH_xMIPv6
     //================Added by Zarrar Yousaf ===================================
 
-    const IPv6Address& getDestinationAddress();
     //void updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
     //const IPv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
     //const IPv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
