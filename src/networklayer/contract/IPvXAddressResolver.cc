@@ -298,7 +298,7 @@ IRoutingTable *IPvXAddressResolver::findRoutingTableOf(cModule *host)
     cModule *mod = host->getSubmodule("routingTable");
     return dynamic_cast<IRoutingTable *>(mod);
 #else
-    throw cRuntimeError("INET compiled without IPv4 features!");
+    return NULL;
 #endif
 }
 
@@ -308,7 +308,7 @@ RoutingTable6 *IPvXAddressResolver::findRoutingTable6Of(cModule *host)
     cModule *mod = host->getSubmodule("routingTable6");
     return dynamic_cast<RoutingTable6 *>(mod);
 #else
-    throw cRuntimeError("INET compiled without IPv6 features!");
+    return NULL;
 #endif
 }
 
