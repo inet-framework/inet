@@ -50,4 +50,5 @@ void TCPSocketMap::deleteSockets()
 {
     for (SocketMap::iterator i=socketMap.begin(); i!=socketMap.end(); ++i)
        delete i->second;
+    socketMap.clear();
 }
