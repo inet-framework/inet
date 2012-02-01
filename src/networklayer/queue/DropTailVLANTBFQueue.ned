@@ -29,7 +29,7 @@ simple DropTailVLANTBFQueue like OutputQueue
     parameters:
         int frameCapacity = default(100);  // per-subqueue capacity
         int numQueues = default(1);	// number of per-VLAN queues
-		string classifierClass = default("VLANClassifer");  // class that inherits from IQoSClassifier
+		string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         int burstSize @unit(byte) = default(3000B);
 			// token bucket size; must be larger than mtu.
 			// note that with a finite line/peak rate,

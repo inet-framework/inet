@@ -39,7 +39,7 @@ void VLANTagger::initialize()
             if (dynamicTagging == true)
             {
                 // get an access to the relay module for dynamic VLAN tagging
-                cModule *relayModule = getParentModule()->getSubmodule("relay");
+                cModule *relayModule = getParentModule()->getSubmodule("relayUnit");
                 relay = check_and_cast<MACRelayUnitNPWithVLAN *>(relayModule);
             }
         }

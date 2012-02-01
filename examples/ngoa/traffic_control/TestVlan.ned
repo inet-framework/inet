@@ -22,6 +22,7 @@ package inet.examples.ngoa.traffic_control;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
 import inet.nodes.ethernet.EtherSwitch2WithOutputQueueAndVLAN;
+import inet.nodes.inet.Router;
 //import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
@@ -47,7 +48,9 @@ network TestVlan
         double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
-        @display("bgb=650,233");
+        double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
+        double backbone_delay2 @unit(s) = default(2.7ms);
+        @display("bgb=684,233");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
@@ -55,7 +58,7 @@ network TestVlan
         }
         server: StandardServerWithEthernetInterface2 {
             parameters:
-                @display("p=574,119;i=device/server_l");
+                @display("p=632,119;i=device/server_l");
             gates:
                 ethg[1];
         }
@@ -83,13 +86,17 @@ network TestVlan
             gates:
                 ethg[1];
         }
+        router: Router {
+            @display("p=507,120");
+        }
     connections:
         for i=0..N-1, for j=0..n-1 {
-            host[i*n+j].ethg[0] <--> { delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
+            host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
         }
         for i=0..N-1 {
-            onu[i].ethg[n] <--> { delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i];
+            onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i];
         }
-        accessSwitch.ethg[N] <--> { delay = feeder_delay; datarate = feeder_rate; } <--> olt.ethg[0];
-        olt.ethg[1] <--> { delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        accessSwitch.ethg[N] <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> olt.ethg[0];
+        olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router.ethg++;
+        router.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> server.ethg++;
 }

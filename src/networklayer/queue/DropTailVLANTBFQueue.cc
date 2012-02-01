@@ -41,8 +41,6 @@ void DropTailVLANTBFQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
-
-
     // configuration
     frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
