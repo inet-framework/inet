@@ -100,7 +100,8 @@
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             33dd-eae7
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             a476-84b5
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             439b-6f8f
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c General -r 0,                50s,             757c-4ede
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             757c-4ede
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             c6d3-70d0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           714b-443f
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           c784-169c
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            b6cf-2d75
