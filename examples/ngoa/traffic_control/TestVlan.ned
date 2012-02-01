@@ -20,9 +20,9 @@
 package inet.examples.ngoa.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+//import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
 import inet.nodes.ethernet.EtherSwitch2WithOutputQueueAndVLAN;
-import inet.nodes.inet.Router;
+import inet.nodes.inet.RouterWithEthernetInterface2;
 //import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
@@ -68,7 +68,7 @@ network TestVlan
             gates:
                 ethg[2];
         }
-        accessSwitch: EtherSwitch2WithOutputQueue {
+        accessSwitch: EtherSwitch2WithOutputQueueAndVLAN {
             parameters:
                 @display("p=269,119");
             gates:
@@ -86,7 +86,7 @@ network TestVlan
             gates:
                 ethg[1];
         }
-        router: Router {
+        router: RouterWithEthernetInterface2 {
             @display("p=507,120");
         }
     connections:

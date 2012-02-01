@@ -181,7 +181,8 @@ void MACRelayUnitNPWithVLAN::broadcastFrame(EtherFrame *frame, int inputport)
 
     if (iter == vlanTable.end())
     {
-        EV << getFullPath() << ": The contents of the vlanTable:" << endl;
+        EV << getFullPath() << ": The VID of the received frame:" << vlanFrame->getVid() << endl;
+        EV << "The contents of the vlanTable:" << endl;
         for (VLANRegistrationTable::iterator vid_it = vlanTable.begin(); vid_it != vlanTable.end(); vid_it++)
         {
             EV << "VID: " << vid_it->first << endl;
