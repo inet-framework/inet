@@ -418,6 +418,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
     const IPv6Address& destAddr, int& outIfID)
 {
     IPv6Address nextHopAddr;
+    simtime_t expiryTime;
 
     //RFC 2461 Section 5.2
     //Next-hop determination for a given unicast destination operates as follows.
@@ -429,19 +430,20 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
 
     if (route != NULL)
     {
+        expiryTime = route->getExpiryTime();
+        outIfID = route->getInterfaceId();
+
         //If the destination is on-link, the next-hop address is the same as the
         //packet's destination address.
         if (route->getNextHop().isUnspecified())
         {
             EV << "Dest is on-link, next-hop addr is same as dest addr.\n";
-            outIfID = route->getInterfaceId();
             nextHopAddr = destAddr;
         }
         else
         {
             EV << "A next-hop address was found with the route, dest is off-link\n";
             EV << "Assume next-hop address as the selected default router.\n";
-            outIfID = route->getInterfaceId();
             nextHopAddr = route->getNextHop();
         }
     }
@@ -452,6 +454,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
 
         EV << "No routes were found, Dest addr is off-link.\n";
         nextHopAddr = selectDefaultRouter(outIfID);
+        expiryTime = 0;
 
         if (outIfID == -1)
             EV << "No Default Routers were found.";
@@ -461,7 +464,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
 
     /*the results of next-hop determination computations are saved in the Destination
     Cache (which also contains updates learned from Redirect messages).*/
-    rt6->updateDestCache(destAddr, nextHopAddr, outIfID);
+    rt6->updateDestCache(destAddr, nextHopAddr, outIfID, expiryTime);
     return nextHopAddr;
 }
 

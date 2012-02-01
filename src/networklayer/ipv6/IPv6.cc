@@ -782,7 +782,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             nextHop = destAddress;  // next hop is the host itself
 
         // add result into destination cache
-        rt->updateDestCache(destAddress, nextHop, interfaceId);
+        rt->updateDestCache(destAddress, nextHop, interfaceId, route->getExpiryTime());
     }
 
     return true;

@@ -459,18 +459,26 @@ bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
     return false;
 }
 
-const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId) const
+const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId)
 {
     Enter_Method("lookupDestCache(%s)", dest.str().c_str());
 
-    DestCache::const_iterator it = destCache.find(dest);
+    DestCache::iterator it = destCache.find(dest);
     if (it == destCache.end())
     {
         outInterfaceId = -1;
         return IPv6Address::UNSPECIFIED_ADDRESS;
     }
-    outInterfaceId = it->second.interfaceId;
-    return it->second.nextHopAddr;
+    DestCacheEntry &entry = it->second;
+    if (entry.expiryTime > 0 && simTime() > entry.expiryTime)
+    {
+        destCache.erase(it);
+        outInterfaceId = -1;
+        return IPv6Address::UNSPECIFIED_ADDRESS;
+    }
+
+    outInterfaceId = entry.interfaceId;
+    return entry.nextHopAddr;
 }
 
 const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
@@ -514,11 +522,12 @@ bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix) const
     return false;
 }
 
-void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId)
+void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
 {
-    // FIXME this performs 2 lookups -- optimize to do only one
-    destCache[dest].nextHopAddr = nextHopAddr;
-    destCache[dest].interfaceId = interfaceId;
+    DestCacheEntry &entry = destCache[dest];
+    entry.nextHopAddr = nextHopAddr;
+    entry.interfaceId = interfaceId;
+    entry.expiryTime = expiryTime;
 
     updateDisplayString();
 }

@@ -120,6 +120,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     {
         int interfaceId;
         IPv6Address nextHopAddr;
+        simtime_t expiryTime;
         // more destination specific data may be added here, e.g. path MTU
     };
     friend std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
@@ -231,7 +232,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * NOTE: outInterfaceId is an OUTPUT parameter -- its initial value is ignored,
      * and the lookupDestCache() sets it to the correct value instead.
      */
-    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId) const;
+    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId);
 
     /**
      * Performs longest prefix match in the routing table and returns
@@ -251,7 +252,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     /**
      * Add or update a destination cache entry.
      */
-    virtual void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId);
+    virtual void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
 
     /**
      * Discard all entries in destination cache

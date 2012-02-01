@@ -92,7 +92,7 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            ce03-a4e3
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            ac66-fcda
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           2b94-1db7
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          4180-79e8
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          6979-289d
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             996b-dda2
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             20df-9f24
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             344b-0a1e
