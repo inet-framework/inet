@@ -237,35 +237,32 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 
     if (nce == NULL)
     {
-        //If no entry exists,
         EV << "No Entry exists in the Neighbour Cache.\n";
+        InterfaceEntry *ie = ift->getInterfaceById(nextHopIfID);
+        if (ie->isPointToPoint())
+        {
+            //the sender creates one, sets its state to STALE,
+            EV << "Creating an STALE entry in the neighbour cache.\n";
+            nce = neighbourCache.addNeighbour(nextHopAddr, nextHopIfID, MACAddress::UNSPECIFIED_ADDRESS);
+        }
+        else
+        {
+            //the sender creates one, sets its state to INCOMPLETE,
+            EV << "Creating an INCOMPLETE entry in the neighbour cache.\n";
+            nce = neighbourCache.addNeighbour(nextHopAddr, nextHopIfID);
 
-        //the sender creates one, sets its state to INCOMPLETE,
-        EV << "Creating an INCOMPLETE entry in the neighbour cache.\n";
-        nce = neighbourCache.addNeighbour(nextHopAddr, nextHopIfID);
+            //initiates Address Resolution,
+            EV << "Initiating Address Resolution for:" << nextHopAddr
+               << " on Interface:" << nextHopIfID << endl;
+            initiateAddressResolution(msg->getSrcAddress(), nce);
+        }
+    }
 
-        //initiates Address Resolution,
-        EV << "Initiating Address Resolution for:" << nextHopAddr
-           << " on Interface:" << nextHopIfID << endl;
-        initiateAddressResolution(msg->getSrcAddress(), nce);
-
-        //and then queues the data packet pending completion of address resolution.
+    if (nce->reachabilityState == IPv6NeighbourCache::INCOMPLETE)
+    {
+        EV << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
         EV << "Add packet to entry's queue until Address Resolution is complete.\n";
-        nce->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::INCOMPLETE)
-    {
-        EV << "Reachability State is INCOMPLETE.Address Resolution already initiated.\n";
         bubble("Packet added to queue until Address Resolution is complete.");
-        nce->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
-    }
-    else if (nce->macAddress.isUnspecified())
-    {
-        EV << "NCE's MAC address is unspecified.\n";
-        EV << "Initiate Address Resolution and add packet to queue.\n";
-        initiateAddressResolution(msg->getSrcAddress(), nce);
         nce->pendingPackets.push_back(msg);
         pendingQueue.insert(msg);
     }
@@ -1416,27 +1413,14 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
 
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
-            if (ra->getSourceLinkLayerAddress().isUnspecified())
-            {
-                neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
+            neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
 #ifndef WITH_xMIPv6
-                    simTime() + ra->getRouterLifetime());
+                ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime());
 #else /* WITH_xMIPv6 */
-                    simTime() + ra->getRouterLifetime(), ra->getHomeAgentFlag() );
+                ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime(), ra->getHomeAgentFlag() );
 #endif /* WITH_xMIPv6 */
-                //Note:invalidation timers are not explicitly defined.
-            }
-            else
-            {
-                neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
-#ifndef WITH_xMIPv6
-                    ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime());
-#else /* WITH_xMIPv6 */
-                    ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime(), ra->getHomeAgentFlag() );
-#endif /* WITH_xMIPv6 */
-                //According to Greg, we should add a default route for hosts as well!
-                rt6->addDefaultRoute(raSrcAddr, ifID, simTime() + ra->getRouterLifetime());
-            }
+            //According to Greg, we should add a default route for hosts as well!
+            rt6->addDefaultRoute(raSrcAddr, ifID, simTime() + ra->getRouterLifetime());
         }
         else
         {

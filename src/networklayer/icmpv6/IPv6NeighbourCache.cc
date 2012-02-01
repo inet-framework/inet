@@ -97,30 +97,6 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(
 }
 
 /**
- * Creates and initializes a router entry (isRouter=isDefaultRouter=true), state=INCOMPLETE.
- *
- * Update by CB: Added an optional parameter which is false by default. Specifies whether a router is also a home agent.
- */
-IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(
-        const IPv6Address& addr, int interfaceID, simtime_t expiryTime, bool isHomeAgent)
-{
-    Key key(addr, interfaceID);
-    ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
-    Neighbour& nbor = neighbourMap[key];
-
-    nbor.nceKey = lookupKeyAddr(key); //a ptr that links to the key.-WEI for convenience.
-    nbor.isRouter = true;
-    nbor.isDefaultRouter = true; //FIXME: a router may advertise itself it self as a router but not as a default one.-WEI
-    nbor.isHomeAgent = isHomeAgent; //Zarrar 09.03.07 --- FIXME: NOT EVERY ROUTER IS A HOME AGENT // update 3.9.07 - CB
-    nbor.reachabilityState = INCOMPLETE;
-    nbor.reachabilityExpires = 0;
-    nbor.numProbesSent = 0;
-    nbor.nudTimeoutEvent = NULL;
-    nbor.routerExpiryTime = expiryTime;
-    return &nbor;
-}
-
-/**
  * Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE.
  *
  * Update by CB: Added an optional parameter which is false by default. Specifies whether a router is also a home agent.

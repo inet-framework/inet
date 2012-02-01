@@ -138,11 +138,6 @@ class INET_API IPv6NeighbourCache
     virtual Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID,
                             MACAddress macAddress);
 
-    /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), state=INCOMPLETE. */
-    //TODO merge into next one (using default arg)
-    virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
-                        simtime_t expiryTime, bool isHomeAgent = false); // added HA flag, 3.9.07 - CB
-
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE. */
     virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
                          MACAddress macAddress, simtime_t expiryTime, bool isHomeAgent = false); // added HA flag, 3.9.07 - CB

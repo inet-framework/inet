@@ -301,14 +301,18 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
      }
 #endif /* WITH_xMIPv6 */
 
-    MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);
+    MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId); // might initiate NUD
     if (macAddr.isUnspecified())
     {
-        EV << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
-        send(datagram, "ndOut");
-        return;
+        if (!ie->isPointToPoint())
+        {
+            EV << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
+            send(datagram, "ndOut");
+            return;
+        }
     }
-    EV << "link-layer address: " << macAddr << "\n";
+    else
+        EV << "link-layer address: " << macAddr << "\n";
 
     // send out datagram
     numForwarded++;
