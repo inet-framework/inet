@@ -241,7 +241,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addSuccess(self, test):
         super(SimulationTextTestResult, self).addSuccess(test)
         if self.showAll:
-            self.stream.writeln("ok")
+            self.stream.writeln(": PASS")
         elif self.dots:
             self.stream.write('.')
             self.stream.flush()
@@ -252,7 +252,7 @@ class SimulationTextTestResult(unittest.TestResult):
         self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
             (cause, detail) = self._splitMsg(err[1])
-            self.stream.writeln("ERROR (%s)" % cause)
+            self.stream.writeln(": ERROR (%s)" % cause)
             if detail:
                 self.stream.writeln(detail)
         elif self.dots:
@@ -265,7 +265,7 @@ class SimulationTextTestResult(unittest.TestResult):
         self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
             (cause, detail) = self._splitMsg(err[1])
-            self.stream.writeln("FAIL (%s)" % cause)
+            self.stream.writeln(": FAIL (%s)" % cause)
             if detail:
                 self.stream.writeln(detail)
         elif self.dots:
@@ -275,7 +275,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addSkip(self, test, reason):
         super(SimulationTextTestResult, self).addSkip(test, reason)
         if self.showAll:
-            self.stream.writeln("skipped {0!r}".format(reason))
+            self.stream.writeln(": skipped {0!r}".format(reason))
         elif self.dots:
             self.stream.write("s")
             self.stream.flush()
@@ -283,7 +283,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addExpectedFailure(self, test, err):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         if self.showAll:
-            self.stream.writeln("expected failure")
+            self.stream.writeln(": expected failure")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -291,7 +291,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addUnexpectedSuccess(self, test):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         if self.showAll:
-            self.stream.writeln("unexpected success")
+            self.stream.writeln(": unexpected success")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
