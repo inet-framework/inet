@@ -125,7 +125,7 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
     if (connected && !duplexMode)
     {
         if (curEtherDescr->halfDuplexFrameMinBytes < 0.0)
-            error("The %g bps ethernet supports only the full duplex connections", curEtherDescr->txrate);
+            error("%g bps Ethernet only supports full duplex links", curEtherDescr->txrate);
     }
 }
 
@@ -208,13 +208,13 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(address))
     {
-        error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
+        error("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME_BYTES)
     {
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
+        error("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
 
@@ -244,7 +244,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
                   txQueue.innerQueue->getQueueLimit());
 
         // store frame and possibly begin transmitting
-        EV << "Frame " << frame << " arrived from higher layers, enqueueing\n";
+        EV << "Frame " << frame << " arrived from higher layer, enqueueing\n";
         txQueue.innerQueue->insertFrame(frame);
 
         if (!curTxFrame && !txQueue.innerQueue->empty())
@@ -318,7 +318,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     {
         if (simTime() - msg->getSendingTime() >= curEtherDescr->maxPropagationDelay)
         {
-            error("very long frame propagation time detected, "
+            error("Very long frame propagation time detected, "
                   "maybe cable exceeds maximum allowed length? "
                   "(%lgs corresponds to an approx. %lgm cable)",
                   SIMTIME_STR(simTime() - msg->getSendingTime()),
@@ -429,10 +429,10 @@ void EtherMAC::handleEndIFGPeriod()
 
     currentSendPkTreeID = 0;
 
-    if (NULL == curTxFrame)
+    if (curTxFrame == NULL)
         error("End of IFG and no frame to transmit");
 
-    EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
+    EV << "IFG elapsed, starting transmission of frame " << curTxFrame << endl;
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
 
@@ -474,7 +474,7 @@ void EtherMAC::startFrameTransmission()
         // But we don't know of any ongoing transmission so we blindly
         // start transmitting, immediately collide and send a jam signal.
         //
-        EV << "startFrameTransmission() send JAM signal.\n";
+        EV << "startFrameTransmission(): sending JAM signal.\n";
         printState();
 
         sendJamSignal();
@@ -510,7 +510,7 @@ void EtherMAC::handleEndTxPeriod()
 
     currentSendPkTreeID = 0;
 
-    if (NULL == curTxFrame)
+    if (curTxFrame == NULL)
         error("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);  //consider: emit with start time of frame
@@ -587,10 +587,10 @@ void EtherMAC::handleEndRxPeriod()
 void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
-        error("At end of BACKOFF not in BACKOFF_STATE!");
+        error("At end of BACKOFF and not in BACKOFF_STATE");
 
-    if (NULL == curTxFrame)
-        error("At end of BACKOFF and not have current tx frame!");
+    if (curTxFrame == NULL)
+        error("At end of BACKOFF and no frame to transmit");
 
     if (receiveState == RX_IDLE_STATE)
     {
@@ -599,7 +599,7 @@ void EtherMAC::handleEndBackoffPeriod()
     }
     else
     {
-        EV << "Backoff period ended but channel not free, idling\n";
+        EV << "Backoff period ended but channel is not free, idling\n";
         transmitState = TX_IDLE_STATE;
     }
 }
@@ -607,7 +607,7 @@ void EtherMAC::handleEndBackoffPeriod()
 void EtherMAC::sendJamSignal()
 {
     if (currentSendPkTreeID == 0)
-        throw cRuntimeError("model error: send JAM without transmit packet");
+        throw cRuntimeError("Model error: sending JAM while not transmitting");
 
     EtherJam *jam = new EtherJam("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
@@ -627,7 +627,7 @@ void EtherMAC::sendJamSignal()
 void EtherMAC::handleEndJammingPeriod()
 {
     if (transmitState != JAMMING_STATE)
-        error("At end of JAMMING not in JAMMING_STATE!");
+        error("At end of JAMMING but not in JAMMING_STATE");
 
     EV << "Jamming finished, executing backoff\n";
     handleRetransmission();
@@ -728,7 +728,7 @@ void EtherMAC::processMessageWhenDisabled(cMessage *msg)
 void EtherMAC::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
-        error("At end of PAUSE not in PAUSE_STATE!");
+        error("At end of PAUSE and not in PAUSE_STATE");
 
     EV << "Pause finished, resuming transmissions\n";
     beginSendFrames();
@@ -891,7 +891,7 @@ void EtherMAC::beginSendFrames()
     if (curTxFrame)
     {
         // Other frames are queued, therefore wait IFG period and transmit next frame
-        EV << "Transmit next frame in output queue, after IFG period\n";
+        EV << "Will transmit next frame in output queue after IFG period\n";
         scheduleEndIFGPeriod();
     }
     else
