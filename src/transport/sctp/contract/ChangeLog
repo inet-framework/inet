@@ -1,0 +1,41 @@
+2011-11-18  Zoltan Bojthe
+
+	NEDDOC fixes
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-03-08  Zoltan Bojthe
+
+	Project Features support: SCTP-related files moved from transport/contract/
+	into  transport/sctp/contract/
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-09-25  Irene Ruengeler
+
+	Initial checkin of the SCTP code; SCTPCommand and SCTPSocket added to
+	transport/contract/.
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- src/transport/contract INET/src/transport/contract

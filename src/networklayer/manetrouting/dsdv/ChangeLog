@@ -1,0 +1,68 @@
+2012-01-19  Andras Varga
+
+	Follow IPv4Route change: "host" in IPv4Route was renamed to 
+	"destination"
+
+2012-01-19  Zoltan Bojthe
+
+	Follow RoutingTable change: returned IPv4Route pointers are no longer 
+	const
+
+2012-01-20  Andras Varga
+
+	DSDV_2: timeToLiveRoutingEntry NED parameter renamed to routeLifetime
+
+2012-01-09  Zoltan Bojthe
+
+	Moved DSDV-related fields/functions from RoutingTable to DSDV_2.
+
+	DSDV route expiry is now implemented with a new isValid() method on 
+	IPv4Route; RoutingTable will ignore invalid routes (isValid()==false).
+
+	Details:
+	- remove DSDV related fields/functions from the IPv4Route, IRoutingTable,
+	  and RoutingTable classes
+	- added new DSDVIPv4Route class that extends IPv4Route with DSDV-related
+	  fields: expiryTime, sequencenumber (changed installtime to expirytime)
+	- add IPv4Route::isValid() that compares simTime() to expiryTime
+	- rename dsdvTestAndDelete() in RoutingTable to purge() -- it throws out
+	  invalid routes using isValid()
+	- remove set/getTimeToLiveRoutingEntry() functions from IRoutingTable
+	- DSDV changed to add entries to the routing table with 255.255.255.255 netmask
+	- DSDV to use DSDVIPv4Route entries
+
+2012-01-09  Zoltan Bojthe
+
+	DSDV_2: bugfix for #497: dynamic routing protocols (manetrouting)
+	modify routing entries. Solution: remove routing entry and add a new one,
+	instead of modifying the existing route.
+
+	[Note: this fix is no longer needed, as a later RoutingTable/IPv4Route
+	change makes it possible to change routes on the fly.]
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-18  Andras Varga
+
+	comments, whitespace, etc.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

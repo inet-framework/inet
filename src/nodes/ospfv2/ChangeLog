@@ -1,0 +1,32 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-03-29  Zoltan Bojthe
+
+	featuresupport: add ETHERNET feature
+
+2011-03-04  Zoltan Bojthe
+
+	Features: add more features
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-10-28  Andras Varga
+
+	Initial version of OSPFRouter, from Andras Babos
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- INET/src/nodes/inet Nodes/INET

@@ -1,0 +1,128 @@
+2011-12-21  Andras Varga
+
+	statistics:
+	- removed "stats" where "histogram" was already present (it implies "stats")
+	- standardizing on lower case statistics titles
+	- record packet counts in a less confusing way: as rcvdPk:count instead
+	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
+	  recorded as rcvdPk:sum(packetBytes)
+
+2011-12-06  Andras Varga
+
+	ethernet: added EtherTrafGen and EtherHost2
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-04  Zoltan Bojthe
+
+	eliminate some warnings: variable set but not used
+
+2011-08-15  Andras Varga
+
+	Adapted units to recent OMNeT++ change: replaced Kbps,KB,MB,GB with
+	kbps,KiB,MiB,GiB
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-07-18  Andras Varga
+
+	apps: added/renamed parameters: 'sendInterval', 'stopTime'
+
+	Renamed the following parameters to 'sendInterval':
+	- messageFreq, waitTime, packetInterval, interval, waitInterval
+
+	Added stopTime parameter to several apps:
+	- TelnetApp, UDPBasicApp, TCPBasicClientApp, IPvXTrafGen, EtherAppCli
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Zoltan Bojthe
+
+	code style, #include changes
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-30  Zoltan Bojthe
+
+	#include, code style, strtok -> cStringTokenizer
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-02-22  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2009-07-21  Andras Varga
+
+	added default icons (mostly to *App modules)
+
+2009-07-18  Andras Varga
+
+	more gate labels added; also, fixed case of TCPOut gates (i.e. they got
+	renamed to tcpOut)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2004-09-16  Andras Varga
+
+	Initial checkin of EtherAppCli and EtherAppSrv, written as part of the
+	Ethernet model.
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Applications/Ethernet INET/src/applications/ethernet

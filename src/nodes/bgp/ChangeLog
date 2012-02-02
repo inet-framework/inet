@@ -1,0 +1,48 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-05-31  Zoltan Bojthe
+
+	BGPRouter: uses firstAvailable() instead haveClass() in tcpType
+	parameter
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Zoltan Bojthe
+
+	TCP_lwIP: rename TCP_lwip to TCP_lwIP
+
+2011-04-15  Rudolf Hornig
+
+	BGP model changes. BGP is now an ITTCPApp.
+
+2011-03-30  Zoltan Bojthe
+
+	NED: hasClass()/haveClass() fixes
+
+2011-03-29  Zoltan Bojthe
+
+	featuresupport: add PPP feature, correcting tcpType, udpType in NED
+	files
+
+2011-03-29  Zoltan Bojthe
+
+	featuresupport: add ETHERNET feature
+
+2011-03-08  Zoltan Bojthe
+
+	Features: TCP_BASE, TCP_INET features added
+
+2011-03-04  Zoltan Bojthe
+
+	Features: moved BGPRouter.ned from nodes/inet/ to nodes/bgp/
+
+2010-08-05  Andras Varga
+
+	* initial checkin of BGPv4 model contributed by Helene Lageber (email:
+	helene.lageber at gmail dot com); BGPRouter.ned went into nodes/inet/
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- src/nodes/inet/
+

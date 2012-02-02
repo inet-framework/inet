@@ -25,17 +25,11 @@ cplusplus
 
 class noncobject MACAddress;
 
-//
-// Capability Information field format. This field is not used
-// by the model (and is omitted from management frame formats too),
-// because its fields are related to features not supported by this model
-// (PCF, privacy, and beacons in ad-hoc mode). It is only provided here
-// for completeness.
-//
+
 packet ETXBasePacket 
 {
      MACAddress source; 
-     MACAddress dest;   //
+     MACAddress dest;
 }
 
 packet MACETXPacket extends ETXBasePacket
@@ -43,11 +37,11 @@ packet MACETXPacket extends ETXBasePacket
      byteLength = 100;
      MACAddress neighbors[];
      int recPackets[];
-};
+}
 
 packet MACBwPacket extends ETXBasePacket
 {
      int type;
      simtime_t time;
-};
+}
 

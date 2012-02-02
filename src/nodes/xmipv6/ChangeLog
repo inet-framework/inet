@@ -1,0 +1,20 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: remove MobileNode6 and SimpleWirelesshost6, as
+	existing compound modules already provide the same functionality
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: Fixes for ieee80211 node changes
+
+2011-04-14  Zoltan Bojthe
+
+	Merge branch 'topic/features_based' of xMIPv6 into topic/xMIPv6Feature
+
+	merged commit is
+	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
+

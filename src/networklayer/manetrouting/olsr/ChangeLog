@@ -1,0 +1,44 @@
+2012-01-19  Andras Varga
+
+	manet compile fix: a const std::set<> can only be iterated with
+	const_iterator
+
+	It appears to be a bug in gcc that it accepts plain iterator (only for
+	std::set though, the same with std::vector or std::map causes an error).
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-18  Andras Varga
+
+	apps: renamed address/port params to localAddress/localPort where
+	appropriate
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent thoughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I didn't touch external code that was ported into INET and is likely
+	 to be updated in the future with newer versions: aodv-uu, dsr-uu,
+	dymoum,
+	 lwIP, etc.
+
+	- I used omnetpp\_scripts\tidymodel\spaces.pl, plus some manual tweaks
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	rename IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

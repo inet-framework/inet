@@ -1,0 +1,104 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-08-03  Tamas Borbely
+
+	fix example in UDPSocket.h comment
+
+2011-07-28  Andras Varga
+
+	UDPSocket: removed callback support
+
+	It didn't provide much utility value, and apparently nobody used it.
+
+2011-07-25  Andras Varga
+
+	Heavy API changes; added multicast, broadcast and ttl support
+
+	Features/improvements:
+	- added support for the following socket options (see Unix setsockopt()):
+	  time-to-live (unicast and multicast), broadcast, multicast output
+	  interface, join multicast group, leave multicast group.
+
+	- UDPControlInfo was as a bit confusing, as it contained the union of
+	  all fields needed for all commands/indications, so it was not
+	  clear whether some field X was used for some command/indication,
+	  and if so, what its exact role was. Specific UDPControlInfo classes
+	  are now much more explicit about this.
+
+	- UDPSocket class now contains much less state (clearer responsibilities,
+	  less chance of disagreement with UDP module's view)
+
+	Details:
+	- UDPControlInfo has been split to: UDPBindCommand, UDPConnectCommand,
+	  UDPSendCommand, UDPCloseCommand, and UDPDataIndication,
+	  UDPErrorIndication for the opposite direction. Used with the
+	  corresponding UDP_C_xxx and UDP_I_xxx message kinds.
+
+	- UDP_C_UNBIND message kind has been renamed to UDP_C_CLOSE
+
+	- added UDP_C_SETOPTION (for setting socket options);
+	  it must be acompanied by any of: UDPSetTimeToLiveCommand,
+	  UDPSetBroadcastCommand, UDPSetMulticastInterfaceCommand,
+	  UDPJoinMulticastGroupCommand, UDPLeaveMulticastGroupCommand.
+
+	- the "unspecified" port number value has been changed from 0 to -1,
+	  for consistency with other parameters in the NED file
+
+	- userId was removed, as it hasn't offered a tremendous utility
+	  value, and apparently nobody used it
+
+	UDPSocket class:
+	- now it stores minimal state (practically just the socket id),
+	  and everything else is immediately sent down to the UDP module
+	- new methods for socket options:
+	     setTimeToLive(),
+	     setBroadcast(),
+	     setMulticastOutputInterface()
+	     joinMulticastGroup()
+	     leaveMulticastGroup()
+	- new utility method:
+	     getReceivedPacketInfo()
+	- removed methods:
+	     setUserId() / getUserId() -- userId is no longer;
+	     getState() / stateName() -- state is not kept;
+	     getLocalAddress() / getLocalPort() -- state is not kept;
+	     setMulticastInterfaceId() / getMulticastInterfaceId() -- renamed
+
+2011-07-21  Andras Varga
+
+	UDP, UDPSocket: documentation updated
+
+	Apparently the UDPSocket docu was a copy/paste of TCPSocket docu.
+
+2011-07-19  Andras Varga
+
+	UDPSocket: send() and sendTo() to accept cPackets only
+
+	Note: in UDP, cMessage with UDP_C_DATA would cause "cannot cast" anyway.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-11  Zoltan Bojthe
+
+	Features: UDP: move files from transport/contract to
+	transport/udp/contract
+

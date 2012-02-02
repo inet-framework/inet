@@ -1,0 +1,28 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-10  Andras Varga
+
+	Battery models moved from src/battery/ into src/battery/models;
+	IBattery created in src/battery/
+

@@ -1,0 +1,29 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-04-15  Rudolf Hornig
+
+	Removed empty.xml files. Renamed routingTableFile to routingTable. Added
+	default value to the parameter.
+
+2011-03-31  Rudolf Hornig
+
+	Migrated Obstacle, Battery, Annotation and multi-radio support from
+	INETMANET.
+

@@ -1,0 +1,80 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-20  Levente Meszaros
+
+	Renamed lowergateIn to lowerLayerIn and lowergateOut to lowerLayerOut.
+
+2011-07-20  Levente Meszaros
+
+	Renamed uppergateIn to upperLayerIn and uppergateOut to upperLayerOut.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-19  Rudolf Hornig
+
+	Original channel controller modified to work with radios instead of
+	hosts. Channel controller extended is removed.
+
+2011-05-17  Rudolf Hornig
+
+	Channel comntrol and ChannelControlExtended is merged and become
+	ChannelCOntrolExtended. AirframeExtended is merged into AirFrame
+
+2011-05-06  Zoltan Bojthe
+
+	Mobility made independent of ChannelControl
+
+	- moved ChannelControl* to world/radio
+
+	- merged ChannelAccessExtended to ChannelAccess
+
+	- host registration was moved from Mobility to the radio modules.
+	 (There can be multiple radios per host, so ChannelControlExtended
+	 now maintains a registration count for each host.)
+	 Mobility now doesn't refer to ChannelControl at all, so one can
+	 create mobile networks that don't contain ChannelControl at all;
+	 ChannelControl is only needed for radio communication.
+
+	- global playgroundSizeX/Y parameters have been replaced with
+	 per-mobility constraintAreaX/Y, constraintAreaWidth/Height
+	 parameters for most mobility modules
+	 NOTE: Playground is now conceptionally unlimited, only the
+	 movement of individual nodes are (can be) constrained to
+	 rectangular areas. (This change was needed because mobility
+	 modules now don't access ChannelControl that used to contain
+	 the playgroundSizeX/Y parameters.)
+
+	- x,y parameters have been renamed to initialX/Y; a new
+	 initFromDisplayString parameter controls whether the initial
+	 coordinates come from the display string or from the parameters
+	 (for most modules; some mobility modules don't have these parameters)
+
+	Example simulations are updated in a separate commit.
+
+2011-03-31  Zoltan Bojthe
+
+	new place for PowerControl; base radio feature for 802.11 features
+
+2011-03-08  Rudolf Hornig
+
+	mf80211 and iee80211 can be compiled separately
+
+2011-03-08  Rudolf Hornig
+
+	mf80211, ieee80211 and mobility feature
+

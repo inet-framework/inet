@@ -1,0 +1,130 @@
+2012-01-11  Zoltan Bojthe
+
+	NetworkLayer: added directions for connection display strings;
+	add missing @labels to gates
+
+2012-01-03  Andras Varga
+
+	NodeBase: neddoc fix
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-09  Zoltan Bojthe
+
+	wireless IPv4 noes moved from nodes/wireless to nodes/inet
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-24  Andras Varga
+
+	added PcapRecorder (ZBojthe):
+	  pcapRecorder[] submodule array added to NodeBase (to ease instantiation in hosts/routers)
+
+2011-04-08  Rudolf Hornig
+
+	StandardHost and Router now have a common base (NodeBase - containing Link~ and
+	NetworkLayer) Wireless~ and AdhocHost is derived from StandardHost. All of
+	them (including Router) support multiple wireless, Ethernet, PPP and
+	external interfaces (i.e. multiple wireless radios are supported using
+	different channels)
+
+	Several modules - especially inside StandardHost - are now conditional
+	(using NED's new "conditional submodule" feature), and will be instantiated
+	only if needed. For example, TCP is only instantiated if there are TCP
+	applications configured for the host.
+
+	Router and StandardHost have optional mobility support. The mobility module
+	is created only if there are wireless cards present in the node (numRadios>0).
+	Of course WirelessHost and AdhocHost have mobility by default. You can configure
+	the mobility type using the "mobilityType" parameter. BasicMobility have
+	been renamed to NullMobility (resulting stationary nodes). There is a dummy
+	mobility type called NoMobility which does not have any C++ implementation.
+	Nodes that do not need mobility support (i.e. no radios) should set their type
+	to NoMobility.
+
+	changed StandardHost and Router to use *.typename for ppp,eth,wlan
+	interfaces and mobility type
+
+	Refactored in Ethernet and PPP interfaces. NoQueue can be used also as
+	queueType parameter. Added support for input and output hooks in NICs.
+
+	IExtInterface renamed to IExternalNic for naming consistency.
+
+	Removed different Ieee802.11 wireless NICs. Only Ieee80211 remained and
+	the mgmtType parameter can be used to configure the NIC.
+
+	FailedRouter has been removed (was a trivial node). BurstHost moved to the
+	example directory (it was not generic and was used only by a single example).
+	MobileHost has been removed; use AdhocHost instead as a drop-in replacement.
+
+2011-03-10  Rudolf Hornig
+
+	Moved NAMTrace and NAMTraceWriter to the obsolete directory.
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Interfaces renamed to start with I. Renamed INetworkInterface to
+	IWiredNic. Support for full duplex ethernet NIC.
+
+2010-11-22  Rudolf Hornig
+
+	Added plugin interfaces to the network layer to be able to add
+	drop/duplicate modules, througput meters etc.
+
+2010-11-22  Rudolf Hornig
+
+	EtherMAC interface introduced and a more configurable StandardHost
+
+2011-02-23  Zoltan Bojthe
+
+	StandardHost: enable different udp, tcp, sctp Application Types in one
+	Host
+
+2009-07-17  Levente Meszaros
+
+	Added module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+	added @labels(node) to hosts/routers so that they appear at top of the
+	palette when editing a network (in OMNeT++ 4.1+)
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2004-10-05  Andras Varga
+
+	Files moved from Nodes/ into the Nodes/INET/ subdirectory
+
+2003..2004  Andras Varga
+
+	IPSuite extensive refactoring, see networklayer/ipv4/ChangeLog
+
+2003-09-23  Andras Varga
+
+	Code taken over from original IPSuite and MPLS models.
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Nodes Nodes/INET INET/src/nodes/inet

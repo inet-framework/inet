@@ -1,0 +1,145 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-09-14  Zoltan Bojthe
+
+	bug #361: Ieee80211MgmtSTA::initialize error
+
+	The Ieee80211MgmtSTA needs to initialize at stage 1 because
+	ChannelControl initializes numChannels at stage 0.
+
+2011-11-10  Zoltan Bojthe
+
+	fixes for bug #190 by Alfonso Ariza: 802.11 STA nodes abort the
+	simulation
+
+	If the STA node is not associated to an AP, it will send a packet with an
+	invalid address to the mac and the mac will stop the simulation. It's
+	necessary to modify the files Ieee80211STA.cc and Ieee80211STASimple.cc
+
+	Copied changes from bugreport and from inetmanet.
+
+	In Ieee80211MgmtSTA, I removed the old solution, and inserted new
+	solution from manet.
+
+2011-07-20  Levente Mészáros
+
+	Renamed lowergateIn to lowerLayerIn and lowergateOut to lowerLayerOut.
+	Renamed uppergateIn to upperLayerIn and uppergateOut to upperLayerOut.
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-28  Rudolf Hornig
+
+	Added Mesh network support. Use Ieee80211NicMesh
+
+2011-04-15  Rudolf Hornig
+
+	Added new ieee802.11 model from INETMANET, supporting a,b,g,p modes.
+	Use Ieee80211NewNic
+
+2011-04-08  Rudolf Hornig
+
+	Added support for optional submodules (Mgmt, hooks) in Ieee80211Nic.
+
+2011-04-05  Rudolf Hornig
+
+	Radio refactoring. Removed abstract baseclass. Instead of overriding
+	virtual methods, there are parameters now to specify propagation and
+	radio model. Removed different Ieee802.11 wireless NICs. Only Ieee80211
+	remained and the mgmtType parameter can be used to configure the NIC.
+	Simplifications in radio Ieee80211module. Added multiradio example.
+
+2011-03-08  Rudolf Hornig
+
+	Separated mf80211, ieee80211 and mobility feature and
+	mf80211 and iee80211 can be compiled independently
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Interfaces renamed to start with I.
+
+2011-01-05  Zoltan Bojthe
+
+	ieee80211: mgmt AP: reset authentication status, when starting a new
+	auth sequence
+
+2010-12-21  Zoltan Bojthe
+
+	ieee80211MgmtSTA: bugfix: drop higher layer frames, when STA is not
+	associated
+
+2010-09-30  Andras Varga
+
+	introduced a utility function for interface name creation
+
+2010-12-09  Zoltan Bojthe
+
+	ieee802.11: using ieee data frame with SNAP
+	for transmit original EtherType in 802.11 packet
+
+2010-12-09  Zoltan Bojthe
+
+	Bugfix: Ieee80211MgmtAP: Send broadcast packets, don't drop it
+
+2010-11-30  Zoltan Bojthe
+
+	using constant, not a number.
+	get* and is* functions are const now
+	add and use header-length constants
+	Delete stored objects in destructor. (undisposed objects bug)
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-06-24  Zoltan Bojthe
+
+	Signals for statistics recording
+
+2009-07-18  Andras Varga
+
+	Radio changed into a moduleinterface as it was originally intended
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(Ieee80211Frame);  @labels(AirFrame);
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2006-05-04  Andras Varga
+
+	Checked in the new MAC model written by Levente Meszaros;
+	see mac/ChangeLog for details.
+
+2006-05-02  Andras Varga
+
+	Started implementing infrastructure mode for 802.11;
+	see mgmt/ChangeLog for details.
+
+2005-08-04  Andras Varga
+
+	Added placeholder for 802.11 infrastructure mode implementation;
+	see mgmt/ChangeLog for details.
+
+	If you are interested in the early history of the 802.11 code,
+	change to the project root and type
+
+	$ gitk -- NetworkInterfaces/Ieee80211 \
+	    INET/src/networkinterfaces/ieee80211 INET/src/linklayer/ieee80211

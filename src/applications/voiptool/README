@@ -1,0 +1,65 @@
+VoIPTool 2.0
+============
+
+This is the OMNeT++ 4.x port and complete rewrite (by Zoltan Bojthe)
+of the TKN VoIPTool, http://www.tkn.tu-berlin.de/research/omnetVoipTool/
+
+The fraction of voice over Internet Protocol (VoIP) based telephone calls
+among the totality of voice based communication acts has been significantly
+growing during the last years. In wired as well as wireless communication
+applications, VoIP is expected to completely replace former circuit
+switched telephony. This project provides an OMNeT++-based VoIP traffic
+generator that creates realistic VoIP packet streams, due to the
+utilization of real audio data and an existing VoIP standard codec.
+Moreover, by applying ITU-T's perceptual evaluation of speech quality
+(PESQ) approach at the sink, the perceived quality of a transmitted VoIP
+stream can be determined.
+
+This library is an add-on to the INET Framework, http://inet.omnetpp.org.
+It provides two modules: VoIPSourceApp and VoIPSinkApp. Both are
+application-layer modules that operate over UDP, and can be used in INET's
+StandardHost very much like other UDP traffic generators and sinks (see the
+udpApp[] submodule vector, numUdpApps parameter, etc. in StandardHost.)
+
+VoIPSourceApp accepts an audio file and a destination IP address/port as
+input, and will transmit the file's contents as voice traffic over UDP n
+times (by default once). For transmission, the audio is resampled at the
+given frequency (by default 8KHz) and depth (by default 16 bits), and
+encoded with the given codec (by default G.726) at the given bit rate (by
+default 40Kbps), and chopped into packets that each carry dt milliseconds
+of voice (by default 20ms). (The above default values may be out of date;
+actual values come from the NED file).  Packets that are all silence (all
+samples are below a given threshold in absolute value) are transmitted as
+special "silence" packets. The module does not simulate any particular VoIP
+protocol (e.g. RTP), but instead accepts a "header size" parameter that
+can be set accordingly.
+
+VoIPSinkApp listens on an UDP port, and expects to receive VoIP packets on
+it. The received voice is then saved into a result audio file that can be
+compared with the original for further evaluation. VoIP packets are
+numbered, and out-of-order packets are discarded (the corresponding voice
+interval will be recorded as silence into the file). VoIP packets that miss
+their deadlines will similarly be discarded. It is assumed that the audio is
+played back with delay (by default 20ms), which allows some jitter for the
+incoming packets. The resulting audio file is closed when the simulation
+completes (i.e. in the OMNeT++ finish() function).
+
+VoIPTool requires a "devel" package of the avcodec library (part of FFmpeg) 
+to be installed on your system. On Ubuntu, this package can be installed 
+with the following command:
+
+$ sudo apt-get install libavcodec-dev
+
+The package name and installation command may vary for other Linux systems.
+
+
+Related publication:
+
+M. Bohge and M. Renwanz, "A realistic VoIP traffic generation and evaluation
+tool for OMNeT++", 1st International OMNeT++ Workshop, March 2008, Marseille,
+France.
+
+
+---
+Andras
+

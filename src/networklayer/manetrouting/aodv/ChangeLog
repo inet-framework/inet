@@ -1,0 +1,64 @@
+2012-01-09  Zoltan Bojthe
+
+	manetrouting: use 255.255.255.255 netmask for routes
+
+	Before it used the IP address class' netmask.
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-09-12  Zoltan Bojthe
+
+	manetrouting: adds message descriptors for AODV messages
+
+	for show/edit these messages in TkEnv interface
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-28  Zoltan Bojthe
+
+	manetrouting: compile fixes for linux
+
+2011-07-27  Andras Varga
+
+	manetrouting: compile fixes for MSVC
+
+	debug_aodv.h: there seems to have been some confusion around the DEBUG
+	macro. Rewrote it as to what I think was the original intent: the DEBUG
+	variable should control whether we want logging or not, and the same
+	macro is used throughout the code for log statements.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

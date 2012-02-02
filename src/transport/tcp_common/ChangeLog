@@ -1,0 +1,62 @@
+2011-12-21  Andras Varga
+
+	TCPSpoof: statistics revised (sentPkBytes->sentPk, title changed to 
+	lowercase, etc)
+
+2011-11-18  Zoltan Bojthe
+
+	NEDDOC fixes
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-07-24  Andras Varga
+
+	cosmetics
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-07-05  Zoltan Bojthe
+
+	TCP SACK ASSERT fix by Thomas Reschka
+
+	The patch is fixing the issue which is described here:
+	http://groups.google.com/group/omnetpp/browse_thread/thread/c39c2a55db10fc7d/1a6e05230c54ac7b?lnk=gst&q=TCP+SACK#1a6e05230c54ac7b
+
+	In addition it avoids an ASSERT in setSackedBit() which appears when an
+	ACK (with SACK option) is received and AckNo & SACK are below snd_una
+	(this is no D-SACK case).
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-05-11  Rudolf Hornig
+
+	TCP rename step 2

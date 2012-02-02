@@ -1,0 +1,108 @@
+2012-01-19  Andras Varga
+
+	Adapted to change: "host" in IPv4Route renamed to "destination"
+
+2012-01-19  Zoltan Bojthe
+
+	FlatnetworkConfigurator: refined WeightedTopology support
+
+2011-12-19  Zoltan Bojthe
+
+	bugfix for #465: FlatNetworkConfigurator calculated wrong paths
+	when multihomed hosts were present. Solution: if IPForward==false
+	for a host, add it with weight=INFINITY to the graph so no routes
+	will go through it. Requires base/WeightedTopology (or OMNeT++ 4.3
+	when it'll be available)
+
+2011-12-15  Andras Varga
+
+	NetworkConfigurator removed (it was incomplete; added back on a branch)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-03  Zoltan Bojthe
+
+	Project Features support: autorouting/ split into autorouting/ipv4/
+	and autorouting/ipv6/
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-13  Zoltan Bojthe
+
+	code style
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-07-18  Andras Varga
+
+	added @labels(node) to hosts/routers so that they appear at top of the
+	palette when editing a network (in OMNeT++ 4.1+)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-05-07  Andras Varga
+
+	FlatNetworkConfigurator to use @node properties instead of moduleTypes
+	parameter
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-07-03  Andras Varga
+
+	* FlatNetworkConfigurator[6]: nonIPModuleTypes are now implicitly added
+	to moduleTypes. Before, one had to add e.g. EtherSwitch to both -- now
+	it's enough to add it to nonIPModuleTypes.
+
+2005-07-03  Andras Varga
+
+	* FlatNetworkConfigurator[6]: nonIPModuleTypes are now implicitly added
+	to moduleTypes. Before, one had to add e.g. EtherSwitch to both -- now
+	it's enough to add it to nonIPModuleTypes.
+
+2004-08-03  Andras Varga
+
+	Initial checkin of FlatNetworkConfigurator.
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- Network/AutoRouting INET/src/networklayer/autorouting

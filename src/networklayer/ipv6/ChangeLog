@@ -1,11 +1,243 @@
+2011-08-02  Andras Varga
+
+	Set etherType=ETHERTYPE_IPv6 on outgoing datagrams
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Andras Varga
+
+	minor: use dropAndDelete() instead of drop()+delete [ZBojthe]
+
+2011-10-14  Zoltan Bojthe
+
+	adds missing dup()
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-08-02  Andras Varga
+
+	cosmetics
+
+2011-08-03  Zoltan Bojthe
+
+	RoutingTable6: bugfix
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6 related: Code style, #include optimisation
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: includes, haveClass() --> firstAvailable(), code style
+
+2011-04-14  Zoltan Bojthe
+
+	Merge branch 'topic/features_based' of xMIPv6 into topic/xMIPv6Feature
+
+	merged commit is
+	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
+
+2011-04-15  Rudolf Hornig
+
+	Removed empty.xml files. Renamed routingTableFile to routingTable. Added
+	default value to the parameter.
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-18  Rudolf Hornig
+
+	Rename wrongly named localDeliver
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Rudolf Hornig
+
+	Fixed issues with routingTable6 file parameter.
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	removed obsolete and misleading !WORK_IN_PROGRESS! files
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-19  Zoltan Bojthe
+
+	IPv6: code style: reduce differences for xMIPv6
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2011-01-13  Zoltan Bojthe
+
+	minimal optimisation
+
+2011-01-13  Zoltan Bojthe
+
+	code style
+
+2011-01-13  Zoltan Bojthe
+
+	cleaning includes
+
+2011-01-13  Zoltan Bojthe
+
+	RoutingTable6: bugfix from xMIPv6 code
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2011-01-06  Zoltan Bojthe
+
+	cosmetic changes: indentation, spell checking
+
+2011-01-05  Zoltan Bojthe
+
+	minimal changes
+
+2010-12-21  Zoltan Bojthe
+
+	IPv6InterfaceData: getter functions be const
+
+	and name of getter functions be get....()
+
+2010-12-17  Zoltan Bojthe
+
+	code styling
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: identically change in RoutingTable6.cc
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: reordering fields of struct AdvPrefix
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: add missing dup() function
+
+2010-12-15  Zoltan Bojthe
+
+	code style changes
+
+	add/remove empty lines move "break" to new line
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: Extension Header MSG refactoring
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: extension header in controlinfo
+
+2010-12-10  Zoltan Bojthe
+
+	IPv6Header: change type of fields to uint8 from unsigned char
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2010-02-27  Andras Varga
+
+	IPv6Datagram can now use ExtensionHeader's dup()
+
+2009-12-21  Andras Varga
+
+	fix: IP: fragmentOffset and moreFragments header fields were not cleared
+	on reassembled datagrams; fix typo [reported by vire]
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
 2008-07-02  Andras Varga
 
-    * RoutingTable6: now it listens to interface changes
+	* RoutingTable6: now it listens to interface changes
 
-    * RoutingTable6: properly fire notifications on routing table changes
+	* RoutingTable6: properly fire notifications on routing table changes
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
 
 2005-08-04  Andras Varga
 
-    * checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
-    Monash University; code skeleton and some initial code
-    implemented by Andras Varga
+	* checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
+	Monash University; code skeleton and some initial code
+	implemented by Andras Varga
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Network/IPv6 INET/src/networklayer/ipv6

@@ -1,0 +1,53 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6 related: Code style, #include optimisation
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: includes, haveClass() --> firstAvailable(), code style
+
+2011-04-14  Zoltan Bojthe
+
+	Merge branch 'topic/features_based' of xMIPv6 into topic/xMIPv6Feature;
+	the merged commit is
+	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
+
+	xMIPv6 was written as an extension for the INET Framework jointly
+	by Faqir Zarrar Yousaf (TU Dortmund) and Christian Bauer (DLR).
+
+	Original project URL:
+	http://www.kn.e-technik.tu-dortmund.de/content/view/232/lang,de/
+
+	Publication:
+	Faqir Yousaf, Christian Bauer and Christian Wietfeld, "An Accurate and
+	Extensible Mobile IPv6 (xMIPV6) Simulation Model for OMNeT++",
+	1st International OMNeT++ Workshop, Marseille, March 2008.
+

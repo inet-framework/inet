@@ -1,3 +1,74 @@
+2012-01-19  Andras Varga
+
+	IPv4Route: member variables made private, updated OSPFv2 and BGP
+	accordingly
+
+	OSPFv2 and BGP had redundant getters/setters in OSPFRoutingTableEntry
+	etc, they were removed
+
+2012-01-19  Andras Varga
+
+	Adapted to change: "host" in IPv4Route renamed to "destination"
+
+2012-01-09  Andras Varga
+
+	Adapted to RoutingTable change: IPv4Route pointers returned by
+	RoutingTable are no longer const
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-09-22  Andras Varga
+
+	Changes related to the new BGP model: OSPFRouting::insertExternalRoute(),
+	etc.
+
 2010-08-13  Andras Varga
 
 	* coding style made more consistent with the rest of the INET:
@@ -6,15 +77,34 @@
 	- removed excessive in-line spaces
 	- removed superfluous "void" keywords from arg-less methods
 
+2009-03-25  ------ INET-20090325 released ------
+
 2008-12-11  Andras Varga
 
 	* added LGPL headers to files
 
-2007..2008  Andras Varga
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
 
-	* ported to OMNeT++ 4.0
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
 
 2006-05-01  Andras Varga
 
 	* checked in more patches from author of this model, Andras Babos
 
+2005-10-28  Andras Varga
+
+	Initial revision of the OSPFv2 model, written by Andras Babos for MSc
+	final project at TU Budapest, with some help from Andras Varga.
+
+	If you are interested in the early history of the OSPF code, change
+	to the project root and type
+
+	$ gitk -- Network/OSPFv2 INET/src/networklayer/ospfv2

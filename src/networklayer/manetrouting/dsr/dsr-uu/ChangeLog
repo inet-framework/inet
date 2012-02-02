@@ -1,8 +1,41 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-08-02  Zoltan Bojthe
+
+	check NULL after MALLOC immediately
+
+2011-07-25  Zoltan Bojthe
+
+	MACAddress, ManetRouting, Ieee80211Mesh: Fixes for changed internal
+	MACAddress representation from unsigned char[6] to uint64.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.
+
 0.1:
 	* Initial release.
-0.2:	
+0.2:
 	* Added spec file.
-	* Compilation fixes for kernel 2.6.12 on FC4 
+	* Compilation fixes for kernel 2.6.12 on FC4
 	* Fixed segmentation fault on module load on newer 2.4 kernels.
 	* Fixed bug in dsr_srt_find_addr that made automatic route
 	shortening not always work.

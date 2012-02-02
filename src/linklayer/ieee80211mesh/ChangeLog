@@ -1,0 +1,17 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-20  Levente Meszaros
+
+	Gate renaming:
+	- lowergateIn to lowerLayerIn, lowergateOut to lowerLayerOut
+	- uppergateIn to upperLayerIn, uppergateOut to upperLayerOut
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-29  Zoltan Bojthe
+
+	Fixes for ieee80211Mesh
+
+2011-04-28  Rudolf Hornig
+
+	Added Mesh network support to Ieee80211

@@ -1,0 +1,61 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-19  Rudolf Hornig
+
+	Added a SPEED_OF_LIGHT global constant in INETDefs.h
+
+2011-05-19  Rudolf Hornig
+
+	Original channel controller modified to work with radios instead of
+	hosts. Channel controller extended is removed.
+
+2011-05-17  Rudolf Hornig
+
+	Channel comntrol and ChannelControlExtended is merged and become
+	ChannelCOntrolExtended. AirframeExtended is merged into AirFrame
+
+2011-05-11  Andras Varga
+
+	Compile fixes for MSVC
+
+	- disambiguate arg types for pow(), sqrt(), etc. (ambiguity caused
+	compile errors)
+	- added implementations for missing C99 functions
+	- MSVC does not have <stdint.h>, but most of its declarations are
+	already provided by <omnetpp.h>
+
+2011-04-05  Rudolf Hornig
+
+	Radio refactoring. Removed abstract baseclass. Instead of overriding
+	virtual methods, there are parameters now to specify propagation and
+	radio model.
+
+2011-03-31  Rudolf Hornig
+
+	radio refactoring
+
+2011-03-31  Rudolf Hornig
+
+	Migrated the propagation models from INETMANET.
+

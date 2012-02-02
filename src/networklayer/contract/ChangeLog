@@ -1,33 +1,223 @@
+2012-01-05  Zoltan Bojthe
+
+	IPv4Address: added AddressCategory enum, getAddressCategory() function
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-08-03  Andras Varga
+
+	IPvXAddress fix: a blank IPvXAddress was not equal to a blank
+	IPv6Address
+
+2011-07-24  Andras Varga
+
+	cosmetics
+
+2011-07-24  Andras Varga
+
+	IPvXAddress: added isMulticast()
+
+2011-07-19  Andras Varga
+
+	SCTP apps: refactoring: more concise parsing of "localAddress" param
+
+	Use cStringTokenizer and IPvXAddressResolver for parsing.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	fixing IPv6Address test
+
+	also some include optimisation
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.
+
+2011-04-13  Rudolf Hornig
+
+	Fix for parallel simulation support.
+
+2011-03-30  Zoltan Bojthe
+
+	#include, code style, strtok -> cStringTokenizer
+
+2011-03-18  Zoltan Bojthe
+
+	correcting "#ifdef"-s
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-04  Zoltan Bojthe
+
+	Features: add more features
+
+2011-03-03  Zoltan Bojthe
+
+	features: add *_examples features, add SCTP feature
+
+	correcting some #include, etc
+
+2011-03-03  Zoltan Bojthe
+
+	features: TCP_NSC, TCP_lwip, IPv6 completed
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	eliminate warnings: comparison between signed and unsigned integers
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Zoltan Bojthe
+
+	IPvAddress optimalisation, code styling
+
+2010-11-22  Rudolf Hornig
+
+	Added GlobalARP support (from INETMANET)
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-12-15  Zoltan Bojthe
+
+	(M)IPv6: add constants
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: extension header in controlinfo
+
+2010-08-05  Andras Varga
+
+	checked in BGPv4 code contributed by Helene Lageber
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-12-21  Andras Varga
+
+	minor: improved IPControlInfo/IPv6ControlInfo documentation + added
+	getOrigDatagram() method
+
+2009-12-21  Andras Varga
+
+	fix: IPControlInfo and IPv6ControlInfo destructors often crashed on exit
+	when trying to delete origDatagram [fix suggested by vire]
+
+2009-12-15  Andras Varga
+
+	IPvXAddress improvements:
+
+	added words() and wordCount() functions bugfix in the equals() function
+
+	Author: Zoltan Bojthe
+
+2009-03-25  ------ INET-20090325 released ------
+
 2008-09-12  Tamas Borbely
 
-    * DLL export IPControlInfo and IPv6ControlInfo.
+	* DLL export IPControlInfo and IPv6ControlInfo.
 
 2008-09-09  Tamas Borbely
 
-    * IPAddress: isLinkLocalMulticast() fixed. It accepted
-          244.0.0.x instead of 224.0.0.x.
+	* IPAddress: isLinkLocalMulticast() fixed. It accepted
+	  244.0.0.x instead of 224.0.0.x.
 
 2008-07-01  Andras Varga
 
-    * InterfaceTable and associated files moved to new directory common/
+	* InterfaceTable and associated files moved to new directory common/
 
 2008-06-30  Andras Varga
 
-    * IPAddress: internal representation changed to use a single int32
-    instead of unsigned char[4], for more efficient code; several methods
-    made inline [code from Ingmar Baumgart, OverSim]
+	* IPAddress: internal representation changed to use a single int32
+	instead of unsigned char[4], for more efficient code; several methods
+	made inline [code from Ingmar Baumgart, OverSim]
 
-    * parsim: added pack/unpack functions for IPAddress, IPv6Address,
-    IPvXAddress
+	* parsim: added pack/unpack functions for IPAddress, IPv6Address,
+	IPvXAddress
 
-    * InterfaceTable: added deleteInterface()
+	* InterfaceTable: added deleteInterface()
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
 
 2005-10-28  Andras Varga
 
-    * IPControlInfo.msg: added outputPort field
+	* IPControlInfo.msg: added outputPort field
+
+2005-08-04  Andras Varga
+
+	* created Network/Contract/ directory by moving files from
+	Network/IPv4/ and Network/IPv6/
 
 2005-07-12  Andras Varga
 
-    * IPAddress, IPv6Address, IPvXAddress: renamed isNull() to
-    isUnspecified()
+	* IPAddress, IPv6Address, IPvXAddress: renamed isNull() to
+	isUnspecified()
 
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Network/IPv4 Network/IPv6 Network/Contract INET/src/networklayer/contract

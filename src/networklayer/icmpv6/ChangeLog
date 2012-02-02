@@ -1,5 +1,172 @@
+2011-12-21  Andras Varga
+
+	IPv6NeighborDiscovery: added @signal[startDAD]
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6 related: Code style, #include optimisation
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	IPv6: bugfix: missing {/}
+
+2011-03-02  Zoltan Bojthe
+
+	eliminate warnings: comparison between signed and unsigned integers
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	removed obsolete and misleading !WORK_IN_PROGRESS! files
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-19  Zoltan Bojthe
+
+	IPv6NeighbourCache: add isHomeAgent flag (merged from xMIPv6)
+
+2011-01-19  Zoltan Bojthe
+
+	reduce differences for xMIPv6
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2011-01-13  Zoltan Bojthe
+
+	code style
+
+2011-01-13  Zoltan Bojthe
+
+	cleaning includes
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2011-01-06  Zoltan Bojthe
+
+	IPv6ND: add a statistic signal.
+
+2011-01-06  Zoltan Bojthe
+
+	IPv6ND: remove unused variable
+
+2011-01-06  Zoltan Bojthe
+
+	cosmetic changes: indentation, spell checking
+
+2011-01-05  Zoltan Bojthe
+
+	minimal changes
+
+2010-12-21  Zoltan Bojthe
+
+	IPv6InterfaceData: getter functions be const
+
+	and name of getter functions be get....()
+
+2010-12-20  Zoltan Bojthe
+
+	add comments
+
+2010-12-20  Zoltan Bojthe
+
+	icmpv6: add MIPv6 variable, add/modify comments
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6Neighbour: using cancelAndDelete() for delete events, remove deleted
+	entry from list
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6NDMessage: add structures, add and reordering fields, add comments
+
+2010-12-15  Zoltan Bojthe
+
+	(M)IPv6: add constants
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: scheduling simtime-relative (need it, when module created
+	dynamically)
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: bugfix: delete undisposed objects in IPv6NeighbourDiscovery
+
+2010-12-10  Zoltan Bojthe
+
+	comment change, newline at the end of file
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
 2005-08-04  Andras Varga
 
-    * checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
-    Monash University; code skeleton and some initial code
-    implemented by Andras Varga
+	* checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
+	Monash University; code skeleton and some initial code
+	implemented by Andras Varga

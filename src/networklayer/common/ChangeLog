@@ -1,27 +1,136 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-09-16  Zoltan Bojthe
+
+	fixes for bug #137: order of modules in ned leads to segfault in
+	inet-EtherMacBase/InterfaceTable
+
+	I added a test for InterfaceTable::addInterface() function
+	for checking initialization of 'nb' member. When 'nb' is NULL, the
+	InterfaceTable not yet initialized ('nb' setted in stage 0).
+
+2011-11-04  Zoltan Bojthe
+
+	IPv6 comment
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	fixing IPv6Address test
+
+	also some include optimisation
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-28  Rudolf Hornig
+
+	Added Mesh network support to Ieee80211
+
+2011-03-18  Zoltan Bojthe
+
+	changes in includes
+
+2011-03-10  Rudolf Hornig
+
+	Moved NAMTrace and NAMTraceWriter to the obsolete directory.
+
+2011-03-04  Zoltan Bojthe
+
+	Features: add more features
+
+2011-03-03  Zoltan Bojthe
+
+	features: add *_examples features, add SCTP feature
+
+	correcting some #include, etc
+
+2011-03-03  Zoltan Bojthe
+
+	features: TCP_NSC, TCP_lwip, IPv6 completed
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Rudolf Hornig
+
+	Dropped EmptyHook. Nop is used instead.
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-09-26  Andras Varga
+
+	typos
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-03-25  ------ INET-20090325 released ------
+
 2008-07-07  Andras Varga
 
-    * introduced IInterfaceTable, to allow users implement their own
-    InterfaceTables and plug them into INET simulations, without any
-    change to the base INET.
+	* introduced IInterfaceTable, to allow users implement their own
+	InterfaceTables and plug them into INET simulations, without any
+	change to the base INET.
 
 2008-07-01  Andras Varga
 
-    * created this package, by moving files from contract/
+	* created this package, by moving files from contract/
 
-    * InterfaceEntry: setter methods made virtual. This has near zero
-    performance cost (calls to setters are rare, and the class already
-    has a vptr due to cObject). Also added backpointer to containing
-    InterfaceTable.
+	* InterfaceEntry: setter methods made virtual. This has near zero
+	performance cost (calls to setters are rare, and the class already
+	has a vptr due to cObject). Also added backpointer to containing
+	InterfaceTable.
 
-    * InterfaceTable: implemented NotificationBoard-based notifications
-    about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED,
-    NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
-    The detail object for all four are the InterfaceEntry.
+	* InterfaceTable: implemented NotificationBoard-based notifications
+	about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED,
+	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
+	The detail object for all four are the InterfaceEntry.
 
-    * InterfaceTable: created a getInterfaceById() method, NOT to be
-    confused with getInterface(pos)! Ids are stable after deletions,
-    unlike 0..getNumInterfaces()-1 indices
+	* InterfaceTable: created a getInterfaceById() method, NOT to be
+	confused with getInterface(pos)! Ids are stable after deletions,
+	unlike 0..getNumInterfaces()-1 indices
 
-
-    TODO: changes to protocol-specific interface data (IPv4, IPv6)
-    don't trigger a notification yet
+	See contract/ChangeLog for earlier history of this code.

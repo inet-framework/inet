@@ -1,4 +1,150 @@
+2011-12-15  Zoltan Bojthe
+
+	IPv4 bugfix #469: ARP: global cache is incompatible with dynamic module
+	creation
+
+	bug was: The initialize() and destructor functions of the ARP module
+	clear the global ARP cache. If it is called during simulation, then any
+	subsequent ARP request stops the simulation with an error.
+
+2011-12-15  Andras Varga
+
+	statistics: ARP: wording
+
+2011-08-02  Andras Varga
+
+	Set ETHERTYPE_IPv4 on outgoing packets
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-04  Zoltan Bojthe
+
+	eliminate some warnings: variable set but not used
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2010-11-22  Rudolf Hornig
+
+	Added GlobalARP support (from INETMANET)
+
+2011-02-25  Zoltan Bojthe
+
+	fix: cannot use "%d" format for size_t on 64-bit systems; use '<<' instead
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-02-22  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
 2008-07-08  Andras Varga
 
-    * ARP: performance: introduced nicOutBaseGateId for use in send(),
-    instead of looking up the gate by name each time
+	* ARP: performance: introduced nicOutBaseGateId for use in send(),
+	instead of looking up the gate by name each time
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-08-04  Andras Varga
+
+	ARP code moved from NetworkInterfaces/ARP/ into Network/ARP/.
+
+2004-04-26  Andras Varga
+
+	Initial revision of the ARP code, written from scratch.
+
+	If you are interested in the early history of the ARP code, change
+	to the project root and type
+
+	$ gitk -- NetworkInterfaces/ARP Network/ARP INET/src/networklayer/arp

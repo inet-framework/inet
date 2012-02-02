@@ -1,74 +1,90 @@
-2011-07-25  Andras Varga
+2012-01-11  Zoltan Bojthe
 
-   * UDP: heavy API changes; added multicast, broadcast and ttl support
+	fix for bug #516: UDP leaks multicast
 
-    Bugs fixed:
-    - connect without bind is now supported (used to be an error)
-    - send has previously ignored the socket altogether
-    - bug: for bind, port=0 was refused
-    - it was not possible to receive broadcasts and multicasts
+2011-12-21  Andras Varga
 
-    Features/improvements:
-    - added support for the following socket options (see Unix setsockopt()):
-      time-to-live (unicast and multicast), broadcast, multicast output
-      interface, join multicast group, leave multicast group.
-    - UDPControlInfo was as a bit confusing, as it contained the union of
-      all fields needed for all commands/indications, so it was not
-      clear whether some field X was used for some command/indication,
-      and if so, what its exact role was. Specific UDPControlInfo classes
-      are now much more explicit about this.
-    - UDPSocket class now contains much less state (clearer responsibilities,
-      less chance of disagreement with UDP module's view)
+	statistics:
+	- revised rcvdPk, sentPk, dropPk
+	- standardizing on lower case statistics titles
+	- record packet counts in a less confusing way: as rcvdPk:count instead
+	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
+	  recorded as rcvdPk:sum(packetBytes)
 
-    Details:
-    - UDPControlInfo has been split to:
-         UDPBindCommand,
-         UDPConnectCommand,
-         UDPSendCommand,
-         UDPCloseCommand,
-      and
-         UDPDataIndication,
-         UDPErrorIndication
-      for the opposite direction. Used with the corresponding
-      UDP_C_xxx and UDP_I_xxx message kinds.
-    - UDP_C_UNBIND message kind has been renamed to UDP_C_CLOSE
-    - added UDP_C_SETOPTION (for setting socket options);
-      it must be acompanied by any of:
-         UDPSetTimeToLiveCommand,
-         UDPSetBroadcastCommand,
-         UDPSetMulticastInterfaceCommand,
-         UDPJoinMulticastGroupCommand,
-         UDPLeaveMulticastGroupCommand.
-    - the "unspecified" port number value has been changed from 0 to -1,
-      for consistency with other parameters in the NED file
-    - userId was removed, as it hasn't offered a tremendous utility
-      value, and apparently nobody used it
+2011-11-18  ------ INET-1.99.2 released ------
 
-    UDPSocket class:
-    - now it stores minimal state (practically just the socket id),
-      and everything else is immediately sent down to the UDP module
-    - new methods for socket options:
-         setTimeToLive(),
-         setBroadcast(),
-         setMulticastOutputInterface()
-         joinMulticastGroup()
-         leaveMulticastGroup()
-    - new utility method:
-         getReceivedPacketInfo()
-    - removed methods:
-         setUserId() / getUserId() -- userId is no longer;
-         getState() / stateName() -- state is not kept;
-         getLocalAddress() / getLocalPort() -- state is not kept;
-         setMulticastInterfaceId() / getMulticastInterfaceId() -- renamed
+2011-11-17  Andras Varga
+
+	UDP: fix #446: when there is no socket to deliver to, decapsulated
+	packet remains in memory
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-28  Andras Varga
+
+	UDP: cosmetics: functions reordered; no other change
+
+2011-07-28  Andras Varga
+
+	Heavy API changes; added multicast, broadcast and ttl support.
+
+	Features/improvements:
+	- added support for the following socket options (see Unix setsockopt()):
+	  time-to-live (unicast and multicast), broadcast, multicast output
+	  interface, join multicast group, leave multicast group.
+	- UDPControlInfo and UDPSocket has changed, see contract/ChangeLog!
+
+	Bugs fixed:
+	- connect without bind is now supported (used to be an error)
+	- send has previously ignored the socket altogether
+	- bug: for bind, port=0 was refused
+	- it was not possible to receive broadcasts and multicasts
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-03-03  ------ INET-1.99.0 released ------
 
 2010-03-26  Andras Varga
 
-    * fix: represent port numbers with ushort
+	* fix: represent port numbers with ushort
+
+2009-03-25  ------ INET-20090325 released ------
 
 2008-06-29  Andras Varga
 
-    * factored out createUDPPacket()
+	* factored out createUDPPacket()
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
 
 2005-07-14  Andras Varga
 
-    * UDPModule renamed to UDP
+	* UDPModule renamed to UDP
+
+2003..2004  Andras Varga
+
+	IPSuite extensive refactoring, see networklayer/ipv4/ChangeLog
+
+2003-09-23  Andras Varga
+
+	Initial version taken over from IPSuite.
+
+	If you are interested in the early history of the UDP code, change
+	to the project root and type
+
+	$ gitk -- Transport/UDP INET/src/transport/udp

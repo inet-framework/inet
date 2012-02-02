@@ -1,0 +1,33 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-05-11  Andras Varga
+
+	Compile fixes for MSVC
+
+	- disambiguate arg types for pow(), sqrt(), etc. (ambiguity caused
+	compile errors)
+	- added implementations for missing C99 functions
+	- MSVC does not have <stdint.h>, but most of its declarations are
+	already provided by <omnetpp.h>
+
+2011-04-15  Rudolf Hornig
+
+	Added new ieee802.11 model from INETMANET, supporting a,b,g,p modes.
+

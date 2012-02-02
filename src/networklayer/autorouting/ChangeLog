@@ -1,5 +1,0 @@
-2005-07-03  Andras Varga
-
-    * FlatNetworkConfigurator[6]: nonIPModuleTypes are now implicitly added
-    to moduleTypes. Before, one had to add e.g. EtherSwitch to both -- now
-    it's enough to add it to nonIPModuleTypes.

@@ -1,0 +1,180 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-12  Andras Varga
+
+	HttpTools topic branch merged into the INET codebase (integration
+	branch)
+
+2011-08-06  Andras Varga
+
+	HttpTools: trimRight() crashed on empty string, replaced with a shorter
+	implementation
+
+2011-08-05  Andras Varga
+
+	HttpTools: HttpController.registerWWWserver() renamed to
+	registerServer()
+
+	Camelcase consistency, and consistency with getServerModule(),
+	getAnyServerModule()
+
+2011-08-05  Andras Varga
+
+	HttpTools: HttpUtils: parameter rename
+
+	extractServerName() and extractResourceName() actually accept URLs, so
+	rename "path" arg to "url". Also rename internal variables.
+
+2011-08-05  Andras Varga
+
+	HttpTools: refactoring of wwwName and getWWW()
+
+	wwwName and getWWW() renamed to hostName and getHostName() (i.e. host
+	name or domain name of the server), and moved from HttpNodeBase into
+	HttpServerBase where they belong.
+
+	port (listen port of the server) also moved to HttpServerBase.
+
+	TODO: the following line in HttpServerBase is now obviously wrong:
+	replymsg->setOriginatorUrl(hostName.c_str());
+
+2011-08-05  Andras Varga
+
+	HttpTools: rdObject::get() renamed to draw()
+
+2011-08-05  Andras Varga
+
+	HttpTools: rdHistogramBin moved into rdHistogram
+
+2011-08-05  Andras Varga
+
+	HttpTools: C++ cosmetics: if/then's broken to two lines
+
+2011-08-05  Andras Varga
+
+	HttpTools: C++ cosmetics: use empty() instead of size()==0; fix "\\n"
+
+2011-08-05  Andras Varga
+
+	HttpTools: doxy comment cosmetics only
+
+	Note: @brief's have been removed because in INET we have
+	JAVADOC_AUTOBRIEF=YES in doxy.cfg, which automatically treats the 1st
+	line (until the first dot) as brief description.
+
+	Also, HttpTools doesn't need its own doxy.cfg.
+
+2011-08-04  Andras Varga
+
+	HttpTools: cosmetics on C++ and NED sources (e.g. remove spaces
+	near parens)
+
+2011-08-04  Andras Varga
+
+	HttpTools: introduced IHttpDirectApp; related small changes
+
+2011-08-04  Andras Varga
+
+	HttpTools: SITE_DEF_STRUCT renamed to HtmlPageData
+
+2011-08-04  Andras Varga
+
+	HttpTools: small fixes on examples: linkSpeed; Mbps; sendQueueClass;
+	ethernetline
+
+2011-08-07  Andras Varga
+
+	HttpTools: NED parameter "www" renamed to "hostName"
+
+	It is a parameter of servers, and holds the domain name of the server.
+
+2011-08-04  Andras Varga
+
+	HttpTools: MESSAGE_QUEUE_TYPE renamed HttpRequestQueue, changed and
+	moved into HttpBrowserBase
+
+	Details:
+	- renamed to HttpRequestQueue
+	- moved into HttpBrowserBase (it was only used in browsers)
+	- it is actually used to queue up HTTP requests, so cMessage* was
+	  replaced with HttpRequestMessage* there and in related methods
+
+2011-08-04  Andras Varga
+
+	HttpTools: BROWSE_EVENT_ENTRY renamed to BrowseEvent, and made inner
+	class of HttpBrowserBase
+
+	Also: BROWSE_EVENT_QUEUE_TYPE renamed to BrowseEventsList.
+
+2011-08-04  Andras Varga
+
+	HttpTools: SOCK_DATA_STRUCT turned into inner class and renamed to
+	SockData
+
+	Reason: it was only used in HttpBrowser.
+
+2011-08-04  Andras Varga
+
+	HttpTools: renamed CONTENT_TYPE_ENUM to HttpContentType
+
+	- enum decl moved into .msg file, because it is needed in
+	  HttpReplyMessage too
+	- renamed CONTENT_TYPE_ENUM to HttpContentType
+	- its values renamed too: rt_unknown to CT_UNKNOWN, etc
+
+2011-08-04  Andras Varga
+
+	HttpTools: made it compile with MSVC
+
+2011-08-07  Andras Varga
+
+	HttpTools: removed GPL license text (we already have the GPL header in
+	each file)
+
+2011-08-04  Andras Varga
+
+	HttpTools: make_neddoc script removed (docu is now generated using
+	the IDE)
+
+2011-08-04  Andras Varga
+
+	HttpTools: HttpController moved to world/ [ZBojthe]
+
+2011-08-07  Andras Varga
+
+	HttpTools: added existing documentation as neddoc comments
+
+2011-08-xx  Andras Varga
+
+	HttpTools: HttpNodeBase to IHttpDirectApp
+
+2011-07-27  Zoltan Bojthe
+
+	HttpTools: remove "using namespace std"
+
+2011-06-xx  Andras Varga
+
+	HttpTools: DirectHost moved into nodes/
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: cosmetics: spacing (by spaces.pl script)
+
+2011-06-07  Andras Varga
+
+	HttpTools: Rename httpt* modules to Http*
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: converted NED files to OMNeT++ 4.1 syntax;
+	adapted NED files to the new INET version; more fixes.
+	Examples are now working.
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: svn checkout, initial commit into a topic branch
+
+	svn checkout http://omnet-httptools.googlecode.com/svn/trunk/
+	omnet-httptools-read-only
+
+	--> svn rev.92

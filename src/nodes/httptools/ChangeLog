@@ -1,0 +1,18 @@
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-08-04  Andras Varga
+
+	HttpTools: NED files cosmetics
+
+2011-08-05  Andras Varga
+
+	HttpTools: cosmetics: remove spaces near parens
+
+2011-08-04  Andras Varga
+
+	HttpTools: introduced IHttpDirectApp; related small changes
+
+2011-11-12  Andras Varga
+
+	HttpTools: DirectHost moved into nodes/
+
