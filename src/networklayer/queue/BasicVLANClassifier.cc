@@ -28,7 +28,8 @@ Register_Class(BasicVLANClassifier);
 
 int BasicVLANClassifier::getNumQueues()
 {
-    return indexTable.size();
+//    return indexTable.size();
+    return numQueues;
 }
 
 int BasicVLANClassifier::classifyPacket(cMessage *msg)
@@ -56,13 +57,13 @@ int BasicVLANClassifier::classifyByVID(int vid)
     }
     else
     {
-        if (indexTable.size() >= maxNumQueues)
+        if (numQueues >= maxNumQueues)
         {
             throw cRuntimeError("%s::classifyByVID: Exceeds the maximum number of queues", getFullPath().c_str());
         }
         else
         {
-            return (indexTable[vid] = indexTable.size());
+            return (indexTable[vid] = numQueues++);
         }
     }
 }

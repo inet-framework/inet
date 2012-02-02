@@ -65,6 +65,7 @@ class INET_API MACRelayUnitNPWithVLAN : public MACRelayUnitNP
 
     struct PortStatus
     {
+        int portno; // port index
         PortRegistration registration;
         bool tagged;    // indicating whether frames are to be VLAN-tagged or untagged when transmitted
     };

@@ -47,7 +47,7 @@ class INET_API BasicVLANClassifier : public IQoSClassifier
         /**
          * Set maximum number of subqueue indexes.
          */
-        void setMaxNumQueues(int n) {maxNumQueues = n;}
+        virtual void setMaxNumQueues(int n) {maxNumQueues = n;}
 
         /**
          * Returns the current number of subqueue indexes assigned to VIDs.

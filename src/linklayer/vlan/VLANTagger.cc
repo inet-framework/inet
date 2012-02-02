@@ -25,48 +25,57 @@ VLANTagger::~VLANTagger()
 {
 }
 
-void VLANTagger::initialize()
+void
+VLANTagger::initialize()
 {
-    // verbose = par("verbose");
     tagged = (bool) par("tagged");
     dynamicTagging = (bool) par("dynamicTagging");
-    pvid = (VID) par("pvid");
+
+    // parse 'vids' and add results into 'vidSet'
+    vidSet.clear();
+    std::string vids = par("vidSet").stdstringValue();
+    if (vids.size() > 0)
+    {
+        VID vid;
+        int i = 0;
+        std::string::size_type idx1 = 0, idx2 = 0;
+        while ((idx1 != std::string::npos) && (idx2 != std::string::npos))
+        {
+            idx2 = vids.find(' ', idx1);
+            vid = (VID) atoi((vids.substr(idx1, idx2)).c_str());
+            if ((vid < 1) || (vid > 4094))
+            {
+                error("A VID value is beyond the allowed range.");
+            }
+            else
+            {
+                vidSet.push_back(vid);
+            }
+            if (idx2 != std::string::npos)
+            {
+                idx1 = vids.find_first_not_of(' ', idx2 + 1);
+            }
+            i++;
+        }
+    }
 
     if (tagged == false)
     {
-        if ((pvid >= 1) && (pvid <= 4094))
-        {
-            if (dynamicTagging == true)
+        if (dynamicTagging == false)
+        { // untagged port with static tagging
+            if (vidSet.size() == 1)
             {
-                // get an access to the relay module for dynamic VLAN tagging
-                cModule *relayModule = getParentModule()->getSubmodule("relayUnit");
-                relay = check_and_cast<MACRelayUnitNPWithVLAN *>(relayModule);
+                pvid = vidSet[0];
+            }
+            else
+            {
+                error("No or multiple PVIDs for untagged port with static tagging.");
             }
         }
         else
-        {
-            error("PVID value is beyond the allowed range of VID values.");
-        }
-    }
-    else
-    {
-        vidSet.clear();
-        std::string vids = par("vidSet").stdstringValue();
-        if (vids.size() > 0)
-        {
-            // parse 'vids' and add results into 'vidSet'
-            int i = 0;
-            std::string::size_type idx1 = 0, idx2 = 0;
-            while ((idx1 != std::string::npos) && (idx2 != std::string::npos))
-            {
-                idx2 = vids.find(' ', idx1);
-                vidSet.push_back(atoi((vids.substr(idx1, idx2)).c_str()));
-                if (idx2 != std::string::npos)
-                {
-                    idx1 = vids.find_first_not_of(' ', idx2 + 1);
-                }
-                i++;
-            }
+        { // get an access to the relay module for untagged port with dynamic tagging
+            cModule *relayModule = getParentModule()->getSubmodule("relayUnit");
+            relay = check_and_cast<MACRelayUnitNPWithVLAN *>(relayModule);
         }
     }
 }

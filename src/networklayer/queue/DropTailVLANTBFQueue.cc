@@ -52,11 +52,11 @@ void DropTailVLANTBFQueue::initialize()
     // state
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
+    classifier->setMaxNumQueues(numQueues);
 
     outGate = gate("out");
 
-//    numQueues = classifier->getNumQueues();
-//    queues = new cQueue *[numQueues];
+    // set subqueues
     queues.assign(numQueues, (cQueue *)NULL);
     meanBucketLength.assign(numQueues, burstSize);
     peakBucketLength.assign(numQueues, mtu);

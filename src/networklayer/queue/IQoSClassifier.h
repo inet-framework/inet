@@ -34,6 +34,14 @@
 class INET_API IQoSClassifier : public cPolymorphic
 {
   public:
+
+    /**
+     * Set maximum number of subqueue indexes.
+     * - note that this is not declared as a pure virtual function
+     * - due to compatibility with classes not implementing this function.
+     */
+    virtual void setMaxNumQueues(int n) {};
+
     /**
      * Returns the largest value plus one classifyPacket() returns.
      */

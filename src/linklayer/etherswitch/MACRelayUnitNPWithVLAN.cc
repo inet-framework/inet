@@ -96,20 +96,20 @@ void MACRelayUnitNPWithVLAN::initialize(int stage)
             cModule *taggerModule = getParentModule()->getSubmodule("tagger", i);
             VLANTagger *tagger = check_and_cast<VLANTagger *>(taggerModule);
 
-            std::vector<VID> vids;
-            if (tagger->isTagged() == false)
-            {
-                vids.push_back(tagger->getPvid());
-            }
-            else
-            {
-                vids = tagger->getVidSet();
-            }
-
+            std::vector<VID> vids = tagger->getVidSet();;
+//            if (tagger->isTagged() == false)
+//            {
+//                vids.push_back(tagger->getPvid());
+//            }
+//            else
+//            {
+//                vids = tagger->getVidSet();
+//            }
             for (unsigned int j = 0; j < vids.size(); j++)
             {
                 PortMap portMap;
                 PortStatus *portStatus = new PortStatus();
+                portStatus->portno = i;
                 portStatus->registration = Fixed;
                 portStatus->tagged = tagger->isTagged();
 
@@ -198,9 +198,9 @@ void MACRelayUnitNPWithVLAN::broadcastFrame(EtherFrame *frame, int inputport)
         PortMap &portMap = iter->second;
         for (unsigned int i = 0; i < portMap.size(); i++)
         {
-            if ((i != inputport) && (portMap[i]->registration == Fixed))
+            if ((portMap[i]->portno != inputport) && (portMap[i]->registration == Fixed))
             {
-                send((EthernetIIFrameWithVLAN*) vlanFrame->dup(), "lowerLayerOut", i);
+                send((EthernetIIFrameWithVLAN*) vlanFrame->dup(), "lowerLayerOut", portMap[i]->portno);
             }
         }
     }
