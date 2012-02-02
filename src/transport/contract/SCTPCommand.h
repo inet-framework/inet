@@ -75,11 +75,6 @@ enum SCTPFlags
     COMPLETE_MESG_ORDERED   = 0
 };
 
-
-//
-// Currently not in use.
-//
-
 #endif
 
 
