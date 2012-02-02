@@ -1,0 +1,71 @@
+#! /usr/bin/env python
+#
+# This script automatically updates ChangeLog files from the git history.
+# The result may need some editing before committing back into the repo.
+#
+import re
+import os
+import string
+import subprocess
+
+# configuration
+since = '2012-02-02'
+entriesToIgnore = []
+addMarker = True
+
+isWindows = ('OS' in os.environ) and os.environ['OS']=='Windows_NT'
+isMSYS = isWindows and ('OSTYPE' in os.environ) and os.environ['OSTYPE']=='msys'
+
+def updateChangeLogIn(dir):
+    global since, addMarker, isWindows, isMSYS
+
+    # read existing ChangeLog file
+    f = open(os.path.join(dir,'ChangeLog'), 'r')
+    oldLog = f.read()
+    f.close()
+
+    # if "since" is not set, find most recent entry in the log
+    if since=="":
+        since = '2000-01-01'
+        m = re.search('^\d\d\d\d-\d\d-\d\d', oldLog)
+        if m:
+            since = m.group(0)
+
+    # get appropriately formatted git log since that date
+    gitLogCommand = ['git', 'log', '--date=short', '--pretty=format:%ad  %an%n%n%w(81,8,8)%s%n%n%b', '--since='+since, dir]
+    newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS))
+
+    newLog = re.sub('(?m)^    (    )?', "\t", newLog) # spaces-to-tab
+    for e in entriesToIgnore:
+        newLog = string.replace(newLog, e, "")     # remove ignorable entries
+
+    # if there's nothing new, skip the rest
+    if string.strip(newLog) == "":
+        print "    nothing new since", since
+        return
+
+    print "   ", len(re.findall('(?m)^20', newLog)), "entrie(s) since", since
+
+    # concatenate the two logs
+    marker = "----------- lines above this marker have been added from git log -----------\n\n" if addMarker else ""
+    updatedLog = newLog.strip() + "\n\n" + marker + oldLog.strip() + "\n"
+
+    # some cleanup
+    updatedLog = re.sub('(?m)^\s+X-Committed-on-Branch:.*$', '', updatedLog)  # remove X-Committed-on-Branch lines
+    updatedLog = re.sub('(?m)^    (    )?', "\t", updatedLog) # spaces-to-tab
+    updatedLog = re.sub('(?m)[ \t]+$', '', updatedLog)     # remove end-line spaces
+    updatedLog = re.sub("(?s)\n\n+", "\n\n", updatedLog)   # remove multiple blank lines
+    updatedLog = string.strip(updatedLog)+"\n"             # remove leading/trailing blank
+
+    # write to disk
+    f = open(os.path.join(dir,'ChangeLog'), 'w')
+    f.write(updatedLog)
+    f.close()
+
+# find those directories that contain ChangeLogs, and update them
+for root, dirs, files in os.walk('.'):
+    if 'ChangeLog' in files:
+        print root, "contains ChangeLog, updating..."
+        updateChangeLogIn(root)
+
+
