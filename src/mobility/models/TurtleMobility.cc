@@ -306,7 +306,7 @@ double TurtleMobility::getValue(const char *s)
         return expr.doubleValue(this);
     }
     catch (std::exception& e) {
-        throw cRuntimeError(this, "wrong value '%s' around %s: %s", s,
+        throw cRuntimeError("wrong value '%s' around %s: %s", s,
                 nextStatement->getSourceLocation(), e.what());
     }
 }

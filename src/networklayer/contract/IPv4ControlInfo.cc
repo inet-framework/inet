@@ -55,7 +55,7 @@ void IPv4ControlInfo::copy(const IPv4ControlInfo& other)
         dgram = dgram->dup();
         take(dgram);
 #else
-        throw cRuntimeError("INET compiled without IPv4 features!");
+        throw cRuntimeError(this, "INET compiled without IPv4 features!");
 #endif
     }
 }
@@ -65,11 +65,10 @@ void IPv4ControlInfo::setOrigDatagram(IPv4Datagram *d)
 #ifdef WITH_IPv4
     if (dgram)
         throw cRuntimeError(this, "IPv4ControlInfo::setOrigDatagram(): a datagram is already attached");
-
     dgram = d;
     take(dgram);
 #else
-    throw cRuntimeError("INET compiled without IPv4 features!");
+    throw cRuntimeError(this, "INET compiled without IPv4 features!");
 #endif
 }
 
@@ -86,7 +85,7 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     dgram = NULL;
     return ret;
 #else
-    throw cRuntimeError("INET compiled without IPv4 features!");
+    throw cRuntimeError(this, "INET compiled without IPv4 features!");
 #endif
 }
 

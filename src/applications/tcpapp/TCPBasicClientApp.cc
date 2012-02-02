@@ -93,7 +93,7 @@ void TCPBasicClientApp::handleTimer(cMessage *msg)
            break;
 
         default:
-            throw cRuntimeError(this, "invalid timer msg: kind=%d", msg->getKind());
+            throw cRuntimeError("invalid timer msg: kind=%d", msg->getKind());
     }
 }
 

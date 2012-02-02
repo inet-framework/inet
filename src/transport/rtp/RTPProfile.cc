@@ -163,7 +163,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 
     cModuleType *moduleType = cModuleType::find(moduleName);
     if (moduleType == NULL)
-        throw cRuntimeError(this, "RTPProfile: payload sender module '%s' not found", moduleName);
+        throw cRuntimeError("RTPProfile: payload sender module '%s' not found", moduleName);
 
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
@@ -225,7 +225,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
         if (moduleType == NULL)
-            throw cRuntimeError(this, "Receiver module type %s not found", payloadReceiverName);
+            throw cRuntimeError("Receiver module type %s not found", payloadReceiverName);
         else
         {
             RTPPayloadReceiver *receiverModule =
@@ -304,7 +304,7 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
     }
 
     if (!assigned)
-        throw cRuntimeError(this, "Can't manage more senders");
+        throw cRuntimeError("Can't manage more senders");
 
     _ssrcGates[ssrc] = ssrcGate;
     return ssrcGate;

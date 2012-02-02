@@ -103,12 +103,12 @@ void EtherBus::initialize()
         if (i == 0)
             datarate = drate;
         else if (datarate != drate)
-            throw cRuntimeError(this, "The input datarate at tap %i differs from datarates of previous taps", i);
+            throw cRuntimeError("The input datarate at tap %i differs from datarates of previous taps", i);
 
         drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
 
         if (datarate != drate)
-            throw cRuntimeError(this, "The output datarate at tap %i differs from datarates of previous taps", i);
+            throw cRuntimeError("The output datarate at tap %i differs from datarates of previous taps", i);
 
         igate->setDeliverOnReceptionStart(true);
     }

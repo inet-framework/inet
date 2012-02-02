@@ -388,7 +388,7 @@ bool VoIPSourceApp::checkSilence(enum SampleFormat sampleFormat, void* _buf, int
         break;
 
     default:
-        throw cRuntimeError(this, "invalid sampleFormat:%d", sampleFormat);
+        throw cRuntimeError("invalid sampleFormat: %d", sampleFormat);
     }
 
     return max < voipSilenceThreshold;

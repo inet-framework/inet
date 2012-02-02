@@ -203,7 +203,7 @@ void RoutingTable6::updateDisplayString()
 
 void RoutingTable6::handleMessage(cMessage *msg)
 {
-    throw cRuntimeError(this, "This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void RoutingTable6::receiveChangeNotification(int category, const cObject *details)
@@ -363,7 +363,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
         // 0 should be treated as infinity
         int pfxLen;
         if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(), pfxLen))
-            throw cRuntimeError(this, "element <%s> at %s: wrong IPv6Address/prefix syntax %s",
+            throw cRuntimeError("element <%s> at %s: wrong IPv6Address/prefix syntax %s",
                       node->getTagName(), node->getSourceLocation(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;

@@ -67,7 +67,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.get4());
 
     if (rtie == NULL) {
-        throw cRuntimeError(this, "No interface for remote address %s found!", remoteAddress.get4().str().c_str());
+        throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get4().str().c_str());
     }
 
     pmtu = rtie->getMTU();
@@ -503,7 +503,7 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
     case SCTP_C_NO_OUTSTANDING:      return SCTP_E_SEND_SHUTDOWN_ACK;
     default:
         sctpEV3<<"commandCode="<<commandCode<<"\n";
-        throw cRuntimeError(this, "Unknown message kind in app command");
+        throw cRuntimeError("Unknown message kind in app command");
     }
 }
 
@@ -556,7 +556,7 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
             }*/
             break;
 
-        default: throw cRuntimeError(this, "wrong event code");
+        default: throw cRuntimeError("wrong event code");
     }
 
     delete sctpCommand;

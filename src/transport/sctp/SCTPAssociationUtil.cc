@@ -356,10 +356,10 @@ void SCTPAssociation::sendInit()
     uint32 length = SCTP_INIT_CHUNK_LENGTH;
 
     if (remoteAddr.isUnspecified() || remotePort==0)
-        throw cRuntimeError(this, "Error processing command ASSOCIATE: foreign socket unspecified");
+        throw cRuntimeError("Error processing command ASSOCIATE: foreign socket unspecified");
 
     if (localPort==0)
-        throw cRuntimeError(this, "Error processing command ASSOCIATE: local port unspecified");
+        throw cRuntimeError("Error processing command ASSOCIATE: local port unspecified");
 
     state->setPrimaryPath(getPath(remoteAddr));
     // create message consisting of INIT chunk

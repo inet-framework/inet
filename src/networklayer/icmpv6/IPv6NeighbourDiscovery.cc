@@ -491,7 +491,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
 
     const Key *nceKey = nce->nceKey;
     if ( nceKey == NULL )
-        throw cRuntimeError(this, "The nceKey is NULL at nce->MAC=%s, isRouter=%d",
+        throw cRuntimeError("The nceKey is NULL at nce->MAC=%s, isRouter=%d",
                 nce->macAddress.str().c_str(), nce->isRouter);
 
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);

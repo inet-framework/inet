@@ -85,7 +85,7 @@ void InterfaceTable::updateDisplayString()
 
 void InterfaceTable::handleMessage(cMessage *msg)
 {
-    throw cRuntimeError(this, "This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void InterfaceTable::receiveChangeNotification(int category, const cObject *details)
@@ -117,7 +117,7 @@ InterfaceEntry *InterfaceTable::getInterface(int pos)
 {
     int n = getNumInterfaces(); // also fills tmpInterfaceList
     if (pos<0 || pos>=n)
-        throw cRuntimeError(this, "getInterface(): interface index %d out of range 0..%d", pos, n-1);
+        throw cRuntimeError("getInterface(): interface index %d out of range 0..%d", pos, n-1);
 
     if (!tmpInterfaceList)
     {
@@ -145,7 +145,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
     if (getInterfaceByName(entry->getName())!=NULL)
-        throw cRuntimeError(this, "addInterface(): interface '%s' already registered", entry->getName());
+        throw cRuntimeError("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
     entry->setInterfaceId(INTERFACEIDS_START + idToInterface.size());
@@ -167,7 +167,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
     while (ifmod && ifmod->getParentModule()!=host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError(this, "addInterface(): specified module is not in this host/router");
+        throw cRuntimeError("addInterface(): specified module is not in this host/router");
 
     // find gates connected to host / network layer
     cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL;
@@ -193,7 +193,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
     if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
-        throw cRuntimeError(this, "addInterface(): interface must be connected to network layer's ifIn[]/ifOut[] gates of the same index");
+        throw cRuntimeError("addInterface(): interface must be connected to network layer's ifIn[]/ifOut[] gates of the same index");
 
     entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
 }
@@ -202,7 +202,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 {
     int id = entry->getInterfaceId();
     if (entry != getInterfaceById(id))
-        throw cRuntimeError(this, "deleteInterface(): interface '%s' not found in interface table", entry->getName());
+        throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getName());
 
     nb->fireChangeNotification(NF_INTERFACE_DELETED, entry);  // actually, only going to be deleted
 

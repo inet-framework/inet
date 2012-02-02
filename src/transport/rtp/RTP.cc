@@ -105,7 +105,7 @@ void RTP::handleMessageFromApp(cMessage *msg)
         break;
 
     default:
-        throw cRuntimeError(this, "unknown RTPControlInfo type from application");
+        throw cRuntimeError("unknown RTPControlInfo type from application");
     }
 }
 
@@ -140,7 +140,7 @@ void RTP::handleMessageFromProfile(cMessage *msg)
         break;
 
     default:
-        throw cRuntimeError(this, "Unknown RTPInnerPacket type %d from profile", rinp->getType());
+        throw cRuntimeError("Unknown RTPInnerPacket type %d from profile", rinp->getType());
     }
     ev << "handleMessageFromProfile(cMessage *msg) Exit" << endl;
 }
@@ -160,7 +160,7 @@ void RTP::handleMessageFromRTCP(cMessage *msg)
         break;
 
     default:
-        throw cRuntimeError(this, "Unknown RTPInnerPacket type %d from rtcp", rinp->getType());
+        throw cRuntimeError("Unknown RTPInnerPacket type %d from rtcp", rinp->getType());
     }
 }
 
@@ -361,7 +361,7 @@ int RTP::resolveMTU()
     const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(_destinationAddress);
 
     if (rtie == NULL)
-        throw cRuntimeError(this, "No interface for remote address %s found!", _destinationAddress.str().c_str());
+        throw cRuntimeError("No interface for remote address %s found!", _destinationAddress.str().c_str());
 
     int pmtu = rtie->getMTU();
     return pmtu - 20 - 8;

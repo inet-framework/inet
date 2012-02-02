@@ -672,14 +672,14 @@ void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
 
     if (!handle)
     {
-        throw cRuntimeError(this, "The loading of '%s' NSC stack is unsuccessful: %s. Check the LD_LIBRARY_PATH or stackname!", stacknameP, dlerror());
+        throw cRuntimeError("The loading of '%s' NSC stack is unsuccessful: %s. Check the LD_LIBRARY_PATH or stackname!", stacknameP, dlerror());
     }
 
     create = (FCreateStack)dlsym(handle, "nsc_create_stack");
 
     if (!create)
     {
-        throw cRuntimeError(this, "The '%s' NSC stack creation unsuccessful: %s", stacknameP, dlerror());
+        throw cRuntimeError("The '%s' NSC stack creation unsuccessful: %s", stacknameP, dlerror());
     }
 
     pStackM = create(this, this, NULL);
@@ -876,7 +876,7 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
         case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
         case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
         case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
-        default: throw cRuntimeError(this, "wrong command from app: %d", msgP->getKind());
+        default: throw cRuntimeError("wrong command from app: %d", msgP->getKind());
     }
 
     /*
@@ -897,7 +897,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     inetSockPair.remoteM.portM = openCmd->getRemotePort();
 
     if (inetSockPair.remoteM.ipAddrM.isUnspecified() || inetSockPair.remoteM.portM == -1)
-        throw cRuntimeError(this, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
+        throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
     tcpEV << this << ": OPEN: "
         << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << " --> "
@@ -936,7 +936,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommandP);
 
     if (!openCmd->getFork())
-        throw cRuntimeError(this, "TCP_NSC supports Forking mode only");
+        throw cRuntimeError("TCP_NSC supports Forking mode only");
 
 
     TCP_NSC_Connection::SockPair inetSockPair, nscSockPair;
@@ -952,7 +952,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     (void)nscRemoteAddr; // Eliminate "unused variable" warning.
 
     if (inetSockPair.localM.portM == -1)
-        throw cRuntimeError(this, "Error processing command OPEN_PASSIVE: local port must be specified");
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
 
     tcpEV << this << "Starting to listen on: " << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << "\n";
 

@@ -85,7 +85,7 @@ void UDPBasicBurst::initialize(int stage)
     const char *addrModeStr = par("chooseDestAddrMode").stringValue();
     int addrMode = cEnum::get("ChooseDestAddrMode")->lookup(addrModeStr);
     if (addrMode == -1)
-        throw cRuntimeError(this, "Invalid chooseDestAddrMode: '%s'", addrModeStr);
+        throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
     chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
 
     WATCH(numSent);
@@ -250,14 +250,14 @@ void UDPBasicBurst::generateBurst()
 
     double sendInterval = sendIntervalPar->doubleValue();
     if (sendInterval <= 0.0)
-        throw cRuntimeError(this, "The sendInterval parameter must be bigger than 0");
+        throw cRuntimeError("The sendInterval parameter must be bigger than 0");
     nextPkt += sendInterval;
 
     if (activeBurst && nextBurst <= now) // new burst
     {
         double burstDuration = burstDurationPar->doubleValue();
         if (burstDuration < 0.0)
-            throw cRuntimeError(this, "The burstDuration parameter mustn't be smaller than 0");
+            throw cRuntimeError("The burstDuration parameter mustn't be smaller than 0");
         double sleepDuration = sleepDurationPar->doubleValue();
 
         if (burstDuration == 0.0)
@@ -265,7 +265,7 @@ void UDPBasicBurst::generateBurst()
         else
         {
             if (sleepDuration < 0.0)
-                throw cRuntimeError(this, "The sleepDuration parameter mustn't be smaller than 0");
+                throw cRuntimeError("The sleepDuration parameter mustn't be smaller than 0");
             nextSleep = now + burstDuration;
             nextBurst = nextSleep + sleepDuration;
         }

@@ -81,7 +81,7 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     // done
     return ethframe;
 #else
-    throw cRuntimeError(this, "INET compiled without ETHERNET feature!");
+    throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif
 }
 
@@ -114,7 +114,7 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
     // done
     return frame;
 #else
-    throw cRuntimeError(this, "INET compiled without ETHERNET feature!");
+    throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif
 }
 

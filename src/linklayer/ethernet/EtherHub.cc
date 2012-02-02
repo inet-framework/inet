@@ -47,12 +47,12 @@ void EtherHub::initialize()
         if (i == 0)
             datarate = drate;
         else if (datarate != drate)
-            throw cRuntimeError(this, "The input datarate at port %i differs from datarates of previous ports", i);
+            throw cRuntimeError("The input datarate at port %i differs from datarates of previous ports", i);
 
         drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
 
         if (datarate != drate)
-            throw cRuntimeError(this, "The output datarate at port %i differs from datarates of previous ports", i);
+            throw cRuntimeError("The output datarate at port %i differs from datarates of previous ports", i);
 
         igate->setDeliverOnReceptionStart(true);
     }

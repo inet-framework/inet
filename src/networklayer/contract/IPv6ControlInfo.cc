@@ -90,7 +90,7 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
     dgram = NULL;
     return ret;
 #else
-    throw cRuntimeError("INET compiled without IPv6 features!");
+    throw cRuntimeError(this, "INET compiled without IPv6 features!");
 #endif
 }
 
@@ -128,7 +128,7 @@ void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
     // insert at position atPos, shift up the rest of the array
     extensionHeaders.insert(extensionHeaders.begin()+atPos, eh);
 #else
-    throw cRuntimeError("INET compiled without IPv6 features!");
+    throw cRuntimeError(this, "INET compiled without IPv6 features!");
 #endif
 }
 
@@ -143,6 +143,6 @@ IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
     extensionHeaders.erase(first);
     return ret;
 #else
-    throw cRuntimeError("INET compiled without IPv6 features!");
+    throw cRuntimeError(this, "INET compiled without IPv6 features!");
 #endif
 }

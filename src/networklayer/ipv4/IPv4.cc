@@ -509,7 +509,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         if (manetRouting)
             sendToManet(datagram);
 #else
-        throw cRuntimeError(this, "DSR protocol packet received, but MANET routing support is not available.");
+        throw cRuntimeError("DSR protocol packet received, but MANET routing support is not available.");
 #endif
     }
     else
@@ -656,7 +656,7 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src)==NULL)
-            throw cRuntimeError(this, "Wrong source address %s in (%s)%s: no interface with such address",
+            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 
         datagram->setSrcAddress(src);

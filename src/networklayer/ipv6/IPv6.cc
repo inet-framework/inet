@@ -733,10 +733,10 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destI
         {
 
 #ifndef WITH_xMIPv6
-            throw cRuntimeError(this, "Wrong source address %s in (%s)%s: no interface with such address",
+            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 #else /* WITH_xMIPv6 */
-            // throw cRuntimeError(this, "Wrong source address %s in (%s)%s: no interface with such address",
+            // throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
             //          src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
             delete datagram;
             return NULL;

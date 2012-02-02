@@ -155,7 +155,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
             break;
 
         default:
-            throw cRuntimeError(this, "Invalid msgKind value %d in message '%s'",
+            throw cRuntimeError("Invalid msgKind value %d in message '%s'",
                     msgIn->getKind(), msgIn->getName());
             break;
         }
