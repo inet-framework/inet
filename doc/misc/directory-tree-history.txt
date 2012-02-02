@@ -1,0 +1,355 @@
+DIRECTORY TREE HISTORY
+======================
+
+This file describes changes in the INET project's directory tree. Folders
+are sometimes renamed, moved, new folders are created by splitting files
+from an existing folder, folders are merged, deleted, etc. This file exists
+because it is not easy to get an overview of these changes from the git
+history alone. (When you view a file or folder's history in git, the log
+ends where the file or folder was renamed or moved in the project tree.)
+
+As a consequence of renames, you need to invoke gitk (or git log) with
+multiple path args to see the full history of a given folder.
+
+   HINT: Change to the project root and invoke gitk there (instead of
+   invoking it in a random directory and giving it a full path)!
+   Otherwise gitk won't show the files affected by the selected patch
+   (the "file list" panel of gitk will be empty.)
+
+For example, if you wish to see the full history of src/linklayer/ieee80211,
+you need to issue the following command in the project root folder:
+
+$ gitk -- src/linklayer/ieee80211 INET/src/linklayer/ieee80211 \
+          NetworkInterfaces/Ieee80211
+
+For src/networklayer/ipv4:
+
+$ gitk -- src/networklayer/ipv4 INET/src/networklayer/ipv4 Network/IPv4
+
+For src/transport/tcp_common/contract:
+
+$ gitk -- src/transport/tcp_common/contract src/transport/contract \
+          INET/src/transport/contract Transport/Contract
+
+For src/transport/tcp_common:
+
+$ gitk -- src/transport/tcp_common src/transport/tcp \
+          INET/src/transport/tcp Transport/TCP
+
+Integration (since 2010)
+------------------------
+
+Folders that appeared due to the integration of code from external projects
+include:
+
+Added HttpTools:
++ src/world/httptools
++ src/applications/httptools
++ src/nodes/httptools
++ examples/httptools
++ examples/httptools/direct
++ examples/httptools/direct/flashdirect
++ examples/httptools/direct/pairdirect
++ examples/httptools/sites
++ examples/httptools/sites/www_single_org
++ examples/httptools/socket
++ examples/httptools/socket/pairsocket
++ examples/httptools/socket/simpleddos
++ examples/httptools/socket/tenserverssocket
+
+Added VoIPTool:
++ src/applications/voiptool
++ examples/voiptool
++ examples/voiptool/VoIPToolLargeNet
++ examples/voiptool/VoIPToolTest
++ examples/voiptool/VoIPToolTrafficTest
++ examples/voiptool/soundFiles
+
+Added MANETRouting from INETMANET:
++ src/networklayer/manetrouting
++ src/networklayer/manetrouting/aodv
++ src/networklayer/manetrouting/aodv/aodv-uu
++ src/networklayer/manetrouting/base
++ src/networklayer/manetrouting/batman
++ src/networklayer/manetrouting/dsdv
++ src/networklayer/manetrouting/dsr
++ src/networklayer/manetrouting/dsr/dsr-uu
++ src/networklayer/manetrouting/dymo
++ src/networklayer/manetrouting/dymo/dymoum
++ src/networklayer/manetrouting/dymo_fau
++ src/networklayer/manetrouting/olsr
++ examples/manetrouting
++ examples/manetrouting/fg80211
++ examples/manetrouting/fg80211/ini
++ examples/manetrouting/grid_aodv
++ examples/manetrouting/multiradio
++ examples/manetrouting/net80211_aodv
++ examples/manetrouting/net80211_control
+
+Added IEEE 802.11 Mesh radio from INETMANET:
++ src/linklayer/ieee80211mesh
++ src/linklayer/ieee80211mesh/mgmt
+
+Added xMIPv6:
++ src/networklayer/ipv6tunneling
++ src/networklayer/xmipv6
++ src/nodes/xmipv6
++ examples/mobileipv6
+
+Added TCP variants:
++ src/transport/tcp_nsc
++ src/transport/tcp_lwip
+
+New examples:
++ examples/bgpv4/BGPandOSPF/RoutingConfig
++ examples/inet/bottleneck
++ examples/inet/pcaprecorder
++ examples/inet/udpburst
++ examples/wireless/synchronized
+...
+
+
+Adding Feature Support (2011-03-28 through 2011-05-13)
+------------------------------------------------------
+
+Around April 2011, Project Features support was implemented in OMNeT++ 4.2,
+and feature support was introduced into the INET Framework using
+development snapshots of OMNeT++. (4.2 was not released until November,)
+Feature support necessitated splitting up some folders, e.g. the
+contract/ folders under transport/ and networklayer/.
+
+src/util/headerserializers/         -> src/util/headerserializers/ipv4
+                                       src/util/headerserializers/sctp
+                                       src/util/headerserializers/tcp
+                                       src/util/headerserializers/udp
+
+src/util/headerserializers/headers  -> src/util/headerserializers/ipv4/headers
+                                       src/util/headerserializers/udp/headers
+                                       src/util/headerserializers/tcp/headers
+                                       src/util/headerserializers/sctp/headers
+
+src/mobility                        -> src/mobility
+                                       src/mobility/models
+
+src/networklayer/autorouting        -> src/networklayer/autorouting/ipv4
+                                       src/networklayer/autorouting/ipv6
+
+src/networklayer/contract           -> src/networklayer/ipv4/contract
+                                       src/networklayer/ipv6/contract
+
+src/transport/contract              -> src/transport/sctp/contract
+                                       src/transport/tcp_common/contract
+                                       src/transport/udp/contract
+
+src/transport/tcp                   -> src/transport/tcp_common
+                                       src/transport/tcp
+
+src/world                           -> src/world/annotations
+                                       src/world/obstacles
+                                       src/world/powercontrol
+                                       src/world/radio
+                                       src/world/scenario
+
+src/linklayer/etherswitch           -> src/linklayer/ethernet/switch
+
+src/linklayer/mfcore                -> src/linklayer/mf80211/core
+
+src/nodes/inet                      -> src/nodes/inet
+                                       src/nodes/bgp
+                                       src/nodes/ospfv2
+                                       src/nodes/mf80211
+
+
+Quagga Project Split (2009-02-24)
+---------------------------------
+
+Between 2008-01-25 and 2009-02-24, there were only two toplevel directories,
+INET/ and Quagga/. On 2009-02-24, Quagga was moved out to its own project
+on github. The INET files were moved one level up in the tree, so src/,
+examples/, doc/ etc became the toplevel directories.
+
+INET/doc           -> doc
+INET/src           -> src
+INET/examples      -> examples
+INET/etc           -> etc
+INET/tests         -> tests
+Quagga             -> [https://github.com/inet-framework/inet-quagga]
+
+
+Porting from OMNeT++ 3.x (2008-01-25..28)
+-----------------------------------------
+
+While porting INET to OMNeT++ 4.0 in 2008, the directory tree has been
+reorganized. In short, all model code has been moved into a new src/ folder,
+all directory names became lowercase, and several directories were
+renamed in addition to the case change. These changes are in the git repo
+in several commits, all dated 2008-01-28.
+
+Documentation      -> INET/doc
+Examples           -> INET/examples
+Etc                -> INET/etc
+Tests              -> INET/tests
+Applications       -> INET/src/applications
+Base               -> INET/src/base
+NetworkInterfaces  -> INET/src/linklayer
+Mobility           -> INET/src/mobility
+Network            -> INET/src/networklayer
+Nodes              -> INET/src/nodes
+Transport          -> INET/src/transport
+Util               -> INET/src/util
+World              -> INET/src/world
+
+and:
+
+Network/Quagga     -> Quagga/src
+Examples/Quagga    -> Quagga/examples
+
+
+CUMULATIVE LIST OF TREE CHANGES
+-------------------------------
+
+The following table shows the mapping between the original (pre-2008)
+state and the state after adding feature support (mid-2011).
+
+It does not include new directories that appeared due to the integration
+of external code.
+
+NEW:                                       OLD:
+doc                                        was Documentation
+doc/src                                    was Documentation/src
+doc/src/tcp                                was Documentation/src/tcp
+doc/walkthrough                            was Documentation/walkthrough
+doc/walkthrough/images                     was Documentation/walkthrough/images
+doc/walkthrough/thumbs                     was Documentation/walkthrough/thumbs
+_scripts                                   was Etc/scripts
+etc                                        was Etc, Etc/XMLSchema, Etc/XSD2HTML
+etc/plugins                                was Etc/plugins
+examples                                   was Examples
+examples/adhoc                             was Examples/Adhoc
+examples/adhoc/ieee80211                   was Examples/Adhoc/Ieee80211
+examples/adhoc/mf80211                     was Examples/Adhoc/MF80211
+examples/ethernet                          was Examples/Ethernet
+examples/ethernet/arptest                  was Examples/Ethernet/ARPTest
+examples/ethernet/arptest2                 was Examples/Ethernet/ARPTest2
+examples/ethernet/lans                     was Examples/Ethernet/LANs
+examples/inet                              was Examples/INET
+examples/inet/bulktransfer                 was Examples/INET/BulkTransfer
+examples/inet/flatnet                      was Examples/INET/FlatNet
+examples/inet/kidsnw1                      was Examples/INET/KIDSNw1
+examples/inet/multicast                    was Examples/INET/Multicast
+examples/inet/nclients                     was Examples/INET/NClients
+examples/inet/redtest                      was Examples/INET/REDTest
+examples/inet/routerperf                   was Examples/INET/RouterPerf
+examples/ipv6                              was Examples/IPv6
+examples/ipv6/demonetworketh               was Examples/IPv6/DemoNetworkEth
+examples/ipv6/nclients                     was Examples/IPv6/NClients
+examples/mobility                          was Examples/Adhoc/Mobility
+examples/mpls                              was Examples/MPLS
+examples/mpls/ldp                          was Examples/MPLS/LDP
+examples/mpls/net37                        was Examples/MPLS/Net37
+examples/mpls/testte_failure               was Examples/MPLS/TestTE_Failure
+examples/mpls/testte_failure2              was Examples/MPLS/TestTE_Failure2
+examples/mpls/testte_reroute               was Examples/MPLS/TestTE_Reroute
+examples/mpls/testte_routing               was Examples/MPLS/TestTE_Routing
+examples/mpls/testte_tunnel                was Examples/MPLS/TestTE_Tunnel
+examples/ospfv2                            was Examples/OSPFv2
+examples/ospfv2/areas                      was Examples/OSPFv2/Areas
+examples/ospfv2/backbone                   was Examples/OSPFv2/Backbone
+examples/ospfv2/fulltest                   was Examples/OSPFv2/FullTest
+examples/ospfv2/simpletest                 was Examples/OSPFv2/SimpleTest
+examples/rtp                               was Examples/RTP
+examples/rtp/data                          was Examples/RTP/Data
+examples/rtp/multicast1                    was Examples/RTP/Multicast1
+examples/rtp/multicast2                    was Examples/RTP/Multicast2
+examples/rtp/unicast                       was Examples/RTP/Unicast
+examples/wireless                          was Examples/Wireless
+examples/wireless/handover                 was Examples/Wireless/Handover
+examples/wireless/hosttohost               was Examples/Wireless/HostToHost
+examples/wireless/lan80211                 was Examples/Wireless/80211Lan
+examples/wireless/throughput               was Examples/Wireless/Throughput
+src/applications                           was Applications
+src/applications/ethernet                  was Applications/Ethernet
+src/applications/generic                   was Applications/Generic
+src/applications/pingapp                   was Applications/PingApp
+src/applications/rtpapp                    split from Transport/RTP
+src/applications/tcpapp                    was Applications/TCPApp
+src/applications/udpapp                    was Applications/UDPApp
+src/base                                   was Base
+src/linklayer                              was NetworkInterfaces
+src/linklayer/contract                     was NetworkInterfaces/Contract
+src/linklayer/ethernet                     was NetworkInterfaces/Ethernet
+src/linklayer/ethernet/switch              was NetworkInterfaces/EtherSwitch
+src/linklayer/ieee80211                    was NetworkInterfaces/Ieee80211
+src/linklayer/ieee80211/mac                was NetworkInterfaces/Ieee80211/Mac
+src/linklayer/ieee80211/mgmt               was NetworkInterfaces/Ieee80211/Mgmt
+src/linklayer/ieee80211/radio              split from NetworkInterfaces/Radio
+src/linklayer/mf80211                      was NetworkInterfaces/MF80211
+src/linklayer/mf80211/core                 was NetworkInterfaces/MFCore
+src/linklayer/mf80211/macLayer             was NetworkInterfaces/MF80211/macLayer
+src/linklayer/mf80211/phyLayer             was NetworkInterfaces/MF80211/phyLayer
+src/linklayer/mf80211/phyLayer/decider     was NetworkInterfaces/MF80211/phyLayer/decider
+src/linklayer/mf80211/phyLayer/snrEval     was NetworkInterfaces/MF80211/phyLayer/snrEval
+src/linklayer/ppp                          was NetworkInterfaces/PPP
+src/linklayer/radio                        was NetworkInterfaces/Radio
+src/mobility                               was Mobility
+src/mobility/models                        split from split from Mobility
+src/networklayer                           was Network
+src/networklayer/arp                       was Network/ARP
+src/networklayer/autorouting               was Network/AutoRouting
+src/networklayer/autorouting/ipv4          split from Network/AutoRouting
+src/networklayer/autorouting/ipv6          split from Network/AutoRouting
+src/networklayer/common                    split from Network/Contract
+src/networklayer/contract                  was Network/Contract
+src/networklayer/extras                    was Network/Extras
+src/networklayer/icmpv6                    was Network/ICMPv6
+src/networklayer/ipv4                      was Network/IPv4
+src/networklayer/ipv4/contract             split from Network/Contract
+src/networklayer/ipv6                      was Network/IPv6
+src/networklayer/ipv6/contract             split from Network/Contract
+src/networklayer/ldp                       was Network/LDP
+src/networklayer/mpls                      was Network/MPLS
+src/networklayer/ospfv2                    was Network/OSPFv2
+src/networklayer/ospfv2/interface          was Network/OSPFv2/Interface
+src/networklayer/ospfv2/messagehandler     was Network/OSPFv2/MessageHandler
+src/networklayer/ospfv2/neighbor           was Network/OSPFv2/Neighbor
+src/networklayer/ospfv2/router             was Network/OSPFv2/Router
+src/networklayer/queue                     was Network/Queue
+src/networklayer/rsvp_te                   was Network/RSVP_TE
+src/networklayer/ted                       was Network/TED
+src/nodes                                  was Nodes
+src/nodes/inet                             was Nodes/INET
+src/nodes/ipv6                             was Nodes/IPv6
+src/nodes/mf80211                          was Nodes/Adhoc
+src/nodes/mpls                             was Nodes/MPLS
+src/nodes/ospfv2                           split from Nodes/INET
+src/nodes/wireless                         was Nodes/Wireless
+src/transport                              was Transport
+src/transport/contract                     was Transport/Contract
+src/transport/rtp                          was Transport/RTP
+src/transport/rtp/profiles                 was Transport/RTP/Profiles
+src/transport/rtp/profiles/avprofile       was Transport/RTP/Profiles/AVProfile
+src/transport/tcp                          was Transport/TCP
+src/transport/tcp/flavours                 was Transport/TCP/flavours
+src/transport/tcp/queues                   was Transport/TCP/queues
+src/transport/tcp_common                   split from Transport/TCP
+src/transport/tcp_common/contract          split from Transport/Contract
+src/transport/udp                          was Transport/UDP
+src/transport/udp/contract                 split from Transport/Contract
+src/util                                   was Util
+src/util/headerserializers                 was Util/HeaderSerializers
+src/util/headerserializers/headers         was Util/HeaderSerializers/headers
+src/util/headerserializers/ipv4            split from Util/HeaderSerializers
+src/util/headerserializers/ipv4/headers    split from Util/HeaderSerializers/headers
+src/util/headerserializers/tcp             split from Util/HeaderSerializers
+src/util/headerserializers/tcp/headers     split from Util/HeaderSerializers/headers
+src/util/headerserializers/udp             split from Util/HeaderSerializers
+src/util/headerserializers/udp/headers     split from Util/HeaderSerializers/headers
+src/world                                  was World
+tests                                      was Tests
+tests/dlltest                              was Tests/DLLTest
+tests/ipv4                                 was Tests/IPv4
+tests/ipv6                                 was Tests/IPv6
+tests/newtcp                               was Tests/NewTCP
+tests/newtcp/test                          was Tests/NewTCP/test
+
+
